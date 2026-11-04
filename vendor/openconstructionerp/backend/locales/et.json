@@ -1,0 +1,2539 @@
+{
+  "costs.catalog_name_unavailable": "Seda nime ei saa uue kataloogi jaoks kasutada. Valige teine nimi.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Avatud lähtekoodiga ehituskulude kalkulatsioon"
+  },
+  "nav": {
+    "dashboard": "Töölaud",
+    "assemblies": "Koostised",
+    "ai_estimate": "AI hinnang",
+    "settings": "Seaded",
+    "5d_cost_model": "5D kulumudel",
+    "templates": "Mallid",
+    "reports": "Aruanded",
+    "sustainability": "Jätkusuutlikkus",
+    "group_estimation": "Kalkuleerimine",
+    "group_planning": "Planeerimine",
+    "group_procurement": "Hanked",
+    "group_tools": "Tööriistad",
+    "architecture": "Arhitektuurikaart"
+  },
+  "common": {
+    "save": "Salvesta",
+    "cancel": "Tühista",
+    "delete": "Kustuta",
+    "edit": "Muuda",
+    "create": "Loo",
+    "search": "Otsi",
+    "filter": "Filtreeri",
+    "export": "Ekspordi",
+    "import": "Impordi",
+    "loading": "Laadimine...",
+    "error": "Viga",
+    "success": "Õnnestus",
+    "confirm": "Kinnita",
+    "back": "Tagasi",
+    "next": "Järgmine",
+    "yes": "Jah",
+    "no": "Ei"
+  },
+  "auth": {
+    "login": "Logi sisse",
+    "logout": "Logi välja",
+    "email": "E-post",
+    "password": "Parool"
+  },
+  "projects": {
+    "title": "Projektid",
+    "new_project": "Uus projekt",
+    "project_name": "Projekti nimi",
+    "no_projects": "Projekte pole veel"
+  },
+  "boq": {
+    "title": "Mahutabel",
+    "position": "Positsioon",
+    "ordinal": "Järjekorranumber",
+    "description": "Kirjeldus",
+    "quantity": "Kogus",
+    "unit": "Ühik",
+    "unit_rate": "Ühikuhind",
+    "total": "Kokku",
+    "add_position": "Lisa positsioon",
+    "add_section": "Lisa jaotis",
+    "assembly": "Koost",
+    "subtotal": "Vahesumma",
+    "grand_total": "Üldkokkuvõte",
+    "direct_cost": "Otsekulu",
+    "net_total": "Netosumma",
+    "gross_total": "Brutokogusumma",
+    "vat": "Käibemaks",
+    "add_markups": "Lisa juurdehindlused",
+    "validate": "Valideeri",
+    "export": "Ekspordi",
+    "mvp": {
+      "title": "Vali materjalid",
+      "subtitle_one": "{{count}} ressurss vajab valikut",
+      "subtitle_other": "{{count}} ressurssi vajab valikut",
+      "bulk_label": "Kiirtäitmine:",
+      "bulk_median": "Mediaan kõigile",
+      "bulk_mean": "Keskmine kõigile",
+      "bulk_cheapest": "Odavaim kõigile",
+      "bulk_priciest": "Kalleim kõigile",
+      "slot_variant_count": "{{n}} valikut",
+      "selected_label": "Valitud:",
+      "default_mean": "keskmine hind",
+      "default_median": "mediaanhind",
+      "row_median": "Mediaanhind · {{price}}",
+      "row_mean": "Keskmine hind · {{price}}",
+      "subtotal_label": "Positsiooni hind",
+      "apply": "Rakenda ja lisa mahutabelisse",
+      "batch_progress": "Kirje {{current}} / {{total}}",
+      "toast_applied_one": "{{count}} variant valitud",
+      "toast_applied_other": "{{count}} varianti valitud"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Vahetusaruanne"
+      },
+      "column": {
+        "severity": "Tõsidus",
+        "kind": "Kao liik",
+        "position": "Positsioon",
+        "field": "Väli",
+        "original": "Algne väärtus",
+        "written": "Kirjutatud väärtus",
+        "count": "Arv",
+        "detail": "Üksikasjad"
+      },
+      "severity": {
+        "error": "Kriitiline",
+        "warning": "Hoiatus",
+        "info": "Märkus"
+      },
+      "kind": {
+        "unsupported_element": "Toetamata element",
+        "truncated_text": "Tekst kärbitud",
+        "altered_text": "Tekst muudetud",
+        "rounded_value": "Väärtus ümardatud",
+        "value_out_of_range": "Väärtus väljaspool vahemikku",
+        "dropped_attribute": "Atribuut kõrvale jäetud",
+        "unmapped_unit": "Ühik sidumata",
+        "lost_hierarchy": "Hierarhiatase kadus",
+        "markup_not_representable": "Juurdehindlust ei saa kujutada",
+        "attachment_skipped": "Manus vahele jäetud",
+        "changed_identifier": "Tunnus muutus",
+        "exceeds_limit": "Mälupiir ületatud",
+        "rejected_row": "Rida tagasi lükatud",
+        "skipped_row": "Rida vahele jäetud",
+        "parser_warning": "Lugeja hoiatus",
+        "roundtrip_mismatch": "Edasi-tagasi kontrolli kõrvalekalle"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Haru tekkepunkt",
+      "base_snapshot_from": "Haru tekkepunkt (hetktõmmisest „{snapshot}”)",
+      "before_cherry_pick": "Enne muudatuste rakendamist harust „{source}”",
+      "before_merge": "Enne haru „{branch}” ühendamist",
+      "errors": {
+        "branch_closed": "See haru on ühendatud või arhiveeritud ega võta enam muudatusi vastu.",
+        "not_a_branch": "See mahutabel ei ole haru.",
+        "same_bill": "Valige kaks erinevat eelarvet.",
+        "different_project": "Mõlemad eelarved peavad kuuluma samasse projekti.",
+        "different_tree": "Mõlemad eelarved peavad olema sama põhieelarve harud.",
+        "unresolved_conflicts": "Mõlemas eelarves muudetud positsioone: {count}. Otsustage enne rakendamist, millise versiooni igaühe puhul alles jätate.",
+        "merge_forbidden": "Teil pole õigust põhieelarvega ühendada.",
+        "confirm_required": "Kinnitage ühendamine: see kirjutab põhieelarve üle.",
+        "design_options_unavailable": "Projektilahenduse variantide moodul pole paigaldatud.",
+        "base_snapshot_in_use": "See hetktõmmis on avatud haru tekkepunkt ja seda ei saa kustutada."
+      },
+      "export": {
+        "title_positions": "Eelarvete võrdlus positsioonide kaupa",
+        "title_sections": "Eelarvete võrdlus jaotiste kaupa",
+        "title_cost_groups": "Eelarvete võrdlus kulugruppide kaupa",
+        "project": "Projekt",
+        "bill_a": "Eelarve A",
+        "bill_b": "Eelarve B",
+        "total_a": "Kokku A",
+        "total_b": "Kokku B",
+        "delta": "Vahe",
+        "counts": "Muudatused",
+        "counts_value": "lisatud: {added}, eemaldatud: {removed}, muudetud: {changed}",
+        "col_ordinal": "Pos.",
+        "col_description": "Kirjeldus",
+        "col_unit": "Ühik",
+        "col_change": "Muutus",
+        "col_qty_a": "Kogus A",
+        "col_qty_b": "Kogus B",
+        "col_rate_a": "Hind A",
+        "col_rate_b": "Hind B",
+        "col_total_a": "Kokku A",
+        "col_total_b": "Kokku B",
+        "col_delta": "Vahe",
+        "col_section": "Jaotis",
+        "col_cost_group": "Kulugrupp",
+        "change_added": "Lisatud",
+        "change_removed": "Eemaldatud",
+        "change_changed": "Muudetud",
+        "change_unchanged": "Muutmata",
+        "ungrouped": "Rühmitamata",
+        "empty": "Kaks eelarvet on identsed.",
+        "total": "Kokku"
+      }
+    }
+  },
+  "costs": {
+    "title": "Kuluandmebaas",
+    "rate": "Hind",
+    "material": "Materjal",
+    "labor": "Tööjõud",
+    "equipment": "Seadmed",
+    "search_costs": "Otsi kulukirjeid..."
+  },
+  "assemblies": {
+    "title": "Koostised",
+    "description": "Korduvkasutatavad kuluretseptid — ühenda materjalid, tööjõud ja seadmed kasutusvalmis mallideks",
+    "new_assembly": "Uus koostis",
+    "from_database": "Andmebaasist",
+    "apply_to_boq": "Rakenda mahutabelisse",
+    "add_component": "Lisa komponent",
+    "no_assemblies": "Koostisi pole veel",
+    "no_assemblies_hint": "Loo oma esimene koostis kuluandmebaasist või ressursikataloogist",
+    "total_rate": "Kogusumma"
+  },
+  "catalog": {
+    "title": "Ressursikataloog",
+    "description": "Sirvi ja halda materjale, seadmeid, tööjõukulusid ja operaatoreid",
+    "add_resource": "Lisa ressurss",
+    "import_region": "Impordi piirkond",
+    "build_assembly": "Koosta koost",
+    "my_catalog": "Minu kataloog"
+  },
+  "validation": {
+    "title": "Valideerimine",
+    "passed": "Läbitud",
+    "warnings": "Hoiatused",
+    "errors": "Vead",
+    "score": "Kvaliteediskoor",
+    "run_validation": "Käivita valideerimine",
+    "missing_quantity": "Positsioonil {position} puudub kogus",
+    "missing_rate": "Positsioonil {position} puudub ühikuhind",
+    "missing_description": "Positsioonil {position} puudub kirjeldus",
+    "missing_classification": "Positsioon {position} vajab klassifikatsioonikoodi",
+    "duplicate_ordinal": "Korduv järjekorranumber: {ordinal}",
+    "rate_anomaly": "Ühikuhind {rate} ületab piirmäära ({threshold})",
+    "nl": {
+      "not_a_string": "Sisend peab olema tekst.",
+      "empty": "Sisend on tühi.",
+      "too_long": "Sisend ületab {max} tähemärki.",
+      "ai_unparsable": "AI vastust ei õnnestunud tõlgendada DSL-dokumendina.",
+      "no_pattern": "Sisestatud lausele ei vastanud ükski muster.",
+      "try": "Proovige: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D ajakava",
+    "generated": {
+      "position_label": "Rida {ordinal}",
+      "section_label": "Jaotis {ordinal}",
+      "task_description": "Automaatselt loodud mahutabeli rea {ordinal} põhjal ({quantity} {unit})",
+      "section_description": "Kokkuvõte: mahutabeli jaotis {ordinal}",
+      "start_milestone": "Projekti algus",
+      "start_milestone_description": "Projekti alguse verstapost",
+      "completion_milestone": "Projekti lõpetamine",
+      "completion_milestone_description": "Projekti lõpetamise verstapost",
+      "labour_resource": "Tööjõud",
+      "machine_resource": "Masinad"
+    },
+    "progress_sheet": {
+      "sheet_title": "Edenemine",
+      "title": "Edenemise uuendamise leht",
+      "detail_schedule": "Ajakava: {name}",
+      "detail_exported": "Eksporditud: {date}",
+      "instructions": "Täida ainult valged veerud. Ära muuda halle veerge, ridade järjekorda ega peidetud veerge.",
+      "col": {
+        "activity_ref": "Tegevuse ID",
+        "name": "Tegevus",
+        "wbs_code": "WBS",
+        "responsible": "Vastutaja",
+        "planned_start": "Planeeritud algus",
+        "planned_finish": "Planeeritud lõpp",
+        "percent_complete": "% valmis",
+        "actual_start": "Tegelik algus",
+        "actual_finish": "Tegelik lõpp",
+        "remaining_duration": "Järele (tööpäeva)",
+        "notes": "Märkmed",
+        "row_key": "Rea võti",
+        "stamp": "Tempel"
+      }
+    }
+  },
+  "cad": {
+    "title": "CAD import",
+    "upload": "Laadi üles CAD-fail",
+    "supported_formats": "Toetatud vormingud: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Teisendamine...",
+    "elements_found": "Leiti {count} elementi"
+  },
+  "takeoff": {
+    "title": "Koguste mõõdistus",
+    "auto_detect": "Automaattuvastus",
+    "manual_measure": "Käsitsi mõõtmine",
+    "confidence": "Usaldusväärsus"
+  },
+  "tendering": {
+    "title": "Hanked",
+    "create_tender": "Loo hange",
+    "bid": "Pakkumus",
+    "award": "Sõlmi leping"
+  },
+  "modules": {
+    "title": "Moodulid",
+    "installed": "Installitud",
+    "available": "Saadaval",
+    "install": "Paigalda",
+    "uninstall": "Eemalda",
+    "update": "Uuenda"
+  },
+  "dashboard": {
+    "welcome": "Tere tulemast OpenConstructionERP-i",
+    "subtitle": "Sinu ehituskalkulatsiooni töökeskkond",
+    "recent_projects": "Hiljutised projektid",
+    "system_status": "Süsteemi olek",
+    "modules_loaded": "Laaditud moodulid",
+    "validation_rules": "Valideerimisreeglid",
+    "languages": "Keeled",
+    "continue_estimate": "Jätka viimast kalkulatsiooni",
+    "getting_started": "Alustamine",
+    "total_value": "Koguväärtus",
+    "active_estimates": "Aktiivsed kalkulatsioonid",
+    "schedule_status": "Ajakava olek",
+    "quality_score": "Kvaliteediskoor",
+    "analytics": "Analüütika",
+    "project_overview": "Projekti ülevaade",
+    "step_load_db": "Laadi kuluandmebaas",
+    "step_load_db_desc": "Impordi 55 000+ kirjega regionaalsed hinnaandmed",
+    "step_ai_search": "Luba AI-otsing",
+    "step_ai_search_desc": "Genereeri vektorväärtused semantiliseks kulude sobitamiseks",
+    "step_connect_ai": "Ühenda AI",
+    "step_connect_ai_desc": "Lisa API võtmed AI-põhise kalkuleerimise jaoks",
+    "step_create_project": "Loo projekt",
+    "step_create_project_desc": "Alusta oma esimest ehituskalkulatsiooni projekti",
+    "step_build_boq": "Koosta oma mahutabel",
+    "step_build_boq_desc": "Loo mahutabel AI abiga"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "tk",
+    "lsum": "kogusumma",
+    "h": "h",
+    "set": "kompl."
+  },
+  "contacts": {
+    "title": "Kontaktide kataloog",
+    "new_contact": "Uus kontakt",
+    "contact_type": "Kontakti tüüp",
+    "client": "Klient",
+    "subcontractor": "Alltöövõtja",
+    "supplier": "Tarnija",
+    "consultant": "Konsultant",
+    "internal": "Sisemine",
+    "company_name": "Ettevõtte nimi",
+    "search_contacts": "Otsi kontakte...",
+    "no_contacts": "Kontakte pole veel",
+    "prequalification": "Eelkvalifikatsioon",
+    "approved": "Kinnitatud",
+    "pending": "Ootel",
+    "expired": "Aegunud"
+  },
+  "tasks": {
+    "title": "Ülesanded",
+    "new_task": "Uus ülesanne",
+    "task": "Ülesanne",
+    "topic": "Teema",
+    "information": "Informatsioon",
+    "decision": "Otsus",
+    "personal": "Isiklik ülesanne",
+    "my_tasks": "Minu ülesanded",
+    "open": "Avatud",
+    "in_progress": "Pooleli",
+    "completed": "Lõpetatud",
+    "draft": "Mustand",
+    "due_date": "Tähtaeg",
+    "assignee": "Vastutaja",
+    "priority": "Prioriteet",
+    "checklist": "Kontrollnimekiri",
+    "focus_area": "Fookusvaldkond"
+  },
+  "rfi": {
+    "title": "Teabepäringud",
+    "new_rfi": "Uus RFI",
+    "subject": "Teema",
+    "question": "Küsimus",
+    "response": "Vastus",
+    "ball_in_court": "Vastutaja",
+    "days_open": "Päevi avatud",
+    "cost_impact": "Mõju kuludele",
+    "schedule_impact": "Mõju ajakavale",
+    "respond": "Vasta",
+    "close": "Sulge",
+    "overdue": "Tähtaeg möödas"
+  },
+  "finance": {
+    "title": "Finants",
+    "budgets": "Eelarved",
+    "invoices": "Arved",
+    "payable": "Makstav",
+    "receivable": "Saadaolev",
+    "payments": "Maksed",
+    "evm": "Teenitud väärtus",
+    "invoice_number": "Arve nr",
+    "amount": "Summa",
+    "status": "Olek",
+    "approve": "Kinnita",
+    "pay": "Märgi makstuks",
+    "original_budget": "Algne eelarve",
+    "revised_budget": "Korrigeeritud eelarve",
+    "committed": "Kohustatud",
+    "actual": "Tegelik",
+    "forecast": "Prognoos",
+    "variance": "Hälve"
+  },
+  "procurement": {
+    "title": "Hanked",
+    "purchase_orders": "Ostutellimused",
+    "goods_receipts": "Kaubavastuvõtud",
+    "new_po": "Uus ostutellimus",
+    "po_number": "Ostutellimuse nr",
+    "vendor": "Tarnija",
+    "issue": "Väljasta",
+    "confirm": "Kinnita vastuvõtt"
+  },
+  "safety": {
+    "title": "Ohutus",
+    "incidents": "Intsidendid",
+    "observations": "Vaatlused",
+    "new_incident": "Uus intsident",
+    "new_observation": "Uus tähelepanek",
+    "severity": "Tõsidus",
+    "risk_score": "Riskiskoor",
+    "days_lost": "Kaotatud päevad",
+    "treatment": "Meede",
+    "corrective_action": "Korrigeeriv meede"
+  },
+  "meetings": {
+    "title": "Koosolekud",
+    "new_meeting": "Uus koosolek",
+    "meeting_type": "Tüüp",
+    "attendees": "Osalejad",
+    "agenda": "Päevakord",
+    "action_items": "Ülesanded",
+    "minutes": "Protokoll",
+    "complete": "Lõpeta koosolek",
+    "present": "Kohal",
+    "absent": "Puudub",
+    "excused": "Vabandatud",
+    "actions": {
+      "status": {
+        "open": "Avatud",
+        "completed": "Lõpetatud",
+        "cancelled": "Tühistatud"
+      },
+      "flag": {
+        "overdue": "Tähtaeg ületatud",
+        "on_track": "Graafikus"
+      },
+      "label": {
+        "action_item": "Tegevus",
+        "completion_rate": "Tegevuste täitmise määr",
+        "open_vs_done": "Avatud vs tehtud",
+        "overdue": "Tähtaja ületanud tegevused"
+      },
+      "explain": {
+        "action_item": "Tegevus on koosolekul kokkulepitud ülesanne, millel on vastutaja ja tähtaeg.",
+        "completion_rate": "Tegevuste täitmise määr on lõpetatud tegevuste arv jagatud tegevuste koguarvuga, vahemikus 0 kuni 1.",
+        "open_vs_done": "Avatud tegevused vajavad veel tööd. Tehtud tegevused on lõpetatud ega vaja enam tööd.",
+        "overdue": "Tegevus on tähtaja ületanud, kui see on endiselt avatud ja selle tähtaeg on varasem kui võrdlemiskuupäev."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Koosoleku protokoll",
+      "issued": "VÄLJA ANTUD",
+      "draft": "VAHEPROTOKOLL",
+      "date": "Kuupäev:",
+      "location": "Asukoht:",
+      "type": "Tüüp:",
+      "number": "Koosoleku nr:",
+      "chairperson": "Juhataja:",
+      "next_meeting": "Järgmine koosolek:",
+      "not_available": "Puudub",
+      "not_scheduled": "Pole kavandatud",
+      "attendance": "Osavõtt",
+      "present": "Kohal:",
+      "absent": "Puudujad / vabandanud:",
+      "agenda": "Päevakord, arutelu ja otsused",
+      "required": "(kohustuslik)",
+      "discussion": "Arutelu:",
+      "decision": "Otsus:",
+      "decisions": "Otsused",
+      "open_questions": "Lahtised küsimused",
+      "actions": "Tegevused",
+      "col_number": "#",
+      "col_action": "Tegevus",
+      "col_owner": "Vastutaja",
+      "col_due": "Tähtaeg",
+      "col_status": "Staatus",
+      "brought_forward": "[Üle toodud]",
+      "overdue": "(üle tähtaja)",
+      "status_open": "Avatud",
+      "status_in_progress": "Töös",
+      "status_done": "Tehtud",
+      "status_cancelled": "Tühistatud",
+      "summary": "Kokkuvõte",
+      "generated": "Koostatud: {stamp}",
+      "issued_at": "Välja antud {stamp}",
+      "running_head": "{project} - Protokoll",
+      "type_progress": "Edenemine",
+      "type_design": "Projekteerimine",
+      "type_safety": "Ohutus",
+      "type_subcontractor": "Alltöövõtja",
+      "type_kickoff": "Alustamine",
+      "type_closeout": "Üleandmine",
+      "type_commercial": "Kommertsalane"
+    }
+  },
+  "inspections": {
+    "title": "Kvaliteediülevaatused",
+    "new_inspection": "Uus ülevaatus",
+    "inspector": "Ülevaataja",
+    "checklist": "Kontrollnimekiri",
+    "pass": "Läbitud",
+    "fail": "Ebaõnnestunud",
+    "partial": "Osaline",
+    "critical": "Kriitiline",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Planeeritud",
+        "in_progress": "Pooleli",
+        "completed": "Lõpetatud",
+        "failed": "Ebaõnnestunud",
+        "cancelled": "Tühistatud"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Mittevastavuse aruanded",
+    "new_ncr": "Uus mittevastavusaruanne",
+    "root_cause": "Algpõhjus",
+    "corrective_action": "Korrigeeriv meede",
+    "preventive_action": "Ennetav meede",
+    "material": "Materjal",
+    "workmanship": "Teostus",
+    "design": "Projekteerimine"
+  },
+  "submittals": {
+    "title": "Esitised",
+    "new_submittal": "Uus esitis",
+    "spec_section": "Spetsifikatsiooni jaotis",
+    "revision": "Redaktsioon",
+    "submit": "Esita",
+    "review": "Ülevaatus",
+    "approved_as_noted": "Kinnitatud märkustega",
+    "revise_resubmit": "Paranda ja esita uuesti",
+    "intl": {
+      "status_labels": {
+        "draft": "Mustand",
+        "submitted": "Esitatud",
+        "under_review": "Läbivaatamisel",
+        "approved": "Kinnitatud",
+        "approved_as_noted": "Kinnitatud märkustega",
+        "revise_and_resubmit": "Paranda ja esita uuesti",
+        "rejected": "Tagasi lükatud",
+        "closed": "Suletud"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Kirjavahetus",
+    "new_entry": "Uus kirje",
+    "incoming": "Sissetulev",
+    "outgoing": "Väljaminev",
+    "letter": "Kiri",
+    "email": "E-kiri",
+    "notice": "Teade",
+    "date_sent": "Saatmiskuupäev",
+    "date_received": "Saabumiskuupäev"
+  },
+  "cde": {
+    "title": "Ühine andmekeskkond",
+    "new_container": "Uus konteiner",
+    "container_code": "Konteineri kood",
+    "cde_state": "Ühise andmekeskkonna olek",
+    "wip": "Pooleli",
+    "shared": "Jagatud",
+    "published": "Avaldatud",
+    "archived": "Arhiveeritud",
+    "promote": "Vii edasi",
+    "suitability": "Sobivus",
+    "discipline": "Eriala",
+    "revisions": "Versioonid",
+    "intl": {
+      "state_labels": {
+        "wip": "Töös",
+        "shared": "Jagatud",
+        "published": "Avaldatud",
+        "archived": "Arhiveeritud"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Saatelehed",
+    "new_transmittal": "Uus saateleht",
+    "purpose": "Eesmärk",
+    "for_approval": "Kinnitamiseks",
+    "for_information": "Informatsiooniks",
+    "for_construction": "Ehituseks",
+    "recipients": "Saajad",
+    "acknowledge": "Kinnita teadmiseks",
+    "locked": "Lukustatud",
+    "issue_transmittal": "Väljasta",
+    "intl": {
+      "status_words": {
+        "draft": "mustand",
+        "issued": "saadetud",
+        "responded": "vastatud"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Teavitused",
+    "no_notifications": "Uusi teavitusi pole",
+    "mark_all_read": "Märgi kõik loetuks",
+    "unread": "Lugemata"
+  },
+  "comments": {
+    "title": "Kommentaarid",
+    "post": "Postita",
+    "reply": "Vasta",
+    "edit": "Muuda",
+    "delete": "Kustuta",
+    "placeholder": "Kirjuta kommentaar...",
+    "empty": "Kommentaare pole veel. Alustage arutelu.",
+    "edited": "muudetud",
+    "deleted": "See kommentaar on kustutatud"
+  },
+  "bim": {
+    "title": "BIM keskus",
+    "models": "Mudelid",
+    "elements": "Elemendid",
+    "upload_model": "Laadi üles mudel",
+    "processing": "Töötlemine",
+    "active": "Aktiivne",
+    "link_to_boq": "Seo mahutabeliga",
+    "properties": "Omadused",
+    "quantities": "Kogused",
+    "wireframe": "Traatraam",
+    "section_box": "Lõikekast",
+    "measure": "Mõõda",
+    "zoom_to_fit": "Mahuta vaatesse"
+  },
+  "reporting": {
+    "title": "Aruanded ja töölauad",
+    "kpi": "KPI-töölaud",
+    "generate_report": "Koosta aruanne",
+    "templates": "Mallid",
+    "project_status": "Projekti olek",
+    "cost_report": "Kuluaruanne",
+    "schedule_status": "Ajakava olek",
+    "safety_report": "Ohutusaruanne",
+    "explain": {
+      "report_total_one": "Aruande kokku: {money} ({count} rea summa).",
+      "report_total_other": "Aruande kokku: {money} ({count} rea summa).",
+      "percent_of_total": "{part} on {percent} väärtusest {total} (protsent kogusummast).",
+      "percent_zero_total": "{part} väärtusest {total}: kogusumma on null, seetõttu kuvatakse iga osa 0 protsendina.",
+      "breakdown_empty": "Kulude jaotus: andmed puuduvad.",
+      "breakdown_one": "Kulude jaotus: {count} grupp, aruande kokku {money}.",
+      "breakdown_other": "Kulude jaotus: {count} gruppi, aruande kokku {money}.",
+      "top_n_one": "Esimesed {requested}: {shown} / {shown} rida.",
+      "top_n_other": "Esimesed {requested}: {shown} / {shown} rida."
+    }
+  },
+  "gantt": {
+    "title": "Gantti diagramm",
+    "day": "Päev",
+    "week": "Nädal",
+    "month": "Kuu",
+    "critical_path": "Kriitiline tee",
+    "baseline": "Baasjoon",
+    "dependencies": "Sõltuvused",
+    "today": "Täna"
+  },
+  "settings": {
+    "regional": "Piirkondlikud seaded",
+    "timezone": "Ajavöönd",
+    "measurement": "Mõõtühikute süsteem",
+    "paper_size": "Paberi formaat",
+    "date_format": "Kuupäevavorming",
+    "number_format": "Arvuvorming",
+    "currency": "Valuuta",
+    "metric": "Meetermõõdustik",
+    "imperial": "Inglise mõõdustik"
+  },
+  "users": {
+    "management": "Kasutajate haldus",
+    "management_desc": "Hallake meeskonnaliikmeid, rolle ja juurdepääsu",
+    "invite_user": "Kutsu kasutaja",
+    "invite": "Kutsu",
+    "full_name": "Täisnimi",
+    "email": "E-post",
+    "password": "Parool",
+    "role": "Roll",
+    "status": "Olek",
+    "last_login": "Viimane sisselogimine",
+    "actions": "Toimingud",
+    "name": "Nimi",
+    "total": "Kasutajaid kokku",
+    "active": "Aktiivne",
+    "inactive": "Mitteaktiivne",
+    "admins": "Administraatorid",
+    "managers": "Juhid",
+    "search": "Otsi nime või e-posti järgi...",
+    "no_users": "Kasutajaid ei leitud",
+    "updated": "Kasutaja uuendatud",
+    "invited": "Kasutaja edukalt kutsutud",
+    "deactivate": "Deaktiveeri",
+    "activate": "Aktiveeri",
+    "never": "Mitte kunagi",
+    "role_admin_desc": "Täielik juurdepääs kõigile funktsioonidele",
+    "role_manager_desc": "Projekti ja meeskonna haldus",
+    "role_editor_desc": "Sisu loomine ja muutmine",
+    "role_viewer_desc": "Ainult vaatamisõigus"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "See hetktõmmis on külmutatud. Külmutatud hetktõmmis on kirje ja seda ei saa muuta.",
+      "frozen_no_delete": "Külmutatud hetktõmmis on kirje ja seda ei saa kustutada.",
+      "draft_open": "Mustandi hetktõmmis on juba avatud. Külmuta või kustuta see enne uue alustamist.",
+      "no_line_method": "Sellel real puudub oma meetod.",
+      "snapshot_missing": "Hetktõmmist ei leitud.",
+      "line_missing": "Hetktõmmisel pole sellist rida.",
+      "document_missing": "Lingitud dokument ei kuulu sellesse projekti.",
+      "freeze_refused": "Hetktõmmist ei saa veel külmutada: {count} rea muutus ületab piiri ilma kommentaari ja aluseta.",
+      "no_frozen_snapshot": "Võrdlemiseks pole veel külmutatud hetktõmmist.",
+      "no_ledger": "Arvete register pole selles paigalduses saadaval.",
+      "no_snapshot": "Dokumenteerimiseks pole veel hetktõmmist."
+    },
+    "export": {
+      "project": "Projekt",
+      "generated": "Koostatud",
+      "currency": "Valuuta",
+      "page": "Leht",
+      "generated_at": "Koostamise kuupäev",
+      "empty": "Kuvada pole veel midagi.",
+      "total": "Kokku",
+      "cost_report": "Kuluaruanne",
+      "phase_comparison": "Etappide võrdlus",
+      "invoice_ledger": "Arvete register",
+      "forecast_documentation": "Prognoosi dokumentatsioon",
+      "as_of": "Seisuga",
+      "forecast_method": "Prognoosimeetod",
+      "col_account": "Konto",
+      "col_code": "Kood",
+      "col_description": "Kirjeldus",
+      "col_source": "Allikas",
+      "col_method": "Meetod",
+      "col_planned": "Eelarvestatud",
+      "col_committed": "Kokku lepitud",
+      "col_pending": "Ootel muudatused",
+      "col_measured": "Mõõdetud",
+      "col_certified": "Kinnitatud",
+      "col_invoiced": "Arveldatud",
+      "col_paid": "Makstud",
+      "col_forecast": "Prognoos",
+      "col_variance": "Kõrvalekalle",
+      "col_variance_pct": "Kõrvalekalle %",
+      "col_forecast_of_plan": "Prognoos % eelarvest",
+      "col_measured_of_committed": "Mõõdetud % kokkulepitust",
+      "col_invoiced_of_committed": "Arveldatud % kokkulepitust",
+      "col_contract": "Leping",
+      "col_contract_title": "Lepingu nimetus",
+      "col_invoice": "Arve",
+      "col_date": "Kuupäev",
+      "col_kind": "Liik",
+      "col_release_status": "Vabastamine",
+      "col_net": "Neto",
+      "col_vat": "KM",
+      "col_gross": "Bruto",
+      "col_retention": "Kinnipeetav summa",
+      "col_release": "Vabastatud kinnipeetav summa",
+      "col_discount": "Allahindlus",
+      "col_payable": "Tasumisele",
+      "col_open": "Avatud",
+      "col_previous": "Eelmine",
+      "col_delta": "Muutus",
+      "col_delta_pct": "Muutus %",
+      "col_needs_evidence": "Vajab alust",
+      "col_comment": "Kommentaar",
+      "col_evidence": "Alusdokument",
+      "row_unassigned": "Raha ilma kulureata",
+      "row_loose_changes": "Muudatused ilma lepinguta",
+      "row_no_contract": "Lepingut pole",
+      "contract_value": "Lepingu maksumus",
+      "retention_held": "Kinni peetud summa",
+      "yes": "Jah",
+      "no": "Ei",
+      "snapshot_date": "Hetktõmmise kuupäev",
+      "snapshot_status": "Olek",
+      "previous_snapshot": "Eelmine külmutatud hetktõmmis",
+      "method_explained": "Kuidas prognoosi lugeda",
+      "evidence_threshold": "Alus nõutav üle",
+      "threshold_both": "muutus üle {parts}",
+      "threshold_any": "iga muutus",
+      "frozen_at": "Külmutatud"
+    },
+    "method": {
+      "best_available": "Parim saadaolev allikas",
+      "maximum": "Suurim väärtus",
+      "evm_cpi": "Teenitud väärtus (CPI)",
+      "manual": "Käsitsi"
+    },
+    "method_help": {
+      "best_available": "Iga rida võtab oma küpseima arvu: lõpparve, muidu mõõdetud töö, muidu tellimus, muidu kalkulatsioon, muidu eelarve.",
+      "maximum": "Iga rida võtab oma arvudest suurima (eelarve, kalkulatsioon, tellimus, mõõdetud, arveldatud), et prognoos ei varjaks riski.",
+      "evm_cpi": "Iga rida arvutab valmimiskulu edenemise põhjal: seni kulutatud raha jagatud tehtud töö osakaaluga.",
+      "manual": "Inimene määrab rea arvu ja lingib selle aluseks oleva dokumendi."
+    },
+    "source": {
+      "none": "Arv puudub",
+      "budget": "Eelarve",
+      "estimate": "Kalkulatsioon",
+      "partly_awarded": "Osaliselt tellitud",
+      "awarded": "Tellitud",
+      "measured": "Mõõdetud",
+      "final": "Lõpparve",
+      "manual": "Käsitsi",
+      "invoiced": "Arveldatud",
+      "evm": "Teenitud väärtus"
+    },
+    "layer": {
+      "budget": "Eelarve",
+      "estimate": "Kalkulatsioon",
+      "tender": "Parim pakkumus",
+      "awarded": "Tellitud",
+      "changes": "Kinnitatud muudatused",
+      "committed": "Kokku lepitud",
+      "pending": "Ootel muudatused",
+      "measured": "Mõõdetud",
+      "certified": "Kinnitatud",
+      "invoiced": "Arveldatud",
+      "paid": "Makstud",
+      "forecast": "Prognoos"
+    },
+    "invoice_kind": {
+      "interim": "Vaheaarve",
+      "final": "Lõpparve",
+      "daywork": "Tunnitöö",
+      "credit_note": "Kreeditarve"
+    },
+    "release_status": {
+      "open": "Avatud",
+      "released": "Vabastatud"
+    },
+    "evidence_kind": {
+      "document": "Dokument",
+      "minutes": "Protokoll",
+      "other": "Muu"
+    },
+    "snapshot_status": {
+      "draft": "Mustand",
+      "frozen": "Külmutatud"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Projekti nr",
+      "generated_on": "Koostamise kuupäev",
+      "records": "Kirjeid",
+      "currency": "Valuuta",
+      "status": "Staatus",
+      "name": "Nimi",
+      "signature": "Allkiri",
+      "date": "Kuupäev",
+      "signatures": "Allkirjad",
+      "yes": "Jah",
+      "no": "Ei",
+      "days_one": "{n} päev",
+      "days_other": "{n} päeva",
+      "empty_register": "Kirjeid ei ole.",
+      "total": "Kokku",
+      "signer_title": "Ametikoht",
+      "sig_prepared_by": "Koostaja",
+      "sig_checked_by": "Kontrollija",
+      "sig_approved_by": "Kinnitaja",
+      "footer_generated": "Koostatud {timestamp}",
+      "footer_page": "Lehekülg {page} / {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Kooskõlastusdokumentide register",
+        "doc_title": "Kooskõlastusdokument",
+        "doc_title_product_data": "Materjali kinnitusleht",
+        "col_number": "Dokumendi nr",
+        "col_title": "Pealkiri",
+        "col_type": "Liik",
+        "col_spec": "Spetsifikatsiooni osa",
+        "col_rev": "Red.",
+        "col_date_submitted": "Esitamise kp",
+        "col_date_required": "Nõutav kp",
+        "col_date_returned": "Tagastamise kp",
+        "col_reviewer": "Läbivaataja",
+        "col_approver": "Kinnitaja",
+        "col_ball_in_court": "Järgmine tegutseja",
+        "submitted_by_org": "Esitav ettevõte",
+        "review_notes": "Läbivaataja märkused",
+        "no_review_notes": "Läbivaataja märkusi ei ole.",
+        "sig_submitted": "Esitamine",
+        "sig_reviewed": "Läbivaatus",
+        "sig_approved": "Kinnitamine",
+        "register_filename": "kooskolastusdokumentide-register",
+        "register_title_shop_drawing": "Tööjooniste register",
+        "register_title_product_data": "Materjalikinnituste register",
+        "register_title_method_statement": "Töömetoodikate register",
+        "register_filename_shop_drawing": "toojooniste-register",
+        "register_filename_product_data": "materjalikinnituste-register",
+        "register_filename_method_statement": "toometoodikate-register",
+        "col_discipline": "Eriala",
+        "col_manufacturer": "Tootja / kaubamärk",
+        "col_model": "Mudel / tähis",
+        "col_origin": "Päritoluriik",
+        "col_supplier": "Tarnija",
+        "col_product": "Tootja / mudel / päritolu",
+        "col_review_code": "Hinnangu kood",
+        "col_outcome": "Läbivaatuse tulemus",
+        "col_review_period": "Läbivaatuse aeg (päeva)",
+        "col_review_due": "Läbivaatuse tähtaeg",
+        "col_days_in_review": "Päevi läbivaatusel",
+        "col_days_in_review_print": "Päevi läbivaatusel",
+        "col_review_overdue": "Päevi hilinenud",
+        "col_required_on_site": "Vaja objektil",
+        "col_long_lead": "Pikk tarneaeg",
+        "col_lead_time": "Tarneaeg (nädalat)",
+        "col_needed_by": "Kinnitus vajalik",
+        "col_approval_late": "Päevi üle tähtaja",
+        "col_drawings": "Seotud joonised",
+        "col_submitted_returned": "Esitatud / tagastatud",
+        "col_on_site_needed_by": "Objektil / kinnitus",
+        "resubmit_for_record": "Parandatud eksemplar esitada uuesti arhiveerimiseks",
+        "review_history": "Läbivaatuse ajalugu",
+        "hist_submitted": "Esitatud",
+        "hist_returned": "Tagastatud",
+        "drawings_missing_one": "{n} seotud joonis ei ole enam saadaval",
+        "drawings_missing_other": "{n} seotud joonist ei ole enam saadaval",
+        "weeks_one": "{n} nädal",
+        "weeks_other": "{n} nädalat"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kavand",
+          "submitted": "Esitatud",
+          "under_review": "Läbivaatusel",
+          "approved": "Kinnitatud",
+          "approved_as_noted": "Kinnitatud märkustega",
+          "revise_and_resubmit": "Parandada ja esitada uuesti",
+          "rejected": "Tagasi lükatud",
+          "closed": "Suletud"
+        },
+        "type": {
+          "shop_drawing": "Tööjoonis",
+          "product_data": "Tootekirjeldus",
+          "sample": "Näidis",
+          "mock_up": "Prototüüp",
+          "test_report": "Katseprotokoll",
+          "calculation": "Arvutus",
+          "method_statement": "Töömetoodika",
+          "certificate": "Sertifikaat",
+          "warranty": "Garantii"
+        },
+        "discipline": {
+          "mechanical": "Mehaanika",
+          "hvac": "Küte ja ventilatsioon",
+          "plumbing": "Vesi ja kanalisatsioon",
+          "fire_protection": "Tuleohutus",
+          "electrical": "Elektrisüsteemid",
+          "lighting": "Valgustus",
+          "elv": "Nõrkvool",
+          "bms": "Hoone automaatika",
+          "architectural": "Arhitektuur",
+          "structural": "Konstruktsioonid",
+          "civil": "Ehitus ja rajatised"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Muudatuskorralduste register",
+        "doc_title": "Muudatuskorraldus",
+        "col_code": "Kood",
+        "col_title": "Pealkiri",
+        "col_reason": "Põhjus",
+        "col_instrument": "Dokumendi liik",
+        "col_submitted": "Esitamise kp",
+        "col_contractor_amount": "Töövõtja summa",
+        "col_engineer_amount": "Inseneri summa",
+        "col_approved_amount": "Kinnitatud summa",
+        "col_cost_impact": "Mõju maksumusele",
+        "col_time_impact": "Mõju ajale (päeva)",
+        "col_approved_time": "Kinnitatud aeg (päeva)",
+        "time_impact": "Mõju ajale",
+        "approved_time": "Kinnitatud aeg",
+        "col_approved": "Kinnitamise kp",
+        "submitted_by": "Esitaja",
+        "approved_by": "Kinnitaja",
+        "description": "Kirjeldus",
+        "no_description": "Kirjeldust ei ole.",
+        "items": "Muudatuse read",
+        "item_description": "Kirjeldus",
+        "item_change": "Muudatus",
+        "item_unit": "Ühik",
+        "item_original_quantity": "Algkogus",
+        "item_new_quantity": "Uus kogus",
+        "item_original_rate": "Algühikuhind",
+        "item_new_rate": "Uus ühikuhind",
+        "item_cost_delta": "Maksumuse vahe",
+        "register_filename": "muudatuskorralduste-register"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kavand",
+          "submitted": "Esitatud",
+          "approved": "Kinnitatud",
+          "rejected": "Tagasi lükatud",
+          "executed": "Täidetud"
+        },
+        "reason": {
+          "client_request": "Tellija soov",
+          "design_change": "Projekti muudatus",
+          "unforeseen": "Ettenägematud asjaolud",
+          "regulatory": "Regulatiivne nõue",
+          "error": "Viga või puudujääk",
+          "non_conformance": "Mittevastavus",
+          "value_engineering": "Väärtusinseneeria"
+        },
+        "instrument": {
+          "works_change": "Korraldatud muudatus",
+          "site_confirmation": "Objektil kinnitatud muudatus",
+          "claim": "Nõue"
+        },
+        "change": {
+          "added": "Lisatud",
+          "removed": "Eemaldatud",
+          "modified": "Muudetud"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Tõendite kogu",
+        "subject": "Teema",
+        "basis": "Alus",
+        "period_from": "Varaseim kirje",
+        "period_to": "Hiliseim kirje",
+        "digest": "Terviklikkuse kood (SHA-256, esimesed 16 märki)",
+        "col_row": "Nr",
+        "col_record_id": "Kirje ID",
+        "col_section": "Jaotis",
+        "col_date": "Kuupäev",
+        "col_kind": "Kirje liik",
+        "col_title": "Pealkiri",
+        "col_summary": "Kokkuvõte",
+        "col_reference": "Viide",
+        "register_filename": "toendite-kogu"
+      },
+      "labels": {
+        "section": {
+          "notices": "Teated",
+          "correspondence": "Kirjavahetus",
+          "rfis": "Teabepäringud (RFI)",
+          "variations": "Muudatused",
+          "approvals": "Kinnitused",
+          "delay": "Viivitus",
+          "timeline": "Ajajoon",
+          "other": "Muu"
+        },
+        "kind": {
+          "notice": "Teade",
+          "variation_notice": "Muudatusteade",
+          "variation_request": "Muudatustaotlus",
+          "variation_order": "Muudatuse korraldus",
+          "change_order": "Muudatuskorraldus",
+          "moc_entry": "Muudatuse kirje",
+          "correspondence": "Kirjavahetus"
+        },
+        "basis": {
+          "dispute": "Vaidlus",
+          "valuation": "Hindamine",
+          "delay": "Viivitus / tähtaja pikendamine",
+          "general": "Üldine kirje"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Kirjavahetuse register",
+        "doc_title": "Kirjavahetus",
+        "col_reference": "Viite nr",
+        "col_direction": "Suund",
+        "col_type": "Liik",
+        "col_subject": "Teema",
+        "col_from": "Saatja",
+        "col_to": "Adressaat",
+        "col_date_sent": "Saatmise kp",
+        "col_date_received": "Saabumise kp",
+        "col_response_due": "Vastamise tähtaeg",
+        "col_clause": "Lepingu punkt",
+        "notes": "Märkused",
+        "no_notes": "Märkusi ei ole.",
+        "attachments": "Lisatud failid",
+        "linked_documents": "Seotud dokumendid",
+        "sig_prepared": "Koostaja",
+        "sig_received": "Vastuvõtja",
+        "register_filename": "kirjavahetuse-register"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Sissetulev",
+          "outgoing": "Väljaminev"
+        },
+        "type": {
+          "letter": "Kiri",
+          "email": "E-kiri",
+          "notice": "Teade",
+          "memo": "Märgukiri",
+          "report": "Aruanne"
+        },
+        "status": {
+          "open": "Avatud",
+          "awaiting_response": "Vastust oodatakse",
+          "responded": "Vastatud",
+          "closed": "Suletud"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Saatelehtede register",
+        "doc_title": "Saateleht",
+        "col_number": "Saatelehe nr",
+        "col_subject": "Teema",
+        "col_purpose": "Eesmärk",
+        "col_issued": "Väljastamise kp",
+        "col_response_due": "Vastamise tähtaeg",
+        "col_recipients": "Saajad",
+        "col_item_count": "Kirjeid",
+        "sender": "Saatja",
+        "cover_note": "Saatekiri",
+        "no_cover_note": "Saatekirja ei ole.",
+        "recipients": "Saajad",
+        "recipient": "Saaja",
+        "action_required": "Vajalik tegevus",
+        "acknowledged": "Kättesaamine kinnitatud",
+        "responded": "Vastamise kp",
+        "items": "Edastatud dokumendid",
+        "item_no": "Nr",
+        "item_description": "Kirjeldus",
+        "item_notes": "Märkused",
+        "sig_issued": "Väljastaja",
+        "sig_received": "Vastuvõtja",
+        "register_filename": "saatelehtede-register"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kavand",
+          "issued": "Väljastatud",
+          "responded": "Vastatud"
+        },
+        "purpose": {
+          "for_approval": "Kinnitamiseks",
+          "for_review": "Läbivaatamiseks",
+          "for_information": "Teadmiseks",
+          "for_construction": "Ehitamiseks",
+          "for_tender": "Pakkumiseks",
+          "for_record": "Arhiveerimiseks"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Muudatuste register",
+        "claim_register_title": "Nõuete register",
+        "notice_register_title": "Teadete register",
+        "doc_title": "Muudatustaotlus",
+        "doc_title_credit": "Muudatustaotlus (töö vähendamine)",
+        "time_impact": "Mõju ajale",
+        "col_code": "Kood",
+        "col_title": "Pealkiri",
+        "col_classification": "Liik",
+        "col_urgency": "Kiireloomulisus",
+        "col_requested": "Taotlemise kp",
+        "col_claimed_amount": "Nõutav summa",
+        "col_agreed_amount": "Kokkulepitud summa",
+        "col_time_impact": "Mõju ajale (päeva)",
+        "col_response_due": "Vastamise tähtaeg",
+        "col_clause": "Lepingu punkt",
+        "col_row": "Nr",
+        "col_claim_type": "Nõude liik",
+        "col_raised": "Esitamise kp",
+        "col_period_start": "Periood alates",
+        "col_period_end": "Periood kuni",
+        "col_description": "Kirjeldus",
+        "col_decided_amount": "Otsustatud summa",
+        "col_days_requested": "Taotletud päevi",
+        "col_days_granted": "Lubatud päevi",
+        "col_recipient_type": "Adressaat",
+        "col_recipient": "Saaja",
+        "col_target_response": "Oodatav vastus",
+        "col_response_received": "Vastus saadud",
+        "requested_by": "Taotleja",
+        "decided_by": "Otsustaja",
+        "date_submitted": "Esitamise kp",
+        "date_decided": "Otsuse kp",
+        "description": "Kirjeldus",
+        "no_description": "Kirjeldust ei ole.",
+        "decision_notes": "Otsuse märkused",
+        "no_decision_notes": "Otsust pole veel tehtud.",
+        "variation_register_filename": "muudatuste-register",
+        "claim_register_filename": "nouete-register",
+        "notice_register_filename": "teadete-register"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Kavand",
+          "submitted": "Esitatud",
+          "under_review": "Läbivaatusel",
+          "approved": "Kinnitatud",
+          "rejected": "Tagasi lükatud",
+          "converted_to_vo": "Muudetud korralduseks"
+        },
+        "claim_status": {
+          "draft": "Kavand",
+          "submitted": "Esitatud",
+          "under_review": "Läbivaatusel",
+          "agreed": "Kokku lepitud",
+          "granted": "Rahuldatud",
+          "rejected": "Tagasi lükatud"
+        },
+        "notice_status": {
+          "issued": "Väljastatud",
+          "acknowledged": "Kättesaamine kinnitatud",
+          "responded": "Vastatud",
+          "closed": "Suletud"
+        },
+        "classification": {
+          "scope_change": "Mahu muudatus",
+          "unforeseen": "Ettenägematu asjaolu",
+          "owner_change": "Tellija muudatus",
+          "design_dev": "Projekti arendus",
+          "regulatory": "Regulatiivne nõue",
+          "other": "Muu"
+        },
+        "urgency": {
+          "low": "Madal",
+          "med": "Keskmine",
+          "high": "Kõrge"
+        },
+        "claim_type": {
+          "disruption": "Töö häirimine",
+          "eot": "Tähtaja pikendamine"
+        },
+        "recipient_type": {
+          "owner": "Tellija",
+          "contractor": "Töövõtja",
+          "architect": "Arhitekt",
+          "engineer": "Insener",
+          "consultant": "Konsultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Ehituspäevik",
+        "overview": "Ülevaade",
+        "site_supervisor": "Objektijuht",
+        "not_recorded": "Märkimata",
+        "labour_on_site": "Tööjõud objektil",
+        "equipment_on_site": "Tehnika objektil",
+        "completeness": "Täielikkus",
+        "weather": "Ilm",
+        "weather_time": "Kellaaeg",
+        "weather_source": "Allikas",
+        "weather_temp": "Temp (C)",
+        "weather_wind": "Tuul (km/h)",
+        "weather_precip": "Sademed (mm)",
+        "weather_conditions": "Ilmastik",
+        "weather_empty": "Selle päeva ilma ei ole märgitud.",
+        "site_record": "Objekti kirje",
+        "entries_empty": "Sellesse päevikusse ei ole kirjeid tehtud.",
+        "notes": "Märkused",
+        "notes_empty": "Lisamärkusi ei ole.",
+        "footer_supervisor": "Objektijuht: {name}",
+        "footer_supervisor_missing": "Objektijuht: märkimata",
+        "footer_generated": "Koostatud: {timestamp}",
+        "footer_page": "Lk {page} / {total}",
+        "workforce": "Tööjõud ettevõtete kaupa",
+        "workforce_company": "Ettevõte",
+        "workforce_count": "Inimesi",
+        "workforce_unassigned": "Ettevõttele määramata",
+        "workforce_total": "Kokku",
+        "signatures": "Allkirjad",
+        "sig_prepared": "Koostaja (objektijuht)",
+        "sig_approved": "Kinnitaja (tellija esindaja)",
+        "sig_name": "Nimi",
+        "sig_title": "Ametikoht",
+        "sig_date": "Kuupäev",
+        "sig_signature": "Allkiri",
+        "signed_note": "Allkirjastatud süsteemis: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "ehituspaevik",
+        "summary_wind": "tuul {value} km/h",
+        "summary_precipitation": "sademed {value} mm",
+        "summary_humidity": "õhuniiskus {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Külastajad",
+          "event": "Sündmused",
+          "delivery": "Tarnitud materjalid",
+          "completion": "Tehtud tööd",
+          "incident_summary": "Tööohutus ja vahejuhtumid",
+          "inspection_summary": "Kontrollid",
+          "photo_note": "Fotomärkmed",
+          "general": "Üldmärkused"
+        },
+        "status": {
+          "open": "Avatud",
+          "closed": "Suletud",
+          "signed": "Allkirjastatud",
+          "archived": "Arhiveeritud"
+        },
+        "condition": {
+          "clear": "selge",
+          "mainly_clear": "enamasti selge",
+          "partly_cloudy": "vahelduv pilvisus",
+          "cloudy": "pilvine",
+          "overcast": "tihe pilvisus",
+          "fog": "udu",
+          "fog_rime": "härmatav udu",
+          "drizzle_light": "nõrk uduvihm",
+          "drizzle_moderate": "mõõdukas uduvihm",
+          "drizzle_dense": "tihe uduvihm",
+          "rain": "vihm",
+          "rain_light": "nõrk vihm",
+          "rain_moderate": "mõõdukas vihm",
+          "rain_heavy": "tugev vihm",
+          "freezing_rain_light": "nõrk jäävihm",
+          "freezing_rain_heavy": "tugev jäävihm",
+          "snow": "lumi",
+          "snow_light": "nõrk lumesadu",
+          "snow_moderate": "mõõdukas lumesadu",
+          "snow_heavy": "tugev lumesadu",
+          "rain_showers_light": "nõrgad hoovihmad",
+          "rain_showers_moderate": "mõõdukad hoovihmad",
+          "rain_showers_violent": "tugevad hoovihmad",
+          "snow_showers_light": "nõrgad lumehood",
+          "snow_showers_heavy": "tugevad lumehood",
+          "thunderstorm": "äikesetorm",
+          "thunderstorm_hail_light": "äikesetorm nõrga rahega",
+          "thunderstorm_hail_heavy": "äikesetorm tugeva rahega"
+        },
+        "source": {
+          "manual": "Käsitsi sisestatud",
+          "open_meteo": "Ilmateenistus",
+          "sensor": "Objekti andur"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Teabepäringute logi (RFI)",
+        "col_number": "RFI nr",
+        "col_subject": "Teema",
+        "col_raised_by": "Esitaja",
+        "col_assigned_to": "Määratud",
+        "col_ball_in_court": "Järgmine tegutseja",
+        "col_date_required": "Nõutav kp",
+        "col_response_due": "Vastamise tähtaeg",
+        "col_days_open": "Päevi avatud",
+        "col_cost_impact": "Mõju maksumusele",
+        "col_schedule_impact": "Mõju ajakavale",
+        "col_response": "Vastus",
+        "yes_with": "Jah ({detail})",
+        "register_filename": "rfi-logi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Mustand",
+          "open": "Avatud",
+          "answered": "Vastatud",
+          "closed": "Suletud",
+          "void": "Kehtetu"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "AI genereeritud",
+        "drawing": "Joonis",
+        "cost_estimate": "MAKSUMUSE HINDAMINE",
+        "summary": "KOKKUVÕTE",
+        "project": "Projekt:",
+        "boq": "BOQ:",
+        "date": "Kuupäev:",
+        "status": "Staatus:",
+        "prepared_by": "Koostas:",
+        "approved_by": "Kinnitas:",
+        "signature_hint": "Nimi / allkiri / kuupäev",
+        "contents": "Jaotised / positsioonid:",
+        "pos": "Poz.",
+        "description": "Kirjeldus",
+        "unit": "Ühik",
+        "qty": "Kogus",
+        "rate": "Hind",
+        "total": "Kokku",
+        "subtotal": "Vahesumma:",
+        "other_positions": "Muud positsioonid",
+        "direct_cost": "Otsesed kulud:",
+        "markups": "Lisandid (ilma käibemaksuta):",
+        "net_total": "Netosumma (ilma käibemaksuta):",
+        "gross_total": "Brutosumma",
+        "page": "Lehekülg",
+        "of": "/",
+        "generated": "Genereeritud:",
+        "summary_report": "Kokkuvõtlik aruanne",
+        "positions_omitted": "{count} positsiooni (täielik detailsus jäetud jõudluse tagamiseks)",
+        "section": "Jaotis",
+        "items": "Positsioonid",
+        "cost_summary": "Maksumuse kokkuvõte",
+        "table_of_contents": "Sisukord",
+        "resources_omitted": "Ressursside kalkulatsiooni ei prinditud: sellel arvestusel on ühe PDF-i jaoks liiga palju ressursirida.",
+        "status_draft": "Mustand",
+        "status_final": "Lõplik",
+        "status_archived": "Arhiveeritud",
+        "subject": "Koguste nimekiri",
+        "tax_vat": "KM"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "ARVE",
+        "date": "Kuupäev: {value}",
+        "due": "Tähtaeg: {value}",
+        "from": "Müüja",
+        "bill_to": "Ostja",
+        "vat_id": "KMKR: {value}",
+        "ref": "Viide: {value}",
+        "th_description": "Kirjeldus",
+        "th_qty": "Kogus",
+        "th_unit": "Ühik",
+        "th_unit_price": "Ühikhind",
+        "th_net": "Netosumma ({currency})",
+        "net_total": "Netosumma kokku",
+        "vat_total": "Käibemaks",
+        "grand_total": "Kokku tasuda",
+        "retention_prepaid": "Garantiiraha / ettemakse",
+        "amount_due": "Tasumisele kuuluv summa",
+        "payment": "Maksmine",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Konto: {value}",
+        "bank_code": "Pangakood: {value}",
+        "account_holder": "Konto omanik: {value}",
+        "footer": "See PDF sisaldab manustatud EN 16931 e-arvet (Factur-X / ZUGFeRD). Kehtiv dokument on manustatud XML.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ",",
+        "group_separator": " "
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Aruanne",
+        "meta_project": "Projekt",
+        "meta_type": "Tüüp",
+        "meta_generated": "Genereeritud",
+        "meta_currency": "Valuuta",
+        "field_column": "Väli",
+        "value_column": "Väärtus",
+        "yes": "Jah",
+        "no": "Ei",
+        "no_data_heading": "Andmed puuduvad",
+        "no_data_body": "See aruanne genereeriti tühja andmeseisuga. Kontrollige, kas allikmoodulid (finants, graafik, ohutus jt) tagastasid andmed valitud projekti kohta.",
+        "no_data_body_short": "See aruanne genereeriti tühja andmeseisuga. Kontrollige, kas allikmoodulid tagastasid valitud projekti kohta andmed.",
+        "footer_generated_by": "Genereeris OpenConstructionERP ajahetkel {timestamp}.",
+        "worksheet_name": "Aruanne",
+        "pdf_subject": "Projekti aruanne",
+        "overall_progress": "Üldine edenemine",
+        "as_of": "Seisuga",
+        "recorded_by": "Salvestas",
+        "period": "Periood",
+        "entries_suffix": "({count} kirjet)",
+        "site_photo_alt": "Objekti foto",
+        "ai_summary_heading": "Kokkuvõte",
+        "ai_badge": "AI genereeritud",
+        "ai_note": "Tehisintellekt genereeris selle allpool toodud projektiandmete põhjal.",
+        "ai_note_confidence": "Tehisintellekt genereeris selle allpool toodud projektiandmete põhjal (usaldusväärsus {confidence}).",
+        "ai_note_review": "Enne kliendile jagamist kontrollige üle."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Nimi",
+          "status": "Staatus",
+          "phase": "Faas",
+          "planned_start": "Planeeritud algus",
+          "planned_end": "Planeeritud lõpp",
+          "schedule_progress_pct": "Graafiku edenemine %",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Eelarve kasutatud %",
+          "as_of": "Seisuga",
+          "progress_pct": "Edenemine %",
+          "risk_score_avg": "Keskmine riskiskoor",
+          "open_rfis": "Avatud RFI-d",
+          "open_submittals": "Avatud esitused",
+          "open_defects": "Avatud puudused",
+          "open_observations": "Avatud tähelepanekud",
+          "budget": "Eelarve",
+          "committed": "Kohustatud",
+          "actual": "Tegelik",
+          "payable": "Tasumisele kuuluv",
+          "receivable": "Laekuv",
+          "net_cash_flow": "Netorahavoog"
+        },
+        "section_titles": {
+          "Project Overview": "Projekti ülevaade",
+          "Key Performance Indicators": "Põhilised tulemusnäitajad",
+          "Schedule Status": "Graafiku seis",
+          "Risk Summary": "Riskide kokkuvõte",
+          "Open Issues": "Avatud küsimused",
+          "Cost Summary": "Maksumuse kokkuvõte",
+          "Cost Breakdown": "Maksumuse jaotus",
+          "Change Orders": "Muutetööd",
+          "Cash Flow": "Rahavoog",
+          "Schedule Overview": "Graafiku ülevaade",
+          "Milestone Status": "Etappide seis",
+          "Critical Path": "Kriitiline tee",
+          "3-Week Lookahead": "3-nädalane ettevaade",
+          "Safety KPIs": "Ohutuse tulemusnäitajad",
+          "Incident Log": "Juhtumite register",
+          "Near-Miss Reports": "Vahejuhtumite aruanded",
+          "Safety Training": "Ohutusalane koolitus",
+          "Inspection Summary": "Kontrollide kokkuvõte",
+          "By Inspection Type": "Kontrolli liigi järgi",
+          "Punch List Status": "Puudusnimekirja seis",
+          "Recent Inspections": "Viimased kontrollid",
+          "Portfolio Overview": "Portfelli ülevaade",
+          "Project Statuses": "Projektide staatused",
+          "KPI Comparison": "Tulemusnäitajate võrdlus",
+          "Portfolio Risks": "Portfelli riskid",
+          "Field Progress": "Objekti edenemine",
+          "Top Risks": "Peamised riskid",
+          "Site Photos": "Objekti fotod",
+          "Summary": "Kokkuvõte"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Ostutellimus",
+        "gr_title": "Kaubasaadetise vastuvõtt",
+        "supplier": "Tarnija",
+        "po_type": "Tellimuse liik",
+        "issue_date": "Väljastamise kuupäev",
+        "delivery_date": "Tarnekuupäev",
+        "created_by": "Koostas",
+        "order_total": "Tellimuse kogusumma",
+        "line_items": "Reapositsioonid",
+        "col_no": "Nr",
+        "col_description": "Kirjeldus",
+        "col_quantity": "Kogus",
+        "col_unit": "Ühik",
+        "col_unit_rate": "Ühikhind",
+        "col_amount": "Summa",
+        "no_line_items": "Reapositsioone pole.",
+        "totals": "Kokkuvõte",
+        "subtotal": "Netosumma",
+        "tax": "Maks",
+        "total_gross": "Kokku koos maksuga",
+        "terms": "Tingimused",
+        "payment_terms": "Maksetingimused",
+        "retention": "Garantiiraha",
+        "retention_at": "Garantiiraha kinnipidamine",
+        "retention_at_receipt": "Kaubasaadetise vastuvõtul",
+        "retention_at_invoice": "Arvel",
+        "invoice_tolerance": "Arve lubatud kõrvalekalle",
+        "supplier_confirmation": "Tarnija kinnitus",
+        "supplier_reference": "Tarnija viide",
+        "confirmed_delivery": "Kinnitatud tarnekuupäev",
+        "acknowledged_on": "Kinnitatud kuupäeval",
+        "not_confirmed": "Tarnija pole veel kinnitanud.",
+        "notes": "Märkused",
+        "no_notes": "Märkusi pole lisatud.",
+        "sig_ordered_by": "Tellija",
+        "purchase_order": "Ostutellimus",
+        "receipt_date": "Vastuvõtu kuupäev",
+        "received_by": "Vastu võtnud",
+        "delivery_note": "Saatelleht",
+        "col_ordered": "Tellitud",
+        "col_received": "Vastu võetud",
+        "col_rejected": "Tagasi lükatud",
+        "col_batch": "Partii / lot",
+        "rejections": "Tagasilükkamised",
+        "col_reason": "Põhjus",
+        "no_rejections": "Midagi ei lükatud tagasi.",
+        "sig_delivered_by": "Tarnija esindaja",
+        "counterparty_tax_id": "KMKR",
+        "counterparty_address": "Aadress"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Mustand",
+          "approved": "Kinnitatud",
+          "issued": "Väljastatud",
+          "partially_received": "Osaliselt vastu võetud",
+          "completed": "Lõpetatud",
+          "cancelled": "Tühistatud"
+        },
+        "gr_status": {
+          "draft": "Mustand",
+          "confirmed": "Kinnitatud"
+        },
+        "po_type": {
+          "standard": "Standardne",
+          "blanket": "Raamtellimus",
+          "service": "Teenused"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Arve",
+        "payment_title": "Makse",
+        "direction": "Suund",
+        "supplier": "Tarnija",
+        "client": "Klient",
+        "invoice_date": "Arve kuupäev",
+        "due_date": "Tasumistähtaeg",
+        "payment_terms": "Maksetingimused",
+        "purchase_order": "Ostutellimus",
+        "invoice_total": "Arve kogusumma",
+        "line_items": "Reapositsioonid",
+        "col_no": "Nr",
+        "col_description": "Kirjeldus",
+        "col_quantity": "Kogus",
+        "col_unit": "Ühik",
+        "col_unit_rate": "Ühikhind",
+        "col_vat": "KM",
+        "col_amount": "Summa",
+        "no_line_items": "Reapositsioone pole.",
+        "totals": "Kokkuvõte",
+        "subtotal": "Netosumma",
+        "tax": "Maks",
+        "total_gross": "Kokku koos maksuga",
+        "retention": "Garantiiraha",
+        "amount_due": "Tasumisele kuuluv pärast garantiiraha",
+        "payments": "Maksed",
+        "col_date": "Kuupäev",
+        "col_reference": "Viide",
+        "col_paid": "Makstud",
+        "col_withheld": "Kinni peetud",
+        "refund": "Tagasimakse",
+        "no_payments": "Makseid pole registreeritud.",
+        "notes": "Märkused",
+        "no_notes": "Märkusi pole lisatud.",
+        "invoice": "Arve",
+        "invoice_number": "Arve nr",
+        "payment_date": "Makse kuupäev",
+        "reference": "Viide",
+        "amount_paid": "Makstud summa",
+        "exchange_rate": "Vahetuskurss",
+        "kind": "Tüüp",
+        "kind_payment": "Makse",
+        "kind_refund": "Tagasimakse",
+        "withholding": "Kinni peetud garantiiraha",
+        "withheld_amount": "Kinni peetud summa",
+        "release_date": "Vabastamise kuupäev",
+        "gross_settled": "Tasutud brutosumma",
+        "no_withholding": "Sellest maksest ei ole midagi kinni peetud.",
+        "counterparty_tax_id": "KMKR",
+        "counterparty_address": "Aadress"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Mustand",
+          "pending": "Kinnitamisel",
+          "approved": "Kinnitatud",
+          "sent": "Saadetud",
+          "paid": "Tasutud",
+          "cancelled": "Tühistatud",
+          "credit_note_issued": "Kreeditarve väljastatud"
+        },
+        "direction": {
+          "payable": "Tasumisele kuuluv (tarnija arve)",
+          "receivable": "Laekuv (kliendi arve)"
+        },
+        "payment_status": {
+          "completed": "Lõpetatud",
+          "refunded": "Tagastatud"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Leht {page} / {total}",
+    "page": "Leht {page}",
+    "printed": "Prinditud: {timestamp}",
+    "generated": "Koostatud: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} kutsus sind kliendiportaali",
+      "login_subject": "Sinu sisselogimislink kliendiportaali",
+      "invite_heading": "Tere tulemast kliendiportaali",
+      "login_heading": "Logi kliendiportaali sisse",
+      "greeting": "Tere, {name}!",
+      "greeting_generic": "Tere!",
+      "invite_body": "{sender} andis sulle juurdepääsu kliendiportaalile. Seal saad jälgida oma projekti: edenemisaruandeid, dokumente, arveid ja eesseisvaid verstaposte.",
+      "login_body": "Siin on sisselogimislink, mida palusid.",
+      "link_help": "Allolev nupp logib sind sisse. Parooli pole vaja. Link toimib ainult ühe korra ja aegub {hours} tunni pärast.",
+      "ignore": "Kui sa seda e-kirja ei oodanud, võid selle ignoreerida. Ilma selle lingita ei pääse keegi ligi.",
+      "invite_cta": "Ava portaal",
+      "login_cta": "Logi sisse",
+      "sender_generic": "Sinu projektimeeskond"
+    },
+    "tender_invite": {
+      "subject": "Pakkumiskutse: {package}",
+      "heading": "Pakkumiskutse",
+      "greeting": "Lugupeetud {company},",
+      "greeting_generic": "Lugupeetud saaja,",
+      "invite": "Kutsume teid esitama pakkumist pakkumispaketile {package}.",
+      "invite_project": "Kutsume teid esitama pakkumist pakkumispaketile {package}. Projekt: {project}.",
+      "deadline": "Pakkumiste esitamise tähtaeg: {deadline}",
+      "link_help": "Allolev nupp avab mahtude loendi. Sisestage ühikuhinnad veebis, salvestage vajaduse korral mustand ja esitage pakkumine enne tähtaega. Kontot pole vaja.",
+      "link_personal": "See link on mõeldud ainult teie ettevõttele. Palun ärge edastage seda.",
+      "cta": "Ava mahtude loend ja sisesta hinnad",
+      "no_link": "Palun tutvuge paketi andmetega ja esitage oma pakkumine enne ülaltoodud tähtaega."
+    },
+    "notification_email": {
+      "greeting": "Tere, {name}!",
+      "greeting_generic": "Tere!",
+      "cta": "Ava OpenConstructionERP",
+      "footer": "Saad selle e-kirja oma teavitusseadete põhjal. Seadeid saad muuta oma profiilis.",
+      "digest_subject": "OpenConstructionERP: Teavituste kokkuvõte ({count})",
+      "digest_heading": "Viimased teavitused:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Hindade võrdlus",
+      "comparison_sheet": "Võrdlus",
+      "bidder_title": "Hinnastatav mahtude loend",
+      "bidder_sheet": "Mahtude loend",
+      "project": "Projekt",
+      "package": "Pakett",
+      "currency": "Valuuta",
+      "date": "Kuupäev",
+      "return_by": "Tagastada hiljemalt",
+      "item": "Nimetus",
+      "description": "Kirjeldus",
+      "unit": "Ühik",
+      "quantity": "Kogus",
+      "unit_price": "Ühikuhind",
+      "line_total": "Rea summa",
+      "own_estimate": "Oma hinnang",
+      "not_priced": "hinnastamata",
+      "sum_priced_lines": "Hinnastatud ridade summa",
+      "bid_total": "Esitatud pakkumuse kogusumma",
+      "lines_priced": "Hinnastatud read",
+      "lines_priced_value": "{priced} / {total}",
+      "deviation": "Kõrvalekalle omaenda hinnangust",
+      "not_comparable": "pole võrreldav",
+      "other_currency": "Pakkumuse valuuta: {currency}. Seda ei järjestata pakkumiste hulgas, mille valuuta on {reporting}.",
+      "legend": "Seletus",
+      "legend_lowest": "Roheline: rea madalaim ühikuhind.",
+      "legend_high": "▲ punane: üle {pct}% rea mediaanhinnast kõrgem.",
+      "legend_low": "▼ kollane: üle {pct}% rea mediaanhinnast madalam.",
+      "legend_missing": "„{marker}“: pakkuja ei ole reale hinda andnud.",
+      "legend_incomplete": "Pakkumus, milles on hinnastamata ridu, märgitakse veerus „Hinnastatud read“ ja seda ei järjestata kogusumma alusel madalaimaks.",
+      "legend_totals": "Pakkumuse kogusumma on pakkuja esitatud summa; see võib erineda hinnastatud ridade summast.",
+      "bidder": "Pakkuja",
+      "bidder_note": "Pakkuja märkus",
+      "reference": "Viide (ära muuda)",
+      "total": "Kokku",
+      "instructions": "Sisestage igale reale ühikuhind kollastesse lahtritesse. Kogused ja kirjeldused on lukustatud, rea summad ja kogusumma arvutatakse automaatselt. Jätke lahter tühjaks, kui te rida ei hinnasta."
+    },
+    "cost_plan": {
+      "sheet_plan": "NRM 1 kuluplaan",
+      "sheet_unallocated": "Jaotamata",
+      "title": "Ehituselementide kuluplaan (NRM 1)",
+      "bill": "Mahtude loend",
+      "currency": "Valuuta",
+      "gifa": "Brutopind (m2)",
+      "gifa_project": "projektist",
+      "gifa_entered": "sisestatud selle ekspordi jaoks",
+      "gifa_none": "määramata, kulu m2 kohta ei kuvata",
+      "col_code": "Kood",
+      "col_description": "Element",
+      "col_positions": "Positsioonid",
+      "col_basis": "Alus",
+      "col_total": "Kokku",
+      "col_per_m2": "Kulu / m2 brutopinda",
+      "col_share": "% kogusummast",
+      "col_running": "Jooksev summa",
+      "group_level": "Rühma tase, elementi pole määratud",
+      "facilitating_works_estimate": "Ettevalmistustööde hinnang",
+      "works_estimate": "Ehitustööde hinnang",
+      "addons_heading": "NRM 1 rühmad 9-14 hinnastatud mahtude loendi positsioonidena",
+      "unallocated": "Elemendile jaotamata",
+      "direct_cost": "Mahtude loendi otsekulu",
+      "markups_heading": "Juurdehindlused (mahtude loendi enda juurdehindluste jada, järjekorras)",
+      "markups_total": "Juurdehindlused kokku",
+      "grand_total": "Kuluplaani kogusumma",
+      "basis_direct": "{pct}% otsekulust",
+      "basis_running": "{pct}% jooksvast vahesummast",
+      "basis_lump": "Kindel summa",
+      "basis_banded": "Astmeline skaala",
+      "basis_escalation": "Indeksi alusel korrigeerimine",
+      "basis_other": "{kind}",
+      "basis_scoped": "piiratud jaotisega",
+      "col_ordinal": "Järjekorranumber",
+      "col_position": "Kirjeldus",
+      "col_written_code": "Kood nii, nagu see on kirjutatud",
+      "col_reason": "Põhjus",
+      "reason_no_code": "Positsioonil ega selle jaotistel pole NRM-koodi",
+      "reason_invalid_code": "Kood ei ole NRM-number",
+      "reason_unknown_group": "NRM 1 selliseid rühmi ei tunne",
+      "truncated": "Loend on lühendatud. Kuvatud positsioone: {shown}, positsioone kokku: {count}. Kogusumma hõlmab kõiki."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Nõuded",
+      "sheet_summary": "Kokkuvõte",
+      "sheet_legend": "Seletus",
+      "summary_element": "Element",
+      "summary_count": "Nõuete arv",
+      "summary_total": "Kokku",
+      "legend_column": "Veerg",
+      "legend_description": "Kirjeldus",
+      "unspecified": "Määratlemata",
+      "h01": "Element / IFC-klass",
+      "h02": "Klassifikatsioon",
+      "h03": "Omaduste rühm",
+      "h04": "Omaduse nimi",
+      "h05": "Andmetüüp",
+      "h06": "Kohustuslik",
+      "h07": "Lubatud väärtused",
+      "h08": "Min",
+      "h09": "Maks",
+      "h10": "Ühik",
+      "h11": "Muster",
+      "h12": "Etapp",
+      "h13": "Osapool",
+      "h14": "Kasutusjuht",
+      "h15": "Allikas",
+      "d01": "IFC olemiklass (nt IFCWALL, IFCBEAM)",
+      "d02": "Klassifitseerimissüsteem ja kood (nt Uniclass 2015: EF_25_10)",
+      "d03": "Omaduste komplekti nimi (nt Pset_WallCommon)",
+      "d04": "Nõutava omaduse või atribuudi nimi",
+      "d05": "IFC andmetüüp (IFCLABEL, IFCREAL, IFCBOOLEAN jne)",
+      "d06": "Kardinaalsus: kohustuslik, valikuline või keelatud",
+      "d07": "Lubatud väärtuste loend, eraldatud semikoolonitega",
+      "d08": "Arvulise vahemiku piirid",
+      "d09": "Mõõtühik (m, m2, kg jne)",
+      "d10": "Regulaaravaldis väärtuse valideerimiseks",
+      "d11": "Projekti etapp või verstapost (nt eelprojekt, RIBA Stage 3)",
+      "d12": "Vastutav osapool (arhitekt, konstruktor jne)",
+      "d13": "Nõude eesmärk või kasutusjuht",
+      "d14": "Allikaks olev standard või dokument"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Mahtude loend loodud",
+      "notifications.boq.created.body": "Sinu mahtude loend „{boq_name}“ on salvestatud.",
+      "notifications.meeting.action_assigned.title": "Koosoleku tegevus määrati sulle",
+      "notifications.meeting.action_assigned.body": "Koosolekult {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Dokumendi olek muutus",
+      "notifications.cde.state_transitioned.body": "Konteiner viidi olekusse „{new_state}“.",
+      "notifications.cde.linked_published.title": "Sinu tööga seotud dokument avaldati",
+      "notifications.cde.linked_published.body": "{container_code} on avaldatud. Revisjon: {revision_code}. Sinu seotud kirjed: {records}.",
+      "notifications.rfi.assigned.title": "RFI määrati sulle",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "RFI-le vastati",
+      "notifications.rfi.responded.body": "Sinu päringule {code} ({title}) on vastatud.",
+      "notifications.risk.assigned.title": "Risk määrati sulle",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Kulude ületamise hoiatus",
+      "notifications.costmodel.overrun_alert.body": "Kulud ületavad eelarvet. Kategooria: {category}. Tegelik kulu {actual} {currency} ületab hoiatuspiiri +{threshold_pct}% planeeritud summast {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Kooskõlastusdokument ootab ülevaatamist",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Kooskõlastusdokument kinnitatud",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Kooskõlastusdokument tagasi lükatud",
+      "notifications.submittal.rejected.body": "{code} ({title}). Põhjus: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Kooskõlastusdokument vajab parandamist",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Põhjus: {reason}",
+      "notifications.transmittal.issued.title": "Edastus esitati sulle",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Edastus kinnitati kättesaaduks",
+      "notifications.transmittal.acknowledged.body": "Saaja kinnitas: {code} ({title}).",
+      "notifications.transmittal.responded.title": "Edastusele vastati",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "RFI määrati sulle",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Uus ülesanne määrati",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Arve kinnitatud",
+      "notification.invoice_approved_body": "Arve {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Ülevaatus planeeritud",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, kuupäev: {inspection_date}",
+      "notification.submittal_status_changed_title": "Kooskõlastusdokumendi olek muutus",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Koosolek planeeritud",
+      "notification.meeting_scheduled_body": "{title}, kuupäev: {meeting_date}",
+      "notification.ncr_created_title": "Mittevastavus registreeritud",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Dokument üles laaditud",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Sind mainiti kommentaaris",
+      "notifications.file_comments.mention.body": "„{excerpt}“",
+      "notifications.collaboration.comment_added.title": "Uus kommentaar arutelus",
+      "notifications.collaboration.comment_added.body": "Objekt: {entity_type}. „{excerpt}“",
+      "notifications.clash.high_severity.title": "Tuvastati tõsine kokkupõrge",
+      "notifications.clash.high_severity.body": "Kokkupõrge, tõsidus {severity}: {a_name} ja {b_name}",
+      "notifications.validation.report.title": "Valideerimine tuvastas probleeme",
+      "notifications.validation.report.body": "Valideeritud objekt: {target_type}. Vigu: {error_count}, hoiatusi: {warning_count}.",
+      "notifications.punchlist.auto_created.title": "Puuduste nimekirja punkt loodud",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Teavituste kokkuvõte",
+      "notifications.digest.body": "Kanal: {channel}. Uusi värskendusi: {count}.",
+      "notifications.approval.overdue.title": "Kinnitamine hilineb",
+      "notifications.approval.overdue.body": "Objekt: {target_kind}. Etapp {step_ordinal} hilineb. Tunde hilinenud: {hours_overdue}.",
+      "notifications.approval.escalated.title": "Kinnitamine eskaleeriti sulle",
+      "notifications.approval.escalated.body": "Objekt: {target_kind}. Etapp {step_ordinal} eskaleeriti sulle (tase {level}).",
+      "notifications.approval.reassigned.title": "Kinnitamine anti sulle üle",
+      "notifications.approval.reassigned.body": "Objekt: {target_kind}. Etapi {step_ordinal} otsustad nüüd sina.",
+      "notifications.deadline.overdue.title": "Üle tähtaja: {title}",
+      "notifications.deadline.overdue.body": "Moodul: {module}. Kirje „{title}“ on tähtaja ületanud. Päevi hilinenud: {days_overdue}.",
+      "notifications.deadline.escalated.title": "Eskaleeritud tähtaja ületanud kirje",
+      "notifications.deadline.escalated.body": "Moodul: {module}. Kirje „{title}“ on endiselt avatud ja tähtaja ületanud ning see on eskaleeritud. Päevi hilinenud: {days_overdue}.",
+      "notifications.deadline.approaching.title": "Tähtaeg läheneb: {title}",
+      "notifications.deadline.approaching.body": "Moodul: {module}. Kirje „{title}“ tähtaeg: {due_date}.",
+      "notifications.deadline.built.approaching.title": "Tähtaeg läheneb: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: „{title}“, tähtaeg: {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Üle tähtaja: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "RFI {reference} „{title}“ (projekt: {project}) tähtaeg oli {due_date_display} ja see on hilinenud. Päevi hilinenud: {days_overdue}. Vastus on nõutav.",
+      "notifications.deadline.rfi.escalated.title": "Eskaleeritud: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "RFI {reference} „{title}“ (projekt: {project}) on endiselt avatud ja tähtaeg {due_date_display} on möödunud. Päevi hilinenud: {days_overdue}. Küsimus on eskaleeritud sulle.",
+      "notifications.deadline.rfi.approaching.title": "Tähtaeg läheneb: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "RFI {reference} „{title}“ (projekt: {project}) tähtaeg: {due_date_display}. Vastus on nõutav.",
+      "notifications.deadline.submittals.overdue.title": "Üle tähtaja: kooskõlastusdokument {reference}",
+      "notifications.deadline.submittals.overdue.body": "Kooskõlastusdokument {reference} „{title}“ (projekt: {project}) tähtaeg oli {due_date_display} ja see on hilinenud. Päevi hilinenud: {days_overdue}. Ülevaatus on nõutav.",
+      "notifications.deadline.submittals.escalated.title": "Eskaleeritud: kooskõlastusdokument {reference}",
+      "notifications.deadline.submittals.escalated.body": "Kooskõlastusdokument {reference} „{title}“ (projekt: {project}) on endiselt avatud ja tähtaeg {due_date_display} on möödunud. Päevi hilinenud: {days_overdue}. Küsimus on eskaleeritud sulle.",
+      "notifications.deadline.submittals.approaching.title": "Tähtaeg läheneb: kooskõlastusdokument {reference}",
+      "notifications.deadline.submittals.approaching.body": "Kooskõlastusdokument {reference} „{title}“ (projekt: {project}) tähtaeg: {due_date_display}. Ülevaatus on nõutav.",
+      "notifications.deadline.correspondence.overdue.title": "Üle tähtaja: kirjavahetus {reference}",
+      "notifications.deadline.correspondence.overdue.body": "Kirjavahetusele {reference} „{title}“ (projekt: {project}) oleks pidanud vastama hiljemalt {due_date_display} ja see on hilinenud. Päevi hilinenud: {days_overdue}. Vastus on nõutav.",
+      "notifications.deadline.correspondence.escalated.title": "Eskaleeritud: kirjavahetus {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Kirjavahetus {reference} „{title}“ (projekt: {project}) on endiselt vastamata ja tähtaeg {due_date_display} on möödunud. Päevi hilinenud: {days_overdue}. Küsimus on eskaleeritud sulle.",
+      "notifications.deadline.correspondence.approaching.title": "Tähtaeg läheneb: kirjavahetus {reference}",
+      "notifications.deadline.correspondence.approaching.body": "Kirjavahetusele {reference} „{title}“ (projekt: {project}) tuleb vastata hiljemalt {due_date_display}. Vastus on nõutav.",
+      "notifications.deadline.variations.overdue.title": "Üle tähtaja: muudatustöö {reference}",
+      "notifications.deadline.variations.overdue.body": "Muudatustöö {reference} „{title}“ (projekt: {project}) tähtaeg oli {due_date_display} ja see on hilinenud. Päevi hilinenud: {days_overdue}. Otsus on nõutav.",
+      "notifications.deadline.variations.escalated.title": "Eskaleeritud: muudatustöö {reference}",
+      "notifications.deadline.variations.escalated.body": "Muudatustöö {reference} „{title}“ (projekt: {project}) on endiselt avatud ja tähtaeg {due_date_display} on möödunud. Päevi hilinenud: {days_overdue}. Küsimus on eskaleeritud sulle.",
+      "notifications.deadline.variations.approaching.title": "Tähtaeg läheneb: muudatustöö {reference}",
+      "notifications.deadline.variations.approaching.body": "Muudatustöö {reference} „{title}“ (projekt: {project}) tähtaeg: {due_date_display}. Otsus on nõutav.",
+      "notifications.variation.submitted.title": "Muudatustöö ootab otsust: {code}",
+      "notifications.variation.submitted.body": "Muudatustöö {code} „{title}“ (projekt: {project}) on esitatud ja ootab otsust.",
+      "notifications.variation.approved.title": "Muudatustöö kinnitatud: {code}",
+      "notifications.variation.approved.body": "Muudatustöö {code} „{title}“ (projekt: {project}) on kinnitatud.",
+      "notifications.variation.rejected.title": "Muudatustöö tagasi lükatud: {code}",
+      "notifications.variation.rejected.body": "Muudatustöö {code} „{title}“ (projekt: {project}) lükati tagasi ja saadeti sulle tagasi.",
+      "notifications.variation.rejected_reason.body": "Muudatustöö {code} „{title}“ (projekt: {project}) lükati tagasi ja saadeti sulle tagasi. Põhjus: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Muudatuskorraldus ootab kinnitamist: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Muudatuskorraldus {code} „{title}“ (projekt: {project}) on esitatud ja ootab kinnitamist.",
+      "notifications.changeorder.approved.title": "Muudatuskorraldus kinnitatud: {code}",
+      "notifications.changeorder.approved.body": "Muudatuskorraldus {code} „{title}“ (projekt: {project}) on kinnitatud.",
+      "notifications.changeorder.rejected.title": "Muudatuskorraldus tagasi lükatud: {code}",
+      "notifications.changeorder.rejected.body": "Muudatuskorraldus {code} „{title}“ (projekt: {project}) lükati tagasi.",
+      "notifications.submittal.approved_as_noted.title": "Kooskõlastusdokument kinnitatud märkustega",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Dokument ootab sinu kinnitust",
+      "notifications.file_approval.needs_approver.body": "Dokument (liik: {file_kind}) ootab sinu kinnitust.",
+      "notifications.file_approval.approved.title": "Sinu dokument on kinnitatud",
+      "notifications.file_approval.approved.body": "Dokument (liik: {file_kind}) läbis kõik kinnitusetapid.",
+      "notifications.file_approval.rejected.title": "Sinu dokument saadeti tagasi",
+      "notifications.file_approval.rejected.body": "Dokument (liik: {file_kind}) lükati tagasi ja vajab muudatusi.",
+      "notifications.portal.user_invited.title": "Portaali kasutaja kutsuti",
+      "notifications.portal.user_invited.body": "{portal_user_email} kutsuti rolli: {portal_role}.",
+      "notifications.portal.message_received.title": "Uus portaalisõnum",
+      "notifications.portal.message_received.body": "{buyer_name} saatis sõnumi."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "ID",
+          "Tegevuse ID",
+          "Tegevuse kood",
+          "Ülesande ID",
+          "Kood",
+          "Nr"
+        ],
+        "name": [
+          "Nimi",
+          "Ülesande nimi",
+          "Tegevuse nimi",
+          "Tegevus",
+          "Ülesanne"
+        ],
+        "wbs": [
+          "WBS",
+          "WBS-kood",
+          "WBS-number",
+          "Liigendusnumber"
+        ],
+        "outline_level": [
+          "Liigendustase",
+          "Tase",
+          "Taandetase",
+          "Taane"
+        ],
+        "start": [
+          "Algus",
+          "Alguskuupäev",
+          "Alustamise kuupäev",
+          "Planeeritud algus"
+        ],
+        "finish": [
+          "Lõpp",
+          "Lõppkuupäev",
+          "Planeeritud lõpp",
+          "Valmimiskuupäev"
+        ],
+        "duration": [
+          "Kestus",
+          "Kestus (päeva)",
+          "Päevad",
+          "Algne kestus"
+        ],
+        "predecessors": [
+          "Eelnevad",
+          "Eelnev",
+          "Eeltegevused",
+          "Sõltub",
+          "Sõltuvused"
+        ],
+        "percent_complete": [
+          "% valmis",
+          "Valmidus",
+          "Valmidus (%)",
+          "Edenemine",
+          "% tehtud"
+        ],
+        "milestone": [
+          "Verstapost",
+          "On verstapost"
+        ],
+        "resource": [
+          "Ressurss",
+          "Ressursid",
+          "Ressursi nimi",
+          "Meeskond",
+          "Määratud"
+        ],
+        "notes": [
+          "Märkused",
+          "Märkus",
+          "Kommentaarid",
+          "Kommentaar",
+          "Märkmed"
+        ],
+        "client_visible": [
+          "Nähtav kliendile",
+          "Näita kliendile",
+          "Jaga kliendiga"
+        ]
+      },
+      "yes_words": [
+        "jah",
+        "tõene"
+      ],
+      "no_words": [
+        "ei",
+        "väär"
+      ],
+      "example_names": [
+        "Kande- ja ümbrisekonstruktsioonid",
+        "Kaevetööd",
+        "Vundamendid",
+        "Vundamendid üle antud"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "*leping*",
+          "kokkulep*"
+        ],
+        "contact": [
+          "kontakt*",
+          "*tarnija*",
+          "*töövõtja*",
+          "klient*",
+          "tellija*",
+          "*hankija*"
+        ],
+        "schedule_activity": [
+          "tegevus*",
+          "ülesan*",
+          "wbs",
+          "tööetapp*",
+          "töölõik*"
+        ],
+        "document": [
+          "*dokument*",
+          "joonis*",
+          "manus*"
+        ],
+        "user": [
+          "*vastutaja*",
+          "vastutav*",
+          "täitja*",
+          "inspektor*",
+          "objektijuht*",
+          "ehitusjuht*"
+        ],
+        "due": [
+          "tähtaeg*",
+          "tähtaja*",
+          "tähtpäev*",
+          "aegumis*",
+          "kehtivus*",
+          "uuendamis*",
+          "sihtkuupäev*"
+        ]
+      },
+      "link_labels": {
+        "contract": "Leping",
+        "contact": "Kontakt",
+        "schedule_activity": "Ajakava tegevus",
+        "document": "Dokument",
+        "user": "Vastutaja"
+      },
+      "state_labels": [
+        "Avatud",
+        "Töös",
+        "Valmis"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Hanke {package} lisa {number}",
+      "addendum_heading": "Hanke lisa",
+      "greeting": "Austatud {company},",
+      "greeting_generic": "Austatud härra või proua,",
+      "addendum_intro": "Hankepaketile {package} on välja antud lisa {number}: {title}.",
+      "addendum_deadline": "Pakkumuste esitamise tähtaeg on nihkunud kuupäevalt {old} kuupäevale {new}.",
+      "addendum_boq": "Koguste loetelu on muutunud (versioon {revision}). Palun hinnake kehtiv versioon.",
+      "addendum_documents": "Välja antud dokumendid: {documents}",
+      "addendum_ack": "Palun kinnitage selle lisa kättesaamine. Pakkumus, mis ei kinnita kõiki lisasid, võidakse lugeda nõuetele mittevastavaks.",
+      "answer_subject": "Hanke {package} selgitus {number}",
+      "answer_heading": "Hanke selgitus",
+      "answer_intro": "Hankepaketi {package} kohta esitatud küsimusele on vastatud. Vastus kehtib kõigile pakkujatele.",
+      "question_label": "Küsimus",
+      "answer_label": "Vastus"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Arendustulu brutoväärtus (GDV)",
+      "total_development_cost": "Arenduse kogukulu",
+      "residual_land_value": "Maa jääkväärtus",
+      "developer_profit": "Arendaja kasum",
+      "profit_on_cost": "Kasum kulust",
+      "profit_on_gdv": "Kasum GDV-st",
+      "construction_cost": "Ehituskulu",
+      "professional_fees": "Erialaste konsultatsioonide tasud",
+      "contingency": "Reserv ettenägematuteks kuludeks",
+      "finance_cost": "Finantseerimiskulu",
+      "sales_costs": "Müügikulud"
+    },
+    "status": {
+      "viable": "Elujõuline",
+      "unviable": "Ebaelujõuline",
+      "marginal": "Piirjuhtum",
+      "pending": "Pole veel hinnatud"
+    },
+    "figure": {
+      "gross_development_value": "Kõigi projekti üksuste müügiväärtuste summa, kõik ühes valuutas.",
+      "total_development_cost": "Kõik projekti teostamise kulud peale maa enda: ehitus, tasud, reserv, finantseerimine ja müügikulud.",
+      "residual_land_value": "See, mis maale jääb, kui brutoarendusväärtusest on maha arvatud arenduse kogukulu ja arendaja sihtkasum.",
+      "developer_profit": "Kasum, mida arendaja soovib alles jätta, määratud sihtmäärana brutoarendusväärtuse suhtes.",
+      "profit_on_cost": "Arendaja kasum jagatuna arenduse kogukuluga, esitatud suhtarvuna.",
+      "profit_on_gdv": "Arendaja kasum jagatuna brutoarendusväärtusega, esitatud suhtarvuna."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Töölaager",
+        "rental": "Üürielamu",
+        "hotel": "Hotell"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Ootel",
+        "approved": "Kinnitatud",
+        "rejected": "Tagasi lükatud"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Täidetud",
+        "fail": "Täitmata",
+        "not_applicable": "Ei kohaldu"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Joonis",
+        "contract": "Leping",
+        "specification": "Spetsifikatsioon",
+        "photo": "Foto",
+        "correspondence": "Kirjavahetus",
+        "reality_capture": "Tegelikkuse jäädvustus",
+        "other": "Muu"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Ootel",
+        "approved": "Kinnitatud",
+        "rejected": "Tagasi lükatud",
+        "cancelled": "Tühistatud"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Mustand",
+        "submitted": "Esitatud kinnitamiseks",
+        "approved": "Kinnitatud",
+        "posted": "Kantud pearaamatusse"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Avatud",
+        "assigned": "Määratud",
+        "in_progress": "Pooleli",
+        "resolved": "Lahendatud",
+        "verified": "Kontrollitud",
+        "closed": "Suletud"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "tähelepanek",
+        "minor": "väike",
+        "major": "suur",
+        "critical": "kriitiline"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Isik",
+        "crew": "Brigaad",
+        "equipment": "Tehnika",
+        "subcontractor": "Alltöövõtja"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI mudeli nimi on aegunud või pole saadaval. Avage Seaded > AI ja määrake oma teenusepakkuja jaoks kehtiv mudeli nimi.",
+      "not_configured": "AI pole seadistatud. Seadistage seadetes AI teenusepakkuja."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "kontrollitud",
+      "bound": "lisatud",
+      "empty": "puudub"
+    },
+    "package_status_labels": {
+      "draft": "mustand",
+      "in_progress": "pooleli",
+      "ready": "valmis",
+      "issued": "välja antud"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "takistus",
+      "critical": "kriitiline",
+      "warning": "hoiatus",
+      "suggestion": "soovitus"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strateegia",
+      "brief": "Lähteülesanne",
+      "concept": "Kontseptsioon",
+      "design": "Projekteerimine",
+      "approval": "Luba",
+      "detail": "Detailprojekteerimine",
+      "tender": "Hange",
+      "award": "Hankeleping",
+      "construction": "Ehitus",
+      "handover": "Üleandmine",
+      "operation": "Kasutus"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Tööl pole lõigatavaid detaile",
+        "suggestion": "Lisa detailid käsitsi, kleebi need või impordi painutusnimekirjast, mõõdistusest, mahutabeli realt või failist."
+      },
+      "has_stock": {
+        "fail": "Tööl pole ladu, millest lõigata",
+        "suggestion": "Lisa vähemalt üks laopikkus või plaadi suurus või kasuta taas ehitusplatsi lao jääke."
+      },
+      "sheet_dimensions": {
+        "fail": "Kirjel {ref} puudub laius",
+        "suggestion": "Sisesta iga plaadidetaili ja plaadi suuruse pikkus ja laius."
+      },
+      "piece_fits_stock": {
+        "fail": "Detail {ref} ({size} mm) ei mahu ühegi laosuuruse peale",
+        "suggestion": "Lisa pikem või suurem laosuurus, vähenda tasandust või jaga detail ühendusega."
+      },
+      "grain_allows_fit": {
+        "fail": "Detail {ref} mahub ainult risti kiudu pööratult",
+        "suggestion": "Luba selle detaili pööramine või lisa plaadi suurus, kuhu see mahub piki kiudu."
+      },
+      "kerf_set": {
+        "fail": "Saelõike laius on null",
+        "suggestion": "Sisesta saeketta või lõike laius, vastasel juhul on mitme lõikega varraste saagis ülehinnatud."
+      },
+      "min_offcut_set": {
+        "fail": "Väikseimat kasutatavat jääki pole määratud",
+        "suggestion": "Määra lühim hoidmist väärt jääk, et taaskasutatavaid jääke ei loetaks raiskamiseks."
+      },
+      "stock_priced": {
+        "fail": "Laovarul {ref} puudub ühikuhind",
+        "suggestion": "Sisesta detaili hind, et plaan näitaks oma maksumust ja valiks odavaima laovaru."
+      },
+      "stock_sufficient": {
+        "fail": "Saadaolevale lattu paigutamata detaile: {count}",
+        "suggestion": "Suurenda saadaolevat kogust või lisa veel üks laosuurus."
+      },
+      "yield_threshold": {
+        "fail": "Saagis {actual} % on alla läve {threshold} %",
+        "suggestion": "Lisa veel üks laopikkus või -suurus, luba pööramine või vaata selle materjali lävi üle."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Puuduste nimekirja kanne '{title}' on suletud ilma fotota",
+    "punch_no_photo_fix": "Lisage foto valminud tööst",
+    "photo_weak": "Kirjel '{title}' on {count} fotol asukoht või tegemisaeg puudu",
+    "photo_weak_fix": "Tehke foto rakenduses uuesti, asukoht sisse lülitatud",
+    "defect_no_photo": "Puudus '{reference}' on suletud ilma kõrvaldamise fotota",
+    "defect_no_photo_fix": "Lisage foto kõrvaldatud tööst"
+  },
+  "closeout_dossier": {
+    "more_items": "Veel {count} kannet pole loetletud",
+    "category_missing": "Nõutava kategooria '{category}' kohta puudub tõend",
+    "category_missing_fix": "Siduge dokument selle kategooria kontrollnimekirja punktiga või lisage uus",
+    "category_unverified": "Kategooria '{category}' tõend pole veel kontrollitud",
+    "category_unverified_fix": "Paluge juhil seotud tõend üle vaadata ja kinnitada",
+    "punch_open": "Puuduste nimekirja kanne '{name}' on endiselt avatud",
+    "punch_open_fix": "Lahendage ja sulgege kanne või jätke see selle dokumentatsiooni ulatusest välja",
+    "punch_no_photo": "Lahendatud puuduste nimekirja kandel '{name}' pole fotot",
+    "punch_no_photo_fix": "Lisage foto valminud tööst",
+    "system_pending": "Süsteem '{name}' pole kasutusele võetud",
+    "system_pending_fix": "Lõpetage kasutuselevõtu kontrollnimekirjad ja märkige süsteem kasutusele võetuks",
+    "critical_issues": "{count} kriitilist kasutuselevõtu probleemi on veel avatud",
+    "critical_issues_fix": "Sulgege kriitilised probleemid enne üleandmist",
+    "acceptance_missing": "Vastuvõtuakti pole seotud",
+    "acceptance_missing_fix": "Siduge allkirjastatud vastuvõtuakt kontrollnimekirja vastuvõtupunktiga",
+    "acceptance_unsigned": "Vastuvõtuakt pole täielikult allkirjastatud (olek: {status})",
+    "acceptance_unsigned_fix": "Koguge puuduolevad allkirjad jaotises Allkirjastamine",
+    "blocked": "Dokumentatsioon ei vasta oma kontrollnimekirjale. Parandage tähelepanekud või koostage see ikkagi mittetäielikuna (juhi kinnitus).",
+    "delivery_title": "Üleandmisdokumentatsioon: {project}",
+    "delivery_body": "Üleandmisdokumentatsioon '{title}' ({scope}) on valmis. Allolev link laadib selle alla ja kehtib kuni {expires}.",
+    "pdf": {
+      "title": "Üleandmisdokumentatsioon",
+      "scope": "Ulatus",
+      "built": "Koostatud",
+      "status_passed": "Kontrollnimekiri läbitud",
+      "status_warnings": "Kontrollnimekiri läbitud hoiatustega",
+      "status_errors": "Mittetäielik: kontrollnimekirja tähelepanekud avatud",
+      "findings": "Kontrollnimekirja avatud tähelepanekud",
+      "severity": "Tõsidus",
+      "finding": "Tähelepanek",
+      "severity_error": "Viga",
+      "severity_warning": "Hoiatus",
+      "severity_info": "Info",
+      "contents": "Sisu",
+      "file": "Fail",
+      "size": "Suurus",
+      "punch": "Lahendatud puuduste nimekiri",
+      "item": "Kanne",
+      "status": "Olek",
+      "photos": "Fotod",
+      "evidence": "Fototõendid"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Elemendi '{name}' hinnang {rating} ei ole skaala '{scale}' tase",
+    "rule_poor_without_action": "Elemendi '{name}' hinnang on {rating}, kuid sellel pole planeeritud hooldustegevust",
+    "rule_poor_without_action_fix": "Tuletage kava või lisage sellele elemendile tegevus",
+    "rule_action_unpriced": "Elemendi '{name}' tegevusel aastal {year} pole ühikuhinda",
+    "rule_action_unpriced_fix": "Sisestage ühikuhind, et kava kokkuvõtted seda sisaldaksid",
+    "rule_defect_incomplete": "Elemendi '{name}' hinnang nõuab töid, kuid tõsidust ega ulatust pole salvestatud"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, lk {page}",
+    "text_change": "\"{old}\" muudetud kujule \"{new}\"",
+    "kind": {
+      "added": "Lisatud",
+      "removed": "Eemaldatud",
+      "modified": "Muudetud",
+      "text": "Tekst muudetud"
+    },
+    "status": {
+      "open": "Avatud",
+      "relevant": "Oluline",
+      "not_relevant": "Ebaoluline"
+    },
+    "errors": {
+      "revision_not_found": "Joonise redaktsiooni ei leitud sellest projektist.",
+      "revision_not_parsed": "Joonisel pole veel töödeldud versiooni, mida võrrelda.",
+      "comparison_not_found": "Võrdlust ei leitud.",
+      "change_not_found": "Muudatust ei leitud.",
+      "same_revision": "Valige võrdlemiseks kaks erinevat redaktsiooni või lehte.",
+      "manual_points": "Käsitsi joondamine nõuab kahte erinevat punkti kummagi redaktsiooni peal.",
+      "alignment_singular": "Joondust ei saa rakendada: see variseb lehe kokku.",
+      "region_empty": "Muudatusel {seq} puudub suurus.",
+      "region_off_sheet": "Muudatus {seq} jääb lehest välja.",
+      "module_missing": "Selle toimingu jaoks vajalik moodul ei ole paigaldatud."
+    },
+    "rfi": {
+      "subject": "Joonise muudatus {seq} lehel {sheet}",
+      "question": "Lehe {sheet} redaktsioon {new} erineb redaktsioonist {old} märgitud alal ({kind}). Palun kinnitage muudatuse eesmärk ja kas see mõjutab koguseid."
+    },
+    "markup": {
+      "text": "Redaktsiooni muudatus {seq}: {kind}"
+    },
+    "report": {
+      "title": "Joonise redaktsioonide võrdlus",
+      "project": "Projekt",
+      "name": "Võrdlus",
+      "old_revision": "Vanem redaktsioon",
+      "new_revision": "Uuem redaktsioon",
+      "alignment": "Joondus",
+      "alignment_none": "Joondamata (sama raam)",
+      "alignment_auto": "Automaatne",
+      "alignment_manual": "Käsitsi, kaks punkti",
+      "confidence": "usaldusväärsus {value}",
+      "summary": "Muudatused",
+      "summary_counts": "Kokku {total}: lisatud {added}, eemaldatud {removed}, muudetud {modified}, teksti {text}",
+      "generated_on": "Koostamise kuupäev",
+      "generated": "Koostatud {timestamp}",
+      "page_of": "Lk {page} / {total}",
+      "no_changes": "Kahe redaktsiooni vahel muudatusi ei leitud.",
+      "col_no": "Nr",
+      "col_preview": "Eelvaade",
+      "col_kind": "Muudatus",
+      "col_location": "Asukoht",
+      "col_detail": "Üksikasjad",
+      "col_status": "Staatus",
+      "col_comment": "Kommentaar",
+      "col_follow_up": "Järgmine samm",
+      "page_at": "Lk {page}, {coords}",
+      "layer": "Kiht {layer}",
+      "entity_counts": "Objektid: lisatud {added}, eemaldatud {removed}, muudetud {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Redaktsioonipilv",
+      "remeasure": "Mõõda uuesti: {items} kogust, {positions} eelarve rida"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Mõlemad pooled on erinevad redaktsioonid.",
+      "distinct_revisions_fail": "Võrdlus võrdleb lehte iseendaga.",
+      "distinct_revisions_hint": "Valige joonise vanem ja uuem redaktsioon.",
+      "alignment_not_needed": "DWG redaktsioonidel on samad joonestusühikud; joondamist pole vaja.",
+      "alignment_missing_matrix": "Võrdlusel puudub joondus.",
+      "alignment_singular": "Joondus variseb lehe kokku ja seda ei saa rakendada.",
+      "alignment_scale": "Joondus muudab lehe mõõtkava {scale} korda, rohkem kui ühe joonise redaktsioonid erinevad.",
+      "alignment_low_confidence": "Automaatne joondus on ebakindel (usaldusväärsus {confidence}).",
+      "alignment_manual_points": "Käsitsi joondamine nõuab kahte punktipaari.",
+      "alignment_ok": "Lehe joondus on usutav.",
+      "alignment_hint": "Joondage lehed käsitsi kahe märgi järgi, mis on mõlemal redaktsioonil, näiteks teljeristumised.",
+      "region_empty": "Muudatusel {seq} puudub suurus.",
+      "region_off_sheet": "Muudatus {seq} jääb lehest välja.",
+      "regions_ok": "Iga muudetud ala asub lehel.",
+      "triaged_ok": "Iga muudatus on üle vaadatud.",
+      "triaged_open": "{count} muudatust on veel avatud.",
+      "triaged_hint": "Märkige iga muudatus oluliseks või ebaoluliseks.",
+      "followed_up_ok": "Iga olulise muudatusega on tegeletud.",
+      "followed_up_missing": "Muudatus {seq} on märgitud oluliseks, kuid sellel pole kommentaari, RFI-d, pilve ega ümbermõõtmise märget.",
+      "followed_up_hint": "Kommenteerige muudatust, koostage RFI või pilv või märkige selle sees olevad kogused ümbermõõtmiseks."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Rahavoo prognoos",
+      "portfolio_title": "Portfelli rahavoo prognoos",
+      "empty": "Sellele valikule rahavoo prognoosi ei ole.",
+      "project": "Projekt",
+      "as_of": "Seisuga",
+      "currency": "Valuuta",
+      "delay_days": "Laekumised viivitatud (päeva)",
+      "overrun_pct": "Kulude ületamine (%)",
+      "closing_position": "Lõppsaldo",
+      "peak_funding": "Maksimaalne rahastusvajadus",
+      "peak_period": "Suurima rahastusvajaduse kuu",
+      "col": {
+        "period": "Kuu",
+        "planned_in": "Planeeritud laekumised",
+        "actual_in": "Tegelikud laekumised",
+        "expected_in": "Oodatavad laekumised",
+        "planned_out": "Planeeritud väljamaksed",
+        "actual_out": "Tegelikud väljamaksed",
+        "expected_out": "Oodatavad väljamaksed",
+        "net": "Netto",
+        "cumulative": "Kumulatiivne seis"
+      }
+    }
+  }
+}

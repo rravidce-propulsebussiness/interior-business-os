@@ -1,0 +1,2011 @@
+{
+  "costs.catalog_name_unavailable": "এই নাম নতুন ক্যাটালগের জন্য ব্যবহার করা যাবে না। অন্য নাম বেছে নিন।",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "ওপেন-সোর্স নির্মাণ ব্যয় এস্টিমেশন"
+  },
+  "nav": {
+    "dashboard": "ড্যাশবোর্ড",
+    "assemblies": "অ্যাসেম্বলি",
+    "ai_estimate": "AI এস্টিমেট",
+    "settings": "সেটিংস",
+    "5d_cost_model": "5D কস্ট মডেল",
+    "templates": "টেমপ্লেট",
+    "reports": "রিপোর্ট",
+    "sustainability": "স্থায়িত্ব",
+    "group_estimation": "এস্টিমেশন",
+    "group_planning": "পরিকল্পনা",
+    "group_procurement": "ক্রয়",
+    "group_tools": "টুল",
+    "architecture": "আর্কিটেকচার ম্যাপ"
+  },
+  "common": {
+    "save": "সংরক্ষণ করুন",
+    "cancel": "বাতিল করুন",
+    "delete": "মুছুন",
+    "edit": "সম্পাদনা করুন",
+    "create": "তৈরি করুন",
+    "search": "খুঁজুন",
+    "filter": "ফিল্টার",
+    "export": "এক্সপোর্ট",
+    "import": "ইম্পোর্ট করুন",
+    "loading": "লোড হচ্ছে...",
+    "error": "ত্রুটি",
+    "success": "সফল",
+    "confirm": "নিশ্চিত করুন",
+    "back": "পেছনে",
+    "next": "পরবর্তী",
+    "yes": "হ্যাঁ",
+    "no": "না"
+  },
+  "auth": {
+    "login": "লগ ইন",
+    "logout": "লগ আউট",
+    "email": "ইমেইল",
+    "password": "পাসওয়ার্ড"
+  },
+  "projects": {
+    "title": "প্রকল্প",
+    "new_project": "নতুন প্রকল্প",
+    "project_name": "প্রকল্পের নাম",
+    "no_projects": "এখনো কোনো প্রকল্প নেই"
+  },
+  "boq": {
+    "title": "বিল অফ কোয়ান্টিটিজ",
+    "position": "পজিশন",
+    "ordinal": "ক্রমিক",
+    "description": "বিবরণ",
+    "quantity": "পরিমাণ",
+    "unit": "একক",
+    "unit_rate": "একক রেট",
+    "total": "মোট",
+    "add_position": "পজিশন যোগ করুন",
+    "add_section": "সেকশন যোগ করুন",
+    "assembly": "অ্যাসেম্বলি",
+    "subtotal": "উপ-যোগফল",
+    "grand_total": "সর্বমোট",
+    "direct_cost": "সরাসরি কস্ট",
+    "net_total": "নিট মোট",
+    "gross_total": "গ্রস মোট",
+    "vat": "মূসক",
+    "add_markups": "মার্কআপ যোগ করুন",
+    "validate": "ভ্যালিডেট করুন",
+    "export": "রপ্তানি করুন",
+    "mvp": {
+      "title": "উপকরণ বেছে নিন",
+      "subtitle_one": "{{count}}টি রিসোর্সের জন্য একটি পছন্দ প্রয়োজন",
+      "subtitle_other": "{{count}}টি রিসোর্সের জন্য একটি পছন্দ প্রয়োজন",
+      "bulk_label": "দ্রুত পূরণ:",
+      "bulk_median": "সবার জন্য মধ্যক",
+      "bulk_mean": "সবার জন্য গড়",
+      "bulk_cheapest": "সবার জন্য সবচেয়ে সস্তা",
+      "bulk_priciest": "সবার জন্য সবচেয়ে ব্যয়বহুল",
+      "slot_variant_count": "{{n}}টি অপশন",
+      "selected_label": "নির্বাচিত:",
+      "default_mean": "গড় রেট",
+      "default_median": "মধ্যক রেট",
+      "row_median": "মধ্যক রেট · {{price}}",
+      "row_mean": "গড় রেট · {{price}}",
+      "subtotal_label": "পজিশন রেট",
+      "apply": "প্রয়োগ করুন ও BOQ-তে যোগ করুন",
+      "batch_progress": "{{total}}-এর মধ্যে আইটেম {{current}}",
+      "toast_applied_one": "{{count}}টি ভ্যারিয়েন্ট নির্বাচিত হয়েছে",
+      "toast_applied_other": "{{count}}টি ভ্যারিয়েন্ট নির্বাচিত হয়েছে"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "বিনিময় প্রতিবেদন"
+      },
+      "column": {
+        "severity": "তীব্রতা",
+        "kind": "ক্ষতির ধরন",
+        "position": "আইটেম",
+        "field": "ক্ষেত্র",
+        "original": "মূল মান",
+        "written": "লেখা মান",
+        "count": "সংখ্যা",
+        "detail": "বিস্তারিত"
+      },
+      "severity": {
+        "error": "জটিল",
+        "warning": "সতর্কতা",
+        "info": "নোট"
+      },
+      "kind": {
+        "unsupported_element": "অসমর্থিত উপাদান",
+        "truncated_text": "পাঠ্য ছাঁটা হয়েছে",
+        "altered_text": "পাঠ্য বদলেছে",
+        "rounded_value": "মান গোলাকৃত",
+        "value_out_of_range": "মান সীমার বাইরে",
+        "dropped_attribute": "অ্যাট্রিবিউট বাদ পড়েছে",
+        "unmapped_unit": "একক মেলেনি",
+        "lost_hierarchy": "স্তরবিন্যাস হারিয়েছে",
+        "markup_not_representable": "মার্কআপ দেখানো যায় না",
+        "attachment_skipped": "সংযুক্তি বাদ দেওয়া হয়েছে",
+        "changed_identifier": "শনাক্তকারী বদলেছে",
+        "exceeds_limit": "সংরক্ষণ সীমা ছাড়িয়েছে",
+        "rejected_row": "সারি প্রত্যাখ্যাত",
+        "skipped_row": "সারি বাদ দেওয়া হয়েছে",
+        "parser_warning": "রিডারের সতর্কতা",
+        "roundtrip_mismatch": "রাউন্ড ট্রিপ অসঙ্গতি"
+      }
+    },
+    "branch": {
+      "base_snapshot": "শাখা-বিন্দু",
+      "base_snapshot_from": "শাখা-বিন্দু (স্ন্যাপশট \"{snapshot}\" থেকে)",
+      "before_cherry_pick": "\"{source}\" থেকে পরিবর্তন প্রয়োগের আগে",
+      "before_merge": "শাখা \"{branch}\" মার্জের আগে",
+      "errors": {
+        "branch_closed": "এই শাখা মার্জ বা আর্কাইভ হয়ে গেছে, আর পরিবর্তন নিতে পারবে না।",
+        "not_a_branch": "এই পরিমাণ তালিকা কোনো শাখা নয়।",
+        "same_bill": "দুটি ভিন্ন প্রাক্কলন বেছে নিন।",
+        "different_project": "দুটি প্রাক্কলনই একই প্রকল্পের হতে হবে।",
+        "different_tree": "দুটি প্রাক্কলনই একই মূল প্রাক্কলনের শাখা হতে হবে।",
+        "unresolved_conflicts": "{count}টি আইটেম দুই প্রাক্কলনেই বদলানো হয়েছে। প্রয়োগের আগে প্রতিটির জন্য কোন সংস্করণ রাখবেন তা ঠিক করুন।",
+        "merge_forbidden": "মূল প্রাক্কলনে মার্জ করার অনুমতি আপনার নেই।",
+        "confirm_required": "মার্জ নিশ্চিত করুন: এটি মূল প্রাক্কলন নতুন করে লেখে।",
+        "design_options_unavailable": "ডিজাইন বিকল্প মডিউল ইনস্টল করা নেই।",
+        "base_snapshot_in_use": "এই স্ন্যাপশট একটি খোলা শাখার শাখা-বিন্দু, তাই মুছে ফেলা যাবে না।"
+      },
+      "export": {
+        "title_positions": "আইটেম অনুযায়ী প্রাক্কলন তুলনা",
+        "title_sections": "বিভাগ অনুযায়ী প্রাক্কলন তুলনা",
+        "title_cost_groups": "ব্যয় গ্রুপ অনুযায়ী প্রাক্কলন তুলনা",
+        "project": "প্রকল্প",
+        "bill_a": "প্রাক্কলন A",
+        "bill_b": "প্রাক্কলন B",
+        "total_a": "মোট A",
+        "total_b": "মোট B",
+        "delta": "পার্থক্য",
+        "counts": "পরিবর্তন",
+        "counts_value": "{added}টি যোগ, {removed}টি সরানো, {changed}টি বদলেছে",
+        "col_ordinal": "নং",
+        "col_description": "বিবরণ",
+        "col_unit": "একক",
+        "col_change": "পরিবর্তন",
+        "col_qty_a": "পরিমাণ A",
+        "col_qty_b": "পরিমাণ B",
+        "col_rate_a": "দর A",
+        "col_rate_b": "দর B",
+        "col_total_a": "মোট A",
+        "col_total_b": "মোট B",
+        "col_delta": "পার্থক্য",
+        "col_section": "বিভাগ",
+        "col_cost_group": "ব্যয় গ্রুপ",
+        "change_added": "যোগ হয়েছে",
+        "change_removed": "সরানো হয়েছে",
+        "change_changed": "বদলেছে",
+        "change_unchanged": "অপরিবর্তিত",
+        "ungrouped": "গ্রুপহীন",
+        "empty": "দুটি প্রাক্কলন অভিন্ন।",
+        "total": "মোট"
+      }
+    }
+  },
+  "costs": {
+    "title": "কস্ট ডেটাবেস",
+    "rate": "রেট",
+    "material": "উপকরণ",
+    "labor": "শ্রম",
+    "equipment": "যন্ত্রপাতি",
+    "search_costs": "কস্ট আইটেম খুঁজুন..."
+  },
+  "assemblies": {
+    "title": "অ্যাসেম্বলি",
+    "description": "পুনর্ব্যবহারযোগ্য কস্ট রেসিপি — উপকরণ, শ্রম এবং যন্ত্রপাতি একত্রিত করে ব্যবহারের জন্য প্রস্তুত টেমপ্লেট তৈরি করুন",
+    "new_assembly": "নতুন অ্যাসেম্বলি",
+    "from_database": "ডেটাবেস থেকে",
+    "apply_to_boq": "BOQ-তে প্রয়োগ করুন",
+    "add_component": "কম্পোনেন্ট যোগ করুন",
+    "no_assemblies": "এখনো কোনো অ্যাসেম্বলি নেই",
+    "no_assemblies_hint": "কস্ট ডেটাবেস বা রিসোর্স ক্যাটালগ থেকে আপনার প্রথম অ্যাসেম্বলি তৈরি করুন",
+    "total_rate": "মোট রেট"
+  },
+  "catalog": {
+    "title": "রিসোর্স ক্যাটালগ",
+    "description": "উপকরণ, যন্ত্রপাতি, শ্রম হার এবং অপারেটর ব্রাউজ ও পরিচালনা করুন",
+    "add_resource": "রিসোর্স যোগ করুন",
+    "import_region": "অঞ্চল ইম্পোর্ট করুন",
+    "build_assembly": "অ্যাসেম্বলি তৈরি করুন",
+    "my_catalog": "আমার ক্যাটালগ"
+  },
+  "validation": {
+    "title": "ভ্যালিডেশন",
+    "passed": "উত্তীর্ণ",
+    "warnings": "সতর্কতা",
+    "errors": "ত্রুটি",
+    "score": "গুণমান স্কোর",
+    "run_validation": "ভ্যালিডেশন চালান",
+    "missing_quantity": "{position} পজিশনে কোনো পরিমাণ নেই",
+    "missing_rate": "{position} পজিশনে কোনো একক রেট নেই",
+    "missing_description": "{position} পজিশনে কোনো বিবরণ নেই",
+    "missing_classification": "{position} পজিশনের জন্য একটি শ্রেণীবিভাগ কোড প্রয়োজন",
+    "duplicate_ordinal": "সদৃশ ক্রমিক নম্বর: {ordinal}",
+    "rate_anomaly": "একক রেট {rate} সীমা অতিক্রম করেছে ({threshold})",
+    "nl": {
+      "not_a_string": "ইনপুট অবশ্যই টেক্সট হতে হবে।",
+      "empty": "ইনপুট খালি।",
+      "too_long": "ইনপুট {max} অক্ষরের বেশি।",
+      "ai_unparsable": "এআই-এর উত্তর DSL ডকুমেন্ট হিসেবে পার্স করা যায়নি।",
+      "no_pattern": "ইনপুট বাক্যের সাথে কোনো প্যাটার্ন মেলেনি।",
+      "try": "চেষ্টা করুন: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D সময়সূচি",
+    "generated": {
+      "position_label": "পজিশন {ordinal}",
+      "section_label": "বিভাগ {ordinal}",
+      "task_description": "BOQ-এর পজিশন {ordinal} থেকে স্বয়ংক্রিয়ভাবে তৈরি ({quantity} {unit})",
+      "section_description": "সারাংশ: BOQ-এর বিভাগ {ordinal}",
+      "start_milestone": "প্রকল্প শুরু",
+      "start_milestone_description": "প্রকল্প শুরুর মাইলফলক",
+      "completion_milestone": "প্রকল্প সমাপ্তি",
+      "completion_milestone_description": "প্রকল্প সমাপ্তির মাইলফলক",
+      "labour_resource": "শ্রমিক",
+      "machine_resource": "যন্ত্রপাতি"
+    },
+    "progress_sheet": {
+      "sheet_title": "অগ্রগতি",
+      "title": "অগ্রগতি আপডেট শিট",
+      "detail_schedule": "সময়সূচি: {name}",
+      "detail_exported": "এক্সপোর্ট: {date}",
+      "instructions": "শুধু সাদা কলামগুলো পূরণ করুন। ধূসর কলাম, সারির ক্রম ও লুকানো কলাম বদলাবেন না।",
+      "col": {
+        "activity_ref": "কার্যক্রম আইডি",
+        "name": "কার্যক্রম",
+        "wbs_code": "WBS",
+        "responsible": "দায়িত্বপ্রাপ্ত",
+        "planned_start": "পরিকল্পিত শুরু",
+        "planned_finish": "পরিকল্পিত সমাপ্তি",
+        "percent_complete": "% সম্পন্ন",
+        "actual_start": "প্রকৃত শুরু",
+        "actual_finish": "প্রকৃত সমাপ্তি",
+        "remaining_duration": "অবশিষ্ট (কর্মদিবস)",
+        "notes": "নোট",
+        "row_key": "সারি কী",
+        "stamp": "স্ট্যাম্প"
+      }
+    }
+  },
+  "cad": {
+    "title": "CAD ইম্পোর্ট",
+    "upload": "CAD ফাইল আপলোড করুন",
+    "supported_formats": "সমর্থিত: DWG, DGN, RVT, IFC, PDF",
+    "converting": "রূপান্তর করা হচ্ছে...",
+    "elements_found": "{count}টি এলিমেন্ট পাওয়া গেছে"
+  },
+  "takeoff": {
+    "title": "কোয়ান্টিটি টেকঅফ",
+    "auto_detect": "স্বয়ংক্রিয় সনাক্তকরণ",
+    "manual_measure": "ম্যানুয়াল পরিমাপ",
+    "confidence": "নির্ভরযোগ্যতা"
+  },
+  "tendering": {
+    "title": "টেন্ডারিং",
+    "create_tender": "টেন্ডার তৈরি করুন",
+    "bid": "বিড",
+    "award": "প্রদান করুন"
+  },
+  "modules": {
+    "title": "মডিউল",
+    "installed": "ইনস্টল করা হয়েছে",
+    "available": "উপলব্ধ",
+    "install": "ইনস্টল করুন",
+    "uninstall": "আনইনস্টল করুন",
+    "update": "আপডেট করুন"
+  },
+  "dashboard": {
+    "welcome": "OpenConstructionERP-এ স্বাগতম",
+    "subtitle": "আপনার নির্মাণ এস্টিমেশন ওয়ার্কস্পেস",
+    "recent_projects": "সাম্প্রতিক প্রকল্প",
+    "system_status": "সিস্টেম স্ট্যাটাস",
+    "modules_loaded": "মডিউল লোড হয়েছে",
+    "validation_rules": "ভ্যালিডেশন নিয়ম",
+    "languages": "ভাষা",
+    "continue_estimate": "সর্বশেষ এস্টিমেট চালিয়ে যান",
+    "getting_started": "শুরু করা",
+    "total_value": "মোট মূল্য",
+    "active_estimates": "সক্রিয় এস্টিমেট",
+    "schedule_status": "সময়সূচির স্ট্যাটাস",
+    "quality_score": "গুণমান স্কোর",
+    "analytics": "অ্যানালিটিক্স",
+    "project_overview": "প্রকল্প ওভারভিউ",
+    "step_load_db": "কস্ট ডেটাবেস লোড করুন",
+    "step_load_db_desc": "55,000+ আইটেমসহ আঞ্চলিক দাম নির্ধারণ ডেটা ইম্পোর্ট করুন",
+    "step_ai_search": "AI খোঁজ সক্রিয় করুন",
+    "step_ai_search_desc": "সিমান্টিক কস্ট মিলানোর জন্য ভেক্টর এমবেডিং তৈরি করুন",
+    "step_connect_ai": "AI সংযুক্ত করুন",
+    "step_connect_ai_desc": "AI-চালিত এস্টিমেশনের জন্য আপনার API কী যোগ করুন",
+    "step_create_project": "প্রকল্প তৈরি করুন",
+    "step_create_project_desc": "আপনার প্রথম নির্মাণ এস্টিমেশন প্রকল্প শুরু করুন",
+    "step_build_boq": "আপনার BOQ তৈরি করুন",
+    "step_build_boq_desc": "AI সহায়তায় একটি Bill of Quantities তৈরি করুন"
+  },
+  "units": {
+    "m": "মি",
+    "m2": "মি²",
+    "m3": "মি³",
+    "kg": "কেজি",
+    "t": "টন",
+    "pcs": "পিস",
+    "lsum": "লাম্প সাম",
+    "h": "ঘ",
+    "set": "সেট"
+  },
+  "contacts": {
+    "title": "যোগাযোগ ডিরেক্টরি",
+    "new_contact": "নতুন কন্টাক্ট",
+    "contact_type": "যোগাযোগের ধরন",
+    "client": "ক্লায়েন্ট",
+    "subcontractor": "উপ-ঠিকাদার",
+    "supplier": "সরবরাহকারী",
+    "consultant": "পরামর্শদাতা",
+    "internal": "অভ্যন্তরীণ",
+    "company_name": "কোম্পানির নাম",
+    "search_contacts": "যোগাযোগ খুঁজুন...",
+    "no_contacts": "এখনো কোনো যোগাযোগ নেই",
+    "prequalification": "প্রি-কোয়ালিফিকেশন",
+    "approved": "অনুমোদিত",
+    "pending": "মুলতুবি",
+    "expired": "মেয়াদোত্তীর্ণ"
+  },
+  "tasks": {
+    "title": "কাজ",
+    "new_task": "নতুন কাজ",
+    "task": "কাজ",
+    "topic": "বিষয়",
+    "information": "তথ্য",
+    "decision": "সিদ্ধান্ত",
+    "personal": "ব্যক্তিগত কাজ",
+    "my_tasks": "আমার কাজ",
+    "open": "খোলা",
+    "in_progress": "চলমান",
+    "completed": "সম্পন্ন",
+    "draft": "খসড়া",
+    "due_date": "নির্ধারিত তারিখ",
+    "assignee": "নিয়োজিত ব্যক্তি",
+    "priority": "অগ্রাধিকার",
+    "checklist": "চেকলিস্ট",
+    "focus_area": "মনোযোগের ক্ষেত্র"
+  },
+  "rfi": {
+    "title": "তথ্যের জন্য অনুরোধ",
+    "new_rfi": "নতুন RFI",
+    "subject": "বিষয়",
+    "question": "প্রশ্ন",
+    "response": "উত্তর",
+    "ball_in_court": "বল যার কোর্টে",
+    "days_open": "খোলা দিন",
+    "cost_impact": "কস্ট প্রভাব",
+    "schedule_impact": "সময়সূচি প্রভাব",
+    "respond": "উত্তর দিন",
+    "close": "বন্ধ করুন",
+    "overdue": "বকেয়া"
+  },
+  "finance": {
+    "title": "ফাইন্যান্স",
+    "budgets": "বাজেট",
+    "invoices": "ইনভয়েস",
+    "payable": "প্রদেয়",
+    "receivable": "প্রাপ্য",
+    "payments": "পেমেন্ট",
+    "evm": "আর্নড ভ্যালু",
+    "invoice_number": "ইনভয়েস #",
+    "amount": "পরিমাণ",
+    "status": "স্ট্যাটাস",
+    "approve": "অনুমোদন করুন",
+    "pay": "পরিশোধিত হিসেবে চিহ্নিত করুন",
+    "original_budget": "মূল বাজেট",
+    "revised_budget": "সংশোধিত বাজেট",
+    "committed": "প্রতিশ্রুত",
+    "actual": "প্রকৃত",
+    "forecast": "পূর্বাভাস",
+    "variance": "ভেরিয়েন্স"
+  },
+  "procurement": {
+    "title": "ক্রয়",
+    "purchase_orders": "ক্রয় আদেশ",
+    "goods_receipts": "মাল প্রাপ্তি",
+    "new_po": "নতুন ক্রয় আদেশ",
+    "po_number": "ক্রয়াদেশ নং",
+    "vendor": "বিক্রেতা",
+    "issue": "ইস্যু করুন",
+    "confirm": "প্রাপ্তি নিশ্চিত করুন"
+  },
+  "safety": {
+    "title": "নিরাপত্তা",
+    "incidents": "ঘটনা",
+    "observations": "পর্যবেক্ষণ",
+    "new_incident": "নতুন ঘটনা",
+    "new_observation": "নতুন পর্যবেক্ষণ",
+    "severity": "তীব্রতা",
+    "risk_score": "ঝুঁকি স্কোর",
+    "days_lost": "হারানো দিন",
+    "treatment": "চিকিৎসা",
+    "corrective_action": "সংশোধনমূলক পদক্ষেপ"
+  },
+  "meetings": {
+    "title": "মিটিং",
+    "new_meeting": "নতুন মিটিং",
+    "meeting_type": "ধরন",
+    "attendees": "উপস্থিত ব্যক্তিরা",
+    "agenda": "আলোচ্যসূচি",
+    "action_items": "কার্যক্রম আইটেম",
+    "minutes": "মিনিট",
+    "complete": "মিটিং সম্পন্ন করুন",
+    "present": "উপস্থিত",
+    "absent": "অনুপস্থিত",
+    "excused": "অব্যাহতিপ্রাপ্ত",
+    "actions": {
+      "status": {
+        "open": "খোলা",
+        "completed": "সম্পন্ন",
+        "cancelled": "বাতিল"
+      },
+      "flag": {
+        "overdue": "মেয়াদোত্তীর্ণ",
+        "on_track": "সময়মতো এগোচ্ছে"
+      },
+      "label": {
+        "action_item": "করণীয় আইটেম",
+        "completion_rate": "করণীয় সম্পন্নের হার",
+        "open_vs_done": "খোলা বনাম সম্পন্ন",
+        "overdue": "মেয়াদোত্তীর্ণ করণীয়"
+      },
+      "explain": {
+        "action_item": "করণীয় আইটেম হলো সভায় সম্মত একটি কাজ, যার দায়িত্বপ্রাপ্ত ব্যক্তি এবং শেষ তারিখ রয়েছে।",
+        "completion_rate": "করণীয় সম্পন্নের হার হলো মোট করণীয়ের মধ্যে সম্পন্ন করণীয়ের অনুপাত, যার মান ০ থেকে ১ পর্যন্ত।",
+        "open_vs_done": "খোলা করণীয়ে এখনও কাজ বাকি। সম্পন্ন করণীয় শেষ হয়েছে এবং আর কাজের প্রয়োজন নেই।",
+        "overdue": "কোনো করণীয় মেয়াদোত্তীর্ণ হয় যখন সেটি এখনও খোলা থাকে এবং এর শেষ তারিখ রেফারেন্স তারিখের আগে।"
+      }
+    },
+    "minutes_pdf": {
+      "title": "সভার কার্যবিবরণী",
+      "issued": "জারিকৃত",
+      "draft": "খসড়া",
+      "date": "তারিখ:",
+      "location": "স্থান:",
+      "type": "ধরন:",
+      "number": "সভা নং:",
+      "chairperson": "সভাপতি:",
+      "next_meeting": "পরবর্তী সভা:",
+      "not_available": "প্রযোজ্য নয়",
+      "not_scheduled": "নির্ধারিত নয়",
+      "attendance": "উপস্থিতি",
+      "present": "উপস্থিত:",
+      "absent": "অনুপস্থিত / অব্যাহতিপ্রাপ্ত:",
+      "agenda": "আলোচ্যসূচি, আলোচনা ও সিদ্ধান্ত",
+      "required": "(আবশ্যক)",
+      "discussion": "আলোচনা:",
+      "decision": "সিদ্ধান্ত:",
+      "decisions": "সিদ্ধান্তসমূহ",
+      "open_questions": "উন্মুক্ত প্রশ্ন",
+      "actions": "কর্মতালিকা",
+      "col_number": "#",
+      "col_action": "কাজ",
+      "col_owner": "দায়িত্বপ্রাপ্ত",
+      "col_due": "নির্ধারিত তারিখ",
+      "col_status": "অবস্থা",
+      "brought_forward": "[আগের সভা থেকে আনা]",
+      "overdue": "(মেয়াদোত্তীর্ণ)",
+      "status_open": "খোলা",
+      "status_in_progress": "চলমান",
+      "status_done": "সম্পন্ন",
+      "status_cancelled": "বাতিল",
+      "summary": "সারসংক্ষেপ",
+      "generated": "তৈরির সময়: {stamp}",
+      "issued_at": "জারির সময় {stamp}",
+      "running_head": "{project} - কার্যবিবরণী",
+      "type_progress": "অগ্রগতি",
+      "type_design": "নকশা",
+      "type_safety": "নিরাপত্তা",
+      "type_subcontractor": "সাবকন্ট্রাক্টর",
+      "type_kickoff": "সূচনা",
+      "type_closeout": "সমাপনী",
+      "type_commercial": "বাণিজ্যিক"
+    }
+  },
+  "inspections": {
+    "title": "গুণমান পরিদর্শন",
+    "new_inspection": "নতুন পরিদর্শন",
+    "inspector": "পরিদর্শক",
+    "checklist": "চেকলিস্ট",
+    "pass": "উত্তীর্ণ",
+    "fail": "ব্যর্থ",
+    "partial": "আংশিক",
+    "critical": "সংকটজনক",
+    "intl": {
+      "status_labels": {
+        "scheduled": "নির্ধারিত",
+        "in_progress": "চলছে",
+        "completed": "সম্পন্ন",
+        "failed": "ব্যর্থ",
+        "cancelled": "বাতিল"
+      }
+    }
+  },
+  "ncr": {
+    "title": "অ-অনুবর্তিতা রিপোর্ট",
+    "new_ncr": "নতুন NCR",
+    "root_cause": "মূল কারণ",
+    "corrective_action": "সংশোধনমূলক পদক্ষেপ",
+    "preventive_action": "প্রতিরোধমূলক পদক্ষেপ",
+    "material": "উপকরণ",
+    "workmanship": "কারিগরি মান",
+    "design": "নকশা"
+  },
+  "submittals": {
+    "title": "সাবমিটাল",
+    "new_submittal": "নতুন সাবমিটাল",
+    "spec_section": "স্পেক বিভাগ",
+    "revision": "সংশোধন",
+    "submit": "জমা দিন",
+    "review": "পর্যালোচনা করুন",
+    "approved_as_noted": "নোটসহ অনুমোদিত",
+    "revise_resubmit": "সংশোধন ও পুনরায় জমা",
+    "intl": {
+      "status_labels": {
+        "draft": "খসড়া",
+        "submitted": "জমা দেওয়া হয়েছে",
+        "under_review": "পর্যালোচনাধীন",
+        "approved": "অনুমোদিত",
+        "approved_as_noted": "মন্তব্যসহ অনুমোদিত",
+        "revise_and_resubmit": "সংশোধন করে পুনরায় জমা দিন",
+        "rejected": "প্রত্যাখ্যাত",
+        "closed": "বন্ধ"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "করেসপন্ডেন্স",
+    "new_entry": "নতুন এন্ট্রি",
+    "incoming": "ইনকামিং",
+    "outgoing": "আউটগোয়িং",
+    "letter": "চিঠি",
+    "email": "ইমেইল",
+    "notice": "নোটিশ",
+    "date_sent": "প্রেরণের তারিখ",
+    "date_received": "প্রাপ্তির তারিখ"
+  },
+  "cde": {
+    "title": "কমন ডেটা এনভায়রনমেন্ট",
+    "new_container": "নতুন কন্টেইনার",
+    "container_code": "কন্টেইনার কোড",
+    "cde_state": "কমন ডেটা এনভায়রনমেন্টের স্ট্যাটাস",
+    "wip": "চলমান",
+    "shared": "শেয়ার্ড",
+    "published": "প্রকাশিত",
+    "archived": "আর্কাইভ করা হয়েছে",
+    "promote": "প্রোমোট করুন",
+    "suitability": "উপযোগিতা",
+    "discipline": "ডিসিপ্লিন",
+    "revisions": "সংশোধন",
+    "intl": {
+      "state_labels": {
+        "wip": "কাজ চলছে",
+        "shared": "শেয়ার করা",
+        "published": "প্রকাশিত",
+        "archived": "আর্কাইভড"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "ট্রান্সমিটাল",
+    "new_transmittal": "নতুন ট্রান্সমিটাল",
+    "purpose": "উদ্দেশ্য",
+    "for_approval": "অনুমোদনের জন্য",
+    "for_information": "তথ্যের জন্য",
+    "for_construction": "নির্মাণের জন্য",
+    "recipients": "প্রাপক",
+    "acknowledge": "স্বীকার করুন",
+    "locked": "লক করা",
+    "issue_transmittal": "ইস্যু করুন",
+    "intl": {
+      "status_words": {
+        "draft": "খসড়া",
+        "issued": "প্রেরিত",
+        "responded": "উত্তর দেওয়া হয়েছে"
+      }
+    }
+  },
+  "notifications": {
+    "title": "বিজ্ঞপ্তি",
+    "no_notifications": "কোনো নতুন বিজ্ঞপ্তি নেই",
+    "mark_all_read": "সব পঠিত হিসেবে চিহ্নিত করুন",
+    "unread": "অপঠিত"
+  },
+  "comments": {
+    "title": "মন্তব্য",
+    "post": "পোস্ট করুন",
+    "reply": "উত্তর দিন",
+    "edit": "সম্পাদনা করুন",
+    "delete": "মুছুন",
+    "placeholder": "একটি মন্তব্য লিখুন...",
+    "empty": "এখনো কোনো মন্তব্য নেই। আলোচনা শুরু করুন।",
+    "edited": "এডিট করা হয়েছে",
+    "deleted": "এই মন্তব্যটি মুছে ফেলা হয়েছে"
+  },
+  "bim": {
+    "title": "BIM হাব",
+    "models": "মডেল",
+    "elements": "এলিমেন্ট",
+    "upload_model": "মডেল আপলোড করুন",
+    "processing": "প্রসেস হচ্ছে",
+    "active": "সক্রিয়",
+    "link_to_boq": "BOQ-তে লিংক করুন",
+    "properties": "বৈশিষ্ট্য",
+    "quantities": "পরিমাণ",
+    "wireframe": "ওয়্যারফ্রেম",
+    "section_box": "সেকশন বক্স",
+    "measure": "পরিমাপ করুন",
+    "zoom_to_fit": "স্ক্রিনে ফিট করুন"
+  },
+  "reporting": {
+    "title": "রিপোর্ট ও ড্যাশবোর্ড",
+    "kpi": "KPI ড্যাশবোর্ড",
+    "generate_report": "রিপোর্ট তৈরি করুন",
+    "templates": "টেমপ্লেট",
+    "project_status": "প্রকল্পের স্ট্যাটাস",
+    "cost_report": "কস্ট রিপোর্ট",
+    "schedule_status": "সময়সূচির স্ট্যাটাস",
+    "safety_report": "নিরাপত্তা রিপোর্ট",
+    "explain": {
+      "report_total_one": "প্রতিবেদনের মোট: {money} ({count}টি সারির যোগফল)।",
+      "report_total_other": "প্রতিবেদনের মোট: {money} ({count}টি সারির যোগফল)।",
+      "percent_of_total": "{part}, {total}-এর {percent} (মোটের শতাংশ)।",
+      "percent_zero_total": "{part} / {total}: মোট শূন্য, তাই প্রতিটি অংশ 0 শতাংশ হিসেবে দেখানো হয়েছে।",
+      "breakdown_empty": "ব্যয়ের বিভাজন: কোনো তথ্য নেই।",
+      "breakdown_one": "ব্যয়ের বিভাজন: {count}টি গ্রুপ, প্রতিবেদনের মোট {money}।",
+      "breakdown_other": "ব্যয়ের বিভাজন: {count}টি গ্রুপ, প্রতিবেদনের মোট {money}।",
+      "top_n_one": "শীর্ষ {requested}: {shown}টির মধ্যে {shown}টি সারি।",
+      "top_n_other": "শীর্ষ {requested}: {shown}টির মধ্যে {shown}টি সারি।"
+    }
+  },
+  "gantt": {
+    "title": "গ্যান্ট চার্ট",
+    "day": "দিন",
+    "week": "সপ্তাহ",
+    "month": "মাস",
+    "critical_path": "ক্রিটিক্যাল পাথ",
+    "baseline": "বেসলাইন",
+    "dependencies": "ডিপেন্ডেন্সি",
+    "today": "আজ"
+  },
+  "settings": {
+    "regional": "আঞ্চলিক সেটিংস",
+    "timezone": "টাইমজোন",
+    "measurement": "পরিমাপ পদ্ধতি",
+    "paper_size": "কাগজের আকার",
+    "date_format": "তারিখ ফরম্যাট",
+    "number_format": "সংখ্যার ফরম্যাট",
+    "currency": "মুদ্রা",
+    "metric": "মেট্রিক পদ্ধতি",
+    "imperial": "ইম্পেরিয়াল পদ্ধতি"
+  },
+  "users": {
+    "management": "ব্যবহারকারী ব্যবস্থাপনা",
+    "management_desc": "টিম সদস্য, ভূমিকা, ও অ্যাক্সেস পরিচালনা করুন",
+    "invite_user": "ব্যবহারকারীকে আমন্ত্রণ জানান",
+    "invite": "আমন্ত্রণ জানান",
+    "full_name": "পুরো নাম",
+    "email": "ইমেইল",
+    "password": "পাসওয়ার্ড",
+    "role": "ভূমিকা",
+    "status": "স্ট্যাটাস",
+    "last_login": "শেষ লগইন",
+    "actions": "কার্যক্রম",
+    "name": "নাম",
+    "total": "মোট ব্যবহারকারী",
+    "active": "সক্রিয়",
+    "inactive": "নিষ্ক্রিয়",
+    "admins": "অ্যাডমিন",
+    "managers": "ম্যানেজার",
+    "search": "নাম বা ইমেইল দিয়ে খুঁজুন...",
+    "no_users": "কোনো ব্যবহারকারী পাওয়া যায়নি",
+    "updated": "ব্যবহারকারী আপডেট করা হয়েছে",
+    "invited": "ব্যবহারকারী সফলভাবে আমন্ত্রিত হয়েছেন",
+    "deactivate": "নিষ্ক্রিয় করুন",
+    "activate": "সক্রিয় করুন",
+    "never": "কখনো নয়",
+    "role_admin_desc": "সব ফিচারে সম্পূর্ণ অ্যাক্সেস",
+    "role_manager_desc": "প্রকল্প ও টিম ব্যবস্থাপনা",
+    "role_editor_desc": "কনটেন্ট তৈরি ও সম্পাদনা করুন",
+    "role_viewer_desc": "শুধুমাত্র পড়ার অ্যাক্সেস"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "এই স্ন্যাপশট ফ্রিজ করা আছে। ফ্রিজ করা স্ন্যাপশট একটি রেকর্ড, এটি বদলানো যায় না।",
+      "frozen_no_delete": "ফ্রিজ করা স্ন্যাপশট একটি রেকর্ড, এটি মুছে ফেলা যায় না।",
+      "draft_open": "একটি খসড়া স্ন্যাপশট আগে থেকেই খোলা আছে। আরেকটি শুরুর আগে সেটি ফ্রিজ করুন বা মুছুন।",
+      "no_line_method": "এই আইটেমের নিজস্ব কোনো পদ্ধতি নেই।",
+      "snapshot_missing": "স্ন্যাপশট পাওয়া যায়নি।",
+      "line_missing": "এই স্ন্যাপশটে এমন কোনো আইটেম নেই।",
+      "document_missing": "সংযুক্ত নথিটি এই প্রকল্পের নয়।",
+      "freeze_refused": "স্ন্যাপশট এখনই ফ্রিজ করা যাচ্ছে না: {count}টি আইটেম মন্তব্য ও প্রমাণ ছাড়াই সীমা ছাড়িয়ে গেছে।",
+      "no_frozen_snapshot": "তুলনার জন্য এখনো কোনো ফ্রিজ করা স্ন্যাপশট নেই।",
+      "no_ledger": "এই ইনস্টলেশনে ইনভয়েস খতিয়ান পাওয়া যাচ্ছে না।",
+      "no_snapshot": "নথিভুক্ত করার মতো কোনো স্ন্যাপশট এখনো নেই।"
+    },
+    "export": {
+      "project": "প্রকল্প",
+      "generated": "তৈরির সময়",
+      "currency": "মুদ্রা",
+      "page": "পৃষ্ঠা",
+      "generated_at": "তৈরির তারিখ",
+      "empty": "দেখানোর মতো কিছু এখনো নেই।",
+      "total": "মোট",
+      "cost_report": "ব্যয় প্রতিবেদন",
+      "phase_comparison": "পর্যায়ের তুলনা",
+      "invoice_ledger": "ইনভয়েস খতিয়ান",
+      "forecast_documentation": "পূর্বাভাসের নথি",
+      "as_of": "তারিখ অনুযায়ী",
+      "forecast_method": "পূর্বাভাস পদ্ধতি",
+      "col_account": "হিসাব",
+      "col_code": "কোড",
+      "col_description": "বিবরণ",
+      "col_source": "উৎস",
+      "col_method": "পদ্ধতি",
+      "col_planned": "পরিকল্পিত",
+      "col_committed": "প্রতিশ্রুত",
+      "col_pending": "অপেক্ষমাণ পরিবর্তন",
+      "col_measured": "পরিমাপকৃত",
+      "col_certified": "পরিশোধের জন্য প্রত্যয়িত",
+      "col_invoiced": "ইনভয়েসকৃত",
+      "col_paid": "পরিশোধিত",
+      "col_forecast": "পূর্বাভাস",
+      "col_variance": "বিচ্যুতি",
+      "col_variance_pct": "বিচ্যুতি %",
+      "col_forecast_of_plan": "পরিকল্পনার তুলনায় পূর্বাভাস %",
+      "col_measured_of_committed": "প্রতিশ্রুতির তুলনায় পরিমাপকৃত %",
+      "col_invoiced_of_committed": "প্রতিশ্রুতির তুলনায় ইনভয়েসকৃত %",
+      "col_contract": "চুক্তি",
+      "col_contract_title": "চুক্তির শিরোনাম",
+      "col_invoice": "ইনভয়েস",
+      "col_date": "তারিখ",
+      "col_kind": "ধরন",
+      "col_release_status": "অবমুক্তি",
+      "col_net": "নিট",
+      "col_vat": "ভ্যাট",
+      "col_gross": "মোট",
+      "col_retention": "ধরে রাখা অর্থ",
+      "col_release": "অবমুক্ত ধরে রাখা অর্থ",
+      "col_discount": "ছাড়",
+      "col_payable": "প্রদেয়",
+      "col_open": "খোলা",
+      "col_previous": "আগের",
+      "col_delta": "পরিবর্তন",
+      "col_delta_pct": "পরিবর্তন %",
+      "col_needs_evidence": "প্রমাণ দরকার",
+      "col_comment": "মন্তব্য",
+      "col_evidence": "প্রমাণ",
+      "row_unassigned": "ব্যয় আইটেম ছাড়া অর্থ",
+      "row_loose_changes": "চুক্তিবিহীন পরিবর্তন",
+      "row_no_contract": "চুক্তি নেই",
+      "contract_value": "চুক্তিমূল্য",
+      "retention_held": "ধরে রাখা অর্থ",
+      "yes": "হ্যাঁ",
+      "no": "না",
+      "snapshot_date": "স্ন্যাপশটের তারিখ",
+      "snapshot_status": "অবস্থা",
+      "previous_snapshot": "আগের ফ্রিজ করা স্ন্যাপশট",
+      "method_explained": "পূর্বাভাস কীভাবে পড়বেন",
+      "evidence_threshold": "এর বেশি হলে প্রমাণ দরকার",
+      "threshold_both": "{parts}-এর বেশি পরিবর্তন",
+      "threshold_any": "যেকোনো পরিবর্তন",
+      "frozen_at": "ফ্রিজের সময়"
+    },
+    "method": {
+      "best_available": "সেরা উপলব্ধ উৎস",
+      "maximum": "সর্বোচ্চ মান",
+      "evm_cpi": "আর্নড ভ্যালু (CPI)",
+      "manual": "ম্যানুয়াল"
+    },
+    "method_help": {
+      "best_available": "প্রতিটি আইটেম তার সবচেয়ে পরিণত সংখ্যাটি নেয়: চূড়ান্ত হিসাব, না হলে পরিমাপকৃত কাজ, না হলে কার্যাদেশ, না হলে প্রাক্কলন, না হলে বাজেট।",
+      "maximum": "প্রতিটি আইটেম তার সংখ্যাগুলোর (বাজেট, প্রাক্কলন, কার্যাদেশ, পরিমাপকৃত, ইনভয়েসকৃত) মধ্যে সর্বোচ্চটি নেয়, ফলে পূর্বাভাস কোনো ঝুঁকি লুকায় না।",
+      "evm_cpi": "প্রতিটি আইটেম অগ্রগতি থেকে সমাপ্তিকালীন ব্যয় হিসাব করে: এ পর্যন্ত খরচ করা অর্থকে সম্পন্ন কাজের অনুপাত দিয়ে ভাগ করা হয়।",
+      "manual": "একজন ব্যক্তি আইটেমের সংখ্যা ঠিক করেন এবং তার ভিত্তি নথিটি যুক্ত করেন।"
+    },
+    "source": {
+      "none": "কোনো সংখ্যা নেই",
+      "budget": "বাজেট",
+      "estimate": "প্রাক্কলন",
+      "partly_awarded": "আংশিক কার্যাদেশ",
+      "awarded": "কার্যাদেশপ্রাপ্ত",
+      "measured": "পরিমাপকৃত",
+      "final": "চূড়ান্ত হিসাব",
+      "manual": "ম্যানুয়াল",
+      "invoiced": "ইনভয়েসকৃত",
+      "evm": "আর্নড ভ্যালু"
+    },
+    "layer": {
+      "budget": "বাজেট",
+      "estimate": "প্রাক্কলন",
+      "tender": "সেরা দরপত্র",
+      "awarded": "কার্যাদেশপ্রাপ্ত",
+      "changes": "অনুমোদিত পরিবর্তন",
+      "committed": "প্রতিশ্রুত",
+      "pending": "অপেক্ষমাণ পরিবর্তন",
+      "measured": "পরিমাপকৃত",
+      "certified": "পরিশোধের জন্য প্রত্যয়িত",
+      "invoiced": "ইনভয়েসকৃত",
+      "paid": "পরিশোধিত",
+      "forecast": "পূর্বাভাস"
+    },
+    "invoice_kind": {
+      "interim": "অন্তর্বর্তী",
+      "final": "চূড়ান্ত",
+      "daywork": "দৈনিক মজুরির কাজ",
+      "credit_note": "ক্রেডিট নোট"
+    },
+    "release_status": {
+      "open": "খোলা",
+      "released": "অবমুক্ত"
+    },
+    "evidence_kind": {
+      "document": "নথি",
+      "minutes": "সভার কার্যবিবরণী",
+      "other": "অন্যান্য"
+    },
+    "snapshot_status": {
+      "draft": "খসড়া",
+      "frozen": "ফ্রিজ করা"
+    }
+  },
+  "pdf_footer": {
+    "page_of": "পৃষ্ঠা {page} / {total}",
+    "page": "পৃষ্ঠা {page}",
+    "printed": "মুদ্রিত: {timestamp}",
+    "generated": "তৈরি: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} আপনাকে ক্লায়েন্ট পোর্টালে আমন্ত্রণ জানিয়েছেন",
+      "login_subject": "ক্লায়েন্ট পোর্টালের জন্য আপনার সাইন-ইন লিংক",
+      "invite_heading": "ক্লায়েন্ট পোর্টালে স্বাগতম",
+      "login_heading": "ক্লায়েন্ট পোর্টালে সাইন ইন করুন",
+      "greeting": "প্রিয় {name},",
+      "greeting_generic": "প্রিয় গ্রাহক,",
+      "invite_body": "{sender} আপনাকে ক্লায়েন্ট পোর্টালে প্রবেশাধিকার দিয়েছেন। সেখানে আপনি আপনার প্রকল্পের অগ্রগতি দেখতে পারবেন: অগ্রগতির প্রতিবেদন, নথি, ইনভয়েস এবং পরবর্তী মাইলফলক।",
+      "login_body": "আপনার অনুরোধ করা সাইন-ইন লিংকটি এখানে দেওয়া হলো।",
+      "link_help": "নিচের বোতামটি আপনাকে সাইন ইন করাবে। পাসওয়ার্ডের প্রয়োজন নেই। লিংকটি একবারই কাজ করে এবং {hours} ঘণ্টা পর মেয়াদোত্তীর্ণ হয়ে যায়।",
+      "ignore": "আপনি যদি এই ইমেইলটি আশা না করে থাকেন, তবে এটি উপেক্ষা করতে পারেন। এই লিংক ছাড়া কেউ প্রবেশাধিকার পায় না।",
+      "invite_cta": "পোর্টাল খুলুন",
+      "login_cta": "সাইন ইন করুন",
+      "sender_generic": "আপনার প্রকল্প দল"
+    },
+    "tender_invite": {
+      "subject": "দরপত্র আহ্বান: {package}",
+      "heading": "দরপত্র আহ্বান",
+      "greeting": "জনাব/জনাবা {company},",
+      "greeting_generic": "জনাব/জনাবা,",
+      "invite": "আপনাকে দরপত্র প্যাকেজ {package}-এর জন্য দরপত্র দাখিল করতে আমন্ত্রণ জানানো হচ্ছে।",
+      "invite_project": "আপনাকে প্রকল্প {project}-এর দরপত্র প্যাকেজ {package}-এর জন্য দরপত্র দাখিল করতে আমন্ত্রণ জানানো হচ্ছে।",
+      "deadline": "দাখিলের শেষ সময়: {deadline}",
+      "link_help": "নিচের বোতামটি পরিমাণ তালিকা (বিল অব কোয়ান্টিটিজ) খোলে। আপনার একক দর অনলাইনে লিখুন, যখন খুশি খসড়া সংরক্ষণ করুন এবং শেষ সময়ের আগে দাখিল করুন। অ্যাকাউন্টের প্রয়োজন নেই।",
+      "link_personal": "এই লিংকটি শুধু আপনার প্রতিষ্ঠানের জন্য। অনুগ্রহ করে এটি অন্যকে পাঠাবেন না।",
+      "cta": "তালিকা খুলে দর লিখুন",
+      "no_link": "অনুগ্রহ করে প্যাকেজের বিবরণ দেখুন এবং উপরে উল্লিখিত শেষ সময়ের আগে আপনার প্রস্তাব জানান।"
+    },
+    "notification_email": {
+      "greeting": "প্রিয় {name},",
+      "greeting_generic": "প্রিয় গ্রাহক,",
+      "cta": "OpenConstructionERP-তে খুলুন",
+      "footer": "আপনার নোটিফিকেশন সেটিংসের কারণে আপনি এই ইমেইলটি পাচ্ছেন। প্রোফাইলে গিয়ে সেটিংস বদলাতে পারেন।",
+      "digest_subject": "OpenConstructionERP: নোটিফিকেশন সারসংক্ষেপ ({count})",
+      "digest_heading": "সাম্প্রতিক নোটিফিকেশন:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "দরের তুলনা",
+      "comparison_sheet": "তুলনা",
+      "bidder_title": "দর লেখার জন্য পরিমাণ তালিকা",
+      "bidder_sheet": "পরিমাণ তালিকা",
+      "project": "প্রকল্প",
+      "package": "প্যাকেজ",
+      "currency": "মুদ্রা",
+      "date": "তারিখ",
+      "return_by": "ফেরত দেওয়ার শেষ তারিখ",
+      "item": "আইটেম",
+      "description": "বিবরণ",
+      "unit": "একক",
+      "quantity": "পরিমাণ",
+      "unit_price": "একক দর",
+      "line_total": "আইটেমের মোট",
+      "own_estimate": "নিজস্ব প্রাক্কলন",
+      "not_priced": "দর দেওয়া হয়নি",
+      "sum_priced_lines": "দর দেওয়া আইটেমের যোগফল",
+      "bid_total": "দাখিল করা দরপত্রের মোট",
+      "lines_priced": "দর দেওয়া আইটেম",
+      "lines_priced_value": "{total}-এর মধ্যে {priced}",
+      "deviation": "নিজস্ব প্রাক্কলন থেকে ব্যবধান",
+      "not_comparable": "প্রযোজ্য নয়",
+      "other_currency": "{currency} মুদ্রায় উদ্ধৃত, {reporting} মুদ্রার দরপত্রের সঙ্গে ক্রমানুসারে সাজানো হয়নি।",
+      "legend": "সংকেত ব্যাখ্যা",
+      "legend_lowest": "সবুজ: আইটেমের সর্বনিম্ন একক দর।",
+      "legend_high": "▲ লাল: আইটেমের মধ্যমা দরের চেয়ে {pct}%-এর বেশি উপরে।",
+      "legend_low": "▼ হলদে-কমলা: আইটেমের মধ্যমা দরের চেয়ে {pct}%-এর বেশি নিচে।",
+      "legend_missing": "\"{marker}\": দরপত্রদাতা এই আইটেমের দর দেননি।",
+      "legend_incomplete": "যে দরপত্রে কিছু আইটেমের দর দেওয়া হয়নি, সেটি \"দর দেওয়া আইটেম\" কলামে চিহ্নিত থাকে এবং মোটের ভিত্তিতে সর্বনিম্ন হিসেবে গণ্য হয় না।",
+      "legend_totals": "দরপত্রের মোট হলো দরপত্রদাতার দাখিল করা অঙ্ক; এটি দর দেওয়া আইটেমগুলোর যোগফল থেকে আলাদা হতে পারে।",
+      "bidder": "দরপত্রদাতা",
+      "bidder_note": "দরপত্রদাতার মন্তব্য",
+      "reference": "রেফারেন্স (সম্পাদনা করবেন না)",
+      "total": "মোট",
+      "instructions": "হলুদ ঘরগুলোতে প্রতিটি আইটেমের একক দর লিখুন। পরিমাণ ও বিবরণ নির্ধারিত, আইটেমের মোট ও সর্বমোট নিজে থেকেই হিসাব হয়। কোনো আইটেমে দর না দিলে ঘরটি ফাঁকা রাখুন।"
+    },
+    "cost_plan": {
+      "sheet_plan": "NRM 1 ব্যয় পরিকল্পনা",
+      "sheet_unallocated": "বরাদ্দ হয়নি",
+      "title": "উপাদানভিত্তিক ব্যয় পরিকল্পনা (NRM 1)",
+      "bill": "পরিমাণ তালিকা",
+      "currency": "মুদ্রা",
+      "gifa": "GIFA, মোট অভ্যন্তরীণ মেঝের ক্ষেত্রফল (m2)",
+      "gifa_project": "প্রকল্প থেকে",
+      "gifa_entered": "এই এক্সপোর্টের জন্য লেখা হয়েছে",
+      "gifa_none": "নির্ধারিত নয়, প্রতি m2 ব্যয় দেখানো হয়নি",
+      "col_code": "কোড",
+      "col_description": "উপাদান",
+      "col_positions": "আইটেম",
+      "col_basis": "ভিত্তি",
+      "col_total": "মোট",
+      "col_per_m2": "প্রতি m2 GIFA ব্যয়",
+      "col_share": "মোটের %",
+      "col_running": "ক্রমযোজিত মোট",
+      "group_level": "গ্রুপ স্তর, কোনো উপাদান নির্দিষ্ট নয়",
+      "facilitating_works_estimate": "সহায়ক কাজের প্রাক্কলন",
+      "works_estimate": "ভবন নির্মাণ কাজের প্রাক্কলন",
+      "addons_heading": "NRM 1 গ্রুপ 9-14, পরিমাণ তালিকার আইটেম হিসেবে দর সহ",
+      "unallocated": "কোনো উপাদানে বরাদ্দ হয়নি",
+      "direct_cost": "পরিমাণ তালিকার সরাসরি ব্যয়",
+      "markups_heading": "মার্কআপ (পরিমাণ তালিকার নিজস্ব ক্রম অনুযায়ী)",
+      "markups_total": "মার্কআপের মোট",
+      "grand_total": "ব্যয় পরিকল্পনার সর্বমোট",
+      "basis_direct": "সরাসরি ব্যয়ের উপর {pct}%",
+      "basis_running": "ক্রমযোজিত উপমোটের উপর {pct}%",
+      "basis_lump": "এককালীন অঙ্ক",
+      "basis_banded": "স্তরভিত্তিক হার",
+      "basis_escalation": "সূচকভিত্তিক মূল্যবৃদ্ধি",
+      "basis_other": "{kind}",
+      "basis_scoped": "অংশভিত্তিক সীমাবদ্ধ",
+      "col_ordinal": "ক্রমিক নম্বর",
+      "col_position": "বিবরণ",
+      "col_written_code": "লেখা কোড",
+      "col_reason": "কারণ",
+      "reason_no_code": "আইটেম বা তার অংশগুলোতে NRM কোড নেই",
+      "reason_invalid_code": "কোডটি NRM নম্বর নয়",
+      "reason_unknown_group": "NRM 1-এ এমন কোনো গ্রুপ নেই",
+      "truncated": "তালিকা {count}টির মধ্যে প্রথম {shown}টি আইটেমে সংক্ষিপ্ত করা হয়েছে; মোটের হিসাবে সব আইটেম ধরা হয়েছে।"
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "প্রয়োজনীয়তা",
+      "sheet_summary": "সারসংক্ষেপ",
+      "sheet_legend": "সংকেত ব্যাখ্যা",
+      "summary_element": "উপাদান",
+      "summary_count": "প্রয়োজনীয়তার সংখ্যা",
+      "summary_total": "মোট",
+      "legend_column": "কলাম",
+      "legend_description": "বিবরণ",
+      "unspecified": "অনির্দিষ্ট",
+      "h01": "উপাদান / IFC ক্লাস",
+      "h02": "শ্রেণিবিন্যাস",
+      "h03": "বৈশিষ্ট্য গ্রুপ",
+      "h04": "বৈশিষ্ট্যের নাম",
+      "h05": "ডেটার ধরন",
+      "h06": "বাধ্যবাধকতা",
+      "h07": "অনুমোদিত মান",
+      "h08": "সর্বনিম্ন",
+      "h09": "সর্বোচ্চ",
+      "h10": "একক",
+      "h11": "প্যাটার্ন",
+      "h12": "পর্যায়",
+      "h13": "দায়িত্বপ্রাপ্ত পক্ষ",
+      "h14": "ব্যবহারের ক্ষেত্র",
+      "h15": "উৎস",
+      "d01": "IFC এনটিটি ক্লাস (যেমন IFCWALL, IFCBEAM)",
+      "d02": "শ্রেণিবিন্যাস পদ্ধতি ও কোড (যেমন Uniclass 2015: EF_25_10)",
+      "d03": "বৈশিষ্ট্য সেটের নাম (যেমন Pset_WallCommon)",
+      "d04": "প্রয়োজনীয় বৈশিষ্ট্য বা অ্যাট্রিবিউটের নাম",
+      "d05": "IFC ডেটার ধরন (IFCLABEL, IFCREAL, IFCBOOLEAN ইত্যাদি)",
+      "d06": "কার্ডিনালিটি: বাধ্যতামূলক, ঐচ্ছিক বা নিষিদ্ধ",
+      "d07": "অনুমোদিত মানের সেমিকোলন দিয়ে আলাদা করা তালিকা",
+      "d08": "সংখ্যাগত সীমার মান",
+      "d09": "পরিমাপের একক (m, m2, kg ইত্যাদি)",
+      "d10": "মান যাচাইয়ের জন্য রেগুলার এক্সপ্রেশন প্যাটার্ন",
+      "d11": "প্রকল্পের পর্যায় বা মাইলফলক (LP3, RIBA Stage 3 ইত্যাদি)",
+      "d12": "দায়িত্বপ্রাপ্ত পক্ষ (স্থপতি, কাঠামো প্রকৌশলী ইত্যাদি)",
+      "d13": "প্রয়োজনীয়তার উদ্দেশ্য বা ব্যবহারের ক্ষেত্র",
+      "d14": "উৎস মান বা নথি"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "BOQ তৈরি হয়েছে",
+      "notifications.boq.created.body": "আপনার পরিমাণ তালিকা '{boq_name}' সংরক্ষিত হয়েছে।",
+      "notifications.meeting.action_assigned.title": "আপনাকে করণীয় কাজ দেওয়া হয়েছে",
+      "notifications.meeting.action_assigned.body": "সভা {meeting_number} থেকে: {description}",
+      "notifications.cde.state_transitioned.title": "নথির অবস্থা বদলেছে",
+      "notifications.cde.state_transitioned.body": "কনটেইনার '{new_state}' অবস্থায় গেছে।",
+      "notifications.cde.linked_published.title": "আপনার কাজের সঙ্গে যুক্ত একটি নথি প্রকাশিত হয়েছে",
+      "notifications.cde.linked_published.body": "{container_code} সংশোধন {revision_code}-এ প্রকাশিত হয়েছে। আপনার যুক্ত রেকর্ড: {records}।",
+      "notifications.rfi.assigned.title": "আপনাকে RFI দেওয়া হয়েছে",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "RFI-এর উত্তর এসেছে",
+      "notifications.rfi.responded.body": "আপনার অনুরোধ {code} ({title})-এর উত্তর এসেছে।",
+      "notifications.risk.assigned.title": "আপনাকে ঝুঁকি দেওয়া হয়েছে",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "ব্যয় অতিক্রমের সতর্কতা",
+      "notifications.costmodel.overrun_alert.body": "{category} ব্যয় বাজেটের চেয়ে বেশি: প্রকৃত {actual} {currency}, পরিকল্পিত {planned} {currency}-এর উপর +{threshold_pct}% সতর্কতা সীমা ছাড়িয়েছে।",
+      "notifications.submittal.submitted.title": "সাবমিটাল পর্যালোচনার অপেক্ষায়",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "সাবমিটাল অনুমোদিত",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "সাবমিটাল প্রত্যাখ্যাত",
+      "notifications.submittal.rejected.body": "{code} ({title})। কারণ: {reason}",
+      "notifications.submittal.revise_resubmit.title": "সাবমিটাল সংশোধন প্রয়োজন",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title})। কারণ: {reason}",
+      "notifications.transmittal.issued.title": "আপনাকে ট্রান্সমিটাল ইস্যু করা হয়েছে",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "ট্রান্সমিটাল প্রাপ্তি স্বীকার করা হয়েছে",
+      "notifications.transmittal.acknowledged.body": "প্রাপক {code} ({title}) নিশ্চিত করেছেন।",
+      "notifications.transmittal.responded.title": "ট্রান্সমিটালের উত্তর এসেছে",
+      "notifications.transmittal.responded.body": "{code} ({title})। {response_summary}",
+      "notification.rfi_assigned_title": "আপনাকে RFI দেওয়া হয়েছে",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "নতুন কাজ দেওয়া হয়েছে",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "ইনভয়েস অনুমোদিত",
+      "notification.invoice_approved_body": "ইনভয়েস {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "পরিদর্শনের সময়সূচি নির্ধারিত",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, তারিখ {inspection_date}",
+      "notification.submittal_status_changed_title": "সাবমিটালের অবস্থা বদলেছে",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "সভার সময়সূচি নির্ধারিত",
+      "notification.meeting_scheduled_body": "{title}, তারিখ {meeting_date}",
+      "notification.ncr_created_title": "অসঙ্গতি নথিভুক্ত হয়েছে",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "নথি আপলোড হয়েছে",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "একটি মন্তব্যে আপনার উল্লেখ করা হয়েছে",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "আলোচনায় নতুন মন্তব্য",
+      "notifications.collaboration.comment_added.body": "{entity_type}-এ: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "গুরুতর ক্ল্যাশ শনাক্ত হয়েছে",
+      "notifications.clash.high_severity.body": "{severity} ক্ল্যাশ: {a_name} ও {b_name}",
+      "notifications.validation.report.title": "যাচাইয়ে সমস্যা পাওয়া গেছে",
+      "notifications.validation.report.body": "এই {target_type}-এ ত্রুটি: {error_count}, সতর্কতা: {warning_count}।",
+      "notifications.punchlist.auto_created.title": "পাঞ্চ তালিকার আইটেম তৈরি হয়েছে",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "নোটিফিকেশন সারসংক্ষেপ",
+      "notifications.digest.body": "{channel} চ্যানেলে আপনার জন্য নতুন আপডেট: {count}।",
+      "notifications.approval.overdue.title": "অনুমোদনে বিলম্ব",
+      "notifications.approval.overdue.body": "এই {target_kind}-এর ধাপ {step_ordinal} {hours_overdue} ঘণ্টা বিলম্বিত।",
+      "notifications.approval.escalated.title": "অনুমোদন আপনার কাছে উন্নীত করা হয়েছে",
+      "notifications.approval.escalated.body": "এই {target_kind}-এর ধাপ {step_ordinal} আপনার কাছে উন্নীত হয়েছে (স্তর {level})।",
+      "notifications.approval.reassigned.title": "অনুমোদন আপনাকে পুনরায় দেওয়া হয়েছে",
+      "notifications.approval.reassigned.body": "এই {target_kind}-এর ধাপ {step_ordinal}-এর সিদ্ধান্ত এখন আপনার।",
+      "notifications.deadline.overdue.title": "বিলম্বিত: {title}",
+      "notifications.deadline.overdue.body": "{module}-এর আইটেম \"{title}\" নির্ধারিত তারিখ পেরিয়েছে, বিলম্বের দিন: {days_overdue}।",
+      "notifications.deadline.escalated.title": "বিলম্বিত আইটেম উন্নীত করা হয়েছে",
+      "notifications.deadline.escalated.body": "{module}-এর আইটেম \"{title}\" এখনও খোলা, বিলম্বের দিন: {days_overdue}, এবং এটি উন্নীত করা হয়েছে।",
+      "notifications.deadline.approaching.title": "শেষ তারিখ ঘনিয়ে এসেছে: {title}",
+      "notifications.deadline.approaching.body": "{module}-এর আইটেম \"{title}\"-এর নির্ধারিত তারিখ {due_date}।",
+      "notifications.deadline.built.approaching.title": "শেষ তারিখ ঘনিয়ে এসেছে: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: \"{title}\"-এর নির্ধারিত তারিখ {due_date}।",
+      "notifications.deadline.rfi.overdue.title": "বিলম্বিত: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "{project}-এর RFI {reference} \"{title}\"-এর নির্ধারিত তারিখ ছিল {due_date_display}, বিলম্বের দিন: {days_overdue}। উত্তর প্রয়োজন।",
+      "notifications.deadline.rfi.escalated.title": "উন্নীত: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "{project}-এর RFI {reference} \"{title}\" এখনও খোলা। নির্ধারিত তারিখ ছিল {due_date_display}, বিলম্বের দিন: {days_overdue}, এবং এটি আপনার কাছে উন্নীত করা হয়েছে।",
+      "notifications.deadline.rfi.approaching.title": "শেষ তারিখ ঘনিয়ে এসেছে: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "{project}-এর RFI {reference} \"{title}\"-এর নির্ধারিত তারিখ {due_date_display}। উত্তর প্রয়োজন।",
+      "notifications.deadline.submittals.overdue.title": "বিলম্বিত: সাবমিটাল {reference}",
+      "notifications.deadline.submittals.overdue.body": "{project}-এর সাবমিটাল {reference} \"{title}\"-এর নির্ধারিত তারিখ ছিল {due_date_display}, বিলম্বের দিন: {days_overdue}। পর্যালোচনা প্রয়োজন।",
+      "notifications.deadline.submittals.escalated.title": "উন্নীত: সাবমিটাল {reference}",
+      "notifications.deadline.submittals.escalated.body": "{project}-এর সাবমিটাল {reference} \"{title}\" এখনও খোলা। নির্ধারিত তারিখ ছিল {due_date_display}, বিলম্বের দিন: {days_overdue}, এবং এটি আপনার কাছে উন্নীত করা হয়েছে।",
+      "notifications.deadline.submittals.approaching.title": "শেষ তারিখ ঘনিয়ে এসেছে: সাবমিটাল {reference}",
+      "notifications.deadline.submittals.approaching.body": "{project}-এর সাবমিটাল {reference} \"{title}\"-এর নির্ধারিত তারিখ {due_date_display}। পর্যালোচনা প্রয়োজন।",
+      "notifications.deadline.correspondence.overdue.title": "বিলম্বিত: চিঠিপত্র {reference}",
+      "notifications.deadline.correspondence.overdue.body": "{project}-এর চিঠিপত্র {reference} \"{title}\"-এর উত্তর {due_date_display}-এর মধ্যে প্রয়োজন ছিল, বিলম্বের দিন: {days_overdue}। উত্তর প্রয়োজন।",
+      "notifications.deadline.correspondence.escalated.title": "উন্নীত: চিঠিপত্র {reference}",
+      "notifications.deadline.correspondence.escalated.body": "{project}-এর চিঠিপত্র {reference} \"{title}\"-এর উত্তর এখনও দেওয়া হয়নি। নির্ধারিত তারিখ ছিল {due_date_display}, বিলম্বের দিন: {days_overdue}, এবং এটি আপনার কাছে উন্নীত করা হয়েছে।",
+      "notifications.deadline.correspondence.approaching.title": "শেষ তারিখ ঘনিয়ে এসেছে: চিঠিপত্র {reference}",
+      "notifications.deadline.correspondence.approaching.body": "{project}-এর চিঠিপত্র {reference} \"{title}\"-এর উত্তর {due_date_display}-এর মধ্যে প্রয়োজন। উত্তর প্রয়োজন।",
+      "notifications.deadline.variations.overdue.title": "বিলম্বিত: ভ্যারিয়েশন {reference}",
+      "notifications.deadline.variations.overdue.body": "{project}-এর ভ্যারিয়েশন {reference} \"{title}\"-এর নির্ধারিত তারিখ ছিল {due_date_display}, বিলম্বের দিন: {days_overdue}। সিদ্ধান্ত প্রয়োজন।",
+      "notifications.deadline.variations.escalated.title": "উন্নীত: ভ্যারিয়েশন {reference}",
+      "notifications.deadline.variations.escalated.body": "{project}-এর ভ্যারিয়েশন {reference} \"{title}\" এখনও খোলা। নির্ধারিত তারিখ ছিল {due_date_display}, বিলম্বের দিন: {days_overdue}, এবং এটি আপনার কাছে উন্নীত করা হয়েছে।",
+      "notifications.deadline.variations.approaching.title": "শেষ তারিখ ঘনিয়ে এসেছে: ভ্যারিয়েশন {reference}",
+      "notifications.deadline.variations.approaching.body": "{project}-এর ভ্যারিয়েশন {reference} \"{title}\"-এর নির্ধারিত তারিখ {due_date_display}। সিদ্ধান্ত প্রয়োজন।",
+      "notifications.variation.submitted.title": "ভ্যারিয়েশন সিদ্ধান্তের অপেক্ষায়: {code}",
+      "notifications.variation.submitted.body": "{project}-এর ভ্যারিয়েশন {code} \"{title}\" দাখিল করা হয়েছে এবং সিদ্ধান্তের অপেক্ষায় আছে।",
+      "notifications.variation.approved.title": "ভ্যারিয়েশন অনুমোদিত: {code}",
+      "notifications.variation.approved.body": "{project}-এর ভ্যারিয়েশন {code} \"{title}\" অনুমোদিত হয়েছে।",
+      "notifications.variation.rejected.title": "ভ্যারিয়েশন প্রত্যাখ্যাত: {code}",
+      "notifications.variation.rejected.body": "{project}-এর ভ্যারিয়েশন {code} \"{title}\" প্রত্যাখ্যাত হয়ে আপনার কাছে ফেরত এসেছে।",
+      "notifications.variation.rejected_reason.body": "{project}-এর ভ্যারিয়েশন {code} \"{title}\" প্রত্যাখ্যাত হয়ে আপনার কাছে ফেরত এসেছে। কারণ: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "চেঞ্জ অর্ডার অনুমোদনের অপেক্ষায়: {code}",
+      "notifications.changeorder.awaiting_approval.body": "{project}-এর চেঞ্জ অর্ডার {code} \"{title}\" দাখিল করা হয়েছে এবং অনুমোদনের অপেক্ষায় আছে।",
+      "notifications.changeorder.approved.title": "চেঞ্জ অর্ডার অনুমোদিত: {code}",
+      "notifications.changeorder.approved.body": "{project}-এর চেঞ্জ অর্ডার {code} \"{title}\" অনুমোদিত হয়েছে।",
+      "notifications.changeorder.rejected.title": "চেঞ্জ অর্ডার প্রত্যাখ্যাত: {code}",
+      "notifications.changeorder.rejected.body": "{project}-এর চেঞ্জ অর্ডার {code} \"{title}\" প্রত্যাখ্যাত হয়েছে।",
+      "notifications.submittal.approved_as_noted.title": "সাবমিটাল মন্তব্যসহ অনুমোদিত",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "একটি নথিতে আপনার অনুমোদন প্রয়োজন",
+      "notifications.file_approval.needs_approver.body": "একটি {file_kind} আপনার অনুমোদনের অপেক্ষায় আছে।",
+      "notifications.file_approval.approved.title": "আপনার নথি অনুমোদিত হয়েছে",
+      "notifications.file_approval.approved.body": "আপনার {file_kind} সব অনুমোদন ধাপ পার হয়েছে।",
+      "notifications.file_approval.rejected.title": "আপনার নথি ফেরত পাঠানো হয়েছে",
+      "notifications.file_approval.rejected.body": "আপনার {file_kind} প্রত্যাখ্যাত হয়েছে এবং পরিবর্তন প্রয়োজন।",
+      "notifications.portal.user_invited.title": "পোর্টাল ব্যবহারকারীকে আমন্ত্রণ জানানো হয়েছে",
+      "notifications.portal.user_invited.body": "{portal_user_email}-কে {portal_role} হিসেবে আমন্ত্রণ জানানো হয়েছে।",
+      "notifications.portal.message_received.title": "পোর্টালে নতুন বার্তা",
+      "notifications.portal.message_received.body": "{buyer_name} একটি বার্তা পাঠিয়েছেন।"
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "কার্যক্রম আইডি",
+          "আইডি",
+          "কার্যক্রম কোড",
+          "কাজের আইডি",
+          "ক্রমিক নং"
+        ],
+        "name": [
+          "কার্যক্রমের নাম",
+          "কাজের নাম",
+          "কার্যক্রম",
+          "কাজ",
+          "নাম"
+        ],
+        "wbs": [
+          "WBS",
+          "WBS কোড",
+          "WBS নম্বর",
+          "আউটলাইন নম্বর"
+        ],
+        "outline_level": [
+          "আউটলাইন স্তর",
+          "স্তর",
+          "ইন্ডেন্ট স্তর",
+          "ইন্ডেন্ট"
+        ],
+        "start": [
+          "শুরু",
+          "শুরুর তারিখ",
+          "আরম্ভ",
+          "পরিকল্পিত শুরু"
+        ],
+        "finish": [
+          "সমাপ্তি",
+          "সমাপ্তির তারিখ",
+          "শেষ",
+          "শেষের তারিখ",
+          "পরিকল্পিত সমাপ্তি"
+        ],
+        "duration": [
+          "মেয়াদ",
+          "মেয়াদ (দিন)",
+          "দিন",
+          "মূল মেয়াদ"
+        ],
+        "predecessors": [
+          "পূর্ববর্তী",
+          "পূর্ববর্তী কার্যক্রম",
+          "নির্ভর করে",
+          "নির্ভরতা"
+        ],
+        "percent_complete": [
+          "% সম্পন্ন",
+          "সম্পন্নের শতাংশ",
+          "অগ্রগতি",
+          "অগ্রগতি (%)"
+        ],
+        "milestone": [
+          "মাইলফলক",
+          "মাইলফলক কি"
+        ],
+        "resource": [
+          "রিসোর্স",
+          "রিসোর্সের নাম",
+          "সম্পদ",
+          "দল",
+          "দায়িত্বপ্রাপ্ত"
+        ],
+        "notes": [
+          "মন্তব্য",
+          "নোট",
+          "টীকা",
+          "বিবরণ",
+          "রিমার্কস"
+        ],
+        "client_visible": [
+          "ক্লায়েন্টের জন্য দৃশ্যমান",
+          "ক্লায়েন্টকে দেখান",
+          "ক্লায়েন্টের সঙ্গে শেয়ার করুন"
+        ]
+      },
+      "yes_words": [
+        "হ্যাঁ",
+        "হাঁ",
+        "সত্য"
+      ],
+      "no_words": [
+        "না",
+        "মিথ্যা"
+      ],
+      "example_names": [
+        "কাঠামো ও কোর",
+        "মাটি খনন",
+        "ভিত্তি",
+        "ভিত্তি গৃহীত"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "চুক্তি*",
+          "ঠিকা*",
+          "কন্ট্রাক্ট",
+          "অ্যাগ্রিমেন্ট*"
+        ],
+        "contact": [
+          "যোগাযোগ*",
+          "সরবরাহকারী*",
+          "বিক্রেতা*",
+          "সাবকন্ট্রাক্টর*",
+          "উপঠিকাদার*",
+          "গ্রাহক*",
+          "ক্লায়েন্ট*"
+        ],
+        "schedule_activity": [
+          "কার্যক্রম*",
+          "অ্যাকটিভিটি*",
+          "টাস্ক*",
+          "wbs"
+        ],
+        "document": [
+          "নথি*",
+          "ডকুমেন্ট*",
+          "ড্রয়িং*",
+          "সংযুক্তি*"
+        ],
+        "user": [
+          "দায়িত্বপ্রাপ্ত*",
+          "পরিদর্শক*",
+          "ইন্সপেক্টর*",
+          "সুপারভাইজার*",
+          "ফোরম্যান*",
+          "নিযুক্ত ব্যক্তি*"
+        ],
+        "due": [
+          "নির্ধারিত তারিখ*",
+          "শেষ তারিখ*",
+          "সময়সীমা*",
+          "মেয়াদোত্তীর্ণ*",
+          "লক্ষ্য তারিখ*",
+          "নবায়ন*"
+        ]
+      },
+      "link_labels": {
+        "contract": "চুক্তি",
+        "contact": "যোগাযোগ",
+        "schedule_activity": "সূচির কার্যক্রম",
+        "document": "নথি",
+        "user": "দায়িত্বপ্রাপ্ত ব্যক্তি"
+      },
+      "state_labels": [
+        "খোলা",
+        "চলমান",
+        "সম্পন্ন"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "টেন্ডার {package}-এর অ্যাডেনডাম {number}",
+      "addendum_heading": "টেন্ডার অ্যাডেনডাম",
+      "greeting": "সম্মানিত {company},",
+      "greeting_generic": "সম্মানিত মহোদয়গণ,",
+      "addendum_intro": "টেন্ডার প্যাকেজ {package}-এর অ্যাডেনডাম {number} জারি হয়েছে: {title}।",
+      "addendum_deadline": "জমার শেষ সময় {old} থেকে {new}-এ সরানো হয়েছে।",
+      "addendum_boq": "বিল অব কোয়ান্টিটিজ পরিবর্তিত হয়েছে (সংশোধন {revision})। অনুগ্রহ করে বর্তমান সংশোধনের দর দিন।",
+      "addendum_documents": "জারি করা নথি: {documents}",
+      "addendum_ack": "অনুগ্রহ করে এই অ্যাডেনডামের প্রাপ্তি স্বীকার করুন। যে দরপত্র সব অ্যাডেনডাম স্বীকার করে না, তা অসম্মত বিবেচিত হতে পারে।",
+      "answer_subject": "টেন্ডার {package}-এর স্পষ্টীকরণ {number}",
+      "answer_heading": "টেন্ডার স্পষ্টীকরণ",
+      "answer_intro": "টেন্ডার প্যাকেজ {package} সংক্রান্ত একটি প্রশ্নের উত্তর দেওয়া হয়েছে। এই উত্তর সব দরদাতার জন্য প্রযোজ্য।",
+      "question_label": "প্রশ্ন",
+      "answer_label": "উত্তর"
+    }
+  },
+  "document_forms": {
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "এআই-দ্বারা তৈরি",
+        "drawing": "অঙ্কন",
+        "cost_estimate": "ব্যয় প্রাক্কলন",
+        "summary": "সারসংক্ষেপ",
+        "project": "প্রকল্প:",
+        "boq": "বিওকিউ:",
+        "date": "তারিখ:",
+        "status": "অবস্থা:",
+        "prepared_by": "প্রস্তুতকারী:",
+        "approved_by": "অনুমোদনকারী:",
+        "signature_hint": "নাম / স্বাক্ষর / তারিখ",
+        "contents": "বিভাগ / অবস্থান:",
+        "pos": "ক্রম।",
+        "description": "বিবরণ",
+        "unit": "একক",
+        "qty": "পরিমাণ",
+        "rate": "দর",
+        "total": "মোট",
+        "subtotal": "উপমোট:",
+        "other_positions": "অন্যান্য অবস্থান",
+        "direct_cost": "প্রত্যক্ষ ব্যয়:",
+        "markups": "মার্কআপ (কর ব্যতীত):",
+        "net_total": "নিট মোট (কর ব্যতীত):",
+        "gross_total": "স্থূল মোট",
+        "page": "পৃষ্ঠা",
+        "of": "এর",
+        "generated": "তৈরির সময়:",
+        "summary_report": "সারসংক্ষেপ প্রতিবেদন",
+        "positions_omitted": "{count}টি অবস্থান (কর্মক্ষমতার জন্য সম্পূর্ণ বিবরণ বাদ দেওয়া হয়েছে)",
+        "section": "বিভাগ",
+        "items": "আইটেম",
+        "cost_summary": "ব্যয়ের সারসংক্ষেপ",
+        "table_of_contents": "বিষয়সূচি",
+        "resources_omitted": "রিসোর্স বিশ্লেষণ মুদ্রিত হয়নি: এই বিলে একটি পিডিএফের জন্য রিসোর্স লাইন অনেক বেশি।",
+        "status_draft": "খসড়া",
+        "status_final": "চূড়ান্ত",
+        "status_archived": "আর্কাইভকৃত",
+        "subject": "পরিমাণ বিবরণী",
+        "tax_vat": "ভ্যাট"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "চালান",
+        "date": "তারিখ: {value}",
+        "due": "পরিশোধের তারিখ: {value}",
+        "from": "প্রেরক",
+        "bill_to": "প্রাপক",
+        "vat_id": "ভ্যাট: {value}",
+        "ref": "রেফারেন্স: {value}",
+        "th_description": "বিবরণ",
+        "th_qty": "পরিমাণ",
+        "th_unit": "একক",
+        "th_unit_price": "একক মূল্য",
+        "th_net": "নিট ({currency})",
+        "net_total": "নিট মোট",
+        "vat_total": "ভ্যাট",
+        "grand_total": "সর্বমোট",
+        "retention_prepaid": "সংরক্ষিত / অগ্রিম পরিশোধিত",
+        "amount_due": "পরিশোধযোগ্য পরিমাণ",
+        "payment": "পরিশোধ",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "হিসাব নম্বর: {value}",
+        "bank_code": "ব্যাংক কোড: {value}",
+        "account_holder": "হিসাবধারী: {value}",
+        "footer": "এই পিডিএফে একটি এমবেডেড EN 16931 ই-চালান (Factur-X / ZUGFeRD) রয়েছে। এমবেডেড XML-ই কার্যকর দলিল।",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "প্রতিবেদন",
+        "meta_project": "প্রকল্প",
+        "meta_type": "ধরন",
+        "meta_generated": "তৈরি",
+        "meta_currency": "মুদ্রা",
+        "field_column": "ক্ষেত্র",
+        "value_column": "মান",
+        "yes": "হ্যাঁ",
+        "no": "না",
+        "no_data_heading": "কোনো তথ্য পাওয়া যায়নি",
+        "no_data_body": "এই প্রতিবেদনটি একটি খালি তথ্য স্ন্যাপশট থেকে তৈরি হয়েছে। নির্বাচিত প্রকল্পের জন্য উৎস মডিউলগুলো (অর্থ, সময়সূচি, নিরাপত্তা ইত্যাদি) তথ্য ফেরত দিয়েছে কিনা যাচাই করুন।",
+        "no_data_body_short": "এই প্রতিবেদনটি একটি খালি তথ্য স্ন্যাপশট থেকে তৈরি হয়েছে। নির্বাচিত প্রকল্পের জন্য উৎস মডিউলগুলো তথ্য ফেরত দিয়েছে কিনা যাচাই করুন।",
+        "footer_generated_by": "OpenConstructionERP দ্বারা {timestamp}-এ তৈরি।",
+        "worksheet_name": "প্রতিবেদন",
+        "pdf_subject": "প্রকল্প প্রতিবেদন",
+        "overall_progress": "সামগ্রিক অগ্রগতি",
+        "as_of": "তারিখ অনুযায়ী",
+        "recorded_by": "রেকর্ডকারী",
+        "period": "সময়কাল",
+        "entries_suffix": "({count}টি এন্ট্রি)",
+        "site_photo_alt": "সাইটের ছবি",
+        "ai_summary_heading": "সারসংক্ষেপ",
+        "ai_badge": "এআই-দ্বারা তৈরি",
+        "ai_note": "নিচের প্রকল্প তথ্য থেকে এআই-দ্বারা তৈরি।",
+        "ai_note_confidence": "নিচের প্রকল্প তথ্য থেকে এআই-দ্বারা তৈরি (নির্ভরযোগ্যতা {confidence})।",
+        "ai_note_review": "ক্লায়েন্টের সাথে শেয়ার করার আগে পর্যালোচনা করুন।"
+      },
+      "labels": {
+        "field_labels": {
+          "name": "নাম",
+          "status": "অবস্থা",
+          "phase": "পর্যায়",
+          "planned_start": "পরিকল্পিত শুরু",
+          "planned_end": "পরিকল্পিত শেষ",
+          "schedule_progress_pct": "সময়সূচি অগ্রগতি %",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "ব্যবহৃত বাজেট %",
+          "as_of": "তারিখ অনুযায়ী",
+          "progress_pct": "অগ্রগতি %",
+          "risk_score_avg": "গড় ঝুঁকি স্কোর",
+          "open_rfis": "খোলা RFI",
+          "open_submittals": "খোলা সাবমিটাল",
+          "open_defects": "খোলা ত্রুটি",
+          "open_observations": "খোলা পর্যবেক্ষণ",
+          "budget": "বাজেট",
+          "committed": "প্রতিশ্রুত",
+          "actual": "প্রকৃত",
+          "payable": "প্রদেয়",
+          "receivable": "প্রাপ্য",
+          "net_cash_flow": "নিট নগদ প্রবাহ"
+        },
+        "section_titles": {
+          "Project Overview": "প্রকল্পের সংক্ষিপ্ত বিবরণ",
+          "Key Performance Indicators": "মূল কার্যসম্পাদন সূচক",
+          "Schedule Status": "সময়সূচির অবস্থা",
+          "Risk Summary": "ঝুঁকির সারসংক্ষেপ",
+          "Open Issues": "খোলা সমস্যা",
+          "Cost Summary": "ব্যয়ের সারসংক্ষেপ",
+          "Cost Breakdown": "ব্যয়ের বিভাজন",
+          "Change Orders": "পরিবর্তন আদেশ",
+          "Cash Flow": "নগদ প্রবাহ",
+          "Schedule Overview": "সময়সূচির সংক্ষিপ্ত বিবরণ",
+          "Milestone Status": "মাইলফলকের অবস্থা",
+          "Critical Path": "সংকটপূর্ণ পথ",
+          "3-Week Lookahead": "৩ সপ্তাহের পূর্বাভাস",
+          "Safety KPIs": "নিরাপত্তা KPI",
+          "Incident Log": "ঘটনার লগ",
+          "Near-Miss Reports": "দুর্ঘটনা-প্রায় প্রতিবেদন",
+          "Safety Training": "নিরাপত্তা প্রশিক্ষণ",
+          "Inspection Summary": "পরিদর্শনের সারসংক্ষেপ",
+          "By Inspection Type": "পরিদর্শনের ধরন অনুযায়ী",
+          "Punch List Status": "পাঞ্চ তালিকার অবস্থা",
+          "Recent Inspections": "সাম্প্রতিক পরিদর্শন",
+          "Portfolio Overview": "পোর্টফোলিওর সংক্ষিপ্ত বিবরণ",
+          "Project Statuses": "প্রকল্পের অবস্থা",
+          "KPI Comparison": "KPI তুলনা",
+          "Portfolio Risks": "পোর্টফোলিওর ঝুঁকি",
+          "Field Progress": "মাঠপর্যায়ের অগ্রগতি",
+          "Top Risks": "প্রধান ঝুঁকি",
+          "Site Photos": "সাইটের ছবি",
+          "Summary": "সারসংক্ষেপ"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "ক্রয় আদেশ",
+        "gr_title": "পণ্য প্রাপ্তি",
+        "supplier": "সরবরাহকারী",
+        "po_type": "আদেশের ধরন",
+        "issue_date": "ইস্যুর তারিখ",
+        "delivery_date": "সরবরাহের তারিখ",
+        "created_by": "প্রস্তুতকারী",
+        "order_total": "আদেশের মোট",
+        "line_items": "লাইন আইটেম",
+        "col_no": "নং",
+        "col_description": "বিবরণ",
+        "col_quantity": "পরিমাণ",
+        "col_unit": "একক",
+        "col_unit_rate": "একক দর",
+        "col_amount": "পরিমাণ টাকা",
+        "no_line_items": "কোনো লাইন আইটেম নেই।",
+        "totals": "মোট",
+        "subtotal": "নিট পরিমাণ",
+        "tax": "কর",
+        "total_gross": "করসহ মোট",
+        "terms": "শর্তাবলি",
+        "payment_terms": "পরিশোধের শর্ত",
+        "retention": "সংরক্ষণ (রিটেনশন)",
+        "retention_at": "সংরক্ষণ কাটা হবে",
+        "retention_at_receipt": "পণ্য প্রাপ্তিতে",
+        "retention_at_invoice": "চালানে",
+        "invoice_tolerance": "চালানের সহনশীলতা",
+        "supplier_confirmation": "সরবরাহকারীর নিশ্চিতকরণ",
+        "supplier_reference": "সরবরাহকারীর রেফারেন্স",
+        "confirmed_delivery": "নিশ্চিত সরবরাহের তারিখ",
+        "acknowledged_on": "স্বীকৃতির তারিখ",
+        "not_confirmed": "সরবরাহকারী এখনও নিশ্চিত করেনি।",
+        "notes": "মন্তব্য",
+        "no_notes": "কোনো মন্তব্য লিপিবদ্ধ নেই।",
+        "sig_ordered_by": "আদেশদাতা",
+        "purchase_order": "ক্রয় আদেশ",
+        "receipt_date": "প্রাপ্তির তারিখ",
+        "received_by": "গ্রহণকারী",
+        "delivery_note": "ডেলিভারি নোট",
+        "col_ordered": "আদেশকৃত",
+        "col_received": "প্রাপ্ত",
+        "col_rejected": "প্রত্যাখ্যাত",
+        "col_batch": "ব্যাচ / লট",
+        "rejections": "প্রত্যাখ্যান",
+        "col_reason": "কারণ",
+        "no_rejections": "কিছুই প্রত্যাখ্যাত হয়নি।",
+        "sig_delivered_by": "সরবরাহকারী",
+        "counterparty_tax_id": "করদাতা শনাক্তকরণ নম্বর",
+        "counterparty_address": "ঠিকানা"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "খসড়া",
+          "approved": "অনুমোদিত",
+          "issued": "ইস্যুকৃত",
+          "partially_received": "আংশিক প্রাপ্ত",
+          "completed": "সম্পন্ন",
+          "cancelled": "বাতিল"
+        },
+        "gr_status": {
+          "draft": "খসড়া",
+          "confirmed": "নিশ্চিত"
+        },
+        "po_type": {
+          "standard": "স্ট্যান্ডার্ড",
+          "blanket": "ব্ল্যাঙ্কেট আদেশ",
+          "service": "সেবা"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "চালান",
+        "payment_title": "পরিশোধ",
+        "direction": "দিক",
+        "supplier": "সরবরাহকারী",
+        "client": "ক্লায়েন্ট",
+        "invoice_date": "চালানের তারিখ",
+        "due_date": "পরিশোধের শেষ তারিখ",
+        "payment_terms": "পরিশোধের শর্ত",
+        "purchase_order": "ক্রয় আদেশ",
+        "invoice_total": "চালানের মোট",
+        "line_items": "লাইন আইটেম",
+        "col_no": "নং",
+        "col_description": "বিবরণ",
+        "col_quantity": "পরিমাণ",
+        "col_unit": "একক",
+        "col_unit_rate": "একক দর",
+        "col_vat": "ভ্যাট",
+        "col_amount": "পরিমাণ টাকা",
+        "no_line_items": "কোনো লাইন আইটেম নেই।",
+        "totals": "মোট",
+        "subtotal": "নিট পরিমাণ",
+        "tax": "কর",
+        "total_gross": "করসহ মোট",
+        "retention": "সংরক্ষণ (রিটেনশন)",
+        "amount_due": "সংরক্ষণ বাদে প্রদেয়",
+        "payments": "পরিশোধসমূহ",
+        "col_date": "তারিখ",
+        "col_reference": "রেফারেন্স",
+        "col_paid": "পরিশোধিত",
+        "col_withheld": "কাটা হয়েছে",
+        "refund": "ফেরত",
+        "no_payments": "কোনো পরিশোধ লিপিবদ্ধ নেই।",
+        "notes": "মন্তব্য",
+        "no_notes": "কোনো মন্তব্য লিপিবদ্ধ নেই।",
+        "invoice": "চালান",
+        "invoice_number": "চালান নম্বর",
+        "payment_date": "পরিশোধের তারিখ",
+        "reference": "রেফারেন্স",
+        "amount_paid": "পরিশোধিত পরিমাণ",
+        "exchange_rate": "বিনিময় হার",
+        "kind": "ধরন",
+        "kind_payment": "পরিশোধ",
+        "kind_refund": "ফেরত",
+        "withholding": "সংরক্ষণ কাটা হয়েছে",
+        "withheld_amount": "কাটা পরিমাণ",
+        "release_date": "ছাড়ের তারিখ",
+        "gross_settled": "নিষ্পন্ন স্থূল পরিমাণ",
+        "no_withholding": "এই পরিশোধ থেকে কিছু কাটা হয়নি।",
+        "counterparty_tax_id": "করদাতা শনাক্তকরণ নম্বর",
+        "counterparty_address": "ঠিকানা"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "খসড়া",
+          "pending": "অনুমোদনের অপেক্ষায়",
+          "approved": "অনুমোদিত",
+          "sent": "পাঠানো হয়েছে",
+          "paid": "পরিশোধিত",
+          "cancelled": "বাতিল",
+          "credit_note_issued": "ক্রেডিট নোট ইস্যু করা হয়েছে"
+        },
+        "direction": {
+          "payable": "প্রদেয় (সরবরাহকারীর চালান)",
+          "receivable": "প্রাপ্য (ক্লায়েন্টের চালান)"
+        },
+        "payment_status": {
+          "completed": "সম্পন্ন",
+          "refunded": "ফেরত দেওয়া হয়েছে"
+        }
+      }
+    },
+    "furniture": {
+      "footer_page": "পৃষ্ঠা {page} / {total}"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "মোট উন্নয়ন মূল্য (GDV)",
+      "total_development_cost": "মোট উন্নয়ন ব্যয়",
+      "residual_land_value": "অবশিষ্ট জমির মূল্য",
+      "developer_profit": "ডেভেলপারের মুনাফা",
+      "profit_on_cost": "ব্যয়ের উপর মুনাফা",
+      "profit_on_gdv": "GDV-এর উপর মুনাফা",
+      "construction_cost": "নির্মাণ ব্যয়",
+      "professional_fees": "পেশাদার ফি",
+      "contingency": "আকস্মিক ব্যয়",
+      "finance_cost": "অর্থায়ন ব্যয়",
+      "sales_costs": "বিক্রয় ব্যয়"
+    },
+    "status": {
+      "viable": "কার্যকর",
+      "unviable": "অকার্যকর",
+      "marginal": "প্রান্তিক",
+      "pending": "এখনও মূল্যায়ন হয়নি"
+    },
+    "figure": {
+      "gross_development_value": "স্কিমের সব ইউনিটের মোট বিক্রয় মূল্য, সবই একই মুদ্রায়।",
+      "total_development_cost": "জমি বাদে স্কিম বাস্তবায়নের সব ব্যয়: নির্মাণ, ফি, আকস্মিক ব্যয়, অর্থায়ন ও বিক্রয় ব্যয়।",
+      "residual_land_value": "মোট উন্নয়ন ব্যয় ও লক্ষ্য ডেভেলপার মুনাফা মোট উন্নয়ন মূল্য থেকে বাদ দেওয়ার পর জমির জন্য যা অবশিষ্ট থাকে।",
+      "developer_profit": "ডেভেলপার যে মুনাফা রাখতে চায়, যা মোট উন্নয়ন মূল্যের লক্ষ্য অনুপাত হিসেবে নির্ধারিত।",
+      "profit_on_cost": "ডেভেলপারের মুনাফাকে মোট উন্নয়ন ব্যয় দিয়ে ভাগ করে অনুপাত হিসেবে দেখানো হয়।",
+      "profit_on_gdv": "ডেভেলপারের মুনাফাকে মোট উন্নয়ন মূল্য দিয়ে ভাগ করে অনুপাত হিসেবে দেখানো হয়।"
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "শ্রমিক ক্যাম্প",
+        "rental": "ভাড়ার আবাসন",
+        "hotel": "হোটেল"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "অপেক্ষমাণ",
+        "approved": "অনুমোদিত",
+        "rejected": "প্রত্যাখ্যাত"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "পূরণ হয়েছে",
+        "fail": "পূরণ হয়নি",
+        "not_applicable": "প্রযোজ্য নয়"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "নকশা",
+        "contract": "চুক্তি",
+        "specification": "স্পেসিফিকেশন",
+        "photo": "ছবি",
+        "correspondence": "যোগাযোগ",
+        "reality_capture": "বাস্তব অবস্থার ধারণ",
+        "other": "অন্যান্য"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "অপেক্ষমাণ",
+        "approved": "অনুমোদিত",
+        "rejected": "প্রত্যাখ্যাত",
+        "cancelled": "বাতিল"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "খসড়া",
+        "submitted": "অনুমোদনের জন্য জমা",
+        "approved": "অনুমোদিত",
+        "posted": "লেজারে পোস্ট করা হয়েছে"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "খোলা",
+        "assigned": "নিয়োগ করা",
+        "in_progress": "চলছে",
+        "resolved": "সমাধান হয়েছে",
+        "verified": "যাচাই করা",
+        "closed": "বন্ধ"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "পর্যবেক্ষণ",
+        "minor": "ছোট",
+        "major": "বড়",
+        "critical": "গুরুতর"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "ব্যক্তি",
+        "crew": "দল",
+        "equipment": "সরঞ্জাম",
+        "subcontractor": "উপ-ঠিকাদার"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "এআই মডেলের নাম পুরোনো বা অনুপলব্ধ। সেটিংস > AI খুলুন এবং আপনার প্রদানকারীর জন্য একটি বর্তমানে বৈধ মডেলের নাম সেট করুন।",
+      "not_configured": "এআই কনফিগার করা নেই। অনুগ্রহ করে সেটিংসে একটি এআই প্রদানকারী সেট করুন।"
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "যাচাই করা",
+      "bound": "সংযুক্ত",
+      "empty": "বাকি"
+    },
+    "package_status_labels": {
+      "draft": "খসড়া",
+      "in_progress": "চলছে",
+      "ready": "প্রস্তুত",
+      "issued": "জারি করা হয়েছে"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "বাধা",
+      "critical": "গুরুতর",
+      "warning": "সতর্কতা",
+      "suggestion": "পরামর্শ"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "কৌশল",
+      "brief": "ব্রিফ",
+      "concept": "ধারণা",
+      "design": "নকশা",
+      "approval": "অনুমতি",
+      "detail": "বিস্তারিত নকশা",
+      "tender": "দরপত্র",
+      "award": "কার্যাদেশ",
+      "construction": "নির্মাণ",
+      "handover": "হস্তান্তর",
+      "operation": "পরিচালনা"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "ঠিক আছে",
+      "has_pieces": {
+        "fail": "কাজটিতে কাটার মতো কোনো অংশ নেই",
+        "suggestion": "অংশ হাতে যোগ করুন, পেস্ট করুন, অথবা বেন্ডিং শিডিউল, টেকঅফ, BOQ লাইন বা ফাইল থেকে আমদানি করুন।"
+      },
+      "has_stock": {
+        "fail": "কাজটিতে কাটার মতো কোনো স্টক নেই",
+        "suggestion": "অন্তত একটি স্টক দৈর্ঘ্য বা শিট সাইজ যোগ করুন, অথবা সাইট ইনভেন্টরির অবশিষ্টাংশ আবার ব্যবহার করুন।"
+      },
+      "sheet_dimensions": {
+        "fail": "{ref}-এর প্রস্থ নেই",
+        "suggestion": "প্রতিটি শিট অংশ ও শিট সাইজের দৈর্ঘ্য ও প্রস্থ দুটোই দিন।"
+      },
+      "piece_fits_stock": {
+        "fail": "অংশ {ref} ({size} mm) কোনো স্টক সাইজে ধরে না",
+        "suggestion": "আরও লম্বা বা বড় স্টক সাইজ যোগ করুন, ছাঁটাই কমান, অথবা জোড় দিয়ে অংশটি ভাগ করুন।"
+      },
+      "grain_allows_fit": {
+        "fail": "অংশ {ref} কেবল দানার আড়াআড়ি ঘোরালে ধরে",
+        "suggestion": "এই অংশ ঘোরানোর অনুমতি দিন অথবা এমন শিট সাইজ যোগ করুন যেখানে এটি দানার দিক বরাবর ধরে।"
+      },
+      "kerf_set": {
+        "fail": "করাতের কাটের প্রস্থ শূন্য",
+        "suggestion": "ব্লেড বা কাটের প্রস্থ দিন, নইলে একাধিক কাটের প্রতিটি রডের ফলন বাড়িয়ে দেখানো হবে।"
+      },
+      "min_offcut_set": {
+        "fail": "ন্যূনতম ব্যবহারযোগ্য অবশিষ্টাংশ নির্ধারিত নেই",
+        "suggestion": "রাখার মতো সবচেয়ে ছোট অবশিষ্টাংশ নির্ধারণ করুন, যাতে পুনর্ব্যবহারযোগ্য অবশিষ্টাংশ অপচয় হিসেবে না ধরা হয়।"
+      },
+      "stock_priced": {
+        "fail": "স্টক {ref}-এর একক দাম নেই",
+        "suggestion": "প্রতি টুকরার দাম দিন, যাতে পরিকল্পনা তার খরচ দেখায় ও সবচেয়ে সস্তা স্টক বাছে।"
+      },
+      "stock_sufficient": {
+        "fail": "মজুত স্টকে বসানো হয়নি এমন অংশ: {count}",
+        "suggestion": "মজুত পরিমাণ বাড়ান অথবা আরেকটি স্টক সাইজ যোগ করুন।"
+      },
+      "yield_threshold": {
+        "fail": "{actual} % ফলন {threshold} % সীমার নিচে",
+        "suggestion": "আরেকটি স্টক দৈর্ঘ্য বা সাইজ যোগ করুন, ঘোরানোর অনুমতি দিন, অথবা এই উপাদানের সীমা পর্যালোচনা করুন।"
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "পাঞ্চ আইটেম '{title}' ছবি ছাড়াই বন্ধ করা হয়েছে",
+    "punch_no_photo_fix": "সম্পন্ন কাজের একটি ছবি যোগ করুন",
+    "photo_weak": "'{title}'-এর {count}টি ছবিতে অবস্থান বা তোলার সময় নেই",
+    "photo_weak_fix": "লোকেশন চালু রেখে অ্যাপে আবার ছবিটি তুলুন",
+    "defect_no_photo": "ত্রুটি '{reference}' সংশোধনের ছবি ছাড়াই বন্ধ করা হয়েছে",
+    "defect_no_photo_fix": "সংশোধিত কাজের একটি ছবি সংযুক্ত করুন"
+  },
+  "closeout_dossier": {
+    "more_items": "আরও {count}টি আইটেম তালিকাভুক্ত নয়",
+    "category_missing": "প্রয়োজনীয় বিভাগ '{category}'-এর কোনো প্রমাণ নেই",
+    "category_missing_fix": "এই বিভাগের কোনো চেকলিস্ট আইটেমে একটি নথি যুক্ত করুন, অথবা একটি যোগ করুন",
+    "category_unverified": "'{category}'-এর প্রমাণ এখনও যাচাই করা হয়নি",
+    "category_unverified_fix": "একজন ব্যবস্থাপককে সংযুক্ত প্রমাণ পর্যালোচনা ও যাচাই করতে বলুন",
+    "punch_open": "পাঞ্চ আইটেম '{name}' এখনও খোলা",
+    "punch_open_fix": "আইটেমটি নিষ্পত্তি করে বন্ধ করুন, অথবা এই ডসিয়ারের পরিধি থেকে বাদ দিন",
+    "punch_no_photo": "নিষ্পন্ন পাঞ্চ আইটেম '{name}'-এর ছবি নেই",
+    "punch_no_photo_fix": "সম্পন্ন কাজের একটি ছবি যোগ করুন",
+    "system_pending": "সিস্টেম '{name}' কমিশন করা হয়নি",
+    "system_pending_fix": "কমিশনিং চেকলিস্ট সম্পূর্ণ করুন এবং সিস্টেমটিকে কমিশনড চিহ্নিত করুন",
+    "critical_issues": "{count}টি সংকটজনক কমিশনিং সমস্যা এখনও খোলা",
+    "critical_issues_fix": "হস্তান্তরের আগে সংকটজনক সমস্যাগুলো বন্ধ করুন",
+    "acceptance_missing": "কোনো গ্রহণ সনদ যুক্ত নেই",
+    "acceptance_missing_fix": "স্বাক্ষরিত গ্রহণ সনদটি গ্রহণ চেকলিস্ট আইটেমে যুক্ত করুন",
+    "acceptance_unsigned": "গ্রহণ সনদ পুরোপুরি স্বাক্ষরিত নয় (অবস্থা: {status})",
+    "acceptance_unsigned_fix": "স্বাক্ষর বিভাগে বাকি স্বাক্ষর সংগ্রহ করুন",
+    "blocked": "ডসিয়ারটি চেকলিস্টে উত্তীর্ণ হয়নি। পর্যবেক্ষণগুলো ঠিক করুন, অথবা অসম্পূর্ণ হিসেবে তবুও সংকলন করুন (ব্যবস্থাপকের অনুমোদনে)।",
+    "delivery_title": "হস্তান্তর ডসিয়ার: {project}",
+    "delivery_body": "হস্তান্তর ডসিয়ার '{title}' ({scope}) প্রস্তুত। নিচের লিঙ্ক থেকে এটি ডাউনলোড হয় এবং {expires} পর্যন্ত বৈধ।",
+    "pdf": {
+      "title": "হস্তান্তর ডসিয়ার",
+      "scope": "পরিধি",
+      "built": "সংকলনের সময়",
+      "status_passed": "চেকলিস্ট উত্তীর্ণ",
+      "status_warnings": "চেকলিস্ট সতর্কতাসহ উত্তীর্ণ",
+      "status_errors": "অসম্পূর্ণ: চেকলিস্টের পর্যবেক্ষণ খোলা",
+      "findings": "চেকলিস্টের খোলা পর্যবেক্ষণ",
+      "severity": "তীব্রতা",
+      "finding": "পর্যবেক্ষণ",
+      "severity_error": "ত্রুটি",
+      "severity_warning": "সতর্কতা",
+      "severity_info": "তথ্য",
+      "contents": "সূচিপত্র",
+      "file": "ফাইল",
+      "size": "আকার",
+      "punch": "নিষ্পন্ন পাঞ্চ তালিকা",
+      "item": "আইটেম",
+      "status": "অবস্থা",
+      "photos": "ছবি",
+      "evidence": "ছবির প্রমাণ"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "'{name}'-এর রেটিং {rating} স্কেল '{scale}'-এর কোনো স্তর নয়",
+    "rule_poor_without_action": "'{name}'-এর রেটিং {rating} কিন্তু কোনো পরিকল্পিত রক্ষণাবেক্ষণ পদক্ষেপ নেই",
+    "rule_poor_without_action_fix": "পরিকল্পনা তৈরি করুন, অথবা এই এলিমেন্টের জন্য একটি পদক্ষেপ যোগ করুন",
+    "rule_action_unpriced": "{year} সালে '{name}'-এর পদক্ষেপের একক খরচ নেই",
+    "rule_action_unpriced_fix": "একক খরচ লিখুন যাতে পরিকল্পনার মোটে তা ধরা হয়",
+    "rule_defect_incomplete": "'{name}'-এর রেটিং কাজের দাবি করে কিন্তু তীব্রতা বা পরিমাণ লেখা নেই"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, পৃষ্ঠা {page}",
+    "text_change": "\"{old}\" পরিবর্তিত হয়ে \"{new}\" হয়েছে",
+    "kind": {
+      "added": "যোগ করা হয়েছে",
+      "removed": "সরানো হয়েছে",
+      "modified": "পরিবর্তিত",
+      "text": "লেখা পরিবর্তিত"
+    },
+    "status": {
+      "open": "উন্মুক্ত",
+      "relevant": "প্রাসঙ্গিক",
+      "not_relevant": "অপ্রাসঙ্গিক"
+    },
+    "errors": {
+      "revision_not_found": "এই প্রকল্পে ড্রয়িং রিভিশন পাওয়া যায়নি।",
+      "revision_not_parsed": "তুলনা করার মতো ড্রয়িংয়ের কোনো প্রক্রিয়াজাত সংস্করণ এখনও নেই।",
+      "comparison_not_found": "তুলনা পাওয়া যায়নি।",
+      "change_not_found": "পরিবর্তন পাওয়া যায়নি।",
+      "same_revision": "তুলনার জন্য দুটি ভিন্ন রিভিশন বা পৃষ্ঠা বেছে নিন।",
+      "manual_points": "ম্যানুয়াল অ্যালাইনমেন্টে প্রতিটি রিভিশনে দুটি আলাদা বিন্দু লাগে।",
+      "alignment_singular": "অ্যালাইনমেন্ট প্রয়োগ করা যাবে না: এটি শিটকে সংকুচিত করে ফেলে।",
+      "region_empty": "পরিবর্তন {seq}-এর কোনো আকার নেই।",
+      "region_off_sheet": "পরিবর্তন {seq} শিটের বাইরে রয়েছে।",
+      "module_missing": "এই কাজের জন্য প্রয়োজনীয় মডিউল ইনস্টল করা নেই।"
+    },
+    "rfi": {
+      "subject": "{sheet}-এ ড্রয়িং পরিবর্তন {seq}",
+      "question": "{sheet}-এর রিভিশন {new} চিহ্নিত এলাকায় ({kind}) রিভিশন {old} থেকে আলাদা। অনুগ্রহ করে পরিবর্তনের উদ্দেশ্য এবং পরিমাণ প্রভাবিত হচ্ছে কি না নিশ্চিত করুন।"
+    },
+    "markup": {
+      "text": "রিভিশন পরিবর্তন {seq}: {kind}"
+    },
+    "report": {
+      "title": "ড্রয়িং রিভিশন তুলনা",
+      "project": "প্রকল্প",
+      "name": "তুলনা",
+      "old_revision": "পুরোনো রিভিশন",
+      "new_revision": "নতুন রিভিশন",
+      "alignment": "অ্যালাইনমেন্ট",
+      "alignment_none": "অ্যালাইন করা হয়নি (একই ফ্রেম)",
+      "alignment_auto": "স্বয়ংক্রিয়",
+      "alignment_manual": "ম্যানুয়াল, দুটি বিন্দু",
+      "confidence": "নির্ভরযোগ্যতা {value}",
+      "summary": "পরিবর্তনসমূহ",
+      "summary_counts": "মোট {total}: {added} যোগ, {removed} সরানো, {modified} পরিবর্তিত, {text} লেখা",
+      "generated_on": "তৈরির তারিখ",
+      "generated": "তৈরি হয়েছে {timestamp}",
+      "page_of": "পৃষ্ঠা {page}/{total}",
+      "no_changes": "দুটি রিভিশনের মধ্যে কোনো পরিবর্তন পাওয়া যায়নি।",
+      "col_no": "নং",
+      "col_preview": "প্রিভিউ",
+      "col_kind": "পরিবর্তন",
+      "col_location": "অবস্থান",
+      "col_detail": "বিবরণ",
+      "col_status": "অবস্থা",
+      "col_comment": "মন্তব্য",
+      "col_follow_up": "পরবর্তী পদক্ষেপ",
+      "page_at": "পৃষ্ঠা {page}, {coords}",
+      "layer": "লেয়ার {layer}",
+      "entity_counts": "এন্টিটি: {added} যোগ, {removed} সরানো, {modified} পরিবর্তিত",
+      "rfi": "RFI {number}",
+      "markup": "রিভিশন ক্লাউড",
+      "remeasure": "পুনঃপরিমাপ: {items}টি পরিমাণ, {positions}টি BOQ আইটেম"
+    },
+    "rules": {
+      "distinct_revisions_ok": "দুই পক্ষই ভিন্ন রিভিশন।",
+      "distinct_revisions_fail": "তুলনাটি একটি শিটকে তার নিজের সঙ্গেই তুলনা করছে।",
+      "distinct_revisions_hint": "ড্রয়িংয়ের পুরোনো ও নতুন রিভিশন বেছে নিন।",
+      "alignment_not_needed": "DWG রিভিশনগুলো ড্রয়িং ইউনিট ভাগ করে; অ্যালাইনমেন্টের প্রয়োজন নেই।",
+      "alignment_missing_matrix": "তুলনায় কোনো অ্যালাইনমেন্ট নেই।",
+      "alignment_singular": "অ্যালাইনমেন্ট শিটকে সংকুচিত করে ফেলে এবং প্রয়োগ করা যায় না।",
+      "alignment_scale": "অ্যালাইনমেন্ট শিটের স্কেল {scale} গুণ বদলাচ্ছে, যা একই ড্রয়িংয়ের রিভিশনের পার্থক্যের চেয়ে বেশি।",
+      "alignment_low_confidence": "স্বয়ংক্রিয় অ্যালাইনমেন্ট অনিশ্চিত (নির্ভরযোগ্যতা {confidence})।",
+      "alignment_manual_points": "ম্যানুয়াল অ্যালাইনমেন্টে দুই জোড়া বিন্দু লাগে।",
+      "alignment_ok": "শিটের অ্যালাইনমেন্ট বিশ্বাসযোগ্য।",
+      "alignment_hint": "দুই রিভিশনেই থাকা দুটি চিহ্ন, যেমন গ্রিডের ছেদবিন্দু ধরে হাতে শিটগুলো অ্যালাইন করুন।",
+      "region_empty": "পরিবর্তন {seq}-এর কোনো আকার নেই।",
+      "region_off_sheet": "পরিবর্তন {seq} শিটের বাইরে রয়েছে।",
+      "regions_ok": "প্রতিটি পরিবর্তিত এলাকা শিটের ওপর রয়েছে।",
+      "triaged_ok": "প্রতিটি পরিবর্তন পর্যালোচিত হয়েছে।",
+      "triaged_open": "{count}টি পরিবর্তন এখনও উন্মুক্ত।",
+      "triaged_hint": "প্রতিটি পরিবর্তনকে প্রাসঙ্গিক বা অপ্রাসঙ্গিক হিসেবে চিহ্নিত করুন।",
+      "followed_up_ok": "প্রতিটি প্রাসঙ্গিক পরিবর্তনের পরবর্তী পদক্ষেপ নেওয়া হয়েছে।",
+      "followed_up_missing": "পরিবর্তন {seq} প্রাসঙ্গিক হিসেবে চিহ্নিত, কিন্তু এতে মন্তব্য, RFI, ক্লাউড বা পুনঃপরিমাপের চিহ্ন নেই।",
+      "followed_up_hint": "পরিবর্তনে মন্তব্য করুন, RFI বা ক্লাউড তৈরি করুন, অথবা এর ভেতরের পরিমাণগুলো পুনঃপরিমাপের জন্য চিহ্নিত করুন।"
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "ক্যাশ-ফ্লো পূর্বাভাস",
+      "portfolio_title": "পোর্টফোলিও ক্যাশ-ফ্লো পূর্বাভাস",
+      "empty": "এই নির্বাচনের জন্য কোনো ক্যাশ-ফ্লো পূর্বাভাস নেই।",
+      "project": "প্রকল্প",
+      "as_of": "তারিখ অনুযায়ী",
+      "currency": "মুদ্রা",
+      "delay_days": "প্রাপ্তি বিলম্বিত (দিন)",
+      "overrun_pct": "ব্যয় বৃদ্ধি (%)",
+      "closing_position": "সমাপনী স্থিতি",
+      "peak_funding": "সর্বোচ্চ অর্থায়ন প্রয়োজন",
+      "peak_period": "সর্বোচ্চ অর্থায়ন প্রয়োজনের মাস",
+      "col": {
+        "period": "মাস",
+        "planned_in": "পরিকল্পিত আয়",
+        "actual_in": "প্রকৃত আয়",
+        "expected_in": "প্রত্যাশিত আয়",
+        "planned_out": "পরিকল্পিত ব্যয়",
+        "actual_out": "প্রকৃত ব্যয়",
+        "expected_out": "প্রত্যাশিত ব্যয়",
+        "net": "নিট",
+        "cumulative": "ক্রমযোজিত স্থিতি"
+      }
+    }
+  }
+}

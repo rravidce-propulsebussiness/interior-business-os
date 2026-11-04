@@ -1,0 +1,1438 @@
+{
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Seotud raha ei ole määratud ühelegi kulureale.",
+      "suggestion": "Seo lepingu- või tellimusread kulureadega, et raha kuvataks õiges kohas."
+    },
+    "certified_over_committed": {
+      "fail": "Kinnitatud töö ületab hankelepingu summat koos kinnitatud muudatustega.",
+      "suggestion": "Kinnita lisatööd katvad muudatus või kontrolli arvet."
+    },
+    "forecast_over_plan": {
+      "fail": "Prognoos on planeeritud summast kõrgem.",
+      "suggestion": "Kontrolli prognoosi allikat; kui ootad kokkuhoidu, sisesta põhjendusega käsitsi prognoos."
+    },
+    "partly_awarded": {
+      "fail": "Planeeritud summast on hankega kaetud vaid osa; prognoosist võib puududa veel hankimata töö.",
+      "suggestion": "Kui sellel real on veel hankimata tööd, sisesta käsitsi prognoos."
+    },
+    "pending_changes": {
+      "fail": "Muudatustellimused ootavad otsust.",
+      "suggestion": "Tee otsus ootel muudatustellimuste kohta; prognoos ei sisalda neid veel."
+    },
+    "snapshot_stale": {
+      "fail": "Üle kuu pole ühtegi prognoosi salvestatud.",
+      "suggestion": "Salvesta prognoosi hetktõmmis, et kuluajalugu püsiks loetav."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Konto kood {code} esineb kulustruktuuris mitu korda.",
+      "suggestion": "Jäta koodi kohta üks konto ja liiguta selle kuluread sellele."
+    },
+    "mixed_standard": {
+      "fail": "Kulustruktuur segab koodistikke: {standards}.",
+      "suggestion": "Ehita struktuur ühest koodistikust; vasta teised koodid sellele."
+    },
+    "account_parent_cycle": {
+      "fail": "Konto {code} on oma esivanem {count} konto kaudu.",
+      "suggestion": "Anna ühele neist kontodest ülemkonto väljaspool tsüklit."
+    },
+    "account_too_deep": {
+      "fail": "Konto {code} asub tasemel {level}, sügavamal kui koodistiku {max} taset.",
+      "suggestion": "Lisa konto ülemkonto alla koodistiku sügavuse piires."
+    },
+    "no_account": {
+      "fail": "{count} kulurida väärtusega {amount} ei ole ühelgi kontol (esimene: {code}).",
+      "suggestion": "Anna neile positsioonidele struktuuri koodistiku kood või määra kuluread kontole."
+    },
+    "invalid_account": {
+      "fail": "{count} kulurida väärtusega {amount} on suletud kontol või kontol, mis ei võta kandeid vastu (esimene: {code}).",
+      "suggestion": "Liiguta kuluread avatud kontole, mis võtab kandeid vastu."
+    },
+    "own_amount_on_parent": {
+      "fail": "Kontol {code} on alamkontod ja lisaks oma summa {amount}.",
+      "suggestion": "Liiguta oma summa alamkontole või jäta see teadliku reservina."
+    },
+    "rollup_mismatch": {
+      "fail": "Struktuuri summa {reported} erineb osade summast {expected} võrra {difference}.",
+      "suggestion": "Laadi struktuur uuesti; kui vahe jääb, kontrolli kontosid, millel puudub ülemkonto."
+    },
+    "allocation_incomplete": {
+      "fail": "Positsiooni {ordinal} osad annavad kokku {total}{unit}, mitte {expected}{unit}.",
+      "suggestion": "Korrigeeri osad nii, et kogu positsioon on jaotatud, ei rohkem ega vähem."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Positsioon {ordinal} on jaotatud osaliselt protsendi ja osaliselt koguse järgi.",
+      "suggestion": "Jaota positsioon ainult ühel viisil."
+    },
+    "vector_not_inherited": {
+      "fail": "Lepingurida {code} on kulureal, millele selle ehitusmahtude positsiooni pole määratud.",
+      "suggestion": "Pane rida tagasi positsiooni kulureale või salvesta erand koos põhjendusega."
+    }
+  },
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "Ettenägematute kulude rida „{markup}” arvutatakse aluselt, mis sisaldab juba kasumirida „{profit}”, nii et riskideks eraldatud rahale lisatakse kasumimarginaal",
+      "suggestion": "Rakendage seda rida otsestele kuludele, välja arvatud juhul, kui turu tavapärane meetod paigutab riski teadlikult üldkulude ja kasumi järele"
+    },
+    "order_is_declared": {
+      "fail": "Järjekorranumbrit {order} kasutab mitu lisakulurida: {markups}",
+      "suggestion": "Andke igale lisakulureale oma järjekorranumber, et lisade arvutamise järjekord ei jääks juhuse hooleks"
+    },
+    "percentage_within_band": {
+      "fail": "„{markup}” on liigina {category} {percentage}%, väljaspool usutavat vahemikku 0 kuni {ceiling}%",
+      "suggestion": "Kontrollige kümnendkohta. Rida hinnastatakse igal juhul täpselt sisestatud väärtuse järgi"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "„{markup}” rakendub alusele „{apply_to}”, kuid sellele ei eelne midagi, seega arvutatakse see ainult otsestelt kuludelt",
+      "suggestion": "Tõstke see nende ridade järele, millele lisa peab rakenduma, või rakendage otsestele kuludele"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" pakub {percentage}% hinnakirja suhtes, mis jääb väljapool mõistlikku ±{band}% vahemikku",
+      "duplicate": "\"{markup}\" on teine pakkumise lisatasu või allahindlus samale tööulatusele kui \"{other}\", seega need liituvad",
+      "suggestion": "Jätke igale arvele või jaotisele üks lisatasu või allahindlus ning kontrollige märki ja komakohta. Rida hinnatakse igal juhul täpselt nii, nagu sisestati"
+    }
+  },
+  "common": {
+    "ok": "Korras"
+  },
+  "export": {
+    "generated": "Loodud",
+    "content_digest": "Sisu räsi"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "Töötajale {worker} on selleks päevaks kirjendatud {hours} h, üle {max} h piiri",
+      "suggestion": "Jaotage tunnid enne esitamist õigele päevale või töötajale"
+    },
+    "line_complete": {
+      "fail": "Rida {line} on puudulik: {reason}",
+      "labour_xor_plant": "tuleb kirjendada kas tööjõud või masin, mitte mõlemad ega jätta mõlemad kirjendamata",
+      "hours_positive": "tundide arv peab olema suurem kui null",
+      "cost_code_required": "kulukood on nõutav",
+      "suggestion": "Täiendage rida enne tööajatabeli esitamist"
+    },
+    "cost_code_resolves": {
+      "fail": "Rea {line} kood '{code}' ei vasta ühelegi selle projekti mahuloendi reale ega WBS-ile",
+      "suggestion": "Valige kulukood või WBS, mis on projekti mahuloendis olemas"
+    },
+    "daywork_needs_variation": {
+      "fail": "Arvestusliku töö rida {line} ei ole seotud avatud muudatusega",
+      "suggestion": "Siduge arvestuslik töö muudatusega, mille alusel see telliti"
+    },
+    "plant_needs_equipment": {
+      "fail": "Masinarida {line} ei nimeta seadet",
+      "suggestion": "Lisage masin, et masinatundide maksumust saaks arvutada"
+    },
+    "approved_immutable": {
+      "fail": "Selle tööajatabeli olek on {status} ja seda ei saa muuta",
+      "suggestion": "Heakskiidetud tundide parandamiseks sisestage vastukandega tööajatabel"
+    },
+    "offline_clock_plausible": {
+      "fail": "Selle päeva salvestanud seadme kell oli serveri kellast {minutes} minutit ees",
+      "suggestion": "Seadistage seadme kell, et salvestatud ajad oleksid loetavad õiges järjekorras"
+    },
+    "offline_sync_delay": {
+      "fail": "Töö tehti {date}, kuid andmed jõudsid kontorisse alles {days} päeva hiljem",
+      "suggestion": "Kontrollige enne kinnitamist tunde selle päeva andmetega; maksearvestuse periood võib juba suletud olla"
+    },
+    "outdoor_heat_ban": {
+      "fail": "Real {line} on töö ajavahemikus {start}-{end} kuupäeval {date}, mis jääb keskpäevase välitööde keelu ({ban_from}-{ban_to}) sisse",
+      "suggestion": "Kui töö tehti väljas otsese päikese käes, viige see keeluaegadest välja; sisetööd ja erandiga sektorid ei kuulu keelu alla"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} registreeris sisenemise kell {time} {distance} m väljaspool objekti piirdeaeda ja supervisor ei ole seda kinnitanud",
+      "suggestion": "Palu juhendajal kinnitada või tagasi lükata registreering koos põhjendusega"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} töövahetused kattuvad, algavad kell {first} ja {second}",
+      "suggestion": "Parandage sisse- või väljaregistreerimise ajad nii, et vahetused ei kattuks"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} registreeris sisenemise kell {time} ja ei registreerinud kunagi väljumist",
+      "suggestion": "Märkige väljumise aeg või kandke vahetus tööajalehele käsitsi"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} mahumõõtmise ettepanekut ootavad veel ülevaatust ega ole siin hinnastatud",
+      "suggestion": "Vaadake ülevaatusjärjekord läbi, et kinnitatud kogused vastaksid joonisele"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Rea {ordinal} kogus ei tohi olla null ega puududa",
+      "suggestion": "Määrake kogus, mis on suurem kui 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Reale {ordinal} tuleb määrata ühikuhind",
+      "suggestion": "Määrake hind kuluandmebaasist"
+    },
+    "position_has_description": {
+      "fail": "Rea {ordinal} kirjeldus ei tohi olla tühi"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Järjenumber '{ordinal}' kordub {count} real"
+    },
+    "unit_rate_in_range": {
+      "fail": "Rida {ordinal}: hind {rate} on >{threshold} (5 × mediaan)",
+      "suggestion": "Kontrollige seda ühikuhinda; see on ebatavaliselt kõrge"
+    },
+    "negative_values": {
+      "fail": "Real {ordinal} on negatiivsed väärtused: {details}",
+      "suggestion": "Parandage negatiivsed väärtused; kasutage positiivseid arve"
+    },
+    "unrealistic_rate": {
+      "fail": "Rida {ordinal}: {details}",
+      "suggestion": "Kontrollige seda väärtust; see tundub ebarealistlikult kõrge",
+      "not_assessed_no_currency": "{count} rida jäid hindamata: mahuloend ei määra valuutat, seega ei saanud valuutas {reference} väljendatud rahalisi piirmäärasid sellesse teisendada",
+      "not_assessed_no_currency_suggestion": "Määrake projekti valuuta või salvestage valuuta ridadele",
+      "not_assessed_no_rate": "{count} rida valuutas {currency} jäid hindamata: kurssi valuutast {reference} valuutasse {currency} ei ole salvestatud, seega ei saanud rahalisi piirmäärasid sellele mahuloendile kohandada",
+      "not_assessed_no_rate_suggestion": "Lisage valuuta {reference} kurss valuuta {currency} jaoks valuutakursside registrisse või projekti vahetuskurssidesse"
+    },
+    "total_mismatch": {
+      "fail": "Rida {ordinal}: arvutatud {computed} != salvestatud {stored} (vahe={diff})",
+      "suggestion": "Arvutage summa uuesti: kogus × ühikuhind"
+    },
+    "resource_split_mismatch": {
+      "fail": "Rida {ordinal}: ressursside vahesumma {subtotal} erineb ühikuhinnast {rate} väärtuse {diff} võrra",
+      "suggestion": "Vaadake üle ressursside kogused ja hinnad; nende ühikupõhine summa peab vastama rea ühikuhinnale"
+    },
+    "empty_unit": {
+      "fail": "Rea {ordinal} ühik on tühi või puudub",
+      "suggestion": "Määrake mõõtühik (m, m2, m3, kg, tk, kogusumma jne)"
+    },
+    "section_without_items": {
+      "fail": "Jaotises {ordinal} ({title}) ei ole alamridu",
+      "suggestion": "Lisage jaotisesse ridu või eemaldage tühi jaotis"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Rida {ordinal}: ühikuhind {rate}/{unit} ületab võrdluspiiri {threshold}/{unit} ja võib olla ebarealistlik",
+      "suggestion": "Kontrollige seda hinda; ühiku {unit} tavahinnad peaksid jääma alla {threshold}. Kontrollige ühiku- ja kümnendkoha vigu.",
+      "not_assessed_no_currency": "{count} rida jäid hindamata: mahuloend ei määra valuutat, seega ei saanud valuutas {reference} väljendatud võrdluspiire sellesse teisendada",
+      "not_assessed_no_currency_suggestion": "Määrake projekti valuuta või salvestage valuuta ridadele",
+      "not_assessed_no_rate": "{count} rida valuutas {currency} jäid hindamata: kurssi valuutast {reference} valuutasse {currency} ei ole salvestatud, seega ei saanud võrdluspiire sellele mahuloendile kohandada",
+      "not_assessed_no_rate_suggestion": "Lisage valuuta {reference} kurss valuuta {currency} jaoks valuutakursside registrisse või projekti vahetuskurssidesse"
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} rida {total_count} reast ({percent}) kasutavad kogusummat; see ületab piirmäära {threshold}",
+      "suggestion": "Jagage kogusummaga read mõõdetavateks kogusteks (m, m2, m3, kg, tk), et hinnang oleks täpsem"
+    },
+    "cost_concentration": {
+      "fail": "Rida {ordinal} moodustab {share} mahuloendi kogukulust ({value} summast {grand_total}); see ületab piirmäära {threshold}",
+      "suggestion": "Jagage rida väiksemateks osadeks või kontrollige maksumust; üks rida ei tohiks eelarves domineerida"
+    },
+    "currency_consistency": {
+      "fail": "Leiti erinevaid valuutasid: {currencies}",
+      "suggestion": "Kasutage kogu mahuloendis üht valuutat"
+    },
+    "measurement_consistency": {
+      "fail": "Mahuloendis on segamini meetermõõdustiku ja Briti ühikud; kasutage järjepidevalt üht süsteemi",
+      "suggestion": "Teisendage kõik kogused kas meetermõõdustiku või Briti ühikutesse"
+    },
+    "revision_cost_impact_review": {
+      "fail": "Revisjoni kulumõju {amount} ei ole veel muudatusena kajastatud",
+      "suggestion": "Looge sellest revisjonide võrdlusest muudatustaotluse mustand kulumuutuse jälgimiseks"
+    },
+    "base_date_readable": {
+      "fail": "Baaskuupäev '{base_date}' ei ole kehtiv kuupäev, seega maksustatakse mahuloend tänase, mitte selle enda kuupäeva maksumääraga",
+      "suggestion": "Määrake hinnabaas päeva, kuu, kvartali või aastana ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "Maksukuupäev '{tax_date}' ei ole kehtiv kuupäev, seega maksustatakse mahuloend tänase, mitte selle enda kuupäeva maksumääraga",
+      "suggestion": "Määrake maksukuupäev päeva, kuu, kvartali või aastana ({shapes}) või tühjendage see, et kasutada mahuloendi baaskuupäeva"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import vormingust {format}: positsioon {ordinal}, väli {field} ei jõudnud kohale tervena (fail: {original}, mahutabel: {written})",
+      "fail_export": "Eksport vormingusse {format}: positsioon {ordinal}, väli {field} ei jõudnud väljundisse tervena (mahutabel: {original}, fail: {written})",
+      "suggestion": "Ava selle faili vahetusaruanne, paranda rida või allikas ja korda vahetust"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Real {ordinal} puudub DIN 276 KG",
+      "suggestion": "Määrake kolmekohaline DIN 276 kulurühm (nt 330 seintele)"
+    },
+    "valid_cost_group": {
+      "fail": "Vigane DIN 276 kood '{code}' real {ordinal}"
+    },
+    "hierarchy": {
+      "fail": "Rida {ordinal}: KG {child} ei kuulu ülemrühma KG {parent} alla (oodatud eesliide '{prefix}')",
+      "suggestion": "Viige rida õigesse ülemrühma või muutke KG kood ülemrühma hierarhiaga vastavaks ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Mahuloendist puudub KG rühm {group} - {group_name}",
+      "suggestion": "Lisage KG {group} ({group_name}) read täieliku katvuse tagamiseks"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Järjenumber '{ordinal}' ei vasta selle faili GAEB OZ-Maske vormingule",
+      "suggestion": "Kasutage faili OZ-Maske vormingut, nt 001.001.0010 või 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Rida {ordinal}: alumise taseme real puudub ülemjaotis; GAEB LV hierarhia nõuab Leistungsgruppe ülemrühma",
+      "suggestion": "Määrake see rida ülemjaotisse (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Rida {ordinal}: Einheitspreis {rate} on negatiivne (ühik='{unit}'); negatiivset hinda ei saa GAEB-is edastada",
+      "zero": "Rida {ordinal}: Einheitspreis on 0.00 (ühik='{unit}'); kinnitage, et tegemist on pakutud nullhinnaga, mitte puuduva hinnaga",
+      "suggestion": "Sisestage positiivne Einheitspreis või märkige rida Bedarfsposition-iks (valikuline töömaht) või kogusummaga reaks (ühik='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "Ülemise taseme jaotisel '{ordinal}' puudub GAEB Leistungsbereich kood (oodatud kolmekohaline tööliigi kood, nt '012')",
+      "suggestion": "Lisage jaotisele kolmekohaline tööliigi kood (Leistungsbereich), nt '012' mullatöödele ja '013' müüritöödele"
+    },
+    "quantity_decimals": {
+      "fail": "Rida {ordinal}: kogusel {quantity} on {decimals} komakohta; GAEB X83 tava lubab kuni 3",
+      "suggestion": "Ümardage kogus GAEB X83 järgi kuni 3 komakohani"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Real {ordinal} puudub NRM elemendikood",
+      "suggestion": "Määrake NRM 1/2 elemendikood (nt 2.6.1 välisseintele)"
+    },
+    "valid_element": {
+      "fail": "Vigane NRM kood '{code}' real {ordinal}"
+    },
+    "completeness": {
+      "fail": "Mahuloendist puudub NRM rühm {group} - {group_name}",
+      "suggestion": "Lisage NRM rühma {group} ({group_name}) read"
+    },
+    "base_date_declared": {
+      "fail": "Kuluplaan ei määra baaskuupäeva, mille seisuga selle hinnad kehtivad",
+      "suggestion": "Salvestage baaskuupäev mahuloendile. Ilma selleta ei saa öelda, kas hind on aegunud või kui palju inflatsiooni tuleb veel lisada"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Kuluplaan ei ütle, millise projekteerimisetapi jaoks see koostati",
+      "suggestion": "Salvestage etapp. Kuluplaanilt oodatav täpsus sõltub koostamise etapist; etapi varjamine tekitab vale ootuse"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Kuluplaanis puuduvad peatöövõtja ehitusplatsi üldkulud nii rühmana {group} kui ka lisareana",
+      "overheads_and_profit": "Kuluplaanis puuduvad peatöövõtja üldkulud ja kasum nii rühmana {group} kui ka lisareana",
+      "suggestion": "Lisage need NRM rühma elemendina või mõõdetud töödele rakenduva lisareana. Mõlemad on õiged; väljajätmine alahindab tööde maksumust"
+    },
+    "risk_allowance_present": {
+      "fail": "Kuluplaanis puudub riskivaru",
+      "suggestion": "Lisage riskivaru NRM rühmana 13 või ettenägematute kulude reana. Ilma riskivaruta esitab kuluplaan ühe hinnangu kindla summana"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Real {ordinal} puudub MasterFormat kood",
+      "suggestion": "Määrake MasterFormat kood (nt 03 30 00 kohapeal valatud betoonile)"
+    },
+    "valid_division": {
+      "fail": "Vigane MasterFormat kood '{code}' real {ordinal}",
+      "suggestion": "Kasutage kuuekohalist MasterFormat vormingut: XX XX XX (nt 03 30 00)"
+    },
+    "completeness": {
+      "fail": "Mahuloendist puudub jaotis {division} - {division_name}",
+      "suggestion": "Lisage jaotise {division} ({division_name}) read"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Real {ordinal} puudub SINAPI kood",
+      "suggestion": "Määrake SINAPI analüüsikood (nt 87878 C30 betoonile)"
+    },
+    "valid_code": {
+      "fail": "Vigane SINAPI kood '{code}' real {ordinal}"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Real {ordinal} puudub NBR 12721 jaotis",
+      "suggestion": "Märkige reale NBR 12721 jaotis (S1 = ettevalmistustööd, S2 = alusehitis, ..., S11 = täiendavad tööd)"
+    },
+    "valid_section": {
+      "fail": "Rea {ordinal} NBR 12721 jaotis '{code}' ei ole üks jaotistest S1..S11",
+      "suggestion": "Kasutage koode S1 kuni S11 (nt S3 pealisehitisele)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Real {ordinal} puudub ГЭСН/ФЕР kood",
+      "suggestion": "Määrake ГЭСН kood (nt 06-01-001-01 betoonile)"
+    },
+    "valid_code": {
+      "fail": "ГЭСН kood '{code}' ei vasta vormingule XX-XX-XXX-XX",
+      "suggestion": "Kasutage vormingut NN-NN-NNN-NN (nt 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "Rida {ordinal} viitab normile {code}, kuid ei sisalda ressursieritlust",
+      "suggestion": "Importige normi tööjõu-, masina- ja materjalikogused või põhjendage, miks see rida neist erineb"
+    },
+    "labour_hours_present": {
+      "fail": "Rea {ordinal} ({code}) ressursieritluses puuduvad töötunnid",
+      "suggestion": "Lisage normis ette nähtud inimtöötunnid; üldkulud ja hinnanguline kasum normeeritakse palgakulu alusel ning ilma nendeta ei saa neid arvutada"
+    },
+    "price_level_declared": {
+      "fail": "Eelarve ei ütle, millise hinnatasemega summad on esitatud",
+      "suggestion": "Määrake hinnatase (kuupäev) ja rakendatud teisendusindeks, et kontrollija jõuaks sama summani"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Rida {ordinal} ei ole määratud ühtegi tehnilisse tööpaketti (Lot technique)",
+      "suggestion": "Määrake tehniline tööpakett (nt Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Ainult {priced}/{total} rida ({percent}) on hinnastatud; alla 80% piiri",
+      "suggestion": "Hinnastage kõik read enne DPGF-i esitamist"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Järjenumber '{ordinal}' ei vasta ÖNORM vormingule XX.XX.XXXXA",
+      "suggestion": "Kasutage ÖNORM B 2063 vormingut (nt 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Rida {ordinal}: kirjeldus on liiga lühike ({length} märki, vähemalt 20)",
+      "suggestion": "Lisage rea kirjeldusse üksikasju ÖNORM B 2063 järgi"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Real {ordinal} puudub GB/T 50500 kood",
+      "suggestion": "Määrake üheksakohaline GB/T 50500 kood (nt 010101001)"
+    },
+    "valid_code": {
+      "fail": "Vigane GB/T 50500 kood '{code}'; oodatud on 9 või 12 numbrit"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Real {ordinal} puudub CPWD/DSR kood",
+      "suggestion": "Määrake CPWD DSR rea viide (nt 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "Rea {ordinal} ühik '{unit}' ei vasta IS 1200 standardile",
+      "suggestion": "Kasutage IS 1200 standardühikuid: m, m2, m3, kg, nos, rm jne"
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "Real {ordinal} puudub Ungari rea kood",
+      "invalid": "Rea {ordinal} kood '{code}' ei vasta kummalegi ridade klassifikatsioonile",
+      "suggestion": "Hoonetöödel kasutatakse MA-CC-SS-II (peatükid 01 kuni 17), taristutöödel projekti koodisõnastiku kuue- või seitsmekohalist reanumbrit"
+    },
+    "chapter_recognised": {
+      "fail": "Rea {ordinal} peatükk {chapter} ei ole üks klassifikatsiooni seitsmeteistkümnest peatükist"
+    },
+    "material_fee_split": {
+      "fail": "Rida {ordinal}: materjal {material} ja töö tasu {fee} ei anna kokku hinda {rate}",
+      "suggestion": "Parandage materjali ja töö tasu ühikuhinnad või koguhind, et jaotus klapiks"
+    },
+    "item_number_unique": {
+      "fail": "Reanumbrit {number} kasutatakse {count} real, kuigi see peab tähistama ühte rida",
+      "suggestion": "Andke igale reale oma projektipõhine reanumber enne mahuloendi kliendile saatmist"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Rea {ordinal} kood '{code}' ei näita, millisest hinnakirjast see pärineb",
+      "suggestion": "Ametlik voce kood algab hinnakirja piirkonna ja väljaande aastaga, näiteks TOS25_01.A03.001.001 (Toscana 2025). Kopeerige kood täpselt piirkondliku hinnakirja järgi, importige rida hinnakirjast või nummerdage uus hind NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Rida {ordinal} ei viita prezzario voce reale",
+      "suggestion": "Valige rida imporditud piirkondlikust hinnakirjast või märkige see hinnaanalüüsiga põhjendatud uueks hinnaks (nuovo prezzo, NP)"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Mahuloendis puudub eraldi rida ohutuskuludele, millele hanke allahindlus ei rakendu",
+      "suggestion": "Lisage ohutuskulud (oneri della sicurezza) oma jaotise või lisareana, hinnastades need hinnakirja ohutuspeatüki või ohutuskava järgi"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Rida {ordinal} ({code}) ei määra tööjõu osakaalu",
+      "suggestion": "Võtke incidenza della manodopera hinnakirjast või lisage tööjõuressurss, et tööjõukulu saaks hankes eraldi näidata"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Piirkondliku hinnakirja hinnad sisaldavad juba üldkulusid (13–17%) ja kasumit (10%). Nende uuesti rakendamine suurendab kogusummat ligikaudu {percent}%.",
+      "suggestion": "Eemaldage sellest mahuloendist üldkulu- ja kasumilisad või jätke need ainult oma analüüsiga hinnastatud ridadele (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Rida {ordinal} ei määra deviz general peatükki",
+      "suggestion": "Paigutage rida HG 907/2016 peatükki ja alapeatükki, näiteks 4.1 ehitus- ja paigaldustöödele või 5.1 ehitusplatsi korraldusele"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Rea {ordinal} deviz kood '{code}' ei ole deviz general peatükk ega alapeatükk",
+      "suggestion": "Kasutage HG 907/2016 deviz general peatükkide 1 kuni 6 koodi, näiteks 1.2, 2, 3.5, 4.1, 5.1 või 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Real {ordinal} puudub ühtse hinnakirja (ΝΕΤ) artikkel",
+      "suggestion": "Määrake ΝΕΤ artikkel, mille alusel rida hinnastati, näiteks ΟΙΚ 32.01.06 või uue artikli puhul ΝΑΟΙΚ"
+    },
+    "net_article_valid": {
+      "invalid": "Rea {ordinal} artikkel '{code}' ei vasta ΝΕΤ artikli vormingule",
+      "chapter": "Rea {ordinal} artikkel '{code}' algab peatükiga {chapter}, mida hoonetööde hinnakirjas ei ole",
+      "suggestion": "Kirjutage hinnakirja eesliide ja artiklinumber, näiteks ΟΙΚ 38.20.02, ΟΔΟ Α-2 või ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Rida {ordinal} ei määra koondeelarve peatükki",
+      "suggestion": "Paigutage rida selle peatükki зведений кошторисний розрахунок koondeelarves vahemikus 1 kuni 12; põhiobjekti hoonetööd kuuluvad peatükki 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Rea {ordinal} peatükk {chapter} ei ole üks koondeelarve kaheteistkümnest peatükist",
+      "suggestion": "Kasutage peatüki numbrit 1 kuni 12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Real {ordinal} puudub birim fiyat poz number",
+      "suggestion": "Määrake Bayındırlık poz number (nt 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "Poz '{code}' ei ole ei praeguse ühikuhinnaraamatu number (XX.XXX.XXXX) ega vanem number (XX.XXX/X)",
+      "suggestion": "Kasutage raamatu numbrit, nt 15.140.1002 või vanema lepingu puhul 04.013/1; nummerdage oma analüüsitud read kujul ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Poz '{code}' real {ordinal} algab numbriga {chapter}, mis ei ole selle kontrolli tuntud ühikuhinnakirja peatükk",
+      "suggestion": "Ministeeriumi raamat nummerdab ehitustööd 15, mehaanilised paigaldustööd 25 ja elektripaigaldustööd 35, ressursihinnad alla 10 ja masinaanalüüsid alla 19. Kontrolli numbrit loendi vastu, kust see võeti, või nummerda oma kirje ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "Ühik '{unit}' real {ordinal} ei ole ühik, milles ühikuhinnakirjad mõõdavad",
+      "suggestion": "Kasuta ühikut, mille loend kirje jaoks annab, näiteks m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Poz '{code}' mõõdetakse selles eelarves {count} erineva ühikuga ({units})",
+      "suggestion": "Poz-number on defineeritud ühes ühikus. Vii read loendi ühikusse või anna erinevale tööle oma number"
+    },
+    "poz_rate_consistent": {
+      "fail": "Poz '{code}' on selles eelarves hinnastatud {count} erineva ühikuhinnaga ({rates})",
+      "suggestion": "Ühel poz-numbril on eelarves üks ühikuhind. Kasuta ühte hinda või nummerda erinev kirje eraldi oma kirjeks"
+    },
+    "own_item_analysed": {
+      "fail": "Oma kirjel '{code}' real {ordinal} puudub hinnaanalüüs",
+      "suggestion": "Kirje, mida loendis pole, hinnastatakse oma analüüsiga. Lisa töö-, materjali- ja masinaressursid rea alla või kirjuta analüüs märkusesse"
+    },
+    "profit_overhead_once": {
+      "fail": "Töövõtja kasum ja üldkulud on rakendatud {count} real, kokku {total} protsenti, üle ühekordse {limit} protsendi",
+      "suggestion": "25 protsenti lisatakse üks kord. Jäta üks rida ja eemalda see täielikult, kui hinnad on avaldatud ühikuhinnad, mis seda juba sisaldavad"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Poz '{code}' real {ordinal} on mõõdetud ühikus '{unit}', kuid paigaldatud ühikuhinnaraamat määratleb selle ühikus '{book_unit}'",
+      "suggestion": "Poz-number on määratletud ühes ühikus. Mõõtke rida raamatu ühikus või nummerdage erinev töö oma kirjena (ÖZEL-1)",
+      "not_installed": "Riiklik ühikuhindade baas ({region}) ei ole paigaldatud, seega ei võrreldud {count} poz-numbri ühikuid ja hindu avaldatud raamatuga. Laadige see kuluandmebaasi impordilehelt",
+      "unavailable": "Riiklikku ühikuhindade baasi ({region}) ei õnnestunud lugeda, seega ei võrreldud {count} poz-numbri ühikuid ja hindu avaldatud raamatuga"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz '{code}' real {ordinal}: hind {rate} on {percent} protsenti madalam kui paigaldatud ühikuhinnaraamatu avaldatud hind {published}",
+      "above": "Poz '{code}' real {ordinal}: hind {rate} on {percent} protsenti kõrgem kui paigaldatud ühikuhinnaraamatu avaldatud hind {published}",
+      "fail": "See ületab selle kontrolli jaoks seatud {limit} protsenti",
+      "suggestion": "Võrdlus kasutab siin paigaldatud ühikuhindade baasi, mis ei salvesta oma raamatu aastat. Hoone-, mehaanika- ja elektripeatükkide avaldatud hinnad sisaldavad juba {markup} protsenti töövõtja kasumit ja üldkulusid. Avaldatud hinnast madalam hind on pärast hankeallahindlust tavaline; kontrollige, et erinevus on tahtlik",
+      "repriced": "Riiklik ühikuhindade baas ({region}) on viidud teisele turule või valuutale, seega ei võrreldud hindu avaldatud hindadega. Selle kontrolli käivitamiseks viige baas tagasi koduturule",
+      "currency_differs": "{count} rea hinnad on valuutas {currency}, ühikuhinnaraamat aga valuutas {book_currency}, seega ei võrreldud neid avaldatud hindadega",
+      "currency_unknown": "{count} rea valuutat ei ole salvestatud, seega ei võrreldud nende hindu avaldatud hindadega valuutas {book_currency}"
+    }
+  },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "Maksuread '{line}' arvestab KDV-d {rate} protsenti, mis ei ole Türgi õiguses sätestatud määr; KDV on 20, 10 või 1 protsenti",
+      "fail_superseded": "Maksuread '{line}' arvestab KDV-d {rate} protsenti, mis asendati 10. juulil 2023; KDV on nüüd 20, 10 või 1 protsenti",
+      "suggestion": "Määrake KDV rea väärtuseks 20 protsenti või 10 või 1 protsenti, kui tarne selleks kvalifitseerub, või 0 maksuvaba tarne puhul"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Real {ordinal} puudub 積算 kood",
+      "suggestion": "Määrake 積算基準 rea kood"
+    },
+    "metric_units": {
+      "fail": "Rea {ordinal} ühik '{unit}' ei ole standardne",
+      "suggestion": "Kasutage standardseid meetermõõdustiku ühikuid: m, m2, m3, kg, t, 式 jne"
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Real {ordinal} puudub FIEBDC-3 mõistekood",
+      "suggestion": "Määrake FIEBDC-3 kood (nt E04CM040 või 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Vigane FIEBDC-3 kood '{code}' real {ordinal}",
+      "suggestion": "Kasutage FIEBDC-3 tähtnumbrilist vormingut (nt E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "Rea {ordinal} APU on puudulik; puuduvad kulukomponendid: {missing}",
+      "suggestion": "Lisage ühikuhinna analüüsi puuduvad otsese kulu komponendid (costo directo: tööjõud, materjalid, masinad)"
+    },
+    "iva_rate_valid": {
+      "fail": "Rea {ordinal} IVA määr {rate} on vigane; Mehhiko IVA on 16, 8 (piiriala) või 0 protsenti",
+      "suggestion": "Määrake IVA määraks 16% (standard), 8% (piiriala) või 0%"
+    },
+    "subcontract_retencion": {
+      "fail": "Alltöövõturida {ordinal} ei märgi, kas IVA/ISR kinnipidamised rakenduvad",
+      "suggestion": "Salvestage alltöövõturea IVA ja ISR kinnipidamised või märkige, et neid ei rakendata"
+    },
+    "cfdi_rfc_present": {
+      "missing": "CFDI väljastaja andmed on hanke ekspordiks puudulikud; puudub: {missing}",
+      "invalid_rfc": "RFC '{rfc}' ei ole kehtiv CFDI RFC (ettevõttel 12 märki, eraisikul 13)",
+      "suggestion": "Määrake CFDI 4.0 arvelduseks projekti profiilis väljastaja RFC, regimen fiscal ja uso CFDI"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Andmeid muutvad sõlmed ilma kontrollväravata: {nodes}",
+      "suggestion": "Lisage enne avaldamist valideerimis- või inimese heakskiidu värav igale teele käivitus-/AI-sõlmest iga kirjutava sõlmeni."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "Kinnisvaraarendus nõuab aktiivset deponeerimiskontot järelevalveasutuse '{regulator}' jaoks",
+      "suggestion": "Avage deponeerimiskonto järelevalveasutuse tegevusloaga pangas jaotises Vastavus → Deponeerimiskontod"
+    },
+    "escrow_iban_valid": {
+      "fail": "Deponeerimiskonto {account}: IBAN '{iban}' ei läbi ISO 13616 struktuurikontrolli",
+      "suggestion": "Parandage IBAN: riigikood, pikkus ja kontrollsumma peavad vastama ISO 13616 nõuetele"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Deponeerimiskonto {account}: pearaamatu saldo {ledger} erineb tehingute summast {transactions} väärtuse {drift} võrra",
+      "suggestion": "Viige deponeerimiskonto vastavusse; uurige kirjendamata laekumisi või puuduvaid deebeteid"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Leping {contract}: omandiosade summa on {total}% (peab olema täpselt 100%)",
+      "suggestion": "Kohandage osapoolte protsendid nii, et summa oleks 100.00%"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Leping {contract}: osamaksete summa {instalments} erineb lepingu väärtusest {contract_value} (vahe {drift})",
+      "suggestion": "Tasakaalustage maksegraafik, et osamaksed annaksid kokku lepingu kogusumma"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Broneering {reservation}: aegumisaeg {expires} ei ole tulevikus",
+      "suggestion": "Pikendage broneeringut või muutke selle olek aegunuks/tühistatuks"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Vahendustasu leping {agreement}: {issue}",
+      "suggestion": "Kasutage protsendimäära 0.1% kuni 15%, fikseeritud summat või mittetühja astmelist skaalat"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Hinnamaatriks {matrix}: reegli '{factor}' kordaja {multiplier} on väljaspool vahemikku [-0.50, 2.00]",
+      "suggestion": "Piirake korrigeerimised vahemikku -50% kuni +200%, et vältida ebarealistlikke krundihindu"
+    },
+    "escrow_release_within_progress": {
+      "fail": "Eskrokonto {account}: vabastatud {released} ületab piiri {cap} (kinnitatud edenemine {progress}% kogutud rahast)",
+      "suggestion": "Peatage edasised vabastamised kuni järgmise edenemistõendini või registreerige tõend, mis edenemist suurendab"
+    }
+  },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Positsioon {ordinal} '{description}' ({amount}) on hinnakirjas hinnatud, kuid ükski tegevus seda ei kanna, seega pole selle maksumus ajakavas",
+      "suggestion": "Lisage positsioonile kogus või siduge see tegevusega ning koostage ajakava uuesti."
+    },
+    "cost_reconciliation": {
+      "fail": "Ajakavas on {planned} hinnakirja {bill}-st: {difference} hinnatud tööst ei ole üheski tegevuses",
+      "suggestion": "Kontrollige positsioone, mille kattuvuskontroll loetleb, ning koostage ajakava uuesti."
+    },
+    "duration_vs_norm": {
+      "fail": "Tegevus '{activity}' kestab {duration} tööpäeva, samas kui töö- ja masinanormid annavad {norm}",
+      "suggestion": "Kontrollige positsiooni kogust, brigaadi ja normtunde või käsitsi muudetud kestust."
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "Tegevusel '{activity}' puudub seos tüübiga {ends} (avatud ots / eraldiseisev tegevus)",
+      "both": "eelkäija või järgija",
+      "predecessor": "eelkäija",
+      "successor": "järgija",
+      "suggestion": "Siduge tegevus võrku eelkäija ja järgija seostega või määrake see algus-/lõppverstapostiks"
+    },
+    "negative_lag": {
+      "fail": "Seos {predecessor} -> {successor} kasutab negatiivset viivitust ({lag} päeva), mis on edumaa ja moonutab kriitilist teed",
+      "suggestion": "Asendage edumaa selgesõnalise tegevuse või SS/FF seosega, et järjekord jääks põhjendatavaks"
+    },
+    "excessive_lag": {
+      "fail": "Seose {predecessor} -> {successor} viivitus on {lag} päeva, üle {threshold} päeva piiri",
+      "suggestion": "Modelleerige ooteaeg eraldi tegevusena (hange, kivinemine, heakskiit), et sellel oleks olek ja seda saaks ressursside tasandamisel arvestada"
+    },
+    "hard_constraints": {
+      "fail": "Tegevusel '{activity}' on jäik kuupäevapiirang ({constraint}), mis tühistab võrgu loogika",
+      "suggestion": "Kasutage paindlikku piirangut (algus mitte varem kui) või määrake kuupäev seoste kaudu, et tegevus saaks eelkäijate hilinemisel nihkuda"
+    },
+    "negative_float": {
+      "fail": "Tegevuse '{activity}' koguajavaru on negatiivne ({float} päeva), seega ei ole ajakava praeguste seostega teostatav",
+      "suggestion": "Järjestage tööd ümber, leevendage jäika piirangut või lisage dokumenteeritud järelejõudmisplaan, et ajavaru oleks null või suurem"
+    },
+    "high_float": {
+      "fail": "Tegevuse '{activity}' koguajavaru on väga suur ({float} päeva), üle {threshold} päeva piiri",
+      "suggestion": "Kontrollige puuduva järgijaseose olemasolu; suur ajavaru tähendab tavaliselt nõrka seotust võrguga"
+    },
+    "missing_duration": {
+      "fail": "Tegevuse '{activity}' kestus ({duration} päeva) ei sobi tegevusele, mis ei ole verstapost",
+      "suggestion": "Määrake positiivne kestus tööpäevades või märkige rida verstapostiks, kui see on tõesti nullkestusega sündmus"
+    },
+    "duration_on_project_week": {
+      "fail": "Tegevus '{activity}' on salvestatud kestusega {stored} tööpäeva, lugedes esmaspäevast reedeni ajavahemikus {start} kuni {end}; projekti töönädala {calendar} järgi annavad need kuupäevad {expected}",
+      "suggestion": "Salvestage tegevuse kuupäevad uuesti, et kestus arvutataks projekti töönädala järgi, või sisestage kestus teadlikult"
+    },
+    "dates_match_source": {
+      "fail": "{activity} lõpeb {days} päeva kaugusel imporditud faili lõpust ({source}).",
+      "suggestion": "Võrdle ümberarvutatud kuupäevi lähtefailiga, seejärel nõustu nendega või taasta allika kuupäevad."
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "Leht {sheet} on jooniste loendis, kuid puudub üleslaaditud komplektist",
+      "suggestion": "Laadige puuduv leht üles või kinnitage, et see eemaldati väljastusest"
+    },
+    "extra": {
+      "fail": "Leht {sheet} on üleslaaditud komplektis, kuid puudub jooniste loendist",
+      "suggestion": "Lisage see loendisse või väljastusregistrisse või eemaldage üleliigne leht"
+    },
+    "revision_mismatch": {
+      "fail": "Lehe {sheet} revisjon on {actual_rev}, kuid loend eeldab revisjoni {expected_rev}",
+      "suggestion": "Väljastage oodatud revisjon või uuendage loend praegusele revisjonile"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Sellel ostutellimusel pole ridu, seega ei arvestata selle siduvat summat",
+      "suggestion": "Lisage tellitud tooted enne ostutellimuse kinnitamist"
+    },
+    "po_line_amount": {
+      "fail": "Rea {line} summa on {actual}, kuid kogus korda ühikuhind on {expected}",
+      "suggestion": "Parandage kogus, ühikuhind või rea summa, et kõik kolm oleksid kooskõlas"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Vahesumma on {actual}, kuid read annavad kokku {expected}",
+      "suggestion": "Arvutage vahesumma praegustest ridadest uuesti"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Kogusumma on {actual}, kuid vahesumma koos maksuga on {expected}",
+      "suggestion": "Arvutage kogusumma uuesti, et see vastaks vahesummale koos maksuga"
+    },
+    "po_no_negative_line": {
+      "fail": "Rea {line} kogus ei ole positiivne või ühikuhind on negatiivne",
+      "suggestion": "Vastukande jaoks koostage kreeditarve, mitte negatiivne rida"
+    },
+    "po_currency_set": {
+      "fail": "Sellel ostutellimusel puudub valuuta, seega ei saa selle summat koondada ega maksta",
+      "suggestion": "Määrake valuuta, tavaliselt projekti kasutatav valuuta"
+    },
+    "po_vendor_assigned": {
+      "fail": "See ostutellimus ei nimeta tarnijat",
+      "suggestion": "Valige tarnija enne kohustuse kinnitamist"
+    },
+    "po_retention_within_bounds": {
+      "fail": "Kinnipidamise määr {percent}% jääb väljapoole usutavat vahemikku 0 kuni {max}%",
+      "suggestion": "Sisestage kinnipidamine protsendina, näiteks 5 tähendab viit protsenti"
+    },
+    "po_delivery_after_issue": {
+      "fail": "Tarne on määratud kuupäevale {delivery}, enne väljastuskuupäeva {issue}",
+      "suggestion": "Viige tarnekuupäev väljastuskuupäevale või hilisemaks"
+    },
+    "po_line_cost_coded": {
+      "fail": "Real {line} puudub WBS, kulukategooria või kulurida, seega ei kajastu see kulueritluses",
+      "suggestion": "Määrake kulukood, et kohustus kajastuks eelarve suhtes"
+    },
+    "invoice_within_order": {
+      "fail": "Arve {invoice} ületab tellimuse {po} avatud jääki {remaining} summa {excess} võrra",
+      "suggestion": "Võrrelge arvet tellimusega; kui lisa on kokku lepitud, salvestage see enne kinnitamist tellimuse muudatusena"
+    },
+    "invoice_quantity_received": {
+      "fail": "Realt {line} esitataks arve kokku kogusele {invoiced}, kuid vastu on võetud ainult {received}",
+      "suggestion": "Oodake saatelehte või kinnitage kauba vastuvõtt enne selle koguse kinnitamist"
+    },
+    "invoice_value_received": {
+      "fail": "Tellimuse {po} arved annaksid kokku {invoiced}, kuid vastuvõetud kaupade väärtus tellimuse hindades on ainult {received}",
+      "suggestion": "Oodake saatelehte või kinnitage kauba vastuvõtt enne selle summa kinnitamist"
+    },
+    "requisition_quantity_positive": {
+      "fail": "Rida {line} küsib {quantity}, kuid materjalitaotluse real peab kogus olema suurem kui null",
+      "suggestion": "Sisestage vajalik kogus või eemaldage rida"
+    },
+    "requisition_source_unit": {
+      "fail": "Rida {line} on ühikus {unit}, kuid üks selle BOQ allikatest on ühikus {source_unit}",
+      "suggestion": "Kasutage BOQ ressursi ühikut või jagage rida nii, et iga ühik oleks eraldi real"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "Vajaduse kuupäev {date} on juba möödas (täna on {today})",
+      "suggestion": "Määrake kuupäev, mil materjali objektil tegelikult vaja on"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Tarnija {vendor} ei ole tarnijate registris",
+      "suggestion": "Valige tarnija tarnijate registrist"
+    },
+    "requisition_vendor_active": {
+      "fail": "Tarnija {vendor} ei ole tarnijate registris aktiivne, seega ei saa temalt midagi tellida",
+      "suggestion": "Valige aktiivne tarnija või aktiveerige see esmalt tarnijate registris uuesti"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "Materjalitaotlus {req} ei nimeta tarnijat, ostutellimus vajab aga üht",
+      "suggestion": "Valige enne teisendamist tarnija tarnijate registrist"
+    },
+    "requisition_single_currency": {
+      "fail": "Materjalitaotluse {req} ridade hinnad on valuutas {currencies}, kuid ühel ostutellimusel on üks valuuta",
+      "suggestion": "Hinnastage kõik read ühes valuutas või jagage read eraldi taotlusteks"
+    },
+    "requisition_line_cost_line": {
+      "fail": "Rida {line} ei ole seotud kulureaga, seega ei kuvata selle tellimust eelarve vastu kohustusena",
+      "suggestion": "Looge rida BOQ-st või siduge see enne tellimist kulureaga"
+    },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "Rida {line} soovitab tarnijat {vendor}, kes ei ole tarnijate registris",
+      "suggestion": "Valige soovitatud tarnija tarnijate registrist või eemaldage soovitus"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "Rida {line} soovitab tarnijat {vendor}, kes ei ole tarnijate registris aktiivne",
+      "suggestion": "Soovitage aktiivset tarnijat või jätke valik hankijale"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Rea {line} BOQ allikad soovitavad {count} erinevat tarnijat",
+      "suggestion": "Valige reale üks tarnija või jagage rida nii, et iga tarnija saab oma rea"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "Rida {line} soovitab tarnijat {vendor}, kuid tellimistaotlus tuleb tellida teiselt tarnijalt",
+      "suggestion": "Kontrollige, kas valitud tarnija suudab selle rea tarnida, või tellige see eraldi"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "Rida {line} on vaja kuupäevaks {date}, mis on juba möödas (täna on {today})",
+      "suggestion": "Märkige kuupäev, millal materjali objektil tegelikult vaja on"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "Rida {line} oli planeeritud tegevusele, mis algas {anchor}, kuid tegevus algab nüüd {start}",
+      "suggestion": "Võrrelge rea vajaduse kuupäeva praeguse ajakavaga ja muutke seda vajaduse korral"
+    },
+    "requisition_approver_not_requester": {
+      "fail": "Materjalitaotluse {req} koostaja on ühtlasi selle määratud kinnitaja number {step}",
+      "suggestion": "Määrake sellele sammule teine kinnitaja, et otsustaks keegi peale taotleja"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "Real {line} on tellimustes {ordered} {unit}, rohkem kui küsitud {requested} {unit}",
+      "suggestion": "Kontrollige, kas lisakogus on tahtlik, või vähendage tellimuserida"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "Tellimus {order} sisaldab rida {line} ühikus {unit}, mida ei saa teisendada rea ühikuks {line_unit}",
+      "suggestion": "Parandage tellimuserea ühik, et selle kogus loetaks tellituks"
+    },
+    "requisition_sources_reconcile": {
+      "fail": "Rida {line} küsib {quantity} {unit}, kuid selle BOQ allikad annavad kokku {sources} {unit}",
+      "suggestion": "Seadke kogus selle allikate summaks või eemaldage allikad, mida rida ei kata"
+    },
+    "requisition_over_allocated": {
+      "fail": "Rida {line} nõuab {excess} {unit} rohkem, kui BOQ vajab ({demand} {unit} kokku, neist {covered} {unit} on juba teiste materjalitaotluste all)",
+      "suggestion": "Vähendage kogust või märkige reale põhjus, kui lisakogus on tahtlik"
+    },
+    "receipt_certificate_present": {
+      "fail": "Rida {line} telliti koos {required}, kuid tarnes on {delivered}",
+      "suggestion": "Lisage tellimuses nõutud sertifikaat või lükake rida tagasi, kuni tarnija selle saadab"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Rea {line} sertifikaat {certificate} kehtib partii {certificate_batch} kohta, kuid tarniti partii {batch}",
+      "suggestion": "Kontrollige materjalil partii- või sulatinumbrit ja nõudke tarnijalt saabunud partii sertifikaati"
+    },
+    "receipt_route_approved": {
+      "fail": "Kaubasaadetise vastuvõtt {receipt} tellimusele {po} on kinnitusringis ja pole veel kinnitatud",
+      "suggestion": "Oodake, kuni vastuvõtu kinnitusring on lõppenud, enne makse vabastamist"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Kaubasaadetise vastuvõtu {receipt} sisseveakontroll tellimusel {po} pole veel läbitud",
+      "suggestion": "Viige kontroll lõpule või märkige, miks võib materjali eest enne kontrolli maksta"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Sellel lepingul pole tööpakette, seega puudub alus maksetaotluse esitamiseks",
+      "suggestion": "Jagage lepinguline töömaht tööpakettideks enne lepingu aktiveerimist"
+    },
+    "package_scope_described": {
+      "fail": "Tööpaketil {package} on nimi, kuid puudub selle tööde kirjeldus",
+      "suggestion": "Kirjutage üles, mida pakett sisaldab, et hilisemal muudatusvaidlusel oleks lähtekoht"
+    },
+    "agreement_value_positive": {
+      "fail": "Lepingu väärtus on {value}, seega puudub kinnipidamisel ja lepinguväärtuste jaotusel arvutusalus",
+      "suggestion": "Sisestage kokkulepitud lepingu väärtus enne lepingu aktiveerimist"
+    },
+    "packages_within_value": {
+      "fail": "Tööpakettide väärtus on {planned}, kuid lepingu väärtus on {total}",
+      "suggestion": "Hinnastage paketid ümber või suurendage lepingu väärtust, et leping kataks oma töömahu"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Leping lõpeb {end}, enne kui algab {start}",
+      "suggestion": "Parandage algus- või lõppkuupäev, et lepinguperiood kulgeks ajas edasi"
+    },
+    "agreement_currency_set": {
+      "fail": "Sellel lepingul puudub valuuta, seega ei saa selle makseid koondada ega tasuda",
+      "suggestion": "Määrake valuuta, tavaliselt projekti kasutatav valuuta"
+    },
+    "retention_within_bounds": {
+      "fail": "Kinnipidamise määr {percent}% jääb väljapoole usutavat vahemikku 0 kuni {max}%",
+      "suggestion": "Sisestage kinnipidamine iga makse protsendina, mitte summana"
+    },
+    "insurance_valid_at_start": {
+      "fail": "Alltöövõtja kindlustus lõppes {expiry}, enne tööde algust {reference}",
+      "suggestion": "Hankige kehtiv tõend enne alltöövõtja objektile lubamist"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Alltöövõtt {agreement} ja leping {contract} näivad olevat sama alltöövõtt, seega võidakse seda finantsarvestuses kaks korda lugeda",
+      "suggestion": "Siduge need, kui tegemist on sama alltöövõtuga, või märkige need erinevaks"
+    },
+    "contact_linked": {
+      "fail": "Kontaktisik {contact} ei ole seotud kontaktide kataloogiga, seega võib sama isik olla kirjas kaks korda",
+      "suggestion": "Lisage kontaktisikule e-posti aadress, et see saaks kataloogiga sobitada"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "See kooskõlastuseks esitatav dokument ei nimeta kontrollijat, seega ei lähe see kellegi menetlusse",
+      "suggestion": "Määrake vastama pidav kontrollija enne esitamist"
+    },
+    "required_date_present": {
+      "fail": "Sellel kooskõlastusdokumendil puudub vajalik kuupäev, seega ei saa seda kunagi hilinenuks lugeda",
+      "suggestion": "Määrake kontrolli vajalikkuse kuupäev nende tööde järgi, mille see dokument vabastab"
+    },
+    "required_date_after_submitted": {
+      "fail": "Kontroll on vajalik {required}, enne dokumendi esitamist {submitted}",
+      "suggestion": "Viige vajalik kuupäev esitamise järgsele tööpäevale"
+    },
+    "review_window_sufficient": {
+      "fail": "Kontrollijal on {days} päeva, vähem kui kontrolliks tavaliselt vajalikud {minimum} päeva",
+      "suggestion": "Andke tavapärane kontrolliperiood või leppige lühem aeg kõigepealt kontrollijaga kokku"
+    },
+    "spec_section_present": {
+      "fail": "See kooskõlastusdokument ei nimeta tehnilise kirjelduse jaotist, seega ei saa register seda liigitada",
+      "suggestion": "Sisestage tehnilise kirjelduse jaotis, millele dokument vastab"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "Sama inimene ({person}) on nii kontrollija kui ka kinnitaja, seega puudub teine sõltumatu kontroll",
+      "suggestion": "Määrake kinnitajaks kontrollijast erinev inimene"
+    },
+    "linked_scope_present": {
+      "fail": "See kooskõlastusdokument ei ole seotud ühegi töömahu reaga, seega ei koondu see paketti",
+      "suggestion": "Siduge mahuloendi read, mida see dokument hõlmab"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Sellel päringul puuduvad töömaht ja kirjeldus, seega pole tarnijal midagi hinnastada",
+      "suggestion": "Kirjeldage töömahtu enne avaldamist, et saabuvad pakkumised oleksid võrreldavad"
+    },
+    "deadline_present": {
+      "fail": "See päring ei määra esitamise tähtaega, seega pakkumiste vastuvõtt ei sulgu",
+      "suggestion": "Määrake kuupäev ja kellaaeg, millal pakkumised peavad kohal olema"
+    },
+    "deadline_parseable": {
+      "fail": "Esitamise tähtaeg {value} ei ole süsteemile loetav kuupäev ning kõik pakkumised lükatakse tagasi",
+      "suggestion": "Sisestage tähtaeg kuupäevana, näiteks 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "Esitamise tähtaeg {deadline} on tänaseks {today} juba möödunud, seega jõuab päring kohale suletuna",
+      "suggestion": "Viige tähtaeg enne avaldamist tulevikku"
+    },
+    "has_recipients": {
+      "fail": "See päring pole suunatud ühelegi tarnijale, seega ei teavita avaldamine kedagi",
+      "suggestion": "Lisage tarnijad, kellele päring saadetakse"
+    },
+    "currency_set": {
+      "fail": "See päring ei määra valuutat, seega ei saa pakkumisi omavahel järjestada",
+      "suggestion": "Määrake valuuta, milles pakkumised tuleb hinnastada"
+    },
+    "bid_currency_matches": {
+      "fail": "Pakkumine {bid} on valuutas {bid_currency}, kuid päring on valuutas {rfq_currency}",
+      "suggestion": "Paluge pakkujal esitada uus pakkumine päringu valuutas või salvestage kokkulepitud teisendus"
+    },
+    "bid_amounts_parseable": {
+      "fail": "Pakkumise {bid} summa {value} ei ole järjestamiseks sobiv arv",
+      "suggestion": "Parandage pakkumuse summa enne lepingu sõlmimise otsust"
+    },
+    "bids_still_valid": {
+      "fail": "Pakkumine {bid} aegus {expired} ja täna on {today}, seega ei ole hind enam siduv",
+      "suggestion": "Paluge pakkujal hind enne lepingu sõlmimise otsust kinnitada"
+    },
+    "award_has_competition": {
+      "fail": "See otsus põhineb {count} pakkumisel, vähem kui konkurentsipõhiseks võrdluseks vajalikud {minimum}",
+      "suggestion": "Salvestage, miks ühelt pakkujalt tellimine on põhjendatud, või kutsuge rohkem pakkujaid"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Ressurssi ei leitud",
+    "project_not_found": "Projekti ei leitud",
+    "vendor_not_found": "Tarnijat ei leitud",
+    "template_not_found": "Malli ei leitud",
+    "position_not_found": "Rida ei leitud",
+    "boq_not_found": "Mahuloendit ei leitud",
+    "session_not_found": "Seanssi ei leitud",
+    "document_not_found": "Dokumenti ei leitud",
+    "documents_batch_delete_referenced": "Muud kirjed viitavad endiselt selle kogumi dokumentidele. Vaadake üle, millised seosed kustutamine katkestab, ja kinnitage parameetriga acknowledge_references.",
+    "invitation_not_found": "Kutset ei leitud",
+    "agreement_not_found": "Lepingut ei leitud",
+    "rejection_not_found": "Tagasilükkamist ei leitud",
+    "claim_not_found": "Vahemakse taotlust ei leitud",
+    "gaeb_x89_final_account_unsupported": "Lõpparvestust või osalist lõpparvestust ei saa veel GAEB X89 vormingus eksportida. See peab arveldama kumulatiivsed tööd varasemaid makseid maha arvates, kuid taotlusest luuakse ainult ühe perioodi vahearve. Eksportige taotlus vahearvena.",
+    "xpwe_native_file_refused": "See on eelarvestusprogrammi oma projektifail, mida saab avada ainult selle programmiga. Eksportige eelarve oma programmist XPWE vormingus ja laadige üles .xpwe fail.",
+    "xpwe_unreadable": "Seda faili ei saa lugeda XPWE-na. See võib olla rikutud või muud tüüpi. Eksportige eelarve uuesti XPWE-na ja laadige üles .xpwe-fail.",
+    "plot_not_found": "Krunti ei leitud",
+    "survey_not_found": "Droonimõõdistust ei leitud",
+    "diary_video_not_found": "Päeviku videot ei leitud",
+    "diary_photo_not_found": "Päeviku fotot ei leitud",
+    "bidder_not_found": "Pakkujat ei leitud",
+    "webhook_not_found": "Webhooki ei leitud",
+    "submission_not_found": "Esitatud dokumenti ei leitud",
+    "measurement_not_found": "Objekti mõõdistust ei leitud",
+    "salescontract_not_found": "Müügilepingut ei leitud",
+    "prompt_not_found": "Viibamalli ei leitud",
+    "prequalification_not_found": "Eelkvalifitseerimist ei leitud",
+    "purchase_requisition_not_found": "Ostutaotlust ei leitud",
+    "purchase_order_not_found": "Ostutellimust ei leitud",
+    "group_not_found": "Rühma ei leitud",
+    "final_account_not_found": "Lõpparvestust ei leitud",
+    "estimate_job_not_found": "Eelarvestusülesannet ei leitud",
+    "escrow_not_found": "Deponeerimiskonto tehingut ei leitud",
+    "commission_accrual_not_found": "Arvestatud vahendustasu ei leitud",
+    "baseline_not_found": "Alusplaani ei leitud",
+    "fx_rate_set_locked": "Kuupäeva {date} EKP kursid on lukustatud, seega ei kirjutanud värskendus neid üle. Avage esmalt selle kursikomplekti lukustus, kui see peab võtma uue avaldatud väärtuse.",
+    "boq_locked": "Mahuloend on lukustatud ja seda ei saa muuta. Muudatusteks looge revisjon.",
+    "boq_link_owner_locked": "Koodi '{code}' määrab lukustatud mahuloendi '{bill}' rida ja sellega sidumine muudaks seda mahuloendit. Avage kõigepealt selle mahuloendi lukustus või sisestage rida uue koodiga."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "Selle muudatuse mahuloendi rida {line} ei viita ühelegi lähteallikale: ei lepinguväärtuste jaotuse reale ega eelarvereale",
+      "suggestion": "Määrake lepingurida, mida muudatus mõjutab, või eelarverida, kust töömaht pärineb, et summat saaks põhjendada"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "Selle taotluse koondhinnang on {estimate}, kuid hinnastatud mahuloendi summa on {priced}",
+      "suggestion": "Kandke hinnastatud summa taotlusele või parandage mahuloend, et kasutusel oleks üks summa"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "Rida {line} on märgitud eemaldatava töömahuna, kuid selle kogus {quantity} on positiivne; väljajäetav töö lahutatakse lepingust negatiivse kogusena",
+      "added_negative": "Rida {line} on märgitud lisatava töömahuna, kuid selle kogus {quantity} on negatiivne; lepingust lahutatav töömaht on eemaldatav, mitte lisatav",
+      "removed_needs_contract_line": "Rida {line} on märgitud eemaldatava töömahuna, kuid ei viita lepinguväärtuste jaotuse reale, seega puudub eemaldatav lepinguline töö",
+      "modified_needs_contract_line": "Rida {line} on märgitud muudetava töömahuna, kuid ei viita lepinguväärtuste jaotuse reale, seega puudub muudetav lepinguline töö",
+      "suggestion": "Parandage muutuse liik või kogus rea lähteviites või määrake lepingurida, mida muudatus mõjutab"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Sellel kasutuslool ei ole veel samme, seega pole lugejal midagi järgida.",
+      "suggestion": "Lisage vähemalt üks samm, mis nimetab avatava vaate ja seal tehtava toimingu."
+    },
+    "step_titled": {
+      "fail": "{count} sammul puudub pealkiri või avatav vaade.",
+      "suggestion": "Andke igale sammule lühike pealkiri ja valige vaade, mille see avab."
+    },
+    "step_purpose": {
+      "fail": "{count} sammu {total} sammust ei ütle, miks need vajalikud on, seega mõjub kasutuslugu selgituse asemel klõpsude loendina.",
+      "suggestion": "Lisage iga sammu juurde üks rida selle eesmärgi kohta; seda vajab uus kasutaja."
+    },
+    "distinct_screens": {
+      "fail": "{count} sammu avavad sama vaate nagu eelmine samm, seega ei näe lugeja muutust ega suuda samme eristada.",
+      "suggestion": "Ühendage need üheks sammuks või suunake teine vaatesse, kuhu töö tegelikult liigub."
+    },
+    "duration_plausible": {
+      "fail": "See kasutuslugu näeb {steps} sammu jaoks ette {minutes} minutit. Lugeja, kes ei jõua sammu pidada, kaotab usalduse ülejäänud hinnangu vastu.",
+      "suggestion": "Suurendage hinnangut vähemalt {minimum} minutini või eemaldage osa samme."
+    },
+    "described": {
+      "fail": "Sellel kasutuslool puudub kokkuvõte, seega näitab loend ainult pealkirja.",
+      "suggestion": "Lisage üks lause selle kohta, mida lugeja on lõpuks valmis teinud."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "Eelarve ei nimeta lepingu vormi, mille alusel see hinnastati",
+      "suggestion": "Salvestage lepingu vorm. Ehitusplatsi üldkulud, risk ja maksetingimused hinnastatakse eri vormide puhul erinevalt, seega ütleb summa ilma selleta vähe"
+    },
+    "payment_regime_declared": {
+      "fail": "Maksmise mehhanism on puudulik: {missing} pole salvestatud",
+      "suggestion": "Salvestage mõlemad kuupäevad. Ehitusleping, mis kumbagi ei määra, ei ole neist vabastatud: Scheme for Construction Contracts määrab mõlemad ning poolte maksetingimused tulevad õigusaktist, mitte allkirjastatud lepingust"
+    },
+    "retention_declared": {
+      "fail": "Eelarve ei ütle, milline kinnipidamine rakendub",
+      "suggestion": "Salvestage kinnipidamise protsent ja vabastamine või märkige, et seda ei rakendata. Kinnipidamine on töövõtja teenitud raha, mida ta ei saa välja võtta; sellest vaikiv eelarve vaikib ka käibekapitalist"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "CDM 2015 kohustatud isikud pole salvestatud: puudub {missing}",
+      "suggestion": "Salvestage määramised. Kui projektis töötab rohkem kui üks töövõtja, peab tellija kirjalikult määrama peaprojekteerija ja peatöövõtja; tegemata jätmisel kannab tellija neid kohustusi ise"
+    },
+    "hrb_regime_declared": {
+      "fail": "Suurema riskiga hoone küsimus on lahendamata: {reason}",
+      "unanswered": "eelarve ei ütle, kas tegemist on suurema riskiga hoonega",
+      "disagrees": "eelarve märgib suurema riski väärtuseks {declared}, kuid selle enda mõõtmed annavad {derived}",
+      "suggestion": "Hoone on suurema riskiga, kui see on vähemalt 18 m kõrge või vähemalt 7-korruseline JA sisaldab vähemalt kaht eluruumi. Mõlemad tingimuste osad loevad: kõrge hoone ilma eluruumideta ei ole suurema riskiga ning selle sellisena käsitlemine lisab tarbetu etapiviisilise kooskõlastusmenetluse"
+    },
+    "vat_treatment_declared": {
+      "fail": "Eelarve ei ütle, kuidas käibemaksu käsitletakse",
+      "suggestion": "Salvestage käsitlus: standardmäär, soodus- või nullmäär, kui tööd vastavad tingimustele, või riigisisene pöördmaksustamine, kui tarne kuulub selle alla. Pöördmaksustamine viib käibemaksu kliendile ja muudab töövõtja arveldatavat summat"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Projekt ei nimeta riiki, seega ei saa määrata hinnabaasi, maksumäära ega töökalendrit",
+      "suggestion": "Määrake projekti seadetes riik. Riik määrab piirkondliku paketi, maksud ja kalendri, mille järgi summasid tõlgendatakse"
+    },
+    "currency_set": {
+      "fail": "Projekt ei määra valuutat, seega ei saa selle mahuloendeid, lisasid ega lepinguid kokku liita",
+      "suggestion": "Valige projekti seadetes valuuta. Iga mahuloend ja leping hinnastatakse selles ning iga kogusumma esitatakse selles"
+    },
+    "currency_matches_bill": {
+      "fail": "Projekt on hinnastatud valuutas {project_currency}, kuid selle mahuloendi read valuutades {bill_currencies}",
+      "suggestion": "Teisendage read projekti valuutasse määratud kursiga või salvestage vahetuskurss projektile, et mahuloendi kogusumma oleks üks arv"
+    },
+    "priced_bill_present": {
+      "fail": "Projektil puudub ridadega mahuloend, seega pole eelarvestamise alust",
+      "suggestion": "Looge mahuloend ja lisage read või importige see CAD-mudelist, arvutustabelist või andmevahetusfailist"
+    },
+    "bill_base_date_set": {
+      "fail": "Mahuloend „{bill}” ei määra baaskuupäeva, mille seisuga hinnad kehtivad",
+      "suggestion": "Salvestage baaskuupäev mahuloendile. Ilma selleta ei saa hindu indekseerida, oma kuupäeva järgi maksustada ega teise eelarvega võrrelda"
+    },
+    "classification_standard_set": {
+      "fail": "Projektil puudub klassifikatsioonistandard, seega on selle ridadel koodid, mida ei saa kontrollida",
+      "suggestion": "Valige klassifikatsioonistandard, mille järgi projekt on kodeeritud. See määrab ka, millise riigi reeglikogumeid valideerimine käivitab"
+    },
+    "planned_dates_set": {
+      "both_missing": "Projektil puuduvad nii kavandatud algus- kui ka lõppkuupäev",
+      "start_missing": "Projektil on kavandatud lõppkuupäev, kuid puudub alguskuupäev",
+      "end_missing": "Projektil on kavandatud alguskuupäev, kuid puudub lõppkuupäev",
+      "unreadable": "Kavandatud väärtust „{value}” ei saa kuupäevana lugeda",
+      "suggestion": "Sisestage projekti kavandatud algus ja lõpp kuupäevadena. Ajasõltuv kulu, hinnatõus ja ajakava arvutatakse nende vahele"
+    },
+    "planned_dates_ordered": {
+      "fail": "Projekt on kavandatud algama {start} ja lõppema {end}, mis on enne algust",
+      "suggestion": "Vahetage või parandage kavandatud kuupäevad nii, et algus oleks enne lõppu"
+    },
+    "client_recorded": {
+      "fail": "Projekt ei määra klienti ja ükski leping ei nimeta tellijat",
+      "suggestion": "Salvestage klient projektile või lisage tellija lepingu osapooleks, et eelarvel oleks adressaat"
+    },
+    "procurement_started": {
+      "fail": "Projekt on faasis {phase}, kuid sellel puuduvad leping ja hankepakett",
+      "suggestion": "Looge mahuloendist hankepakett, salvestage leping või viige faas tagasi tegelikku eelarvestamise etappi"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Rida {ordinal}: ressursiread ei võimalda rida hinnastada, seega ühikuhinda neist uuesti ei tuletatud",
+      "fallback_allowance": "Rida {ordinal}: ressursiread on hinnangulise varu jaotus, mis sisaldab rea kogust, seega ühikuhinda neist uuesti ei tuletatud",
+      "assumed_norm": "Rida {ordinal}: ressursiread sisaldavad norme, mida kataloog pole kunagi määranud, seega ühikuhinda neist uuesti ei tuletatud",
+      "norm_collapsed": "Rida {ordinal}: ressursiread kaotasid katalooginormi ja sisaldavad selle asemel rea kogust, seega ühikuhinda neist uuesti ei tuletatud",
+      "whole_position_quantities": "Rida {ordinal}: ressursiread sisaldavad kogu rea koguseid ühikupõhiste normide asemel, seega ühikuhinda neist uuesti ei tuletatud",
+      "suggestion": "Vaadake analüüs üle; tuletage rida uuesti kataloogireast ressursinormide ülevaatuse kaudu või parandage read käsitsi"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Rida {ordinal} ei viita ühelegi KNR kataloogitabelile",
+      "suggestion": "Nimetage normide lähtetabel väljal podstawa, näiteks KNR 2-02 0201-01, või kirjutage oma arvutusega hinnastatud rea puhul kalkulacja indywidualna"
+    },
+    "knr_reference_recognised": {
+      "fail": "Rea {ordinal} viide '{code}' ei nimeta KNR kataloogiperekonda",
+      "suggestion": "Alustage viidet kataloogiperekonnaga, näiteks KNR, KNNR, KNR-W või KSNR, või märkige rida kalkulacja indywidualna"
+    }
+  },
+  "bim_rules": {
+    "filter_not_object": "Omaduste tingimused peavad nimetama iga omaduse koos vajaliku väärtusega.",
+    "unknown_operator": "Tingimus omadusele \"{prop}\" kasutab võrdlust, mida see versioon ei tunne. Valige loendist üks.",
+    "value_not_allowed": "Tingimus omadusele \"{prop}\" kontrollib, kas omadus on tühi, ega võta väärtust.",
+    "value_required": "Tingimus omadusele \"{prop}\" vajab väärtust.",
+    "value_too_long": "Tingimuse väärtus omadusele \"{prop}\" on liiga pikk, kuni 500 märki.",
+    "value_not_number": "Tingimus omadusele \"{prop}\" võrdleb arve ja \"{value}\" ei ole arv. Sisestage arv, vajadusel ühikuga, nt mm, m, m2, m3 või kg.",
+    "group_not_found": "Salvestatud rühma või Smart View'd, kust see reegel elemendid võtab, selles projektis ei ole. Vali teine või tühjenda väli."
+  },
+  "bim_versions": {
+    "parent_not_found": "Mudel, mille uus versioon see üleslaadimine peaks olema, ei kuulu sellesse projekti. Valige mõni muu või laadige see üles eraldi mudelina.",
+    "parent_not_ready": "Mudeli \"{name}\" import pole veel lõppenud, seega ei saa see veel uut versiooni vastu võtta. Oodake, kuni see on valmis, või laadige see fail üles eraldi mudelina.",
+    "parent_superseded": "Mudelil \"{name}\" on juba uuem versioon {version}. Laadige see fail selle asemel üles uusima versiooni uue versioonina."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Leping {code} on väärt {amount}, kuid sellel pole ajakava ridu, seega pole selle raha ühelgi kulureal.",
+      "suggestion": "Andke lepingule konto kulukontrollis või lisage selle read."
+    },
+    "contract_sum_differs": {
+      "fail": "Leping {code} on väärt {total}, kuid selle read annavad kokku {lines} (vahe {difference}).",
+      "suggestion": "Parandage lepingu väärtust või ridu, et need klapiksid."
+    },
+    "change_without_agreed_amount": {
+      "fail": "Muudatus {code} on kinnitatud ilma kokkulepitud summata.",
+      "suggestion": "Sisestage töövõtjaga kokku lepitud summa enne muudatuse kinnitamist."
+    },
+    "change_without_approval_date": {
+      "fail": "Muudatus {code} on kinnitatud ilma kinnitamise kuupäevata.",
+      "suggestion": "Sisestage, millal muudatus kinnitati."
+    },
+    "billed_before_approval": {
+      "fail": "Lepingule {contract} on muudatuse {code} eest arvestatud {amount}, kuid muudatuse staatus on {status} ja see pole kinnitatud.",
+      "suggestion": "Kinnitage muudatus enne või võtke arvestus maksenõudest maha."
+    },
+    "contract_over_target": {
+      "fail": "Leping {code} seob {committed}, see on {difference} rohkem kui {target} mahuloendis, mille alusel see anti (üle {tolerance} %).",
+      "suggestion": "Võrrelge tellimist ja selle muudatusi mahuloendiga ning märkige, miks töö maksab rohkem."
+    },
+    "account_over_plan": {
+      "fail": "Kontol {code} on kohustusi {committed}, see on {difference} üle plaani {planned} (üle {tolerance} %).",
+      "suggestion": "Kontrollige konto kohustusi või uuendage plaani koos põhjendusega."
+    },
+    "quantity_overrun": {
+      "fail": "Lepingu {contract} rida {code} on mõõdetud {measured} {unit}, lepingus {contracted} {unit}, see on {over} % rohkem (lubatud {tolerance} %).",
+      "suggestion": "Kontrollige mõõtmist või leppige lisakogus kokku muudatusena."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Leping {code} on mõõdetud {measured}, see on {difference} üle selle väärtuse koos kinnitatud muudatustega ({committed}).",
+      "suggestion": "Kinnitage lisatööd katvad muudatus või kontrollige mõõtmist."
+    },
+    "invoice_without_contract": {
+      "fail": "Hankija arve {number} summas {amount} ei kuulu ühegi lepingu ega tellimuse alla.",
+      "suggestion": "Siduge selle read lepinguga või kandke see otsese kuluna ühele kontole."
+    }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "Lepingu {contract} arve {number} näitab seisuga {net}, mis on vähem kui eelmise arve {previous_number} {previous}, kuigi leping arveldatakse kumulatiivselt.",
+      "suggestion": "Kui arve esitab ainult uusi töid, arveldatakse leping juurdekasvuna; kui see vähendab kogusummat, sisestage see kreeditarvena."
+    },
+    "invoice_after_final": {
+      "fail": "Lepingu {contract} arve {number} järgneb lõpparvele {final}.",
+      "suggestion": "Sisestage hilisemad tööd tunnitööna või kreeditarvena või märkige õige arve lõpparveks."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "Lepingu {contract} arve {number} loodi nõudest ja esitab ühe perioodi, kuid leping arveldatakse kumulatiivselt.",
+      "suggestion": "Kasutage lepingu kohta ühte arveldusviisi: lülitage leping juurdekasvu arveldusele või sisestage selle asemel töövõtja kumulatiivsed arved."
+    },
+    "release_differs": {
+      "fail": "Lepingu {contract} arve {number} kinnitatud vabastus on {stored}, kuid lepingu tingimused annavad täna {computed}.",
+      "suggestion": "Kontrollige, mis on pärast vabastamist muutunud (tingimused, arve summad, mahaarvamised), seejärel avage vabastus uuesti ja kinnitage see."
+    },
+    "rounding_out_of_range": {
+      "fail": "Arve {number} on ümardatud {rounding} võrra, mis jääb väljapoole kokkulepitud ümardussammu {step}.",
+      "suggestion": "Ümardamine vähendab vabastust vähem kui ühe sammu võrra; lülitage ümardamine maksetingimustes sisse või avage vabastus uuesti."
+    },
+    "final_retention_without_warranty": {
+      "fail": "Lepingu {contract} lõpparve {number} peab kinni {amount} kinnipidamist, kuid garantiikinnipidamist pole kokku lepitud.",
+      "suggestion": "Leppige maksetingimustes kokku garantiikinnipidamine või avage vabastus uuesti, et kogu kinnipidamine makstaks välja lõpparvega."
+    },
+    "posting_exceeds_held": {
+      "fail": "Lepingult {contract} on tagastatud rohkem kinnipidamist, kui kinni peetakse: {amount} liiga palju.",
+      "suggestion": "Tühistage liiga suur kinnipidamise kanne ja kandke tegelikult kinnipeetav summa."
+    },
+    "posting_before_event": {
+      "fail": "Lepingu {contract} kinnipidamine {amount} tagastati {posted}, enne vabastamise sündmust, mille tähtaeg oli {due}.",
+      "suggestion": "Kontrollige vabastamise sündmuse kuupäeva või kandke vabastus pärast sündmuse toimumist."
+    },
+    "posting_without_event_date": {
+      "fail": "Lepingu {contract} kinnipidamine {amount} tagastati, kuid vabastamise sündmuse kuupäeva pole sisestatud.",
+      "suggestion": "Sisestage vabastamise sündmuse saabumise kuupäev, et makset saaks selle vastu kontrollida."
+    },
+    "retention_still_held": {
+      "fail": "Leping {contract} on lõpetatud ja peab endiselt kinni {amount} kinnipidamist.",
+      "suggestion": "Vabastage kinnipidamine selle sündmuse järgi kinnipidamiste registris või jätke see garantiiajaks kinni."
+    },
+    "discount_not_agreed": {
+      "fail": "Lepingu {contract} arve {number} vabastus arvestab ette makstud soodustust {amount}, kuid leping seda ei luba.",
+      "suggestion": "Lülitage ettemaksusoodustus makse tingimustes sisse või avage vabastus uuesti ilma selleta."
+    },
+    "discount_after_deadline": {
+      "fail": "Arvelt {number} peeti kinni soodustus {amount}, kuid makse kuupäeval {paid_on} tehti pärast soodustuse kuupäeva {until}.",
+      "suggestion": "Makske ka soodustuse summa või märkige, miks töövõtja hilinenud soodustuse vastu võttis."
+    },
+    "invoiced_over_measured": {
+      "fail": "Leping {contract} on arveldatud summas {invoiced}, mis on {difference} võrra üle mõõdetud {measured} (kogus korrutatud ühikuhinnaga).",
+      "suggestion": "Kontrollige mõõdistust enne rohkema raha vabastamist või pidage vahe järgmisel vabastusel kinni."
+    },
+    "invoiced_over_contract": {
+      "fail": "Leping {contract} on arveldatud summas {invoiced}, mis on {difference} võrra üle selle väärtuse {value}, ja midagi pole mõõdetud.",
+      "suggestion": "Sisestage mõõdistus või muudatus, mis katab lisaraha, enne kui vabastate rohkem."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "Arve {number} on pöördmaksustatav, kuid sisaldab käibemaksu {vat}.",
+      "suggestion": "Pöördmaksustatav arve ei sisalda käibemaksu; parandage käibemaksu summa või selle ridade käibemaksu kategooria."
+    },
+    "line_without_vat_rate": {
+      "fail": "Arve {number} sisaldab käibemaksu, kuid {count} rea juures puudub käibemaksumäär.",
+      "suggestion": "Sisestage käibemaksumäär igale reale, et mahaarvamised ja ekspordid kasutaksid õiget maksu."
+    },
+    "duplicate_number": {
+      "fail": "Sama töövõtja arve number {number} on sisestatud {count} korda.",
+      "suggestion": "Tühistage koopia või parandage arve number, kui tegu on erinevate arvetega."
+    },
+    "possible_duplicate": {
+      "fail": "Arvel {number} on sama töövõtja, summa ({amount}) ja kuupäev ({on}) mis arvel {other}.",
+      "suggestion": "Kontrollige, et see pole sama arve, mis on sisestatud kaks korda teise numbriga."
+    },
+    "certificate_missing": {
+      "fail": "Arve {number} lepingu {contract} alusel: saajal ei ole kuupäeva {on} seisuga kehtivat dokumenti ({certificate}), mida {reference} nõuab enne makse vabastamist.",
+      "suggestion": "Kandke tõend saaja alltöövõtja kirjele või hoidke makset kinni, kuni see esitatakse."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "Arve {number} sisaldab ehitustöid või muid split payment kaupu ja ületab piiri {threshold}, kuid sellel pole märget «{annotation}».",
+      "suggestion": "Küsige tarnijalt märkega parandatud arvet ja tasuge see igal juhul split payment'iga: sel viisil tasumise kohustus ei sõltu märkest."
+    },
+    "split_payment_not_used": {
+      "fail": "Arve {number} kuulub split payment alla, kuid selle tasumine registreeriti muul viisil. Ostja vastutab lisaks {sanction}, 30 protsendi eest selle käibemaksust.",
+      "suggestion": "Tasuge sellised arved käibemaksukontolt split payment'iga ja registreerige makse meetodiks split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "Arve {number} ületab piiri {threshold} ning pole registreeritud, kas see sisaldab split payment lisa kaupu või teenuseid.",
+      "suggestion": "Registreerige arvel, kas see sisaldab lisa kaupu või teenuseid (annex_15) või nende koode (pkwiu_codes), et makseviisi saaks kontrollida."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "Arve {number} arvestab käibemaksu {rate} protsenti kogu hinnalt, kuid eluruumi kasulik pind on {area_m2} m2 ja vähendatud määr kehtib kuni {limit_m2} m2 ({reference}).",
+      "suggestion": "Arvestage vähendatud määr {reduced_share_percent} protsendile hinnast ja üldmäär ülejäänule."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "Arve {number} arvestab vähendatud eluruumi määra {rate} protsenti, kuid projektis pole registreeritud, millist eluruumi see puudutab ega selle kasulikku pinda ({reference}).",
+      "suggestion": "Registreerige projektis eluruumi liik ja kasulik pind (vat_housing), et määra ja selle pinnapiiri saaks kontrollida."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "Arve {number} arvestab vähendatud eluruumi määra {rate} protsenti objektile {object}, mis sellele ei kvalifitseeru ({reference}).",
+      "suggestion": "Arvestage üldmäär või parandage projektis registreeritud eluruum."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "Arve {number} rakendab pöördmaksustamist {count} real, kuid ehitusteenuste riigisisene pöördmaksustamine on selles riigis lõppenud.",
+      "suggestion": "Kui tarnija pole asutatud välismaal, küsige käibemaksuga arvet; selliseid arveid tasutakse split payment'iga."
+    },
+    "payment_term_over_cap": {
+      "fail": "Leping {contract} näeb ette maksetähtaja {days} päeva, mis on pikem kui {cap} päeva, mida maksehäirete seadus ettevõtete vahel lubab.",
+      "suggestion": "Lühendage tähtaeg {cap} päevani või registreerige, miks pikem tähtaeg on sõnaselgelt kokku lepitud ega ole alltöövõtjale ilmselgelt ebaõiglane."
+    }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}: prognoos {forecast} jääb alla juba kokku lepitud või ootel muudatustes nõutud {owed} ({difference} vähem) ja miski ei selgita seda.",
+      "suggestion": "Lisa madalama arvu aluseks olev dokument (kreeditarve, kokkulepe, protokoll) või kirjuta reale, miks selle meetod annab vähem."
+    },
+    "move_without_evidence": {
+      "fail": "{code}: prognoos muutus viimasest külmutatud hetktõmmisest alates {previous} -> {current} ({delta}), ületab projekti piiri ja sel pole veel kommentaari ega alust.",
+      "suggestion": "Kirjuta, miks arv muutus, ja lingi selle aluseks olev dokument või protokoll enne hetktõmmise külmutamist."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} prognoositakse meetodiga {method} projekti meetodi {project_method} asemel ja ükski kommentaar ei ütle, miks.",
+      "suggestion": "Lisa rea meetodile lühike kommentaar või pane rida tagasi projekti meetodile."
+    },
+    "method": {
+      "best_available": "parim saadaolev allikas",
+      "maximum": "suurim väärtus",
+      "evm_cpi": "kulutõhusus (CPI)",
+      "manual": "käsitsi sisestatud summa"
+    }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "sotsiaalkindlustuse võlgnevuse puudumise tõend",
+    "construction_tax_exemption": "ehitusmaksu vabastuse tõend",
+    "employers_liability_clearance": "tööandja vastutuse võlgnevuse puudumise tõend",
+    "insurance": "kindlustustõend",
+    "license": "töövõtja tegevusluba"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "Müügihindadega eksport erineb redaktori kogusummast {gap} võrra, rohkem kui lubatud hälve {tolerance}",
+      "suggestion": "Kontrollige ümardamist ekspordi eelvaates või suurendage selle eelarve lubatud hälvet"
+    }
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Real {ordinal} puudub klassifikaatorikood, seetõttu ei saa seda liigitada tööliigi alla, kuhu see kuulub",
+      "suggestion": "Määrake real klassifikaatorikood (Pakistani vaikimisi on MasterFormat), et kogused koonduksid tööliigi kaupa"
+    },
+    "sales_tax_line_present": {
+      "fail": "Arvel puudub käibemaksu rida",
+      "suggestion": "Lisage käibemaks eraldi reana vahesumma järele: provintsi maks teenustelt ehituslepingu puhul või föderaalne käibemaks kaupadelt tarne puhul"
+    },
+    "sales_tax_rate_known": {
+      "fail": "Käibemaksu rida arvestab {percent} protsenti, mis ei ole Pakistanis ehituse jaoks kehtiv määr",
+      "suggestion": "Kontrollige määra provintsi ja maksja järgi, näiteks 16 protsenti Punjabis või 15 protsenti Sindhis, vähendatud määr riigi ehitustöödele või 18 protsenti föderaalne käibemaks kaupadelt"
+    }
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Hinnakirja ei leitud",
+    "catalog_item_not_found": "Kataloogi toodet ei leitud",
+    "entry_not_found": "Valitud tarnija hinda ei ole olemas",
+    "entry_other_vendor": "Valitud hind kuulub teise tarnija hinnakirja",
+    "price_list_expired": "Hinnakiri \"{name}\" aegus {valid_to}. Importige kehtiv hinnakiri või sisestage kokkulepitud hind käsitsi.",
+    "import_unreadable": "Faili ei saa hinnakirjana lugeda ({reason})",
+    "import_needs_price_column": "Valige hinda sisaldav veerg",
+    "duplicate_vendor_sku": "Need tarnija tootekoodid esinevad failis mitu korda: {skus}",
+    "valid_to_before_valid_from": "Lõppkuupäev on enne alguskuupäeva",
+    "category_not_found": "Tootekategooriat ei leitud",
+    "net_above_gross": "Netohind {net} on kõrgem kui hinnakirja hind {gross}",
+    "discount_not_found": "Allahindluslepingut ei leitud",
+    "discount_basis": "Sisestage kas allahindluse protsent või kindel netohind (kindel netohind nõuab toodet)",
+    "attachment_not_found": "Manust ei leitud",
+    "price_missing": "Real \"{line}\" puudub kehtiv hind: sisestage ühikuhind või importige tarnija hinnakiri"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Positsioon {ordinal}: {count} mõõtmine(d) annavad koguse, kuid joonise revisjoni ei ole salvestatud",
+      "suggestion": "Määrake joonise revisjon projektifailides ning mõõtke või teisaldage mõõtmine uuesti, et leht ja revisjon salvestuksid"
+    },
+    "superseded_revision": {
+      "fail": "Positsioon {ordinal}: kogus võeti joonisest {drawing} rev. {revision}, kuid kehtiv on nüüd rev. {current}",
+      "suggestion": "Võrrelge kahte revisjoni ja uuendage kogust või esitage erinevuse kohta muudatustellimus"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Positsioon {ordinal}: joonis {drawing} on sisestatud ilma revisjonita",
+      "suggestion": "Lisage joonise revisjon, mille järgi kogus hinnastati"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Välja '{field}' muudeti nii seadmes kui ka serveris ja lahendust pole valitud",
+      "suggestion": "Valige sellele väljale oma, serveri või käsitsi väärtus ja saatke liitmine uuesti"
+    }
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Rida {row}: ühelgi selle ajakava tegevusel ei ole ID-d {ref}.",
+      "duplicate": "Rida {row}: tegevus {ref} esineb lehel mitu korda.",
+      "suggestion": "Ekspordi uus leht ning ära lisa, kopeeri ega järjesta ridu ümber."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Rida {row}: % valmis ei ole arv.",
+      "actual_start_not_a_date": "Rida {row}: tegelik algus ei ole kuupäev.",
+      "actual_finish_not_a_date": "Rida {row}: tegelik lõpp ei ole kuupäev.",
+      "remaining_not_a_whole_number": "Rida {row}: järelejäänud kestus ei ole täisarv päevi.",
+      "percent_out_of_range": "Rida {row}: % valmis on {value}, see peab olema vahemikus 0 kuni 100.",
+      "remaining_negative": "Rida {row}: järelejäänud kestus on {value}, see ei tohi olla negatiivne.",
+      "suggestion": "Sisesta % valmis vahemikus 0 kuni 100, kuupäevad kuupäevadena ja järelejäänud kestus täistööpäevades."
+    },
+    "date_logic": {
+      "finish_before_start": "Rida {row}: tegelik lõpp {finish} on enne tegelikku algust {start}.",
+      "finish_without_start": "Rida {row}: tegelik lõpp {finish} on sisestatud ilma tegeliku alguseta.",
+      "after_status_date": "Rida {row}: tegelik kuupäev {value} on pärast olekukuupäeva {status_date}.",
+      "finish_needs_complete": "Rida {row}: tegelik lõpp on sisestatud, kuid tegevus on valmis vaid {percent}%.",
+      "suggestion": "Tegelikud kuupäevad peavad olema järjekorras, mitte hilisemad kui olekukuupäev, ja tegelik lõpp tähendab 100% valmidust."
+    },
+    "unchanged_since_export": {
+      "fail": "Rida {row}: {activity} muudeti rakenduses pärast lehe eksporti.",
+      "suggestion": "Kontrolli praeguseid väärtusi enne selle rea rakendamist või ekspordi uus leht."
+    },
+    "plausibility": {
+      "progress_decreased": "Rida {row}: edenemine väheneb {old}%-lt {new}%-le.",
+      "complete_without_finish": "Rida {row}: 100% valmis ilma tegeliku lõputa; lõpuna kasutatakse olekukuupäeva.",
+      "started_without_start": "Rida {row}: edenemine on sisestatud ilma tegeliku alguseta.",
+      "suggestion": "Kontrolli rida enne rakendamist ehitusplatsiga."
+    }
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Haru on avatud {days} päeva ja põhieelarve on selle loomisest saadik muutunud {changes} positsioonis",
+      "suggestion": "Kandke põhieelarve muudatused harusse, ühendage haru või arhiveerige see"
+    },
+    "unresolved_conflicts": {
+      "fail": "Positsiooni {ordinal} „{description}” on muudetud nii selles harus kui ka põhieelarves",
+      "suggestion": "Avage ühendamise aken ja otsustage, millise positsiooni versiooni alles jätate"
+    }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Rahaseis langeb {period} kuus miinusesse {amount}, ületades rahastuspiiri {threshold}.",
+      "suggestion": "Tagage rahastus enne {period}, tooge laekumised varem sisse või lükake maksed edasi."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} tuli tasuda {due} ja see on endiselt tasumata ({days} päeva hilinemist).",
+      "suggestion": "Nõudke makset kliendilt või muutke prognoosis oodatavat kuupäeva."
+    },
+    "forecast_missing": {
+      "fail": "{project} on aktiivne, kuid sellel ei ole lepingut, arvet, tellimust, allhanget ega plaani, mille põhjal rahavoogu prognoosida.",
+      "suggestion": "Sisestage kliendileping koos maksegraafikuga või planeeritud rahavoog kulumudelis."
+    }
+  }
+}

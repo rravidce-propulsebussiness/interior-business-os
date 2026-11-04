@@ -1,0 +1,318 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠app.core.tax - unified VAT/GST rate lookup.
+
+Exposes a single :func:`get_vat_rate` entry point so callers never need to
+know which pack owns a given country code.
+
+The rate table below is **hand-maintained here**, not read from anywhere. It
+was transcribed from the regional packs' ``vat_rates`` dicts and has to be
+kept in step with them by hand: this module imports :mod:`decimal` and
+nothing else, so editing a pack's ``vat_rates`` does not change what
+:func:`get_vat_rate` returns, and editing this table does not change what a
+pack's ``GET /config/`` reports.
+
+Nothing currently checks that the two agree - ``test_vat_lookup`` covers this
+table against hardcoded expectations and ``test_regional_pack_vat_completeness``
+covers the packs against theirs, but no test compares one to the other, so the
+two can drift apart silently. Treat that as a known gap, not as a guarantee.
+
+Said plainly because the previous wording ("aggregates ``vat_rates`` dicts
+from all regional pack configs") described a registry that does not exist,
+and a reader could reasonably have built on it.
+
+Design rules (Wave 25 / task #168):
+- Rates are returned as :class:`decimal.Decimal` (not float).
+- ``kind`` is one of ``'standard'``, ``'reduced'``, ``'zero'``.
+- US has no federal VAT; calling ``get_vat_rate('US', ...)`` raises
+  :class:`VATNotApplicable`.
+- Countries not covered by any pack raise :class:`VATNotApplicable`.
+
+Sources (cited in commit message, summarised here for reference):
+- DE: Umsatzsteuergesetz §12 - standard 19 %, reduced 7 %, zero 0 %
+  (European Commission VAT Rates Database 2026-01)
+- AT: Umsatzsteuergesetz §10 - standard 20 %, reduced 10 %, zero 0 %
+  (EC VAT Rates Database 2026-01)
+- CH: MWSTG Art. 25 - standard 8.1 %, reduced 2.6 %, zero 0 %
+  (ESTV / Swiss Federal Tax Administration, effective 2024-01-01)
+- GB: HMRC VAT Notice 700 - standard 20 %, reduced 5 %, zero 0 %
+  (HMRC, effective April 2011, still current 2026)
+- AU: A New Tax System (Goods and Services Tax) Act 1999 - standard 10 %
+  (ATO, GST; 'zero' = GST-free supplies = 0 %)
+- NZ: Goods and Services Tax Act 1985 - standard 15 %
+  (IRD New Zealand; 'zero' = zero-rated supplies = 0 %)
+- JP: Consumption Tax Act - standard 10 %, reduced 8 %
+  (NTA Japan, effective October 2019)
+- SG: GST Act - standard 9 % (effective 1 Jan 2024), zero 0 %
+  (IRAS Singapore, GST rate increase 2024)
+- AE: Federal Decree-Law No. 8 of 2017 - standard 5 %
+  (UAE FTA, effective 1 Jan 2018)
+- SA: Royal Decree No. M/113 - standard 15 %
+  (ZATCA, increased from 5 % effective 1 Jul 2020)
+- BH: Decree-Law No. 48 of 2018 - standard 10 %
+  (NBR Bahrain, increased from 5 % effective 1 Jan 2022)
+- OM: Royal Decree No. 121/2020 - standard 5 %
+  (Oman Tax Authority, effective 16 Apr 2021)
+- IN: CGST Act 2017 - principal rate 18 % (works contracts), reduced 12 %
+  (GST Council; 'standard' = 18 % construction services)
+- MX: Ley del IVA Art. 1 - standard 16 %
+  (SAT Mexico 2026; border-zone 8 % captured as 'reduced')
+- AR: Ley 23.349 - standard 21 %, reduced 10.5 %
+  (AFIP Argentina 2026)
+- CL: Ley 825 - standard 19 %
+  (SII Chile 2026)
+- CO: Estatuto Tributario Art. 468 - standard 19 %
+  (DIAN Colombia 2026)
+- PE: TUO IGV SUNAT - standard 18 % (IGV 16 % + IPM 2 %)
+  (SUNAT Peru 2026)
+- RO: TVA - standard 21 %, reduced 11 %, zero 0 %, effective 1 Aug 2025. The
+  reform raised the standard rate from 19 % and replaced the former 5 % and
+  9 % reduced rates with the single 11 % band. Construction services and
+  building materials are standard-rated; the 11 % band does not cover them.
+  (PwC Worldwide Tax Summaries - Romania, and European Commission "Your
+  Europe" VAT rules and rates, both read 2026-08-26)
+- RU: НК РФ ст. 164 - standard 22 %, reduced 10 %, zero 0 %, the standard rate
+  effective 1 Jan 2026. It was raised from 20 %, and the 10 % reduced class
+  (food, medicine, children's goods, books) was retained unchanged, so only
+  the standard rate moved. Construction work is standard-rated.
+  (Federal Tax Service of Russia, "Taxes 2026", https://www.nalog.gov.ru/new2026/,
+  read 2026-09-07. It gives the standard rate as "20% -> 22%" applying to sales
+  of goods, works and services from 1 January 2026, and lists 10 % among the
+  rates that did not change while 20/120 becomes 22/122. The instrument that
+  page implements is Federal Law No. 425-FZ of 28 November 2025, official
+  publication number 0001202511280017; that identity is taken from the state
+  publication portal's index record and not from the law text, which did not
+  load. The figure remains pending review by a Russian cost engineer, the same
+  standing caveat packs/russia-gesn records in its manifest ``review_status``.)
+- HU: 2007. évi CXXVII. törvény (Áfa tv.) 82. § - standard 27 %. Two reduced
+  rates, 5 % and 18 %, and a 0 % rate exist and are not in this table; see
+  the comment at the entry. (Nemzeti Jogszabálytár, read 2026-10-10)
+- PL: Ustawa o podatku od towarow i uslug (VAT Act of 11 Mar 2004) art. 41
+  and 146ef - standard 23 %, reduced 8 %, both since 1 Jan 2011. The 5 %
+  rate and the area limits of the 8 % housing rate are not in this table;
+  see the comment at the entry. (ifirma summary of the Ministry of Finance
+  explanations and gazetaprawna, read 2026-10-19)
+- ES: Ley 37/1992 art. 90 and 91 - standard 21 %, reduced 10 %, effective
+  1 Sep 2012. The 4 % super-reduced rate is not in this table; see the comment
+  at the entry. (BOE consolidated text, read 2026-10-10)
+- EG: Value Added Tax Law No. 67 of 2016 - standard 14 % since 1 Jul 2017
+  (13 % from 8 Sep 2016), exports zero-rated. Construction and contracting
+  works were taxed under a 5 % schedule tax without input credit until
+  17 Jul 2025 and at the standard 14 % with input credit from 18 Jul 2025
+  (Law No. 157 of 2025). This table has no date axis, so neither the
+  history nor the construction regimes are here: the dated rows are in the
+  tax seed and the per-contract regimes in :mod:`app.core.vat_regimes`.
+  (PwC Worldwide Tax Summaries - Egypt, other taxes, and EY Tax News
+  2025-1554, both read 2026-10-19)
+- ZA: Value-Added Tax Act 89 of 1991 - standard 15 %, zero-rated 0 %
+  (SARS South Africa; standard rate raised from 14 % to 15 % on 1 Apr 2018.
+  Note: ISO code ZA is South Africa, distinct from SA = Saudi Arabia above.)
+- US: No federal VAT; state/local sales tax varies by jurisdiction.
+  (IRS; Tax Foundation State Sales Tax Rates 2026)
+"""
+
+from __future__ import annotations
+
+from decimal import Decimal
+
+
+class VATNotApplicable(Exception):
+    """Raised when no VAT rate is defined for a country/kind combination.
+
+    This covers:
+    - Countries with no VAT system (e.g. US, where only state-level sales
+      tax applies - not modelled as a single federal rate).
+    - Countries not yet covered by any regional pack's ``vat_rates`` dict.
+    - A ``kind`` key that does not exist for an otherwise-covered country.
+    """
+
+    def __init__(self, country_code: str, kind: str) -> None:
+        self.country_code = country_code
+        self.kind = kind
+        super().__init__(
+            f"No VAT rate for country={country_code!r}, kind={kind!r}. "
+            "This country either has no federal VAT (e.g. US uses per-state "
+            "sales tax) or is not yet covered by a regional pack."
+        )
+
+
+# ── Master rate table ─────────────────────────────────────────────────────────
+#
+# Structure: {ISO-2 country code: {kind: Decimal-as-string}}
+# 'kind' values: 'standard' | 'reduced' | 'zero'
+#
+# Transcribed by hand from each regional pack's ``vat_rates`` dict (Wave 25)
+# and maintained here since - the packs are not read at runtime. Changing a
+# rate means changing it in both places.
+# Rate values are stored as strings and coerced to Decimal on first access
+# (lazy - avoids import-time Decimal allocation for unused entries).
+#
+# sentinel _RATES_BUILT guards one-time lazy init to keep import fast.
+
+_RAW: dict[str, dict[str, str]] = {
+    # ── DACH ─────────────────────────────────────────────────────────────
+    "DE": {"standard": "0.19", "reduced": "0.07", "zero": "0.00"},
+    "AT": {"standard": "0.20", "reduced": "0.10", "zero": "0.00"},
+    "CH": {"standard": "0.081", "reduced": "0.026", "zero": "0.00"},
+    # ── UK ───────────────────────────────────────────────────────────────
+    "GB": {"standard": "0.20", "reduced": "0.05", "zero": "0.00"},
+    # ── Asia-Pacific ─────────────────────────────────────────────────────
+    "AU": {"standard": "0.10", "zero": "0.00"},
+    "NZ": {"standard": "0.15", "zero": "0.00"},
+    "JP": {"standard": "0.10", "reduced": "0.08"},
+    "SG": {"standard": "0.09", "zero": "0.00"},
+    # HK has no GST/VAT - raises VATNotApplicable
+    # MY SST is not a VAT system - raises VATNotApplicable
+    # ── Middle East ───────────────────────────────────────────────────────
+    "AE": {"standard": "0.05", "zero": "0.00"},
+    "SA": {"standard": "0.15", "zero": "0.00"},
+    "BH": {"standard": "0.10", "zero": "0.00"},
+    "OM": {"standard": "0.05", "zero": "0.00"},
+    "QA": {"standard": "0.00"},  # Qatar has no VAT (zero rate for all)
+    "KW": {"standard": "0.00"},  # Kuwait has not implemented VAT (2026)
+    # ── India ─────────────────────────────────────────────────────────────
+    "IN": {"standard": "0.18", "reduced": "0.12", "zero": "0.00"},
+    # ── Latin America ─────────────────────────────────────────────────────
+    "MX": {"standard": "0.16", "reduced": "0.08", "zero": "0.00"},
+    "AR": {"standard": "0.21", "reduced": "0.105", "zero": "0.00"},
+    "CL": {"standard": "0.19", "zero": "0.00"},
+    "CO": {"standard": "0.19", "zero": "0.00"},
+    "PE": {"standard": "0.18", "zero": "0.00"},
+    # BR uses a fragmented indirect tax system (ISS, ICMS, PIS/COFINS)
+    # not equivalent to a simple VAT rate - raises VATNotApplicable
+    # ── Eastern Europe ────────────────────────────────────────────────────
+    # Reformed on 2025-08-01: standard 19 → 21, and the 5 % / 9 % reduced pair
+    # replaced by a single 11 % band. This table carries only what is in force
+    # now - it has no date axis at all - so the pre-reform rates are not here.
+    # ``oe_i18n_tax_config`` is the dated one; ask it for a past date.
+    #
+    # RO is the first entry in this table with no regional pack behind it -
+    # there is no ``ro_pack``, and ``get_vat_rate`` is called in production only
+    # by ``mexico_pack`` (MX) and ``sa_pack`` (ZA). So these figures have no
+    # consumer today: they are here for the table's completeness, not because
+    # something prices from them. Do not read the entry's presence as evidence
+    # that a Romanian pack exists or that Romanian VAT flows through here.
+    "RO": {"standard": "0.21", "reduced": "0.11", "zero": "0.00"},
+    # ── Türkiye ───────────────────────────────────────────────────────────
+    # KDV, Law 3065 art. 28 and Karar 2007/13033 as amended by Karar 7346
+    # (Resmî Gazete 7 July 2023, no. 32241): general rate 20 and list (II)
+    # rate 10, both in force since 10 July 2023.
+    # https://www.resmigazete.gov.tr/eskiler/2023/07/20230707-11.pdf
+    # Türkiye has a second reduced rate, 1 percent on list (I), and this
+    # table has one "reduced" slot per country, so the 1 percent is not here.
+    # Like RO above, the entry has no consumer today; the dated rates live in
+    # the tax seed and the rate a bill charges comes from the TR markup stack.
+    "TR": {"standard": "0.20", "reduced": "0.10"},
+    # ── Hungary ───────────────────────────────────────────────────────────
+    # ÁFA, 2007. évi CXXVII. törvény 82. § (1): 27 percent of the tax base,
+    # the wording set by 2011. évi CLVI. törvény 118. §.
+    # https://njt.jog.gov.hu/jogszabaly/2007-127-00-00 (read 2026-10-10 in the
+    # text consolidated to 2026-09-15)
+    # There is no "reduced" key on purpose. 82. § (2) and (3) set two reduced
+    # rates of equal standing, 5 percent on annex 3 and 18 percent on annex
+    # 3/A, and (4) a 0 percent rate on annex 3/B. This table has one "reduced"
+    # slot per country, and choosing one of the two would state as Hungary's
+    # reduced rate a figure that is wrong for the other annex, so asking for
+    # it raises VATNotApplicable. The tax seed carries both as AFA_5 and
+    # AFA_18. Construction services between Hungarian taxable persons mostly
+    # carry no VAT on the invoice at all: 142. § (1) b) puts the tax on the
+    # customer (see HU_FORDITOTT_ADOZAS_EPITES in tax_withholding).
+    # Like RO and TR, the entry has no consumer today.
+    "HU": {"standard": "0.27"},
+    # ── Poland ────────────────────────────────────────────────────────────
+    # VAT Act of 11 March 2004, art. 41 ust. 1 and 2 with art. 146ef: 23 and
+    # 8 percent since 1 January 2011, zero on exports and intra-EU supplies.
+    # https://www.ifirma.pl/blog/stawki-vat-dla-budownictwa-mieszkaniowego-w-wyjasnieniach-mf
+    # (read 2026-10-19). "reduced" is the 8 percent because it is the one
+    # construction meets: art. 41 ust. 12 to 12c apply it to building and
+    # renovating dwellings, a house up to 300 m2 and a flat up to 150 m2 of
+    # usable area, and above the limit only to the limit's share of the price.
+    # This table cannot say that; app.core.vat_construction splits the price.
+    # The 5 percent rate (food, books) is the seed's VAT_5 line.
+    "PL": {"standard": "0.23", "reduced": "0.08", "zero": "0.00"},
+    # ── Spain ─────────────────────────────────────────────────────────────
+    # IVA, Ley 37/1992: art. 90.Uno, general rate 21 percent, and art. 91.Uno,
+    # reduced rate 10 percent, both since 1 September 2012 (Real Decreto-ley
+    # 20/2012, art. 23).
+    # https://www.boe.es/buscar/act.php?id=BOE-A-1992-28740 (read 2026-10-10)
+    # Spain has a second reduced rate, the 4 percent of art. 91.Dos, and this
+    # table has one "reduced" slot per country, so the 4 percent is not here.
+    # The 10 percent is the one construction meets: art. 91.Uno.3.1 applies it
+    # to works under a contract made directly between developer and contractor
+    # for building or rehabilitating dwellings, and art. 91.Uno.2.10 to
+    # renovation and repair of dwellings on its conditions.
+    # These are the rates of the IVA territory, which is the peninsula and the
+    # Balearic Islands. The Canary Islands charge IGIC and Ceuta and Melilla
+    # charge IPSI, neither of which is in this table.
+    # Like RO and TR, the entry has no consumer today.
+    "ES": {"standard": "0.21", "reduced": "0.10"},
+    # ── Russia / CIS ──────────────────────────────────────────────────────
+    # Standard rate 22 % since 2026-01-01, up from 20 %. This table carries no
+    # effective dates, so it states only what is in force now; the dated
+    # history lives in the tax seed and in property_dev/data/tax_rates.yaml.
+    "RU": {"standard": "0.22", "reduced": "0.10", "zero": "0.00"},
+    # ── Africa ────────────────────────────────────────────────────────────
+    # EG: standard 14 % since 2017-07-01, exports zero-rated. Today's rate
+    # only; see the module docstring for the construction regimes.
+    "EG": {"standard": "0.14", "zero": "0.00"},
+    # ZA = South Africa (VAT Act 89 of 1991, SARS). Standard 15 % since
+    # 1 Apr 2018. No reduced tier; basic foodstuffs and exports are zero-rated.
+    "ZA": {"standard": "0.15", "zero": "0.00"},
+    # ── US - no federal VAT ──────────────────────────────────────────────
+    # US deliberately absent; get_vat_rate('US', ...) → VATNotApplicable
+}
+
+_CACHE: dict[str, dict[str, Decimal]] = {}
+
+
+def _build_country(country_code: str) -> dict[str, Decimal]:
+    """Coerce raw string rates to Decimal for one country."""
+    raw = _RAW.get(country_code.upper())
+    if raw is None:
+        return {}
+    return {kind: Decimal(val) for kind, val in raw.items()}
+
+
+def get_vat_rate(country_code: str, kind: str = "standard") -> Decimal:
+    """Return the VAT/GST rate for a country and rate kind.
+
+    Args:
+        country_code: ISO 3166-1 alpha-2 country code (case-insensitive).
+        kind: One of ``'standard'``, ``'reduced'``, or ``'zero'``.
+              Defaults to ``'standard'``.
+
+    Returns:
+        :class:`~decimal.Decimal` in the range ``[0, 0.50]``.
+
+    Raises:
+        :class:`VATNotApplicable`: When the country has no federal VAT
+            (US), is not covered by any regional pack, or the requested
+            ``kind`` does not exist for that country.
+
+    Examples::
+
+        >>> get_vat_rate('DE')
+        Decimal('0.19')
+        >>> get_vat_rate('GB', 'reduced')
+        Decimal('0.05')
+        >>> get_vat_rate('US', 'standard')
+        Traceback (most recent call last):
+            ...
+        VATNotApplicable: No VAT rate for country='US', kind='standard'. ...
+    """
+    cc = country_code.upper()
+    if cc not in _CACHE:
+        built = _build_country(cc)
+        if not built and cc not in _RAW:
+            raise VATNotApplicable(country_code, kind)
+        _CACHE[cc] = built
+
+    rates = _CACHE.get(cc, {})
+    if kind not in rates:
+        raise VATNotApplicable(country_code, kind)
+    return rates[kind]
+
+
+def list_covered_countries() -> list[str]:
+    """Return ISO-2 codes for all countries with at least one VAT rate."""
+    return sorted(_RAW.keys())

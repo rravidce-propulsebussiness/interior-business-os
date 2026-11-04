@@ -1,0 +1,1958 @@
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+// Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { useState, useMemo, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useNavigate, Link, Navigate, useSearchParams } from 'react-router-dom';
+import clsx from 'clsx';
+import {
+  Search,
+  Database,
+  Sparkles,
+  Globe,
+  FileInput,
+  BarChart3,
+  Plug,
+  Package,
+  Check,
+  Download,
+  ShieldCheck,
+  Building2,
+  Boxes,
+  Loader2,
+  Settings,
+  AlertTriangle,
+  Trash2,
+  RefreshCw,
+  Info,
+  Calculator,
+  ClipboardList,
+  Pencil,
+  Users,
+  Layers,
+  Server,
+  type LucideIcon,
+} from 'lucide-react';
+import { Card, Badge, Button, Input, InfoHint, Breadcrumb, ConfirmDialog, DismissibleInfo, IntroRichText, ModuleGuideButton } from '@/shared/ui';
+import { PageHeader } from '@/shared/ui/PageHeader';
+import { modulesGuide } from './modulesGuide';
+import { AdvancedModeNotice } from './AdvancedModeNotice';
+import { resolveModuleDisplayName } from './moduleDisplayName';
+import {
+  CompanyProfileCard,
+  ProfileSwitchDialog,
+  getPresetIcon,
+  sortPresets,
+  useCompanyProfiles,
+} from './companyProfiles';
+import {
+  ALL_CATEGORIES,
+  filterModules,
+  tallyModuleCategories,
+  type ModuleSearchContext,
+} from './moduleSearch';
+import { PacksCatalog } from './packs/PacksCatalog';
+import { ModulePackagesPanel } from './ModulePackagesPanel';
+import { useConfirm } from '@/shared/hooks/useConfirm';
+import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
+import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
+import {
+  describeSnapshotRestore,
+  mayStillBeRunning,
+  SNAPSHOT_RESTORE_TIMEOUT_MS,
+  type SnapshotRestoreResponse,
+} from '@/features/costs/vectorIndex';
+import { useToastStore } from '@/stores/useToastStore';
+import { useModuleStore } from '@/stores/useModuleStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { getModulesByCategory } from '@/modules/_registry';
+import { translateManifestText } from '@/modules/_i18n';
+import { fmtList, fmtFixed } from '@/shared/lib/formatters';
+import { invalidateProjectLists } from '@/features/projects/invalidateProjectLists';
+
+/* ── Types ─────────────────────────────────────────────────────────────── */
+
+interface MarketplaceModule {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  icon: string;
+  version: string;
+  size_mb: number;
+  author: string;
+  tags: string[];
+  requires: string[];
+  installed: boolean;
+  price: string;
+}
+
+interface SystemModule {
+  name: string;
+  version: string;
+  display_name: string;
+  display_name_i18n?: Record<string, string>;
+  description?: string;
+  author?: string;
+  category: string;
+  depends: string[];
+  optional_depends?: string[];
+  has_router: boolean;
+  loaded: boolean;
+  enabled: boolean;
+  is_core: boolean;
+}
+
+/* ── Tab definitions ───────────────────────────────────────────────────── */
+
+// The Packs tab keeps the internal key ``partner-packs`` so existing deep-links
+// (``/modules?tab=partner-packs``, the dashboard co-brand banner) keep working.
+// ``resolveTabParam`` maps the new ``?tab=packs`` alias onto the same panel.
+const MODULE_TAB_IDS = ['profiles', 'partner-packs', 'data-packages', 'system'] as const;
+type TabKey = (typeof MODULE_TAB_IDS)[number];
+
+const TABS: { key: TabKey; labelKey: string; defaultLabel: string; icon: LucideIcon }[] = [
+  { key: 'profiles', labelKey: 'modules.tab_profiles', defaultLabel: 'Company Profiles', icon: Users },
+  { key: 'partner-packs', labelKey: 'modules.tab_packs', defaultLabel: 'Packs', icon: Package },
+  { key: 'data-packages', labelKey: 'modules.tab_data_packages', defaultLabel: 'Data Packages', icon: Layers },
+  { key: 'system', labelKey: 'modules.tab_system', defaultLabel: 'System Modules', icon: Server },
+];
+
+/** Map a ``?tab=`` query value to a panel key, accepting the new ``packs``
+ *  alias for the Packs umbrella as well as the legacy ``partner-packs`` id. */
+function resolveTabParam(tab: string | null): TabKey | null {
+  if (!tab) return null;
+  if (tab === 'packs') return 'partner-packs';
+  return (MODULE_TAB_IDS as readonly string[]).includes(tab) ? (tab as TabKey) : null;
+}
+
+/* ── Marketplace category config ───────────────────────────────────────── */
+
+type CategoryKey =
+  | 'all'
+  | 'demo_project'
+  | 'resource_catalog'
+  | 'cost_database'
+  | 'vector_index'
+  | 'language'
+  | 'converter'
+  | 'analytics'
+  | 'integration';
+
+interface CategoryMeta {
+  labelKey: string;
+  defaultLabel: string;
+  icon: LucideIcon;
+}
+
+const CATEGORIES: Record<CategoryKey, CategoryMeta> = {
+  all: { labelKey: 'marketplace.category_all', defaultLabel: 'All', icon: Package },
+  demo_project: { labelKey: 'marketplace.category_demo', defaultLabel: 'Demo Projects', icon: Building2 },
+  resource_catalog: { labelKey: 'marketplace.category_resource_catalog', defaultLabel: 'Resource Catalogs', icon: Boxes },
+  cost_database: { labelKey: 'marketplace.category_cost_database', defaultLabel: 'Cost Databases', icon: Database },
+  vector_index: { labelKey: 'marketplace.category_vector_index', defaultLabel: 'Vector Indices', icon: Sparkles },
+  language: { labelKey: 'marketplace.category_language', defaultLabel: 'Languages', icon: Globe },
+  converter: { labelKey: 'marketplace.category_converter', defaultLabel: 'Converters', icon: FileInput },
+  analytics: { labelKey: 'marketplace.category_analytics', defaultLabel: 'Analytics', icon: BarChart3 },
+  integration: { labelKey: 'marketplace.category_integration', defaultLabel: 'Integrations', icon: Plug },
+};
+
+const CATEGORY_KEYS = Object.keys(CATEGORIES) as CategoryKey[];
+
+/* ── Helpers ───────────────────────────────────────────────────────────── */
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Database, Sparkles, Globe, FileInput, BarChart3, Plug, Building2, Boxes,
+  Calculator, ClipboardList, Pencil,
+};
+
+function getModuleIcon(iconName: string): LucideIcon {
+  return ICON_MAP[iconName] ?? Package;
+}
+
+function formatSize(sizeMb: number): string {
+  if (sizeMb < 1) return `${Math.round(sizeMb * 1024)} KB`;
+  if (sizeMb >= 1024) return `${fmtFixed(sizeMb / 1024, 1)} GB`;
+  return `${fmtFixed(sizeMb, 1)} MB`;
+}
+
+/* ── Module category display config ────────────────────────────────────── */
+
+const MODULE_CATEGORY_ORDER = [
+  'core',
+  'estimation',
+  'planning',
+  'procurement',
+  'finance',
+  'commercial',
+  'contracts',
+  'bim',
+  'ai',
+  'analytics',
+  'quality',
+  'safety',
+  'field',
+  'communication',
+  'documentation',
+  'integration',
+  'converter',
+  'tools',
+  'regional',
+] as const;
+
+const MODULE_CATEGORY_META: Record<string, { labelKey: string; defaultLabel: string }> = {
+  core: { labelKey: 'modules.cat_core', defaultLabel: 'Core' },
+  estimation: { labelKey: 'nav.group_estimation', defaultLabel: 'Estimation' },
+  planning: { labelKey: 'nav.group_planning', defaultLabel: 'Planning' },
+  procurement: { labelKey: 'nav.group_procurement', defaultLabel: 'Procurement' },
+  finance: { labelKey: 'modules.cat_finance', defaultLabel: 'Finance' },
+  commercial: { labelKey: 'modules.cat_commercial', defaultLabel: 'Commercial' },
+  contracts: { labelKey: 'modules.cat_contracts', defaultLabel: 'Contracts' },
+  bim: { labelKey: 'modules.cat_bim', defaultLabel: 'BIM' },
+  ai: { labelKey: 'modules.cat_ai', defaultLabel: 'AI' },
+  analytics: { labelKey: 'modules.cat_analytics', defaultLabel: 'Analytics' },
+  quality: { labelKey: 'modules.cat_quality', defaultLabel: 'Quality' },
+  safety: { labelKey: 'modules.cat_safety', defaultLabel: 'Safety' },
+  field: { labelKey: 'modules.cat_field', defaultLabel: 'Field Operations' },
+  communication: { labelKey: 'modules.cat_communication', defaultLabel: 'Communication' },
+  documentation: { labelKey: 'modules.cat_documentation', defaultLabel: 'Documentation' },
+  integration: { labelKey: 'modules.cat_integration', defaultLabel: 'Integration' },
+  converter: { labelKey: 'modules.cat_converter', defaultLabel: 'CAD / BIM Converters' },
+  tools: { labelKey: 'nav.group_tools', defaultLabel: 'Tools' },
+  regional: { labelKey: 'modules.cat_regional', defaultLabel: 'Regional Standards' },
+};
+
+/**
+ * The wording for a backend category.
+ *
+ * The map above covers the categories the frontend registry uses; the server
+ * ships several it has never heard of (`business`, `extension`, `controls`,
+ * `enterprise` and more). Those fall back to the raw value rather than
+ * disappearing, which is also what the module card has always printed, so the
+ * chip and the card under it read the same.
+ */
+function moduleCategoryLabel(
+  category: string,
+  t: (key: string, options: { defaultValue: string }) => string,
+): string {
+  const meta = MODULE_CATEGORY_META[category];
+  return meta ? t(meta.labelKey, { defaultValue: meta.defaultLabel }) : category;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* ── Main component ──────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+export function ModulesPage() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Deep-link support: ``/modules?tab=packs`` (new) and the legacy
+  // ``/modules?tab=partner-packs`` (dashboard co-brand banner) both open the
+  // Packs tab directly. Falls back to Company Profiles.
+  const [activeTab, setActiveTab] = useState<TabKey>(
+    () => resolveTabParam(searchParams.get('tab')) ?? 'profiles',
+  );
+  // The tab is written back to the URL so the Packs tab's filters, which live
+  // in the query string, survive a reload on the tab they belong to.
+  const selectTab = useCallback(
+    (tab: TabKey) => {
+      setActiveTab(tab);
+      setSearchParams(
+        tab === 'profiles' ? {} : { tab: tab === 'partner-packs' ? 'packs' : tab },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
+  const onTabKeyDown = useTabKeyboardNav<TabKey>({
+    ids: MODULE_TAB_IDS,
+    activeId: activeTab,
+    onChange: selectTab,
+    orientation: 'horizontal',
+  });
+
+  // Finding a module by name. The field sits above the tab bar, not inside the
+  // System Modules panel, because the reader who cannot find a module is by
+  // definition on the wrong tab - the page opens on Company Profiles and the
+  // modules are three tabs away. Typing therefore also opens the panel that
+  // holds the answer: a search that returns nothing because the match lives
+  // elsewhere is the very failure this replaces.
+  const [moduleQuery, setModuleQuery] = useState('');
+  const handleModuleQuery = (value: string): void => {
+    setModuleQuery(value);
+    if (value.trim() && activeTab !== 'system') selectTab('system');
+  };
+
+  // ``?tab=packs&pack=<slug>`` names one pack: a case page or the onboarding
+  // offer already knows which. Its home is now the pack's own page, which
+  // opens the same setup dialog the card used to.
+  const linkedPack = searchParams.get('pack');
+  if (linkedPack && resolveTabParam(searchParams.get('tab')) === 'partner-packs') {
+    return <Navigate to={`/packs/${encodeURIComponent(linkedPack)}?setup=1`} replace />;
+  }
+
+  return (
+    <div className="space-y-5 animate-fade-in">
+      <Breadcrumb items={[{ label: t('nav.modules', 'Modules') }]} />
+
+      {/* Header */}
+      <PageHeader
+        className="animate-card-in"
+        srTitle={t('nav.modules', 'Modules')}
+        subtitle={t('modules.page_subtitle', {
+          defaultValue: 'Manage your company profile, data packages, and system modules.',
+        })}
+        actions={
+          <>
+            {/* How it works guide - explains the four tabs and the
+                profiles / packs / data-packages / system-modules flow.
+                Sits at the head of the action cluster as the leading help pill. */}
+            <ModuleGuideButton content={modulesGuide} />
+            <Link
+              to="/modules/developer-guide"
+              className="inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-oe-blue/30 bg-oe-blue/5 text-xs font-medium text-oe-blue hover:bg-oe-blue/10 hover:border-oe-blue/50 transition-colors shrink-0"
+              title={t('modules.dev_guide_hint', {
+                defaultValue: 'Learn how to build your own module',
+              })}
+            >
+              <Info size={14} />
+              {t('modules.dev_guide', { defaultValue: 'Build a module - developer guide' })}
+            </Link>
+          </>
+        }
+      />
+
+      {/* Canonical module intro — pain-named, copy from MODULE_INTRO_COPY. */}
+      <DismissibleInfo
+        storageKey="modules"
+        title={t('modules.intro_title', {
+          defaultValue: 'Show only the tools this company needs',
+        })}
+        more={
+          t('modules.intro_more_profiles', { defaultValue: '' })
+            ? <IntroRichText text={t('modules.intro_more_profiles')} />
+            : undefined
+        }
+        links={[
+          {
+            label: t('nav.setup_databases', { defaultValue: 'Databases & Resources' }),
+            onClick: () => navigate('/setup/databases'),
+          },
+          {
+            label: t('modules.dev_guide', { defaultValue: 'Developer guide' }),
+            onClick: () => navigate('/modules/developer-guide'),
+          },
+          { label: t('nav.settings', { defaultValue: 'Settings' }), onClick: () => navigate('/settings') },
+        ]}
+      >
+        {t('modules.intro_body_profiles', {
+          defaultValue:
+            'Pick a company profile to switch on the modules your company uses and switch off the rest. A profile with its own workspace also shapes the menu in Simple mode; otherwise the menu stays as it is. Apply a pack to load a ready-made preset for a country, industry, partner or showcase, and install data packages like cost databases, resource catalogues and languages from the marketplace. System modules lists everything currently loaded so you can see what is active and what an install would add.',
+        })}
+      </DismissibleInfo>
+
+      {/* Simple mode hides most of the sidebar regardless of what is enabled
+          below, so say so here rather than leaving the user to discover it by
+          switching a module on and finding no new menu entry. */}
+      <AdvancedModeNotice />
+
+      {/* Find a module — spans the page, lands you on the tab that answers. */}
+      <div className="max-w-md animate-card-in" style={{ animationDelay: '20ms' }}>
+        <Input
+          id="modules-find"
+          type="search"
+          label={t('modules.find_module', { defaultValue: 'Find a module' })}
+          placeholder={t('modules.find_module_placeholder', {
+            defaultValue: 'Find a module by name, for example Regional Pack',
+          })}
+          value={moduleQuery}
+          onChange={(e) => handleModuleQuery(e.target.value)}
+          icon={<Search size={16} />}
+        />
+        <InfoHint
+          inline
+          className="mt-1"
+          text={t('modules.find_module_hint', {
+            defaultValue:
+              'Searches every backend module by name, id and category, in the language you are reading. Results open on the System Modules tab.',
+          })}
+        />
+      </div>
+
+      {/* Tab bar */}
+      <div
+        className="flex gap-1 rounded-lg bg-surface-secondary p-1 animate-card-in"
+        role="tablist"
+        aria-label={t('modules.tabs', { defaultValue: 'Module sections' })}
+        onKeyDown={onTabKeyDown}
+        style={{ animationDelay: '30ms' }}
+      >
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              onClick={() => selectTab(tab.key)}
+              role="tab"
+              id={`modules-tab-${tab.key}`}
+              aria-selected={isActive}
+              aria-controls={`modules-panel-${tab.key}`}
+              tabIndex={isActive ? 0 : -1}
+              className={clsx(
+                'flex-1 inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-all duration-fast',
+                isActive
+                  ? 'bg-surface-elevated text-content-primary shadow-xs'
+                  : 'text-content-secondary hover:text-content-primary',
+              )}
+            >
+              <Icon size={16} />
+              {t(tab.labelKey, { defaultValue: tab.defaultLabel })}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab content */}
+      <div
+        role="tabpanel"
+        id={`modules-panel-${activeTab}`}
+        aria-labelledby={`modules-tab-${activeTab}`}
+      >
+        {activeTab === 'profiles' && <CompanyProfilesTab />}
+        {activeTab === 'partner-packs' && <PacksCatalog embedded />}
+        {activeTab === 'data-packages' && <DataPackagesTab />}
+        {activeTab === 'system' && (
+          <SystemModulesTab query={moduleQuery} onClearQuery={() => setModuleQuery('')} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* ── Tab 1: Company Profiles ─────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+function CompanyProfilesTab() {
+  const { t } = useTranslation();
+  const { isModuleEnabled, setModuleEnabled, canDisable, getEnabledDependents } = useModuleStore();
+  const profiles = useCompanyProfiles();
+  const { presets, presetsLoading, presetsError, refetchPresets, shapes, activeProfileKey, activePreset } = profiles;
+  const activeModuleCount = activePreset?.module_count ?? 0;
+
+  return (
+    <div className="animate-card-in" style={{ animationDelay: '60ms' }}>
+      {/* Current profile banner */}
+      {activePreset && (
+        <div className="mb-6 rounded-xl border border-oe-blue/20 bg-oe-blue-subtle px-5 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-oe-blue/10 text-oe-blue">
+                {(() => { const Icon = getPresetIcon(activePreset.icon); return <Icon size={20} />; })()}
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-content-primary">
+                  {t('modules.current_profile', { defaultValue: 'Current Profile' })}:{' '}
+                  {t(`onboarding.company_${activePreset.key}`, { defaultValue: activePreset.label })}
+                </p>
+                <p className="text-xs text-content-secondary">
+                  {activeModuleCount} {t('modules.modules_active_label', { defaultValue: 'modules active' })}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Profile cards grid */}
+      <h2 className="text-sm font-semibold text-content-secondary uppercase tracking-wider mb-3">
+        {t('modules.choose_profile', { defaultValue: 'Company Profiles' })}
+      </h2>
+
+      {presetsLoading ? (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Card key={i} className="animate-pulse" padding="sm">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-surface-secondary" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-2/3 rounded bg-surface-secondary" />
+                  <div className="h-3 w-full rounded bg-surface-secondary" />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : presetsError ? (
+        <div className="py-12 text-center">
+          <AlertTriangle size={36} className="mx-auto mb-3 text-semantic-warning" strokeWidth={1.5} />
+          <p className="text-sm font-medium text-content-secondary">
+            {t('modules.profiles_load_failed', { defaultValue: 'Failed to load profiles' })}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<RefreshCw size={14} />}
+            onClick={() => void refetchPresets()}
+            className="mt-3"
+          >
+            {t('common.retry', { defaultValue: 'Retry' })}
+          </Button>
+        </div>
+      ) : !presets || presets.length === 0 ? (
+        <div className="py-12 text-center">
+          <Users size={36} className="mx-auto mb-3 text-content-tertiary" />
+          <p className="text-sm font-medium text-content-secondary">
+            {t('modules.no_profiles', { defaultValue: 'No company profiles available' })}
+          </p>
+          <p className="mt-1 text-xs text-content-tertiary">
+            {t('modules.no_profiles_hint', { defaultValue: 'Profiles help pre-configure which modules are active for your company type.' })}
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {sortPresets(presets).map((preset) => (
+            <CompanyProfileCard
+              key={preset.key}
+              preset={preset}
+              isActive={preset.key === activeProfileKey}
+              shape={shapes.get(preset.key)}
+              onSelect={profiles.requestSwitch}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Active module toggles */}
+      <div className="mt-10">
+        <ModuleTogglesSection
+          isModuleEnabled={isModuleEnabled}
+          setModuleEnabled={setModuleEnabled}
+          canDisable={canDisable}
+          getEnabledDependents={getEnabledDependents}
+        />
+      </div>
+
+      <ProfileSwitchDialog state={profiles} />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* ── Module Toggles Section (shared between profiles tab) ────────────── */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+interface ModuleTogglesSectionProps {
+  isModuleEnabled: (key: string) => boolean;
+  setModuleEnabled: (key: string, enabled: boolean) => void;
+  canDisable: (key: string) => { allowed: boolean; blockedBy: string[] };
+  getEnabledDependents: (key: string) => string[];
+}
+
+export function ModuleTogglesSection({
+  isModuleEnabled,
+  setModuleEnabled,
+  canDisable,
+  getEnabledDependents,
+}: ModuleTogglesSectionProps) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const grouped = getModulesByCategory();
+
+  function handleToggle(key: string, name: string, currentlyEnabled: boolean) {
+    if (currentlyEnabled) {
+      const { allowed, blockedBy } = canDisable(key);
+      if (!allowed) {
+        addToast({
+          type: 'warning',
+          title: t('modules.cannot_disable', { defaultValue: 'Cannot disable' }),
+          message: t('modules.required_by', {
+            defaultValue: '{{name}} is required by: {{deps}}',
+            name,
+            deps: fmtList(blockedBy),
+          }),
+        });
+        return;
+      }
+    }
+    setModuleEnabled(key, !currentlyEnabled);
+    addToast({
+      type: 'success',
+      title: !currentlyEnabled
+        ? t('modules.enabled', { defaultValue: '{{name}} enabled', name })
+        : t('modules.disabled', { defaultValue: '{{name}} disabled', name }),
+    });
+  }
+
+  const totalActive = MODULE_CATEGORY_ORDER.reduce((sum, cat) => {
+    const mods = grouped[cat];
+    return sum + (mods?.filter((m) => isModuleEnabled(m.id)).length ?? 0);
+  }, 0);
+
+  const totalMods = MODULE_CATEGORY_ORDER.reduce((sum, cat) => {
+    return sum + (grouped[cat]?.length ?? 0);
+  }, 0);
+
+  return (
+    <div>
+      <div className="mb-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-sm font-semibold text-content-secondary uppercase tracking-wider mb-0.5">
+            {t('modules.active_modules', { defaultValue: 'Active Modules' })} ({totalActive})
+          </h2>
+          <p className="text-xs text-content-tertiary">
+            {t('modules.section_desc', {
+              defaultValue: 'Toggle optional features on or off. Disabled modules are hidden from the sidebar.',
+            })}
+          </p>
+        </div>
+        <span className="text-xs text-content-quaternary">
+          {totalActive}/{totalMods}
+        </span>
+      </div>
+
+      <div className="space-y-6">
+        {MODULE_CATEGORY_ORDER.map((cat) => {
+          const mods = grouped[cat];
+          if (!mods || mods.length === 0) return null;
+          const catMeta = MODULE_CATEGORY_META[cat] ?? { labelKey: cat, defaultLabel: cat };
+
+          return (
+            <div key={cat}>
+              <div className="flex items-center gap-2 mb-2.5">
+                <h3 className="text-xs font-semibold text-content-primary">
+                  {t(catMeta.labelKey, { defaultValue: catMeta.defaultLabel })}
+                </h3>
+                <div className="flex-1 h-px bg-border-light" />
+                <span className="text-2xs text-content-quaternary">
+                  {mods.filter((m) => isModuleEnabled(m.id)).length}/{mods.length}{' '}
+                  {t('modules.active_count', { defaultValue: 'active' })}
+                </span>
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {mods.map((mod) => {
+                  const Icon = mod.icon;
+                  const enabled = isModuleEnabled(mod.id);
+                  const deps = mod.depends ?? [];
+                  const dependents = getEnabledDependents(mod.id);
+                  const displayName = translateManifestText(t, mod.name);
+                  const displayDesc = translateManifestText(t, mod.description);
+
+                  return (
+                    <ModuleToggleCard
+                      key={mod.id}
+                      icon={Icon}
+                      name={displayName}
+                      description={displayDesc}
+                      version={mod.version}
+                      enabled={enabled}
+                      onToggle={() => handleToggle(mod.id, displayName, enabled)}
+                      deps={deps}
+                      dependents={dependents}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* ── Tab 2: Data Packages ────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+function DataPackagesTab() {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const { confirm, ...confirmProps } = useConfirm();
+  const [activeCategory, setActiveCategory] = useState<CategoryKey>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [marketplaceLimit, setMarketplaceLimit] = useState(12);
+  const [installingId, setInstallingId] = useState<string | null>(null);
+
+  const { data: modules, isLoading, isError: marketplaceError, refetch: refetchMarketplace } = useQuery({
+    queryKey: ['marketplace'],
+    queryFn: () => apiGet<MarketplaceModule[]>('/marketplace'),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+  });
+
+  const { data: demoStatus } = useQuery({
+    queryKey: ['demo-status'],
+    queryFn: () => apiGet<Record<string, boolean>>('/demo/status'),
+  });
+
+  const filtered = useMemo(() => {
+    if (!modules) return [];
+    const query = searchQuery.toLowerCase().trim();
+    return modules.filter((mod) => {
+      const matchesCategory = activeCategory === 'all' || mod.category === activeCategory;
+      const matchesSearch =
+        !query ||
+        mod.name.toLowerCase().includes(query) ||
+        mod.description.toLowerCase().includes(query) ||
+        mod.tags.some((tag) => tag.toLowerCase().includes(query)) ||
+        mod.author.toLowerCase().includes(query);
+      return matchesCategory && matchesSearch;
+    });
+  }, [modules, activeCategory, searchQuery]);
+
+  const categoryCounts = useMemo(() => {
+    if (!modules) return {} as Record<CategoryKey, number>;
+    const counts: Record<string, number> = { all: modules.length };
+    for (const mod of modules) {
+      counts[mod.category] = (counts[mod.category] ?? 0) + 1;
+    }
+    return counts as Record<CategoryKey, number>;
+  }, [modules]);
+
+  const CATALOG_ID_TO_REGION: Record<string, string> = {
+    'catalog-ar-dubai': 'AR_DUBAI',
+    'catalog-de-berlin': 'DE_BERLIN',
+    'catalog-en-toronto': 'ENG_TORONTO',
+    'catalog-sp-barcelona': 'SP_BARCELONA',
+    'catalog-fr-paris': 'FR_PARIS',
+    'catalog-hi-mumbai': 'HI_MUMBAI',
+    'catalog-pt-saopaulo': 'PT_SAOPAULO',
+    'catalog-ru-stpetersburg': 'RU_STPETERSBURG',
+    'catalog-uk-gbp': 'UK_GBP',
+    'catalog-usa-usd': 'USA_USD',
+    'catalog-zh-shanghai': 'ZH_SHANGHAI',
+  };
+
+  async function handleInstallClick(mod: MarketplaceModule): Promise<void> {
+    switch (mod.category) {
+      case 'resource_catalog': {
+        const region = CATALOG_ID_TO_REGION[mod.id];
+        if (!region) {
+          addToast({ type: 'error', title: t('marketplace.unknown_region', { defaultValue: 'Unknown region' }), message: t('marketplace.no_region_mapping', { defaultValue: 'No region mapping for {{id}}', id: mod.id }) });
+          break;
+        }
+        setInstallingId(mod.id);
+        try {
+          const result = await apiPost<{ imported: number; skipped: number; region: string }>(`/v1/catalog/import/${region}`);
+          addToast({
+            type: 'success',
+            title: t('marketplace.catalog_imported', { defaultValue: 'Catalog imported' }),
+            message: t('marketplace.catalog_imported_message', { defaultValue: '{{imported}} resources imported, {{skipped}} skipped for {{region}}.', imported: result.imported, skipped: result.skipped, region: result.region }),
+          });
+          queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+          queryClient.invalidateQueries({ queryKey: ['catalog'] });
+        } catch (err) {
+          addToast({ type: 'error', title: t('marketplace.import_failed', { defaultValue: 'Import failed' }), message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }) });
+        } finally {
+          setInstallingId(null);
+        }
+        break;
+      }
+      case 'cost_database':
+        navigate('/costs/import');
+        break;
+      case 'vector_index': {
+        const VECTOR_ID_TO_DB: Record<string, string> = {
+          'vector-usa-usd': 'USA_USD', 'vector-uk-gbp': 'UK_GBP',
+          'vector-de-berlin': 'DE_BERLIN', 'vector-eng-toronto': 'ENG_TORONTO',
+          'vector-fr-paris': 'FR_PARIS', 'vector-sp-barcelona': 'SP_BARCELONA',
+          'vector-pt-saopaulo': 'PT_SAOPAULO', 'vector-ru-stpetersburg': 'RU_STPETERSBURG',
+          'vector-ar-dubai': 'AR_DUBAI', 'vector-zh-shanghai': 'ZH_SHANGHAI',
+          'vector-hi-mumbai': 'HI_MUMBAI',
+        };
+        const dbId = VECTOR_ID_TO_DB[mod.id];
+        if (!dbId) {
+          addToast({ type: 'error', title: t('marketplace.unknown_region', { defaultValue: 'Unknown region' }), message: t('marketplace.no_region_mapping', { defaultValue: 'No region mapping for {{id}}', id: mod.id }) });
+          break;
+        }
+        setInstallingId(mod.id);
+
+        // Probe embedder load state. If the model isn't resident yet,
+        // surface a "Downloading model from HuggingFace..." hint so the
+        // user understands why the install spinner is sitting on a
+        // multi-hundred-MB cold start. Polled in parallel with the
+        // install request; gives up after 60 s or once the install
+        // request completes.
+        let downloadPollAlive = true;
+        let downloadHintShown = false;
+        void (async () => {
+          const pollStart = Date.now();
+          while (downloadPollAlive && Date.now() - pollStart < 60_000) {
+            try {
+              const ds = await apiGet<{ model: string; status: string; dimension: number }>(
+                '/v1/costs/vector/download-status/',
+              );
+              if (ds.status === 'ready') break;
+              if (!downloadHintShown) {
+                downloadHintShown = true;
+                addToast({
+                  type: 'info',
+                  title: t('marketplace.embedder_downloading', {
+                    defaultValue: 'Downloading model from HuggingFace…',
+                  }),
+                  message: t('marketplace.embedder_downloading_hint', {
+                    defaultValue:
+                      'First install pulls the embedding model ({{model}}). This can take a minute on slow connections.',
+                    model: ds.model,
+                  }),
+                });
+              }
+            } catch {
+              // Endpoint not reachable yet — skip this tick, keep polling.
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+          }
+        })();
+
+        try {
+          const status = await apiGet<{ backend: string; connected: boolean; can_restore_snapshots: boolean; can_generate_locally: boolean }>('/v1/costs/vector/status/');
+          let vecIndexed = 0;
+          if (status.can_restore_snapshots) {
+            // The restore runs on the server's own budget - 600s to download
+            // ~1.1 GB plus 1800s to hand it to Qdrant - and the handler never
+            // checks whether the browser is still there. On the default 45s a
+            // successful restore could only ever be reported as a failure. The
+            // wrapper's own timeout toast is suppressed because the catch here
+            // reports this call in both directions.
+            let restore: SnapshotRestoreResponse | undefined;
+            try {
+              restore = await apiPost<SnapshotRestoreResponse>(
+                `/v1/costs/vector/restore-snapshot/${dbId}`,
+                undefined,
+                { timeoutMs: SNAPSHOT_RESTORE_TIMEOUT_MS, suppressTimeoutToast: true },
+              );
+            } catch (restoreErr: unknown) {
+              // We stopped listening, the server did not stop working, and no
+              // endpoint reports the per-region collection a restore writes -
+              // so there is nothing to poll and nowhere to send the user. Say
+              // that, rather than reporting an import failure that did not
+              // happen.
+              if (!mayStillBeRunning(restoreErr)) throw restoreErr;
+              addToast({
+                type: 'info',
+                title: t('costs.snapshot_restore_running_title', { defaultValue: 'Snapshot restore still running' }),
+                message: t('costs.snapshot_restore_running_msg', {
+                  defaultValue:
+                    'The server keeps downloading and restoring the snapshot after the browser stops waiting, so nothing was cancelled. A snapshot this size can take well over half an hour.',
+                }),
+              });
+              break;
+            }
+            // Read `vectors_count`: the restore endpoint returns no `indexed`
+            // field at all, so the old read defaulted to 0 and announced "the
+            // backend indexed 0 vectors" at the end of every restore that
+            // worked.
+            const outcome = describeSnapshotRestore(restore);
+            if (outcome.kind !== 'not_restored') {
+              addToast({
+                type: 'success',
+                title: t('marketplace.vector_imported', { defaultValue: 'Vector index loaded' }),
+                message:
+                  outcome.kind === 'restored'
+                    ? t('marketplace.vector_ready_count', {
+                        defaultValue: '{{count}} vectors ready for {{region}}',
+                        count: outcome.vectors,
+                        region: dbId,
+                      })
+                    : t('costs.snapshot_restored_no_count', {
+                        defaultValue:
+                          'The snapshot was restored. The vector database did not report how many vectors it holds.',
+                      }),
+              });
+              queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+              queryClient.invalidateQueries({ queryKey: ['vector-status'] });
+              break;
+            }
+          } else if (status.connected) {
+            const vecRes = await apiPost<{ restored?: boolean; indexed?: number; database?: string; duration_seconds?: number }>(`/v1/costs/vector/load-github/${dbId}`);
+            // `load-github` reports its result in `indexed`, which is a
+            // different field from the restore endpoint's `vectors_count`.
+            // The POST can return ``indexed: 0`` when the backend is reachable
+            // but could not actually build the index (no embedding model, or
+            // an empty snapshot). Reflect that truthfully instead of always
+            // claiming success.
+            vecIndexed = vecRes?.indexed ?? 0;
+          } else {
+            throw new Error(t('marketplace.no_vector_backend', { defaultValue: 'No vector database available. Install LanceDB (pip install lancedb) or start Qdrant (docker run -p 6333:6333 qdrant/qdrant)' }));
+          }
+          if (vecIndexed > 0) {
+            addToast({
+              type: 'success',
+              title: t('marketplace.vector_imported', { defaultValue: 'Vector index loaded' }),
+              message: t('marketplace.vector_ready_count', {
+                defaultValue: '{{count}} vectors ready for {{region}}',
+                count: vecIndexed,
+                region: dbId,
+              }),
+            });
+          } else {
+            addToast({
+              type: 'info',
+              title: t('marketplace.vector_no_index', { defaultValue: 'No vectors indexed' }),
+              message: t('marketplace.vector_no_index_message', {
+                defaultValue:
+                  'The vector backend is reachable but indexed 0 vectors for {{region}}. The embedding model is likely unavailable here, so semantic cost search stays limited until vectors are generated.',
+                region: dbId,
+              }),
+            });
+          }
+          queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+          queryClient.invalidateQueries({ queryKey: ['vector-status'] });
+        } catch (err) {
+          addToast({ type: 'error', title: t('marketplace.import_failed', { defaultValue: 'Import failed' }), message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }) });
+        } finally {
+          downloadPollAlive = false;
+          setInstallingId(null);
+        }
+        break;
+      }
+      case 'demo_project': {
+        const demoId = mod.id.replace('demo-', '');
+        setInstallingId(mod.id);
+        try {
+          const result = await apiPost<{ project_id: string; project_name: string; already_installed?: boolean }>(`/demo/install/${demoId}`);
+          if (result.already_installed) {
+            addToast({
+              type: 'info',
+              title: t('marketplace.demo_already_installed', { defaultValue: 'Already installed' }),
+              message: t('marketplace.demo_already_installed_message', {
+                defaultValue: '{{name}} is already installed. Opening existing project.',
+                name: result.project_name,
+              }),
+            });
+          } else {
+            addToast({ type: 'success', title: t('marketplace.demo_installed', { defaultValue: 'Demo installed' }), message: t('marketplace.demo_installed_message', { defaultValue: '{{name}} created with full BOQ, schedule, budget, and tendering.', name: result.project_name }) });
+          }
+          queryClient.invalidateQueries({ queryKey: ['demo-status'] });
+          queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+          invalidateProjectLists(queryClient);
+          navigate(`/projects/${result.project_id}`);
+        } catch (err) {
+          addToast({ type: 'error', title: t('marketplace.install_failed', { defaultValue: 'Install failed' }), message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }) });
+        } finally {
+          setInstallingId(null);
+        }
+        break;
+      }
+      case 'integration':
+        navigate('/settings');
+        break;
+    }
+  }
+
+  async function handleUninstallDemo(demoId: string): Promise<void> {
+    const confirmed = await confirm({
+      title: t('marketplace.uninstall_demo_confirm_title', { defaultValue: 'Uninstall demo?' }),
+      message: t('marketplace.uninstall_demo_confirm', {
+        defaultValue: 'Are you sure you want to uninstall this demo project? All associated data will be deleted.',
+      }),
+      confirmLabel: t('marketplace.uninstall', { defaultValue: 'Uninstall' }),
+    });
+    if (!confirmed) return;
+    setInstallingId(`demo-${demoId}`);
+    try {
+      const result = await apiDelete<{ deleted_projects: number }>(`/demo/uninstall/${demoId}`);
+      addToast({
+        type: 'success',
+        title: t('marketplace.demo_uninstalled', { defaultValue: 'Demo uninstalled' }),
+        message: t('marketplace.demo_uninstalled_message', { defaultValue: '{{count}} project(s) removed.', count: result.deleted_projects }),
+      });
+      queryClient.invalidateQueries({ queryKey: ['demo-status'] });
+      queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+      invalidateProjectLists(queryClient);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('marketplace.uninstall_failed', { defaultValue: 'Uninstall failed' }),
+        message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }),
+      });
+    } finally {
+      setInstallingId(null);
+    }
+  }
+
+  async function handleReinstallDemo(demoId: string): Promise<void> {
+    const confirmed = await confirm({
+      title: t('marketplace.reinstall_demo_confirm_title', { defaultValue: 'Reinstall demo?' }),
+      message: t('marketplace.reinstall_demo_confirm', {
+        defaultValue: 'This will delete the existing demo project and create a fresh copy. All changes you made to the demo will be lost.',
+      }),
+      confirmLabel: t('marketplace.reinstall', { defaultValue: 'Reinstall' }),
+    });
+    if (!confirmed) return;
+    setInstallingId(`demo-${demoId}`);
+    try {
+      const result = await apiPost<{ project_id: string; project_name: string }>(`/demo/install/${demoId}?force=true`);
+      addToast({
+        type: 'success',
+        title: t('marketplace.demo_reinstalled', { defaultValue: 'Demo reinstalled' }),
+        message: t('marketplace.demo_reinstalled_message', {
+          defaultValue: '{{name}} has been recreated with fresh data.',
+          name: result.project_name,
+        }),
+      });
+      queryClient.invalidateQueries({ queryKey: ['demo-status'] });
+      queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+      invalidateProjectLists(queryClient);
+      navigate(`/projects/${result.project_id}`);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('marketplace.reinstall_failed', { defaultValue: 'Reinstall failed' }),
+        message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }),
+      });
+    } finally {
+      setInstallingId(null);
+    }
+  }
+
+  async function handleClearAllDemos(): Promise<void> {
+    const confirmed = await confirm({
+      title: t('marketplace.clear_all_demos_confirm_title', { defaultValue: 'Clear all demos?' }),
+      message: t('marketplace.clear_all_demos_confirm', {
+        defaultValue: 'Are you sure you want to remove ALL demo projects and their data? This cannot be undone.',
+      }),
+    });
+    if (!confirmed) return;
+    try {
+      const result = await apiDelete<{ deleted_projects: number }>('/demo/clear-all');
+      addToast({
+        type: 'success',
+        title: t('marketplace.demos_cleared', { defaultValue: 'Demo data cleared' }),
+        message: t('marketplace.demos_cleared_message', { defaultValue: '{{count}} demo project(s) removed.', count: result.deleted_projects }),
+      });
+      queryClient.invalidateQueries({ queryKey: ['demo-status'] });
+      queryClient.invalidateQueries({ queryKey: ['marketplace'] });
+      invalidateProjectLists(queryClient);
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('marketplace.clear_failed', { defaultValue: 'Clear failed' }),
+        message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }),
+      });
+    }
+  }
+
+  return (
+    <div className="animate-card-in" style={{ animationDelay: '60ms' }}>
+      {/* Installed packages summary */}
+      {modules && modules.filter((m) => m.installed).length > 0 && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-semibold text-content-tertiary uppercase tracking-wider">
+              {t('marketplace.my_modules', { defaultValue: 'Installed Packages' })}
+            </h3>
+            {demoStatus && Object.values(demoStatus).some(Boolean) && (
+              <Button variant="ghost" size="sm" icon={<Trash2 size={14} />} onClick={() => void handleClearAllDemos()}>
+                {t('marketplace.clear_demo_data', { defaultValue: 'Clear All Demo Data' })}
+              </Button>
+            )}
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {modules.filter((m) => m.installed).map((mod) => {
+              const Icon = getModuleIcon(mod.icon);
+              const statusBadge = getInstalledModuleBadge(mod, t);
+              return (
+                <div
+                  key={mod.id}
+                  className="flex items-center gap-3 rounded-lg border border-border-light bg-surface-elevated px-3 py-2.5 transition-all hover:border-border"
+                >
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-semantic-success-bg text-semantic-success dark:text-emerald-400">
+                    <Icon size={15} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-xs font-medium text-content-primary truncate block">{mod.name}</span>
+                    <span className="text-2xs text-content-tertiary">{statusBadge.subtitle}</span>
+                  </div>
+                  {statusBadge.type === 'badge' ? (
+                    <Badge variant="success" size="sm"><Check size={10} className="mr-0.5" />{statusBadge.label}</Badge>
+                  ) : statusBadge.type === 'manage' ? (
+                    <Button variant="secondary" size="sm" onClick={() => navigate('/costs/import')}>
+                      {t('marketplace.manage', 'Manage')}
+                    </Button>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Available packages header */}
+      <h2 className="text-sm font-semibold text-content-secondary uppercase tracking-wider mb-3 mt-4">
+        {t('marketplace.available', { defaultValue: 'Data Packages & Add-ons' })}
+      </h2>
+
+      {/* Search */}
+      <div className="mb-6 max-w-md">
+        <Input
+          aria-label={t('marketplace.search_packages', { defaultValue: 'Search packages' })}
+          placeholder={t('marketplace.search_placeholder', { defaultValue: 'Search packages...' })}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          icon={<Search size={16} />}
+        />
+      </div>
+
+      {/* Category tabs */}
+      <div className="mb-6 flex flex-wrap gap-2">
+        {CATEGORY_KEYS.map((key) => {
+          const meta = CATEGORIES[key];
+          const Icon = meta.icon;
+          const isActive = activeCategory === key;
+          const count = categoryCounts[key] ?? 0;
+          return (
+            <button
+              key={key}
+              onClick={() => setActiveCategory(key)}
+              className={clsx(
+                'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-all duration-fast ease-oe',
+                isActive
+                  ? 'bg-oe-blue text-content-inverse shadow-xs'
+                  : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary hover:text-content-primary',
+              )}
+            >
+              <Icon size={14} strokeWidth={1.75} />
+              <span>{t(meta.labelKey, { defaultValue: meta.defaultLabel })}</span>
+              {count > 0 && (
+                <span
+                  className={clsx(
+                    'ml-0.5 text-2xs font-semibold rounded-full px-1.5',
+                    isActive ? 'bg-white/20 text-content-inverse' : 'bg-surface-primary text-content-tertiary',
+                  )}
+                >
+                  {count}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Module grid */}
+      {isLoading ? (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <Card key={i} className="animate-pulse">
+              <div className="flex items-start gap-3">
+                <div className="h-11 w-11 rounded-xl bg-surface-secondary" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-2/3 rounded bg-surface-secondary" />
+                  <div className="h-3 w-full rounded bg-surface-secondary" />
+                  <div className="h-3 w-1/2 rounded bg-surface-secondary" />
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      ) : marketplaceError ? (
+        <div className="py-16 text-center">
+          <AlertTriangle size={40} className="mx-auto mb-3 text-semantic-warning" strokeWidth={1.5} />
+          <p className="text-sm font-medium text-content-secondary">
+            {t('marketplace.load_failed', { defaultValue: 'Failed to load marketplace' })}
+          </p>
+          <p className="mt-1 text-xs text-content-tertiary">
+            {t('marketplace.load_failed_hint', {
+              defaultValue: 'Check your connection and try again.',
+            })}
+          </p>
+          <Button
+            variant="secondary"
+            size="sm"
+            icon={<RefreshCw size={14} />}
+            onClick={() => void refetchMarketplace()}
+            className="mt-4"
+          >
+            {t('common.retry', { defaultValue: 'Retry' })}
+          </Button>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="py-16 text-center">
+          <Package size={40} className="mx-auto mb-3 text-content-tertiary" />
+          <p className="text-sm font-medium text-content-secondary">
+            {t('marketplace.no_results', { defaultValue: 'No modules found' })}
+          </p>
+          <p className="mt-1 text-xs text-content-tertiary">
+            {t('marketplace.no_results_hint', { defaultValue: 'Try adjusting your search or category filter.' })}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.slice(0, marketplaceLimit).map((mod, i) => {
+              const isDemoInstalled = mod.category === 'demo_project' && demoStatus?.[mod.id.replace('demo-', '')] === true;
+              return (
+                <MarketplaceCard
+                  key={mod.id}
+                  module={mod}
+                  index={i}
+                  isInstalling={installingId === mod.id}
+                  onInstall={() => void handleInstallClick(mod)}
+                  isDemoInstalled={isDemoInstalled}
+                  onUninstallDemo={
+                    mod.category === 'demo_project'
+                      ? () => void handleUninstallDemo(mod.id.replace('demo-', ''))
+                      : undefined
+                  }
+                  onReinstallDemo={
+                    mod.category === 'demo_project'
+                      ? () => void handleReinstallDemo(mod.id.replace('demo-', ''))
+                      : undefined
+                  }
+                />
+              );
+            })}
+          </div>
+          {filtered.length > marketplaceLimit && (
+            <div className="mt-6 text-center">
+              <Button variant="secondary" onClick={() => setMarketplaceLimit((prev) => prev + 12)}>
+                {t('marketplace.show_more', {
+                  defaultValue: 'Show more ({{remaining}} remaining)',
+                  remaining: filtered.length - marketplaceLimit,
+                })}
+              </Button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Community / Build Your Own */}
+      <div className="mt-12">
+        <Card>
+          <div className="relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/[0.05] via-indigo-500/[0.03] to-blue-500/[0.05]" />
+            <div className="relative p-6">
+              <div className="flex items-center gap-2 mb-3">
+                <Plug size={20} className="text-purple-500" />
+                <h2 className="text-lg font-semibold text-content-primary">
+                  {t('modules.community_title', { defaultValue: 'Build Your Own Module' })}
+                </h2>
+              </div>
+              <p className="text-sm text-content-secondary leading-relaxed mb-4">
+                {t('modules.community_desc', { defaultValue: 'OpenConstructionERP has a modular plugin architecture. Anyone can create custom modules - cost databases, regional standards, CAD converters, analytics dashboards, integrations with external systems, or any other functionality.' })}
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href="mailto:info@datadrivenconstruction.io?subject=OpenConstructionERP%20Module%20Proposal"
+                  className="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 transition-colors"
+                >
+                  <Package size={16} />
+                  {t('modules.community_submit_email', { defaultValue: 'Submit Module via Email' })}
+                </a>
+                <a
+                  href="https://github.com/datadrivenconstruction/OpenConstructionERP/issues/new?title=Module%20Proposal:%20&labels=module-proposal"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-secondary/80 transition-colors"
+                >
+                  <Info size={16} />
+                  {t('modules.community_submit_github', { defaultValue: 'Propose on GitHub' })}
+                </a>
+                <a
+                  href="https://t.me/datadrivenconstruction"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border border-border-light bg-surface-secondary px-4 py-2 text-sm font-medium text-content-primary hover:bg-surface-secondary/80 transition-colors"
+                >
+                  <Globe size={16} />
+                  {t('modules.community_telegram', { defaultValue: 'Discuss in Telegram' })}
+                </a>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+      <ConfirmDialog {...confirmProps} />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* ── Tab 3: System Modules ───────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+interface SystemModulesTabProps {
+  /** The page-level "Find a module" text. Owned above so it survives a tab switch. */
+  query: string;
+  onClearQuery: () => void;
+}
+
+function SystemModulesTab({ query, onClearQuery }: SystemModulesTabProps) {
+  const { t, i18n } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const queryClient = useQueryClient();
+  const userRole = useAuthStore((s) => s.userRole);
+  const isAdmin = userRole === 'admin';
+  const [togglingModule, setTogglingModule] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>(ALL_CATEGORIES);
+  const { confirm, ...confirmProps } = useConfirm();
+
+  const { data: systemModules, refetch, isLoading, isError: systemError } = useQuery({
+    queryKey: ['system-modules'],
+    queryFn: () => apiGet<SystemModule[]>('/v1/modules/'),
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
+
+  const enabledCount = systemModules?.filter((m) => m.enabled).length ?? 0;
+
+  // Module names arrive from the backend manifest in English. Everything the
+  // user reads goes through here so a name is translated in the card, in the
+  // confirm dialog and in the toast alike. A name translated in one of those
+  // and English in the next reads as two different modules.
+  const nameOf = (mod: SystemModule): string => resolveModuleDisplayName(mod, t, i18n.language);
+
+  // The same translation the card prints is what the search reads, so the word
+  // on screen is the word that works. `categoryLabel` is passed in rather than
+  // imported by the search module because the label map lives on this page.
+  const searchContext: ModuleSearchContext = useMemo(
+    () => ({
+      t,
+      language: i18n.language,
+      categoryLabel: (category: string) => moduleCategoryLabel(category, t),
+    }),
+    [t, i18n.language],
+  );
+
+  // Chips count the whole list, not the search result, so they stay put while
+  // the reader types instead of rearranging under the cursor.
+  const categoryTallies = useMemo(
+    () => tallyModuleCategories(systemModules ?? [], MODULE_CATEGORY_ORDER),
+    [systemModules],
+  );
+
+  const visibleModules = useMemo(
+    () => filterModules(systemModules ?? [], query, activeCategory, searchContext),
+    [systemModules, query, activeCategory, searchContext],
+  );
+
+  const isFiltered = query.trim().length > 0 || activeCategory !== ALL_CATEGORIES;
+
+  function clearFilters(): void {
+    setActiveCategory(ALL_CATEGORIES);
+    onClearQuery();
+  }
+
+  async function handleBackendToggle(mod: SystemModule): Promise<void> {
+    // Enabling/disabling a backend module is admin-only on the server
+    // (RequirePermission("admin")). Guard here so non-admins never fire a
+    // request that 403s — the toggle is also disabled in the UI for them.
+    if (!isAdmin) {
+      addToast({
+        type: 'warning',
+        title: t('modules.admin_only', { defaultValue: 'Admin only' }),
+        message: t('modules.admin_only_modules', {
+          defaultValue: 'Only administrators can enable or disable system modules.',
+        }),
+      });
+      return;
+    }
+    if (mod.is_core) {
+      addToast({
+        type: 'warning',
+        title: t('modules.cannot_disable', { defaultValue: 'Cannot disable' }),
+        message: t('modules.core_module_locked', {
+          defaultValue: '{{name}} is a core module and cannot be disabled.',
+          name: nameOf(mod),
+        }),
+      });
+      return;
+    }
+    // Disabling removes a backend plugin and can break dependent routes /
+    // require an app restart, so confirm first. Enabling is safe and stays
+    // immediate (mirrors the company-profile module-toggle guard pattern).
+    if (mod.enabled) {
+      const confirmed = await confirm({
+        title: t('modules.confirm_disable_system_title', {
+          defaultValue: 'Disable {{name}}?',
+          name: nameOf(mod),
+        }),
+        message: t('modules.confirm_disable_system', {
+          defaultValue:
+            'Disable {{name}}? This removes the module from the backend and may require an app restart.',
+          name: nameOf(mod),
+        }),
+        confirmLabel: t('common.disable', { defaultValue: 'Disable' }),
+        variant: 'warning',
+      });
+      if (!confirmed) return;
+    }
+    setTogglingModule(mod.name);
+    const action = mod.enabled ? 'disable' : 'enable';
+    try {
+      await apiPost<{ name: string; status: string }>(`/v1/modules/${mod.name}/${action}`);
+      addToast({
+        type: 'success',
+        title: action === 'enable'
+          ? t('modules.enabled', { defaultValue: '{{name}} enabled', name: nameOf(mod) })
+          : t('modules.disabled', { defaultValue: '{{name}} disabled', name: nameOf(mod) }),
+      });
+      // Invalidate the shared ['system-modules'] query so BOTH this tab and
+      // the Sidebar (which reads the same key to gate routes for disabled
+      // backend modules) refetch and stay in sync — without this, disabling
+      // a module left its sidebar route live and broken.
+      void queryClient.invalidateQueries({ queryKey: ['system-modules'] });
+    } catch (err) {
+      addToast({
+        type: 'error',
+        title: t('modules.toggle_failed', { defaultValue: 'Toggle failed' }),
+        message: err instanceof Error ? err.message : t('common.unknown_error', { defaultValue: 'Unknown error' }),
+      });
+    } finally {
+      setTogglingModule(null);
+    }
+  }
+
+  if (systemError) {
+    return (
+      <div className="py-16 text-center animate-card-in">
+        <AlertTriangle size={40} className="mx-auto mb-3 text-semantic-warning" strokeWidth={1.5} />
+        <p className="text-sm font-medium text-content-secondary">
+          {t('modules.system_load_failed', { defaultValue: 'Failed to load system modules' })}
+        </p>
+        <Button
+          variant="secondary"
+          size="sm"
+          icon={<RefreshCw size={14} />}
+          onClick={() => void refetch()}
+          className="mt-4"
+        >
+          {t('common.retry', { defaultValue: 'Retry' })}
+        </Button>
+      </div>
+    );
+  }
+
+  // Loading skeleton — keeps the empty-state ("No system modules loaded")
+  // from flashing during the initial fetch.
+  if (isLoading) {
+    return (
+      <div className="animate-card-in" style={{ animationDelay: '60ms' }}>
+        <div className="mb-4 space-y-1.5">
+          <div className="h-4 w-32 rounded bg-surface-secondary animate-pulse" />
+          <div className="h-3 w-2/3 rounded bg-surface-secondary animate-pulse" />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 9 }).map((_, i) => (
+            <Card key={i} className="animate-pulse" padding="sm">
+              <div className="flex items-center gap-2.5">
+                <div className="h-8 w-8 shrink-0 rounded-lg bg-surface-secondary" />
+                <div className="min-w-0 flex-1 space-y-1.5">
+                  <div className="h-3 w-2/3 rounded bg-surface-secondary" />
+                  <div className="h-2.5 w-1/3 rounded bg-surface-secondary" />
+                </div>
+                <div className="h-5 w-9 shrink-0 rounded-full bg-surface-secondary" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (!systemModules || systemModules.length === 0) {
+    return (
+      <div className="py-16 text-center animate-card-in">
+        <Server size={40} className="mx-auto mb-3 text-content-tertiary" />
+        <p className="text-sm font-medium text-content-secondary">
+          {t('modules.no_system_modules', { defaultValue: 'No system modules loaded' })}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="animate-card-in" style={{ animationDelay: '60ms' }}>
+      <div className="mb-4">
+        <p className="text-sm text-content-secondary">
+          {enabledCount}/{systemModules.length}{' '}
+          {t('marketplace.modules_enabled', { defaultValue: 'modules enabled' })}
+          {isFiltered && (
+            <span className="ml-2 text-content-tertiary">
+              {t('modules.system_match_count', {
+                defaultValue: '- {{shown}} of {{total}} shown',
+                shown: visibleModules.length,
+                total: systemModules.length,
+              })}
+            </span>
+          )}
+        </p>
+        <InfoHint
+          inline
+          className="mt-1"
+          text={t('modules.system_hint', {
+            defaultValue: 'System modules are backend plugins loaded from the server. Toggle non-core modules to enable or disable them.',
+          })}
+        />
+        {!isAdmin && (
+          <p className="mt-1.5 inline-flex items-center gap-1.5 text-2xs text-content-tertiary">
+            <ShieldCheck size={12} className="shrink-0" />
+            {t('modules.system_admin_only_hint', {
+              defaultValue: 'Only administrators can enable or disable system modules.',
+            })}
+          </p>
+        )}
+      </div>
+
+      {isAdmin && <ModulePackagesPanel />}
+
+      {/* Category chips. 14 regional packs are a group a reader thinks in, and
+          the list is far too long to scan without one. */}
+      <div className="mb-4 flex flex-wrap gap-2">
+        {[{ category: ALL_CATEGORIES, count: systemModules.length }, ...categoryTallies].map(
+          ({ category, count }) => {
+            const isActive = activeCategory === category;
+            return (
+              <button
+                key={category}
+                onClick={() => setActiveCategory(category)}
+                aria-pressed={isActive}
+                className={clsx(
+                  'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-fast ease-oe',
+                  isActive
+                    ? 'bg-oe-blue text-content-inverse shadow-xs'
+                    : 'bg-surface-secondary text-content-secondary hover:bg-surface-tertiary hover:text-content-primary',
+                )}
+              >
+                <span>
+                  {category === ALL_CATEGORIES
+                    ? t('marketplace.category_all', { defaultValue: 'All' })
+                    : moduleCategoryLabel(category, t)}
+                </span>
+                <span
+                  className={clsx(
+                    'ml-0.5 text-2xs font-semibold rounded-full px-1.5',
+                    isActive ? 'bg-white/20 text-content-inverse' : 'bg-surface-primary text-content-tertiary',
+                  )}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          },
+        )}
+      </div>
+
+      {visibleModules.length === 0 ? (
+        <div className="py-16 text-center animate-card-in">
+          <Search size={40} className="mx-auto mb-3 text-content-tertiary" strokeWidth={1.5} />
+          <p className="text-sm font-medium text-content-secondary">
+            {t('modules.no_system_matches', { defaultValue: 'No system module matches' })}
+          </p>
+          <p className="mx-auto mt-1 max-w-md text-xs text-content-tertiary">
+            {t('modules.no_system_matches_hint', {
+              defaultValue:
+                'Try a shorter search or pick All above. Company profiles, packs and data packages are separate lists, on the other tabs of this page.',
+            })}
+          </p>
+          <Button variant="secondary" size="sm" onClick={clearFilters} className="mt-4">
+            {t('common.clear_filters', { defaultValue: 'Clear filters' })}
+          </Button>
+        </div>
+      ) : (
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {visibleModules.map((mod, i) => (
+          <Card
+            key={mod.name}
+            className="animate-card-in"
+            style={{ animationDelay: `${80 + i * 30}ms` }}
+            padding="sm"
+          >
+            <div className="flex items-center gap-2.5">
+              <div
+                className={clsx(
+                  'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
+                  mod.enabled
+                    ? 'bg-semantic-success-bg text-semantic-success dark:text-emerald-400'
+                    : 'bg-surface-tertiary text-content-quaternary',
+                )}
+              >
+                {mod.is_core ? <ShieldCheck size={15} /> : <Package size={15} />}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-semibold text-content-primary truncate">
+                    {nameOf(mod)}
+                  </span>
+                  {mod.is_core ? (
+                    <Badge variant="blue" size="sm">{t('modules.core', { defaultValue: 'Core' })}</Badge>
+                  ) : mod.enabled ? (
+                    <Badge variant="success" size="sm" dot>{t('marketplace.active', { defaultValue: 'Active' })}</Badge>
+                  ) : (
+                    <Badge variant="neutral" size="sm">{t('modules.disabled_label', { defaultValue: 'Disabled' })}</Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5 text-2xs text-content-tertiary">
+                  <span className="font-mono">v{mod.version}</span>
+                  {mod.category && mod.category !== 'core' && (
+                    <>
+                      <span className="text-border">|</span>
+                      <span>{moduleCategoryLabel(mod.category, t)}</span>
+                    </>
+                  )}
+                </div>
+                {mod.description && (
+                  <p className="text-2xs text-content-quaternary mt-0.5 line-clamp-1">{mod.description}</p>
+                )}
+                {mod.depends && mod.depends.length > 0 && (
+                  <span className="text-2xs text-content-quaternary">
+                    {t('modules.depends_on', { defaultValue: 'Requires: {{deps}}', deps: fmtList(mod.depends) })}
+                  </span>
+                )}
+              </div>
+
+              {!mod.is_core && (
+                <button
+                  onClick={() => void handleBackendToggle(mod)}
+                  disabled={togglingModule === mod.name || !isAdmin}
+                  role="switch"
+                  aria-checked={mod.enabled}
+                  title={
+                    isAdmin
+                      ? undefined
+                      : t('modules.admin_only', { defaultValue: 'Admin only' })
+                  }
+                  aria-label={
+                    isAdmin
+                      ? t('modules.toggle_module', {
+                          defaultValue: '{{action}} {{name}}',
+                          action: mod.enabled ? t('common.disable', { defaultValue: 'Disable' }) : t('common.enable', { defaultValue: 'Enable' }),
+                          name: nameOf(mod),
+                        })
+                      : t('modules.toggle_module_admin_only', {
+                          defaultValue: '{{name}} - admin only',
+                          name: nameOf(mod),
+                        })
+                  }
+                  className={clsx('shrink-0', !isAdmin && 'cursor-not-allowed opacity-50')}
+                >
+                  {togglingModule === mod.name ? (
+                    <Loader2 size={16} className="animate-spin text-content-tertiary" />
+                  ) : (
+                    <div
+                      className={clsx(
+                        'relative h-5 w-9 rounded-full transition-colors duration-200',
+                        mod.enabled ? 'bg-oe-blue' : 'bg-content-quaternary',
+                      )}
+                    >
+                      <div
+                        className={clsx(
+                          'absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200',
+                          mod.enabled ? 'translate-x-[18px]' : 'translate-x-0.5',
+                        )}
+                      />
+                    </div>
+                  )}
+                </button>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div>
+      )}
+
+      <ConfirmDialog {...confirmProps} />
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════ */
+/* ── Shared sub-components ───────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Module Toggle Card ────────────────────────────────────────────────── */
+
+interface ModuleToggleCardProps {
+  icon: LucideIcon;
+  name: string;
+  description: string;
+  version?: string;
+  enabled: boolean;
+  onToggle: () => void;
+  deps?: string[];
+  dependents?: string[];
+}
+
+function ModuleToggleCard({
+  icon: Icon,
+  name,
+  description,
+  version,
+  enabled,
+  onToggle,
+  deps,
+  dependents,
+}: ModuleToggleCardProps) {
+  const { t } = useTranslation();
+  const hasBlockers = (dependents ?? []).length > 0;
+
+  return (
+    <div
+      className={clsx(
+        'flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-all',
+        enabled
+          ? 'border-border-light bg-surface-elevated hover:border-border'
+          : 'border-border-light/50 bg-surface-secondary/50 opacity-60 hover:opacity-80',
+      )}
+    >
+      <div
+        className={clsx(
+          'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors',
+          enabled ? 'bg-oe-blue-subtle text-oe-blue-text' : 'bg-surface-tertiary text-content-quaternary',
+        )}
+      >
+        <Icon size={15} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <span
+          className={clsx(
+            'text-xs font-medium truncate block',
+            // When disabled the card carries opacity-60, which can push the
+            // primary text below WCAG AA. Drop to the tertiary token (still a
+            // muted look) rather than dimming an already-lower-contrast color.
+            enabled ? 'text-content-primary' : 'text-content-tertiary',
+          )}
+        >
+          {name}
+        </span>
+        <span
+          className={clsx(
+            'text-2xs line-clamp-1',
+            enabled ? 'text-content-tertiary' : 'text-content-secondary',
+          )}
+        >
+          {description}
+          {version ? ` · v${version}` : ''}
+        </span>
+        {hasBlockers && enabled && (
+          <div className="flex items-center gap-1 mt-0.5">
+            <AlertTriangle size={9} className="text-amber-500 shrink-0" />
+            <span className="text-2xs text-amber-600 dark:text-amber-400 truncate">
+              {t('modules.required_by_short', {
+                defaultValue: 'Required by {{deps}}',
+                deps: fmtList((dependents ?? [])),
+              })}
+            </span>
+          </div>
+        )}
+        {deps && deps.length > 0 && (
+          <span className="text-2xs text-content-quaternary">
+            {t('modules.depends_on', { defaultValue: 'Requires: {{deps}}', deps: fmtList(deps) })}
+          </span>
+        )}
+      </div>
+
+      <button
+        onClick={onToggle}
+        role="switch"
+        aria-checked={enabled}
+        aria-label={t('modules.toggle_module', {
+          defaultValue: '{{action}} {{name}}',
+          action: enabled ? t('common.disable', { defaultValue: 'Disable' }) : t('common.enable', { defaultValue: 'Enable' }),
+          name,
+        })}
+        className="shrink-0"
+      >
+        <div
+          className={clsx(
+            'relative h-5 w-9 rounded-full transition-colors duration-200',
+            enabled ? 'bg-oe-blue' : 'bg-content-quaternary',
+          )}
+        >
+          <div
+            className={clsx(
+              'absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-transform duration-200',
+              enabled ? 'translate-x-[18px]' : 'translate-x-0.5',
+            )}
+          />
+        </div>
+      </button>
+    </div>
+  );
+}
+
+/* ── Marketplace Card ──────────────────────────────────────────────────── */
+
+interface MarketplaceCardProps {
+  module: MarketplaceModule;
+  index: number;
+  isInstalling?: boolean;
+  onInstall: () => void;
+  isDemoInstalled?: boolean;
+  onUninstallDemo?: () => void;
+  onReinstallDemo?: () => void;
+}
+
+function MarketplaceCard({ module: mod, index, isInstalling, onInstall, isDemoInstalled, onUninstallDemo, onReinstallDemo }: MarketplaceCardProps) {
+  const { t } = useTranslation();
+  const Icon = getModuleIcon(mod.icon);
+  const isLanguage = mod.category === 'language';
+  const isBuiltIn = mod.category === 'converter' || mod.category === 'analytics';
+  const isIntegration = mod.category === 'integration';
+
+  return (
+    <Card hoverable className="animate-card-in group" style={{ animationDelay: `${80 + index * 30}ms` }}>
+      <div className="flex items-start gap-3">
+        <div
+          className={clsx(
+            'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors duration-fast ease-oe',
+            mod.category === 'resource_catalog'
+              ? 'bg-semantic-warning-bg text-semantic-warning'
+              : mod.category === 'cost_database'
+                ? 'bg-oe-blue-subtle text-oe-blue-text'
+                : mod.category === 'vector_index'
+                  ? 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400'
+                  : mod.category === 'language'
+                    ? 'bg-semantic-success-bg text-semantic-success dark:text-emerald-400'
+                    : mod.category === 'converter'
+                      ? 'bg-semantic-warning-bg text-semantic-warning'
+                      : mod.category === 'analytics'
+                        ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
+                        : 'bg-surface-secondary text-content-secondary',
+          )}
+        >
+          <Icon size={20} strokeWidth={1.75} />
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <span className="text-sm font-semibold text-content-primary truncate block">{mod.name}</span>
+          <div className="mt-0.5 flex items-center gap-1.5 text-2xs text-content-tertiary">
+            <span>{mod.author}</span>
+            <span className="text-border">|</span>
+            <span className="font-mono">v{mod.version}</span>
+            <span className="text-border">|</span>
+            <span>{formatSize(mod.size_mb)}</span>
+          </div>
+          <p className="mt-2 text-xs text-content-secondary line-clamp-2 leading-relaxed">{mod.description}</p>
+
+          {/* Vector index hint */}
+          {mod.category === 'vector_index' && !mod.installed && (
+            <div className="mt-2 flex items-start gap-1.5 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200/50 dark:border-purple-800/30 px-2.5 py-1.5">
+              <Info size={12} className="text-purple-500 shrink-0 mt-0.5" />
+              <div className="text-2xs text-purple-700 dark:text-purple-300 leading-relaxed">
+                <strong>{t('marketplace.vector_option_a', { defaultValue: 'Option A' })}:</strong> Qdrant + Snapshot (3072d):<br />
+                <code className="font-mono bg-purple-100 dark:bg-purple-800/40 px-1 rounded text-[10px]">docker run -p 6333:6333 qdrant/qdrant</code><br />
+                <strong>{t('marketplace.vector_option_b', { defaultValue: 'Option B' })}:</strong> LanceDB (384d):<br />
+                <code className="font-mono bg-purple-100 dark:bg-purple-800/40 px-1 rounded text-[10px]">pip install lancedb sentence-transformers</code>
+              </div>
+            </div>
+          )}
+
+          {/* Tags */}
+          <div className="mt-3 flex items-center gap-1.5 flex-wrap">
+            {mod.tags.slice(0, 3).map((tag) => (
+              <Badge key={tag} variant="neutral" size="sm">{tag}</Badge>
+            ))}
+            {mod.tags.length > 3 && <Badge variant="neutral" size="sm">+{mod.tags.length - 3}</Badge>}
+            <div className="flex-1" />
+            {!isLanguage && <Badge variant="success" size="sm">{t('marketplace.free', { defaultValue: 'Free' })}</Badge>}
+          </div>
+
+          {/* Action button */}
+          <div className="mt-3">
+            {isLanguage ? (
+              <Badge variant="success" size="sm"><Check size={10} className="mr-0.5" />{t('marketplace.included', { defaultValue: 'Included' })}</Badge>
+            ) : isBuiltIn ? (
+              <Badge variant="success" size="sm"><Check size={10} className="mr-0.5" />{t('marketplace.builtin', { defaultValue: 'Built-in' })}</Badge>
+            ) : isIntegration ? (
+              <Button variant="secondary" size="sm" icon={<Settings size={14} />} onClick={onInstall}>
+                {t('marketplace.requires_setup', { defaultValue: 'Configure' })}
+              </Button>
+            ) : mod.installed && mod.category === 'cost_database' ? (
+              <Button variant="secondary" size="sm" icon={<Check size={14} />} onClick={onInstall}>
+                {t('marketplace.manage', { defaultValue: 'Manage' })}
+              </Button>
+            ) : mod.installed && mod.category === 'resource_catalog' ? (
+              <Button variant="secondary" size="sm" disabled icon={<Check size={14} />}>
+                {t('marketplace.imported', { defaultValue: 'Imported' })}
+              </Button>
+            ) : mod.installed && mod.category === 'vector_index' ? (
+              <Button variant="secondary" size="sm" disabled icon={<Check size={14} />}>
+                {t('marketplace.indexed', { defaultValue: 'Indexed' })}
+              </Button>
+            ) : (mod.installed || isDemoInstalled) && mod.category === 'demo_project' ? (
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="success" size="sm"><Check size={10} className="mr-0.5" />{t('marketplace.installed', { defaultValue: 'Installed' })}</Badge>
+                {onReinstallDemo && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={isInstalling ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
+                    onClick={onReinstallDemo}
+                    disabled={isInstalling}
+                    className="text-content-secondary hover:text-content-primary hover:bg-surface-secondary"
+                  >
+                    {t('marketplace.reinstall', { defaultValue: 'Reinstall' })}
+                  </Button>
+                )}
+                {onUninstallDemo && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={isInstalling ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                    onClick={onUninstallDemo}
+                    disabled={isInstalling}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20"
+                  >
+                    {t('marketplace.uninstall', { defaultValue: 'Uninstall' })}
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={isInstalling ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+                onClick={onInstall}
+                disabled={isInstalling}
+              >
+                {isInstalling
+                  ? t('marketplace.installing', { defaultValue: 'Installing...' })
+                  : t('marketplace.install', { defaultValue: 'Install' })}
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+/* ── Installed module badge helper ──────────────────────────────────────── */
+
+interface InstalledBadgeInfo {
+  type: 'badge' | 'manage';
+  label: string;
+  subtitle: string;
+}
+
+function getInstalledModuleBadge(
+  mod: MarketplaceModule,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): InstalledBadgeInfo {
+  switch (mod.category) {
+    case 'language':
+      return { type: 'badge', label: t('marketplace.included', { defaultValue: 'Included' }), subtitle: t('marketplace.included', { defaultValue: 'Included' }) };
+    case 'analytics':
+    case 'converter':
+      return { type: 'badge', label: t('marketplace.builtin', { defaultValue: 'Built-in' }), subtitle: t('marketplace.builtin', { defaultValue: 'Built-in' }) };
+    case 'integration':
+      return { type: 'manage', label: t('marketplace.configure', { defaultValue: 'Configure' }), subtitle: t('marketplace.requires_setup', { defaultValue: 'Requires Setup' }) };
+    case 'resource_catalog':
+      return { type: 'badge', label: t('marketplace.imported', { defaultValue: 'Imported' }), subtitle: t('marketplace.imported', { defaultValue: 'Imported' }) };
+    case 'vector_index':
+      return { type: 'badge', label: t('marketplace.indexed', { defaultValue: 'Indexed' }), subtitle: t('marketplace.indexed', { defaultValue: 'Indexed' }) };
+    case 'demo_project':
+      return { type: 'badge', label: t('marketplace.installed', { defaultValue: 'Installed' }), subtitle: t('marketplace.installed', { defaultValue: 'Installed' }) };
+    case 'cost_database':
+      return { type: 'manage', label: t('marketplace.manage', { defaultValue: 'Manage' }), subtitle: `v${mod.version}` };
+    default:
+      return { type: 'badge', label: t('marketplace.installed', { defaultValue: 'Installed' }), subtitle: `v${mod.version}` };
+  }
+}

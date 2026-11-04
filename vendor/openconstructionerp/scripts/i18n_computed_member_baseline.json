@@ -1,0 +1,409 @@
+{
+  "construction_control.capture_method.": {
+    "locales_ok": 3,
+    "locales_total": 43,
+    "members": 8,
+    "missing": {
+      "ar": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "bg": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "bn": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "cs": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "da": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "de": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "el": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "es": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "es-CL": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "es-CO": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "es-MX": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "et": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "fa": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "fi": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "fil": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "fr": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "he": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "hi": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "hr": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "id": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "it": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "ja": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "kk": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "ko": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "ky": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "mn": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "nl": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "no": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "pl": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "pt": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "pt-BR": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "ro": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "ru": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "sv": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "th": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "tr": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "uk": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "ur": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "vi": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ],
+      "zh": [
+        "construction_control.capture_method.drone_lidar",
+        "construction_control.capture_method.gnss",
+        "construction_control.capture_method.laser_scan",
+        "construction_control.capture_method.manual",
+        "construction_control.capture_method.model_extract",
+        "construction_control.capture_method.photogrammetry",
+        "construction_control.capture_method.tape",
+        "construction_control.capture_method.total_station"
+      ]
+    }
+  }
+}

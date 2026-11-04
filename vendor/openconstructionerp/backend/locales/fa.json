@@ -1,0 +1,2539 @@
+{
+  "costs.catalog_name_unavailable": "این نام را نمی‌توان برای کاتالوگ جدید استفاده کرد. نام دیگری انتخاب کنید.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "برآورد متن‌باز هزینه ساخت‌وساز"
+  },
+  "nav": {
+    "dashboard": "داشبورد",
+    "assemblies": "اسمبلی‌ها",
+    "ai_estimate": "برآورد هوش مصنوعی",
+    "settings": "تنظیمات",
+    "5d_cost_model": "مدل هزینه 5D",
+    "templates": "قالب‌ها",
+    "reports": "گزارش‌ها",
+    "sustainability": "پایداری",
+    "group_estimation": "برآورد",
+    "group_planning": "برنامه‌ریزی",
+    "group_procurement": "تدارکات",
+    "group_tools": "ابزارها",
+    "architecture": "نقشه معماری"
+  },
+  "common": {
+    "save": "ذخیره",
+    "cancel": "لغو",
+    "delete": "حذف",
+    "edit": "ویرایش",
+    "create": "ایجاد",
+    "search": "جست‌وجو",
+    "filter": "فیلتر",
+    "export": "برون‌بری",
+    "import": "درون‌ریزی",
+    "loading": "در حال بارگذاری...",
+    "error": "خطا",
+    "success": "موفقیت",
+    "confirm": "تأیید",
+    "back": "بازگشت",
+    "next": "بعدی",
+    "yes": "بله",
+    "no": "خیر"
+  },
+  "auth": {
+    "login": "ورود",
+    "logout": "خروج",
+    "email": "ایمیل",
+    "password": "رمز عبور"
+  },
+  "projects": {
+    "title": "پروژه‌ها",
+    "new_project": "پروژه جدید",
+    "project_name": "نام پروژه",
+    "no_projects": "هنوز پروژه‌ای نیست"
+  },
+  "boq": {
+    "title": "صورت مقادیر (BOQ)",
+    "position": "ردیف",
+    "ordinal": "شماره ردیف",
+    "description": "شرح",
+    "quantity": "مقدار",
+    "unit": "واحد",
+    "unit_rate": "نرخ واحد",
+    "total": "جمع کل",
+    "add_position": "افزودن موقعیت",
+    "add_section": "افزودن بخش",
+    "assembly": "مجموعه",
+    "subtotal": "جمع جزء",
+    "grand_total": "جمع کل",
+    "direct_cost": "هزینه مستقیم",
+    "net_total": "جمع خالص",
+    "gross_total": "جمع ناخالص",
+    "vat": "مالیات بر ارزش افزوده",
+    "add_markups": "افزودن افزودنی‌ها",
+    "validate": "اعتبارسنجی",
+    "export": "برون‌بری",
+    "mvp": {
+      "title": "انتخاب مصالح",
+      "subtitle_one": "{{count}} منبع نیاز به انتخاب دارد",
+      "subtitle_other": "{{count}} منبع نیاز به انتخاب دارند",
+      "bulk_label": "پرکردن سریع:",
+      "bulk_median": "میانه برای همه",
+      "bulk_mean": "میانگین برای همه",
+      "bulk_cheapest": "ارزان‌ترین برای همه",
+      "bulk_priciest": "گران‌ترین برای همه",
+      "slot_variant_count": "{{n}} گزینه",
+      "selected_label": "انتخاب‌شده:",
+      "default_mean": "نرخ میانگین",
+      "default_median": "نرخ میانه",
+      "row_median": "نرخ میانه · {{price}}",
+      "row_mean": "نرخ میانگین · {{price}}",
+      "subtotal_label": "نرخ ردیف",
+      "apply": "اعمال و افزودن به صورت مقادیر",
+      "batch_progress": "قلم {{current}} از {{total}}",
+      "toast_applied_one": "{{count}} گزینه انتخاب شد",
+      "toast_applied_other": "{{count}} گزینه انتخاب شد"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "گزارش تبادل"
+      },
+      "column": {
+        "severity": "شدت",
+        "kind": "نوع اتلاف",
+        "position": "ردیف",
+        "field": "فیلد",
+        "original": "مقدار اصلی",
+        "written": "مقدار نوشته‌شده",
+        "count": "تعداد",
+        "detail": "جزئیات"
+      },
+      "severity": {
+        "error": "بحرانی",
+        "warning": "هشدار",
+        "info": "نکته"
+      },
+      "kind": {
+        "unsupported_element": "عنصر پشتیبانی‌نشده",
+        "truncated_text": "متن کوتاه‌شده",
+        "altered_text": "متن تغییریافته",
+        "rounded_value": "مقدار گرد‌شده",
+        "value_out_of_range": "مقدار خارج از محدوده",
+        "dropped_attribute": "ویژگی حذف‌شده",
+        "unmapped_unit": "واحد نگاشت‌نشده",
+        "lost_hierarchy": "سطح سلسله‌مراتب از دست رفت",
+        "markup_not_representable": "ضریب افزایشی قابل نمایش نیست",
+        "attachment_skipped": "پیوست نادیده گرفته شد",
+        "changed_identifier": "شناسه تغییر کرد",
+        "exceeds_limit": "از حد ذخیره‌سازی فراتر رفت",
+        "rejected_row": "ردیف رد شد",
+        "skipped_row": "ردیف نادیده گرفته شد",
+        "parser_warning": "هشدار خواننده",
+        "roundtrip_mismatch": "اختلاف رفت‌وبرگشت"
+      }
+    },
+    "branch": {
+      "base_snapshot": "نقطه انشعاب",
+      "base_snapshot_from": "نقطه انشعاب (از نسخه لحظه‌ای «{snapshot}»)",
+      "before_cherry_pick": "پیش از اعمال تغییرات «{source}»",
+      "before_merge": "پیش از ادغام شاخه «{branch}»",
+      "errors": {
+        "branch_closed": "این شاخه ادغام یا بایگانی شده و تغییر دیگری نمی‌پذیرد.",
+        "not_a_branch": "این صورت‌حساب مقادیر یک شاخه نیست.",
+        "same_bill": "دو برآورد متفاوت انتخاب کنید.",
+        "different_project": "هر دو برآورد باید به یک پروژه تعلق داشته باشند.",
+        "different_tree": "هر دو برآورد باید شاخه‌های یک برآورد اصلی باشند.",
+        "unresolved_conflicts": "{count} ردیف در هر دو برآورد تغییر کرده است. پیش از اعمال، برای هر یک تعیین کنید کدام نسخه حفظ شود.",
+        "merge_forbidden": "شما مجوز ادغام در برآورد اصلی را ندارید.",
+        "confirm_required": "ادغام را تأیید کنید: این کار برآورد اصلی را بازنویسی می‌کند.",
+        "design_options_unavailable": "ماژول گزینه‌های طراحی نصب نشده است.",
+        "base_snapshot_in_use": "این نسخه لحظه‌ای نقطه انشعاب یک شاخه باز است و حذف نمی‌شود."
+      },
+      "export": {
+        "title_positions": "مقایسه برآورد بر حسب ردیف",
+        "title_sections": "مقایسه برآورد بر حسب بخش",
+        "title_cost_groups": "مقایسه برآورد بر حسب گروه هزینه",
+        "project": "پروژه",
+        "bill_a": "برآورد A",
+        "bill_b": "برآورد B",
+        "total_a": "جمع A",
+        "total_b": "جمع B",
+        "delta": "تفاوت",
+        "counts": "تغییرات",
+        "counts_value": "{added} افزوده، {removed} حذف، {changed} تغییر",
+        "col_ordinal": "ردیف",
+        "col_description": "شرح",
+        "col_unit": "واحد",
+        "col_change": "تغییر",
+        "col_qty_a": "مقدار A",
+        "col_qty_b": "مقدار B",
+        "col_rate_a": "نرخ A",
+        "col_rate_b": "نرخ B",
+        "col_total_a": "جمع A",
+        "col_total_b": "جمع B",
+        "col_delta": "تفاوت",
+        "col_section": "بخش",
+        "col_cost_group": "گروه هزینه",
+        "change_added": "افزوده‌شده",
+        "change_removed": "حذف‌شده",
+        "change_changed": "تغییریافته",
+        "change_unchanged": "بدون تغییر",
+        "ungrouped": "بدون گروه",
+        "empty": "دو برآورد یکسان‌اند.",
+        "total": "جمع"
+      }
+    }
+  },
+  "costs": {
+    "title": "پایگاه داده هزینه",
+    "rate": "نرخ",
+    "material": "مصالح",
+    "labor": "نیروی کار",
+    "equipment": "ماشین‌آلات",
+    "search_costs": "جست‌وجوی اقلام هزینه..."
+  },
+  "assemblies": {
+    "title": "اسمبلی‌ها",
+    "description": "دستورهای هزینه‌ای قابل‌استفاده مجدد — مصالح، نیروی کار و ماشین‌آلات را در قالب‌های آماده ترکیب کنید",
+    "new_assembly": "اسمبلی جدید",
+    "from_database": "از پایگاه داده",
+    "apply_to_boq": "اعمال به صورت مقادیر",
+    "add_component": "افزودن جزء",
+    "no_assemblies": "هنوز مجموعه‌ای نیست",
+    "no_assemblies_hint": "اولین مجموعه خود را از پایگاه داده هزینه یا فهرست منابع بسازید",
+    "total_rate": "نرخ کل"
+  },
+  "catalog": {
+    "title": "کاتالوگ منبع",
+    "description": "مصالح، ماشین‌آلات، نرخ نیروی کار و اپراتورها را مرور و مدیریت کنید",
+    "add_resource": "افزودن منبع",
+    "import_region": "درون‌ریزی منطقه",
+    "build_assembly": "ساخت اسمبلی",
+    "my_catalog": "کاتالوگ من"
+  },
+  "validation": {
+    "title": "اعتبارسنجی",
+    "passed": "قبول‌شده",
+    "warnings": "هشدارها",
+    "errors": "خطاها",
+    "score": "امتیاز کیفیت",
+    "run_validation": "اجرای اعتبارسنجی",
+    "missing_quantity": "ردیف {position} فاقد مقدار است",
+    "missing_rate": "ردیف {position} فاقد نرخ واحد است",
+    "missing_description": "ردیف {position} فاقد شرح است",
+    "missing_classification": "ردیف {position} به کد طبقه‌بندی نیاز دارد",
+    "duplicate_ordinal": "شماره ردیف تکراری: {ordinal}",
+    "rate_anomaly": "نرخ واحد {rate} از حد آستانه ({threshold}) فراتر رفته است",
+    "nl": {
+      "not_a_string": "ورودی باید متن باشد.",
+      "empty": "ورودی خالی است.",
+      "too_long": "ورودی از {max} نویسه بیشتر است.",
+      "ai_unparsable": "پاسخ هوش مصنوعی را نمی‌توان به‌عنوان سند DSL تجزیه کرد.",
+      "no_pattern": "هیچ الگویی با جمله ورودی مطابقت نداشت.",
+      "try": "امتحان کنید: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "زمان‌بندی 4D",
+    "generated": {
+      "position_label": "ردیف {ordinal}",
+      "section_label": "بخش {ordinal}",
+      "task_description": "به‌صورت خودکار از ردیف {ordinal} صورت مقادیر ایجاد شد ({quantity} {unit})",
+      "section_description": "خلاصه: بخش {ordinal} صورت مقادیر",
+      "start_milestone": "شروع پروژه",
+      "start_milestone_description": "نقطه عطف شروع پروژه",
+      "completion_milestone": "تکمیل پروژه",
+      "completion_milestone_description": "نقطه عطف تکمیل پروژه",
+      "labour_resource": "نیروی کار",
+      "machine_resource": "ماشین‌آلات"
+    },
+    "progress_sheet": {
+      "sheet_title": "پیشرفت",
+      "title": "برگه به‌روزرسانی پیشرفت",
+      "detail_schedule": "زمان‌بندی: {name}",
+      "detail_exported": "زمان صدور: {date}",
+      "instructions": "فقط ستون‌های سفید را پر کنید. ستون‌های خاکستری، ترتیب ردیف‌ها و ستون‌های پنهان را تغییر ندهید.",
+      "col": {
+        "activity_ref": "شناسه فعالیت",
+        "name": "فعالیت",
+        "wbs_code": "WBS",
+        "responsible": "مسئول",
+        "planned_start": "شروع برنامه‌ریزی‌شده",
+        "planned_finish": "پایان برنامه‌ریزی‌شده",
+        "percent_complete": "% پیشرفت",
+        "actual_start": "شروع واقعی",
+        "actual_finish": "پایان واقعی",
+        "remaining_duration": "باقی‌مانده (روز کاری)",
+        "notes": "یادداشت‌ها",
+        "row_key": "کلید ردیف",
+        "stamp": "مهر"
+      }
+    }
+  },
+  "cad": {
+    "title": "درون‌ریزی CAD",
+    "upload": "بارگذاری فایل CAD",
+    "supported_formats": "فرمت‌های پشتیبانی‌شده: DWG, DGN, RVT, IFC, PDF",
+    "converting": "در حال تبدیل...",
+    "elements_found": "{count} عنصر یافت شد"
+  },
+  "takeoff": {
+    "title": "متره مقادیر",
+    "auto_detect": "تشخیص خودکار",
+    "manual_measure": "اندازه‌گیری دستی",
+    "confidence": "اطمینان"
+  },
+  "tendering": {
+    "title": "مناقصه‌گذاری",
+    "create_tender": "ایجاد مناقصه",
+    "bid": "پیشنهاد",
+    "award": "واگذاری"
+  },
+  "modules": {
+    "title": "ماژول‌ها",
+    "installed": "نصب‌شده",
+    "available": "موجود",
+    "install": "نصب",
+    "uninstall": "حذف نصب",
+    "update": "به‌روزرسانی"
+  },
+  "dashboard": {
+    "welcome": "به OpenConstructionERP خوش آمدید",
+    "subtitle": "فضای کاری برآورد ساخت‌وساز شما",
+    "recent_projects": "پروژه‌های اخیر",
+    "system_status": "وضعیت سیستم",
+    "modules_loaded": "ماژول‌های بارگذاری‌شده",
+    "validation_rules": "قواعد اعتبارسنجی",
+    "languages": "زبان‌ها",
+    "continue_estimate": "ادامه آخرین برآورد",
+    "getting_started": "شروع کار",
+    "total_value": "ارزش کل",
+    "active_estimates": "برآوردهای فعال",
+    "schedule_status": "وضعیت زمان‌بندی",
+    "quality_score": "امتیاز کیفیت",
+    "analytics": "تحلیل‌ها",
+    "project_overview": "نمای کلی پروژه",
+    "step_load_db": "بارگذاری پایگاه داده هزینه",
+    "step_load_db_desc": "داده قیمت‌گذاری منطقه‌ای با بیش از 55,000 قلم را درون‌ریزی کنید",
+    "step_ai_search": "فعال‌سازی جست‌وجوی هوش مصنوعی",
+    "step_ai_search_desc": "برداره embedding را برای تطبیق معنایی هزینه تولید کنید",
+    "step_connect_ai": "اتصال هوش مصنوعی",
+    "step_connect_ai_desc": "کلیدهای API خود را برای برآورد مبتنی بر هوش مصنوعی اضافه کنید",
+    "step_create_project": "ایجاد پروژه",
+    "step_create_project_desc": "اولین پروژه برآورد ساخت‌وساز خود را شروع کنید",
+    "step_build_boq": "صورت مقادیر خود را بسازید",
+    "step_build_boq_desc": "یک صورت مقادیر (BOQ) را با کمک هوش مصنوعی ایجاد کنید"
+  },
+  "units": {
+    "m": "متر",
+    "m2": "متر مربع",
+    "m3": "متر مکعب",
+    "kg": "کیلوگرم",
+    "t": "تن",
+    "pcs": "عدد",
+    "lsum": "مقطوع",
+    "h": "ساعت",
+    "set": "دست"
+  },
+  "contacts": {
+    "title": "فهرست مخاطبان",
+    "new_contact": "مخاطب جدید",
+    "contact_type": "نوع مخاطب",
+    "client": "کارفرما",
+    "subcontractor": "پیمانکار فرعی",
+    "supplier": "تأمین‌کننده",
+    "consultant": "مشاور",
+    "internal": "داخلی",
+    "company_name": "نام شرکت",
+    "search_contacts": "جست‌وجوی مخاطبان...",
+    "no_contacts": "هنوز مخاطبی وجود ندارد",
+    "prequalification": "ارزیابی صلاحیت پیش از مناقصه",
+    "approved": "تأییدشده",
+    "pending": "در انتظار",
+    "expired": "منقضی‌شده"
+  },
+  "tasks": {
+    "title": "وظایف",
+    "new_task": "وظیفه جدید",
+    "task": "وظیفه",
+    "topic": "موضوع",
+    "information": "اطلاعات",
+    "decision": "تصمیم",
+    "personal": "وظیفه شخصی",
+    "my_tasks": "وظایف من",
+    "open": "باز",
+    "in_progress": "در حال انجام",
+    "completed": "تکمیل‌شده",
+    "draft": "پیش‌نویس",
+    "due_date": "تاریخ سررسید",
+    "assignee": "مسئول",
+    "priority": "اولویت",
+    "checklist": "چک‌لیست",
+    "focus_area": "حوزه تمرکز"
+  },
+  "rfi": {
+    "title": "درخواست‌های اطلاعات",
+    "new_rfi": "RFI جدید",
+    "subject": "موضوع",
+    "question": "پرسش",
+    "response": "پاسخ",
+    "ball_in_court": "مسئول پاسخ",
+    "days_open": "روزهای باز",
+    "cost_impact": "اثر هزینه",
+    "schedule_impact": "اثر بر زمان‌بندی",
+    "respond": "پاسخ دادن",
+    "close": "بستن",
+    "overdue": "معوق"
+  },
+  "finance": {
+    "title": "مالی",
+    "budgets": "بودجه‌ها",
+    "invoices": "فاکتورها",
+    "payable": "پرداختنی",
+    "receivable": "دریافتنی",
+    "payments": "پرداخت‌ها",
+    "evm": "ارزش کسب‌شده",
+    "invoice_number": "شماره فاکتور",
+    "amount": "مبلغ",
+    "status": "وضعیت",
+    "approve": "تأیید",
+    "pay": "علامت‌گذاری به‌عنوان پرداخت‌شده",
+    "original_budget": "بودجه اولیه",
+    "revised_budget": "بودجه بازنگری‌شده",
+    "committed": "متعهدشده",
+    "actual": "واقعی",
+    "forecast": "پیش‌بینی",
+    "variance": "انحراف"
+  },
+  "procurement": {
+    "title": "تدارکات",
+    "purchase_orders": "سفارش‌های خرید",
+    "goods_receipts": "رسیدهای کالا",
+    "new_po": "سفارش خرید جدید",
+    "po_number": "شماره PO",
+    "vendor": "فروشنده",
+    "issue": "صدور",
+    "confirm": "تأیید دریافت"
+  },
+  "safety": {
+    "title": "ایمنی",
+    "incidents": "حوادث",
+    "observations": "مشاهدات",
+    "new_incident": "حادثه جدید",
+    "new_observation": "مشاهده جدید",
+    "severity": "شدت",
+    "risk_score": "امتیاز ریسک",
+    "days_lost": "روزهای ازدست‌رفته",
+    "treatment": "درمان",
+    "corrective_action": "اقدام اصلاحی"
+  },
+  "meetings": {
+    "title": "جلسات",
+    "new_meeting": "جلسه جدید",
+    "meeting_type": "نوع",
+    "attendees": "حاضرین",
+    "agenda": "دستور جلسه",
+    "action_items": "اقدامات",
+    "minutes": "صورتجلسه",
+    "complete": "تکمیل جلسه",
+    "present": "حاضر",
+    "absent": "غایب",
+    "excused": "غیبت موجه",
+    "actions": {
+      "status": {
+        "open": "باز",
+        "completed": "انجام‌شده",
+        "cancelled": "لغو‌شده"
+      },
+      "flag": {
+        "overdue": "دیرکرد",
+        "on_track": "در مسیر"
+      },
+      "label": {
+        "action_item": "اقدام",
+        "completion_rate": "نرخ انجام اقدامات",
+        "open_vs_done": "باز در برابر انجام‌شده",
+        "overdue": "اقدامات دیرکرد"
+      },
+      "explain": {
+        "action_item": "اقدام، وظیفه‌ای است که در جلسه توافق شده و مسئول و تاریخ سررسید دارد.",
+        "completion_rate": "نرخ انجام اقدامات از تقسیم اقدامات انجام‌شده بر کل اقدامات به دست می‌آید و عددی بین ۰ و ۱ است.",
+        "open_vs_done": "اقدامات باز هنوز نیاز به کار دارند. اقدامات انجام‌شده کامل شده‌اند و کار بیشتری لازم ندارند.",
+        "overdue": "اقدامی دیرکرد است که هنوز باز باشد و تاریخ سررسیدش قبل از تاریخ مرجع باشد."
+      }
+    },
+    "minutes_pdf": {
+      "title": "صورت‌جلسه",
+      "issued": "صادر شده",
+      "draft": "پیش‌نویس",
+      "date": "تاریخ:",
+      "location": "مکان:",
+      "type": "نوع:",
+      "number": "شماره جلسه:",
+      "chairperson": "رئیس جلسه:",
+      "next_meeting": "جلسه بعدی:",
+      "not_available": "نامشخص",
+      "not_scheduled": "برنامه‌ریزی نشده",
+      "attendance": "حضور و غیاب",
+      "present": "حاضران:",
+      "absent": "غایبان / دارای عذر:",
+      "agenda": "دستور کار، بحث و تصمیم‌ها",
+      "required": "(الزامی)",
+      "discussion": "بحث:",
+      "decision": "تصمیم:",
+      "decisions": "تصمیم‌ها",
+      "open_questions": "پرسش‌های باز",
+      "actions": "اقدام‌ها",
+      "col_number": "#",
+      "col_action": "اقدام",
+      "col_owner": "مسئول",
+      "col_due": "سررسید",
+      "col_status": "وضعیت",
+      "brought_forward": "[منتقل‌شده]",
+      "overdue": "(سررسید گذشته)",
+      "status_open": "باز",
+      "status_in_progress": "در حال انجام",
+      "status_done": "انجام‌شده",
+      "status_cancelled": "لغو شده",
+      "summary": "خلاصه",
+      "generated": "تاریخ تولید: {stamp}",
+      "issued_at": "تاریخ صدور {stamp}",
+      "running_head": "{project} - صورت‌جلسه",
+      "type_progress": "پیشرفت",
+      "type_design": "طراحی",
+      "type_safety": "ایمنی",
+      "type_subcontractor": "پیمانکار جزء",
+      "type_kickoff": "آغاز",
+      "type_closeout": "تحویل و اختتام",
+      "type_commercial": "مالی و قراردادی"
+    }
+  },
+  "inspections": {
+    "title": "بازرسی‌های کیفیت",
+    "new_inspection": "بازرسی جدید",
+    "inspector": "بازرس",
+    "checklist": "چک‌لیست",
+    "pass": "قبول",
+    "fail": "رد",
+    "partial": "جزئی",
+    "critical": "بحرانی",
+    "intl": {
+      "status_labels": {
+        "scheduled": "برنامه‌ریزی شده",
+        "in_progress": "در حال انجام",
+        "completed": "تکمیل شده",
+        "failed": "ناموفق",
+        "cancelled": "لغو شده"
+      }
+    }
+  },
+  "ncr": {
+    "title": "گزارش‌های عدم‌انطباق",
+    "new_ncr": "NCR جدید",
+    "root_cause": "علت ریشه‌ای",
+    "corrective_action": "اقدام اصلاحی",
+    "preventive_action": "اقدام پیشگیرانه",
+    "material": "مصالح",
+    "workmanship": "کیفیت اجرا",
+    "design": "طراحی"
+  },
+  "submittals": {
+    "title": "مدارک ارسالی",
+    "new_submittal": "مدرک ارسالی جدید",
+    "spec_section": "بخش مشخصات فنی",
+    "revision": "بازنگری",
+    "submit": "ارسال",
+    "review": "بررسی",
+    "approved_as_noted": "تأییدشده با یادداشت",
+    "revise_resubmit": "بازنگری و ارسال مجدد",
+    "intl": {
+      "status_labels": {
+        "draft": "پیش‌نویس",
+        "submitted": "ارسال شده",
+        "under_review": "در حال بررسی",
+        "approved": "تأیید شده",
+        "approved_as_noted": "تأیید با یادداشت",
+        "revise_and_resubmit": "اصلاح و ارسال مجدد",
+        "rejected": "رد شده",
+        "closed": "بسته شده"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "مکاتبات",
+    "new_entry": "ردیف جدید",
+    "incoming": "ورودی",
+    "outgoing": "خروجی",
+    "letter": "نامه",
+    "email": "ایمیل",
+    "notice": "اخطار",
+    "date_sent": "تاریخ ارسال",
+    "date_received": "تاریخ دریافت"
+  },
+  "cde": {
+    "title": "محیط داده مشترک",
+    "new_container": "کانتینر جدید",
+    "container_code": "کد کانتینر",
+    "cde_state": "وضعیت CDE",
+    "wip": "در حال انجام",
+    "shared": "مشترک",
+    "published": "منتشرشده",
+    "archived": "بایگانی‌شده",
+    "promote": "ارتقا",
+    "suitability": "تناسب",
+    "discipline": "رشته",
+    "revisions": "بازبینی‌ها",
+    "intl": {
+      "state_labels": {
+        "wip": "در حال کار",
+        "shared": "به اشتراک گذاشته شده",
+        "published": "منتشر شده",
+        "archived": "بایگانی شده"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "ارسالی‌ها",
+    "new_transmittal": "ابلاغیه جدید",
+    "purpose": "هدف",
+    "for_approval": "برای تأیید",
+    "for_information": "برای اطلاع",
+    "for_construction": "برای اجرا",
+    "recipients": "گیرندگان",
+    "acknowledge": "تأیید دریافت",
+    "locked": "قفل‌شده",
+    "issue_transmittal": "صدور",
+    "intl": {
+      "status_words": {
+        "draft": "پیش‌نویس",
+        "issued": "ارسال شده",
+        "responded": "پاسخ داده شده"
+      }
+    }
+  },
+  "notifications": {
+    "title": "اعلان‌ها",
+    "no_notifications": "اعلان جدیدی نیست",
+    "mark_all_read": "علامت‌گذاری همه به‌عنوان خوانده‌شده",
+    "unread": "خوانده‌نشده"
+  },
+  "comments": {
+    "title": "نظرها",
+    "post": "ارسال",
+    "reply": "پاسخ",
+    "edit": "ویرایش",
+    "delete": "حذف",
+    "placeholder": "نوشتن نظر...",
+    "empty": "هنوز نظری نیست. گفتگو را شروع کنید.",
+    "edited": "ویرایش‌شده",
+    "deleted": "این نظر حذف شد"
+  },
+  "bim": {
+    "title": "مرکز BIM",
+    "models": "مدل‌ها",
+    "elements": "عناصر",
+    "upload_model": "آپلود مدل",
+    "processing": "در حال پردازش",
+    "active": "فعال",
+    "link_to_boq": "پیوند به صورت مقادیر",
+    "properties": "ویژگی‌ها",
+    "quantities": "مقادیر",
+    "wireframe": "سیم‌توری",
+    "section_box": "جعبه برش",
+    "measure": "اندازه‌گیری",
+    "zoom_to_fit": "نمایش کامل"
+  },
+  "reporting": {
+    "title": "گزارش‌ها و داشبوردها",
+    "kpi": "داشبورد KPI",
+    "generate_report": "تولید گزارش",
+    "templates": "قالب‌ها",
+    "project_status": "وضعیت پروژه",
+    "cost_report": "گزارش هزینه",
+    "schedule_status": "وضعیت زمان‌بندی",
+    "safety_report": "گزارش ایمنی",
+    "explain": {
+      "report_total_one": "جمع گزارش: {money} (مجموع {count} ردیف).",
+      "report_total_other": "جمع گزارش: {money} (مجموع {count} ردیف).",
+      "percent_of_total": "{part} برابر {percent} از {total} است (درصد از کل).",
+      "percent_zero_total": "{part} از {total}: جمع کل صفر است، بنابراین هر سهم به‌صورت ۰ درصد گزارش می‌شود.",
+      "breakdown_empty": "تفکیک هزینه‌ها: داده‌ای وجود ندارد.",
+      "breakdown_one": "تفکیک هزینه‌ها: {count} گروه، جمع گزارش {money}.",
+      "breakdown_other": "تفکیک هزینه‌ها: {count} گروه، جمع گزارش {money}.",
+      "top_n_one": "{requested} مورد برتر: {shown} از {shown} ردیف.",
+      "top_n_other": "{requested} مورد برتر: {shown} از {shown} ردیف."
+    }
+  },
+  "gantt": {
+    "title": "نمودار گانت",
+    "day": "روز",
+    "week": "هفته",
+    "month": "ماه",
+    "critical_path": "مسیر بحرانی",
+    "baseline": "خط مبنا",
+    "dependencies": "وابستگی‌ها",
+    "today": "امروز"
+  },
+  "settings": {
+    "regional": "تنظیمات منطقه‌ای",
+    "timezone": "منطقه زمانی",
+    "measurement": "سیستم اندازه‌گیری",
+    "paper_size": "اندازه کاغذ",
+    "date_format": "قالب تاریخ",
+    "number_format": "قالب عدد",
+    "currency": "ارز",
+    "metric": "متری",
+    "imperial": "امپریال"
+  },
+  "users": {
+    "management": "مدیریت کاربران",
+    "management_desc": "اعضای تیم، نقش‌ها و دسترسی را مدیریت کنید",
+    "invite_user": "دعوت کاربر",
+    "invite": "دعوت",
+    "full_name": "نام کامل",
+    "email": "ایمیل",
+    "password": "گذرواژه",
+    "role": "نقش",
+    "status": "وضعیت",
+    "last_login": "آخرین ورود",
+    "actions": "اقدامات",
+    "name": "نام",
+    "total": "جمع کاربران",
+    "active": "فعال",
+    "inactive": "غیرفعال",
+    "admins": "مدیران سیستم",
+    "managers": "مدیران",
+    "search": "جستجو بر اساس نام یا ایمیل...",
+    "no_users": "کاربری یافت نشد",
+    "updated": "کاربر به‌روزشد",
+    "invited": "کاربر با موفقیت دعوت شد",
+    "deactivate": "غیرفعال‌سازی",
+    "activate": "فعال‌سازی",
+    "never": "هرگز",
+    "role_admin_desc": "دسترسی کامل به همه امکانات",
+    "role_manager_desc": "مدیریت پروژه و تیم",
+    "role_editor_desc": "ایجاد و ویرایش محتوا",
+    "role_viewer_desc": "دسترسی فقط‌خواندنی"
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "پروژه",
+      "project_no": "شماره پروژه",
+      "generated_on": "تاریخ تولید",
+      "records": "رکوردها",
+      "currency": "واحد پول",
+      "status": "وضعیت",
+      "name": "نام",
+      "signature": "امضا",
+      "date": "تاریخ",
+      "signatures": "امضاها",
+      "yes": "بله",
+      "no": "خیر",
+      "days_one": "{n} روز",
+      "days_other": "{n} روز",
+      "empty_register": "رکوردی وجود ندارد.",
+      "total": "جمع کل",
+      "signer_title": "سمت",
+      "sig_prepared_by": "تهیه‌کننده",
+      "sig_checked_by": "بررسی‌کننده",
+      "sig_approved_by": "تأییدکننده",
+      "footer_generated": "تولید شده در {timestamp}",
+      "footer_page": "صفحه {page} از {total}"
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "سفارش خرید",
+        "gr_title": "رسید کالا",
+        "supplier": "تأمین‌کننده",
+        "po_type": "نوع سفارش",
+        "issue_date": "تاریخ صدور",
+        "delivery_date": "تاریخ تحویل",
+        "created_by": "تهیه‌کننده",
+        "order_total": "جمع سفارش",
+        "line_items": "اقلام سفارش",
+        "col_no": "ردیف",
+        "col_description": "شرح",
+        "col_quantity": "مقدار",
+        "col_unit": "واحد",
+        "col_unit_rate": "بهای واحد",
+        "col_amount": "مبلغ",
+        "no_line_items": "قلمی وجود ندارد.",
+        "totals": "جمع‌ها",
+        "subtotal": "مبلغ خالص",
+        "tax": "مالیات",
+        "total_gross": "جمع با مالیات",
+        "terms": "شرایط",
+        "payment_terms": "شرایط پرداخت",
+        "retention": "سپرده حسن انجام کار",
+        "retention_at": "کسر سپرده در مرحله",
+        "retention_at_receipt": "رسید کالا",
+        "retention_at_invoice": "صورت‌حساب",
+        "invoice_tolerance": "حد مجاز اختلاف صورت‌حساب",
+        "supplier_confirmation": "تأیید تأمین‌کننده",
+        "supplier_reference": "شناسه مرجع تأمین‌کننده",
+        "confirmed_delivery": "تاریخ تحویل تأییدشده",
+        "acknowledged_on": "تاریخ اعلام وصول",
+        "not_confirmed": "تأمین‌کننده هنوز تأیید نکرده است.",
+        "notes": "یادداشت‌ها",
+        "no_notes": "یادداشتی ثبت نشده است.",
+        "sig_ordered_by": "سفارش‌دهنده",
+        "purchase_order": "سفارش خرید",
+        "receipt_date": "تاریخ دریافت",
+        "received_by": "تحویل‌گیرنده",
+        "delivery_note": "بارنامه تحویل",
+        "col_ordered": "سفارش‌شده",
+        "col_received": "دریافت‌شده",
+        "col_rejected": "مردود",
+        "col_batch": "بچ / لات",
+        "rejections": "اقلام مردود",
+        "col_reason": "دلیل",
+        "no_rejections": "هیچ قلمی مردود نشد.",
+        "sig_delivered_by": "تحویل‌دهنده",
+        "counterparty_tax_id": "شناسه مالیاتی",
+        "counterparty_address": "نشانی"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "پیش‌نویس",
+          "approved": "تأییدشده",
+          "issued": "صادرشده",
+          "partially_received": "تحویل جزئی",
+          "completed": "تکمیل‌شده",
+          "cancelled": "لغوشده"
+        },
+        "gr_status": {
+          "draft": "پیش‌نویس",
+          "confirmed": "تأییدشده"
+        },
+        "po_type": {
+          "standard": "عادی",
+          "blanket": "سفارش چارچوبی",
+          "service": "خدمات"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "صورت‌حساب",
+        "payment_title": "پرداخت",
+        "direction": "جهت",
+        "supplier": "تأمین‌کننده",
+        "client": "مشتری",
+        "invoice_date": "تاریخ صورت‌حساب",
+        "due_date": "سررسید",
+        "payment_terms": "شرایط پرداخت",
+        "purchase_order": "سفارش خرید",
+        "invoice_total": "جمع صورت‌حساب",
+        "line_items": "اقلام صورت‌حساب",
+        "col_no": "ردیف",
+        "col_description": "شرح",
+        "col_quantity": "مقدار",
+        "col_unit": "واحد",
+        "col_unit_rate": "بهای واحد",
+        "col_vat": "ارزش افزوده",
+        "col_amount": "مبلغ",
+        "no_line_items": "قلمی وجود ندارد.",
+        "totals": "جمع‌ها",
+        "subtotal": "مبلغ خالص",
+        "tax": "مالیات",
+        "total_gross": "جمع با مالیات",
+        "retention": "سپرده حسن انجام کار",
+        "amount_due": "قابل پرداخت پس از کسر سپرده",
+        "payments": "پرداخت‌ها",
+        "col_date": "تاریخ",
+        "col_reference": "شماره مرجع",
+        "col_paid": "پرداخت‌شده",
+        "col_withheld": "کسرشده",
+        "refund": "استرداد",
+        "no_payments": "پرداختی ثبت نشده است.",
+        "notes": "یادداشت‌ها",
+        "no_notes": "یادداشتی ثبت نشده است.",
+        "invoice": "صورت‌حساب",
+        "invoice_number": "شماره صورت‌حساب",
+        "payment_date": "تاریخ پرداخت",
+        "reference": "شماره مرجع",
+        "amount_paid": "مبلغ پرداخت‌شده",
+        "exchange_rate": "نرخ تبدیل ارز",
+        "kind": "نوع",
+        "kind_payment": "پرداخت",
+        "kind_refund": "استرداد",
+        "withholding": "سپرده کسرشده",
+        "withheld_amount": "مبلغ کسرشده",
+        "release_date": "تاریخ آزادسازی",
+        "gross_settled": "مبلغ ناخالص تسویه‌شده",
+        "no_withholding": "از این پرداخت چیزی کسر نشده است.",
+        "counterparty_tax_id": "شناسه مالیاتی",
+        "counterparty_address": "نشانی"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "پیش‌نویس",
+          "pending": "در انتظار تأیید",
+          "approved": "تأییدشده",
+          "sent": "ارسال‌شده",
+          "paid": "پرداخت‌شده",
+          "cancelled": "لغوشده",
+          "credit_note_issued": "صورت‌حساب اعتباری صادر شد"
+        },
+        "direction": {
+          "payable": "پرداختنی (صورت‌حساب تأمین‌کننده)",
+          "receivable": "دریافتنی (صورت‌حساب مشتری)"
+        },
+        "payment_status": {
+          "completed": "تکمیل‌شده",
+          "refunded": "مسترد‌شده"
+        }
+      }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "فهرست مدارک ارسالی برای تأیید",
+        "doc_title": "مدرک ارسالی برای تأیید",
+        "doc_title_product_data": "فرم تأیید مصالح",
+        "col_number": "شماره مدرک",
+        "col_title": "عنوان",
+        "col_type": "نوع",
+        "col_spec": "بخش مشخصات فنی",
+        "col_rev": "بازنگری",
+        "col_date_submitted": "تاریخ ارسال",
+        "col_date_required": "تاریخ مورد نیاز",
+        "col_date_returned": "تاریخ بازگشت",
+        "col_reviewer": "بررسی‌کننده",
+        "col_approver": "تأییدکننده",
+        "col_ball_in_court": "متولی اقدام بعدی",
+        "submitted_by_org": "شرکت ارسال‌کننده",
+        "review_notes": "توضیحات بررسی‌کننده",
+        "no_review_notes": "توضیحی از بررسی‌کننده ثبت نشده است.",
+        "sig_submitted": "ارسال",
+        "sig_reviewed": "بررسی",
+        "sig_approved": "تأیید",
+        "register_filename": "fehrest-madarek-ersali",
+        "register_title_shop_drawing": "فهرست نقشه‌های کارگاهی",
+        "register_title_product_data": "فهرست تأیید مصالح",
+        "register_title_method_statement": "فهرست دستورالعمل‌های اجرایی",
+        "register_filename_shop_drawing": "fehrest-naghsheh-kargahi",
+        "register_filename_product_data": "fehrest-taeid-masaleh",
+        "register_filename_method_statement": "fehrest-dastoorolamal-ejraei",
+        "col_discipline": "رشته",
+        "col_manufacturer": "سازنده / برند",
+        "col_model": "مدل / شناسه",
+        "col_origin": "کشور سازنده",
+        "col_supplier": "تأمین‌کننده",
+        "col_product": "سازنده / مدل / مبدأ",
+        "col_review_code": "کد بررسی",
+        "col_outcome": "نتیجه بررسی",
+        "col_review_period": "مهلت بررسی (روز)",
+        "col_review_due": "سررسید بررسی",
+        "col_days_in_review": "روز در بررسی",
+        "col_days_in_review_print": "روز در بررسی",
+        "col_review_overdue": "روز تأخیر",
+        "col_required_on_site": "نیاز در کارگاه",
+        "col_long_lead": "زمان تأمین طولانی",
+        "col_lead_time": "زمان تأمین (هفته)",
+        "col_needed_by": "تأیید لازم تا",
+        "col_approval_late": "روز تأخیر از موعد نیاز",
+        "col_drawings": "نقشه‌های مرتبط",
+        "col_submitted_returned": "ارسال / بازگشت",
+        "col_on_site_needed_by": "در کارگاه / تأیید تا",
+        "resubmit_for_record": "نسخه اصلاح‌شده برای بایگانی دوباره ارسال شود",
+        "review_history": "سوابق بررسی",
+        "hist_submitted": "ارسال شد",
+        "hist_returned": "بازگردانده شد",
+        "drawings_missing_one": "{n} نقشه مرتبط دیگر در دسترس نیست",
+        "drawings_missing_other": "{n} نقشه مرتبط دیگر در دسترس نیستند",
+        "weeks_one": "{n} هفته",
+        "weeks_other": "{n} هفته"
+      },
+      "labels": {
+        "status": {
+          "draft": "پیش‌نویس",
+          "submitted": "ارسال‌شده",
+          "under_review": "در حال بررسی",
+          "approved": "تأییدشده",
+          "approved_as_noted": "تأیید با اعمال ملاحظات",
+          "revise_and_resubmit": "اصلاح و ارسال مجدد",
+          "rejected": "ردشده",
+          "closed": "بسته"
+        },
+        "type": {
+          "shop_drawing": "نقشه کارگاهی",
+          "product_data": "مشخصات محصول",
+          "sample": "نمونه",
+          "mock_up": "ماکت اجرایی",
+          "test_report": "گزارش آزمایش",
+          "calculation": "محاسبات",
+          "method_statement": "دستورالعمل اجرایی",
+          "certificate": "گواهی‌نامه",
+          "warranty": "گارانتی"
+        },
+        "discipline": {
+          "mechanical": "مکانیک",
+          "hvac": "تأسیسات تهویه مطبوع",
+          "plumbing": "لوله‌کشی و فاضلاب",
+          "fire_protection": "اطفای حریق",
+          "electrical": "برق",
+          "lighting": "روشنایی",
+          "elv": "برق ضعیف",
+          "bms": "اتوماسیون ساختمان",
+          "architectural": "معماری",
+          "structural": "سازه",
+          "civil": "عمران"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "فهرست دستورهای تغییر",
+        "doc_title": "دستور تغییر",
+        "col_code": "کد",
+        "col_title": "عنوان",
+        "col_reason": "دلیل",
+        "col_instrument": "سند تغییر",
+        "col_submitted": "تاریخ ارسال",
+        "col_contractor_amount": "مبلغ پیمانکار",
+        "col_engineer_amount": "مبلغ مهندس",
+        "col_approved_amount": "مبلغ تأییدشده",
+        "col_cost_impact": "اثر بر هزینه",
+        "col_time_impact": "اثر بر زمان (روز)",
+        "col_approved_time": "زمان تأییدشده (روز)",
+        "time_impact": "اثر بر زمان",
+        "approved_time": "زمان تأییدشده",
+        "col_approved": "تاریخ تأیید",
+        "submitted_by": "ارسال",
+        "approved_by": "تأیید",
+        "description": "شرح",
+        "no_description": "شرحی ثبت نشده است.",
+        "items": "اقلام تغییر",
+        "item_description": "شرح",
+        "item_change": "تغییر",
+        "item_unit": "واحد",
+        "item_original_quantity": "مقدار اولیه",
+        "item_new_quantity": "مقدار جدید",
+        "item_original_rate": "نرخ اولیه",
+        "item_new_rate": "نرخ جدید",
+        "item_cost_delta": "اختلاف هزینه",
+        "register_filename": "fehrest-dastoor-taghir"
+      },
+      "labels": {
+        "status": {
+          "draft": "پیش‌نویس",
+          "submitted": "ارسال‌شده",
+          "approved": "تأییدشده",
+          "rejected": "ردشده",
+          "executed": "اجراشده"
+        },
+        "reason": {
+          "client_request": "درخواست کارفرما",
+          "design_change": "تغییر طراحی",
+          "unforeseen": "شرایط پیش‌بینی‌نشده",
+          "regulatory": "الزامات قانونی",
+          "error": "اشتباه یا نقص",
+          "non_conformance": "عدم انطباق",
+          "value_engineering": "مهندسی ارزش"
+        },
+        "instrument": {
+          "works_change": "تغییر ابلاغی",
+          "site_confirmation": "تأییدیه کارگاهی",
+          "claim": "ادعا"
+        },
+        "change": {
+          "added": "افزوده",
+          "removed": "حذف‌شده",
+          "modified": "اصلاح‌شده"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "مجموعه مستندات",
+        "subject": "موضوع",
+        "basis": "مبنا",
+        "period_from": "قدیمی‌ترین سابقه",
+        "period_to": "جدیدترین سابقه",
+        "digest": "کد صحت (SHA-256، 16 نویسه اول)",
+        "col_row": "ردیف",
+        "col_record_id": "شناسه سابقه",
+        "col_section": "بخش",
+        "col_date": "تاریخ",
+        "col_kind": "نوع سابقه",
+        "col_title": "عنوان",
+        "col_summary": "خلاصه",
+        "col_reference": "مرجع",
+        "register_filename": "majmoeh-mostanadat"
+      },
+      "labels": {
+        "section": {
+          "notices": "اخطارها",
+          "correspondence": "مکاتبات",
+          "rfis": "درخواست‌های اطلاعات (RFI)",
+          "variations": "دستورهای تغییر",
+          "approvals": "تأییدیه‌ها",
+          "delay": "تأخیر",
+          "timeline": "خط زمانی",
+          "other": "سایر"
+        },
+        "kind": {
+          "notice": "اخطار",
+          "variation_notice": "اخطار تغییر",
+          "variation_request": "درخواست تغییر",
+          "variation_order": "دستور تغییر",
+          "change_order": "دستور تغییر",
+          "moc_entry": "سابقه تغییر",
+          "correspondence": "مکاتبه"
+        },
+        "basis": {
+          "dispute": "اختلاف",
+          "valuation": "ارزیابی",
+          "delay": "تأخیر / تمدید مدت",
+          "general": "سابقه عمومی"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "دفتر مکاتبات",
+        "doc_title": "مکاتبه",
+        "col_reference": "شماره مرجع",
+        "col_direction": "جهت",
+        "col_type": "نوع",
+        "col_subject": "موضوع",
+        "col_from": "از",
+        "col_to": "به",
+        "col_date_sent": "تاریخ ارسال",
+        "col_date_received": "تاریخ دریافت",
+        "col_response_due": "مهلت پاسخ",
+        "col_clause": "بند قرارداد",
+        "notes": "یادداشت‌ها",
+        "no_notes": "یادداشتی ثبت نشده است.",
+        "attachments": "فایل‌های پیوست",
+        "linked_documents": "مدارک مرتبط",
+        "sig_prepared": "تنظیم",
+        "sig_received": "دریافت",
+        "register_filename": "daftar-mokatebat"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "وارده",
+          "outgoing": "صادره"
+        },
+        "type": {
+          "letter": "نامه",
+          "email": "ایمیل",
+          "notice": "اخطار",
+          "memo": "یادداشت داخلی",
+          "report": "گزارش"
+        },
+        "status": {
+          "open": "باز",
+          "awaiting_response": "در انتظار پاسخ",
+          "responded": "پاسخ داده شد",
+          "closed": "بسته"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "فهرست ترنسمیتال‌ها",
+        "doc_title": "ترنسمیتال",
+        "col_number": "شماره ترنسمیتال",
+        "col_subject": "موضوع",
+        "col_purpose": "هدف",
+        "col_issued": "تاریخ صدور",
+        "col_response_due": "مهلت پاسخ",
+        "col_recipients": "گیرندگان",
+        "col_item_count": "اقلام",
+        "sender": "فرستنده",
+        "cover_note": "یادداشت همراه",
+        "no_cover_note": "یادداشت همراهی وجود ندارد.",
+        "recipients": "گیرندگان",
+        "recipient": "گیرنده",
+        "action_required": "اقدام لازم",
+        "acknowledged": "تأیید دریافت",
+        "responded": "تاریخ پاسخ",
+        "items": "مدارک ارسال‌شده",
+        "item_no": "ردیف",
+        "item_description": "شرح",
+        "item_notes": "یادداشت‌ها",
+        "sig_issued": "صدور",
+        "sig_received": "دریافت",
+        "register_filename": "fehrest-transmittal"
+      },
+      "labels": {
+        "status": {
+          "draft": "پیش‌نویس",
+          "issued": "صادرشده",
+          "responded": "پاسخ داده شد"
+        },
+        "purpose": {
+          "for_approval": "برای تأیید",
+          "for_review": "برای بررسی",
+          "for_information": "برای اطلاع",
+          "for_construction": "برای اجرا",
+          "for_tender": "برای مناقصه",
+          "for_record": "برای بایگانی"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "فهرست دستورهای تغییر",
+        "claim_register_title": "فهرست ادعاها",
+        "notice_register_title": "فهرست اخطارها",
+        "doc_title": "درخواست تغییر",
+        "doc_title_credit": "درخواست تغییر (کاهش)",
+        "time_impact": "اثر بر زمان",
+        "col_code": "کد",
+        "col_title": "عنوان",
+        "col_classification": "نوع",
+        "col_urgency": "فوریت",
+        "col_requested": "تاریخ درخواست",
+        "col_claimed_amount": "مبلغ ادعا‌شده",
+        "col_agreed_amount": "مبلغ توافق‌شده",
+        "col_time_impact": "اثر بر زمان (روز)",
+        "col_response_due": "مهلت پاسخ",
+        "col_clause": "بند قرارداد",
+        "col_row": "ردیف",
+        "col_claim_type": "نوع ادعا",
+        "col_raised": "تاریخ طرح",
+        "col_period_start": "دوره از",
+        "col_period_end": "دوره تا",
+        "col_description": "شرح",
+        "col_decided_amount": "مبلغ مصوب",
+        "col_days_requested": "روزهای درخواستی",
+        "col_days_granted": "روزهای پذیرفته‌شده",
+        "col_recipient_type": "خطاب به",
+        "col_recipient": "گیرنده",
+        "col_target_response": "پاسخ مورد انتظار",
+        "col_response_received": "پاسخ دریافتی",
+        "requested_by": "درخواست",
+        "decided_by": "تصمیم‌گیری",
+        "date_submitted": "تاریخ ارسال",
+        "date_decided": "تاریخ تصمیم",
+        "description": "شرح",
+        "no_description": "شرحی ثبت نشده است.",
+        "decision_notes": "ملاحظات تصمیم",
+        "no_decision_notes": "هنوز تصمیمی ثبت نشده است.",
+        "variation_register_filename": "fehrest-dastoor-taghir",
+        "claim_register_filename": "fehrest-edaaha",
+        "notice_register_filename": "fehrest-ekhtarha"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "پیش‌نویس",
+          "submitted": "ارسال‌شده",
+          "under_review": "در حال بررسی",
+          "approved": "تأییدشده",
+          "rejected": "ردشده",
+          "converted_to_vo": "تبدیل به دستور تغییر"
+        },
+        "claim_status": {
+          "draft": "پیش‌نویس",
+          "submitted": "ارسال‌شده",
+          "under_review": "در حال بررسی",
+          "agreed": "توافق‌شده",
+          "granted": "پذیرفته‌شده",
+          "rejected": "ردشده"
+        },
+        "notice_status": {
+          "issued": "صادرشده",
+          "acknowledged": "رسید تأیید شده",
+          "responded": "پاسخ داده شد",
+          "closed": "بسته"
+        },
+        "classification": {
+          "scope_change": "تغییر دامنه کار",
+          "unforeseen": "شرایط پیش‌بینی‌نشده",
+          "owner_change": "تغییر از سوی کارفرما",
+          "design_dev": "تکمیل طراحی",
+          "regulatory": "الزامات قانونی",
+          "other": "سایر"
+        },
+        "urgency": {
+          "low": "کم",
+          "med": "متوسط",
+          "high": "زیاد"
+        },
+        "claim_type": {
+          "disruption": "اختلال در پیشرفت کار",
+          "eot": "تمدید مدت"
+        },
+        "recipient_type": {
+          "owner": "کارفرما",
+          "contractor": "پیمانکار",
+          "architect": "معمار",
+          "engineer": "مهندس",
+          "consultant": "مشاور"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "گزارش روزانه کارگاه",
+        "overview": "نمای کلی",
+        "site_supervisor": "سرپرست کارگاه",
+        "not_recorded": "ثبت نشده",
+        "labour_on_site": "نیروی انسانی در کارگاه",
+        "equipment_on_site": "تجهیزات در کارگاه",
+        "completeness": "میزان تکمیل",
+        "weather": "آب‌وهوا",
+        "weather_time": "ساعت",
+        "weather_source": "منبع",
+        "weather_temp": "دما (°C)",
+        "weather_wind": "باد (km/h)",
+        "weather_precip": "بارش (mm)",
+        "weather_conditions": "وضعیت",
+        "weather_empty": "برای این روز آب‌وهوایی ثبت نشده است.",
+        "site_record": "سوابق کارگاه",
+        "entries_empty": "برای این گزارش موردی ثبت نشده است.",
+        "notes": "یادداشت‌ها",
+        "notes_empty": "یادداشت دیگری وجود ندارد.",
+        "footer_supervisor": "سرپرست: {name}",
+        "footer_supervisor_missing": "سرپرست کارگاه: ثبت نشده",
+        "footer_generated": "تاریخ تولید: {timestamp}",
+        "footer_page": "صفحه {page} از {total}",
+        "workforce": "نیروی انسانی به تفکیک شرکت",
+        "workforce_company": "شرکت",
+        "workforce_count": "تعداد نفرات",
+        "workforce_unassigned": "بدون شرکت",
+        "workforce_total": "جمع",
+        "signatures": "امضاها",
+        "sig_prepared": "تنظیم (مدیر کارگاه)",
+        "sig_approved": "تأیید (نماینده کارفرما)",
+        "sig_name": "نام",
+        "sig_title": "سمت",
+        "sig_date": "تاریخ",
+        "sig_signature": "امضا",
+        "signed_note": "امضا‌شده در سامانه: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "gozaresh-roozaneh",
+        "summary_wind": "باد {value} km/h",
+        "summary_precipitation": "بارش {value} mm",
+        "summary_humidity": "رطوبت {value} %",
+        "percent": "{value}%",
+        "decimal_mark": "."
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "بازدیدکنندگان",
+          "event": "رویدادها",
+          "delivery": "مصالح تحویلی",
+          "completion": "کارهای انجام‌شده",
+          "incident_summary": "ایمنی و حوادث",
+          "inspection_summary": "بازرسی‌ها",
+          "photo_note": "یادداشت‌های تصویری",
+          "general": "یادداشت‌های عمومی"
+        },
+        "status": {
+          "open": "باز",
+          "closed": "بسته",
+          "signed": "امضاشده",
+          "archived": "بایگانی‌شده"
+        },
+        "condition": {
+          "clear": "صاف",
+          "mainly_clear": "عمدتاً صاف",
+          "partly_cloudy": "نیمه‌ابری",
+          "cloudy": "ابری",
+          "overcast": "کاملاً ابری",
+          "fog": "مه",
+          "fog_rime": "مه یخ‌زده",
+          "drizzle_light": "نمنم باران ضعیف",
+          "drizzle_moderate": "نمنم باران متوسط",
+          "drizzle_dense": "نمنم باران شدید",
+          "rain": "باران",
+          "rain_light": "باران ضعیف",
+          "rain_moderate": "باران متوسط",
+          "rain_heavy": "باران شدید",
+          "freezing_rain_light": "باران یخ‌زده ضعیف",
+          "freezing_rain_heavy": "باران یخ‌زده شدید",
+          "snow": "برف",
+          "snow_light": "برف ضعیف",
+          "snow_moderate": "برف متوسط",
+          "snow_heavy": "برف سنگین",
+          "rain_showers_light": "رگبار ضعیف",
+          "rain_showers_moderate": "رگبار متوسط",
+          "rain_showers_violent": "رگبار شدید",
+          "snow_showers_light": "بارش برف ضعیف و پراکنده",
+          "snow_showers_heavy": "بارش برف شدید و پراکنده",
+          "thunderstorm": "طوفان تندری",
+          "thunderstorm_hail_light": "طوفان تندری با تگرگ ضعیف",
+          "thunderstorm_hail_heavy": "طوفان تندری با تگرگ شدید"
+        },
+        "source": {
+          "manual": "ورود دستی",
+          "open_meteo": "سرویس هواشناسی",
+          "sensor": "حسگر کارگاه"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "فهرست درخواست‌های اطلاعات (RFI)",
+        "col_number": "شماره RFI",
+        "col_subject": "موضوع",
+        "col_raised_by": "درخواست‌کننده",
+        "col_assigned_to": "ارجاع به",
+        "col_ball_in_court": "متولی اقدام بعدی",
+        "col_date_required": "تاریخ مورد نیاز",
+        "col_response_due": "مهلت پاسخ",
+        "col_days_open": "روزهای باز",
+        "col_cost_impact": "اثر بر هزینه",
+        "col_schedule_impact": "اثر بر برنامه زمانی",
+        "col_response": "پاسخ",
+        "yes_with": "بله ({detail})",
+        "register_filename": "fehrest-darkhast-etelaat"
+      },
+      "labels": {
+        "status": {
+          "draft": "پیش‌نویس",
+          "open": "باز",
+          "answered": "پاسخ داده شد",
+          "closed": "بسته",
+          "void": "ابطال‌شده"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "تولیدشده با هوش مصنوعی",
+        "drawing": "نقشه",
+        "cost_estimate": "برآورد هزینه",
+        "summary": "خلاصه",
+        "project": "پروژه:",
+        "boq": "صورت مقادیر:",
+        "date": "تاریخ:",
+        "status": "وضعیت:",
+        "prepared_by": "تهیه‌کننده:",
+        "approved_by": "تأییدکننده:",
+        "signature_hint": "نام / امضا / تاریخ",
+        "contents": "فصل‌ها / ردیف‌ها:",
+        "pos": "ردیف",
+        "description": "شرح",
+        "unit": "واحد",
+        "qty": "مقدار",
+        "rate": "نرخ",
+        "total": "جمع",
+        "subtotal": "جمع جزء:",
+        "other_positions": "سایر ردیف‌ها",
+        "direct_cost": "بهای مستقیم:",
+        "markups": "سودها و سربارها (بدون مالیات):",
+        "net_total": "جمع خالص (بدون مالیات):",
+        "gross_total": "جمع کل",
+        "page": "صفحه",
+        "of": "از",
+        "generated": "تاریخ تولید:",
+        "summary_report": "گزارش خلاصه",
+        "positions_omitted": "{count} ردیف (جزئیات کامل به دلیل عملکرد حذف شده است)",
+        "section": "فصل",
+        "items": "اقلام",
+        "cost_summary": "خلاصه هزینه‌ها",
+        "table_of_contents": "فهرست مطالب",
+        "resources_omitted": "شرح منابع چاپ نشده است: این صورت مقادیر برای یک فایل PDF تعداد منابع زیادی دارد.",
+        "status_draft": "پیش‌نویس",
+        "status_final": "نهایی",
+        "status_archived": "بایگانی‌شده",
+        "subject": "صورت مقادیر",
+        "tax_vat": "VAT"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "فاکتور",
+        "date": "تاریخ: {value}",
+        "due": "سررسید: {value}",
+        "from": "فرستنده",
+        "bill_to": "صورتحساب برای",
+        "vat_id": "شناسه VAT: {value}",
+        "ref": "شماره مرجع: {value}",
+        "th_description": "شرح",
+        "th_qty": "مقدار",
+        "th_unit": "واحد",
+        "th_unit_price": "بهای واحد",
+        "th_net": "خالص ({currency})",
+        "net_total": "جمع خالص",
+        "vat_total": "VAT",
+        "grand_total": "جمع کل فاکتور",
+        "retention_prepaid": "کسورات / پیش‌پرداخت",
+        "amount_due": "مبلغ قابل پرداخت",
+        "payment": "پرداخت",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "شماره حساب: {value}",
+        "bank_code": "کد بانک: {value}",
+        "account_holder": "صاحب حساب: {value}",
+        "footer": "این فایل PDF دارای صورتحساب الکترونیکی EN 16931 (Factur-X / ZUGFeRD) است. فایل XML تعبیه‌شده سند معتبر است.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "گزارش",
+        "meta_project": "پروژه",
+        "meta_type": "نوع",
+        "meta_generated": "تاریخ تولید",
+        "meta_currency": "ارز",
+        "field_column": "فیلد",
+        "value_column": "مقدار",
+        "yes": "بله",
+        "no": "خیر",
+        "no_data_heading": "داده‌ای موجود نیست",
+        "no_data_body": "این گزارش با یک تصویر خالی از داده تولید شده است. بررسی کنید که ماژول‌های منبع (مالی، زمان‌بندی، ایمنی و غیره) برای پروژه انتخاب‌شده داده بازگردانده باشند.",
+        "no_data_body_short": "این گزارش با یک تصویر خالی از داده تولید شده است. بررسی کنید که ماژول‌های منبع برای پروژه انتخاب‌شده داده بازگردانده باشند.",
+        "footer_generated_by": "تولیدشده توسط OpenConstructionERP در {timestamp}.",
+        "worksheet_name": "گزارش",
+        "pdf_subject": "گزارش پروژه",
+        "overall_progress": "پیشرفت کلی",
+        "as_of": "تا تاریخ",
+        "recorded_by": "ثبت‌کننده",
+        "period": "دوره",
+        "entries_suffix": "({count} مورد)",
+        "site_photo_alt": "عکس کارگاه",
+        "ai_summary_heading": "خلاصه",
+        "ai_badge": "تولیدشده با هوش مصنوعی",
+        "ai_note": "تولیدشده با هوش مصنوعی از داده‌های پروژه در زیر.",
+        "ai_note_confidence": "تولیدشده با هوش مصنوعی از داده‌های پروژه در زیر (ضریب اطمینان {confidence}).",
+        "ai_note_review": "پیش از ارسال برای کارفرما بازبینی کنید."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "نام",
+          "status": "وضعیت",
+          "phase": "فاز",
+          "planned_start": "شروع برنامه‌ریزی‌شده",
+          "planned_end": "پایان برنامه‌ریزی‌شده",
+          "schedule_progress_pct": "درصد پیشرفت زمان‌بندی",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "درصد مصرف بودجه",
+          "as_of": "تا تاریخ",
+          "progress_pct": "درصد پیشرفت",
+          "risk_score_avg": "میانگین امتیاز ریسک",
+          "open_rfis": "RFIهای باز",
+          "open_submittals": "مدارک ارسالی باز",
+          "open_defects": "نواقص باز",
+          "open_observations": "مشاهدات باز",
+          "budget": "بودجه",
+          "committed": "متعهدشده",
+          "actual": "واقعی",
+          "payable": "پرداختنی",
+          "receivable": "دریافتنی",
+          "net_cash_flow": "جریان نقدی خالص"
+        },
+        "section_titles": {
+          "Project Overview": "نمای کلی پروژه",
+          "Key Performance Indicators": "شاخص‌های کلیدی عملکرد",
+          "Schedule Status": "وضعیت زمان‌بندی",
+          "Risk Summary": "خلاصه ریسک‌ها",
+          "Open Issues": "موارد باز",
+          "Cost Summary": "خلاصه هزینه‌ها",
+          "Cost Breakdown": "تفکیک هزینه‌ها",
+          "Change Orders": "دستورهای تغییر",
+          "Cash Flow": "جریان نقدی",
+          "Schedule Overview": "نمای کلی زمان‌بندی",
+          "Milestone Status": "وضعیت نقاط عطف",
+          "Critical Path": "مسیر بحرانی",
+          "3-Week Lookahead": "برنامه سه هفته آینده",
+          "Safety KPIs": "شاخص‌های کلیدی ایمنی",
+          "Incident Log": "ثبت حوادث",
+          "Near-Miss Reports": "گزارش‌های نزدیک به حادثه",
+          "Safety Training": "آموزش ایمنی",
+          "Inspection Summary": "خلاصه بازرسی‌ها",
+          "By Inspection Type": "بر اساس نوع بازرسی",
+          "Punch List Status": "وضعیت فهرست نواقص",
+          "Recent Inspections": "بازرسی‌های اخیر",
+          "Portfolio Overview": "نمای کلی پورتفولیو",
+          "Project Statuses": "وضعیت پروژه‌ها",
+          "KPI Comparison": "مقایسه شاخص‌های کلیدی",
+          "Portfolio Risks": "ریسک‌های پورتفولیو",
+          "Field Progress": "پیشرفت کارگاه",
+          "Top Risks": "مهم‌ترین ریسک‌ها",
+          "Site Photos": "عکس‌های کارگاه",
+          "Summary": "خلاصه"
+        }
+      }
+    }
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "این تصویر وضعیت قفل شده است. تصویر وضعیت قفل‌شده یک سابقهٔ ثبت‌شده است و قابل تغییر نیست.",
+      "frozen_no_delete": "تصویر وضعیت قفل‌شده یک سابقهٔ ثبت‌شده است و قابل حذف نیست.",
+      "draft_open": "یک تصویر وضعیت پیش‌نویس از قبل باز است. پیش از شروع تصویر دیگر، آن را قفل یا حذف کنید.",
+      "no_line_method": "این ردیف روش مخصوص خود را ندارد.",
+      "snapshot_missing": "تصویر وضعیت پیدا نشد.",
+      "line_missing": "این ردیف در تصویر وضعیت وجود ندارد.",
+      "document_missing": "سند پیوست‌شده متعلق به این پروژه نیست.",
+      "freeze_refused": "هنوز نمی‌توان تصویر وضعیت را قفل کرد: {count} ردیف بدون توضیح و مدرک از آستانه عبور کرده‌اند.",
+      "no_frozen_snapshot": "هنوز تصویر وضعیت قفل‌شده‌ای برای مقایسه وجود ندارد.",
+      "no_ledger": "دفتر صورت‌حساب‌ها در این نصب در دسترس نیست.",
+      "no_snapshot": "هنوز تصویر وضعیتی برای مستندسازی وجود ندارد."
+    },
+    "export": {
+      "project": "پروژه",
+      "generated": "تاریخ تولید",
+      "currency": "ارز",
+      "page": "صفحه",
+      "generated_at": "تولید شده در",
+      "empty": "هنوز چیزی برای نمایش نیست.",
+      "total": "جمع",
+      "cost_report": "گزارش هزینه",
+      "phase_comparison": "مقایسهٔ مراحل",
+      "invoice_ledger": "دفتر صورت‌حساب‌ها",
+      "forecast_documentation": "مستندات پیش‌بینی",
+      "as_of": "تا تاریخ",
+      "forecast_method": "روش پیش‌بینی",
+      "col_account": "حساب",
+      "col_code": "کد",
+      "col_description": "شرح",
+      "col_source": "منبع",
+      "col_method": "روش",
+      "col_planned": "برنامه‌ریزی‌شده",
+      "col_committed": "تعهدشده",
+      "col_pending": "تغییرات در انتظار",
+      "col_measured": "اندازه‌گیری‌شده",
+      "col_certified": "تأییدشده برای پرداخت",
+      "col_invoiced": "صورت‌حساب‌شده",
+      "col_paid": "پرداخت‌شده",
+      "col_forecast": "پیش‌بینی",
+      "col_variance": "انحراف",
+      "col_variance_pct": "انحراف %",
+      "col_forecast_of_plan": "پیش‌بینی % از برنامه",
+      "col_measured_of_committed": "اندازه‌گیری % از تعهد",
+      "col_invoiced_of_committed": "صورت‌حساب % از تعهد",
+      "col_contract": "قرارداد",
+      "col_contract_title": "عنوان قرارداد",
+      "col_invoice": "صورت‌حساب",
+      "col_date": "تاریخ",
+      "col_kind": "نوع",
+      "col_release_status": "آزادسازی",
+      "col_net": "خالص",
+      "col_vat": "مالیات بر ارزش افزوده",
+      "col_gross": "ناخالص",
+      "col_retention": "سپرده حسن انجام کار",
+      "col_release": "سپرده آزادشده",
+      "col_discount": "تخفیف",
+      "col_payable": "قابل پرداخت",
+      "col_open": "باز",
+      "col_previous": "قبلی",
+      "col_delta": "تغییر",
+      "col_delta_pct": "تغییر %",
+      "col_needs_evidence": "نیازمند مدرک",
+      "col_comment": "توضیح",
+      "col_evidence": "مدرک",
+      "row_unassigned": "پول بدون ردیف هزینه",
+      "row_loose_changes": "تغییرات بدون قرارداد",
+      "row_no_contract": "بدون قرارداد",
+      "contract_value": "مبلغ قرارداد",
+      "retention_held": "سپرده نگه‌داشته‌شده",
+      "yes": "بله",
+      "no": "خیر",
+      "snapshot_date": "تاریخ تصویر وضعیت",
+      "snapshot_status": "وضعیت",
+      "previous_snapshot": "تصویر وضعیت قفل‌شدهٔ قبلی",
+      "method_explained": "نحوهٔ خواندن پیش‌بینی",
+      "evidence_threshold": "مدرک لازم است بالاتر از",
+      "threshold_both": "تغییر بیش از {parts}",
+      "threshold_any": "هر تغییری",
+      "frozen_at": "زمان قفل شدن"
+    },
+    "method": {
+      "best_available": "بهترین منبع در دسترس",
+      "maximum": "حداکثر مقدار",
+      "evm_cpi": "ارزش کسب‌شده (CPI)",
+      "manual": "دستی"
+    },
+    "method_help": {
+      "best_available": "هر ردیف پخته‌ترین رقم خود را برمی‌دارد: صورت‌وضعیت نهایی، وگرنه کار اندازه‌گیری‌شده، وگرنه مبلغ واگذاری، وگرنه برآورد، وگرنه بودجه.",
+      "maximum": "هر ردیف بالاترین رقم خود را برمی‌دارد (بودجه، برآورد، واگذاری، اندازه‌گیری‌شده، صورت‌حساب‌شده) تا پیش‌بینی هیچ ریسکی را پنهان نکند.",
+      "evm_cpi": "هر ردیف هزینهٔ زمان تکمیل را از روی پیشرفت برآورد می‌کند: پولی که تا اکنون خرج شده تقسیم بر سهم کار انجام‌شده.",
+      "manual": "یک نفر رقم ردیف را تعیین می‌کند و سند پشتوانهٔ آن را پیوند می‌دهد."
+    },
+    "source": {
+      "none": "بدون رقم",
+      "budget": "بودجه",
+      "estimate": "برآورد",
+      "partly_awarded": "واگذاری جزئی",
+      "awarded": "واگذارشده",
+      "measured": "اندازه‌گیری‌شده",
+      "final": "صورت‌وضعیت نهایی",
+      "manual": "دستی",
+      "invoiced": "صورت‌حساب‌شده",
+      "evm": "ارزش کسب‌شده"
+    },
+    "layer": {
+      "budget": "بودجه",
+      "estimate": "برآورد",
+      "tender": "بهترین پیشنهاد",
+      "awarded": "واگذارشده",
+      "changes": "تغییرات تأییدشده",
+      "committed": "تعهدشده",
+      "pending": "تغییرات در انتظار",
+      "measured": "اندازه‌گیری‌شده",
+      "certified": "تأییدشده برای پرداخت",
+      "invoiced": "صورت‌حساب‌شده",
+      "paid": "پرداخت‌شده",
+      "forecast": "پیش‌بینی"
+    },
+    "invoice_kind": {
+      "interim": "موقت",
+      "final": "نهایی",
+      "daywork": "کار روزمزدی",
+      "credit_note": "برگ بستانکاری"
+    },
+    "release_status": {
+      "open": "باز",
+      "released": "آزادشده"
+    },
+    "evidence_kind": {
+      "document": "سند",
+      "minutes": "صورت‌جلسه",
+      "other": "سایر"
+    },
+    "snapshot_status": {
+      "draft": "پیش‌نویس",
+      "frozen": "قفل‌شده"
+    }
+  },
+  "pdf_footer": {
+    "page_of": "صفحه {page} از {total}",
+    "page": "صفحه {page}",
+    "printed": "تاریخ چاپ: {timestamp}",
+    "generated": "تاریخ تولید: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} شما را به پورتال کارفرما دعوت کرده است",
+      "login_subject": "پیوند ورود شما به پورتال کارفرما",
+      "invite_heading": "به پورتال کارفرما خوش آمدید",
+      "login_heading": "ورود به پورتال کارفرما",
+      "greeting": "{name} گرامی، سلام",
+      "greeting_generic": "با سلام،",
+      "invite_body": "{sender} دسترسی شما را به پورتال کارفرما فعال کرده است. در این پورتال می‌توانید پروژه خود را پیگیری کنید: گزارش‌های پیشرفت، مدارک، صورت‌حساب‌ها و نقاط عطف بعدی.",
+      "login_body": "پیوند ورودی که درخواست کرده بودید در زیر آمده است.",
+      "link_help": "با دکمه زیر وارد می‌شوید و نیازی به گذرواژه نیست. این پیوند فقط یک بار قابل استفاده است و {hours} ساعت دیگر منقضی می‌شود.",
+      "ignore": "اگر این ایمیل را انتظار نداشتید، می‌توانید آن را نادیده بگیرید. بدون این پیوند هیچ‌کس به پورتال دسترسی نخواهد داشت.",
+      "invite_cta": "باز کردن پورتال",
+      "login_cta": "ورود",
+      "sender_generic": "تیم پروژه شما"
+    },
+    "tender_invite": {
+      "subject": "دعوت به مناقصه: {package}",
+      "heading": "دعوت به مناقصه",
+      "greeting": "{company} محترم،",
+      "greeting_generic": "با سلام و احترام،",
+      "invite": "از شما دعوت می‌شود برای بسته مناقصه {package} پیشنهاد قیمت ارائه دهید.",
+      "invite_project": "از شما دعوت می‌شود برای بسته مناقصه {package} مربوط به پروژه {project} پیشنهاد قیمت ارائه دهید.",
+      "deadline": "مهلت ارائه پیشنهاد: {deadline}",
+      "link_help": "دکمه زیر فهرست مقادیر را باز می‌کند. قیمت‌های واحد را به‌صورت آنلاین وارد کنید، هر زمان خواستید پیش‌نویس را ذخیره کنید و پیش از پایان مهلت پیشنهاد خود را ارسال نمایید. ایجاد حساب کاربری لازم نیست.",
+      "link_personal": "این پیوند اختصاصی شرکت شماست. لطفاً آن را برای دیگران ارسال نکنید.",
+      "cta": "باز کردن فهرست مقادیر و ورود قیمت‌ها",
+      "no_link": "لطفاً جزئیات بسته را بررسی کنید و پیش از مهلت یادشده پیشنهاد خود را ارسال نمایید."
+    },
+    "notification_email": {
+      "greeting": "{name} گرامی، سلام",
+      "greeting_generic": "با سلام،",
+      "cta": "باز کردن در OpenConstructionERP",
+      "footer": "این ایمیل بر اساس تنظیمات اعلان‌های شما ارسال شده است. می‌توانید آن‌ها را در پروفایل خود تغییر دهید.",
+      "digest_subject": "OpenConstructionERP: خلاصه اعلان‌ها ({count})",
+      "digest_heading": "اعلان‌های اخیر:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "مقایسه قیمت‌ها",
+      "comparison_sheet": "مقایسه",
+      "bidder_title": "فهرست مقادیر برای قیمت‌گذاری",
+      "bidder_sheet": "فهرست مقادیر",
+      "project": "پروژه",
+      "package": "بسته",
+      "currency": "ارز",
+      "date": "تاریخ",
+      "return_by": "مهلت بازگرداندن",
+      "item": "ردیف",
+      "description": "شرح",
+      "unit": "واحد",
+      "quantity": "مقدار",
+      "unit_price": "قیمت واحد",
+      "line_total": "جمع ردیف",
+      "own_estimate": "برآورد داخلی",
+      "not_priced": "قیمت‌گذاری نشده",
+      "sum_priced_lines": "مجموع ردیف‌های قیمت‌گذاری‌شده",
+      "bid_total": "جمع پیشنهاد به‌صورت ارائه‌شده",
+      "lines_priced": "ردیف‌های قیمت‌گذاری‌شده",
+      "lines_priced_value": "{priced} از {total}",
+      "deviation": "انحراف از برآورد داخلی",
+      "not_comparable": "نامشخص",
+      "other_currency": "قیمت‌گذاری به {currency}، در رتبه‌بندی با پیشنهادهای {reporting} لحاظ نشده است.",
+      "legend": "راهنما",
+      "legend_lowest": "سبز: پایین‌ترین قیمت واحد در ردیف.",
+      "legend_high": "▲ قرمز: بیش از {pct}% بالاتر از قیمت میانه ردیف.",
+      "legend_low": "▼ کهربایی: بیش از {pct}% پایین‌تر از قیمت میانه ردیف.",
+      "legend_missing": "\"{marker}\": پیشنهاددهنده برای این ردیف قیمتی ارائه نکرده است.",
+      "legend_incomplete": "پیشنهادی که ردیف قیمت‌گذاری‌نشده دارد در ستون \"ردیف‌های قیمت‌گذاری‌شده\" مشخص می‌شود و بر اساس جمع کل در رتبه کمترین قرار نمی‌گیرد.",
+      "legend_totals": "جمع پیشنهاد همان عددی است که پیشنهاددهنده ارائه کرده است و ممکن است با مجموع ردیف‌های قیمت‌گذاری‌شده‌اش تفاوت داشته باشد.",
+      "bidder": "پیشنهاددهنده",
+      "bidder_note": "یادداشت پیشنهاددهنده",
+      "reference": "مرجع (ویرایش نشود)",
+      "total": "جمع کل",
+      "instructions": "برای هر ردیف در خانه‌های زرد قیمت واحد را وارد کنید. مقادیر و شرح‌ها ثابت هستند و جمع ردیف‌ها و جمع کل خودکار محاسبه می‌شوند. اگر ردیفی را قیمت‌گذاری نمی‌کنید، خانه را خالی بگذارید."
+    },
+    "cost_plan": {
+      "sheet_plan": "طرح هزینه NRM 1",
+      "sheet_unallocated": "تخصیص‌نیافته",
+      "title": "طرح هزینه به تفکیک عناصر (NRM 1)",
+      "bill": "فهرست مقادیر",
+      "currency": "ارز",
+      "gifa": "زیربنای ناخالص داخلی (m2)",
+      "gifa_project": "از پروژه",
+      "gifa_entered": "برای این خروجی وارد شده است",
+      "gifa_none": "تعیین نشده، هزینه هر m2 نمایش داده نمی‌شود",
+      "col_code": "کد",
+      "col_description": "عنصر",
+      "col_positions": "ردیف‌ها",
+      "col_basis": "مبنا",
+      "col_total": "جمع",
+      "col_per_m2": "هزینه هر m2 زیربنای ناخالص",
+      "col_share": "% از جمع کل",
+      "col_running": "جمع انباشته",
+      "group_level": "در سطح گروه، بدون تعیین عنصر",
+      "facilitating_works_estimate": "برآورد کارهای زمینه‌ساز",
+      "works_estimate": "برآورد کارهای ساختمان",
+      "addons_heading": "گروه‌های 9 تا 14 از NRM 1 که به‌صورت ردیف فهرست مقادیر قیمت‌گذاری شده‌اند",
+      "unallocated": "به هیچ عنصری تخصیص نیافته",
+      "direct_cost": "هزینه مستقیم فهرست مقادیر",
+      "markups_heading": "اضافات (به ترتیب همان فهرست مقادیر)",
+      "markups_total": "جمع اضافات",
+      "grand_total": "جمع کل طرح هزینه",
+      "basis_direct": "{pct}% بر هزینه مستقیم",
+      "basis_running": "{pct}% بر جمع انباشته",
+      "basis_lump": "مبلغ مقطوع",
+      "basis_banded": "جدول پله‌ای",
+      "basis_escalation": "تعدیل بر اساس شاخص",
+      "basis_other": "{kind}",
+      "basis_scoped": "محدود به بخش",
+      "col_ordinal": "شماره ترتیب",
+      "col_position": "شرح",
+      "col_written_code": "کد به‌صورت نوشته‌شده",
+      "col_reason": "دلیل",
+      "reason_no_code": "ردیف یا بخش‌های آن کد NRM ندارد",
+      "reason_invalid_code": "کد، شماره NRM نیست",
+      "reason_unknown_group": "چنین گروهی در NRM 1 وجود ندارد",
+      "truncated": "فهرست به {shown} ردیف نخست از {count} ردیف کوتاه شده است؛ جمع کل همه ردیف‌ها را شامل می‌شود."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "الزامات",
+      "sheet_summary": "خلاصه",
+      "sheet_legend": "راهنما",
+      "summary_element": "عنصر",
+      "summary_count": "تعداد الزامات",
+      "summary_total": "جمع کل",
+      "legend_column": "ستون",
+      "legend_description": "شرح",
+      "unspecified": "نامشخص",
+      "h01": "عنصر / کلاس IFC",
+      "h02": "طبقه‌بندی",
+      "h03": "گروه ویژگی",
+      "h04": "نام ویژگی",
+      "h05": "نوع داده",
+      "h06": "الزامی",
+      "h07": "مقادیر مجاز",
+      "h08": "حداقل",
+      "h09": "حداکثر",
+      "h10": "واحد",
+      "h11": "الگو",
+      "h12": "مرحله",
+      "h13": "مسئول",
+      "h14": "مورد استفاده",
+      "h15": "منبع",
+      "d01": "کلاس موجودیت IFC (مانند IFCWALL و IFCBEAM)",
+      "d02": "نظام طبقه‌بندی و کد (مانند Uniclass 2015: EF_25_10)",
+      "d03": "نام مجموعه ویژگی (مانند Pset_WallCommon)",
+      "d04": "نام ویژگی یا مشخصه موردنیاز",
+      "d05": "نوع داده IFC (IFCLABEL، IFCREAL، IFCBOOLEAN و غیره)",
+      "d06": "کاردینالیتی: الزامی، اختیاری یا ممنوع",
+      "d07": "فهرست مقادیر مجاز که با نقطه‌ویرگول از هم جدا شده‌اند",
+      "d08": "کران‌های بازه عددی",
+      "d09": "واحد اندازه‌گیری (m، m2، kg و غیره)",
+      "d10": "الگوی عبارت باقاعده برای اعتبارسنجی مقدار",
+      "d11": "مرحله پروژه یا نقطه عطف (LP3، RIBA Stage 3 و غیره)",
+      "d12": "طرف مسئول (معمار، مهندس سازه و غیره)",
+      "d13": "هدف یا مورد استفاده از این الزام",
+      "d14": "استاندارد یا مدرک منبع"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "فهرست مقادیر ایجاد شد",
+      "notifications.boq.created.body": "فهرست مقادیر \"{boq_name}\" شما ذخیره شد.",
+      "notifications.meeting.action_assigned.title": "یک اقدام جلسه به شما واگذار شد",
+      "notifications.meeting.action_assigned.body": "از جلسه {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "وضعیت مدرک تغییر کرد",
+      "notifications.cde.state_transitioned.body": "محفظه به وضعیت \"{new_state}\" منتقل شد.",
+      "notifications.cde.linked_published.title": "مدرکی مرتبط با کار شما منتشر شد",
+      "notifications.cde.linked_published.body": "{container_code} با ویرایش {revision_code} منتشر شد. سوابق مرتبط شما: {records}.",
+      "notifications.rfi.assigned.title": "یک درخواست اطلاعات (RFI) به شما واگذار شد",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "درخواست اطلاعات (RFI) پاسخ داده شد",
+      "notifications.rfi.responded.body": "درخواست {code} شما ({title}) پاسخ دریافت کرد.",
+      "notifications.risk.assigned.title": "یک ریسک به شما واگذار شد",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "هشدار تجاوز از هزینه",
+      "notifications.costmodel.overrun_alert.body": "هزینه {category} از بودجه فراتر رفته است: مبلغ واقعی {actual} {currency} از آستانه هشدار +{threshold_pct}% بر مبلغ برنامه‌ریزی‌شده {planned} {currency} بیشتر است.",
+      "notifications.submittal.submitted.title": "مدرک ارسالی در انتظار بررسی",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "مدرک ارسالی تأیید شد",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "مدرک ارسالی رد شد",
+      "notifications.submittal.rejected.body": "{code} ({title}). دلیل: {reason}",
+      "notifications.submittal.revise_resubmit.title": "مدرک ارسالی نیاز به اصلاح دارد",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). دلیل: {reason}",
+      "notifications.transmittal.issued.title": "یک نامه ارسال مدارک برای شما صادر شد",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "رسید نامه ارسال مدارک تأیید شد",
+      "notifications.transmittal.acknowledged.body": "گیرنده دریافت {code} ({title}) را تأیید کرد.",
+      "notifications.transmittal.responded.title": "نامه ارسال مدارک پاسخ داده شد",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "یک درخواست اطلاعات (RFI) به شما واگذار شد",
+      "notification.rfi_assigned_body": "درخواست اطلاعات {rfi_number} - {subject}",
+      "notification.task_assigned_title": "وظیفه جدید به شما واگذار شد",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "صورت‌حساب تأیید شد",
+      "notification.invoice_approved_body": "صورت‌حساب {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "بازرسی زمان‌بندی شد",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title} در تاریخ {inspection_date}",
+      "notification.submittal_status_changed_title": "وضعیت مدرک ارسالی تغییر کرد",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "جلسه زمان‌بندی شد",
+      "notification.meeting_scheduled_body": "{title} در تاریخ {meeting_date}",
+      "notification.ncr_created_title": "عدم انطباق ثبت شد",
+      "notification.ncr_created_body": "گزارش عدم انطباق {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "مدرک بارگذاری شد",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "در یک نظر از شما نام برده شد",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "نظر جدید در یک گفتگو",
+      "notifications.collaboration.comment_added.body": "درباره {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "تداخل با شدت بالا شناسایی شد",
+      "notifications.clash.high_severity.body": "تداخل با شدت {severity}: {a_name} با {b_name}",
+      "notifications.validation.report.title": "اعتبارسنجی مشکلاتی یافت",
+      "notifications.validation.report.body": "خطا: {error_count}، هشدار: {warning_count} در این مورد از نوع {target_type}.",
+      "notifications.punchlist.auto_created.title": "یک مورد در فهرست نواقص ایجاد شد",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "خلاصه اعلان‌ها",
+      "notifications.digest.body": "شما {count} به‌روزرسانی جدید در کانال {channel} دارید.",
+      "notifications.approval.overdue.title": "تأیید معوق است",
+      "notifications.approval.overdue.body": "مرحله {step_ordinal} در این مورد ({target_kind}) به اندازه {hours_overdue} ساعت معوق است.",
+      "notifications.approval.escalated.title": "یک تأیید به شما ارجاع شد",
+      "notifications.approval.escalated.body": "مرحله {step_ordinal} در این مورد ({target_kind}) به شما ارجاع شد (سطح {level}).",
+      "notifications.approval.reassigned.title": "یک تأیید به شما واگذار شد",
+      "notifications.approval.reassigned.body": "تصمیم‌گیری درباره مرحله {step_ordinal} در این مورد ({target_kind}) اکنون با شماست.",
+      "notifications.deadline.overdue.title": "معوق: {title}",
+      "notifications.deadline.overdue.body": "مورد \"{title}\" در ماژول {module} به اندازه {days_overdue} روز از سررسید گذشته است.",
+      "notifications.deadline.escalated.title": "مورد معوق ارجاع شد",
+      "notifications.deadline.escalated.body": "مورد \"{title}\" در ماژول {module} همچنان باز است، {days_overdue} روز معوق شده و ارجاع داده شده است.",
+      "notifications.deadline.approaching.title": "سررسید نزدیک است: {title}",
+      "notifications.deadline.approaching.body": "سررسید مورد \"{title}\" در ماژول {module} تاریخ {due_date} است.",
+      "notifications.deadline.built.approaching.title": "سررسید نزدیک است: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: سررسید \"{title}\" تاریخ {due_date} است.",
+      "notifications.deadline.rfi.overdue.title": "معوق: درخواست اطلاعات {reference}",
+      "notifications.deadline.rfi.overdue.body": "سررسید درخواست اطلاعات {reference} \"{title}\" در پروژه {project} تاریخ {due_date_display} بود و {days_overdue} روز معوق شده است. پاسخ لازم است.",
+      "notifications.deadline.rfi.escalated.title": "ارجاع شد: درخواست اطلاعات {reference}",
+      "notifications.deadline.rfi.escalated.body": "درخواست اطلاعات {reference} \"{title}\" در پروژه {project} همچنان باز است، {days_overdue} روز از سررسید {due_date_display} گذشته و به شما ارجاع شده است.",
+      "notifications.deadline.rfi.approaching.title": "سررسید نزدیک است: درخواست اطلاعات {reference}",
+      "notifications.deadline.rfi.approaching.body": "سررسید درخواست اطلاعات {reference} \"{title}\" در پروژه {project} تاریخ {due_date_display} است. پاسخ لازم است.",
+      "notifications.deadline.submittals.overdue.title": "معوق: مدرک ارسالی {reference}",
+      "notifications.deadline.submittals.overdue.body": "سررسید مدرک ارسالی {reference} \"{title}\" در پروژه {project} تاریخ {due_date_display} بود و {days_overdue} روز معوق شده است. بررسی لازم است.",
+      "notifications.deadline.submittals.escalated.title": "ارجاع شد: مدرک ارسالی {reference}",
+      "notifications.deadline.submittals.escalated.body": "مدرک ارسالی {reference} \"{title}\" در پروژه {project} همچنان باز است، {days_overdue} روز از سررسید {due_date_display} گذشته و به شما ارجاع شده است.",
+      "notifications.deadline.submittals.approaching.title": "سررسید نزدیک است: مدرک ارسالی {reference}",
+      "notifications.deadline.submittals.approaching.body": "سررسید مدرک ارسالی {reference} \"{title}\" در پروژه {project} تاریخ {due_date_display} است. بررسی لازم است.",
+      "notifications.deadline.correspondence.overdue.title": "معوق: مکاتبه {reference}",
+      "notifications.deadline.correspondence.overdue.body": "مکاتبه {reference} \"{title}\" در پروژه {project} باید تا {due_date_display} پاسخ داده می‌شد و {days_overdue} روز معوق شده است. پاسخ لازم است.",
+      "notifications.deadline.correspondence.escalated.title": "ارجاع شد: مکاتبه {reference}",
+      "notifications.deadline.correspondence.escalated.body": "مکاتبه {reference} \"{title}\" در پروژه {project} همچنان بی‌پاسخ است، {days_overdue} روز از سررسید {due_date_display} گذشته و به شما ارجاع شده است.",
+      "notifications.deadline.correspondence.approaching.title": "سررسید نزدیک است: مکاتبه {reference}",
+      "notifications.deadline.correspondence.approaching.body": "مکاتبه {reference} \"{title}\" در پروژه {project} باید تا {due_date_display} پاسخ داده شود. پاسخ لازم است.",
+      "notifications.deadline.variations.overdue.title": "معوق: درخواست تغییر {reference}",
+      "notifications.deadline.variations.overdue.body": "سررسید درخواست تغییر {reference} \"{title}\" در پروژه {project} تاریخ {due_date_display} بود و {days_overdue} روز معوق شده است. تصمیم‌گیری لازم است.",
+      "notifications.deadline.variations.escalated.title": "ارجاع شد: درخواست تغییر {reference}",
+      "notifications.deadline.variations.escalated.body": "درخواست تغییر {reference} \"{title}\" در پروژه {project} همچنان باز است، {days_overdue} روز از سررسید {due_date_display} گذشته و به شما ارجاع شده است.",
+      "notifications.deadline.variations.approaching.title": "سررسید نزدیک است: درخواست تغییر {reference}",
+      "notifications.deadline.variations.approaching.body": "سررسید درخواست تغییر {reference} \"{title}\" در پروژه {project} تاریخ {due_date_display} است. تصمیم‌گیری لازم است.",
+      "notifications.variation.submitted.title": "درخواست تغییر در انتظار تصمیم: {code}",
+      "notifications.variation.submitted.body": "درخواست تغییر {code} \"{title}\" در پروژه {project} ارائه شد و در انتظار تصمیم است.",
+      "notifications.variation.approved.title": "درخواست تغییر تأیید شد: {code}",
+      "notifications.variation.approved.body": "درخواست تغییر {code} \"{title}\" در پروژه {project} تأیید شد.",
+      "notifications.variation.rejected.title": "درخواست تغییر رد شد: {code}",
+      "notifications.variation.rejected.body": "درخواست تغییر {code} \"{title}\" در پروژه {project} رد شد و به شما بازگردانده شد.",
+      "notifications.variation.rejected_reason.body": "درخواست تغییر {code} \"{title}\" در پروژه {project} رد شد و به شما بازگردانده شد. دلیل: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "دستور تغییر در انتظار تأیید: {code}",
+      "notifications.changeorder.awaiting_approval.body": "دستور تغییر {code} \"{title}\" در پروژه {project} ارائه شد و در انتظار تأیید است.",
+      "notifications.changeorder.approved.title": "دستور تغییر تأیید شد: {code}",
+      "notifications.changeorder.approved.body": "دستور تغییر {code} \"{title}\" در پروژه {project} تأیید شد.",
+      "notifications.changeorder.rejected.title": "دستور تغییر رد شد: {code}",
+      "notifications.changeorder.rejected.body": "دستور تغییر {code} \"{title}\" در پروژه {project} رد شد.",
+      "notifications.submittal.approved_as_noted.title": "مدرک ارسالی با ملاحظات تأیید شد",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "مدرکی منتظر تأیید شماست",
+      "notifications.file_approval.needs_approver.body": "یک فایل از نوع {file_kind} منتظر تأیید شماست.",
+      "notifications.file_approval.approved.title": "مدرک شما تأیید شد",
+      "notifications.file_approval.approved.body": "فایل شما از نوع {file_kind} همه مراحل تأیید را گذراند.",
+      "notifications.file_approval.rejected.title": "مدرک شما بازگردانده شد",
+      "notifications.file_approval.rejected.body": "فایل شما از نوع {file_kind} رد شد و نیاز به اصلاح دارد.",
+      "notifications.portal.user_invited.title": "کاربر پورتال دعوت شد",
+      "notifications.portal.user_invited.body": "{portal_user_email} با نقش {portal_role} دعوت شد.",
+      "notifications.portal.message_received.title": "پیام جدید در پورتال",
+      "notifications.portal.message_received.body": "{buyer_name} پیامی ارسال کرد."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "شناسه فعالیت",
+          "کد فعالیت",
+          "شماره فعالیت",
+          "شناسه وظیفه",
+          "شناسه"
+        ],
+        "name": [
+          "نام فعالیت",
+          "نام وظیفه",
+          "فعالیت",
+          "وظیفه"
+        ],
+        "wbs": [
+          "WBS",
+          "کد WBS",
+          "شماره WBS",
+          "ساختار شکست کار"
+        ],
+        "outline_level": [
+          "سطح طرح کلی",
+          "سطح سلسله‌مراتب",
+          "سطح تورفتگی",
+          "تورفتگی"
+        ],
+        "start": [
+          "شروع",
+          "تاریخ شروع",
+          "آغاز",
+          "شروع برنامه‌ریزی‌شده"
+        ],
+        "finish": [
+          "پایان",
+          "تاریخ پایان",
+          "اتمام",
+          "تاریخ اتمام",
+          "پایان برنامه‌ریزی‌شده"
+        ],
+        "duration": [
+          "مدت",
+          "مدت (روز)",
+          "مدت اولیه",
+          "تعداد روز"
+        ],
+        "predecessors": [
+          "پیش‌نیازها",
+          "پیش‌نیاز",
+          "وابسته به",
+          "وابستگی‌ها",
+          "فعالیت‌های قبلی"
+        ],
+        "percent_complete": [
+          "% تکمیل",
+          "درصد تکمیل",
+          "درصد پیشرفت",
+          "پیشرفت (%)",
+          "% انجام‌شده"
+        ],
+        "milestone": [
+          "نقطه عطف",
+          "رویداد کلیدی",
+          "آیا نقطه عطف است"
+        ],
+        "resource": [
+          "منابع",
+          "منبع",
+          "نام منابع",
+          "گروه کاری",
+          "مسئول اجرا"
+        ],
+        "notes": [
+          "یادداشت‌ها",
+          "یادداشت",
+          "توضیحات",
+          "ملاحظات"
+        ],
+        "client_visible": [
+          "قابل مشاهده برای کارفرما",
+          "نمایش به کارفرما",
+          "اشتراک با کارفرما",
+          "مرئی برای کارفرما"
+        ]
+      },
+      "yes_words": [
+        "بله",
+        "آری"
+      ],
+      "no_words": [
+        "خیر",
+        "نه"
+      ],
+      "example_names": [
+        "سازه و پوسته",
+        "گودبرداری",
+        "پی‌سازی",
+        "تحویل پی‌سازی"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "*قرارداد*",
+          "پیمان",
+          "*توافق‌نامه*"
+        ],
+        "contact": [
+          "مخاطب*",
+          "*تأمین‌کننده*",
+          "*تامین‌کننده*",
+          "*پیمانکار*",
+          "*کارفرما*",
+          "*مشتری*"
+        ],
+        "schedule_activity": [
+          "*فعالیت*",
+          "*وظیفه*",
+          "*وظایف*",
+          "wbs"
+        ],
+        "document": [
+          "*مدرک*",
+          "*مدارک*",
+          "*سند*",
+          "*نقشه*",
+          "*پیوست*"
+        ],
+        "user": [
+          "*مسئول*",
+          "*مسؤول*",
+          "*بازرس*",
+          "*ناظر*",
+          "*سرکارگر*"
+        ],
+        "due": [
+          "*سررسید*",
+          "*مهلت*",
+          "*انقضا*",
+          "معتبر تا",
+          "تاریخ هدف",
+          "*تمدید*"
+        ]
+      },
+      "link_labels": {
+        "contract": "قرارداد",
+        "contact": "مخاطب",
+        "schedule_activity": "فعالیت برنامه زمانی",
+        "document": "مدرک",
+        "user": "مسئول"
+      },
+      "state_labels": [
+        "باز",
+        "در حال انجام",
+        "انجام‌شده"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "الحاقیه {number} مناقصه {package}",
+      "addendum_heading": "الحاقیه مناقصه",
+      "greeting": "{company} گرامی،",
+      "greeting_generic": "با سلام،",
+      "addendum_intro": "الحاقیه {number} بسته مناقصه {package} صادر شد: {title}.",
+      "addendum_deadline": "مهلت ارسال پیشنهاد از {old} به {new} تغییر یافت.",
+      "addendum_boq": "فهرست مقادیر تغییر کرده است (بازنگری {revision}). لطفاً بازنگری جاری را قیمت‌گذاری کنید.",
+      "addendum_documents": "اسناد صادرشده: {documents}",
+      "addendum_ack": "لطفاً دریافت این الحاقیه را تأیید کنید. پیشنهادی که همه الحاقیه‌ها را تأیید نکند ممکن است مطابق تلقی نشود.",
+      "answer_subject": "توضیح {number} مناقصه {package}",
+      "answer_heading": "توضیح مناقصه",
+      "answer_intro": "به یک پرسش درباره بسته مناقصه {package} پاسخ داده شد. این پاسخ برای همه پیشنهاددهندگان معتبر است.",
+      "question_label": "پرسش",
+      "answer_label": "پاسخ"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "ارزش ناخالص توسعه (GDV)",
+      "total_development_cost": "کل هزینه توسعه",
+      "residual_land_value": "ارزش باقی مانده زمین",
+      "developer_profit": "سود توسعه دهنده",
+      "profit_on_cost": "سود بر هزینه",
+      "profit_on_gdv": "سود بر GDV",
+      "construction_cost": "هزینه ساخت",
+      "professional_fees": "حق الزحمه های حرفه ای",
+      "contingency": "ذخیره احتمالی",
+      "finance_cost": "هزینه مالی",
+      "sales_costs": "هزینه های فروش"
+    },
+    "status": {
+      "viable": "قابل اجرا",
+      "unviable": "غیرقابل اجرا",
+      "marginal": "حاشیه ای",
+      "pending": "هنوز ارزیابی نشده"
+    },
+    "figure": {
+      "gross_development_value": "مجموع ارزش فروش همه واحدهای طرح، همه با یک واحد پول.",
+      "total_development_cost": "همه هزینه های اجرای طرح به جز خود زمین: ساخت، حق الزحمه، ذخیره، تأمین مالی و هزینه های فروش.",
+      "residual_land_value": "آنچه پس از کم کردن کل هزینه توسعه و سود هدف توسعه دهنده از ارزش ناخالص توسعه برای زمین باقی می ماند.",
+      "developer_profit": "سودی که توسعه دهنده قصد نگه داشتن آن را دارد، به عنوان نسبت هدف از ارزش ناخالص توسعه.",
+      "profit_on_cost": "سود توسعه دهنده تقسیم بر کل هزینه توسعه، به صورت نسبت.",
+      "profit_on_gdv": "سود توسعه دهنده تقسیم بر ارزش ناخالص توسعه، به صورت نسبت."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "کمپ کارگری",
+        "rental": "مسکن اجاره‌ای",
+        "hotel": "هتل"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "در انتظار",
+        "approved": "تأیید شده",
+        "rejected": "رد شده"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "برآورده شده",
+        "fail": "برآورده نشده",
+        "not_applicable": "نامرتبط"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "نقشه",
+        "contract": "قرارداد",
+        "specification": "مشخصات فنی",
+        "photo": "عکس",
+        "correspondence": "مکاتبات",
+        "reality_capture": "ثبت واقعیت",
+        "other": "سایر"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "در انتظار",
+        "approved": "تأیید شده",
+        "rejected": "رد شده",
+        "cancelled": "لغو شده"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "پیش نویس",
+        "submitted": "ارسال شده برای تأیید",
+        "approved": "تأیید شده",
+        "posted": "ثبت در دفتر کل"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "باز",
+        "assigned": "واگذار شده",
+        "in_progress": "در حال انجام",
+        "resolved": "رفع شده",
+        "verified": "تأیید شده",
+        "closed": "بسته شده"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "مشاهده",
+        "minor": "جزئی",
+        "major": "عمده",
+        "critical": "بحرانی"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "نفر",
+        "crew": "گروه کاری",
+        "equipment": "تجهیزات",
+        "subcontractor": "پیمانکار جزء"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "نام مدل هوش مصنوعی قدیمی یا در دسترس نیست. به تنظیمات > هوش مصنوعی بروید و نام مدل معتبر فعلی ارائه‌دهنده خود را وارد کنید.",
+      "not_configured": "هوش مصنوعی پیکربندی نشده است. لطفاً یک ارائه‌دهنده هوش مصنوعی را در تنظیمات تعیین کنید."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "تأیید شده",
+      "bound": "پیوست شده",
+      "empty": "باقی‌مانده"
+    },
+    "package_status_labels": {
+      "draft": "پیش‌نویس",
+      "in_progress": "در حال انجام",
+      "ready": "آماده",
+      "issued": "صادر شده"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "مانع",
+      "critical": "بحرانی",
+      "warning": "هشدار",
+      "suggestion": "پیشنهاد"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "راهبرد",
+      "brief": "شرح نیازها",
+      "concept": "مفهوم‌سازی",
+      "design": "طراحی",
+      "approval": "مجوز",
+      "detail": "طراحی تفصیلی",
+      "tender": "مناقصه",
+      "award": "واگذاری",
+      "construction": "اجرا",
+      "handover": "تحویل",
+      "operation": "بهره‌برداری"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "تأیید",
+      "has_pieces": {
+        "fail": "این کار قطعه‌ای برای برش ندارد",
+        "suggestion": "قطعه‌ها را با دست اضافه کنید، بچسبانید یا از جدول خم میلگرد، برداشت، ردیف فهرست مقادیر یا فایل درون‌ریزی کنید."
+      },
+      "has_stock": {
+        "fail": "این کار موجودی‌ای برای برش ندارد",
+        "suggestion": "دست‌کم یک طول موجودی یا اندازه ورق اضافه کنید، یا از ته‌مانده‌های انبار کارگاه دوباره استفاده کنید."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} عرض ندارد",
+        "suggestion": "برای هر قطعه ورق و هر اندازه ورق، هم طول و هم عرض را وارد کنید."
+      },
+      "piece_fits_stock": {
+        "fail": "قطعه {ref} ({size} mm) در هیچ اندازه موجودی جا نمی‌شود",
+        "suggestion": "اندازه موجودی بلندتر یا بزرگ‌تر اضافه کنید، پیرایش را کم کنید یا قطعه را با وصله تقسیم کنید."
+      },
+      "grain_allows_fit": {
+        "fail": "قطعه {ref} فقط با چرخاندن در خلاف جهت الیاف جا می‌شود",
+        "suggestion": "چرخش این قطعه را مجاز کنید یا اندازه ورقی اضافه کنید که در راستای الیاف در آن جا شود."
+      },
+      "kerf_set": {
+        "fail": "پهنای تیغه برش صفر است",
+        "suggestion": "پهنای تیغه یا برش را وارد کنید، وگرنه بازده هر میلگرد با چند برش بیش از واقع نشان داده می‌شود."
+      },
+      "min_offcut_set": {
+        "fail": "حداقل ته‌مانده قابل استفاده تعیین نشده است",
+        "suggestion": "کوتاه‌ترین ته‌مانده ارزشمند برای نگهداری را تعیین کنید تا ته‌مانده‌های قابل استفاده مجدد پرتی حساب نشوند."
+      },
+      "stock_priced": {
+        "fail": "موجودی {ref} قیمت واحد ندارد",
+        "suggestion": "قیمت هر قطعه را وارد کنید تا نقشه هزینه خود را گزارش کند و ارزان‌ترین موجودی را برگزیند."
+      },
+      "stock_sufficient": {
+        "fail": "قطعه‌های جانمایی‌نشده روی موجودی در دسترس: {count}",
+        "suggestion": "مقدار در دسترس را افزایش دهید یا اندازه موجودی دیگری اضافه کنید."
+      },
+      "yield_threshold": {
+        "fail": "بازده {actual} % کمتر از آستانه {threshold} % است",
+        "suggestion": "طول یا اندازه موجودی دیگری اضافه کنید، چرخش را مجاز کنید یا آستانه را برای این مصالح بازبینی کنید."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "مورد فهرست نواقص '{title}' بدون عکس بسته شده است",
+    "punch_no_photo_fix": "عکسی از کار انجام‌شده اضافه کنید",
+    "photo_weak": "{count} عکس در '{title}' موقعیت یا زمان ثبت ندارد",
+    "photo_weak_fix": "عکس را در برنامه با فعال بودن موقعیت‌یابی دوباره بگیرید",
+    "defect_no_photo": "عیب '{reference}' بدون عکس رفع عیب بسته شده است",
+    "defect_no_photo_fix": "عکسی از کار اصلاح‌شده پیوست کنید"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} مورد دیگر فهرست نشده است",
+    "category_missing": "برای دسته الزامی '{category}' مدرکی وجود ندارد",
+    "category_missing_fix": "سندی را به یکی از موارد فهرست بررسی این دسته پیوند دهید یا سندی اضافه کنید",
+    "category_unverified": "مدرک '{category}' هنوز تأیید نشده است",
+    "category_unverified_fix": "از یک مدیر بخواهید مدرک پیوست‌شده را بررسی و تأیید کند",
+    "punch_open": "مورد فهرست نواقص '{name}' هنوز باز است",
+    "punch_open_fix": "مورد را رفع و ببندید یا از محدوده این پرونده خارج کنید",
+    "punch_no_photo": "مورد رفع‌شده فهرست نواقص '{name}' عکس ندارد",
+    "punch_no_photo_fix": "عکسی از کار انجام‌شده اضافه کنید",
+    "system_pending": "سامانه '{name}' راه‌اندازی نشده است",
+    "system_pending_fix": "فهرست‌های بررسی راه‌اندازی را کامل کنید و سامانه را راه‌اندازی‌شده علامت بزنید",
+    "critical_issues": "{count} مشکل بحرانی راه‌اندازی هنوز باز است",
+    "critical_issues_fix": "پیش از تحویل، مشکلات بحرانی را ببندید",
+    "acceptance_missing": "گواهی پذیرش پیوست نشده است",
+    "acceptance_missing_fix": "گواهی پذیرش امضاشده را به مورد پذیرش در فهرست بررسی پیوند دهید",
+    "acceptance_unsigned": "گواهی پذیرش کاملاً امضا نشده است (وضعیت: {status})",
+    "acceptance_unsigned_fix": "امضاهای باقی‌مانده را در بخش امضا جمع‌آوری کنید",
+    "blocked": "پرونده از فهرست بررسی نمی‌گذرد. موارد را رفع کنید یا به‌صورت ناقص تهیه کنید (با تأیید مدیر).",
+    "delivery_title": "پرونده تحویل: {project}",
+    "delivery_body": "پرونده تحویل '{title}' ({scope}) آماده است. پیوند زیر آن را دانلود می‌کند و تا {expires} معتبر است.",
+    "pdf": {
+      "title": "پرونده تحویل",
+      "scope": "محدوده",
+      "built": "زمان تهیه",
+      "status_passed": "فهرست بررسی قبول شد",
+      "status_warnings": "فهرست بررسی با هشدار قبول شد",
+      "status_errors": "ناقص: یافته‌های فهرست بررسی باز است",
+      "findings": "یافته‌های باز فهرست بررسی",
+      "severity": "شدت",
+      "finding": "یافته",
+      "severity_error": "خطا",
+      "severity_warning": "هشدار",
+      "severity_info": "اطلاعات",
+      "contents": "فهرست مطالب",
+      "file": "فایل",
+      "size": "اندازه",
+      "punch": "فهرست نواقص رفع‌شده",
+      "item": "مورد",
+      "status": "وضعیت",
+      "photos": "عکس‌ها",
+      "evidence": "مدارک تصویری"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "ارزیابی {rating} برای '{name}' سطحی از مقیاس '{scale}' نیست",
+    "rule_poor_without_action": "'{name}' ارزیابی {rating} دارد اما اقدام نگهداری برنامه‌ریزی‌شده ندارد",
+    "rule_poor_without_action_fix": "برنامه را استخراج کنید یا برای این عنصر اقدامی اضافه کنید",
+    "rule_action_unpriced": "اقدام '{name}' در سال {year} بهای واحد ندارد",
+    "rule_action_unpriced_fix": "بهای واحد را وارد کنید تا در جمع‌های برنامه بیاید",
+    "rule_defect_incomplete": "ارزیابی '{name}' به کار نیاز دارد اما شدت یا وسعتی ثبت نکرده است"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}، صفحه {page}",
+    "text_change": "«{old}» به «{new}» تغییر کرد",
+    "kind": {
+      "added": "افزوده شد",
+      "removed": "حذف شد",
+      "modified": "اصلاح شد",
+      "text": "متن تغییر کرد"
+    },
+    "status": {
+      "open": "باز",
+      "relevant": "مرتبط",
+      "not_relevant": "نامرتبط"
+    },
+    "errors": {
+      "revision_not_found": "بازنگری نقشه در این پروژه یافت نشد.",
+      "revision_not_parsed": "نقشه هنوز نسخه پردازش‌شده‌ای برای مقایسه ندارد.",
+      "comparison_not_found": "مقایسه یافت نشد.",
+      "change_not_found": "تغییر یافت نشد.",
+      "same_revision": "برای مقایسه دو بازنگری یا صفحهٔ متفاوت انتخاب کنید.",
+      "manual_points": "هم‌ترازی دستی به دو نقطهٔ متمایز روی هر بازنگری نیاز دارد.",
+      "alignment_singular": "هم‌ترازی قابل اعمال نیست: برگه را فشرده می‌کند.",
+      "region_empty": "تغییر {seq} اندازه ندارد.",
+      "region_off_sheet": "تغییر {seq} بیرون از برگه قرار دارد.",
+      "module_missing": "ماژول لازم برای این کار نصب نشده است."
+    },
+    "rfi": {
+      "subject": "تغییر نقشه {seq} در {sheet}",
+      "question": "بازنگری {new} از {sheet} در ناحیهٔ علامت‌گذاری‌شده ({kind}) با بازنگری {old} تفاوت دارد. لطفاً منظور از تغییر و اثر آن بر مقادیر را تأیید کنید."
+    },
+    "markup": {
+      "text": "تغییر بازنگری {seq}: {kind}"
+    },
+    "report": {
+      "title": "مقایسهٔ بازنگری‌های نقشه",
+      "project": "پروژه",
+      "name": "مقایسه",
+      "old_revision": "بازنگری قدیمی‌تر",
+      "new_revision": "بازنگری جدیدتر",
+      "alignment": "هم‌ترازی",
+      "alignment_none": "هم‌تراز نشده (قاب یکسان)",
+      "alignment_auto": "خودکار",
+      "alignment_manual": "دستی، دو نقطه",
+      "confidence": "اطمینان {value}",
+      "summary": "تغییرات",
+      "summary_counts": "جمعاً {total}: {added} افزوده، {removed} حذف‌شده، {modified} اصلاح‌شده، {text} متنی",
+      "generated_on": "تاریخ تولید",
+      "generated": "تولید شده در {timestamp}",
+      "page_of": "صفحه {page} از {total}",
+      "no_changes": "بین دو بازنگری تغییری یافت نشد.",
+      "col_no": "ردیف",
+      "col_preview": "پیش‌نمایش",
+      "col_kind": "تغییر",
+      "col_location": "موقعیت",
+      "col_detail": "جزئیات",
+      "col_status": "وضعیت",
+      "col_comment": "توضیح",
+      "col_follow_up": "پیگیری",
+      "page_at": "صفحه {page} در {coords}",
+      "layer": "لایه {layer}",
+      "entity_counts": "اجزا: {added} افزوده، {removed} حذف‌شده، {modified} اصلاح‌شده",
+      "rfi": "RFI {number}",
+      "markup": "ابر بازنگری",
+      "remeasure": "اندازه‌گیری مجدد: {items} مقدار، {positions} ردیف صورت‌وضعیت"
+    },
+    "rules": {
+      "distinct_revisions_ok": "دو طرف بازنگری‌های متفاوتی هستند.",
+      "distinct_revisions_fail": "مقایسه، یک برگه را با خودش مقایسه می‌کند.",
+      "distinct_revisions_hint": "بازنگری قدیمی‌تر و جدیدتر نقشه را انتخاب کنید.",
+      "alignment_not_needed": "بازنگری‌های DWG واحدهای ترسیم مشترک دارند؛ هم‌ترازی لازم نیست.",
+      "alignment_missing_matrix": "مقایسه هم‌ترازی ندارد.",
+      "alignment_singular": "هم‌ترازی برگه را فشرده می‌کند و قابل اعمال نیست.",
+      "alignment_scale": "هم‌ترازی مقیاس برگه را {scale} برابر می‌کند، بیش از تفاوت معمول بازنگری‌های یک نقشه.",
+      "alignment_low_confidence": "هم‌ترازی خودکار نامطمئن است (اطمینان {confidence}).",
+      "alignment_manual_points": "هم‌ترازی دستی به دو جفت نقطه نیاز دارد.",
+      "alignment_ok": "هم‌ترازی برگه معقول است.",
+      "alignment_hint": "برگه‌ها را با دست روی دو نشانهٔ مشترک در هر دو بازنگری، مانند تقاطع‌های شبکهٔ محورها، هم‌تراز کنید.",
+      "region_empty": "تغییر {seq} اندازه ندارد.",
+      "region_off_sheet": "تغییر {seq} بیرون از برگه قرار دارد.",
+      "regions_ok": "هر ناحیهٔ تغییریافته روی برگه قرار دارد.",
+      "triaged_ok": "هر تغییر بررسی شده است.",
+      "triaged_open": "{count} تغییر هنوز باز است.",
+      "triaged_hint": "هر تغییر را مرتبط یا نامرتبط علامت بزنید.",
+      "followed_up_ok": "هر تغییر مرتبط پیگیری شده است.",
+      "followed_up_missing": "تغییر {seq} مرتبط علامت خورده اما توضیح، RFI، ابر یا نشانهٔ اندازه‌گیری مجدد ندارد.",
+      "followed_up_hint": "برای تغییر توضیح بنویسید، RFI یا ابر ایجاد کنید، یا مقادیر درون آن را برای اندازه‌گیری مجدد علامت بزنید."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "پیش‌بینی جریان نقدی",
+      "portfolio_title": "پیش‌بینی جریان نقدی پورتفولیو",
+      "empty": "برای این انتخاب پیش‌بینی جریان نقدی وجود ندارد.",
+      "project": "پروژه",
+      "as_of": "تا تاریخ",
+      "currency": "ارز",
+      "delay_days": "تأخیر در دریافت‌ها (روز)",
+      "overrun_pct": "افزایش هزینه (%)",
+      "closing_position": "موقعیت پایانی",
+      "peak_funding": "حداکثر نیاز به تأمین مالی",
+      "peak_period": "ماه اوج نیاز به تأمین مالی",
+      "col": {
+        "period": "ماه",
+        "planned_in": "دریافتی برنامه‌ریزی‌شده",
+        "actual_in": "دریافتی واقعی",
+        "expected_in": "دریافتی مورد انتظار",
+        "planned_out": "پرداختی برنامه‌ریزی‌شده",
+        "actual_out": "پرداختی واقعی",
+        "expected_out": "پرداختی مورد انتظار",
+        "net": "خالص",
+        "cumulative": "موقعیت تجمعی"
+      }
+    }
+  }
+}

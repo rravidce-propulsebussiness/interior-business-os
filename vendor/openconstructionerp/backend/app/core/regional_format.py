@@ -1,0 +1,497 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠How a country writes a number and a date on a generated document.
+
+The question this answers
+-------------------------
+A PDF is printed for the market the project is in, not for whoever pressed the
+button, so its separators and its date order belong to the project's country.
+The BOQ generator used to decide them from the currency alone, and a currency
+is a weak proxy for a country: the euro is written ``1.234,56`` in Germany,
+``1 234,56`` in France and ``1,234.56`` in Ireland, so every Irish bill came
+out in German style. A hryvnia had no entry at all and came out American.
+
+So the country decides first, read from :data:`app.core.i18n_data.COUNTRY_DEFAULTS`,
+which carries a display pattern and a date order per country. The currency is
+the fallback for a project with no country, and that fallback is exactly the
+table the BOQ generator used before, so a document with no country prints
+byte for byte as it did.
+
+Decimals are not decided here. How many digits an amount carries is a property
+of the currency (a yen has none), and how many a quantity carries is the
+caller's choice; this module only says which characters separate them.
+
+Two characters worth naming
+---------------------------
+* The space a spaced style groups with is U+00A0, a no-break space, so a
+  right-aligned amount in a narrow table cell is never broken between its
+  thousands. Both bundled faces and the PDF base fonts carry the glyph.
+* The Swiss group separator is U+0027, the ASCII apostrophe. That is what
+  CLDR 48 gives ``de-CH``, ``fr-CH`` and ``it-CH`` alike (measured on ICU
+  78.3, where ``Intl.NumberFormat("de-CH")`` writes ``1'234'567.89``), so the
+  PDF agrees with the amount the browser shows on screen. The typographic
+  U+2019 that older CLDR releases printed is still read as a Swiss pattern.
+
+Digit shapes
+------------
+Which digits print is a separate question from which separators do. CLDR
+writes Arabic with Arabic-Indic digits, while Egyptian business documents are
+commonly printed with Western ones, and a Persian reader writes a third set.
+So a style also names a digit system (the CLDR ``nu`` value: ``latn``,
+``arab``, ``arabext``). A country row in ``COUNTRY_DEFAULTS`` may name one in
+``digit_system``; a request may override it for the documents it renders
+(:func:`set_document_digits`, set by the locale middleware from
+``X-Digit-System`` or ``?digits=``); an explicit argument beats both. A
+non-Latin system brings its own separators, the ones CLDR gives it, because a
+German grouping dot between Arabic-Indic digits reads as nothing in either
+script.
+"""
+
+from __future__ import annotations
+
+from contextvars import ContextVar, Token
+from dataclasses import dataclass, replace
+from datetime import date, datetime
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
+from typing import Final
+
+from app.core.classification_registry import is_macro_region, normalise_region
+from app.core.i18n_data import COUNTRY_DEFAULTS
+
+NBSP: Final = " "
+SWISS_APOSTROPHE: Final = "'"
+TYPOGRAPHIC_APOSTROPHE: Final = "\u2019"
+
+
+@dataclass(frozen=True)
+class NumberStyle:
+    """The two separators a market writes a number with.
+
+    Attributes:
+        group: Between groups of thousands.
+        decimal: Between the whole part and the fraction.
+        indian_grouping: Group the whole part as lakh and crore
+            (``12,34,567``) rather than by threes.
+        digits: The CLDR numbering system the digits print in.
+    """
+
+    group: str
+    decimal: str
+    indian_grouping: bool = False
+    digits: str = "latn"
+
+
+ANGLO: Final = NumberStyle(group=",", decimal=".")
+CONTINENTAL: Final = NumberStyle(group=".", decimal=",")
+SPACED: Final = NumberStyle(group=NBSP, decimal=",")
+SWISS: Final = NumberStyle(group=SWISS_APOSTROPHE, decimal=".")
+INDIAN: Final = NumberStyle(group=",", decimal=".", indian_grouping=True)
+
+#: The digit systems a document can print in, as CLDR names them, with their
+#: zero and the separators CLDR gives them. ``latn`` keeps the market's own
+#: separators, so it carries none here.
+DIGIT_SYSTEMS: Final[dict[str, tuple[str, str, str] | None]] = {
+    "latn": None,
+    # Arabic-Indic digits U+0660..U+0669, Arabic thousands and decimal separators.
+    "arab": ("\u0660", "\u066c", "\u066b"),
+    # Extended Arabic-Indic digits U+06F0..U+06F9 (Persian, Urdu), same separators.
+    "arabext": ("\u06f0", "\u066c", "\u066b"),
+}
+
+_DOCUMENT_DIGITS: ContextVar[str | None] = ContextVar("oe_document_digits", default=None)
+
+
+def normalise_digit_system(value: str | None) -> str | None:
+    """A known digit system name, or ``None`` for anything else."""
+    code = (value or "").strip().lower()
+    return code if code in DIGIT_SYSTEMS else None
+
+
+def set_document_digits(value: str | None) -> Token[str | None]:
+    """Record the digit system the current request asked documents to print in.
+
+    An unknown value records ``None``, which leaves the market's choice alone.
+
+    Returns:
+        The token :func:`reset_document_digits` takes.
+    """
+    return _DOCUMENT_DIGITS.set(normalise_digit_system(value))
+
+
+def reset_document_digits(token: Token[str | None]) -> None:
+    """Undo :func:`set_document_digits`."""
+    _DOCUMENT_DIGITS.reset(token)
+
+
+def document_digits() -> str | None:
+    """The digit system the current request asked for, or ``None``."""
+    return _DOCUMENT_DIGITS.get()
+
+
+def digit_system_for_country(country_code: str | None) -> str | None:
+    """The digit system a country's row names, ``None`` when it names none."""
+    entry = COUNTRY_DEFAULTS.get((country_code or "").strip().upper()) or {}
+    return normalise_digit_system(entry.get("digit_system"))
+
+
+def _chosen_digits(country_code: str | None, digits: str | None) -> str | None:
+    """The argument first, then the request, then the country row."""
+    return normalise_digit_system(digits) or document_digits() or digit_system_for_country(country_code)
+
+
+def with_digits(style: NumberStyle, digits: str | None) -> NumberStyle:
+    """``style`` printed in ``digits``; an unknown or empty value returns it unchanged."""
+    code = normalise_digit_system(digits)
+    if code is None or code == style.digits:
+        return style
+    spec = DIGIT_SYSTEMS[code]
+    if spec is None:
+        return replace(style, digits=code)
+    _zero, group, decimal = spec
+    return replace(style, group=group, decimal=decimal, digits=code)
+
+
+def transliterate_digits(text: str, digits: str | None) -> str:
+    """Rewrite the ASCII digits of ``text`` in another digit system."""
+    spec = DIGIT_SYSTEMS.get(digits or "latn")
+    if spec is None:
+        return text
+    zero = ord(spec[0])
+    return text.translate({ord("0") + n: zero + n for n in range(10)})
+
+
+#: The display patterns ``COUNTRY_DEFAULTS`` and the account settings write,
+#: read as styles. Both Swiss spellings are accepted: the ASCII one is what
+#: CLDR prints today, the typographic one what older releases printed.
+PATTERN_STYLES: Final[dict[str, NumberStyle]] = {
+    "1,234.56": ANGLO,
+    "1.234,56": CONTINENTAL,
+    "1 234,56": SPACED,
+    f"1{NBSP}234,56": SPACED,
+    "1'234.56": SWISS,
+    f"1{TYPOGRAPHIC_APOSTROPHE}234.56": SWISS,
+    "12,34,567.89": INDIAN,
+}
+
+#: The currency fallback, used only when no country is known. This is the
+#: table ``boq/pdf_export.py`` carried before the country decided, kept as it
+#: was so a document without a country does not change.
+_COMMA_DECIMAL_CURRENCIES: Final = frozenset(
+    {
+        "EUR",
+        "RUB",
+        "BRL",
+        "TRY",
+        "PLN",
+        "CZK",
+        "HUF",
+        "RON",
+        "BGN",
+        "HRK",
+        "SEK",
+        "NOK",
+        "DKK",
+        "IDR",
+        "VND",
+        "ARS",
+        "CLP",
+        "COP",
+        "PEN",
+        "UYU",
+    }
+)
+#: Currencies whose only home writes them spaced. Not in the old table: a
+#: hryvnia or a tenge amount fell through to the American default.
+_SPACED_CURRENCIES: Final = frozenset({"UAH", "KZT", "BYN"})
+
+
+#: The value ``oe_projects_project.country_code`` defaulted to until revision
+#: ``v3319``. A row written before it holds this whether or not anybody chose
+#: Germany, so on its own it is not evidence of a German market.
+LEGACY_DEFAULT_COUNTRY: Final = "DE"
+
+
+def _region_country(region: str | None) -> str:
+    """The single country a region names, ``""`` for a macro region or none."""
+    if not region or is_macro_region(region):
+        return ""
+    return normalise_region(region) or ""
+
+
+def document_country(country_code: str | None, region: str | None = None, currency: str | None = None) -> str:
+    """The country a project's documents are written for, ``""`` when nothing names one.
+
+    The project's own ``country_code`` wins, with one exception. The column
+    was ``NOT NULL DEFAULT 'DE'`` until revision ``v3319`` and that migration
+    deliberately left every older row alone, so a project created before it
+    with no country chosen holds ``DE`` exactly as a German one does. Read at
+    face value that turned every such American, British, Indian or Swiss bill
+    into a German one on paper, ``123.456,78 USD``, where the currency rule
+    used before printed it correctly. So a ``DE`` is believed only when the
+    rest of the project does not contradict it:
+
+    * a region naming one other country wins, so a legacy project in region
+      ``US`` is written American;
+    * with no such region, a currency other than the euro hands the decision
+      back to the currency, which is what decided before the country did;
+    * a region that names Germany, or a euro project with no telling region,
+      keeps ``DE``. A German project billed in dollars and priced from a
+      German region is still German.
+
+    Only ``DE`` is doubted. No other value was ever written by default, so any
+    other country is somebody's answer.
+
+    When there is no country at all the region decides. The create form does
+    not always send one: it posts ``region`` and fills the country only from a
+    geocoded address or an active country pack, so a project created by choosing
+    "Ireland" from the region list can reach an export with no country at
+    all and be written in the currency's style, which for the euro is German.
+    The region is read through the classification registry's normaliser,
+    the same reading that already decides the project's standard and rule
+    packs, so a document and a validation run agree on the country.
+
+    A macro region (``DACH``, ``Nordics``, ``LatinAmerica`` ...) is not read:
+    its anchor country is a convention for picking a standard, and writing a
+    Danish or Argentine bill in the anchor's separators would be a guess.
+    That matters for the ``DE`` rule too: ``DACH`` normalises to ``DE``, so a
+    Swiss franc project in region ``DACH`` must not read as agreeing with
+    Germany. It falls to the currency and is written Swiss.
+
+    Args:
+        country_code: ``project.country_code``, any case, may be empty.
+        region: ``project.region``, free text, may be empty.
+        currency: ``project.currency``, ISO 4217, may be empty. Read only to
+            decide whether a stored ``DE`` is the legacy default.
+
+    Returns:
+        ISO 3166-1 alpha-2 in upper case, or ``""``.
+    """
+    explicit = (country_code or "").strip().upper()
+    from_region = _region_country(region)
+    if explicit == LEGACY_DEFAULT_COUNTRY:
+        if from_region and from_region != LEGACY_DEFAULT_COUNTRY:
+            return from_region
+        code = (currency or "").strip().upper()
+        if not from_region and code and code != "EUR":
+            return ""
+        return explicit
+    if explicit:
+        return explicit
+    return from_region
+
+
+def style_for_country(country_code: str | None) -> NumberStyle | None:
+    """The style a country's documents use, or ``None`` when it is not on file."""
+    entry = COUNTRY_DEFAULTS.get((country_code or "").strip().upper())
+    if entry is None:
+        return None
+    return PATTERN_STYLES.get(entry.get("number_format", ""))
+
+
+def style_for_currency(currency: str | None) -> NumberStyle:
+    """The fallback style for an amount whose country nobody recorded."""
+    code = (currency or "").strip().upper()
+    if code == "CHF":
+        return SWISS
+    if code == "INR":
+        return INDIAN
+    if code in _SPACED_CURRENCIES:
+        return SPACED
+    if code in _COMMA_DECIMAL_CURRENCIES:
+        return CONTINENTAL
+    return ANGLO
+
+
+def number_style(
+    country_code: str | None = None,
+    currency: str | None = None,
+    *,
+    digits: str | None = None,
+) -> NumberStyle:
+    """The style to print with: the country's when it has one, the currency's otherwise.
+
+    Args:
+        country_code: ISO 3166-1 alpha-2 of the document's market.
+        currency: ISO 4217, the fallback when no country is on file.
+        digits: A digit system that beats both the request's choice and the
+            country row's (see the module notes on digit shapes).
+
+    Returns:
+        The separators, grouping and digit system to print with.
+    """
+    base = style_for_country(country_code) or style_for_currency(currency)
+    return with_digits(base, _chosen_digits(country_code, digits))
+
+
+def _group_indian(digits: str) -> list[str]:
+    """``1234567`` as ``["12", "34", "567"]``: the last three, then pairs."""
+    if len(digits) <= 3:
+        return [digits]
+    head, last3 = digits[:-3], digits[-3:]
+    groups: list[str] = []
+    while head:
+        groups.insert(0, head[-2:])
+        head = head[:-2]
+    return [*groups, last3]
+
+
+def format_number(value: float | Decimal | int | str | None, decimals: int, style: NumberStyle) -> str:
+    """Write ``value`` with ``decimals`` fraction digits in ``style``.
+
+    Rounded half away from zero on the decimal value rather than through a
+    float, so ``2.675`` prints ``2.68`` the way a person rounding it would.
+    ``None`` and anything that is not a number print as zero, which is what
+    the generators did before for a missing amount.
+    """
+    try:
+        amount = value if isinstance(value, Decimal) else Decimal(str(value if value is not None else 0))
+    except (InvalidOperation, ValueError):
+        amount = Decimal(0)
+    if not amount.is_finite():
+        amount = Decimal(0)
+    places = max(int(decimals), 0)
+    quantum = Decimal(1).scaleb(-places)
+    rounded = amount.quantize(quantum, rounding=ROUND_HALF_UP)
+    sign = "-" if rounded < 0 else ""
+    text = f"{abs(rounded):.{places}f}"
+    whole, _, fraction = text.partition(".")
+    if style.indian_grouping:
+        groups = _group_indian(whole)
+    else:
+        groups = []
+        while whole:
+            groups.insert(0, whole[-3:])
+            whole = whole[:-3]
+    body = style.group.join(groups or ["0"])
+    if places:
+        body = f"{body}{style.decimal}{fraction}"
+    # A negative zero after rounding is still zero on paper.
+    if sign and set(body) <= set(f"0{style.group}{style.decimal}"):
+        sign = ""
+    return f"{sign}{transliterate_digits(body, style.digits)}"
+
+
+#: The date order used when the country is not on file. It is the one the PDF
+#: generators printed for everybody before the country decided.
+DEFAULT_DATE_FORMAT: Final = "DD.MM.YYYY"
+
+
+def date_format_for_country(country_code: str | None) -> str:
+    """The date pattern a country's documents use, ``DD.MM.YYYY`` when unknown."""
+    entry = COUNTRY_DEFAULTS.get((country_code or "").strip().upper())
+    return (entry or {}).get("date_format") or DEFAULT_DATE_FORMAT
+
+
+def format_date(
+    value: date | datetime,
+    country_code: str | None = None,
+    pattern: str | None = None,
+    *,
+    digits: str | None = None,
+) -> str:
+    """Write a date in the order and with the separators its country uses.
+
+    Args:
+        value: The date. A datetime is written by its date part.
+        country_code: ISO 3166-1 alpha-2 of the project's country.
+        pattern: An explicit pattern in the ``DD``/``MM``/``YYYY`` tokens of
+            ``COUNTRY_DEFAULTS``; overrides the country when given.
+        digits: A digit system that beats the request's and the country's.
+
+    Returns:
+        ``04/10/2026`` for Ireland, ``10/04/2026`` for the United States,
+        ``2026-10-04`` for Canada, ``04.10.2026`` when the country is unknown.
+    """
+    day = value.date() if isinstance(value, datetime) else value
+    chosen = pattern or date_format_for_country(country_code)
+    text = chosen.replace("YYYY", f"{day.year:04d}").replace("MM", f"{day.month:02d}").replace("DD", f"{day.day:02d}")
+    return transliterate_digits(text, _chosen_digits(country_code, digits))
+
+
+#: Languages with no country row in ``COUNTRY_DEFAULTS``: the number pattern
+#: and date order their readers expect (CLDR conventions).
+_LANGUAGE_FORMATS: Final[dict[str, tuple[str, str]]] = {
+    "bg": ("1 234,56", "DD.MM.YYYY"),
+    "hr": ("1.234,56", "DD.MM.YYYY"),
+    "id": ("1.234,56", "DD/MM/YYYY"),
+    "ro": ("1.234,56", "DD.MM.YYYY"),
+    "th": ("1,234.56", "DD/MM/YYYY"),
+    "vi": ("1.234,56", "DD/MM/YYYY"),
+    "uz": ("1 234,56", "DD.MM.YYYY"),
+    "et": ("1 234,56", "DD.MM.YYYY"),
+    "ky": ("1 234,56", "DD.MM.YYYY"),
+    "bn": ("12,34,567.89", "DD/MM/YYYY"),
+    "kk": ("1 234,56", "DD.MM.YYYY"),
+    "fil": ("1,234.56", "MM/DD/YYYY"),
+    "ur": ("12,34,567.89", "DD/MM/YYYY"),
+    "fa": ("1,234.56", "YYYY/MM/DD"),
+    "he": ("1,234.56", "DD/MM/YYYY"),
+    "el": ("1.234,56", "DD/MM/YYYY"),
+}
+
+
+def country_for_language(language: str | None) -> str | None:
+    """The first country on file whose default locale is ``language``, else ``None``."""
+    code = (language or "").strip().lower().split("-")[0]
+    for country, entry in COUNTRY_DEFAULTS.items():
+        if entry.get("locale") == code:
+            return country
+    return None
+
+
+def number_style_for_language(language: str | None) -> NumberStyle:
+    """The separators a reader of ``language`` expects when no market is known.
+
+    English reads the Anglo style, so an English document keeps the
+    separators it always had. Digits stay Latin: a language does not choose
+    a digit system, a market does.
+    """
+    code = (language or "").strip().lower().split("-")[0]
+    if code in _LANGUAGE_FORMATS:
+        return PATTERN_STYLES[_LANGUAGE_FORMATS[code][0]]
+    if code == "en":
+        return ANGLO
+    return style_for_country(country_for_language(code)) or ANGLO
+
+
+def date_format_for_language(language: str | None) -> str:
+    """The date pattern a reader of ``language`` expects; ISO for English or unknown."""
+    code = (language or "").strip().lower().split("-")[0]
+    if code in _LANGUAGE_FORMATS:
+        return _LANGUAGE_FORMATS[code][1]
+    country = country_for_language(code) if code != "en" else None
+    return date_format_for_country(country) if country else "YYYY-MM-DD"
+
+
+__all__ = [
+    "ANGLO",
+    "CONTINENTAL",
+    "DEFAULT_DATE_FORMAT",
+    "DIGIT_SYSTEMS",
+    "INDIAN",
+    "LEGACY_DEFAULT_COUNTRY",
+    "NBSP",
+    "PATTERN_STYLES",
+    "SPACED",
+    "SWISS",
+    "SWISS_APOSTROPHE",
+    "TYPOGRAPHIC_APOSTROPHE",
+    "NumberStyle",
+    "country_for_language",
+    "date_format_for_country",
+    "date_format_for_language",
+    "digit_system_for_country",
+    "document_country",
+    "document_digits",
+    "format_date",
+    "format_number",
+    "normalise_digit_system",
+    "number_style",
+    "number_style_for_language",
+    "reset_document_digits",
+    "set_document_digits",
+    "style_for_country",
+    "style_for_currency",
+    "transliterate_digits",
+    "with_digits",
+]

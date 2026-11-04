@@ -1,0 +1,1122 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure arithmetic and completeness checks for a purchase order.
+
+Validation is first-class for this module (platform principle #4), and a purchase
+order is the moment a project turns an estimate into committed money. Approval is
+where the commitment is published to finance (``procurement.po.approved``), so
+approval is where these checks run: a PO whose own arithmetic disagrees with
+itself would otherwise commit one number to the budget and show another to the
+buyer, and nothing downstream re-derives it.
+
+This module is deliberately **dependency-free** in the same spirit as
+``field_time/field_time_math.py``: standard library plus :class:`~decimal.Decimal`
+only, no ORM, no FastAPI, no session. The rule classes in
+``app.core.validation.rules`` stay thin wrappers that translate these outcomes
+into :class:`RuleResult` rows, and the checks themselves are unit-tested without a
+database.
+
+Money discipline
+----------------
+Every amount on the PO model is a Decimal *string* (``amount_total``,
+``unit_rate``, ...). Parsing is total: an unparseable amount is reported as a
+finding rather than raised, because a rule that explodes on bad data hides the
+very row the user needs to see. Comparison tolerance is one cent
+(:data:`MONEY_TOLERANCE`), which absorbs per-line rounding without absorbing a
+real discrepancy.
+
+Currency is never blended: every value on a PO is in that PO's own
+``currency_code``, so these checks compare numbers that are already in one
+currency and never convert.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import date
+from decimal import Decimal, InvalidOperation
+from typing import Any
+
+# The one spelling an amount gets anywhere in this platform. It lives in its own
+# module precisely so that this file can keep the standard-library-only contract
+# its docstring declares: the same function is what the core validation rules
+# call, and a second spelling here would disagree with them on every currency
+# that does not have two decimals.
+from app.core.currency_registry import sentence_amount
+
+#: Amounts closer than this are equal. One cent absorbs per-line rounding
+#: (a 3-decimal unit rate quantised to 2) without absorbing a real mismatch.
+MONEY_TOLERANCE = Decimal("0.01")
+
+#: Retention above this is almost certainly a data-entry error (a rate typed as
+#: an amount). The construction norm sits at 5-10%; anything past half the
+#: commitment is not retention any more.
+MAX_SANE_RETENTION_PERCENT = Decimal("50")
+
+
+@dataclass(frozen=True)
+class Finding:
+    """One failed check on one element.
+
+    :param element_ref: what the user should look at -- a line label or the PO
+        number. Never ``None``: a finding the UI cannot anchor is a finding the
+        user cannot act on.
+    :param params: placeholders for the translated message, all pre-formatted as
+        strings so the message layer never formats money itself.
+    :param details: machine-readable context for the report payload.
+    """
+
+    element_ref: str
+    params: dict[str, str] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
+    # ``"warning"`` lowers this finding below the rule's own severity; None keeps it.
+    severity: str | None = None
+
+
+def parse_money(raw: Any) -> Decimal | None:
+    """Parse a Decimal-string amount, or ``None`` when it is not a number.
+
+    Returning ``None`` rather than raising is deliberate: an unparseable amount
+    is itself a finding, and the caller decides how to report it.
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, Decimal):
+        return raw
+    try:
+        return Decimal(str(raw).strip())
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+
+
+def _money(raw: Any) -> Decimal:
+    """Parse an amount, treating anything unparseable as zero."""
+    parsed = parse_money(raw)
+    return parsed if parsed is not None else Decimal("0")
+
+
+def _fmt(value: Decimal) -> str:
+    """Render a *percentage* for a user-facing message, two decimals, no exponent.
+
+    Not for money, despite the name it has always had. Money goes through
+    :func:`_amount`, which asks the currency how many decimals it keeps and
+    writes the code beside the digits. The retention template glues ``%`` onto
+    its slot, so an amount rendered through this function would read
+    ``50.00 EUR%``, and grouping a percentage gains a reader nothing.
+    """
+    return f"{value.quantize(Decimal('0.01')):f}"
+
+
+def _currency(po: dict[str, Any]) -> str:
+    """The code this purchase order states, never a default.
+
+    Blank stays blank: the renderer then groups the digits and writes no code.
+    :func:`check_currency_set` is the rule that complains about a missing
+    currency, so nothing is lost by declining to guess one here, and a guessed
+    code would read as authoritative and be wrong whenever the project is not in
+    it.
+    """
+    return str(po.get("currency_code") or "").strip()
+
+
+def _amount(value: Decimal, po: dict[str, Any]) -> str:
+    """Render an amount for a message, in the purchase order's own currency."""
+    return sentence_amount(value, _currency(po))
+
+
+def line_label(index: int, item: dict[str, Any]) -> str:
+    """A human line label: the 1-based row number plus a trimmed description."""
+    description = str(item.get("description") or "").strip()
+    if not description:
+        return str(index + 1)
+    if len(description) > 40:
+        description = description[:37] + "..."
+    return f"{index + 1} ({description})"
+
+
+def _items(po: dict[str, Any]) -> list[dict[str, Any]]:
+    items = po.get("items")
+    return [i for i in items if isinstance(i, dict)] if isinstance(items, list) else []
+
+
+def _po_ref(po: dict[str, Any]) -> str:
+    return str(po.get("po_number") or po.get("id") or "?")
+
+
+# ── Checks ───────────────────────────────────────────────────────────────────
+
+
+def check_has_lines(po: dict[str, Any]) -> list[Finding]:
+    """A PO with no lines commits an amount nothing accounts for."""
+    if _items(po):
+        return []
+    return [Finding(element_ref=_po_ref(po), details={"item_count": 0})]
+
+
+def check_line_amount(po: dict[str, Any]) -> list[Finding]:
+    """Each line's ``amount`` must equal ``quantity x unit_rate``."""
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(po)):
+        quantity = parse_money(item.get("quantity"))
+        rate = parse_money(item.get("unit_rate"))
+        amount = parse_money(item.get("amount"))
+        if quantity is None or rate is None or amount is None:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "expected": "?", "actual": "?"},
+                    details={"reason": "unparseable_amount"},
+                )
+            )
+            continue
+        expected = quantity * rate
+        if abs(expected - amount) > MONEY_TOLERANCE:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={
+                        "line": line_label(index, item),
+                        "expected": _amount(expected, po),
+                        "actual": _amount(amount, po),
+                    },
+                    details={
+                        "quantity": str(quantity),
+                        "unit_rate": str(rate),
+                        "expected": str(expected),
+                        "actual": str(amount),
+                    },
+                )
+            )
+    return findings
+
+
+def check_subtotal_matches_lines(po: dict[str, Any]) -> list[Finding]:
+    """``amount_subtotal`` must equal the sum of the line amounts.
+
+    Skipped for a PO with no lines: :func:`check_has_lines` already owns that
+    case, and reporting it twice would double-count one problem.
+    """
+    items = _items(po)
+    if not items:
+        return []
+    lines_total = sum((_money(i.get("amount")) for i in items), Decimal("0"))
+    subtotal = _money(po.get("amount_subtotal"))
+    if abs(lines_total - subtotal) <= MONEY_TOLERANCE:
+        return []
+    return [
+        Finding(
+            element_ref=_po_ref(po),
+            params={"expected": _amount(lines_total, po), "actual": _amount(subtotal, po)},
+            details={"lines_total": str(lines_total), "amount_subtotal": str(subtotal)},
+        )
+    ]
+
+
+def check_total_matches_subtotal_plus_tax(po: dict[str, Any]) -> list[Finding]:
+    """``amount_total`` must equal ``amount_subtotal + tax_amount``.
+
+    This is the number finance commits, so a mismatch here is the one that moves
+    real money.
+    """
+    subtotal = _money(po.get("amount_subtotal"))
+    tax = _money(po.get("tax_amount"))
+    total = _money(po.get("amount_total"))
+    expected = subtotal + tax
+    if abs(expected - total) <= MONEY_TOLERANCE:
+        return []
+    return [
+        Finding(
+            element_ref=_po_ref(po),
+            params={"expected": _amount(expected, po), "actual": _amount(total, po)},
+            details={
+                "amount_subtotal": str(subtotal),
+                "tax_amount": str(tax),
+                "amount_total": str(total),
+            },
+        )
+    ]
+
+
+def check_no_negative_line(po: dict[str, Any]) -> list[Finding]:
+    """Quantity must be positive and the unit rate must not be negative.
+
+    A credit belongs on its own document, not as a negative line hidden inside a
+    commitment; a negative quantity here silently reduces the committed total.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(po)):
+        quantity = parse_money(item.get("quantity"))
+        rate = parse_money(item.get("unit_rate"))
+        reasons: list[str] = []
+        if quantity is not None and quantity <= 0:
+            reasons.append("quantity_not_positive")
+        if rate is not None and rate < 0:
+            reasons.append("rate_negative")
+        if reasons:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item)},
+                    details={"reasons": reasons, "quantity": str(quantity), "unit_rate": str(rate)},
+                )
+            )
+    return findings
+
+
+def check_currency_set(po: dict[str, Any]) -> list[Finding]:
+    """The PO must carry a currency.
+
+    The column defaults to an empty string and the service inherits the project
+    currency; an empty value that reaches approval means neither happened, and an
+    amount without a currency cannot be rolled up or paid.
+    """
+    if str(po.get("currency_code") or "").strip():
+        return []
+    return [Finding(element_ref=_po_ref(po), details={"currency_code": ""})]
+
+
+def check_vendor_assigned(po: dict[str, Any]) -> list[Finding]:
+    """An approved commitment must name the party it is committed to."""
+    if str(po.get("vendor_contact_id") or "").strip():
+        return []
+    return [Finding(element_ref=_po_ref(po), details={"vendor_contact_id": None})]
+
+
+def check_retention_within_bounds(po: dict[str, Any]) -> list[Finding]:
+    """Retention must be a percentage, and a plausible one."""
+    percent = parse_money(po.get("retention_percent"))
+    if percent is None:
+        return [
+            Finding(
+                element_ref=_po_ref(po),
+                params={"percent": "?", "max": _fmt(MAX_SANE_RETENTION_PERCENT)},
+                details={"reason": "unparseable_percent"},
+            )
+        ]
+    if Decimal("0") <= percent <= MAX_SANE_RETENTION_PERCENT:
+        return []
+    return [
+        Finding(
+            element_ref=_po_ref(po),
+            params={"percent": _fmt(percent), "max": _fmt(MAX_SANE_RETENTION_PERCENT)},
+            details={"retention_percent": str(percent), "max": str(MAX_SANE_RETENTION_PERCENT)},
+        )
+    ]
+
+
+def _parse_date(raw: Any) -> date | None:
+    """Parse the leading ``YYYY-MM-DD`` of a date column, or ``None``.
+
+    The date columns are free-form strings, so anything that is not an ISO date
+    is treated as absent rather than as a finding: this check is about ordering,
+    not about format.
+    """
+    text = str(raw or "").strip()
+    if len(text) < 10:
+        return None
+    try:
+        return date.fromisoformat(text[:10])
+    except ValueError:
+        return None
+
+
+def check_delivery_not_before_issue(po: dict[str, Any]) -> list[Finding]:
+    """Delivery cannot be scheduled before the PO goes out."""
+    issue = _parse_date(po.get("issue_date"))
+    delivery = _parse_date(po.get("delivery_date"))
+    if issue is None or delivery is None or delivery >= issue:
+        return []
+    return [
+        Finding(
+            element_ref=_po_ref(po),
+            params={"issue": issue.isoformat(), "delivery": delivery.isoformat()},
+            details={"issue_date": issue.isoformat(), "delivery_date": delivery.isoformat()},
+        )
+    ]
+
+
+def check_line_cost_coded(po: dict[str, Any]) -> list[Finding]:
+    """Each line should carry a WBS, a cost category or a cost-line link.
+
+    An uncoded commitment cannot be reported against a budget: it lands in the
+    project total and nowhere in the breakdown. WARNING rather than ERROR --
+    plenty of real POs are raised before the coding is decided.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(po)):
+        coded = any(str(item.get(key) or "").strip() for key in ("wbs_id", "cost_category", "cost_line_id"))
+        if not coded:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item)},
+                    details={"wbs_id": None, "cost_category": None, "cost_line_id": None},
+                )
+            )
+    return findings
+
+
+# ── Invoice against its purchase order (simple three-way match) ─────────────
+#
+# A supplier invoice linked to an order is checked against what is left on the
+# order and, once goods have been received, against what arrived. Both are
+# WARNINGS: an invoice above the order can be a legitimate extra the site
+# agreed by phone, and a delivery note can reach the office after the invoice.
+# The person approving the invoice reads the warning and decides; nothing here
+# blocks the save. This is deliberately not an accounts-payable matching
+# engine: price variance per unit, tolerances per supplier and partial-line
+# splits are out of scope. An order may carry its own allowance, a percentage,
+# an amount or both (``invoice_tolerance_pct`` / ``invoice_tolerance_abs``);
+# see ``_allowance`` for how the two combine.
+#
+# The payload is built by ``ProcurementService.invoice_match_payload``:
+#
+#     {"po_number", "currency_code", "po_net", "invoiced_before_net",
+#      "invoice_net", "invoice_ref", "has_receipts", "received_net",
+#      "lines": [{"label", "unit", "ordered", "received", "invoiced_before",
+#                 "invoiced"}]}
+#
+# Money is net of VAT on both sides; quantities are per order line.
+
+#: Quantities closer than this are equal (a rounded metre of cable, a kilo).
+QUANTITY_TOLERANCE = Decimal("0.001")
+
+
+def _allowance(payload: dict[str, Any], base: Decimal) -> Decimal:
+    """The overrun the order allows its invoices, measured on *base*.
+
+    A percentage of the base, an amount, or both; with both the invoice must
+    stay inside both, so the smaller band wins. An unset or unreadable value is
+    ignored rather than read as a licence. Never below the rounding band, so an
+    order with no allowance behaves exactly as before.
+    """
+    bands: list[Decimal] = []
+    pct = parse_money(payload.get("invoice_tolerance_pct"))
+    if pct is not None and pct.is_finite() and pct >= 0:
+        bands.append(max(base, Decimal("0")) * pct / Decimal("100"))
+    absolute = parse_money(payload.get("invoice_tolerance_abs"))
+    if absolute is not None and absolute.is_finite() and absolute >= 0:
+        bands.append(absolute)
+    if not bands:
+        return MONEY_TOLERANCE
+    return max(min(bands), MONEY_TOLERANCE).quantize(Decimal("0.01"))
+
+
+def check_invoice_within_order(payload: dict[str, Any]) -> list[Finding]:
+    """The invoice should not exceed what is still open on its order, net of VAT."""
+    po_net = _money(payload.get("po_net"))
+    before = _money(payload.get("invoiced_before_net"))
+    invoice = _money(payload.get("invoice_net"))
+    remaining = po_net - before
+    band = _allowance(payload, po_net)
+    if invoice <= remaining + band:
+        return []
+    return [
+        Finding(
+            element_ref=str(payload.get("invoice_ref") or _po_ref(payload)),
+            params={
+                "po": _po_ref(payload),
+                "invoice": _amount(invoice, payload),
+                "remaining": _amount(max(remaining, Decimal("0")), payload),
+                "excess": _amount(invoice - max(remaining, Decimal("0")), payload),
+            },
+            details={
+                "po_net": str(po_net),
+                "invoiced_before_net": str(before),
+                "invoice_net": str(invoice),
+                "remaining_net": str(remaining),
+                "tolerance_net": str(band),
+            },
+        )
+    ]
+
+
+def check_invoice_quantity_received(payload: dict[str, Any]) -> list[Finding]:
+    """Invoiced quantity per order line should not run ahead of goods received.
+
+    Only once the order has a confirmed goods receipt: an order for services,
+    or one whose deliveries are not booked in the system, has nothing to match
+    and gets no warning. Lines the invoice does not bill are skipped.
+    """
+    if not payload.get("has_receipts"):
+        return []
+    findings: list[Finding] = []
+    for line in payload.get("lines") or []:
+        if not isinstance(line, dict):
+            continue
+        invoiced_now = _money(line.get("invoiced"))
+        if invoiced_now <= 0:
+            continue
+        total = _money(line.get("invoiced_before")) + invoiced_now
+        received = _money(line.get("received"))
+        if total <= received + QUANTITY_TOLERANCE:
+            continue
+        label = str(line.get("label") or "?")
+        unit = str(line.get("unit") or "").strip()
+        findings.append(
+            Finding(
+                element_ref=label,
+                params={
+                    "line": label,
+                    "invoiced": f"{total.normalize():f} {unit}".strip(),
+                    "received": f"{received.normalize():f} {unit}".strip(),
+                },
+                details={
+                    "invoiced_total": str(total),
+                    "received": str(received),
+                    "ordered": str(_money(line.get("ordered"))),
+                },
+            )
+        )
+    return findings
+
+
+def check_invoice_value_received(payload: dict[str, Any]) -> list[Finding]:
+    """An invoice billed as one sum should not run ahead of the value received.
+
+    The quantity check needs invoice lines that name an order line. An invoice
+    entered as a single amount has none, so it is weighed by value instead:
+    everything invoiced on the order so far, this invoice included, against
+    the confirmed receipts priced at the order's unit rates. Silent when the
+    invoice carries matched quantities (the quantity check speaks then) or
+    when nothing has been received yet.
+    """
+    if not payload.get("has_receipts"):
+        return []
+    lines = [line for line in payload.get("lines") or [] if isinstance(line, dict)]
+    if any(_money(line.get("invoiced")) > 0 for line in lines):
+        return []
+    total = _money(payload.get("invoiced_before_net")) + _money(payload.get("invoice_net"))
+    received = _money(payload.get("received_net"))
+    band = _allowance(payload, received)
+    if total <= received + band:
+        return []
+    return [
+        Finding(
+            element_ref=str(payload.get("invoice_ref") or _po_ref(payload)),
+            params={
+                "po": _po_ref(payload),
+                "invoiced": _amount(total, payload),
+                "received": _amount(received, payload),
+            },
+            details={"invoiced_total_net": str(total), "received_net": str(received), "tolerance_net": str(band)},
+        )
+    ]
+
+
+# ── Material requisitions (submission gate) ──────────────────────────────────
+#
+# Payload shape, built by ``RequisitionWorkflowService.validation_payload``:
+#
+#     {"req_number": "MR-0001", "required_date": "2026-11-01" | None,
+#      "today": "2026-10-15",
+#      "items": [{"description", "unit", "quantity_requested",
+#                 "sources": [{"unit", "quantity", "resource_key"}]}]}
+#
+# ``today`` travels in the payload so the date rule answers the same thing in a
+# test as in production, and so a report re-run later says what it said then.
+
+
+def _req_ref(req: dict[str, Any]) -> str:
+    return str(req.get("req_number") or "requisition")
+
+
+def _unit_key(raw: Any) -> str:
+    return str(raw or "").strip().lower()
+
+
+def check_requisition_quantity_positive(req: dict[str, Any]) -> list[Finding]:
+    """Every requisition line must ask for a positive quantity."""
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        quantity = parse_money(item.get("quantity_requested"))
+        if quantity is None or not quantity.is_finite() or quantity <= 0:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "quantity": str(item.get("quantity_requested") or "0")},
+                    details={"quantity_requested": str(item.get("quantity_requested"))},
+                )
+            )
+    return findings
+
+
+def check_requisition_source_unit(req: dict[str, Any]) -> list[Finding]:
+    """A line's unit must equal the unit of every BOQ source it was raised from.
+
+    No conversion is attempted: a line in ``t`` fed by a source in ``kg`` would
+    otherwise sum two different things, and nothing records the factor used.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        line_unit = _unit_key(item.get("unit"))
+        sources = item.get("sources")
+        if not isinstance(sources, list):
+            continue
+        for source in sources:
+            if not isinstance(source, dict):
+                continue
+            source_unit = _unit_key(source.get("unit"))
+            if source_unit != line_unit:
+                findings.append(
+                    Finding(
+                        element_ref=line_label(index, item),
+                        params={
+                            "line": line_label(index, item),
+                            "unit": str(item.get("unit") or "-"),
+                            "source_unit": str(source.get("unit") or "-"),
+                        },
+                        details={"resource_key": source.get("resource_key")},
+                    )
+                )
+    return findings
+
+
+def check_requisition_needed_by_not_past(req: dict[str, Any]) -> list[Finding]:
+    """The date the material is needed by must not already have passed."""
+    raw = req.get("required_date")
+    if not raw:
+        return []
+    try:
+        needed = date.fromisoformat(str(raw)[:10])
+        today = date.fromisoformat(str(req.get("today") or date.today().isoformat())[:10])
+    except ValueError:
+        return [Finding(element_ref=_req_ref(req), params={"date": str(raw), "today": "-"})]
+    if needed >= today:
+        return []
+    return [
+        Finding(
+            element_ref=_req_ref(req),
+            params={"date": needed.isoformat(), "today": today.isoformat()},
+            details={"required_date": needed.isoformat(), "today": today.isoformat()},
+        )
+    ]
+
+
+# ── Material requisitions (approval and conversion, issue #516) ─────────────
+#
+# The payload also carries ``operation`` (``submit``, ``approve`` or
+# ``convert``), ``vendor_id`` (the supplier the step uses, as text or None) and
+# ``vendor`` ({"id", "name", "status"} from the Vendor directory, or None when
+# it could not be read). Lines carry ``currency_code`` and ``cost_line_id``.
+
+
+def _vendor_label(req: dict[str, Any]) -> str:
+    vendor = req.get("vendor")
+    if isinstance(vendor, dict) and str(vendor.get("name") or "").strip():
+        return str(vendor["name"]).strip()
+    return str(req.get("vendor_id") or "-")
+
+
+def check_requisition_vendor_in_directory(req: dict[str, Any]) -> list[Finding]:
+    """A named supplier must be an entry of the Vendor directory."""
+    if not req.get("vendor_id") or isinstance(req.get("vendor"), dict):
+        return []
+    return [
+        Finding(
+            element_ref=_req_ref(req),
+            params={"vendor": str(req.get("vendor_id"))},
+            details={"vendor_id": str(req.get("vendor_id"))},
+        )
+    ]
+
+
+def check_requisition_vendor_active(req: dict[str, Any]) -> list[Finding]:
+    """A named supplier must be active: a suspended or blacklisted one is not ordered from."""
+    vendor = req.get("vendor")
+    if not isinstance(vendor, dict):
+        return []
+    state = str(vendor.get("status") or "").strip().lower()
+    if state == "active":
+        return []
+    return [
+        Finding(
+            element_ref=_req_ref(req),
+            params={"vendor": _vendor_label(req)},
+            details={"vendor_id": str(vendor.get("id") or ""), "vendor_status": state},
+        )
+    ]
+
+
+def check_requisition_vendor_chosen(req: dict[str, Any]) -> list[Finding]:
+    """An order needs a supplier, so a conversion without one is refused."""
+    if req.get("operation") != "convert" or req.get("vendor_id"):
+        return []
+    return [Finding(element_ref=_req_ref(req), params={"req": _req_ref(req)})]
+
+
+def check_requisition_single_currency(req: dict[str, Any]) -> list[Finding]:
+    """One purchase order holds one currency, so the priced lines of a requisition must share one."""
+    currencies = sorted(
+        {str(item.get("currency_code") or "").strip().upper() for item in _items(req)} - {""},
+    )
+    if len(currencies) <= 1:
+        return []
+    return [
+        Finding(
+            element_ref=_req_ref(req),
+            params={"req": _req_ref(req), "currencies": ", ".join(currencies)},
+            details={"currencies": currencies},
+        )
+    ]
+
+
+def check_requisition_line_cost_line(req: dict[str, Any]) -> list[Finding]:
+    """A line linked to no cost line will not show as committed against the budget once ordered."""
+    return [
+        Finding(element_ref=line_label(index, item), params={"line": line_label(index, item)})
+        for index, item in enumerate(_items(req))
+        if not item.get("cost_line_id")
+    ]
+
+
+# ── Material requisitions: suggested supplier and line dates (issue #516) ────
+#
+# Each line also carries ``suggested_vendor_id`` with ``suggested_vendor``
+# ({"id", "name", "status"} or None when the directory cannot resolve it),
+# ``source_suggested_vendor_ids`` (the distinct suggestions of its BOQ
+# sources), and its own ``required_date``, ``schedule_activity_id``,
+# ``schedule_anchor_date`` and ``schedule_activity_start`` (the activity's
+# start as the schedule holds it now).
+
+
+def _line_vendor_label(item: dict[str, Any]) -> str:
+    vendor = item.get("suggested_vendor")
+    if isinstance(vendor, dict) and str(vendor.get("name") or "").strip():
+        return str(vendor["name"]).strip()
+    return str(item.get("suggested_vendor_id") or "-")
+
+
+def check_requisition_suggested_vendor_in_directory(req: dict[str, Any]) -> list[Finding]:
+    """A line's suggested supplier must be an entry of the Vendor directory."""
+    return [
+        Finding(
+            element_ref=line_label(index, item),
+            params={"line": line_label(index, item), "vendor": str(item.get("suggested_vendor_id"))},
+            details={"suggested_vendor_id": str(item.get("suggested_vendor_id"))},
+        )
+        for index, item in enumerate(_items(req))
+        if item.get("suggested_vendor_id") and not isinstance(item.get("suggested_vendor"), dict)
+    ]
+
+
+def check_requisition_suggested_vendor_active(req: dict[str, Any]) -> list[Finding]:
+    """A line should not suggest a supplier that is suspended or blacklisted."""
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        vendor = item.get("suggested_vendor")
+        if not isinstance(vendor, dict):
+            continue
+        state = str(vendor.get("status") or "").strip().lower()
+        if state == "active":
+            continue
+        findings.append(
+            Finding(
+                element_ref=line_label(index, item),
+                params={"line": line_label(index, item), "vendor": _line_vendor_label(item)},
+                details={"suggested_vendor_id": str(vendor.get("id") or ""), "vendor_status": state},
+            )
+        )
+    return findings
+
+
+def check_requisition_suggestion_conflict(req: dict[str, Any]) -> list[Finding]:
+    """Flag a line whose BOQ sources suggest different suppliers.
+
+    The line then carries no suggestion of its own until the requester picks
+    one; the warning makes the disagreement visible instead of choosing.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        offered = sorted({str(v) for v in item.get("source_suggested_vendor_ids") or [] if v})
+        if len(offered) > 1:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "count": str(len(offered))},
+                    details={"suggested_vendor_ids": offered},
+                )
+            )
+    return findings
+
+
+def check_requisition_suggested_vendor_differs(req: dict[str, Any]) -> list[Finding]:
+    """Flag a line that suggests a supplier other than the one chosen for the requisition."""
+    chosen = str(req.get("vendor_id") or "")
+    if not chosen:
+        return []
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        line_vendor = str(item.get("suggested_vendor_id") or "")
+        if line_vendor and line_vendor != chosen:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "vendor": _line_vendor_label(item)},
+                    details={"suggested_vendor_id": line_vendor, "vendor_id": chosen},
+                )
+            )
+    return findings
+
+
+def check_requisition_line_needed_by_not_past(req: dict[str, Any]) -> list[Finding]:
+    """A line's own needed-by date must not already have passed."""
+    try:
+        today = date.fromisoformat(str(req.get("today") or date.today().isoformat())[:10])
+    except ValueError:
+        today = date.today()
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        raw = item.get("required_date")
+        if not raw:
+            continue
+        try:
+            needed = date.fromisoformat(str(raw)[:10])
+        except ValueError:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "date": str(raw), "today": today.isoformat()},
+                )
+            )
+            continue
+        if needed < today:
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={"line": line_label(index, item), "date": needed.isoformat(), "today": today.isoformat()},
+                    details={"required_date": needed.isoformat(), "today": today.isoformat()},
+                )
+            )
+    return findings
+
+
+def check_requisition_line_schedule_moved(req: dict[str, Any]) -> list[Finding]:
+    """Flag a line whose schedule activity has moved since its date was proposed.
+
+    The line's date is left as agreed; the warning tells the requester to look
+    at it again rather than having the schedule rewrite it.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        anchor = str(item.get("schedule_anchor_date") or "")[:10]
+        current = str(item.get("schedule_activity_start") or "")[:10]
+        if not item.get("schedule_activity_id") or not anchor or not current or anchor == current:
+            continue
+        findings.append(
+            Finding(
+                element_ref=line_label(index, item),
+                params={"line": line_label(index, item), "anchor": anchor, "start": current},
+                details={"schedule_activity_id": item.get("schedule_activity_id"), "anchor": anchor, "start": current},
+            )
+        )
+    return findings
+
+
+# ── Material requisitions: approvers and orders (issue #516) ───────────────
+#
+# The payload also carries ``requester_id``, ``approval_chain`` (designated
+# approvers in order, user id strings) and, per line, ``quantity_ordered`` (live,
+# in the line's unit, from orders that are not cancelled and external order
+# lines) and ``order_unit_mismatches`` (order or external lines whose unit
+# cannot be restated in the line's unit, as ``{"ref", "unit"}``).
+
+
+def check_requisition_approver_not_requester(req: dict[str, Any]) -> list[Finding]:
+    """The person who raised a requisition may not be one of its designated approvers."""
+    requester = str(req.get("requester_id") or "")
+    chain = [str(a) for a in req.get("approval_chain") or [] if a]
+    if not requester or requester not in chain:
+        return []
+    return [
+        Finding(
+            element_ref=_req_ref(req),
+            params={"req": _req_ref(req), "step": str(chain.index(requester) + 1)},
+            details={"requester_id": requester, "approval_chain": chain},
+        )
+    ]
+
+
+def check_requisition_line_over_ordered(req: dict[str, Any]) -> list[Finding]:
+    """Flag a line whose live orders hold more than it requested."""
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        requested = parse_money(item.get("quantity_requested"))
+        ordered = parse_money(item.get("quantity_ordered"))
+        if requested is None or ordered is None or ordered <= requested:
+            continue
+        findings.append(
+            Finding(
+                element_ref=line_label(index, item),
+                params={
+                    "line": line_label(index, item),
+                    "ordered": format(ordered, "f"),
+                    "requested": format(requested, "f"),
+                    "unit": str(item.get("unit") or ""),
+                },
+                details={"quantity_ordered": str(ordered), "quantity_requested": str(requested)},
+            )
+        )
+    return findings
+
+
+def check_requisition_order_unit_mismatch(req: dict[str, Any]) -> list[Finding]:
+    """Flag an order line in a unit that cannot be restated in the requisition line's unit.
+
+    Such a line is shown but left out of the ordered and received figures, so
+    the line reads as less ordered than it is until someone corrects the unit.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        for mismatch in item.get("order_unit_mismatches") or []:
+            if not isinstance(mismatch, dict):
+                continue
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={
+                        "line": line_label(index, item),
+                        "order": str(mismatch.get("ref") or "-"),
+                        "unit": str(mismatch.get("unit") or "-"),
+                        "line_unit": str(item.get("unit") or "-"),
+                    },
+                    details=dict(mismatch),
+                )
+            )
+    return findings
+
+
+# ── Material requisitions: coverage and reconciliation (issue #516) ─────────
+#
+# Per source the payload may also carry ``demand`` (the BOQ quantity of that
+# resource, in the source's unit, or None when it is unknown or in another
+# unit) and ``covered_other`` (what other submitted or later requisitions
+# already hold of it, same unit). A line carries ``over_allocation_reason``.
+# ``operation`` is ``draft`` for the read-only check of a draft, where the
+# reconcile finding is only a warning.
+
+
+def _fmt_qty(value: Decimal) -> str:
+    text = format(value.normalize(), "f")
+    return text if "." not in text else text.rstrip("0").rstrip(".")
+
+
+def check_requisition_sources_reconcile(req: dict[str, Any]) -> list[Finding]:
+    """A line's quantity must equal the sum of the BOQ source quantities it was raised from.
+
+    Only sources in the line's own unit are summed; a source in another unit is
+    the unit rule's business and is never added in.
+    """
+    severity = "warning" if req.get("operation") == "draft" else None
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        sources = [s for s in item.get("sources") or [] if isinstance(s, dict)]
+        if not sources:
+            continue
+        line_unit = _unit_key(item.get("unit"))
+        if any(_unit_key(s.get("unit")) != line_unit for s in sources):
+            continue
+        quantity = parse_money(item.get("quantity_requested"))
+        amounts = [parse_money(s.get("quantity")) for s in sources]
+        if quantity is None or any(a is None for a in amounts):
+            continue
+        total = sum((a for a in amounts if a is not None), Decimal("0"))
+        if total == quantity:
+            continue
+        findings.append(
+            Finding(
+                element_ref=line_label(index, item),
+                params={
+                    "line": line_label(index, item),
+                    "quantity": _fmt_qty(quantity),
+                    "sources": _fmt_qty(total),
+                    "unit": str(item.get("unit") or ""),
+                },
+                details={"quantity_requested": str(quantity), "sources_total": str(total)},
+                severity=severity,
+            )
+        )
+    return findings
+
+
+def check_requisition_over_allocated(req: dict[str, Any]) -> list[Finding]:
+    """Flag a source whose quantity, added to what other requisitions hold, passes the BOQ demand.
+
+    Speaks softly: a line that carries an over-allocation reason has been
+    acknowledged by the requester and is not flagged.
+    """
+    findings: list[Finding] = []
+    for index, item in enumerate(_items(req)):
+        if str(item.get("over_allocation_reason") or "").strip():
+            continue
+        for source in item.get("sources") or []:
+            if not isinstance(source, dict):
+                continue
+            demand = parse_money(source.get("demand"))
+            covered = parse_money(source.get("covered_other"))
+            quantity = parse_money(source.get("quantity"))
+            if demand is None or covered is None or quantity is None:
+                continue
+            excess = covered + quantity - demand
+            if excess <= 0:
+                continue
+            findings.append(
+                Finding(
+                    element_ref=line_label(index, item),
+                    params={
+                        "line": line_label(index, item),
+                        "excess": _fmt_qty(excess),
+                        "demand": _fmt_qty(demand),
+                        "covered": _fmt_qty(covered),
+                        "unit": str(source.get("unit") or ""),
+                    },
+                    details={"resource_key": source.get("resource_key"), "excess": str(excess)},
+                )
+            )
+    return findings
+
+
+# ── Goods receipts: material certificates (confirmation gate, BF-01) ─────────
+#
+# Payload shape, built by ``ProcurementService.receipt_validation_payload``:
+#
+#     {"receipt_ref": "LS-4711" | "<receipt id>", "po_number": "PO-0007",
+#      "items": [{"label": "1 (Rebar B500B 12 mm)", "quantity_received": "12.5",
+#                 "batch_lot": "H-20931" | None,
+#                 "required_certificate_type": "en10204_3_1" | None,
+#                 "certificates": [{"certificate_type", "certificate_number",
+#                                   "batch_number"}]}]}
+#
+# ``required_certificate_type`` comes from the order line: the document type is
+# agreed when the material is ordered, so the order is where the requirement is
+# read from. A line that received nothing (fully rejected) needs no document.
+
+
+def _normal_batch(raw: Any) -> str:
+    """A batch or heat number compared without case or inner whitespace."""
+    return "".join(str(raw or "").split()).upper()
+
+
+def _receipt_lines(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    return [i for i in payload.get("items") or [] if isinstance(i, dict)]
+
+
+def _certs(line: dict[str, Any]) -> list[dict[str, Any]]:
+    return [c for c in line.get("certificates") or [] if isinstance(c, dict)]
+
+
+def check_receipt_certificate_present(payload: dict[str, Any]) -> list[Finding]:
+    """A line whose order asks for a certificate must carry one that satisfies it."""
+    from app.modules.procurement.certificates import get_certificate_type, satisfies
+
+    findings: list[Finding] = []
+    for line in _receipt_lines(payload):
+        required = str(line.get("required_certificate_type") or "").strip()
+        if not required:
+            continue
+        received = parse_money(line.get("quantity_received"))
+        if received is None or received <= 0:
+            continue
+        delivered = [str(c.get("certificate_type") or "") for c in _certs(line)]
+        if any(satisfies(code, required) for code in delivered):
+            continue
+        ctype = get_certificate_type(required)
+        label = str(line.get("label") or "?")
+        findings.append(
+            Finding(
+                element_ref=label,
+                params={
+                    "line": label,
+                    "required": ctype.label if ctype else required,
+                    "delivered": ", ".join(sorted(set(filter(None, delivered)))) or "-",
+                },
+                details={"required_certificate_type": required, "delivered_types": delivered},
+            )
+        )
+    return findings
+
+
+def check_receipt_certificate_batch(payload: dict[str, Any]) -> list[Finding]:
+    """The batch or heat number on a certificate should be the batch that arrived.
+
+    Compared only when both are recorded. A certificate for another heat is
+    the classic way a valid-looking document ends up beside the wrong steel.
+    """
+    findings: list[Finding] = []
+    for line in _receipt_lines(payload):
+        batch = _normal_batch(line.get("batch_lot"))
+        if not batch:
+            continue
+        label = str(line.get("label") or "?")
+        for cert in _certs(line):
+            cert_batch = _normal_batch(cert.get("batch_number"))
+            if not cert_batch or cert_batch == batch:
+                continue
+            findings.append(
+                Finding(
+                    element_ref=label,
+                    params={
+                        "line": label,
+                        "certificate": str(cert.get("certificate_number") or "-"),
+                        "certificate_batch": str(cert.get("batch_number") or ""),
+                        "batch": str(line.get("batch_lot") or ""),
+                    },
+                    details={"certificate_batch": cert_batch, "receipt_batch": batch},
+                )
+            )
+    return findings
+
+
+# ── Payment release of a supplier invoice (BF-01) ─────────────────────────────
+#
+# Payload shape, built by ``ProcurementService.payment_release_payload``:
+#
+#     {"po_number": "PO-0007", "invoice_ref": "RE-2026-118",
+#      "receipts": [{"ref": "LS-4711", "approval_status": "pending" | None,
+#                    "inspection_status": "scheduled" | None}]}
+#
+# ``approval_status`` is the latest approval instance on the receipt that was
+# not cancelled; ``None`` when the receipt was never routed. Only confirmed
+# receipts are listed.
+
+_OPEN_INSPECTION_STATUSES = frozenset({"scheduled", "in_progress", "failed"})
+
+
+def check_receipt_route_approved(payload: dict[str, Any]) -> list[Finding]:
+    """Every receipt routed for approval must be approved before its invoice is paid."""
+    findings: list[Finding] = []
+    for receipt in payload.get("receipts") or []:
+        if not isinstance(receipt, dict):
+            continue
+        status = receipt.get("approval_status")
+        if status is None or status == "approved":
+            continue
+        ref = str(receipt.get("ref") or "?")
+        findings.append(
+            Finding(
+                element_ref=ref,
+                params={"receipt": ref, "po": _po_ref(payload)},
+                details={"approval_status": status, "approval_instance_id": receipt.get("approval_instance_id")},
+            )
+        )
+    return findings
+
+
+def check_receipt_inspection_closed(payload: dict[str, Any]) -> list[Finding]:
+    """An incoming inspection raised from a receipt should be passed before payment."""
+    findings: list[Finding] = []
+    for receipt in payload.get("receipts") or []:
+        if not isinstance(receipt, dict):
+            continue
+        status = receipt.get("inspection_status")
+        if status not in _OPEN_INSPECTION_STATUSES:
+            continue
+        ref = str(receipt.get("ref") or "?")
+        findings.append(
+            Finding(
+                element_ref=ref,
+                params={"receipt": ref, "po": _po_ref(payload)},
+                details={"inspection_status": status, "inspection_id": receipt.get("inspection_id")},
+            )
+        )
+    return findings

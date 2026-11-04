@@ -1,0 +1,2540 @@
+{
+  "costs.catalog_name_unavailable": "אי אפשר להשתמש בשם זה לקטלוג חדש. בחרו שם אחר.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "אומדן עלויות בנייה בקוד פתוח"
+  },
+  "nav": {
+    "dashboard": "לוח בקרה",
+    "assemblies": "מכלולים",
+    "ai_estimate": "אומדן AI",
+    "settings": "הגדרות",
+    "5d_cost_model": "מודל עלות 5D",
+    "templates": "תבניות",
+    "reports": "דוחות",
+    "sustainability": "קיימות",
+    "group_estimation": "אומדן",
+    "group_planning": "תכנון",
+    "group_procurement": "רכש",
+    "group_tools": "כלים",
+    "architecture": "מפת ארכיטקטורה"
+  },
+  "common": {
+    "save": "שמירה",
+    "cancel": "ביטול",
+    "delete": "מחיקה",
+    "edit": "עריכה",
+    "create": "יצירה",
+    "search": "חיפוש",
+    "filter": "סינון",
+    "export": "ייצוא",
+    "import": "ייבוא",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "confirm": "אישור",
+    "back": "חזרה",
+    "next": "הבא",
+    "yes": "כן",
+    "no": "לא"
+  },
+  "auth": {
+    "login": "התחברות",
+    "logout": "יציאה",
+    "email": "אימייל",
+    "password": "סיסמה"
+  },
+  "projects": {
+    "title": "פרויקטים",
+    "new_project": "פרויקט חדש",
+    "project_name": "שם הפרויקט",
+    "no_projects": "אין עדיין פרויקטים"
+  },
+  "boq": {
+    "title": "כתב כמויות",
+    "position": "סעיף",
+    "ordinal": "מספר סידורי",
+    "description": "תיאור",
+    "quantity": "כמות",
+    "unit": "יחידה",
+    "unit_rate": "תעריף יחידה",
+    "total": "סה\\\"כ",
+    "add_position": "הוספת סעיף",
+    "add_section": "הוספת סעיף ראשי",
+    "assembly": "מחיר מורכב",
+    "subtotal": "סיכום ביניים",
+    "grand_total": "סך הכול הגדול",
+    "direct_cost": "עלות ישירה",
+    "net_total": "סך נטו",
+    "gross_total": "סך ברוטו",
+    "vat": "מע\\\"מ",
+    "add_markups": "הוספת תוספות",
+    "validate": "אימות",
+    "export": "ייצוא",
+    "mvp": {
+      "title": "בחירת חומרים",
+      "subtitle_one": "{{count}} משאב דורש בחירה",
+      "subtitle_other": "{{count}} משאבים דורשים בחירה",
+      "bulk_label": "מילוי מהיר:",
+      "bulk_median": "חציון לכולם",
+      "bulk_mean": "ממוצע לכולם",
+      "bulk_cheapest": "הזול ביותר לכולם",
+      "bulk_priciest": "היקר ביותר לכולם",
+      "slot_variant_count": "{{n}} אפשרויות",
+      "selected_label": "נבחר:",
+      "default_mean": "תעריף ממוצע",
+      "default_median": "תעריף חציוני",
+      "row_median": "תעריף חציוני · {{price}}",
+      "row_mean": "תעריף ממוצע · {{price}}",
+      "subtotal_label": "תעריף הסעיף",
+      "apply": "החלה והוספה לכתב הכמויות",
+      "batch_progress": "פריט {{current}} מתוך {{total}}",
+      "toast_applied_one": "{{count}} וריאנט נבחר",
+      "toast_applied_other": "{{count}} וריאנטים נבחרו"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "דוח החלפה"
+      },
+      "column": {
+        "severity": "חומרה",
+        "kind": "סוג האובדן",
+        "position": "סעיף",
+        "field": "שדה",
+        "original": "ערך מקורי",
+        "written": "ערך שנכתב",
+        "count": "מספר",
+        "detail": "פרטים"
+      },
+      "severity": {
+        "error": "קריטי",
+        "warning": "אזהרה",
+        "info": "הערה"
+      },
+      "kind": {
+        "unsupported_element": "רכיב לא נתמך",
+        "truncated_text": "טקסט קוצר",
+        "altered_text": "טקסט שונה",
+        "rounded_value": "ערך עוגל",
+        "value_out_of_range": "ערך מחוץ לטווח",
+        "dropped_attribute": "מאפיין נזנח",
+        "unmapped_unit": "יחידה לא ממופה",
+        "lost_hierarchy": "רמת היררכיה אבדה",
+        "markup_not_representable": "תוספת שלא ניתן לייצג",
+        "attachment_skipped": "קובץ מצורף דולג",
+        "changed_identifier": "מזהה השתנה",
+        "exceeds_limit": "חריגה ממגבלת האחסון",
+        "rejected_row": "שורה נדחתה",
+        "skipped_row": "שורה דולגה",
+        "parser_warning": "אזהרת קורא",
+        "roundtrip_mismatch": "סטייה בהלוך-חזור"
+      }
+    },
+    "branch": {
+      "base_snapshot": "נקודת הסתעפות",
+      "base_snapshot_from": "נקודת הסתעפות (מתמונת המצב \"{snapshot}\")",
+      "before_cherry_pick": "לפני החלת שינויים מ-\"{source}\"",
+      "before_merge": "לפני מיזוג הענף \"{branch}\"",
+      "errors": {
+        "branch_closed": "ענף זה מוזג או הועבר לארכיון ואינו מקבל שינויים נוספים.",
+        "not_a_branch": "כתב הכמויות הזה אינו ענף.",
+        "same_bill": "בחרו שני אומדנים שונים.",
+        "different_project": "שני האומדנים חייבים להשתייך לאותו פרויקט.",
+        "different_tree": "שני האומדנים חייבים להיות ענפים של אותו אומדן ראשי.",
+        "unresolved_conflicts": "{count} סעיפים שונו בשני האומדנים. החליטו איזו גרסה לשמור בכל אחד לפני ההחלה.",
+        "merge_forbidden": "אין לך הרשאה למזג לאומדן הראשי.",
+        "confirm_required": "אשרו את המיזוג: הוא משכתב את האומדן הראשי.",
+        "design_options_unavailable": "מודול אפשרויות התכנון אינו מותקן.",
+        "base_snapshot_in_use": "תמונת מצב זו היא נקודת ההסתעפות של ענף פתוח ולא ניתן למחוק אותה."
+      },
+      "export": {
+        "title_positions": "השוואת אומדנים לפי סעיף",
+        "title_sections": "השוואת אומדנים לפי פרק",
+        "title_cost_groups": "השוואת אומדנים לפי קבוצת עלות",
+        "project": "פרויקט",
+        "bill_a": "אומדן A",
+        "bill_b": "אומדן B",
+        "total_a": "סה\"כ A",
+        "total_b": "סה\"כ B",
+        "delta": "הפרש",
+        "counts": "שינויים",
+        "counts_value": "נוספו {added}, הוסרו {removed}, שונו {changed}",
+        "col_ordinal": "סעיף",
+        "col_description": "תיאור",
+        "col_unit": "יחידה",
+        "col_change": "שינוי",
+        "col_qty_a": "כמות A",
+        "col_qty_b": "כמות B",
+        "col_rate_a": "מחיר A",
+        "col_rate_b": "מחיר B",
+        "col_total_a": "סה\"כ A",
+        "col_total_b": "סה\"כ B",
+        "col_delta": "הפרש",
+        "col_section": "פרק",
+        "col_cost_group": "קבוצת עלות",
+        "change_added": "נוסף",
+        "change_removed": "הוסר",
+        "change_changed": "שונה",
+        "change_unchanged": "ללא שינוי",
+        "ungrouped": "ללא קבוצה",
+        "empty": "שני האומדנים זהים.",
+        "total": "סה\"כ"
+      }
+    }
+  },
+  "costs": {
+    "title": "מאגר עלות",
+    "rate": "תעריף",
+    "material": "חומר",
+    "labor": "עבודה",
+    "equipment": "ציוד",
+    "search_costs": "חיפוש פריטי עלות..."
+  },
+  "assemblies": {
+    "title": "מכלולים",
+    "description": "מתכוני עלות לשימוש חוזר — שילוב חומרים, עבודה וציוד בתבניות מוכנות לשימוש",
+    "new_assembly": "מכלול חדש",
+    "from_database": "ממאגר נתונים",
+    "apply_to_boq": "החלה על כתב הכמויות",
+    "add_component": "הוספת רכיב",
+    "no_assemblies": "אין עדיין מכלולים",
+    "no_assemblies_hint": "צרו את המחיר המורכב הראשון שלכם ממאגר העלויות או מקטלוג המשאבים",
+    "total_rate": "שיעור כולל"
+  },
+  "catalog": {
+    "title": "קטלוג משאבים",
+    "description": "עיינו ונהלו חומרים, ציוד, תעריפי עבודה ומפעילים",
+    "add_resource": "הוספת משאב",
+    "import_region": "ייבוא אזור",
+    "build_assembly": "בניית מכלול",
+    "my_catalog": "הקטלוג שלי"
+  },
+  "validation": {
+    "title": "אימות",
+    "passed": "עבר",
+    "warnings": "אזהרות",
+    "errors": "שגיאות",
+    "score": "ציון איכות",
+    "run_validation": "הרץ אימות",
+    "missing_quantity": "לפריט {position} אין כמות",
+    "missing_rate": "לפריט {position} אין תעריף יחידה",
+    "missing_description": "לפריט {position} חסר תיאור",
+    "missing_classification": "פריט {position} דורש קוד סיווג",
+    "duplicate_ordinal": "מספר סידורי כפול: {ordinal}",
+    "rate_anomaly": "תעריף היחידה {rate} חורג מהסף ({threshold})",
+    "nl": {
+      "not_a_string": "הקלט חייב להיות טקסט.",
+      "empty": "הקלט ריק.",
+      "too_long": "הקלט חורג מ-{max} תווים.",
+      "ai_unparsable": "לא ניתן היה לפרש את תשובת ה-AI כמסמך DSL.",
+      "no_pattern": "לא נמצאה תבנית שתואמת את המשפט שהוזן.",
+      "try": "נסו: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "לוח זמנים 4D",
+    "generated": {
+      "position_label": "סעיף {ordinal}",
+      "section_label": "פרק {ordinal}",
+      "task_description": "נוצר אוטומטית מסעיף {ordinal} בכתב הכמויות ({quantity} {unit})",
+      "section_description": "סיכום: פרק {ordinal} בכתב הכמויות",
+      "start_milestone": "התחלת הפרויקט",
+      "start_milestone_description": "אבן דרך להתחלת הפרויקט",
+      "completion_milestone": "השלמת הפרויקט",
+      "completion_milestone_description": "אבן דרך להשלמת הפרויקט",
+      "labour_resource": "כוח אדם",
+      "machine_resource": "ציוד מכני"
+    },
+    "progress_sheet": {
+      "sheet_title": "התקדמות",
+      "title": "גיליון עדכון התקדמות",
+      "detail_schedule": "לוח זמנים: {name}",
+      "detail_exported": "יוצא ב: {date}",
+      "instructions": "מלאו רק את העמודות הלבנות. אל תשנו את העמודות האפורות, את סדר השורות או את העמודות המוסתרות.",
+      "col": {
+        "activity_ref": "מזהה פעילות",
+        "name": "פעילות",
+        "wbs_code": "WBS",
+        "responsible": "אחראי",
+        "planned_start": "התחלה מתוכננת",
+        "planned_finish": "סיום מתוכנן",
+        "percent_complete": "% ביצוע",
+        "actual_start": "התחלה בפועל",
+        "actual_finish": "סיום בפועל",
+        "remaining_duration": "נותר (ימי עבודה)",
+        "notes": "הערות",
+        "row_key": "מפתח שורה",
+        "stamp": "חותמת"
+      }
+    }
+  },
+  "cad": {
+    "title": "ייבוא CAD",
+    "upload": "העלאת קובץ CAD",
+    "supported_formats": "נתמך: DWG, DGN, RVT, IFC, PDF",
+    "converting": "ממיר...",
+    "elements_found": "נמצאו {count} אלמנטים"
+  },
+  "takeoff": {
+    "title": "כתב כמויות",
+    "auto_detect": "זיהוי אוטומטי",
+    "manual_measure": "מדידה ידנית",
+    "confidence": "רמת ביטחון"
+  },
+  "tendering": {
+    "title": "מכרזים",
+    "create_tender": "יצירת מכרז",
+    "bid": "הצעה",
+    "award": "הענקה"
+  },
+  "modules": {
+    "title": "מודולים",
+    "installed": "מותקן",
+    "available": "זמין",
+    "install": "התקנה",
+    "uninstall": "הסרת התקנה",
+    "update": "עדכון"
+  },
+  "dashboard": {
+    "welcome": "ברוכים הבאים ל-OpenConstructionERP",
+    "subtitle": "סביבת העבודה שלכם לאומדן בנייה",
+    "recent_projects": "פרויקטים אחרונים",
+    "system_status": "סטטוס מערכת",
+    "modules_loaded": "מודולים שנטענו",
+    "validation_rules": "כללי אימות",
+    "languages": "שפות",
+    "continue_estimate": "המשך האומדן האחרון",
+    "getting_started": "צעדים ראשונים",
+    "total_value": "ערך כולל",
+    "active_estimates": "אומדנים פעילים",
+    "schedule_status": "סטטוס לוח זמנים",
+    "quality_score": "ציון איכות",
+    "analytics": "אנליטיקה",
+    "project_overview": "סקירת פרויקט",
+    "step_load_db": "טעינת מאגר עלות",
+    "step_load_db_desc": "ייבוא נתוני תמחור אזוריים עם 55,000+ פריטים",
+    "step_ai_search": "הפעלת חיפוש בינה מלאכותית",
+    "step_ai_search_desc": "יצירת הטמעות וקטוריות להתאמת עלות סמנטית",
+    "step_connect_ai": "חיבור בינה מלאכותית",
+    "step_connect_ai_desc": "הוסיפו את מפתחות ה-API שלכם לאומדן מבוסס בינה מלאכותית",
+    "step_create_project": "יצירת פרויקט",
+    "step_create_project_desc": "התחילו את פרויקט אומדן הבנייה הראשון שלכם",
+    "step_build_boq": "בניית כתב הכמויות שלכם",
+    "step_build_boq_desc": "יצירת כתב כמויות בעזרת בינה מלאכותית"
+  },
+  "units": {
+    "m": "מ'",
+    "m2": "מ״ר",
+    "m3": "מ״ק",
+    "kg": "ק״ג",
+    "t": "טון",
+    "pcs": "יח׳",
+    "lsum": "סכום גלובלי",
+    "h": "שע'",
+    "set": "ערכה"
+  },
+  "contacts": {
+    "title": "מדריך אנשי קשר",
+    "new_contact": "איש קשר חדש",
+    "contact_type": "סוג איש קשר",
+    "client": "לקוח",
+    "subcontractor": "קבלן משנה",
+    "supplier": "ספק",
+    "consultant": "יועץ",
+    "internal": "פנימי",
+    "company_name": "שם החברה",
+    "search_contacts": "חיפוש אנשי קשר...",
+    "no_contacts": "אין עדיין אנשי קשר",
+    "prequalification": "הכשרה מקדימה",
+    "approved": "אושר",
+    "pending": "ממתין",
+    "expired": "פג תוקף"
+  },
+  "tasks": {
+    "title": "משימות",
+    "new_task": "משימה חדשה",
+    "task": "משימה",
+    "topic": "נושא",
+    "information": "מידע",
+    "decision": "החלטה",
+    "personal": "משימה אישית",
+    "my_tasks": "המשימות שלי",
+    "open": "פתוח",
+    "in_progress": "בביצוע",
+    "completed": "הושלם",
+    "draft": "טיוטה",
+    "due_date": "תאריך יעד",
+    "assignee": "אחראי",
+    "priority": "עדיפות",
+    "checklist": "רשימת בדיקה",
+    "focus_area": "תחום מיקוד"
+  },
+  "rfi": {
+    "title": "בקשות מידע",
+    "new_rfi": "בקשת מידע חדשה",
+    "subject": "נושא",
+    "question": "שאלה",
+    "response": "תשובה",
+    "ball_in_court": "התור אצל",
+    "days_open": "ימים פתוחים",
+    "cost_impact": "השפעה על עלות",
+    "schedule_impact": "השפעה על לוח הזמנים",
+    "respond": "השב",
+    "close": "סגור",
+    "overdue": "באיחור"
+  },
+  "finance": {
+    "title": "כספים",
+    "budgets": "תקציבים",
+    "invoices": "חשבוניות",
+    "payable": "חייבים",
+    "receivable": "זכאים",
+    "payments": "תשלומים",
+    "evm": "ערך מורווח",
+    "invoice_number": "חשבונית מס'",
+    "amount": "סכום",
+    "status": "סטטוס",
+    "approve": "אישור",
+    "pay": "סמן כשולם",
+    "original_budget": "תקציב מקורי",
+    "revised_budget": "תקציב מעודכן",
+    "committed": "מחויב",
+    "actual": "בפועל",
+    "forecast": "תחזית",
+    "variance": "סטייה"
+  },
+  "procurement": {
+    "title": "רכש",
+    "purchase_orders": "הזמנות רכש",
+    "goods_receipts": "קבלות סחורה",
+    "new_po": "הזמנת רכש חדשה",
+    "po_number": "מס' הזמנת רכש",
+    "vendor": "ספק",
+    "issue": "הנפקה",
+    "confirm": "אישור קבלה"
+  },
+  "safety": {
+    "title": "בטיחות",
+    "incidents": "אירועים",
+    "observations": "תצפיות",
+    "new_incident": "אירוע חדש",
+    "new_observation": "תצפית חדשה",
+    "severity": "חומרה",
+    "risk_score": "ציון סיכון",
+    "days_lost": "ימים אבודים",
+    "treatment": "טיפול",
+    "corrective_action": "פעולה מתקנת"
+  },
+  "meetings": {
+    "title": "פגישות",
+    "new_meeting": "פגישה חדשה",
+    "meeting_type": "סוג",
+    "attendees": "משתתפים",
+    "agenda": "סדר יום",
+    "action_items": "פריטי פעולה",
+    "minutes": "פרוטוקול",
+    "complete": "סיום ישיבה",
+    "present": "נוכח",
+    "absent": "נעדר",
+    "excused": "נעדר בהיתר",
+    "actions": {
+      "status": {
+        "open": "פתוח",
+        "completed": "הושלם",
+        "cancelled": "בוטל"
+      },
+      "flag": {
+        "overdue": "באיחור",
+        "on_track": "בתוך לוח הזמנים"
+      },
+      "label": {
+        "action_item": "פעולה לביצוע",
+        "completion_rate": "שיעור השלמת פעולות",
+        "open_vs_done": "פתוחות מול שהושלמו",
+        "overdue": "פעולות באיחור"
+      },
+      "explain": {
+        "action_item": "פעולה לביצוע היא משימה שסוכמה בישיבה, עם אחראי ותאריך יעד.",
+        "completion_rate": "שיעור השלמת פעולות הוא מספר הפעולות שהושלמו חלקי סך כל הפעולות, בין 0 ל-1.",
+        "open_vs_done": "פעולות פתוחות דורשות עוד עבודה. פעולות שהושלמו סגורות ואינן דורשות עבודה נוספת.",
+        "overdue": "פעולה נחשבת באיחור כאשר היא עדיין פתוחה ותאריך היעד שלה חל לפני תאריך הייחוס."
+      }
+    },
+    "minutes_pdf": {
+      "title": "פרוטוקול ישיבה",
+      "issued": "הופץ",
+      "draft": "טיוטה",
+      "date": "תאריך:",
+      "location": "מיקום:",
+      "type": "סוג:",
+      "number": "ישיבה מס׳:",
+      "chairperson": "יושב ראש:",
+      "next_meeting": "הישיבה הבאה:",
+      "not_available": "לא רלוונטי",
+      "not_scheduled": "לא נקבעה",
+      "attendance": "נוכחות",
+      "present": "נוכחים:",
+      "absent": "נעדרים / מתנצלים:",
+      "agenda": "סדר יום, דיון והחלטות",
+      "required": "(חובה)",
+      "discussion": "דיון:",
+      "decision": "החלטה:",
+      "decisions": "החלטות",
+      "open_questions": "שאלות פתוחות",
+      "actions": "משימות לביצוע",
+      "col_number": "#",
+      "col_action": "משימה",
+      "col_owner": "אחראי",
+      "col_due": "מועד יעד",
+      "col_status": "סטטוס",
+      "brought_forward": "[הועבר מהישיבה הקודמת]",
+      "overdue": "(באיחור)",
+      "status_open": "פתוח",
+      "status_in_progress": "בביצוע",
+      "status_done": "הושלם",
+      "status_cancelled": "בוטל",
+      "summary": "סיכום",
+      "generated": "נוצר: {stamp}",
+      "issued_at": "הופץ ב-{stamp}",
+      "running_head": "{project} - פרוטוקול",
+      "type_progress": "התקדמות",
+      "type_design": "תכנון",
+      "type_safety": "בטיחות",
+      "type_subcontractor": "קבלן משנה",
+      "type_kickoff": "פתיחה",
+      "type_closeout": "סגירה",
+      "type_commercial": "מסחרי"
+    }
+  },
+  "inspections": {
+    "title": "בדיקות איכות",
+    "new_inspection": "בדיקה חדשה",
+    "inspector": "מפקח",
+    "checklist": "רשימת בדיקה",
+    "pass": "עבר",
+    "fail": "נכשל",
+    "partial": "חלקי",
+    "critical": "קריטי",
+    "intl": {
+      "status_labels": {
+        "scheduled": "מתוכננת",
+        "in_progress": "בתהליך",
+        "completed": "הושלמה",
+        "failed": "נכשלה",
+        "cancelled": "בוטלה"
+      }
+    }
+  },
+  "ncr": {
+    "title": "דוחות אי-התאמה",
+    "new_ncr": "אי-התאמה חדשה",
+    "root_cause": "סיבת שורש",
+    "corrective_action": "פעולה מתקנת",
+    "preventive_action": "פעולה מונעת",
+    "material": "חומר",
+    "workmanship": "איכות ביצוע",
+    "design": "תכנון"
+  },
+  "submittals": {
+    "title": "הגשות",
+    "new_submittal": "הגשה חדשה",
+    "spec_section": "פרק מפרט",
+    "revision": "מהדורה",
+    "submit": "הגש",
+    "review": "סקירה",
+    "approved_as_noted": "אושר עם הערות",
+    "revise_resubmit": "תיקון והגשה מחדש",
+    "intl": {
+      "status_labels": {
+        "draft": "טיוטה",
+        "submitted": "הוגש",
+        "under_review": "בבדיקה",
+        "approved": "אושר",
+        "approved_as_noted": "אושר בהערות",
+        "revise_and_resubmit": "לתיקון והגשה מחדש",
+        "rejected": "נדחה",
+        "closed": "סגור"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "התכתבות",
+    "new_entry": "רשומה חדשה",
+    "incoming": "נכנס",
+    "outgoing": "יוצא",
+    "letter": "מכתב",
+    "email": "דוא״ל",
+    "notice": "הודעה",
+    "date_sent": "תאריך שליחה",
+    "date_received": "תאריך קבלה"
+  },
+  "cde": {
+    "title": "סביבת נתונים משותפת",
+    "new_container": "מכל חדש",
+    "container_code": "קוד מכל",
+    "cde_state": "מצב CDE",
+    "wip": "בעבודה",
+    "shared": "משותף",
+    "published": "פורסם",
+    "archived": "בארכיון",
+    "promote": "קידום",
+    "suitability": "התאמה",
+    "discipline": "תחום",
+    "revisions": "גרסאות",
+    "intl": {
+      "state_labels": {
+        "wip": "בעבודה",
+        "shared": "משותף",
+        "published": "פורסם",
+        "archived": "בארכיון"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "העברות",
+    "new_transmittal": "העברה חדשה",
+    "purpose": "מטרה",
+    "for_approval": "לאישור",
+    "for_information": "למידע",
+    "for_construction": "לביצוע",
+    "recipients": "נמענים",
+    "acknowledge": "אשר קבלה",
+    "locked": "נעול",
+    "issue_transmittal": "הנפקה",
+    "intl": {
+      "status_words": {
+        "draft": "טיוטה",
+        "issued": "נשלח",
+        "responded": "נענה"
+      }
+    }
+  },
+  "notifications": {
+    "title": "התראות",
+    "no_notifications": "אין התראות חדשות",
+    "mark_all_read": "סימון הכול כנקרא",
+    "unread": "לא נקרא"
+  },
+  "comments": {
+    "title": "הערות",
+    "post": "פרסום",
+    "reply": "תגובה",
+    "edit": "עריכה",
+    "delete": "מחיקה",
+    "placeholder": "כתבו הערה...",
+    "empty": "אין עדיין תגובות. התחילו את הדיון.",
+    "edited": "נערך",
+    "deleted": "תגובה זו נמחקה"
+  },
+  "bim": {
+    "title": "מרכז BIM",
+    "models": "מודלים",
+    "elements": "אלמנטים",
+    "upload_model": "העלאת מודל",
+    "processing": "מעבד",
+    "active": "פעיל",
+    "link_to_boq": "קישור לכתב כמויות",
+    "properties": "מאפיינים",
+    "quantities": "כמויות",
+    "wireframe": "מסגרת חוט",
+    "section_box": "תיבת חתך",
+    "measure": "מדידה",
+    "zoom_to_fit": "התאמה לתצוגה"
+  },
+  "reporting": {
+    "title": "דוחות ולוחות בקרה",
+    "kpi": "לוח בקרת KPI",
+    "generate_report": "הפקת דוח",
+    "templates": "תבניות",
+    "project_status": "סטטוס הפרויקט",
+    "cost_report": "דוח עלות",
+    "schedule_status": "סטטוס לוח זמנים",
+    "safety_report": "דוח בטיחות",
+    "explain": {
+      "report_total_one": "סה\"כ הדוח: {money} (סכום של {count} שורה).",
+      "report_total_other": "סה\"כ הדוח: {money} (סכום של {count} שורות).",
+      "percent_of_total": "{part} הוא {percent} מתוך {total} (אחוז מהסה\"כ).",
+      "percent_zero_total": "{part} מתוך {total}: הסה\"כ אפס, ולכן כל חלק מדווח כ-0 אחוז.",
+      "breakdown_empty": "פירוט עלויות: אין נתונים.",
+      "breakdown_one": "פירוט עלויות: קבוצה אחת {count}, סה\"כ הדוח {money}.",
+      "breakdown_other": "פירוט עלויות: {count} קבוצות, סה\"כ הדוח {money}.",
+      "top_n_one": "{requested} הראשונות: {shown} מתוך {shown} שורה.",
+      "top_n_other": "{requested} הראשונות: {shown} מתוך {shown} שורות."
+    }
+  },
+  "gantt": {
+    "title": "תרשים גאנט",
+    "day": "יום",
+    "week": "שבוע",
+    "month": "חודש",
+    "critical_path": "נתיב קריטי",
+    "baseline": "בסיס ייחוס",
+    "dependencies": "תלויות",
+    "today": "היום"
+  },
+  "settings": {
+    "regional": "הגדרות אזוריות",
+    "timezone": "אזור זמן",
+    "measurement": "שיטת מדידה",
+    "paper_size": "גודל נייר",
+    "date_format": "פורמט תאריך",
+    "number_format": "פורמט מספרים",
+    "currency": "מטבע",
+    "metric": "מטרי",
+    "imperial": "אימפריאלי"
+  },
+  "users": {
+    "management": "ניהול משתמשים",
+    "management_desc": "ניהול חברי צוות, תפקידים וגישה",
+    "invite_user": "הזמנת משתמש",
+    "invite": "הזמנה",
+    "full_name": "שם מלא",
+    "email": "אימייל",
+    "password": "סיסמה",
+    "role": "תפקיד",
+    "status": "סטטוס",
+    "last_login": "כניסה אחרונה",
+    "actions": "פעולות",
+    "name": "שם",
+    "total": "סה\\\"כ משתמשים",
+    "active": "פעיל",
+    "inactive": "לא פעיל",
+    "admins": "מנהלי מערכת",
+    "managers": "מנהלים",
+    "search": "חיפוש לפי שם או אימייל...",
+    "no_users": "לא נמצאו משתמשים",
+    "updated": "המשתמש עודכן",
+    "invited": "המשתמש הוזמן בהצלחה",
+    "deactivate": "השבתה",
+    "activate": "הפעלה",
+    "never": "אף פעם",
+    "role_admin_desc": "גישה מלאה לכל התכונות",
+    "role_manager_desc": "ניהול פרויקטים וצוות",
+    "role_editor_desc": "יצירה ועריכה של תוכן",
+    "role_viewer_desc": "גישת קריאה בלבד"
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "פרויקט",
+      "project_no": "מס' פרויקט",
+      "generated_on": "תאריך הפקה",
+      "records": "רשומות",
+      "currency": "מטבע",
+      "status": "סטטוס",
+      "name": "שם",
+      "signature": "חתימה",
+      "date": "תאריך",
+      "signatures": "חתימות",
+      "yes": "כן",
+      "no": "לא",
+      "days_one": "{n} יום",
+      "days_other": "{n} ימים",
+      "empty_register": "אין רשומות.",
+      "total": "סה\"כ",
+      "signer_title": "תפקיד",
+      "sig_prepared_by": "הוכן על ידי",
+      "sig_checked_by": "נבדק על ידי",
+      "sig_approved_by": "אושר על ידי",
+      "footer_generated": "הופק ב-{timestamp}",
+      "footer_page": "עמוד {page} מתוך {total}"
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "הזמנת רכש",
+        "gr_title": "קבלת סחורה",
+        "supplier": "ספק",
+        "po_type": "סוג הזמנה",
+        "issue_date": "תאריך הנפקה",
+        "delivery_date": "תאריך אספקה",
+        "created_by": "הוכן על ידי",
+        "order_total": "סה\"כ הזמנה",
+        "line_items": "סעיפי ההזמנה",
+        "col_no": "מס'",
+        "col_description": "תיאור",
+        "col_quantity": "כמות",
+        "col_unit": "יחידה",
+        "col_unit_rate": "מחיר ליחידה",
+        "col_amount": "סכום",
+        "no_line_items": "אין סעיפים.",
+        "totals": "סיכומים",
+        "subtotal": "סכום נטו",
+        "tax": "מס",
+        "total_gross": "סה\"כ כולל מס",
+        "terms": "תנאים",
+        "payment_terms": "תנאי תשלום",
+        "retention": "עכבון (ערבות עיכבון)",
+        "retention_at": "העכבון מנוכה בשלב",
+        "retention_at_receipt": "קבלת סחורה",
+        "retention_at_invoice": "חשבונית",
+        "invoice_tolerance": "סטייה מותרת בחשבונית",
+        "supplier_confirmation": "אישור הספק",
+        "supplier_reference": "אסמכתת הספק",
+        "confirmed_delivery": "תאריך אספקה מאושר",
+        "acknowledged_on": "תאריך אישור קבלה",
+        "not_confirmed": "הספק טרם אישר את ההזמנה.",
+        "notes": "הערות",
+        "no_notes": "לא נרשמו הערות.",
+        "sig_ordered_by": "הוזמן על ידי",
+        "purchase_order": "הזמנת רכש",
+        "receipt_date": "תאריך קבלה",
+        "received_by": "התקבל על ידי",
+        "delivery_note": "תעודת משלוח",
+        "col_ordered": "הוזמן",
+        "col_received": "התקבל",
+        "col_rejected": "נפסל",
+        "col_batch": "אצווה / מנה",
+        "rejections": "פריטים שנפסלו",
+        "col_reason": "סיבה",
+        "no_rejections": "לא נפסל דבר.",
+        "sig_delivered_by": "נמסר על ידי",
+        "counterparty_tax_id": "מספר עוסק / מזהה מס",
+        "counterparty_address": "כתובת"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "טיוטה",
+          "approved": "מאושרת",
+          "issued": "הונפקה",
+          "partially_received": "התקבלה חלקית",
+          "completed": "הושלמה",
+          "cancelled": "בוטלה"
+        },
+        "gr_status": {
+          "draft": "טיוטה",
+          "confirmed": "מאושרת"
+        },
+        "po_type": {
+          "standard": "רגילה",
+          "blanket": "הזמנת מסגרת",
+          "service": "שירותים"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "חשבונית",
+        "payment_title": "תשלום",
+        "direction": "כיוון",
+        "supplier": "ספק",
+        "client": "לקוח",
+        "invoice_date": "תאריך החשבונית",
+        "due_date": "תאריך פירעון",
+        "payment_terms": "תנאי תשלום",
+        "purchase_order": "הזמנת רכש",
+        "invoice_total": "סה\"כ חשבונית",
+        "line_items": "סעיפי החשבונית",
+        "col_no": "מס'",
+        "col_description": "תיאור",
+        "col_quantity": "כמות",
+        "col_unit": "יחידה",
+        "col_unit_rate": "מחיר ליחידה",
+        "col_vat": "מע\"מ",
+        "col_amount": "סכום",
+        "no_line_items": "אין סעיפים.",
+        "totals": "סיכומים",
+        "subtotal": "סכום נטו",
+        "tax": "מס",
+        "total_gross": "סה\"כ כולל מס",
+        "retention": "עכבון (ערבות עיכבון)",
+        "amount_due": "לתשלום לאחר עכבון",
+        "payments": "תשלומים",
+        "col_date": "תאריך",
+        "col_reference": "אסמכתה",
+        "col_paid": "שולם",
+        "col_withheld": "עוכב",
+        "refund": "החזר",
+        "no_payments": "לא נרשמו תשלומים.",
+        "notes": "הערות",
+        "no_notes": "לא נרשמו הערות.",
+        "invoice": "חשבונית",
+        "invoice_number": "מס' חשבונית",
+        "payment_date": "תאריך תשלום",
+        "reference": "אסמכתה",
+        "amount_paid": "סכום ששולם",
+        "exchange_rate": "שער חליפין",
+        "kind": "סוג",
+        "kind_payment": "תשלום",
+        "kind_refund": "החזר",
+        "withholding": "עכבון שנוכה",
+        "withheld_amount": "סכום העכבון",
+        "release_date": "תאריך שחרור",
+        "gross_settled": "סכום ברוטו שסולק",
+        "no_withholding": "לא נוכה עכבון מתשלום זה.",
+        "counterparty_tax_id": "מספר עוסק / מזהה מס",
+        "counterparty_address": "כתובת"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "טיוטה",
+          "pending": "ממתינה לאישור",
+          "approved": "מאושרת",
+          "sent": "נשלחה",
+          "paid": "שולמה",
+          "cancelled": "בוטלה",
+          "credit_note_issued": "הונפקה חשבונית זיכוי"
+        },
+        "direction": {
+          "payable": "לתשלום (חשבונית ספק)",
+          "receivable": "לגבייה (חשבונית לקוח)"
+        },
+        "payment_status": {
+          "completed": "הושלם",
+          "refunded": "הוחזר"
+        }
+      }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "רשימת הגשות לאישור",
+        "doc_title": "הגשה לאישור",
+        "doc_title_product_data": "טופס אישור חומרים",
+        "col_number": "מס' הגשה",
+        "col_title": "כותרת",
+        "col_type": "סוג",
+        "col_spec": "סעיף במפרט",
+        "col_rev": "מהדורה",
+        "col_date_submitted": "תאריך הגשה",
+        "col_date_required": "תאריך נדרש",
+        "col_date_returned": "תאריך החזרה",
+        "col_reviewer": "בודק",
+        "col_approver": "מאשר",
+        "col_ball_in_court": "בטיפול",
+        "submitted_by_org": "חברה מגישה",
+        "review_notes": "הערות הבודק",
+        "no_review_notes": "לא נרשמו הערות בודק.",
+        "sig_submitted": "הגשה",
+        "sig_reviewed": "בדיקה",
+        "sig_approved": "אישור",
+        "register_filename": "reshimat-hagashot",
+        "register_title_shop_drawing": "רשימת תוכניות ייצור",
+        "register_title_product_data": "רשימת אישורי חומרים",
+        "register_title_method_statement": "רשימת מפרטי שיטת ביצוע",
+        "register_filename_shop_drawing": "reshimat-tochniot-yitzur",
+        "register_filename_product_data": "reshimat-ishurei-chomarim",
+        "register_filename_method_statement": "reshimat-shitot-bitzua",
+        "col_discipline": "תחום",
+        "col_manufacturer": "יצרן / מותג",
+        "col_model": "דגם / מק\"ט",
+        "col_origin": "ארץ ייצור",
+        "col_supplier": "ספק",
+        "col_product": "יצרן / דגם / מקור",
+        "col_review_code": "קוד בדיקה",
+        "col_outcome": "תוצאת בדיקה",
+        "col_review_period": "תקופת בדיקה (ימים)",
+        "col_review_due": "מועד בדיקה",
+        "col_days_in_review": "ימים בבדיקה",
+        "col_days_in_review_print": "ימים בבדיקה",
+        "col_review_overdue": "ימי איחור",
+        "col_required_on_site": "נדרש באתר",
+        "col_long_lead": "זמן אספקה ארוך",
+        "col_lead_time": "זמן אספקה (שבועות)",
+        "col_needed_by": "אישור נדרש עד",
+        "col_approval_late": "ימי איחור מהמועד",
+        "col_drawings": "תוכניות מקושרות",
+        "col_submitted_returned": "הוגש / הוחזר",
+        "col_on_site_needed_by": "באתר / אישור עד",
+        "resubmit_for_record": "יש להגיש מחדש עותק מתוקן לתיעוד",
+        "review_history": "היסטוריית בדיקות",
+        "hist_submitted": "הוגש",
+        "hist_returned": "הוחזר",
+        "drawings_missing_one": "{n} תוכנית מקושרת אינה זמינה עוד",
+        "drawings_missing_other": "{n} תוכניות מקושרות אינן זמינות עוד",
+        "weeks_one": "{n} שבוע",
+        "weeks_other": "{n} שבועות"
+      },
+      "labels": {
+        "status": {
+          "draft": "טיוטה",
+          "submitted": "הוגש",
+          "under_review": "בבדיקה",
+          "approved": "אושר",
+          "approved_as_noted": "אושר עם הערות",
+          "revise_and_resubmit": "לתקן ולהגיש מחדש",
+          "rejected": "נדחה",
+          "closed": "סגור"
+        },
+        "type": {
+          "shop_drawing": "תוכנית ייצור",
+          "product_data": "נתוני מוצר",
+          "sample": "דוגמה",
+          "mock_up": "דוגמת ביצוע",
+          "test_report": "דו\"ח בדיקה",
+          "calculation": "חישוב",
+          "method_statement": "מפרט שיטת ביצוע",
+          "certificate": "תעודה",
+          "warranty": "אחריות"
+        },
+        "discipline": {
+          "mechanical": "מכונות",
+          "hvac": "מיזוג אוויר",
+          "plumbing": "אינסטלציה וביוב",
+          "fire_protection": "כיבוי אש",
+          "electrical": "חשמל",
+          "lighting": "תאורה",
+          "elv": "זרם חלש",
+          "bms": "בקרת מבנה",
+          "architectural": "אדריכלות",
+          "structural": "קונסטרוקציה",
+          "civil": "הנדסה אזרחית"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "רשימת הוראות שינוי",
+        "doc_title": "הוראת שינוי",
+        "col_code": "קוד",
+        "col_title": "כותרת",
+        "col_reason": "סיבה",
+        "col_instrument": "סוג המסמך",
+        "col_submitted": "תאריך הגשה",
+        "col_contractor_amount": "סכום הקבלן",
+        "col_engineer_amount": "סכום המהנדס",
+        "col_approved_amount": "סכום מאושר",
+        "col_cost_impact": "השפעה על העלות",
+        "col_time_impact": "השפעה על הזמן (ימים)",
+        "col_approved_time": "זמן מאושר (ימים)",
+        "time_impact": "השפעה על הזמן",
+        "approved_time": "זמן מאושר",
+        "col_approved": "תאריך אישור",
+        "submitted_by": "הגשה",
+        "approved_by": "אישור",
+        "description": "תיאור",
+        "no_description": "לא נרשם תיאור.",
+        "items": "סעיפי השינוי",
+        "item_description": "תיאור",
+        "item_change": "שינוי",
+        "item_unit": "יחידה",
+        "item_original_quantity": "כמות מקורית",
+        "item_new_quantity": "כמות חדשה",
+        "item_original_rate": "מחיר מקורי",
+        "item_new_rate": "מחיר חדש",
+        "item_cost_delta": "הפרש עלות",
+        "register_filename": "reshimat-hora-ot-shinui"
+      },
+      "labels": {
+        "status": {
+          "draft": "טיוטה",
+          "submitted": "הוגש",
+          "approved": "אושר",
+          "rejected": "נדחה",
+          "executed": "בוצע"
+        },
+        "reason": {
+          "client_request": "בקשת לקוח",
+          "design_change": "שינוי תכנון",
+          "unforeseen": "תנאים בלתי צפויים",
+          "regulatory": "דרישה רגולטורית",
+          "error": "טעות או השמטה",
+          "non_conformance": "אי-התאמה",
+          "value_engineering": "הנדסת ערך"
+        },
+        "instrument": {
+          "works_change": "שינוי בהוראה",
+          "site_confirmation": "אישור באתר",
+          "claim": "תביעה"
+        },
+        "change": {
+          "added": "נוסף",
+          "removed": "הוסר",
+          "modified": "שונה"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "חבילת ראיות",
+        "subject": "נושא",
+        "basis": "בסיס",
+        "period_from": "הרישום המוקדם ביותר",
+        "period_to": "הרישום האחרון",
+        "digest": "קוד תקינות (SHA-256, 16 התווים הראשונים)",
+        "col_row": "מס'",
+        "col_record_id": "מזהה רישום",
+        "col_section": "פרק",
+        "col_date": "תאריך",
+        "col_kind": "סוג רישום",
+        "col_title": "כותרת",
+        "col_summary": "תקציר",
+        "col_reference": "סימוכין",
+        "register_filename": "chavilat-re-ayot"
+      },
+      "labels": {
+        "section": {
+          "notices": "הודעות",
+          "correspondence": "התכתבויות",
+          "rfis": "בקשות למידע (RFI)",
+          "variations": "הוראות שינוי",
+          "approvals": "אישורים",
+          "delay": "עיכוב",
+          "timeline": "ציר זמן",
+          "other": "אחר"
+        },
+        "kind": {
+          "notice": "הודעה",
+          "variation_notice": "הודעת שינוי",
+          "variation_request": "בקשת שינוי",
+          "variation_order": "הוראת שינוי",
+          "change_order": "הוראת שינוי",
+          "moc_entry": "רישום שינוי",
+          "correspondence": "התכתבות"
+        },
+        "basis": {
+          "dispute": "מחלוקת",
+          "valuation": "שומה",
+          "delay": "עיכוב / הארכת זמן",
+          "general": "רישום כללי"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "יומן התכתבויות",
+        "doc_title": "התכתבות",
+        "col_reference": "מס' סימוכין",
+        "col_direction": "כיוון",
+        "col_type": "סוג",
+        "col_subject": "נושא",
+        "col_from": "מאת",
+        "col_to": "אל",
+        "col_date_sent": "תאריך שליחה",
+        "col_date_received": "תאריך קבלה",
+        "col_response_due": "מועד נדרש למענה",
+        "col_clause": "סעיף בחוזה",
+        "notes": "הערות",
+        "no_notes": "לא נרשמו הערות.",
+        "attachments": "קבצים מצורפים",
+        "linked_documents": "מסמכים מקושרים",
+        "sig_prepared": "הכנה",
+        "sig_received": "קבלה",
+        "register_filename": "yoman-hitkatvuyot"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "נכנס",
+          "outgoing": "יוצא"
+        },
+        "type": {
+          "letter": "מכתב",
+          "email": "דוא\"ל",
+          "notice": "הודעה",
+          "memo": "מזכר",
+          "report": "דו\"ח"
+        },
+        "status": {
+          "open": "פתוח",
+          "awaiting_response": "ממתין למענה",
+          "responded": "נענה",
+          "closed": "סגור"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "רשימת תעודות משלוח מסמכים",
+        "doc_title": "תעודת משלוח מסמכים",
+        "col_number": "מס' תעודה",
+        "col_subject": "נושא",
+        "col_purpose": "מטרה",
+        "col_issued": "תאריך הנפקה",
+        "col_response_due": "מועד למענה",
+        "col_recipients": "נמענים",
+        "col_item_count": "פריטים",
+        "sender": "שולח",
+        "cover_note": "מכתב מלווה",
+        "no_cover_note": "אין מכתב מלווה.",
+        "recipients": "נמענים",
+        "recipient": "נמען",
+        "action_required": "נדרשת פעולה",
+        "acknowledged": "אישור קבלה",
+        "responded": "תאריך מענה",
+        "items": "פריטים שנשלחו",
+        "item_no": "מס'",
+        "item_description": "תיאור",
+        "item_notes": "הערות",
+        "sig_issued": "הנפקה",
+        "sig_received": "קבלה",
+        "register_filename": "reshimat-te-udot-mishlo-ach"
+      },
+      "labels": {
+        "status": {
+          "draft": "טיוטה",
+          "issued": "הונפק",
+          "responded": "נענה"
+        },
+        "purpose": {
+          "for_approval": "לאישור",
+          "for_review": "לבדיקה",
+          "for_information": "לידיעה",
+          "for_construction": "לביצוע",
+          "for_tender": "למכרז",
+          "for_record": "לתיעוד"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "רשימת הוראות שינוי",
+        "claim_register_title": "רשימת תביעות",
+        "notice_register_title": "רשימת הודעות",
+        "doc_title": "בקשת שינוי",
+        "doc_title_credit": "בקשת שינוי (הפחתה)",
+        "time_impact": "השפעה על הזמן",
+        "col_code": "קוד",
+        "col_title": "כותרת",
+        "col_classification": "סוג",
+        "col_urgency": "דחיפות",
+        "col_requested": "תאריך הבקשה",
+        "col_claimed_amount": "סכום נתבע",
+        "col_agreed_amount": "סכום מוסכם",
+        "col_time_impact": "השפעה על הזמן (ימים)",
+        "col_response_due": "מועד למענה",
+        "col_clause": "סעיף בחוזה",
+        "col_row": "מס'",
+        "col_claim_type": "סוג התביעה",
+        "col_raised": "תאריך הגשה",
+        "col_period_start": "תקופה מ-",
+        "col_period_end": "תקופה עד",
+        "col_description": "תיאור",
+        "col_decided_amount": "סכום שנקבע",
+        "col_days_requested": "ימים מבוקשים",
+        "col_days_granted": "ימים שאושרו",
+        "col_recipient_type": "מופנה אל",
+        "col_recipient": "נמען",
+        "col_target_response": "מענה צפוי",
+        "col_response_received": "מענה שהתקבל",
+        "requested_by": "בקשה",
+        "decided_by": "החלטה",
+        "date_submitted": "תאריך הגשה",
+        "date_decided": "תאריך החלטה",
+        "description": "תיאור",
+        "no_description": "לא נרשם תיאור.",
+        "decision_notes": "הערות להחלטה",
+        "no_decision_notes": "טרם נרשמה החלטה.",
+        "variation_register_filename": "reshimat-hora-ot-shinui",
+        "claim_register_filename": "reshimat-tviot",
+        "notice_register_filename": "reshimat-hoda-ot"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "טיוטה",
+          "submitted": "הוגשה",
+          "under_review": "בבדיקה",
+          "approved": "אושרה",
+          "rejected": "נדחתה",
+          "converted_to_vo": "הומרה להוראת שינוי"
+        },
+        "claim_status": {
+          "draft": "טיוטה",
+          "submitted": "הוגשה",
+          "under_review": "בבדיקה",
+          "agreed": "מוסכמת",
+          "granted": "אושרה",
+          "rejected": "נדחתה"
+        },
+        "notice_status": {
+          "issued": "הונפקה",
+          "acknowledged": "אושרה קבלה",
+          "responded": "נענתה",
+          "closed": "סגורה"
+        },
+        "classification": {
+          "scope_change": "שינוי בהיקף העבודות",
+          "unforeseen": "תנאי בלתי צפוי",
+          "owner_change": "שינוי מצד המזמין",
+          "design_dev": "פיתוח תכנון",
+          "regulatory": "דרישה רגולטורית",
+          "other": "אחר"
+        },
+        "urgency": {
+          "low": "נמוכה",
+          "med": "בינונית",
+          "high": "גבוהה"
+        },
+        "claim_type": {
+          "disruption": "שיבוש עבודה",
+          "eot": "הארכת זמן"
+        },
+        "recipient_type": {
+          "owner": "מזמין",
+          "contractor": "קבלן",
+          "architect": "אדריכל",
+          "engineer": "מהנדס",
+          "consultant": "יועץ"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "יומן עבודה",
+        "overview": "סקירה כללית",
+        "site_supervisor": "מנהל עבודה",
+        "not_recorded": "לא נרשם",
+        "labour_on_site": "כוח אדם באתר",
+        "equipment_on_site": "ציוד באתר",
+        "completeness": "שלמות",
+        "weather": "מזג אוויר",
+        "weather_time": "שעה",
+        "weather_source": "מקור",
+        "weather_temp": "טמפ' (°C)",
+        "weather_wind": "רוח (קמ\"ש)",
+        "weather_precip": "משקעים (מ\"מ)",
+        "weather_conditions": "תנאים",
+        "weather_empty": "לא נרשם מזג אוויר ליום זה.",
+        "site_record": "רישום האתר",
+        "entries_empty": "לא נרשמו רשומות ביומן זה.",
+        "notes": "הערות",
+        "notes_empty": "אין הערות נוספות.",
+        "footer_supervisor": "מנהל עבודה: {name}",
+        "footer_supervisor_missing": "מנהל עבודה: לא נרשם",
+        "footer_generated": "הופק: {timestamp}",
+        "footer_page": "עמוד {page} מתוך {total}",
+        "workforce": "כוח אדם לפי חברה",
+        "workforce_company": "חברה",
+        "workforce_count": "אנשים",
+        "workforce_unassigned": "לא משויכים לחברה",
+        "workforce_total": "סה\"כ",
+        "signatures": "חתימות",
+        "sig_prepared": "הכנה (מנהל האתר)",
+        "sig_approved": "אישור (נציג המזמין)",
+        "sig_name": "שם",
+        "sig_title": "תפקיד",
+        "sig_date": "תאריך",
+        "sig_signature": "חתימה",
+        "signed_note": "נחתם במערכת: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "yoman-avoda",
+        "summary_wind": "רוח {value} קמ\"ש",
+        "summary_precipitation": "משקעים {value} מ\"מ",
+        "summary_humidity": "לחות {value} %",
+        "percent": "{value}%",
+        "decimal_mark": "."
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "מבקרים",
+          "event": "אירועים",
+          "delivery": "חומרים שסופקו",
+          "completion": "עבודות שבוצעו",
+          "incident_summary": "בטיחות ואירועים",
+          "inspection_summary": "בדיקות ופיקוח",
+          "photo_note": "הערות צילום",
+          "general": "הערות כלליות"
+        },
+        "status": {
+          "open": "פתוח",
+          "closed": "סגור",
+          "signed": "חתום",
+          "archived": "בארכיון"
+        },
+        "condition": {
+          "clear": "בהיר",
+          "mainly_clear": "בהיר ברובו",
+          "partly_cloudy": "מעונן חלקית",
+          "cloudy": "מעונן",
+          "overcast": "מעונן לחלוטין",
+          "fog": "ערפל",
+          "fog_rime": "ערפל קפוא",
+          "drizzle_light": "טפטוף קל",
+          "drizzle_moderate": "טפטוף בינוני",
+          "drizzle_dense": "טפטוף כבד",
+          "rain": "גשם",
+          "rain_light": "גשם קל",
+          "rain_moderate": "גשם בינוני",
+          "rain_heavy": "גשם כבד",
+          "freezing_rain_light": "גשם קפוא קל",
+          "freezing_rain_heavy": "גשם קפוא כבד",
+          "snow": "שלג",
+          "snow_light": "שלג קל",
+          "snow_moderate": "שלג בינוני",
+          "snow_heavy": "שלג כבד",
+          "rain_showers_light": "ממטרי גשם קלים",
+          "rain_showers_moderate": "ממטרי גשם בינוניים",
+          "rain_showers_violent": "ממטרי גשם עזים",
+          "snow_showers_light": "ממטרי שלג קלים",
+          "snow_showers_heavy": "ממטרי שלג כבדים",
+          "thunderstorm": "סופת רעמים",
+          "thunderstorm_hail_light": "סופת רעמים עם ברד קל",
+          "thunderstorm_hail_heavy": "סופת רעמים עם ברד כבד"
+        },
+        "source": {
+          "manual": "הזנה ידנית",
+          "open_meteo": "שירות מזג אוויר",
+          "sensor": "חיישן באתר"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "יומן בקשות למידע (RFI)",
+        "col_number": "מס' RFI",
+        "col_subject": "נושא",
+        "col_raised_by": "הוגש על ידי",
+        "col_assigned_to": "מוקצה ל",
+        "col_ball_in_court": "בטיפול",
+        "col_date_required": "תאריך נדרש",
+        "col_response_due": "מועד למענה",
+        "col_days_open": "ימים פתוח",
+        "col_cost_impact": "השפעה על העלות",
+        "col_schedule_impact": "השפעה על לוח הזמנים",
+        "col_response": "מענה",
+        "yes_with": "כן ({detail})",
+        "register_filename": "yoman-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "טיוטה",
+          "open": "פתוח",
+          "answered": "נענה",
+          "closed": "סגור",
+          "void": "בוטל"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "נוצר בבינה מלאכותית",
+        "drawing": "שרטוט",
+        "cost_estimate": "אומדן עלויות",
+        "summary": "סיכום",
+        "project": "פרויקט:",
+        "boq": "כתב כמויות:",
+        "date": "תאריך:",
+        "status": "סטטוס:",
+        "prepared_by": "הוכן על ידי:",
+        "approved_by": "אושר על ידי:",
+        "signature_hint": "שם / חתימה / תאריך",
+        "contents": "פרקים / סעיפים:",
+        "pos": "סעיף",
+        "description": "תיאור",
+        "unit": "יחידה",
+        "qty": "כמות",
+        "rate": "מחיר יחידה",
+        "total": "סה\"כ",
+        "subtotal": "ביניים:",
+        "other_positions": "סעיפים נוספים",
+        "direct_cost": "עלות ישירה:",
+        "markups": "תוספות (ללא מע\"מ):",
+        "net_total": "סה\"כ נטו (ללא מע\"מ):",
+        "gross_total": "סה\"כ ברוטו",
+        "page": "עמוד",
+        "of": "מתוך",
+        "generated": "נוצר:",
+        "summary_report": "דוח סיכום",
+        "positions_omitted": "{count} סעיפים (פירוט מלא הושמט לשם ביצועים)",
+        "section": "פרק",
+        "items": "פריטים",
+        "cost_summary": "סיכום עלויות",
+        "table_of_contents": "תוכן עניינים",
+        "resources_omitted": "פירוט משאבים לא הודפס: לכתב כמויות זה יש יותר מדי שורות משאבים עבור קובץ PDF אחד.",
+        "status_draft": "טיוטה",
+        "status_final": "סופי",
+        "status_archived": "בארכיון",
+        "subject": "כתב כמויות",
+        "tax_vat": "מע\"מ"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "חשבונית",
+        "date": "תאריך: {value}",
+        "due": "לתשלום עד: {value}",
+        "from": "מאת",
+        "bill_to": "לכבוד",
+        "vat_id": "מספר עוסק / מע\"מ: {value}",
+        "ref": "אסמכתא: {value}",
+        "th_description": "תיאור",
+        "th_qty": "כמות",
+        "th_unit": "יחידה",
+        "th_unit_price": "מחיר ליחידה",
+        "th_net": "נטו ({currency})",
+        "net_total": "סה\"כ נטו",
+        "vat_total": "מע\"מ",
+        "grand_total": "סה\"כ לתשלום",
+        "retention_prepaid": "שמירה / מקדמה ששולמה",
+        "amount_due": "יתרה לתשלום",
+        "payment": "תשלום",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "מספר חשבון: {value}",
+        "bank_code": "קוד בנק: {value}",
+        "account_holder": "בעל החשבון: {value}",
+        "footer": "קובץ PDF זה כולל חשבונית אלקטרונית לפי EN 16931 (Factur-X / ZUGFeRD). קובץ ה-XML המוטמע הוא המסמך המחייב.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "דוח",
+        "meta_project": "פרויקט",
+        "meta_type": "סוג",
+        "meta_generated": "נוצר",
+        "meta_currency": "מטבע",
+        "field_column": "שדה",
+        "value_column": "ערך",
+        "yes": "כן",
+        "no": "לא",
+        "no_data_heading": "אין נתונים זמינים",
+        "no_data_body": "דוח זה נוצר עם תמונת נתונים ריקה. יש לוודא שמודולי המקור (כספים, לוח זמנים, בטיחות וכו') החזירו נתונים עבור הפרויקט שנבחר.",
+        "no_data_body_short": "דוח זה נוצר עם תמונת נתונים ריקה. יש לוודא שמודולי המקור החזירו נתונים עבור הפרויקט שנבחר.",
+        "footer_generated_by": "נוצר על ידי OpenConstructionERP בתאריך {timestamp}.",
+        "worksheet_name": "דוח",
+        "pdf_subject": "דוח פרויקט",
+        "overall_progress": "התקדמות כללית",
+        "as_of": "נכון ליום",
+        "recorded_by": "נרשם על ידי",
+        "period": "תקופה",
+        "entries_suffix": "({count} רשומות)",
+        "site_photo_alt": "תמונה מהאתר",
+        "ai_summary_heading": "סיכום",
+        "ai_badge": "נוצר בבינה מלאכותית",
+        "ai_note": "נוצר בבינה מלאכותית מנתוני הפרויקט שלהלן.",
+        "ai_note_confidence": "נוצר בבינה מלאכותית מנתוני הפרויקט שלהלן (רמת ביטחון {confidence}).",
+        "ai_note_review": "יש לבדוק לפני שיתוף עם הלקוח."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "שם",
+          "status": "סטטוס",
+          "phase": "שלב",
+          "planned_start": "התחלה מתוכננת",
+          "planned_end": "סיום מתוכנן",
+          "schedule_progress_pct": "אחוז התקדמות בלוח הזמנים",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "אחוז תקציב שנוצל",
+          "as_of": "נכון ליום",
+          "progress_pct": "אחוז התקדמות",
+          "risk_score_avg": "ציון סיכון ממוצע",
+          "open_rfis": "RFI פתוחים",
+          "open_submittals": "הגשות פתוחות",
+          "open_defects": "ליקויים פתוחים",
+          "open_observations": "הערות פתוחות",
+          "budget": "תקציב",
+          "committed": "מחויב",
+          "actual": "בפועל",
+          "payable": "לתשלום",
+          "receivable": "לגבייה",
+          "net_cash_flow": "תזרים מזומנים נטו"
+        },
+        "section_titles": {
+          "Project Overview": "סקירת הפרויקט",
+          "Key Performance Indicators": "מדדי ביצוע מרכזיים",
+          "Schedule Status": "מצב לוח הזמנים",
+          "Risk Summary": "סיכום סיכונים",
+          "Open Issues": "נושאים פתוחים",
+          "Cost Summary": "סיכום עלויות",
+          "Cost Breakdown": "פירוט עלויות",
+          "Change Orders": "הזמנות שינוי",
+          "Cash Flow": "תזרים מזומנים",
+          "Schedule Overview": "סקירת לוח הזמנים",
+          "Milestone Status": "מצב אבני דרך",
+          "Critical Path": "נתיב קריטי",
+          "3-Week Lookahead": "תכנון מתגלגל ל-3 שבועות",
+          "Safety KPIs": "מדדי בטיחות",
+          "Incident Log": "יומן אירועים",
+          "Near-Miss Reports": "דיווחי כמעט-תאונה",
+          "Safety Training": "הדרכות בטיחות",
+          "Inspection Summary": "סיכום ביקורות",
+          "By Inspection Type": "לפי סוג ביקורת",
+          "Punch List Status": "מצב רשימת ליקויים",
+          "Recent Inspections": "ביקורות אחרונות",
+          "Portfolio Overview": "סקירת תיק הפרויקטים",
+          "Project Statuses": "סטטוסים של הפרויקטים",
+          "KPI Comparison": "השוואת מדדי ביצוע",
+          "Portfolio Risks": "סיכוני תיק הפרויקטים",
+          "Field Progress": "התקדמות באתר",
+          "Top Risks": "הסיכונים המרכזיים",
+          "Site Photos": "תמונות מהאתר",
+          "Summary": "סיכום"
+        }
+      }
+    }
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "תמונת המצב הזו מוקפאת. תמונת מצב מוקפאת היא רשומה ואי אפשר לשנות אותה.",
+      "frozen_no_delete": "תמונת מצב מוקפאת היא רשומה ואי אפשר למחוק אותה.",
+      "draft_open": "כבר פתוחה תמונת מצב בטיוטה. הקפיאו או מחקו אותה לפני שפותחים אחרת.",
+      "no_line_method": "לסעיף הזה אין שיטה משלו.",
+      "snapshot_missing": "תמונת המצב לא נמצאה.",
+      "line_missing": "אין סעיף כזה בתמונת המצב.",
+      "document_missing": "המסמך המקושר אינו שייך לפרויקט הזה.",
+      "freeze_refused": "אי אפשר להקפיא את תמונת המצב עדיין: {count} סעיפים חרגו מהסף ללא הערה ואסמכתה.",
+      "no_frozen_snapshot": "אין עדיין תמונת מצב מוקפאת להשוואה.",
+      "no_ledger": "פנקס החשבוניות אינו זמין בהתקנה הזו.",
+      "no_snapshot": "אין עדיין תמונת מצב לתיעוד."
+    },
+    "export": {
+      "project": "פרויקט",
+      "generated": "נוצר",
+      "currency": "מטבע",
+      "page": "עמוד",
+      "generated_at": "נוצר בתאריך",
+      "empty": "אין עדיין מה להציג.",
+      "total": "סה\"כ",
+      "cost_report": "דוח עלויות",
+      "phase_comparison": "השוואת שלבים",
+      "invoice_ledger": "פנקס חשבוניות",
+      "forecast_documentation": "תיעוד התחזית",
+      "as_of": "נכון ל",
+      "forecast_method": "שיטת התחזית",
+      "col_account": "חשבון",
+      "col_code": "קוד",
+      "col_description": "תיאור",
+      "col_source": "מקור",
+      "col_method": "שיטה",
+      "col_planned": "מתוכנן",
+      "col_committed": "התחייבויות",
+      "col_pending": "שינויים ממתינים",
+      "col_measured": "נמדד",
+      "col_certified": "מאושר לתשלום",
+      "col_invoiced": "חויב",
+      "col_paid": "שולם",
+      "col_forecast": "תחזית",
+      "col_variance": "סטייה",
+      "col_variance_pct": "סטייה %",
+      "col_forecast_of_plan": "תחזית % מהתכנון",
+      "col_measured_of_committed": "נמדד % מההתחייבות",
+      "col_invoiced_of_committed": "חויב % מההתחייבות",
+      "col_contract": "חוזה",
+      "col_contract_title": "שם החוזה",
+      "col_invoice": "חשבונית",
+      "col_date": "תאריך",
+      "col_kind": "סוג",
+      "col_release_status": "שחרור",
+      "col_net": "נטו",
+      "col_vat": "מע\"מ",
+      "col_gross": "ברוטו",
+      "col_retention": "עכבון",
+      "col_release": "עכבון ששוחרר",
+      "col_discount": "הנחה",
+      "col_payable": "לתשלום",
+      "col_open": "פתוח",
+      "col_previous": "קודם",
+      "col_delta": "שינוי",
+      "col_delta_pct": "שינוי %",
+      "col_needs_evidence": "נדרשת אסמכתה",
+      "col_comment": "הערה",
+      "col_evidence": "אסמכתה",
+      "row_unassigned": "כסף ללא סעיף עלות",
+      "row_loose_changes": "שינויים ללא חוזה",
+      "row_no_contract": "ללא חוזה",
+      "contract_value": "ערך החוזה",
+      "retention_held": "עכבון מוחזק",
+      "yes": "כן",
+      "no": "לא",
+      "snapshot_date": "תאריך תמונת המצב",
+      "snapshot_status": "סטטוס",
+      "previous_snapshot": "תמונת המצב המוקפאת הקודמת",
+      "method_explained": "איך קוראים את התחזית",
+      "evidence_threshold": "נדרשת אסמכתה מעל",
+      "threshold_both": "שינוי של יותר מ-{parts}",
+      "threshold_any": "כל שינוי",
+      "frozen_at": "הוקפא ב"
+    },
+    "method": {
+      "best_available": "המקור הטוב ביותר הזמין",
+      "maximum": "ערך מרבי",
+      "evm_cpi": "ערך מושג (CPI)",
+      "manual": "ידני"
+    },
+    "method_help": {
+      "best_available": "כל סעיף לוקח את הנתון הבשל ביותר שלו: החשבון הסופי, אחרת העבודה הנמדדת, אחרת ההזמנה, אחרת האומדן, אחרת התקציב.",
+      "maximum": "כל סעיף לוקח את הגבוה מנתוניו (תקציב, אומדן, הזמנה, נמדד, חויב), כך שהתחזית אף פעם לא מסתירה סיכון.",
+      "evm_cpi": "כל סעיף מקרין את העלות בסיום לפי ההתקדמות: הכסף שהוצא עד כה מחולק בשיעור העבודה שבוצעה.",
+      "manual": "אדם קובע את נתון הסעיף ומקשר את המסמך שעומד מאחוריו."
+    },
+    "source": {
+      "none": "אין נתון",
+      "budget": "תקציב",
+      "estimate": "אומדן",
+      "partly_awarded": "הוזמן חלקית",
+      "awarded": "הוזמן",
+      "measured": "נמדד",
+      "final": "חשבון סופי",
+      "manual": "ידני",
+      "invoiced": "חויב",
+      "evm": "ערך מושג"
+    },
+    "layer": {
+      "budget": "תקציב",
+      "estimate": "אומדן",
+      "tender": "הצעה מובילה",
+      "awarded": "הוזמן",
+      "changes": "שינויים מאושרים",
+      "committed": "התחייבויות",
+      "pending": "שינויים ממתינים",
+      "measured": "נמדד",
+      "certified": "מאושר לתשלום",
+      "invoiced": "חויב",
+      "paid": "שולם",
+      "forecast": "תחזית"
+    },
+    "invoice_kind": {
+      "interim": "חשבון חלקי",
+      "final": "חשבון סופי",
+      "daywork": "עבודות יומיות",
+      "credit_note": "חשבונית זיכוי"
+    },
+    "release_status": {
+      "open": "פתוח",
+      "released": "שוחרר"
+    },
+    "evidence_kind": {
+      "document": "מסמך",
+      "minutes": "פרוטוקול",
+      "other": "אחר"
+    },
+    "snapshot_status": {
+      "draft": "טיוטה",
+      "frozen": "מוקפאת"
+    }
+  },
+  "pdf_footer": {
+    "page_of": "עמוד {page} מתוך {total}",
+    "page": "עמוד {page}",
+    "printed": "הודפס: {timestamp}",
+    "generated": "נוצר: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} הזמין אתכם לפורטל הלקוחות",
+      "login_subject": "קישור הכניסה שלכם לפורטל הלקוחות",
+      "invite_heading": "ברוכים הבאים לפורטל הלקוחות",
+      "login_heading": "כניסה לפורטל הלקוחות",
+      "greeting": "שלום {name},",
+      "greeting_generic": "שלום רב,",
+      "invite_body": "{sender} העניק לכם גישה לפורטל הלקוחות. בפורטל תוכלו לעקוב אחר הפרויקט שלכם: דוחות התקדמות, מסמכים, חשבוניות ואבני הדרך הבאות.",
+      "login_body": "להלן קישור הכניסה שביקשתם.",
+      "link_help": "הכפתור שלהלן מכניס אתכם למערכת, ללא צורך בסיסמה. הקישור תקף לשימוש חד-פעמי ויפוג בעוד {hours} שעות.",
+      "ignore": "אם לא ציפיתם להודעה זו, ניתן להתעלם ממנה. ללא הקישור הזה איש אינו מקבל גישה.",
+      "invite_cta": "פתיחת הפורטל",
+      "login_cta": "כניסה",
+      "sender_generic": "צוות הפרויקט שלכם"
+    },
+    "tender_invite": {
+      "subject": "הזמנה להגשת הצעות במכרז: {package}",
+      "heading": "הזמנה להגשת הצעות במכרז",
+      "greeting": "לכבוד {company},",
+      "greeting_generic": "שלום רב,",
+      "invite": "אתם מוזמנים להגיש הצעה לחבילת המכרז {package}.",
+      "invite_project": "אתם מוזמנים להגיש הצעה לחבילת המכרז {package} בפרויקט {project}.",
+      "deadline": "המועד האחרון להגשת הצעות: {deadline}",
+      "link_help": "הכפתור שלהלן פותח את כתב הכמויות. הזינו מחירי יחידה באופן מקוון, שמרו טיוטה בכל עת והגישו את ההצעה לפני המועד האחרון. אין צורך בחשבון משתמש.",
+      "link_personal": "הקישור הזה אישי לחברתכם. נא לא להעבירו הלאה.",
+      "cta": "פתיחת כתב הכמויות והזנת מחירים",
+      "no_link": "נא לעיין בפרטי החבילה ולשלוח את הצעתכם לפני המועד האחרון שצוין לעיל."
+    },
+    "notification_email": {
+      "greeting": "שלום {name},",
+      "greeting_generic": "שלום רב,",
+      "cta": "פתיחה ב-OpenConstructionERP",
+      "footer": "הודעה זו נשלחה אליכם בהתאם להגדרות ההתראות שלכם. ניתן לשנות אותן בפרופיל האישי.",
+      "digest_subject": "OpenConstructionERP: סיכום התראות ({count})",
+      "digest_heading": "התראות אחרונות:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "השוואת מחירים",
+      "comparison_sheet": "השוואה",
+      "bidder_title": "כתב כמויות לתמחור",
+      "bidder_sheet": "כתב כמויות",
+      "project": "פרויקט",
+      "package": "חבילה",
+      "currency": "מטבע",
+      "date": "תאריך",
+      "return_by": "להחזרה עד",
+      "item": "סעיף",
+      "description": "תיאור",
+      "unit": "יחידה",
+      "quantity": "כמות",
+      "unit_price": "מחיר יחידה",
+      "line_total": "סה\"כ שורה",
+      "own_estimate": "אומדן פנימי",
+      "not_priced": "לא תומחר",
+      "sum_priced_lines": "סכום השורות המתומחרות",
+      "bid_total": "סה\"כ ההצעה כפי שהוגשה",
+      "lines_priced": "שורות מתומחרות",
+      "lines_priced_value": "{priced} מתוך {total}",
+      "deviation": "חריגה מהאומדן הפנימי",
+      "not_comparable": "לא רלוונטי",
+      "other_currency": "הצעה ב-{currency}, אינה מדורגת מול הצעות ב-{reporting}.",
+      "legend": "מקרא",
+      "legend_lowest": "ירוק: מחיר היחידה הנמוך ביותר בשורה.",
+      "legend_high": "▲ אדום: יותר מ-{pct}% מעל המחיר החציוני בשורה.",
+      "legend_low": "▼ כתום: יותר מ-{pct}% מתחת למחיר החציוני בשורה.",
+      "legend_missing": "\"{marker}\": המציע לא נתן מחיר לשורה.",
+      "legend_incomplete": "הצעה עם שורות לא מתומחרות מסומנת בעמודה \"שורות מתומחרות\" ואינה מדורגת כזולה ביותר לפי הסכום הכולל שלה.",
+      "legend_totals": "סה\"כ ההצעה הוא הסכום שהמציע הגיש, ועשוי להיות שונה מסכום השורות המתומחרות שלו.",
+      "bidder": "מציע",
+      "bidder_note": "הערת המציע",
+      "reference": "מזהה (לא לעריכה)",
+      "total": "סה\"כ",
+      "instructions": "הזינו מחיר יחידה לכל שורה בתאים הצהובים. הכמויות והתיאורים קבועים, וסכומי השורות והסכום הכולל מחושבים אוטומטית. אם אינכם מתמחרים שורה, השאירו את התא ריק."
+    },
+    "cost_plan": {
+      "sheet_plan": "תכנית עלויות NRM 1",
+      "sheet_unallocated": "לא מוקצה",
+      "title": "תכנית עלויות לפי אלמנטים (NRM 1)",
+      "bill": "כתב כמויות",
+      "currency": "מטבע",
+      "gifa": "שטח רצפות פנימי ברוטו (m2)",
+      "gifa_project": "מתוך הפרויקט",
+      "gifa_entered": "הוזן עבור ייצוא זה",
+      "gifa_none": "לא הוגדר, העלות למ\"ר לא מוצגת",
+      "col_code": "קוד",
+      "col_description": "אלמנט",
+      "col_positions": "סעיפים",
+      "col_basis": "בסיס",
+      "col_total": "סה\"כ",
+      "col_per_m2": "עלות ל-m2 משטח רצפות ברוטו",
+      "col_share": "% מהסה\"כ",
+      "col_running": "סה\"כ מצטבר",
+      "group_level": "ברמת קבוצה, ללא אלמנט",
+      "facilitating_works_estimate": "אומדן עבודות הכנה",
+      "works_estimate": "אומדן עבודות הבנייה",
+      "addons_heading": "קבוצות 9-14 של NRM 1 שתומחרו כסעיפים בכתב הכמויות",
+      "unallocated": "לא מוקצה לאלמנט",
+      "direct_cost": "עלות ישירה של כתב הכמויות",
+      "markups_heading": "תוספות (לפי הסדר בכתב הכמויות עצמו)",
+      "markups_total": "סה\"כ תוספות",
+      "grand_total": "סה\"כ תכנית העלויות",
+      "basis_direct": "{pct}% על העלות הישירה",
+      "basis_running": "{pct}% על הסכום המצטבר",
+      "basis_lump": "סכום כולל קבוע",
+      "basis_banded": "סולם מדורג",
+      "basis_escalation": "התייקרות לפי מדד",
+      "basis_other": "{kind}",
+      "basis_scoped": "מוגבל לפרק",
+      "col_ordinal": "מספר סידורי",
+      "col_position": "תיאור",
+      "col_written_code": "הקוד כפי שנכתב",
+      "col_reason": "סיבה",
+      "reason_no_code": "אין קוד NRM בסעיף או בפרקיו",
+      "reason_invalid_code": "הקוד אינו מספר NRM",
+      "reason_unknown_group": "אין קבוצה כזו ב-NRM 1",
+      "truncated": "הרשימה קוצרה ל-{shown} הסעיפים הראשונים מתוך {count}; הסכום הכולל כולל את כולם."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "דרישות",
+      "sheet_summary": "סיכום",
+      "sheet_legend": "מקרא",
+      "summary_element": "אלמנט",
+      "summary_count": "מספר הדרישות",
+      "summary_total": "סה\"כ",
+      "legend_column": "עמודה",
+      "legend_description": "תיאור",
+      "unspecified": "לא צוין",
+      "h01": "אלמנט / מחלקת IFC",
+      "h02": "סיווג",
+      "h03": "קבוצת מאפיינים",
+      "h04": "שם המאפיין",
+      "h05": "סוג נתונים",
+      "h06": "חובה",
+      "h07": "ערכים מותרים",
+      "h08": "מינימום",
+      "h09": "מקסימום",
+      "h10": "יחידה",
+      "h11": "תבנית",
+      "h12": "שלב",
+      "h13": "גורם אחראי",
+      "h14": "מקרה שימוש",
+      "h15": "מקור",
+      "d01": "מחלקת ישות IFC (לדוגמה IFCWALL, IFCBEAM)",
+      "d02": "מערכת סיווג וקוד (לדוגמה Uniclass 2015: EF_25_10)",
+      "d03": "שם קבוצת המאפיינים (לדוגמה Pset_WallCommon)",
+      "d04": "שם המאפיין או התכונה הנדרשים",
+      "d05": "סוג הנתונים ב-IFC (IFCLABEL, IFCREAL, IFCBOOLEAN ועוד)",
+      "d06": "עוצמת דרישה: חובה, רשות או אסור",
+      "d07": "רשימת ערכים מותרים, מופרדים בנקודה-פסיק",
+      "d08": "גבולות הטווח המספרי",
+      "d09": "יחידת מידה (m, m2, kg ועוד)",
+      "d10": "תבנית ביטוי רגולרי לאימות הערך",
+      "d11": "שלב הפרויקט או אבן דרך (LP3, RIBA Stage 3 ועוד)",
+      "d12": "הגורם האחראי (אדריכל, מהנדס קונסטרוקציה ועוד)",
+      "d13": "מטרת הדרישה או מקרה השימוש בה",
+      "d14": "התקן או המסמך שמהם נגזרה הדרישה"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "כתב כמויות נוצר",
+      "notifications.boq.created.body": "כתב הכמויות \"{boq_name}\" שלכם נשמר.",
+      "notifications.meeting.action_assigned.title": "הוקצה לכם סעיף לביצוע",
+      "notifications.meeting.action_assigned.body": "מישיבה {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "סטטוס המסמך השתנה",
+      "notifications.cde.state_transitioned.body": "המכיל עבר לסטטוס \"{new_state}\".",
+      "notifications.cde.linked_published.title": "מסמך הקשור לעבודתכם פורסם",
+      "notifications.cde.linked_published.body": "{container_code} פורסם בגרסה {revision_code}. הרשומות המקושרות שלכם: {records}.",
+      "notifications.rfi.assigned.title": "הוקצתה לכם בקשה למידע (RFI)",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "בקשה למידע (RFI) נענתה",
+      "notifications.rfi.responded.body": "התקבלה תשובה לבקשתכם {code} ({title}).",
+      "notifications.risk.assigned.title": "הוקצה לכם סיכון",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "התראת חריגה בעלות",
+      "notifications.costmodel.overrun_alert.body": "עלות {category} חורגת מהתקציב: העלות בפועל {actual} {currency} עוברת את סף ההתראה של +{threshold_pct}% מעל המתוכנן {planned} {currency}.",
+      "notifications.submittal.submitted.title": "הגשה לאישור ממתינה לבדיקה",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "ההגשה לאישור אושרה",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "ההגשה לאישור נדחתה",
+      "notifications.submittal.rejected.body": "{code} ({title}). סיבה: {reason}",
+      "notifications.submittal.revise_resubmit.title": "ההגשה לאישור דורשת תיקון",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). סיבה: {reason}",
+      "notifications.transmittal.issued.title": "הונפק לכם מכתב מסירת מסמכים",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "קבלת מכתב מסירת המסמכים אושרה",
+      "notifications.transmittal.acknowledged.body": "הנמען אישר את קבלת {code} ({title}).",
+      "notifications.transmittal.responded.title": "מכתב מסירת המסמכים נענה",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "הוקצתה לכם בקשה למידע (RFI)",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "הוקצתה לכם משימה חדשה",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "החשבונית אושרה",
+      "notification.invoice_approved_body": "חשבונית {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "נקבעה בדיקה",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title} בתאריך {inspection_date}",
+      "notification.submittal_status_changed_title": "סטטוס ההגשה לאישור השתנה",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "נקבעה ישיבה",
+      "notification.meeting_scheduled_body": "{title} בתאריך {meeting_date}",
+      "notification.ncr_created_title": "נרשמה אי-התאמה",
+      "notification.ncr_created_body": "דוח אי-התאמה {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "מסמך הועלה",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "הוזכרתם בתגובה",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "תגובה חדשה בדיון",
+      "notifications.collaboration.comment_added.body": "ב-{entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "זוהתה התנגשות בחומרה גבוהה",
+      "notifications.clash.high_severity.body": "התנגשות בחומרה {severity}: {a_name} מול {b_name}",
+      "notifications.validation.report.title": "הבדיקה איתרה בעיות",
+      "notifications.validation.report.body": "שגיאות: {error_count}, אזהרות: {warning_count} ב-{target_type} זה.",
+      "notifications.punchlist.auto_created.title": "נוצר סעיף ברשימת הליקויים",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "סיכום התראות",
+      "notifications.digest.body": "יש לכם {count} עדכונים חדשים בערוץ {channel}.",
+      "notifications.approval.overdue.title": "אישור באיחור",
+      "notifications.approval.overdue.body": "שלב {step_ordinal} ב-{target_kind} זה באיחור של {hours_overdue} שעות.",
+      "notifications.approval.escalated.title": "אישור הועבר אליכם להסלמה",
+      "notifications.approval.escalated.body": "שלב {step_ordinal} ב-{target_kind} זה הועבר אליכם להסלמה (רמה {level}).",
+      "notifications.approval.reassigned.title": "אישור הוקצה מחדש אליכם",
+      "notifications.approval.reassigned.body": "ההחלטה בשלב {step_ordinal} ב-{target_kind} זה היא כעת באחריותכם.",
+      "notifications.deadline.overdue.title": "באיחור: {title}",
+      "notifications.deadline.overdue.body": "פריט במודול {module} \"{title}\" באיחור של {days_overdue} ימים ממועד היעד.",
+      "notifications.deadline.escalated.title": "פריט באיחור הועבר להסלמה",
+      "notifications.deadline.escalated.body": "פריט במודול {module} \"{title}\" עדיין פתוח, באיחור של {days_overdue} ימים, והועבר להסלמה.",
+      "notifications.deadline.approaching.title": "מועד היעד מתקרב: {title}",
+      "notifications.deadline.approaching.body": "מועד היעד של פריט במודול {module} \"{title}\" הוא {due_date}.",
+      "notifications.deadline.built.approaching.title": "מועד היעד מתקרב: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: מועד היעד של \"{title}\" הוא {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "באיחור: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "מועד היעד של RFI {reference} \"{title}\" בפרויקט {project} היה {due_date_display}, והוא באיחור של {days_overdue} ימים. נדרשת תשובה.",
+      "notifications.deadline.rfi.escalated.title": "הועבר להסלמה: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "RFI {reference} \"{title}\" בפרויקט {project} עדיין פתוח, {days_overdue} ימים אחרי מועד היעד {due_date_display}, והועבר אליכם להסלמה.",
+      "notifications.deadline.rfi.approaching.title": "מועד היעד מתקרב: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "מועד היעד של RFI {reference} \"{title}\" בפרויקט {project} הוא {due_date_display}. נדרשת תשובה.",
+      "notifications.deadline.submittals.overdue.title": "באיחור: הגשה לאישור {reference}",
+      "notifications.deadline.submittals.overdue.body": "מועד היעד של הגשה לאישור {reference} \"{title}\" בפרויקט {project} היה {due_date_display}, והיא באיחור של {days_overdue} ימים. נדרשת בדיקה.",
+      "notifications.deadline.submittals.escalated.title": "הועבר להסלמה: הגשה לאישור {reference}",
+      "notifications.deadline.submittals.escalated.body": "הגשה לאישור {reference} \"{title}\" בפרויקט {project} עדיין פתוחה, {days_overdue} ימים אחרי מועד היעד {due_date_display}, והועברה אליכם להסלמה.",
+      "notifications.deadline.submittals.approaching.title": "מועד היעד מתקרב: הגשה לאישור {reference}",
+      "notifications.deadline.submittals.approaching.body": "מועד היעד של הגשה לאישור {reference} \"{title}\" בפרויקט {project} הוא {due_date_display}. נדרשת בדיקה.",
+      "notifications.deadline.correspondence.overdue.title": "באיחור: התכתבות {reference}",
+      "notifications.deadline.correspondence.overdue.body": "ההתכתבות {reference} \"{title}\" בפרויקט {project} נדרשה לקבל מענה עד {due_date_display}, והיא באיחור של {days_overdue} ימים. נדרשת תשובה.",
+      "notifications.deadline.correspondence.escalated.title": "הועבר להסלמה: התכתבות {reference}",
+      "notifications.deadline.correspondence.escalated.body": "ההתכתבות {reference} \"{title}\" בפרויקט {project} עדיין ללא מענה, {days_overdue} ימים אחרי מועד היעד {due_date_display}, והועברה אליכם להסלמה.",
+      "notifications.deadline.correspondence.approaching.title": "מועד היעד מתקרב: התכתבות {reference}",
+      "notifications.deadline.correspondence.approaching.body": "ההתכתבות {reference} \"{title}\" בפרויקט {project} דורשת מענה עד {due_date_display}. נדרשת תשובה.",
+      "notifications.deadline.variations.overdue.title": "באיחור: בקשת שינוי {reference}",
+      "notifications.deadline.variations.overdue.body": "מועד היעד של בקשת שינוי {reference} \"{title}\" בפרויקט {project} היה {due_date_display}, והיא באיחור של {days_overdue} ימים. נדרשת החלטה.",
+      "notifications.deadline.variations.escalated.title": "הועבר להסלמה: בקשת שינוי {reference}",
+      "notifications.deadline.variations.escalated.body": "בקשת שינוי {reference} \"{title}\" בפרויקט {project} עדיין פתוחה, {days_overdue} ימים אחרי מועד היעד {due_date_display}, והועברה אליכם להסלמה.",
+      "notifications.deadline.variations.approaching.title": "מועד היעד מתקרב: בקשת שינוי {reference}",
+      "notifications.deadline.variations.approaching.body": "מועד היעד של בקשת שינוי {reference} \"{title}\" בפרויקט {project} הוא {due_date_display}. נדרשת החלטה.",
+      "notifications.variation.submitted.title": "בקשת שינוי ממתינה להחלטה: {code}",
+      "notifications.variation.submitted.body": "בקשת שינוי {code} \"{title}\" בפרויקט {project} הוגשה וממתינה להחלטה.",
+      "notifications.variation.approved.title": "בקשת שינוי אושרה: {code}",
+      "notifications.variation.approved.body": "בקשת שינוי {code} \"{title}\" בפרויקט {project} אושרה.",
+      "notifications.variation.rejected.title": "בקשת שינוי נדחתה: {code}",
+      "notifications.variation.rejected.body": "בקשת שינוי {code} \"{title}\" בפרויקט {project} נדחתה והוחזרה אליכם.",
+      "notifications.variation.rejected_reason.body": "בקשת שינוי {code} \"{title}\" בפרויקט {project} נדחתה והוחזרה אליכם. סיבה: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "הוראת שינוי ממתינה לאישור: {code}",
+      "notifications.changeorder.awaiting_approval.body": "הוראת שינוי {code} \"{title}\" בפרויקט {project} הוגשה וממתינה לאישור.",
+      "notifications.changeorder.approved.title": "הוראת שינוי אושרה: {code}",
+      "notifications.changeorder.approved.body": "הוראת שינוי {code} \"{title}\" בפרויקט {project} אושרה.",
+      "notifications.changeorder.rejected.title": "הוראת שינוי נדחתה: {code}",
+      "notifications.changeorder.rejected.body": "הוראת שינוי {code} \"{title}\" בפרויקט {project} נדחתה.",
+      "notifications.submittal.approved_as_noted.title": "ההגשה לאישור אושרה עם הערות",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "מסמך ממתין לאישורכם",
+      "notifications.file_approval.needs_approver.body": "קובץ מסוג {file_kind} ממתין לאישורכם.",
+      "notifications.file_approval.approved.title": "המסמך שלכם אושר",
+      "notifications.file_approval.approved.body": "הקובץ שלכם מסוג {file_kind} עבר את כל שלבי האישור.",
+      "notifications.file_approval.rejected.title": "המסמך שלכם הוחזר",
+      "notifications.file_approval.rejected.body": "הקובץ שלכם מסוג {file_kind} נדחה ודורש תיקונים.",
+      "notifications.portal.user_invited.title": "משתמש פורטל הוזמן",
+      "notifications.portal.user_invited.body": "{portal_user_email} הוזמן בתפקיד {portal_role}.",
+      "notifications.portal.message_received.title": "הודעה חדשה בפורטל",
+      "notifications.portal.message_received.body": "{buyer_name} שלח הודעה."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "מזהה פעילות",
+          "קוד פעילות",
+          "מספר פעילות",
+          "מזהה משימה",
+          "מזהה"
+        ],
+        "name": [
+          "שם פעילות",
+          "שם משימה",
+          "פעילות",
+          "משימה"
+        ],
+        "wbs": [
+          "WBS",
+          "קוד WBS",
+          "מספר WBS",
+          "מבנה פירוט עבודה"
+        ],
+        "outline_level": [
+          "רמת מתאר",
+          "רמת היררכיה",
+          "רמת הזחה",
+          "הזחה"
+        ],
+        "start": [
+          "התחלה",
+          "תאריך התחלה",
+          "תחילת עבודה",
+          "התחלה מתוכננת"
+        ],
+        "finish": [
+          "סיום",
+          "תאריך סיום",
+          "גמר",
+          "סיום מתוכנן"
+        ],
+        "duration": [
+          "משך",
+          "משך (ימים)",
+          "משך מקורי",
+          "מספר ימים"
+        ],
+        "predecessors": [
+          "קודמים",
+          "פעילויות קודמות",
+          "תלוי ב",
+          "תלויות"
+        ],
+        "percent_complete": [
+          "% השלמה",
+          "אחוז השלמה",
+          "אחוז התקדמות",
+          "התקדמות (%)",
+          "% ביצוע"
+        ],
+        "milestone": [
+          "אבן דרך",
+          "האם אבן דרך"
+        ],
+        "resource": [
+          "משאבים",
+          "משאב",
+          "שמות משאבים",
+          "צוות",
+          "אחראי ביצוע"
+        ],
+        "notes": [
+          "הערות",
+          "הערה",
+          "תגובות",
+          "תגובה"
+        ],
+        "client_visible": [
+          "גלוי ללקוח",
+          "הצג ללקוח",
+          "שיתוף עם הלקוח",
+          "מוצג ללקוח"
+        ]
+      },
+      "yes_words": [
+        "כן"
+      ],
+      "no_words": [
+        "לא"
+      ],
+      "example_names": [
+        "שלד ומעטפת",
+        "חפירה",
+        "יסודות",
+        "אישור יסודות"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "חוזה",
+          "חוזים",
+          "הסכם",
+          "הסכמים",
+          "*חוזה*"
+        ],
+        "contact": [
+          "איש קשר",
+          "אנשי קשר",
+          "ספק",
+          "ספקים",
+          "קבלן*",
+          "לקוח",
+          "לקוחות"
+        ],
+        "schedule_activity": [
+          "פעילות",
+          "פעילויות",
+          "משימה",
+          "משימות",
+          "wbs"
+        ],
+        "document": [
+          "מסמך",
+          "מסמכים",
+          "שרטוט",
+          "שרטוטים",
+          "תכנית",
+          "קובץ מצורף"
+        ],
+        "user": [
+          "אחראי",
+          "אחראית",
+          "מוקצה",
+          "מפקח",
+          "מנהל עבודה",
+          "מבקר"
+        ],
+        "due": [
+          "מועד יעד",
+          "מועד אחרון",
+          "תאריך יעד",
+          "תפוגה",
+          "תוקף עד",
+          "חידוש"
+        ]
+      },
+      "link_labels": {
+        "contract": "חוזה",
+        "contact": "איש קשר",
+        "schedule_activity": "פעילות בלוח הזמנים",
+        "document": "מסמך",
+        "user": "אחראי"
+      },
+      "state_labels": [
+        "פתוח",
+        "בביצוע",
+        "הושלם"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "תוספת {number} למכרז {package}",
+      "addendum_heading": "תוספת למכרז",
+      "greeting": "לכבוד {company},",
+      "greeting_generic": "לכבוד המציעים,",
+      "addendum_intro": "תוספת {number} לחבילת המכרז {package} פורסמה: {title}.",
+      "addendum_deadline": "מועד הגשת ההצעות הוזז מ-{old} ל-{new}.",
+      "addendum_boq": "כתב הכמויות השתנה (גרסה {revision}). נא לתמחר את הגרסה העדכנית.",
+      "addendum_documents": "מסמכים שפורסמו: {documents}",
+      "addendum_ack": "נא לאשר קבלה של תוספת זו. הצעה שאינה מאשרת את כל התוספות עשויה להיחשב כלא תואמת.",
+      "answer_subject": "הבהרה {number} למכרז {package}",
+      "answer_heading": "הבהרה למכרז",
+      "answer_intro": "נענתה שאלה בנוגע לחבילת המכרז {package}. התשובה חלה על כל המציעים.",
+      "question_label": "שאלה",
+      "answer_label": "תשובה"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "שווי פיתוח כולל (GDV)",
+      "total_development_cost": "עלות פיתוח כוללת",
+      "residual_land_value": "שווי קרקע שיורי",
+      "developer_profit": "רווח היזם",
+      "profit_on_cost": "רווח על העלות",
+      "profit_on_gdv": "רווח על GDV",
+      "construction_cost": "עלות בנייה",
+      "professional_fees": "שכר מקצועי",
+      "contingency": "עתודה לבלתי צפוי",
+      "finance_cost": "עלות מימון",
+      "sales_costs": "עלויות מכירה"
+    },
+    "status": {
+      "viable": "בר ביצוע",
+      "unviable": "לא בר ביצוע",
+      "marginal": "גבולי",
+      "pending": "טרם נבדק"
+    },
+    "figure": {
+      "gross_development_value": "סך שווי המכירה של כל היחידות בתכנית, הכול במטבע אחד.",
+      "total_development_cost": "כל עלויות הביצוע של התכנית מלבד הקרקע עצמה: בנייה, שכר מקצועי, עתודה, מימון ועלויות מכירה.",
+      "residual_land_value": "מה שנותר לקרקע לאחר שמפחיתים מהשווי הכולל את עלות הפיתוח הכוללת ואת רווח היזם הנדרש.",
+      "developer_profit": "הרווח שהיזם שואף להשאיר, מוגדר כיחס יעד מתוך השווי הכולל של הפיתוח.",
+      "profit_on_cost": "רווח היזם חלקי עלות הפיתוח הכוללת, מוצג כיחס.",
+      "profit_on_gdv": "רווח היזם חלקי השווי הכולל של הפיתוח, מוצג כיחס."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "מחנה עובדים",
+        "rental": "דיור להשכרה",
+        "hotel": "מלון"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "ממתין",
+        "approved": "אושר",
+        "rejected": "נדחה"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "עומד בדרישה",
+        "fail": "לא עומד בדרישה",
+        "not_applicable": "לא רלוונטי"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "שרטוט",
+        "contract": "חוזה",
+        "specification": "מפרט",
+        "photo": "תמונה",
+        "correspondence": "התכתבות",
+        "reality_capture": "תיעוד מציאות",
+        "other": "אחר"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "ממתין",
+        "approved": "אושר",
+        "rejected": "נדחה",
+        "cancelled": "בוטל"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "טיוטה",
+        "submitted": "הוגש לאישור",
+        "approved": "אושר",
+        "posted": "נרשם בספר הראשי"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "פתוח",
+        "assigned": "הוקצה",
+        "in_progress": "בתהליך",
+        "resolved": "טופל",
+        "verified": "אומת",
+        "closed": "סגור"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "הערה",
+        "minor": "קל",
+        "major": "משמעותי",
+        "critical": "קריטי"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "אדם",
+        "crew": "צוות",
+        "equipment": "ציוד",
+        "subcontractor": "קבלן משנה"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "שם מודל ה-AI אינו מעודכן או אינו זמין. פתחו הגדרות > AI והגדירו שם מודל תקף לספק שלכם.",
+      "not_configured": "ה-AI אינו מוגדר. אנא הגדירו ספק AI בהגדרות."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "אומת",
+      "bound": "צורף",
+      "empty": "חסר"
+    },
+    "package_status_labels": {
+      "draft": "טיוטה",
+      "in_progress": "בתהליך",
+      "ready": "מוכן",
+      "issued": "הונפק"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "חוסם",
+      "critical": "קריטי",
+      "warning": "אזהרה",
+      "suggestion": "הצעה"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "אסטרטגיה",
+      "brief": "תוכנית דרישות",
+      "concept": "קונספט",
+      "design": "תכנון",
+      "approval": "היתר",
+      "detail": "תכנון מפורט",
+      "tender": "מכרז",
+      "award": "הזמנה",
+      "construction": "ביצוע",
+      "handover": "מסירה",
+      "operation": "תפעול"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "piece_fits_stock": {
+        "fail": "החלק {ref} ({size} מ\"מ) לא מתאים לאף גודל מלאי",
+        "suggestion": "הוסיפו גודל מלאי ארוך או גדול יותר, הקטינו את הגזום, או פצלו את החלק במפגש."
+      },
+      "has_stock": {
+        "suggestion": "הוסיפו לפחות אורך מלאי או גודל לוח אחד, או השתמשו בשאריות ממלאי האתר.",
+        "fail": "בעבודה אין מלאי לחיתוך ממנו"
+      },
+      "yield_threshold": {
+        "suggestion": "הוסיפו אורך או גודל מלאי נוסף, אפשרו סיבוב, או בדקו את הסף עבור חומר זה.",
+        "fail": "הניצולת {actual} % נמוכה מהסף של {threshold} %"
+      },
+      "ok": "תקין",
+      "kerf_set": {
+        "fail": "רוחב המסור (החריץ) הוא אפס",
+        "suggestion": "הזינו את רוחב הלהב או החיתוך, אחרת הניצולת של כל מוט עם כמה חיתוכים מוגזמת."
+      },
+      "grain_allows_fit": {
+        "fail": "החלק {ref} מתאים רק כשהוא מסובב לרוחב הסיבים",
+        "suggestion": "אפשרו סיבוב לחלק זה או הוסיפו גודל לוח שמתאים לו לאורך הסיבים."
+      },
+      "has_pieces": {
+        "fail": "בעבודה אין חלקים לחיתוך",
+        "suggestion": "הוסיפו חלקים ידנית, הדביקו אותם או ייבאו מלוח כיפוף, ממדידת כמויות, משורת כתב כמויות או מקובץ."
+      },
+      "min_offcut_set": {
+        "fail": "לא הוגדרה שארית מינימלית שמיש",
+        "suggestion": "הגדירו את השארית הקצרה ביותר שכדאי לשמור, כדי ששאריות לשימוש חוזר לא ייספרו כפסולת."
+      },
+      "sheet_dimensions": {
+        "suggestion": "הגדירו לכל חלק לוח ולכל גודל לוח גם אורך וגם רוחב.",
+        "fail": "ל-{ref} אין רוחב"
+      },
+      "stock_priced": {
+        "fail": "למלאי {ref} אין עלות ליחידה",
+        "suggestion": "הזינו מחיר ליחידה כדי שהתוכנית תדווח על עלותה ותבחר את המלאי הזול ביותר."
+      },
+      "stock_sufficient": {
+        "suggestion": "הגדילו את הכמות הזמינה או הוסיפו גודל מלאי נוסף.",
+        "fail": "חלקים שלא שובצו במלאי הזמין: {count}"
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "פריט הליקויים '{title}' נסגר ללא תמונה",
+    "punch_no_photo_fix": "הוסיפו תמונה של העבודה שהושלמה",
+    "photo_weak": "ב-'{title}' יש {count} תמונות ללא מיקום או זמן צילום",
+    "photo_weak_fix": "צלמו שוב את התמונה באפליקציה כשהמיקום מופעל",
+    "defect_no_photo": "הליקוי '{reference}' נסגר ללא תמונה של התיקון",
+    "defect_no_photo_fix": "צרפו תמונה של העבודה המתוקנת"
+  },
+  "closeout_dossier": {
+    "more_items": "עוד {count} פריטים שאינם מוצגים",
+    "category_missing": "אין ראיה לקטגוריה הנדרשת '{category}'",
+    "category_missing_fix": "קשרו מסמך לפריט ברשימת הבדיקה מקטגוריה זו, או הוסיפו אחד",
+    "category_unverified": "הראיה לקטגוריה '{category}' טרם אומתה",
+    "category_unverified_fix": "בקשו ממנהל לבדוק ולאמת את הראיה המצורפת",
+    "punch_open": "פריט הליקויים '{name}' עדיין פתוח",
+    "punch_open_fix": "טפלו בפריט וסגרו אותו, או הוציאו אותו מהיקף התיק",
+    "punch_no_photo": "לפריט הליקויים שטופל '{name}' אין תמונה",
+    "punch_no_photo_fix": "הוסיפו תמונה של העבודה שהושלמה",
+    "system_pending": "המערכת '{name}' לא הורצה",
+    "system_pending_fix": "השלימו את רשימות הבדיקה של ההרצה וסמנו את המערכת כמורצת",
+    "critical_issues": "{count} בעיות הרצה קריטיות עדיין פתוחות",
+    "critical_issues_fix": "סגרו את הבעיות הקריטיות לפני המסירה",
+    "acceptance_missing": "לא מצורפת תעודת קבלה",
+    "acceptance_missing_fix": "צרפו את תעודת הקבלה החתומה לפריט הקבלה ברשימת הבדיקה",
+    "acceptance_unsigned": "תעודת הקבלה אינה חתומה במלואה (סטטוס: {status})",
+    "acceptance_unsigned_fix": "אספו את החתימות החסרות במודול החתימות",
+    "blocked": "התיק נכשל ברשימת הבדיקה. תקנו את הממצאים, או הרכיבו אותו בכל זאת כחלקי (באישור מנהל).",
+    "delivery_title": "תיק מסירה: {project}",
+    "delivery_body": "תיק המסירה '{title}' ({scope}) מוכן. הקישור שלהלן מוריד אותו ותקף עד {expires}.",
+    "pdf": {
+      "title": "תיק מסירה",
+      "scope": "היקף",
+      "built": "הורכב",
+      "status_passed": "רשימת הבדיקה עברה",
+      "status_warnings": "רשימת הבדיקה עברה עם אזהרות",
+      "status_errors": "חלקי: ממצאים פתוחים ברשימת הבדיקה",
+      "findings": "ממצאים פתוחים ברשימת הבדיקה",
+      "severity": "חומרה",
+      "finding": "ממצא",
+      "severity_error": "שגיאה",
+      "severity_warning": "אזהרה",
+      "severity_info": "מידע",
+      "contents": "תוכן עניינים",
+      "file": "קובץ",
+      "size": "גודל",
+      "punch": "רשימת ליקויים שטופלה",
+      "item": "פריט",
+      "status": "סטטוס",
+      "photos": "תמונות",
+      "evidence": "ראיות צילום"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "דירוג {rating} של '{name}' אינו רמה בסולם '{scale}'",
+    "rule_poor_without_action": "'{name}' מדורג {rating} אך אין לו פעולת תחזוקה מתוכננת",
+    "rule_poor_without_action_fix": "גזרו את התוכנית, או הוסיפו פעולה לאלמנט זה",
+    "rule_action_unpriced": "לפעולה של '{name}' בשנת {year} אין עלות יחידה",
+    "rule_action_unpriced_fix": "הזינו עלות יחידה כדי שסכומי התוכנית יכללו אותה",
+    "rule_defect_incomplete": "דירוג '{name}' מחייב עבודה אך לא נרשמו חומרה או היקף"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, עמוד {page}",
+    "text_change": "\"{old}\" שונה ל-\"{new}\"",
+    "kind": {
+      "added": "נוסף",
+      "removed": "הוסר",
+      "modified": "שונה",
+      "text": "הטקסט שונה"
+    },
+    "status": {
+      "open": "פתוח",
+      "relevant": "רלוונטי",
+      "not_relevant": "לא רלוונטי"
+    },
+    "errors": {
+      "revision_not_found": "גרסת השרטוט לא נמצאה בפרויקט זה.",
+      "revision_not_parsed": "לשרטוט עדיין אין גרסה מעובדת להשוואה.",
+      "comparison_not_found": "ההשוואה לא נמצאה.",
+      "change_not_found": "השינוי לא נמצא.",
+      "same_revision": "בחרו שתי גרסאות או שני עמודים שונים להשוואה.",
+      "manual_points": "יישור ידני דורש שתי נקודות שונות בכל גרסה.",
+      "alignment_singular": "לא ניתן להחיל את היישור: הוא מכווץ את הגיליון.",
+      "region_empty": "לשינוי {seq} אין גודל.",
+      "region_off_sheet": "שינוי {seq} נמצא מחוץ לגיליון.",
+      "module_missing": "המודול הדרוש לפעולה זו אינו מותקן."
+    },
+    "rfi": {
+      "subject": "שינוי שרטוט {seq} ב-{sheet}",
+      "question": "גרסה {new} של {sheet} שונה מגרסה {old} באזור המסומן ({kind}). אנא אשרו את מטרת השינוי ואם הכמויות מושפעות."
+    },
+    "markup": {
+      "text": "שינוי גרסה {seq}: {kind}"
+    },
+    "report": {
+      "title": "השוואת גרסאות שרטוט",
+      "project": "פרויקט",
+      "name": "השוואה",
+      "old_revision": "גרסה ישנה",
+      "new_revision": "גרסה חדשה",
+      "alignment": "יישור",
+      "alignment_none": "לא מיושר (אותה מסגרת)",
+      "alignment_auto": "אוטומטי",
+      "alignment_manual": "ידני, שתי נקודות",
+      "confidence": "רמת ודאות {value}",
+      "summary": "שינויים",
+      "summary_counts": "סה\"כ {total}: {added} נוספו, {removed} הוסרו, {modified} שונו, {text} טקסט",
+      "generated_on": "תאריך יצירה",
+      "generated": "נוצר ב-{timestamp}",
+      "page_of": "עמוד {page} מתוך {total}",
+      "no_changes": "לא נמצאו שינויים בין שתי הגרסאות.",
+      "col_no": "מס'",
+      "col_preview": "תצוגה מקדימה",
+      "col_kind": "שינוי",
+      "col_location": "מיקום",
+      "col_detail": "פירוט",
+      "col_status": "סטטוס",
+      "col_comment": "הערה",
+      "col_follow_up": "המשך טיפול",
+      "page_at": "עמוד {page} ב-{coords}",
+      "layer": "שכבה {layer}",
+      "entity_counts": "ישויות: {added} נוספו, {removed} הוסרו, {modified} שונו",
+      "rfi": "RFI {number}",
+      "markup": "ענן גרסה",
+      "remeasure": "מדידה חוזרת: {items} כמויות, {positions} סעיפי כתב כמויות"
+    },
+    "rules": {
+      "distinct_revisions_ok": "שני הצדדים הם גרסאות שונות.",
+      "distinct_revisions_fail": "ההשוואה משווה גיליון לעצמו.",
+      "distinct_revisions_hint": "בחרו את הגרסה הישנה והחדשה של השרטוט.",
+      "alignment_not_needed": "גרסאות DWG חולקות יחידות שרטוט; אין צורך ביישור.",
+      "alignment_missing_matrix": "להשוואה אין יישור.",
+      "alignment_singular": "היישור מכווץ את הגיליון ולא ניתן להחילו.",
+      "alignment_scale": "היישור משנה את קנה המידה של הגיליון פי {scale}, יותר משגרסאות של אותו שרטוט נבדלות.",
+      "alignment_low_confidence": "היישור האוטומטי אינו בטוח (רמת ודאות {confidence}).",
+      "alignment_manual_points": "יישור ידני דורש שני זוגות נקודות.",
+      "alignment_ok": "יישור הגיליון סביר.",
+      "alignment_hint": "יישרו את הגיליונות ידנית לפי שני סימנים המשותפים לשתי הגרסאות, כמו מפגשי צירים.",
+      "region_empty": "לשינוי {seq} אין גודל.",
+      "region_off_sheet": "שינוי {seq} נמצא מחוץ לגיליון.",
+      "regions_ok": "כל אזור שהשתנה נמצא על הגיליון.",
+      "triaged_ok": "כל שינוי נבדק.",
+      "triaged_open": "{count} שינויים עדיין פתוחים.",
+      "triaged_hint": "סמנו כל שינוי כרלוונטי או לא רלוונטי.",
+      "followed_up_ok": "כל שינוי רלוונטי טופל להמשך.",
+      "followed_up_missing": "שינוי {seq} מסומן כרלוונטי אך אין לו הערה, RFI, ענן או סימון למדידה חוזרת.",
+      "followed_up_hint": "הוסיפו הערה לשינוי, פתחו RFI או ענן, או סמנו את הכמויות שבתוכו למדידה חוזרת."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "תחזית תזרים מזומנים",
+      "portfolio_title": "תחזית תזרים מזומנים לתיק הפרויקטים",
+      "empty": "אין תחזית תזרים מזומנים לבחירה זו.",
+      "project": "פרויקט",
+      "as_of": "נכון ל",
+      "currency": "מטבע",
+      "delay_days": "קבלות שנדחו בימים",
+      "overrun_pct": "חריגת עלויות (%)",
+      "closing_position": "יתרת סגירה",
+      "peak_funding": "צורך מירבי במימון",
+      "peak_period": "חודש שיא צורך במימון",
+      "col": {
+        "period": "חודש",
+        "planned_in": "הכנסות מתוכננות",
+        "actual_in": "הכנסות בפועל",
+        "expected_in": "הכנסות צפויות",
+        "planned_out": "הוצאות מתוכננות",
+        "actual_out": "הוצאות בפועל",
+        "expected_out": "הוצאות צפויות",
+        "net": "נטו",
+        "cumulative": "מצב מצטבר"
+      }
+    }
+  }
+}

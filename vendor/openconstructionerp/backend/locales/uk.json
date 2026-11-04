@@ -1,0 +1,2537 @@
+{
+  "costs.catalog_name_unavailable": "Цю назву не можна використати для нового каталогу. Виберіть іншу назву.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Кошторисна справа з відкритим кодом"
+  },
+  "nav": {
+    "dashboard": "Панель керування",
+    "assemblies": "Збірні розцінки",
+    "ai_estimate": "ШІ-оцінка",
+    "settings": "Налаштування",
+    "5d_cost_model": "5D модель вартості",
+    "templates": "Шаблони",
+    "reports": "Звіти",
+    "sustainability": "Сталий розвиток",
+    "group_estimation": "Кошторисна справа",
+    "group_planning": "Планування",
+    "group_procurement": "Закупівлі",
+    "group_tools": "Інструменти",
+    "architecture": "Карта архітектури"
+  },
+  "common": {
+    "save": "Зберегти",
+    "cancel": "Скасувати",
+    "delete": "Видалити",
+    "edit": "Редагувати",
+    "create": "Створити",
+    "search": "Пошук",
+    "filter": "Фільтр",
+    "export": "Експорт",
+    "import": "Імпорт",
+    "loading": "Завантаження...",
+    "error": "Помилка",
+    "success": "Успішно",
+    "confirm": "Підтвердити",
+    "back": "Назад",
+    "next": "Далі",
+    "yes": "Так",
+    "no": "Ні"
+  },
+  "auth": {
+    "login": "Увійти",
+    "logout": "Вийти",
+    "email": "Ел. пошта",
+    "password": "Пароль"
+  },
+  "projects": {
+    "title": "Проєкти",
+    "new_project": "Новий проєкт",
+    "project_name": "Назва проєкту",
+    "no_projects": "Проєктів ще немає"
+  },
+  "boq": {
+    "title": "Кошторис",
+    "position": "Позиція",
+    "ordinal": "Порядковий номер",
+    "description": "Опис",
+    "quantity": "Кількість",
+    "unit": "Од. вим.",
+    "unit_rate": "Ціна за одиницю",
+    "total": "Разом",
+    "add_position": "Додати позицію",
+    "add_section": "Додати розділ",
+    "assembly": "Збірна розцінка",
+    "subtotal": "Проміжний підсумок",
+    "grand_total": "Загальний підсумок",
+    "direct_cost": "Прямі витрати",
+    "net_total": "Разом без ПДВ",
+    "gross_total": "Разом з ПДВ",
+    "vat": "ПДВ",
+    "add_markups": "Додати націнки",
+    "validate": "Перевірити",
+    "export": "Експорт",
+    "mvp": {
+      "title": "Оберіть матеріали",
+      "subtitle_one": "{{count}} ресурс потребує вибору",
+      "subtitle_other": "{{count}} ресурсів потребують вибору",
+      "bulk_label": "Швидке заповнення:",
+      "bulk_median": "Медіана для всіх",
+      "bulk_mean": "Середнє для всіх",
+      "bulk_cheapest": "Найдешевше для всіх",
+      "bulk_priciest": "Найдорожче для всіх",
+      "slot_variant_count": "{{n}} варіантів",
+      "selected_label": "Обрано:",
+      "default_mean": "середня ціна",
+      "default_median": "медіанна ціна",
+      "row_median": "Медіанна ціна · {{price}}",
+      "row_mean": "Середня ціна · {{price}}",
+      "subtotal_label": "Ціна позиції",
+      "apply": "Застосувати й додати до кошторису",
+      "batch_progress": "Позиція {{current}} з {{total}}",
+      "toast_applied_one": "Обрано {{count}} варіант",
+      "toast_applied_other": "Обрано {{count}} варіантів"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Звіт обміну"
+      },
+      "column": {
+        "severity": "Серйозність",
+        "kind": "Вид втрати",
+        "position": "Позиція",
+        "field": "Поле",
+        "original": "Початкове значення",
+        "written": "Записане значення",
+        "count": "Кількість",
+        "detail": "Деталі"
+      },
+      "severity": {
+        "error": "Критична",
+        "warning": "Попередження",
+        "info": "Примітка"
+      },
+      "kind": {
+        "unsupported_element": "Елемент не підтримується",
+        "truncated_text": "Текст скорочено",
+        "altered_text": "Текст змінено",
+        "rounded_value": "Значення округлено",
+        "value_out_of_range": "Значення поза діапазоном",
+        "dropped_attribute": "Атрибут відкинуто",
+        "unmapped_unit": "Одиницю не зіставлено",
+        "lost_hierarchy": "Рівень ієрархії втрачено",
+        "markup_not_representable": "Надбавку не можна подати",
+        "attachment_skipped": "Вкладення пропущено",
+        "changed_identifier": "Ідентифікатор змінено",
+        "exceeds_limit": "Перевищено ліміт зберігання",
+        "rejected_row": "Рядок відхилено",
+        "skipped_row": "Рядок пропущено",
+        "parser_warning": "Попередження читача",
+        "roundtrip_mismatch": "Розбіжність при поверненні"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Точка відгалуження",
+      "base_snapshot_from": "Точка відгалуження (зі знімка «{snapshot}»)",
+      "before_cherry_pick": "Перед застосуванням змін із «{source}»",
+      "before_merge": "Перед злиттям гілки «{branch}»",
+      "errors": {
+        "branch_closed": "Цю гілку вже влито або архівовано, вносити в неї зміни не можна.",
+        "not_a_branch": "Цей кошторис не є гілкою.",
+        "same_bill": "Виберіть два різні кошториси.",
+        "different_project": "Обидва кошториси мають належати до одного проєкту.",
+        "different_tree": "Обидва кошториси мають бути гілками одного основного кошторису.",
+        "unresolved_conflicts": "Позицій, змінених в обох кошторисах: {count}. Перед застосуванням вирішіть, яку версію залишити для кожної.",
+        "merge_forbidden": "У вас немає права на злиття з основним кошторисом.",
+        "confirm_required": "Підтвердьте злиття: воно перезаписує основний кошторис.",
+        "design_options_unavailable": "Модуль варіантів проєктних рішень не встановлено.",
+        "base_snapshot_in_use": "Цей знімок - точка відгалуження відкритої гілки, його не можна видалити."
+      },
+      "export": {
+        "title_positions": "Порівняння кошторисів за позиціями",
+        "title_sections": "Порівняння кошторисів за розділами",
+        "title_cost_groups": "Порівняння кошторисів за групами витрат",
+        "project": "Проєкт",
+        "bill_a": "Кошторис A",
+        "bill_b": "Кошторис B",
+        "total_a": "Разом A",
+        "total_b": "Разом B",
+        "delta": "Різниця",
+        "counts": "Зміни",
+        "counts_value": "додано: {added}, видалено: {removed}, змінено: {changed}",
+        "col_ordinal": "Поз.",
+        "col_description": "Найменування",
+        "col_unit": "Од.",
+        "col_change": "Зміна",
+        "col_qty_a": "К-сть A",
+        "col_qty_b": "К-сть B",
+        "col_rate_a": "Розцінка A",
+        "col_rate_b": "Розцінка B",
+        "col_total_a": "Разом A",
+        "col_total_b": "Разом B",
+        "col_delta": "Різниця",
+        "col_section": "Розділ",
+        "col_cost_group": "Група витрат",
+        "change_added": "Додано",
+        "change_removed": "Видалено",
+        "change_changed": "Змінено",
+        "change_unchanged": "Без змін",
+        "ungrouped": "Без групи",
+        "empty": "Два кошториси ідентичні.",
+        "total": "Разом"
+      }
+    }
+  },
+  "costs": {
+    "title": "База розцінок",
+    "rate": "Розцінка",
+    "material": "Матеріали",
+    "labor": "Оплата праці",
+    "equipment": "Машини та механізми",
+    "search_costs": "Пошук розцінок..."
+  },
+  "assemblies": {
+    "title": "Збірні розцінки",
+    "description": "Багаторазові рецепти вартості — поєднуйте матеріали, працю й техніку в готові шаблони",
+    "new_assembly": "Нова збірна розцінка",
+    "from_database": "З бази даних",
+    "apply_to_boq": "Застосувати до кошторису",
+    "add_component": "Додати складник",
+    "no_assemblies": "Збірних розцінок ще немає",
+    "no_assemblies_hint": "Створіть першу збірну розцінку з Бази розцінок або Каталогу ресурсів",
+    "total_rate": "Підсумкова розцінка"
+  },
+  "catalog": {
+    "title": "Каталог ресурсів",
+    "description": "Перегляд і ведення матеріалів, техніки, розцінок праці та операторів",
+    "add_resource": "Додати ресурс",
+    "import_region": "Імпорт регіону",
+    "build_assembly": "Скласти збірну розцінку",
+    "my_catalog": "Мій каталог"
+  },
+  "validation": {
+    "title": "Перевірка",
+    "passed": "Пройдено",
+    "warnings": "Попередження",
+    "errors": "Помилки",
+    "score": "Оцінка якості",
+    "run_validation": "Запустити перевірку",
+    "missing_quantity": "Позиція {position} не має кількості",
+    "missing_rate": "Позиція {position} не має ціни за одиницю",
+    "missing_description": "Позиція {position} не має опису",
+    "missing_classification": "Позиція {position} потребує коду класифікації",
+    "duplicate_ordinal": "Дубльований порядковий номер: {ordinal}",
+    "rate_anomaly": "Ціна за одиницю {rate} перевищує поріг ({threshold})",
+    "nl": {
+      "not_a_string": "Вхідні дані мають бути текстом.",
+      "empty": "Вхідні дані порожні.",
+      "too_long": "Вхідні дані перевищують {max} символів.",
+      "ai_unparsable": "Відповідь ШІ не вдалося розібрати як документ DSL.",
+      "no_pattern": "Жоден шаблон не відповідає введеному реченню.",
+      "try": "Спробуйте: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D календарний графік",
+    "generated": {
+      "position_label": "Позиція {ordinal}",
+      "section_label": "Розділ {ordinal}",
+      "task_description": "Автоматично створено з позиції {ordinal} кошторису ({quantity} {unit})",
+      "section_description": "Підсумок: розділ {ordinal} кошторису",
+      "start_milestone": "Початок проєкту",
+      "start_milestone_description": "Контрольна точка початку проєкту",
+      "completion_milestone": "Завершення проєкту",
+      "completion_milestone_description": "Контрольна точка завершення проєкту",
+      "labour_resource": "Трудовитрати",
+      "machine_resource": "Машини та механізми"
+    },
+    "progress_sheet": {
+      "sheet_title": "Прогрес",
+      "title": "Аркуш оновлення прогресу",
+      "detail_schedule": "Графік: {name}",
+      "detail_exported": "Експортовано: {date}",
+      "instructions": "Заповнюйте лише білі стовпці. Не змінюйте сірі стовпці, порядок рядків і приховані стовпці.",
+      "col": {
+        "activity_ref": "ID роботи",
+        "name": "Робота",
+        "wbs_code": "WBS",
+        "responsible": "Відповідальний",
+        "planned_start": "Плановий початок",
+        "planned_finish": "Планове закінчення",
+        "percent_complete": "% виконання",
+        "actual_start": "Фактичний початок",
+        "actual_finish": "Фактичне закінчення",
+        "remaining_duration": "Залишилось (робочих днів)",
+        "notes": "Примітки",
+        "row_key": "Ключ рядка",
+        "stamp": "Мітка"
+      }
+    }
+  },
+  "cad": {
+    "title": "Імпорт CAD",
+    "upload": "Завантажити файл CAD",
+    "supported_formats": "Підтримуються: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Конвертація...",
+    "elements_found": "Знайдено елементів: {count}"
+  },
+  "takeoff": {
+    "title": "Підрахунок обсягів",
+    "auto_detect": "Автовизначення",
+    "manual_measure": "Ручний обмір",
+    "confidence": "Достовірність"
+  },
+  "tendering": {
+    "title": "Тендери",
+    "create_tender": "Створити тендер",
+    "bid": "Тендерна пропозиція",
+    "award": "Визначення переможця"
+  },
+  "modules": {
+    "title": "Модулі",
+    "installed": "Встановлено",
+    "available": "Доступно",
+    "install": "Встановити",
+    "uninstall": "Видалити",
+    "update": "Оновити"
+  },
+  "dashboard": {
+    "welcome": "Ласкаво просимо до OpenConstructionERP",
+    "subtitle": "Ваш робочий простір кошторисної справи",
+    "recent_projects": "Останні проєкти",
+    "system_status": "Стан системи",
+    "modules_loaded": "Завантажено модулів",
+    "validation_rules": "Правила перевірки",
+    "languages": "Мови",
+    "continue_estimate": "Продовжити останній кошторис",
+    "getting_started": "Початок роботи",
+    "total_value": "Загальна вартість",
+    "active_estimates": "Активні кошториси",
+    "schedule_status": "Стан графіка",
+    "quality_score": "Оцінка якості",
+    "analytics": "Аналітика",
+    "project_overview": "Огляд проєктів",
+    "step_load_db": "Завантажити базу розцінок",
+    "step_load_db_desc": "Імпортуйте регіональні ціни, понад 55 000 позицій",
+    "step_ai_search": "Увімкнути ШІ-пошук",
+    "step_ai_search_desc": "Створіть векторні вкладення для семантичного добору розцінок",
+    "step_connect_ai": "Підключити ШІ",
+    "step_connect_ai_desc": "Додайте свої ключі API для оцінки за допомогою ШІ",
+    "step_create_project": "Створити проєкт",
+    "step_create_project_desc": "Розпочніть свій перший кошторисний проєкт",
+    "step_build_boq": "Скласти кошторис",
+    "step_build_boq_desc": "Складіть кошторис за допомогою ШІ"
+  },
+  "units": {
+    "m": "м",
+    "m2": "м²",
+    "m3": "м³",
+    "kg": "кг",
+    "t": "т",
+    "pcs": "шт",
+    "lsum": "комплексно",
+    "h": "год",
+    "set": "компл"
+  },
+  "contacts": {
+    "title": "Довідник контактів",
+    "new_contact": "Новий контакт",
+    "contact_type": "Тип контакту",
+    "client": "Замовник",
+    "subcontractor": "Субпідрядник",
+    "supplier": "Постачальник",
+    "consultant": "Консультант",
+    "internal": "Внутрішній",
+    "company_name": "Назва компанії",
+    "search_contacts": "Пошук контактів...",
+    "no_contacts": "Контактів ще немає",
+    "prequalification": "Попередня кваліфікація",
+    "approved": "Схвалено",
+    "pending": "На розгляді",
+    "expired": "Термін вичерпано"
+  },
+  "tasks": {
+    "title": "Завдання",
+    "new_task": "Нове завдання",
+    "task": "Завдання",
+    "topic": "Тема",
+    "information": "Інформація",
+    "decision": "Рішення",
+    "personal": "Особисте завдання",
+    "my_tasks": "Мої завдання",
+    "open": "Відкрито",
+    "in_progress": "У роботі",
+    "completed": "Виконано",
+    "draft": "Чернетка",
+    "due_date": "Термін виконання",
+    "assignee": "Відповідальний",
+    "priority": "Пріоритет",
+    "checklist": "Контрольний перелік",
+    "focus_area": "Напрям уваги"
+  },
+  "rfi": {
+    "title": "Запити на інформацію",
+    "new_rfi": "Новий запит",
+    "subject": "Тема",
+    "question": "Питання",
+    "response": "Відповідь",
+    "ball_in_court": "Черга відповіді",
+    "days_open": "Днів відкрито",
+    "cost_impact": "Вплив на вартість",
+    "schedule_impact": "Вплив на графік",
+    "respond": "Відповісти",
+    "close": "Закрити",
+    "overdue": "Прострочено"
+  },
+  "finance": {
+    "title": "Фінанси",
+    "budgets": "Бюджети",
+    "invoices": "Рахунки",
+    "payable": "Кредиторська заборгованість",
+    "receivable": "Дебіторська заборгованість",
+    "payments": "Платежі",
+    "evm": "Освоєний обсяг",
+    "invoice_number": "Рахунок №",
+    "amount": "Сума",
+    "status": "Статус",
+    "approve": "Затвердити",
+    "pay": "Позначити оплаченим",
+    "original_budget": "Початковий бюджет",
+    "revised_budget": "Уточнений бюджет",
+    "committed": "Законтрактовано",
+    "actual": "Фактично",
+    "forecast": "Прогноз",
+    "variance": "Відхилення"
+  },
+  "procurement": {
+    "title": "Закупівлі",
+    "purchase_orders": "Замовлення на закупівлю",
+    "goods_receipts": "Прибуткові накладні",
+    "new_po": "Нове замовлення",
+    "po_number": "Замовлення №",
+    "vendor": "Постачальник",
+    "issue": "Видати",
+    "confirm": "Підтвердити отримання"
+  },
+  "safety": {
+    "title": "Охорона праці",
+    "incidents": "Нещасні випадки",
+    "observations": "Спостереження",
+    "new_incident": "Новий нещасний випадок",
+    "new_observation": "Нове спостереження",
+    "severity": "Тяжкість",
+    "risk_score": "Оцінка ризику",
+    "days_lost": "Втрачено днів",
+    "treatment": "Медична допомога",
+    "corrective_action": "Коригувальна дія"
+  },
+  "meetings": {
+    "title": "Наради",
+    "new_meeting": "Нова нарада",
+    "meeting_type": "Тип",
+    "attendees": "Учасники",
+    "agenda": "Порядок денний",
+    "action_items": "Доручення",
+    "minutes": "Протокол",
+    "complete": "Завершити нараду",
+    "present": "Присутній",
+    "absent": "Відсутній",
+    "excused": "Відсутній з поважної причини",
+    "actions": {
+      "status": {
+        "open": "Відкрито",
+        "completed": "Виконано",
+        "cancelled": "Скасовано"
+      },
+      "flag": {
+        "overdue": "Прострочено",
+        "on_track": "За графіком"
+      },
+      "label": {
+        "action_item": "Дія",
+        "completion_rate": "Частка виконаних дій",
+        "open_vs_done": "Відкриті та виконані",
+        "overdue": "Прострочені дії"
+      },
+      "explain": {
+        "action_item": "Дія — це завдання, погоджене на нараді, з відповідальним і терміном виконання.",
+        "completion_rate": "Частка виконаних дій — це кількість виконаних дій, поділена на загальну кількість дій, від 0 до 1.",
+        "open_vs_done": "Відкриті дії ще потребують роботи. Виконані дії завершено, і вони не потребують подальшої роботи.",
+        "overdue": "Дія прострочена, якщо вона ще відкрита, а термін її виконання минув до опорної дати."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Протокол наради",
+      "issued": "ВИДАНО",
+      "draft": "ЧЕРНЕТКА",
+      "date": "Дата:",
+      "location": "Місце:",
+      "type": "Тип:",
+      "number": "Нарада №:",
+      "chairperson": "Головуючий:",
+      "next_meeting": "Наступна нарада:",
+      "not_available": "Немає даних",
+      "not_scheduled": "Не заплановано",
+      "attendance": "Присутність",
+      "present": "Присутні:",
+      "absent": "Відсутні / з поважної причини:",
+      "agenda": "Порядок денний, обговорення та рішення",
+      "required": "(обов'язково)",
+      "discussion": "Обговорення:",
+      "decision": "Рішення:",
+      "decisions": "Рішення",
+      "open_questions": "Відкриті питання",
+      "actions": "Доручення",
+      "col_number": "#",
+      "col_action": "Доручення",
+      "col_owner": "Відповідальний",
+      "col_due": "Строк",
+      "col_status": "Статус",
+      "brought_forward": "[Перенесено]",
+      "overdue": "(прострочено)",
+      "status_open": "Відкрито",
+      "status_in_progress": "У роботі",
+      "status_done": "Виконано",
+      "status_cancelled": "Скасовано",
+      "summary": "Резюме",
+      "generated": "Сформовано: {stamp}",
+      "issued_at": "Видано {stamp}",
+      "running_head": "{project} - Протокол",
+      "type_progress": "Хід робіт",
+      "type_design": "Проєктна",
+      "type_safety": "Охорона праці",
+      "type_subcontractor": "Субпідрядник",
+      "type_kickoff": "Стартова",
+      "type_closeout": "Здавання об'єкта",
+      "type_commercial": "Комерційна"
+    }
+  },
+  "inspections": {
+    "title": "Контроль якості",
+    "new_inspection": "Новий контроль",
+    "inspector": "Інспектор",
+    "checklist": "Контрольний перелік",
+    "pass": "Прийнято",
+    "fail": "Не прийнято",
+    "partial": "Частково",
+    "critical": "Критично",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Заплановано",
+        "in_progress": "Виконується",
+        "completed": "Завершено",
+        "failed": "Не пройдено",
+        "cancelled": "Скасовано"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Акти невідповідності",
+    "new_ncr": "Новий акт невідповідності",
+    "root_cause": "Корінна причина",
+    "corrective_action": "Коригувальна дія",
+    "preventive_action": "Запобіжна дія",
+    "material": "Матеріал",
+    "workmanship": "Якість робіт",
+    "design": "Проєктне рішення"
+  },
+  "submittals": {
+    "title": "Подання на погодження",
+    "new_submittal": "Нове подання",
+    "spec_section": "Розділ специфікації",
+    "revision": "Редакція",
+    "submit": "Подати",
+    "review": "Розгляд",
+    "approved_as_noted": "Погоджено із зауваженнями",
+    "revise_resubmit": "Виправити й подати повторно",
+    "intl": {
+      "status_labels": {
+        "draft": "Чернетка",
+        "submitted": "Подано",
+        "under_review": "На розгляді",
+        "approved": "Схвалено",
+        "approved_as_noted": "Схвалено із зауваженнями",
+        "revise_and_resubmit": "Доопрацювати та подати знову",
+        "rejected": "Відхилено",
+        "closed": "Закрито"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Листування",
+    "new_entry": "Новий запис",
+    "incoming": "Вхідні",
+    "outgoing": "Вихідні",
+    "letter": "Лист",
+    "email": "Ел. пошта",
+    "notice": "Повідомлення",
+    "date_sent": "Дата надсилання",
+    "date_received": "Дата отримання"
+  },
+  "cde": {
+    "title": "Спільне середовище даних",
+    "new_container": "Новий контейнер",
+    "container_code": "Код контейнера",
+    "cde_state": "Стан у середовищі",
+    "wip": "У роботі",
+    "shared": "Спільний доступ",
+    "published": "Опубліковано",
+    "archived": "Архів",
+    "promote": "Перевести на наступний стан",
+    "suitability": "Придатність",
+    "discipline": "Розділ",
+    "revisions": "Редакції",
+    "intl": {
+      "state_labels": {
+        "wip": "В роботі",
+        "shared": "Надано доступ",
+        "published": "Опубліковано",
+        "archived": "В архіві"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Супровідні відомості",
+    "new_transmittal": "Нова супровідна відомість",
+    "purpose": "Призначення",
+    "for_approval": "На погодження",
+    "for_information": "До відома",
+    "for_construction": "У виробництво робіт",
+    "recipients": "Одержувачі",
+    "acknowledge": "Підтвердити отримання",
+    "locked": "Заблоковано",
+    "issue_transmittal": "Видати",
+    "intl": {
+      "status_words": {
+        "draft": "чернетка",
+        "issued": "надіслано",
+        "responded": "відповідь надано"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Сповіщення",
+    "no_notifications": "Нових сповіщень немає",
+    "mark_all_read": "Позначити всі як прочитані",
+    "unread": "Непрочитані"
+  },
+  "comments": {
+    "title": "Коментарі",
+    "post": "Опублікувати",
+    "reply": "Відповісти",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "placeholder": "Напишіть коментар...",
+    "empty": "Коментарів ще немає. Почніть обговорення.",
+    "edited": "відредаговано",
+    "deleted": "Цей коментар видалено"
+  },
+  "bim": {
+    "title": "Центр BIM",
+    "models": "Моделі",
+    "elements": "Елементи",
+    "upload_model": "Завантажити модель",
+    "processing": "Обробка",
+    "active": "Активна",
+    "link_to_boq": "Прив'язати до кошторису",
+    "properties": "Властивості",
+    "quantities": "Обсяги",
+    "wireframe": "Каркас",
+    "section_box": "Область перерізу",
+    "measure": "Вимірювання",
+    "zoom_to_fit": "Вписати у вікно"
+  },
+  "reporting": {
+    "title": "Звіти та панелі",
+    "kpi": "Панель KPI",
+    "generate_report": "Сформувати звіт",
+    "templates": "Шаблони",
+    "project_status": "Стан проєкту",
+    "cost_report": "Звіт про витрати",
+    "schedule_status": "Стан графіка",
+    "safety_report": "Звіт з охорони праці",
+    "explain": {
+      "report_total_one": "Підсумок звіту: {money} (сума {count} рядка).",
+      "report_total_other": "Підсумок звіту: {money} (сума {count} рядків).",
+      "percent_of_total": "{part} становить {percent} від {total} (відсоток від підсумку).",
+      "percent_zero_total": "{part} від {total}: підсумок дорівнює нулю, тому кожна частка показана як 0 відсотків.",
+      "breakdown_empty": "Розбивка витрат: даних немає.",
+      "breakdown_one": "Розбивка витрат: {count} група, підсумок звіту {money}.",
+      "breakdown_other": "Розбивка витрат: {count} груп, підсумок звіту {money}.",
+      "top_n_one": "Перші {requested}: {shown} з {shown} рядка.",
+      "top_n_other": "Перші {requested}: {shown} з {shown} рядків."
+    }
+  },
+  "gantt": {
+    "title": "Діаграма Ганта",
+    "day": "День",
+    "week": "Тиждень",
+    "month": "Місяць",
+    "critical_path": "Критичний шлях",
+    "baseline": "Базовий план",
+    "dependencies": "Залежності",
+    "today": "Сьогодні"
+  },
+  "settings": {
+    "regional": "Регіональні налаштування",
+    "timezone": "Часовий пояс",
+    "measurement": "Система вимірювання",
+    "paper_size": "Формат паперу",
+    "date_format": "Формат дати",
+    "number_format": "Формат чисел",
+    "currency": "Валюта",
+    "metric": "Метрична",
+    "imperial": "Імперська"
+  },
+  "users": {
+    "management": "Керування користувачами",
+    "management_desc": "Керуйте учасниками команди, ролями та доступом",
+    "invite_user": "Запросити користувача",
+    "invite": "Запросити",
+    "full_name": "Повне ім'я",
+    "email": "Ел. пошта",
+    "password": "Пароль",
+    "role": "Роль",
+    "status": "Статус",
+    "last_login": "Останній вхід",
+    "actions": "Дії",
+    "name": "Ім'я",
+    "total": "Усього користувачів",
+    "active": "Активні",
+    "inactive": "Неактивні",
+    "admins": "Адміністратори",
+    "managers": "Менеджери",
+    "search": "Пошук за ім'ям або ел. поштою...",
+    "no_users": "Користувачів не знайдено",
+    "updated": "Користувача оновлено",
+    "invited": "Користувача успішно запрошено",
+    "deactivate": "Деактивувати",
+    "activate": "Активувати",
+    "never": "Ніколи",
+    "role_admin_desc": "Повний доступ до всіх можливостей",
+    "role_manager_desc": "Керування проєктами та командою",
+    "role_editor_desc": "Створення та редагування вмісту",
+    "role_viewer_desc": "Доступ лише для читання"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Цей зріз заморожено. Заморожений зріз - це зафіксований запис, змінити його не можна.",
+      "frozen_no_delete": "Заморожений зріз - це зафіксований запис, видалити його не можна.",
+      "draft_open": "Чернетку зрізу вже відкрито. Заморозьте або видаліть її, перш ніж починати новий зріз.",
+      "no_line_method": "У цього рядка немає власного методу.",
+      "snapshot_missing": "Зріз не знайдено.",
+      "line_missing": "У цьому зрізі немає такого рядка.",
+      "document_missing": "Пов'язаний документ не належить до цього проєкту.",
+      "freeze_refused": "Зріз поки не можна заморозити: у {count} рядків відхилення перевищує поріг, а коментаря й підтвердного документа немає.",
+      "no_frozen_snapshot": "Замороженого зрізу для порівняння поки немає.",
+      "no_ledger": "Журнал рахунків недоступний у цій інсталяції.",
+      "no_snapshot": "Зрізу для оформлення поки немає."
+    },
+    "export": {
+      "project": "Проєкт",
+      "generated": "Сформовано",
+      "currency": "Валюта",
+      "page": "Сторінка",
+      "generated_at": "Дата формування",
+      "empty": "Поки що нічого показувати.",
+      "total": "Разом",
+      "cost_report": "Звіт із витрат",
+      "phase_comparison": "Порівняння за етапами",
+      "invoice_ledger": "Журнал рахунків",
+      "forecast_documentation": "Обґрунтування прогнозу",
+      "as_of": "Станом на",
+      "forecast_method": "Метод прогнозу",
+      "col_account": "Стаття",
+      "col_code": "Код",
+      "col_description": "Найменування",
+      "col_source": "Джерело",
+      "col_method": "Метод",
+      "col_planned": "План",
+      "col_committed": "Законтрактовано",
+      "col_pending": "Зміни на погодженні",
+      "col_measured": "Виконано (за обмірами)",
+      "col_certified": "Прийнято до оплати",
+      "col_invoiced": "Виставлено в рахунках",
+      "col_paid": "Сплачено",
+      "col_forecast": "Прогноз",
+      "col_variance": "Відхилення",
+      "col_variance_pct": "Відхилення %",
+      "col_forecast_of_plan": "Прогноз % від плану",
+      "col_measured_of_committed": "Виконано % від законтрактованого",
+      "col_invoiced_of_committed": "Виставлено % від законтрактованого",
+      "col_contract": "Договір",
+      "col_contract_title": "Назва договору",
+      "col_invoice": "Рахунок",
+      "col_date": "Дата",
+      "col_kind": "Вид",
+      "col_release_status": "Повернення",
+      "col_net": "Без ПДВ",
+      "col_vat": "ПДВ",
+      "col_gross": "З ПДВ",
+      "col_retention": "Гарантійне утримання",
+      "col_release": "Утримання повернуто",
+      "col_discount": "Знижка",
+      "col_payable": "До сплати",
+      "col_open": "Відкрито",
+      "col_previous": "Попереднє",
+      "col_delta": "Зміна",
+      "col_delta_pct": "Зміна %",
+      "col_needs_evidence": "Потрібен документ",
+      "col_comment": "Коментар",
+      "col_evidence": "Підтвердний документ",
+      "row_unassigned": "Суми без статті витрат",
+      "row_loose_changes": "Зміни поза договором",
+      "row_no_contract": "Без договору",
+      "contract_value": "Сума договору",
+      "retention_held": "Утримано",
+      "yes": "Так",
+      "no": "Ні",
+      "snapshot_date": "Дата зрізу",
+      "snapshot_status": "Статус",
+      "previous_snapshot": "Попередній заморожений зріз",
+      "method_explained": "Як читати прогноз",
+      "evidence_threshold": "Документ потрібен при зміні понад",
+      "threshold_both": "{parts}",
+      "threshold_any": "будь-яка зміна",
+      "frozen_at": "Заморожено"
+    },
+    "method": {
+      "best_available": "Найкраще доступне джерело",
+      "maximum": "Максимальне значення",
+      "evm_cpi": "Освоєний обсяг (CPI)",
+      "manual": "Вручну"
+    },
+    "method_help": {
+      "best_available": "Для кожного рядка береться найнадійніша цифра: підсумковий розрахунок, інакше виконані за обмірами роботи, інакше сума за результатами закупівлі, інакше кошторис, інакше бюджет.",
+      "maximum": "Для кожного рядка береться найбільша з цифр (бюджет, кошторис, закупівля, обміри, рахунки), щоб прогноз не приховував ризик.",
+      "evm_cpi": "Для кожного рядка вартість на завершення рахується за прогресом: витрачені на сьогодні гроші діляться на частку виконаних робіт.",
+      "manual": "Цифру рядка задає людина і додає документ, на якому вона ґрунтується."
+    },
+    "source": {
+      "none": "Немає цифри",
+      "budget": "Бюджет",
+      "estimate": "Кошторис",
+      "partly_awarded": "Закуплено частково",
+      "awarded": "Закуплено",
+      "measured": "Виконано за обмірами",
+      "final": "Підсумковий розрахунок",
+      "manual": "Вручну",
+      "invoiced": "Виставлено в рахунках",
+      "evm": "Освоєний обсяг"
+    },
+    "layer": {
+      "budget": "Бюджет",
+      "estimate": "Кошторис",
+      "tender": "Краща пропозиція",
+      "awarded": "Закуплено",
+      "changes": "Затверджені зміни",
+      "committed": "Законтрактовано",
+      "pending": "Зміни на погодженні",
+      "measured": "Виконано (за обмірами)",
+      "certified": "Прийнято до оплати",
+      "invoiced": "Виставлено в рахунках",
+      "paid": "Сплачено",
+      "forecast": "Прогноз"
+    },
+    "invoice_kind": {
+      "interim": "Проміжний",
+      "final": "Підсумковий",
+      "daywork": "Погодинні роботи",
+      "credit_note": "Кредит-нота"
+    },
+    "release_status": {
+      "open": "Відкрито",
+      "released": "Повернуто"
+    },
+    "evidence_kind": {
+      "document": "Документ",
+      "minutes": "Протокол",
+      "other": "Інше"
+    },
+    "snapshot_status": {
+      "draft": "Чернетка",
+      "frozen": "Заморожено"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Проєкт",
+      "project_no": "№ проєкту",
+      "generated_on": "Дата формування",
+      "records": "Записи",
+      "currency": "Валюта",
+      "status": "Статус",
+      "name": "ПІБ",
+      "signature": "Підпис",
+      "date": "Дата",
+      "signatures": "Підписи",
+      "yes": "Так",
+      "no": "Ні",
+      "days_one": "{n} дн.",
+      "days_other": "{n} дн.",
+      "empty_register": "Записів немає.",
+      "total": "Разом",
+      "signer_title": "Посада",
+      "sig_prepared_by": "Підготовка",
+      "sig_checked_by": "Перевірка",
+      "sig_approved_by": "Затвердження",
+      "footer_generated": "Сформовано {timestamp}",
+      "footer_page": "Сторінка {page} з {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Реєстр подань на погодження",
+        "doc_title": "Подання на погодження",
+        "doc_title_product_data": "Бланк погодження матеріалу",
+        "col_number": "№ подання",
+        "col_title": "Назва",
+        "col_type": "Тип",
+        "col_spec": "Розділ специфікації",
+        "col_rev": "Ред.",
+        "col_date_submitted": "Дата подання",
+        "col_date_required": "Потрібна дата",
+        "col_date_returned": "Дата повернення",
+        "col_reviewer": "Рецензент",
+        "col_approver": "Погоджувач",
+        "col_ball_in_court": "Хід за",
+        "submitted_by_org": "Компанія-заявник",
+        "review_notes": "Зауваження рецензента",
+        "no_review_notes": "Зауважень рецензента не зафіксовано.",
+        "sig_submitted": "Подання",
+        "sig_reviewed": "Розгляд",
+        "sig_approved": "Погодження",
+        "register_filename": "reiestr-podan-na-pohodzhennia",
+        "register_title_shop_drawing": "Реєстр робочих креслень",
+        "register_title_product_data": "Реєстр погодження матеріалів",
+        "register_title_method_statement": "Реєстр методик виконання робіт",
+        "register_filename_shop_drawing": "reiestr-robochykh-kreslen",
+        "register_filename_product_data": "reiestr-pohodzhennia-materialiv",
+        "register_filename_method_statement": "reiestr-metodyk-vykonannia-robit",
+        "col_discipline": "Розділ",
+        "col_manufacturer": "Виробник / марка",
+        "col_model": "Модель / артикул",
+        "col_origin": "Країна походження",
+        "col_supplier": "Постачальник",
+        "col_product": "Виробник / модель / походження",
+        "col_review_code": "Код розгляду",
+        "col_outcome": "Результат розгляду",
+        "col_review_period": "Термін розгляду (дні)",
+        "col_review_due": "Розгляд до",
+        "col_days_in_review": "Днів на розгляді",
+        "col_days_in_review_print": "Днів на розгляді",
+        "col_review_overdue": "Днів прострочення",
+        "col_required_on_site": "Потрібно на об'єкті",
+        "col_long_lead": "Тривала поставка",
+        "col_lead_time": "Термін поставки (тижні)",
+        "col_needed_by": "Погодити до",
+        "col_approval_late": "Днів після строку",
+        "col_drawings": "Пов'язані креслення",
+        "col_submitted_returned": "Подано / повернено",
+        "col_on_site_needed_by": "На об'єкті / погодити до",
+        "resubmit_for_record": "Виправлений примірник подати повторно для обліку",
+        "review_history": "Історія розгляду",
+        "hist_submitted": "Подано",
+        "hist_returned": "Повернено",
+        "drawings_missing_one": "{n} пов'язане креслення більше недоступне",
+        "drawings_missing_other": "{n} пов'язаних креслень більше недоступні",
+        "weeks_one": "{n} тиждень",
+        "weeks_other": "{n} тиж."
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернетка",
+          "submitted": "Подано",
+          "under_review": "На розгляді",
+          "approved": "Погоджено",
+          "approved_as_noted": "Погоджено із зауваженнями",
+          "revise_and_resubmit": "Доопрацювати й подати повторно",
+          "rejected": "Відхилено",
+          "closed": "Закрито"
+        },
+        "type": {
+          "shop_drawing": "Робоче креслення",
+          "product_data": "Технічні дані виробу",
+          "sample": "Зразок",
+          "mock_up": "Макет",
+          "test_report": "Протокол випробувань",
+          "calculation": "Розрахунок",
+          "method_statement": "Методика виконання робіт",
+          "certificate": "Сертифікат",
+          "warranty": "Гарантія"
+        },
+        "discipline": {
+          "mechanical": "Механічні системи",
+          "hvac": "ОВК",
+          "plumbing": "Водопостачання та водовідведення",
+          "fire_protection": "Пожежний захист",
+          "electrical": "Електрика",
+          "lighting": "Освітлення",
+          "elv": "Слабкострумові системи",
+          "bms": "Автоматизація будівлі",
+          "architectural": "Архітектура",
+          "structural": "Конструкції",
+          "civil": "Загальнобудівельні роботи"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Реєстр розпоряджень про зміну",
+        "doc_title": "Розпорядження про зміну",
+        "col_code": "Код",
+        "col_title": "Назва",
+        "col_reason": "Причина",
+        "col_instrument": "Інструмент",
+        "col_submitted": "Дата подання",
+        "col_contractor_amount": "Сума підрядника",
+        "col_engineer_amount": "Сума інженера",
+        "col_approved_amount": "Погоджена сума",
+        "col_cost_impact": "Вплив на вартість",
+        "col_time_impact": "Вплив на строки (дні)",
+        "col_approved_time": "Погоджений строк (дні)",
+        "time_impact": "Вплив на строки",
+        "approved_time": "Погоджений строк",
+        "col_approved": "Дата погодження",
+        "submitted_by": "Подання",
+        "approved_by": "Погодження",
+        "description": "Опис",
+        "no_description": "Опису не зафіксовано.",
+        "items": "Позиції зміни",
+        "item_description": "Опис",
+        "item_change": "Зміна",
+        "item_unit": "Од. вим.",
+        "item_original_quantity": "Початк. к-сть",
+        "item_new_quantity": "Нова к-сть",
+        "item_original_rate": "Початкова ціна",
+        "item_new_rate": "Нова ціна",
+        "item_cost_delta": "Різниця вартості",
+        "register_filename": "reiestr-rozporiadzhen-pro-zminu"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернетка",
+          "submitted": "Подано",
+          "approved": "Погоджено",
+          "rejected": "Відхилено",
+          "executed": "Виконано"
+        },
+        "reason": {
+          "client_request": "Запит замовника",
+          "design_change": "Зміна проєкту",
+          "unforeseen": "Непередбачені умови",
+          "regulatory": "Вимоги регуляторів",
+          "error": "Помилка або упущення",
+          "non_conformance": "Невідповідність",
+          "value_engineering": "Оптимізація вартості"
+        },
+        "instrument": {
+          "works_change": "Доручена зміна",
+          "site_confirmation": "Підтвердження на об'єкті",
+          "claim": "Претензія"
+        },
+        "change": {
+          "added": "Додано",
+          "removed": "Вилучено",
+          "modified": "Змінено"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Доказовий пакет",
+        "subject": "Предмет",
+        "basis": "Підстава",
+        "period_from": "Найраніший запис",
+        "period_to": "Найпізніший запис",
+        "digest": "Код цілісності (SHA-256, перші 16 символів)",
+        "col_row": "№",
+        "col_record_id": "ID запису",
+        "col_section": "Розділ",
+        "col_date": "Дата",
+        "col_kind": "Тип запису",
+        "col_title": "Назва",
+        "col_summary": "Зміст",
+        "col_reference": "Посилання",
+        "register_filename": "dokazovyi-paket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Повідомлення",
+          "correspondence": "Листування",
+          "rfis": "Запити (RFI)",
+          "variations": "Зміни",
+          "approvals": "Погодження",
+          "delay": "Затримка",
+          "timeline": "Хронологія",
+          "other": "Інше"
+        },
+        "kind": {
+          "notice": "Повідомлення",
+          "variation_notice": "Повідомлення про зміну",
+          "variation_request": "Запит на зміну",
+          "variation_order": "Розпорядження про зміну",
+          "change_order": "Наказ про зміну",
+          "moc_entry": "Запис про зміну",
+          "correspondence": "Листування"
+        },
+        "basis": {
+          "dispute": "Спір",
+          "valuation": "Оцінка вартості",
+          "delay": "Затримка / продовження строку",
+          "general": "Загальний запис"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Журнал листування",
+        "doc_title": "Листування",
+        "col_reference": "№ документа",
+        "col_direction": "Напрям",
+        "col_type": "Тип",
+        "col_subject": "Тема",
+        "col_from": "Від",
+        "col_to": "Кому",
+        "col_date_sent": "Дата відправлення",
+        "col_date_received": "Дата отримання",
+        "col_response_due": "Відповісти до",
+        "col_clause": "Пункт договору",
+        "notes": "Примітки",
+        "no_notes": "Приміток не зафіксовано.",
+        "attachments": "Додані файли",
+        "linked_documents": "Пов'язані документи",
+        "sig_prepared": "Підготовка",
+        "sig_received": "Отримання",
+        "register_filename": "zhurnal-lystuvannia"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Вхідний",
+          "outgoing": "Вихідний"
+        },
+        "type": {
+          "letter": "Лист",
+          "email": "Ел. лист",
+          "notice": "Повідомлення",
+          "memo": "Службова записка",
+          "report": "Звіт"
+        },
+        "status": {
+          "open": "Відкрито",
+          "awaiting_response": "Очікує відповіді",
+          "responded": "Відповідь надано",
+          "closed": "Закрито"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Реєстр передавальних відомостей",
+        "doc_title": "Передавальна відомість",
+        "col_number": "№ відомості",
+        "col_subject": "Тема",
+        "col_purpose": "Призначення",
+        "col_issued": "Дата видачі",
+        "col_response_due": "Відповісти до",
+        "col_recipients": "Адресати",
+        "col_item_count": "Позицій",
+        "sender": "Відправник",
+        "cover_note": "Супровідна примітка",
+        "no_cover_note": "Супровідної примітки немає.",
+        "recipients": "Адресати",
+        "recipient": "Адресат",
+        "action_required": "Потрібна дія",
+        "acknowledged": "Отримання підтверджено",
+        "responded": "Дата відповіді",
+        "items": "Передані позиції",
+        "item_no": "№",
+        "item_description": "Опис",
+        "item_notes": "Примітки",
+        "sig_issued": "Видача",
+        "sig_received": "Отримання",
+        "register_filename": "reiestr-peredavalnykh-vidomostei"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернетка",
+          "issued": "Видано",
+          "responded": "Відповідь надано"
+        },
+        "purpose": {
+          "for_approval": "На погодження",
+          "for_review": "На розгляд",
+          "for_information": "До відома",
+          "for_construction": "До виконання робіт",
+          "for_tender": "Для тендеру",
+          "for_record": "Для обліку"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Реєстр змін",
+        "claim_register_title": "Реєстр претензій",
+        "notice_register_title": "Реєстр повідомлень",
+        "doc_title": "Запит на зміну",
+        "doc_title_credit": "Запит на зміну (зменшення)",
+        "time_impact": "Вплив на строки",
+        "col_code": "Код",
+        "col_title": "Назва",
+        "col_classification": "Тип",
+        "col_urgency": "Терміновість",
+        "col_requested": "Дата запиту",
+        "col_claimed_amount": "Заявлена сума",
+        "col_agreed_amount": "Узгоджена сума",
+        "col_time_impact": "Вплив на строки (дні)",
+        "col_response_due": "Відповісти до",
+        "col_clause": "Пункт договору",
+        "col_row": "№",
+        "col_claim_type": "Вид претензії",
+        "col_raised": "Дата подання",
+        "col_period_start": "Період з",
+        "col_period_end": "Період по",
+        "col_description": "Опис",
+        "col_decided_amount": "Визначена сума",
+        "col_days_requested": "Запитано днів",
+        "col_days_granted": "Надано днів",
+        "col_recipient_type": "Адресовано",
+        "col_recipient": "Адресат",
+        "col_target_response": "Очікувана відповідь",
+        "col_response_received": "Відповідь отримано",
+        "requested_by": "Запит",
+        "decided_by": "Рішення",
+        "date_submitted": "Дата подання",
+        "date_decided": "Дата рішення",
+        "description": "Опис",
+        "no_description": "Опису не зафіксовано.",
+        "decision_notes": "Примітки до рішення",
+        "no_decision_notes": "Рішення ще не зафіксовано.",
+        "variation_register_filename": "reiestr-zmin",
+        "claim_register_filename": "reiestr-pretenzii",
+        "notice_register_filename": "reiestr-povidomlen"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Чернетка",
+          "submitted": "Подано",
+          "under_review": "На розгляді",
+          "approved": "Погоджено",
+          "rejected": "Відхилено",
+          "converted_to_vo": "Перетворено на розпорядження"
+        },
+        "claim_status": {
+          "draft": "Чернетка",
+          "submitted": "Подано",
+          "under_review": "На розгляді",
+          "agreed": "Узгоджено",
+          "granted": "Задоволено",
+          "rejected": "Відхилено"
+        },
+        "notice_status": {
+          "issued": "Видано",
+          "acknowledged": "Підтверджено",
+          "responded": "Відповідь надано",
+          "closed": "Закрито"
+        },
+        "classification": {
+          "scope_change": "Зміна обсягу",
+          "unforeseen": "Непередбачена умова",
+          "owner_change": "Зміна від замовника",
+          "design_dev": "Розвиток проєкту",
+          "regulatory": "Вимоги регуляторів",
+          "other": "Інше"
+        },
+        "urgency": {
+          "low": "Низька",
+          "med": "Середня",
+          "high": "Висока"
+        },
+        "claim_type": {
+          "disruption": "Порушення ходу робіт",
+          "eot": "Продовження строку"
+        },
+        "recipient_type": {
+          "owner": "Замовник",
+          "contractor": "Підрядник",
+          "architect": "Архітектор",
+          "engineer": "Інженер",
+          "consultant": "Консультант"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Журнал щоденних робіт",
+        "overview": "Загальні відомості",
+        "site_supervisor": "Керівник будівництва",
+        "not_recorded": "Не зафіксовано",
+        "labour_on_site": "Працівники на об'єкті",
+        "equipment_on_site": "Техніка на об'єкті",
+        "completeness": "Повнота",
+        "weather": "Погода",
+        "weather_time": "Час",
+        "weather_source": "Джерело",
+        "weather_temp": "Темп. (°C)",
+        "weather_wind": "Вітер (км/год)",
+        "weather_precip": "Опади (мм)",
+        "weather_conditions": "Умови",
+        "weather_empty": "Погоду за цей день не зафіксовано.",
+        "site_record": "Запис по об'єкту",
+        "entries_empty": "У цьому журналі записів немає.",
+        "notes": "Примітки",
+        "notes_empty": "Додаткових приміток немає.",
+        "footer_supervisor": "Керівник: {name}",
+        "footer_supervisor_missing": "Керівник будівництва: не зафіксовано",
+        "footer_generated": "Сформовано: {timestamp}",
+        "footer_page": "Сторінка {page} з {total}",
+        "workforce": "Працівники за компаніями",
+        "workforce_company": "Компанія",
+        "workforce_count": "Осіб",
+        "workforce_unassigned": "Без закріплення за компанією",
+        "workforce_total": "Разом",
+        "signatures": "Підписи",
+        "sig_prepared": "Підготовка (керівник будівництва)",
+        "sig_approved": "Затвердження (представник замовника)",
+        "sig_name": "ПІБ",
+        "sig_title": "Посада",
+        "sig_date": "Дата",
+        "sig_signature": "Підпис",
+        "signed_note": "Підписано в системі: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "zhurnal",
+        "summary_wind": "вітер {value} км/год",
+        "summary_precipitation": "опади {value} мм",
+        "summary_humidity": "вологість {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Відвідувачі",
+          "event": "Події",
+          "delivery": "Доставлені матеріали",
+          "completion": "Виконані роботи",
+          "incident_summary": "Безпека та інциденти",
+          "inspection_summary": "Перевірки",
+          "photo_note": "Фотонотатки",
+          "general": "Загальні примітки"
+        },
+        "status": {
+          "open": "Відкрито",
+          "closed": "Закрито",
+          "signed": "Підписано",
+          "archived": "В архіві"
+        },
+        "condition": {
+          "clear": "ясно",
+          "mainly_clear": "переважно ясно",
+          "partly_cloudy": "мінлива хмарність",
+          "cloudy": "хмарно",
+          "overcast": "похмуро",
+          "fog": "туман",
+          "fog_rime": "паморозний туман",
+          "drizzle_light": "слабка мряка",
+          "drizzle_moderate": "помірна мряка",
+          "drizzle_dense": "сильна мряка",
+          "rain": "дощ",
+          "rain_light": "слабкий дощ",
+          "rain_moderate": "помірний дощ",
+          "rain_heavy": "сильний дощ",
+          "freezing_rain_light": "слабкий крижаний дощ",
+          "freezing_rain_heavy": "сильний крижаний дощ",
+          "snow": "сніг",
+          "snow_light": "слабкий сніг",
+          "snow_moderate": "помірний сніг",
+          "snow_heavy": "сильний сніг",
+          "rain_showers_light": "слабка злива",
+          "rain_showers_moderate": "помірна злива",
+          "rain_showers_violent": "сильна злива",
+          "snow_showers_light": "слабкий снігопад",
+          "snow_showers_heavy": "сильний снігопад",
+          "thunderstorm": "гроза",
+          "thunderstorm_hail_light": "гроза зі слабким градом",
+          "thunderstorm_hail_heavy": "гроза із сильним градом"
+        },
+        "source": {
+          "manual": "Ручне введення",
+          "open_meteo": "Метеослужба",
+          "sensor": "Датчик на об'єкті"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Журнал запитів (RFI)",
+        "col_number": "№ RFI",
+        "col_subject": "Тема",
+        "col_raised_by": "Ініціатор",
+        "col_assigned_to": "Виконавець",
+        "col_ball_in_court": "Хід за",
+        "col_date_required": "Потрібна дата",
+        "col_response_due": "Відповісти до",
+        "col_days_open": "Днів відкрито",
+        "col_cost_impact": "Вплив на вартість",
+        "col_schedule_impact": "Вплив на строки",
+        "col_response": "Відповідь",
+        "yes_with": "Так ({detail})",
+        "register_filename": "zhurnal-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернетка",
+          "open": "Відкрито",
+          "answered": "Відповідь надано",
+          "closed": "Закрито",
+          "void": "Анульовано"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Створено ШІ",
+        "drawing": "Креслення",
+        "cost_estimate": "КОШТОРИСНИЙ РОЗРАХУНОК",
+        "summary": "ПІДСУМКИ",
+        "project": "Проєкт:",
+        "boq": "Кошторис:",
+        "date": "Дата:",
+        "status": "Статус:",
+        "prepared_by": "Склав:",
+        "approved_by": "Затвердив:",
+        "signature_hint": "ПІБ / Підпис / Дата",
+        "contents": "Розділи / Позиції:",
+        "pos": "№ з/п",
+        "description": "Найменування",
+        "unit": "Од. вим.",
+        "qty": "Кількість",
+        "rate": "Ціна",
+        "total": "Сума",
+        "subtotal": "Разом за розділом:",
+        "other_positions": "Інші позиції",
+        "direct_cost": "Прямі витрати:",
+        "markups": "Нарахування (без ПДВ):",
+        "net_total": "Разом без ПДВ:",
+        "gross_total": "Усього з ПДВ",
+        "page": "Стор.",
+        "of": "з",
+        "generated": "Складено:",
+        "summary_report": "Зведений звіт",
+        "positions_omitted": "Позицій: {count} (деталізацію пропущено для швидкодії)",
+        "section": "Розділ",
+        "items": "Позицій",
+        "cost_summary": "Зведення витрат",
+        "table_of_contents": "Зміст",
+        "resources_omitted": "Склад ресурсів не надруковано: у цьому кошторисі забагато рядків ресурсів для одного PDF.",
+        "status_draft": "Чернетка",
+        "status_final": "Затверджено",
+        "status_archived": "В архіві",
+        "subject": "Кошторис",
+        "tax_vat": "ПДВ"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "РАХУНОК-ФАКТУРА",
+        "date": "Дата: {value}",
+        "due": "Строк оплати: {value}",
+        "from": "Від",
+        "bill_to": "Платник",
+        "vat_id": "ІПН/ПДВ: {value}",
+        "ref": "Посилання: {value}",
+        "th_description": "Опис",
+        "th_qty": "Кільк.",
+        "th_unit": "Од.",
+        "th_unit_price": "Ціна за од.",
+        "th_net": "Сума без ПДВ ({currency})",
+        "net_total": "Разом без ПДВ",
+        "vat_total": "ПДВ",
+        "grand_total": "Загальна сума",
+        "retention_prepaid": "Утримання / передоплата",
+        "amount_due": "Сума до сплати",
+        "payment": "Платіжні реквізити",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Рахунок: {value}",
+        "bank_code": "Код банку: {value}",
+        "account_holder": "Отримувач: {value}",
+        "footer": "Цей PDF містить вбудовану електронну накладну EN 16931 (Factur-X / ZUGFeRD). Вирішальним документом є вбудований XML.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Звіт",
+        "meta_project": "Проєкт",
+        "meta_type": "Тип",
+        "meta_generated": "Сформовано",
+        "meta_currency": "Валюта",
+        "field_column": "Поле",
+        "value_column": "Значення",
+        "yes": "Так",
+        "no": "Ні",
+        "no_data_heading": "Даних немає",
+        "no_data_body": "Звіт сформовано з порожнім знімком даних. Перевірте, чи повернули вихідні модулі (фінанси, графік, охорона праці тощо) дані для обраного проєкту.",
+        "no_data_body_short": "Звіт сформовано з порожнім знімком даних. Перевірте, чи повернули вихідні модулі дані для обраного проєкту.",
+        "footer_generated_by": "Сформовано в OpenConstructionERP о {timestamp}.",
+        "worksheet_name": "Звіт",
+        "pdf_subject": "Звіт за проєктом",
+        "overall_progress": "Загальний прогрес",
+        "as_of": "Станом на",
+        "recorded_by": "Зафіксував",
+        "period": "Період",
+        "entries_suffix": "({count} записів)",
+        "site_photo_alt": "Фото з об'єкта",
+        "ai_summary_heading": "Підсумок",
+        "ai_badge": "Згенеровано ШІ",
+        "ai_note": "Згенеровано ШІ на основі даних проєкту нижче.",
+        "ai_note_confidence": "Згенеровано ШІ на основі даних проєкту нижче (рівень довіри {confidence}).",
+        "ai_note_review": "Перевірте перед передачею замовнику."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Назва",
+          "status": "Статус",
+          "phase": "Етап",
+          "planned_start": "Планový початок",
+          "planned_end": "Планове завершення",
+          "schedule_progress_pct": "Прогрес за графіком, %",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Освоєння бюджету, %",
+          "as_of": "Станом на",
+          "progress_pct": "Прогрес, %",
+          "risk_score_avg": "Середній бал ризику",
+          "open_rfis": "Відкриті запити (RFI)",
+          "open_submittals": "Відкриті подання",
+          "open_defects": "Відкриті дефекти",
+          "open_observations": "Відкриті зауваження",
+          "budget": "Бюджет",
+          "committed": "Зобов'язання",
+          "actual": "Фактично",
+          "payable": "До сплати",
+          "receivable": "До отримання",
+          "net_cash_flow": "Чистий грошовий потік"
+        },
+        "section_titles": {
+          "Project Overview": "Огляд проєкту",
+          "Key Performance Indicators": "Ключові показники ефективності",
+          "Schedule Status": "Стан графіка",
+          "Risk Summary": "Зведення ризиків",
+          "Open Issues": "Відкриті питання",
+          "Cost Summary": "Зведення вартості",
+          "Cost Breakdown": "Деталізація вартості",
+          "Change Orders": "Зміни до контракту",
+          "Cash Flow": "Грошовий потік",
+          "Schedule Overview": "Огляд графіка",
+          "Milestone Status": "Стан контрольних точок",
+          "Critical Path": "Критичний шлях",
+          "3-Week Lookahead": "Прогноз на 3 тижні",
+          "Safety KPIs": "Показники охорони праці",
+          "Incident Log": "Журнал інцидентів",
+          "Near-Miss Reports": "Звіти про події з ризиком",
+          "Safety Training": "Навчання з охорони праці",
+          "Inspection Summary": "Зведення інспекцій",
+          "By Inspection Type": "За типом інспекції",
+          "Punch List Status": "Стан списку недоліків",
+          "Recent Inspections": "Останні інспекції",
+          "Portfolio Overview": "Огляд портфеля",
+          "Project Statuses": "Статуси проєктів",
+          "KPI Comparison": "Порівняння KPI",
+          "Portfolio Risks": "Ризики портфеля",
+          "Field Progress": "Прогрес на об'єкті",
+          "Top Risks": "Основні ризики",
+          "Site Photos": "Фото з об'єкта",
+          "Summary": "Підсумок"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Замовлення на закупівлю",
+        "gr_title": "Акт приймання товару",
+        "supplier": "Постачальник",
+        "po_type": "Тип замовлення",
+        "issue_date": "Дата видачі",
+        "delivery_date": "Дата поставки",
+        "created_by": "Підготував",
+        "order_total": "Сума замовлення",
+        "line_items": "Позиції",
+        "col_no": "№",
+        "col_description": "Опис",
+        "col_quantity": "Кільк.",
+        "col_unit": "Од.",
+        "col_unit_rate": "Ціна за од.",
+        "col_amount": "Сума",
+        "no_line_items": "Позицій немає.",
+        "totals": "Підсумки",
+        "subtotal": "Сума без ПДВ",
+        "tax": "Податок",
+        "total_gross": "Разом з податком",
+        "terms": "Умови",
+        "payment_terms": "Умови оплати",
+        "retention": "Гарантійне утримання",
+        "retention_at": "Утримання здійснюється при",
+        "retention_at_receipt": "приймання товару",
+        "retention_at_invoice": "виставленні рахунку",
+        "invoice_tolerance": "Допуск за рахунком",
+        "supplier_confirmation": "Підтвердження постачальника",
+        "supplier_reference": "Номер постачальника",
+        "confirmed_delivery": "Підтверджена дата поставки",
+        "acknowledged_on": "Підтверджено",
+        "not_confirmed": "Постачальник ще не підтвердив.",
+        "notes": "Примітки",
+        "no_notes": "Примітки не внесено.",
+        "sig_ordered_by": "Замовив",
+        "purchase_order": "Замовлення на закупівлю",
+        "receipt_date": "Дата приймання",
+        "received_by": "Прийняв",
+        "delivery_note": "Накладна",
+        "col_ordered": "Замовлено",
+        "col_received": "Отримано",
+        "col_rejected": "Відхилено",
+        "col_batch": "Партія / лот",
+        "rejections": "Відхилення",
+        "col_reason": "Причина",
+        "no_rejections": "Нічого не відхилено.",
+        "sig_delivered_by": "Доставив",
+        "counterparty_tax_id": "ІПН / ЄДРПОУ",
+        "counterparty_address": "Адреса"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Чернетка",
+          "approved": "Погоджено",
+          "issued": "Видано",
+          "partially_received": "Частково отримано",
+          "completed": "Завершено",
+          "cancelled": "Скасовано"
+        },
+        "gr_status": {
+          "draft": "Чернетка",
+          "confirmed": "Підтверджено"
+        },
+        "po_type": {
+          "standard": "Стандартне",
+          "blanket": "Рамкове замовлення",
+          "service": "Послуги"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Рахунок",
+        "payment_title": "Платіж",
+        "direction": "Напрям",
+        "supplier": "Постачальник",
+        "client": "Замовник",
+        "invoice_date": "Дата рахунку",
+        "due_date": "Строк оплати",
+        "payment_terms": "Умови оплати",
+        "purchase_order": "Замовлення на закупівлю",
+        "invoice_total": "Сума рахунку",
+        "line_items": "Позиції",
+        "col_no": "№",
+        "col_description": "Опис",
+        "col_quantity": "Кільк.",
+        "col_unit": "Од.",
+        "col_unit_rate": "Ціна за од.",
+        "col_vat": "ПДВ",
+        "col_amount": "Сума",
+        "no_line_items": "Позицій немає.",
+        "totals": "Підсумки",
+        "subtotal": "Сума без ПДВ",
+        "tax": "Податок",
+        "total_gross": "Разом з податком",
+        "retention": "Гарантійне утримання",
+        "amount_due": "До сплати після утримання",
+        "payments": "Платежі",
+        "col_date": "Дата",
+        "col_reference": "Посилання",
+        "col_paid": "Сплачено",
+        "col_withheld": "Утримано",
+        "refund": "Повернення",
+        "no_payments": "Платежів не зафіксовано.",
+        "notes": "Примітки",
+        "no_notes": "Примітки не внесено.",
+        "invoice": "Рахунок",
+        "invoice_number": "Номер рахунку",
+        "payment_date": "Дата платежу",
+        "reference": "Посилання",
+        "amount_paid": "Сплачена сума",
+        "exchange_rate": "Курс обміну",
+        "kind": "Тип",
+        "kind_payment": "Платіж",
+        "kind_refund": "Повернення",
+        "withholding": "Утримання",
+        "withheld_amount": "Утримана сума",
+        "release_date": "Дата вивільнення",
+        "gross_settled": "Сума з урахуванням утримання",
+        "no_withholding": "З цього платежу нічого не утримано.",
+        "counterparty_tax_id": "ІПН / ЄДРПОУ",
+        "counterparty_address": "Адреса"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Чернетка",
+          "pending": "Очікує погодження",
+          "approved": "Погоджено",
+          "sent": "Надіслано",
+          "paid": "Сплачено",
+          "cancelled": "Скасовано",
+          "credit_note_issued": "Виписано кредит-ноту"
+        },
+        "direction": {
+          "payable": "До сплати (рахунок постачальника)",
+          "receivable": "До отримання (рахунок замовнику)"
+        },
+        "payment_status": {
+          "completed": "Завершено",
+          "refunded": "Повернено"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Сторінка {page} з {total}",
+    "page": "Сторінка {page}",
+    "printed": "Надруковано: {timestamp}",
+    "generated": "Сформовано: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} запрошує вас до клієнтського порталу",
+      "login_subject": "Ваше посилання для входу до клієнтського порталу",
+      "invite_heading": "Ласкаво просимо до клієнтського порталу",
+      "login_heading": "Вхід до клієнтського порталу",
+      "greeting": "Вітаємо, {name},",
+      "greeting_generic": "Вітаємо,",
+      "invite_body": "{sender} надає вам доступ до клієнтського порталу. Тут ви можете стежити за ходом проєкту: звіти про виконання, документи, рахунки та найближчі віхи.",
+      "login_body": "Ось посилання для входу, яке ви запитували.",
+      "link_help": "Кнопка нижче виконає вхід. Пароль не потрібен. Посилання діє один раз і спливає через {hours} год.",
+      "ignore": "Якщо ви не очікували цього листа, просто проігноруйте його. Без цього посилання ніхто не отримає доступу.",
+      "invite_cta": "Відкрити портал",
+      "login_cta": "Увійти",
+      "sender_generic": "Ваша проєктна команда"
+    },
+    "tender_invite": {
+      "subject": "Запрошення до участі в тендері: {package}",
+      "heading": "Запрошення до участі в тендері",
+      "greeting": "Шановна компаніє {company},",
+      "greeting_generic": "Шановні панове,",
+      "invite": "Запрошуємо вас подати пропозицію щодо тендерного пакета {package}.",
+      "invite_project": "Запрошуємо вас подати пропозицію щодо тендерного пакета {package} за проєктом {project}.",
+      "deadline": "Кінцевий строк подання: {deadline}",
+      "link_help": "Кнопка нижче відкриває відомість обсягів робіт. Вкажіть ціни за одиницю онлайн, зберігайте чернетку в будь-який момент і подайте пропозицію до кінцевого строку. Обліковий запис не потрібен.",
+      "link_personal": "Це посилання персональне для вашої компанії. Будь ласка, не пересилайте його далі.",
+      "cta": "Відкрити відомість і вказати ціни",
+      "no_link": "Будь ласка, ознайомтеся з деталями пакета та надішліть свою пропозицію до зазначеного вище кінцевого строку."
+    },
+    "notification_email": {
+      "greeting": "Вітаємо, {name},",
+      "greeting_generic": "Вітаємо,",
+      "cta": "Відкрити в OpenConstructionERP",
+      "footer": "Ви отримуєте цей лист згідно з налаштуваннями сповіщень. Змінити їх можна у вашому профілі.",
+      "digest_subject": "OpenConstructionERP: підсумок сповіщень ({count})",
+      "digest_heading": "Останні сповіщення:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Порівняння пропозицій",
+      "comparison_sheet": "Порівняння",
+      "bidder_title": "Відомість обсягів для оцінки",
+      "bidder_sheet": "Відомість",
+      "project": "Проєкт",
+      "package": "Пакет",
+      "currency": "Валюта",
+      "date": "Дата",
+      "return_by": "Подати до",
+      "item": "№",
+      "description": "Найменування",
+      "unit": "Од. вим.",
+      "quantity": "Кількість",
+      "unit_price": "Ціна за одиницю",
+      "line_total": "Вартість",
+      "own_estimate": "Власний кошторис",
+      "not_priced": "немає ціни",
+      "sum_priced_lines": "Сума оцінених позицій",
+      "bid_total": "Сума пропозиції за заявкою",
+      "lines_priced": "Оцінено позицій",
+      "lines_priced_value": "{priced} з {total}",
+      "deviation": "Відхилення від власного кошторису",
+      "not_comparable": "н/д",
+      "other_currency": "Ціни в {currency}, не порівнюються з пропозиціями в {reporting}.",
+      "legend": "Позначення",
+      "legend_lowest": "Зелений: найнижча ціна за одиницю в позиції.",
+      "legend_high": "▲ червоний: більш ніж на {pct}% вище медіани позиції.",
+      "legend_low": "▼ жовтий: більш ніж на {pct}% нижче медіани позиції.",
+      "legend_missing": "«{marker}»: учасник не вказав ціну для позиції.",
+      "legend_incomplete": "Пропозиція з позиціями без ціни позначена в рядку «Оцінено позицій» і не вважається найдешевшою за сумою.",
+      "legend_totals": "Сума пропозиції вказана учасником і може відрізнятися від суми оцінених позицій.",
+      "bidder": "Учасник",
+      "bidder_note": "Примітка учасника",
+      "reference": "Ідентифікатор (не змінювати)",
+      "total": "Разом",
+      "instructions": "Вкажіть ціну за одиницю для кожної позиції в жовтих клітинках. Кількості та найменування зафіксовані, вартість і підсумок рахуються самі. Залиште клітинку порожньою, якщо не оцінюєте позицію."
+    },
+    "cost_plan": {
+      "sheet_plan": "Кошторис за NRM 1",
+      "sheet_unallocated": "Не розподілено",
+      "title": "Поелементний кошторис (NRM 1)",
+      "bill": "Відомість обсягів робіт",
+      "currency": "Валюта",
+      "gifa": "Загальна внутрішня площа (m2)",
+      "gifa_project": "з проєкту",
+      "gifa_entered": "введено для цього експорту",
+      "gifa_none": "не задано, вартість за m2 не показується",
+      "col_code": "Код",
+      "col_description": "Елемент",
+      "col_positions": "Позиції",
+      "col_basis": "База",
+      "col_total": "Разом",
+      "col_per_m2": "Вартість за m2 загальної внутрішньої площі",
+      "col_share": "% від загальної суми",
+      "col_running": "Наростаючий підсумок",
+      "group_level": "Рівень групи, елемент не вказано",
+      "facilitating_works_estimate": "Кошторис підготовчих робіт",
+      "works_estimate": "Кошторис будівельних робіт",
+      "addons_heading": "Групи NRM 1 9-14, оцінені як позиції відомості",
+      "unallocated": "Не віднесено до елемента",
+      "direct_cost": "Прямі витрати за відомістю",
+      "markups_heading": "Надбавки (власний каскад відомості, у порядку застосування)",
+      "markups_total": "Надбавки разом",
+      "grand_total": "Усього за кошторисом",
+      "basis_direct": "{pct}% від прямих витрат",
+      "basis_running": "{pct}% від наростаючого проміжного підсумку",
+      "basis_lump": "Паушальна сума",
+      "basis_banded": "Ступінчаста шкала",
+      "basis_escalation": "Індексація",
+      "basis_other": "{kind}",
+      "basis_scoped": "для розділу",
+      "col_ordinal": "№ з/п",
+      "col_position": "Найменування",
+      "col_written_code": "Код як вказано",
+      "col_reason": "Причина",
+      "reason_no_code": "Немає коду NRM ні в позиції, ні в її розділах",
+      "reason_invalid_code": "Код не є номером NRM",
+      "reason_unknown_group": "Такої групи в NRM 1 немає",
+      "truncated": "Список скорочено до перших {shown} із {count} позицій; підсумок враховує всі."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Вимоги",
+      "sheet_summary": "Зведення",
+      "sheet_legend": "Позначення",
+      "summary_element": "Елемент",
+      "summary_count": "Кількість вимог",
+      "summary_total": "Разом",
+      "legend_column": "Стовпець",
+      "legend_description": "Опис",
+      "unspecified": "Не вказано",
+      "h01": "Елемент / клас IFC",
+      "h02": "Класифікація",
+      "h03": "Група властивостей",
+      "h04": "Назва властивості",
+      "h05": "Тип даних",
+      "h06": "Обов'язково",
+      "h07": "Допустимі значення",
+      "h08": "Мін.",
+      "h09": "Макс.",
+      "h10": "Од. вим.",
+      "h11": "Шаблон",
+      "h12": "Стадія",
+      "h13": "Виконавець",
+      "h14": "Сценарій застосування",
+      "h15": "Джерело",
+      "d01": "Клас сутності IFC (наприклад, IFCWALL, IFCBEAM)",
+      "d02": "Система класифікації та код (наприклад, Uniclass 2015: EF_25_10)",
+      "d03": "Назва набору властивостей (наприклад, Pset_WallCommon)",
+      "d04": "Назва необхідної властивості або атрибута",
+      "d05": "Тип даних IFC (IFCLABEL, IFCREAL, IFCBOOLEAN тощо)",
+      "d06": "Кратність: обов'язково, необов'язково або заборонено",
+      "d07": "Перелік допустимих значень через крапку з комою",
+      "d08": "Межі числового діапазону",
+      "d09": "Одиниця виміру (m, m2, kg тощо)",
+      "d10": "Регулярний вираз для перевірки значення",
+      "d11": "Стадія або віха проєкту (LP3, RIBA Stage 3 тощо)",
+      "d12": "Відповідальна сторона (архітектор, інженер-конструктор тощо)",
+      "d13": "Призначення або сценарій застосування вимоги",
+      "d14": "Вихідний стандарт або документ"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Відомість обсягів робіт створено",
+      "notifications.boq.created.body": "Вашу відомість обсягів робіт '{boq_name}' збережено.",
+      "notifications.meeting.action_assigned.title": "Вам призначено доручення за підсумками наради",
+      "notifications.meeting.action_assigned.body": "За підсумками наради {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Статус документа змінено",
+      "notifications.cde.state_transitioned.body": "Контейнер переведено до статусу '{new_state}'.",
+      "notifications.cde.linked_published.title": "Опубліковано документ, пов'язаний з вашою роботою",
+      "notifications.cde.linked_published.body": "{container_code} опубліковано в ревізії {revision_code}. Пов'язані з вами записи: {records}.",
+      "notifications.rfi.assigned.title": "Вам призначено запит на інформацію (RFI)",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "На запит на інформацію (RFI) надано відповідь",
+      "notifications.rfi.responded.body": "На ваш запит {code} ({title}) надійшла відповідь.",
+      "notifications.risk.assigned.title": "Вам призначено ризик",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Попередження про перевитрату",
+      "notifications.costmodel.overrun_alert.body": "Витрати за статтею {category} перевищили бюджет: фактичні {actual} {currency} вище порога попередження +{threshold_pct}% від запланованих {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Документ на погодження очікує перевірки",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Документ на погодження затверджено",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Документ на погодження відхилено",
+      "notifications.submittal.rejected.body": "{code} ({title}). Причина: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Документ на погодження потребує доопрацювання",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Причина: {reason}",
+      "notifications.transmittal.issued.title": "Вам надіслано супровідний лист",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Отримання супровідного листа підтверджено",
+      "notifications.transmittal.acknowledged.body": "Отримувач підтвердив отримання {code} ({title}).",
+      "notifications.transmittal.responded.title": "На супровідний лист надано відповідь",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "Вам призначено запит на інформацію (RFI)",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Призначено нове завдання",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Рахунок затверджено",
+      "notification.invoice_approved_body": "Рахунок {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Інспекцію заплановано",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, дата: {inspection_date}",
+      "notification.submittal_status_changed_title": "Статус документа на погодження змінено",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Нараду заплановано",
+      "notification.meeting_scheduled_body": "{title}, дата: {meeting_date}",
+      "notification.ncr_created_title": "Зафіксовано невідповідність",
+      "notification.ncr_created_body": "Акт про невідповідність {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Документ завантажено",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Вас згадали в коментарі",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "Новий коментар в обговоренні",
+      "notifications.collaboration.comment_added.body": "До об'єкта {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "Виявлено колізію високої критичності",
+      "notifications.clash.high_severity.body": "Колізія ({severity}): {a_name} та {b_name}",
+      "notifications.validation.report.title": "Перевірка виявила зауваження",
+      "notifications.validation.report.body": "Помилок: {error_count}, попереджень: {warning_count}. Об'єкт: {target_type}.",
+      "notifications.punchlist.auto_created.title": "Створено пункт переліку зауважень",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Підсумок сповіщень",
+      "notifications.digest.body": "Нових оновлень у каналі {channel}: {count}.",
+      "notifications.approval.overdue.title": "Погодження прострочено",
+      "notifications.approval.overdue.body": "Крок {step_ordinal} за об'єктом ({target_kind}) прострочено на {hours_overdue} год.",
+      "notifications.approval.escalated.title": "Погодження ескальовано вам",
+      "notifications.approval.escalated.body": "Крок {step_ordinal} за об'єктом ({target_kind}) передано вам (рівень {level}).",
+      "notifications.approval.reassigned.title": "Погодження передано вам",
+      "notifications.approval.reassigned.body": "Крок {step_ordinal} за об'єктом ({target_kind}) тепер на вашому рішенні.",
+      "notifications.deadline.overdue.title": "Прострочено: {title}",
+      "notifications.deadline.overdue.body": "Запис \"{title}\" ({module}) прострочено на {days_overdue} дн.",
+      "notifications.deadline.escalated.title": "Ескалація простроченого запису",
+      "notifications.deadline.escalated.body": "Запис \"{title}\" ({module}) досі відкритий, прострочення: {days_overdue} дн., питання ескальовано.",
+      "notifications.deadline.approaching.title": "Наближається строк: {title}",
+      "notifications.deadline.approaching.body": "Запис \"{title}\" ({module}) зі строком {due_date}.",
+      "notifications.deadline.built.approaching.title": "Наближається строк: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: \"{title}\", строк: {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Прострочено: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "Строк відповіді на запит на інформацію (RFI) {reference} \"{title}\" за проєктом {project} минув {due_date_display}, прострочення: {days_overdue} дн. Потрібна відповідь.",
+      "notifications.deadline.rfi.escalated.title": "Ескалація: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "Запит на інформацію (RFI) {reference} \"{title}\" за проєктом {project} досі відкритий, строк {due_date_display} перевищено на {days_overdue} дн., питання передано вам.",
+      "notifications.deadline.rfi.approaching.title": "Наближається строк: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "Строк відповіді на запит на інформацію (RFI) {reference} \"{title}\" за проєктом {project}: {due_date_display}. Потрібна відповідь.",
+      "notifications.deadline.submittals.overdue.title": "Прострочено: документ на погодження {reference}",
+      "notifications.deadline.submittals.overdue.body": "Документ на погодження {reference} \"{title}\" за проєктом {project} потрібно було перевірити до {due_date_display}, прострочення: {days_overdue} дн. Потрібна перевірка.",
+      "notifications.deadline.submittals.escalated.title": "Ескалація: документ на погодження {reference}",
+      "notifications.deadline.submittals.escalated.body": "Документ на погодження {reference} \"{title}\" за проєктом {project} досі відкритий, строк {due_date_display} перевищено на {days_overdue} дн., питання передано вам.",
+      "notifications.deadline.submittals.approaching.title": "Наближається строк: документ на погодження {reference}",
+      "notifications.deadline.submittals.approaching.body": "Документ на погодження {reference} \"{title}\" за проєктом {project} потрібно перевірити до {due_date_display}. Потрібна перевірка.",
+      "notifications.deadline.correspondence.overdue.title": "Прострочено: листування {reference}",
+      "notifications.deadline.correspondence.overdue.body": "На лист {reference} \"{title}\" за проєктом {project} потрібно було відповісти до {due_date_display}, прострочення: {days_overdue} дн. Потрібна відповідь.",
+      "notifications.deadline.correspondence.escalated.title": "Ескалація: листування {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Лист {reference} \"{title}\" за проєктом {project} досі без відповіді, строк {due_date_display} перевищено на {days_overdue} дн., питання передано вам.",
+      "notifications.deadline.correspondence.approaching.title": "Наближається строк: листування {reference}",
+      "notifications.deadline.correspondence.approaching.body": "На лист {reference} \"{title}\" за проєктом {project} потрібно відповісти до {due_date_display}. Потрібна відповідь.",
+      "notifications.deadline.variations.overdue.title": "Прострочено: зміна обсягу робіт {reference}",
+      "notifications.deadline.variations.overdue.body": "Зміну обсягу робіт {reference} \"{title}\" за проєктом {project} потрібно було розглянути до {due_date_display}, прострочення: {days_overdue} дн. Потрібне рішення.",
+      "notifications.deadline.variations.escalated.title": "Ескалація: зміна обсягу робіт {reference}",
+      "notifications.deadline.variations.escalated.body": "Зміна обсягу робіт {reference} \"{title}\" за проєктом {project} досі відкрита, строк {due_date_display} перевищено на {days_overdue} дн., питання передано вам.",
+      "notifications.deadline.variations.approaching.title": "Наближається строк: зміна обсягу робіт {reference}",
+      "notifications.deadline.variations.approaching.body": "Зміну обсягу робіт {reference} \"{title}\" за проєктом {project} потрібно розглянути до {due_date_display}. Потрібне рішення.",
+      "notifications.variation.submitted.title": "Зміна обсягу робіт очікує рішення: {code}",
+      "notifications.variation.submitted.body": "Зміну обсягу робіт {code} \"{title}\" за проєктом {project} подано, вона очікує рішення.",
+      "notifications.variation.approved.title": "Зміну обсягу робіт затверджено: {code}",
+      "notifications.variation.approved.body": "Зміну обсягу робіт {code} \"{title}\" за проєктом {project} затверджено.",
+      "notifications.variation.rejected.title": "Зміну обсягу робіт відхилено: {code}",
+      "notifications.variation.rejected.body": "Зміну обсягу робіт {code} \"{title}\" за проєктом {project} відхилено та повернуто вам.",
+      "notifications.variation.rejected_reason.body": "Зміну обсягу робіт {code} \"{title}\" за проєктом {project} відхилено та повернуто вам. Причина: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Замовлення на зміну очікує затвердження: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Замовлення на зміну {code} \"{title}\" за проєктом {project} подано, воно очікує затвердження.",
+      "notifications.changeorder.approved.title": "Замовлення на зміну затверджено: {code}",
+      "notifications.changeorder.approved.body": "Замовлення на зміну {code} \"{title}\" за проєктом {project} затверджено.",
+      "notifications.changeorder.rejected.title": "Замовлення на зміну відхилено: {code}",
+      "notifications.changeorder.rejected.body": "Замовлення на зміну {code} \"{title}\" за проєктом {project} відхилено.",
+      "notifications.submittal.approved_as_noted.title": "Документ на погодження затверджено із зауваженнями",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Документ очікує вашого погодження",
+      "notifications.file_approval.needs_approver.body": "Документ ({file_kind}) очікує вашого погодження.",
+      "notifications.file_approval.approved.title": "Ваш документ затверджено",
+      "notifications.file_approval.approved.body": "Ваш документ ({file_kind}) пройшов усі кроки погодження.",
+      "notifications.file_approval.rejected.title": "Ваш документ повернуто",
+      "notifications.file_approval.rejected.body": "Ваш документ ({file_kind}) відхилено, він потребує доопрацювання.",
+      "notifications.portal.user_invited.title": "Користувача запрошено до порталу",
+      "notifications.portal.user_invited.body": "Запрошення надіслано: {portal_user_email}, роль: {portal_role}.",
+      "notifications.portal.message_received.title": "Нове повідомлення в порталі",
+      "notifications.portal.message_received.body": "{buyer_name} надіслав(ла) повідомлення."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "ID",
+          "ID роботи",
+          "Код роботи",
+          "ID завдання",
+          "Код",
+          "№"
+        ],
+        "name": [
+          "Назва",
+          "Назва завдання",
+          "Назва роботи",
+          "Робота",
+          "Завдання"
+        ],
+        "wbs": [
+          "WBS",
+          "Код WBS",
+          "Номер WBS",
+          "Номер структури"
+        ],
+        "outline_level": [
+          "Рівень структури",
+          "Рівень",
+          "Рівень вкладеності",
+          "Відступ"
+        ],
+        "start": [
+          "Початок",
+          "Дата початку",
+          "Планований початок"
+        ],
+        "finish": [
+          "Закінчення",
+          "Дата закінчення",
+          "Кінець",
+          "Планове закінчення"
+        ],
+        "duration": [
+          "Тривалість",
+          "Тривалість (дні)",
+          "Дні",
+          "Початкова тривалість"
+        ],
+        "predecessors": [
+          "Попередники",
+          "Попередник",
+          "Залежить від",
+          "Залежності"
+        ],
+        "percent_complete": [
+          "% завершення",
+          "Відсоток завершення",
+          "Прогрес",
+          "Прогрес (%)",
+          "% виконано"
+        ],
+        "milestone": [
+          "Віха",
+          "Є віхою"
+        ],
+        "resource": [
+          "Ресурс",
+          "Ресурси",
+          "Назви ресурсів",
+          "Бригада",
+          "Призначено"
+        ],
+        "notes": [
+          "Примітки",
+          "Примітка",
+          "Коментарі",
+          "Коментар",
+          "Опис",
+          "Зауваження"
+        ],
+        "client_visible": [
+          "Видно замовнику",
+          "Видимий для замовника",
+          "Показати замовнику",
+          "Поділитися із замовником"
+        ]
+      },
+      "yes_words": [
+        "так",
+        "є"
+      ],
+      "no_words": [
+        "ні",
+        "немає"
+      ],
+      "example_names": [
+        "Коробка будівлі",
+        "Земляні роботи",
+        "Фундаменти",
+        "Фундаменти прийнято"
+      ]
+    },
+    "module_suggest": {
+      "link_labels": {
+        "contract": "Договір",
+        "contact": "Контакт",
+        "schedule_activity": "Робота графіка",
+        "document": "Документ",
+        "user": "Відповідальний"
+      },
+      "keywords": {
+        "contract": [
+          "договір*",
+          "договор*",
+          "контракт*"
+        ],
+        "contact": [
+          "контакт*",
+          "постачальник*",
+          "субпідрядник*",
+          "підрядник*",
+          "замовник*",
+          "клієнт*"
+        ],
+        "schedule_activity": [
+          "завдан*",
+          "робота графіка",
+          "позиція графіка"
+        ],
+        "document": [
+          "документ*",
+          "креслен*",
+          "вкладен*"
+        ],
+        "user": [
+          "відповідальн*",
+          "виконавец*",
+          "виконавц*",
+          "інспектор*",
+          "виконроб*",
+          "майстер"
+        ],
+        "due": [
+          "термін*",
+          "строк*",
+          "дедлайн*",
+          "діє до",
+          "дійсний до",
+          "закінчення дії"
+        ]
+      },
+      "state_labels": [
+        "Відкрито",
+        "В роботі",
+        "Готово"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Додаток {number} до тендера {package}",
+      "addendum_heading": "Тендерний додаток",
+      "greeting": "Шановна компаніє {company},",
+      "greeting_generic": "Шановні панове,",
+      "addendum_intro": "Видано додаток {number} до тендерного пакета {package}: {title}.",
+      "addendum_deadline": "Кінцевий строк подання перенесено з {old} на {new}.",
+      "addendum_boq": "Відомість обсягів змінено (ревізія {revision}). Просимо вказати ціни за чинною ревізією.",
+      "addendum_documents": "Видані документи: {documents}",
+      "addendum_ack": "Просимо підтвердити отримання цього додатка. Пропозиція, що не підтверджує всі додатки, може бути визнана такою, що не відповідає вимогам.",
+      "answer_subject": "Роз'яснення {number} до тендера {package}",
+      "answer_heading": "Роз'яснення тендера",
+      "answer_intro": "На запитання щодо тендерного пакета {package} надано відповідь. Відповідь стосується всіх учасників.",
+      "question_label": "Запитання",
+      "answer_label": "Відповідь"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Валова вартість розробки (GDV)",
+      "total_development_cost": "Загальна вартість розробки",
+      "residual_land_value": "Залишкова вартість землі",
+      "developer_profit": "Прибуток забудовника",
+      "profit_on_cost": "Прибуток до вартості",
+      "profit_on_gdv": "Прибуток до GDV",
+      "construction_cost": "Вартість будівництва",
+      "professional_fees": "Професійні гонорари",
+      "contingency": "Резерв на непередбачене",
+      "finance_cost": "Вартість фінансування",
+      "sales_costs": "Витрати на продаж"
+    },
+    "status": {
+      "viable": "Життєздатний",
+      "unviable": "Нежиттєздатний",
+      "marginal": "Граничний",
+      "pending": "Ще не оцінено"
+    },
+    "figure": {
+      "gross_development_value": "Загальна сума продажів усіх одиниць проєкту, в одній валюті.",
+      "total_development_cost": "Усі витрати на реалізацію проєкту, крім самої землі: будівництво, гонорари, резерв, фінансування та витрати на продаж.",
+      "residual_land_value": "Залишок для землі після віднімання від валової вартості розробки загальної вартості розробки та цільового прибутку забудовника.",
+      "developer_profit": "Прибуток, який забудовник прагне зберегти, задається як цільова частка валової вартості розробки.",
+      "profit_on_cost": "Прибуток забудовника, поділений на загальну вартість розробки, виражений як співвідношення.",
+      "profit_on_gdv": "Прибуток забудовника, поділений на валову вартість розробки, виражений як співвідношення."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Табір для робітників",
+        "rental": "Орендоване житло",
+        "hotel": "Готель"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Очікує",
+        "approved": "Схвалено",
+        "rejected": "Відхилено"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Виконано",
+        "fail": "Не виконано",
+        "not_applicable": "Не застосовується"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Креслення",
+        "contract": "Договір",
+        "specification": "Специфікація",
+        "photo": "Фото",
+        "correspondence": "Листування",
+        "reality_capture": "Фіксація фактичного стану",
+        "other": "Інше"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Очікує",
+        "approved": "Схвалено",
+        "rejected": "Відхилено",
+        "cancelled": "Скасовано"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Чернетка",
+        "submitted": "Надіслано на погодження",
+        "approved": "Схвалено",
+        "posted": "Проведено в облік"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Відкрито",
+        "assigned": "Призначено",
+        "in_progress": "Виконується",
+        "resolved": "Усунено",
+        "verified": "Перевірено",
+        "closed": "Закрито"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "зауваження",
+        "minor": "незначна",
+        "major": "значна",
+        "critical": "критична"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Особа",
+        "crew": "Бригада",
+        "equipment": "Техніка",
+        "subcontractor": "Субпідрядник"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Назва моделі ШІ застаріла або недоступна. Відкрийте Налаштування > ШІ та вкажіть чинну назву моделі для вашого провайдера.",
+      "not_configured": "ШІ не налаштовано. Будь ласка, налаштуйте провайдера ШІ в Налаштуваннях."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "перевірено",
+      "bound": "прикріплено",
+      "empty": "відсутнє"
+    },
+    "package_status_labels": {
+      "draft": "чернетка",
+      "in_progress": "виконується",
+      "ready": "готово",
+      "issued": "видано"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "блокер",
+      "critical": "критично",
+      "warning": "попередження",
+      "suggestion": "пропозиція"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Стратегія",
+      "brief": "Технічне завдання",
+      "concept": "Концепція",
+      "design": "Проєктування",
+      "approval": "Дозвіл",
+      "detail": "Робоче проєктування",
+      "tender": "Тендер",
+      "award": "Укладення договору",
+      "construction": "Будівництво",
+      "handover": "Передача",
+      "operation": "Експлуатація"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "У завданні немає деталей для розкрою",
+        "suggestion": "Додайте деталі вручну, вставте їх або імпортуйте з відомості гнуття, обміру, рядка кошторису чи файлу."
+      },
+      "has_stock": {
+        "fail": "У завданні немає заготовок для розкрою",
+        "suggestion": "Додайте принаймні одну довжину заготовки або розмір аркуша чи використайте залишки зі складу об'єкта."
+      },
+      "sheet_dimensions": {
+        "fail": "У {ref} не задано ширину",
+        "suggestion": "Вкажіть довжину й ширину для кожної листової деталі та кожного розміру аркуша."
+      },
+      "piece_fits_stock": {
+        "fail": "Деталь {ref} ({size} mm) не вміщується в жодну заготовку",
+        "suggestion": "Додайте довшу або більшу заготовку, зменште обрізку чи розділіть деталь стиком."
+      },
+      "grain_allows_fit": {
+        "fail": "Деталь {ref} вміщується лише після повороту впоперек волокон",
+        "suggestion": "Дозвольте поворот цієї деталі або додайте розмір аркуша, у який вона увійде вздовж волокон."
+      },
+      "kerf_set": {
+        "fail": "Ширина різу дорівнює нулю",
+        "suggestion": "Вкажіть товщину пилки або різу, інакше вихід придатного для кожного стрижня з кількома розрізами буде завищено."
+      },
+      "min_offcut_set": {
+        "fail": "Не задано мінімальний придатний залишок",
+        "suggestion": "Задайте найкоротший залишок, який варто зберегти, щоб придатні залишки не враховувалися як відходи."
+      },
+      "stock_priced": {
+        "fail": "У заготовки {ref} немає ціни за одиницю",
+        "suggestion": "Вкажіть ціну за штуку, щоб план показував вартість і обирав найдешевші заготовки."
+      },
+      "stock_sufficient": {
+        "fail": "Деталей, не розміщених на доступних заготовках: {count}",
+        "suggestion": "Збільште наявну кількість або додайте інший розмір заготовки."
+      },
+      "yield_threshold": {
+        "fail": "Вихід придатного {actual} % нижчий за поріг {threshold} %",
+        "suggestion": "Додайте іншу довжину чи розмір заготовки, дозвольте поворот або перегляньте поріг для цього матеріалу."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Зауваження '{title}' закрито без фото",
+    "punch_no_photo_fix": "Додайте фото виконаної роботи",
+    "photo_weak": "Фото в '{title}' без місця або часу зйомки: {count}",
+    "photo_weak_fix": "Перезніміть фото в застосунку з увімкненою геолокацією",
+    "defect_no_photo": "Дефект '{reference}' закрито без фото усунення",
+    "defect_no_photo_fix": "Додайте фото усунутого дефекту"
+  },
+  "closeout_dossier": {
+    "more_items": "Ще позицій, не показаних у списку: {count}",
+    "category_missing": "Немає підтвердження для обов'язкової категорії '{category}'",
+    "category_missing_fix": "Прив'яжіть документ до пункту чекліста цієї категорії або додайте його",
+    "category_unverified": "Підтвердження для '{category}' ще не перевірено",
+    "category_unverified_fix": "Попросіть керівника перевірити й підтвердити прив'язані матеріали",
+    "punch_open": "Зауваження '{name}' досі відкрите",
+    "punch_open_fix": "Усуньте й закрийте зауваження або виключіть його з обсягу цього досьє",
+    "punch_no_photo": "Закрите зауваження '{name}' не має фото",
+    "punch_no_photo_fix": "Додайте фото виконаної роботи",
+    "system_pending": "Систему '{name}' не прийнято в налагодженні",
+    "system_pending_fix": "Завершіть чеклисти налагодження та позначте систему як налагоджену",
+    "critical_issues": "Відкритих критичних проблем налагодження: {count}",
+    "critical_issues_fix": "Закрийте критичні проблеми до передавання об'єкта",
+    "acceptance_missing": "Акт приймання не прив'язано",
+    "acceptance_missing_fix": "Прив'яжіть підписаний акт приймання до пункту приймання в чеклісті",
+    "acceptance_unsigned": "Акт приймання підписано не повністю (статус: {status})",
+    "acceptance_unsigned_fix": "Зберіть відсутні підписи в розділі «Підписання»",
+    "blocked": "Досьє не проходить свій чекліст. Усуньте зауваження або все одно сформуйте його як неповне (підтвердження керівника).",
+    "delivery_title": "Досьє передавання об'єкта: {project}",
+    "delivery_body": "Досьє передавання об'єкта '{title}' ({scope}) готове. Посилання нижче завантажує його й діє до {expires}.",
+    "pdf": {
+      "title": "Досьє передавання об'єкта",
+      "scope": "Обсяг",
+      "built": "Сформовано",
+      "status_passed": "Чекліст пройдено",
+      "status_warnings": "Чекліст пройдено з попередженнями",
+      "status_errors": "Неповне: є відкриті зауваження чекліста",
+      "findings": "Відкриті зауваження чекліста",
+      "severity": "Серйозність",
+      "finding": "Зауваження",
+      "severity_error": "Помилка",
+      "severity_warning": "Попередження",
+      "severity_info": "Інфо",
+      "contents": "Зміст",
+      "file": "Файл",
+      "size": "Розмір",
+      "punch": "Список закритих зауважень",
+      "item": "Позиція",
+      "status": "Статус",
+      "photos": "Фото",
+      "evidence": "Фотофіксація"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Оцінка {rating} для '{name}' не є рівнем шкали '{scale}'",
+    "rule_poor_without_action": "'{name}' оцінено на {rating}, але запланованих дій з обслуговування немає",
+    "rule_poor_without_action_fix": "Складіть план або додайте дію для цього елемента",
+    "rule_action_unpriced": "Дія для '{name}' на {year} рік не має одиничної вартості",
+    "rule_action_unpriced_fix": "Вкажіть одиничну вартість, щоб підсумки плану її враховували",
+    "rule_defect_incomplete": "Оцінка '{name}' потребує робіт, але серйозність і частка ураження не записані"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, сторінка {page}",
+    "text_change": "«{old}» змінено на «{new}»",
+    "kind": {
+      "added": "Додано",
+      "removed": "Видалено",
+      "modified": "Змінено",
+      "text": "Текст змінено"
+    },
+    "status": {
+      "open": "Відкрито",
+      "relevant": "Суттєво",
+      "not_relevant": "Несуттєво"
+    },
+    "errors": {
+      "revision_not_found": "Ревізію креслення не знайдено в цьому проєкті.",
+      "revision_not_parsed": "Креслення ще не має обробленої версії для порівняння.",
+      "comparison_not_found": "Порівняння не знайдено.",
+      "change_not_found": "Зміну не знайдено.",
+      "same_revision": "Виберіть дві різні ревізії або сторінки для порівняння.",
+      "manual_points": "Для ручного суміщення потрібні дві різні точки на кожній ревізії.",
+      "alignment_singular": "Суміщення неможливо застосувати: воно стискає аркуш.",
+      "region_empty": "Зміна {seq} не має розміру.",
+      "region_off_sheet": "Зміна {seq} лежить за межами аркуша.",
+      "module_missing": "Модуль, потрібний для цієї дії, не встановлено."
+    },
+    "rfi": {
+      "subject": "Зміна креслення {seq} на {sheet}",
+      "question": "Ревізія {new} аркуша {sheet} відрізняється від ревізії {old} у позначеній ділянці ({kind}). Підтвердьте намір зміни та чи зачеплено обсяги."
+    },
+    "markup": {
+      "text": "Зміна ревізії {seq}: {kind}"
+    },
+    "report": {
+      "title": "Порівняння ревізій креслення",
+      "project": "Проєкт",
+      "name": "Порівняння",
+      "old_revision": "Старіша ревізія",
+      "new_revision": "Новіша ревізія",
+      "alignment": "Суміщення",
+      "alignment_none": "Не суміщено (одна рамка)",
+      "alignment_auto": "Автоматичне",
+      "alignment_manual": "Ручне, за двома точками",
+      "confidence": "достовірність {value}",
+      "summary": "Зміни",
+      "summary_counts": "Усього {total}: додано {added}, видалено {removed}, змінено {modified}, текст {text}",
+      "generated_on": "Дата формування",
+      "generated": "Сформовано {timestamp}",
+      "page_of": "Сторінка {page} з {total}",
+      "no_changes": "Між двома ревізіями змін не знайдено.",
+      "col_no": "№",
+      "col_preview": "Перегляд",
+      "col_kind": "Зміна",
+      "col_location": "Місце",
+      "col_detail": "Деталі",
+      "col_status": "Статус",
+      "col_comment": "Коментар",
+      "col_follow_up": "Подальші дії",
+      "page_at": "Сторінка {page}, {coords}",
+      "layer": "Шар {layer}",
+      "entity_counts": "Об'єкти: додано {added}, видалено {removed}, змінено {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Хмара ревізії",
+      "remeasure": "Переобмір: обсягів {items}, позицій BOQ {positions}"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Обидві сторони є різними ревізіями.",
+      "distinct_revisions_fail": "Порівняння зіставляє аркуш із самим собою.",
+      "distinct_revisions_hint": "Виберіть старішу й новішу ревізії креслення.",
+      "alignment_not_needed": "Ревізії DWG мають однакові одиниці креслення; суміщення не потрібне.",
+      "alignment_missing_matrix": "Порівняння не має суміщення.",
+      "alignment_singular": "Суміщення стискає аркуш і не може бути застосоване.",
+      "alignment_scale": "Суміщення масштабує аркуш у {scale} раза, більше, ніж відрізняються ревізії одного креслення.",
+      "alignment_low_confidence": "Автоматичне суміщення ненадійне (достовірність {confidence}).",
+      "alignment_manual_points": "Для ручного суміщення потрібні дві пари точок.",
+      "alignment_ok": "Суміщення аркуша виглядає правдоподібно.",
+      "alignment_hint": "Сумістіть аркуші вручну за двома позначками, спільними для обох ревізій, наприклад за перетинами осей.",
+      "region_empty": "Зміна {seq} не має розміру.",
+      "region_off_sheet": "Зміна {seq} лежить за межами аркуша.",
+      "regions_ok": "Усі змінені ділянки лежать на аркуші.",
+      "triaged_ok": "Усі зміни перевірено.",
+      "triaged_open": "Відкритих змін: {count}.",
+      "triaged_hint": "Позначте кожну зміну як суттєву або несуттєву.",
+      "followed_up_ok": "Для кожної суттєвої зміни є подальші дії.",
+      "followed_up_missing": "Зміну {seq} позначено як суттєву, але вона не має коментаря, RFI, хмари ревізії чи позначки переобміру.",
+      "followed_up_hint": "Прокоментуйте зміну, створіть RFI або хмару ревізії чи позначте обсяги в ній для переобміру."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Прогноз грошового потоку",
+      "portfolio_title": "Прогноз грошового потоку портфеля",
+      "empty": "Для цього вибору прогнозу грошового потоку немає.",
+      "project": "Проєкт",
+      "as_of": "Станом на",
+      "currency": "Валюта",
+      "delay_days": "Затримка надходжень (днів)",
+      "overrun_pct": "Перевитрата бюджету (%)",
+      "closing_position": "Підсумковий залишок",
+      "peak_funding": "Пікова потреба у фінансуванні",
+      "peak_period": "Місяць піку потреби у фінансуванні",
+      "col": {
+        "period": "Місяць",
+        "planned_in": "Планові надходження",
+        "actual_in": "Фактичні надходження",
+        "expected_in": "Очікувані надходження",
+        "planned_out": "Планові витрати",
+        "actual_out": "Фактичні витрати",
+        "expected_out": "Очікувані витрати",
+        "net": "Чистий потік",
+        "cumulative": "Накопичена позиція"
+      }
+    }
+  }
+}

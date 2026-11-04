@@ -1,0 +1,2541 @@
+{
+  "costs.catalog_name_unavailable": "لا يمكن استخدام هذا الاسم لكتالوج جديد. اختر اسمًا آخر.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "تقدير تكاليف البناء مفتوح المصدر"
+  },
+  "nav": {
+    "dashboard": "لوحة المعلومات",
+    "assemblies": "تحليلات الأسعار",
+    "ai_estimate": "تقدير بالذكاء الاصطناعي",
+    "settings": "الإعدادات",
+    "5d_cost_model": "نموذج التكلفة 5D",
+    "templates": "قوالب",
+    "reports": "التقارير",
+    "sustainability": "الاستدامة",
+    "group_estimation": "التقدير",
+    "group_planning": "التخطيط",
+    "group_procurement": "المشتريات",
+    "group_tools": "الأدوات",
+    "architecture": "خريطة البنية"
+  },
+  "common": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "create": "إنشاء",
+    "search": "بحث",
+    "filter": "تصفية",
+    "export": "تصدير",
+    "import": "استيراد",
+    "loading": "جارٍ التحميل...",
+    "error": "خطأ",
+    "success": "تم بنجاح",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "next": "التالي",
+    "yes": "نعم",
+    "no": "لا"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور"
+  },
+  "projects": {
+    "title": "المشاريع",
+    "new_project": "مشروع جديد",
+    "project_name": "اسم المشروع",
+    "no_projects": "لا توجد مشاريع بعد"
+  },
+  "boq": {
+    "title": "جدول الكميات",
+    "position": "بند",
+    "ordinal": "رقم التسلسل",
+    "description": "الوصف",
+    "quantity": "الكمية",
+    "unit": "الوحدة",
+    "unit_rate": "سعر الوحدة",
+    "total": "الإجمالي",
+    "add_position": "إضافة بند",
+    "add_section": "إضافة قسم",
+    "assembly": "تحليل سعر",
+    "subtotal": "المجموع الفرعي",
+    "grand_total": "المجموع الكلي",
+    "direct_cost": "التكلفة المباشرة",
+    "net_total": "الإجمالي الصافي",
+    "gross_total": "الإجمالي الكلي",
+    "vat": "ضريبة القيمة المضافة",
+    "add_markups": "إضافة هوامش",
+    "validate": "تحقق",
+    "export": "تصدير",
+    "mvp": {
+      "title": "اختيار المواد",
+      "subtitle_one": "موردٌ واحد يحتاج إلى اختيار",
+      "subtitle_other": "{{count}} مورد يحتاج إلى اختيار",
+      "bulk_label": "تعبئة سريعة:",
+      "bulk_median": "الوسيط للكل",
+      "bulk_mean": "المتوسط للكل",
+      "bulk_cheapest": "الأرخص للكل",
+      "bulk_priciest": "الأغلى للكل",
+      "slot_variant_count": "{{n}} خيارات",
+      "selected_label": "المختار:",
+      "default_mean": "السعر المتوسط",
+      "default_median": "السعر الوسيط",
+      "row_median": "الوسيط · {{price}}",
+      "row_mean": "المتوسط · {{price}}",
+      "subtotal_label": "سعر البند",
+      "apply": "تطبيق وإضافة إلى جدول الكميات",
+      "batch_progress": "العنصر {{current}} من {{total}}",
+      "toast_applied_one": "تم اختيار بديل واحد",
+      "toast_applied_other": "تم اختيار {{count}} بديل"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "تقرير التبادل"
+      },
+      "column": {
+        "severity": "الخطورة",
+        "kind": "نوع الفقدان",
+        "position": "البند",
+        "field": "الحقل",
+        "original": "القيمة الأصلية",
+        "written": "القيمة المكتوبة",
+        "count": "العدد",
+        "detail": "التفاصيل"
+      },
+      "severity": {
+        "error": "حرج",
+        "warning": "تحذير",
+        "info": "ملاحظة"
+      },
+      "kind": {
+        "unsupported_element": "عنصر غير مدعوم",
+        "truncated_text": "نص مقتطع",
+        "altered_text": "نص معدّل",
+        "rounded_value": "قيمة مقربة",
+        "value_out_of_range": "قيمة خارج النطاق",
+        "dropped_attribute": "سمة محذوفة",
+        "unmapped_unit": "وحدة غير مطابقة",
+        "lost_hierarchy": "مستوى هرمي مفقود",
+        "markup_not_representable": "علاوة غير قابلة للتمثيل",
+        "attachment_skipped": "مرفق متجاهل",
+        "changed_identifier": "معرّف متغير",
+        "exceeds_limit": "تجاوز حد التخزين",
+        "rejected_row": "صف مرفوض",
+        "skipped_row": "صف متجاهل",
+        "parser_warning": "تحذير القارئ",
+        "roundtrip_mismatch": "اختلاف في الذهاب والإياب"
+      }
+    },
+    "branch": {
+      "base_snapshot": "نقطة التفرّع",
+      "base_snapshot_from": "نقطة التفرّع (من اللقطة \"{snapshot}\")",
+      "before_cherry_pick": "قبل تطبيق التغييرات من \"{source}\"",
+      "before_merge": "قبل دمج الفرع \"{branch}\"",
+      "errors": {
+        "branch_closed": "تم دمج هذا الفرع أو أرشفته ولا يمكنه قبول مزيد من التغييرات.",
+        "not_a_branch": "جدول الكميات هذا ليس فرعًا.",
+        "same_bill": "اختر تقديرين مختلفين.",
+        "different_project": "يجب أن ينتمي التقديران إلى المشروع نفسه.",
+        "different_tree": "يجب أن يكون التقديران فرعين من التقدير الرئيسي نفسه.",
+        "unresolved_conflicts": "تم تغيير {count} بنود في التقديرين معًا. قرّر النسخة التي تبقيها لكل بند قبل التطبيق.",
+        "merge_forbidden": "ليست لديك صلاحية الدمج في التقدير الرئيسي.",
+        "confirm_required": "أكّد الدمج: فهو يعيد كتابة التقدير الرئيسي.",
+        "design_options_unavailable": "وحدة خيارات التصميم غير مثبّتة.",
+        "base_snapshot_in_use": "هذه اللقطة هي نقطة التفرّع لفرع مفتوح ولا يمكن حذفها."
+      },
+      "export": {
+        "title_positions": "مقارنة التقديرات حسب البند",
+        "title_sections": "مقارنة التقديرات حسب القسم",
+        "title_cost_groups": "مقارنة التقديرات حسب مجموعة التكلفة",
+        "project": "المشروع",
+        "bill_a": "التقدير A",
+        "bill_b": "التقدير B",
+        "total_a": "الإجمالي A",
+        "total_b": "الإجمالي B",
+        "delta": "الفرق",
+        "counts": "التغييرات",
+        "counts_value": "أُضيف {added}، أُزيل {removed}، عُدّل {changed}",
+        "col_ordinal": "البند",
+        "col_description": "الوصف",
+        "col_unit": "الوحدة",
+        "col_change": "التغيير",
+        "col_qty_a": "الكمية A",
+        "col_qty_b": "الكمية B",
+        "col_rate_a": "السعر A",
+        "col_rate_b": "السعر B",
+        "col_total_a": "الإجمالي A",
+        "col_total_b": "الإجمالي B",
+        "col_delta": "الفرق",
+        "col_section": "القسم",
+        "col_cost_group": "مجموعة التكلفة",
+        "change_added": "مُضاف",
+        "change_removed": "مُزال",
+        "change_changed": "مُعدّل",
+        "change_unchanged": "دون تغيير",
+        "ungrouped": "بلا مجموعة",
+        "empty": "التقديران متطابقان.",
+        "total": "الإجمالي"
+      }
+    }
+  },
+  "costs": {
+    "title": "قاعدة بيانات الأسعار",
+    "rate": "السعر",
+    "material": "مواد",
+    "labor": "عمالة",
+    "equipment": "معدات",
+    "search_costs": "بحث في الأسعار..."
+  },
+  "assemblies": {
+    "title": "تحليلات الأسعار",
+    "description": "وصفات تسعير قابلة لإعادة الاستخدام، تجمع المواد والعمالة والمعدات في قوالب جاهزة للاستخدام",
+    "new_assembly": "تحليل سعر جديد",
+    "from_database": "من قاعدة بيانات الأسعار",
+    "apply_to_boq": "تطبيق على جدول الكميات",
+    "add_component": "إضافة مكوّن",
+    "no_assemblies": "لا توجد تحليلات أسعار بعد",
+    "no_assemblies_hint": "أنشئ أول تحليل سعر من قاعدة بيانات الأسعار أو من دليل الموارد",
+    "total_rate": "السعر الإجمالي"
+  },
+  "catalog": {
+    "title": "دليل الموارد",
+    "description": "تصفّح وأدر المواد والمعدات وأسعار العمالة والمشغّلين",
+    "add_resource": "إضافة مورد",
+    "import_region": "استيراد منطقة",
+    "build_assembly": "إنشاء تحليل سعر",
+    "my_catalog": "دليلي"
+  },
+  "validation": {
+    "title": "التحقق",
+    "passed": "ناجح",
+    "warnings": "تحذيرات",
+    "errors": "أخطاء",
+    "score": "درجة الجودة",
+    "run_validation": "تشغيل التحقق",
+    "missing_quantity": "البند {position} بدون كمية",
+    "missing_rate": "البند {position} بدون سعر وحدة",
+    "missing_description": "البند {position} بدون وصف",
+    "missing_classification": "البند {position} يحتاج رمز تصنيف",
+    "duplicate_ordinal": "رقم تسلسل مكرر: {ordinal}",
+    "rate_anomaly": "سعر الوحدة {rate} يتجاوز الحد ({threshold})",
+    "nl": {
+      "not_a_string": "يجب أن يكون الإدخال نصًا.",
+      "empty": "الإدخال فارغ.",
+      "too_long": "يتجاوز الإدخال {max} حرفًا.",
+      "ai_unparsable": "تعذّر تحليل رد الذكاء الاصطناعي كمستند DSL.",
+      "no_pattern": "لم يتطابق أي نمط مع الجملة المدخلة.",
+      "try": "جرّب: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "جدول زمني 4D",
+    "generated": {
+      "position_label": "البند {ordinal}",
+      "section_label": "القسم {ordinal}",
+      "task_description": "تم إنشاؤه تلقائيًا من البند {ordinal} في جدول الكميات ({quantity} {unit})",
+      "section_description": "ملخص: القسم {ordinal} من جدول الكميات",
+      "start_milestone": "بداية المشروع",
+      "start_milestone_description": "معلم بداية المشروع",
+      "completion_milestone": "اكتمال المشروع",
+      "completion_milestone_description": "معلم اكتمال المشروع",
+      "labour_resource": "العمالة",
+      "machine_resource": "المعدات"
+    },
+    "progress_sheet": {
+      "sheet_title": "الإنجاز",
+      "title": "ورقة تحديث الإنجاز",
+      "detail_schedule": "الجدول الزمني: {name}",
+      "detail_exported": "تاريخ التصدير: {date}",
+      "instructions": "املأ الأعمدة البيضاء فقط. لا تغيّر الأعمدة الرمادية ولا ترتيب الصفوف ولا الأعمدة المخفية.",
+      "col": {
+        "activity_ref": "معرّف النشاط",
+        "name": "النشاط",
+        "wbs_code": "WBS",
+        "responsible": "المسؤول",
+        "planned_start": "البدء المخطط",
+        "planned_finish": "الانتهاء المخطط",
+        "percent_complete": "نسبة الإنجاز %",
+        "actual_start": "البدء الفعلي",
+        "actual_finish": "الانتهاء الفعلي",
+        "remaining_duration": "المتبقي (أيام عمل)",
+        "notes": "ملاحظات",
+        "row_key": "مفتاح الصف",
+        "stamp": "الختم"
+      }
+    }
+  },
+  "cad": {
+    "title": "استيراد CAD",
+    "upload": "رفع ملف CAD",
+    "supported_formats": "الصيغ: DWG، DGN، RVT، IFC، PDF",
+    "converting": "جارٍ التحويل...",
+    "elements_found": "تم العثور على {count} عنصر"
+  },
+  "takeoff": {
+    "title": "حصر الكميات",
+    "auto_detect": "كشف تلقائي",
+    "manual_measure": "قياس يدوي",
+    "confidence": "الموثوقية"
+  },
+  "tendering": {
+    "title": "المناقصات",
+    "create_tender": "إنشاء مناقصة",
+    "bid": "عرض سعر",
+    "award": "ترسية"
+  },
+  "modules": {
+    "title": "الوحدات",
+    "installed": "مُثبّت",
+    "available": "متاح",
+    "install": "تثبيت",
+    "uninstall": "إزالة",
+    "update": "تحديث"
+  },
+  "dashboard": {
+    "welcome": "مرحباً بك في OpenConstructionERP",
+    "subtitle": "منصة تقدير تكاليف البناء مفتوحة المصدر",
+    "recent_projects": "المشاريع الأخيرة",
+    "system_status": "حالة النظام",
+    "modules_loaded": "الوحدات المحمّلة",
+    "validation_rules": "قواعد التحقق",
+    "languages": "اللغات",
+    "continue_estimate": "متابعة آخر تقدير",
+    "getting_started": "البدء",
+    "total_value": "القيمة الإجمالية",
+    "active_estimates": "التقديرات النشطة",
+    "schedule_status": "حالة الجدول",
+    "quality_score": "درجة الجودة",
+    "analytics": "التحليلات",
+    "project_overview": "نظرة عامة على المشروع",
+    "step_load_db": "تحميل قاعدة الأسعار",
+    "step_load_db_desc": "استيراد بيانات الأسعار الإقليمية مع 55,000+ عنصر",
+    "step_ai_search": "تفعيل البحث الذكي",
+    "step_ai_search_desc": "إنشاء تضمينات متجهية للمطابقة الدلالية للتكاليف",
+    "step_connect_ai": "ربط الذكاء الاصطناعي",
+    "step_connect_ai_desc": "أضف مفاتيح API للتقدير بالذكاء الاصطناعي",
+    "step_create_project": "إنشاء مشروع",
+    "step_create_project_desc": "ابدأ أول مشروع تقدير تكاليف البناء",
+    "step_build_boq": "إنشاء جدول الكميات",
+    "step_build_boq_desc": "أنشئ جدول كميات بمساعدة الذكاء الاصطناعي"
+  },
+  "units": {
+    "m": "م",
+    "m2": "م²",
+    "m3": "م³",
+    "kg": "كغ",
+    "t": "طن",
+    "pcs": "قطعة",
+    "lsum": "مقطوعية",
+    "h": "ساعة",
+    "set": "طقم"
+  },
+  "contacts": {
+    "title": "دليل جهات الاتصال",
+    "new_contact": "جهة اتصال جديدة",
+    "contact_type": "نوع جهة الاتصال",
+    "client": "المالك",
+    "subcontractor": "مقاول من الباطن",
+    "supplier": "مورّد",
+    "consultant": "الاستشاري",
+    "internal": "داخلي",
+    "company_name": "اسم الشركة",
+    "search_contacts": "البحث في جهات الاتصال...",
+    "no_contacts": "لا توجد جهات اتصال بعد",
+    "prequalification": "التأهيل المسبق",
+    "approved": "معتمد",
+    "pending": "قيد الانتظار",
+    "expired": "منتهي الصلاحية"
+  },
+  "tasks": {
+    "title": "المهام",
+    "new_task": "مهمة جديدة",
+    "task": "مهمة",
+    "topic": "موضوع",
+    "information": "معلومة",
+    "decision": "قرار",
+    "personal": "مهمة شخصية",
+    "my_tasks": "مهامي",
+    "open": "مفتوحة",
+    "in_progress": "قيد التنفيذ",
+    "completed": "مكتملة",
+    "draft": "مسودة",
+    "due_date": "تاريخ الاستحقاق",
+    "assignee": "المسؤول",
+    "priority": "الأولوية",
+    "checklist": "قائمة التحقق",
+    "focus_area": "مجال التركيز"
+  },
+  "rfi": {
+    "title": "طلبات المعلومات",
+    "new_rfi": "طلب معلومات جديد",
+    "subject": "الموضوع",
+    "question": "السؤال",
+    "response": "الرد",
+    "ball_in_court": "المسؤول الحالي",
+    "days_open": "أيام الفتح",
+    "cost_impact": "الأثر على التكلفة",
+    "schedule_impact": "الأثر على البرنامج الزمني",
+    "respond": "إرسال الرد",
+    "close": "إغلاق",
+    "overdue": "متأخر"
+  },
+  "finance": {
+    "title": "الشؤون المالية",
+    "budgets": "الموازنات",
+    "invoices": "الفواتير",
+    "payable": "ذمم دائنة",
+    "receivable": "ذمم مدينة",
+    "payments": "المدفوعات",
+    "evm": "القيمة المكتسبة",
+    "invoice_number": "رقم الفاتورة",
+    "amount": "المبلغ",
+    "status": "الحالة",
+    "approve": "اعتماد",
+    "pay": "تعليم كمدفوعة",
+    "original_budget": "الموازنة الأصلية",
+    "revised_budget": "الموازنة المعدّلة",
+    "committed": "ملتزم به",
+    "actual": "الفعلي",
+    "forecast": "المتوقع",
+    "variance": "الانحراف"
+  },
+  "procurement": {
+    "title": "المشتريات",
+    "purchase_orders": "أوامر الشراء",
+    "goods_receipts": "إشعارات استلام البضاعة",
+    "new_po": "أمر شراء جديد",
+    "po_number": "رقم أمر الشراء",
+    "vendor": "المورّد",
+    "issue": "إصدار",
+    "confirm": "تأكيد الاستلام"
+  },
+  "safety": {
+    "title": "السلامة",
+    "incidents": "الحوادث",
+    "observations": "الملاحظات",
+    "new_incident": "حادث جديد",
+    "new_observation": "ملاحظة جديدة",
+    "severity": "درجة الخطورة",
+    "risk_score": "درجة المخاطرة",
+    "days_lost": "أيام الفقد",
+    "treatment": "العلاج",
+    "corrective_action": "الإجراء التصحيحي"
+  },
+  "meetings": {
+    "title": "الاجتماعات",
+    "new_meeting": "اجتماع جديد",
+    "meeting_type": "النوع",
+    "attendees": "الحضور",
+    "agenda": "جدول الأعمال",
+    "action_items": "بنود المتابعة",
+    "minutes": "المحضر",
+    "complete": "إنهاء الاجتماع",
+    "present": "حاضر",
+    "absent": "غائب",
+    "excused": "غياب بعذر",
+    "actions": {
+      "status": {
+        "open": "مفتوح",
+        "completed": "مكتمل",
+        "cancelled": "ملغى"
+      },
+      "flag": {
+        "overdue": "متأخر",
+        "on_track": "في المسار"
+      },
+      "label": {
+        "action_item": "بند إجراء",
+        "completion_rate": "نسبة إنجاز الإجراءات",
+        "open_vs_done": "المفتوح مقابل المنجز",
+        "overdue": "الإجراءات المتأخرة"
+      },
+      "explain": {
+        "action_item": "بند الإجراء هو مهمة متفق عليها في الاجتماع، ولها مسؤول وتاريخ استحقاق.",
+        "completion_rate": "نسبة إنجاز الإجراءات هي عدد الإجراءات المكتملة مقسومًا على إجمالي الإجراءات، وتتراوح بين 0 و1.",
+        "open_vs_done": "الإجراءات المفتوحة ما زالت تحتاج إلى عمل. الإجراءات المنجزة مكتملة ولا تحتاج إلى مزيد من العمل.",
+        "overdue": "يكون الإجراء متأخرًا عندما يكون ما زال مفتوحًا وتاريخ استحقاقه سابقًا لتاريخ المرجع."
+      }
+    },
+    "minutes_pdf": {
+      "title": "محضر الاجتماع",
+      "issued": "صادر",
+      "draft": "مسودة",
+      "date": "التاريخ:",
+      "location": "الموقع:",
+      "type": "النوع:",
+      "number": "رقم الاجتماع:",
+      "chairperson": "رئيس الاجتماع:",
+      "next_meeting": "الاجتماع القادم:",
+      "not_available": "غير متاح",
+      "not_scheduled": "غير محدد",
+      "attendance": "الحضور",
+      "present": "الحاضرون:",
+      "absent": "الغائبون / المعتذرون:",
+      "agenda": "جدول الأعمال والمناقشة والقرارات",
+      "required": "(مطلوب)",
+      "discussion": "المناقشة:",
+      "decision": "القرار:",
+      "decisions": "القرارات",
+      "open_questions": "الأسئلة المفتوحة",
+      "actions": "بنود العمل",
+      "col_number": "#",
+      "col_action": "الإجراء",
+      "col_owner": "المسؤول",
+      "col_due": "الاستحقاق",
+      "col_status": "الحالة",
+      "brought_forward": "[مرحَّل]",
+      "overdue": "(متأخر)",
+      "status_open": "مفتوح",
+      "status_in_progress": "قيد التنفيذ",
+      "status_done": "مكتمل",
+      "status_cancelled": "ملغى",
+      "summary": "الملخص",
+      "generated": "تاريخ الإنشاء: {stamp}",
+      "issued_at": "تاريخ الإصدار {stamp}",
+      "running_head": "{project} - المحضر",
+      "type_progress": "متابعة التقدم",
+      "type_design": "التصميم",
+      "type_safety": "السلامة",
+      "type_subcontractor": "مقاول الباطن",
+      "type_kickoff": "الانطلاق",
+      "type_closeout": "التسليم والإغلاق",
+      "type_commercial": "تجاري"
+    }
+  },
+  "inspections": {
+    "title": "فحوص الجودة",
+    "new_inspection": "فحص جديد",
+    "inspector": "المفتّش",
+    "checklist": "قائمة التحقق",
+    "pass": "مطابق",
+    "fail": "غير مطابق",
+    "partial": "جزئي",
+    "critical": "حرج",
+    "intl": {
+      "status_labels": {
+        "scheduled": "مجدول",
+        "in_progress": "قيد التنفيذ",
+        "completed": "مكتمل",
+        "failed": "فشل",
+        "cancelled": "ملغى"
+      }
+    }
+  },
+  "ncr": {
+    "title": "تقارير عدم المطابقة",
+    "new_ncr": "عدم مطابقة جديد",
+    "root_cause": "السبب الجذري",
+    "corrective_action": "الإجراء التصحيحي",
+    "preventive_action": "الإجراء الوقائي",
+    "material": "مواد",
+    "workmanship": "جودة التنفيذ",
+    "design": "التصميم"
+  },
+  "submittals": {
+    "title": "المستندات المقدّمة للاعتماد",
+    "new_submittal": "مستند جديد",
+    "spec_section": "بند المواصفات",
+    "revision": "المراجعة",
+    "submit": "تقديم",
+    "review": "مراجعة",
+    "approved_as_noted": "معتمد مع الملاحظات",
+    "revise_resubmit": "التعديل وإعادة التقديم",
+    "intl": {
+      "status_labels": {
+        "draft": "مسودة",
+        "submitted": "مقدَّم",
+        "under_review": "قيد المراجعة",
+        "approved": "موافق عليه",
+        "approved_as_noted": "موافق عليه مع ملاحظات",
+        "revise_and_resubmit": "يُعدَّل ويُعاد تقديمه",
+        "rejected": "مرفوض",
+        "closed": "مغلق"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "المراسلات",
+    "new_entry": "قيد جديد",
+    "incoming": "وارد",
+    "outgoing": "صادر",
+    "letter": "خطاب",
+    "email": "بريد إلكتروني",
+    "notice": "إشعار",
+    "date_sent": "تاريخ الإرسال",
+    "date_received": "تاريخ الاستلام"
+  },
+  "cde": {
+    "title": "بيئة البيانات المشتركة",
+    "new_container": "حاوية جديدة",
+    "container_code": "رمز الحاوية",
+    "cde_state": "حالة بيئة البيانات",
+    "wip": "قيد الإعداد",
+    "shared": "مشترك",
+    "published": "منشور",
+    "archived": "مؤرشف",
+    "promote": "الترقية",
+    "suitability": "الملاءمة",
+    "discipline": "التخصص",
+    "revisions": "المراجعات",
+    "intl": {
+      "state_labels": {
+        "wip": "قيد العمل",
+        "shared": "مشترك",
+        "published": "منشور",
+        "archived": "مؤرشف"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "إشعارات الإحالة",
+    "new_transmittal": "إشعار إحالة جديد",
+    "purpose": "الغرض",
+    "for_approval": "للاعتماد",
+    "for_information": "للعلم",
+    "for_construction": "للتنفيذ",
+    "recipients": "المستلمون",
+    "acknowledge": "الإقرار بالاستلام",
+    "locked": "مقفل",
+    "issue_transmittal": "إصدار",
+    "intl": {
+      "status_words": {
+        "draft": "مسودة",
+        "issued": "مُرسَل",
+        "responded": "تم الرد"
+      }
+    }
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "no_notifications": "لا توجد إشعارات جديدة",
+    "mark_all_read": "تعليم الكل كمقروء",
+    "unread": "غير مقروء"
+  },
+  "comments": {
+    "title": "التعليقات",
+    "post": "نشر",
+    "reply": "رد",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "placeholder": "اكتب تعليقاً...",
+    "empty": "لا توجد تعليقات بعد. ابدأ النقاش.",
+    "edited": "معدّل",
+    "deleted": "تم حذف هذا التعليق"
+  },
+  "bim": {
+    "title": "مركز BIM",
+    "models": "النماذج",
+    "elements": "العناصر",
+    "upload_model": "رفع نموذج",
+    "processing": "قيد المعالجة",
+    "active": "نشط",
+    "link_to_boq": "الربط بجدول الكميات",
+    "properties": "الخصائص",
+    "quantities": "الكميات",
+    "wireframe": "الإطار السلكي",
+    "section_box": "صندوق القطاع",
+    "measure": "قياس",
+    "zoom_to_fit": "ملاءمة العرض"
+  },
+  "reporting": {
+    "title": "التقارير ولوحات المتابعة",
+    "kpi": "لوحة مؤشرات الأداء",
+    "generate_report": "إنشاء تقرير",
+    "templates": "القوالب",
+    "project_status": "حالة المشروع",
+    "cost_report": "تقرير التكاليف",
+    "schedule_status": "حالة البرنامج الزمني",
+    "safety_report": "تقرير السلامة",
+    "explain": {
+      "report_total_one": "إجمالي التقرير: {money} (مجموع {count} بند).",
+      "report_total_other": "إجمالي التقرير: {money} (مجموع {count} بندًا).",
+      "percent_of_total": "{part} يمثل {percent} من {total} (نسبة من الإجمالي).",
+      "percent_zero_total": "{part} من {total}: الإجمالي صفر، لذلك يُعرض كل نصيب بنسبة 0 بالمئة.",
+      "breakdown_empty": "تفصيل التكاليف: لا توجد بيانات.",
+      "breakdown_one": "تفصيل التكاليف: مجموعة واحدة ({count})، إجمالي التقرير {money}.",
+      "breakdown_other": "تفصيل التكاليف: {count} مجموعة، إجمالي التقرير {money}.",
+      "top_n_one": "أعلى {requested}: {shown} من {shown} بند.",
+      "top_n_other": "أعلى {requested}: {shown} من {shown} بندًا."
+    }
+  },
+  "gantt": {
+    "title": "مخطط جانت",
+    "day": "يوم",
+    "week": "أسبوع",
+    "month": "شهر",
+    "critical_path": "المسار الحرج",
+    "baseline": "الخط الأساسي",
+    "dependencies": "العلاقات",
+    "today": "اليوم"
+  },
+  "settings": {
+    "regional": "الإعدادات الإقليمية",
+    "timezone": "المنطقة الزمنية",
+    "measurement": "نظام القياس",
+    "paper_size": "حجم الورق",
+    "date_format": "تنسيق التاريخ",
+    "number_format": "تنسيق الأرقام",
+    "currency": "العملة",
+    "metric": "متري",
+    "imperial": "إمبراطوري"
+  },
+  "users": {
+    "management": "إدارة المستخدمين",
+    "management_desc": "إدارة أعضاء الفريق والأدوار والصلاحيات",
+    "invite_user": "دعوة مستخدم",
+    "invite": "دعوة",
+    "full_name": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "role": "الدور",
+    "status": "الحالة",
+    "last_login": "آخر تسجيل دخول",
+    "actions": "الإجراءات",
+    "name": "الاسم",
+    "total": "إجمالي المستخدمين",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "admins": "المسؤولون",
+    "managers": "المديرون",
+    "search": "البحث بالاسم أو البريد الإلكتروني...",
+    "no_users": "لم يتم العثور على مستخدمين",
+    "updated": "تم تحديث المستخدم",
+    "invited": "تم إرسال الدعوة بنجاح",
+    "deactivate": "إلغاء التنشيط",
+    "activate": "تنشيط",
+    "never": "أبداً",
+    "role_admin_desc": "صلاحية كاملة على جميع الميزات",
+    "role_manager_desc": "إدارة المشاريع والفريق",
+    "role_editor_desc": "إنشاء المحتوى وتحريره",
+    "role_viewer_desc": "اطلاع فقط"
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "المشروع",
+      "project_no": "رقم المشروع",
+      "generated_on": "تاريخ الإنشاء",
+      "records": "السجلات",
+      "currency": "العملة",
+      "status": "الحالة",
+      "name": "الاسم",
+      "signature": "التوقيع",
+      "date": "التاريخ",
+      "signatures": "التوقيعات",
+      "yes": "نعم",
+      "no": "لا",
+      "days_one": "{n} يوم",
+      "days_other": "{n} أيام",
+      "empty_register": "لا توجد سجلات.",
+      "total": "الإجمالي",
+      "signer_title": "المسمى الوظيفي",
+      "sig_prepared_by": "أعدّه",
+      "sig_checked_by": "راجعه",
+      "sig_approved_by": "اعتمده",
+      "footer_generated": "أُنشئ في {timestamp}",
+      "footer_page": "صفحة {page} من {total}"
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "أمر شراء",
+        "gr_title": "إشعار استلام بضائع",
+        "supplier": "المورّد",
+        "po_type": "نوع الأمر",
+        "issue_date": "تاريخ الإصدار",
+        "delivery_date": "تاريخ التسليم",
+        "created_by": "أعدّه",
+        "order_total": "إجمالي الأمر",
+        "line_items": "بنود الأمر",
+        "col_no": "م",
+        "col_description": "الوصف",
+        "col_quantity": "الكمية",
+        "col_unit": "الوحدة",
+        "col_unit_rate": "سعر الوحدة",
+        "col_amount": "المبلغ",
+        "no_line_items": "لا توجد بنود.",
+        "totals": "الإجماليات",
+        "subtotal": "المبلغ الصافي",
+        "tax": "الضريبة",
+        "total_gross": "الإجمالي شامل الضريبة",
+        "terms": "الشروط",
+        "payment_terms": "شروط الدفع",
+        "retention": "الاستقطاع (محتجزات الضمان)",
+        "retention_at": "يُستقطع عند",
+        "retention_at_receipt": "استلام البضائع",
+        "retention_at_invoice": "الفاتورة",
+        "invoice_tolerance": "هامش السماح في الفاتورة",
+        "supplier_confirmation": "تأكيد المورّد",
+        "supplier_reference": "مرجع المورّد",
+        "confirmed_delivery": "تاريخ التسليم المؤكد",
+        "acknowledged_on": "تاريخ الإقرار",
+        "not_confirmed": "لم يؤكد المورّد الأمر بعد.",
+        "notes": "ملاحظات",
+        "no_notes": "لا توجد ملاحظات مسجّلة.",
+        "sig_ordered_by": "طلبه",
+        "purchase_order": "أمر الشراء",
+        "receipt_date": "تاريخ الاستلام",
+        "received_by": "استلمه",
+        "delivery_note": "إشعار التسليم",
+        "col_ordered": "المطلوب",
+        "col_received": "المستلم",
+        "col_rejected": "المرفوض",
+        "col_batch": "الدفعة / التشغيلة",
+        "rejections": "المرفوضات",
+        "col_reason": "السبب",
+        "no_rejections": "لم يُرفض أي شيء.",
+        "sig_delivered_by": "سلّمه",
+        "counterparty_tax_id": "الرقم الضريبي",
+        "counterparty_address": "العنوان"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "مسودة",
+          "approved": "معتمد",
+          "issued": "صادر",
+          "partially_received": "مستلم جزئيًا",
+          "completed": "مكتمل",
+          "cancelled": "ملغى"
+        },
+        "gr_status": {
+          "draft": "مسودة",
+          "confirmed": "مؤكد"
+        },
+        "po_type": {
+          "standard": "عادي",
+          "blanket": "أمر شراء إطاري",
+          "service": "خدمات"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "فاتورة",
+        "payment_title": "دفعة",
+        "direction": "الاتجاه",
+        "supplier": "المورّد",
+        "client": "العميل",
+        "invoice_date": "تاريخ الفاتورة",
+        "due_date": "تاريخ الاستحقاق",
+        "payment_terms": "شروط الدفع",
+        "purchase_order": "أمر الشراء",
+        "invoice_total": "إجمالي الفاتورة",
+        "line_items": "بنود الفاتورة",
+        "col_no": "م",
+        "col_description": "الوصف",
+        "col_quantity": "الكمية",
+        "col_unit": "الوحدة",
+        "col_unit_rate": "سعر الوحدة",
+        "col_vat": "ضريبة القيمة المضافة",
+        "col_amount": "المبلغ",
+        "no_line_items": "لا توجد بنود.",
+        "totals": "الإجماليات",
+        "subtotal": "المبلغ الصافي",
+        "tax": "الضريبة",
+        "total_gross": "الإجمالي شامل الضريبة",
+        "retention": "الاستقطاع (محتجزات الضمان)",
+        "amount_due": "المستحق بعد الاستقطاع",
+        "payments": "الدفعات",
+        "col_date": "التاريخ",
+        "col_reference": "المرجع",
+        "col_paid": "المدفوع",
+        "col_withheld": "المستقطع",
+        "refund": "استرداد",
+        "no_payments": "لا توجد دفعات مسجّلة.",
+        "notes": "ملاحظات",
+        "no_notes": "لا توجد ملاحظات مسجّلة.",
+        "invoice": "الفاتورة",
+        "invoice_number": "رقم الفاتورة",
+        "payment_date": "تاريخ الدفع",
+        "reference": "المرجع",
+        "amount_paid": "المبلغ المدفوع",
+        "exchange_rate": "سعر الصرف",
+        "kind": "النوع",
+        "kind_payment": "دفعة",
+        "kind_refund": "استرداد",
+        "withholding": "الاستقطاع المحتجز",
+        "withheld_amount": "المبلغ المستقطع",
+        "release_date": "تاريخ الإفراج",
+        "gross_settled": "المبلغ الإجمالي المسدَّد",
+        "no_withholding": "لم يُستقطع أي مبلغ من هذه الدفعة.",
+        "counterparty_tax_id": "الرقم الضريبي",
+        "counterparty_address": "العنوان"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "مسودة",
+          "pending": "بانتظار الاعتماد",
+          "approved": "معتمدة",
+          "sent": "مُرسلة",
+          "paid": "مدفوعة",
+          "cancelled": "ملغاة",
+          "credit_note_issued": "صدر إشعار دائن"
+        },
+        "direction": {
+          "payable": "مستحقة الدفع (فاتورة مورّد)",
+          "receivable": "مستحقة القبض (فاتورة عميل)"
+        },
+        "payment_status": {
+          "completed": "مكتملة",
+          "refunded": "مستردة"
+        }
+      }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "سجل المستندات المقدمة للاعتماد",
+        "doc_title": "مستند مقدم للاعتماد",
+        "doc_title_product_data": "نموذج اعتماد المواد",
+        "col_number": "رقم المستند",
+        "col_title": "العنوان",
+        "col_type": "النوع",
+        "col_spec": "بند المواصفات",
+        "col_rev": "المراجعة",
+        "col_date_submitted": "تاريخ التقديم",
+        "col_date_required": "تاريخ المطلوب",
+        "col_date_returned": "تاريخ الإعادة",
+        "col_reviewer": "المراجع",
+        "col_approver": "المعتمد",
+        "col_ball_in_court": "الجهة المطلوب منها الإجراء",
+        "submitted_by_org": "الشركة المقدمة",
+        "review_notes": "ملاحظات المراجع",
+        "no_review_notes": "لا توجد ملاحظات مسجلة من المراجع.",
+        "sig_submitted": "تقديم",
+        "sig_reviewed": "مراجعة",
+        "sig_approved": "اعتماد",
+        "register_filename": "sijil-mustanadat-muqaddama",
+        "register_title_shop_drawing": "سجل مخططات التنفيذ",
+        "register_title_product_data": "سجل اعتماد المواد",
+        "register_title_method_statement": "سجل بيانات طريقة التنفيذ",
+        "register_filename_shop_drawing": "sijil-mukhattatat-tanfidh",
+        "register_filename_product_data": "sijil-itimad-mawad",
+        "register_filename_method_statement": "sijil-tariqat-tanfidh",
+        "col_discipline": "التخصص",
+        "col_manufacturer": "الشركة المصنعة / العلامة",
+        "col_model": "الطراز / المرجع",
+        "col_origin": "بلد المنشأ",
+        "col_supplier": "المورّد",
+        "col_product": "الصانع / الطراز / المنشأ",
+        "col_review_code": "رمز المراجعة",
+        "col_outcome": "نتيجة المراجعة",
+        "col_review_period": "مدة المراجعة (أيام)",
+        "col_review_due": "موعد المراجعة",
+        "col_days_in_review": "أيام المراجعة",
+        "col_days_in_review_print": "أيام المراجعة",
+        "col_review_overdue": "أيام التأخير",
+        "col_required_on_site": "مطلوب في الموقع",
+        "col_long_lead": "مدة توريد طويلة",
+        "col_lead_time": "مدة التوريد (أسابيع)",
+        "col_needed_by": "الاعتماد مطلوب قبل",
+        "col_approval_late": "أيام التأخر عن الموعد",
+        "col_drawings": "المخططات المرتبطة",
+        "col_submitted_returned": "التقديم / الإعادة",
+        "col_on_site_needed_by": "في الموقع / الاعتماد قبل",
+        "resubmit_for_record": "يُعاد تقديم النسخة المصححة للسجل",
+        "review_history": "سجل المراجعات",
+        "hist_submitted": "تم التقديم",
+        "hist_returned": "تمت الإعادة",
+        "drawings_missing_one": "{n} مخطط مرتبط لم يعد متاحاً",
+        "drawings_missing_other": "{n} من المخططات المرتبطة لم تعد متاحة",
+        "weeks_one": "{n} أسبوع",
+        "weeks_other": "{n} أسابيع"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودة",
+          "submitted": "مقدَّم",
+          "under_review": "قيد المراجعة",
+          "approved": "معتمد",
+          "approved_as_noted": "معتمد مع الملاحظات",
+          "revise_and_resubmit": "يُعدَّل ويُعاد تقديمه",
+          "rejected": "مرفوض",
+          "closed": "مغلق"
+        },
+        "type": {
+          "shop_drawing": "مخطط تنفيذي",
+          "product_data": "بيانات المنتج",
+          "sample": "عينة",
+          "mock_up": "نموذج تجريبي",
+          "test_report": "تقرير اختبار",
+          "calculation": "حسابات",
+          "method_statement": "بيان طريقة التنفيذ",
+          "certificate": "شهادة",
+          "warranty": "ضمان"
+        },
+        "discipline": {
+          "mechanical": "ميكانيكا",
+          "hvac": "التكييف والتهوية",
+          "plumbing": "السباكة والصرف",
+          "fire_protection": "مكافحة الحريق",
+          "electrical": "كهرباء",
+          "lighting": "إنارة",
+          "elv": "التيار الخفيف",
+          "bms": "أتمتة المباني",
+          "architectural": "عمارة",
+          "structural": "إنشائي",
+          "civil": "أعمال مدنية"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "سجل أوامر التغيير",
+        "doc_title": "أمر تغيير",
+        "col_code": "الرمز",
+        "col_title": "العنوان",
+        "col_reason": "السبب",
+        "col_instrument": "أداة التغيير",
+        "col_submitted": "تاريخ التقديم",
+        "col_contractor_amount": "مبلغ المقاول",
+        "col_engineer_amount": "مبلغ المهندس",
+        "col_approved_amount": "المبلغ المعتمد",
+        "col_cost_impact": "الأثر على التكلفة",
+        "col_time_impact": "الأثر على المدة (أيام)",
+        "col_approved_time": "المدة المعتمدة (أيام)",
+        "time_impact": "الأثر على المدة",
+        "approved_time": "المدة المعتمدة",
+        "col_approved": "تاريخ الاعتماد",
+        "submitted_by": "تقديم",
+        "approved_by": "اعتماد",
+        "description": "الوصف",
+        "no_description": "لا يوجد وصف مسجل.",
+        "items": "بنود التغيير",
+        "item_description": "الوصف",
+        "item_change": "التغيير",
+        "item_unit": "الوحدة",
+        "item_original_quantity": "الكمية الأصلية",
+        "item_new_quantity": "الكمية الجديدة",
+        "item_original_rate": "السعر الأصلي",
+        "item_new_rate": "السعر الجديد",
+        "item_cost_delta": "فرق التكلفة",
+        "register_filename": "sijil-awamir-taghyir"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودة",
+          "submitted": "مقدَّم",
+          "approved": "معتمد",
+          "rejected": "مرفوض",
+          "executed": "منفَّذ"
+        },
+        "reason": {
+          "client_request": "طلب العميل",
+          "design_change": "تغيير في التصميم",
+          "unforeseen": "ظروف غير متوقعة",
+          "regulatory": "متطلبات تنظيمية",
+          "error": "خطأ أو سهو",
+          "non_conformance": "عدم مطابقة",
+          "value_engineering": "هندسة القيمة"
+        },
+        "instrument": {
+          "works_change": "تغيير مُوجَّه",
+          "site_confirmation": "تأكيد من الموقع",
+          "claim": "مطالبة"
+        },
+        "change": {
+          "added": "مضاف",
+          "removed": "محذوف",
+          "modified": "معدَّل"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "حزمة الأدلة",
+        "subject": "الموضوع",
+        "basis": "الأساس",
+        "period_from": "أقدم سجل",
+        "period_to": "أحدث سجل",
+        "digest": "رمز التحقق (SHA-256، أول 16 حرفاً)",
+        "col_row": "م",
+        "col_record_id": "معرّف السجل",
+        "col_section": "القسم",
+        "col_date": "التاريخ",
+        "col_kind": "نوع السجل",
+        "col_title": "العنوان",
+        "col_summary": "الملخص",
+        "col_reference": "المرجع",
+        "register_filename": "hizmat-adilla"
+      },
+      "labels": {
+        "section": {
+          "notices": "الإشعارات",
+          "correspondence": "المراسلات",
+          "rfis": "طلبات المعلومات (RFI)",
+          "variations": "أوامر التغيير",
+          "approvals": "الاعتمادات",
+          "delay": "التأخير",
+          "timeline": "الجدول الزمني",
+          "other": "أخرى"
+        },
+        "kind": {
+          "notice": "إشعار",
+          "variation_notice": "إشعار تغيير",
+          "variation_request": "طلب تغيير",
+          "variation_order": "أمر تغيير",
+          "change_order": "أمر تغيير",
+          "moc_entry": "سجل تغيير",
+          "correspondence": "مراسلة"
+        },
+        "basis": {
+          "dispute": "نزاع",
+          "valuation": "تقييم",
+          "delay": "تأخير / تمديد المدة",
+          "general": "سجل عام"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "سجل المراسلات",
+        "doc_title": "مراسلة",
+        "col_reference": "الرقم المرجعي",
+        "col_direction": "الاتجاه",
+        "col_type": "النوع",
+        "col_subject": "الموضوع",
+        "col_from": "من",
+        "col_to": "إلى",
+        "col_date_sent": "تاريخ الإرسال",
+        "col_date_received": "تاريخ الاستلام",
+        "col_response_due": "موعد الرد المطلوب",
+        "col_clause": "بند العقد",
+        "notes": "ملاحظات",
+        "no_notes": "لا توجد ملاحظات مسجلة.",
+        "attachments": "الملفات المرفقة",
+        "linked_documents": "المستندات المرتبطة",
+        "sig_prepared": "إعداد",
+        "sig_received": "استلام",
+        "register_filename": "sijil-murasalat"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "وارد",
+          "outgoing": "صادر"
+        },
+        "type": {
+          "letter": "خطاب",
+          "email": "بريد إلكتروني",
+          "notice": "إشعار",
+          "memo": "مذكرة",
+          "report": "تقرير"
+        },
+        "status": {
+          "open": "مفتوح",
+          "awaiting_response": "بانتظار الرد",
+          "responded": "تم الرد",
+          "closed": "مغلق"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "سجل المراسلات الناقلة",
+        "doc_title": "مراسلة ناقلة",
+        "col_number": "رقم الناقلة",
+        "col_subject": "الموضوع",
+        "col_purpose": "الغرض",
+        "col_issued": "تاريخ الإصدار",
+        "col_response_due": "موعد الرد",
+        "col_recipients": "المستلمون",
+        "col_item_count": "البنود",
+        "sender": "المُرسِل",
+        "cover_note": "مذكرة مرفقة",
+        "no_cover_note": "لا توجد مذكرة مرفقة.",
+        "recipients": "المستلمون",
+        "recipient": "المستلم",
+        "action_required": "الإجراء المطلوب",
+        "acknowledged": "إقرار الاستلام",
+        "responded": "تاريخ الرد",
+        "items": "المستندات المرسلة",
+        "item_no": "م",
+        "item_description": "الوصف",
+        "item_notes": "ملاحظات",
+        "sig_issued": "إصدار",
+        "sig_received": "استلام",
+        "register_filename": "sijil-murasalat-naqila"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودة",
+          "issued": "صادر",
+          "responded": "تم الرد"
+        },
+        "purpose": {
+          "for_approval": "للاعتماد",
+          "for_review": "للمراجعة",
+          "for_information": "للعلم",
+          "for_construction": "للتنفيذ",
+          "for_tender": "للمناقصة",
+          "for_record": "للحفظ في السجل"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "سجل أوامر التغيير",
+        "claim_register_title": "سجل المطالبات",
+        "notice_register_title": "سجل الإشعارات",
+        "doc_title": "طلب تغيير",
+        "doc_title_credit": "طلب تغيير (حذف)",
+        "time_impact": "الأثر على المدة",
+        "col_code": "الرمز",
+        "col_title": "العنوان",
+        "col_classification": "النوع",
+        "col_urgency": "الأولوية",
+        "col_requested": "تاريخ الطلب",
+        "col_claimed_amount": "المبلغ المطالب به",
+        "col_agreed_amount": "المبلغ المتفق عليه",
+        "col_time_impact": "الأثر على المدة (أيام)",
+        "col_response_due": "موعد الرد",
+        "col_clause": "بند العقد",
+        "col_row": "م",
+        "col_claim_type": "نوع المطالبة",
+        "col_raised": "تاريخ الرفع",
+        "col_period_start": "الفترة من",
+        "col_period_end": "الفترة إلى",
+        "col_description": "الوصف",
+        "col_decided_amount": "المبلغ المقرر",
+        "col_days_requested": "الأيام المطلوبة",
+        "col_days_granted": "الأيام الممنوحة",
+        "col_recipient_type": "الموجَّه إلى",
+        "col_recipient": "المستلم",
+        "col_target_response": "الرد المتوقع",
+        "col_response_received": "الرد المستلم",
+        "requested_by": "تقديم الطلب",
+        "decided_by": "اتخاذ القرار",
+        "date_submitted": "تاريخ التقديم",
+        "date_decided": "تاريخ القرار",
+        "description": "الوصف",
+        "no_description": "لا يوجد وصف مسجل.",
+        "decision_notes": "ملاحظات القرار",
+        "no_decision_notes": "لم يُسجَّل قرار بعد.",
+        "variation_register_filename": "sijil-awamir-taghyir",
+        "claim_register_filename": "sijil-mutalabat",
+        "notice_register_filename": "sijil-ishearat"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "مسودة",
+          "submitted": "مقدَّم",
+          "under_review": "قيد المراجعة",
+          "approved": "معتمد",
+          "rejected": "مرفوض",
+          "converted_to_vo": "حُوِّل إلى أمر"
+        },
+        "claim_status": {
+          "draft": "مسودة",
+          "submitted": "مقدَّمة",
+          "under_review": "قيد المراجعة",
+          "agreed": "متفق عليها",
+          "granted": "ممنوحة",
+          "rejected": "مرفوضة"
+        },
+        "notice_status": {
+          "issued": "صادر",
+          "acknowledged": "تم الإقرار بالاستلام",
+          "responded": "تم الرد",
+          "closed": "مغلق"
+        },
+        "classification": {
+          "scope_change": "تغيير في نطاق العمل",
+          "unforeseen": "ظرف غير متوقع",
+          "owner_change": "تغيير من المالك",
+          "design_dev": "تطوير التصميم",
+          "regulatory": "متطلبات تنظيمية",
+          "other": "أخرى"
+        },
+        "urgency": {
+          "low": "منخفضة",
+          "med": "متوسطة",
+          "high": "عالية"
+        },
+        "claim_type": {
+          "disruption": "تعطيل سير الأعمال",
+          "eot": "تمديد المدة"
+        },
+        "recipient_type": {
+          "owner": "المالك",
+          "contractor": "المقاول",
+          "architect": "المهندس المعماري",
+          "engineer": "المهندس",
+          "consultant": "الاستشاري"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "اليومية الموقعية",
+        "overview": "نظرة عامة",
+        "site_supervisor": "مشرف الموقع",
+        "not_recorded": "غير مسجل",
+        "labour_on_site": "العمالة في الموقع",
+        "equipment_on_site": "المعدات في الموقع",
+        "completeness": "اكتمال البيانات",
+        "weather": "الطقس",
+        "weather_time": "الوقت",
+        "weather_source": "المصدر",
+        "weather_temp": "الحرارة (°م)",
+        "weather_wind": "الرياح (كم/س)",
+        "weather_precip": "الهطول (مم)",
+        "weather_conditions": "الحالة",
+        "weather_empty": "لا توجد بيانات طقس مسجلة لهذا اليوم.",
+        "site_record": "سجل الموقع",
+        "entries_empty": "لا توجد بنود مسجلة في هذه اليومية.",
+        "notes": "ملاحظات",
+        "notes_empty": "لا توجد ملاحظات إضافية.",
+        "footer_supervisor": "المشرف: {name}",
+        "footer_supervisor_missing": "مشرف الموقع: غير مسجل",
+        "footer_generated": "تاريخ الإنشاء: {timestamp}",
+        "footer_page": "صفحة {page} من {total}",
+        "workforce": "القوى العاملة حسب الشركة",
+        "workforce_company": "الشركة",
+        "workforce_count": "العدد",
+        "workforce_unassigned": "غير مسندين إلى شركة",
+        "workforce_total": "الإجمالي",
+        "signatures": "التوقيعات",
+        "sig_prepared": "إعداد (مدير الموقع)",
+        "sig_approved": "اعتماد (ممثل صاحب العمل)",
+        "sig_name": "الاسم",
+        "sig_title": "المسمى الوظيفي",
+        "sig_date": "التاريخ",
+        "sig_signature": "التوقيع",
+        "signed_note": "تم التوقيع في النظام: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "alyawmiya-almawqiiya",
+        "summary_wind": "الرياح {value} كم/س",
+        "summary_precipitation": "الهطول {value} مم",
+        "summary_humidity": "الرطوبة {value} %",
+        "percent": "{value}%",
+        "decimal_mark": "."
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "الزوار",
+          "event": "الأحداث",
+          "delivery": "المواد الموردة",
+          "completion": "الأعمال المنفذة",
+          "incident_summary": "السلامة والحوادث",
+          "inspection_summary": "أعمال الفحص",
+          "photo_note": "ملاحظات الصور",
+          "general": "ملاحظات عامة"
+        },
+        "status": {
+          "open": "مفتوحة",
+          "closed": "مغلقة",
+          "signed": "موقّعة",
+          "archived": "مؤرشفة"
+        },
+        "condition": {
+          "clear": "صافٍ",
+          "mainly_clear": "صافٍ في الغالب",
+          "partly_cloudy": "غائم جزئياً",
+          "cloudy": "غائم",
+          "overcast": "ملبّد بالغيوم",
+          "fog": "ضباب",
+          "fog_rime": "ضباب متجمد",
+          "drizzle_light": "رذاذ خفيف",
+          "drizzle_moderate": "رذاذ متوسط",
+          "drizzle_dense": "رذاذ كثيف",
+          "rain": "مطر",
+          "rain_light": "مطر خفيف",
+          "rain_moderate": "مطر متوسط",
+          "rain_heavy": "مطر غزير",
+          "freezing_rain_light": "مطر متجمد خفيف",
+          "freezing_rain_heavy": "مطر متجمد غزير",
+          "snow": "ثلج",
+          "snow_light": "ثلج خفيف",
+          "snow_moderate": "ثلج متوسط",
+          "snow_heavy": "ثلج كثيف",
+          "rain_showers_light": "زخات مطر خفيفة",
+          "rain_showers_moderate": "زخات مطر متوسطة",
+          "rain_showers_violent": "زخات مطر عنيفة",
+          "snow_showers_light": "زخات ثلج خفيفة",
+          "snow_showers_heavy": "زخات ثلج كثيفة",
+          "thunderstorm": "عاصفة رعدية",
+          "thunderstorm_hail_light": "عاصفة رعدية مع برَد خفيف",
+          "thunderstorm_hail_heavy": "عاصفة رعدية مع برَد كثيف"
+        },
+        "source": {
+          "manual": "إدخال يدوي",
+          "open_meteo": "خدمة الطقس",
+          "sensor": "حساس الموقع"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "سجل طلبات المعلومات (RFI)",
+        "col_number": "رقم RFI",
+        "col_subject": "الموضوع",
+        "col_raised_by": "مقدم الطلب",
+        "col_assigned_to": "المسند إليه",
+        "col_ball_in_court": "الجهة المطلوب منها الإجراء",
+        "col_date_required": "تاريخ المطلوب",
+        "col_response_due": "موعد الرد",
+        "col_days_open": "أيام الفتح",
+        "col_cost_impact": "الأثر على التكلفة",
+        "col_schedule_impact": "الأثر على الجدول الزمني",
+        "col_response": "الرد",
+        "yes_with": "نعم ({detail})",
+        "register_filename": "sijil-talabat-maelumat"
+      },
+      "labels": {
+        "status": {
+          "draft": "مسودة",
+          "open": "مفتوح",
+          "answered": "تمت الإجابة",
+          "closed": "مغلق",
+          "void": "ملغى"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "أنشأه الذكاء الاصطناعي",
+        "drawing": "رسم",
+        "cost_estimate": "تقدير التكلفة",
+        "summary": "الملخص",
+        "project": "المشروع:",
+        "boq": "جدول الكميات:",
+        "date": "التاريخ:",
+        "status": "الحالة:",
+        "prepared_by": "أعده:",
+        "approved_by": "اعتمده:",
+        "signature_hint": "الاسم / التوقيع / التاريخ",
+        "contents": "الأقسام / البنود:",
+        "pos": "رقم البند",
+        "description": "الوصف",
+        "unit": "الوحدة",
+        "qty": "الكمية",
+        "rate": "سعر الوحدة",
+        "total": "الإجمالي",
+        "subtotal": "المجموع الفرعي:",
+        "other_positions": "بنود أخرى",
+        "direct_cost": "التكلفة المباشرة:",
+        "markups": "الهوامش والنسب (دون الضريبة):",
+        "net_total": "الإجمالي الصافي (دون الضريبة):",
+        "gross_total": "الإجمالي الكلي",
+        "page": "صفحة",
+        "of": "من",
+        "generated": "تاريخ الإنشاء:",
+        "summary_report": "تقرير الملخص",
+        "positions_omitted": "{count} بندًا (التفاصيل الكاملة محذوفة لتحسين الأداء)",
+        "section": "القسم",
+        "items": "البنود",
+        "cost_summary": "ملخص التكلفة",
+        "table_of_contents": "فهرس المحتويات",
+        "resources_omitted": "لم يُطبع تفصيل الموارد: يحتوي جدول الكميات هذا على عدد كبير جدًا من بنود الموارد لملف PDF واحد.",
+        "status_draft": "مسودة",
+        "status_final": "نهائي",
+        "status_archived": "مؤرشف",
+        "subject": "جدول الكميات",
+        "tax_vat": "ضريبة القيمة المضافة"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "فاتورة",
+        "date": "التاريخ: {value}",
+        "due": "تاريخ الاستحقاق: {value}",
+        "from": "من",
+        "bill_to": "فوترة إلى",
+        "vat_id": "الرقم الضريبي: {value}",
+        "ref": "المرجع: {value}",
+        "th_description": "الوصف",
+        "th_qty": "الكمية",
+        "th_unit": "الوحدة",
+        "th_unit_price": "سعر الوحدة",
+        "th_net": "الصافي ({currency})",
+        "net_total": "الإجمالي الصافي",
+        "vat_total": "ضريبة القيمة المضافة",
+        "grand_total": "المجموع الكلي",
+        "retention_prepaid": "الاستقطاع / الدفعة المقدمة",
+        "amount_due": "المبلغ المستحق",
+        "payment": "الدفع",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "رقم الحساب: {value}",
+        "bank_code": "رمز البنك: {value}",
+        "account_holder": "صاحب الحساب: {value}",
+        "footer": "يتضمن ملف PDF هذا فاتورة إلكترونية وفق المعيار EN 16931 (Factur-X / ZUGFeRD). ملف XML المضمّن هو المستند المعتمد.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "التقرير",
+        "meta_project": "المشروع",
+        "meta_type": "النوع",
+        "meta_generated": "تاريخ الإنشاء",
+        "meta_currency": "العملة",
+        "field_column": "الحقل",
+        "value_column": "القيمة",
+        "yes": "نعم",
+        "no": "لا",
+        "no_data_heading": "لا توجد بيانات متاحة",
+        "no_data_body": "أُنشئ هذا التقرير من لقطة بيانات فارغة. تحقّق من أن الوحدات المصدرية (المالية، والجدول الزمني، والسلامة، وغيرها) أعادت بيانات للمشروع المحدد.",
+        "no_data_body_short": "أُنشئ هذا التقرير من لقطة بيانات فارغة. تحقّق من أن الوحدات المصدرية أعادت بيانات للمشروع المحدد.",
+        "footer_generated_by": "أنشأه OpenConstructionERP بتاريخ {timestamp}.",
+        "worksheet_name": "التقرير",
+        "pdf_subject": "تقرير المشروع",
+        "overall_progress": "التقدم الإجمالي",
+        "as_of": "حتى تاريخ",
+        "recorded_by": "سجّله",
+        "period": "الفترة",
+        "entries_suffix": "({count} سجلًا)",
+        "site_photo_alt": "صورة للموقع",
+        "ai_summary_heading": "الملخص",
+        "ai_badge": "أنشأه الذكاء الاصطناعي",
+        "ai_note": "أنشأه الذكاء الاصطناعي من بيانات المشروع أدناه.",
+        "ai_note_confidence": "أنشأه الذكاء الاصطناعي من بيانات المشروع أدناه (درجة الثقة {confidence}).",
+        "ai_note_review": "يُرجى المراجعة قبل مشاركته مع العميل."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "الاسم",
+          "status": "الحالة",
+          "phase": "المرحلة",
+          "planned_start": "بداية مخططة",
+          "planned_end": "نهاية مخططة",
+          "schedule_progress_pct": "نسبة إنجاز الجدول الزمني",
+          "cpi": "مؤشر أداء التكلفة",
+          "spi": "مؤشر أداء الجدول",
+          "budget_consumed_pct": "نسبة استهلاك الميزانية",
+          "as_of": "حتى تاريخ",
+          "progress_pct": "نسبة الإنجاز",
+          "risk_score_avg": "متوسط درجة المخاطر",
+          "open_rfis": "طلبات المعلومات المفتوحة",
+          "open_submittals": "الوثائق المفتوحة للاعتماد",
+          "open_defects": "العيوب المفتوحة",
+          "open_observations": "الملاحظات المفتوحة",
+          "budget": "الميزانية",
+          "committed": "الملتزم به",
+          "actual": "الفعلي",
+          "payable": "المستحق الدفع",
+          "receivable": "المستحق القبض",
+          "net_cash_flow": "صافي التدفق النقدي"
+        },
+        "section_titles": {
+          "Project Overview": "نظرة عامة على المشروع",
+          "Key Performance Indicators": "مؤشرات الأداء الرئيسية",
+          "Schedule Status": "حالة الجدول الزمني",
+          "Risk Summary": "ملخص المخاطر",
+          "Open Issues": "المسائل المفتوحة",
+          "Cost Summary": "ملخص التكلفة",
+          "Cost Breakdown": "تفصيل التكلفة",
+          "Change Orders": "أوامر التغيير",
+          "Cash Flow": "التدفق النقدي",
+          "Schedule Overview": "نظرة عامة على الجدول الزمني",
+          "Milestone Status": "حالة المراحل الرئيسية",
+          "Critical Path": "المسار الحرج",
+          "3-Week Lookahead": "خطة الأسابيع الثلاثة القادمة",
+          "Safety KPIs": "مؤشرات أداء السلامة",
+          "Incident Log": "سجل الحوادث",
+          "Near-Miss Reports": "تقارير الحوادث الوشيكة",
+          "Safety Training": "التدريب على السلامة",
+          "Inspection Summary": "ملخص التفتيش",
+          "By Inspection Type": "حسب نوع التفتيش",
+          "Punch List Status": "حالة قائمة الملاحظات النهائية",
+          "Recent Inspections": "أحدث عمليات التفتيش",
+          "Portfolio Overview": "نظرة عامة على المحفظة",
+          "Project Statuses": "حالات المشاريع",
+          "KPI Comparison": "مقارنة مؤشرات الأداء",
+          "Portfolio Risks": "مخاطر المحفظة",
+          "Field Progress": "تقدم العمل في الموقع",
+          "Top Risks": "أبرز المخاطر",
+          "Site Photos": "صور الموقع",
+          "Summary": "الملخص"
+        }
+      }
+    }
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "هذه اللقطة مجمّدة. اللقطة المجمّدة سجل ثابت ولا يمكن تعديلها.",
+      "frozen_no_delete": "اللقطة المجمّدة سجل ثابت ولا يمكن حذفها.",
+      "draft_open": "توجد لقطة مسودة مفتوحة بالفعل. جمّدها أو احذفها قبل بدء لقطة أخرى.",
+      "no_line_method": "هذا البند ليس له أسلوب خاص به.",
+      "snapshot_missing": "اللقطة غير موجودة.",
+      "line_missing": "لا يوجد هذا البند في اللقطة.",
+      "document_missing": "المستند المرتبط لا ينتمي إلى هذا المشروع.",
+      "freeze_refused": "لا يمكن تجميد اللقطة بعد: تجاوز {count} بند(بنود) الحد المسموح دون تعليق ودليل داعم.",
+      "no_frozen_snapshot": "لا توجد لقطة مجمّدة للمقارنة بها بعد.",
+      "no_ledger": "سجل الفواتير غير متاح في هذا التثبيت.",
+      "no_snapshot": "لا توجد لقطة لتوثيقها بعد."
+    },
+    "export": {
+      "project": "المشروع",
+      "generated": "تاريخ الإنشاء",
+      "currency": "العملة",
+      "page": "الصفحة",
+      "generated_at": "أُنشئ في",
+      "empty": "لا توجد بيانات للعرض بعد.",
+      "total": "الإجمالي",
+      "cost_report": "تقرير التكلفة",
+      "phase_comparison": "مقارنة المراحل",
+      "invoice_ledger": "سجل الفواتير",
+      "forecast_documentation": "توثيق التوقعات",
+      "as_of": "حتى تاريخ",
+      "forecast_method": "أسلوب التوقع",
+      "col_account": "الحساب",
+      "col_code": "الرمز",
+      "col_description": "الوصف",
+      "col_source": "المصدر",
+      "col_method": "الأسلوب",
+      "col_planned": "المخطط",
+      "col_committed": "الملتزم به",
+      "col_pending": "التغييرات المعلقة",
+      "col_measured": "المقاس",
+      "col_certified": "المعتمد للدفع",
+      "col_invoiced": "المفوتر",
+      "col_paid": "المدفوع",
+      "col_forecast": "التوقع",
+      "col_variance": "الانحراف",
+      "col_variance_pct": "الانحراف %",
+      "col_forecast_of_plan": "التوقع % من المخطط",
+      "col_measured_of_committed": "المقاس % من الملتزم به",
+      "col_invoiced_of_committed": "المفوتر % من الملتزم به",
+      "col_contract": "العقد",
+      "col_contract_title": "عنوان العقد",
+      "col_invoice": "الفاتورة",
+      "col_date": "التاريخ",
+      "col_kind": "النوع",
+      "col_release_status": "الإفراج",
+      "col_net": "الصافي",
+      "col_vat": "ضريبة القيمة المضافة",
+      "col_gross": "الإجمالي",
+      "col_retention": "المحتجزات",
+      "col_release": "المحتجزات المفرج عنها",
+      "col_discount": "الخصم",
+      "col_payable": "المستحق الدفع",
+      "col_open": "مفتوح",
+      "col_previous": "السابق",
+      "col_delta": "التغيير",
+      "col_delta_pct": "التغيير %",
+      "col_needs_evidence": "يتطلب دليلاً",
+      "col_comment": "التعليق",
+      "col_evidence": "الدليل",
+      "row_unassigned": "مبالغ دون بند تكلفة",
+      "row_loose_changes": "تغييرات دون عقد",
+      "row_no_contract": "دون عقد",
+      "contract_value": "قيمة العقد",
+      "retention_held": "المحتجزات المحتفظ بها",
+      "yes": "نعم",
+      "no": "لا",
+      "snapshot_date": "تاريخ اللقطة",
+      "snapshot_status": "الحالة",
+      "previous_snapshot": "اللقطة المجمّدة السابقة",
+      "method_explained": "كيف يُقرأ التوقع",
+      "evidence_threshold": "يلزم دليل عند تجاوز",
+      "threshold_both": "تغيير يزيد عن {parts}",
+      "threshold_any": "أي تغيير",
+      "frozen_at": "جُمّدت في"
+    },
+    "method": {
+      "best_available": "أفضل مصدر متاح",
+      "maximum": "القيمة القصوى",
+      "evm_cpi": "القيمة المكتسبة (CPI)",
+      "manual": "يدوي"
+    },
+    "method_help": {
+      "best_available": "يأخذ كل بند أنضج رقم متوفر له: الحساب الختامي، ثم الأعمال المقاسة، ثم الترسية، ثم التقدير، ثم الميزانية.",
+      "maximum": "يأخذ كل بند أعلى أرقامه (الميزانية، التقدير، الترسية، المقاس، المفوتر)، فلا يخفي التوقع أي مخاطرة.",
+      "evm_cpi": "يُسقِط كل بند تكلفته عند الإنجاز من التقدم المحرز: المبلغ المنفق حتى الآن مقسوماً على نسبة الأعمال المنجزة.",
+      "manual": "يحدد شخص رقم البند ويربطه بالمستند الذي يسنده."
+    },
+    "source": {
+      "none": "لا يوجد رقم",
+      "budget": "الميزانية",
+      "estimate": "التقدير",
+      "partly_awarded": "مُرسّى جزئياً",
+      "awarded": "مُرسّى",
+      "measured": "مقاس",
+      "final": "الحساب الختامي",
+      "manual": "يدوي",
+      "invoiced": "مفوتر",
+      "evm": "القيمة المكتسبة"
+    },
+    "layer": {
+      "budget": "الميزانية",
+      "estimate": "التقدير",
+      "tender": "أفضل عطاء",
+      "awarded": "المُرسّى",
+      "changes": "التغييرات المعتمدة",
+      "committed": "الملتزم به",
+      "pending": "التغييرات المعلقة",
+      "measured": "المقاس",
+      "certified": "المعتمد للدفع",
+      "invoiced": "المفوتر",
+      "paid": "المدفوع",
+      "forecast": "التوقع"
+    },
+    "invoice_kind": {
+      "interim": "مرحلية",
+      "final": "ختامية",
+      "daywork": "أعمال باليومية",
+      "credit_note": "إشعار دائن"
+    },
+    "release_status": {
+      "open": "مفتوح",
+      "released": "مُفرج عنه"
+    },
+    "evidence_kind": {
+      "document": "مستند",
+      "minutes": "محضر اجتماع",
+      "other": "أخرى"
+    },
+    "snapshot_status": {
+      "draft": "مسودة",
+      "frozen": "مجمّدة"
+    }
+  },
+  "pdf_footer": {
+    "page_of": "الصفحة {page} من {total}",
+    "page": "الصفحة {page}",
+    "printed": "تاريخ الطباعة: {timestamp}",
+    "generated": "تاريخ الإنشاء: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "دعاكم {sender} إلى بوابة العملاء",
+      "login_subject": "رابط تسجيل الدخول إلى بوابة العملاء",
+      "invite_heading": "مرحباً بكم في بوابة العملاء",
+      "login_heading": "تسجيل الدخول إلى بوابة العملاء",
+      "greeting": "السيد/السيدة {name} المحترم/المحترمة،",
+      "greeting_generic": "تحية طيبة،",
+      "invite_body": "منحكم {sender} حق الوصول إلى بوابة العملاء. يمكنكم من خلالها متابعة مشروعكم: تقارير التقدم والمستندات والفواتير والمراحل الرئيسية القادمة.",
+      "login_body": "نرفق لكم رابط تسجيل الدخول الذي طلبتموه.",
+      "link_help": "يتيح لكم الزر أدناه تسجيل الدخول دون كلمة مرور. الرابط صالح للاستخدام مرة واحدة وتنتهي صلاحيته خلال {hours} ساعة.",
+      "ignore": "إذا لم تكونوا تتوقعون هذه الرسالة، يمكنكم تجاهلها. لا يمكن لأي شخص الدخول دون هذا الرابط.",
+      "invite_cta": "فتح البوابة",
+      "login_cta": "تسجيل الدخول",
+      "sender_generic": "فريق مشروعكم"
+    },
+    "tender_invite": {
+      "subject": "دعوة لتقديم عطاء: {package}",
+      "heading": "دعوة لتقديم عطاء",
+      "greeting": "السادة {company} المحترمين،",
+      "greeting_generic": "السادة المحترمين،",
+      "invite": "يسرنا دعوتكم إلى تقديم عرض سعر لحزمة المناقصة {package}.",
+      "invite_project": "يسرنا دعوتكم إلى تقديم عرض سعر لحزمة المناقصة {package} الخاصة بمشروع {project}.",
+      "deadline": "الموعد النهائي لتقديم العروض: {deadline}",
+      "link_help": "يفتح الزر أدناه جدول الكميات. أدخلوا أسعار الوحدات عبر الإنترنت، واحفظوا مسودة في أي وقت، ثم قدموا العرض قبل الموعد النهائي. لا حاجة إلى حساب.",
+      "link_personal": "هذا الرابط خاص بشركتكم، لذا نرجو عدم تحويله إلى الآخرين.",
+      "cta": "فتح جدول الكميات وإدخال الأسعار",
+      "no_link": "نرجو مراجعة تفاصيل الحزمة وإرسال عرضكم قبل الموعد النهائي المذكور أعلاه."
+    },
+    "notification_email": {
+      "greeting": "السيد/السيدة {name} المحترم/المحترمة،",
+      "greeting_generic": "تحية طيبة،",
+      "cta": "الفتح في OpenConstructionERP",
+      "footer": "وصلتكم هذه الرسالة بناءً على إعدادات الإشعارات الخاصة بكم، ويمكنكم تغييرها من ملفكم الشخصي.",
+      "digest_subject": "OpenConstructionERP: ملخص الإشعارات ({count})",
+      "digest_heading": "آخر الإشعارات:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "مقارنة الأسعار",
+      "comparison_sheet": "المقارنة",
+      "bidder_title": "جدول الكميات للتسعير",
+      "bidder_sheet": "جدول الكميات",
+      "project": "المشروع",
+      "package": "الحزمة",
+      "currency": "العملة",
+      "date": "التاريخ",
+      "return_by": "آخر موعد للإعادة",
+      "item": "البند",
+      "description": "الوصف",
+      "unit": "الوحدة",
+      "quantity": "الكمية",
+      "unit_price": "سعر الوحدة",
+      "line_total": "إجمالي البند",
+      "own_estimate": "التقدير الداخلي",
+      "not_priced": "غير مسعّر",
+      "sum_priced_lines": "مجموع البنود المسعّرة",
+      "bid_total": "إجمالي العرض كما قُدّم",
+      "lines_priced": "البنود المسعّرة",
+      "lines_priced_value": "{priced} من {total}",
+      "deviation": "الانحراف عن التقدير الداخلي",
+      "not_comparable": "غير متاح",
+      "other_currency": "العرض بعملة {currency}، ولا يُرتَّب مقابل العروض بعملة {reporting}.",
+      "legend": "دليل الألوان والرموز",
+      "legend_lowest": "أخضر: أدنى سعر وحدة في البند.",
+      "legend_high": "▲ أحمر: أعلى من متوسط سعر البند بأكثر من {pct}%.",
+      "legend_low": "▼ كهرماني: أقل من متوسط سعر البند بأكثر من {pct}%.",
+      "legend_missing": "\"{marker}\": لم يقدّم مقدّم العرض سعراً لهذا البند.",
+      "legend_incomplete": "يُشار في عمود \"البنود المسعّرة\" إلى العرض الذي تتضمن بنوده بنوداً غير مسعّرة، ولا يُصنَّف الأدنى بحسب إجماليه.",
+      "legend_totals": "إجمالي العرض هو الرقم الذي قدّمه مقدّم العرض، وقد يختلف عن مجموع بنوده المسعّرة.",
+      "bidder": "مقدّم العرض",
+      "bidder_note": "ملاحظة مقدّم العرض",
+      "reference": "المرجع (لا يُعدَّل)",
+      "total": "الإجمالي",
+      "instructions": "أدخلوا سعر الوحدة لكل بند في الخلايا الصفراء. الكميات والأوصاف ثابتة، أما إجماليات البنود والإجمالي العام فتُحسب تلقائياً. اتركوا الخلية فارغة إذا لم تقوموا بتسعير البند."
+    },
+    "cost_plan": {
+      "sheet_plan": "خطة التكلفة NRM 1",
+      "sheet_unallocated": "غير موزَّع",
+      "title": "خطة التكلفة بحسب العناصر (NRM 1)",
+      "bill": "جدول الكميات",
+      "currency": "العملة",
+      "gifa": "مساحة الطوابق الداخلية الإجمالية (m2)",
+      "gifa_project": "من المشروع",
+      "gifa_entered": "أُدخلت لهذا التصدير",
+      "gifa_none": "غير محددة، لذلك لا تُعرض التكلفة لكل m2",
+      "col_code": "الرمز",
+      "col_description": "العنصر",
+      "col_positions": "البنود",
+      "col_basis": "الأساس",
+      "col_total": "الإجمالي",
+      "col_per_m2": "التكلفة لكل m2 من المساحة الإجمالية",
+      "col_share": "% من الإجمالي",
+      "col_running": "الإجمالي التراكمي",
+      "group_level": "على مستوى المجموعة، دون تحديد عنصر",
+      "facilitating_works_estimate": "تقدير الأعمال التمهيدية",
+      "works_estimate": "تقدير أعمال المبنى",
+      "addons_heading": "مجموعات NRM 1 من 9 إلى 14 المسعّرة كبنود في جدول الكميات",
+      "unallocated": "غير موزَّع على عنصر",
+      "direct_cost": "التكلفة المباشرة لجدول الكميات",
+      "markups_heading": "الإضافات (تسلسل الجدول نفسه بالترتيب)",
+      "markups_total": "إجمالي الإضافات",
+      "grand_total": "إجمالي خطة التكلفة",
+      "basis_direct": "{pct}% على التكلفة المباشرة",
+      "basis_running": "{pct}% على المجموع التراكمي",
+      "basis_lump": "مبلغ مقطوع",
+      "basis_banded": "جدول شرائح",
+      "basis_escalation": "تعديل بحسب المؤشر",
+      "basis_other": "{kind}",
+      "basis_scoped": "محدد بقسم",
+      "col_ordinal": "الرقم التسلسلي",
+      "col_position": "الوصف",
+      "col_written_code": "الرمز كما كُتب",
+      "col_reason": "السبب",
+      "reason_no_code": "لا يوجد رمز NRM في البند أو في أقسامه",
+      "reason_invalid_code": "الرمز ليس رقم NRM",
+      "reason_unknown_group": "لا توجد مجموعة بهذا الرقم في NRM 1",
+      "truncated": "اقتُصرت القائمة على أول {shown} من أصل {count} بنداً، ويشمل الإجمالي جميع البنود."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "المتطلبات",
+      "sheet_summary": "الملخص",
+      "sheet_legend": "دليل الأعمدة",
+      "summary_element": "العنصر",
+      "summary_count": "عدد المتطلبات",
+      "summary_total": "الإجمالي",
+      "legend_column": "العمود",
+      "legend_description": "الوصف",
+      "unspecified": "غير محدد",
+      "h01": "العنصر / فئة IFC",
+      "h02": "التصنيف",
+      "h03": "مجموعة الخصائص",
+      "h04": "اسم الخاصية",
+      "h05": "نوع البيانات",
+      "h06": "إلزامي",
+      "h07": "القيم المسموح بها",
+      "h08": "الحد الأدنى",
+      "h09": "الحد الأقصى",
+      "h10": "الوحدة",
+      "h11": "النمط",
+      "h12": "المرحلة",
+      "h13": "الجهة المعنية",
+      "h14": "حالة الاستخدام",
+      "h15": "المصدر",
+      "d01": "فئة كيان IFC (مثل IFCWALL وIFCBEAM)",
+      "d02": "نظام التصنيف ورمزه (مثل Uniclass 2015: EF_25_10)",
+      "d03": "اسم مجموعة الخصائص (مثل Pset_WallCommon)",
+      "d04": "اسم الخاصية أو السمة المطلوبة",
+      "d05": "نوع بيانات IFC (IFCLABEL وIFCREAL وIFCBOOLEAN وغيرها)",
+      "d06": "الإلزامية: مطلوب أو اختياري أو محظور",
+      "d07": "قائمة بالقيم المسموح بها، تفصل بينها فاصلة منقوطة",
+      "d08": "حدود النطاق الرقمي",
+      "d09": "وحدة القياس (m وm2 وkg وغيرها)",
+      "d10": "نمط التعبير النمطي للتحقق من القيمة",
+      "d11": "مرحلة المشروع أو المعلم الرئيسي (LP3 وRIBA Stage 3 وغيرها)",
+      "d12": "الجهة المسؤولة (المهندس المعماري، المهندس الإنشائي وغيرهما)",
+      "d13": "الغرض من المتطلب أو حالة استخدامه",
+      "d14": "المعيار أو المستند المصدر"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "تم إنشاء جدول الكميات",
+      "notifications.boq.created.body": "تم حفظ جدول الكميات \"{boq_name}\" الخاص بكم.",
+      "notifications.meeting.action_assigned.title": "أُسند إليكم بند إجراء",
+      "notifications.meeting.action_assigned.body": "من الاجتماع {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "تغيّرت حالة المستند",
+      "notifications.cde.state_transitioned.body": "انتقلت الحاوية إلى الحالة \"{new_state}\".",
+      "notifications.cde.linked_published.title": "نُشر مستند مرتبط بعملكم",
+      "notifications.cde.linked_published.body": "نُشر {container_code} بالمراجعة {revision_code}. السجلات المرتبطة بكم: {records}.",
+      "notifications.rfi.assigned.title": "أُسند إليكم طلب معلومات (RFI)",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "تمت الإجابة عن طلب المعلومات (RFI)",
+      "notifications.rfi.responded.body": "ورد رد على طلبكم {code} ({title}).",
+      "notifications.risk.assigned.title": "أُسندت إليكم مخاطرة",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "تنبيه تجاوز التكلفة",
+      "notifications.costmodel.overrun_alert.body": "تكلفة {category} تجاوزت الميزانية: الفعلية {actual} {currency} تتخطى حد التنبيه +{threshold_pct}% فوق المخططة {planned} {currency}.",
+      "notifications.submittal.submitted.title": "طلب اعتماد بانتظار المراجعة",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "تم اعتماد الطلب",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "تم رفض طلب الاعتماد",
+      "notifications.submittal.rejected.body": "{code} ({title}). السبب: {reason}",
+      "notifications.submittal.revise_resubmit.title": "طلب الاعتماد يحتاج إلى تعديل",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). السبب: {reason}",
+      "notifications.transmittal.issued.title": "صدرت إليكم مراسلة إرسال مستندات",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "تم تأكيد استلام مراسلة الإرسال",
+      "notifications.transmittal.acknowledged.body": "أكد المستلم استلام {code} ({title}).",
+      "notifications.transmittal.responded.title": "تم الرد على مراسلة الإرسال",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "أُسند إليكم طلب معلومات (RFI)",
+      "notification.rfi_assigned_body": "طلب المعلومات {rfi_number} - {subject}",
+      "notification.task_assigned_title": "أُسندت إليكم مهمة جديدة",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "تم اعتماد الفاتورة",
+      "notification.invoice_approved_body": "الفاتورة {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "تمت جدولة معاينة",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title} بتاريخ {inspection_date}",
+      "notification.submittal_status_changed_title": "تغيّرت حالة طلب الاعتماد",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "تمت جدولة اجتماع",
+      "notification.meeting_scheduled_body": "{title} بتاريخ {meeting_date}",
+      "notification.ncr_created_title": "تم تسجيل حالة عدم مطابقة",
+      "notification.ncr_created_body": "تقرير عدم المطابقة {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "تم رفع مستند",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "تمت الإشارة إليكم في تعليق",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "تعليق جديد في نقاش",
+      "notifications.collaboration.comment_added.body": "على {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "رُصد تعارض عالي الخطورة",
+      "notifications.clash.high_severity.body": "تعارض بدرجة {severity}: {a_name} مع {b_name}",
+      "notifications.validation.report.title": "أظهر التحقق وجود مشكلات",
+      "notifications.validation.report.body": "أخطاء: {error_count}، تحذيرات: {warning_count} في هذا العنصر من نوع {target_type}.",
+      "notifications.punchlist.auto_created.title": "تم إنشاء بند في قائمة الملاحظات",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "ملخص الإشعارات",
+      "notifications.digest.body": "لديكم {count} تحديثات جديدة على قناة {channel}.",
+      "notifications.approval.overdue.title": "الموافقة متأخرة",
+      "notifications.approval.overdue.body": "الخطوة {step_ordinal} في هذا العنصر ({target_kind}) متأخرة بمقدار {hours_overdue} ساعة.",
+      "notifications.approval.escalated.title": "صُعّدت إليكم موافقة",
+      "notifications.approval.escalated.body": "صُعّدت إليكم الخطوة {step_ordinal} في هذا العنصر ({target_kind}) (المستوى {level}).",
+      "notifications.approval.reassigned.title": "أُعيد إسناد موافقة إليكم",
+      "notifications.approval.reassigned.body": "القرار في الخطوة {step_ordinal} من هذا العنصر ({target_kind}) أصبح من مسؤوليتكم.",
+      "notifications.deadline.overdue.title": "متأخر: {title}",
+      "notifications.deadline.overdue.body": "بند الوحدة {module} \"{title}\" تجاوز موعد استحقاقه بمقدار {days_overdue} يوم.",
+      "notifications.deadline.escalated.title": "بند متأخر تم تصعيده",
+      "notifications.deadline.escalated.body": "بند الوحدة {module} \"{title}\" لا يزال مفتوحاً ومتأخراً {days_overdue} يوم، وقد تم تصعيده.",
+      "notifications.deadline.approaching.title": "يقترب موعده: {title}",
+      "notifications.deadline.approaching.body": "موعد استحقاق بند الوحدة {module} \"{title}\" هو {due_date}.",
+      "notifications.deadline.built.approaching.title": "يقترب موعده: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: موعد استحقاق \"{title}\" هو {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "متأخر: طلب المعلومات {reference}",
+      "notifications.deadline.rfi.overdue.body": "كان موعد استحقاق طلب المعلومات {reference} \"{title}\" في مشروع {project} هو {due_date_display}، وهو متأخر {days_overdue} يوم. الرد مطلوب.",
+      "notifications.deadline.rfi.escalated.title": "تم التصعيد: طلب المعلومات {reference}",
+      "notifications.deadline.rfi.escalated.body": "طلب المعلومات {reference} \"{title}\" في مشروع {project} لا يزال مفتوحاً، متأخراً {days_overdue} يوم عن موعد استحقاقه {due_date_display}، وقد تم تصعيده إليكم.",
+      "notifications.deadline.rfi.approaching.title": "يقترب موعده: طلب المعلومات {reference}",
+      "notifications.deadline.rfi.approaching.body": "موعد استحقاق طلب المعلومات {reference} \"{title}\" في مشروع {project} هو {due_date_display}. الرد مطلوب.",
+      "notifications.deadline.submittals.overdue.title": "متأخر: طلب الاعتماد {reference}",
+      "notifications.deadline.submittals.overdue.body": "كان موعد استحقاق طلب الاعتماد {reference} \"{title}\" في مشروع {project} هو {due_date_display}، وهو متأخر {days_overdue} يوم. المراجعة مطلوبة.",
+      "notifications.deadline.submittals.escalated.title": "تم التصعيد: طلب الاعتماد {reference}",
+      "notifications.deadline.submittals.escalated.body": "طلب الاعتماد {reference} \"{title}\" في مشروع {project} لا يزال مفتوحاً، متأخراً {days_overdue} يوم عن موعد استحقاقه {due_date_display}، وقد تم تصعيده إليكم.",
+      "notifications.deadline.submittals.approaching.title": "يقترب موعده: طلب الاعتماد {reference}",
+      "notifications.deadline.submittals.approaching.body": "موعد استحقاق طلب الاعتماد {reference} \"{title}\" في مشروع {project} هو {due_date_display}. المراجعة مطلوبة.",
+      "notifications.deadline.correspondence.overdue.title": "متأخر: المراسلة {reference}",
+      "notifications.deadline.correspondence.overdue.body": "كان مطلوباً الرد على المراسلة {reference} \"{title}\" في مشروع {project} بحلول {due_date_display}، وهي متأخرة {days_overdue} يوم. الرد مطلوب.",
+      "notifications.deadline.correspondence.escalated.title": "تم التصعيد: المراسلة {reference}",
+      "notifications.deadline.correspondence.escalated.body": "المراسلة {reference} \"{title}\" في مشروع {project} لا تزال دون رد، متأخرة {days_overdue} يوم عن موعد استحقاقها {due_date_display}، وقد تم تصعيدها إليكم.",
+      "notifications.deadline.correspondence.approaching.title": "يقترب موعده: المراسلة {reference}",
+      "notifications.deadline.correspondence.approaching.body": "المراسلة {reference} \"{title}\" في مشروع {project} تتطلب رداً بحلول {due_date_display}. الرد مطلوب.",
+      "notifications.deadline.variations.overdue.title": "متأخر: طلب التغيير {reference}",
+      "notifications.deadline.variations.overdue.body": "كان موعد استحقاق طلب التغيير {reference} \"{title}\" في مشروع {project} هو {due_date_display}، وهو متأخر {days_overdue} يوم. القرار مطلوب.",
+      "notifications.deadline.variations.escalated.title": "تم التصعيد: طلب التغيير {reference}",
+      "notifications.deadline.variations.escalated.body": "طلب التغيير {reference} \"{title}\" في مشروع {project} لا يزال مفتوحاً، متأخراً {days_overdue} يوم عن موعد استحقاقه {due_date_display}، وقد تم تصعيده إليكم.",
+      "notifications.deadline.variations.approaching.title": "يقترب موعده: طلب التغيير {reference}",
+      "notifications.deadline.variations.approaching.body": "موعد استحقاق طلب التغيير {reference} \"{title}\" في مشروع {project} هو {due_date_display}. القرار مطلوب.",
+      "notifications.variation.submitted.title": "طلب تغيير بانتظار القرار: {code}",
+      "notifications.variation.submitted.body": "تم تقديم طلب التغيير {code} \"{title}\" في مشروع {project} وهو بانتظار القرار.",
+      "notifications.variation.approved.title": "تمت الموافقة على طلب التغيير: {code}",
+      "notifications.variation.approved.body": "تمت الموافقة على طلب التغيير {code} \"{title}\" في مشروع {project}.",
+      "notifications.variation.rejected.title": "تم رفض طلب التغيير: {code}",
+      "notifications.variation.rejected.body": "تم رفض طلب التغيير {code} \"{title}\" في مشروع {project} وإعادته إليكم.",
+      "notifications.variation.rejected_reason.body": "تم رفض طلب التغيير {code} \"{title}\" في مشروع {project} وإعادته إليكم. السبب: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "أمر تغيير بانتظار الموافقة: {code}",
+      "notifications.changeorder.awaiting_approval.body": "تم تقديم أمر التغيير {code} \"{title}\" في مشروع {project} وهو بانتظار الموافقة.",
+      "notifications.changeorder.approved.title": "تمت الموافقة على أمر التغيير: {code}",
+      "notifications.changeorder.approved.body": "تمت الموافقة على أمر التغيير {code} \"{title}\" في مشروع {project}.",
+      "notifications.changeorder.rejected.title": "تم رفض أمر التغيير: {code}",
+      "notifications.changeorder.rejected.body": "تم رفض أمر التغيير {code} \"{title}\" في مشروع {project}.",
+      "notifications.submittal.approved_as_noted.title": "تم اعتماد الطلب مع ملاحظات",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "مستند بانتظار موافقتكم",
+      "notifications.file_approval.needs_approver.body": "هناك ملف من نوع {file_kind} بانتظار موافقتكم.",
+      "notifications.file_approval.approved.title": "تمت الموافقة على مستندكم",
+      "notifications.file_approval.approved.body": "اجتاز ملفكم من نوع {file_kind} جميع خطوات الموافقة.",
+      "notifications.file_approval.rejected.title": "أُعيد إليكم مستندكم",
+      "notifications.file_approval.rejected.body": "تم رفض ملفكم من نوع {file_kind} ويحتاج إلى تعديلات.",
+      "notifications.portal.user_invited.title": "تمت دعوة مستخدم إلى البوابة",
+      "notifications.portal.user_invited.body": "تمت دعوة {portal_user_email} بصفة {portal_role}.",
+      "notifications.portal.message_received.title": "رسالة جديدة في البوابة",
+      "notifications.portal.message_received.body": "أرسل {buyer_name} رسالة."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "رقم النشاط",
+          "رمز النشاط",
+          "معرّف النشاط",
+          "رقم المهمة",
+          "المعرّف"
+        ],
+        "name": [
+          "اسم النشاط",
+          "اسم المهمة",
+          "النشاط",
+          "المهمة"
+        ],
+        "wbs": [
+          "WBS",
+          "رمز WBS",
+          "رقم WBS",
+          "هيكل تجزئة العمل"
+        ],
+        "outline_level": [
+          "مستوى التفرع",
+          "مستوى الهيكل",
+          "مستوى الإزاحة",
+          "المستوى الهرمي"
+        ],
+        "start": [
+          "البداية",
+          "تاريخ البداية",
+          "تاريخ البدء",
+          "البدء المخطط"
+        ],
+        "finish": [
+          "النهاية",
+          "تاريخ النهاية",
+          "تاريخ الانتهاء",
+          "الانتهاء",
+          "الانتهاء المخطط"
+        ],
+        "duration": [
+          "المدة",
+          "المدة (أيام)",
+          "المدة الأصلية",
+          "عدد الأيام"
+        ],
+        "predecessors": [
+          "الأنشطة السابقة",
+          "النشاط السابق",
+          "السوابق",
+          "تعتمد على",
+          "الاعتماديات"
+        ],
+        "percent_complete": [
+          "% الإنجاز",
+          "نسبة الإنجاز",
+          "نسبة الإنجاز (%)",
+          "التقدم (%)",
+          "% المنجز"
+        ],
+        "milestone": [
+          "معلم رئيسي",
+          "مرحلة رئيسية",
+          "هل هو معلم رئيسي"
+        ],
+        "resource": [
+          "الموارد",
+          "المورد",
+          "أسماء الموارد",
+          "الطاقم",
+          "المكلّف"
+        ],
+        "notes": [
+          "ملاحظات",
+          "ملاحظة",
+          "تعليقات",
+          "تعليق"
+        ],
+        "client_visible": [
+          "ظاهر للعميل",
+          "مرئي للعميل",
+          "إظهار للعميل",
+          "مشاركة مع العميل"
+        ]
+      },
+      "yes_words": [
+        "نعم"
+      ],
+      "no_words": [
+        "لا"
+      ],
+      "example_names": [
+        "الهيكل والغلاف",
+        "الحفر",
+        "الأساسات",
+        "استلام الأساسات"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "*عقد*",
+          "*عقود*",
+          "اتفاقية*",
+          "*الاتفاقية*"
+        ],
+        "contact": [
+          "جهة اتصال",
+          "جهات الاتصال",
+          "*مورد*",
+          "*مقاول*",
+          "*عميل*",
+          "*العملاء*",
+          "*زبون*"
+        ],
+        "schedule_activity": [
+          "*نشاط*",
+          "*أنشطة*",
+          "*مهمة*",
+          "*مهام*",
+          "wbs"
+        ],
+        "document": [
+          "*مستند*",
+          "*وثيقة*",
+          "*وثائق*",
+          "*مخطط*",
+          "*مرفق*"
+        ],
+        "user": [
+          "*مسؤول*",
+          "*مسئول*",
+          "*مكلف*",
+          "*مفتش*",
+          "*مشرف*",
+          "*مراقب*"
+        ],
+        "due": [
+          "*استحقاق*",
+          "*الموعد النهائي*",
+          "*انتهاء*",
+          "*تجديد*",
+          "صالح حتى",
+          "تاريخ مستهدف"
+        ]
+      },
+      "link_labels": {
+        "contract": "العقد",
+        "contact": "جهة الاتصال",
+        "schedule_activity": "نشاط الجدول الزمني",
+        "document": "المستند",
+        "user": "المسؤول"
+      },
+      "state_labels": [
+        "مفتوح",
+        "قيد التنفيذ",
+        "منجز"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "الملحق {number} للمناقصة {package}",
+      "addendum_heading": "ملحق المناقصة",
+      "greeting": "السادة {company}،",
+      "greeting_generic": "السادة المحترمون،",
+      "addendum_intro": "صدر الملحق {number} لحزمة المناقصة {package}: {title}.",
+      "addendum_deadline": "تم نقل الموعد النهائي لتقديم العروض من {old} إلى {new}.",
+      "addendum_boq": "تم تعديل جدول الكميات (المراجعة {revision}). يرجى تسعير المراجعة الحالية.",
+      "addendum_documents": "المستندات الصادرة: {documents}",
+      "addendum_ack": "يرجى تأكيد استلام هذا الملحق. قد يُعدّ أي عرض لا يؤكد جميع الملاحق غير مطابق للشروط.",
+      "answer_subject": "التوضيح {number} للمناقصة {package}",
+      "answer_heading": "توضيح المناقصة",
+      "answer_intro": "تمت الإجابة عن سؤال يخص حزمة المناقصة {package}. وتنطبق الإجابة على جميع المتقدمين.",
+      "question_label": "السؤال",
+      "answer_label": "الإجابة"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "القيمة الإجمالية للتطوير (GDV)",
+      "total_development_cost": "إجمالي تكلفة التطوير",
+      "residual_land_value": "القيمة المتبقية للأرض",
+      "developer_profit": "ربح المطور",
+      "profit_on_cost": "الربح على التكلفة",
+      "profit_on_gdv": "الربح على القيمة الإجمالية (GDV)",
+      "construction_cost": "تكلفة الإنشاء",
+      "professional_fees": "الأتعاب المهنية",
+      "contingency": "الاحتياطي الطارئ",
+      "finance_cost": "تكلفة التمويل",
+      "sales_costs": "تكاليف البيع"
+    },
+    "status": {
+      "viable": "قابل للتنفيذ",
+      "unviable": "غير قابل للتنفيذ",
+      "marginal": "هامشي",
+      "pending": "لم يُقيَّم بعد"
+    },
+    "figure": {
+      "gross_development_value": "إجمالي قيمة المبيعات لكل الوحدات في المخطط، كلها بعملة واحدة.",
+      "total_development_cost": "كل تكاليف تنفيذ المخطط باستثناء الأرض نفسها: الإنشاء والأتعاب والاحتياطي والتمويل وتكاليف البيع.",
+      "residual_land_value": "ما يتبقى للأرض بعد خصم إجمالي تكلفة التطوير وربح المطور المستهدف من القيمة الإجمالية للتطوير.",
+      "developer_profit": "الربح الذي يسعى المطور للاحتفاظ به، محددًا كنسبة مستهدفة من القيمة الإجمالية للتطوير.",
+      "profit_on_cost": "ربح المطور مقسومًا على إجمالي تكلفة التطوير، معروضًا كنسبة.",
+      "profit_on_gdv": "ربح المطور مقسومًا على القيمة الإجمالية للتطوير، معروضًا كنسبة."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "مخيم عمال",
+        "rental": "سكن للإيجار",
+        "hotel": "فندق"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "قيد الانتظار",
+        "approved": "موافق عليه",
+        "rejected": "مرفوض"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "مستوفى",
+        "fail": "غير مستوفى",
+        "not_applicable": "لا ينطبق"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "مخطط",
+        "contract": "عقد",
+        "specification": "مواصفات",
+        "photo": "صورة",
+        "correspondence": "مراسلات",
+        "reality_capture": "التقاط الواقع",
+        "other": "أخرى"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "قيد الانتظار",
+        "approved": "موافق عليه",
+        "rejected": "مرفوض",
+        "cancelled": "ملغى"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "مسودة",
+        "submitted": "مرسل للموافقة",
+        "approved": "موافق عليه",
+        "posted": "مرحّل إلى دفتر الأستاذ"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "مفتوح",
+        "assigned": "مُسنَد",
+        "in_progress": "قيد التنفيذ",
+        "resolved": "تم الحل",
+        "verified": "تم التحقق",
+        "closed": "مغلق"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "ملاحظة",
+        "minor": "طفيف",
+        "major": "جسيم",
+        "critical": "حرج"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "شخص",
+        "crew": "طاقم",
+        "equipment": "معدات",
+        "subcontractor": "مقاول من الباطن"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "اسم نموذج الذكاء الاصطناعي قديم أو غير متاح. افتح الإعدادات > الذكاء الاصطناعي واختر اسم نموذج صالحًا حاليًا لمزودك.",
+      "not_configured": "الذكاء الاصطناعي غير مُعدّ. يرجى إعداد مزود للذكاء الاصطناعي في الإعدادات."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "تم التحقق",
+      "bound": "مرفق",
+      "empty": "مفقود"
+    },
+    "package_status_labels": {
+      "draft": "مسودة",
+      "in_progress": "قيد التنفيذ",
+      "ready": "جاهز",
+      "issued": "صادر"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "عائق",
+      "critical": "حرج",
+      "warning": "تحذير",
+      "suggestion": "اقتراح"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "الاستراتيجية",
+      "brief": "الموجز",
+      "concept": "المفهوم",
+      "design": "التصميم",
+      "approval": "التصريح",
+      "detail": "التصميم التفصيلي",
+      "tender": "المناقصة",
+      "award": "الترسية",
+      "construction": "التنفيذ",
+      "handover": "التسليم",
+      "operation": "التشغيل"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "موافق",
+      "has_pieces": {
+        "fail": "المهمة لا تحتوي على قطع للقص",
+        "suggestion": "أضف القطع يدوياً أو الصقها أو استوردها من جدول ثني الحديد أو الحصر أو بند جدول الكميات أو ملف."
+      },
+      "has_stock": {
+        "fail": "المهمة لا توفر مخزوناً للقص منه",
+        "suggestion": "أضف طول مخزون واحداً على الأقل أو مقاس لوح، أو أعد استخدام البقايا من مخزون الموقع."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} بلا عرض",
+        "suggestion": "أدخل الطول والعرض لكل قطعة لوح ولكل مقاس لوح."
+      },
+      "piece_fits_stock": {
+        "fail": "القطعة {ref} ({size} mm) لا تناسب أي مقاس مخزون",
+        "suggestion": "أضف مقاس مخزون أطول أو أكبر، أو قلّل التشذيب، أو قسّم القطعة بوصلة."
+      },
+      "grain_allows_fit": {
+        "fail": "القطعة {ref} لا تناسب إلا إذا دُوّرت عمودياً على اتجاه الألياف",
+        "suggestion": "اسمح بتدوير هذه القطعة أو أضف مقاس لوح تناسبه فيه على امتداد الألياف."
+      },
+      "kerf_set": {
+        "fail": "عرض شفرة القص يساوي صفراً",
+        "suggestion": "أدخل عرض الشفرة أو القص، وإلا فسيكون مردود كل قضيب بعدة قطوع مبالغاً فيه."
+      },
+      "min_offcut_set": {
+        "fail": "لم يتم تحديد أقل بقايا قابلة للاستخدام",
+        "suggestion": "حدد أقصر بقايا تستحق الاحتفاظ بها، حتى لا تُحتسب البقايا القابلة لإعادة الاستخدام هدراً."
+      },
+      "stock_priced": {
+        "fail": "المخزون {ref} بلا سعر وحدة",
+        "suggestion": "أدخل سعراً للقطعة ليعرض الخطة تكلفتها ويختار أرخص مخزون."
+      },
+      "stock_sufficient": {
+        "fail": "قطع غير موزعة على المخزون المتاح: {count}",
+        "suggestion": "ارفع الكمية المتاحة أو أضف مقاس مخزون آخر."
+      },
+      "yield_threshold": {
+        "fail": "المردود {actual} % أقل من الحد {threshold} %",
+        "suggestion": "أضف طول أو مقاس مخزون آخر، أو اسمح بالتدوير، أو راجع الحد لهذه المادة."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "البند '{title}' في قائمة الملاحظات مغلق دون صورة",
+    "punch_no_photo_fix": "أضف صورة للأعمال المنجزة",
+    "photo_weak": "{count} صورة في '{title}' تفتقر إلى الموقع أو وقت الالتقاط",
+    "photo_weak_fix": "أعد التقاط الصورة في التطبيق مع تفعيل الموقع",
+    "defect_no_photo": "العيب '{reference}' مغلق دون صورة للإصلاح",
+    "defect_no_photo_fix": "أرفق صورة للأعمال المُصلَحة"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} بند آخر غير مدرج",
+    "category_missing": "لا يوجد دليل للفئة المطلوبة '{category}'",
+    "category_missing_fix": "اربط مستنداً ببند قائمة تحقق من هذه الفئة، أو أضف مستنداً",
+    "category_unverified": "الدليل الخاص بـ '{category}' لم يُوثَّق بعد",
+    "category_unverified_fix": "اطلب من مدير مراجعة الدليل المرتبط وتوثيقه",
+    "punch_open": "البند '{name}' في قائمة الملاحظات ما زال مفتوحاً",
+    "punch_open_fix": "عالج البند وأغلقه، أو استثنه من نطاق هذا الملف",
+    "punch_no_photo": "البند المنجز '{name}' في قائمة الملاحظات بلا صورة",
+    "punch_no_photo_fix": "أضف صورة للأعمال المنجزة",
+    "system_pending": "النظام '{name}' لم يُشغَّل تجريبياً",
+    "system_pending_fix": "أكمل قوائم تحقق التشغيل التجريبي ثم علّم النظام كمُشغَّل",
+    "critical_issues": "{count} مشكلة حرجة في التشغيل التجريبي ما زالت مفتوحة",
+    "critical_issues_fix": "أغلق المشكلات الحرجة قبل التسليم",
+    "acceptance_missing": "لم تُربط شهادة قبول",
+    "acceptance_missing_fix": "اربط شهادة القبول الموقَّعة ببند قائمة تحقق القبول",
+    "acceptance_unsigned": "شهادة القبول غير موقَّعة بالكامل (الحالة: {status})",
+    "acceptance_unsigned_fix": "اجمع التواقيع المتبقية في التوقيع",
+    "blocked": "الملف لا يجتاز قائمة التحقق. عالج الملاحظات، أو جمّعه على أي حال كغير مكتمل (باعتماد مدير).",
+    "delivery_title": "ملف التسليم: {project}",
+    "delivery_body": "ملف التسليم '{title}' ({scope}) جاهز. الرابط أدناه ينزّله وهو صالح حتى {expires}.",
+    "pdf": {
+      "title": "ملف التسليم",
+      "scope": "النطاق",
+      "built": "تاريخ التجميع",
+      "status_passed": "اجتازت قائمة التحقق",
+      "status_warnings": "اجتازت قائمة التحقق مع تحذيرات",
+      "status_errors": "غير مكتمل: ملاحظات قائمة التحقق مفتوحة",
+      "findings": "ملاحظات قائمة التحقق المفتوحة",
+      "severity": "الشدة",
+      "finding": "الملاحظة",
+      "severity_error": "خطأ",
+      "severity_warning": "تحذير",
+      "severity_info": "معلومة",
+      "contents": "المحتويات",
+      "file": "الملف",
+      "size": "الحجم",
+      "punch": "قائمة الملاحظات المنجزة",
+      "item": "البند",
+      "status": "الحالة",
+      "photos": "الصور",
+      "evidence": "الأدلة المصوّرة"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "التقييم {rating} للعنصر '{name}' ليس مستوى في المقياس '{scale}'",
+    "rule_poor_without_action": "'{name}' مقيَّم {rating} ولكن لا يوجد له إجراء صيانة مخطط",
+    "rule_poor_without_action_fix": "استخلص الخطة، أو أضف إجراءً لهذا العنصر",
+    "rule_action_unpriced": "الإجراء الخاص بـ '{name}' في {year} بلا تكلفة وحدة",
+    "rule_action_unpriced_fix": "أدخل تكلفة وحدة كي تشملها إجماليات الخطة",
+    "rule_defect_incomplete": "تقييم '{name}' يستدعي أعمالاً لكنه لا يسجّل شدة ولا مدى"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}، الصفحة {page}",
+    "text_change": "تم تغيير \"{old}\" إلى \"{new}\"",
+    "kind": {
+      "added": "مضاف",
+      "removed": "محذوف",
+      "modified": "معدّل",
+      "text": "تغيّر النص"
+    },
+    "status": {
+      "open": "مفتوح",
+      "relevant": "ذو صلة",
+      "not_relevant": "غير ذي صلة"
+    },
+    "errors": {
+      "revision_not_found": "لم يتم العثور على مراجعة المخطط في هذا المشروع.",
+      "revision_not_parsed": "لا توجد للمخطط نسخة معالجة للمقارنة بعد.",
+      "comparison_not_found": "لم يتم العثور على المقارنة.",
+      "change_not_found": "لم يتم العثور على التغيير.",
+      "same_revision": "اختر مراجعتين أو صفحتين مختلفتين للمقارنة.",
+      "manual_points": "تتطلب المحاذاة اليدوية نقطتين مختلفتين على كل مراجعة.",
+      "alignment_singular": "لا يمكن تطبيق المحاذاة: فهي تطوي اللوحة.",
+      "region_empty": "التغيير {seq} بلا حجم.",
+      "region_off_sheet": "التغيير {seq} يقع خارج اللوحة.",
+      "module_missing": "الوحدة المطلوبة لهذا الإجراء غير مثبّتة."
+    },
+    "rfi": {
+      "subject": "تغيير المخطط {seq} في {sheet}",
+      "question": "تختلف المراجعة {new} من {sheet} عن المراجعة {old} في المنطقة المحددة ({kind}). يرجى تأكيد الغرض من التغيير وما إذا كانت الكميات متأثرة."
+    },
+    "markup": {
+      "text": "تغيير المراجعة {seq}: {kind}"
+    },
+    "report": {
+      "title": "مقارنة مراجعات المخطط",
+      "project": "المشروع",
+      "name": "المقارنة",
+      "old_revision": "المراجعة الأقدم",
+      "new_revision": "المراجعة الأحدث",
+      "alignment": "المحاذاة",
+      "alignment_none": "غير محاذى (الإطار نفسه)",
+      "alignment_auto": "تلقائية",
+      "alignment_manual": "يدوية، نقطتان",
+      "confidence": "الثقة {value}",
+      "summary": "التغييرات",
+      "summary_counts": "الإجمالي {total}: {added} مضاف، {removed} محذوف، {modified} معدّل، {text} نصي",
+      "generated_on": "تاريخ الإنشاء",
+      "generated": "تم الإنشاء {timestamp}",
+      "page_of": "الصفحة {page} من {total}",
+      "no_changes": "لم يتم العثور على تغييرات بين المراجعتين.",
+      "col_no": "الرقم",
+      "col_preview": "معاينة",
+      "col_kind": "التغيير",
+      "col_location": "الموقع",
+      "col_detail": "التفاصيل",
+      "col_status": "الحالة",
+      "col_comment": "تعليق",
+      "col_follow_up": "المتابعة",
+      "page_at": "الصفحة {page} عند {coords}",
+      "layer": "الطبقة {layer}",
+      "entity_counts": "العناصر: {added} مضاف، {removed} محذوف، {modified} معدّل",
+      "rfi": "RFI {number}",
+      "markup": "سحابة المراجعة",
+      "remeasure": "إعادة القياس: {items} كميات، {positions} بنود جدول الكميات"
+    },
+    "rules": {
+      "distinct_revisions_ok": "الجانبان مراجعتان مختلفتان.",
+      "distinct_revisions_fail": "تقارن المقارنة اللوحة بنفسها.",
+      "distinct_revisions_hint": "اختر المراجعة الأقدم والأحدث للمخطط.",
+      "alignment_not_needed": "تشترك مراجعات DWG في وحدات الرسم؛ لا حاجة إلى محاذاة.",
+      "alignment_missing_matrix": "ليس للمقارنة محاذاة.",
+      "alignment_singular": "تطوي المحاذاة اللوحة ولا يمكن تطبيقها.",
+      "alignment_scale": "تغيّر المحاذاة مقياس اللوحة بمقدار {scale}، وهو أكبر مما تختلف به مراجعات المخطط الواحد.",
+      "alignment_low_confidence": "المحاذاة التلقائية غير مؤكدة (الثقة {confidence}).",
+      "alignment_manual_points": "تتطلب المحاذاة اليدوية زوجين من النقاط.",
+      "alignment_ok": "محاذاة اللوحة معقولة.",
+      "alignment_hint": "حاذِ اللوحات يدويًا على علامتين مشتركتين بين المراجعتين، مثل تقاطعات المحاور.",
+      "region_empty": "التغيير {seq} بلا حجم.",
+      "region_off_sheet": "التغيير {seq} يقع خارج اللوحة.",
+      "regions_ok": "كل منطقة متغيرة تقع على اللوحة.",
+      "triaged_ok": "تمت مراجعة كل تغيير.",
+      "triaged_open": "لا يزال {count} من التغييرات مفتوحًا.",
+      "triaged_hint": "علّم كل تغيير بأنه ذو صلة أو غير ذي صلة.",
+      "followed_up_ok": "كل تغيير ذي صلة تمت متابعته.",
+      "followed_up_missing": "التغيير {seq} معلَّم بأنه ذو صلة ولكن بلا تعليق أو RFI أو سحابة أو علامة إعادة قياس.",
+      "followed_up_hint": "علّق على التغيير، أو أنشئ RFI أو سحابة، أو علّم الكميات داخله لإعادة القياس."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "توقع التدفق النقدي",
+      "portfolio_title": "توقع التدفق النقدي للمحفظة",
+      "empty": "لا يوجد توقع تدفق نقدي لهذا التحديد.",
+      "project": "المشروع",
+      "as_of": "حتى تاريخ",
+      "currency": "العملة",
+      "delay_days": "تأخير المقبوضات بعدد (أيام)",
+      "overrun_pct": "تجاوز التكلفة (%)",
+      "closing_position": "الرصيد الختامي",
+      "peak_funding": "الحد الأقصى لاحتياج التمويل",
+      "peak_period": "شهر ذروة احتياج التمويل",
+      "col": {
+        "period": "الشهر",
+        "planned_in": "مقبوضات مخططة",
+        "actual_in": "مقبوضات فعلية",
+        "expected_in": "مقبوضات متوقعة",
+        "planned_out": "مدفوعات مخططة",
+        "actual_out": "مدفوعات فعلية",
+        "expected_out": "مدفوعات متوقعة",
+        "net": "الصافي",
+        "cumulative": "الرصيد التراكمي"
+      }
+    }
+  }
+}

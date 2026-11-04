@@ -1,0 +1,2537 @@
+{
+  "costs.catalog_name_unavailable": "Det här namnet kan inte användas för en ny katalog. Välj ett annat namn.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Byggkalkylering med öppen källkod"
+  },
+  "nav": {
+    "dashboard": "Översikt",
+    "assemblies": "Sammansatta kalkyler",
+    "ai_estimate": "AI-kalkyl",
+    "settings": "Inställningar",
+    "5d_cost_model": "5D Kostnadsmodell",
+    "templates": "Mallar",
+    "reports": "Rapporter",
+    "sustainability": "Hållbarhet",
+    "group_estimation": "Kalkyl",
+    "group_planning": "Planering",
+    "group_procurement": "Inköp",
+    "group_tools": "Verktyg",
+    "architecture": "Arkitekturkarta"
+  },
+  "common": {
+    "save": "Spara",
+    "cancel": "Avbryt",
+    "delete": "Radera",
+    "edit": "Redigera",
+    "create": "Skapa",
+    "search": "Sök",
+    "filter": "Filtrera",
+    "export": "Exportera",
+    "import": "Importera",
+    "loading": "Laddar...",
+    "error": "Fel",
+    "success": "Klart",
+    "confirm": "Bekräfta",
+    "back": "Tillbaka",
+    "next": "Nästa",
+    "yes": "Ja",
+    "no": "Nej"
+  },
+  "auth": {
+    "login": "Logga in",
+    "logout": "Logga ut",
+    "email": "E-post",
+    "password": "Lösenord"
+  },
+  "projects": {
+    "title": "Projekt",
+    "new_project": "Nytt projekt",
+    "project_name": "Projektnamn",
+    "no_projects": "Inga projekt ännu"
+  },
+  "boq": {
+    "title": "Mängdförteckning",
+    "position": "Post",
+    "ordinal": "Positionsnummer",
+    "description": "Beskrivning",
+    "quantity": "Mängd",
+    "unit": "Enhet",
+    "unit_rate": "À-pris",
+    "total": "Summa",
+    "add_position": "Lägg till post",
+    "add_section": "Lägg till avsnitt",
+    "assembly": "Kalkylsammansatt",
+    "subtotal": "Delsumma",
+    "grand_total": "Totalsumma",
+    "direct_cost": "Direkt kostnad",
+    "net_total": "Nettosumma",
+    "gross_total": "Bruttosumma",
+    "vat": "Moms",
+    "add_markups": "Lägg till påslag",
+    "validate": "Validera",
+    "export": "Exportera",
+    "mvp": {
+      "title": "Välj material",
+      "subtitle_one": "{{count}} resurs behöver ett val",
+      "subtitle_other": "{{count}} resurser behöver ett val",
+      "bulk_label": "Snabbifyllning:",
+      "bulk_median": "Median för alla",
+      "bulk_mean": "Medelvärde för alla",
+      "bulk_cheapest": "Billigast för alla",
+      "bulk_priciest": "Dyrast för alla",
+      "slot_variant_count": "{{n}} alternativ",
+      "selected_label": "Valt:",
+      "default_mean": "medelpris",
+      "default_median": "medianpris",
+      "row_median": "Medianpris · {{price}}",
+      "row_mean": "Medelpris · {{price}}",
+      "subtotal_label": "Postpris",
+      "apply": "Tillämpa och lägg till i mängdförteckningen",
+      "batch_progress": "Post {{current}} av {{total}}",
+      "toast_applied_one": "{{count}} variant vald",
+      "toast_applied_other": "{{count}} varianter valda"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Utbytesrapport"
+      },
+      "column": {
+        "severity": "Allvarlighet",
+        "kind": "Typ av förlust",
+        "position": "Post",
+        "field": "Fält",
+        "original": "Originalvärde",
+        "written": "Skrivet värde",
+        "count": "Antal",
+        "detail": "Detalj"
+      },
+      "severity": {
+        "error": "Kritisk",
+        "warning": "Varning",
+        "info": "Anmärkning"
+      },
+      "kind": {
+        "unsupported_element": "Elementet stöds inte",
+        "truncated_text": "Text avkortad",
+        "altered_text": "Text ändrad",
+        "rounded_value": "Värde avrundat",
+        "value_out_of_range": "Värde utanför intervallet",
+        "dropped_attribute": "Attribut borttaget",
+        "unmapped_unit": "Enhet ej mappad",
+        "lost_hierarchy": "Hierarkinivå förlorad",
+        "markup_not_representable": "Påslag kan inte återges",
+        "attachment_skipped": "Bilaga hoppades över",
+        "changed_identifier": "Identifierare ändrad",
+        "exceeds_limit": "Lagringsgränsen överskriden",
+        "rejected_row": "Rad avvisad",
+        "skipped_row": "Rad överhoppad",
+        "parser_warning": "Läsarvarning",
+        "roundtrip_mismatch": "Avvikelse vid tur och retur"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Förgreningspunkt",
+      "base_snapshot_from": "Förgreningspunkt (från ögonblicksbilden \"{snapshot}\")",
+      "before_cherry_pick": "Innan ändringar från \"{source}\" tillämpas",
+      "before_merge": "Innan varianten \"{branch}\" slås samman",
+      "errors": {
+        "branch_closed": "Den här varianten har slagits samman eller arkiverats och kan inte ta emot fler ändringar.",
+        "not_a_branch": "Den här mängdförteckningen är ingen variant.",
+        "same_bill": "Välj två olika kalkyler.",
+        "different_project": "Båda kalkylerna måste tillhöra samma projekt.",
+        "different_tree": "Båda kalkylerna måste vara varianter av samma huvudkalkyl.",
+        "unresolved_conflicts": "{count} poster har ändrats i båda kalkylerna. Avgör vilken version som ska behållas för varje post innan du tillämpar.",
+        "merge_forbidden": "Du har inte behörighet att slå samman med huvudkalkylen.",
+        "confirm_required": "Bekräfta sammanslagningen: den skriver om huvudkalkylen.",
+        "design_options_unavailable": "Modulen för projekteringsalternativ är inte installerad.",
+        "base_snapshot_in_use": "Den här ögonblicksbilden är förgreningspunkt för en öppen variant och kan inte tas bort."
+      },
+      "export": {
+        "title_positions": "Kalkyljämförelse per post",
+        "title_sections": "Kalkyljämförelse per avsnitt",
+        "title_cost_groups": "Kalkyljämförelse per kostnadsgrupp",
+        "project": "Projekt",
+        "bill_a": "Kalkyl A",
+        "bill_b": "Kalkyl B",
+        "total_a": "Summa A",
+        "total_b": "Summa B",
+        "delta": "Skillnad",
+        "counts": "Ändringar",
+        "counts_value": "{added} tillagda, {removed} borttagna, {changed} ändrade",
+        "col_ordinal": "Pos.",
+        "col_description": "Beskrivning",
+        "col_unit": "Enhet",
+        "col_change": "Ändring",
+        "col_qty_a": "Mängd A",
+        "col_qty_b": "Mängd B",
+        "col_rate_a": "À-pris A",
+        "col_rate_b": "À-pris B",
+        "col_total_a": "Summa A",
+        "col_total_b": "Summa B",
+        "col_delta": "Skillnad",
+        "col_section": "Avsnitt",
+        "col_cost_group": "Kostnadsgrupp",
+        "change_added": "Tillagd",
+        "change_removed": "Borttagen",
+        "change_changed": "Ändrad",
+        "change_unchanged": "Oförändrad",
+        "ungrouped": "Ej grupperad",
+        "empty": "De två kalkylerna är identiska.",
+        "total": "Summa"
+      }
+    }
+  },
+  "costs": {
+    "title": "Prisdatabas",
+    "rate": "Pris",
+    "material": "Material",
+    "labor": "Arbetskraft",
+    "equipment": "Maskiner",
+    "search_costs": "Sök priser..."
+  },
+  "assemblies": {
+    "title": "Sammansatta kalkyler",
+    "description": "Återanvändbara prisrecept — kombinera material, arbetskraft och maskiner till färdiga mallar",
+    "new_assembly": "Ny sammansatt kalkyl",
+    "from_database": "Från prisdatabasen",
+    "apply_to_boq": "Tillämpa på mängdförteckningen",
+    "add_component": "Lägg till komponent",
+    "no_assemblies": "Inga sammansatta kalkyler ännu",
+    "no_assemblies_hint": "Skapa din första sammansatta kalkyl från prisdatabasen eller resurskatalogen",
+    "total_rate": "Totalpris"
+  },
+  "catalog": {
+    "title": "Resurskatalog",
+    "description": "Bläddra bland och hantera material, maskiner, arbetskostnader och operatörer",
+    "add_resource": "Lägg till resurs",
+    "import_region": "Importera region",
+    "build_assembly": "Skapa sammansatt kalkyl",
+    "my_catalog": "Min katalog"
+  },
+  "validation": {
+    "title": "Validering",
+    "passed": "Godkänd",
+    "warnings": "Varningar",
+    "errors": "Fel",
+    "score": "Kvalitetspoäng",
+    "run_validation": "Kör validering",
+    "missing_quantity": "Post {position} saknar mängd",
+    "missing_rate": "Post {position} saknar à-pris",
+    "missing_description": "Post {position} saknar beskrivning",
+    "missing_classification": "Post {position} behöver en klassificeringskod",
+    "duplicate_ordinal": "Dubblerat positionsnummer: {ordinal}",
+    "rate_anomaly": "À-pris {rate} överstiger gränsvärde ({threshold})",
+    "nl": {
+      "not_a_string": "Indata måste vara text.",
+      "empty": "Indata är tom.",
+      "too_long": "Indata överskrider {max} tecken.",
+      "ai_unparsable": "AI-svaret kunde inte tolkas som ett DSL-dokument.",
+      "no_pattern": "Inget mönster matchade den inmatade meningen.",
+      "try": "Prova: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D Tidsplan",
+    "generated": {
+      "position_label": "Post {ordinal}",
+      "section_label": "Avsnitt {ordinal}",
+      "task_description": "Automatiskt genererad från post {ordinal} i mängdförteckningen ({quantity} {unit})",
+      "section_description": "Sammanfattning: avsnitt {ordinal} i mängdförteckningen",
+      "start_milestone": "Projektstart",
+      "start_milestone_description": "Milstolpe för projektstart",
+      "completion_milestone": "Projektavslut",
+      "completion_milestone_description": "Milstolpe för projektavslut",
+      "labour_resource": "Arbetskraft",
+      "machine_resource": "Maskiner"
+    },
+    "progress_sheet": {
+      "sheet_title": "Framsteg",
+      "title": "Blad för framstegsuppdatering",
+      "detail_schedule": "Tidplan: {name}",
+      "detail_exported": "Exporterad: {date}",
+      "instructions": "Fyll bara i de vita kolumnerna. Ändra inte de grå kolumnerna, radernas ordning eller de dolda kolumnerna.",
+      "col": {
+        "activity_ref": "Aktivitets-ID",
+        "name": "Aktivitet",
+        "wbs_code": "WBS",
+        "responsible": "Ansvarig",
+        "planned_start": "Planerad start",
+        "planned_finish": "Planerat slut",
+        "percent_complete": "% klart",
+        "actual_start": "Faktisk start",
+        "actual_finish": "Faktiskt slut",
+        "remaining_duration": "Återstående (arbetsdagar)",
+        "notes": "Anteckningar",
+        "row_key": "Radnyckel",
+        "stamp": "Stämpel"
+      }
+    }
+  },
+  "cad": {
+    "title": "CAD-import",
+    "upload": "Ladda upp CAD-fil",
+    "supported_formats": "Stöds: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Konverterar...",
+    "elements_found": "{count} element hittade"
+  },
+  "takeoff": {
+    "title": "Mängdavtagning",
+    "auto_detect": "Automatisk detektion",
+    "manual_measure": "Manuell mätning",
+    "confidence": "Säkerhet"
+  },
+  "tendering": {
+    "title": "Upphandling",
+    "create_tender": "Skapa upphandling",
+    "bid": "Anbud",
+    "award": "Tilldelning"
+  },
+  "modules": {
+    "title": "Moduler",
+    "installed": "Installerade",
+    "available": "Tillgängliga",
+    "install": "Installera",
+    "uninstall": "Avinstallera",
+    "update": "Uppdatera"
+  },
+  "dashboard": {
+    "welcome": "Välkommen till OpenConstructionERP",
+    "subtitle": "Byggkalkylering med öppen källkod",
+    "recent_projects": "Senaste projekt",
+    "system_status": "Systemstatus",
+    "modules_loaded": "Laddade moduler",
+    "validation_rules": "Valideringsregler",
+    "languages": "Språk",
+    "continue_estimate": "Fortsätt senaste kalkylen",
+    "getting_started": "Kom igång",
+    "total_value": "Totalt värde",
+    "active_estimates": "Aktiva kalkyler",
+    "schedule_status": "Tidplansstatus",
+    "quality_score": "Kvalitetspoäng",
+    "analytics": "Analys",
+    "project_overview": "Projektöversikt",
+    "step_load_db": "Läs in prisdatabasen",
+    "step_load_db_desc": "Importera regionala prisdata med mer än 55 000 poster",
+    "step_ai_search": "Aktivera AI-sökning",
+    "step_ai_search_desc": "Skapa semantiska vektorer för prismatchning",
+    "step_connect_ai": "Anslut AI",
+    "step_connect_ai_desc": "Lägg till dina API-nycklar för AI-stödd kalkylering",
+    "step_create_project": "Skapa projekt",
+    "step_create_project_desc": "Starta ditt första kalkylprojekt",
+    "step_build_boq": "Bygg din mängdförteckning",
+    "step_build_boq_desc": "Skapa en mängdförteckning med hjälp av AI"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "st",
+    "lsum": "a-pris",
+    "h": "tim",
+    "set": "set"
+  },
+  "contacts": {
+    "title": "Kontaktregister",
+    "new_contact": "Ny kontakt",
+    "contact_type": "Kontakttyp",
+    "client": "Beställare",
+    "subcontractor": "Underentreprenör",
+    "supplier": "Leverantör",
+    "consultant": "Konsult",
+    "internal": "Intern",
+    "company_name": "Företagsnamn",
+    "search_contacts": "Sök kontakter...",
+    "no_contacts": "Inga kontakter ännu",
+    "prequalification": "Prekvalificering",
+    "approved": "Godkänd",
+    "pending": "Väntar",
+    "expired": "Utgången"
+  },
+  "tasks": {
+    "title": "Uppgifter",
+    "new_task": "Ny uppgift",
+    "task": "Uppgift",
+    "topic": "Ämne",
+    "information": "Information",
+    "decision": "Beslut",
+    "personal": "Personlig uppgift",
+    "my_tasks": "Mina uppgifter",
+    "open": "Öppen",
+    "in_progress": "Pågår",
+    "completed": "Klar",
+    "draft": "Utkast",
+    "due_date": "Förfallodatum",
+    "assignee": "Ansvarig",
+    "priority": "Prioritet",
+    "checklist": "Checklista",
+    "focus_area": "Fokusområde"
+  },
+  "rfi": {
+    "title": "Informationsförfrågningar",
+    "new_rfi": "Ny förfrågan",
+    "subject": "Ämne",
+    "question": "Fråga",
+    "response": "Svar",
+    "ball_in_court": "Nuvarande ansvarig",
+    "days_open": "Dagar öppen",
+    "cost_impact": "Kostnadspåverkan",
+    "schedule_impact": "Tidspåverkan",
+    "respond": "Besvara",
+    "close": "Stäng",
+    "overdue": "Försenad"
+  },
+  "finance": {
+    "title": "Ekonomi",
+    "budgets": "Budgetar",
+    "invoices": "Fakturor",
+    "payable": "Leverantörsskulder",
+    "receivable": "Kundfordringar",
+    "payments": "Betalningar",
+    "evm": "Upparbetat värde",
+    "invoice_number": "Fakturanr.",
+    "amount": "Belopp",
+    "status": "Status",
+    "approve": "Godkänn",
+    "pay": "Markera som betald",
+    "original_budget": "Ursprunglig budget",
+    "revised_budget": "Reviderad budget",
+    "committed": "Bundet",
+    "actual": "Utfall",
+    "forecast": "Prognos",
+    "variance": "Avvikelse"
+  },
+  "procurement": {
+    "title": "Inköp",
+    "purchase_orders": "Inköpsorder",
+    "goods_receipts": "Godsmottagningar",
+    "new_po": "Ny inköpsorder",
+    "po_number": "Ordernr.",
+    "vendor": "Leverantör",
+    "issue": "Utfärda",
+    "confirm": "Bekräfta mottagning"
+  },
+  "safety": {
+    "title": "Säkerhet",
+    "incidents": "Tillbud",
+    "observations": "Observationer",
+    "new_incident": "Nytt tillbud",
+    "new_observation": "Ny observation",
+    "severity": "Allvarlighetsgrad",
+    "risk_score": "Riskpoäng",
+    "days_lost": "Frånvarodagar",
+    "treatment": "Behandling",
+    "corrective_action": "Korrigerande åtgärd"
+  },
+  "meetings": {
+    "title": "Möten",
+    "new_meeting": "Nytt möte",
+    "meeting_type": "Typ",
+    "attendees": "Deltagare",
+    "agenda": "Dagordning",
+    "action_items": "Åtgärdspunkter",
+    "minutes": "Protokoll",
+    "complete": "Avsluta mötet",
+    "present": "Närvarande",
+    "absent": "Frånvarande",
+    "excused": "Anmäld frånvaro",
+    "actions": {
+      "status": {
+        "open": "Öppen",
+        "completed": "Slutförd",
+        "cancelled": "Avbruten"
+      },
+      "flag": {
+        "overdue": "Försenad",
+        "on_track": "I tid"
+      },
+      "label": {
+        "action_item": "Åtgärdspunkt",
+        "completion_rate": "Andel slutförda åtgärder",
+        "open_vs_done": "Öppna kontra klara",
+        "overdue": "Försenade åtgärder"
+      },
+      "explain": {
+        "action_item": "En åtgärdspunkt är en uppgift som överenskommits vid ett möte, med en ansvarig och ett förfallodatum.",
+        "completion_rate": "Andelen slutförda åtgärder är antalet slutförda åtgärder delat med alla åtgärder, från 0 till 1.",
+        "open_vs_done": "Öppna åtgärder kräver fortsatt arbete. Klara åtgärder är slutförda och kräver inget mer arbete.",
+        "overdue": "En åtgärd är försenad när den fortfarande är öppen och dess förfallodatum är före referensdatumet."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Mötesprotokoll",
+      "issued": "UTFÄRDAT",
+      "draft": "UTKAST",
+      "date": "Datum:",
+      "location": "Plats:",
+      "type": "Typ:",
+      "number": "Möte nr:",
+      "chairperson": "Ordförande:",
+      "next_meeting": "Nästa möte:",
+      "not_available": "Ej tillämpligt",
+      "not_scheduled": "Ej planerat",
+      "attendance": "Närvaro",
+      "present": "Närvarande:",
+      "absent": "Frånvarande / anmält förhinder:",
+      "agenda": "Dagordning, diskussion och beslut",
+      "required": "(obligatoriskt)",
+      "discussion": "Diskussion:",
+      "decision": "Beslut:",
+      "decisions": "Beslut",
+      "open_questions": "Öppna frågor",
+      "actions": "Åtgärder",
+      "col_number": "#",
+      "col_action": "Åtgärd",
+      "col_owner": "Ansvarig",
+      "col_due": "Förfallodatum",
+      "col_status": "Status",
+      "brought_forward": "[Överfört]",
+      "overdue": "(försenad)",
+      "status_open": "Öppen",
+      "status_in_progress": "Pågår",
+      "status_done": "Klar",
+      "status_cancelled": "Avbruten",
+      "summary": "Sammanfattning",
+      "generated": "Skapat: {stamp}",
+      "issued_at": "Utfärdat {stamp}",
+      "running_head": "{project} - Protokoll",
+      "type_progress": "Byggmöte",
+      "type_design": "Projektering",
+      "type_safety": "Arbetsmiljö",
+      "type_subcontractor": "Underentreprenör",
+      "type_kickoff": "Startmöte",
+      "type_closeout": "Slutbesiktning",
+      "type_commercial": "Kommersiellt"
+    }
+  },
+  "inspections": {
+    "title": "Kvalitetskontroller",
+    "new_inspection": "Ny kontroll",
+    "inspector": "Kontrollant",
+    "checklist": "Checklista",
+    "pass": "Godkänd",
+    "fail": "Underkänd",
+    "partial": "Delvis",
+    "critical": "Kritisk",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Schemalagd",
+        "in_progress": "Pågår",
+        "completed": "Slutförd",
+        "failed": "Underkänd",
+        "cancelled": "Avbruten"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Avvikelserapporter",
+    "new_ncr": "Ny avvikelse",
+    "root_cause": "Grundorsak",
+    "corrective_action": "Korrigerande åtgärd",
+    "preventive_action": "Förebyggande åtgärd",
+    "material": "Material",
+    "workmanship": "Utförande",
+    "design": "Projektering"
+  },
+  "submittals": {
+    "title": "Handlingar för godkännande",
+    "new_submittal": "Ny handling",
+    "spec_section": "Avsnitt i beskrivningen",
+    "revision": "Revidering",
+    "submit": "Skicka in",
+    "review": "Granska",
+    "approved_as_noted": "Godkänd med anmärkning",
+    "revise_resubmit": "Revidera och skicka in igen",
+    "intl": {
+      "status_labels": {
+        "draft": "Utkast",
+        "submitted": "Inlämnad",
+        "under_review": "Under granskning",
+        "approved": "Godkänd",
+        "approved_as_noted": "Godkänd med anmärkningar",
+        "revise_and_resubmit": "Revidera och skicka in igen",
+        "rejected": "Avslagen",
+        "closed": "Stängd"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Korrespondens",
+    "new_entry": "Ny registrering",
+    "incoming": "Inkommande",
+    "outgoing": "Utgående",
+    "letter": "Brev",
+    "email": "E-post",
+    "notice": "Meddelande",
+    "date_sent": "Skickat datum",
+    "date_received": "Mottaget datum"
+  },
+  "cde": {
+    "title": "Gemensam datamiljö",
+    "new_container": "Ny behållare",
+    "container_code": "Behållarkod",
+    "cde_state": "CDE-status",
+    "wip": "Under arbete",
+    "shared": "Delad",
+    "published": "Publicerad",
+    "archived": "Arkiverad",
+    "promote": "Flytta fram",
+    "suitability": "Lämplighet",
+    "discipline": "Teknikområde",
+    "revisions": "Revideringar",
+    "intl": {
+      "state_labels": {
+        "wip": "Pågående arbete",
+        "shared": "Delad",
+        "published": "Publicerad",
+        "archived": "Arkiverad"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Följesedlar",
+    "new_transmittal": "Ny följesedel",
+    "purpose": "Syfte",
+    "for_approval": "För godkännande",
+    "for_information": "För kännedom",
+    "for_construction": "För produktion",
+    "recipients": "Mottagare",
+    "acknowledge": "Bekräfta mottagande",
+    "locked": "Låst",
+    "issue_transmittal": "Utfärda",
+    "intl": {
+      "status_words": {
+        "draft": "utkast",
+        "issued": "utskickad",
+        "responded": "besvarad"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Aviseringar",
+    "no_notifications": "Inga nya aviseringar",
+    "mark_all_read": "Markera alla som lästa",
+    "unread": "Olästa"
+  },
+  "comments": {
+    "title": "Kommentarer",
+    "post": "Publicera",
+    "reply": "Svara",
+    "edit": "Redigera",
+    "delete": "Ta bort",
+    "placeholder": "Skriv en kommentar...",
+    "empty": "Inga kommentarer ännu. Starta diskussionen.",
+    "edited": "redigerad",
+    "deleted": "Den här kommentaren har tagits bort"
+  },
+  "bim": {
+    "title": "BIM-hubb",
+    "models": "Modeller",
+    "elements": "Element",
+    "upload_model": "Ladda upp modell",
+    "processing": "Bearbetar",
+    "active": "Aktiv",
+    "link_to_boq": "Koppla till mängdförteckningen",
+    "properties": "Egenskaper",
+    "quantities": "Mängder",
+    "wireframe": "Trådmodell",
+    "section_box": "Sektionsbox",
+    "measure": "Mät",
+    "zoom_to_fit": "Zooma till vy"
+  },
+  "reporting": {
+    "title": "Rapporter och instrumentpaneler",
+    "kpi": "KPI-panel",
+    "generate_report": "Generera rapport",
+    "templates": "Mallar",
+    "project_status": "Projektstatus",
+    "cost_report": "Kostnadsrapport",
+    "schedule_status": "Tidplansstatus",
+    "safety_report": "Säkerhetsrapport",
+    "explain": {
+      "report_total_one": "Rapportens summa: {money} (summan av {count} rad).",
+      "report_total_other": "Rapportens summa: {money} (summan av {count} rader).",
+      "percent_of_total": "{part} är {percent} av {total} (procent av totalen).",
+      "percent_zero_total": "{part} av {total}: totalen är noll, så varje andel redovisas som 0 procent.",
+      "breakdown_empty": "Kostnadsfördelning: inga data.",
+      "breakdown_one": "Kostnadsfördelning: {count} grupp, rapportens summa {money}.",
+      "breakdown_other": "Kostnadsfördelning: {count} grupper, rapportens summa {money}.",
+      "top_n_one": "Topp {requested}: {shown} av {shown} rad.",
+      "top_n_other": "Topp {requested}: {shown} av {shown} rader."
+    }
+  },
+  "gantt": {
+    "title": "Gantt-schema",
+    "day": "Dag",
+    "week": "Vecka",
+    "month": "Månad",
+    "critical_path": "Kritisk linje",
+    "baseline": "Baslinje",
+    "dependencies": "Beroenden",
+    "today": "I dag"
+  },
+  "settings": {
+    "regional": "Regionala inställningar",
+    "timezone": "Tidszon",
+    "measurement": "Måttsystem",
+    "paper_size": "Pappersformat",
+    "date_format": "Datumformat",
+    "number_format": "Talformat",
+    "currency": "Valuta",
+    "metric": "Metriskt",
+    "imperial": "Imperiellt"
+  },
+  "users": {
+    "management": "Användarhantering",
+    "management_desc": "Hantera teammedlemmar, roller och behörigheter",
+    "invite_user": "Bjud in användare",
+    "invite": "Bjud in",
+    "full_name": "Fullständigt namn",
+    "email": "E-post",
+    "password": "Lösenord",
+    "role": "Roll",
+    "status": "Status",
+    "last_login": "Senaste inloggning",
+    "actions": "Åtgärder",
+    "name": "Namn",
+    "total": "Antal användare",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "admins": "Administratörer",
+    "managers": "Chefer",
+    "search": "Sök på namn eller e-post...",
+    "no_users": "Inga användare hittades",
+    "updated": "Användare uppdaterad",
+    "invited": "Inbjudan skickad",
+    "deactivate": "Inaktivera",
+    "activate": "Aktivera",
+    "never": "Aldrig",
+    "role_admin_desc": "Fullständig åtkomst till alla funktioner",
+    "role_manager_desc": "Projekt- och teamhantering",
+    "role_editor_desc": "Skapa och redigera innehåll",
+    "role_viewer_desc": "Endast läsbehörighet"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Den här ögonblicksbilden är fryst. En fryst ögonblicksbild är en registrering och kan inte ändras.",
+      "frozen_no_delete": "En fryst ögonblicksbild är en registrering och kan inte tas bort.",
+      "draft_open": "Det finns redan en öppen utkastbild. Frys eller ta bort den innan du startar en ny.",
+      "no_line_method": "Den här raden har ingen egen metod.",
+      "snapshot_missing": "Ögonblicksbilden hittades inte.",
+      "line_missing": "Ögonblicksbilden har ingen sådan rad.",
+      "document_missing": "Det länkade dokumentet tillhör inte det här projektet.",
+      "freeze_refused": "Ögonblicksbilden kan inte frysas ännu: {count} rad(er) har ändrats över tröskeln utan kommentar och underlag.",
+      "no_frozen_snapshot": "Det finns ännu ingen fryst ögonblicksbild att jämföra med.",
+      "no_ledger": "Fakturaregistret är inte tillgängligt i den här installationen.",
+      "no_snapshot": "Det finns ännu ingen ögonblicksbild att dokumentera."
+    },
+    "export": {
+      "project": "Projekt",
+      "generated": "Skapad",
+      "currency": "Valuta",
+      "page": "Sida",
+      "generated_at": "Skapad den",
+      "empty": "Inget att visa ännu.",
+      "total": "Summa",
+      "cost_report": "Kostnadsrapport",
+      "phase_comparison": "Fasjämförelse",
+      "invoice_ledger": "Fakturaregister",
+      "forecast_documentation": "Prognosdokumentation",
+      "as_of": "Per",
+      "forecast_method": "Prognosmetod",
+      "col_account": "Konto",
+      "col_code": "Kod",
+      "col_description": "Beskrivning",
+      "col_source": "Källa",
+      "col_method": "Metod",
+      "col_planned": "Budgeterat",
+      "col_committed": "Åtaganden",
+      "col_pending": "Väntande ändringar",
+      "col_measured": "Uppmätt",
+      "col_certified": "Attesterat",
+      "col_invoiced": "Fakturerat",
+      "col_paid": "Betalt",
+      "col_forecast": "Prognos",
+      "col_variance": "Avvikelse",
+      "col_variance_pct": "Avvikelse %",
+      "col_forecast_of_plan": "Prognos % av budget",
+      "col_measured_of_committed": "Uppmätt % av åtagande",
+      "col_invoiced_of_committed": "Fakturerat % av åtagande",
+      "col_contract": "Kontrakt",
+      "col_contract_title": "Kontraktsnamn",
+      "col_invoice": "Faktura",
+      "col_date": "Datum",
+      "col_kind": "Typ",
+      "col_release_status": "Frisläppning",
+      "col_net": "Netto",
+      "col_vat": "Moms",
+      "col_gross": "Brutto",
+      "col_retention": "Innehållning",
+      "col_release": "Frisläppt innehållning",
+      "col_discount": "Rabatt",
+      "col_payable": "Att betala",
+      "col_open": "Öppet",
+      "col_previous": "Föregående",
+      "col_delta": "Förändring",
+      "col_delta_pct": "Förändring %",
+      "col_needs_evidence": "Underlag krävs",
+      "col_comment": "Kommentar",
+      "col_evidence": "Underlag",
+      "row_unassigned": "Belopp utan kostnadsrad",
+      "row_loose_changes": "Ändringar utan kontrakt",
+      "row_no_contract": "Inget kontrakt",
+      "contract_value": "Kontraktsvärde",
+      "retention_held": "Innehållen retention",
+      "yes": "Ja",
+      "no": "Nej",
+      "snapshot_date": "Datum för ögonblicksbild",
+      "snapshot_status": "Status",
+      "previous_snapshot": "Föregående frysta ögonblicksbild",
+      "method_explained": "Så läses prognosen",
+      "evidence_threshold": "Underlag krävs över",
+      "threshold_both": "en förändring på mer än {parts}",
+      "threshold_any": "varje förändring",
+      "frozen_at": "Fryst"
+    },
+    "method": {
+      "best_available": "Bästa tillgängliga källa",
+      "maximum": "Högsta värde",
+      "evm_cpi": "Förtjänat värde (CPI)",
+      "manual": "Manuell"
+    },
+    "method_help": {
+      "best_available": "Varje rad använder sitt mest mogna värde: sluträkningen, annars uppmätt arbete, annars tilldelningen, annars kalkylen, annars budgeten.",
+      "maximum": "Varje rad använder det högsta av sina värden (budget, kalkyl, tilldelning, uppmätt, fakturerat), så att prognosen aldrig döljer en risk.",
+      "evm_cpi": "Varje rad räknar fram slutkostnaden utifrån framdriften: hittills förbrukade medel delat med andelen utfört arbete.",
+      "manual": "En person anger radens värde och länkar dokumentet bakom det."
+    },
+    "source": {
+      "none": "Inget värde",
+      "budget": "Budget",
+      "estimate": "Kalkyl",
+      "partly_awarded": "Delvis tilldelat",
+      "awarded": "Tilldelat",
+      "measured": "Uppmätt",
+      "final": "Sluträkning",
+      "manual": "Manuell",
+      "invoiced": "Fakturerat",
+      "evm": "Förtjänat värde"
+    },
+    "layer": {
+      "budget": "Budget",
+      "estimate": "Kalkyl",
+      "tender": "Bästa anbud",
+      "awarded": "Tilldelat",
+      "changes": "Godkända ändringar",
+      "committed": "Åtaganden",
+      "pending": "Väntande ändringar",
+      "measured": "Uppmätt",
+      "certified": "Attesterat",
+      "invoiced": "Fakturerat",
+      "paid": "Betalt",
+      "forecast": "Prognos"
+    },
+    "invoice_kind": {
+      "interim": "A conto",
+      "final": "Slutfaktura",
+      "daywork": "Regiarbete",
+      "credit_note": "Kreditfaktura"
+    },
+    "release_status": {
+      "open": "Öppen",
+      "released": "Frisläppt"
+    },
+    "evidence_kind": {
+      "document": "Dokument",
+      "minutes": "Protokoll",
+      "other": "Övrigt"
+    },
+    "snapshot_status": {
+      "draft": "Utkast",
+      "frozen": "Fryst"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Projektnr",
+      "generated_on": "Framtagen",
+      "records": "Poster",
+      "currency": "Valuta",
+      "status": "Status",
+      "name": "Namn",
+      "signature": "Underskrift",
+      "date": "Datum",
+      "signatures": "Underskrifter",
+      "yes": "Ja",
+      "no": "Nej",
+      "days_one": "{n} dag",
+      "days_other": "{n} dagar",
+      "empty_register": "Inga poster.",
+      "total": "Summa",
+      "signer_title": "Titel",
+      "sig_prepared_by": "Upprättande",
+      "sig_checked_by": "Kontroll",
+      "sig_approved_by": "Godkännande",
+      "footer_generated": "Framtagen {timestamp}",
+      "footer_page": "Sida {page} av {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Inlämningsregister",
+        "doc_title": "Inlämning för godkännande",
+        "doc_title_product_data": "Materialgodkännande",
+        "col_number": "Inlämningsnr",
+        "col_title": "Benämning",
+        "col_type": "Typ",
+        "col_spec": "Beskrivningsavsnitt",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Inlämnad",
+        "col_date_required": "Önskat datum",
+        "col_date_returned": "Återlämnad",
+        "col_reviewer": "Granskare",
+        "col_approver": "Godkännare",
+        "col_ball_in_court": "Bollen hos",
+        "submitted_by_org": "Inlämnande företag",
+        "review_notes": "Granskningskommentarer",
+        "no_review_notes": "Inga granskningskommentarer registrerade.",
+        "sig_submitted": "Inlämning",
+        "sig_reviewed": "Granskning",
+        "sig_approved": "Godkännande",
+        "register_filename": "inlamningsregister",
+        "register_title_shop_drawing": "Register över verkstadsritningar",
+        "register_title_product_data": "Register över materialgodkännanden",
+        "register_title_method_statement": "Register över metodbeskrivningar",
+        "register_filename_shop_drawing": "register-over-verkstadsritningar",
+        "register_filename_product_data": "register-over-materialgodkannanden",
+        "register_filename_method_statement": "register-over-metodbeskrivningar",
+        "col_discipline": "Disciplin",
+        "col_manufacturer": "Fabrikat / märke",
+        "col_model": "Modell / typ",
+        "col_origin": "Ursprungsland",
+        "col_supplier": "Leverantör",
+        "col_product": "Fabrikat / modell / ursprung",
+        "col_review_code": "Granskningskod",
+        "col_outcome": "Granskningsresultat",
+        "col_review_period": "Granskningstid (dagar)",
+        "col_review_due": "Granskning senast",
+        "col_days_in_review": "Dagar i granskning",
+        "col_days_in_review_print": "Dagar i granskning",
+        "col_review_overdue": "Dagar över tiden",
+        "col_required_on_site": "Behövs på plats",
+        "col_long_lead": "Lång leveranstid",
+        "col_lead_time": "Leveranstid (veckor)",
+        "col_needed_by": "Godkännande senast",
+        "col_approval_late": "Dagar efter sista datum",
+        "col_drawings": "Länkade ritningar",
+        "col_submitted_returned": "Inlämnad / återlämnad",
+        "col_on_site_needed_by": "På plats / godkännande senast",
+        "resubmit_for_record": "Rättat exemplar ska lämnas in på nytt för arkivering",
+        "review_history": "Granskningshistorik",
+        "hist_submitted": "Inlämnad",
+        "hist_returned": "Återlämnad",
+        "drawings_missing_one": "{n} länkad ritning är inte längre tillgänglig",
+        "drawings_missing_other": "{n} länkade ritningar är inte längre tillgängliga",
+        "weeks_one": "{n} vecka",
+        "weeks_other": "{n} veckor"
+      },
+      "labels": {
+        "status": {
+          "draft": "Utkast",
+          "submitted": "Inlämnad",
+          "under_review": "Under granskning",
+          "approved": "Godkänd",
+          "approved_as_noted": "Godkänd med anmärkning",
+          "revise_and_resubmit": "Revidera och lämna in på nytt",
+          "rejected": "Underkänd",
+          "closed": "Avslutad"
+        },
+        "type": {
+          "shop_drawing": "Arbetsritning",
+          "product_data": "Produktdata",
+          "sample": "Prov",
+          "mock_up": "Mock-up",
+          "test_report": "Provningsrapport",
+          "calculation": "Beräkning",
+          "method_statement": "Metodbeskrivning",
+          "certificate": "Certifikat",
+          "warranty": "Garanti"
+        },
+        "discipline": {
+          "mechanical": "Mekanik",
+          "hvac": "VVS-teknik",
+          "plumbing": "Vatten och avlopp",
+          "fire_protection": "Brandskydd",
+          "electrical": "El",
+          "lighting": "Belysning",
+          "elv": "Svagström",
+          "bms": "Byggautomation",
+          "architectural": "Arkitekt",
+          "structural": "Konstruktion",
+          "civil": "Mark och anläggning"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Ändringsorderregister",
+        "doc_title": "Ändringsorder",
+        "col_code": "Kod",
+        "col_title": "Benämning",
+        "col_reason": "Orsak",
+        "col_instrument": "Typ",
+        "col_submitted": "Inlämnad",
+        "col_contractor_amount": "Entreprenörens belopp",
+        "col_engineer_amount": "Konsultens belopp",
+        "col_approved_amount": "Godkänt belopp",
+        "col_cost_impact": "Kostnadspåverkan",
+        "col_time_impact": "Tidspåverkan (dagar)",
+        "col_approved_time": "Godkänd tid (dagar)",
+        "time_impact": "Tidspåverkan",
+        "approved_time": "Godkänd tid",
+        "col_approved": "Godkänd",
+        "submitted_by": "Inlämning",
+        "approved_by": "Godkännande",
+        "description": "Beskrivning",
+        "no_description": "Ingen beskrivning registrerad.",
+        "items": "Ändringsposter",
+        "item_description": "Beskrivning",
+        "item_change": "Ändring",
+        "item_unit": "Enhet",
+        "item_original_quantity": "Urspr. mängd",
+        "item_new_quantity": "Ny mängd",
+        "item_original_rate": "Urspr. à-pris",
+        "item_new_rate": "Nytt à-pris",
+        "item_cost_delta": "Kostnadsskillnad",
+        "register_filename": "andringsorderregister"
+      },
+      "labels": {
+        "status": {
+          "draft": "Utkast",
+          "submitted": "Inlämnad",
+          "approved": "Godkänd",
+          "rejected": "Avslagen",
+          "executed": "Genomförd"
+        },
+        "reason": {
+          "client_request": "Beställarens önskemål",
+          "design_change": "Projekteringsändring",
+          "unforeseen": "Oförutsedda förhållanden",
+          "regulatory": "Myndighetskrav",
+          "error": "Fel eller utelämnande",
+          "non_conformance": "Avvikelse",
+          "value_engineering": "Värdeoptimering"
+        },
+        "instrument": {
+          "works_change": "Beordrad ändring",
+          "site_confirmation": "Platsbekräftelse",
+          "claim": "Krav"
+        },
+        "change": {
+          "added": "Tillagd",
+          "removed": "Borttagen",
+          "modified": "Ändrad"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Underlagspaket",
+        "subject": "Ärende",
+        "basis": "Grund",
+        "period_from": "Tidigaste post",
+        "period_to": "Senaste post",
+        "digest": "Integritetskod (SHA-256, första 16 tecknen)",
+        "col_row": "Nr",
+        "col_record_id": "Post-ID",
+        "col_section": "Avsnitt",
+        "col_date": "Datum",
+        "col_kind": "Posttyp",
+        "col_title": "Benämning",
+        "col_summary": "Sammanfattning",
+        "col_reference": "Referens",
+        "register_filename": "underlagspaket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Meddelanden",
+          "correspondence": "Korrespondens",
+          "rfis": "Förfrågningar (RFI)",
+          "variations": "Ändringar",
+          "approvals": "Godkännanden",
+          "delay": "Försening",
+          "timeline": "Tidslinje",
+          "other": "Övrigt"
+        },
+        "kind": {
+          "notice": "Meddelande",
+          "variation_notice": "Meddelande om ändring",
+          "variation_request": "Begäran om ändring",
+          "variation_order": "Ändringsorder",
+          "change_order": "Ändringsorder",
+          "moc_entry": "Ändringspost",
+          "correspondence": "Korrespondens"
+        },
+        "basis": {
+          "dispute": "Tvist",
+          "valuation": "Värdering",
+          "delay": "Försening / tidsförlängning",
+          "general": "Allmän post"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Korrespondenslogg",
+        "doc_title": "Korrespondens",
+        "col_reference": "Referensnr",
+        "col_direction": "Riktning",
+        "col_type": "Typ",
+        "col_subject": "Ärende",
+        "col_from": "Från",
+        "col_to": "Till",
+        "col_date_sent": "Skickad",
+        "col_date_received": "Mottagen",
+        "col_response_due": "Svar senast",
+        "col_clause": "Avtalspunkt",
+        "notes": "Anteckningar",
+        "no_notes": "Inga anteckningar registrerade.",
+        "attachments": "Bifogade filer",
+        "linked_documents": "Länkade handlingar",
+        "sig_prepared": "Upprättande",
+        "sig_received": "Mottagande",
+        "register_filename": "korrespondenslogg"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Inkommande",
+          "outgoing": "Utgående"
+        },
+        "type": {
+          "letter": "Brev",
+          "email": "E-post",
+          "notice": "Meddelande",
+          "memo": "PM",
+          "report": "Rapport"
+        },
+        "status": {
+          "open": "Öppen",
+          "awaiting_response": "Väntar på svar",
+          "responded": "Besvarad",
+          "closed": "Avslutad"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Översändningsregister",
+        "doc_title": "Översändning",
+        "col_number": "Översändningsnr",
+        "col_subject": "Ärende",
+        "col_purpose": "Syfte",
+        "col_issued": "Utfärdad",
+        "col_response_due": "Svar senast",
+        "col_recipients": "Mottagare",
+        "col_item_count": "Poster",
+        "sender": "Avsändare",
+        "cover_note": "Följebrev",
+        "no_cover_note": "Inget följebrev.",
+        "recipients": "Mottagare",
+        "recipient": "Mottagare",
+        "action_required": "Åtgärd krävs",
+        "acknowledged": "Mottagande bekräftat",
+        "responded": "Besvarad",
+        "items": "Översända handlingar",
+        "item_no": "Nr",
+        "item_description": "Beskrivning",
+        "item_notes": "Anteckningar",
+        "sig_issued": "Utfärdande",
+        "sig_received": "Mottagande",
+        "register_filename": "oversandningsregister"
+      },
+      "labels": {
+        "status": {
+          "draft": "Utkast",
+          "issued": "Utfärdad",
+          "responded": "Besvarad"
+        },
+        "purpose": {
+          "for_approval": "För godkännande",
+          "for_review": "För granskning",
+          "for_information": "För kännedom",
+          "for_construction": "För utförande",
+          "for_tender": "För anbud",
+          "for_record": "För arkivering"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Ändringsregister",
+        "claim_register_title": "Kravregister",
+        "notice_register_title": "Meddelanderegister",
+        "doc_title": "Begäran om ändring",
+        "doc_title_credit": "Begäran om ändring (avdrag)",
+        "time_impact": "Tidspåverkan",
+        "col_code": "Kod",
+        "col_title": "Benämning",
+        "col_classification": "Typ",
+        "col_urgency": "Brådska",
+        "col_requested": "Begärd",
+        "col_claimed_amount": "Yrkat belopp",
+        "col_agreed_amount": "Överenskommet belopp",
+        "col_time_impact": "Tidspåverkan (dagar)",
+        "col_response_due": "Svar senast",
+        "col_clause": "Avtalspunkt",
+        "col_row": "Nr",
+        "col_claim_type": "Kravtyp",
+        "col_raised": "Framställd",
+        "col_period_start": "Period från",
+        "col_period_end": "Period till",
+        "col_description": "Beskrivning",
+        "col_decided_amount": "Beslutat belopp",
+        "col_days_requested": "Begärda dagar",
+        "col_days_granted": "Beviljade dagar",
+        "col_recipient_type": "Riktat till",
+        "col_recipient": "Mottagare",
+        "col_target_response": "Förväntat svar",
+        "col_response_received": "Svar mottaget",
+        "requested_by": "Begäran",
+        "decided_by": "Beslut",
+        "date_submitted": "Inlämnad",
+        "date_decided": "Beslutad",
+        "description": "Beskrivning",
+        "no_description": "Ingen beskrivning registrerad.",
+        "decision_notes": "Beslutsanteckningar",
+        "no_decision_notes": "Inget beslut registrerat ännu.",
+        "variation_register_filename": "andringsregister",
+        "claim_register_filename": "kravregister",
+        "notice_register_filename": "meddelanderegister"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Utkast",
+          "submitted": "Inlämnad",
+          "under_review": "Under granskning",
+          "approved": "Godkänd",
+          "rejected": "Avslagen",
+          "converted_to_vo": "Omvandlad till order"
+        },
+        "claim_status": {
+          "draft": "Utkast",
+          "submitted": "Inlämnad",
+          "under_review": "Under granskning",
+          "agreed": "Överenskommet",
+          "granted": "Beviljat",
+          "rejected": "Avslaget"
+        },
+        "notice_status": {
+          "issued": "Utfärdat",
+          "acknowledged": "Bekräftat",
+          "responded": "Besvarat",
+          "closed": "Avslutat"
+        },
+        "classification": {
+          "scope_change": "Ändrad omfattning",
+          "unforeseen": "Oförutsett förhållande",
+          "owner_change": "Beställarändring",
+          "design_dev": "Projektutveckling",
+          "regulatory": "Myndighetskrav",
+          "other": "Övrigt"
+        },
+        "urgency": {
+          "low": "Låg",
+          "med": "Medel",
+          "high": "Hög"
+        },
+        "claim_type": {
+          "disruption": "Störning",
+          "eot": "Tidsförlängning"
+        },
+        "recipient_type": {
+          "owner": "Beställare",
+          "contractor": "Entreprenör",
+          "architect": "Arkitekt",
+          "engineer": "Ingenjör",
+          "consultant": "Konsult"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Byggdagbok",
+        "overview": "Översikt",
+        "site_supervisor": "Platschef",
+        "not_recorded": "Ej registrerat",
+        "labour_on_site": "Arbetskraft på plats",
+        "equipment_on_site": "Maskiner på plats",
+        "completeness": "Fullständighet",
+        "weather": "Väder",
+        "weather_time": "Tid",
+        "weather_source": "Källa",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Vind (km/h)",
+        "weather_precip": "Nederbörd (mm)",
+        "weather_conditions": "Förhållanden",
+        "weather_empty": "Inget väder registrerat för denna dag.",
+        "site_record": "Platsnotering",
+        "entries_empty": "Inga anteckningar registrerade i denna dagbok.",
+        "notes": "Anteckningar",
+        "notes_empty": "Inga ytterligare anteckningar.",
+        "footer_supervisor": "Platschef: {name}",
+        "footer_supervisor_missing": "Platschef: ej registrerat",
+        "footer_generated": "Framtagen: {timestamp}",
+        "footer_page": "Sida {page} av {total}",
+        "workforce": "Personal per företag",
+        "workforce_company": "Företag",
+        "workforce_count": "Personer",
+        "workforce_unassigned": "Ej knuten till företag",
+        "workforce_total": "Summa",
+        "signatures": "Underskrifter",
+        "sig_prepared": "Upprättande (platschef)",
+        "sig_approved": "Godkännande (beställarens representant)",
+        "sig_name": "Namn",
+        "sig_title": "Titel",
+        "sig_date": "Datum",
+        "sig_signature": "Underskrift",
+        "signed_note": "Signerat i systemet: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "byggdagbok",
+        "summary_wind": "vind {value} km/h",
+        "summary_precipitation": "nederbörd {value} mm",
+        "summary_humidity": "luftfuktighet {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Besökare",
+          "event": "Händelser",
+          "delivery": "Levererade material",
+          "completion": "Utfört arbete",
+          "incident_summary": "Säkerhet och incidenter",
+          "inspection_summary": "Besiktningar",
+          "photo_note": "Fotoanteckningar",
+          "general": "Allmänna anteckningar"
+        },
+        "status": {
+          "open": "Öppen",
+          "closed": "Avslutad",
+          "signed": "Signerad",
+          "archived": "Arkiverad"
+        },
+        "condition": {
+          "clear": "klart",
+          "mainly_clear": "mestadels klart",
+          "partly_cloudy": "delvis molnigt",
+          "cloudy": "molnigt",
+          "overcast": "mulet",
+          "fog": "dimma",
+          "fog_rime": "underkyld dimma",
+          "drizzle_light": "lätt duggregn",
+          "drizzle_moderate": "måttligt duggregn",
+          "drizzle_dense": "kraftigt duggregn",
+          "rain": "regn",
+          "rain_light": "lätt regn",
+          "rain_moderate": "måttligt regn",
+          "rain_heavy": "kraftigt regn",
+          "freezing_rain_light": "lätt underkylt regn",
+          "freezing_rain_heavy": "kraftigt underkylt regn",
+          "snow": "snö",
+          "snow_light": "lätt snöfall",
+          "snow_moderate": "måttligt snöfall",
+          "snow_heavy": "kraftigt snöfall",
+          "rain_showers_light": "lätta regnskurar",
+          "rain_showers_moderate": "måttliga regnskurar",
+          "rain_showers_violent": "kraftiga regnskurar",
+          "snow_showers_light": "lätta snöbyar",
+          "snow_showers_heavy": "kraftiga snöbyar",
+          "thunderstorm": "åska",
+          "thunderstorm_hail_light": "åska med lätt hagel",
+          "thunderstorm_hail_heavy": "åska med kraftigt hagel"
+        },
+        "source": {
+          "manual": "Manuell registrering",
+          "open_meteo": "Vädertjänst",
+          "sensor": "Sensor på plats"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "RFI-logg",
+        "col_number": "RFI-nr",
+        "col_subject": "Ärende",
+        "col_raised_by": "Ställd av",
+        "col_assigned_to": "Tilldelad",
+        "col_ball_in_court": "Bollen hos",
+        "col_date_required": "Önskat datum",
+        "col_response_due": "Svar senast",
+        "col_days_open": "Dagar öppen",
+        "col_cost_impact": "Kostnadspåverkan",
+        "col_schedule_impact": "Tidspåverkan",
+        "col_response": "Svar",
+        "yes_with": "Ja ({detail})",
+        "register_filename": "rfi-logg"
+      },
+      "labels": {
+        "status": {
+          "draft": "Utkast",
+          "open": "Öppen",
+          "answered": "Besvarad",
+          "closed": "Stängd",
+          "void": "Ogiltig"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "AI-genererad",
+        "drawing": "Ritning",
+        "cost_estimate": "KOSTNADSKALKYL",
+        "summary": "SAMMANFATTNING",
+        "project": "Projekt:",
+        "boq": "Mängdförteckning:",
+        "date": "Datum:",
+        "status": "Status:",
+        "prepared_by": "Upprättad av:",
+        "approved_by": "Godkänd av:",
+        "signature_hint": "Namn / Signatur / Datum",
+        "contents": "Avsnitt / Poster:",
+        "pos": "Pos.",
+        "description": "Beskrivning",
+        "unit": "Enhet",
+        "qty": "Kvantitet",
+        "rate": "Enhetspris",
+        "total": "Summa",
+        "subtotal": "Delsumma:",
+        "other_positions": "Övriga poster",
+        "direct_cost": "Direkta kostnader:",
+        "markups": "Påslag (exkl. moms):",
+        "net_total": "Nettosumma (exkl. moms):",
+        "gross_total": "Bruttosumma",
+        "page": "Sida",
+        "of": "av",
+        "generated": "Genererad:",
+        "summary_report": "Sammanfattningsrapport",
+        "positions_omitted": "{count} poster (fullständig detalj utelämnad av prestandaskäl)",
+        "section": "Avsnitt",
+        "items": "Poster",
+        "cost_summary": "Kostnadssammanställning",
+        "table_of_contents": "Innehållsförteckning",
+        "resources_omitted": "Resursuppbyggnad skrivs inte ut: denna mängdförteckning har för många resursrader för en PDF.",
+        "status_draft": "Utkast",
+        "status_final": "Slutlig",
+        "status_archived": "Arkiverad",
+        "subject": "Mängdförteckning",
+        "tax_vat": "Moms"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "FAKTURA",
+        "date": "Datum: {value}",
+        "due": "Förfallodatum: {value}",
+        "from": "Från",
+        "bill_to": "Fakturamottagare",
+        "vat_id": "Momsreg.nr: {value}",
+        "ref": "Referens: {value}",
+        "th_description": "Beskrivning",
+        "th_qty": "Kvantitet",
+        "th_unit": "Enhet",
+        "th_unit_price": "Enhetspris",
+        "th_net": "Netto ({currency})",
+        "net_total": "Nettosumma",
+        "vat_total": "Moms",
+        "grand_total": "Totalsumma",
+        "retention_prepaid": "Innehållen säkerhet / förskott",
+        "amount_due": "Att betala",
+        "payment": "Betalning",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Kontonummer: {value}",
+        "bank_code": "Bankkod: {value}",
+        "account_holder": "Kontoinnehavare: {value}",
+        "footer": "Denna PDF innehåller en inbäddad EN 16931-e-faktura (Factur-X / ZUGFeRD). Den inbäddade XML-filen är det gällande dokumentet.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ",",
+        "group_separator": " "
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Rapport",
+        "meta_project": "Projekt",
+        "meta_type": "Typ",
+        "meta_generated": "Genererad",
+        "meta_currency": "Valuta",
+        "field_column": "Fält",
+        "value_column": "Värde",
+        "yes": "Ja",
+        "no": "Nej",
+        "no_data_heading": "Inga data tillgängliga",
+        "no_data_body": "Denna rapport genererades med en tom datasnapshot. Kontrollera att källmodulerna (ekonomi, tidplan, säkerhet m.fl.) returnerade data för det valda projektet.",
+        "no_data_body_short": "Denna rapport genererades med en tom datasnapshot. Kontrollera att källmodulerna returnerade data för det valda projektet.",
+        "footer_generated_by": "Genererad av OpenConstructionERP {timestamp}.",
+        "worksheet_name": "Rapport",
+        "pdf_subject": "Projektrapport",
+        "overall_progress": "Total framdrift",
+        "as_of": "Per",
+        "recorded_by": "Registrerad av",
+        "period": "Period",
+        "entries_suffix": "({count} poster)",
+        "site_photo_alt": "Foto från arbetsplatsen",
+        "ai_summary_heading": "Sammanfattning",
+        "ai_badge": "AI-genererad",
+        "ai_note": "Genererad av AI från projektdata nedan.",
+        "ai_note_confidence": "Genererad av AI från projektdata nedan (konfidens {confidence}).",
+        "ai_note_review": "Granska innan delning med kund."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Namn",
+          "status": "Status",
+          "phase": "Fas",
+          "planned_start": "Planerad start",
+          "planned_end": "Planerat slut",
+          "schedule_progress_pct": "Tidplanens framdrift %",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Förbrukad budget %",
+          "as_of": "Per",
+          "progress_pct": "Framdrift %",
+          "risk_score_avg": "Genomsnittlig riskpoäng",
+          "open_rfis": "Öppna RFI:er",
+          "open_submittals": "Öppna inlämningar",
+          "open_defects": "Öppna brister",
+          "open_observations": "Öppna iakttagelser",
+          "budget": "Budget",
+          "committed": "Bundet",
+          "actual": "Faktiskt",
+          "payable": "Skulder",
+          "receivable": "Fordringar",
+          "net_cash_flow": "Nettokassaflöde"
+        },
+        "section_titles": {
+          "Project Overview": "Projektöversikt",
+          "Key Performance Indicators": "Nyckeltal",
+          "Schedule Status": "Tidplanestatus",
+          "Risk Summary": "Risksammanfattning",
+          "Open Issues": "Öppna ärenden",
+          "Cost Summary": "Kostnadssammanställning",
+          "Cost Breakdown": "Kostnadsfördelning",
+          "Change Orders": "Ändringsorder",
+          "Cash Flow": "Kassaflöde",
+          "Schedule Overview": "Tidplansöversikt",
+          "Milestone Status": "Milstolpsstatus",
+          "Critical Path": "Kritisk väg",
+          "3-Week Lookahead": "Tre veckors planering framåt",
+          "Safety KPIs": "Säkerhetsnyckeltal",
+          "Incident Log": "Incidentlogg",
+          "Near-Miss Reports": "Tillbudsrapporter",
+          "Safety Training": "Säkerhetsutbildning",
+          "Inspection Summary": "Besiktningssammanfattning",
+          "By Inspection Type": "Per besiktningstyp",
+          "Punch List Status": "Status för slutbesiktningslista",
+          "Recent Inspections": "Senaste besiktningar",
+          "Portfolio Overview": "Portföljöversikt",
+          "Project Statuses": "Projektstatus",
+          "KPI Comparison": "Jämförelse av nyckeltal",
+          "Portfolio Risks": "Portföljrisker",
+          "Field Progress": "Framdrift på plats",
+          "Top Risks": "Största risker",
+          "Site Photos": "Foton från arbetsplatsen",
+          "Summary": "Sammanfattning"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Inköpsorder",
+        "gr_title": "Mottagningsrapport",
+        "supplier": "Leverantör",
+        "po_type": "Ordertyp",
+        "issue_date": "Utfärdad",
+        "delivery_date": "Leveransdatum",
+        "created_by": "Upprättad av",
+        "order_total": "Orderbelopp",
+        "line_items": "Orderrader",
+        "col_no": "Nr",
+        "col_description": "Beskrivning",
+        "col_quantity": "Kvantitet",
+        "col_unit": "Enhet",
+        "col_unit_rate": "Enhetspris",
+        "col_amount": "Belopp",
+        "no_line_items": "Inga orderrader.",
+        "totals": "Summor",
+        "subtotal": "Nettobelopp",
+        "tax": "Moms",
+        "total_gross": "Totalt inkl. moms",
+        "terms": "Villkor",
+        "payment_terms": "Betalningsvillkor",
+        "retention": "Innehållen säkerhet",
+        "retention_at": "Säkerhet innehålls vid",
+        "retention_at_receipt": "Mottagning",
+        "retention_at_invoice": "Faktura",
+        "invoice_tolerance": "Tolerans för faktura",
+        "supplier_confirmation": "Leverantörens bekräftelse",
+        "supplier_reference": "Leverantörens referens",
+        "confirmed_delivery": "Bekräftat leveransdatum",
+        "acknowledged_on": "Bekräftad den",
+        "not_confirmed": "Ännu inte bekräftad av leverantören.",
+        "notes": "Anteckningar",
+        "no_notes": "Inga anteckningar registrerade.",
+        "sig_ordered_by": "Beställd av",
+        "purchase_order": "Inköpsorder",
+        "receipt_date": "Mottagningsdatum",
+        "received_by": "Mottagen av",
+        "delivery_note": "Följesedel",
+        "col_ordered": "Beställt",
+        "col_received": "Mottaget",
+        "col_rejected": "Reklamerat",
+        "col_batch": "Batch / lot",
+        "rejections": "Reklamationer",
+        "col_reason": "Orsak",
+        "no_rejections": "Inget reklamerades.",
+        "sig_delivered_by": "Levererad av",
+        "counterparty_tax_id": "Momsreg.nr",
+        "counterparty_address": "Adress"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Utkast",
+          "approved": "Godkänd",
+          "issued": "Utfärdad",
+          "partially_received": "Delvis mottagen",
+          "completed": "Slutförd",
+          "cancelled": "Avbruten"
+        },
+        "gr_status": {
+          "draft": "Utkast",
+          "confirmed": "Bekräftad"
+        },
+        "po_type": {
+          "standard": "Standard",
+          "blanket": "Ramorder",
+          "service": "Tjänster"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Faktura",
+        "payment_title": "Betalning",
+        "direction": "Riktning",
+        "supplier": "Leverantör",
+        "client": "Kund",
+        "invoice_date": "Fakturadatum",
+        "due_date": "Förfallodatum",
+        "payment_terms": "Betalningsvillkor",
+        "purchase_order": "Inköpsorder",
+        "invoice_total": "Fakturabelopp",
+        "line_items": "Fakturarader",
+        "col_no": "Nr",
+        "col_description": "Beskrivning",
+        "col_quantity": "Kvantitet",
+        "col_unit": "Enhet",
+        "col_unit_rate": "Enhetspris",
+        "col_vat": "Moms",
+        "col_amount": "Belopp",
+        "no_line_items": "Inga fakturarader.",
+        "totals": "Summor",
+        "subtotal": "Nettobelopp",
+        "tax": "Moms",
+        "total_gross": "Totalt inkl. moms",
+        "retention": "Innehållen säkerhet",
+        "amount_due": "Att betala efter innehållen säkerhet",
+        "payments": "Betalningar",
+        "col_date": "Datum",
+        "col_reference": "Referens",
+        "col_paid": "Betalt",
+        "col_withheld": "Innehållet",
+        "refund": "Återbetalning",
+        "no_payments": "Inga betalningar registrerade.",
+        "notes": "Anteckningar",
+        "no_notes": "Inga anteckningar registrerade.",
+        "invoice": "Faktura",
+        "invoice_number": "Fakturanr",
+        "payment_date": "Betalningsdatum",
+        "reference": "Referens",
+        "amount_paid": "Betalt belopp",
+        "exchange_rate": "Valutakurs",
+        "kind": "Typ",
+        "kind_payment": "Betalning",
+        "kind_refund": "Återbetalning",
+        "withholding": "Innehållen säkerhet",
+        "withheld_amount": "Innehållet belopp",
+        "release_date": "Frigivningsdatum",
+        "gross_settled": "Reglerat bruttobelopp",
+        "no_withholding": "Inget har innehållits från denna betalning.",
+        "counterparty_tax_id": "Momsreg.nr",
+        "counterparty_address": "Adress"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Utkast",
+          "pending": "Väntar på godkännande",
+          "approved": "Godkänd",
+          "sent": "Skickad",
+          "paid": "Betald",
+          "cancelled": "Avbruten",
+          "credit_note_issued": "Kreditnota utfärdad"
+        },
+        "direction": {
+          "payable": "Skuld (leverantörsfaktura)",
+          "receivable": "Fordran (kundfaktura)"
+        },
+        "payment_status": {
+          "completed": "Slutförd",
+          "refunded": "Återbetald"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Sida {page} av {total}",
+    "page": "Sida {page}",
+    "printed": "Utskrivet: {timestamp}",
+    "generated": "Skapad: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} har bjudit in dig till kundportalen",
+      "login_subject": "Din inloggningslänk till kundportalen",
+      "invite_heading": "Välkommen till kundportalen",
+      "login_heading": "Logga in i kundportalen",
+      "greeting": "Hej {name},",
+      "greeting_generic": "Hej,",
+      "invite_body": "{sender} har gett dig tillgång till kundportalen. Där kan du följa ditt projekt: framstegsrapporter, handlingar, fakturor och kommande milstolpar.",
+      "login_body": "Här är den inloggningslänk du begärde.",
+      "link_help": "Knappen nedan loggar in dig. Inget lösenord behövs. Länken fungerar en gång och är giltig i {hours} timmar.",
+      "ignore": "Om du inte väntade dig det här mejlet kan du bortse från det. Ingen får tillgång utan den här länken.",
+      "invite_cta": "Öppna portalen",
+      "login_cta": "Logga in",
+      "sender_generic": "Ditt projektteam"
+    },
+    "tender_invite": {
+      "subject": "Inbjudan att lämna anbud: {package}",
+      "heading": "Inbjudan att lämna anbud",
+      "greeting": "Hej {company},",
+      "greeting_generic": "Hej,",
+      "invite": "Ni inbjuds härmed att lämna anbud på anbudspaketet {package}.",
+      "invite_project": "Ni inbjuds härmed att lämna anbud på anbudspaketet {package} i projektet {project}.",
+      "deadline": "Sista anbudsdag: {deadline}",
+      "link_help": "Knappen nedan öppnar mängdförteckningen. Fyll i dina á-priser online, spara ett utkast när du vill och lämna anbudet före sista anbudsdag. Inget konto behövs.",
+      "link_personal": "Länken är personlig för ert företag. Vidarebefordra den inte.",
+      "cta": "Öppna mängdförteckningen och prissätt",
+      "no_link": "Granska uppgifterna om paketet och lämna ert anbud före sista anbudsdag ovan."
+    },
+    "notification_email": {
+      "greeting": "Hej {name},",
+      "greeting_generic": "Hej,",
+      "cta": "Öppna i OpenConstructionERP",
+      "footer": "Du får det här mejlet på grund av dina aviseringsinställningar. Du kan ändra dem i din profil.",
+      "digest_subject": "OpenConstructionERP: Sammanställning av aviseringar ({count})",
+      "digest_heading": "Senaste aviseringar:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Prisjämförelse",
+      "comparison_sheet": "Jämförelse",
+      "bidder_title": "Mängdförteckning för prissättning",
+      "bidder_sheet": "Mängdförteckning",
+      "project": "Projekt",
+      "package": "Paket",
+      "currency": "Valuta",
+      "date": "Datum",
+      "return_by": "Återlämnas senast",
+      "item": "Post",
+      "description": "Beskrivning",
+      "unit": "Enhet",
+      "quantity": "Mängd",
+      "unit_price": "À-pris",
+      "line_total": "Radsumma",
+      "own_estimate": "Egen kalkyl",
+      "not_priced": "ej prissatt",
+      "sum_priced_lines": "Summa prissatta rader",
+      "bid_total": "Anbudssumma enligt inlämnat anbud",
+      "lines_priced": "Prissatta rader",
+      "lines_priced_value": "{priced} av {total}",
+      "deviation": "Avvikelse från egen kalkyl",
+      "not_comparable": "saknas",
+      "other_currency": "Offererat i {currency}, rangordnas inte mot anbud i {reporting}.",
+      "legend": "Teckenförklaring",
+      "legend_lowest": "Grönt: lägsta à-pris på raden.",
+      "legend_high": "▲ rött: mer än {pct}% över medianpriset på raden.",
+      "legend_low": "▼ gult: mer än {pct}% under medianpriset på raden.",
+      "legend_missing": "”{marker}”: anbudsgivaren har inte angett något pris för raden.",
+      "legend_incomplete": "Ett anbud med oprissatta rader markeras i ”Prissatta rader” och rangordnas inte som lägst på sin totalsumma.",
+      "legend_totals": "Anbudssumman är det belopp som anbudsgivaren har lämnat; den kan skilja sig från summan av de prissatta raderna.",
+      "bidder": "Anbudsgivare",
+      "bidder_note": "Anmärkning från anbudsgivaren",
+      "reference": "Referens (redigera inte)",
+      "total": "Summa",
+      "instructions": "Ange ett à-pris för varje rad i de gula cellerna. Mängder och beskrivningar är låsta, radsummor och totalsumma räknas ut automatiskt. Lämna cellen tom om ni inte prissätter raden."
+    },
+    "cost_plan": {
+      "sheet_plan": "Kostnadsplan NRM 1",
+      "sheet_unallocated": "Ej fördelat",
+      "title": "Kostnadsplan per byggdel (NRM 1)",
+      "bill": "Mängdförteckning",
+      "currency": "Valuta",
+      "gifa": "BTA (m2)",
+      "gifa_project": "från projektet",
+      "gifa_entered": "angiven för den här exporten",
+      "gifa_none": "ej angiven, kostnad per m2 visas inte",
+      "col_code": "Kod",
+      "col_description": "Byggdel",
+      "col_positions": "Poster",
+      "col_basis": "Grund",
+      "col_total": "Summa",
+      "col_per_m2": "Kostnad per m2 BTA",
+      "col_share": "% av summan",
+      "col_running": "Löpande summa",
+      "group_level": "Gruppnivå, ingen byggdel angiven",
+      "facilitating_works_estimate": "Kalkyl för förberedande arbeten",
+      "works_estimate": "Kalkyl för byggnadsarbeten",
+      "addons_heading": "NRM 1 grupp 9-14 prissatta som poster i mängdförteckningen",
+      "unallocated": "Ej fördelat på byggdel",
+      "direct_cost": "Direkt kostnad enligt mängdförteckningen",
+      "markups_heading": "Påslag (mängdförteckningens egen påslagskedja, i ordning)",
+      "markups_total": "Summa påslag",
+      "grand_total": "Total kostnadsplan",
+      "basis_direct": "{pct}% på direkt kostnad",
+      "basis_running": "{pct}% på löpande delsumma",
+      "basis_lump": "Fast belopp",
+      "basis_banded": "Intervalltrappa",
+      "basis_escalation": "Indexreglering",
+      "basis_other": "{kind}",
+      "basis_scoped": "avgränsad till avsnitt",
+      "col_ordinal": "Löpnummer",
+      "col_position": "Benämning",
+      "col_written_code": "Kod som angiven",
+      "col_reason": "Orsak",
+      "reason_no_code": "Ingen NRM-kod på posten eller dess avsnitt",
+      "reason_invalid_code": "Koden är inte ett NRM-nummer",
+      "reason_unknown_group": "NRM 1 har ingen sådan grupp",
+      "truncated": "Listan är avkortad till de första {shown} av {count} posterna; summan omfattar alla."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Krav",
+      "sheet_summary": "Sammanfattning",
+      "sheet_legend": "Teckenförklaring",
+      "summary_element": "Byggdel",
+      "summary_count": "Antal krav",
+      "summary_total": "Summa",
+      "legend_column": "Kolumn",
+      "legend_description": "Beskrivning",
+      "unspecified": "Ospecificerad",
+      "h01": "Byggdel / IFC-klass",
+      "h02": "Klassificering",
+      "h03": "Egenskapsgrupp",
+      "h04": "Egenskapsnamn",
+      "h05": "Datatyp",
+      "h06": "Obligatorisk",
+      "h07": "Tillåtna värden",
+      "h08": "Min",
+      "h09": "Max",
+      "h10": "Enhet",
+      "h11": "Mönster",
+      "h12": "Skede",
+      "h13": "Aktör",
+      "h14": "Användningsfall",
+      "h15": "Källa",
+      "d01": "IFC-entitetsklass (t.ex. IFCWALL, IFCBEAM)",
+      "d02": "Klassificeringssystem och kod (t.ex. BSAB 96 eller Uniclass 2015: EF_25_10)",
+      "d03": "Namn på egenskapsuppsättning (t.ex. Pset_WallCommon)",
+      "d04": "Namn på den obligatoriska egenskapen eller attributet",
+      "d05": "IFC-datatyp (IFCLABEL, IFCREAL, IFCBOOLEAN osv.)",
+      "d06": "Kardinalitet: obligatorisk, valfri eller förbjuden",
+      "d07": "Lista över tillåtna värden, åtskilda med semikolon",
+      "d08": "Gränser för numeriskt intervall",
+      "d09": "Måttenhet (m, m2, kg osv.)",
+      "d10": "Reguljärt uttryck för validering av värdet",
+      "d11": "Projektskede eller milstolpe (programskede, RIBA Stage 3 osv.)",
+      "d12": "Ansvarig part (arkitekt, konstruktör osv.)",
+      "d13": "Syfte eller användningsfall för kravet",
+      "d14": "Källa: standard eller dokument"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Mängdförteckning skapad",
+      "notifications.boq.created.body": "Din mängdförteckning ”{boq_name}” har sparats.",
+      "notifications.meeting.action_assigned.title": "Åtgärdspunkt tilldelad dig",
+      "notifications.meeting.action_assigned.body": "Från möte {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Dokumentstatus ändrad",
+      "notifications.cde.state_transitioned.body": "Containern har flyttats till ”{new_state}”.",
+      "notifications.cde.linked_published.title": "Ett dokument i ditt arbete har publicerats",
+      "notifications.cde.linked_published.body": "{container_code} är publicerad i revision {revision_code}. Dina länkade poster: {records}.",
+      "notifications.rfi.assigned.title": "RFI tilldelad dig",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "RFI besvarad",
+      "notifications.rfi.responded.body": "Din förfrågan {code} ({title}) har fått svar.",
+      "notifications.risk.assigned.title": "Risk tilldelad dig",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Varning för kostnadsöverskridande",
+      "notifications.costmodel.overrun_alert.body": "Kostnaden för {category} överskrider budget: faktiskt utfall {actual} {currency} överstiger varningsgränsen +{threshold_pct}% på planerade {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Godkännandehandling väntar på granskning",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Godkännandehandling godkänd",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Godkännandehandling underkänd",
+      "notifications.submittal.rejected.body": "{code} ({title}). Orsak: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Godkännandehandling måste revideras",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Orsak: {reason}",
+      "notifications.transmittal.issued.title": "Översändande utfärdat till dig",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Översändande kvitterat",
+      "notifications.transmittal.acknowledged.body": "Mottagaren har bekräftat {code} ({title}).",
+      "notifications.transmittal.responded.title": "Översändande besvarat",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "RFI tilldelad dig",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Ny uppgift tilldelad",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Faktura godkänd",
+      "notification.invoice_approved_body": "Faktura {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Besiktning inbokad",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, datum: {inspection_date}",
+      "notification.submittal_status_changed_title": "Status för godkännandehandling ändrad",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Möte inbokat",
+      "notification.meeting_scheduled_body": "{title}, datum: {meeting_date}",
+      "notification.ncr_created_title": "Avvikelse registrerad",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Dokument uppladdat",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Du nämndes i en kommentar",
+      "notifications.file_comments.mention.body": "”{excerpt}”",
+      "notifications.collaboration.comment_added.title": "Ny kommentar i en diskussion",
+      "notifications.collaboration.comment_added.body": "Gäller {entity_type}: ”{excerpt}”",
+      "notifications.clash.high_severity.title": "Allvarlig kollision upptäckt",
+      "notifications.clash.high_severity.body": "Kollision, allvarlighet {severity}: {a_name} mot {b_name}",
+      "notifications.validation.report.title": "Valideringen hittade problem",
+      "notifications.validation.report.body": "Validering av {target_type}: fel {error_count}, varningar {warning_count}.",
+      "notifications.punchlist.auto_created.title": "Punkt på anmärkningslistan skapad",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Sammanställning av aviseringar",
+      "notifications.digest.body": "Nya uppdateringar i kanalen {channel}: {count}.",
+      "notifications.approval.overdue.title": "Godkännande försenat",
+      "notifications.approval.overdue.body": "Steg {step_ordinal} för {target_kind} är försenat. Timmar över tiden: {hours_overdue}.",
+      "notifications.approval.escalated.title": "Godkännande eskalerat till dig",
+      "notifications.approval.escalated.body": "Steg {step_ordinal} för {target_kind} har eskalerats till dig (nivå {level}).",
+      "notifications.approval.reassigned.title": "Godkännande omfördelat till dig",
+      "notifications.approval.reassigned.body": "Steg {step_ordinal} för {target_kind} ska nu beslutas av dig.",
+      "notifications.deadline.overdue.title": "Försenad: {title}",
+      "notifications.deadline.overdue.body": "Post i {module} ”{title}” har passerat sitt förfallodatum. Antal dagar: {days_overdue}.",
+      "notifications.deadline.escalated.title": "Eskalerad försenad post",
+      "notifications.deadline.escalated.body": "Post i {module} ”{title}” är fortfarande öppen och försenad, och har eskalerats. Antal dagar: {days_overdue}.",
+      "notifications.deadline.approaching.title": "Förfaller snart: {title}",
+      "notifications.deadline.approaching.body": "Post i {module} ”{title}” förfaller {due_date}.",
+      "notifications.deadline.built.approaching.title": "Förfaller snart: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: ”{title}” förfaller {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Försenad: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "RFI {reference} ”{title}” i {project} skulle besvaras senast {due_date_display} och är försenad. Antal dagar: {days_overdue}. Svar krävs.",
+      "notifications.deadline.rfi.escalated.title": "Eskalerad: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "RFI {reference} ”{title}” i {project} är fortfarande öppen och har passerat sitt förfallodatum {due_date_display}. Antal dagar: {days_overdue}. Ärendet har eskalerats till dig.",
+      "notifications.deadline.rfi.approaching.title": "Förfaller snart: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "RFI {reference} ”{title}” i {project} förfaller {due_date_display}. Svar krävs.",
+      "notifications.deadline.submittals.overdue.title": "Försenad: godkännandehandling {reference}",
+      "notifications.deadline.submittals.overdue.body": "Godkännandehandling {reference} ”{title}” i {project} skulle granskas senast {due_date_display} och är försenad. Antal dagar: {days_overdue}. Granskning krävs.",
+      "notifications.deadline.submittals.escalated.title": "Eskalerad: godkännandehandling {reference}",
+      "notifications.deadline.submittals.escalated.body": "Godkännandehandling {reference} ”{title}” i {project} är fortfarande öppen och har passerat sitt förfallodatum {due_date_display}. Antal dagar: {days_overdue}. Ärendet har eskalerats till dig.",
+      "notifications.deadline.submittals.approaching.title": "Förfaller snart: godkännandehandling {reference}",
+      "notifications.deadline.submittals.approaching.body": "Godkännandehandling {reference} ”{title}” i {project} förfaller {due_date_display}. Granskning krävs.",
+      "notifications.deadline.correspondence.overdue.title": "Försenad: korrespondens {reference}",
+      "notifications.deadline.correspondence.overdue.body": "Korrespondens {reference} ”{title}” i {project} skulle besvaras senast {due_date_display} och är försenad. Antal dagar: {days_overdue}. Svar krävs.",
+      "notifications.deadline.correspondence.escalated.title": "Eskalerad: korrespondens {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Korrespondens {reference} ”{title}” i {project} är fortfarande obesvarad och har passerat sitt förfallodatum {due_date_display}. Antal dagar: {days_overdue}. Ärendet har eskalerats till dig.",
+      "notifications.deadline.correspondence.approaching.title": "Förfaller snart: korrespondens {reference}",
+      "notifications.deadline.correspondence.approaching.body": "Korrespondens {reference} ”{title}” i {project} ska besvaras senast {due_date_display}. Svar krävs.",
+      "notifications.deadline.variations.overdue.title": "Försenad: ÄTA-arbete {reference}",
+      "notifications.deadline.variations.overdue.body": "ÄTA-arbete {reference} ”{title}” i {project} skulle avgöras senast {due_date_display} och är försenat. Antal dagar: {days_overdue}. Beslut krävs.",
+      "notifications.deadline.variations.escalated.title": "Eskalerad: ÄTA-arbete {reference}",
+      "notifications.deadline.variations.escalated.body": "ÄTA-arbete {reference} ”{title}” i {project} är fortfarande öppet och har passerat sitt förfallodatum {due_date_display}. Antal dagar: {days_overdue}. Ärendet har eskalerats till dig.",
+      "notifications.deadline.variations.approaching.title": "Förfaller snart: ÄTA-arbete {reference}",
+      "notifications.deadline.variations.approaching.body": "ÄTA-arbete {reference} ”{title}” i {project} förfaller {due_date_display}. Beslut krävs.",
+      "notifications.variation.submitted.title": "ÄTA-arbete väntar på beslut: {code}",
+      "notifications.variation.submitted.body": "ÄTA-arbete {code} ”{title}” i {project} har lämnats in och väntar på beslut.",
+      "notifications.variation.approved.title": "ÄTA-arbete godkänt: {code}",
+      "notifications.variation.approved.body": "ÄTA-arbete {code} ”{title}” i {project} har godkänts.",
+      "notifications.variation.rejected.title": "ÄTA-arbete avslaget: {code}",
+      "notifications.variation.rejected.body": "ÄTA-arbete {code} ”{title}” i {project} har avslagits och returnerats till dig.",
+      "notifications.variation.rejected_reason.body": "ÄTA-arbete {code} ”{title}” i {project} har avslagits och returnerats till dig. Orsak: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Ändringsorder väntar på godkännande: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Ändringsorder {code} ”{title}” i {project} har lämnats in och väntar på godkännande.",
+      "notifications.changeorder.approved.title": "Ändringsorder godkänd: {code}",
+      "notifications.changeorder.approved.body": "Ändringsorder {code} ”{title}” i {project} har godkänts.",
+      "notifications.changeorder.rejected.title": "Ändringsorder avslagen: {code}",
+      "notifications.changeorder.rejected.body": "Ändringsorder {code} ”{title}” i {project} har avslagits.",
+      "notifications.submittal.approved_as_noted.title": "Godkännandehandling godkänd med anmärkning",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Ett dokument väntar på ditt godkännande",
+      "notifications.file_approval.needs_approver.body": "Ett dokument ({file_kind}) väntar på ditt godkännande.",
+      "notifications.file_approval.approved.title": "Ditt dokument har godkänts",
+      "notifications.file_approval.approved.body": "Ditt dokument ({file_kind}) har passerat alla godkännandesteg.",
+      "notifications.file_approval.rejected.title": "Ditt dokument har returnerats",
+      "notifications.file_approval.rejected.body": "Ditt dokument ({file_kind}) har underkänts och måste ändras.",
+      "notifications.portal.user_invited.title": "Portalanvändare inbjuden",
+      "notifications.portal.user_invited.body": "{portal_user_email} har bjudits in med rollen {portal_role}.",
+      "notifications.portal.message_received.title": "Nytt portalmeddelande",
+      "notifications.portal.message_received.body": "{buyer_name} har skickat ett meddelande."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "ID",
+          "Aktivitets-ID",
+          "Aktivitetskod",
+          "Uppgifts-ID",
+          "Kod",
+          "Nr",
+          "Nummer"
+        ],
+        "name": [
+          "Namn",
+          "Uppgiftsnamn",
+          "Aktivitetsnamn",
+          "Aktivitet",
+          "Uppgift"
+        ],
+        "wbs": [
+          "WBS",
+          "WBS-kod",
+          "WBS-nummer",
+          "Dispositionsnummer"
+        ],
+        "outline_level": [
+          "Dispositionsnivå",
+          "Nivå",
+          "Indragsnivå",
+          "Indrag"
+        ],
+        "start": [
+          "Start",
+          "Startdatum",
+          "Planerad start"
+        ],
+        "finish": [
+          "Slut",
+          "Slutdatum",
+          "Planerat slut",
+          "Färdigdatum"
+        ],
+        "duration": [
+          "Varaktighet",
+          "Varaktighet (dagar)",
+          "Dagar",
+          "Ursprunglig varaktighet"
+        ],
+        "predecessors": [
+          "Föregångare",
+          "Föregående",
+          "Beroende av",
+          "Beroenden"
+        ],
+        "percent_complete": [
+          "% klart",
+          "Procent klart",
+          "% slutfört",
+          "Framsteg",
+          "Framsteg (%)"
+        ],
+        "milestone": [
+          "Milstolpe",
+          "Är milstolpe"
+        ],
+        "resource": [
+          "Resurs",
+          "Resurser",
+          "Resursnamn",
+          "Arbetslag",
+          "Tilldelad"
+        ],
+        "notes": [
+          "Anteckningar",
+          "Anmärkning",
+          "Kommentarer",
+          "Kommentar",
+          "Noteringar"
+        ],
+        "client_visible": [
+          "Synlig för kund",
+          "Visa för kund",
+          "Dela med kund"
+        ]
+      },
+      "yes_words": [
+        "ja",
+        "sant"
+      ],
+      "no_words": [
+        "nej",
+        "falskt"
+      ],
+      "example_names": [
+        "Stomme och klimatskal",
+        "Schaktning",
+        "Grundläggning",
+        "Grundläggning godkänd"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "*avtal*",
+          "*kontrakt*"
+        ],
+        "contact": [
+          "kontakt*",
+          "*leverantör*",
+          "*underentreprenör*",
+          "*entreprenör*",
+          "*beställare*"
+        ],
+        "schedule_activity": [
+          "*aktivitet*",
+          "uppgift*",
+          "wbs",
+          "arbetsmoment*"
+        ],
+        "document": [
+          "*dokument*",
+          "ritning*",
+          "*bilaga*",
+          "handling*"
+        ],
+        "user": [
+          "*ansvarig*",
+          "tilldelad*",
+          "kontrollant*",
+          "inspektör*",
+          "arbetsledare*",
+          "platschef*"
+        ],
+        "due": [
+          "*förfall*",
+          "*frist*",
+          "deadline*",
+          "utgångsdatum*",
+          "giltig till",
+          "måldatum",
+          "förnyelse*"
+        ]
+      },
+      "link_labels": {
+        "contract": "Avtal",
+        "contact": "Kontakt",
+        "schedule_activity": "Aktivitet i tidplanen",
+        "document": "Dokument",
+        "user": "Ansvarig"
+      },
+      "state_labels": [
+        "Öppen",
+        "Pågående",
+        "Klar"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Tillägg {number} till upphandlingen {package}",
+      "addendum_heading": "Tillägg till upphandlingen",
+      "greeting": "Till {company},",
+      "greeting_generic": "Till berörda,",
+      "addendum_intro": "Tillägg {number} till upphandlingspaketet {package} har publicerats: {title}.",
+      "addendum_deadline": "Sista dag för anbud har flyttats från {old} till {new}.",
+      "addendum_boq": "Mängdförteckningen har ändrats (revision {revision}). Vänligen prissätt den gällande revisionen.",
+      "addendum_documents": "Publicerade dokument: {documents}",
+      "addendum_ack": "Bekräfta vänligen mottagandet av detta tillägg. Ett anbud som inte bekräftar alla tillägg kan komma att bedömas som icke godkänt.",
+      "answer_subject": "Förtydligande {number} till upphandlingen {package}",
+      "answer_heading": "Förtydligande av upphandlingen",
+      "answer_intro": "En fråga om upphandlingspaketet {package} har besvarats. Svaret gäller alla anbudsgivare.",
+      "question_label": "Fråga",
+      "answer_label": "Svar"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Bruttoutvecklingsvärde (GDV)",
+      "total_development_cost": "Total utvecklingskostnad",
+      "residual_land_value": "Restvärde för mark",
+      "developer_profit": "Utvecklarvinst",
+      "profit_on_cost": "Vinst på kostnad",
+      "profit_on_gdv": "Vinst på GDV",
+      "construction_cost": "Byggkostnad",
+      "professional_fees": "Konsultarvoden",
+      "contingency": "Oförutsedda kostnader",
+      "finance_cost": "Finansieringskostnad",
+      "sales_costs": "Försäljningskostnader"
+    },
+    "status": {
+      "viable": "Genomförbart",
+      "unviable": "Ej genomförbart",
+      "marginal": "Marginellt",
+      "pending": "Ännu inte bedömt"
+    },
+    "figure": {
+      "gross_development_value": "Det totala försäljningsvärdet för alla enheter i projektet, allt i en valuta.",
+      "total_development_cost": "Alla kostnader för att genomföra projektet utom marken: byggnation, arvoden, oförutsedda kostnader, finansiering och försäljningskostnader.",
+      "residual_land_value": "Det som återstår till marken efter att total utvecklingskostnad och utvecklarens målvinst dragits från bruttoutvecklingsvärdet.",
+      "developer_profit": "Vinsten utvecklaren vill behålla, uttryckt som ett målvärde av bruttoutvecklingsvärdet.",
+      "profit_on_cost": "Utvecklarvinst delat med total utvecklingskostnad, uttryckt som kvot.",
+      "profit_on_gdv": "Utvecklarvinst delat med bruttoutvecklingsvärdet, uttryckt som kvot."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Arbetarläger",
+        "rental": "Hyresbostad",
+        "hotel": "Hotell"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Väntar",
+        "approved": "Godkänd",
+        "rejected": "Avslagen"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Uppfyllt",
+        "fail": "Ej uppfyllt",
+        "not_applicable": "Ej tillämplig"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Ritning",
+        "contract": "Avtal",
+        "specification": "Specifikation",
+        "photo": "Foto",
+        "correspondence": "Korrespondens",
+        "reality_capture": "Verklighetsinsamling",
+        "other": "Övrigt"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Väntar",
+        "approved": "Godkänd",
+        "rejected": "Avslagen",
+        "cancelled": "Avbruten"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Utkast",
+        "submitted": "Skickad för godkännande",
+        "approved": "Godkänd",
+        "posted": "Bokförd"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Öppen",
+        "assigned": "Tilldelad",
+        "in_progress": "Pågår",
+        "resolved": "Åtgärdad",
+        "verified": "Verifierad",
+        "closed": "Stängd"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "observation",
+        "minor": "mindre",
+        "major": "större",
+        "critical": "kritisk"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Person",
+        "crew": "Arbetslag",
+        "equipment": "Utrustning",
+        "subcontractor": "Underentreprenör"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Namnet på AI-modellen är föråldrat eller inte tillgängligt. Öppna Inställningar > AI och ange ett aktuellt giltigt modellnamn för din leverantör.",
+      "not_configured": "AI är inte konfigurerat. Ange en AI-leverantör i Inställningar."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "verifierad",
+      "bound": "bifogad",
+      "empty": "saknas"
+    },
+    "package_status_labels": {
+      "draft": "utkast",
+      "in_progress": "pågår",
+      "ready": "klar",
+      "issued": "utfärdad"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "hinder",
+      "critical": "kritisk",
+      "warning": "varning",
+      "suggestion": "förslag"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategi",
+      "brief": "Behovsbeskrivning",
+      "concept": "Koncept",
+      "design": "Projektering",
+      "approval": "Bygglov",
+      "detail": "Detaljprojektering",
+      "tender": "Upphandling",
+      "award": "Tilldelning",
+      "construction": "Produktion",
+      "handover": "Överlämning",
+      "operation": "Drift"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Jobbet har inga delar att kapa",
+        "suggestion": "Lägg till delar för hand, klistra in dem eller importera dem från en bockningslista, en mängdavtagning, en mängdrad eller en fil."
+      },
+      "has_stock": {
+        "fail": "Jobbet har inget lager att kapa från",
+        "suggestion": "Lägg till minst en lagerlängd eller skivstorlek, eller återanvänd restbitar från platslagret."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} saknar bredd",
+        "suggestion": "Ange både längd och bredd för varje skivdel och varje skivstorlek."
+      },
+      "piece_fits_stock": {
+        "fail": "Del {ref} ({size} mm) passar inte i någon lagerpost",
+        "suggestion": "Lägg till en längre eller större lagerdimension, minska kapningen eller dela delen med en skarv."
+      },
+      "grain_allows_fit": {
+        "fail": "Del {ref} passar bara när den vrids tvärs fiberriktningen",
+        "suggestion": "Tillåt vridning av den här delen eller lägg till en skivstorlek där den passar längs fiberriktningen."
+      },
+      "kerf_set": {
+        "fail": "Sågsnittet är noll",
+        "suggestion": "Ange bladets eller snittets bredd, annars överskattas utbytet för varje stång med flera snitt."
+      },
+      "min_offcut_set": {
+        "fail": "Ingen minsta användbar restbit är angiven",
+        "suggestion": "Ange den kortaste rest som är värd att spara, så att återanvändbara restbitar inte räknas som spill."
+      },
+      "stock_priced": {
+        "fail": "Lagerpost {ref} saknar enhetspris",
+        "suggestion": "Ange ett pris per styck så att planen visar kostnaden och väljer det billigaste lagret."
+      },
+      "stock_sufficient": {
+        "fail": "Delar som inte placerats på tillgängligt lager: {count}",
+        "suggestion": "Öka den tillgängliga mängden eller lägg till en annan lagerdimension."
+      },
+      "yield_threshold": {
+        "fail": "Utbytet {actual} % ligger under gränsen på {threshold} %",
+        "suggestion": "Lägg till en annan lagerlängd eller dimension, tillåt vridning eller se över gränsen för det här materialet."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Anmärkningen '{title}' är avslutad utan foto",
+    "punch_no_photo_fix": "Lägg till ett foto av det utförda arbetet",
+    "photo_weak": "{count} foto på '{title}' saknar plats eller tagningstid",
+    "photo_weak_fix": "Ta om fotot i appen med platsinformation aktiverad",
+    "defect_no_photo": "Felet '{reference}' är avslutat utan foto av åtgärden",
+    "defect_no_photo_fix": "Bifoga ett foto av det åtgärdade arbetet"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} fler poster visas inte",
+    "category_missing": "Inget bevis för den obligatoriska kategorin '{category}'",
+    "category_missing_fix": "Koppla ett dokument till en checklistepunkt i denna kategori, eller lägg till ett",
+    "category_unverified": "Beviset för '{category}' är inte verifierat ännu",
+    "category_unverified_fix": "Låt en chef granska och verifiera det kopplade beviset",
+    "punch_open": "Anmärkningen '{name}' är fortfarande öppen",
+    "punch_open_fix": "Åtgärda och avsluta posten, eller undanta den från denna dokumentations omfattning",
+    "punch_no_photo": "Den åtgärdade anmärkningen '{name}' saknar foto",
+    "punch_no_photo_fix": "Lägg till ett foto av det utförda arbetet",
+    "system_pending": "Systemet '{name}' är inte driftsatt",
+    "system_pending_fix": "Slutför driftsättningens checklistor och markera systemet som driftsatt",
+    "critical_issues": "{count} kritiska driftsättningsproblem är fortfarande öppna",
+    "critical_issues_fix": "Avsluta de kritiska problemen före överlämnandet",
+    "acceptance_missing": "Inget godkännandeintyg är kopplat",
+    "acceptance_missing_fix": "Koppla det signerade godkännandeintyget till godkännandepunkten i checklistan",
+    "acceptance_unsigned": "Godkännandeintyget är inte fullständigt signerat (status: {status})",
+    "acceptance_unsigned_fix": "Samla in de saknade signaturerna i Signering",
+    "blocked": "Dokumentationen uppfyller inte sin checklista. Åtgärda noteringarna, eller sammanställ den ändå som ofullständig (chefens godkännande).",
+    "delivery_title": "Överlämnandedokumentation: {project}",
+    "delivery_body": "Överlämnandedokumentationen '{title}' ({scope}) är klar. Länken nedan laddar ned den och är giltig till {expires}.",
+    "pdf": {
+      "title": "Överlämnandedokumentation",
+      "scope": "Omfattning",
+      "built": "Sammanställd",
+      "status_passed": "Checklistan godkänd",
+      "status_warnings": "Checklistan godkänd med varningar",
+      "status_errors": "Ofullständig: öppna noteringar i checklistan",
+      "findings": "Öppna noteringar i checklistan",
+      "severity": "Allvarlighetsgrad",
+      "finding": "Notering",
+      "severity_error": "Fel",
+      "severity_warning": "Varning",
+      "severity_info": "Info",
+      "contents": "Innehåll",
+      "file": "Fil",
+      "size": "Storlek",
+      "punch": "Åtgärdad anmärkningslista",
+      "item": "Post",
+      "status": "Status",
+      "photos": "Foton",
+      "evidence": "Fotobevis"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Bedömningen {rating} för '{name}' är inte en nivå på skalan '{scale}'",
+    "rule_poor_without_action": "'{name}' är bedömd {rating} men har ingen planerad underhållsåtgärd",
+    "rule_poor_without_action_fix": "Ta fram planen eller lägg till en åtgärd för detta element",
+    "rule_action_unpriced": "Åtgärden för '{name}' år {year} saknar enhetskostnad",
+    "rule_action_unpriced_fix": "Ange en enhetskostnad så att plansummorna inkluderar den",
+    "rule_defect_incomplete": "Bedömningen av '{name}' kräver arbete men registrerar varken allvarlighetsgrad eller omfattning"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, sida {page}",
+    "text_change": "\"{old}\" ändrad till \"{new}\"",
+    "kind": {
+      "added": "Tillagd",
+      "removed": "Borttagen",
+      "modified": "Ändrad",
+      "text": "Text ändrad"
+    },
+    "status": {
+      "open": "Öppen",
+      "relevant": "Relevant",
+      "not_relevant": "Inte relevant"
+    },
+    "errors": {
+      "revision_not_found": "Ritningsrevisionen hittades inte i det här projektet.",
+      "revision_not_parsed": "Ritningen har ännu ingen bearbetad version att jämföra.",
+      "comparison_not_found": "Jämförelsen hittades inte.",
+      "change_not_found": "Ändringen hittades inte.",
+      "same_revision": "Välj två olika revisioner eller sidor att jämföra.",
+      "manual_points": "Manuell passning kräver två skilda punkter på varje revision.",
+      "alignment_singular": "Passningen kan inte tillämpas: den kollapsar bladet.",
+      "region_empty": "Ändring {seq} har ingen storlek.",
+      "region_off_sheet": "Ändring {seq} ligger utanför bladet.",
+      "module_missing": "Modulen som behövs för den här åtgärden är inte installerad."
+    },
+    "rfi": {
+      "subject": "Ritningsändring {seq} på {sheet}",
+      "question": "Revision {new} av {sheet} skiljer sig från revision {old} i det markerade området ({kind}). Bekräfta avsikten med ändringen och om mängder påverkas."
+    },
+    "markup": {
+      "text": "Revisionsändring {seq}: {kind}"
+    },
+    "report": {
+      "title": "Jämförelse av ritningsrevisioner",
+      "project": "Projekt",
+      "name": "Jämförelse",
+      "old_revision": "Äldre revision",
+      "new_revision": "Nyare revision",
+      "alignment": "Passning",
+      "alignment_none": "Inte passad (samma ram)",
+      "alignment_auto": "Automatisk",
+      "alignment_manual": "Manuell, två punkter",
+      "confidence": "säkerhet {value}",
+      "summary": "Ändringar",
+      "summary_counts": "Totalt {total}: {added} tillagda, {removed} borttagna, {modified} ändrade, {text} text",
+      "generated_on": "Skapad den",
+      "generated": "Skapad {timestamp}",
+      "page_of": "Sida {page} av {total}",
+      "no_changes": "Inga ändringar hittades mellan de två revisionerna.",
+      "col_no": "Nr",
+      "col_preview": "Förhandsvisning",
+      "col_kind": "Ändring",
+      "col_location": "Plats",
+      "col_detail": "Detalj",
+      "col_status": "Status",
+      "col_comment": "Kommentar",
+      "col_follow_up": "Uppföljning",
+      "page_at": "Sida {page} vid {coords}",
+      "layer": "Lager {layer}",
+      "entity_counts": "Objekt: {added} tillagda, {removed} borttagna, {modified} ändrade",
+      "rfi": "RFI {number}",
+      "markup": "Revisionsmoln",
+      "remeasure": "Mät om: {items} mängder, {positions} poster i kalkylen"
+    },
+    "rules": {
+      "distinct_revisions_ok": "De två sidorna är olika revisioner.",
+      "distinct_revisions_fail": "Jämförelsen jämför ett blad med sig självt.",
+      "distinct_revisions_hint": "Välj den äldre och den nyare revisionen av ritningen.",
+      "alignment_not_needed": "DWG-revisioner delar ritningsenheter; ingen passning behövs.",
+      "alignment_missing_matrix": "Jämförelsen har ingen passning.",
+      "alignment_singular": "Passningen kollapsar bladet och kan inte tillämpas.",
+      "alignment_scale": "Passningen skalar om bladet med {scale}, mer än revisioner av en ritning skiljer sig åt.",
+      "alignment_low_confidence": "Den automatiska passningen är osäker (säkerhet {confidence}).",
+      "alignment_manual_points": "En manuell passning kräver två punktpar.",
+      "alignment_ok": "Bladpassningen är rimlig.",
+      "alignment_hint": "Passa bladen för hand mot två märken som båda revisionerna delar, till exempel rutnätskorsningar.",
+      "region_empty": "Ändring {seq} har ingen storlek.",
+      "region_off_sheet": "Ändring {seq} ligger utanför bladet.",
+      "regions_ok": "Varje ändrat område ligger på bladet.",
+      "triaged_ok": "Varje ändring har granskats.",
+      "triaged_open": "{count} ändringar är fortfarande öppna.",
+      "triaged_hint": "Markera varje ändring som relevant eller inte relevant.",
+      "followed_up_ok": "Varje relevant ändring är uppföljd.",
+      "followed_up_missing": "Ändring {seq} är markerad som relevant men har ingen kommentar, RFI, moln eller flagga för ommätning.",
+      "followed_up_hint": "Kommentera ändringen, skapa en RFI eller ett moln, eller flagga mängderna i den för omätning."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Kassaflödesprognos",
+      "portfolio_title": "Portföljens kassaflödesprognos",
+      "empty": "Ingen kassaflödesprognos för detta urval.",
+      "project": "Projekt",
+      "as_of": "Per",
+      "currency": "Valuta",
+      "delay_days": "Inbetalningar försenade med (dagar)",
+      "overrun_pct": "Kostnadsöverskridande (%)",
+      "closing_position": "Slutsaldo",
+      "peak_funding": "Högsta finansieringsbehov",
+      "peak_period": "Månad med högsta finansieringsbehov",
+      "col": {
+        "period": "Månad",
+        "planned_in": "Planerade inbetalningar",
+        "actual_in": "Faktiska inbetalningar",
+        "expected_in": "Förväntade inbetalningar",
+        "planned_out": "Planerade utbetalningar",
+        "actual_out": "Faktiska utbetalningar",
+        "expected_out": "Förväntade utbetalningar",
+        "net": "Netto",
+        "cumulative": "Ackumulerad position"
+      }
+    }
+  }
+}

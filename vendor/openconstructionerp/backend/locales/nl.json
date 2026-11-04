@@ -1,0 +1,2512 @@
+{
+  "costs.catalog_name_unavailable": "Deze naam kan niet worden gebruikt voor een nieuwe catalogus. Kies een andere naam.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Open-source bouwkostencalculatie"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "assemblies": "Samengestelde prijzen",
+    "ai_estimate": "AI-raming",
+    "settings": "Instellingen",
+    "5d_cost_model": "5D Kostenmodel",
+    "templates": "Sjablonen",
+    "reports": "Rapporten",
+    "sustainability": "Duurzaamheid",
+    "group_estimation": "Calculatie",
+    "group_planning": "Planning",
+    "group_procurement": "Inkoop",
+    "group_tools": "Hulpmiddelen",
+    "architecture": "Architectuurkaart"
+  },
+  "common": {
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "create": "Aanmaken",
+    "search": "Zoeken",
+    "filter": "Filteren",
+    "export": "Exporteren",
+    "import": "Importeren",
+    "loading": "Laden...",
+    "error": "Fout",
+    "success": "Gelukt",
+    "confirm": "Bevestigen",
+    "back": "Terug",
+    "next": "Volgende",
+    "yes": "Ja",
+    "no": "Nee"
+  },
+  "auth": {
+    "login": "Inloggen",
+    "logout": "Uitloggen",
+    "email": "E-mail",
+    "password": "Wachtwoord"
+  },
+  "projects": {
+    "title": "Projecten",
+    "new_project": "Nieuw project",
+    "project_name": "Projectnaam",
+    "no_projects": "Nog geen projecten"
+  },
+  "boq": {
+    "title": "Hoeveelhedenstaat",
+    "position": "Post",
+    "ordinal": "Volgnummer",
+    "description": "Omschrijving",
+    "quantity": "Hoeveelheid",
+    "unit": "Eenheid",
+    "unit_rate": "Eenheidsprijs",
+    "total": "Totaal",
+    "add_position": "Post toevoegen",
+    "add_section": "Hoofdstuk toevoegen",
+    "assembly": "Samengestelde prijs",
+    "subtotal": "Subtotaal",
+    "grand_total": "Eindtotaal",
+    "direct_cost": "Directe kosten",
+    "net_total": "Netto totaal",
+    "gross_total": "Bruto totaal",
+    "vat": "BTW",
+    "add_markups": "Opslagen toevoegen",
+    "validate": "Valideren",
+    "export": "Exporteren",
+    "mvp": {
+      "title": "Materialen kiezen",
+      "subtitle_one": "{{count}} middel vereist een keuze",
+      "subtitle_other": "{{count}} middelen vereisen een keuze",
+      "bulk_label": "Snel invullen:",
+      "bulk_median": "Mediaan voor alles",
+      "bulk_mean": "Gemiddelde voor alles",
+      "bulk_cheapest": "Goedkoopste voor alles",
+      "bulk_priciest": "Duurste voor alles",
+      "slot_variant_count": "{{n}} opties",
+      "selected_label": "Gekozen:",
+      "default_mean": "gemiddelde prijs",
+      "default_median": "mediane prijs",
+      "row_median": "Mediane prijs · {{price}}",
+      "row_mean": "Gemiddelde prijs · {{price}}",
+      "subtotal_label": "Postprijs",
+      "apply": "Toepassen en toevoegen aan hoeveelhedenstaat",
+      "batch_progress": "Post {{current}} van {{total}}",
+      "toast_applied_one": "{{count}} variant gekozen",
+      "toast_applied_other": "{{count}} varianten gekozen"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Uitwisselingsrapport"
+      },
+      "column": {
+        "severity": "Ernst",
+        "kind": "Soort verlies",
+        "position": "Post",
+        "field": "Veld",
+        "original": "Oorspronkelijke waarde",
+        "written": "Weggeschreven waarde",
+        "count": "Aantal",
+        "detail": "Details"
+      },
+      "severity": {
+        "error": "Kritiek",
+        "warning": "Waarschuwing",
+        "info": "Opmerking"
+      },
+      "kind": {
+        "unsupported_element": "Element niet ondersteund",
+        "truncated_text": "Tekst ingekort",
+        "altered_text": "Tekst gewijzigd",
+        "rounded_value": "Waarde afgerond",
+        "value_out_of_range": "Waarde buiten bereik",
+        "dropped_attribute": "Attribuut weggelaten",
+        "unmapped_unit": "Eenheid niet gekoppeld",
+        "lost_hierarchy": "Hiërarchieniveau verloren",
+        "markup_not_representable": "Opslag niet weer te geven",
+        "attachment_skipped": "Bijlage overgeslagen",
+        "changed_identifier": "Identificatie gewijzigd",
+        "exceeds_limit": "Opslaglimiet overschreden",
+        "rejected_row": "Rij geweigerd",
+        "skipped_row": "Rij overgeslagen",
+        "parser_warning": "Waarschuwing van de lezer",
+        "roundtrip_mismatch": "Afwijking bij round trip"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Aftakpunt",
+      "base_snapshot_from": "Aftakpunt (uit momentopname \"{snapshot}\")",
+      "before_cherry_pick": "Voor het overnemen van wijzigingen uit \"{source}\"",
+      "before_merge": "Voor het samenvoegen van variant \"{branch}\"",
+      "errors": {
+        "branch_closed": "Deze variant is samengevoegd of gearchiveerd en kan geen wijzigingen meer krijgen.",
+        "not_a_branch": "Dit bestek is geen variant.",
+        "same_bill": "Kies twee verschillende ramingen.",
+        "different_project": "Beide ramingen moeten bij hetzelfde project horen.",
+        "different_tree": "Beide ramingen moeten varianten van dezelfde hoofdraming zijn.",
+        "unresolved_conflicts": "{count} posten zijn in beide ramingen gewijzigd. Bepaal per post welke versie blijft voordat u toepast.",
+        "merge_forbidden": "U hebt geen recht om samen te voegen met de hoofdraming.",
+        "confirm_required": "Bevestig het samenvoegen: de hoofdraming wordt herschreven.",
+        "design_options_unavailable": "De module voor ontwerpopties is niet geïnstalleerd.",
+        "base_snapshot_in_use": "Deze momentopname is het aftakpunt van een open variant en kan niet worden verwijderd."
+      },
+      "export": {
+        "title_positions": "Ramingvergelijking per post",
+        "title_sections": "Ramingvergelijking per onderdeel",
+        "title_cost_groups": "Ramingvergelijking per kostengroep",
+        "project": "Project",
+        "bill_a": "Raming A",
+        "bill_b": "Raming B",
+        "total_a": "Totaal A",
+        "total_b": "Totaal B",
+        "delta": "Verschil",
+        "counts": "Wijzigingen",
+        "counts_value": "{added} toegevoegd, {removed} verwijderd, {changed} gewijzigd",
+        "col_ordinal": "Pos.",
+        "col_description": "Omschrijving",
+        "col_unit": "Eenheid",
+        "col_change": "Wijziging",
+        "col_qty_a": "Hvh. A",
+        "col_qty_b": "Hvh. B",
+        "col_rate_a": "Tarief A",
+        "col_rate_b": "Tarief B",
+        "col_total_a": "Totaal A",
+        "col_total_b": "Totaal B",
+        "col_delta": "Verschil",
+        "col_section": "Onderdeel",
+        "col_cost_group": "Kostengroep",
+        "change_added": "Toegevoegd",
+        "change_removed": "Verwijderd",
+        "change_changed": "Gewijzigd",
+        "change_unchanged": "Ongewijzigd",
+        "ungrouped": "Niet gegroepeerd",
+        "empty": "De twee ramingen zijn identiek.",
+        "total": "Totaal"
+      }
+    }
+  },
+  "costs": {
+    "title": "Prijsdatabase",
+    "rate": "Prijs",
+    "material": "Materiaal",
+    "labor": "Arbeid",
+    "equipment": "Materieel",
+    "search_costs": "Prijzen zoeken..."
+  },
+  "assemblies": {
+    "title": "Samengestelde prijzen",
+    "description": "Herbruikbare prijsrecepten — combineer materialen, arbeid en materieel in kant-en-klare sjablonen",
+    "new_assembly": "Nieuwe samengestelde prijs",
+    "from_database": "Uit de prijsdatabase",
+    "apply_to_boq": "Toepassen op hoeveelhedenstaat",
+    "add_component": "Component toevoegen",
+    "no_assemblies": "Nog geen samengestelde prijzen",
+    "no_assemblies_hint": "Maak uw eerste samengestelde prijs vanuit de prijsdatabase of de middelencatalogus",
+    "total_rate": "Totaalprijs"
+  },
+  "catalog": {
+    "title": "Middelencatalogus",
+    "description": "Bekijk en beheer materialen, materieel, arbeidstarieven en machinisten",
+    "add_resource": "Middel toevoegen",
+    "import_region": "Regio importeren",
+    "build_assembly": "Samengestelde prijs maken",
+    "my_catalog": "Mijn catalogus"
+  },
+  "validation": {
+    "title": "Validatie",
+    "passed": "Geslaagd",
+    "warnings": "Waarschuwingen",
+    "errors": "Fouten",
+    "score": "Kwaliteitsscore",
+    "run_validation": "Validatie starten",
+    "missing_quantity": "Post {position} heeft geen hoeveelheid",
+    "missing_rate": "Post {position} heeft geen eenheidsprijs",
+    "missing_description": "Post {position} heeft geen omschrijving",
+    "missing_classification": "Post {position} heeft een classificatiecode nodig",
+    "duplicate_ordinal": "Dubbel volgnummer: {ordinal}",
+    "rate_anomaly": "Eenheidsprijs {rate} overschrijdt drempelwaarde ({threshold})",
+    "nl": {
+      "not_a_string": "De invoer moet tekst zijn.",
+      "empty": "De invoer is leeg.",
+      "too_long": "De invoer is langer dan {max} tekens.",
+      "ai_unparsable": "Het AI-antwoord kon niet als DSL-document worden gelezen.",
+      "no_pattern": "Geen patroon kwam overeen met de ingevoerde zin.",
+      "try": "Probeer: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D Planning",
+    "generated": {
+      "position_label": "Post {ordinal}",
+      "section_label": "Sectie {ordinal}",
+      "task_description": "Automatisch gegenereerd uit post {ordinal} van de hoeveelhedenstaat ({quantity} {unit})",
+      "section_description": "Samenvatting: sectie {ordinal} van de hoeveelhedenstaat",
+      "start_milestone": "Projectstart",
+      "start_milestone_description": "Mijlpaal voor projectstart",
+      "completion_milestone": "Projectafronding",
+      "completion_milestone_description": "Mijlpaal voor projectafronding",
+      "labour_resource": "Arbeid",
+      "machine_resource": "Materieel"
+    },
+    "progress_sheet": {
+      "sheet_title": "Voortgang",
+      "title": "Blad voor voortgangsupdate",
+      "detail_schedule": "Planning: {name}",
+      "detail_exported": "Geëxporteerd: {date}",
+      "instructions": "Vul alleen de witte kolommen in. Wijzig de grijze kolommen, de volgorde van de rijen en de verborgen kolommen niet.",
+      "col": {
+        "activity_ref": "Activiteit-ID",
+        "name": "Activiteit",
+        "wbs_code": "WBS",
+        "responsible": "Verantwoordelijke",
+        "planned_start": "Geplande start",
+        "planned_finish": "Gepland einde",
+        "percent_complete": "% voltooid",
+        "actual_start": "Werkelijke start",
+        "actual_finish": "Werkelijk einde",
+        "remaining_duration": "Resterend (werkdagen)",
+        "notes": "Notities",
+        "row_key": "Rijsleutel",
+        "stamp": "Stempel"
+      }
+    }
+  },
+  "cad": {
+    "title": "CAD-import",
+    "upload": "CAD-bestand uploaden",
+    "supported_formats": "Ondersteund: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Converteren...",
+    "elements_found": "{count} elementen gevonden"
+  },
+  "takeoff": {
+    "title": "Hoeveelheden bepaling",
+    "auto_detect": "Automatische detectie",
+    "manual_measure": "Handmatige meting",
+    "confidence": "Betrouwbaarheid"
+  },
+  "tendering": {
+    "title": "Aanbesteding",
+    "create_tender": "Aanbesteding aanmaken",
+    "bid": "Inschrijving",
+    "award": "Gunning"
+  },
+  "modules": {
+    "title": "Modules",
+    "installed": "Geïnstalleerd",
+    "available": "Beschikbaar",
+    "install": "Installeren",
+    "uninstall": "Deïnstalleren",
+    "update": "Bijwerken"
+  },
+  "dashboard": {
+    "welcome": "Welkom bij OpenConstructionERP",
+    "subtitle": "Open-source bouwkostencalculatie-platform",
+    "recent_projects": "Recente projecten",
+    "system_status": "Systeemstatus",
+    "modules_loaded": "Geladen modules",
+    "validation_rules": "Validatieregels",
+    "languages": "Talen",
+    "continue_estimate": "Laatste calculatie voortzetten",
+    "getting_started": "Aan de slag",
+    "total_value": "Totale waarde",
+    "active_estimates": "Actieve calculaties",
+    "schedule_status": "Planningsstatus",
+    "quality_score": "Kwaliteitsscore",
+    "analytics": "Analyses",
+    "project_overview": "Projectoverzicht",
+    "step_load_db": "Prijsdatabase laden",
+    "step_load_db_desc": "Importeer regionale prijsgegevens met meer dan 55.000 posten",
+    "step_ai_search": "AI-zoeken inschakelen",
+    "step_ai_search_desc": "Genereer semantische vectoren voor het matchen van prijzen",
+    "step_connect_ai": "AI verbinden",
+    "step_connect_ai_desc": "Voeg uw API-sleutels toe voor calculatie met AI",
+    "step_create_project": "Project maken",
+    "step_create_project_desc": "Start uw eerste calculatieproject",
+    "step_build_boq": "Stel uw hoeveelhedenstaat op",
+    "step_build_boq_desc": "Maak een hoeveelhedenstaat met hulp van AI"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "st",
+    "lsum": "post",
+    "h": "uur",
+    "set": "set"
+  },
+  "contacts": {
+    "title": "Contactenlijst",
+    "new_contact": "Nieuw contact",
+    "contact_type": "Contacttype",
+    "client": "Opdrachtgever",
+    "subcontractor": "Onderaannemer",
+    "supplier": "Leverancier",
+    "consultant": "Adviseur",
+    "internal": "Intern",
+    "company_name": "Bedrijfsnaam",
+    "search_contacts": "Contacten zoeken...",
+    "no_contacts": "Nog geen contacten",
+    "prequalification": "Prekwalificatie",
+    "approved": "Goedgekeurd",
+    "pending": "In behandeling",
+    "expired": "Verlopen"
+  },
+  "tasks": {
+    "title": "Taken",
+    "new_task": "Nieuwe taak",
+    "task": "Taak",
+    "topic": "Onderwerp",
+    "information": "Informatie",
+    "decision": "Besluit",
+    "personal": "Persoonlijke taak",
+    "my_tasks": "Mijn taken",
+    "open": "Open",
+    "in_progress": "In uitvoering",
+    "completed": "Afgerond",
+    "draft": "Concept",
+    "due_date": "Uiterste datum",
+    "assignee": "Toegewezen aan",
+    "priority": "Prioriteit",
+    "checklist": "Checklist",
+    "focus_area": "Aandachtsgebied"
+  },
+  "rfi": {
+    "title": "Informatieverzoeken",
+    "new_rfi": "Nieuw verzoek",
+    "subject": "Onderwerp",
+    "question": "Vraag",
+    "response": "Antwoord",
+    "ball_in_court": "Huidige verantwoordelijke",
+    "days_open": "Dagen open",
+    "cost_impact": "Kostengevolg",
+    "schedule_impact": "Planningsgevolg",
+    "respond": "Antwoorden",
+    "close": "Sluiten",
+    "overdue": "Te laat"
+  },
+  "finance": {
+    "title": "Financiën",
+    "budgets": "Budgetten",
+    "invoices": "Facturen",
+    "payable": "Crediteuren",
+    "receivable": "Debiteuren",
+    "payments": "Betalingen",
+    "evm": "Verdiende waarde",
+    "invoice_number": "Factuurnr.",
+    "amount": "Bedrag",
+    "status": "Status",
+    "approve": "Goedkeuren",
+    "pay": "Markeren als betaald",
+    "original_budget": "Oorspronkelijk budget",
+    "revised_budget": "Herzien budget",
+    "committed": "Vastgelegd",
+    "actual": "Werkelijk",
+    "forecast": "Prognose",
+    "variance": "Afwijking"
+  },
+  "procurement": {
+    "title": "Inkoop",
+    "purchase_orders": "Inkooporders",
+    "goods_receipts": "Goederenontvangsten",
+    "new_po": "Nieuwe inkooporder",
+    "po_number": "Ordernr.",
+    "vendor": "Leverancier",
+    "issue": "Uitgeven",
+    "confirm": "Ontvangst bevestigen"
+  },
+  "safety": {
+    "title": "Veiligheid",
+    "incidents": "Incidenten",
+    "observations": "Observaties",
+    "new_incident": "Nieuw incident",
+    "new_observation": "Nieuwe observatie",
+    "severity": "Ernst",
+    "risk_score": "Risicoscore",
+    "days_lost": "Verzuimdagen",
+    "treatment": "Behandeling",
+    "corrective_action": "Corrigerende maatregel"
+  },
+  "meetings": {
+    "title": "Vergaderingen",
+    "new_meeting": "Nieuwe vergadering",
+    "meeting_type": "Type",
+    "attendees": "Deelnemers",
+    "agenda": "Agenda",
+    "action_items": "Actiepunten",
+    "minutes": "Notulen",
+    "complete": "Vergadering afsluiten",
+    "present": "Aanwezig",
+    "absent": "Afwezig",
+    "excused": "Verhinderd",
+    "actions": {
+      "status": {
+        "open": "Open",
+        "completed": "Afgerond",
+        "cancelled": "Geannuleerd"
+      },
+      "flag": {
+        "overdue": "Te laat",
+        "on_track": "Op schema"
+      },
+      "label": {
+        "action_item": "Actiepunt",
+        "completion_rate": "Afrondingspercentage acties",
+        "open_vs_done": "Open versus afgerond",
+        "overdue": "Acties over tijd"
+      },
+      "explain": {
+        "action_item": "Een actiepunt is een taak die in een vergadering is afgesproken, met een verantwoordelijke en een uiterlijke datum.",
+        "completion_rate": "Het afrondingspercentage van acties is het aantal afgeronde acties gedeeld door het totaal aantal acties, van 0 tot 1.",
+        "open_vs_done": "Open acties vragen nog om werk. Afgeronde acties zijn voltooid en vragen geen verder werk.",
+        "overdue": "Een actie is te laat wanneer zij nog open is en de uiterlijke datum vóór de referentiedatum ligt."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Vergaderverslag",
+      "issued": "UITGEGEVEN",
+      "draft": "CONCEPT",
+      "date": "Datum:",
+      "location": "Locatie:",
+      "type": "Type:",
+      "number": "Vergadering nr.:",
+      "chairperson": "Voorzitter:",
+      "next_meeting": "Volgende vergadering:",
+      "not_available": "n.v.t.",
+      "not_scheduled": "Niet gepland",
+      "attendance": "Aanwezigheid",
+      "present": "Aanwezig:",
+      "absent": "Afwezig / afgemeld:",
+      "agenda": "Agenda, bespreking en besluiten",
+      "required": "(vereist)",
+      "discussion": "Bespreking:",
+      "decision": "Besluit:",
+      "decisions": "Besluiten",
+      "open_questions": "Openstaande vragen",
+      "actions": "Actiepunten",
+      "col_number": "#",
+      "col_action": "Actie",
+      "col_owner": "Verantwoordelijke",
+      "col_due": "Deadline",
+      "col_status": "Status",
+      "brought_forward": "[Doorgeschoven]",
+      "overdue": "(te laat)",
+      "status_open": "Open",
+      "status_in_progress": "In uitvoering",
+      "status_done": "Afgerond",
+      "status_cancelled": "Geannuleerd",
+      "summary": "Samenvatting",
+      "generated": "Gegenereerd: {stamp}",
+      "issued_at": "Uitgegeven {stamp}",
+      "running_head": "{project} - Verslag",
+      "type_progress": "Voortgang",
+      "type_design": "Ontwerp",
+      "type_safety": "Veiligheid",
+      "type_subcontractor": "Onderaannemer",
+      "type_kickoff": "Startvergadering",
+      "type_closeout": "Oplevering",
+      "type_commercial": "Commercieel"
+    }
+  },
+  "inspections": {
+    "title": "Kwaliteitskeuringen",
+    "new_inspection": "Nieuwe keuring",
+    "inspector": "Keurmeester",
+    "checklist": "Checklist",
+    "pass": "Goedgekeurd",
+    "fail": "Afgekeurd",
+    "partial": "Gedeeltelijk",
+    "critical": "Kritiek",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Gepland",
+        "in_progress": "Bezig",
+        "completed": "Voltooid",
+        "failed": "Afgekeurd",
+        "cancelled": "Geannuleerd"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Afwijkingsrapporten",
+    "new_ncr": "Nieuwe afwijking",
+    "root_cause": "Grondoorzaak",
+    "corrective_action": "Corrigerende maatregel",
+    "preventive_action": "Preventieve maatregel",
+    "material": "Materiaal",
+    "workmanship": "Uitvoering",
+    "design": "Ontwerp"
+  },
+  "submittals": {
+    "title": "Goedkeuringsdocumenten",
+    "new_submittal": "Nieuw document",
+    "spec_section": "Bestekartikel",
+    "revision": "Revisie",
+    "submit": "Indienen",
+    "review": "Beoordelen",
+    "approved_as_noted": "Goedgekeurd met opmerkingen",
+    "revise_resubmit": "Herzien en opnieuw indienen",
+    "intl": {
+      "status_labels": {
+        "draft": "Concept",
+        "submitted": "Ingediend",
+        "under_review": "In beoordeling",
+        "approved": "Goedgekeurd",
+        "approved_as_noted": "Goedgekeurd met opmerkingen",
+        "revise_and_resubmit": "Herzien en opnieuw indienen",
+        "rejected": "Afgewezen",
+        "closed": "Gesloten"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Correspondentie",
+    "new_entry": "Nieuwe registratie",
+    "incoming": "Inkomend",
+    "outgoing": "Uitgaand",
+    "letter": "Brief",
+    "email": "E-mail",
+    "notice": "Kennisgeving",
+    "date_sent": "Verzenddatum",
+    "date_received": "Ontvangstdatum"
+  },
+  "cde": {
+    "title": "Gemeenschappelijke data-omgeving",
+    "new_container": "Nieuwe container",
+    "container_code": "Containercode",
+    "cde_state": "CDE-status",
+    "wip": "In bewerking",
+    "shared": "Gedeeld",
+    "published": "Gepubliceerd",
+    "archived": "Gearchiveerd",
+    "promote": "Bevorderen",
+    "suitability": "Geschiktheid",
+    "discipline": "Discipline",
+    "revisions": "Revisies",
+    "intl": {
+      "state_labels": {
+        "wip": "In bewerking",
+        "shared": "Gedeeld",
+        "published": "Gepubliceerd",
+        "archived": "Gearchiveerd"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Verzendlijsten",
+    "new_transmittal": "Nieuwe verzendlijst",
+    "purpose": "Doel",
+    "for_approval": "Ter goedkeuring",
+    "for_information": "Ter informatie",
+    "for_construction": "Voor uitvoering",
+    "recipients": "Ontvangers",
+    "acknowledge": "Ontvangst bevestigen",
+    "locked": "Vergrendeld",
+    "issue_transmittal": "Uitgeven",
+    "intl": {
+      "status_words": {
+        "draft": "concept",
+        "issued": "verzonden",
+        "responded": "beantwoord"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Meldingen",
+    "no_notifications": "Geen nieuwe meldingen",
+    "mark_all_read": "Alles als gelezen markeren",
+    "unread": "Ongelezen"
+  },
+  "comments": {
+    "title": "Reacties",
+    "post": "Plaatsen",
+    "reply": "Antwoorden",
+    "edit": "Bewerken",
+    "delete": "Verwijderen",
+    "placeholder": "Schrijf een reactie...",
+    "empty": "Nog geen reacties. Start de discussie.",
+    "edited": "bewerkt",
+    "deleted": "Deze reactie is verwijderd"
+  },
+  "bim": {
+    "title": "BIM-hub",
+    "models": "Modellen",
+    "elements": "Elementen",
+    "upload_model": "Model uploaden",
+    "processing": "Verwerken",
+    "active": "Actief",
+    "link_to_boq": "Koppelen aan hoeveelhedenstaat",
+    "properties": "Eigenschappen",
+    "quantities": "Hoeveelheden",
+    "wireframe": "Draadmodel",
+    "section_box": "Sectiebox",
+    "measure": "Meten",
+    "zoom_to_fit": "Passend zoomen"
+  },
+  "reporting": {
+    "title": "Rapporten en dashboards",
+    "kpi": "KPI-dashboard",
+    "generate_report": "Rapport genereren",
+    "templates": "Sjablonen",
+    "project_status": "Projectstatus",
+    "cost_report": "Kostenrapport",
+    "schedule_status": "Planningsstatus",
+    "safety_report": "Veiligheidsrapport",
+    "explain": {
+      "report_total_one": "Totaal van het rapport: {money} (som van {count} regel).",
+      "report_total_other": "Totaal van het rapport: {money} (som van {count} regels).",
+      "percent_of_total": "{part} is {percent} van {total} (procent van het totaal).",
+      "percent_zero_total": "{part} van {total}: het totaal is nul, dus elk aandeel wordt als 0 procent weergegeven.",
+      "breakdown_empty": "Kostenspecificatie: geen gegevens.",
+      "breakdown_one": "Kostenspecificatie: {count} groep, totaal van het rapport {money}.",
+      "breakdown_other": "Kostenspecificatie: {count} groepen, totaal van het rapport {money}.",
+      "top_n_one": "Top {requested}: {shown} van {shown} regel.",
+      "top_n_other": "Top {requested}: {shown} van {shown} regels."
+    }
+  },
+  "gantt": {
+    "title": "Gantt-diagram",
+    "day": "Dag",
+    "week": "Week",
+    "month": "Maand",
+    "critical_path": "Kritieke pad",
+    "baseline": "Basisplanning",
+    "dependencies": "Afhankelijkheden",
+    "today": "Vandaag"
+  },
+  "settings": {
+    "regional": "Regionale instellingen",
+    "timezone": "Tijdzone",
+    "measurement": "Maatsysteem",
+    "paper_size": "Papierformaat",
+    "date_format": "Datumnotatie",
+    "number_format": "Getalnotatie",
+    "currency": "Valuta",
+    "metric": "Metrisch",
+    "imperial": "Imperiaal"
+  },
+  "users": {
+    "management": "Gebruikersbeheer",
+    "management_desc": "Beheer teamleden, rollen en toegang",
+    "invite_user": "Gebruiker uitnodigen",
+    "invite": "Uitnodigen",
+    "full_name": "Volledige naam",
+    "email": "E-mail",
+    "password": "Wachtwoord",
+    "role": "Rol",
+    "status": "Status",
+    "last_login": "Laatste aanmelding",
+    "actions": "Acties",
+    "name": "Naam",
+    "total": "Totaal gebruikers",
+    "active": "Actief",
+    "inactive": "Inactief",
+    "admins": "Beheerders",
+    "managers": "Managers",
+    "search": "Zoeken op naam of e-mail...",
+    "no_users": "Geen gebruikers gevonden",
+    "updated": "Gebruiker bijgewerkt",
+    "invited": "Uitnodiging verstuurd",
+    "deactivate": "Deactiveren",
+    "activate": "Activeren",
+    "never": "Nooit",
+    "role_admin_desc": "Volledige toegang tot alle functies",
+    "role_manager_desc": "Project- en teambeheer",
+    "role_editor_desc": "Inhoud maken en bewerken",
+    "role_viewer_desc": "Alleen-lezen toegang"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Deze momentopname is bevroren. Een bevroren momentopname is een vastlegging en kan niet worden gewijzigd.",
+      "frozen_no_delete": "Een bevroren momentopname is een vastlegging en kan niet worden verwijderd.",
+      "draft_open": "Er staat al een conceptmomentopname open. Bevries of verwijder die voordat u een nieuwe start.",
+      "no_line_method": "Deze regel heeft geen eigen methode.",
+      "snapshot_missing": "Momentopname niet gevonden.",
+      "line_missing": "Deze momentopname bevat die regel niet.",
+      "document_missing": "Het gekoppelde document hoort niet bij dit project.",
+      "freeze_refused": "De momentopname kan nog niet worden bevroren: {count} regel(s) liggen boven de drempel zonder toelichting en onderbouwing.",
+      "no_frozen_snapshot": "Er is nog geen bevroren momentopname om mee te vergelijken.",
+      "no_ledger": "Het factuurregister is niet beschikbaar in deze installatie.",
+      "no_snapshot": "Er is nog geen momentopname om vast te leggen."
+    },
+    "export": {
+      "project": "Project",
+      "generated": "Gegenereerd",
+      "currency": "Valuta",
+      "page": "Pagina",
+      "generated_at": "Gegenereerd op",
+      "empty": "Nog niets om te tonen.",
+      "total": "Totaal",
+      "cost_report": "Kostenrapport",
+      "phase_comparison": "Fasevergelijking",
+      "invoice_ledger": "Factuurregister",
+      "forecast_documentation": "Prognosedocumentatie",
+      "as_of": "Per",
+      "forecast_method": "Prognosemethode",
+      "col_account": "Rekening",
+      "col_code": "Code",
+      "col_description": "Omschrijving",
+      "col_source": "Bron",
+      "col_method": "Methode",
+      "col_planned": "Geraamd",
+      "col_committed": "Aangegaan",
+      "col_pending": "Openstaande wijzigingen",
+      "col_measured": "Opgemeten",
+      "col_certified": "Gecertificeerd",
+      "col_invoiced": "Gefactureerd",
+      "col_paid": "Betaald",
+      "col_forecast": "Prognose",
+      "col_variance": "Afwijking",
+      "col_variance_pct": "Afwijking %",
+      "col_forecast_of_plan": "Prognose % van raming",
+      "col_measured_of_committed": "Opgemeten % van aangegaan",
+      "col_invoiced_of_committed": "Gefactureerd % van aangegaan",
+      "col_contract": "Contract",
+      "col_contract_title": "Contractnaam",
+      "col_invoice": "Factuur",
+      "col_date": "Datum",
+      "col_kind": "Soort",
+      "col_release_status": "Vrijgave",
+      "col_net": "Netto",
+      "col_vat": "btw",
+      "col_gross": "Bruto",
+      "col_retention": "Inhouding",
+      "col_release": "Inhouding vrijgegeven",
+      "col_discount": "Korting",
+      "col_payable": "Te betalen",
+      "col_open": "Open",
+      "col_previous": "Vorige",
+      "col_delta": "Wijziging",
+      "col_delta_pct": "Wijziging %",
+      "col_needs_evidence": "Onderbouwing nodig",
+      "col_comment": "Toelichting",
+      "col_evidence": "Onderbouwing",
+      "row_unassigned": "Bedragen zonder kostenregel",
+      "row_loose_changes": "Wijzigingen zonder contract",
+      "row_no_contract": "Geen contract",
+      "contract_value": "Contractwaarde",
+      "retention_held": "Ingehouden bedrag",
+      "yes": "Ja",
+      "no": "Nee",
+      "snapshot_date": "Datum momentopname",
+      "snapshot_status": "Status",
+      "previous_snapshot": "Vorige bevroren momentopname",
+      "method_explained": "Hoe de prognose wordt gelezen",
+      "evidence_threshold": "Onderbouwing nodig boven",
+      "threshold_both": "een verschuiving van meer dan {parts}",
+      "threshold_any": "elke verschuiving",
+      "frozen_at": "Bevroren op"
+    },
+    "method": {
+      "best_available": "Beste beschikbare bron",
+      "maximum": "Maximumwaarde",
+      "evm_cpi": "Earned value (CPI)",
+      "manual": "Handmatig"
+    },
+    "method_help": {
+      "best_available": "Elke regel neemt zijn meest rijpe cijfer: de eindafrekening, anders het opgemeten werk, anders de gunning, anders de raming, anders het budget.",
+      "maximum": "Elke regel neemt de hoogste van zijn cijfers (budget, raming, gunning, opgemeten, gefactureerd), zodat de prognose nooit een risico verbergt.",
+      "evm_cpi": "Elke regel rekent zijn kosten bij oplevering door op basis van de voortgang: het tot nu toe bestede geld gedeeld door het aandeel uitgevoerd werk.",
+      "manual": "Een persoon stelt het cijfer van de regel vast en koppelt het document erachter."
+    },
+    "source": {
+      "none": "Geen cijfer",
+      "budget": "Budget",
+      "estimate": "Raming",
+      "partly_awarded": "Deels gegund",
+      "awarded": "Gegund",
+      "measured": "Opgemeten",
+      "final": "Eindafrekening",
+      "manual": "Handmatig",
+      "invoiced": "Gefactureerd",
+      "evm": "Earned value"
+    },
+    "layer": {
+      "budget": "Budget",
+      "estimate": "Raming",
+      "tender": "Beste inschrijving",
+      "awarded": "Gegund",
+      "changes": "Goedgekeurde wijzigingen",
+      "committed": "Aangegaan",
+      "pending": "Openstaande wijzigingen",
+      "measured": "Opgemeten",
+      "certified": "Gecertificeerd",
+      "invoiced": "Gefactureerd",
+      "paid": "Betaald",
+      "forecast": "Prognose"
+    },
+    "invoice_kind": {
+      "interim": "Termijn",
+      "final": "Eind",
+      "daywork": "Regiewerk",
+      "credit_note": "Creditnota"
+    },
+    "release_status": {
+      "open": "Open",
+      "released": "Vrijgegeven"
+    },
+    "evidence_kind": {
+      "document": "Document",
+      "minutes": "Notulen",
+      "other": "Overig"
+    },
+    "snapshot_status": {
+      "draft": "Concept",
+      "frozen": "Bevroren"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Project",
+      "project_no": "Projectnr.",
+      "generated_on": "Aangemaakt op",
+      "records": "Records",
+      "currency": "Valuta",
+      "status": "Status",
+      "name": "Naam",
+      "signature": "Handtekening",
+      "date": "Datum",
+      "signatures": "Handtekeningen",
+      "yes": "Ja",
+      "no": "Nee",
+      "days_one": "{n} dag",
+      "days_other": "{n} dagen",
+      "empty_register": "Geen records.",
+      "total": "Totaal",
+      "signer_title": "Functie",
+      "sig_prepared_by": "Opgesteld door",
+      "sig_checked_by": "Gecontroleerd door",
+      "sig_approved_by": "Goedgekeurd door",
+      "footer_generated": "Aangemaakt {timestamp}",
+      "footer_page": "Pagina {page} van {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Submittalregister",
+        "doc_title": "Submittal",
+        "doc_title_product_data": "Materiaalgoedkeuringsformulier",
+        "col_number": "Submittalnr.",
+        "col_title": "Titel",
+        "col_type": "Type",
+        "col_spec": "Bestekonderdeel",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Datum ingediend",
+        "col_date_required": "Benodigd op",
+        "col_date_returned": "Datum geretourneerd",
+        "col_reviewer": "Beoordelaar",
+        "col_approver": "Goedkeurder",
+        "col_ball_in_court": "Actie bij",
+        "submitted_by_org": "Indienend bedrijf",
+        "review_notes": "Opmerkingen beoordelaar",
+        "no_review_notes": "Geen opmerkingen van de beoordelaar vastgelegd.",
+        "sig_submitted": "Ingediend door",
+        "sig_reviewed": "Beoordeeld door",
+        "sig_approved": "Goedgekeurd door",
+        "register_filename": "submittalregister",
+        "register_title_shop_drawing": "Werktekeningenregister",
+        "register_title_product_data": "Materiaalgoedkeuringsregister",
+        "register_title_method_statement": "Werkmethodenregister",
+        "register_filename_shop_drawing": "werktekeningenregister",
+        "register_filename_product_data": "materiaalgoedkeuringsregister",
+        "register_filename_method_statement": "werkmethodenregister",
+        "col_discipline": "Discipline",
+        "col_manufacturer": "Fabrikant / merk",
+        "col_model": "Model / referentie",
+        "col_origin": "Land van herkomst",
+        "col_supplier": "Leverancier",
+        "col_product": "Fabrikant / model / herkomst",
+        "col_review_code": "Beoordelingscode",
+        "col_outcome": "Beoordelingsresultaat",
+        "col_review_period": "Beoordelingstermijn (dagen)",
+        "col_review_due": "Beoordeling uiterlijk",
+        "col_days_in_review": "Dagen in beoordeling",
+        "col_days_in_review_print": "Dagen in beoordeling",
+        "col_review_overdue": "Dagen te laat",
+        "col_required_on_site": "Benodigd op locatie",
+        "col_long_lead": "Lange levertijd",
+        "col_lead_time": "Levertijd (weken)",
+        "col_needed_by": "Goedkeuring nodig uiterlijk",
+        "col_approval_late": "Dagen na uiterste datum",
+        "col_drawings": "Gekoppelde tekeningen",
+        "col_submitted_returned": "Ingediend / geretourneerd",
+        "col_on_site_needed_by": "Op locatie / goedkeuring uiterlijk",
+        "resubmit_for_record": "Gecorrigeerd exemplaar opnieuw indienen voor het dossier",
+        "review_history": "Beoordelingshistorie",
+        "hist_submitted": "Ingediend",
+        "hist_returned": "Geretourneerd",
+        "drawings_missing_one": "{n} gekoppelde tekening is niet meer beschikbaar",
+        "drawings_missing_other": "{n} gekoppelde tekeningen zijn niet meer beschikbaar",
+        "weeks_one": "{n} week",
+        "weeks_other": "{n} weken"
+      },
+      "labels": {
+        "status": {
+          "draft": "Concept",
+          "submitted": "Ingediend",
+          "under_review": "In beoordeling",
+          "approved": "Goedgekeurd",
+          "approved_as_noted": "Goedgekeurd met opmerkingen",
+          "revise_and_resubmit": "Herzien en opnieuw indienen",
+          "rejected": "Afgekeurd",
+          "closed": "Gesloten"
+        },
+        "type": {
+          "shop_drawing": "Werktekening",
+          "product_data": "Productdata",
+          "sample": "Monster",
+          "mock_up": "Mock-up",
+          "test_report": "Testrapport",
+          "calculation": "Berekening",
+          "method_statement": "Werkmethode",
+          "certificate": "Certificaat",
+          "warranty": "Garantie"
+        },
+        "discipline": {
+          "mechanical": "Werktuigbouw",
+          "hvac": "HVAC",
+          "plumbing": "Sanitair en riolering",
+          "fire_protection": "Brandveiligheid",
+          "electrical": "Elektrotechniek",
+          "lighting": "Verlichting",
+          "elv": "Zwakstroom",
+          "bms": "Gebouwbeheer",
+          "architectural": "Architectuur",
+          "structural": "Constructie",
+          "civil": "Civiele techniek"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Register wijzigingsopdrachten",
+        "doc_title": "Wijzigingsopdracht",
+        "col_code": "Code",
+        "col_title": "Titel",
+        "col_reason": "Reden",
+        "col_instrument": "Instrument",
+        "col_submitted": "Datum ingediend",
+        "col_contractor_amount": "Bedrag aannemer",
+        "col_engineer_amount": "Bedrag ingenieur",
+        "col_approved_amount": "Goedgekeurd bedrag",
+        "col_cost_impact": "Kostengevolg",
+        "col_time_impact": "Tijdsgevolg (dagen)",
+        "col_approved_time": "Goedgekeurde tijd (dagen)",
+        "time_impact": "Tijdsgevolg",
+        "approved_time": "Goedgekeurde tijd",
+        "col_approved": "Datum goedgekeurd",
+        "submitted_by": "Ingediend door",
+        "approved_by": "Goedgekeurd door",
+        "description": "Omschrijving",
+        "no_description": "Geen omschrijving vastgelegd.",
+        "items": "Wijzigingsposten",
+        "item_description": "Omschrijving",
+        "item_change": "Wijziging",
+        "item_unit": "Eenheid",
+        "item_original_quantity": "Oorspr. hoeveelh.",
+        "item_new_quantity": "Nieuwe hoeveelh.",
+        "item_original_rate": "Oorspr. tarief",
+        "item_new_rate": "Nieuw tarief",
+        "item_cost_delta": "Kostenverschil",
+        "register_filename": "register-wijzigingsopdrachten"
+      },
+      "labels": {
+        "status": {
+          "draft": "Concept",
+          "submitted": "Ingediend",
+          "approved": "Goedgekeurd",
+          "rejected": "Afgewezen",
+          "executed": "Uitgevoerd"
+        },
+        "reason": {
+          "client_request": "Verzoek opdrachtgever",
+          "design_change": "Ontwerpwijziging",
+          "unforeseen": "Onvoorziene omstandigheden",
+          "regulatory": "Wet- en regelgeving",
+          "error": "Fout of omissie",
+          "non_conformance": "Afwijking",
+          "value_engineering": "Value engineering"
+        },
+        "instrument": {
+          "works_change": "Opgedragen wijziging",
+          "site_confirmation": "Bevestiging op locatie",
+          "claim": "Claim"
+        },
+        "change": {
+          "added": "Toegevoegd",
+          "removed": "Vervallen",
+          "modified": "Gewijzigd"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Bewijsdossier",
+        "subject": "Onderwerp",
+        "basis": "Grondslag",
+        "period_from": "Oudste registratie",
+        "period_to": "Nieuwste registratie",
+        "digest": "Integriteitscode (SHA-256, eerste 16 tekens)",
+        "col_row": "Nr.",
+        "col_record_id": "Registratie-ID",
+        "col_section": "Onderdeel",
+        "col_date": "Datum",
+        "col_kind": "Soort registratie",
+        "col_title": "Titel",
+        "col_summary": "Samenvatting",
+        "col_reference": "Referentie",
+        "register_filename": "bewijsdossier"
+      },
+      "labels": {
+        "section": {
+          "notices": "Kennisgevingen",
+          "correspondence": "Correspondentie",
+          "rfis": "Informatieverzoeken (RFI's)",
+          "variations": "Wijzigingen",
+          "approvals": "Goedkeuringen",
+          "delay": "Vertraging",
+          "timeline": "Tijdlijn",
+          "other": "Overig"
+        },
+        "kind": {
+          "notice": "Kennisgeving",
+          "variation_notice": "Melding wijziging",
+          "variation_request": "Wijzigingsverzoek",
+          "variation_order": "Wijzigingsopdracht (meer-/minderwerk)",
+          "change_order": "Wijzigingsopdracht",
+          "moc_entry": "Wijzigingsregistratie",
+          "correspondence": "Correspondentie"
+        },
+        "basis": {
+          "dispute": "Geschil",
+          "valuation": "Waardering",
+          "delay": "Vertraging / termijnverlenging",
+          "general": "Algemene registratie"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Correspondentielogboek",
+        "doc_title": "Correspondentie",
+        "col_reference": "Kenmerk",
+        "col_direction": "Richting",
+        "col_type": "Type",
+        "col_subject": "Onderwerp",
+        "col_from": "Van",
+        "col_to": "Aan",
+        "col_date_sent": "Verzenddatum",
+        "col_date_received": "Ontvangstdatum",
+        "col_response_due": "Reactie uiterlijk",
+        "col_clause": "Contractartikel",
+        "notes": "Opmerkingen",
+        "no_notes": "Geen opmerkingen vastgelegd.",
+        "attachments": "Bijgevoegde bestanden",
+        "linked_documents": "Gekoppelde documenten",
+        "sig_prepared": "Opgesteld door",
+        "sig_received": "Ontvangen door",
+        "register_filename": "correspondentielogboek"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Inkomend",
+          "outgoing": "Uitgaand"
+        },
+        "type": {
+          "letter": "Brief",
+          "email": "E-mail",
+          "notice": "Kennisgeving",
+          "memo": "Memo",
+          "report": "Rapport"
+        },
+        "status": {
+          "open": "Open",
+          "awaiting_response": "Wacht op reactie",
+          "responded": "Beantwoord",
+          "closed": "Gesloten"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Verzendregister",
+        "doc_title": "Verzendformulier",
+        "col_number": "Verzendnr.",
+        "col_subject": "Onderwerp",
+        "col_purpose": "Doel",
+        "col_issued": "Verzenddatum",
+        "col_response_due": "Reactie uiterlijk",
+        "col_recipients": "Ontvangers",
+        "col_item_count": "Stukken",
+        "sender": "Afzender",
+        "cover_note": "Begeleidend schrijven",
+        "no_cover_note": "Geen begeleidend schrijven.",
+        "recipients": "Ontvangers",
+        "recipient": "Ontvanger",
+        "action_required": "Actie vereist",
+        "acknowledged": "Ontvangst bevestigd",
+        "responded": "Datum reactie",
+        "items": "Verzonden stukken",
+        "item_no": "Nr.",
+        "item_description": "Omschrijving",
+        "item_notes": "Opmerkingen",
+        "sig_issued": "Verzonden door",
+        "sig_received": "Ontvangen door",
+        "register_filename": "verzendregister"
+      },
+      "labels": {
+        "status": {
+          "draft": "Concept",
+          "issued": "Verzonden",
+          "responded": "Beantwoord"
+        },
+        "purpose": {
+          "for_approval": "Ter goedkeuring",
+          "for_review": "Ter beoordeling",
+          "for_information": "Ter informatie",
+          "for_construction": "Voor uitvoering",
+          "for_tender": "Voor aanbesteding",
+          "for_record": "Ter archivering"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Wijzigingenregister",
+        "claim_register_title": "Claimregister",
+        "notice_register_title": "Kennisgevingenregister",
+        "doc_title": "Wijzigingsverzoek",
+        "doc_title_credit": "Wijzigingsverzoek (minderwerk)",
+        "time_impact": "Tijdsgevolg",
+        "col_code": "Code",
+        "col_title": "Titel",
+        "col_classification": "Type",
+        "col_urgency": "Urgentie",
+        "col_requested": "Datum aangevraagd",
+        "col_claimed_amount": "Geclaimd bedrag",
+        "col_agreed_amount": "Overeengekomen bedrag",
+        "col_time_impact": "Tijdsgevolg (dagen)",
+        "col_response_due": "Reactie uiterlijk",
+        "col_clause": "Contractartikel",
+        "col_row": "Nr.",
+        "col_claim_type": "Soort claim",
+        "col_raised": "Datum ingediend",
+        "col_period_start": "Periode van",
+        "col_period_end": "Periode tot",
+        "col_description": "Omschrijving",
+        "col_decided_amount": "Vastgesteld bedrag",
+        "col_days_requested": "Gevraagde dagen",
+        "col_days_granted": "Toegekende dagen",
+        "col_recipient_type": "Gericht aan",
+        "col_recipient": "Ontvanger",
+        "col_target_response": "Verwachte reactie",
+        "col_response_received": "Reactie ontvangen",
+        "requested_by": "Aangevraagd door",
+        "decided_by": "Besloten door",
+        "date_submitted": "Datum ingediend",
+        "date_decided": "Datum besluit",
+        "description": "Omschrijving",
+        "no_description": "Geen omschrijving vastgelegd.",
+        "decision_notes": "Toelichting op besluit",
+        "no_decision_notes": "Nog geen besluit vastgelegd.",
+        "variation_register_filename": "wijzigingenregister",
+        "claim_register_filename": "claimregister",
+        "notice_register_filename": "kennisgevingenregister"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Concept",
+          "submitted": "Ingediend",
+          "under_review": "In beoordeling",
+          "approved": "Goedgekeurd",
+          "rejected": "Afgewezen",
+          "converted_to_vo": "Omgezet in opdracht"
+        },
+        "claim_status": {
+          "draft": "Concept",
+          "submitted": "Ingediend",
+          "under_review": "In beoordeling",
+          "agreed": "Overeengekomen",
+          "granted": "Toegekend",
+          "rejected": "Afgewezen"
+        },
+        "notice_status": {
+          "issued": "Verzonden",
+          "acknowledged": "Ontvangst bevestigd",
+          "responded": "Beantwoord",
+          "closed": "Gesloten"
+        },
+        "classification": {
+          "scope_change": "Wijziging werkomvang",
+          "unforeseen": "Onvoorziene omstandigheid",
+          "owner_change": "Wijziging door opdrachtgever",
+          "design_dev": "Ontwerpuitwerking",
+          "regulatory": "Wet- en regelgeving",
+          "other": "Overig"
+        },
+        "urgency": {
+          "low": "Laag",
+          "med": "Gemiddeld",
+          "high": "Hoog"
+        },
+        "claim_type": {
+          "disruption": "Verstoring",
+          "eot": "Termijnverlenging"
+        },
+        "recipient_type": {
+          "owner": "Opdrachtgever",
+          "contractor": "Aannemer",
+          "architect": "Architect",
+          "engineer": "Ingenieur",
+          "consultant": "Adviseur"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Dagrapport bouwplaats",
+        "overview": "Overzicht",
+        "site_supervisor": "Uitvoerder",
+        "not_recorded": "Niet vastgelegd",
+        "labour_on_site": "Personeel op locatie",
+        "equipment_on_site": "Materieel op locatie",
+        "completeness": "Volledigheid",
+        "weather": "Weer",
+        "weather_time": "Tijd",
+        "weather_source": "Bron",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Wind (km/u)",
+        "weather_precip": "Neerslag (mm)",
+        "weather_conditions": "Weersgesteldheid",
+        "weather_empty": "Geen weergegevens vastgelegd voor deze dag.",
+        "site_record": "Bouwplaatsregistratie",
+        "entries_empty": "Geen aantekeningen vastgelegd voor dit dagrapport.",
+        "notes": "Opmerkingen",
+        "notes_empty": "Geen aanvullende opmerkingen.",
+        "footer_supervisor": "Uitvoerder: {name}",
+        "footer_supervisor_missing": "Uitvoerder: niet vastgelegd",
+        "footer_generated": "Aangemaakt: {timestamp}",
+        "footer_page": "Pagina {page} van {total}",
+        "workforce": "Personeel per bedrijf",
+        "workforce_company": "Bedrijf",
+        "workforce_count": "Personen",
+        "workforce_unassigned": "Niet aan een bedrijf toegewezen",
+        "workforce_total": "Totaal",
+        "signatures": "Handtekeningen",
+        "sig_prepared": "Opgesteld door (uitvoerder)",
+        "sig_approved": "Goedgekeurd door (vertegenwoordiger opdrachtgever)",
+        "sig_name": "Naam",
+        "sig_title": "Functie",
+        "sig_date": "Datum",
+        "sig_signature": "Handtekening",
+        "signed_note": "Digitaal ondertekend in het systeem: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "dagrapport",
+        "summary_wind": "wind {value} km/u",
+        "summary_precipitation": "neerslag {value} mm",
+        "summary_humidity": "luchtvochtigheid {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Bezoekers",
+          "event": "Gebeurtenissen",
+          "delivery": "Geleverde materialen",
+          "completion": "Uitgevoerde werkzaamheden",
+          "incident_summary": "Veiligheid en incidenten",
+          "inspection_summary": "Keuringen",
+          "photo_note": "Fotonotities",
+          "general": "Algemene opmerkingen"
+        },
+        "status": {
+          "open": "Open",
+          "closed": "Gesloten",
+          "signed": "Ondertekend",
+          "archived": "Gearchiveerd"
+        },
+        "condition": {
+          "clear": "helder",
+          "mainly_clear": "overwegend helder",
+          "partly_cloudy": "half bewolkt",
+          "cloudy": "bewolkt",
+          "overcast": "zwaar bewolkt",
+          "fog": "mist",
+          "fog_rime": "aanvriezende mist",
+          "drizzle_light": "lichte motregen",
+          "drizzle_moderate": "matige motregen",
+          "drizzle_dense": "zware motregen",
+          "rain": "regen",
+          "rain_light": "lichte regen",
+          "rain_moderate": "matige regen",
+          "rain_heavy": "zware regen",
+          "freezing_rain_light": "lichte ijzel",
+          "freezing_rain_heavy": "zware ijzel",
+          "snow": "sneeuw",
+          "snow_light": "lichte sneeuw",
+          "snow_moderate": "matige sneeuw",
+          "snow_heavy": "zware sneeuw",
+          "rain_showers_light": "lichte regenbuien",
+          "rain_showers_moderate": "matige regenbuien",
+          "rain_showers_violent": "hevige regenbuien",
+          "snow_showers_light": "lichte sneeuwbuien",
+          "snow_showers_heavy": "zware sneeuwbuien",
+          "thunderstorm": "onweer",
+          "thunderstorm_hail_light": "onweer met lichte hagel",
+          "thunderstorm_hail_heavy": "onweer met zware hagel"
+        },
+        "source": {
+          "manual": "Handmatige invoer",
+          "open_meteo": "Weerdienst",
+          "sensor": "Sensor op locatie"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Informatieverzoeken (RFI-logboek)",
+        "col_number": "RFI-nr.",
+        "col_subject": "Onderwerp",
+        "col_raised_by": "Ingediend door",
+        "col_assigned_to": "Toegewezen aan",
+        "col_ball_in_court": "Actie bij",
+        "col_date_required": "Benodigd op",
+        "col_response_due": "Reactie uiterlijk",
+        "col_days_open": "Dagen open",
+        "col_cost_impact": "Kostengevolg",
+        "col_schedule_impact": "Planningsgevolg",
+        "col_response": "Reactie",
+        "yes_with": "Ja ({detail})",
+        "register_filename": "rfi-logboek"
+      },
+      "labels": {
+        "status": {
+          "draft": "Concept",
+          "open": "Open",
+          "answered": "Beantwoord",
+          "closed": "Gesloten",
+          "void": "Ongeldig"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Door AI gegenereerd",
+        "drawing": "Tekening",
+        "cost_estimate": "KOSTENRAMING",
+        "summary": "SAMENVATTING",
+        "project": "Project:",
+        "boq": "Aanbestedingsstaat:",
+        "date": "Datum:",
+        "status": "Status:",
+        "prepared_by": "Opgesteld door:",
+        "approved_by": "Goedgekeurd door:",
+        "signature_hint": "Naam / Handtekening / Datum",
+        "contents": "Hoofdstukken / Posten:",
+        "pos": "Pos.",
+        "description": "Omschrijving",
+        "unit": "Eenheid",
+        "qty": "Hoev.",
+        "rate": "Prijs",
+        "total": "Totaal",
+        "subtotal": "Subtotaal:",
+        "other_positions": "Overige posten",
+        "direct_cost": "Directe kosten:",
+        "markups": "Opslagen (excl. btw):",
+        "net_total": "Totaal netto (excl. btw):",
+        "gross_total": "Totaal bruto",
+        "page": "Pagina",
+        "of": "van",
+        "generated": "Gegenereerd:",
+        "summary_report": "Samenvattend rapport",
+        "positions_omitted": "{count} posten (volledige details weggelaten voor de prestaties)",
+        "section": "Hoofdstuk",
+        "items": "Posten",
+        "cost_summary": "Kostenoverzicht",
+        "table_of_contents": "Inhoudsopgave",
+        "resources_omitted": "Opbouw van middelen niet afgedrukt: deze staat heeft te veel regels met middelen voor één PDF.",
+        "status_draft": "Concept",
+        "status_final": "Definitief",
+        "status_archived": "Gearchiveerd",
+        "subject": "Aanbestedingsstaat",
+        "tax_vat": "btw"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "FACTUUR",
+        "date": "Datum: {value}",
+        "due": "Vervaldatum: {value}",
+        "from": "Van",
+        "bill_to": "Factuuradres",
+        "vat_id": "btw-nr.: {value}",
+        "ref": "Ref.: {value}",
+        "th_description": "Omschrijving",
+        "th_qty": "Aantal",
+        "th_unit": "Eenheid",
+        "th_unit_price": "Stukprijs",
+        "th_net": "Netto ({currency})",
+        "net_total": "Totaal netto",
+        "vat_total": "btw",
+        "grand_total": "Totaal incl. btw",
+        "retention_prepaid": "Retentie / vooruitbetaald",
+        "amount_due": "Te betalen bedrag",
+        "payment": "Betaling",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Rekeningnummer: {value}",
+        "bank_code": "Bankcode: {value}",
+        "account_holder": "Rekeninghouder: {value}",
+        "footer": "Deze PDF bevat een ingesloten EN 16931-e-factuur (Factur-X / ZUGFeRD). Het ingesloten XML-bestand is het bepalende document.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ",",
+        "group_separator": "."
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Rapport",
+        "meta_project": "Project",
+        "meta_type": "Type",
+        "meta_generated": "Gegenereerd",
+        "meta_currency": "Valuta",
+        "field_column": "Veld",
+        "value_column": "Waarde",
+        "yes": "Ja",
+        "no": "Nee",
+        "no_data_heading": "Geen gegevens beschikbaar",
+        "no_data_body": "Dit rapport is gegenereerd met een lege gegevensmomentopname. Controleer of de brongegevens (financiën, planning, veiligheid, enz.) gegevens hebben geleverd voor het geselecteerde project.",
+        "no_data_body_short": "Dit rapport is gegenereerd met een lege gegevensmomentopname. Controleer of de brongegevens gegevens hebben geleverd voor het geselecteerde project.",
+        "footer_generated_by": "Gegenereerd door OpenConstructionERP op {timestamp}.",
+        "worksheet_name": "Rapport",
+        "pdf_subject": "Projectrapport",
+        "overall_progress": "Totale voortgang",
+        "as_of": "Per",
+        "recorded_by": "Vastgelegd door",
+        "period": "Periode",
+        "entries_suffix": "({count} registraties)",
+        "site_photo_alt": "Foto van de bouwplaats",
+        "ai_summary_heading": "Samenvatting",
+        "ai_badge": "Door AI gegenereerd",
+        "ai_note": "Door AI gegenereerd op basis van de onderstaande projectgegevens.",
+        "ai_note_confidence": "Door AI gegenereerd op basis van de onderstaande projectgegevens (betrouwbaarheid {confidence}).",
+        "ai_note_review": "Controleer voordat u dit met de opdrachtgever deelt."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Naam",
+          "status": "Status",
+          "phase": "Fase",
+          "planned_start": "Geplande start",
+          "planned_end": "Geplande einde",
+          "schedule_progress_pct": "Voortgang planning (%)",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Budget verbruikt (%)",
+          "as_of": "Per",
+          "progress_pct": "Voortgang (%)",
+          "risk_score_avg": "Gemiddelde risicoscore",
+          "open_rfis": "Open RFI's",
+          "open_submittals": "Open indieningen",
+          "open_defects": "Open gebreken",
+          "open_observations": "Open observaties",
+          "budget": "Budget",
+          "committed": "Vastgelegd",
+          "actual": "Werkelijk",
+          "payable": "Te betalen",
+          "receivable": "Te ontvangen",
+          "net_cash_flow": "Netto kasstroom"
+        },
+        "section_titles": {
+          "Project Overview": "Projectoverzicht",
+          "Key Performance Indicators": "Kernprestatie-indicatoren",
+          "Schedule Status": "Planningsstatus",
+          "Risk Summary": "Risicosamenvatting",
+          "Open Issues": "Openstaande punten",
+          "Cost Summary": "Kostenoverzicht",
+          "Cost Breakdown": "Kostenspecificatie",
+          "Change Orders": "Meerwerkopdrachten",
+          "Cash Flow": "Kasstroom",
+          "Schedule Overview": "Planningsoverzicht",
+          "Milestone Status": "Status mijlpalen",
+          "Critical Path": "Kritiek pad",
+          "3-Week Lookahead": "Vooruitblik 3 weken",
+          "Safety KPIs": "Veiligheids-KPI's",
+          "Incident Log": "Incidentenregister",
+          "Near-Miss Reports": "Meldingen bijna-ongevallen",
+          "Safety Training": "Veiligheidstraining",
+          "Inspection Summary": "Inspectieoverzicht",
+          "By Inspection Type": "Per inspectietype",
+          "Punch List Status": "Status puntenlijst",
+          "Recent Inspections": "Recente inspecties",
+          "Portfolio Overview": "Portefeuilleoverzicht",
+          "Project Statuses": "Projectstatussen",
+          "KPI Comparison": "KPI-vergelijking",
+          "Portfolio Risks": "Portefeuillerisico's",
+          "Field Progress": "Voortgang op de bouwplaats",
+          "Top Risks": "Belangrijkste risico's",
+          "Site Photos": "Foto's van de bouwplaats",
+          "Summary": "Samenvatting"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Inkooporder",
+        "gr_title": "Goederenontvangst",
+        "supplier": "Leverancier",
+        "po_type": "Ordertype",
+        "issue_date": "Orderdatum",
+        "delivery_date": "Leverdatum",
+        "created_by": "Opgesteld door",
+        "order_total": "Ordertotaal",
+        "line_items": "Orderregels",
+        "col_no": "Nr.",
+        "col_description": "Omschrijving",
+        "col_quantity": "Hoev.",
+        "col_unit": "Eenheid",
+        "col_unit_rate": "Eenheidsprijs",
+        "col_amount": "Bedrag",
+        "no_line_items": "Geen orderregels.",
+        "totals": "Totalen",
+        "subtotal": "Netto bedrag",
+        "tax": "Btw",
+        "total_gross": "Totaal incl. btw",
+        "terms": "Voorwaarden",
+        "payment_terms": "Betalingscondities",
+        "retention": "Retentie",
+        "retention_at": "Retentie ingehouden bij",
+        "retention_at_receipt": "Goederenontvangst",
+        "retention_at_invoice": "Factuur",
+        "invoice_tolerance": "Factuurtolerantie",
+        "supplier_confirmation": "Bevestiging leverancier",
+        "supplier_reference": "Referentie leverancier",
+        "confirmed_delivery": "Bevestigde leverdatum",
+        "acknowledged_on": "Bevestigd op",
+        "not_confirmed": "Nog niet bevestigd door de leverancier.",
+        "notes": "Opmerkingen",
+        "no_notes": "Geen opmerkingen vastgelegd.",
+        "sig_ordered_by": "Besteld door",
+        "purchase_order": "Inkooporder",
+        "receipt_date": "Ontvangstdatum",
+        "received_by": "Ontvangen door",
+        "delivery_note": "Pakbon",
+        "col_ordered": "Besteld",
+        "col_received": "Ontvangen",
+        "col_rejected": "Afgekeurd",
+        "col_batch": "Partij / lot",
+        "rejections": "Afkeuringen",
+        "col_reason": "Reden",
+        "no_rejections": "Er is niets afgekeurd.",
+        "sig_delivered_by": "Geleverd door",
+        "counterparty_tax_id": "btw-nummer",
+        "counterparty_address": "Adres"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Concept",
+          "approved": "Goedgekeurd",
+          "issued": "Uitgegeven",
+          "partially_received": "Deels ontvangen",
+          "completed": "Afgerond",
+          "cancelled": "Geannuleerd"
+        },
+        "gr_status": {
+          "draft": "Concept",
+          "confirmed": "Bevestigd"
+        },
+        "po_type": {
+          "standard": "Standaard",
+          "blanket": "Raamorder",
+          "service": "Diensten"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Factuur",
+        "payment_title": "Betaling",
+        "direction": "Richting",
+        "supplier": "Leverancier",
+        "client": "Opdrachtgever",
+        "invoice_date": "Factuurdatum",
+        "due_date": "Vervaldatum",
+        "payment_terms": "Betalingscondities",
+        "purchase_order": "Inkooporder",
+        "invoice_total": "Factuurtotaal",
+        "line_items": "Factuurregels",
+        "col_no": "Nr.",
+        "col_description": "Omschrijving",
+        "col_quantity": "Hoev.",
+        "col_unit": "Eenheid",
+        "col_unit_rate": "Eenheidsprijs",
+        "col_vat": "btw",
+        "col_amount": "Bedrag",
+        "no_line_items": "Geen factuurregels.",
+        "totals": "Totalen",
+        "subtotal": "Netto bedrag",
+        "tax": "Btw",
+        "total_gross": "Totaal incl. btw",
+        "retention": "Retentie",
+        "amount_due": "Te betalen na retentie",
+        "payments": "Betalingen",
+        "col_date": "Datum",
+        "col_reference": "Referentie",
+        "col_paid": "Betaald",
+        "col_withheld": "Ingehouden",
+        "refund": "Terugbetaling",
+        "no_payments": "Geen betalingen vastgelegd.",
+        "notes": "Opmerkingen",
+        "no_notes": "Geen opmerkingen vastgelegd.",
+        "invoice": "Factuur",
+        "invoice_number": "Factuurnr.",
+        "payment_date": "Betaaldatum",
+        "reference": "Referentie",
+        "amount_paid": "Betaald bedrag",
+        "exchange_rate": "Wisselkoers",
+        "kind": "Type",
+        "kind_payment": "Betaling",
+        "kind_refund": "Terugbetaling",
+        "withholding": "Ingehouden retentie",
+        "withheld_amount": "Ingehouden bedrag",
+        "release_date": "Vrijgavedatum",
+        "gross_settled": "Afgewikkeld bruto bedrag",
+        "no_withholding": "Van deze betaling is niets ingehouden.",
+        "counterparty_tax_id": "btw-nummer",
+        "counterparty_address": "Adres"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Concept",
+          "pending": "In afwachting van goedkeuring",
+          "approved": "Goedgekeurd",
+          "sent": "Verzonden",
+          "paid": "Betaald",
+          "cancelled": "Geannuleerd",
+          "credit_note_issued": "Creditnota uitgegeven"
+        },
+        "direction": {
+          "payable": "Crediteur (leveranciersfactuur)",
+          "receivable": "Debiteur (factuur aan opdrachtgever)"
+        },
+        "payment_status": {
+          "completed": "Afgerond",
+          "refunded": "Terugbetaald"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Pagina {page} van {total}",
+    "page": "Pagina {page}",
+    "printed": "Afgedrukt: {timestamp}",
+    "generated": "Gegenereerd: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} heeft u uitgenodigd voor het klantportaal",
+      "login_subject": "Uw inloglink voor het klantportaal",
+      "invite_heading": "Welkom in het klantportaal",
+      "login_heading": "Inloggen op het klantportaal",
+      "greeting": "Beste {name},",
+      "greeting_generic": "Geachte heer, mevrouw,",
+      "invite_body": "{sender} heeft u toegang gegeven tot het klantportaal. Daar volgt u uw project: voortgangsrapporten, documenten, facturen en de volgende mijlpalen.",
+      "login_body": "Hier is de inloglink die u hebt aangevraagd.",
+      "link_help": "Met de knop hieronder logt u in. Een wachtwoord is niet nodig. De link werkt één keer en verloopt over {hours} uur.",
+      "ignore": "Had u deze e-mail niet verwacht, dan kunt u hem negeren. Zonder deze link krijgt niemand toegang.",
+      "invite_cta": "Portaal openen",
+      "login_cta": "Inloggen",
+      "sender_generic": "Uw projectteam"
+    },
+    "tender_invite": {
+      "subject": "Uitnodiging tot inschrijving: {package}",
+      "heading": "Uitnodiging tot inschrijving",
+      "greeting": "Geachte heer, mevrouw van {company},",
+      "greeting_generic": "Geachte heer, mevrouw,",
+      "invite": "U wordt uitgenodigd een offerte in te dienen voor het aanbestedingspakket {package}.",
+      "invite_project": "U wordt uitgenodigd een offerte in te dienen voor het aanbestedingspakket {package} van het project {project}.",
+      "deadline": "Uiterste inschrijfdatum: {deadline}",
+      "link_help": "Met de knop hieronder opent u de staat van hoeveelheden. Vul uw eenheidsprijzen online in, sla een concept op wanneer u wilt en dien uw offerte voor de uiterste datum in. Een account is niet nodig.",
+      "link_personal": "Deze link is persoonlijk voor uw bedrijf. Stuur hem alstublieft niet door.",
+      "cta": "Staat openen en prijzen invullen",
+      "no_link": "Bekijk de stukken en stuur ons uw offerte voor de bovengenoemde uiterste datum."
+    },
+    "notification_email": {
+      "greeting": "Beste {name},",
+      "greeting_generic": "Geachte heer, mevrouw,",
+      "cta": "Openen in OpenConstructionERP",
+      "footer": "U ontvangt deze e-mail vanwege uw meldingsinstellingen. U kunt ze wijzigen in uw profiel.",
+      "digest_subject": "OpenConstructionERP: Overzicht van meldingen ({count})",
+      "digest_heading": "Recente meldingen:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Prijsvergelijking",
+      "comparison_sheet": "Vergelijking",
+      "bidder_title": "Bestek om te prijzen",
+      "bidder_sheet": "Bestek",
+      "project": "Project",
+      "package": "Perceel",
+      "currency": "Valuta",
+      "date": "Datum",
+      "return_by": "Indienen voor",
+      "item": "Post",
+      "description": "Omschrijving",
+      "unit": "Eenheid",
+      "quantity": "Hoeveelheid",
+      "unit_price": "Eenheidsprijs",
+      "line_total": "Bedrag",
+      "own_estimate": "Eigen raming",
+      "not_priced": "niet geprijsd",
+      "sum_priced_lines": "Som van geprijsde posten",
+      "bid_total": "Inschrijfsom zoals ingediend",
+      "lines_priced": "Geprijsde posten",
+      "lines_priced_value": "{priced} van {total}",
+      "deviation": "Afwijking van eigen raming",
+      "not_comparable": "n.v.t.",
+      "other_currency": "Geprijsd in {currency}, niet vergeleken met inschrijvingen in {reporting}.",
+      "legend": "Legenda",
+      "legend_lowest": "Groen: de laagste eenheidsprijs van de post.",
+      "legend_high": "▲ rood: meer dan {pct}% boven de mediaan van de post.",
+      "legend_low": "▼ oranje: meer dan {pct}% onder de mediaan van de post.",
+      "legend_missing": "\"{marker}\": de inschrijver gaf geen prijs voor de post.",
+      "legend_incomplete": "Een inschrijving met niet-geprijsde posten is gemarkeerd bij \"Geprijsde posten\" en telt niet als laagste op het totaal.",
+      "legend_totals": "De inschrijfsom is het bedrag dat de inschrijver opgaf; het kan afwijken van de som van de geprijsde posten.",
+      "bidder": "Inschrijver",
+      "bidder_note": "Opmerking inschrijver",
+      "reference": "Referentie (niet wijzigen)",
+      "total": "Totaal",
+      "instructions": "Vul voor elke post een eenheidsprijs in de gele cellen in. Hoeveelheden en omschrijvingen liggen vast, bedragen en totaal rekenen zichzelf uit. Laat de cel leeg als u de post niet prijst."
+    },
+    "cost_plan": {
+      "sheet_plan": "Kostenplan NRM 1",
+      "sheet_unallocated": "Niet toegewezen",
+      "title": "Kostenplan per element (NRM 1)",
+      "bill": "Bestek",
+      "currency": "Valuta",
+      "gifa": "BVO (m2)",
+      "gifa_project": "uit het project",
+      "gifa_entered": "ingevoerd voor deze export",
+      "gifa_none": "niet ingesteld, kosten per m2 niet getoond",
+      "col_code": "Code",
+      "col_description": "Element",
+      "col_positions": "Posten",
+      "col_basis": "Grondslag",
+      "col_total": "Totaal",
+      "col_per_m2": "Kosten per m2 BVO",
+      "col_share": "% van totaal",
+      "col_running": "Lopend totaal",
+      "group_level": "Groepsniveau, geen element opgegeven",
+      "facilitating_works_estimate": "Raming voorbereidende werken",
+      "works_estimate": "Raming bouwwerkzaamheden",
+      "addons_heading": "NRM 1 groepen 9-14 geprijsd als posten van het bestek",
+      "unallocated": "Niet aan een element toegewezen",
+      "direct_cost": "Directe kosten van het bestek",
+      "markups_heading": "Opslagen (eigen cascade van het bestek, in volgorde)",
+      "markups_total": "Totaal opslagen",
+      "grand_total": "Totaal kostenplan",
+      "basis_direct": "{pct} % over de directe kosten",
+      "basis_running": "{pct} % over het lopende subtotaal",
+      "basis_lump": "Vast bedrag",
+      "basis_banded": "Staffel",
+      "basis_escalation": "Indexering",
+      "basis_other": "{kind}",
+      "basis_scoped": "beperkt tot een hoofdstuk",
+      "col_ordinal": "Volgnr.",
+      "col_position": "Omschrijving",
+      "col_written_code": "Code zoals ingevoerd",
+      "col_reason": "Reden",
+      "reason_no_code": "Geen NRM-code bij de post of de bijbehorende hoofdstukken",
+      "reason_invalid_code": "De code is geen NRM-nummer",
+      "reason_unknown_group": "NRM 1 kent deze groep niet",
+      "truncated": "Lijst ingekort tot de eerste {shown} van {count} posten; het totaal omvat alle posten."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Eisen",
+      "sheet_summary": "Samenvatting",
+      "sheet_legend": "Legenda",
+      "summary_element": "Element",
+      "summary_count": "Aantal eisen",
+      "summary_total": "Totaal",
+      "legend_column": "Kolom",
+      "legend_description": "Beschrijving",
+      "unspecified": "Niet gespecificeerd",
+      "h01": "Element / IFC-klasse",
+      "h02": "Classificatie",
+      "h03": "Eigenschappengroep",
+      "h04": "Naam van de eigenschap",
+      "h05": "Gegevenstype",
+      "h06": "Verplicht",
+      "h07": "Toegestane waarden",
+      "h08": "Min.",
+      "h09": "Max.",
+      "h10": "Eenheid",
+      "h11": "Patroon",
+      "h12": "Fase",
+      "h13": "Actor",
+      "h14": "Toepassing",
+      "h15": "Bron",
+      "d01": "IFC-entiteitsklasse (bijv. IFCWALL, IFCBEAM)",
+      "d02": "Classificatiesysteem en code (bijv. Uniclass 2015: EF_25_10)",
+      "d03": "Naam van de eigenschappenset (bijv. Pset_WallCommon)",
+      "d04": "Naam van de vereiste eigenschap of het vereiste attribuut",
+      "d05": "IFC-gegevenstype (IFCLABEL, IFCREAL, IFCBOOLEAN, enz.)",
+      "d06": "Kardinaliteit: verplicht, optioneel of verboden",
+      "d07": "Lijst met toegestane waarden, gescheiden door puntkomma's",
+      "d08": "Grenzen van het numerieke bereik",
+      "d09": "Meeteenheid (m, m2, kg, enz.)",
+      "d10": "Reguliere expressie voor de validatie van de waarde",
+      "d11": "Projectfase of mijlpaal (LP3, RIBA Stage 3, enz.)",
+      "d12": "Verantwoordelijke partij (architect, constructeur, enz.)",
+      "d13": "Doel of toepassing van de eis",
+      "d14": "Bronnorm of brondocument"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Bestek aangemaakt",
+      "notifications.boq.created.body": "Uw bestek '{boq_name}' is opgeslagen.",
+      "notifications.meeting.action_assigned.title": "Er is u een actiepunt toegewezen",
+      "notifications.meeting.action_assigned.body": "Uit vergadering {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Documentstatus gewijzigd",
+      "notifications.cde.state_transitioned.body": "De container is overgegaan naar de status '{new_state}'.",
+      "notifications.cde.linked_published.title": "Een aan uw werk gekoppeld document is gepubliceerd",
+      "notifications.cde.linked_published.body": "{container_code} is gepubliceerd in revisie {revision_code}. Uw gekoppelde records: {records}.",
+      "notifications.rfi.assigned.title": "Er is u een informatieverzoek (RFI) toegewezen",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "Informatieverzoek (RFI) beantwoord",
+      "notifications.rfi.responded.body": "Uw verzoek {code} ({title}) is beantwoord.",
+      "notifications.risk.assigned.title": "Er is u een risico toegewezen",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Waarschuwing kostenoverschrijding",
+      "notifications.costmodel.overrun_alert.body": "De kosten van de categorie {category} overschrijden het budget: de werkelijke kosten van {actual} {currency} liggen boven de waarschuwingsgrens van +{threshold_pct} % op de geplande {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Indiening wacht op beoordeling",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Indiening goedgekeurd",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Indiening afgekeurd",
+      "notifications.submittal.rejected.body": "{code} ({title}). Reden: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Indiening moet worden herzien",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Reden: {reason}",
+      "notifications.transmittal.issued.title": "Er is u een transmittal gestuurd",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Transmittal ontvangen",
+      "notifications.transmittal.acknowledged.body": "De ontvanger heeft de ontvangst van {code} ({title}) bevestigd.",
+      "notifications.transmittal.responded.title": "Transmittal beantwoord",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "Er is u een informatieverzoek (RFI) toegewezen",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Nieuwe taak toegewezen",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Factuur goedgekeurd",
+      "notification.invoice_approved_body": "Factuur {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Inspectie ingepland",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, op {inspection_date}",
+      "notification.submittal_status_changed_title": "Status van indiening gewijzigd",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Vergadering ingepland",
+      "notification.meeting_scheduled_body": "{title}, op {meeting_date}",
+      "notification.ncr_created_title": "Afwijking (NCR) geregistreerd",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Document geüpload",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "U bent genoemd in een reactie",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "Nieuwe reactie in een discussie",
+      "notifications.collaboration.comment_added.body": "Bij {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "Clash met hoge ernst gedetecteerd",
+      "notifications.clash.high_severity.body": "Clash met ernst {severity}: {a_name} tegenover {b_name}",
+      "notifications.validation.report.title": "Validatie heeft problemen gevonden",
+      "notifications.validation.report.body": "{error_count} fout(en) en {warning_count} waarschuwing(en) bij dit object ({target_type}).",
+      "notifications.punchlist.auto_created.title": "Opleverpunt aangemaakt",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Overzicht van meldingen",
+      "notifications.digest.body": "U hebt {count} nieuwe updates in het kanaal {channel}.",
+      "notifications.approval.overdue.title": "Goedkeuring te laat",
+      "notifications.approval.overdue.body": "Stap {step_ordinal} van dit object ({target_kind}) loopt {hours_overdue} uur achter.",
+      "notifications.approval.escalated.title": "Goedkeuring aan u geëscaleerd",
+      "notifications.approval.escalated.body": "Stap {step_ordinal} van dit object ({target_kind}) is aan u geëscaleerd (niveau {level}).",
+      "notifications.approval.reassigned.title": "Goedkeuring aan u toegewezen",
+      "notifications.approval.reassigned.body": "Stap {step_ordinal} van dit object ({target_kind}) ligt nu bij u ter beslissing.",
+      "notifications.deadline.overdue.title": "Te laat: {title}",
+      "notifications.deadline.overdue.body": "Item uit module {module} \"{title}\": de termijn is {days_overdue} dag(en) verstreken.",
+      "notifications.deadline.escalated.title": "Verlopen item geëscaleerd",
+      "notifications.deadline.escalated.body": "Item uit module {module} \"{title}\": staat nog open, is {days_overdue} dag(en) te laat en is geëscaleerd.",
+      "notifications.deadline.approaching.title": "Binnenkort aflopend: {title}",
+      "notifications.deadline.approaching.body": "Item uit module {module} \"{title}\": uiterlijk {due_date}.",
+      "notifications.deadline.built.approaching.title": "Binnenkort aflopend: {title}",
+      "notifications.deadline.built.approaching.body": "Module {module}: \"{title}\", uiterlijk {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Te laat: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "RFI {reference} \"{title}\" van project {project} moest uiterlijk {due_date_display} zijn beantwoord en is {days_overdue} dag(en) te laat. Antwoord vereist.",
+      "notifications.deadline.rfi.escalated.title": "Geëscaleerd: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "RFI {reference} \"{title}\" van project {project} staat nog open, {days_overdue} dag(en) na de uiterste datum van {due_date_display}, en is aan u geëscaleerd.",
+      "notifications.deadline.rfi.approaching.title": "Binnenkort aflopend: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "RFI {reference} \"{title}\" van project {project} moet uiterlijk {due_date_display} zijn beantwoord. Antwoord vereist.",
+      "notifications.deadline.submittals.overdue.title": "Te laat: indiening {reference}",
+      "notifications.deadline.submittals.overdue.body": "Indiening {reference} \"{title}\" van project {project} moest uiterlijk {due_date_display} zijn beoordeeld en is {days_overdue} dag(en) te laat. Beoordeling vereist.",
+      "notifications.deadline.submittals.escalated.title": "Geëscaleerd: indiening {reference}",
+      "notifications.deadline.submittals.escalated.body": "Indiening {reference} \"{title}\" van project {project} staat nog open, {days_overdue} dag(en) na de uiterste datum van {due_date_display}, en is aan u geëscaleerd.",
+      "notifications.deadline.submittals.approaching.title": "Binnenkort aflopend: indiening {reference}",
+      "notifications.deadline.submittals.approaching.body": "Indiening {reference} \"{title}\" van project {project} moet uiterlijk {due_date_display} zijn beoordeeld. Beoordeling vereist.",
+      "notifications.deadline.correspondence.overdue.title": "Te laat: correspondentie {reference}",
+      "notifications.deadline.correspondence.overdue.body": "Correspondentie {reference} \"{title}\" van project {project} moest uiterlijk {due_date_display} zijn beantwoord en is {days_overdue} dag(en) te laat. Antwoord vereist.",
+      "notifications.deadline.correspondence.escalated.title": "Geëscaleerd: correspondentie {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Correspondentie {reference} \"{title}\" van project {project} is nog onbeantwoord, {days_overdue} dag(en) na de uiterste datum van {due_date_display}, en is aan u geëscaleerd.",
+      "notifications.deadline.correspondence.approaching.title": "Binnenkort aflopend: correspondentie {reference}",
+      "notifications.deadline.correspondence.approaching.body": "Correspondentie {reference} \"{title}\" van project {project} moet uiterlijk {due_date_display} worden beantwoord. Antwoord vereist.",
+      "notifications.deadline.variations.overdue.title": "Te laat: wijziging {reference}",
+      "notifications.deadline.variations.overdue.body": "Wijziging {reference} \"{title}\" van project {project} moest uiterlijk {due_date_display} zijn beslist en is {days_overdue} dag(en) te laat. Beslissing vereist.",
+      "notifications.deadline.variations.escalated.title": "Geëscaleerd: wijziging {reference}",
+      "notifications.deadline.variations.escalated.body": "Wijziging {reference} \"{title}\" van project {project} staat nog open, {days_overdue} dag(en) na de uiterste datum van {due_date_display}, en is aan u geëscaleerd.",
+      "notifications.deadline.variations.approaching.title": "Binnenkort aflopend: wijziging {reference}",
+      "notifications.deadline.variations.approaching.body": "Wijziging {reference} \"{title}\" van project {project} moet uiterlijk {due_date_display} zijn beslist. Beslissing vereist.",
+      "notifications.variation.submitted.title": "Wijziging wacht op beslissing: {code}",
+      "notifications.variation.submitted.body": "Wijziging {code} \"{title}\" van project {project} is ingediend en wacht op een beslissing.",
+      "notifications.variation.approved.title": "Wijziging goedgekeurd: {code}",
+      "notifications.variation.approved.body": "Wijziging {code} \"{title}\" van project {project} is goedgekeurd.",
+      "notifications.variation.rejected.title": "Wijziging afgewezen: {code}",
+      "notifications.variation.rejected.body": "Wijziging {code} \"{title}\" van project {project} is afgewezen en aan u teruggestuurd.",
+      "notifications.variation.rejected_reason.body": "Wijziging {code} \"{title}\" van project {project} is afgewezen en aan u teruggestuurd. Reden: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Wijzigingsopdracht wacht op goedkeuring: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Wijzigingsopdracht {code} \"{title}\" van project {project} is ingediend en wacht op goedkeuring.",
+      "notifications.changeorder.approved.title": "Wijzigingsopdracht goedgekeurd: {code}",
+      "notifications.changeorder.approved.body": "Wijzigingsopdracht {code} \"{title}\" van project {project} is goedgekeurd.",
+      "notifications.changeorder.rejected.title": "Wijzigingsopdracht afgewezen: {code}",
+      "notifications.changeorder.rejected.body": "Wijzigingsopdracht {code} \"{title}\" van project {project} is afgewezen.",
+      "notifications.submittal.approved_as_noted.title": "Indiening goedgekeurd met opmerkingen",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Een document wacht op uw goedkeuring",
+      "notifications.file_approval.needs_approver.body": "Een document wacht op uw goedkeuring, soort: {file_kind}.",
+      "notifications.file_approval.approved.title": "Uw document is goedgekeurd",
+      "notifications.file_approval.approved.body": "Uw document (soort: {file_kind}) heeft alle goedkeuringsstappen doorlopen.",
+      "notifications.file_approval.rejected.title": "Uw document is teruggestuurd",
+      "notifications.file_approval.rejected.body": "Uw document (soort: {file_kind}) is afgewezen en moet worden aangepast.",
+      "notifications.portal.user_invited.title": "Portalgebruiker uitgenodigd",
+      "notifications.portal.user_invited.body": "{portal_user_email} uitgenodigd met de rol {portal_role}.",
+      "notifications.portal.message_received.title": "Nieuw bericht in het portaal",
+      "notifications.portal.message_received.body": "{buyer_name} heeft een bericht gestuurd."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "Nr",
+          "Activiteitcode",
+          "Nummer"
+        ],
+        "name": [
+          "Taaknaam",
+          "Naam",
+          "Activiteit",
+          "Taak"
+        ],
+        "wbs": [
+          "WBS-code",
+          "Overzichtsnummer"
+        ],
+        "outline_level": [
+          "Overzichtsniveau",
+          "Niveau"
+        ],
+        "start": [
+          "Begindatum",
+          "Begin",
+          "Startdatum"
+        ],
+        "finish": [
+          "Einddatum",
+          "Einde",
+          "Eind"
+        ],
+        "duration": [
+          "Duur",
+          "Dagen"
+        ],
+        "predecessors": [
+          "Voorgangers",
+          "Voorganger",
+          "Afhankelijkheden"
+        ],
+        "percent_complete": [
+          "% Voltooid",
+          "Percentage voltooid",
+          "Voortgang"
+        ],
+        "milestone": [
+          "Mijlpaal"
+        ],
+        "resource": [
+          "Resource",
+          "Resourcenamen",
+          "Ploeg"
+        ],
+        "notes": [
+          "Notities",
+          "Opmerkingen",
+          "Omschrijving",
+          "Beschrijving"
+        ],
+        "client_visible": [
+          "Zichtbaar voor klant",
+          "Klant zichtbaar"
+        ]
+      },
+      "yes_words": [
+        "ja",
+        "waar"
+      ],
+      "no_words": [
+        "nee",
+        "onwaar"
+      ],
+      "example_names": [
+        "Ruwbouw",
+        "Grondwerk",
+        "Funderingen",
+        "Oplevering funderingen"
+      ]
+    },
+    "module_suggest": {
+      "link_labels": {
+        "contract": "Contract",
+        "contact": "Contact",
+        "schedule_activity": "Activiteit",
+        "document": "Document",
+        "user": "Verantwoordelijke"
+      },
+      "keywords": {
+        "contract": [
+          "contract*",
+          "overeenkomst*"
+        ],
+        "contact": [
+          "contact*",
+          "leverancier*",
+          "onderaannemer*",
+          "klant*",
+          "opdrachtgever*"
+        ],
+        "schedule_activity": [
+          "activiteit*",
+          "taak",
+          "taken"
+        ],
+        "document": [
+          "document*",
+          "tekening*",
+          "bijlage*"
+        ],
+        "user": [
+          "verantwoordelijk*",
+          "toegewezen*",
+          "inspecteur*",
+          "uitvoerder*",
+          "opzichter*"
+        ],
+        "due": [
+          "vervaldatum*",
+          "deadline*",
+          "*termijn*",
+          "geldig tot",
+          "uiterlijk*"
+        ]
+      },
+      "state_labels": [
+        "Open",
+        "In behandeling",
+        "Gereed"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Addendum {number} bij de aanbesteding {package}",
+      "addendum_heading": "Addendum bij de aanbesteding",
+      "greeting": "Geachte {company},",
+      "greeting_generic": "Geachte heer/mevrouw,",
+      "addendum_intro": "Addendum {number} bij het aanbestedingspakket {package} is uitgebracht: {title}.",
+      "addendum_deadline": "De deadline voor indiening is verschoven van {old} naar {new}.",
+      "addendum_boq": "De hoeveelhedenstaat is gewijzigd (revisie {revision}). Gelieve de huidige revisie te prijzen.",
+      "addendum_documents": "Uitgebrachte documenten: {documents}",
+      "addendum_ack": "Bevestig a.u.b. de ontvangst van dit addendum. Een inschrijving die niet alle addenda bevestigt, kan als niet-conform worden beschouwd.",
+      "answer_subject": "Verduidelijking {number} bij de aanbesteding {package}",
+      "answer_heading": "Verduidelijking aanbesteding",
+      "answer_intro": "Een vraag over aanbestedingspakket {package} is beantwoord. Het antwoord geldt voor alle inschrijvers.",
+      "question_label": "Vraag",
+      "answer_label": "Antwoord"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Bruto ontwikkelwaarde (GDV)",
+      "total_development_cost": "Totale ontwikkelkosten",
+      "residual_land_value": "Residuele grondwaarde",
+      "developer_profit": "Ontwikkelaarswinst",
+      "profit_on_cost": "Winst op kosten",
+      "profit_on_gdv": "Winst op GDV",
+      "construction_cost": "Bouwkosten",
+      "professional_fees": "Honoraria",
+      "contingency": "Onvoorzien",
+      "finance_cost": "Financieringskosten",
+      "sales_costs": "Verkoopkosten"
+    },
+    "status": {
+      "viable": "Haalbaar",
+      "unviable": "Niet haalbaar",
+      "marginal": "Marginaal",
+      "pending": "Nog niet beoordeeld"
+    },
+    "figure": {
+      "gross_development_value": "De totale verkoopwaarde van alle eenheden in het plan, allemaal in één valuta.",
+      "total_development_cost": "Alle kosten van het realiseren van het plan behalve de grond zelf: bouw, honoraria, onvoorzien, financiering en verkoopkosten.",
+      "residual_land_value": "Wat na aftrek van de totale ontwikkelkosten en de beoogde ontwikkelaarswinst van de bruto ontwikkelwaarde overblijft voor de grond.",
+      "developer_profit": "De winst die de ontwikkelaar wil behouden, uitgedrukt als doelpercentage van de bruto ontwikkelwaarde.",
+      "profit_on_cost": "Ontwikkelaarswinst gedeeld door de totale ontwikkelkosten, uitgedrukt als verhouding.",
+      "profit_on_gdv": "Ontwikkelaarswinst gedeeld door de bruto ontwikkelwaarde, uitgedrukt als verhouding."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Werkerskamp",
+        "rental": "Huurwoning",
+        "hotel": "Hotel"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "In behandeling",
+        "approved": "Goedgekeurd",
+        "rejected": "Afgewezen"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Voldaan",
+        "fail": "Niet voldaan",
+        "not_applicable": "Niet van toepassing"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Tekening",
+        "contract": "Contract",
+        "specification": "Specificatie",
+        "photo": "Foto",
+        "correspondence": "Correspondentie",
+        "reality_capture": "Reality capture",
+        "other": "Overig"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "In behandeling",
+        "approved": "Goedgekeurd",
+        "rejected": "Afgewezen",
+        "cancelled": "Geannuleerd"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Concept",
+        "submitted": "Ingediend voor goedkeuring",
+        "approved": "Goedgekeurd",
+        "posted": "Geboekt in grootboek"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Open",
+        "assigned": "Toegewezen",
+        "in_progress": "Bezig",
+        "resolved": "Opgelost",
+        "verified": "Gecontroleerd",
+        "closed": "Gesloten"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "observatie",
+        "minor": "klein",
+        "major": "groot",
+        "critical": "kritiek"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Persoon",
+        "crew": "Ploeg",
+        "equipment": "Materieel",
+        "subcontractor": "Onderaannemer"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "De naam van het AI-model is verouderd of niet beschikbaar. Open Instellingen > AI en stel een actueel geldige modelnaam in voor uw provider.",
+      "not_configured": "AI is niet ingesteld. Stel een AI-provider in via Instellingen."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "gecontroleerd",
+      "bound": "bijgevoegd",
+      "empty": "ontbreekt"
+    },
+    "package_status_labels": {
+      "draft": "concept",
+      "in_progress": "bezig",
+      "ready": "gereed",
+      "issued": "uitgegeven"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "blokkerend",
+      "critical": "kritiek",
+      "warning": "waarschuwing",
+      "suggestion": "suggestie"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategie",
+      "brief": "Programma van eisen",
+      "concept": "Concept",
+      "design": "Schetsontwerp",
+      "approval": "Vergunning",
+      "detail": "Definitief ontwerp",
+      "tender": "Aanbesteding",
+      "award": "Gunning",
+      "construction": "Uitvoering",
+      "handover": "Oplevering",
+      "operation": "Gebruik"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "piece_fits_stock": {
+        "fail": "Stuk {ref} ({size} mm) past in geen enkele voorraadmaat",
+        "suggestion": "Voeg een langere of grotere voorraadmaat toe, verklein de afkorting, of splits het stuk met een las of stootvoeg."
+      },
+      "has_stock": {
+        "suggestion": "Voeg minstens één voorraadlengte of plaatmaat toe, of gebruik reststukken uit de bouwplaatsvoorraad opnieuw.",
+        "fail": "De opdracht biedt geen voorraad om uit te zagen"
+      },
+      "yield_threshold": {
+        "suggestion": "Voeg nog een voorraadlengte of -maat toe, sta draaien toe, of herzie de drempel voor dit materiaal.",
+        "fail": "Rendement {actual} % ligt onder de drempel van {threshold} %"
+      },
+      "ok": "OK",
+      "kerf_set": {
+        "fail": "De zaagbreedte is nul",
+        "suggestion": "Voer de bladdikte of snijbreedte in, anders is het rendement van elke staaf met meerdere zaagsneden te hoog."
+      },
+      "grain_allows_fit": {
+        "fail": "Stuk {ref} past alleen als het dwars op de vezelrichting wordt gedraaid",
+        "suggestion": "Sta draaien toe voor dit stuk of voeg een plaatmaat toe waarin het in de vezelrichting past."
+      },
+      "has_pieces": {
+        "fail": "De opdracht heeft geen stukken om te zagen",
+        "suggestion": "Voeg stukken handmatig toe, plak ze, of importeer ze uit een buigstaat, meetstaat, begrotingsregel of bestand."
+      },
+      "min_offcut_set": {
+        "fail": "Er is geen minimaal bruikbaar reststuk ingesteld",
+        "suggestion": "Stel het kortste reststuk in dat het bewaren waard is, zodat herbruikbare reststukken niet als afval meetellen."
+      },
+      "sheet_dimensions": {
+        "suggestion": "Geef elk plaatstuk en elke plaatmaat zowel een lengte als een breedte.",
+        "fail": "{ref} heeft geen breedte"
+      },
+      "stock_priced": {
+        "fail": "Voorraad {ref} heeft geen eenheidsprijs",
+        "suggestion": "Voer een prijs per stuk in, zodat het plan de kosten toont en de goedkoopste voorraad kiest."
+      },
+      "stock_sufficient": {
+        "suggestion": "Verhoog de beschikbare hoeveelheid of voeg nog een voorraadmaat toe.",
+        "fail": "Stukken die niet op de beschikbare voorraad zijn geplaatst: {count}"
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Restpunt '{title}' is zonder foto afgehandeld",
+    "punch_no_photo_fix": "Voeg een foto van het voltooide werk toe",
+    "photo_weak": "{count} foto('s) bij '{title}' missen locatie of opnametijd",
+    "photo_weak_fix": "Maak de foto opnieuw in de app met locatie ingeschakeld",
+    "defect_no_photo": "Gebrek '{reference}' is gesloten zonder foto van het herstel",
+    "defect_no_photo_fix": "Voeg een foto van het herstelde werk toe"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} extra item(s) niet weergegeven",
+    "category_missing": "Geen bewijs voor de vereiste categorie '{category}'",
+    "category_missing_fix": "Koppel een document aan een checklistpunt van deze categorie of voeg er een toe",
+    "category_unverified": "Bewijs voor '{category}' is nog niet geverifieerd",
+    "category_unverified_fix": "Laat een manager het gekoppelde bewijs beoordelen en verifiëren",
+    "punch_open": "Restpunt '{name}' staat nog open",
+    "punch_open_fix": "Los het item op en sluit het, of sluit het uit van de scope van dit dossier",
+    "punch_no_photo": "Afgehandeld restpunt '{name}' heeft geen foto",
+    "punch_no_photo_fix": "Voeg een foto van het voltooide werk toe",
+    "system_pending": "Systeem '{name}' is niet in bedrijf gesteld",
+    "system_pending_fix": "Rond de inbedrijfstellingschecklists af en markeer het systeem als in bedrijf gesteld",
+    "critical_issues": "{count} kritieke inbedrijfstellingsproblemen staan nog open",
+    "critical_issues_fix": "Sluit de kritieke problemen vóór de oplevering",
+    "acceptance_missing": "Er is geen opleveringscertificaat gekoppeld",
+    "acceptance_missing_fix": "Koppel het ondertekende opleveringscertificaat aan het opleveringspunt van de checklist",
+    "acceptance_unsigned": "Het opleveringscertificaat is niet volledig ondertekend (status: {status})",
+    "acceptance_unsigned_fix": "Verzamel de openstaande handtekeningen bij Ondertekenen",
+    "blocked": "Het dossier voldoet niet aan zijn checklist. Los de bevindingen op of stel het toch samen als onvolledig (akkoord van de manager).",
+    "delivery_title": "Opleveringsdossier: {project}",
+    "delivery_body": "Het opleveringsdossier '{title}' ({scope}) is klaar. Via de onderstaande link kunt u het downloaden; de link is geldig tot {expires}.",
+    "pdf": {
+      "title": "Opleveringsdossier",
+      "scope": "Scope",
+      "built": "Samengesteld",
+      "status_passed": "Checklist doorstaan",
+      "status_warnings": "Checklist doorstaan met waarschuwingen",
+      "status_errors": "Onvolledig: bevindingen van de checklist open",
+      "findings": "Openstaande bevindingen van de checklist",
+      "severity": "Ernst",
+      "finding": "Bevinding",
+      "severity_error": "Fout",
+      "severity_warning": "Waarschuwing",
+      "severity_info": "Info",
+      "contents": "Inhoud",
+      "file": "Bestand",
+      "size": "Grootte",
+      "punch": "Afgehandelde restpuntenlijst",
+      "item": "Item",
+      "status": "Status",
+      "photos": "Foto's",
+      "evidence": "Fotobewijs"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Beoordeling {rating} van '{name}' is geen niveau van schaal '{scale}'",
+    "rule_poor_without_action": "'{name}' is beoordeeld met {rating} maar heeft geen geplande onderhoudsactie",
+    "rule_poor_without_action_fix": "Leid het plan af of voeg een actie voor dit element toe",
+    "rule_action_unpriced": "De actie voor '{name}' in {year} heeft geen eenheidsprijs",
+    "rule_action_unpriced_fix": "Voer een eenheidsprijs in zodat de plantotalen die meenemen",
+    "rule_defect_incomplete": "De beoordeling van '{name}' vraagt om werk maar legt geen ernst of omvang vast"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, pagina {page}",
+    "text_change": "\"{old}\" gewijzigd in \"{new}\"",
+    "kind": {
+      "added": "Toegevoegd",
+      "removed": "Verwijderd",
+      "modified": "Gewijzigd",
+      "text": "Tekst gewijzigd"
+    },
+    "status": {
+      "open": "Open",
+      "relevant": "Relevant",
+      "not_relevant": "Niet relevant"
+    },
+    "errors": {
+      "revision_not_found": "Tekeningrevisie niet gevonden in dit project.",
+      "revision_not_parsed": "De tekening heeft nog geen verwerkte versie om te vergelijken.",
+      "comparison_not_found": "Vergelijking niet gevonden.",
+      "change_not_found": "Wijziging niet gevonden.",
+      "same_revision": "Kies twee verschillende revisies of pagina's om te vergelijken.",
+      "manual_points": "Handmatig uitlijnen vereist twee verschillende punten op elke revisie.",
+      "alignment_singular": "De uitlijning kan niet worden toegepast: het blad klapt ineen.",
+      "region_empty": "Wijziging {seq} heeft geen afmeting.",
+      "region_off_sheet": "Wijziging {seq} ligt buiten het blad.",
+      "module_missing": "De module die voor deze actie nodig is, is niet geïnstalleerd."
+    },
+    "rfi": {
+      "subject": "Tekeningwijziging {seq} op {sheet}",
+      "question": "Revisie {new} van {sheet} wijkt in het gemarkeerde gebied ({kind}) af van revisie {old}. Bevestig de bedoeling van de wijziging en of hoeveelheden worden geraakt."
+    },
+    "markup": {
+      "text": "Revisiewijziging {seq}: {kind}"
+    },
+    "report": {
+      "title": "Vergelijking van tekeningrevisies",
+      "project": "Project",
+      "name": "Vergelijking",
+      "old_revision": "Oudere revisie",
+      "new_revision": "Nieuwere revisie",
+      "alignment": "Uitlijning",
+      "alignment_none": "Niet uitgelijnd (zelfde kader)",
+      "alignment_auto": "Automatisch",
+      "alignment_manual": "Handmatig, twee punten",
+      "confidence": "betrouwbaarheid {value}",
+      "summary": "Wijzigingen",
+      "summary_counts": "{total} in totaal: {added} toegevoegd, {removed} verwijderd, {modified} gewijzigd, {text} tekst",
+      "generated_on": "Aanmaakdatum",
+      "generated": "Gegenereerd op {timestamp}",
+      "page_of": "Pagina {page} van {total}",
+      "no_changes": "Tussen de twee revisies zijn geen wijzigingen gevonden.",
+      "col_no": "Nr.",
+      "col_preview": "Voorbeeld",
+      "col_kind": "Wijziging",
+      "col_location": "Locatie",
+      "col_detail": "Detail",
+      "col_status": "Status",
+      "col_comment": "Opmerking",
+      "col_follow_up": "Opvolging",
+      "page_at": "Pagina {page} op {coords}",
+      "layer": "Laag {layer}",
+      "entity_counts": "Objecten: {added} toegevoegd, {removed} verwijderd, {modified} gewijzigd",
+      "rfi": "RFI {number}",
+      "markup": "Revisiewolk",
+      "remeasure": "Opnieuw opmeten: {items} hoeveelheden, {positions} posten in de begroting"
+    },
+    "rules": {
+      "distinct_revisions_ok": "De twee zijden zijn verschillende revisies.",
+      "distinct_revisions_fail": "De vergelijking vergelijkt een blad met zichzelf.",
+      "distinct_revisions_hint": "Kies de oudere en de nieuwere revisie van de tekening.",
+      "alignment_not_needed": "DWG-revisies delen tekeneenheden; uitlijnen is niet nodig.",
+      "alignment_missing_matrix": "De vergelijking heeft geen uitlijning.",
+      "alignment_singular": "De uitlijning laat het blad ineenklappen en kan niet worden toegepast.",
+      "alignment_scale": "De uitlijning schaalt het blad met {scale}, meer dan revisies van één tekening verschillen.",
+      "alignment_low_confidence": "De automatische uitlijning is onzeker (betrouwbaarheid {confidence}).",
+      "alignment_manual_points": "Handmatig uitlijnen vereist twee puntparen.",
+      "alignment_ok": "De bladuitlijning is aannemelijk.",
+      "alignment_hint": "Lijn de bladen met de hand uit op twee merktekens die beide revisies delen, zoals rasterkruisingen.",
+      "region_empty": "Wijziging {seq} heeft geen afmeting.",
+      "region_off_sheet": "Wijziging {seq} ligt buiten het blad.",
+      "regions_ok": "Elk gewijzigd gebied ligt op het blad.",
+      "triaged_ok": "Elke wijziging is beoordeeld.",
+      "triaged_open": "{count} wijzigingen staan nog open.",
+      "triaged_hint": "Markeer elke wijziging als relevant of niet relevant.",
+      "followed_up_ok": "Elke relevante wijziging is opgevolgd.",
+      "followed_up_missing": "Wijziging {seq} is als relevant gemarkeerd maar heeft geen opmerking, RFI, wolk of markering voor opnieuw opmeten.",
+      "followed_up_hint": "Geef commentaar op de wijziging, maak een RFI of wolk, of markeer de hoeveelheden erin voor opnieuw opmeten."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Cashflowprognose",
+      "portfolio_title": "Cashflowprognose portefeuille",
+      "empty": "Geen cashflowprognose voor deze selectie.",
+      "project": "Project",
+      "as_of": "Per",
+      "currency": "Valuta",
+      "delay_days": "Ontvangsten vertraagd met (dagen)",
+      "overrun_pct": "Kostenoverschrijding (%)",
+      "closing_position": "Eindsaldo",
+      "peak_funding": "Maximale financieringsbehoefte",
+      "peak_period": "Maand met hoogste financieringsbehoefte",
+      "col": {
+        "period": "Maand",
+        "planned_in": "Geplande ontvangsten",
+        "actual_in": "Werkelijke ontvangsten",
+        "expected_in": "Verwachte ontvangsten",
+        "planned_out": "Geplande uitgaven",
+        "actual_out": "Werkelijke uitgaven",
+        "expected_out": "Verwachte uitgaven",
+        "net": "Netto",
+        "cumulative": "Cumulatieve positie"
+      }
+    }
+  }
+}

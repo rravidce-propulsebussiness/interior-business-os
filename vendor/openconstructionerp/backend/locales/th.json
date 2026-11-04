@@ -1,0 +1,2533 @@
+{
+  "costs.catalog_name_unavailable": "ไม่สามารถใช้ชื่อนี้สำหรับแคตตาล็อกใหม่ได้ กรุณาเลือกชื่ออื่น",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "การประมาณราคาก่อสร้างแบบโอเพนซอร์ส"
+  },
+  "nav": {
+    "dashboard": "แดชบอร์ด",
+    "assemblies": "ชุดประกอบ",
+    "ai_estimate": "ประมาณราคาด้วย AI",
+    "settings": "การตั้งค่า",
+    "5d_cost_model": "แบบจำลองต้นทุน 5D",
+    "templates": "เทมเพลต",
+    "reports": "รายงาน",
+    "sustainability": "ความยั่งยืน",
+    "group_estimation": "การประมาณราคา",
+    "group_planning": "การวางแผน",
+    "group_procurement": "การจัดซื้อ",
+    "group_tools": "เครื่องมือ",
+    "architecture": "แผนผังสถาปัตยกรรม"
+  },
+  "common": {
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "delete": "ลบ",
+    "edit": "แก้ไข",
+    "create": "สร้าง",
+    "search": "ค้นหา",
+    "filter": "กรอง",
+    "export": "ส่งออก",
+    "import": "นำเข้า",
+    "loading": "กำลังโหลด...",
+    "error": "ข้อผิดพลาด",
+    "success": "สำเร็จ",
+    "confirm": "ยืนยัน",
+    "back": "ย้อนกลับ",
+    "next": "ถัดไป",
+    "yes": "ใช่",
+    "no": "ไม่"
+  },
+  "auth": {
+    "login": "เข้าสู่ระบบ",
+    "logout": "ออกจากระบบ",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน"
+  },
+  "projects": {
+    "title": "โครงการ",
+    "new_project": "โครงการใหม่",
+    "project_name": "ชื่อโครงการ",
+    "no_projects": "ยังไม่มีโครงการ"
+  },
+  "boq": {
+    "title": "บัญชีปริมาณงาน",
+    "position": "รายการ",
+    "ordinal": "ลำดับ",
+    "description": "รายละเอียด",
+    "quantity": "ปริมาณ",
+    "unit": "หน่วย",
+    "unit_rate": "ราคาต่อหน่วย",
+    "total": "รวม",
+    "add_position": "เพิ่มรายการ",
+    "add_section": "เพิ่มส่วน",
+    "assembly": "ชุดประกอบ",
+    "subtotal": "ผลรวมย่อย",
+    "grand_total": "ยอดรวมทั้งหมด",
+    "direct_cost": "ต้นทุนตรง",
+    "net_total": "ยอดสุทธิ",
+    "gross_total": "ยอดรวมทั้งสิ้น",
+    "vat": "ภาษีมูลค่าเพิ่ม",
+    "add_markups": "เพิ่มมาร์กอัป",
+    "validate": "ตรวจสอบ",
+    "export": "ส่งออก",
+    "mvp": {
+      "title": "เลือกวัสดุ",
+      "subtitle_one": "มีทรัพยากร {{count}} รายการที่ต้องเลือก",
+      "subtitle_other": "มีทรัพยากร {{count}} รายการที่ต้องเลือก",
+      "bulk_label": "กรอกด่วน:",
+      "bulk_median": "ค่ามัธยฐานสำหรับทั้งหมด",
+      "bulk_mean": "ค่าเฉลี่ยสำหรับทั้งหมด",
+      "bulk_cheapest": "ถูกที่สุดสำหรับทั้งหมด",
+      "bulk_priciest": "แพงที่สุดสำหรับทั้งหมด",
+      "slot_variant_count": "{{n}} ตัวเลือก",
+      "selected_label": "เลือกแล้ว:",
+      "default_mean": "ราคาเฉลี่ย",
+      "default_median": "ราคามัธยฐาน",
+      "row_median": "ราคามัธยฐาน · {{price}}",
+      "row_mean": "ราคาเฉลี่ย · {{price}}",
+      "subtotal_label": "ราคารายการ",
+      "apply": "ใช้และเพิ่มลงในบัญชีปริมาณงาน",
+      "batch_progress": "รายการที่ {{current}} จาก {{total}}",
+      "toast_applied_one": "เลือกแล้ว {{count}} ตัวเลือก",
+      "toast_applied_other": "เลือกแล้ว {{count}} ตัวเลือก"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "รายงานการแลกเปลี่ยนข้อมูล"
+      },
+      "column": {
+        "severity": "ระดับความรุนแรง",
+        "kind": "ประเภทของการสูญเสีย",
+        "position": "รายการงาน",
+        "field": "ฟิลด์",
+        "original": "ค่าต้นฉบับ",
+        "written": "ค่าที่เขียนลงไป",
+        "count": "จำนวน",
+        "detail": "รายละเอียด"
+      },
+      "severity": {
+        "error": "วิกฤต",
+        "warning": "คำเตือน",
+        "info": "หมายเหตุ"
+      },
+      "kind": {
+        "unsupported_element": "ไม่รองรับองค์ประกอบนี้",
+        "truncated_text": "ข้อความถูกตัด",
+        "altered_text": "ข้อความถูกเปลี่ยน",
+        "rounded_value": "ค่าถูกปัดเศษ",
+        "value_out_of_range": "ค่าอยู่นอกช่วง",
+        "dropped_attribute": "แอตทริบิวต์ถูกทิ้ง",
+        "unmapped_unit": "หน่วยไม่ได้แมป",
+        "lost_hierarchy": "ระดับลำดับชั้นสูญหาย",
+        "markup_not_representable": "แสดงส่วนบวกเพิ่มไม่ได้",
+        "attachment_skipped": "ข้ามไฟล์แนบ",
+        "changed_identifier": "รหัสระบุถูกเปลี่ยน",
+        "exceeds_limit": "เกินขีดจำกัดการจัดเก็บ",
+        "rejected_row": "ปฏิเสธแถว",
+        "skipped_row": "ข้ามแถว",
+        "parser_warning": "คำเตือนจากตัวอ่าน",
+        "roundtrip_mismatch": "ไม่ตรงกันเมื่อส่งออกแล้วนำเข้ากลับ"
+      }
+    },
+    "branch": {
+      "base_snapshot": "จุดแยก",
+      "base_snapshot_from": "จุดแยก (จากสแนปช็อต \"{snapshot}\")",
+      "before_cherry_pick": "ก่อนนำการเปลี่ยนแปลงจาก \"{source}\" มาใช้",
+      "before_merge": "ก่อนรวมแบรนช์ \"{branch}\"",
+      "errors": {
+        "branch_closed": "แบรนช์นี้ถูกรวมหรือเก็บถาวรแล้ว จึงรับการเปลี่ยนแปลงเพิ่มไม่ได้",
+        "not_a_branch": "ใบแสดงปริมาณงานนี้ไม่ใช่แบรนช์",
+        "same_bill": "เลือกประมาณการสองชุดที่ต่างกัน",
+        "different_project": "ประมาณการทั้งสองต้องอยู่ในโครงการเดียวกัน",
+        "different_tree": "ประมาณการทั้งสองต้องเป็นแบรนช์ของประมาณการหลักเดียวกัน",
+        "unresolved_conflicts": "มี {count} รายการที่ถูกแก้ไขในประมาณการทั้งสองชุด โปรดเลือกฉบับที่จะเก็บของแต่ละรายการก่อนนำไปใช้",
+        "merge_forbidden": "คุณไม่มีสิทธิ์รวมเข้าประมาณการหลัก",
+        "confirm_required": "โปรดยืนยันการรวม: การรวมจะเขียนทับประมาณการหลัก",
+        "design_options_unavailable": "ไม่ได้ติดตั้งโมดูลตัวเลือกการออกแบบ",
+        "base_snapshot_in_use": "สแนปช็อตนี้เป็นจุดแยกของแบรนช์ที่ยังเปิดอยู่ จึงลบไม่ได้"
+      },
+      "export": {
+        "title_positions": "เปรียบเทียบประมาณการตามรายการ",
+        "title_sections": "เปรียบเทียบประมาณการตามหมวด",
+        "title_cost_groups": "เปรียบเทียบประมาณการตามกลุ่มต้นทุน",
+        "project": "โครงการ",
+        "bill_a": "ประมาณการ A",
+        "bill_b": "ประมาณการ B",
+        "total_a": "รวม A",
+        "total_b": "รวม B",
+        "delta": "ผลต่าง",
+        "counts": "การเปลี่ยนแปลง",
+        "counts_value": "เพิ่ม {added} ลบ {removed} เปลี่ยน {changed}",
+        "col_ordinal": "ลำดับ",
+        "col_description": "รายละเอียด",
+        "col_unit": "หน่วย",
+        "col_change": "การเปลี่ยนแปลง",
+        "col_qty_a": "ปริมาณ A",
+        "col_qty_b": "ปริมาณ B",
+        "col_rate_a": "ราคา A",
+        "col_rate_b": "ราคา B",
+        "col_total_a": "รวม A",
+        "col_total_b": "รวม B",
+        "col_delta": "ผลต่าง",
+        "col_section": "หมวด",
+        "col_cost_group": "กลุ่มต้นทุน",
+        "change_added": "เพิ่มแล้ว",
+        "change_removed": "ลบแล้ว",
+        "change_changed": "เปลี่ยนแปลง",
+        "change_unchanged": "ไม่เปลี่ยนแปลง",
+        "ungrouped": "ไม่ได้จัดกลุ่ม",
+        "empty": "ประมาณการทั้งสองเหมือนกัน",
+        "total": "รวมทั้งสิ้น"
+      }
+    }
+  },
+  "costs": {
+    "title": "ฐานข้อมูลต้นทุน",
+    "rate": "ราคา",
+    "material": "วัสดุ",
+    "labor": "ค่าแรง",
+    "equipment": "อุปกรณ์",
+    "search_costs": "ค้นหารายการต้นทุน..."
+  },
+  "assemblies": {
+    "title": "ชุดประกอบ",
+    "description": "สูตรต้นทุนที่ใช้ซ้ำได้ — รวมวัสดุค่าแรงและอุปกรณ์เป็นเทมเพลตพร้อมใช้งาน",
+    "new_assembly": "ชุดประกอบใหม่",
+    "from_database": "จากฐานข้อมูล",
+    "apply_to_boq": "ใช้กับ BOQ",
+    "add_component": "เพิ่มองค์ประกอบ",
+    "no_assemblies": "ยังไม่มีชุดประกอบ",
+    "no_assemblies_hint": "สร้างชุดประกอบแรกของคุณจากฐานข้อมูลต้นทุนหรือแคตตาล็อกทรัพยากร",
+    "total_rate": "ราคารวม"
+  },
+  "catalog": {
+    "title": "แคตตาล็อกทรัพยากร",
+    "description": "เรียกดูและจัดการวัสดุอุปกรณ์ค่าแรงและผู้ปฏิบัติงาน",
+    "add_resource": "เพิ่มทรัพยากร",
+    "import_region": "นำเข้าภูมิภาค",
+    "build_assembly": "สร้างชุดประกอบ",
+    "my_catalog": "แคตตาล็อกของฉัน"
+  },
+  "validation": {
+    "title": "การตรวจสอบ",
+    "passed": "ผ่าน",
+    "warnings": "คำเตือน",
+    "errors": "ข้อผิดพลาด",
+    "score": "คะแนนคุณภาพ",
+    "run_validation": "เรียกใช้การตรวจสอบ",
+    "missing_quantity": "รายการ {position} ไม่มีปริมาณ",
+    "missing_rate": "รายการ {position} ไม่มีราคาต่อหน่วย",
+    "missing_description": "รายการ {position} ไม่มีรายละเอียด",
+    "missing_classification": "รายการ {position} ต้องการรหัสการจำแนกประเภท",
+    "duplicate_ordinal": "หมายเลขลำดับซ้ำ: {ordinal}",
+    "rate_anomaly": "ราคาต่อหน่วย {rate} เกินเกณฑ์ ({threshold})",
+    "nl": {
+      "not_a_string": "ข้อมูลที่ป้อนต้องเป็นข้อความ",
+      "empty": "ไม่มีข้อมูลที่ป้อน",
+      "too_long": "ข้อมูลที่ป้อนยาวเกิน {max} อักขระ",
+      "ai_unparsable": "ไม่สามารถแปลผลตอบกลับของ AI เป็นเอกสาร DSL ได้",
+      "no_pattern": "ไม่มีรูปแบบใดตรงกับประโยคที่ป้อน",
+      "try": "ลองใช้: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "กำหนดการ 4D",
+    "generated": {
+      "position_label": "รายการที่ {ordinal}",
+      "section_label": "หมวดที่ {ordinal}",
+      "task_description": "สร้างขึ้นโดยอัตโนมัติจากรายการ {ordinal} ของ BOQ ({quantity} {unit})",
+      "section_description": "สรุป: หมวด {ordinal} ของ BOQ",
+      "start_milestone": "เริ่มต้นโครงการ",
+      "start_milestone_description": "หลักไมล์การเริ่มต้นโครงการ",
+      "completion_milestone": "เสร็จสิ้นโครงการ",
+      "completion_milestone_description": "หลักไมล์การเสร็จสิ้นโครงการ",
+      "labour_resource": "แรงงาน",
+      "machine_resource": "เครื่องจักร"
+    },
+    "progress_sheet": {
+      "sheet_title": "ความคืบหน้า",
+      "title": "ชีตอัปเดตความคืบหน้า",
+      "detail_schedule": "ตารางงาน: {name}",
+      "detail_exported": "ส่งออกเมื่อ: {date}",
+      "instructions": "กรอกเฉพาะคอลัมน์สีขาว ห้ามเปลี่ยนคอลัมน์สีเทา ลำดับแถว หรือคอลัมน์ที่ซ่อนอยู่",
+      "col": {
+        "activity_ref": "ID กิจกรรม",
+        "name": "กิจกรรม",
+        "wbs_code": "WBS",
+        "responsible": "ผู้รับผิดชอบ",
+        "planned_start": "วันเริ่มตามแผน",
+        "planned_finish": "วันสิ้นสุดตามแผน",
+        "percent_complete": "% เสร็จ",
+        "actual_start": "วันเริ่มจริง",
+        "actual_finish": "วันสิ้นสุดจริง",
+        "remaining_duration": "คงเหลือ (วันทำงาน)",
+        "notes": "หมายเหตุ",
+        "row_key": "คีย์แถว",
+        "stamp": "ตราประทับ"
+      }
+    }
+  },
+  "cad": {
+    "title": "นำเข้า CAD",
+    "upload": "อัปโหลดไฟล์ CAD",
+    "supported_formats": "รองรับ: DWG, DGN, RVT, IFC, PDF",
+    "converting": "กำลังแปลง...",
+    "elements_found": "พบ {count} องค์ประกอบ"
+  },
+  "takeoff": {
+    "title": "การคำนวณปริมาณ",
+    "auto_detect": "ตรวจจับอัตโนมัติ",
+    "manual_measure": "วัดด้วยตนเอง",
+    "confidence": "ความเชื่อมั่น"
+  },
+  "tendering": {
+    "title": "การประกวดราคา",
+    "create_tender": "สร้างการประกวดราคา",
+    "bid": "เสนอราคา",
+    "award": "มอบรางวัล"
+  },
+  "modules": {
+    "title": "โมดูล",
+    "installed": "ติดตั้งแล้ว",
+    "available": "พร้อมใช้งาน",
+    "install": "ติดตั้ง",
+    "uninstall": "ถอนการติดตั้ง",
+    "update": "อัปเดต"
+  },
+  "dashboard": {
+    "welcome": "ยินดีต้อนรับสู่ OpenConstructionERP",
+    "subtitle": "พื้นที่ทำงานประมาณราคาก่อสร้างของคุณ",
+    "recent_projects": "โครงการล่าสุด",
+    "system_status": "สถานะระบบ",
+    "modules_loaded": "โมดูลที่โหลดแล้ว",
+    "validation_rules": "กฎการตรวจสอบ",
+    "languages": "ภาษา",
+    "continue_estimate": "ทำประมาณราคาต่อจากครั้งล่าสุด",
+    "getting_started": "เริ่มต้นใช้งาน",
+    "total_value": "มูลค่ารวม",
+    "active_estimates": "ประมาณราคาที่ใช้งานอยู่",
+    "schedule_status": "สถานะกำหนดการ",
+    "quality_score": "คะแนนคุณภาพ",
+    "analytics": "การวิเคราะห์",
+    "project_overview": "ภาพรวมโครงการ",
+    "step_load_db": "โหลดฐานข้อมูลต้นทุน",
+    "step_load_db_desc": "นำเข้าข้อมูลราคาภูมิภาคพร้อมรายการกว่า 55,000 รายการ",
+    "step_ai_search": "เปิดใช้งานการค้นหา AI",
+    "step_ai_search_desc": "สร้างเวกเตอร์เอ็มเบ็ดดิงสำหรับการจับคู่ต้นทุนเชิงความหมาย",
+    "step_connect_ai": "เชื่อมต่อ AI",
+    "step_connect_ai_desc": "เพิ่มคีย์ API ของคุณสำหรับประมาณราคาด้วย AI",
+    "step_create_project": "สร้างโครงการ",
+    "step_create_project_desc": "เริ่มต้นโครงการประมาณราคาก่อสร้างแรกของคุณ",
+    "step_build_boq": "สร้าง BOQ ของคุณ",
+    "step_build_boq_desc": "สร้างบัญชีปริมาณงานด้วยความช่วยเหลือจาก AI"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "ชิ้น",
+    "lsum": "เหมา",
+    "h": "ชม.",
+    "set": "ชุด"
+  },
+  "contacts": {
+    "title": "สมุดรายชื่อผู้ติดต่อ",
+    "new_contact": "ผู้ติดต่อใหม่",
+    "contact_type": "ประเภทผู้ติดต่อ",
+    "client": "ลูกค้า",
+    "subcontractor": "ผู้รับเหมาช่วง",
+    "supplier": "ผู้จัดหา",
+    "consultant": "ที่ปรึกษา",
+    "internal": "ภายใน",
+    "company_name": "ชื่อบริษัท",
+    "search_contacts": "ค้นหาผู้ติดต่อ...",
+    "no_contacts": "ยังไม่มีผู้ติดต่อ",
+    "prequalification": "การคัดเลือกเบื้องต้น",
+    "approved": "อนุมัติแล้ว",
+    "pending": "รอดำเนินการ",
+    "expired": "หมดอายุ"
+  },
+  "tasks": {
+    "title": "งาน",
+    "new_task": "งานใหม่",
+    "task": "งาน",
+    "topic": "หัวข้อ",
+    "information": "ข้อมูล",
+    "decision": "การตัดสินใจ",
+    "personal": "งานส่วนตัว",
+    "my_tasks": "งานของฉัน",
+    "open": "เปิด",
+    "in_progress": "กำลังดำเนินการ",
+    "completed": "เสร็จสิ้น",
+    "draft": "ร่าง",
+    "due_date": "วันครบกำหนด",
+    "assignee": "ผู้รับมอบหมาย",
+    "priority": "ความสำคัญ",
+    "checklist": "รายการตรวจสอบ",
+    "focus_area": "พื้นที่โฟกัส"
+  },
+  "rfi": {
+    "title": "คำขอข้อมูล",
+    "new_rfi": "RFI ใหม่",
+    "subject": "เรื่อง",
+    "question": "คำถาม",
+    "response": "คำตอบ",
+    "ball_in_court": "อยู่ที่ฝั่ง",
+    "days_open": "จำนวนวันที่เปิด",
+    "cost_impact": "ผลกระทบด้านต้นทุน",
+    "schedule_impact": "ผลกระทบด้านกำหนดการ",
+    "respond": "ตอบ",
+    "close": "ปิด",
+    "overdue": "เลยกำหนด"
+  },
+  "finance": {
+    "title": "การเงิน",
+    "budgets": "งบประมาณ",
+    "invoices": "ใบแจ้งหนี้",
+    "payable": "เจ้าหนี้",
+    "receivable": "ลูกหนี้",
+    "payments": "การชำระเงิน",
+    "evm": "มูลค่าได้รับ",
+    "invoice_number": "เลขที่ใบแจ้งหนี้",
+    "amount": "จำนวนเงิน",
+    "status": "สถานะ",
+    "approve": "อนุมัติ",
+    "pay": "ทำเครื่องหมายว่าชำระแล้ว",
+    "original_budget": "งบประมาณเริ่มต้น",
+    "revised_budget": "งบประมาณที่ปรับปรุง",
+    "committed": "ผูกพันแล้ว",
+    "actual": "จริง",
+    "forecast": "คาดการณ์",
+    "variance": "ส่วนต่าง"
+  },
+  "procurement": {
+    "title": "การจัดซื้อ",
+    "purchase_orders": "ใบสั่งซื้อ",
+    "goods_receipts": "ใบรับสินค้า",
+    "new_po": "PO ใหม่",
+    "po_number": "เลขที่ PO",
+    "vendor": "ผู้ขาย",
+    "issue": "ออก",
+    "confirm": "ยืนยันการรับ"
+  },
+  "safety": {
+    "title": "ความปลอดภัย",
+    "incidents": "เหตุการณ์",
+    "observations": "การสังเกต",
+    "new_incident": "เหตุการณ์ใหม่",
+    "new_observation": "การสังเกตใหม่",
+    "severity": "ความรุนแรง",
+    "risk_score": "คะแนนความเสี่ยง",
+    "days_lost": "จำนวนวันที่สูญเสีย",
+    "treatment": "การรักษา",
+    "corrective_action": "การแก้ไข"
+  },
+  "meetings": {
+    "title": "การประชุม",
+    "new_meeting": "การประชุมใหม่",
+    "meeting_type": "ประเภท",
+    "attendees": "ผู้เข้าร่วม",
+    "agenda": "วาระ",
+    "action_items": "รายการดำเนินการ",
+    "minutes": "บันทึกการประชุม",
+    "complete": "เสร็จสิ้นการประชุม",
+    "present": "เข้าร่วม",
+    "absent": "ขาด",
+    "excused": "ลา",
+    "actions": {
+      "status": {
+        "open": "เปิดอยู่",
+        "completed": "เสร็จสิ้น",
+        "cancelled": "ยกเลิก"
+      },
+      "flag": {
+        "overdue": "เกินกำหนด",
+        "on_track": "เป็นไปตามแผน"
+      },
+      "label": {
+        "action_item": "รายการที่ต้องดำเนินการ",
+        "completion_rate": "อัตราการดำเนินการเสร็จ",
+        "open_vs_done": "ที่เปิดอยู่ เทียบกับเสร็จแล้ว",
+        "overdue": "รายการที่เกินกำหนด"
+      },
+      "explain": {
+        "action_item": "รายการที่ต้องดำเนินการคืองานที่ตกลงกันในการประชุม มีผู้รับผิดชอบและวันที่กำหนดส่ง",
+        "completion_rate": "อัตราการดำเนินการเสร็จคือจำนวนรายการที่เสร็จแล้วหารด้วยจำนวนรายการทั้งหมด มีค่าตั้งแต่ 0 ถึง 1",
+        "open_vs_done": "รายการที่เปิดอยู่ยังต้องดำเนินการต่อ รายการที่เสร็จแล้วไม่ต้องดำเนินการเพิ่มเติม",
+        "overdue": "รายการจะถือว่าเกินกำหนดเมื่อยังเปิดอยู่และวันที่กำหนดส่งอยู่ก่อนวันที่อ้างอิง"
+      }
+    },
+    "minutes_pdf": {
+      "title": "รายงานการประชุม",
+      "issued": "ออกเอกสารแล้ว",
+      "draft": "ฉบับร่าง",
+      "date": "วันที่:",
+      "location": "สถานที่:",
+      "type": "ประเภท:",
+      "number": "การประชุมครั้งที่:",
+      "chairperson": "ประธานการประชุม:",
+      "next_meeting": "การประชุมครั้งถัดไป:",
+      "not_available": "ไม่มีข้อมูล",
+      "not_scheduled": "ยังไม่กำหนด",
+      "attendance": "การเข้าร่วม",
+      "present": "ผู้เข้าร่วม:",
+      "absent": "ผู้ไม่เข้าร่วม / ลา:",
+      "agenda": "วาระ การอภิปราย และมติ",
+      "required": "(จำเป็น)",
+      "discussion": "การอภิปราย:",
+      "decision": "มติ:",
+      "decisions": "มติที่ประชุม",
+      "open_questions": "ประเด็นค้างพิจารณา",
+      "actions": "รายการดำเนินการ",
+      "col_number": "#",
+      "col_action": "การดำเนินการ",
+      "col_owner": "ผู้รับผิดชอบ",
+      "col_due": "กำหนดเสร็จ",
+      "col_status": "สถานะ",
+      "brought_forward": "[ยกมาจากครั้งก่อน]",
+      "overdue": "(เกินกำหนด)",
+      "status_open": "เปิด",
+      "status_in_progress": "กำลังดำเนินการ",
+      "status_done": "เสร็จสิ้น",
+      "status_cancelled": "ยกเลิก",
+      "summary": "สรุป",
+      "generated": "สร้างเมื่อ: {stamp}",
+      "issued_at": "ออกเอกสารเมื่อ {stamp}",
+      "running_head": "{project} - รายงานการประชุม",
+      "type_progress": "ความก้าวหน้า",
+      "type_design": "การออกแบบ",
+      "type_safety": "ความปลอดภัย",
+      "type_subcontractor": "ผู้รับเหมาช่วง",
+      "type_kickoff": "เริ่มต้นโครงการ",
+      "type_closeout": "ส่งมอบงาน",
+      "type_commercial": "การค้า"
+    }
+  },
+  "inspections": {
+    "title": "การตรวจสอบคุณภาพ",
+    "new_inspection": "การตรวจสอบใหม่",
+    "inspector": "ผู้ตรวจสอบ",
+    "checklist": "รายการตรวจสอบ",
+    "pass": "ผ่าน",
+    "fail": "ไม่ผ่าน",
+    "partial": "บางส่วน",
+    "critical": "วิกฤต",
+    "intl": {
+      "status_labels": {
+        "scheduled": "กำหนดไว้แล้ว",
+        "in_progress": "กำลังดำเนินการ",
+        "completed": "เสร็จสิ้น",
+        "failed": "ไม่ผ่าน",
+        "cancelled": "ยกเลิกแล้ว"
+      }
+    }
+  },
+  "ncr": {
+    "title": "รายงานความไม่สอดคล้อง",
+    "new_ncr": "NCR ใหม่",
+    "root_cause": "สาเหตุหลัก",
+    "corrective_action": "การแก้ไข",
+    "preventive_action": "การป้องกัน",
+    "material": "วัสดุ",
+    "workmanship": "ฝีมือช่าง",
+    "design": "ออกแบบ"
+  },
+  "submittals": {
+    "title": "เอกสารส่ง",
+    "new_submittal": "เอกสารส่งใหม่",
+    "spec_section": "ส่วนข้อกำหนด",
+    "revision": "การแก้ไข",
+    "submit": "ส่ง",
+    "review": "ตรวจสอบ",
+    "approved_as_noted": "อนุมัติตามที่ระบุ",
+    "revise_resubmit": "แก้ไขและส่งใหม่",
+    "intl": {
+      "status_labels": {
+        "draft": "ฉบับร่าง",
+        "submitted": "ส่งแล้ว",
+        "under_review": "อยู่ระหว่างการตรวจสอบ",
+        "approved": "อนุมัติ",
+        "approved_as_noted": "อนุมัติพร้อมหมายเหตุ",
+        "revise_and_resubmit": "แก้ไขและส่งใหม่",
+        "rejected": "ไม่อนุมัติ",
+        "closed": "ปิดแล้ว"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "จดหมายโต้ตอบ",
+    "new_entry": "รายการใหม่",
+    "incoming": "ขาเข้า",
+    "outgoing": "ขาออก",
+    "letter": "จดหมาย",
+    "email": "อีเมล",
+    "notice": "ประกาศ",
+    "date_sent": "วันที่ส่ง",
+    "date_received": "วันที่ได้รับ"
+  },
+  "cde": {
+    "title": "สภาพแวดล้อมข้อมูลกลาง",
+    "new_container": "คอนเทนเนอร์ใหม่",
+    "container_code": "รหัสคอนเทนเนอร์",
+    "cde_state": "สถานะ CDE",
+    "wip": "กำลังดำเนินงาน",
+    "shared": "แชร์แล้ว",
+    "published": "เผยแพร่แล้ว",
+    "archived": "เก็บถาวรแล้ว",
+    "promote": "เลื่อนระดับ",
+    "suitability": "ความเหมาะสม",
+    "discipline": "สาขา",
+    "revisions": "การแก้ไข",
+    "intl": {
+      "state_labels": {
+        "wip": "กำลังดำเนินการ",
+        "shared": "แชร์แล้ว",
+        "published": "เผยแพร่แล้ว",
+        "archived": "จัดเก็บแล้ว"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "เอกสารนำส่ง",
+    "new_transmittal": "เอกสารนำส่งใหม่",
+    "purpose": "วัตถุประสงค์",
+    "for_approval": "เพื่ออนุมัติ",
+    "for_information": "เพื่อทราบ",
+    "for_construction": "เพื่อก่อสร้าง",
+    "recipients": "ผู้รับ",
+    "acknowledge": "รับทราบ",
+    "locked": "ล็อก",
+    "issue_transmittal": "ออก",
+    "intl": {
+      "status_words": {
+        "draft": "ฉบับร่าง",
+        "issued": "ส่งแล้ว",
+        "responded": "ตอบกลับแล้ว"
+      }
+    }
+  },
+  "notifications": {
+    "title": "การแจ้งเตือน",
+    "no_notifications": "ไม่มีการแจ้งเตือนใหม่",
+    "mark_all_read": "ทำเครื่องหมายว่าอ่านแล้วทั้งหมด",
+    "unread": "ยังไม่อ่าน"
+  },
+  "comments": {
+    "title": "ความคิดเห็น",
+    "post": "โพสต์",
+    "reply": "ตอบกลับ",
+    "edit": "แก้ไข",
+    "delete": "ลบ",
+    "placeholder": "เขียนความคิดเห็น...",
+    "empty": "ยังไม่มีความคิดเห็น เริ่มการสนทนา",
+    "edited": "แก้ไขแล้ว",
+    "deleted": "ความคิดเห็นนี้ถูกลบ"
+  },
+  "bim": {
+    "title": "ศูนย์กลาง BIM",
+    "models": "โมเดล",
+    "elements": "องค์ประกอบ",
+    "upload_model": "อัปโหลดโมเดล",
+    "processing": "กำลังประมวลผล",
+    "active": "ใช้งานอยู่",
+    "link_to_boq": "เชื่อมโยงกับ BOQ",
+    "properties": "คุณสมบัติ",
+    "quantities": "ปริมาณ",
+    "wireframe": "โครงลวด",
+    "section_box": "กล่องตัดขวาง",
+    "measure": "วัด",
+    "zoom_to_fit": "ซูมพอดี"
+  },
+  "reporting": {
+    "title": "รายงานและแดชบอร์ด",
+    "kpi": "แดชบอร์ด KPI",
+    "generate_report": "สร้างรายงาน",
+    "templates": "เทมเพลต",
+    "project_status": "สถานะโครงการ",
+    "cost_report": "รายงานต้นทุน",
+    "schedule_status": "สถานะกำหนดการ",
+    "safety_report": "รายงานความปลอดภัย",
+    "explain": {
+      "report_total_one": "ยอดรวมของรายงาน: {money} (ผลรวมของ {count} แถว)",
+      "report_total_other": "ยอดรวมของรายงาน: {money} (ผลรวมของ {count} แถว)",
+      "percent_of_total": "{part} คิดเป็น {percent} ของ {total} (ร้อยละของยอดรวม)",
+      "percent_zero_total": "{part} จาก {total}: ยอดรวมเป็นศูนย์ จึงแสดงทุกส่วนเป็นร้อยละ 0",
+      "breakdown_empty": "รายละเอียดต้นทุน: ไม่มีข้อมูล",
+      "breakdown_one": "รายละเอียดต้นทุน: {count} กลุ่ม ยอดรวมของรายงาน {money}",
+      "breakdown_other": "รายละเอียดต้นทุน: {count} กลุ่ม ยอดรวมของรายงาน {money}",
+      "top_n_one": "{requested} รายการแรก: แสดง {shown} จาก {shown} แถว",
+      "top_n_other": "{requested} รายการแรก: แสดง {shown} จาก {shown} แถว"
+    }
+  },
+  "gantt": {
+    "title": "แผนภูมิแกนต์",
+    "day": "วัน",
+    "week": "สัปดาห์",
+    "month": "เดือน",
+    "critical_path": "เส้นทางวิกฤต",
+    "baseline": "เส้นฐาน",
+    "dependencies": "การพึ่งพา",
+    "today": "วันนี้"
+  },
+  "settings": {
+    "regional": "การตั้งค่าภูมิภาค",
+    "timezone": "เขตเวลา",
+    "measurement": "ระบบการวัด",
+    "paper_size": "ขนาดกระดาษ",
+    "date_format": "รูปแบบวันที่",
+    "number_format": "รูปแบบตัวเลข",
+    "currency": "สกุลเงิน",
+    "metric": "เมตริก",
+    "imperial": "อิมพีเรียล"
+  },
+  "users": {
+    "management": "การจัดการผู้ใช้",
+    "management_desc": "จัดการสมาชิกในทีมบทบาทและการเข้าถึง",
+    "invite_user": "เชิญผู้ใช้",
+    "invite": "เชิญ",
+    "full_name": "ชื่อเต็ม",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "role": "บทบาท",
+    "status": "สถานะ",
+    "last_login": "เข้าสู่ระบบล่าสุด",
+    "actions": "การดำเนินการ",
+    "name": "ชื่อ",
+    "total": "ผู้ใช้ทั้งหมด",
+    "active": "ใช้งานอยู่",
+    "inactive": "ไม่ใช้งาน",
+    "admins": "ผู้ดูแลระบบ",
+    "managers": "ผู้จัดการ",
+    "search": "ค้นหาตามชื่อหรืออีเมล...",
+    "no_users": "ไม่พบผู้ใช้",
+    "updated": "อัปเดตผู้ใช้แล้ว",
+    "invited": "เชิญผู้ใช้สำเร็จ",
+    "deactivate": "ปิดใช้งาน",
+    "activate": "เปิดใช้งาน",
+    "never": "ไม่เคย",
+    "role_admin_desc": "เข้าถึงคุณสมบัติทั้งหมดได้เต็มที่",
+    "role_manager_desc": "การจัดการโครงการและทีม",
+    "role_editor_desc": "สร้างและแก้ไขเนื้อหา",
+    "role_viewer_desc": "เข้าถึงแบบอ่านอย่างเดียว"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "สแนปช็อตนี้ถูกล็อกแล้ว สแนปช็อตที่ล็อกเป็นบันทึกถาวรและแก้ไขไม่ได้",
+      "frozen_no_delete": "สแนปช็อตที่ล็อกเป็นบันทึกถาวรและลบไม่ได้",
+      "draft_open": "มีสแนปช็อตฉบับร่างเปิดอยู่แล้ว โปรดล็อกหรือลบก่อนเริ่มฉบับใหม่",
+      "no_line_method": "รายการนี้ไม่มีวิธีคำนวณของตัวเอง",
+      "snapshot_missing": "ไม่พบสแนปช็อต",
+      "line_missing": "สแนปช็อตนี้ไม่มีรายการดังกล่าว",
+      "document_missing": "เอกสารที่เชื่อมโยงไม่ได้อยู่ในโครงการนี้",
+      "freeze_refused": "ยังล็อกสแนปช็อตไม่ได้: มี {count} รายการที่เกินเกณฑ์โดยไม่มีหมายเหตุและหลักฐาน",
+      "no_frozen_snapshot": "ยังไม่มีสแนปช็อตที่ล็อกไว้สำหรับเปรียบเทียบ",
+      "no_ledger": "การติดตั้งนี้ไม่มีสมุดบัญชีใบแจ้งหนี้",
+      "no_snapshot": "ยังไม่มีสแนปช็อตให้จัดทำเอกสาร"
+    },
+    "export": {
+      "project": "โครงการ",
+      "generated": "สร้างเมื่อ",
+      "currency": "สกุลเงิน",
+      "page": "หน้า",
+      "generated_at": "วันที่สร้าง",
+      "empty": "ยังไม่มีข้อมูลให้แสดง",
+      "total": "รวม",
+      "cost_report": "รายงานต้นทุน",
+      "phase_comparison": "เปรียบเทียบตามช่วงงาน",
+      "invoice_ledger": "สมุดบัญชีใบแจ้งหนี้",
+      "forecast_documentation": "เอกสารประกอบการพยากรณ์",
+      "as_of": "ณ วันที่",
+      "forecast_method": "วิธีพยากรณ์",
+      "col_account": "บัญชี",
+      "col_code": "รหัส",
+      "col_description": "รายละเอียด",
+      "col_source": "แหล่งที่มา",
+      "col_method": "วิธี",
+      "col_planned": "ตามแผน",
+      "col_committed": "ผูกพันแล้ว",
+      "col_pending": "การเปลี่ยนแปลงที่รออนุมัติ",
+      "col_measured": "ปริมาณงานที่วัดได้",
+      "col_certified": "รับรองเพื่อจ่ายเงิน",
+      "col_invoiced": "แจ้งหนี้แล้ว",
+      "col_paid": "จ่ายแล้ว",
+      "col_forecast": "พยากรณ์",
+      "col_variance": "ส่วนต่าง",
+      "col_variance_pct": "ส่วนต่าง %",
+      "col_forecast_of_plan": "พยากรณ์ % ของแผน",
+      "col_measured_of_committed": "วัดได้ % ของยอดผูกพัน",
+      "col_invoiced_of_committed": "แจ้งหนี้ % ของยอดผูกพัน",
+      "col_contract": "สัญญา",
+      "col_contract_title": "ชื่อสัญญา",
+      "col_invoice": "ใบแจ้งหนี้",
+      "col_date": "วันที่",
+      "col_kind": "ประเภท",
+      "col_release_status": "การคืนเงิน",
+      "col_net": "สุทธิ",
+      "col_vat": "ภาษีมูลค่าเพิ่ม",
+      "col_gross": "รวมภาษี",
+      "col_retention": "เงินประกันผลงาน",
+      "col_release": "เงินประกันผลงานที่คืนแล้ว",
+      "col_discount": "ส่วนลด",
+      "col_payable": "ยอดที่ต้องจ่าย",
+      "col_open": "ค้างอยู่",
+      "col_previous": "ก่อนหน้า",
+      "col_delta": "การเปลี่ยนแปลง",
+      "col_delta_pct": "เปลี่ยนแปลง %",
+      "col_needs_evidence": "ต้องมีหลักฐาน",
+      "col_comment": "หมายเหตุ",
+      "col_evidence": "หลักฐาน",
+      "row_unassigned": "เงินที่ไม่อยู่ในรายการต้นทุนใด",
+      "row_loose_changes": "การเปลี่ยนแปลงที่ไม่มีสัญญา",
+      "row_no_contract": "ไม่มีสัญญา",
+      "contract_value": "มูลค่าสัญญา",
+      "retention_held": "เงินประกันผลงานที่หักไว้",
+      "yes": "ใช่",
+      "no": "ไม่ใช่",
+      "snapshot_date": "วันที่สแนปช็อต",
+      "snapshot_status": "สถานะ",
+      "previous_snapshot": "สแนปช็อตที่ล็อกครั้งก่อน",
+      "method_explained": "วิธีอ่านค่าพยากรณ์",
+      "evidence_threshold": "ต้องมีหลักฐานเมื่อเปลี่ยนเกิน",
+      "threshold_both": "เปลี่ยนแปลงเกิน {parts}",
+      "threshold_any": "ทุกการเปลี่ยนแปลง",
+      "frozen_at": "ล็อกเมื่อ"
+    },
+    "method": {
+      "best_available": "แหล่งข้อมูลที่ดีที่สุดที่มี",
+      "maximum": "ค่าสูงสุด",
+      "evm_cpi": "มูลค่าที่ได้รับ (CPI)",
+      "manual": "กรอกเอง"
+    },
+    "method_help": {
+      "best_available": "แต่ละรายการใช้ตัวเลขที่เป็นหลักฐานแน่นที่สุด: บัญชีปิดงาน รองลงมาคืองานที่วัดได้ ตามด้วยราคาที่มอบงาน ประมาณการ และงบประมาณ",
+      "maximum": "แต่ละรายการใช้ค่าที่สูงที่สุดจากตัวเลขของตน (งบประมาณ ประมาณการ ราคามอบงาน ปริมาณที่วัดได้ ยอดแจ้งหนี้) ค่าพยากรณ์จึงไม่ซ่อนความเสี่ยง",
+      "evm_cpi": "แต่ละรายการคาดการณ์ต้นทุนเมื่องานเสร็จจากความคืบหน้า: เงินที่ใช้ไปแล้วหารด้วยสัดส่วนงานที่ทำเสร็จ",
+      "manual": "ผู้ใช้กำหนดตัวเลขของรายการเองและเชื่อมโยงเอกสารที่รองรับ"
+    },
+    "source": {
+      "none": "ไม่มีตัวเลข",
+      "budget": "งบประมาณ",
+      "estimate": "ประมาณการ",
+      "partly_awarded": "มอบงานบางส่วน",
+      "awarded": "มอบงานแล้ว",
+      "measured": "วัดได้",
+      "final": "บัญชีปิดงาน",
+      "manual": "กรอกเอง",
+      "invoiced": "แจ้งหนี้แล้ว",
+      "evm": "มูลค่าที่ได้รับ"
+    },
+    "layer": {
+      "budget": "งบประมาณ",
+      "estimate": "ประมาณการ",
+      "tender": "ข้อเสนอที่ดีที่สุด",
+      "awarded": "มอบงานแล้ว",
+      "changes": "การเปลี่ยนแปลงที่อนุมัติ",
+      "committed": "ผูกพันแล้ว",
+      "pending": "การเปลี่ยนแปลงที่รออนุมัติ",
+      "measured": "ปริมาณงานที่วัดได้",
+      "certified": "รับรองเพื่อจ่ายเงิน",
+      "invoiced": "แจ้งหนี้แล้ว",
+      "paid": "จ่ายแล้ว",
+      "forecast": "พยากรณ์"
+    },
+    "invoice_kind": {
+      "interim": "งวดงาน",
+      "final": "งวดสุดท้าย",
+      "daywork": "งานรายวัน",
+      "credit_note": "ใบลดหนี้"
+    },
+    "release_status": {
+      "open": "ค้างอยู่",
+      "released": "คืนแล้ว"
+    },
+    "evidence_kind": {
+      "document": "เอกสาร",
+      "minutes": "รายงานการประชุม",
+      "other": "อื่น ๆ"
+    },
+    "snapshot_status": {
+      "draft": "ฉบับร่าง",
+      "frozen": "ล็อกแล้ว"
+    }
+  },
+  "document_forms": {
+    "submittals": {
+      "labels": {
+        "discipline": {
+          "plumbing": "ระบบสุขาภิบาล",
+          "fire_protection": "ระบบป้องกันอัคคีภัย",
+          "civil": "โยธา",
+          "bms": "ระบบอาคารอัตโนมัติ",
+          "hvac": "ระบบปรับอากาศ",
+          "lighting": "ระบบแสงสว่าง",
+          "mechanical": "เครื่องกล",
+          "architectural": "สถาปัตยกรรม",
+          "electrical": "ไฟฟ้า",
+          "structural": "โครงสร้าง",
+          "elv": "ระบบไฟฟ้ากระแสต่ำ"
+        },
+        "type": {
+          "sample": "ตัวอย่างวัสดุ",
+          "method_statement": "วิธีการทำงาน",
+          "shop_drawing": "แบบ Shop Drawing",
+          "mock_up": "Mock-up",
+          "certificate": "ใบรับรอง",
+          "test_report": "รายงานผลทดสอบ",
+          "calculation": "รายการคำนวณ",
+          "product_data": "ข้อมูลผลิตภัณฑ์",
+          "warranty": "ใบรับประกัน"
+        },
+        "status": {
+          "draft": "ฉบับร่าง",
+          "approved_as_noted": "อนุมัติตามหมายเหตุ",
+          "revise_and_resubmit": "แก้ไขและส่งใหม่",
+          "rejected": "ไม่อนุมัติ",
+          "under_review": "อยู่ระหว่างตรวจสอบ",
+          "closed": "ปิดแล้ว",
+          "submitted": "ส่งแล้ว",
+          "approved": "อนุมัติ"
+        }
+      },
+      "strings": {
+        "review_history": "ประวัติการตรวจสอบ",
+        "submitted_by_org": "บริษัทผู้ยื่น",
+        "doc_title": "เอกสารขออนุมัติ",
+        "col_on_site_needed_by": "เข้าไซต์ / อนุมัติภายใน",
+        "col_drawings": "แบบที่เกี่ยวข้อง",
+        "col_approval_late": "เกินกำหนด (วัน)",
+        "col_needed_by": "ต้องอนุมัติภายใน",
+        "col_lead_time": "ระยะเวลาสั่งของ (สัปดาห์)",
+        "sig_reviewed": "ผู้ตรวจสอบ",
+        "col_model": "รุ่น / อ้างอิง",
+        "col_discipline": "สาขางาน",
+        "col_date_submitted": "วันที่ส่ง",
+        "col_reviewer": "ผู้ตรวจสอบ",
+        "col_required_on_site": "วันที่ต้องใช้ในไซต์",
+        "register_title_method_statement": "ทะเบียนวิธีการทำงาน",
+        "col_supplier": "ผู้จัดจำหน่าย",
+        "hist_returned": "ส่งคืน",
+        "col_review_code": "รหัสผลตรวจ",
+        "col_origin": "ประเทศผู้ผลิต",
+        "register_filename_method_statement": "tabian-withi-kan-tham-ngan",
+        "sig_submitted": "ผู้ยื่น",
+        "col_long_lead": "สั่งนาน",
+        "drawings_missing_other": "แบบที่เกี่ยวข้อง {n} รายการไม่สามารถใช้งานได้",
+        "col_product": "ผู้ผลิต / รุ่น / แหล่งผลิต",
+        "col_outcome": "ผลการตรวจสอบ",
+        "col_number": "เลขที่เอกสาร",
+        "register_filename_product_data": "tabian-anumat-wasadu",
+        "col_manufacturer": "ผู้ผลิต / ยี่ห้อ",
+        "col_rev": "ครั้งที่แก้ไข",
+        "register_filename_shop_drawing": "tabian-shop-drawing",
+        "col_type": "ประเภท",
+        "col_review_overdue": "เกินกำหนด (วัน)",
+        "weeks_other": "{n} สัปดาห์",
+        "hist_submitted": "ส่งเอกสาร",
+        "doc_title_product_data": "ใบขออนุมัติวัสดุ",
+        "col_approver": "ผู้อนุมัติ",
+        "col_date_required": "วันที่ต้องการ",
+        "col_title": "เรื่อง",
+        "col_ball_in_court": "ผู้ต้องดำเนินการ",
+        "no_review_notes": "ไม่มีความเห็นของผู้ตรวจสอบ",
+        "sig_approved": "ผู้อนุมัติ",
+        "register_title": "ทะเบียนเอกสารขออนุมัติ",
+        "register_filename": "tabian-ekasan-kho-anumat",
+        "col_submitted_returned": "ส่ง / ส่งคืน",
+        "col_date_returned": "วันที่ส่งคืน",
+        "col_review_due": "กำหนดตรวจสอบ",
+        "col_spec": "หมวดข้อกำหนด",
+        "col_days_in_review_print": "จำนวนวันตรวจสอบ",
+        "drawings_missing_one": "แบบที่เกี่ยวข้อง {n} รายการไม่สามารถใช้งานได้",
+        "register_title_product_data": "ทะเบียนขออนุมัติวัสดุ",
+        "review_notes": "ความเห็นของผู้ตรวจสอบ",
+        "resubmit_for_record": "ส่งฉบับที่แก้ไขแล้วอีกครั้งเพื่อเก็บเป็นบันทึก",
+        "col_days_in_review": "จำนวนวันตรวจสอบ",
+        "weeks_one": "{n} สัปดาห์",
+        "register_title_shop_drawing": "ทะเบียนแบบ Shop Drawing",
+        "col_review_period": "ระยะเวลาตรวจ (วัน)"
+      }
+    },
+    "transmittals": {
+      "labels": {
+        "purpose": {
+          "for_construction": "เพื่อก่อสร้าง",
+          "for_approval": "เพื่ออนุมัติ",
+          "for_review": "เพื่อตรวจสอบ",
+          "for_information": "เพื่อทราบ",
+          "for_record": "เพื่อเก็บบันทึก",
+          "for_tender": "เพื่อประกวดราคา"
+        },
+        "status": {
+          "draft": "ฉบับร่าง",
+          "responded": "ตอบกลับแล้ว",
+          "issued": "ออกแล้ว"
+        }
+      },
+      "strings": {
+        "col_purpose": "วัตถุประสงค์",
+        "col_subject": "เรื่อง",
+        "doc_title": "ใบนำส่งเอกสาร",
+        "cover_note": "หมายเหตุนำส่ง",
+        "acknowledged": "ยืนยันการรับแล้ว",
+        "sig_issued": "ผู้ออก",
+        "col_response_due": "กำหนดตอบกลับ",
+        "col_recipients": "ผู้รับ",
+        "col_item_count": "รายการ",
+        "item_description": "รายละเอียด",
+        "col_issued": "วันที่ออก",
+        "sender": "ผู้ส่ง",
+        "register_title": "ทะเบียนใบนำส่งเอกสาร",
+        "recipients": "ผู้รับ",
+        "responded": "วันที่ตอบกลับ",
+        "items": "เอกสารที่นำส่ง",
+        "item_no": "ลำดับ",
+        "item_notes": "หมายเหตุ",
+        "col_number": "เลขที่ใบนำส่ง",
+        "recipient": "ผู้รับ",
+        "action_required": "สิ่งที่ต้องดำเนินการ",
+        "no_cover_note": "ไม่มีหมายเหตุนำส่ง",
+        "register_filename": "tabian-bai-nam-song-ekasan",
+        "sig_received": "ผู้รับเอกสาร"
+      }
+    },
+    "furniture": {
+      "records": "รายการ",
+      "project_no": "เลขที่โครงการ",
+      "sig_prepared_by": "ผู้จัดทำ",
+      "signer_title": "ตำแหน่ง",
+      "total": "รวม",
+      "date": "วันที่",
+      "footer_generated": "สร้างเมื่อ {timestamp}",
+      "sig_checked_by": "ผู้ตรวจสอบ",
+      "project": "โครงการ",
+      "status": "สถานะ",
+      "currency": "สกุลเงิน",
+      "yes": "ใช่",
+      "signature": "ลายมือชื่อ",
+      "signatures": "ลายมือชื่อ",
+      "days_one": "{n} วัน",
+      "footer_page": "หน้า {page} จาก {total}",
+      "sig_approved_by": "ผู้อนุมัติ",
+      "no": "ไม่ใช่",
+      "days_other": "{n} วัน",
+      "empty_register": "ไม่มีรายการ",
+      "name": "ชื่อ-สกุล",
+      "generated_on": "วันที่สร้าง"
+    },
+    "changeorders": {
+      "labels": {
+        "reason": {
+          "error": "ข้อผิดพลาดหรือตกหล่น",
+          "regulatory": "ข้อกำหนดทางกฎหมาย",
+          "unforeseen": "สภาพที่คาดไม่ถึง",
+          "non_conformance": "งานไม่เป็นไปตามข้อกำหนด",
+          "design_change": "เปลี่ยนแปลงแบบ",
+          "client_request": "เจ้าของงานร้องขอ",
+          "value_engineering": "วิศวกรรมคุณค่า"
+        },
+        "instrument": {
+          "claim": "การเรียกร้อง",
+          "works_change": "คำสั่งเปลี่ยนแปลงงาน",
+          "site_confirmation": "ใบยืนยันหน้างาน"
+        },
+        "change": {
+          "modified": "แก้ไข",
+          "added": "เพิ่ม",
+          "removed": "ลบ"
+        },
+        "status": {
+          "draft": "ฉบับร่าง",
+          "executed": "ดำเนินการแล้ว",
+          "rejected": "ไม่อนุมัติ",
+          "submitted": "ส่งแล้ว",
+          "approved": "อนุมัติ"
+        }
+      },
+      "strings": {
+        "time_impact": "ผลกระทบด้านเวลา",
+        "item_original_rate": "ราคาต่อหน่วยเดิม",
+        "doc_title": "ใบสั่งเปลี่ยนแปลงงาน",
+        "col_code": "รหัส",
+        "approved_by": "ผู้อนุมัติ",
+        "col_approved_time": "เวลาที่อนุมัติ (วัน)",
+        "item_new_rate": "ราคาต่อหน่วยใหม่",
+        "col_approved": "วันที่อนุมัติ",
+        "col_contractor_amount": "ยอดผู้รับเหมา",
+        "col_engineer_amount": "ยอดวิศวกร",
+        "no_description": "ไม่มีรายละเอียด",
+        "col_submitted": "วันที่ส่ง",
+        "approved_time": "เวลาที่อนุมัติ",
+        "col_cost_impact": "ผลกระทบด้านต้นทุน",
+        "item_description": "รายละเอียด",
+        "item_cost_delta": "ส่วนต่างราคา",
+        "col_title": "เรื่อง",
+        "submitted_by": "ผู้ส่ง",
+        "register_title": "ทะเบียนใบสั่งเปลี่ยนแปลงงาน",
+        "item_original_quantity": "ปริมาณเดิม",
+        "items": "รายการเปลี่ยนแปลง",
+        "col_instrument": "ประเภทเอกสาร",
+        "col_time_impact": "ผลกระทบด้านเวลา (วัน)",
+        "col_reason": "เหตุผล",
+        "item_change": "การเปลี่ยนแปลง",
+        "col_approved_amount": "ยอดที่อนุมัติ",
+        "item_new_quantity": "ปริมาณใหม่",
+        "register_filename": "tabian-bai-sang-plian-plaeng-ngan",
+        "description": "รายละเอียด",
+        "item_unit": "หน่วย"
+      }
+    },
+    "variations": {
+      "labels": {
+        "notice_status": {
+          "responded": "ตอบกลับแล้ว",
+          "acknowledged": "ยืนยันการรับแล้ว",
+          "closed": "ปิดแล้ว",
+          "issued": "ออกแล้ว"
+        },
+        "request_status": {
+          "draft": "ฉบับร่าง",
+          "rejected": "ไม่อนุมัติ",
+          "converted_to_vo": "แปลงเป็นใบสั่งแล้ว",
+          "under_review": "อยู่ระหว่างตรวจสอบ",
+          "submitted": "ส่งแล้ว",
+          "approved": "อนุมัติ"
+        },
+        "claim_type": {
+          "eot": "ขยายระยะเวลา",
+          "disruption": "การรบกวนงาน"
+        },
+        "recipient_type": {
+          "owner": "เจ้าของโครงการ",
+          "consultant": "ที่ปรึกษา",
+          "contractor": "ผู้รับเหมา",
+          "architect": "สถาปนิก",
+          "engineer": "วิศวกร"
+        },
+        "urgency": {
+          "low": "ต่ำ",
+          "med": "ปานกลาง",
+          "high": "สูง"
+        },
+        "classification": {
+          "other": "อื่น ๆ",
+          "regulatory": "ข้อกำหนดทางกฎหมาย",
+          "unforeseen": "สภาพที่คาดไม่ถึง",
+          "owner_change": "เจ้าของโครงการเปลี่ยนแปลง",
+          "design_dev": "พัฒนาแบบ",
+          "scope_change": "เปลี่ยนแปลงขอบเขตงาน"
+        },
+        "claim_status": {
+          "draft": "ฉบับร่าง",
+          "granted": "อนุญาต",
+          "rejected": "ไม่อนุมัติ",
+          "agreed": "ตกลงแล้ว",
+          "under_review": "อยู่ระหว่างตรวจสอบ",
+          "submitted": "ส่งแล้ว"
+        }
+      },
+      "strings": {
+        "col_row": "ลำดับ",
+        "time_impact": "ผลกระทบด้านเวลา",
+        "doc_title": "คำขอเปลี่ยนแปลงงาน",
+        "col_code": "รหัส",
+        "date_decided": "วันที่ตัดสิน",
+        "col_decided_amount": "ยอดที่ตัดสิน",
+        "variation_register_title": "ทะเบียนงานเปลี่ยนแปลง",
+        "notice_register_title": "ทะเบียนหนังสือแจ้ง",
+        "decision_notes": "หมายเหตุการตัดสิน",
+        "col_classification": "ประเภท",
+        "requested_by": "ผู้ขอ",
+        "col_agreed_amount": "ยอดที่ตกลง",
+        "col_recipient": "ผู้รับ",
+        "col_response_due": "กำหนดตอบกลับ",
+        "no_description": "ไม่มีรายละเอียด",
+        "decided_by": "ผู้ตัดสิน",
+        "variation_register_filename": "tabian-ngan-plian-plaeng",
+        "claim_register_title": "ทะเบียนการเรียกร้อง",
+        "col_days_granted": "จำนวนวันที่อนุญาต",
+        "col_title": "เรื่อง",
+        "date_submitted": "วันที่ส่ง",
+        "col_clause": "ข้อสัญญา",
+        "col_raised": "วันที่ยื่น",
+        "col_description": "รายละเอียด",
+        "col_period_end": "ถึงวันที่",
+        "col_requested": "วันที่ขอ",
+        "claim_register_filename": "tabian-kan-riak-rong",
+        "col_response_received": "วันที่ได้รับตอบ",
+        "doc_title_credit": "คำขอเปลี่ยนแปลงงาน (งานลด)",
+        "col_time_impact": "ผลกระทบด้านเวลา (วัน)",
+        "col_claimed_amount": "ยอดที่เรียกร้อง",
+        "col_period_start": "ตั้งแต่วันที่",
+        "notice_register_filename": "tabian-nangsue-chaeng",
+        "description": "รายละเอียด",
+        "no_decision_notes": "ยังไม่มีการบันทึกการตัดสิน",
+        "col_recipient_type": "ส่งถึง",
+        "col_target_response": "คาดว่าจะตอบ",
+        "col_days_requested": "จำนวนวันที่ขอ",
+        "col_claim_type": "ประเภทการเรียกร้อง",
+        "col_urgency": "ความเร่งด่วน"
+      }
+    },
+    "correspondence": {
+      "labels": {
+        "direction": {
+          "outgoing": "ส่งออก",
+          "incoming": "รับเข้า"
+        },
+        "type": {
+          "letter": "หนังสือ",
+          "notice": "หนังสือแจ้ง",
+          "memo": "บันทึกข้อความ",
+          "report": "รายงาน",
+          "email": "อีเมล"
+        },
+        "status": {
+          "awaiting_response": "รอตอบกลับ",
+          "closed": "ปิดแล้ว",
+          "responded": "ตอบกลับแล้ว",
+          "open": "เปิดอยู่"
+        }
+      },
+      "strings": {
+        "col_to": "ถึง",
+        "no_notes": "ไม่มีหมายเหตุ",
+        "col_subject": "เรื่อง",
+        "doc_title": "หนังสือโต้ตอบ",
+        "register_title": "ทะเบียนหนังสือโต้ตอบ",
+        "col_clause": "ข้อสัญญา",
+        "linked_documents": "เอกสารที่เกี่ยวข้อง",
+        "col_reference": "เลขที่หนังสือ",
+        "col_date_received": "วันที่รับ",
+        "notes": "หมายเหตุ",
+        "col_response_due": "กำหนดตอบกลับ",
+        "sig_prepared": "ผู้จัดทำ",
+        "attachments": "ไฟล์แนบ",
+        "col_date_sent": "วันที่ส่ง",
+        "col_direction": "ทิศทาง",
+        "register_filename": "tabian-nangsue-totop",
+        "col_from": "จาก",
+        "col_type": "ประเภท",
+        "sig_received": "ผู้รับ"
+      }
+    },
+    "claims_evidence": {
+      "labels": {
+        "basis": {
+          "delay": "ความล่าช้า / ขยายระยะเวลา",
+          "valuation": "การประเมินมูลค่า",
+          "dispute": "ข้อพิพาท",
+          "general": "บันทึกทั่วไป"
+        },
+        "section": {
+          "delay": "ความล่าช้า",
+          "rfis": "RFI",
+          "variations": "งานเปลี่ยนแปลง",
+          "other": "อื่น ๆ",
+          "notices": "หนังสือแจ้ง",
+          "approvals": "การอนุมัติ",
+          "correspondence": "หนังสือโต้ตอบ",
+          "timeline": "ลำดับเหตุการณ์"
+        },
+        "kind": {
+          "notice": "หนังสือแจ้ง",
+          "variation_notice": "หนังสือแจ้งงานเปลี่ยนแปลง",
+          "correspondence": "หนังสือโต้ตอบ",
+          "variation_order": "ใบสั่งเปลี่ยนแปลงงาน",
+          "moc_entry": "บันทึกการเปลี่ยนแปลง",
+          "change_order": "ใบสั่งเปลี่ยนแปลง",
+          "variation_request": "คำขอเปลี่ยนแปลงงาน"
+        }
+      },
+      "strings": {
+        "col_row": "ลำดับ",
+        "col_date": "วันที่",
+        "basis": "ฐานการเรียกร้อง",
+        "col_summary": "สรุป",
+        "register_title": "ชุดหลักฐาน",
+        "period_to": "บันทึกล่าสุด",
+        "period_from": "บันทึกแรกสุด",
+        "col_kind": "ประเภทบันทึก",
+        "subject": "เรื่อง",
+        "col_title": "เรื่อง",
+        "register_filename": "chut-lakthan",
+        "col_reference": "เลขที่อ้างอิง",
+        "col_section": "หมวด",
+        "col_record_id": "รหัสบันทึก",
+        "digest": "รหัสตรวจสอบความถูกต้อง (SHA-256 16 อักขระแรก)"
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "col_subject": "เรื่อง",
+        "register_title": "ทะเบียน RFI",
+        "yes_with": "ใช่ ({detail})",
+        "col_raised_by": "ผู้ยื่น",
+        "col_schedule_impact": "ผลกระทบด้านแผนงาน",
+        "col_date_required": "วันที่ต้องการ",
+        "col_assigned_to": "ผู้รับผิดชอบ",
+        "col_ball_in_court": "ผู้ต้องดำเนินการ",
+        "col_response_due": "กำหนดตอบกลับ",
+        "col_number": "เลขที่ RFI",
+        "col_days_open": "จำนวนวันที่ค้าง",
+        "col_cost_impact": "ผลกระทบด้านต้นทุน",
+        "register_filename": "tabian-rfi",
+        "col_response": "คำตอบ"
+      },
+      "labels": {
+        "status": {
+          "draft": "ร่าง",
+          "open": "เปิดอยู่",
+          "answered": "ตอบแล้ว",
+          "closed": "ปิดแล้ว",
+          "void": "เป็นโมฆะ"
+        }
+      }
+    },
+    "daily_diary": {
+      "labels": {
+        "condition": {
+          "rain_showers_violent": "ฝนตกหนักมากเป็นช่วง ๆ",
+          "drizzle_moderate": "ฝนละอองปานกลาง",
+          "fog": "หมอก",
+          "overcast": "ครึ้ม",
+          "snow_moderate": "หิมะปานกลาง",
+          "snow_heavy": "หิมะตกหนัก",
+          "rain_showers_moderate": "ฝนปานกลางเป็นช่วง ๆ",
+          "snow_showers_light": "หิมะเบาบางเป็นช่วง ๆ",
+          "rain_showers_light": "ฝนเล็กน้อยเป็นช่วง ๆ",
+          "snow": "หิมะ",
+          "fog_rime": "หมอกน้ำค้างแข็ง",
+          "partly_cloudy": "มีเมฆบางส่วน",
+          "thunderstorm": "พายุฝนฟ้าคะนอง",
+          "snow_light": "หิมะเล็กน้อย",
+          "freezing_rain_heavy": "ฝนเยือกแข็งหนัก",
+          "drizzle_light": "ฝนละอองเล็กน้อย",
+          "rain_light": "ฝนเล็กน้อย",
+          "thunderstorm_hail_heavy": "พายุฝนฟ้าคะนองและลูกเห็บขนาดใหญ่",
+          "drizzle_dense": "ฝนละอองหนา",
+          "rain": "ฝน",
+          "mainly_clear": "แจ่มใสเป็นส่วนใหญ่",
+          "clear": "แจ่มใส",
+          "rain_heavy": "ฝนตกหนัก",
+          "rain_moderate": "ฝนปานกลาง",
+          "thunderstorm_hail_light": "พายุฝนฟ้าคะนองและลูกเห็บขนาดเล็ก",
+          "cloudy": "มีเมฆมาก",
+          "snow_showers_heavy": "หิมะตกหนักเป็นช่วง ๆ",
+          "freezing_rain_light": "ฝนเยือกแข็งเล็กน้อย"
+        },
+        "source": {
+          "open_meteo": "บริการข้อมูลอากาศ",
+          "sensor": "เซนเซอร์ในไซต์",
+          "manual": "กรอกเอง"
+        },
+        "entry_type": {
+          "incident_summary": "ความปลอดภัยและอุบัติเหตุ",
+          "event": "เหตุการณ์",
+          "visitor": "ผู้มาเยือน",
+          "inspection_summary": "การตรวจสอบ",
+          "completion": "งานที่ทำ",
+          "delivery": "วัสดุที่ส่งเข้า",
+          "photo_note": "บันทึกภาพถ่าย",
+          "general": "บันทึกทั่วไป"
+        },
+        "status": {
+          "closed": "ปิดแล้ว",
+          "archived": "เก็บถาวร",
+          "signed": "ลงนามแล้ว",
+          "open": "เปิดอยู่"
+        }
+      },
+      "strings": {
+        "summary_wind": "ลม {value} km/h",
+        "weather_temp": "อุณหภูมิ (°C)",
+        "doc_title": "รายงานประจำวันหน้างาน",
+        "summary_precipitation": "ปริมาณน้ำฝน {value} mm",
+        "site_supervisor": "ผู้ควบคุมงานหน้างาน",
+        "weather_precip": "น้ำฝน (mm)",
+        "summary_humidity": "ความชื้น {value} %",
+        "footer_supervisor": "ผู้ควบคุมงาน: {name}",
+        "sig_name": "ชื่อ-สกุล",
+        "footer_supervisor_missing": "ผู้ควบคุมงานหน้างาน: ไม่ได้บันทึก",
+        "footer_generated": "สร้างเมื่อ: {timestamp}",
+        "percent": "{value}%",
+        "workforce_total": "รวม",
+        "overview": "ภาพรวม",
+        "workforce": "กำลังคนแยกตามบริษัท",
+        "workforce_count": "จำนวนคน",
+        "not_recorded": "ไม่ได้บันทึก",
+        "sig_prepared": "ผู้จัดทำ (ผู้ควบคุมงานหน้างาน)",
+        "decimal_mark": ".",
+        "sig_approved": "ผู้อนุมัติ (ตัวแทนเจ้าของโครงการ)",
+        "completeness": "ความครบถ้วน",
+        "sig_signature": "ลายมือชื่อ",
+        "signatures": "ลายมือชื่อ",
+        "running_title": "{title} · {date} · {project}",
+        "workforce_company": "บริษัท",
+        "notes_empty": "ไม่มีหมายเหตุเพิ่มเติม",
+        "sig_title": "ตำแหน่ง",
+        "weather": "สภาพอากาศ",
+        "weather_wind": "ลม (km/h)",
+        "weather_time": "เวลา",
+        "weather_empty": "ไม่มีบันทึกสภาพอากาศของวันนี้",
+        "footer_page": "หน้า {page} จาก {total}",
+        "equipment_on_site": "เครื่องจักรในไซต์",
+        "weather_source": "แหล่งข้อมูล",
+        "workforce_unassigned": "ไม่ระบุบริษัท",
+        "sig_date": "วันที่",
+        "filename_prefix": "raingan-prachamwan",
+        "labour_on_site": "แรงงานในไซต์",
+        "weather_conditions": "สภาพ",
+        "signed_note": "ลงนามในระบบแล้ว: {signers}",
+        "notes": "หมายเหตุ",
+        "entries_empty": "ไม่มีรายการบันทึกในรายงานนี้",
+        "site_record": "บันทึกหน้างาน"
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "สร้างโดย AI",
+        "drawing": "แบบ",
+        "cost_estimate": "ประมาณการค่าใช้จ่าย",
+        "summary": "สรุป",
+        "project": "โครงการ:",
+        "boq": "BOQ:",
+        "date": "วันที่:",
+        "status": "สถานะ:",
+        "prepared_by": "จัดทำโดย:",
+        "approved_by": "อนุมัติโดย:",
+        "signature_hint": "ชื่อ / ลายเซ็น / วันที่",
+        "contents": "หมวดงาน / รายการ:",
+        "pos": "ลำดับ",
+        "description": "รายละเอียด",
+        "unit": "หน่วย",
+        "qty": "ปริมาณ",
+        "rate": "ราคาต่อหน่วย",
+        "total": "รวม",
+        "subtotal": "รวมย่อย:",
+        "other_positions": "รายการอื่น",
+        "direct_cost": "ค่าใช้จ่ายทางตรง:",
+        "markups": "ค่าดำเนินการ (ไม่รวมภาษี):",
+        "net_total": "ยอดสุทธิ (ไม่รวมภาษี):",
+        "gross_total": "ยอดรวมทั้งสิ้น",
+        "page": "หน้า",
+        "of": "จาก",
+        "generated": "สร้างเมื่อ:",
+        "summary_report": "รายงานสรุป",
+        "positions_omitted": "{count} รายการ (ละรายละเอียดทั้งหมดเพื่อประสิทธิภาพ)",
+        "section": "หมวดงาน",
+        "items": "รายการ",
+        "cost_summary": "สรุปค่าใช้จ่าย",
+        "table_of_contents": "สารบัญ",
+        "resources_omitted": "ไม่พิมพ์รายละเอียดทรัพยากร: ใบแจ้งปริมาณงานนี้มีรายการทรัพยากรมากเกินกว่าจะพิมพ์ใน PDF ฉบับเดียว",
+        "status_draft": "ฉบับร่าง",
+        "status_final": "ฉบับสมบูรณ์",
+        "status_archived": "จัดเก็บแล้ว",
+        "subject": "ใบแจ้งปริมาณงาน",
+        "tax_vat": "VAT"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "ใบแจ้งหนี้",
+        "date": "วันที่: {value}",
+        "due": "กำหนดชำระ: {value}",
+        "from": "ผู้ออกเอกสาร",
+        "bill_to": "ผู้รับเอกสาร",
+        "vat_id": "VAT: {value}",
+        "ref": "อ้างอิง: {value}",
+        "th_description": "รายละเอียด",
+        "th_qty": "ปริมาณ",
+        "th_unit": "หน่วย",
+        "th_unit_price": "ราคาต่อหน่วย",
+        "th_net": "สุทธิ ({currency})",
+        "net_total": "ยอดสุทธิ",
+        "vat_total": "VAT",
+        "grand_total": "ยอดรวมทั้งสิ้น",
+        "retention_prepaid": "เงินประกันผลงาน / จ่ายล่วงหน้า",
+        "amount_due": "ยอดที่ต้องชำระ",
+        "payment": "การชำระเงิน",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "เลขที่บัญชี: {value}",
+        "bank_code": "รหัสธนาคาร: {value}",
+        "account_holder": "ชื่อบัญชี: {value}",
+        "footer": "PDF นี้มีใบแจ้งหนี้อิเล็กทรอนิกส์ EN 16931 (Factur-X / ZUGFeRD) ฝังอยู่ ไฟล์ XML ที่ฝังไว้คือเอกสารที่มีผลตามกฎหมาย",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "รายงาน",
+        "meta_project": "โครงการ",
+        "meta_type": "ประเภท",
+        "meta_generated": "สร้างเมื่อ",
+        "meta_currency": "สกุลเงิน",
+        "field_column": "ฟิลด์",
+        "value_column": "ค่า",
+        "yes": "ใช่",
+        "no": "ไม่ใช่",
+        "no_data_heading": "ไม่มีข้อมูล",
+        "no_data_body": "รายงานนี้สร้างจากชุดข้อมูลที่ว่างเปล่า โปรดตรวจสอบว่าโมดูลต้นทาง (การเงิน กำหนดการ ความปลอดภัย ฯลฯ) ส่งข้อมูลสำหรับโครงการที่เลือกแล้ว",
+        "no_data_body_short": "รายงานนี้สร้างจากชุดข้อมูลที่ว่างเปล่า โปรดตรวจสอบว่าโมดูลต้นทางส่งข้อมูลสำหรับโครงการที่เลือกแล้ว",
+        "footer_generated_by": "สร้างโดย OpenConstructionERP เมื่อ {timestamp}",
+        "worksheet_name": "รายงาน",
+        "pdf_subject": "รายงานโครงการ",
+        "overall_progress": "ความคืบหน้าโดยรวม",
+        "as_of": "ณ วันที่",
+        "recorded_by": "บันทึกโดย",
+        "period": "ช่วงเวลา",
+        "entries_suffix": "({count} รายการ)",
+        "site_photo_alt": "ภาพถ่ายหน้างาน",
+        "ai_summary_heading": "สรุป",
+        "ai_badge": "สร้างโดย AI",
+        "ai_note": "สร้างโดย AI จากข้อมูลโครงการด้านล่าง",
+        "ai_note_confidence": "สร้างโดย AI จากข้อมูลโครงการด้านล่าง (ระดับความเชื่อมั่น {confidence})",
+        "ai_note_review": "โปรดตรวจสอบก่อนส่งให้ลูกค้า"
+      },
+      "labels": {
+        "field_labels": {
+          "name": "ชื่อ",
+          "status": "สถานะ",
+          "phase": "ระยะงาน",
+          "planned_start": "เริ่มตามแผน",
+          "planned_end": "สิ้นสุดตามแผน",
+          "schedule_progress_pct": "ความคืบหน้าตามกำหนดการ (%)",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "งบที่ใช้ไปแล้ว (%)",
+          "as_of": "ณ วันที่",
+          "progress_pct": "ความคืบหน้า (%)",
+          "risk_score_avg": "คะแนนความเสี่ยงเฉลี่ย",
+          "open_rfis": "RFI ที่ยังเปิดอยู่",
+          "open_submittals": "เอกสารส่งอนุมัติที่ยังเปิดอยู่",
+          "open_defects": "ข้อบกพร่องที่ยังเปิดอยู่",
+          "open_observations": "ข้อสังเกตที่ยังเปิดอยู่",
+          "budget": "งบประมาณ",
+          "committed": "ผูกพันแล้ว",
+          "actual": "ค่าใช้จ่ายจริง",
+          "payable": "เจ้าหนี้",
+          "receivable": "ลูกหนี้",
+          "net_cash_flow": "กระแสเงินสดสุทธิ"
+        },
+        "section_titles": {
+          "Project Overview": "ภาพรวมโครงการ",
+          "Key Performance Indicators": "ตัวชี้วัดผลการดำเนินงานหลัก",
+          "Schedule Status": "สถานะกำหนดการ",
+          "Risk Summary": "สรุปความเสี่ยง",
+          "Open Issues": "ประเด็นที่ยังเปิดอยู่",
+          "Cost Summary": "สรุปค่าใช้จ่าย",
+          "Cost Breakdown": "รายละเอียดค่าใช้จ่าย",
+          "Change Orders": "คำสั่งเปลี่ยนแปลงงาน",
+          "Cash Flow": "กระแสเงินสด",
+          "Schedule Overview": "ภาพรวมกำหนดการ",
+          "Milestone Status": "สถานะจุดสำคัญ",
+          "Critical Path": "เส้นทางวิกฤต",
+          "3-Week Lookahead": "แผนล่วงหน้า 3 สัปดาห์",
+          "Safety KPIs": "ตัวชี้วัดความปลอดภัย",
+          "Incident Log": "บันทึกเหตุการณ์",
+          "Near-Miss Reports": "รายงานเหตุการณ์ที่เกือบเกิดอุบัติเหตุ",
+          "Safety Training": "การฝึกอบรมความปลอดภัย",
+          "Inspection Summary": "สรุปการตรวจสอบ",
+          "By Inspection Type": "แยกตามประเภทการตรวจสอบ",
+          "Punch List Status": "สถานะรายการแก้ไขงาน",
+          "Recent Inspections": "การตรวจสอบล่าสุด",
+          "Portfolio Overview": "ภาพรวมพอร์ตโฟลิโอ",
+          "Project Statuses": "สถานะโครงการ",
+          "KPI Comparison": "เปรียบเทียบตัวชี้วัด",
+          "Portfolio Risks": "ความเสี่ยงของพอร์ตโฟลิโอ",
+          "Field Progress": "ความคืบหน้าหน้างาน",
+          "Top Risks": "ความเสี่ยงหลัก",
+          "Site Photos": "ภาพถ่ายหน้างาน",
+          "Summary": "สรุป"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "ใบสั่งซื้อ",
+        "gr_title": "ใบรับสินค้า",
+        "supplier": "ผู้จัดจำหน่าย",
+        "po_type": "ประเภทใบสั่งซื้อ",
+        "issue_date": "วันที่ออกเอกสาร",
+        "delivery_date": "วันที่ส่งมอบ",
+        "created_by": "จัดทำโดย",
+        "order_total": "ยอดรวมใบสั่งซื้อ",
+        "line_items": "รายการ",
+        "col_no": "ลำดับ",
+        "col_description": "รายละเอียด",
+        "col_quantity": "ปริมาณ",
+        "col_unit": "หน่วย",
+        "col_unit_rate": "ราคาต่อหน่วย",
+        "col_amount": "จำนวนเงิน",
+        "no_line_items": "ไม่มีรายการ",
+        "totals": "ยอดรวม",
+        "subtotal": "มูลค่าสุทธิ",
+        "tax": "ภาษี",
+        "total_gross": "รวมภาษีแล้ว",
+        "terms": "เงื่อนไข",
+        "payment_terms": "เงื่อนไขการชำระเงิน",
+        "retention": "เงินประกันผลงาน",
+        "retention_at": "หักเงินประกันผลงานเมื่อ",
+        "retention_at_receipt": "รับสินค้า",
+        "retention_at_invoice": "ใบแจ้งหนี้",
+        "invoice_tolerance": "ค่าความคลาดเคลื่อนของใบแจ้งหนี้",
+        "supplier_confirmation": "การยืนยันจากผู้จัดจำหน่าย",
+        "supplier_reference": "เลขอ้างอิงของผู้จัดจำหน่าย",
+        "confirmed_delivery": "วันที่ส่งมอบที่ยืนยันแล้ว",
+        "acknowledged_on": "รับทราบเมื่อ",
+        "not_confirmed": "ผู้จัดจำหน่ายยังไม่ยืนยัน",
+        "notes": "หมายเหตุ",
+        "no_notes": "ไม่มีหมายเหตุ",
+        "sig_ordered_by": "สั่งซื้อโดย",
+        "purchase_order": "ใบสั่งซื้อ",
+        "receipt_date": "วันที่รับสินค้า",
+        "received_by": "ผู้รับสินค้า",
+        "delivery_note": "ใบส่งของ",
+        "col_ordered": "สั่งซื้อ",
+        "col_received": "รับแล้ว",
+        "col_rejected": "ปฏิเสธ",
+        "col_batch": "ชุดการผลิต / ล็อต",
+        "rejections": "การปฏิเสธสินค้า",
+        "col_reason": "เหตุผล",
+        "no_rejections": "ไม่มีการปฏิเสธสินค้า",
+        "sig_delivered_by": "ส่งมอบโดย",
+        "counterparty_tax_id": "เลขประจำตัวผู้เสียภาษี",
+        "counterparty_address": "ที่อยู่"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "ฉบับร่าง",
+          "approved": "อนุมัติแล้ว",
+          "issued": "ออกแล้ว",
+          "partially_received": "รับบางส่วนแล้ว",
+          "completed": "เสร็จสิ้น",
+          "cancelled": "ยกเลิก"
+        },
+        "gr_status": {
+          "draft": "ฉบับร่าง",
+          "confirmed": "ยืนยันแล้ว"
+        },
+        "po_type": {
+          "standard": "มาตรฐาน",
+          "blanket": "ใบสั่งซื้อกรอบ",
+          "service": "บริการ"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "ใบแจ้งหนี้",
+        "payment_title": "ใบรับชำระเงิน",
+        "direction": "ทิศทาง",
+        "supplier": "ผู้จัดจำหน่าย",
+        "client": "ลูกค้า",
+        "invoice_date": "วันที่ใบแจ้งหนี้",
+        "due_date": "วันครบกำหนดชำระ",
+        "payment_terms": "เงื่อนไขการชำระเงิน",
+        "purchase_order": "ใบสั่งซื้อ",
+        "invoice_total": "ยอดรวมใบแจ้งหนี้",
+        "line_items": "รายการ",
+        "col_no": "ลำดับ",
+        "col_description": "รายละเอียด",
+        "col_quantity": "ปริมาณ",
+        "col_unit": "หน่วย",
+        "col_unit_rate": "ราคาต่อหน่วย",
+        "col_vat": "VAT",
+        "col_amount": "จำนวนเงิน",
+        "no_line_items": "ไม่มีรายการ",
+        "totals": "ยอดรวม",
+        "subtotal": "มูลค่าสุทธิ",
+        "tax": "ภาษี",
+        "total_gross": "รวมภาษีแล้ว",
+        "retention": "เงินประกันผลงาน",
+        "amount_due": "ยอดชำระหลังหักเงินประกันผลงาน",
+        "payments": "การชำระเงิน",
+        "col_date": "วันที่",
+        "col_reference": "อ้างอิง",
+        "col_paid": "ชำระแล้ว",
+        "col_withheld": "หักไว้",
+        "refund": "คืนเงิน",
+        "no_payments": "ไม่มีการชำระเงิน",
+        "notes": "หมายเหตุ",
+        "no_notes": "ไม่มีหมายเหตุ",
+        "invoice": "ใบแจ้งหนี้",
+        "invoice_number": "เลขที่ใบแจ้งหนี้",
+        "payment_date": "วันที่ชำระเงิน",
+        "reference": "อ้างอิง",
+        "amount_paid": "จำนวนเงินที่ชำระ",
+        "exchange_rate": "อัตราแลกเปลี่ยน",
+        "kind": "ประเภท",
+        "kind_payment": "การชำระเงิน",
+        "kind_refund": "การคืนเงิน",
+        "withholding": "หักเงินประกันผลงาน",
+        "withheld_amount": "จำนวนเงินที่หัก",
+        "release_date": "วันที่ปล่อยเงินประกัน",
+        "gross_settled": "จำนวนเงินรวมที่ชำระแล้ว",
+        "no_withholding": "ไม่มีการหักเงินจากการชำระครั้งนี้",
+        "counterparty_tax_id": "เลขประจำตัวผู้เสียภาษี",
+        "counterparty_address": "ที่อยู่"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "ฉบับร่าง",
+          "pending": "รอการอนุมัติ",
+          "approved": "อนุมัติแล้ว",
+          "sent": "ส่งแล้ว",
+          "paid": "ชำระแล้ว",
+          "cancelled": "ยกเลิก",
+          "credit_note_issued": "ออกใบลดหนี้แล้ว"
+        },
+        "direction": {
+          "payable": "เจ้าหนี้ (ใบแจ้งหนี้จากผู้จัดจำหน่าย)",
+          "receivable": "ลูกหนี้ (ใบแจ้งหนี้ถึงลูกค้า)"
+        },
+        "payment_status": {
+          "completed": "เสร็จสิ้น",
+          "refunded": "คืนเงินแล้ว"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "หน้า {page} จาก {total}",
+    "page": "หน้า {page}",
+    "printed": "พิมพ์เมื่อ: {timestamp}",
+    "generated": "สร้างเมื่อ: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} เชิญคุณเข้าใช้พอร์ทัลลูกค้า",
+      "login_subject": "ลิงก์เข้าสู่ระบบพอร์ทัลลูกค้าของคุณ",
+      "invite_heading": "ยินดีต้อนรับสู่พอร์ทัลลูกค้า",
+      "login_heading": "เข้าสู่ระบบพอร์ทัลลูกค้า",
+      "greeting": "เรียน คุณ{name}",
+      "greeting_generic": "เรียน ผู้ใช้งาน",
+      "invite_body": "{sender} ได้ให้สิทธิ์คุณเข้าถึงพอร์ทัลลูกค้า คุณสามารถติดตามโครงการได้ที่นั่น ทั้งรายงานความคืบหน้า เอกสาร ใบแจ้งหนี้ และเหตุการณ์สำคัญถัดไป",
+      "login_body": "นี่คือลิงก์เข้าสู่ระบบที่คุณขอไว้",
+      "link_help": "กดปุ่มด้านล่างเพื่อเข้าสู่ระบบ ไม่ต้องใช้รหัสผ่าน ลิงก์นี้ใช้ได้เพียงครั้งเดียวและจะหมดอายุใน {hours} ชั่วโมง",
+      "ignore": "หากคุณไม่ได้ขออีเมลฉบับนี้ สามารถเพิกเฉยได้ หากไม่มีลิงก์นี้ จะไม่มีผู้ใดเข้าถึงได้",
+      "invite_cta": "เปิดพอร์ทัล",
+      "login_cta": "เข้าสู่ระบบ",
+      "sender_generic": "ทีมงานโครงการของคุณ"
+    },
+    "tender_invite": {
+      "subject": "หนังสือเชิญเสนอราคา: {package}",
+      "heading": "หนังสือเชิญเสนอราคา",
+      "greeting": "เรียน {company}",
+      "greeting_generic": "เรียน ท่านผู้เกี่ยวข้อง",
+      "invite": "ขอเชิญท่านยื่นข้อเสนอราคาสำหรับแพ็กเกจประกวดราคา {package}",
+      "invite_project": "ขอเชิญท่านยื่นข้อเสนอราคาสำหรับแพ็กเกจประกวดราคา {package} ของโครงการ {project}",
+      "deadline": "กำหนดยื่นข้อเสนอ: {deadline}",
+      "link_help": "กดปุ่มด้านล่างเพื่อเปิดใบแสดงปริมาณงานและราคา กรอกราคาต่อหน่วยทางออนไลน์ บันทึกฉบับร่างได้ทุกเมื่อ และยื่นข้อเสนอก่อนครบกำหนด ไม่ต้องมีบัญชีผู้ใช้",
+      "link_personal": "ลิงก์นี้ออกให้เฉพาะบริษัทของท่าน โปรดอย่าส่งต่อ",
+      "cta": "เปิดใบแสดงปริมาณงานและกรอกราคา",
+      "no_link": "โปรดตรวจสอบรายละเอียดของแพ็กเกจ และส่งข้อเสนอราคากลับมาก่อนกำหนดข้างต้น"
+    },
+    "notification_email": {
+      "greeting": "เรียน คุณ{name}",
+      "greeting_generic": "เรียน ผู้ใช้งาน",
+      "cta": "เปิดใน OpenConstructionERP",
+      "footer": "คุณได้รับอีเมลนี้ตามการตั้งค่าการแจ้งเตือนของคุณ สามารถเปลี่ยนแปลงได้ในโปรไฟล์",
+      "digest_subject": "OpenConstructionERP: สรุปการแจ้งเตือน ({count})",
+      "digest_heading": "การแจ้งเตือนล่าสุด:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "ตารางเปรียบเทียบราคา",
+      "comparison_sheet": "เปรียบเทียบราคา",
+      "bidder_title": "ใบแสดงปริมาณงานสำหรับเสนอราคา",
+      "bidder_sheet": "ใบปริมาณงาน",
+      "project": "โครงการ",
+      "package": "แพ็กเกจ",
+      "currency": "สกุลเงิน",
+      "date": "วันที่",
+      "return_by": "ส่งคืนภายใน",
+      "item": "รายการที่",
+      "description": "รายละเอียดงาน",
+      "unit": "หน่วย",
+      "quantity": "ปริมาณ",
+      "unit_price": "ราคาต่อหน่วย",
+      "line_total": "รวมต่อรายการ",
+      "own_estimate": "ราคากลางของเรา",
+      "not_priced": "ยังไม่ใส่ราคา",
+      "sum_priced_lines": "รวมรายการที่ใส่ราคาแล้ว",
+      "bid_total": "ยอดเสนอราคารวมตามที่ยื่น",
+      "lines_priced": "รายการที่ใส่ราคาแล้ว",
+      "lines_priced_value": "{priced} / {total}",
+      "deviation": "ส่วนต่างจากราคากลางของเรา",
+      "not_comparable": "ไม่เกี่ยวข้อง",
+      "other_currency": "เสนอราคาเป็นสกุลเงิน {currency} จึงไม่นำมาจัดอันดับเทียบกับข้อเสนอในสกุลเงิน {reporting}",
+      "legend": "คำอธิบายสัญลักษณ์",
+      "legend_lowest": "สีเขียว: ราคาต่อหน่วยต่ำสุดของรายการนั้น",
+      "legend_high": "▲ สีแดง: สูงกว่าราคากลางของรายการนั้นเกิน {pct}%",
+      "legend_low": "▼ สีเหลือง: ต่ำกว่าราคากลางของรายการนั้นเกิน {pct}%",
+      "legend_missing": "\"{marker}\": ผู้เสนอราคาไม่ได้ใส่ราคาในรายการนี้",
+      "legend_incomplete": "ข้อเสนอที่มีรายการยังไม่ใส่ราคาจะถูกระบุไว้ในคอลัมน์ \"รายการที่ใส่ราคาแล้ว\" และไม่ถูกจัดเป็นราคาต่ำสุดตามยอดรวม",
+      "legend_totals": "ยอดเสนอราคารวมคือตัวเลขที่ผู้เสนอราคายื่นมา ซึ่งอาจต่างจากผลรวมของรายการที่ใส่ราคาแล้ว",
+      "bidder": "ผู้เสนอราคา",
+      "bidder_note": "หมายเหตุจากผู้เสนอราคา",
+      "reference": "รหัสอ้างอิง (ห้ามแก้ไข)",
+      "total": "รวม",
+      "instructions": "กรอกราคาต่อหน่วยของแต่ละรายการในช่องสีเหลือง ปริมาณและรายละเอียดงานเป็นค่าคงที่ ส่วนจำนวนเงินต่อรายการและยอดรวมคำนวณให้อัตโนมัติ หากไม่เสนอราคารายการใดให้เว้นช่องนั้นว่างไว้"
+    },
+    "cost_plan": {
+      "sheet_plan": "แผนต้นทุน NRM 1",
+      "sheet_unallocated": "ยังไม่จัดสรร",
+      "title": "แผนต้นทุนแยกตามองค์ประกอบอาคาร (NRM 1)",
+      "bill": "ใบแสดงปริมาณงานและราคา",
+      "currency": "สกุลเงิน",
+      "gifa": "พื้นที่ใช้สอยรวมภายใน (m2)",
+      "gifa_project": "จากโครงการ",
+      "gifa_entered": "กรอกสำหรับการส่งออกครั้งนี้",
+      "gifa_none": "ยังไม่ได้ตั้งค่า จึงไม่แสดงต้นทุนต่อ m2",
+      "col_code": "รหัส",
+      "col_description": "องค์ประกอบ",
+      "col_positions": "จำนวนรายการ",
+      "col_basis": "เกณฑ์การคิด",
+      "col_total": "รวม",
+      "col_per_m2": "ต้นทุนต่อ m2 ของพื้นที่ใช้สอยรวมภายใน",
+      "col_share": "สัดส่วน % ของยอดรวม",
+      "col_running": "ยอดสะสม",
+      "group_level": "ระดับกลุ่ม ไม่ได้ระบุองค์ประกอบ",
+      "facilitating_works_estimate": "ประมาณการงานเตรียมการ",
+      "works_estimate": "ประมาณการงานก่อสร้างอาคาร",
+      "addons_heading": "กลุ่ม 9-14 ของ NRM 1 ที่คิดราคาเป็นรายการในใบแสดงปริมาณงาน",
+      "unallocated": "ยังไม่จัดเข้าองค์ประกอบ",
+      "direct_cost": "ต้นทุนทางตรงของใบแสดงปริมาณงาน",
+      "markups_heading": "ค่าใช้จ่ายส่วนเพิ่ม (ตามลำดับการคำนวณของใบแสดงปริมาณงาน)",
+      "markups_total": "รวมค่าใช้จ่ายส่วนเพิ่ม",
+      "grand_total": "รวมแผนต้นทุนทั้งสิ้น",
+      "basis_direct": "{pct}% ของต้นทุนทางตรง",
+      "basis_running": "{pct}% ของยอดสะสมย่อย",
+      "basis_lump": "เหมาจ่าย",
+      "basis_banded": "อัตราตามช่วง",
+      "basis_escalation": "ปรับราคาตามดัชนี",
+      "basis_other": "{kind}",
+      "basis_scoped": "เฉพาะหมวดงาน",
+      "col_ordinal": "ลำดับที่",
+      "col_position": "รายละเอียดงาน",
+      "col_written_code": "รหัสที่ระบุไว้",
+      "col_reason": "เหตุผล",
+      "reason_no_code": "ไม่มีรหัส NRM ที่รายการหรือหมวดงานของรายการ",
+      "reason_invalid_code": "รหัสไม่ใช่หมายเลข NRM",
+      "reason_unknown_group": "NRM 1 ไม่มีกลุ่มนี้",
+      "truncated": "แสดงรายการเพียง {shown} รายการแรกจากทั้งหมด {count} รายการ ยอดรวมครอบคลุมทุกรายการ"
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "ข้อกำหนด",
+      "sheet_summary": "สรุป",
+      "sheet_legend": "คำอธิบาย",
+      "summary_element": "องค์ประกอบ",
+      "summary_count": "จำนวนข้อกำหนด",
+      "summary_total": "รวม",
+      "legend_column": "คอลัมน์",
+      "legend_description": "คำอธิบาย",
+      "unspecified": "ไม่ระบุ",
+      "h01": "องค์ประกอบ / คลาส IFC",
+      "h02": "การจำแนกประเภท",
+      "h03": "กลุ่มคุณสมบัติ",
+      "h04": "ชื่อคุณสมบัติ",
+      "h05": "ชนิดข้อมูล",
+      "h06": "จำเป็น",
+      "h07": "ค่าที่อนุญาต",
+      "h08": "ค่าต่ำสุด",
+      "h09": "ค่าสูงสุด",
+      "h10": "หน่วย",
+      "h11": "รูปแบบ",
+      "h12": "ระยะงาน",
+      "h13": "ผู้รับผิดชอบ",
+      "h14": "กรณีการใช้งาน",
+      "h15": "แหล่งที่มา",
+      "d01": "คลาสเอนทิตี IFC (เช่น IFCWALL, IFCBEAM)",
+      "d02": "ระบบการจำแนกประเภทและรหัส (เช่น Uniclass 2015: EF_25_10)",
+      "d03": "ชื่อชุดคุณสมบัติ (เช่น Pset_WallCommon)",
+      "d04": "ชื่อคุณสมบัติหรือแอตทริบิวต์ที่กำหนด",
+      "d05": "ชนิดข้อมูล IFC (IFCLABEL, IFCREAL, IFCBOOLEAN ฯลฯ)",
+      "d06": "คาร์ดินัลลิตี: จำเป็น ไม่บังคับ หรือห้ามใช้",
+      "d07": "รายการค่าที่อนุญาต คั่นด้วยเครื่องหมายอัฒภาค",
+      "d08": "ขอบเขตของช่วงตัวเลข",
+      "d09": "หน่วยวัด (m, m2, kg ฯลฯ)",
+      "d10": "รูปแบบนิพจน์ปกติสำหรับตรวจสอบค่า",
+      "d11": "ระยะงานหรือเหตุการณ์สำคัญของโครงการ (LP3, RIBA Stage 3 ฯลฯ)",
+      "d12": "ผู้รับผิดชอบ (สถาปนิก วิศวกรโครงสร้าง ฯลฯ)",
+      "d13": "วัตถุประสงค์หรือกรณีการใช้งานของข้อกำหนด",
+      "d14": "มาตรฐานหรือเอกสารต้นทาง"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "สร้างใบแสดงปริมาณงานแล้ว",
+      "notifications.boq.created.body": "บันทึกใบแสดงปริมาณงาน '{boq_name}' ของคุณแล้ว",
+      "notifications.meeting.action_assigned.title": "มีรายการดำเนินการจากการประชุมมอบหมายให้คุณ",
+      "notifications.meeting.action_assigned.body": "จากการประชุม {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "สถานะเอกสารเปลี่ยนแปลง",
+      "notifications.cde.state_transitioned.body": "คอนเทนเนอร์ย้ายไปที่ '{new_state}' แล้ว",
+      "notifications.cde.linked_published.title": "เอกสารที่เกี่ยวกับงานของคุณได้รับการเผยแพร่",
+      "notifications.cde.linked_published.body": "{container_code} เผยแพร่แล้วที่ revision {revision_code} รายการที่เชื่อมโยงของคุณ: {records}",
+      "notifications.rfi.assigned.title": "มอบหมาย RFI ให้คุณ",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "RFI ได้รับคำตอบแล้ว",
+      "notifications.rfi.responded.body": "คำขอ {code} ({title}) ของคุณได้รับคำตอบแล้ว",
+      "notifications.risk.assigned.title": "มอบหมายความเสี่ยงให้คุณ",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "แจ้งเตือนต้นทุนเกินงบ",
+      "notifications.costmodel.overrun_alert.body": "ต้นทุน {category} เกินงบประมาณ: ค่าจริง {actual} {currency} เกินเกณฑ์แจ้งเตือน +{threshold_pct}% ของค่าที่วางแผนไว้ {planned} {currency}",
+      "notifications.submittal.submitted.title": "เอกสารขออนุมัติรอการตรวจสอบ",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "อนุมัติเอกสารขออนุมัติแล้ว",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "ไม่อนุมัติเอกสารขออนุมัติ",
+      "notifications.submittal.rejected.body": "{code} ({title}) เหตุผล: {reason}",
+      "notifications.submittal.revise_resubmit.title": "เอกสารขออนุมัติต้องแก้ไข",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}) เหตุผล: {reason}",
+      "notifications.transmittal.issued.title": "ออกใบนำส่งเอกสารถึงคุณแล้ว",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "ผู้รับยืนยันการรับใบนำส่งเอกสารแล้ว",
+      "notifications.transmittal.acknowledged.body": "ผู้รับยืนยันการรับ {code} ({title}) แล้ว",
+      "notifications.transmittal.responded.title": "ใบนำส่งเอกสารได้รับคำตอบแล้ว",
+      "notifications.transmittal.responded.body": "{code} ({title}) {response_summary}",
+      "notification.rfi_assigned_title": "มอบหมาย RFI ให้คุณ",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "มีงานใหม่มอบหมายให้คุณ",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "อนุมัติใบแจ้งหนี้แล้ว",
+      "notification.invoice_approved_body": "ใบแจ้งหนี้ {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "กำหนดการตรวจสอบงานแล้ว",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title} วันที่ {inspection_date}",
+      "notification.submittal_status_changed_title": "สถานะเอกสารขออนุมัติเปลี่ยนแปลง",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "กำหนดการประชุมแล้ว",
+      "notification.meeting_scheduled_body": "{title} วันที่ {meeting_date}",
+      "notification.ncr_created_title": "มีการออกรายงานงานไม่เป็นไปตามข้อกำหนด",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "อัปโหลดเอกสารแล้ว",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "คุณถูกกล่าวถึงในความคิดเห็น",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "มีความคิดเห็นใหม่ในการสนทนา",
+      "notifications.collaboration.comment_added.body": "ใน {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "ตรวจพบการชนกันที่รุนแรงสูง",
+      "notifications.clash.high_severity.body": "การชนกันระดับ {severity}: {a_name} กับ {b_name}",
+      "notifications.validation.report.title": "การตรวจสอบพบปัญหา",
+      "notifications.validation.report.body": "{target_type} นี้มีข้อผิดพลาด {error_count} รายการและคำเตือน {warning_count} รายการ",
+      "notifications.punchlist.auto_created.title": "สร้างรายการแก้ไขงานแล้ว",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "สรุปการแจ้งเตือน",
+      "notifications.digest.body": "ช่อง {channel} มีความเคลื่อนไหวใหม่ {count} รายการ",
+      "notifications.approval.overdue.title": "การอนุมัติเลยกำหนด",
+      "notifications.approval.overdue.body": "ขั้นตอนที่ {step_ordinal} ของ {target_kind} นี้เลยกำหนด {hours_overdue} ชั่วโมง",
+      "notifications.approval.escalated.title": "การอนุมัติถูกส่งต่อให้คุณ",
+      "notifications.approval.escalated.body": "ขั้นตอนที่ {step_ordinal} ของ {target_kind} นี้ถูกส่งต่อให้คุณ (ระดับ {level})",
+      "notifications.approval.reassigned.title": "มอบหมายการอนุมัติใหม่ให้คุณ",
+      "notifications.approval.reassigned.body": "ขั้นตอนที่ {step_ordinal} ของ {target_kind} นี้เป็นหน้าที่ของคุณในการพิจารณา",
+      "notifications.deadline.overdue.title": "เลยกำหนด: {title}",
+      "notifications.deadline.overdue.body": "รายการ \"{title}\" ของ {module} เลยกำหนด {days_overdue} วัน",
+      "notifications.deadline.escalated.title": "ส่งต่อรายการที่เลยกำหนด",
+      "notifications.deadline.escalated.body": "รายการ \"{title}\" ของ {module} ยังไม่เสร็จและเลยกำหนด {days_overdue} วัน จึงถูกส่งต่อให้ผู้บังคับบัญชา",
+      "notifications.deadline.approaching.title": "ใกล้ครบกำหนด: {title}",
+      "notifications.deadline.approaching.body": "รายการ \"{title}\" ของ {module} ครบกำหนดวันที่ {due_date}",
+      "notifications.deadline.built.approaching.title": "ใกล้ครบกำหนด: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: \"{title}\" ครบกำหนดวันที่ {due_date}",
+      "notifications.deadline.rfi.overdue.title": "เลยกำหนด: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "RFI {reference} \"{title}\" ของโครงการ {project} ครบกำหนดวันที่ {due_date_display} และเลยกำหนด {days_overdue} วัน ต้องตอบกลับ",
+      "notifications.deadline.rfi.escalated.title": "ส่งต่อเรื่องเลยกำหนด: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "RFI {reference} \"{title}\" ของโครงการ {project} ยังไม่ปิด เลยกำหนด {due_date_display} มาแล้ว {days_overdue} วัน และถูกส่งต่อให้คุณ",
+      "notifications.deadline.rfi.approaching.title": "ใกล้ครบกำหนด: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "RFI {reference} \"{title}\" ของโครงการ {project} ครบกำหนดวันที่ {due_date_display} ต้องตอบกลับ",
+      "notifications.deadline.submittals.overdue.title": "เลยกำหนด: เอกสารขออนุมัติ {reference}",
+      "notifications.deadline.submittals.overdue.body": "เอกสารขออนุมัติ {reference} \"{title}\" ของโครงการ {project} ครบกำหนดวันที่ {due_date_display} และเลยกำหนด {days_overdue} วัน ต้องตรวจสอบ",
+      "notifications.deadline.submittals.escalated.title": "ส่งต่อเรื่องเลยกำหนด: เอกสารขออนุมัติ {reference}",
+      "notifications.deadline.submittals.escalated.body": "เอกสารขออนุมัติ {reference} \"{title}\" ของโครงการ {project} ยังไม่ปิด เลยกำหนด {due_date_display} มาแล้ว {days_overdue} วัน และถูกส่งต่อให้คุณ",
+      "notifications.deadline.submittals.approaching.title": "ใกล้ครบกำหนด: เอกสารขออนุมัติ {reference}",
+      "notifications.deadline.submittals.approaching.body": "เอกสารขออนุมัติ {reference} \"{title}\" ของโครงการ {project} ครบกำหนดวันที่ {due_date_display} ต้องตรวจสอบ",
+      "notifications.deadline.correspondence.overdue.title": "เลยกำหนด: หนังสือโต้ตอบ {reference}",
+      "notifications.deadline.correspondence.overdue.body": "หนังสือโต้ตอบ {reference} \"{title}\" ของโครงการ {project} ต้องตอบกลับภายใน {due_date_display} และเลยกำหนด {days_overdue} วัน ต้องตอบกลับ",
+      "notifications.deadline.correspondence.escalated.title": "ส่งต่อเรื่องเลยกำหนด: หนังสือโต้ตอบ {reference}",
+      "notifications.deadline.correspondence.escalated.body": "หนังสือโต้ตอบ {reference} \"{title}\" ของโครงการ {project} ยังไม่ได้รับคำตอบ เลยกำหนด {due_date_display} มาแล้ว {days_overdue} วัน และถูกส่งต่อให้คุณ",
+      "notifications.deadline.correspondence.approaching.title": "ใกล้ครบกำหนด: หนังสือโต้ตอบ {reference}",
+      "notifications.deadline.correspondence.approaching.body": "หนังสือโต้ตอบ {reference} \"{title}\" ของโครงการ {project} ต้องตอบกลับภายใน {due_date_display} ต้องตอบกลับ",
+      "notifications.deadline.variations.overdue.title": "เลยกำหนด: ใบสั่งเปลี่ยนแปลงงาน {reference}",
+      "notifications.deadline.variations.overdue.body": "ใบสั่งเปลี่ยนแปลงงาน {reference} \"{title}\" ของโครงการ {project} ครบกำหนดวันที่ {due_date_display} และเลยกำหนด {days_overdue} วัน ต้องตัดสินใจ",
+      "notifications.deadline.variations.escalated.title": "ส่งต่อเรื่องเลยกำหนด: ใบสั่งเปลี่ยนแปลงงาน {reference}",
+      "notifications.deadline.variations.escalated.body": "ใบสั่งเปลี่ยนแปลงงาน {reference} \"{title}\" ของโครงการ {project} ยังไม่ปิด เลยกำหนด {due_date_display} มาแล้ว {days_overdue} วัน และถูกส่งต่อให้คุณ",
+      "notifications.deadline.variations.approaching.title": "ใกล้ครบกำหนด: ใบสั่งเปลี่ยนแปลงงาน {reference}",
+      "notifications.deadline.variations.approaching.body": "ใบสั่งเปลี่ยนแปลงงาน {reference} \"{title}\" ของโครงการ {project} ครบกำหนดวันที่ {due_date_display} ต้องตัดสินใจ",
+      "notifications.variation.submitted.title": "ใบสั่งเปลี่ยนแปลงงานรอการตัดสินใจ: {code}",
+      "notifications.variation.submitted.body": "ใบสั่งเปลี่ยนแปลงงาน {code} \"{title}\" ของโครงการ {project} ถูกส่งเข้ามาและรอการตัดสินใจ",
+      "notifications.variation.approved.title": "อนุมัติใบสั่งเปลี่ยนแปลงงานแล้ว: {code}",
+      "notifications.variation.approved.body": "ใบสั่งเปลี่ยนแปลงงาน {code} \"{title}\" ของโครงการ {project} ได้รับการอนุมัติแล้ว",
+      "notifications.variation.rejected.title": "ไม่อนุมัติใบสั่งเปลี่ยนแปลงงาน: {code}",
+      "notifications.variation.rejected.body": "ใบสั่งเปลี่ยนแปลงงาน {code} \"{title}\" ของโครงการ {project} ไม่ได้รับการอนุมัติและส่งกลับมาให้คุณ",
+      "notifications.variation.rejected_reason.body": "ใบสั่งเปลี่ยนแปลงงาน {code} \"{title}\" ของโครงการ {project} ไม่ได้รับการอนุมัติและส่งกลับมาให้คุณ เหตุผล: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "คำสั่งเปลี่ยนแปลงรออนุมัติ: {code}",
+      "notifications.changeorder.awaiting_approval.body": "คำสั่งเปลี่ยนแปลง {code} \"{title}\" ของโครงการ {project} ถูกส่งเข้ามาและรออนุมัติ",
+      "notifications.changeorder.approved.title": "อนุมัติคำสั่งเปลี่ยนแปลงแล้ว: {code}",
+      "notifications.changeorder.approved.body": "คำสั่งเปลี่ยนแปลง {code} \"{title}\" ของโครงการ {project} ได้รับการอนุมัติแล้ว",
+      "notifications.changeorder.rejected.title": "ไม่อนุมัติคำสั่งเปลี่ยนแปลง: {code}",
+      "notifications.changeorder.rejected.body": "คำสั่งเปลี่ยนแปลง {code} \"{title}\" ของโครงการ {project} ไม่ได้รับการอนุมัติ",
+      "notifications.submittal.approved_as_noted.title": "อนุมัติเอกสารขออนุมัติโดยมีหมายเหตุ",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "มีเอกสารรอการอนุมัติจากคุณ",
+      "notifications.file_approval.needs_approver.body": "{file_kind} กำลังรอการอนุมัติจากคุณ",
+      "notifications.file_approval.approved.title": "เอกสารของคุณได้รับการอนุมัติแล้ว",
+      "notifications.file_approval.approved.body": "{file_kind} ของคุณผ่านทุกขั้นตอนการอนุมัติแล้ว",
+      "notifications.file_approval.rejected.title": "เอกสารของคุณถูกส่งกลับ",
+      "notifications.file_approval.rejected.body": "{file_kind} ของคุณไม่ได้รับการอนุมัติและต้องแก้ไข",
+      "notifications.portal.user_invited.title": "เชิญผู้ใช้พอร์ทัลแล้ว",
+      "notifications.portal.user_invited.body": "เชิญ {portal_user_email} ในบทบาท {portal_role} แล้ว",
+      "notifications.portal.message_received.title": "มีข้อความใหม่ในพอร์ทัล",
+      "notifications.portal.message_received.body": "{buyer_name} ส่งข้อความมา"
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "รหัสกิจกรรม",
+          "รหัสงาน",
+          "ลำดับกิจกรรม",
+          "Activity ID",
+          "ID"
+        ],
+        "name": [
+          "ชื่อกิจกรรม",
+          "ชื่องาน",
+          "รายการกิจกรรม",
+          "Task Name"
+        ],
+        "wbs": [
+          "WBS",
+          "รหัส WBS",
+          "เลข WBS",
+          "รหัสโครงสร้างงาน"
+        ],
+        "outline_level": [
+          "ระดับโครงร่าง",
+          "ระดับชั้นงาน",
+          "ระดับการเยื้อง",
+          "Outline Level"
+        ],
+        "start": [
+          "วันเริ่มต้น",
+          "วันที่เริ่ม",
+          "เริ่มงาน",
+          "วันเริ่มตามแผน"
+        ],
+        "finish": [
+          "วันสิ้นสุด",
+          "วันที่เสร็จ",
+          "เสร็จงาน",
+          "วันเสร็จตามแผน"
+        ],
+        "duration": [
+          "ระยะเวลา",
+          "ระยะเวลา (วัน)",
+          "ระยะเวลาดำเนินการ",
+          "จำนวนวัน"
+        ],
+        "predecessors": [
+          "งานก่อนหน้า",
+          "กิจกรรมก่อนหน้า",
+          "กิจกรรมที่ต้องเสร็จก่อน",
+          "ความสัมพันธ์งาน"
+        ],
+        "percent_complete": [
+          "% ความคืบหน้า",
+          "ความคืบหน้า (%)",
+          "เปอร์เซ็นต์ความคืบหน้า",
+          "ความคืบหน้า"
+        ],
+        "milestone": [
+          "เหตุการณ์สำคัญ",
+          "หมุดหมายโครงการ",
+          "เป็นเหตุการณ์สำคัญ"
+        ],
+        "resource": [
+          "ทรัพยากร",
+          "ชื่อทรัพยากร",
+          "ผู้รับผิดชอบงาน",
+          "ชุดช่าง",
+          "ทีมงาน"
+        ],
+        "notes": [
+          "หมายเหตุ",
+          "บันทึกเพิ่มเติม",
+          "ข้อสังเกต"
+        ],
+        "client_visible": [
+          "ลูกค้าเห็นได้",
+          "แสดงให้ลูกค้า",
+          "เปิดให้ลูกค้าดู",
+          "แชร์ให้ลูกค้า"
+        ]
+      },
+      "yes_words": [
+        "ใช่",
+        "จริง",
+        "มี"
+      ],
+      "no_words": [
+        "ไม่ใช่",
+        "เท็จ",
+        "ไม่มี"
+      ],
+      "example_names": [
+        "งานโครงสร้างและเปลือกอาคาร",
+        "งานขุดดิน",
+        "งานฐานราก",
+        "ตรวจรับงานฐานราก"
+      ]
+    },
+    "module_suggest": {
+      "link_labels": {
+        "user": "ผู้รับผิดชอบ",
+        "contact": "ผู้ติดต่อ",
+        "contract": "สัญญา",
+        "schedule_activity": "กิจกรรมในแผนงาน",
+        "document": "เอกสาร"
+      },
+      "keywords": {
+        "contact": [
+          "*ผู้ติดต่อ*",
+          "*ซัพพลายเออร์*",
+          "*ผู้ขาย*",
+          "*ผู้รับเหมาช่วง*",
+          "*ลูกค้า*",
+          "*เจ้าของโครงการ*"
+        ],
+        "contract": [
+          "*สัญญา*",
+          "*ข้อตกลง*"
+        ],
+        "schedule_activity": [
+          "*กิจกรรม*",
+          "*แผนงาน*",
+          "*โครงสร้างงาน*",
+          "wbs"
+        ],
+        "user": [
+          "*ผู้รับผิดชอบ*",
+          "*ผู้ได้รับมอบหมาย*",
+          "*ผู้ตรวจ*",
+          "*โฟร์แมน*",
+          "*หัวหน้าคนงาน*"
+        ],
+        "due": [
+          "*กำหนดส่ง*",
+          "*วันครบกำหนด*",
+          "*ครบกำหนด*",
+          "*หมดอายุ*"
+        ],
+        "document": [
+          "*เอกสาร*",
+          "*แบบก่อสร้าง*",
+          "*ไฟล์แนบ*",
+          "*แนบ*"
+        ]
+      },
+      "state_labels": [
+        "เปิด",
+        "กำลังดำเนินการ",
+        "เสร็จสิ้น"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Addendum {number} สำหรับการประมูล {package}",
+      "addendum_heading": "Addendum สำหรับการประมูล",
+      "greeting": "เรียน {company}",
+      "greeting_generic": "เรียน ท่านผู้เกี่ยวข้อง",
+      "addendum_intro": "ได้ออก Addendum {number} สำหรับแพ็กเกจประมูล {package} แล้ว: {title}",
+      "addendum_deadline": "กำหนดยื่นข้อเสนอถูกเลื่อนจาก {old} เป็น {new}",
+      "addendum_boq": "ใบประมาณราคา (BOQ) มีการเปลี่ยนแปลง (ฉบับ {revision}) กรุณาเสนอราคาตามฉบับปัจจุบัน",
+      "addendum_documents": "เอกสารที่ออก: {documents}",
+      "addendum_ack": "กรุณายืนยันการรับ Addendum นี้ ข้อเสนอที่ไม่ยืนยัน Addendum ทุกฉบับอาจถือว่าไม่เป็นไปตามข้อกำหนด",
+      "answer_subject": "คำชี้แจง {number} สำหรับการประมูล {package}",
+      "answer_heading": "คำชี้แจงการประมูล",
+      "answer_intro": "คำถามเกี่ยวกับแพ็กเกจประมูล {package} ได้รับคำตอบแล้ว คำตอบนี้มีผลกับผู้ยื่นข้อเสนอทุกราย",
+      "question_label": "คำถาม",
+      "answer_label": "คำตอบ"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "มูลค่าการพัฒนารวม (GDV)",
+      "total_development_cost": "ต้นทุนการพัฒนารวม",
+      "residual_land_value": "มูลค่าที่ดินคงเหลือ",
+      "developer_profit": "กำไรของผู้พัฒนา",
+      "profit_on_cost": "กำไรต่อต้นทุน",
+      "profit_on_gdv": "กำไรต่อ GDV",
+      "construction_cost": "ต้นทุนการก่อสร้าง",
+      "professional_fees": "ค่าวิชาชีพ",
+      "contingency": "เงินสำรองฉุกเฉิน",
+      "finance_cost": "ต้นทุนทางการเงิน",
+      "sales_costs": "ค่าใช้จ่ายในการขาย"
+    },
+    "status": {
+      "viable": "มีความเป็นไปได้",
+      "unviable": "ไม่มีความเป็นไปได้",
+      "marginal": "อยู่ในเกณฑ์ขอบ",
+      "pending": "ยังไม่ได้ประเมิน"
+    },
+    "figure": {
+      "gross_development_value": "มูลค่าการขายรวมของทุกยูนิตในโครงการ ทั้งหมดในสกุลเงินเดียว",
+      "total_development_cost": "ต้นทุนทั้งหมดในการดำเนินโครงการ ยกเว้นตัวที่ดินเอง: การก่อสร้าง ค่าวิชาชีพ เงินสำรอง ต้นทุนทางการเงิน และค่าใช้จ่ายในการขาย",
+      "residual_land_value": "มูลค่าที่เหลือสำหรับที่ดิน หลังหักต้นทุนการพัฒนารวมและกำไรเป้าหมายของผู้พัฒนาออกจากมูลค่าการพัฒนารวม",
+      "developer_profit": "กำไรที่ผู้พัฒนาตั้งเป้าจะเก็บไว้ กำหนดเป็นอัตราส่วนเป้าหมายของมูลค่าการพัฒนารวม",
+      "profit_on_cost": "กำไรของผู้พัฒนาหารด้วยต้นทุนการพัฒนารวม แสดงเป็นอัตราส่วน",
+      "profit_on_gdv": "กำไรของผู้พัฒนาหารด้วยมูลค่าการพัฒนารวม แสดงเป็นอัตราส่วน"
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "แคมป์คนงาน",
+        "rental": "ที่พักให้เช่า",
+        "hotel": "โรงแรม"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "รอดำเนินการ",
+        "approved": "อนุมัติแล้ว",
+        "rejected": "ไม่อนุมัติ"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "เป็นไปตามข้อกำหนด",
+        "fail": "ไม่เป็นไปตามข้อกำหนด",
+        "not_applicable": "ไม่เกี่ยวข้อง"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "แบบ",
+        "contract": "สัญญา",
+        "specification": "ข้อกำหนดทางเทคนิค",
+        "photo": "รูปภาพ",
+        "correspondence": "หนังสือโต้ตอบ",
+        "reality_capture": "การบันทึกสภาพจริงหน้างาน",
+        "other": "อื่น ๆ"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "รอดำเนินการ",
+        "approved": "อนุมัติแล้ว",
+        "rejected": "ไม่อนุมัติ",
+        "cancelled": "ยกเลิกแล้ว"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "ฉบับร่าง",
+        "submitted": "ส่งเพื่ออนุมัติ",
+        "approved": "อนุมัติแล้ว",
+        "posted": "บันทึกเข้าบัญชีแยกประเภทแล้ว"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "เปิด",
+        "assigned": "มอบหมายแล้ว",
+        "in_progress": "กำลังดำเนินการ",
+        "resolved": "แก้ไขแล้ว",
+        "verified": "ตรวจสอบแล้ว",
+        "closed": "ปิดแล้ว"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "ข้อสังเกต",
+        "minor": "เล็กน้อย",
+        "major": "สำคัญ",
+        "critical": "วิกฤต"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "บุคคล",
+        "crew": "ทีมงาน",
+        "equipment": "เครื่องจักร",
+        "subcontractor": "ผู้รับเหมาช่วง"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "ชื่อโมเดล AI ล้าสมัยหรือไม่พร้อมใช้งาน เปิดการตั้งค่า > AI แล้วระบุชื่อโมเดลที่ใช้งานได้จริงสำหรับผู้ให้บริการของคุณ",
+      "not_configured": "ยังไม่ได้ตั้งค่า AI โปรดตั้งค่าผู้ให้บริการ AI ในการตั้งค่า"
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "ตรวจสอบแล้ว",
+      "bound": "แนบแล้ว",
+      "empty": "ยังไม่มี"
+    },
+    "package_status_labels": {
+      "draft": "ฉบับร่าง",
+      "in_progress": "กำลังดำเนินการ",
+      "ready": "พร้อม",
+      "issued": "ออกแล้ว"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "อุปสรรคสำคัญ",
+      "critical": "วิกฤต",
+      "warning": "คำเตือน",
+      "suggestion": "ข้อเสนอแนะ"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "กลยุทธ์",
+      "brief": "การกำหนดความต้องการ",
+      "concept": "แนวคิด",
+      "design": "ออกแบบ",
+      "approval": "การขออนุญาต",
+      "detail": "ออกแบบรายละเอียด",
+      "tender": "ประกวดราคา",
+      "award": "มอบงาน",
+      "construction": "ก่อสร้าง",
+      "handover": "ส่งมอบ",
+      "operation": "ดำเนินการ"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "งานนี้ไม่มีชิ้นงานที่จะตัด",
+        "suggestion": "เพิ่มชิ้นงานด้วยมือ วางจากสเปรดชีต หรือนำเข้าจากตารางดัดเหล็ก การถอดแบบ รายการ BOQ หรือไฟล์"
+      },
+      "has_stock": {
+        "fail": "งานนี้ไม่มีวัสดุสต็อกให้ตัด",
+        "suggestion": "เพิ่มความยาวสต็อกหรือขนาดแผ่นอย่างน้อยหนึ่งรายการ หรือนำเศษจากคลังหน้างานมาใช้ซ้ำ"
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} ไม่มีความกว้าง",
+        "suggestion": "ระบุทั้งความยาวและความกว้างให้ทุกชิ้นงานแบบแผ่นและทุกขนาดแผ่น"
+      },
+      "piece_fits_stock": {
+        "fail": "ชิ้นงาน {ref} ({size} mm) ไม่พอดีกับวัสดุสต็อกใดเลย",
+        "suggestion": "เพิ่มขนาดสต็อกที่ยาวหรือใหญ่กว่า ลดส่วนตัดขอบ หรือแบ่งชิ้นงานด้วยรอยต่อ"
+      },
+      "grain_allows_fit": {
+        "fail": "ชิ้นงาน {ref} พอดีก็ต่อเมื่อหมุนขวางลายเสี้ยน",
+        "suggestion": "อนุญาตให้หมุนชิ้นงานนี้ หรือเพิ่มขนาดแผ่นที่วางตามแนวลายเสี้ยนได้พอดี"
+      },
+      "kerf_set": {
+        "fail": "ความกว้างรอยเลื่อยเป็นศูนย์",
+        "suggestion": "ระบุความหนาใบเลื่อยหรือความกว้างรอยตัด มิฉะนั้นอัตราการใช้วัสดุของเหล็กเส้นที่ตัดหลายครั้งจะสูงเกินจริง"
+      },
+      "min_offcut_set": {
+        "fail": "ยังไม่ได้ตั้งเศษที่ใช้ได้ขั้นต่ำ",
+        "suggestion": "ตั้งความยาวเศษที่สั้นที่สุดที่คุ้มเก็บไว้ เพื่อไม่ให้เศษที่นำกลับมาใช้ได้ถูกนับเป็นของเสีย"
+      },
+      "stock_priced": {
+        "fail": "วัสดุสต็อก {ref} ไม่มีต้นทุนต่อหน่วย",
+        "suggestion": "ระบุราคาต่อชิ้น เพื่อให้แผนรายงานต้นทุนและเลือกวัสดุสต็อกที่ถูกที่สุด"
+      },
+      "stock_sufficient": {
+        "fail": "ชิ้นงานที่จัดวางบนวัสดุสต็อกที่มีไม่ได้: {count}",
+        "suggestion": "เพิ่มจำนวนคงเหลือ หรือเพิ่มขนาดสต็อกอีกขนาดหนึ่ง"
+      },
+      "yield_threshold": {
+        "fail": "อัตราการใช้วัสดุ {actual} % ต่ำกว่าเกณฑ์ {threshold} %",
+        "suggestion": "เพิ่มความยาวหรือขนาดสต็อกอื่น อนุญาตให้หมุน หรือทบทวนเกณฑ์สำหรับวัสดุนี้"
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "รายการแก้ไข '{title}' ถูกปิดโดยไม่มีภาพถ่าย",
+    "punch_no_photo_fix": "เพิ่มภาพถ่ายของงานที่เสร็จแล้ว",
+    "photo_weak": "ภาพถ่าย {count} ภาพใน '{title}' ไม่มีตำแหน่งหรือเวลาที่ถ่าย",
+    "photo_weak_fix": "ถ่ายภาพใหม่ในแอปโดยเปิดตำแหน่งไว้",
+    "defect_no_photo": "ข้อบกพร่อง '{reference}' ถูกปิดโดยไม่มีภาพถ่ายการแก้ไข",
+    "defect_no_photo_fix": "แนบภาพถ่ายของงานที่แก้ไขแล้ว"
+  },
+  "closeout_dossier": {
+    "more_items": "มีอีก {count} รายการที่ไม่ได้แสดง",
+    "category_missing": "ไม่มีหลักฐานสำหรับหมวดที่จำเป็น '{category}'",
+    "category_missing_fix": "ผูกเอกสารกับรายการตรวจสอบของหมวดนี้ หรือเพิ่มเอกสาร",
+    "category_unverified": "หลักฐานสำหรับ '{category}' ยังไม่ได้รับการตรวจสอบ",
+    "category_unverified_fix": "ให้ผู้จัดการตรวจทานและยืนยันหลักฐานที่แนบไว้",
+    "punch_open": "รายการแก้ไข '{name}' ยังเปิดอยู่",
+    "punch_open_fix": "แก้ไขและปิดรายการ หรือนำออกจากขอบเขตของแฟ้มนี้",
+    "punch_no_photo": "รายการแก้ไข '{name}' ที่ปิดแล้วไม่มีภาพถ่าย",
+    "punch_no_photo_fix": "เพิ่มภาพถ่ายของงานที่เสร็จแล้ว",
+    "system_pending": "ระบบ '{name}' ยังไม่ได้ทดสอบเดินระบบ",
+    "system_pending_fix": "ทำรายการตรวจสอบการทดสอบเดินระบบให้ครบ แล้วทำเครื่องหมายว่าระบบผ่านการทดสอบเดินระบบ",
+    "critical_issues": "ปัญหาวิกฤตจากการทดสอบเดินระบบ {count} รายการยังเปิดอยู่",
+    "critical_issues_fix": "ปิดปัญหาวิกฤตก่อนส่งมอบ",
+    "acceptance_missing": "ไม่มีใบรับรองการตรวจรับที่ผูกไว้",
+    "acceptance_missing_fix": "ผูกใบรับรองการตรวจรับที่ลงนามแล้วกับรายการตรวจสอบการตรวจรับ",
+    "acceptance_unsigned": "ใบรับรองการตรวจรับยังลงนามไม่ครบ (สถานะ: {status})",
+    "acceptance_unsigned_fix": "รวบรวมลายเซ็นที่ยังขาดในส่วนการลงนาม",
+    "blocked": "แฟ้มส่งมอบไม่ผ่านรายการตรวจสอบ แก้ไขข้อค้นพบ หรือรวบรวมต่อไปโดยทำเครื่องหมายว่าไม่สมบูรณ์ (ต้องได้รับอนุมัติจากผู้จัดการ)",
+    "delivery_title": "แฟ้มส่งมอบงาน: {project}",
+    "delivery_body": "แฟ้มส่งมอบงาน '{title}' ({scope}) พร้อมแล้ว ลิงก์ด้านล่างใช้ดาวน์โหลดแฟ้มและใช้ได้ถึง {expires}",
+    "pdf": {
+      "title": "แฟ้มส่งมอบงาน",
+      "scope": "ขอบเขต",
+      "built": "รวบรวมเมื่อ",
+      "status_passed": "ผ่านรายการตรวจสอบ",
+      "status_warnings": "ผ่านรายการตรวจสอบโดยมีคำเตือน",
+      "status_errors": "ไม่สมบูรณ์: ข้อค้นพบของรายการตรวจสอบยังเปิดอยู่",
+      "findings": "ข้อค้นพบของรายการตรวจสอบที่ยังเปิดอยู่",
+      "severity": "ความรุนแรง",
+      "finding": "ข้อค้นพบ",
+      "severity_error": "ข้อผิดพลาด",
+      "severity_warning": "คำเตือน",
+      "severity_info": "ข้อมูล",
+      "contents": "สารบัญ",
+      "file": "ไฟล์",
+      "size": "ขนาด",
+      "punch": "รายการแก้ไขที่ปิดแล้ว",
+      "item": "รายการ",
+      "status": "สถานะ",
+      "photos": "ภาพถ่าย",
+      "evidence": "หลักฐานภาพถ่าย"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "คะแนน {rating} ของ '{name}' ไม่ใช่ระดับของมาตราส่วน '{scale}'",
+    "rule_poor_without_action": "'{name}' ได้คะแนน {rating} แต่ไม่มีการบำรุงรักษาที่วางแผนไว้",
+    "rule_poor_without_action_fix": "สร้างแผน หรือเพิ่มการดำเนินการสำหรับองค์ประกอบนี้",
+    "rule_action_unpriced": "การดำเนินการของ '{name}' ในปี {year} ไม่มีต้นทุนต่อหน่วย",
+    "rule_action_unpriced_fix": "ป้อนต้นทุนต่อหน่วยเพื่อให้รวมอยู่ในยอดรวมของแผน",
+    "rule_defect_incomplete": "การประเมินของ '{name}' ต้องมีการดำเนินงานแต่ไม่ได้บันทึกความรุนแรงหรือขอบเขต"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label} หน้า {page}",
+    "text_change": "\"{old}\" เปลี่ยนเป็น \"{new}\"",
+    "kind": {
+      "added": "เพิ่มแล้ว",
+      "removed": "ลบแล้ว",
+      "modified": "แก้ไขแล้ว",
+      "text": "ข้อความเปลี่ยน"
+    },
+    "status": {
+      "open": "เปิดอยู่",
+      "relevant": "เกี่ยวข้อง",
+      "not_relevant": "ไม่เกี่ยวข้อง"
+    },
+    "errors": {
+      "revision_not_found": "ไม่พบฉบับแก้ไขของแบบในโครงการนี้",
+      "revision_not_parsed": "แบบยังไม่มีเวอร์ชันที่ประมวลผลแล้วสำหรับเปรียบเทียบ",
+      "comparison_not_found": "ไม่พบการเปรียบเทียบ",
+      "change_not_found": "ไม่พบการเปลี่ยนแปลง",
+      "same_revision": "เลือกฉบับแก้ไขหรือหน้าที่แตกต่างกันสองรายการเพื่อเปรียบเทียบ",
+      "manual_points": "การจัดแนวด้วยมือต้องใช้สองจุดที่ต่างกันในแต่ละฉบับแก้ไข",
+      "alignment_singular": "ไม่สามารถใช้การจัดแนวได้ เพราะทำให้แผ่นแบบยุบตัว",
+      "region_empty": "การเปลี่ยนแปลง {seq} ไม่มีขนาด",
+      "region_off_sheet": "การเปลี่ยนแปลง {seq} อยู่นอกแผ่นแบบ",
+      "module_missing": "ไม่ได้ติดตั้งโมดูลที่จำเป็นสำหรับการดำเนินการนี้"
+    },
+    "rfi": {
+      "subject": "การเปลี่ยนแปลงแบบ {seq} บน {sheet}",
+      "question": "ฉบับแก้ไข {new} ของ {sheet} แตกต่างจากฉบับแก้ไข {old} ในพื้นที่ที่ทำเครื่องหมาย ({kind}) โปรดยืนยันเจตนาของการเปลี่ยนแปลงและว่ากระทบปริมาณงานหรือไม่"
+    },
+    "markup": {
+      "text": "การเปลี่ยนแปลงฉบับแก้ไข {seq}: {kind}"
+    },
+    "report": {
+      "title": "เปรียบเทียบฉบับแก้ไขของแบบ",
+      "project": "โครงการ",
+      "name": "การเปรียบเทียบ",
+      "old_revision": "ฉบับแก้ไขเก่า",
+      "new_revision": "ฉบับแก้ไขใหม่",
+      "alignment": "การจัดแนว",
+      "alignment_none": "ยังไม่จัดแนว (กรอบเดียวกัน)",
+      "alignment_auto": "อัตโนมัติ",
+      "alignment_manual": "ด้วยมือ สองจุด",
+      "confidence": "ความเชื่อมั่น {value}",
+      "summary": "การเปลี่ยนแปลง",
+      "summary_counts": "รวม {total} รายการ: เพิ่ม {added} ลบ {removed} แก้ไข {modified} ข้อความ {text}",
+      "generated_on": "วันที่สร้าง",
+      "generated": "สร้างเมื่อ {timestamp}",
+      "page_of": "หน้า {page} จาก {total}",
+      "no_changes": "ไม่พบการเปลี่ยนแปลงระหว่างสองฉบับแก้ไข",
+      "col_no": "ลำดับ",
+      "col_preview": "ตัวอย่าง",
+      "col_kind": "การเปลี่ยนแปลง",
+      "col_location": "ตำแหน่ง",
+      "col_detail": "รายละเอียด",
+      "col_status": "สถานะ",
+      "col_comment": "ความเห็น",
+      "col_follow_up": "การติดตามผล",
+      "page_at": "หน้า {page} ที่ {coords}",
+      "layer": "เลเยอร์ {layer}",
+      "entity_counts": "องค์ประกอบ: เพิ่ม {added} ลบ {removed} แก้ไข {modified}",
+      "rfi": "RFI {number}",
+      "markup": "เมฆแก้ไข",
+      "remeasure": "วัดปริมาณใหม่: {items} ปริมาณงาน, {positions} รายการ BOQ"
+    },
+    "rules": {
+      "distinct_revisions_ok": "ทั้งสองฝั่งเป็นฉบับแก้ไขที่ต่างกัน",
+      "distinct_revisions_fail": "การเปรียบเทียบนี้เปรียบเทียบแผ่นแบบกับตัวมันเอง",
+      "distinct_revisions_hint": "เลือกฉบับแก้ไขเก่าและใหม่ของแบบ",
+      "alignment_not_needed": "ฉบับแก้ไข DWG ใช้หน่วยของแบบร่วมกัน จึงไม่ต้องจัดแนว",
+      "alignment_missing_matrix": "การเปรียบเทียบนี้ไม่มีการจัดแนว",
+      "alignment_singular": "การจัดแนวทำให้แผ่นแบบยุบตัวและไม่สามารถใช้ได้",
+      "alignment_scale": "การจัดแนวปรับมาตราส่วนของแผ่นแบบ {scale} เท่า มากกว่าความต่างปกติของฉบับแก้ไขของแบบเดียวกัน",
+      "alignment_low_confidence": "การจัดแนวอัตโนมัติไม่แน่นอน (ความเชื่อมั่น {confidence})",
+      "alignment_manual_points": "การจัดแนวด้วยมือต้องใช้สองคู่จุด",
+      "alignment_ok": "การจัดแนวแผ่นแบบสมเหตุสมผล",
+      "alignment_hint": "จัดแนวแผ่นแบบด้วยมือตามสองเครื่องหมายที่มีในทั้งสองฉบับแก้ไข เช่น จุดตัดของกริด",
+      "region_empty": "การเปลี่ยนแปลง {seq} ไม่มีขนาด",
+      "region_off_sheet": "การเปลี่ยนแปลง {seq} อยู่นอกแผ่นแบบ",
+      "regions_ok": "ทุกพื้นที่ที่เปลี่ยนแปลงอยู่บนแผ่นแบบ",
+      "triaged_ok": "ตรวจสอบทุกการเปลี่ยนแปลงแล้ว",
+      "triaged_open": "ยังมี {count} การเปลี่ยนแปลงที่เปิดอยู่",
+      "triaged_hint": "ทำเครื่องหมายแต่ละการเปลี่ยนแปลงว่าเกี่ยวข้องหรือไม่เกี่ยวข้อง",
+      "followed_up_ok": "ทุกการเปลี่ยนแปลงที่เกี่ยวข้องมีการติดตามผลแล้ว",
+      "followed_up_missing": "การเปลี่ยนแปลง {seq} ถูกทำเครื่องหมายว่าเกี่ยวข้อง แต่ไม่มีความเห็น RFI เมฆแก้ไข หรือธงวัดปริมาณใหม่",
+      "followed_up_hint": "แสดงความเห็นต่อการเปลี่ยนแปลง สร้าง RFI หรือเมฆแก้ไข หรือทำเครื่องหมายปริมาณงานภายในเพื่อวัดใหม่"
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "การพยากรณ์กระแสเงินสด",
+      "portfolio_title": "การพยากรณ์กระแสเงินสดของพอร์ตโฟลิโอ",
+      "empty": "ไม่มีการพยากรณ์กระแสเงินสดสำหรับการเลือกนี้",
+      "project": "โครงการ",
+      "as_of": "ณ วันที่",
+      "currency": "สกุลเงิน",
+      "delay_days": "เงินรับที่ล่าช้า (วัน)",
+      "overrun_pct": "ค่าใช้จ่ายเกินงบ (%)",
+      "closing_position": "ยอดคงเหลือปลายงวด",
+      "peak_funding": "ความต้องการเงินทุนสูงสุด",
+      "peak_period": "เดือนที่ต้องการเงินทุนสูงสุด",
+      "col": {
+        "period": "เดือน",
+        "planned_in": "เงินรับตามแผน",
+        "actual_in": "เงินรับจริง",
+        "expected_in": "เงินรับที่คาดว่าจะได้",
+        "planned_out": "เงินจ่ายตามแผน",
+        "actual_out": "เงินจ่ายจริง",
+        "expected_out": "เงินจ่ายที่คาดว่าจะจ่าย",
+        "net": "สุทธิ",
+        "cumulative": "ยอดสะสม"
+      }
+    }
+  }
+}

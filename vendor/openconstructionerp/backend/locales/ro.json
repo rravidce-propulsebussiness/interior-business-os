@@ -1,0 +1,2538 @@
+{
+  "costs.catalog_name_unavailable": "Acest nume nu poate fi folosit pentru un catalog nou. Alegeți alt nume.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Estimare de costuri în construcții open-source"
+  },
+  "nav": {
+    "dashboard": "Tablou de bord",
+    "assemblies": "Articole compuse",
+    "ai_estimate": "Estimare AI",
+    "settings": "Setări",
+    "5d_cost_model": "Model de cost 5D",
+    "templates": "Șabloane",
+    "reports": "Rapoarte",
+    "sustainability": "Sustenabilitate",
+    "group_estimation": "Estimare",
+    "group_planning": "Planificare",
+    "group_procurement": "Achiziții",
+    "group_tools": "Instrumente",
+    "architecture": "Hartă arhitectură"
+  },
+  "common": {
+    "save": "Salvați",
+    "cancel": "Anulați",
+    "delete": "Ștergeți",
+    "edit": "Editați",
+    "create": "Creați",
+    "search": "Căutați",
+    "filter": "Filtrați",
+    "export": "Exportați",
+    "import": "Importați",
+    "loading": "Se încarcă...",
+    "error": "Eroare",
+    "success": "Succes",
+    "confirm": "Confirmați",
+    "back": "Înapoi",
+    "next": "Următorul",
+    "yes": "Da",
+    "no": "Nu"
+  },
+  "auth": {
+    "login": "Conectare",
+    "logout": "Deconectare",
+    "email": "E-mail",
+    "password": "Parolă"
+  },
+  "projects": {
+    "title": "Proiecte",
+    "new_project": "Proiect nou",
+    "project_name": "Nume proiect",
+    "no_projects": "Niciun proiect încă"
+  },
+  "boq": {
+    "title": "Antemăsurătoare",
+    "position": "Articol",
+    "ordinal": "Număr de ordine",
+    "description": "Descriere",
+    "quantity": "Cantitate",
+    "unit": "Unitate",
+    "unit_rate": "Preț unitar",
+    "total": "Total",
+    "add_position": "Adăugați articol",
+    "add_section": "Adăugați secțiune",
+    "assembly": "Articol compus",
+    "subtotal": "Subtotal",
+    "grand_total": "Total general",
+    "direct_cost": "Cost direct",
+    "net_total": "Total net",
+    "gross_total": "Total brut",
+    "vat": "TVA",
+    "add_markups": "Adăugați adaosuri",
+    "validate": "Validați",
+    "export": "Exportați",
+    "mvp": {
+      "title": "Alegeți materialele",
+      "subtitle_one": "{{count}} resursă necesită o alegere",
+      "subtitle_other": "{{count}} resurse necesită o alegere",
+      "bulk_label": "Completare rapidă:",
+      "bulk_median": "Mediana pentru toate",
+      "bulk_mean": "Media pentru toate",
+      "bulk_cheapest": "Cel mai ieftin pentru toate",
+      "bulk_priciest": "Cel mai scump pentru toate",
+      "slot_variant_count": "{{n}} opțiuni",
+      "selected_label": "Selectat:",
+      "default_mean": "preț mediu",
+      "default_median": "preț median",
+      "row_median": "Preț median · {{price}}",
+      "row_mean": "Preț mediu · {{price}}",
+      "subtotal_label": "Preț articol",
+      "apply": "Aplicați și adăugați în antemăsurătoare",
+      "batch_progress": "Articolul {{current}} din {{total}}",
+      "toast_applied_one": "{{count}} variantă aleasă",
+      "toast_applied_other": "{{count}} variante alese"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Raport de schimb"
+      },
+      "column": {
+        "severity": "Gravitate",
+        "kind": "Tipul pierderii",
+        "position": "Poziție",
+        "field": "Câmp",
+        "original": "Valoare originală",
+        "written": "Valoare scrisă",
+        "count": "Număr",
+        "detail": "Detaliu"
+      },
+      "severity": {
+        "error": "Critic",
+        "warning": "Avertisment",
+        "info": "Notă"
+      },
+      "kind": {
+        "unsupported_element": "Element neacceptat",
+        "truncated_text": "Text trunchiat",
+        "altered_text": "Text modificat",
+        "rounded_value": "Valoare rotunjită",
+        "value_out_of_range": "Valoare în afara intervalului",
+        "dropped_attribute": "Atribut eliminat",
+        "unmapped_unit": "Unitate nemapată",
+        "lost_hierarchy": "Nivel ierarhic pierdut",
+        "markup_not_representable": "Majorare nereprezentabilă",
+        "attachment_skipped": "Atașament omis",
+        "changed_identifier": "Identificator schimbat",
+        "exceeds_limit": "Limita de stocare depășită",
+        "rejected_row": "Rând respins",
+        "skipped_row": "Rând omis",
+        "parser_warning": "Avertisment de la cititor",
+        "roundtrip_mismatch": "Neconcordanță la dus-întors"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Punct de ramificare",
+      "base_snapshot_from": "Punct de ramificare (din instantaneul „{snapshot}”)",
+      "before_cherry_pick": "Înainte de aplicarea modificărilor din „{source}”",
+      "before_merge": "Înainte de îmbinarea ramurii „{branch}”",
+      "errors": {
+        "branch_closed": "Această ramură a fost îmbinată sau arhivată și nu mai poate primi modificări.",
+        "not_a_branch": "Această listă de cantități nu este o ramură.",
+        "same_bill": "Alegeți două devize diferite.",
+        "different_project": "Ambele devize trebuie să aparțină aceluiași proiect.",
+        "different_tree": "Ambele devize trebuie să fie ramuri ale aceluiași deviz principal.",
+        "unresolved_conflicts": "Articole modificate în ambele devize: {count}. Înainte de aplicare, decideți ce versiune se păstrează pentru fiecare.",
+        "merge_forbidden": "Nu aveți permisiunea de a îmbina în devizul principal.",
+        "confirm_required": "Confirmați îmbinarea: ea rescrie devizul principal.",
+        "design_options_unavailable": "Modulul pentru variante de proiectare nu este instalat.",
+        "base_snapshot_in_use": "Acest instantaneu este punctul de ramificare al unei ramuri deschise și nu poate fi șters."
+      },
+      "export": {
+        "title_positions": "Compararea devizelor pe articole",
+        "title_sections": "Compararea devizelor pe capitole",
+        "title_cost_groups": "Compararea devizelor pe grupuri de costuri",
+        "project": "Proiect",
+        "bill_a": "Deviz A",
+        "bill_b": "Deviz B",
+        "total_a": "Total A",
+        "total_b": "Total B",
+        "delta": "Diferență",
+        "counts": "Modificări",
+        "counts_value": "adăugate: {added}, eliminate: {removed}, modificate: {changed}",
+        "col_ordinal": "Nr.",
+        "col_description": "Descriere",
+        "col_unit": "UM",
+        "col_change": "Modificare",
+        "col_qty_a": "Cant. A",
+        "col_qty_b": "Cant. B",
+        "col_rate_a": "Preț A",
+        "col_rate_b": "Preț B",
+        "col_total_a": "Total A",
+        "col_total_b": "Total B",
+        "col_delta": "Diferență",
+        "col_section": "Capitol",
+        "col_cost_group": "Grup de costuri",
+        "change_added": "Adăugat",
+        "change_removed": "Eliminat",
+        "change_changed": "Modificat",
+        "change_unchanged": "Nemodificat",
+        "ungrouped": "Negrupat",
+        "empty": "Cele două devize sunt identice.",
+        "total": "Total"
+      }
+    }
+  },
+  "costs": {
+    "title": "Bază de date costuri",
+    "rate": "Tarif",
+    "material": "Material",
+    "labor": "Manoperă",
+    "equipment": "Utilaje",
+    "search_costs": "Căutați articole de cost..."
+  },
+  "assemblies": {
+    "title": "Articole compuse",
+    "description": "Rețete reutilizabile de cost — combinați materiale, manoperă și utilaje în șabloane gata de utilizare",
+    "new_assembly": "Articol compus nou",
+    "from_database": "Din baza de date",
+    "apply_to_boq": "Aplicați la antemăsurătoare",
+    "add_component": "Adăugați componentă",
+    "no_assemblies": "Niciun articol compus încă",
+    "no_assemblies_hint": "Creați primul articol compus din Baza de date costuri sau Catalogul de resurse",
+    "total_rate": "Tarif total"
+  },
+  "catalog": {
+    "title": "Catalog de resurse",
+    "description": "Răsfoiți și gestionați materiale, utilaje, tarife de manoperă și operatori",
+    "add_resource": "Adăugați resursă",
+    "import_region": "Importați regiune",
+    "build_assembly": "Construiți articol compus",
+    "my_catalog": "Catalogul meu"
+  },
+  "validation": {
+    "title": "Validare",
+    "passed": "Trecut",
+    "warnings": "Avertismente",
+    "errors": "Erori",
+    "score": "Scor de calitate",
+    "run_validation": "Rulați validarea",
+    "missing_quantity": "Articolul {position} nu are cantitate",
+    "missing_rate": "Articolul {position} nu are preț unitar",
+    "missing_description": "Articolul {position} nu are descriere",
+    "missing_classification": "Articolul {position} are nevoie de un cod de clasificare",
+    "duplicate_ordinal": "Număr de ordine duplicat: {ordinal}",
+    "rate_anomaly": "Prețul unitar {rate} depășește pragul ({threshold})",
+    "nl": {
+      "not_a_string": "Datele introduse trebuie să fie text.",
+      "empty": "Datele introduse sunt goale.",
+      "too_long": "Datele introduse depășesc {max} de caractere.",
+      "ai_unparsable": "Răspunsul AI nu a putut fi interpretat ca document DSL.",
+      "no_pattern": "Niciun model nu se potrivește cu propoziția introdusă.",
+      "try": "Încercați: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "Programare 4D",
+    "generated": {
+      "position_label": "Poziția {ordinal}",
+      "section_label": "Capitolul {ordinal}",
+      "task_description": "Generat automat din poziția {ordinal} a antemăsurătorii ({quantity} {unit})",
+      "section_description": "Rezumat: capitolul {ordinal} al antemăsurătorii",
+      "start_milestone": "Începutul proiectului",
+      "start_milestone_description": "Reper de început al proiectului",
+      "completion_milestone": "Finalizarea proiectului",
+      "completion_milestone_description": "Reper de finalizare al proiectului",
+      "labour_resource": "Manoperă",
+      "machine_resource": "Utilaje"
+    },
+    "progress_sheet": {
+      "sheet_title": "Progres",
+      "title": "Foaie de actualizare a progresului",
+      "detail_schedule": "Planificare: {name}",
+      "detail_exported": "Exportat: {date}",
+      "instructions": "Completați doar coloanele albe. Nu modificați coloanele gri, ordinea rândurilor sau coloanele ascunse.",
+      "col": {
+        "activity_ref": "ID activitate",
+        "name": "Activitate",
+        "wbs_code": "WBS",
+        "responsible": "Responsabil",
+        "planned_start": "Început planificat",
+        "planned_finish": "Sfârșit planificat",
+        "percent_complete": "% finalizat",
+        "actual_start": "Început real",
+        "actual_finish": "Sfârșit real",
+        "remaining_duration": "Rămas (zile lucrătoare)",
+        "notes": "Note",
+        "row_key": "Cheie rând",
+        "stamp": "Ștampilă"
+      }
+    }
+  },
+  "cad": {
+    "title": "Import CAD",
+    "upload": "Încărcați fișier CAD",
+    "supported_formats": "Acceptate: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Se convertește...",
+    "elements_found": "{count} elemente găsite"
+  },
+  "takeoff": {
+    "title": "Antemăsurare cantitativă",
+    "auto_detect": "Detectare automată",
+    "manual_measure": "Măsurare manuală",
+    "confidence": "Încredere"
+  },
+  "tendering": {
+    "title": "Licitație",
+    "create_tender": "Creați licitație",
+    "bid": "Ofertă",
+    "award": "Atribuire"
+  },
+  "modules": {
+    "title": "Module",
+    "installed": "Instalate",
+    "available": "Disponibile",
+    "install": "Instalați",
+    "uninstall": "Dezinstalați",
+    "update": "Actualizați"
+  },
+  "dashboard": {
+    "welcome": "Bine ați venit la OpenConstructionERP",
+    "subtitle": "Spațiul dvs. de lucru pentru estimarea în construcții",
+    "recent_projects": "Proiecte recente",
+    "system_status": "Stare sistem",
+    "modules_loaded": "Module încărcate",
+    "validation_rules": "Reguli de validare",
+    "languages": "Limbi",
+    "continue_estimate": "Continuați ultima estimare",
+    "getting_started": "Primii pași",
+    "total_value": "Valoare totală",
+    "active_estimates": "Estimări active",
+    "schedule_status": "Stare program",
+    "quality_score": "Scor de calitate",
+    "analytics": "Analiză",
+    "project_overview": "Prezentare proiect",
+    "step_load_db": "Încărcați baza de date de costuri",
+    "step_load_db_desc": "Importați date de prețuri regionale cu peste 55.000 de articole",
+    "step_ai_search": "Activați căutarea AI",
+    "step_ai_search_desc": "Generați reprezentări vectoriale pentru potrivirea semantică a costurilor",
+    "step_connect_ai": "Conectați AI",
+    "step_connect_ai_desc": "Adăugați cheile API pentru estimare cu AI",
+    "step_create_project": "Creați proiect",
+    "step_create_project_desc": "Începeți primul dvs. proiect de estimare în construcții",
+    "step_build_boq": "Construiți antemăsurătoarea",
+    "step_build_boq_desc": "Creați o antemăsurătoare cu asistență AI"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "buc",
+    "lsum": "global",
+    "h": "h",
+    "set": "set"
+  },
+  "contacts": {
+    "title": "Director de contacte",
+    "new_contact": "Contact nou",
+    "contact_type": "Tip contact",
+    "client": "Client",
+    "subcontractor": "Subcontractant",
+    "supplier": "Furnizor",
+    "consultant": "Consultant",
+    "internal": "Intern",
+    "company_name": "Nume companie",
+    "search_contacts": "Căutați contacte...",
+    "no_contacts": "Niciun contact încă",
+    "prequalification": "Precalificare",
+    "approved": "Aprobat",
+    "pending": "În așteptare",
+    "expired": "Expirat"
+  },
+  "tasks": {
+    "title": "Sarcini",
+    "new_task": "Sarcină nouă",
+    "task": "Sarcină",
+    "topic": "Subiect",
+    "information": "Informație",
+    "decision": "Decizie",
+    "personal": "Sarcină personală",
+    "my_tasks": "Sarcinile mele",
+    "open": "Deschise",
+    "in_progress": "În curs",
+    "completed": "Finalizate",
+    "draft": "Ciornă",
+    "due_date": "Termen limită",
+    "assignee": "Responsabil",
+    "priority": "Prioritate",
+    "checklist": "Listă de verificare",
+    "focus_area": "Zonă de focus"
+  },
+  "rfi": {
+    "title": "Cereri de informații",
+    "new_rfi": "RFI nou",
+    "subject": "Subiect",
+    "question": "Întrebare",
+    "response": "Răspuns",
+    "ball_in_court": "În responsabilitate",
+    "days_open": "Zile deschis",
+    "cost_impact": "Impact cost",
+    "schedule_impact": "Impact program",
+    "respond": "Răspundeți",
+    "close": "Închideți",
+    "overdue": "Întârziat"
+  },
+  "finance": {
+    "title": "Finanțe",
+    "budgets": "Bugete",
+    "invoices": "Facturi",
+    "payable": "De plată",
+    "receivable": "De încasat",
+    "payments": "Plăți",
+    "evm": "Valoare câștigată",
+    "invoice_number": "Factură nr.",
+    "amount": "Sumă",
+    "status": "Stare",
+    "approve": "Aprobați",
+    "pay": "Marcați ca plătit",
+    "original_budget": "Buget inițial",
+    "revised_budget": "Buget revizuit",
+    "committed": "Angajat",
+    "actual": "Real",
+    "forecast": "Prognoză",
+    "variance": "Variație"
+  },
+  "procurement": {
+    "title": "Achiziții",
+    "purchase_orders": "Comenzi de achiziție",
+    "goods_receipts": "Recepții de marfă",
+    "new_po": "Comandă nouă",
+    "po_number": "Comandă nr.",
+    "vendor": "Furnizor",
+    "issue": "Emiteți",
+    "confirm": "Confirmați recepția"
+  },
+  "safety": {
+    "title": "Siguranță",
+    "incidents": "Incidente",
+    "observations": "Observații",
+    "new_incident": "Incident nou",
+    "new_observation": "Observație nouă",
+    "severity": "Severitate",
+    "risk_score": "Scor de risc",
+    "days_lost": "Zile pierdute",
+    "treatment": "Tratament",
+    "corrective_action": "Acțiune corectivă"
+  },
+  "meetings": {
+    "title": "Întâlniri",
+    "new_meeting": "Întâlnire nouă",
+    "meeting_type": "Tip",
+    "attendees": "Participanți",
+    "agenda": "Agendă",
+    "action_items": "Acțiuni de întreprins",
+    "minutes": "Minute",
+    "complete": "Finalizați întâlnirea",
+    "present": "Prezent",
+    "absent": "Absent",
+    "excused": "Motivat",
+    "actions": {
+      "status": {
+        "open": "Deschisă",
+        "completed": "Finalizată",
+        "cancelled": "Anulată"
+      },
+      "flag": {
+        "overdue": "Întârziată",
+        "on_track": "În grafic"
+      },
+      "label": {
+        "action_item": "Acțiune",
+        "completion_rate": "Rata de finalizare a acțiunilor",
+        "open_vs_done": "Deschise vs. finalizate",
+        "overdue": "Acțiuni întârziate"
+      },
+      "explain": {
+        "action_item": "O acțiune este o sarcină convenită într-o ședință, cu un responsabil și un termen.",
+        "completion_rate": "Rata de finalizare a acțiunilor este numărul de acțiuni finalizate împărțit la numărul total de acțiuni, între 0 și 1.",
+        "open_vs_done": "Acțiunile deschise necesită încă lucru. Acțiunile finalizate sunt încheiate și nu mai necesită lucru.",
+        "overdue": "O acțiune este întârziată atunci când este încă deschisă, iar termenul său este anterior datei de referință."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Proces-verbal de ședință",
+      "issued": "EMIS",
+      "draft": "CIORNĂ",
+      "date": "Data:",
+      "location": "Locație:",
+      "type": "Tip:",
+      "number": "Ședința nr.:",
+      "chairperson": "Președinte de ședință:",
+      "next_meeting": "Următoarea ședință:",
+      "not_available": "N/A",
+      "not_scheduled": "Neprogramată",
+      "attendance": "Prezență",
+      "present": "Prezenți:",
+      "absent": "Absenți / scuzați:",
+      "agenda": "Ordinea de zi, discuții și decizii",
+      "required": "(obligatoriu)",
+      "discussion": "Discuții:",
+      "decision": "Decizie:",
+      "decisions": "Decizii",
+      "open_questions": "Întrebări deschise",
+      "actions": "Acțiuni",
+      "col_number": "#",
+      "col_action": "Acțiune",
+      "col_owner": "Responsabil",
+      "col_due": "Termen",
+      "col_status": "Stare",
+      "brought_forward": "[Reportat]",
+      "overdue": "(depășit)",
+      "status_open": "Deschisă",
+      "status_in_progress": "În curs",
+      "status_done": "Finalizată",
+      "status_cancelled": "Anulată",
+      "summary": "Rezumat",
+      "generated": "Generat: {stamp}",
+      "issued_at": "Emis la {stamp}",
+      "running_head": "{project} - Proces-verbal",
+      "type_progress": "Progres",
+      "type_design": "Proiectare",
+      "type_safety": "Siguranță",
+      "type_subcontractor": "Subcontractor",
+      "type_kickoff": "Demarare",
+      "type_closeout": "Recepție",
+      "type_commercial": "Comercial"
+    }
+  },
+  "inspections": {
+    "title": "Inspecții de calitate",
+    "new_inspection": "Inspecție nouă",
+    "inspector": "Inspector",
+    "checklist": "Listă de verificare",
+    "pass": "Trecut",
+    "fail": "Eșuat",
+    "partial": "Parțial",
+    "critical": "Critic",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Programată",
+        "in_progress": "În desfășurare",
+        "completed": "Finalizată",
+        "failed": "Nereușită",
+        "cancelled": "Anulată"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Rapoarte de neconformitate",
+    "new_ncr": "NCR nou",
+    "root_cause": "Cauză rădăcină",
+    "corrective_action": "Acțiune corectivă",
+    "preventive_action": "Acțiune preventivă",
+    "material": "Material",
+    "workmanship": "Manoperă",
+    "design": "Proiectare"
+  },
+  "submittals": {
+    "title": "Documente de aprobat",
+    "new_submittal": "Document nou de aprobat",
+    "spec_section": "Secțiune specificații",
+    "revision": "Revizie",
+    "submit": "Trimiteți",
+    "review": "Revizuiți",
+    "approved_as_noted": "Aprobat cu observații",
+    "revise_resubmit": "Revizuiți și retrimiteți",
+    "intl": {
+      "status_labels": {
+        "draft": "Ciornă",
+        "submitted": "Trimis",
+        "under_review": "În verificare",
+        "approved": "Aprobat",
+        "approved_as_noted": "Aprobat cu observații",
+        "revise_and_resubmit": "De revizuit și retrimis",
+        "rejected": "Respins",
+        "closed": "Închis"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Corespondență",
+    "new_entry": "Înregistrare nouă",
+    "incoming": "Primit",
+    "outgoing": "Trimis",
+    "letter": "Scrisoare",
+    "email": "E-mail",
+    "notice": "Notificare",
+    "date_sent": "Data trimiterii",
+    "date_received": "Data primirii"
+  },
+  "cde": {
+    "title": "Mediu comun de date",
+    "new_container": "Container nou",
+    "container_code": "Cod container",
+    "cde_state": "Stare CDE",
+    "wip": "În lucru",
+    "shared": "Partajat",
+    "published": "Publicat",
+    "archived": "Arhivat",
+    "promote": "Promovați",
+    "suitability": "Conformitate",
+    "discipline": "Disciplină",
+    "revisions": "Revizii",
+    "intl": {
+      "state_labels": {
+        "wip": "În lucru",
+        "shared": "Partajat",
+        "published": "Publicat",
+        "archived": "Arhivat"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Transmiteri",
+    "new_transmittal": "Transmitere nouă",
+    "purpose": "Scop",
+    "for_approval": "Pentru aprobare",
+    "for_information": "Pentru informare",
+    "for_construction": "Pentru execuție",
+    "recipients": "Destinatari",
+    "acknowledge": "Confirmați primirea",
+    "locked": "Blocat",
+    "issue_transmittal": "Emiteți",
+    "intl": {
+      "status_words": {
+        "draft": "ciornă",
+        "issued": "emis",
+        "responded": "răspuns"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Notificări",
+    "no_notifications": "Nicio notificare nouă",
+    "mark_all_read": "Marcați toate ca citite",
+    "unread": "Necitite"
+  },
+  "comments": {
+    "title": "Comentarii",
+    "post": "Publicați",
+    "reply": "Răspundeți",
+    "edit": "Editați",
+    "delete": "Ștergeți",
+    "placeholder": "Scrieți un comentariu...",
+    "empty": "Niciun comentariu încă. Începeți discuția.",
+    "edited": "editat",
+    "deleted": "Acest comentariu a fost șters"
+  },
+  "bim": {
+    "title": "Centru BIM",
+    "models": "Modele",
+    "elements": "Elemente",
+    "upload_model": "Încărcați model",
+    "processing": "Se procesează",
+    "active": "Activ",
+    "link_to_boq": "Legați la antemăsurătoare",
+    "properties": "Proprietăți",
+    "quantities": "Cantități",
+    "wireframe": "Schiță",
+    "section_box": "Cutie de secțiune",
+    "measure": "Măsurați",
+    "zoom_to_fit": "Mărire la încadrare"
+  },
+  "reporting": {
+    "title": "Rapoarte și tablouri de bord",
+    "kpi": "Tablou de bord KPI",
+    "generate_report": "Generați raport",
+    "templates": "Șabloane",
+    "project_status": "Stare proiect",
+    "cost_report": "Raport de costuri",
+    "schedule_status": "Stare program",
+    "safety_report": "Raport de siguranță",
+    "explain": {
+      "report_total_one": "Total raport: {money} (suma a {count} rând).",
+      "report_total_other": "Total raport: {money} (suma a {count} rânduri).",
+      "percent_of_total": "{part} reprezintă {percent} din {total} (procent din total).",
+      "percent_zero_total": "{part} din {total}: totalul este zero, deci fiecare pondere este raportată ca 0 la sută.",
+      "breakdown_empty": "Defalcarea costurilor: nu există date.",
+      "breakdown_one": "Defalcarea costurilor: {count} grup, total raport {money}.",
+      "breakdown_other": "Defalcarea costurilor: {count} grupuri, total raport {money}.",
+      "top_n_one": "Primele {requested}: {shown} din {shown} rând.",
+      "top_n_other": "Primele {requested}: {shown} din {shown} rânduri."
+    }
+  },
+  "gantt": {
+    "title": "Diagramă Gantt",
+    "day": "Zi",
+    "week": "Săptămână",
+    "month": "Lună",
+    "critical_path": "Cale critică",
+    "baseline": "Linie de bază",
+    "dependencies": "Dependențe",
+    "today": "Astăzi"
+  },
+  "settings": {
+    "regional": "Setări regionale",
+    "timezone": "Fus orar",
+    "measurement": "Sistem de măsurare",
+    "paper_size": "Format hârtie",
+    "date_format": "Format dată",
+    "number_format": "Format număr",
+    "currency": "Monedă",
+    "metric": "Metric",
+    "imperial": "Imperial"
+  },
+  "users": {
+    "management": "Gestionare utilizatori",
+    "management_desc": "Gestionați membrii echipei, rolurile și accesul",
+    "invite_user": "Invitați utilizator",
+    "invite": "Invitați",
+    "full_name": "Nume complet",
+    "email": "E-mail",
+    "password": "Parolă",
+    "role": "Rol",
+    "status": "Stare",
+    "last_login": "Ultima conectare",
+    "actions": "Acțiuni",
+    "name": "Nume",
+    "total": "Total utilizatori",
+    "active": "Activ",
+    "inactive": "Inactiv",
+    "admins": "Administratori",
+    "managers": "Manageri",
+    "search": "Căutați după nume sau e-mail...",
+    "no_users": "Niciun utilizator găsit",
+    "updated": "Utilizator actualizat",
+    "invited": "Utilizator invitat cu succes",
+    "deactivate": "Dezactivați",
+    "activate": "Activați",
+    "never": "Niciodată",
+    "role_admin_desc": "Acces complet la toate funcțiile",
+    "role_manager_desc": "Gestionarea proiectelor și a echipei",
+    "role_editor_desc": "Creați și editați conținut",
+    "role_viewer_desc": "Acces doar pentru citire"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Acest instantaneu este înghețat. Un instantaneu înghețat este o înregistrare și nu poate fi modificat.",
+      "frozen_no_delete": "Un instantaneu înghețat este o înregistrare și nu poate fi șters.",
+      "draft_open": "Există deja un instantaneu în ciornă deschis. Înghețați-l sau ștergeți-l înainte de a începe altul.",
+      "no_line_method": "Această linie nu are o metodă proprie.",
+      "snapshot_missing": "Instantaneul nu a fost găsit.",
+      "line_missing": "Acest instantaneu nu are o astfel de linie.",
+      "document_missing": "Documentul asociat nu aparține acestui proiect.",
+      "freeze_refused": "Instantaneul nu poate fi încă înghețat: {count} linie/linii depășesc pragul fără comentariu și document justificativ.",
+      "no_frozen_snapshot": "Nu există încă un instantaneu înghețat cu care să se compare.",
+      "no_ledger": "Registrul de facturi nu este disponibil în această instalare.",
+      "no_snapshot": "Nu există încă niciun instantaneu de documentat."
+    },
+    "export": {
+      "project": "Proiect",
+      "generated": "Generat",
+      "currency": "Monedă",
+      "page": "Pagina",
+      "generated_at": "Generat la",
+      "empty": "Încă nu e nimic de afișat.",
+      "total": "Total",
+      "cost_report": "Raport de costuri",
+      "phase_comparison": "Comparație pe faze",
+      "invoice_ledger": "Registru de facturi",
+      "forecast_documentation": "Documentația prognozei",
+      "as_of": "La data de",
+      "forecast_method": "Metoda de prognoză",
+      "col_account": "Cont",
+      "col_code": "Cod",
+      "col_description": "Descriere",
+      "col_source": "Sursă",
+      "col_method": "Metodă",
+      "col_planned": "Planificat",
+      "col_committed": "Angajat",
+      "col_pending": "Modificări în așteptare",
+      "col_measured": "Măsurat",
+      "col_certified": "Certificat",
+      "col_invoiced": "Facturat",
+      "col_paid": "Plătit",
+      "col_forecast": "Prognoză",
+      "col_variance": "Abatere",
+      "col_variance_pct": "Abatere %",
+      "col_forecast_of_plan": "Prognoză % din plan",
+      "col_measured_of_committed": "Măsurat % din angajat",
+      "col_invoiced_of_committed": "Facturat % din angajat",
+      "col_contract": "Contract",
+      "col_contract_title": "Denumire contract",
+      "col_invoice": "Factură",
+      "col_date": "Data",
+      "col_kind": "Tip",
+      "col_release_status": "Eliberare",
+      "col_net": "Net",
+      "col_vat": "TVA",
+      "col_gross": "Brut",
+      "col_retention": "Garanție de bună execuție reținută",
+      "col_release": "Garanție eliberată",
+      "col_discount": "Discount",
+      "col_payable": "De plată",
+      "col_open": "Deschis",
+      "col_previous": "Anterior",
+      "col_delta": "Modificare",
+      "col_delta_pct": "Modificare %",
+      "col_needs_evidence": "Necesită document",
+      "col_comment": "Comentariu",
+      "col_evidence": "Document justificativ",
+      "row_unassigned": "Sume fără linie de cost",
+      "row_loose_changes": "Modificări fără contract",
+      "row_no_contract": "Fără contract",
+      "contract_value": "Valoarea contractului",
+      "retention_held": "Sumă reținută",
+      "yes": "Da",
+      "no": "Nu",
+      "snapshot_date": "Data instantaneului",
+      "snapshot_status": "Stare",
+      "previous_snapshot": "Instantaneul înghețat anterior",
+      "method_explained": "Cum se citește prognoza",
+      "evidence_threshold": "Document necesar peste",
+      "threshold_both": "o modificare de peste {parts}",
+      "threshold_any": "orice modificare",
+      "frozen_at": "Înghețat la"
+    },
+    "method": {
+      "best_available": "Cea mai bună sursă disponibilă",
+      "maximum": "Valoare maximă",
+      "evm_cpi": "Valoare câștigată (CPI)",
+      "manual": "Manual"
+    },
+    "method_help": {
+      "best_available": "Fiecare linie ia cifra cea mai matură: situația finală de plată, altfel lucrările măsurate, altfel atribuirea, altfel devizul, altfel bugetul.",
+      "maximum": "Fiecare linie ia cea mai mare dintre cifrele sale (buget, deviz, atribuire, măsurat, facturat), astfel încât prognoza să nu ascundă niciodată un risc.",
+      "evm_cpi": "Fiecare linie proiectează costul la finalizare pornind de la progres: banii cheltuiți până acum împărțiți la ponderea lucrărilor executate.",
+      "manual": "O persoană stabilește cifra liniei și asociază documentul pe care se bazează."
+    },
+    "source": {
+      "none": "Fără cifră",
+      "budget": "Buget",
+      "estimate": "Deviz",
+      "partly_awarded": "Atribuit parțial",
+      "awarded": "Atribuit",
+      "measured": "Măsurat",
+      "final": "Situație finală",
+      "manual": "Manual",
+      "invoiced": "Facturat",
+      "evm": "Valoare câștigată"
+    },
+    "layer": {
+      "budget": "Buget",
+      "estimate": "Deviz",
+      "tender": "Cea mai bună ofertă",
+      "awarded": "Atribuit",
+      "changes": "Modificări aprobate",
+      "committed": "Angajat",
+      "pending": "Modificări în așteptare",
+      "measured": "Măsurat",
+      "certified": "Certificat",
+      "invoiced": "Facturat",
+      "paid": "Plătit",
+      "forecast": "Prognoză"
+    },
+    "invoice_kind": {
+      "interim": "Parțială",
+      "final": "Finală",
+      "daywork": "Lucrări în regie",
+      "credit_note": "Notă de credit"
+    },
+    "release_status": {
+      "open": "Deschisă",
+      "released": "Eliberată"
+    },
+    "evidence_kind": {
+      "document": "Document",
+      "minutes": "Proces-verbal",
+      "other": "Altele"
+    },
+    "snapshot_status": {
+      "draft": "Ciornă",
+      "frozen": "Înghețat"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Proiect",
+      "project_no": "Nr. proiect",
+      "generated_on": "Data generării",
+      "records": "Înregistrări",
+      "currency": "Monedă",
+      "status": "Stare",
+      "name": "Nume",
+      "signature": "Semnătură",
+      "date": "Data",
+      "signatures": "Semnături",
+      "yes": "Da",
+      "no": "Nu",
+      "days_one": "{n} zi",
+      "days_other": "{n} zile",
+      "empty_register": "Nicio înregistrare.",
+      "total": "Total",
+      "signer_title": "Funcția",
+      "sig_prepared_by": "Întocmit de",
+      "sig_checked_by": "Verificat de",
+      "sig_approved_by": "Aprobat de",
+      "footer_generated": "Generat {timestamp}",
+      "footer_page": "Pagina {page} din {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Registru de documente pentru aprobare",
+        "doc_title": "Document pentru aprobare",
+        "doc_title_product_data": "Fișă de aprobare a materialelor",
+        "col_number": "Nr. document",
+        "col_title": "Titlu",
+        "col_type": "Tip",
+        "col_spec": "Capitol din specificații",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Data depunerii",
+        "col_date_required": "Necesar până la",
+        "col_date_returned": "Data returnării",
+        "col_reviewer": "Verificator",
+        "col_approver": "Aprobator",
+        "col_ball_in_court": "Acțiune la",
+        "submitted_by_org": "Firma depunătoare",
+        "review_notes": "Observații verificator",
+        "no_review_notes": "Nicio observație a verificatorului.",
+        "sig_submitted": "Depus de",
+        "sig_reviewed": "Verificat de",
+        "sig_approved": "Aprobat de",
+        "register_filename": "registru-documente-pentru-aprobare",
+        "register_title_shop_drawing": "Registru de desene de execuție",
+        "register_title_product_data": "Registru de aprobare a materialelor",
+        "register_title_method_statement": "Registru de metodologii de execuție",
+        "register_filename_shop_drawing": "registru-desene-de-executie",
+        "register_filename_product_data": "registru-aprobare-materiale",
+        "register_filename_method_statement": "registru-metodologii-de-executie",
+        "col_discipline": "Specialitate",
+        "col_manufacturer": "Producător / marcă",
+        "col_model": "Model / referință",
+        "col_origin": "Țara de origine",
+        "col_supplier": "Furnizor",
+        "col_product": "Producător / model / origine",
+        "col_review_code": "Cod verificare",
+        "col_outcome": "Rezultat verificare",
+        "col_review_period": "Termen verificare (zile)",
+        "col_review_due": "Verificare până la",
+        "col_days_in_review": "Zile în verificare",
+        "col_days_in_review_print": "Zile în verificare",
+        "col_review_overdue": "Zile întârziere",
+        "col_required_on_site": "Necesar pe șantier",
+        "col_long_lead": "Livrare îndelungată",
+        "col_lead_time": "Termen livrare (săpt.)",
+        "col_needed_by": "Aprobare necesară până la",
+        "col_approval_late": "Zile peste termen",
+        "col_drawings": "Desene asociate",
+        "col_submitted_returned": "Depus / returnat",
+        "col_on_site_needed_by": "Pe șantier / aprobare până la",
+        "resubmit_for_record": "Exemplar corectat de redepus pentru evidență",
+        "review_history": "Istoric verificări",
+        "hist_submitted": "Depus",
+        "hist_returned": "Returnat",
+        "drawings_missing_one": "{n} desen asociat nu mai este disponibil",
+        "drawings_missing_other": "{n} desene asociate nu mai sunt disponibile",
+        "weeks_one": "{n} săptămână",
+        "weeks_other": "{n} săpt."
+      },
+      "labels": {
+        "status": {
+          "draft": "Ciornă",
+          "submitted": "Depus",
+          "under_review": "În verificare",
+          "approved": "Aprobat",
+          "approved_as_noted": "Aprobat cu observații",
+          "revise_and_resubmit": "De revizuit și redepus",
+          "rejected": "Respins",
+          "closed": "Închis"
+        },
+        "type": {
+          "shop_drawing": "Desen de execuție",
+          "product_data": "Fișă tehnică produs",
+          "sample": "Mostră",
+          "mock_up": "Machetă de probă",
+          "test_report": "Raport de încercări",
+          "calculation": "Calcul",
+          "method_statement": "Metodologie de execuție",
+          "certificate": "Certificat",
+          "warranty": "Garanție"
+        },
+        "discipline": {
+          "mechanical": "Mecanică",
+          "hvac": "HVAC",
+          "plumbing": "Instalații sanitare și canalizare",
+          "fire_protection": "Protecție la incendiu",
+          "electrical": "Electrică",
+          "lighting": "Iluminat",
+          "elv": "Curenți slabi",
+          "bms": "Automatizare clădiri",
+          "architectural": "Arhitectură",
+          "structural": "Structură",
+          "civil": "Construcții civile"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Registru de ordine de modificare",
+        "doc_title": "Ordin de modificare",
+        "col_code": "Cod",
+        "col_title": "Titlu",
+        "col_reason": "Motiv",
+        "col_instrument": "Instrument",
+        "col_submitted": "Data depunerii",
+        "col_contractor_amount": "Valoare antreprenor",
+        "col_engineer_amount": "Valoare inginer",
+        "col_approved_amount": "Valoare aprobată",
+        "col_cost_impact": "Impact asupra costului",
+        "col_time_impact": "Impact asupra duratei (zile)",
+        "col_approved_time": "Durată aprobată (zile)",
+        "time_impact": "Impact asupra duratei",
+        "approved_time": "Durată aprobată",
+        "col_approved": "Data aprobării",
+        "submitted_by": "Depus de",
+        "approved_by": "Aprobat de",
+        "description": "Descriere",
+        "no_description": "Nicio descriere înregistrată.",
+        "items": "Articole modificate",
+        "item_description": "Descriere",
+        "item_change": "Modificare",
+        "item_unit": "UM",
+        "item_original_quantity": "Cant. inițială",
+        "item_new_quantity": "Cant. nouă",
+        "item_original_rate": "Tarif inițial",
+        "item_new_rate": "Tarif nou",
+        "item_cost_delta": "Diferență de cost",
+        "register_filename": "registru-ordine-de-modificare"
+      },
+      "labels": {
+        "status": {
+          "draft": "Ciornă",
+          "submitted": "Depus",
+          "approved": "Aprobat",
+          "rejected": "Respins",
+          "executed": "Executat"
+        },
+        "reason": {
+          "client_request": "Solicitarea beneficiarului",
+          "design_change": "Modificare de proiect",
+          "unforeseen": "Condiții neprevăzute",
+          "regulatory": "Cerințe legale",
+          "error": "Eroare sau omisiune",
+          "non_conformance": "Neconformitate",
+          "value_engineering": "Inginerie valorică"
+        },
+        "instrument": {
+          "works_change": "Modificare dispusă",
+          "site_confirmation": "Confirmare pe șantier",
+          "claim": "Revendicare"
+        },
+        "change": {
+          "added": "Adăugat",
+          "removed": "Eliminat",
+          "modified": "Modificat"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Dosar de probe",
+        "subject": "Subiect",
+        "basis": "Temei",
+        "period_from": "Cea mai veche înregistrare",
+        "period_to": "Cea mai recentă înregistrare",
+        "digest": "Cod de integritate (SHA-256, primele 16 caractere)",
+        "col_row": "Nr.",
+        "col_record_id": "ID înregistrare",
+        "col_section": "Secțiune",
+        "col_date": "Data",
+        "col_kind": "Tip înregistrare",
+        "col_title": "Titlu",
+        "col_summary": "Rezumat",
+        "col_reference": "Referință",
+        "register_filename": "dosar-de-probe"
+      },
+      "labels": {
+        "section": {
+          "notices": "Notificări",
+          "correspondence": "Corespondență",
+          "rfis": "Cereri de informații (RFI)",
+          "variations": "Modificări",
+          "approvals": "Aprobări",
+          "delay": "Întârziere",
+          "timeline": "Cronologie",
+          "other": "Altele"
+        },
+        "kind": {
+          "notice": "Notificare",
+          "variation_notice": "Notificare de modificare",
+          "variation_request": "Cerere de modificare",
+          "variation_order": "Dispoziție de modificare",
+          "change_order": "Ordin de modificare",
+          "moc_entry": "Înregistrare de modificare",
+          "correspondence": "Corespondență"
+        },
+        "basis": {
+          "dispute": "Litigiu",
+          "valuation": "Evaluare",
+          "delay": "Întârziere / prelungire de termen",
+          "general": "Înregistrare generală"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Registru de corespondență",
+        "doc_title": "Corespondență",
+        "col_reference": "Nr. de referință",
+        "col_direction": "Sens",
+        "col_type": "Tip",
+        "col_subject": "Subiect",
+        "col_from": "De la",
+        "col_to": "Către",
+        "col_date_sent": "Data trimiterii",
+        "col_date_received": "Data primirii",
+        "col_response_due": "Răspuns până la",
+        "col_clause": "Clauză contractuală",
+        "notes": "Observații",
+        "no_notes": "Nicio observație înregistrată.",
+        "attachments": "Fișiere atașate",
+        "linked_documents": "Documente asociate",
+        "sig_prepared": "Întocmit de",
+        "sig_received": "Primit de",
+        "register_filename": "registru-corespondenta"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Intrare",
+          "outgoing": "Ieșire"
+        },
+        "type": {
+          "letter": "Scrisoare",
+          "email": "E-mail",
+          "notice": "Notificare",
+          "memo": "Notă internă",
+          "report": "Raport"
+        },
+        "status": {
+          "open": "Deschis",
+          "awaiting_response": "În așteptarea răspunsului",
+          "responded": "Răspuns primit",
+          "closed": "Închis"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Registru de transmitere a documentelor",
+        "doc_title": "Fișă de transmitere",
+        "col_number": "Nr. transmitere",
+        "col_subject": "Subiect",
+        "col_purpose": "Scop",
+        "col_issued": "Data emiterii",
+        "col_response_due": "Răspuns până la",
+        "col_recipients": "Destinatari",
+        "col_item_count": "Articole",
+        "sender": "Expeditor",
+        "cover_note": "Adresă de însoțire",
+        "no_cover_note": "Fără adresă de însoțire.",
+        "recipients": "Destinatari",
+        "recipient": "Destinatar",
+        "action_required": "Acțiune necesară",
+        "acknowledged": "Primire confirmată",
+        "responded": "Data răspunsului",
+        "items": "Documente transmise",
+        "item_no": "Nr.",
+        "item_description": "Descriere",
+        "item_notes": "Observații",
+        "sig_issued": "Emis de",
+        "sig_received": "Primit de",
+        "register_filename": "registru-transmitere-documente"
+      },
+      "labels": {
+        "status": {
+          "draft": "Ciornă",
+          "issued": "Emis",
+          "responded": "Răspuns primit"
+        },
+        "purpose": {
+          "for_approval": "Pentru aprobare",
+          "for_review": "Pentru verificare",
+          "for_information": "Pentru informare",
+          "for_construction": "Pentru execuție",
+          "for_tender": "Pentru ofertare",
+          "for_record": "Pentru evidență"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Registru de modificări",
+        "claim_register_title": "Registru de revendicări",
+        "notice_register_title": "Registru de notificări",
+        "doc_title": "Cerere de modificare",
+        "doc_title_credit": "Cerere de modificare (lucrări eliminate)",
+        "time_impact": "Impact asupra duratei",
+        "col_code": "Cod",
+        "col_title": "Titlu",
+        "col_classification": "Tip",
+        "col_urgency": "Urgență",
+        "col_requested": "Data solicitării",
+        "col_claimed_amount": "Valoare revendicată",
+        "col_agreed_amount": "Valoare convenită",
+        "col_time_impact": "Impact asupra duratei (zile)",
+        "col_response_due": "Răspuns până la",
+        "col_clause": "Clauză contractuală",
+        "col_row": "Nr.",
+        "col_claim_type": "Tip revendicare",
+        "col_raised": "Data formulării",
+        "col_period_start": "Perioada de la",
+        "col_period_end": "Perioada până la",
+        "col_description": "Descriere",
+        "col_decided_amount": "Valoare stabilită",
+        "col_days_requested": "Zile solicitate",
+        "col_days_granted": "Zile acordate",
+        "col_recipient_type": "Adresat",
+        "col_recipient": "Destinatar",
+        "col_target_response": "Răspuns așteptat",
+        "col_response_received": "Răspuns primit",
+        "requested_by": "Solicitat de",
+        "decided_by": "Decis de",
+        "date_submitted": "Data depunerii",
+        "date_decided": "Data deciziei",
+        "description": "Descriere",
+        "no_description": "Nicio descriere înregistrată.",
+        "decision_notes": "Motivarea deciziei",
+        "no_decision_notes": "Nicio decizie înregistrată încă.",
+        "variation_register_filename": "registru-modificari",
+        "claim_register_filename": "registru-revendicari",
+        "notice_register_filename": "registru-notificari"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Ciornă",
+          "submitted": "Depus",
+          "under_review": "În verificare",
+          "approved": "Aprobat",
+          "rejected": "Respins",
+          "converted_to_vo": "Transformat în dispoziție"
+        },
+        "claim_status": {
+          "draft": "Ciornă",
+          "submitted": "Depus",
+          "under_review": "În verificare",
+          "agreed": "Convenit",
+          "granted": "Acordat",
+          "rejected": "Respins"
+        },
+        "notice_status": {
+          "issued": "Emis",
+          "acknowledged": "Primire confirmată",
+          "responded": "Răspuns primit",
+          "closed": "Închis"
+        },
+        "classification": {
+          "scope_change": "Modificare de domeniu",
+          "unforeseen": "Condiție neprevăzută",
+          "owner_change": "Modificare a beneficiarului",
+          "design_dev": "Detaliere de proiect",
+          "regulatory": "Cerințe legale",
+          "other": "Altele"
+        },
+        "urgency": {
+          "low": "Scăzută",
+          "med": "Medie",
+          "high": "Ridicată"
+        },
+        "claim_type": {
+          "disruption": "Perturbarea lucrărilor",
+          "eot": "Prelungire de termen"
+        },
+        "recipient_type": {
+          "owner": "Beneficiar",
+          "contractor": "Antreprenor",
+          "architect": "Arhitect",
+          "engineer": "Inginer",
+          "consultant": "Consultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Jurnal zilnic de șantier",
+        "overview": "Prezentare generală",
+        "site_supervisor": "Șef de șantier",
+        "not_recorded": "Neînregistrat",
+        "labour_on_site": "Forță de muncă pe șantier",
+        "equipment_on_site": "Utilaje pe șantier",
+        "completeness": "Grad de completare",
+        "weather": "Vreme",
+        "weather_time": "Ora",
+        "weather_source": "Sursa",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Vânt (km/h)",
+        "weather_precip": "Precip. (mm)",
+        "weather_conditions": "Condiții",
+        "weather_empty": "Nicio informație meteo înregistrată pentru această zi.",
+        "site_record": "Evidență de șantier",
+        "entries_empty": "Nicio intrare înregistrată pentru acest jurnal.",
+        "notes": "Observații",
+        "notes_empty": "Nicio observație suplimentară.",
+        "footer_supervisor": "Șef de șantier: {name}",
+        "footer_supervisor_missing": "Șef de șantier: neînregistrat",
+        "footer_generated": "Generat: {timestamp}",
+        "footer_page": "Pagina {page} din {total}",
+        "workforce": "Personal pe firme",
+        "workforce_company": "Firma",
+        "workforce_count": "Persoane",
+        "workforce_unassigned": "Neatribuit unei firme",
+        "workforce_total": "Total",
+        "signatures": "Semnături",
+        "sig_prepared": "Întocmit de (șef de șantier)",
+        "sig_approved": "Aprobat de (reprezentantul beneficiarului)",
+        "sig_name": "Nume",
+        "sig_title": "Funcția",
+        "sig_date": "Data",
+        "sig_signature": "Semnătură",
+        "signed_note": "Semnat în sistem: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "jurnal-zilnic",
+        "summary_wind": "vânt {value} km/h",
+        "summary_precipitation": "precipitații {value} mm",
+        "summary_humidity": "umiditate {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Vizitatori",
+          "event": "Evenimente",
+          "delivery": "Materiale livrate",
+          "completion": "Lucrări executate",
+          "incident_summary": "Securitate și incidente",
+          "inspection_summary": "Inspecții",
+          "photo_note": "Note foto",
+          "general": "Observații generale"
+        },
+        "status": {
+          "open": "Deschis",
+          "closed": "Închis",
+          "signed": "Semnat",
+          "archived": "Arhivat"
+        },
+        "condition": {
+          "clear": "senin",
+          "mainly_clear": "predominant senin",
+          "partly_cloudy": "parțial noros",
+          "cloudy": "noros",
+          "overcast": "cer acoperit",
+          "fog": "ceață",
+          "fog_rime": "ceață cu depunere de chiciură",
+          "drizzle_light": "burniță slabă",
+          "drizzle_moderate": "burniță moderată",
+          "drizzle_dense": "burniță intensă",
+          "rain": "ploaie",
+          "rain_light": "ploaie slabă",
+          "rain_moderate": "ploaie moderată",
+          "rain_heavy": "ploaie torențială",
+          "freezing_rain_light": "ploaie înghețată slabă",
+          "freezing_rain_heavy": "ploaie înghețată puternică",
+          "snow": "ninsoare",
+          "snow_light": "ninsoare slabă",
+          "snow_moderate": "ninsoare moderată",
+          "snow_heavy": "ninsoare abundentă",
+          "rain_showers_light": "averse slabe de ploaie",
+          "rain_showers_moderate": "averse moderate de ploaie",
+          "rain_showers_violent": "averse violente de ploaie",
+          "snow_showers_light": "averse slabe de ninsoare",
+          "snow_showers_heavy": "averse puternice de ninsoare",
+          "thunderstorm": "furtună",
+          "thunderstorm_hail_light": "furtună cu grindină mică",
+          "thunderstorm_hail_heavy": "furtună cu grindină puternică"
+        },
+        "source": {
+          "manual": "Introducere manuală",
+          "open_meteo": "Serviciu meteo",
+          "sensor": "Senzor de șantier"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Registru de cereri de informații (RFI)",
+        "col_number": "Nr. RFI",
+        "col_subject": "Subiect",
+        "col_raised_by": "Inițiat de",
+        "col_assigned_to": "Atribuit",
+        "col_ball_in_court": "Acțiune la",
+        "col_date_required": "Necesar până la",
+        "col_response_due": "Răspuns până la",
+        "col_days_open": "Zile deschis",
+        "col_cost_impact": "Impact asupra costului",
+        "col_schedule_impact": "Impact asupra graficului",
+        "col_response": "Răspuns",
+        "yes_with": "Da ({detail})",
+        "register_filename": "registru-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Ciornă",
+          "open": "Deschis",
+          "answered": "Răspuns",
+          "closed": "Închis",
+          "void": "Anulat"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Generat de AI",
+        "drawing": "Desen",
+        "cost_estimate": "DEVIZ ESTIMATIV",
+        "summary": "REZUMAT",
+        "project": "Proiect:",
+        "boq": "Devizul:",
+        "date": "Data:",
+        "status": "Stare:",
+        "prepared_by": "Întocmit de:",
+        "approved_by": "Aprobat de:",
+        "signature_hint": "Nume / Semnătură / Data",
+        "contents": "Capitole / Poziții:",
+        "pos": "Poz.",
+        "description": "Descriere",
+        "unit": "U.M.",
+        "qty": "Cant.",
+        "rate": "Preț unitar",
+        "total": "Total",
+        "subtotal": "Subtotal:",
+        "other_positions": "Alte poziții",
+        "direct_cost": "Cost direct:",
+        "markups": "Adaosuri (fără TVA):",
+        "net_total": "Total net (fără TVA):",
+        "gross_total": "Total brut",
+        "page": "Pagina",
+        "of": "din",
+        "generated": "Generat:",
+        "summary_report": "Raport sintetic",
+        "positions_omitted": "{count} poziții (detaliul complet a fost omis pentru performanță)",
+        "section": "Capitol",
+        "items": "Articole",
+        "cost_summary": "Sinteza costurilor",
+        "table_of_contents": "Cuprins",
+        "resources_omitted": "Analiza resurselor nu este tipărită: acest deviz are prea multe linii de resurse pentru un singur PDF.",
+        "status_draft": "Ciornă",
+        "status_final": "Final",
+        "status_archived": "Arhivat",
+        "subject": "Devizul de cantități",
+        "tax_vat": "TVA"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "FACTURĂ",
+        "date": "Data: {value}",
+        "due": "Scadentă: {value}",
+        "from": "De la",
+        "bill_to": "Facturat către",
+        "vat_id": "CUI/CIF: {value}",
+        "ref": "Ref: {value}",
+        "th_description": "Descriere",
+        "th_qty": "Cant.",
+        "th_unit": "U.M.",
+        "th_unit_price": "Preț unitar",
+        "th_net": "Net ({currency})",
+        "net_total": "Total net",
+        "vat_total": "TVA",
+        "grand_total": "Total general",
+        "retention_prepaid": "Garanție de bună execuție / avans",
+        "amount_due": "Sumă de plată",
+        "payment": "Plată",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Cont: {value}",
+        "bank_code": "Cod bancar: {value}",
+        "account_holder": "Titular cont: {value}",
+        "footer": "Acest PDF conține o factură electronică EN 16931 încorporată (Factur-X / ZUGFeRD). XML-ul încorporat este documentul oficial.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Raport",
+        "meta_project": "Proiect",
+        "meta_type": "Tip",
+        "meta_generated": "Generat",
+        "meta_currency": "Monedă",
+        "field_column": "Câmp",
+        "value_column": "Valoare",
+        "yes": "Da",
+        "no": "Nu",
+        "no_data_heading": "Nu există date disponibile",
+        "no_data_body": "Acest raport a fost generat cu un instantaneu de date gol. Verificați dacă modulele sursă (finanțe, grafic, siguranță etc.) au returnat date pentru proiectul selectat.",
+        "no_data_body_short": "Acest raport a fost generat cu un instantaneu de date gol. Verificați dacă modulele sursă au returnat date pentru proiectul selectat.",
+        "footer_generated_by": "Generat de OpenConstructionERP la {timestamp}.",
+        "worksheet_name": "Raport",
+        "pdf_subject": "Raport de proiect",
+        "overall_progress": "Progres general",
+        "as_of": "La data de",
+        "recorded_by": "Înregistrat de",
+        "period": "Perioada",
+        "entries_suffix": "({count} înregistrări)",
+        "site_photo_alt": "Fotografie de șantier",
+        "ai_summary_heading": "Rezumat",
+        "ai_badge": "Generat de AI",
+        "ai_note": "Generat de AI din datele de proiect de mai jos.",
+        "ai_note_confidence": "Generat de AI din datele de proiect de mai jos (încredere {confidence}).",
+        "ai_note_review": "Verificați înainte de a-l trimite clientului."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Nume",
+          "status": "Stare",
+          "phase": "Fază",
+          "planned_start": "Început planificat",
+          "planned_end": "Sfârșit planificat",
+          "schedule_progress_pct": "Progres grafic (%)",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Buget consumat (%)",
+          "as_of": "La data de",
+          "progress_pct": "Progres (%)",
+          "risk_score_avg": "Scor mediu de risc",
+          "open_rfis": "Cereri de informații deschise",
+          "open_submittals": "Documente deschise spre aprobare",
+          "open_defects": "Defecte deschise",
+          "open_observations": "Observații deschise",
+          "budget": "Buget",
+          "committed": "Angajat",
+          "actual": "Real",
+          "payable": "De plată",
+          "receivable": "De încasat",
+          "net_cash_flow": "Flux de numerar net"
+        },
+        "section_titles": {
+          "Project Overview": "Prezentare generală a proiectului",
+          "Key Performance Indicators": "Indicatori cheie de performanță",
+          "Schedule Status": "Starea graficului",
+          "Risk Summary": "Sinteza riscurilor",
+          "Open Issues": "Probleme deschise",
+          "Cost Summary": "Sinteza costurilor",
+          "Cost Breakdown": "Defalcarea costurilor",
+          "Change Orders": "Ordine de modificare",
+          "Cash Flow": "Flux de numerar",
+          "Schedule Overview": "Prezentare generală a graficului",
+          "Milestone Status": "Starea etapelor cheie",
+          "Critical Path": "Drumul critic",
+          "3-Week Lookahead": "Previziune pe 3 săptămâni",
+          "Safety KPIs": "Indicatori de sănătate și securitate",
+          "Incident Log": "Registrul incidentelor",
+          "Near-Miss Reports": "Rapoarte de evenimente potențiale",
+          "Safety Training": "Instruire în securitate",
+          "Inspection Summary": "Sinteza inspecțiilor",
+          "By Inspection Type": "Pe tip de inspecție",
+          "Punch List Status": "Starea listei de remedieri",
+          "Recent Inspections": "Inspecții recente",
+          "Portfolio Overview": "Prezentare generală a portofoliului",
+          "Project Statuses": "Stările proiectelor",
+          "KPI Comparison": "Compararea indicatorilor",
+          "Portfolio Risks": "Riscurile portofoliului",
+          "Field Progress": "Progresul pe teren",
+          "Top Risks": "Principalele riscuri",
+          "Site Photos": "Fotografii de șantier",
+          "Summary": "Rezumat"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Comandă de achiziție",
+        "gr_title": "Recepție de marfă",
+        "supplier": "Furnizor",
+        "po_type": "Tip comandă",
+        "issue_date": "Data emiterii",
+        "delivery_date": "Data livrării",
+        "created_by": "Întocmit de",
+        "order_total": "Valoarea comenzii",
+        "line_items": "Poziții",
+        "col_no": "Nr.",
+        "col_description": "Descriere",
+        "col_quantity": "Cant.",
+        "col_unit": "U.M.",
+        "col_unit_rate": "Preț unitar",
+        "col_amount": "Valoare",
+        "no_line_items": "Fără poziții.",
+        "totals": "Totaluri",
+        "subtotal": "Valoare netă",
+        "tax": "TVA",
+        "total_gross": "Total cu TVA",
+        "terms": "Condiții",
+        "payment_terms": "Termene de plată",
+        "retention": "Garanție de bună execuție",
+        "retention_at": "Garanția se reține la",
+        "retention_at_receipt": "Recepția mărfii",
+        "retention_at_invoice": "Factură",
+        "invoice_tolerance": "Toleranță la factură",
+        "supplier_confirmation": "Confirmare furnizor",
+        "supplier_reference": "Referința furnizorului",
+        "confirmed_delivery": "Data de livrare confirmată",
+        "acknowledged_on": "Confirmată la",
+        "not_confirmed": "Nu a fost confirmată încă de furnizor.",
+        "notes": "Observații",
+        "no_notes": "Nu există observații înregistrate.",
+        "sig_ordered_by": "Comandat de",
+        "purchase_order": "Comandă de achiziție",
+        "receipt_date": "Data recepției",
+        "received_by": "Recepționat de",
+        "delivery_note": "Aviz de însoțire a mărfii",
+        "col_ordered": "Comandat",
+        "col_received": "Recepționat",
+        "col_rejected": "Respins",
+        "col_batch": "Lot / serie",
+        "rejections": "Respingeri",
+        "col_reason": "Motiv",
+        "no_rejections": "Nu s-a respins nimic.",
+        "sig_delivered_by": "Livrat de",
+        "counterparty_tax_id": "CUI/CIF",
+        "counterparty_address": "Adresă"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Ciornă",
+          "approved": "Aprobată",
+          "issued": "Emisă",
+          "partially_received": "Parțial recepționată",
+          "completed": "Finalizată",
+          "cancelled": "Anulată"
+        },
+        "gr_status": {
+          "draft": "Ciornă",
+          "confirmed": "Confirmată"
+        },
+        "po_type": {
+          "standard": "Standard",
+          "blanket": "Comandă-cadru",
+          "service": "Servicii"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Factură",
+        "payment_title": "Plată",
+        "direction": "Sens",
+        "supplier": "Furnizor",
+        "client": "Client",
+        "invoice_date": "Data facturii",
+        "due_date": "Data scadenței",
+        "payment_terms": "Termene de plată",
+        "purchase_order": "Comandă de achiziție",
+        "invoice_total": "Valoarea facturii",
+        "line_items": "Poziții",
+        "col_no": "Nr.",
+        "col_description": "Descriere",
+        "col_quantity": "Cant.",
+        "col_unit": "U.M.",
+        "col_unit_rate": "Preț unitar",
+        "col_vat": "TVA",
+        "col_amount": "Valoare",
+        "no_line_items": "Fără poziții.",
+        "totals": "Totaluri",
+        "subtotal": "Valoare netă",
+        "tax": "TVA",
+        "total_gross": "Total cu TVA",
+        "retention": "Garanție de bună execuție",
+        "amount_due": "De plată după reținere",
+        "payments": "Plăți",
+        "col_date": "Data",
+        "col_reference": "Referință",
+        "col_paid": "Plătit",
+        "col_withheld": "Reținut",
+        "refund": "Rambursare",
+        "no_payments": "Nu există plăți înregistrate.",
+        "notes": "Observații",
+        "no_notes": "Nu există observații înregistrate.",
+        "invoice": "Factură",
+        "invoice_number": "Nr. factură",
+        "payment_date": "Data plății",
+        "reference": "Referință",
+        "amount_paid": "Sumă plătită",
+        "exchange_rate": "Curs de schimb",
+        "kind": "Tip",
+        "kind_payment": "Plată",
+        "kind_refund": "Rambursare",
+        "withholding": "Garanție reținută",
+        "withheld_amount": "Sumă reținută",
+        "release_date": "Data eliberării",
+        "gross_settled": "Valoare brută decontată",
+        "no_withholding": "Nu s-a reținut nimic din această plată.",
+        "counterparty_tax_id": "CUI/CIF",
+        "counterparty_address": "Adresă"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Ciornă",
+          "pending": "În așteptarea aprobării",
+          "approved": "Aprobată",
+          "sent": "Trimisă",
+          "paid": "Plătită",
+          "cancelled": "Anulată",
+          "credit_note_issued": "Notă de credit emisă"
+        },
+        "direction": {
+          "payable": "De plată (factură furnizor)",
+          "receivable": "De încasat (factură client)"
+        },
+        "payment_status": {
+          "completed": "Finalizată",
+          "refunded": "Rambursată"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Pagina {page} din {total}",
+    "page": "Pagina {page}",
+    "printed": "Tipărit: {timestamp}",
+    "generated": "Generat: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "Invitație în portalul pentru clienți: {sender}",
+      "login_subject": "Linkul dumneavoastră de autentificare în portalul pentru clienți",
+      "invite_heading": "Bun venit în portalul pentru clienți",
+      "login_heading": "Autentificare în portalul pentru clienți",
+      "greeting": "Bună ziua, {name},",
+      "greeting_generic": "Bună ziua,",
+      "invite_body": "Accesul la portalul pentru clienți v-a fost acordat de: {sender}. Acolo puteți urmări proiectul dumneavoastră: rapoarte de progres, documente, facturi și următoarele termene importante.",
+      "login_body": "Iată linkul de autentificare pe care l-ați solicitat.",
+      "link_help": "Butonul de mai jos vă autentifică în portal. Nu este nevoie de parolă. Linkul poate fi folosit o singură dată. Valabilitate în ore: {hours}.",
+      "ignore": "Dacă nu așteptați acest mesaj, îl puteți ignora. Fără acest link, nimeni nu primește acces.",
+      "invite_cta": "Deschide portalul",
+      "login_cta": "Autentificare",
+      "sender_generic": "Echipa dumneavoastră de proiect"
+    },
+    "tender_invite": {
+      "subject": "Invitație de participare la licitație: {package}",
+      "heading": "Invitație de participare la licitație",
+      "greeting": "Stimată echipă {company},",
+      "greeting_generic": "Stimați domni,",
+      "invite": "Sunteți invitați să depuneți o ofertă pentru pachetul de licitație {package}.",
+      "invite_project": "Sunteți invitați să depuneți o ofertă pentru pachetul de licitație {package} din proiectul {project}.",
+      "deadline": "Termen de depunere: {deadline}",
+      "link_help": "Butonul de mai jos deschide lista de cantități. Introduceți online prețurile unitare, salvați o ciornă oricând doriți și depuneți oferta înainte de termen. Nu este nevoie de cont.",
+      "link_personal": "Acest link este personal pentru firma dumneavoastră. Vă rugăm să nu îl transmiteți mai departe.",
+      "cta": "Deschide lista și introdu prețurile",
+      "no_link": "Vă rugăm să consultați detaliile pachetului și să ne transmiteți oferta înainte de termenul de mai sus."
+    },
+    "notification_email": {
+      "greeting": "Bună ziua, {name},",
+      "greeting_generic": "Bună ziua,",
+      "cta": "Deschide în OpenConstructionERP",
+      "footer": "Primiți acest mesaj în urma setărilor dumneavoastră de notificare. Le puteți modifica în profil.",
+      "digest_subject": "OpenConstructionERP: Rezumat notificări ({count})",
+      "digest_heading": "Notificări recente:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Comparație de prețuri",
+      "comparison_sheet": "Comparație",
+      "bidder_title": "Listă de cantități pentru prețuire",
+      "bidder_sheet": "Listă cantități",
+      "project": "Proiect",
+      "package": "Pachet",
+      "currency": "Monedă",
+      "date": "Data",
+      "return_by": "De returnat până la",
+      "item": "Poziție",
+      "description": "Descriere",
+      "unit": "UM",
+      "quantity": "Cantitate",
+      "unit_price": "Preț unitar",
+      "line_total": "Valoare poziție",
+      "own_estimate": "Estimare proprie",
+      "not_priced": "neprețuit",
+      "sum_priced_lines": "Suma pozițiilor prețuite",
+      "bid_total": "Total ofertă, așa cum a fost depus",
+      "lines_priced": "Poziții prețuite",
+      "lines_priced_value": "{priced} din {total}",
+      "deviation": "Abatere față de estimarea proprie",
+      "not_comparable": "n/a",
+      "other_currency": "Ofertat în {currency}, nu este clasat față de ofertele în {reporting}.",
+      "legend": "Legendă",
+      "legend_lowest": "Verde: cel mai mic preț unitar de pe poziție.",
+      "legend_high": "▲ roșu: cu peste {pct}% peste prețul median de pe poziție.",
+      "legend_low": "▼ chihlimbar: cu peste {pct}% sub prețul median de pe poziție.",
+      "legend_missing": "\"{marker}\": ofertantul nu a indicat preț pentru poziție.",
+      "legend_incomplete": "O ofertă cu poziții neprețuite este marcată în coloana \"Poziții prețuite\" și nu este clasată ca cea mai mică după total.",
+      "legend_totals": "Totalul ofertei este suma depusă de ofertant; poate diferi de suma pozițiilor prețuite.",
+      "bidder": "Ofertant",
+      "bidder_note": "Observația ofertantului",
+      "reference": "Referință (a nu se modifica)",
+      "total": "Total",
+      "instructions": "Introduceți un preț unitar pentru fiecare poziție în celulele galbene. Cantitățile și descrierile sunt fixe, valorile pozițiilor și totalul se calculează automat. Lăsați celula goală dacă nu prețuiți poziția."
+    },
+    "cost_plan": {
+      "sheet_plan": "Plan de costuri NRM 1",
+      "sheet_unallocated": "Nealocat",
+      "title": "Plan de costuri pe elemente (NRM 1)",
+      "bill": "Listă de cantități",
+      "currency": "Monedă",
+      "gifa": "Suprafață desfășurată (m2)",
+      "gifa_project": "din proiect",
+      "gifa_entered": "introdusă pentru acest export",
+      "gifa_none": "nesetată, costul pe m2 nu este afișat",
+      "col_code": "Cod",
+      "col_description": "Element",
+      "col_positions": "Poziții",
+      "col_basis": "Bază de calcul",
+      "col_total": "Total",
+      "col_per_m2": "Cost pe m2 de suprafață desfășurată",
+      "col_share": "% din total",
+      "col_running": "Total cumulat",
+      "group_level": "Nivel de grup, fără element indicat",
+      "facilitating_works_estimate": "Estimare lucrări pregătitoare",
+      "works_estimate": "Estimare lucrări de construcții",
+      "addons_heading": "Grupele 9-14 din NRM 1 prețuite ca poziții ale listei",
+      "unallocated": "Nealocat unui element",
+      "direct_cost": "Cost direct al listei",
+      "markups_heading": "Majorări (cascada proprie a listei, în ordine)",
+      "markups_total": "Total majorări",
+      "grand_total": "Total plan de costuri",
+      "basis_direct": "{pct}% asupra costului direct",
+      "basis_running": "{pct}% asupra subtotalului cumulat",
+      "basis_lump": "Sumă forfetară",
+      "basis_banded": "Scară pe trepte",
+      "basis_escalation": "Actualizare pe bază de indici",
+      "basis_other": "{kind}",
+      "basis_scoped": "pe capitole",
+      "col_ordinal": "Nr. crt.",
+      "col_position": "Descriere",
+      "col_written_code": "Cod așa cum a fost scris",
+      "col_reason": "Motiv",
+      "reason_no_code": "Nu există cod NRM pe poziție sau pe capitolele ei",
+      "reason_invalid_code": "Codul nu este un număr NRM",
+      "reason_unknown_group": "NRM 1 nu are o astfel de grupă",
+      "truncated": "Lista a fost scurtată la primele {shown} din {count} poziții; totalul le cuprinde pe toate."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Cerințe",
+      "sheet_summary": "Sumar",
+      "sheet_legend": "Legendă",
+      "summary_element": "Element",
+      "summary_count": "Număr de cerințe",
+      "summary_total": "Total",
+      "legend_column": "Coloană",
+      "legend_description": "Descriere",
+      "unspecified": "Nespecificat",
+      "h01": "Element / clasă IFC",
+      "h02": "Clasificare",
+      "h03": "Grup de proprietăți",
+      "h04": "Denumirea proprietății",
+      "h05": "Tip de date",
+      "h06": "Obligatoriu",
+      "h07": "Valori permise",
+      "h08": "Min.",
+      "h09": "Max.",
+      "h10": "Unitate",
+      "h11": "Șablon",
+      "h12": "Fază",
+      "h13": "Actor",
+      "h14": "Caz de utilizare",
+      "h15": "Sursă",
+      "d01": "Clasa entității IFC (de ex. IFCWALL, IFCBEAM)",
+      "d02": "Sistem de clasificare și cod (de ex. Uniclass 2015: EF_25_10)",
+      "d03": "Denumirea grupului de proprietăți (de ex. Pset_WallCommon)",
+      "d04": "Denumirea proprietății sau a atributului cerut",
+      "d05": "Tip de date IFC (IFCLABEL, IFCREAL, IFCBOOLEAN etc.)",
+      "d06": "Cardinalitate: obligatoriu, opțional sau interzis",
+      "d07": "Listă de valori permise, separate prin punct și virgulă",
+      "d08": "Limitele intervalului numeric",
+      "d09": "Unitate de măsură (m, m2, kg etc.)",
+      "d10": "Expresie regulată pentru validarea valorii",
+      "d11": "Faza sau jalonul proiectului (LP3, RIBA Stage 3 etc.)",
+      "d12": "Partea responsabilă (arhitect, inginer de structură etc.)",
+      "d13": "Scopul sau cazul de utilizare al cerinței",
+      "d14": "Standardul sau documentul sursă"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Lista de cantități a fost creată",
+      "notifications.boq.created.body": "Lista dumneavoastră de cantități '{boq_name}' a fost salvată.",
+      "notifications.meeting.action_assigned.title": "Vi s-a atribuit o acțiune din ședință",
+      "notifications.meeting.action_assigned.body": "Din ședința {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Starea documentului s-a schimbat",
+      "notifications.cde.state_transitioned.body": "Containerul a trecut în starea '{new_state}'.",
+      "notifications.cde.linked_published.title": "A fost publicat un document legat de activitatea dumneavoastră",
+      "notifications.cde.linked_published.body": "{container_code} a fost publicat la revizia {revision_code}. Înregistrările dumneavoastră legate: {records}.",
+      "notifications.rfi.assigned.title": "Vi s-a atribuit o cerere RFI",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "Cererea RFI a primit răspuns",
+      "notifications.rfi.responded.body": "Cererea dumneavoastră {code} ({title}) a primit răspuns.",
+      "notifications.risk.assigned.title": "Vi s-a atribuit un risc",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Alertă de depășire a costurilor",
+      "notifications.costmodel.overrun_alert.body": "Costurile categoriei {category} depășesc bugetul: valoarea reală de {actual} {currency} depășește pragul de alertă de +{threshold_pct}% față de valoarea planificată de {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Documentație de aprobat în așteptarea verificării",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Documentația de aprobat a fost aprobată",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Documentația de aprobat a fost respinsă",
+      "notifications.submittal.rejected.body": "{code} ({title}). Motiv: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Documentația de aprobat trebuie revizuită",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Motiv: {reason}",
+      "notifications.transmittal.issued.title": "Vi s-a emis un borderou de transmitere a documentelor",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Primirea documentelor a fost confirmată",
+      "notifications.transmittal.acknowledged.body": "Destinatarul a confirmat {code} ({title}).",
+      "notifications.transmittal.responded.title": "Borderoul de transmitere a primit răspuns",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "Vi s-a atribuit o cerere RFI",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "A fost atribuită o sarcină nouă",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Factura a fost aprobată",
+      "notification.invoice_approved_body": "Factura {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "A fost programată o inspecție",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, data: {inspection_date}",
+      "notification.submittal_status_changed_title": "Starea documentației de aprobat s-a schimbat",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "A fost programată o ședință",
+      "notification.meeting_scheduled_body": "{title}, data: {meeting_date}",
+      "notification.ncr_created_title": "A fost înregistrată o neconformitate",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Document încărcat",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Ați fost menționat într-un comentariu",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "Comentariu nou într-o discuție",
+      "notifications.collaboration.comment_added.body": "La {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "A fost detectată o coliziune de severitate ridicată",
+      "notifications.clash.high_severity.body": "Coliziune, severitate {severity}: {a_name} și {b_name}",
+      "notifications.validation.report.title": "Validarea a găsit probleme",
+      "notifications.validation.report.body": "Erori: {error_count}, avertismente: {warning_count} ({target_type}).",
+      "notifications.punchlist.auto_created.title": "A fost creată o poziție în lista de remedieri",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Rezumat notificări",
+      "notifications.digest.body": "Notificări noi pe canalul {channel}: {count}.",
+      "notifications.approval.overdue.title": "Aprobare întârziată",
+      "notifications.approval.overdue.body": "Pasul {step_ordinal} ({target_kind}) are întârziere (ore): {hours_overdue}.",
+      "notifications.approval.escalated.title": "Aprobare escaladată către dumneavoastră",
+      "notifications.approval.escalated.body": "Pasul {step_ordinal} ({target_kind}) a fost escaladat către dumneavoastră (nivel {level}).",
+      "notifications.approval.reassigned.title": "Aprobare redirecționată către dumneavoastră",
+      "notifications.approval.reassigned.body": "Decizia pentru pasul {step_ordinal} ({target_kind}) vă aparține acum.",
+      "notifications.deadline.overdue.title": "Termen depășit: {title}",
+      "notifications.deadline.overdue.body": "Termenul pentru \"{title}\" ({module}) a fost depășit. Zile de întârziere: {days_overdue}.",
+      "notifications.deadline.escalated.title": "Element cu termen depășit, escaladat",
+      "notifications.deadline.escalated.body": "Elementul \"{title}\" ({module}) este încă deschis, zile de întârziere: {days_overdue}, și a fost escaladat.",
+      "notifications.deadline.approaching.title": "Termen apropiat: {title}",
+      "notifications.deadline.approaching.body": "Termenul pentru \"{title}\" ({module}) este {due_date}.",
+      "notifications.deadline.built.approaching.title": "Termen apropiat: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: termenul pentru \"{title}\" este {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Termen depășit: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "Termenul pentru RFI {reference} \"{title}\" din proiectul {project} a fost {due_date_display}. Zile de întârziere: {days_overdue}. Este necesar un răspuns.",
+      "notifications.deadline.rfi.escalated.title": "Escaladat: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "RFI {reference} \"{title}\" din proiectul {project} este încă deschis, termenul a fost {due_date_display}, zile de întârziere: {days_overdue}. A fost escaladat către dumneavoastră.",
+      "notifications.deadline.rfi.approaching.title": "Termen apropiat: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "Termenul pentru RFI {reference} \"{title}\" din proiectul {project} este {due_date_display}. Este necesar un răspuns.",
+      "notifications.deadline.submittals.overdue.title": "Termen depășit: documentație de aprobat {reference}",
+      "notifications.deadline.submittals.overdue.body": "Termenul pentru documentația de aprobat {reference} \"{title}\" din proiectul {project} a fost {due_date_display}. Zile de întârziere: {days_overdue}. Este necesară verificarea.",
+      "notifications.deadline.submittals.escalated.title": "Escaladat: documentație de aprobat {reference}",
+      "notifications.deadline.submittals.escalated.body": "Documentația de aprobat {reference} \"{title}\" din proiectul {project} este încă deschisă, termenul a fost {due_date_display}, zile de întârziere: {days_overdue}. A fost escaladată către dumneavoastră.",
+      "notifications.deadline.submittals.approaching.title": "Termen apropiat: documentație de aprobat {reference}",
+      "notifications.deadline.submittals.approaching.body": "Termenul pentru documentația de aprobat {reference} \"{title}\" din proiectul {project} este {due_date_display}. Este necesară verificarea.",
+      "notifications.deadline.correspondence.overdue.title": "Termen depășit: corespondență {reference}",
+      "notifications.deadline.correspondence.overdue.body": "Corespondența {reference} \"{title}\" din proiectul {project} trebuia să primească răspuns până la {due_date_display}. Zile de întârziere: {days_overdue}. Este necesar un răspuns.",
+      "notifications.deadline.correspondence.escalated.title": "Escaladat: corespondență {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Corespondența {reference} \"{title}\" din proiectul {project} este încă fără răspuns, termenul a fost {due_date_display}, zile de întârziere: {days_overdue}. A fost escaladată către dumneavoastră.",
+      "notifications.deadline.correspondence.approaching.title": "Termen apropiat: corespondență {reference}",
+      "notifications.deadline.correspondence.approaching.body": "Corespondența {reference} \"{title}\" din proiectul {project} necesită răspuns până la {due_date_display}. Este necesar un răspuns.",
+      "notifications.deadline.variations.overdue.title": "Termen depășit: modificare {reference}",
+      "notifications.deadline.variations.overdue.body": "Termenul pentru modificarea {reference} \"{title}\" din proiectul {project} a fost {due_date_display}. Zile de întârziere: {days_overdue}. Este necesară o decizie.",
+      "notifications.deadline.variations.escalated.title": "Escaladat: modificare {reference}",
+      "notifications.deadline.variations.escalated.body": "Modificarea {reference} \"{title}\" din proiectul {project} este încă deschisă, termenul a fost {due_date_display}, zile de întârziere: {days_overdue}. A fost escaladată către dumneavoastră.",
+      "notifications.deadline.variations.approaching.title": "Termen apropiat: modificare {reference}",
+      "notifications.deadline.variations.approaching.body": "Termenul pentru modificarea {reference} \"{title}\" din proiectul {project} este {due_date_display}. Este necesară o decizie.",
+      "notifications.variation.submitted.title": "Modificare în așteptarea deciziei: {code}",
+      "notifications.variation.submitted.body": "Modificarea {code} \"{title}\" din proiectul {project} a fost depusă și așteaptă o decizie.",
+      "notifications.variation.approved.title": "Modificare aprobată: {code}",
+      "notifications.variation.approved.body": "Modificarea {code} \"{title}\" din proiectul {project} a fost aprobată.",
+      "notifications.variation.rejected.title": "Modificare respinsă: {code}",
+      "notifications.variation.rejected.body": "Modificarea {code} \"{title}\" din proiectul {project} a fost respinsă și v-a fost returnată.",
+      "notifications.variation.rejected_reason.body": "Modificarea {code} \"{title}\" din proiectul {project} a fost respinsă și v-a fost returnată. Motiv: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Ordin de modificare în așteptarea aprobării: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Ordinul de modificare {code} \"{title}\" din proiectul {project} a fost depus și așteaptă aprobarea.",
+      "notifications.changeorder.approved.title": "Ordin de modificare aprobat: {code}",
+      "notifications.changeorder.approved.body": "Ordinul de modificare {code} \"{title}\" din proiectul {project} a fost aprobat.",
+      "notifications.changeorder.rejected.title": "Ordin de modificare respins: {code}",
+      "notifications.changeorder.rejected.body": "Ordinul de modificare {code} \"{title}\" din proiectul {project} a fost respins.",
+      "notifications.submittal.approved_as_noted.title": "Documentația de aprobat a fost aprobată cu observații",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Un document necesită aprobarea dumneavoastră",
+      "notifications.file_approval.needs_approver.body": "Un fișier de tip {file_kind} așteaptă aprobarea dumneavoastră.",
+      "notifications.file_approval.approved.title": "Documentul dumneavoastră a fost aprobat",
+      "notifications.file_approval.approved.body": "Fișierul dumneavoastră de tip {file_kind} a trecut prin toate etapele de aprobare.",
+      "notifications.file_approval.rejected.title": "Documentul dumneavoastră a fost returnat",
+      "notifications.file_approval.rejected.body": "Fișierul dumneavoastră de tip {file_kind} a fost respins și necesită modificări.",
+      "notifications.portal.user_invited.title": "Utilizator de portal invitat",
+      "notifications.portal.user_invited.body": "{portal_user_email} a fost invitat cu rolul: {portal_role}.",
+      "notifications.portal.message_received.title": "Mesaj nou în portal",
+      "notifications.portal.message_received.body": "Mesaj trimis de {buyer_name}."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "ID",
+          "ID activitate",
+          "Cod activitate",
+          "Cod",
+          "Nr.",
+          "Număr"
+        ],
+        "name": [
+          "Denumire",
+          "Denumire sarcină",
+          "Denumire activitate",
+          "Activitate",
+          "Sarcină"
+        ],
+        "wbs": [
+          "WBS",
+          "Cod WBS",
+          "Număr WBS",
+          "Număr structură"
+        ],
+        "outline_level": [
+          "Nivel structură",
+          "Nivel",
+          "Nivel indentare",
+          "Indentare"
+        ],
+        "start": [
+          "Început",
+          "Data începerii",
+          "Start",
+          "Început planificat"
+        ],
+        "finish": [
+          "Sfârșit",
+          "Finalizare",
+          "Data finalizării",
+          "Sfârșit planificat",
+          "Termen"
+        ],
+        "duration": [
+          "Durată",
+          "Durată (zile)",
+          "Zile",
+          "Durata inițială"
+        ],
+        "predecessors": [
+          "Predecesori",
+          "Predecesor",
+          "Depinde de",
+          "Dependențe"
+        ],
+        "percent_complete": [
+          "% finalizat",
+          "Procent finalizat",
+          "Progres",
+          "Progres (%)",
+          "% realizat"
+        ],
+        "milestone": [
+          "Jalon",
+          "Este jalon",
+          "Reper"
+        ],
+        "resource": [
+          "Resursă",
+          "Resurse",
+          "Nume resurse",
+          "Echipă",
+          "Executant"
+        ],
+        "notes": [
+          "Note",
+          "Notă",
+          "Comentarii",
+          "Comentariu",
+          "Observații"
+        ],
+        "client_visible": [
+          "Vizibil pentru client",
+          "Vizibil clientului",
+          "Afișează clientului",
+          "Partajează cu clientul"
+        ]
+      },
+      "yes_words": [
+        "da"
+      ],
+      "no_words": [
+        "nu"
+      ],
+      "example_names": [
+        "Structură și închideri",
+        "Excavații",
+        "Fundații",
+        "Fundații recepționate"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "contract*",
+          "acord*",
+          "convenți*"
+        ],
+        "contact": [
+          "contact*",
+          "furnizor*",
+          "subcontractor*",
+          "client*",
+          "beneficiar*",
+          "antreprenor*"
+        ],
+        "schedule_activity": [
+          "activitat*",
+          "sarcin*",
+          "wbs"
+        ],
+        "document": [
+          "document*",
+          "desen*",
+          "anex*",
+          "atașament*"
+        ],
+        "user": [
+          "responsabil*",
+          "atribuit*",
+          "inspector*",
+          "diriginte*",
+          "șef de echipă",
+          "șef de șantier"
+        ],
+        "due": [
+          "scaden*",
+          "termen*",
+          "expir*",
+          "valabil până",
+          "dată țintă",
+          "reînnoir*"
+        ]
+      },
+      "link_labels": {
+        "contract": "Contract",
+        "contact": "Contact",
+        "schedule_activity": "Activitate din grafic",
+        "document": "Document",
+        "user": "Responsabil"
+      },
+      "state_labels": [
+        "Deschis",
+        "În lucru",
+        "Finalizat"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Addendum {number} la licitația {package}",
+      "addendum_heading": "Addendum la licitație",
+      "greeting": "Stimată {company},",
+      "greeting_generic": "Stimați domni,",
+      "addendum_intro": "A fost emis addendumul {number} la pachetul de licitație {package}: {title}.",
+      "addendum_deadline": "Termenul de depunere a ofertelor a fost mutat de la {old} la {new}.",
+      "addendum_boq": "Devizul de cantități s-a modificat (revizia {revision}). Vă rugăm să prețuiți revizia în vigoare.",
+      "addendum_documents": "Documente emise: {documents}",
+      "addendum_ack": "Vă rugăm să confirmați primirea acestui addendum. Oferta care nu confirmă toate addendumurile poate fi considerată neconformă.",
+      "answer_subject": "Clarificarea {number} la licitația {package}",
+      "answer_heading": "Clarificare la licitație",
+      "answer_intro": "A fost răspuns la o întrebare privind pachetul de licitație {package}. Răspunsul se aplică tuturor ofertanților.",
+      "question_label": "Întrebare",
+      "answer_label": "Răspuns"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Valoarea brută de dezvoltare (GDV)",
+      "total_development_cost": "Costul total de dezvoltare",
+      "residual_land_value": "Valoarea reziduală a terenului",
+      "developer_profit": "Profitul dezvoltatorului",
+      "profit_on_cost": "Profit raportat la cost",
+      "profit_on_gdv": "Profit raportat la GDV",
+      "construction_cost": "Costul construcției",
+      "professional_fees": "Onorarii profesionale",
+      "contingency": "Rezervă pentru imprevizibil",
+      "finance_cost": "Costul finanțării",
+      "sales_costs": "Costuri de vânzare"
+    },
+    "status": {
+      "viable": "Viabil",
+      "unviable": "Neviabil",
+      "marginal": "Marginal",
+      "pending": "Încă neevaluat"
+    },
+    "figure": {
+      "gross_development_value": "Valoarea totală de vânzare a tuturor unităților din proiect, toate în aceeași monedă.",
+      "total_development_cost": "Toate costurile de realizare a proiectului, cu excepția terenului: construcție, onorarii, rezervă, finanțare și costuri de vânzare.",
+      "residual_land_value": "Ceea ce rămâne pentru teren după ce din valoarea brută de dezvoltare se scad costul total de dezvoltare și profitul țintă al dezvoltatorului.",
+      "developer_profit": "Profitul pe care dezvoltatorul intenționează să-l păstreze, stabilit ca raport țintă din valoarea brută de dezvoltare.",
+      "profit_on_cost": "Profitul dezvoltatorului împărțit la costul total de dezvoltare, exprimat ca raport.",
+      "profit_on_gdv": "Profitul dezvoltatorului împărțit la valoarea brută de dezvoltare, exprimat ca raport."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Tabără de muncitori",
+        "rental": "Locuință de închiriat",
+        "hotel": "Hotel"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "În așteptare",
+        "approved": "Aprobat",
+        "rejected": "Respins"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Îndeplinit",
+        "fail": "Neîndeplinit",
+        "not_applicable": "Nu se aplică"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Plan",
+        "contract": "Contract",
+        "specification": "Specificație",
+        "photo": "Fotografie",
+        "correspondence": "Corespondență",
+        "reality_capture": "Captură a realității",
+        "other": "Altele"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "În așteptare",
+        "approved": "Aprobat",
+        "rejected": "Respins",
+        "cancelled": "Anulat"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Ciornă",
+        "submitted": "Trimis spre aprobare",
+        "approved": "Aprobat",
+        "posted": "Contabilizat"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Deschisă",
+        "assigned": "Atribuită",
+        "in_progress": "În desfășurare",
+        "resolved": "Remediată",
+        "verified": "Verificată",
+        "closed": "Închisă"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "observație",
+        "minor": "minoră",
+        "major": "majoră",
+        "critical": "critică"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Persoană",
+        "crew": "Echipă",
+        "equipment": "Utilaj",
+        "subcontractor": "Subcontractant"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Numele modelului AI este învechit sau indisponibil. Deschideți Setări > AI și introduceți un nume de model valid pentru furnizorul dvs.",
+      "not_configured": "AI nu este configurat. Configurați un furnizor AI în Setări."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "verificat",
+      "bound": "atașat",
+      "empty": "lipsă"
+    },
+    "package_status_labels": {
+      "draft": "ciornă",
+      "in_progress": "în desfășurare",
+      "ready": "gata",
+      "issued": "emis"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "blocaj",
+      "critical": "critic",
+      "warning": "avertisment",
+      "suggestion": "sugestie"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategie",
+      "brief": "Temă de proiectare",
+      "concept": "Concept",
+      "design": "Proiectare",
+      "approval": "Autorizare",
+      "detail": "Proiectare detaliată",
+      "tender": "Licitație",
+      "award": "Atribuire",
+      "construction": "Execuție",
+      "handover": "Predare",
+      "operation": "Exploatare"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Lucrarea nu are piese de tăiat",
+        "suggestion": "Adăugați piese manual, lipiți-le sau importați-le dintr-un tabel de fasonare, o măsurătoare, o linie de deviz sau un fișier."
+      },
+      "has_stock": {
+        "fail": "Lucrarea nu are stoc din care să se taie",
+        "suggestion": "Adăugați cel puțin o lungime de stoc sau o dimensiune de placă, sau refolosiți resturi din inventarul de șantier."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} nu are lățime",
+        "suggestion": "Indicați lungimea și lățimea pentru fiecare piesă de placă și fiecare dimensiune de placă."
+      },
+      "piece_fits_stock": {
+        "fail": "Piesa {ref} ({size} mm) nu încape în nicio poziție de stoc",
+        "suggestion": "Adăugați o dimensiune de stoc mai lungă sau mai mare, reduceți adaosul sau împărțiți piesa printr-o îmbinare."
+      },
+      "grain_allows_fit": {
+        "fail": "Piesa {ref} încape doar dacă este rotită perpendicular pe fibră",
+        "suggestion": "Permiteți rotirea acestei piese sau adăugați o dimensiune de placă în care încape pe direcția fibrei."
+      },
+      "kerf_set": {
+        "fail": "Lățimea tăieturii este zero",
+        "suggestion": "Introduceți grosimea lamei sau a tăieturii, altfel randamentul fiecărei bare cu mai multe tăieturi este supraestimat."
+      },
+      "min_offcut_set": {
+        "fail": "Nu este setat restul minim utilizabil",
+        "suggestion": "Setați cel mai scurt rest care merită păstrat, astfel încât resturile reutilizabile să nu fie numărate ca pierderi."
+      },
+      "stock_priced": {
+        "fail": "Stocul {ref} nu are cost unitar",
+        "suggestion": "Introduceți un preț pe bucată, ca planul să raporteze costul și să aleagă stocul cel mai ieftin."
+      },
+      "stock_sufficient": {
+        "fail": "Piese neplasate pe stocul disponibil: {count}",
+        "suggestion": "Măriți cantitatea disponibilă sau adăugați o altă dimensiune de stoc."
+      },
+      "yield_threshold": {
+        "fail": "Randamentul de {actual} % este sub pragul de {threshold} %",
+        "suggestion": "Adăugați o altă lungime sau dimensiune de stoc, permiteți rotirea sau revizuiți pragul pentru acest material."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Remedierea '{title}' este închisă fără fotografie",
+    "punch_no_photo_fix": "Adăugați o fotografie a lucrării finalizate",
+    "photo_weak": "{count} fotografie(i) la '{title}' fără locație sau oră de captură",
+    "photo_weak_fix": "Refaceți fotografia în aplicație cu localizarea activată",
+    "defect_no_photo": "Defectul '{reference}' este închis fără fotografie a remedierii",
+    "defect_no_photo_fix": "Atașați o fotografie a lucrării remediate"
+  },
+  "closeout_dossier": {
+    "more_items": "Încă {count} element(e) nelistate",
+    "category_missing": "Nicio dovadă pentru categoria obligatorie '{category}'",
+    "category_missing_fix": "Asociați un document unui punct din lista de verificare a acestei categorii sau adăugați unul",
+    "category_unverified": "Dovada pentru '{category}' nu este încă verificată",
+    "category_unverified_fix": "Cereți unui responsabil să examineze și să verifice dovada asociată",
+    "punch_open": "Remedierea '{name}' este încă deschisă",
+    "punch_open_fix": "Rezolvați și închideți elementul sau excludeți-l din domeniul acestui dosar",
+    "punch_no_photo": "Remedierea rezolvată '{name}' nu are fotografie",
+    "punch_no_photo_fix": "Adăugați o fotografie a lucrării finalizate",
+    "system_pending": "Sistemul '{name}' nu este pus în funcțiune",
+    "system_pending_fix": "Finalizați listele de verificare ale punerii în funcțiune și marcați sistemul ca pus în funcțiune",
+    "critical_issues": "{count} probleme critice de punere în funcțiune sunt încă deschise",
+    "critical_issues_fix": "Închideți problemele critice înainte de predare",
+    "acceptance_missing": "Niciun proces-verbal de recepție nu este asociat",
+    "acceptance_missing_fix": "Asociați procesul-verbal de recepție semnat punctului de recepție din lista de verificare",
+    "acceptance_unsigned": "Procesul-verbal de recepție nu este semnat complet (stare: {status})",
+    "acceptance_unsigned_fix": "Strângeți semnăturile lipsă în Semnare",
+    "blocked": "Dosarul nu respectă lista sa de verificare. Remediați constatările sau compilați-l oricum ca incomplet (aprobarea responsabilului).",
+    "delivery_title": "Dosar de predare: {project}",
+    "delivery_body": "Dosarul de predare '{title}' ({scope}) este gata. Linkul de mai jos îl descarcă și este valabil până la {expires}.",
+    "pdf": {
+      "title": "Dosar de predare",
+      "scope": "Domeniu",
+      "built": "Compilat",
+      "status_passed": "Lista de verificare a fost trecută",
+      "status_warnings": "Lista de verificare a fost trecută cu avertismente",
+      "status_errors": "Incomplet: constatări deschise în lista de verificare",
+      "findings": "Constatări deschise în lista de verificare",
+      "severity": "Gravitate",
+      "finding": "Constatare",
+      "severity_error": "Eroare",
+      "severity_warning": "Avertisment",
+      "severity_info": "Info",
+      "contents": "Cuprins",
+      "file": "Fișier",
+      "size": "Dimensiune",
+      "punch": "Lista de remedieri rezolvate",
+      "item": "Element",
+      "status": "Stare",
+      "photos": "Fotografii",
+      "evidence": "Dovezi foto"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Evaluarea {rating} a elementului '{name}' nu este un nivel al scalei '{scale}'",
+    "rule_poor_without_action": "'{name}' este evaluat cu {rating}, dar nu are nicio acțiune de întreținere planificată",
+    "rule_poor_without_action_fix": "Derivați planul sau adăugați o acțiune pentru acest element",
+    "rule_action_unpriced": "Acțiunea pentru '{name}' din {year} nu are cost unitar",
+    "rule_action_unpriced_fix": "Introduceți un cost unitar pentru ca totalurile planului să îl includă",
+    "rule_defect_incomplete": "Evaluarea elementului '{name}' cere lucrări, dar nu înregistrează gravitatea sau extinderea"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, pagina {page}",
+    "text_change": "„{old}” schimbat în „{new}”",
+    "kind": {
+      "added": "Adăugat",
+      "removed": "Eliminat",
+      "modified": "Modificat",
+      "text": "Text modificat"
+    },
+    "status": {
+      "open": "Deschis",
+      "relevant": "Relevant",
+      "not_relevant": "Nerelevant"
+    },
+    "errors": {
+      "revision_not_found": "Revizia desenului nu a fost găsită în acest proiect.",
+      "revision_not_parsed": "Desenul nu are încă o versiune procesată de comparat.",
+      "comparison_not_found": "Comparația nu a fost găsită.",
+      "change_not_found": "Modificarea nu a fost găsită.",
+      "same_revision": "Alegeți două revizii sau pagini diferite de comparat.",
+      "manual_points": "Alinierea manuală necesită două puncte distincte pe fiecare revizie.",
+      "alignment_singular": "Alinierea nu poate fi aplicată: strivește planșa.",
+      "region_empty": "Modificarea {seq} nu are dimensiune.",
+      "region_off_sheet": "Modificarea {seq} se află în afara planșei.",
+      "module_missing": "Modulul necesar acestei acțiuni nu este instalat."
+    },
+    "rfi": {
+      "subject": "Modificarea desenului {seq} pe {sheet}",
+      "question": "Revizia {new} a planșei {sheet} diferă de revizia {old} în zona marcată ({kind}). Vă rugăm să confirmați intenția modificării și dacă sunt afectate cantitățile."
+    },
+    "markup": {
+      "text": "Modificare de revizie {seq}: {kind}"
+    },
+    "report": {
+      "title": "Compararea reviziilor desenului",
+      "project": "Proiect",
+      "name": "Comparație",
+      "old_revision": "Revizie mai veche",
+      "new_revision": "Revizie mai nouă",
+      "alignment": "Aliniere",
+      "alignment_none": "Nealiniat (același cadru)",
+      "alignment_auto": "Automată",
+      "alignment_manual": "Manuală, două puncte",
+      "confidence": "încredere {value}",
+      "summary": "Modificări",
+      "summary_counts": "{total} în total: {added} adăugate, {removed} eliminate, {modified} modificate, {text} de text",
+      "generated_on": "Data generării",
+      "generated": "Generat la {timestamp}",
+      "page_of": "Pagina {page} din {total}",
+      "no_changes": "Nu s-au găsit modificări între cele două revizii.",
+      "col_no": "Nr.",
+      "col_preview": "Previzualizare",
+      "col_kind": "Modificare",
+      "col_location": "Locație",
+      "col_detail": "Detalii",
+      "col_status": "Stare",
+      "col_comment": "Comentariu",
+      "col_follow_up": "Urmărire",
+      "page_at": "Pagina {page} la {coords}",
+      "layer": "Strat {layer}",
+      "entity_counts": "Entități: {added} adăugate, {removed} eliminate, {modified} modificate",
+      "rfi": "RFI {number}",
+      "markup": "Nor de revizie",
+      "remeasure": "De remăsurat: {items} cantități, {positions} poziții din deviz"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Cele două părți sunt revizii diferite.",
+      "distinct_revisions_fail": "Comparația compară o planșă cu ea însăși.",
+      "distinct_revisions_hint": "Alegeți revizia mai veche și pe cea mai nouă a desenului.",
+      "alignment_not_needed": "Reviziile DWG au aceleași unități de desen; nu este nevoie de aliniere.",
+      "alignment_missing_matrix": "Comparația nu are aliniere.",
+      "alignment_singular": "Alinierea strivește planșa și nu poate fi aplicată.",
+      "alignment_scale": "Alinierea redimensionează planșa cu {scale}, mai mult decât diferă reviziile aceluiași desen.",
+      "alignment_low_confidence": "Alinierea automată este nesigură (încredere {confidence}).",
+      "alignment_manual_points": "O aliniere manuală necesită două perechi de puncte.",
+      "alignment_ok": "Alinierea planșei este plauzibilă.",
+      "alignment_hint": "Aliniați planșele manual după două repere comune ambelor revizii, de exemplu intersecții de axe.",
+      "region_empty": "Modificarea {seq} nu are dimensiune.",
+      "region_off_sheet": "Modificarea {seq} se află în afara planșei.",
+      "regions_ok": "Fiecare zonă modificată se află pe planșă.",
+      "triaged_ok": "Fiecare modificare a fost analizată.",
+      "triaged_open": "{count} modificări sunt încă deschise.",
+      "triaged_hint": "Marcați fiecare modificare ca relevantă sau nerelevantă.",
+      "followed_up_ok": "Fiecare modificare relevantă are urmărire.",
+      "followed_up_missing": "Modificarea {seq} este marcată ca relevantă, dar nu are comentariu, RFI, nor sau indicator de remăsurare.",
+      "followed_up_hint": "Comentați modificarea, emiteți un RFI sau un nor ori marcați cantitățile din ea pentru remăsurare."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Prognoza fluxului de numerar",
+      "portfolio_title": "Prognoza fluxului de numerar al portofoliului",
+      "empty": "Nu există prognoză de flux de numerar pentru această selecție.",
+      "project": "Proiect",
+      "as_of": "La data de",
+      "currency": "Monedă",
+      "delay_days": "Încasări întârziate cu (zile)",
+      "overrun_pct": "Depășire de cost (%)",
+      "closing_position": "Poziție de închidere",
+      "peak_funding": "Necesar maxim de finanțare",
+      "peak_period": "Luna necesarului maxim de finanțare",
+      "col": {
+        "period": "Luna",
+        "planned_in": "Încasări planificate",
+        "actual_in": "Încasări reale",
+        "expected_in": "Încasări așteptate",
+        "planned_out": "Plăți planificate",
+        "actual_out": "Plăți reale",
+        "expected_out": "Plăți așteptate",
+        "net": "Net",
+        "cumulative": "Poziție cumulată"
+      }
+    }
+  }
+}

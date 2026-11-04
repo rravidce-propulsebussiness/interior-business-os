@@ -1,0 +1,2533 @@
+{
+  "costs.catalog_name_unavailable": "この名前は新しいカタログに使用できません。別の名前を選んでください。",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "オープンソース建設コスト見積"
+  },
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "assemblies": "複合単価",
+    "ai_estimate": "AI 見積",
+    "settings": "設定",
+    "5d_cost_model": "5D コストモデル",
+    "templates": "テンプレート",
+    "reports": "レポート",
+    "sustainability": "サステナビリティ",
+    "group_estimation": "積算",
+    "group_planning": "工程管理",
+    "group_procurement": "調達",
+    "group_tools": "ツール",
+    "architecture": "アーキテクチャマップ"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "edit": "編集",
+    "create": "作成",
+    "search": "検索",
+    "filter": "フィルター",
+    "export": "エクスポート",
+    "import": "インポート",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "confirm": "確認",
+    "back": "戻る",
+    "next": "次へ",
+    "yes": "はい",
+    "no": "いいえ"
+  },
+  "auth": {
+    "login": "ログイン",
+    "logout": "ログアウト",
+    "email": "メールアドレス",
+    "password": "パスワード"
+  },
+  "projects": {
+    "title": "プロジェクト",
+    "new_project": "新規プロジェクト",
+    "project_name": "プロジェクト名",
+    "no_projects": "プロジェクトなし"
+  },
+  "boq": {
+    "title": "数量調書",
+    "position": "項目",
+    "ordinal": "番号",
+    "description": "名称・仕様",
+    "quantity": "数量",
+    "unit": "単位",
+    "unit_rate": "単価",
+    "total": "金額",
+    "add_position": "項目を追加",
+    "add_section": "セクションを追加",
+    "assembly": "複合単価",
+    "subtotal": "小計",
+    "grand_total": "合計",
+    "direct_cost": "直接費",
+    "net_total": "税抜合計",
+    "gross_total": "税込合計",
+    "vat": "消費税",
+    "add_markups": "請負高を追加",
+    "validate": "検証",
+    "export": "エクスポート",
+    "mvp": {
+      "title": "材料を選択",
+      "subtitle_one": "{{count}} 件のリソースで選択が必要です",
+      "subtitle_other": "{{count}} 件のリソースで選択が必要です",
+      "bulk_label": "一括入力:",
+      "bulk_median": "すべて中央値",
+      "bulk_mean": "すべて平均値",
+      "bulk_cheapest": "すべて最安値",
+      "bulk_priciest": "すべて最高値",
+      "slot_variant_count": "{{n}} 件の候補",
+      "selected_label": "選択中:",
+      "default_mean": "平均単価",
+      "default_median": "中央値単価",
+      "row_median": "中央値 · {{price}}",
+      "row_mean": "平均値 · {{price}}",
+      "subtotal_label": "項目単価",
+      "apply": "適用して内訳書に追加",
+      "batch_progress": "{{total}} 件中 {{current}} 件目",
+      "toast_applied_one": "{{count}} 件のバリアントを選択しました",
+      "toast_applied_other": "{{count}} 件のバリアントを選択しました"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "交換レポート"
+      },
+      "column": {
+        "severity": "重大度",
+        "kind": "欠落の種類",
+        "position": "項目",
+        "field": "フィールド",
+        "original": "元の値",
+        "written": "書き込まれた値",
+        "count": "件数",
+        "detail": "詳細"
+      },
+      "severity": {
+        "error": "重大",
+        "warning": "警告",
+        "info": "注記"
+      },
+      "kind": {
+        "unsupported_element": "未対応の要素",
+        "truncated_text": "テキスト切り詰め",
+        "altered_text": "テキスト変更",
+        "rounded_value": "値の丸め",
+        "value_out_of_range": "値が範囲外",
+        "dropped_attribute": "属性の破棄",
+        "unmapped_unit": "単位未対応",
+        "lost_hierarchy": "階層レベルの欠落",
+        "markup_not_representable": "諸経費を表現不可",
+        "attachment_skipped": "添付ファイルをスキップ",
+        "changed_identifier": "識別子の変更",
+        "exceeds_limit": "保存上限超過",
+        "rejected_row": "行を拒否",
+        "skipped_row": "行をスキップ",
+        "parser_warning": "リーダー警告",
+        "roundtrip_mismatch": "ラウンドトリップ不一致"
+      }
+    },
+    "branch": {
+      "base_snapshot": "分岐時点",
+      "base_snapshot_from": "分岐時点 (スナップショット「{snapshot}」より)",
+      "before_cherry_pick": "「{source}」からの変更を適用する前",
+      "before_merge": "ブランチ「{branch}」をマージする前",
+      "errors": {
+        "branch_closed": "このブランチはマージ済みまたはアーカイブ済みのため、これ以上変更できません。",
+        "not_a_branch": "この内訳書はブランチではありません。",
+        "same_bill": "異なる2つの見積を選択してください。",
+        "different_project": "両方の見積が同じプロジェクトに属している必要があります。",
+        "different_tree": "両方の見積が同じメイン見積のブランチである必要があります。",
+        "unresolved_conflicts": "{count}件の項目が両方の見積で変更されています。適用前に、それぞれ残す版を決定してください。",
+        "merge_forbidden": "メイン見積へのマージ権限がありません。",
+        "confirm_required": "マージを確認してください。メイン見積が書き換えられます。",
+        "design_options_unavailable": "設計オプションモジュールがインストールされていません。",
+        "base_snapshot_in_use": "このスナップショットは未完了のブランチの分岐時点のため、削除できません。"
+      },
+      "export": {
+        "title_positions": "項目別の見積比較",
+        "title_sections": "セクション別の見積比較",
+        "title_cost_groups": "コストグループ別の見積比較",
+        "project": "プロジェクト",
+        "bill_a": "見積A",
+        "bill_b": "見積B",
+        "total_a": "合計A",
+        "total_b": "合計B",
+        "delta": "差額",
+        "counts": "変更",
+        "counts_value": "{added}件追加、{removed}件削除、{changed}件変更",
+        "col_ordinal": "項目",
+        "col_description": "内容",
+        "col_unit": "単位",
+        "col_change": "変更",
+        "col_qty_a": "数量A",
+        "col_qty_b": "数量B",
+        "col_rate_a": "単価A",
+        "col_rate_b": "単価B",
+        "col_total_a": "合計A",
+        "col_total_b": "合計B",
+        "col_delta": "差額",
+        "col_section": "セクション",
+        "col_cost_group": "コストグループ",
+        "change_added": "追加",
+        "change_removed": "削除",
+        "change_changed": "変更",
+        "change_unchanged": "変更なし",
+        "ungrouped": "未分類",
+        "empty": "2つの見積は同一です。",
+        "total": "合計"
+      }
+    }
+  },
+  "costs": {
+    "title": "単価データベース",
+    "rate": "単価",
+    "material": "材料",
+    "labor": "労務",
+    "equipment": "機械",
+    "search_costs": "単価を検索..."
+  },
+  "assemblies": {
+    "title": "複合単価一覧",
+    "description": "再利用できる単価レシピ。材料、労務、機械を組み合わせてすぐ使えるテンプレートにします",
+    "new_assembly": "複合単価を新規作成",
+    "from_database": "単価データベースから",
+    "apply_to_boq": "数量調書に適用",
+    "add_component": "構成要素を追加",
+    "no_assemblies": "複合単価はまだありません",
+    "no_assemblies_hint": "単価データベースまたはリソースカタログから最初の複合単価を作成してください",
+    "total_rate": "合計単価"
+  },
+  "catalog": {
+    "title": "リソースカタログ",
+    "description": "材料、機械、労務単価、オペレーターを閲覧して管理します",
+    "add_resource": "リソースを追加",
+    "import_region": "地域を取り込む",
+    "build_assembly": "複合単価を作成",
+    "my_catalog": "マイカタログ"
+  },
+  "validation": {
+    "title": "検証",
+    "passed": "合格",
+    "warnings": "警告",
+    "errors": "エラー",
+    "score": "品質スコア",
+    "run_validation": "検証を実行",
+    "missing_quantity": "項目 {position} に数量がありません",
+    "missing_rate": "項目 {position} に単価がありません",
+    "missing_description": "項目 {position} に名称がありません",
+    "missing_classification": "項目 {position} に分類コードが必要です",
+    "duplicate_ordinal": "番号が重複しています: {ordinal}",
+    "rate_anomaly": "単価 {rate} がしきい値を超過 ({threshold})",
+    "nl": {
+      "not_a_string": "入力はテキストである必要があります。",
+      "empty": "入力が空です。",
+      "too_long": "入力が {max} 文字を超えています。",
+      "ai_unparsable": "AI の応答を DSL ドキュメントとして解析できませんでした。",
+      "no_pattern": "入力文に一致するパターンがありません。",
+      "try": "試してください: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D 工程表",
+    "generated": {
+      "position_label": "項目 {ordinal}",
+      "section_label": "セクション {ordinal}",
+      "task_description": "数量調書の項目 {ordinal} から自動生成 ({quantity} {unit})",
+      "section_description": "概要: 数量調書のセクション {ordinal}",
+      "start_milestone": "プロジェクト開始",
+      "start_milestone_description": "プロジェクト開始マイルストーン",
+      "completion_milestone": "プロジェクト完了",
+      "completion_milestone_description": "プロジェクト完了マイルストーン",
+      "labour_resource": "労務",
+      "machine_resource": "建設機械"
+    },
+    "progress_sheet": {
+      "sheet_title": "進捗",
+      "title": "進捗更新シート",
+      "detail_schedule": "スケジュール: {name}",
+      "detail_exported": "書き出し日: {date}",
+      "instructions": "白い列のみ記入してください。灰色の列、行の順序、非表示の列は変更しないでください。",
+      "col": {
+        "activity_ref": "アクティビティ ID",
+        "name": "アクティビティ",
+        "wbs_code": "WBS",
+        "responsible": "担当者",
+        "planned_start": "計画開始",
+        "planned_finish": "計画完了",
+        "percent_complete": "進捗率",
+        "actual_start": "実績開始",
+        "actual_finish": "実績完了",
+        "remaining_duration": "残り (稼働日)",
+        "notes": "メモ",
+        "row_key": "行キー",
+        "stamp": "スタンプ"
+      }
+    }
+  },
+  "cad": {
+    "title": "CAD インポート",
+    "upload": "CAD ファイルをアップロード",
+    "supported_formats": "対応形式: DWG, DGN, RVT, IFC, PDF",
+    "converting": "変換中...",
+    "elements_found": "{count} 個の要素を検出"
+  },
+  "takeoff": {
+    "title": "拾い出し",
+    "auto_detect": "自動検出",
+    "manual_measure": "手動計測",
+    "confidence": "信頼度"
+  },
+  "tendering": {
+    "title": "入札",
+    "create_tender": "入札を作成",
+    "bid": "見積",
+    "award": "落札"
+  },
+  "modules": {
+    "title": "モジュール",
+    "installed": "インストール済み",
+    "available": "利用可能",
+    "install": "インストール",
+    "uninstall": "アンインストール",
+    "update": "更新"
+  },
+  "dashboard": {
+    "welcome": "OpenConstructionERP へようこそ",
+    "subtitle": "オープンソース建設コスト見積プラットフォーム",
+    "recent_projects": "最近のプロジェクト",
+    "system_status": "システム状態",
+    "modules_loaded": "読み込み済みモジュール",
+    "validation_rules": "検証ルール",
+    "languages": "言語",
+    "continue_estimate": "前回の積算を続ける",
+    "getting_started": "はじめに",
+    "total_value": "総工事費",
+    "active_estimates": "進行中の積算",
+    "schedule_status": "工程の状況",
+    "quality_score": "品質スコア",
+    "analytics": "分析",
+    "project_overview": "プロジェクト概要",
+    "step_load_db": "単価データベースを読み込む",
+    "step_load_db_desc": "55,000 件を超える地域単価データを取り込みます",
+    "step_ai_search": "AI 検索を有効にする",
+    "step_ai_search_desc": "単価照合のための意味ベクトルを生成します",
+    "step_connect_ai": "AI を接続する",
+    "step_connect_ai_desc": "AI 積算のために API キーを追加してください",
+    "step_create_project": "プロジェクトを作成",
+    "step_create_project_desc": "最初の積算プロジェクトを始めましょう",
+    "step_build_boq": "数量調書を作成する",
+    "step_build_boq_desc": "AI の支援で数量調書を作成します"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "個",
+    "lsum": "一式",
+    "h": "時間",
+    "set": "セット"
+  },
+  "contacts": {
+    "title": "連絡先一覧",
+    "new_contact": "連絡先を新規作成",
+    "contact_type": "連絡先の種別",
+    "client": "発注者",
+    "subcontractor": "下請業者",
+    "supplier": "資材業者",
+    "consultant": "コンサルタント",
+    "internal": "社内",
+    "company_name": "会社名",
+    "search_contacts": "連絡先を検索...",
+    "no_contacts": "連絡先はまだありません",
+    "prequalification": "事前資格審査",
+    "approved": "承認済み",
+    "pending": "保留中",
+    "expired": "期限切れ"
+  },
+  "tasks": {
+    "title": "タスク",
+    "new_task": "タスクを新規作成",
+    "task": "タスク",
+    "topic": "議題",
+    "information": "情報共有",
+    "decision": "決定事項",
+    "personal": "個人タスク",
+    "my_tasks": "自分のタスク",
+    "open": "未着手",
+    "in_progress": "進行中",
+    "completed": "完了",
+    "draft": "下書き",
+    "due_date": "期限",
+    "assignee": "担当者",
+    "priority": "優先度",
+    "checklist": "チェックリスト",
+    "focus_area": "重点分野"
+  },
+  "rfi": {
+    "title": "質疑応答",
+    "new_rfi": "質疑を新規作成",
+    "subject": "件名",
+    "question": "質問",
+    "response": "回答",
+    "ball_in_court": "現在の担当",
+    "days_open": "未回答日数",
+    "cost_impact": "工事費への影響",
+    "schedule_impact": "工程への影響",
+    "respond": "回答する",
+    "close": "完了にする",
+    "overdue": "期限超過"
+  },
+  "finance": {
+    "title": "財務",
+    "budgets": "予算",
+    "invoices": "請求書",
+    "payable": "買掛金",
+    "receivable": "売掛金",
+    "payments": "支払",
+    "evm": "出来高管理",
+    "invoice_number": "請求書番号",
+    "amount": "金額",
+    "status": "状態",
+    "approve": "承認",
+    "pay": "支払済みにする",
+    "original_budget": "当初予算",
+    "revised_budget": "変更予算",
+    "committed": "契約済み",
+    "actual": "実績",
+    "forecast": "見通し",
+    "variance": "差異"
+  },
+  "procurement": {
+    "title": "調達",
+    "purchase_orders": "発注書",
+    "goods_receipts": "入荷検収",
+    "new_po": "発注書を新規作成",
+    "po_number": "発注番号",
+    "vendor": "取引先",
+    "issue": "発行",
+    "confirm": "入荷を確認"
+  },
+  "safety": {
+    "title": "安全",
+    "incidents": "災害",
+    "observations": "安全観察",
+    "new_incident": "災害を新規登録",
+    "new_observation": "安全観察を新規登録",
+    "severity": "重大度",
+    "risk_score": "リスク評価点",
+    "days_lost": "休業日数",
+    "treatment": "処置",
+    "corrective_action": "是正処置"
+  },
+  "meetings": {
+    "title": "会議",
+    "new_meeting": "会議を新規作成",
+    "meeting_type": "種別",
+    "attendees": "出席者",
+    "agenda": "議事次第",
+    "action_items": "対応事項",
+    "minutes": "議事録",
+    "complete": "会議を終了",
+    "present": "出席",
+    "absent": "欠席",
+    "excused": "欠席届あり",
+    "actions": {
+      "status": {
+        "open": "未完了",
+        "completed": "完了",
+        "cancelled": "取消"
+      },
+      "flag": {
+        "overdue": "期限超過",
+        "on_track": "順調"
+      },
+      "label": {
+        "action_item": "アクション項目",
+        "completion_rate": "アクション完了率",
+        "open_vs_done": "未完了と完了",
+        "overdue": "期限超過のアクション"
+      },
+      "explain": {
+        "action_item": "アクション項目とは、会議で合意され、担当者と期限が定められた作業です。",
+        "completion_rate": "アクション完了率は、完了したアクション数を全アクション数で割った値（0から1）です。",
+        "open_vs_done": "未完了のアクションはまだ作業が必要です。完了のアクションは終了しており、これ以上の作業は不要です。",
+        "overdue": "アクションが未完了のままで、期限が基準日より前の場合、期限超過となります。"
+      }
+    },
+    "minutes_pdf": {
+      "title": "会議議事録",
+      "issued": "発行済",
+      "draft": "草案",
+      "date": "日付：",
+      "location": "場所：",
+      "type": "種別：",
+      "number": "会議番号：",
+      "chairperson": "議長：",
+      "next_meeting": "次回会議：",
+      "not_available": "該当なし",
+      "not_scheduled": "未定",
+      "attendance": "出席状況",
+      "present": "出席者：",
+      "absent": "欠席者／事前連絡あり：",
+      "agenda": "議題、協議および決定事項",
+      "required": "（必須）",
+      "discussion": "協議内容：",
+      "decision": "決定事項：",
+      "decisions": "決定事項",
+      "open_questions": "未解決の事項",
+      "actions": "アクション項目",
+      "col_number": "#",
+      "col_action": "アクション",
+      "col_owner": "担当者",
+      "col_due": "期限",
+      "col_status": "状況",
+      "brought_forward": "[前回からの繰越]",
+      "overdue": "（期限超過）",
+      "status_open": "未着手",
+      "status_in_progress": "進行中",
+      "status_done": "完了",
+      "status_cancelled": "取消",
+      "summary": "概要",
+      "generated": "作成日時：{stamp}",
+      "issued_at": "発行日時：{stamp}",
+      "running_head": "{project} - 議事録",
+      "type_progress": "工程",
+      "type_design": "設計",
+      "type_safety": "安全",
+      "type_subcontractor": "下請業者",
+      "type_kickoff": "着工",
+      "type_closeout": "竣工",
+      "type_commercial": "契約・商務"
+    }
+  },
+  "inspections": {
+    "title": "品質検査",
+    "new_inspection": "検査を新規作成",
+    "inspector": "検査員",
+    "checklist": "チェックリスト",
+    "pass": "合格",
+    "fail": "不合格",
+    "partial": "一部合格",
+    "critical": "重大",
+    "intl": {
+      "status_labels": {
+        "scheduled": "予定",
+        "in_progress": "実施中",
+        "completed": "完了",
+        "failed": "不合格",
+        "cancelled": "取消"
+      }
+    }
+  },
+  "ncr": {
+    "title": "不適合報告書",
+    "new_ncr": "不適合を新規登録",
+    "root_cause": "根本原因",
+    "corrective_action": "是正処置",
+    "preventive_action": "予防処置",
+    "material": "材料",
+    "workmanship": "施工品質",
+    "design": "設計"
+  },
+  "submittals": {
+    "title": "承認申請書類",
+    "new_submittal": "申請書類を新規作成",
+    "spec_section": "仕様書の該当項",
+    "revision": "改訂",
+    "submit": "提出",
+    "review": "審査",
+    "approved_as_noted": "指摘事項付き承認",
+    "revise_resubmit": "修正のうえ再提出",
+    "intl": {
+      "status_labels": {
+        "draft": "下書き",
+        "submitted": "提出済み",
+        "under_review": "審査中",
+        "approved": "承認",
+        "approved_as_noted": "条件付き承認",
+        "revise_and_resubmit": "修正して再提出",
+        "rejected": "不承認",
+        "closed": "完了"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "文書往来",
+    "new_entry": "記録を新規作成",
+    "incoming": "受信",
+    "outgoing": "発信",
+    "letter": "書簡",
+    "email": "メール",
+    "notice": "通知書",
+    "date_sent": "発信日",
+    "date_received": "受信日"
+  },
+  "cde": {
+    "title": "共通データ環境",
+    "new_container": "コンテナを新規作成",
+    "container_code": "コンテナ番号",
+    "cde_state": "CDE 状態",
+    "wip": "作業中",
+    "shared": "共有済み",
+    "published": "公開済み",
+    "archived": "保管済み",
+    "promote": "状態を進める",
+    "suitability": "適合性",
+    "discipline": "工種",
+    "revisions": "改訂履歴",
+    "intl": {
+      "state_labels": {
+        "wip": "作業中",
+        "shared": "共有済み",
+        "published": "発行済み",
+        "archived": "アーカイブ済み"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "書類送付状",
+    "new_transmittal": "送付状を新規作成",
+    "purpose": "目的",
+    "for_approval": "承認用",
+    "for_information": "参考用",
+    "for_construction": "施工用",
+    "recipients": "送付先",
+    "acknowledge": "受領を確認",
+    "locked": "ロック済み",
+    "issue_transmittal": "発行",
+    "intl": {
+      "status_words": {
+        "draft": "下書き",
+        "issued": "発行済み",
+        "responded": "回答済み"
+      }
+    }
+  },
+  "notifications": {
+    "title": "通知",
+    "no_notifications": "新しい通知はありません",
+    "mark_all_read": "すべて既読にする",
+    "unread": "未読"
+  },
+  "comments": {
+    "title": "コメント",
+    "post": "投稿",
+    "reply": "返信",
+    "edit": "編集",
+    "delete": "削除",
+    "placeholder": "コメントを入力...",
+    "empty": "コメントはまだありません。最初の意見をどうぞ。",
+    "edited": "編集済み",
+    "deleted": "このコメントは削除されました"
+  },
+  "bim": {
+    "title": "BIM ハブ",
+    "models": "モデル",
+    "elements": "部材",
+    "upload_model": "モデルをアップロード",
+    "processing": "処理中",
+    "active": "有効",
+    "link_to_boq": "数量調書に紐付け",
+    "properties": "プロパティ",
+    "quantities": "数量",
+    "wireframe": "ワイヤフレーム",
+    "section_box": "断面ボックス",
+    "measure": "計測",
+    "zoom_to_fit": "画面に合わせる"
+  },
+  "reporting": {
+    "title": "レポートとダッシュボード",
+    "kpi": "KPI ダッシュボード",
+    "generate_report": "レポートを作成",
+    "templates": "テンプレート",
+    "project_status": "プロジェクトの状況",
+    "cost_report": "工事費レポート",
+    "schedule_status": "工程の状況",
+    "safety_report": "安全レポート",
+    "explain": {
+      "report_total_one": "レポート合計: {money}（{count} 行の合計）。",
+      "report_total_other": "レポート合計: {money}（{count} 行の合計）。",
+      "percent_of_total": "{part} は {total} の {percent} です（合計に対する割合）。",
+      "percent_zero_total": "{part} / {total}: 合計がゼロのため、各割合は 0 パーセントと表示しています。",
+      "breakdown_empty": "コスト内訳: データがありません。",
+      "breakdown_one": "コスト内訳: {count} グループ、レポート合計 {money}。",
+      "breakdown_other": "コスト内訳: {count} グループ、レポート合計 {money}。",
+      "top_n_one": "上位 {requested}: {shown} 件中 {shown} 行。",
+      "top_n_other": "上位 {requested}: {shown} 件中 {shown} 行。"
+    }
+  },
+  "gantt": {
+    "title": "ガントチャート",
+    "day": "日",
+    "week": "週",
+    "month": "月",
+    "critical_path": "クリティカルパス",
+    "baseline": "基準工程",
+    "dependencies": "先行後続関係",
+    "today": "今日"
+  },
+  "settings": {
+    "regional": "地域設定",
+    "timezone": "タイムゾーン",
+    "measurement": "単位系",
+    "paper_size": "用紙サイズ",
+    "date_format": "日付形式",
+    "number_format": "数値形式",
+    "currency": "通貨",
+    "metric": "メートル法",
+    "imperial": "ヤード・ポンド法"
+  },
+  "users": {
+    "management": "ユーザー管理",
+    "management_desc": "チームメンバー、ロール、アクセス権を管理します",
+    "invite_user": "ユーザーを招待",
+    "invite": "招待",
+    "full_name": "氏名",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "role": "ロール",
+    "status": "状態",
+    "last_login": "最終ログイン",
+    "actions": "操作",
+    "name": "名前",
+    "total": "ユーザー総数",
+    "active": "アクティブ",
+    "inactive": "非アクティブ",
+    "admins": "管理者",
+    "managers": "マネージャー",
+    "search": "名前またはメールアドレスで検索...",
+    "no_users": "ユーザーが見つかりません",
+    "updated": "ユーザーを更新しました",
+    "invited": "招待を送信しました",
+    "deactivate": "無効にする",
+    "activate": "有効にする",
+    "never": "なし",
+    "role_admin_desc": "すべての機能に対する完全な権限",
+    "role_manager_desc": "プロジェクトとチームの管理",
+    "role_editor_desc": "コンテンツの作成と編集",
+    "role_viewer_desc": "閲覧のみ"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "このスナップショットは確定済みです。確定済みのスナップショットは記録のため変更できません。",
+      "frozen_no_delete": "確定済みのスナップショットは記録のため削除できません。",
+      "draft_open": "下書きのスナップショットがすでに開いています。別のものを始める前に、確定するか削除してください。",
+      "no_line_method": "この明細には独自の方法がありません。",
+      "snapshot_missing": "スナップショットが見つかりません。",
+      "line_missing": "このスナップショットにその明細はありません。",
+      "document_missing": "リンクされた文書はこのプロジェクトのものではありません。",
+      "freeze_refused": "まだ確定できません。しきい値を超えた明細が {count} 件あり、コメントと根拠資料がありません。",
+      "no_frozen_snapshot": "比較できる確定済みスナップショットがまだありません。",
+      "no_ledger": "この環境では請求台帳を利用できません。",
+      "no_snapshot": "文書化するスナップショットがまだありません。"
+    },
+    "export": {
+      "project": "プロジェクト",
+      "generated": "作成",
+      "currency": "通貨",
+      "page": "ページ",
+      "generated_at": "作成日",
+      "empty": "表示する内容がまだありません。",
+      "total": "合計",
+      "cost_report": "コスト報告書",
+      "phase_comparison": "フェーズ比較",
+      "invoice_ledger": "請求台帳",
+      "forecast_documentation": "予測の根拠資料",
+      "as_of": "基準日",
+      "forecast_method": "予測方法",
+      "col_account": "勘定",
+      "col_code": "コード",
+      "col_description": "内容",
+      "col_source": "出所",
+      "col_method": "方法",
+      "col_planned": "計画",
+      "col_committed": "契約済",
+      "col_pending": "保留中の変更",
+      "col_measured": "出来高",
+      "col_certified": "支払承認済",
+      "col_invoiced": "請求済",
+      "col_paid": "支払済",
+      "col_forecast": "予測",
+      "col_variance": "差異",
+      "col_variance_pct": "差異率",
+      "col_forecast_of_plan": "計画比の予測率",
+      "col_measured_of_committed": "契約額比の出来高率",
+      "col_invoiced_of_committed": "契約額比の請求率",
+      "col_contract": "契約",
+      "col_contract_title": "契約名",
+      "col_invoice": "請求書",
+      "col_date": "日付",
+      "col_kind": "種別",
+      "col_release_status": "解放",
+      "col_net": "税抜",
+      "col_vat": "VAT",
+      "col_gross": "税込",
+      "col_retention": "留保金",
+      "col_release": "解放済み留保金",
+      "col_discount": "値引き",
+      "col_payable": "支払額",
+      "col_open": "未解放",
+      "col_previous": "前回",
+      "col_delta": "増減",
+      "col_delta_pct": "増減率",
+      "col_needs_evidence": "根拠資料が必要",
+      "col_comment": "コメント",
+      "col_evidence": "根拠資料",
+      "row_unassigned": "原価明細に紐づかない金額",
+      "row_loose_changes": "契約に紐づかない変更",
+      "row_no_contract": "契約なし",
+      "contract_value": "契約金額",
+      "retention_held": "留保中の金額",
+      "yes": "はい",
+      "no": "いいえ",
+      "snapshot_date": "スナップショット日",
+      "snapshot_status": "状態",
+      "previous_snapshot": "前回の確定済みスナップショット",
+      "method_explained": "予測の読み方",
+      "evidence_threshold": "根拠資料が必要な変動幅",
+      "threshold_both": "{parts}を超える変動",
+      "threshold_any": "すべての変動",
+      "frozen_at": "確定日時"
+    },
+    "method": {
+      "best_available": "最良の入手可能な情報源",
+      "maximum": "最大値",
+      "evm_cpi": "アーンドバリュー(CPI)",
+      "manual": "手入力"
+    },
+    "method_help": {
+      "best_available": "各明細は最も確度の高い数値を採用します。最終精算、なければ出来高、なければ発注額、なければ見積、なければ予算の順です。",
+      "maximum": "各明細は数値(予算、見積、発注額、出来高、請求額)のうち最大のものを採用するため、予測がリスクを隠すことはありません。",
+      "evm_cpi": "各明細は進捗から完成時原価を推定します。これまでの支出額を、完了した作業の割合で割ります。",
+      "manual": "担当者が明細の数値を決め、その根拠となる文書を紐づけます。"
+    },
+    "source": {
+      "none": "数値なし",
+      "budget": "予算",
+      "estimate": "見積",
+      "partly_awarded": "一部発注",
+      "awarded": "発注済",
+      "measured": "出来高",
+      "final": "最終精算",
+      "manual": "手入力",
+      "invoiced": "請求済",
+      "evm": "アーンドバリュー"
+    },
+    "layer": {
+      "budget": "予算",
+      "estimate": "見積",
+      "tender": "最良の入札",
+      "awarded": "発注済",
+      "changes": "承認済みの変更",
+      "committed": "契約済",
+      "pending": "保留中の変更",
+      "measured": "出来高",
+      "certified": "支払承認済",
+      "invoiced": "請求済",
+      "paid": "支払済",
+      "forecast": "予測"
+    },
+    "invoice_kind": {
+      "interim": "中間請求",
+      "final": "最終請求",
+      "daywork": "日当作業",
+      "credit_note": "クレジットノート"
+    },
+    "release_status": {
+      "open": "未解放",
+      "released": "解放済み"
+    },
+    "evidence_kind": {
+      "document": "文書",
+      "minutes": "議事録",
+      "other": "その他"
+    },
+    "snapshot_status": {
+      "draft": "下書き",
+      "frozen": "確定済み"
+    }
+  },
+  "document_forms": {
+    "submittals": {
+      "labels": {
+        "discipline": {
+          "plumbing": "給排水衛生",
+          "fire_protection": "消防",
+          "civil": "土木",
+          "bms": "ビル自動制御",
+          "hvac": "空調換気",
+          "lighting": "照明",
+          "mechanical": "機械",
+          "architectural": "建築",
+          "electrical": "電気",
+          "structural": "構造",
+          "elv": "弱電"
+        },
+        "type": {
+          "sample": "サンプル",
+          "method_statement": "施工計画書",
+          "shop_drawing": "施工図",
+          "mock_up": "モックアップ",
+          "certificate": "証明書",
+          "test_report": "試験成績書",
+          "calculation": "計算書",
+          "product_data": "製品資料",
+          "warranty": "保証書"
+        },
+        "status": {
+          "draft": "下書き",
+          "approved_as_noted": "条件付承認",
+          "revise_and_resubmit": "修正再提出",
+          "rejected": "却下",
+          "under_review": "審査中",
+          "closed": "完了",
+          "submitted": "提出済",
+          "approved": "承認"
+        }
+      },
+      "strings": {
+        "review_history": "審査履歴",
+        "submitted_by_org": "提出会社",
+        "doc_title": "承認申請書",
+        "col_on_site_needed_by": "現場搬入 / 承認期限",
+        "col_drawings": "関連図面",
+        "col_approval_late": "期限超過日数",
+        "col_needed_by": "承認必要日",
+        "col_lead_time": "納期(週)",
+        "sig_reviewed": "審査",
+        "col_model": "型番 / 参照",
+        "col_discipline": "工種",
+        "col_date_submitted": "提出日",
+        "col_reviewer": "審査者",
+        "col_required_on_site": "現場必要日",
+        "register_title_method_statement": "施工計画書一覧表",
+        "col_supplier": "納入業者",
+        "hist_returned": "返却",
+        "col_review_code": "審査コード",
+        "col_origin": "原産国",
+        "register_filename_method_statement": "sekou-keikakusho-ichiran",
+        "sig_submitted": "提出",
+        "col_long_lead": "長納期",
+        "drawings_missing_other": "関連図面{n}件が利用できません",
+        "col_product": "メーカー / 型式 / 原産",
+        "col_outcome": "審査結果",
+        "col_number": "申請番号",
+        "register_filename_product_data": "zairyo-shounin-ichiran",
+        "col_manufacturer": "メーカー / ブランド",
+        "col_rev": "版",
+        "register_filename_shop_drawing": "sekouzu-ichiran",
+        "col_type": "種別",
+        "col_review_overdue": "超過日数",
+        "weeks_other": "{n}週",
+        "hist_submitted": "提出",
+        "doc_title_product_data": "材料承認申請書",
+        "col_approver": "承認者",
+        "col_date_required": "必要日",
+        "col_title": "件名",
+        "col_ball_in_court": "対応担当",
+        "no_review_notes": "審査コメントの記録はありません。",
+        "sig_approved": "承認",
+        "register_title": "承認申請一覧表",
+        "register_filename": "shounin-shinsei-ichiran",
+        "col_submitted_returned": "提出 / 返却",
+        "col_date_returned": "返却日",
+        "col_review_due": "審査期限",
+        "col_spec": "仕様書項目",
+        "col_days_in_review_print": "審査日数",
+        "drawings_missing_one": "関連図面{n}件が利用できません",
+        "register_title_product_data": "材料承認一覧表",
+        "review_notes": "審査コメント",
+        "resubmit_for_record": "修正済の写しを記録用に再提出のこと",
+        "col_days_in_review": "審査日数",
+        "weeks_one": "{n}週",
+        "register_title_shop_drawing": "施工図一覧表",
+        "col_review_period": "審査期間(日)"
+      }
+    },
+    "transmittals": {
+      "labels": {
+        "purpose": {
+          "for_construction": "施工用",
+          "for_approval": "承認用",
+          "for_review": "審査用",
+          "for_information": "参考用",
+          "for_record": "記録用",
+          "for_tender": "入札用"
+        },
+        "status": {
+          "draft": "下書き",
+          "responded": "回答済",
+          "issued": "発行済"
+        }
+      },
+      "strings": {
+        "col_purpose": "目的",
+        "col_subject": "件名",
+        "doc_title": "文書送付票",
+        "cover_note": "添え状",
+        "acknowledged": "受領確認済",
+        "sig_issued": "発行",
+        "col_response_due": "回答期限",
+        "col_recipients": "宛先",
+        "col_item_count": "件数",
+        "item_description": "内容",
+        "col_issued": "発行日",
+        "sender": "発信者",
+        "register_title": "文書送付票一覧表",
+        "recipients": "宛先",
+        "responded": "回答日",
+        "items": "送付書類",
+        "item_no": "番号",
+        "item_notes": "備考",
+        "col_number": "送付票番号",
+        "recipient": "宛先",
+        "action_required": "要対応事項",
+        "no_cover_note": "添え状はありません。",
+        "register_filename": "soufuhyou-ichiran",
+        "sig_received": "受領"
+      }
+    },
+    "furniture": {
+      "records": "記録",
+      "project_no": "工事番号",
+      "sig_prepared_by": "作成",
+      "signer_title": "役職",
+      "total": "合計",
+      "date": "日付",
+      "footer_generated": "作成日時 {timestamp}",
+      "sig_checked_by": "確認",
+      "project": "工事名",
+      "status": "状況",
+      "currency": "通貨",
+      "yes": "はい",
+      "signature": "署名",
+      "signatures": "署名",
+      "days_one": "{n}日",
+      "footer_page": "{page} / {total} ページ",
+      "sig_approved_by": "承認",
+      "no": "いいえ",
+      "days_other": "{n}日",
+      "empty_register": "記録はありません。",
+      "name": "氏名",
+      "generated_on": "作成日"
+    },
+    "changeorders": {
+      "labels": {
+        "reason": {
+          "error": "誤記または脱漏",
+          "regulatory": "法規制",
+          "unforeseen": "予見不能な条件",
+          "non_conformance": "不適合",
+          "design_change": "設計変更",
+          "client_request": "発注者要望",
+          "value_engineering": "VE提案"
+        },
+        "instrument": {
+          "claim": "クレーム",
+          "works_change": "変更指示",
+          "site_confirmation": "現場確認書"
+        },
+        "change": {
+          "modified": "変更",
+          "added": "追加",
+          "removed": "削除"
+        },
+        "status": {
+          "draft": "下書き",
+          "executed": "実施済",
+          "rejected": "却下",
+          "submitted": "提出済",
+          "approved": "承認"
+        }
+      },
+      "strings": {
+        "time_impact": "工期への影響",
+        "item_original_rate": "当初単価",
+        "doc_title": "変更指示書",
+        "col_code": "コード",
+        "approved_by": "承認",
+        "col_approved_time": "承認工期(日)",
+        "item_new_rate": "変更後単価",
+        "col_approved": "承認日",
+        "col_contractor_amount": "請負者金額",
+        "col_engineer_amount": "監理者金額",
+        "no_description": "内容の記録はありません。",
+        "col_submitted": "提出日",
+        "approved_time": "承認工期",
+        "col_cost_impact": "費用への影響",
+        "item_description": "内容",
+        "item_cost_delta": "費用差額",
+        "col_title": "件名",
+        "submitted_by": "提出",
+        "register_title": "変更指示書一覧表",
+        "item_original_quantity": "当初数量",
+        "items": "変更項目",
+        "col_instrument": "区分",
+        "col_time_impact": "工期への影響(日)",
+        "col_reason": "理由",
+        "item_change": "変更",
+        "col_approved_amount": "承認金額",
+        "item_new_quantity": "変更後数量",
+        "register_filename": "henkou-shijisho-ichiran",
+        "description": "内容",
+        "item_unit": "単位"
+      }
+    },
+    "variations": {
+      "labels": {
+        "notice_status": {
+          "responded": "回答済",
+          "acknowledged": "受領確認済",
+          "closed": "完了",
+          "issued": "発行済"
+        },
+        "request_status": {
+          "draft": "下書き",
+          "rejected": "却下",
+          "converted_to_vo": "変更指示に移行",
+          "under_review": "審査中",
+          "submitted": "提出済",
+          "approved": "承認"
+        },
+        "claim_type": {
+          "eot": "工期延長",
+          "disruption": "施工阻害"
+        },
+        "recipient_type": {
+          "owner": "発注者",
+          "consultant": "コンサルタント",
+          "contractor": "請負者",
+          "architect": "設計者",
+          "engineer": "技術者"
+        },
+        "urgency": {
+          "low": "低",
+          "med": "中",
+          "high": "高"
+        },
+        "classification": {
+          "other": "その他",
+          "regulatory": "法規制",
+          "unforeseen": "予見不能な条件",
+          "owner_change": "発注者変更",
+          "design_dev": "設計進展",
+          "scope_change": "範囲変更"
+        },
+        "claim_status": {
+          "draft": "下書き",
+          "granted": "認容",
+          "rejected": "却下",
+          "agreed": "合意済",
+          "under_review": "審査中",
+          "submitted": "提出済"
+        }
+      },
+      "strings": {
+        "col_row": "番号",
+        "time_impact": "工期への影響",
+        "doc_title": "変更申請書",
+        "col_code": "コード",
+        "date_decided": "決定日",
+        "col_decided_amount": "決定金額",
+        "variation_register_title": "変更一覧表",
+        "notice_register_title": "通知一覧表",
+        "decision_notes": "決定事項",
+        "col_classification": "種別",
+        "requested_by": "申請",
+        "col_agreed_amount": "合意金額",
+        "col_recipient": "宛先",
+        "col_response_due": "回答期限",
+        "no_description": "内容の記録はありません。",
+        "decided_by": "決定",
+        "variation_register_filename": "henkou-ichiran",
+        "claim_register_title": "クレーム一覧表",
+        "col_days_granted": "認容日数",
+        "col_title": "件名",
+        "date_submitted": "提出日",
+        "col_clause": "契約条項",
+        "col_raised": "発生日",
+        "col_description": "内容",
+        "col_period_end": "期間終了",
+        "col_requested": "申請日",
+        "claim_register_filename": "kureemu-ichiran",
+        "col_response_received": "回答受領",
+        "doc_title_credit": "変更申請書(減額)",
+        "col_time_impact": "工期への影響(日)",
+        "col_claimed_amount": "請求金額",
+        "col_period_start": "期間開始",
+        "notice_register_filename": "tsuuchi-ichiran",
+        "description": "内容",
+        "no_decision_notes": "決定はまだ記録されていません。",
+        "col_recipient_type": "宛先区分",
+        "col_target_response": "回答予定",
+        "col_days_requested": "申請日数",
+        "col_claim_type": "クレーム種別",
+        "col_urgency": "緊急度"
+      }
+    },
+    "correspondence": {
+      "labels": {
+        "direction": {
+          "outgoing": "発信",
+          "incoming": "受信"
+        },
+        "type": {
+          "letter": "書簡",
+          "notice": "通知",
+          "memo": "メモ",
+          "report": "報告書",
+          "email": "メール"
+        },
+        "status": {
+          "awaiting_response": "回答待ち",
+          "closed": "完了",
+          "responded": "回答済",
+          "open": "未完了"
+        }
+      },
+      "strings": {
+        "col_to": "宛先",
+        "no_notes": "備考の記録はありません。",
+        "col_subject": "件名",
+        "doc_title": "往復文書",
+        "register_title": "往復文書台帳",
+        "col_clause": "契約条項",
+        "linked_documents": "関連文書",
+        "col_reference": "文書番号",
+        "col_date_received": "受信日",
+        "notes": "備考",
+        "col_response_due": "回答期限",
+        "sig_prepared": "作成",
+        "attachments": "添付ファイル",
+        "col_date_sent": "発信日",
+        "col_direction": "区分",
+        "register_filename": "oufuku-bunsho-daichou",
+        "col_from": "発信元",
+        "col_type": "種別",
+        "sig_received": "受領"
+      }
+    },
+    "claims_evidence": {
+      "labels": {
+        "basis": {
+          "delay": "遅延 / 工期延長",
+          "valuation": "金額評価",
+          "dispute": "紛争",
+          "general": "一般記録"
+        },
+        "section": {
+          "delay": "遅延",
+          "rfis": "質疑書(RFI)",
+          "variations": "変更",
+          "other": "その他",
+          "notices": "通知",
+          "approvals": "承認",
+          "correspondence": "往復文書",
+          "timeline": "時系列"
+        },
+        "kind": {
+          "notice": "通知",
+          "variation_notice": "変更通知",
+          "correspondence": "往復文書",
+          "variation_order": "変更指示",
+          "moc_entry": "変更記録",
+          "change_order": "変更指示書",
+          "variation_request": "変更申請"
+        }
+      },
+      "strings": {
+        "col_row": "番号",
+        "col_date": "日付",
+        "basis": "根拠",
+        "col_summary": "概要",
+        "register_title": "証拠資料集",
+        "period_to": "最新の記録",
+        "period_from": "最古の記録",
+        "col_kind": "記録種別",
+        "subject": "件名",
+        "col_title": "件名",
+        "register_filename": "shouko-shiryoushuu",
+        "col_reference": "文書番号",
+        "col_section": "区分",
+        "col_record_id": "記録ID",
+        "digest": "完全性コード(SHA-256 先頭16文字)"
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "col_subject": "件名",
+        "register_title": "質疑書(RFI)台帳",
+        "yes_with": "はい ({detail})",
+        "col_raised_by": "提起者",
+        "col_schedule_impact": "工程への影響",
+        "col_date_required": "必要日",
+        "col_assigned_to": "担当者",
+        "col_ball_in_court": "対応担当",
+        "col_response_due": "回答期限",
+        "col_number": "RFI番号",
+        "col_days_open": "未回答日数",
+        "col_cost_impact": "費用への影響",
+        "register_filename": "rfi-daichou",
+        "col_response": "回答"
+      },
+      "labels": {
+        "status": {
+          "draft": "下書き",
+          "open": "未対応",
+          "answered": "回答済み",
+          "closed": "クローズ",
+          "void": "無効"
+        }
+      }
+    },
+    "daily_diary": {
+      "labels": {
+        "condition": {
+          "rain_showers_violent": "激しいにわか雨",
+          "drizzle_moderate": "並の霧雨",
+          "fog": "霧",
+          "overcast": "曇天",
+          "snow_moderate": "並の雪",
+          "snow_heavy": "大雪",
+          "rain_showers_moderate": "並のにわか雨",
+          "snow_showers_light": "弱いにわか雪",
+          "rain_showers_light": "弱いにわか雨",
+          "snow": "雪",
+          "fog_rime": "着氷性の霧",
+          "partly_cloudy": "一部曇り",
+          "thunderstorm": "雷雨",
+          "snow_light": "小雪",
+          "freezing_rain_heavy": "強い着氷性の雨",
+          "drizzle_light": "弱い霧雨",
+          "rain_light": "小雨",
+          "thunderstorm_hail_heavy": "大粒のひょうを伴う雷雨",
+          "drizzle_dense": "濃い霧雨",
+          "rain": "雨",
+          "mainly_clear": "おおむね晴れ",
+          "clear": "晴れ",
+          "rain_heavy": "大雨",
+          "rain_moderate": "並の雨",
+          "thunderstorm_hail_light": "小粒のひょうを伴う雷雨",
+          "cloudy": "曇り",
+          "snow_showers_heavy": "激しいにわか雪",
+          "freezing_rain_light": "弱い着氷性の雨"
+        },
+        "source": {
+          "open_meteo": "気象サービス",
+          "sensor": "現場センサー",
+          "manual": "手入力"
+        },
+        "entry_type": {
+          "incident_summary": "安全と事故",
+          "event": "出来事",
+          "visitor": "来訪者",
+          "inspection_summary": "検査",
+          "completion": "実施作業",
+          "delivery": "搬入材料",
+          "photo_note": "写真メモ",
+          "general": "一般記事"
+        },
+        "status": {
+          "closed": "完了",
+          "archived": "保管済",
+          "signed": "署名済",
+          "open": "記入中"
+        }
+      },
+      "strings": {
+        "summary_wind": "風速 {value} km/h",
+        "weather_temp": "気温(°C)",
+        "doc_title": "作業日報",
+        "summary_precipitation": "降水量 {value} mm",
+        "site_supervisor": "現場代理人",
+        "weather_precip": "降水量(mm)",
+        "summary_humidity": "湿度 {value} %",
+        "footer_supervisor": "現場代理人: {name}",
+        "sig_name": "氏名",
+        "footer_supervisor_missing": "現場代理人: 未記録",
+        "footer_generated": "作成: {timestamp}",
+        "percent": "{value}%",
+        "workforce_total": "合計",
+        "overview": "概要",
+        "workforce": "会社別作業員数",
+        "workforce_count": "人数",
+        "not_recorded": "未記録",
+        "sig_prepared": "作成(現場代理人)",
+        "decimal_mark": ".",
+        "sig_approved": "承認(発注者代表)",
+        "completeness": "記入率",
+        "sig_signature": "署名",
+        "signatures": "署名",
+        "running_title": "{title} · {date} · {project}",
+        "workforce_company": "会社",
+        "notes_empty": "特記事項はありません。",
+        "sig_title": "役職",
+        "weather": "天候",
+        "weather_wind": "風速(km/h)",
+        "weather_time": "時刻",
+        "weather_empty": "この日の天候は記録されていません。",
+        "footer_page": "{page} / {total} ページ",
+        "equipment_on_site": "現場の機械",
+        "weather_source": "情報源",
+        "workforce_unassigned": "会社未割当",
+        "sig_date": "日付",
+        "filename_prefix": "sagyou-nippou",
+        "labour_on_site": "現場の作業員",
+        "weather_conditions": "天候状況",
+        "signed_note": "システム上で署名済: {signers}",
+        "notes": "備考",
+        "entries_empty": "この日報に記入事項はありません。",
+        "site_record": "現場記録"
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "AI生成",
+        "drawing": "図面",
+        "cost_estimate": "コスト見積書",
+        "summary": "概要",
+        "project": "プロジェクト:",
+        "boq": "内訳書:",
+        "date": "日付:",
+        "status": "ステータス:",
+        "prepared_by": "作成者:",
+        "approved_by": "承認者:",
+        "signature_hint": "氏名 / 署名 / 日付",
+        "contents": "章 / 項目:",
+        "pos": "項番",
+        "description": "摘要",
+        "unit": "単位",
+        "qty": "数量",
+        "rate": "単価",
+        "total": "金額",
+        "subtotal": "小計:",
+        "other_positions": "その他の項目",
+        "direct_cost": "直接工事費:",
+        "markups": "諸経費（税抜）:",
+        "net_total": "合計（税抜）:",
+        "gross_total": "総合計",
+        "page": "ページ",
+        "of": "/",
+        "generated": "作成日時:",
+        "summary_report": "概要レポート",
+        "positions_omitted": "{count} 項目（性能上の理由により詳細は省略）",
+        "section": "章",
+        "items": "項目",
+        "cost_summary": "コスト集計",
+        "table_of_contents": "目次",
+        "resources_omitted": "この内訳書は資源明細が多いため、資源の積算内訳は印刷されません。",
+        "status_draft": "下書き",
+        "status_final": "確定",
+        "status_archived": "保管済み",
+        "subject": "数量内訳書",
+        "tax_vat": "消費税"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "請求書",
+        "date": "日付: {value}",
+        "due": "支払期限: {value}",
+        "from": "発行者",
+        "bill_to": "請求先",
+        "vat_id": "VAT番号: {value}",
+        "ref": "参照番号: {value}",
+        "th_description": "摘要",
+        "th_qty": "数量",
+        "th_unit": "単位",
+        "th_unit_price": "単価",
+        "th_net": "税抜金額 ({currency})",
+        "net_total": "税抜合計",
+        "vat_total": "消費税",
+        "grand_total": "税込合計",
+        "retention_prepaid": "保留金 / 前払金",
+        "amount_due": "請求金額",
+        "payment": "支払",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "口座番号: {value}",
+        "bank_code": "銀行コード: {value}",
+        "account_holder": "口座名義: {value}",
+        "footer": "本PDFには EN 16931 準拠の電子インボイス（Factur-X / ZUGFeRD）が埋め込まれています。正本は埋め込まれたXMLです。",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "レポート",
+        "meta_project": "プロジェクト",
+        "meta_type": "種別",
+        "meta_generated": "作成日時",
+        "meta_currency": "通貨",
+        "field_column": "項目",
+        "value_column": "値",
+        "yes": "はい",
+        "no": "いいえ",
+        "no_data_heading": "データがありません",
+        "no_data_body": "このレポートは空のデータスナップショットから作成されました。選択したプロジェクトについて、元のモジュール（財務、工程、安全など）がデータを返しているかご確認ください。",
+        "no_data_body_short": "このレポートは空のデータスナップショットから作成されました。選択したプロジェクトについて、元のモジュールがデータを返しているかご確認ください。",
+        "footer_generated_by": "OpenConstructionERP により {timestamp} に作成されました。",
+        "worksheet_name": "レポート",
+        "pdf_subject": "プロジェクトレポート",
+        "overall_progress": "全体進捗",
+        "as_of": "基準日",
+        "recorded_by": "記録者",
+        "period": "期間",
+        "entries_suffix": "（{count} 件）",
+        "site_photo_alt": "現場写真",
+        "ai_summary_heading": "概要",
+        "ai_badge": "AI生成",
+        "ai_note": "以下のプロジェクトデータから AI が作成しました。",
+        "ai_note_confidence": "以下のプロジェクトデータから AI が作成しました（信頼度 {confidence}）。",
+        "ai_note_review": "顧客に提出する前に内容をご確認ください。"
+      },
+      "labels": {
+        "field_labels": {
+          "name": "名称",
+          "status": "ステータス",
+          "phase": "フェーズ",
+          "planned_start": "予定開始日",
+          "planned_end": "予定終了日",
+          "schedule_progress_pct": "工程進捗率",
+          "cpi": "CPI（コスト効率指数）",
+          "spi": "SPI（工程効率指数）",
+          "budget_consumed_pct": "予算消化率",
+          "as_of": "基準日",
+          "progress_pct": "進捗率",
+          "risk_score_avg": "平均リスクスコア",
+          "open_rfis": "未解決RFI",
+          "open_submittals": "未承認提出書類",
+          "open_defects": "未解決不具合",
+          "open_observations": "未解決指摘事項",
+          "budget": "予算",
+          "committed": "契約済み",
+          "actual": "実績",
+          "payable": "支払債務",
+          "receivable": "未収債権",
+          "net_cash_flow": "正味キャッシュフロー"
+        },
+        "section_titles": {
+          "Project Overview": "プロジェクト概要",
+          "Key Performance Indicators": "主要業績評価指標（KPI）",
+          "Schedule Status": "工程の状況",
+          "Risk Summary": "リスク概要",
+          "Open Issues": "未解決事項",
+          "Cost Summary": "コスト概要",
+          "Cost Breakdown": "コスト内訳",
+          "Change Orders": "変更指示",
+          "Cash Flow": "キャッシュフロー",
+          "Schedule Overview": "工程概要",
+          "Milestone Status": "マイルストーンの状況",
+          "Critical Path": "クリティカルパス",
+          "3-Week Lookahead": "3週間の先行工程",
+          "Safety KPIs": "安全KPI",
+          "Incident Log": "事故記録",
+          "Near-Miss Reports": "ヒヤリハット報告",
+          "Safety Training": "安全教育",
+          "Inspection Summary": "検査概要",
+          "By Inspection Type": "検査種別ごと",
+          "Punch List Status": "手直し項目の状況",
+          "Recent Inspections": "直近の検査",
+          "Portfolio Overview": "ポートフォリオ概要",
+          "Project Statuses": "プロジェクトの状況",
+          "KPI Comparison": "KPI比較",
+          "Portfolio Risks": "ポートフォリオのリスク",
+          "Field Progress": "現場の進捗",
+          "Top Risks": "主要リスク",
+          "Site Photos": "現場写真",
+          "Summary": "概要"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "発注書",
+        "gr_title": "検収書",
+        "supplier": "仕入先",
+        "po_type": "発注区分",
+        "issue_date": "発行日",
+        "delivery_date": "納期",
+        "created_by": "作成者",
+        "order_total": "発注金額",
+        "line_items": "明細",
+        "col_no": "No.",
+        "col_description": "摘要",
+        "col_quantity": "数量",
+        "col_unit": "単位",
+        "col_unit_rate": "単価",
+        "col_amount": "金額",
+        "no_line_items": "明細はありません。",
+        "totals": "合計",
+        "subtotal": "税抜金額",
+        "tax": "消費税",
+        "total_gross": "税込金額",
+        "terms": "条件",
+        "payment_terms": "支払条件",
+        "retention": "保留金",
+        "retention_at": "保留金の控除時点",
+        "retention_at_receipt": "検収時",
+        "retention_at_invoice": "請求時",
+        "invoice_tolerance": "請求許容差",
+        "supplier_confirmation": "仕入先の確認",
+        "supplier_reference": "仕入先の参照番号",
+        "confirmed_delivery": "確認済み納期",
+        "acknowledged_on": "受領確認日",
+        "not_confirmed": "仕入先による確認はまだありません。",
+        "notes": "備考",
+        "no_notes": "備考はありません。",
+        "sig_ordered_by": "発注者",
+        "purchase_order": "発注書",
+        "receipt_date": "検収日",
+        "received_by": "受領者",
+        "delivery_note": "納品書",
+        "col_ordered": "発注数",
+        "col_received": "受領数",
+        "col_rejected": "不合格数",
+        "col_batch": "ロット番号",
+        "rejections": "不合格",
+        "col_reason": "理由",
+        "no_rejections": "不合格はありません。",
+        "sig_delivered_by": "納入者",
+        "counterparty_tax_id": "税務番号",
+        "counterparty_address": "住所"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "下書き",
+          "approved": "承認済み",
+          "issued": "発行済み",
+          "partially_received": "一部検収済み",
+          "completed": "完了",
+          "cancelled": "取消"
+        },
+        "gr_status": {
+          "draft": "下書き",
+          "confirmed": "確定"
+        },
+        "po_type": {
+          "standard": "標準",
+          "blanket": "包括発注",
+          "service": "役務"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "請求書",
+        "payment_title": "支払",
+        "direction": "区分",
+        "supplier": "仕入先",
+        "client": "取引先",
+        "invoice_date": "請求日",
+        "due_date": "支払期限",
+        "payment_terms": "支払条件",
+        "purchase_order": "発注書",
+        "invoice_total": "請求金額",
+        "line_items": "明細",
+        "col_no": "No.",
+        "col_description": "摘要",
+        "col_quantity": "数量",
+        "col_unit": "単位",
+        "col_unit_rate": "単価",
+        "col_vat": "消費税",
+        "col_amount": "金額",
+        "no_line_items": "明細はありません。",
+        "totals": "合計",
+        "subtotal": "税抜金額",
+        "tax": "消費税",
+        "total_gross": "税込金額",
+        "retention": "保留金",
+        "amount_due": "保留金控除後の支払額",
+        "payments": "支払",
+        "col_date": "日付",
+        "col_reference": "参照番号",
+        "col_paid": "支払額",
+        "col_withheld": "控除額",
+        "refund": "返金",
+        "no_payments": "支払記録はありません。",
+        "notes": "備考",
+        "no_notes": "備考はありません。",
+        "invoice": "請求書",
+        "invoice_number": "請求書番号",
+        "payment_date": "支払日",
+        "reference": "参照番号",
+        "amount_paid": "支払額",
+        "exchange_rate": "為替レート",
+        "kind": "種別",
+        "kind_payment": "支払",
+        "kind_refund": "返金",
+        "withholding": "保留金の控除",
+        "withheld_amount": "控除額",
+        "release_date": "保留金の解除日",
+        "gross_settled": "決済総額",
+        "no_withholding": "この支払から控除はありません。",
+        "counterparty_tax_id": "税務番号",
+        "counterparty_address": "住所"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "下書き",
+          "pending": "承認待ち",
+          "approved": "承認済み",
+          "sent": "送付済み",
+          "paid": "支払済み",
+          "cancelled": "取消",
+          "credit_note_issued": "貸方伝票発行済み"
+        },
+        "direction": {
+          "payable": "支払債務（仕入先請求書）",
+          "receivable": "未収債権（取引先請求書）"
+        },
+        "payment_status": {
+          "completed": "完了",
+          "refunded": "返金済み"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "{page} / {total} ページ",
+    "page": "{page} ページ",
+    "printed": "印刷日時: {timestamp}",
+    "generated": "作成日: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} よりクライアントポータルへご招待いたします",
+      "login_subject": "クライアントポータルのログインリンク",
+      "invite_heading": "クライアントポータルへようこそ",
+      "login_heading": "クライアントポータルにログイン",
+      "greeting": "{name} 様",
+      "greeting_generic": "ご担当者様",
+      "invite_body": "{sender} がクライアントポータルへのアクセス権を付与しました。ポータルでは、進捗報告書、書類、請求書、今後のマイルストーンなど、プロジェクトの状況をご確認いただけます。",
+      "login_body": "ご依頼のログインリンクをお送りします。",
+      "link_help": "下のボタンからログインできます。パスワードは不要です。このリンクは一度のみ有効で、{hours} 時間後に失効します。",
+      "ignore": "本メールにお心当たりがない場合は、破棄してください。このリンクがなければ、誰もアクセスすることはできません。",
+      "invite_cta": "ポータルを開く",
+      "login_cta": "ログイン",
+      "sender_generic": "プロジェクトチーム"
+    },
+    "tender_invite": {
+      "subject": "入札のご案内：{package}",
+      "heading": "入札のご案内",
+      "greeting": "{company} 御中",
+      "greeting_generic": "ご担当者様",
+      "invite": "入札パッケージ {package} につきまして、見積のご提出をお願い申し上げます。",
+      "invite_project": "プロジェクト {project} の入札パッケージ {package} につきまして、見積のご提出をお願い申し上げます。",
+      "deadline": "提出期限：{deadline}",
+      "link_help": "下のボタンから数量内訳書をご覧いただけます。オンラインで単価を入力し、下書きはいつでも保存でき、期限までにご提出ください。アカウントは不要です。",
+      "link_personal": "このリンクは貴社専用です。転送しないでください。",
+      "cta": "内訳書を開いて単価を入力",
+      "no_link": "パッケージの内容をご確認のうえ、上記の期限までに見積をご提出ください。"
+    },
+    "notification_email": {
+      "greeting": "{name} 様",
+      "greeting_generic": "ご担当者様",
+      "cta": "OpenConstructionERP で開く",
+      "footer": "このメールは、通知設定に基づいて送信されています。設定はプロフィールから変更できます。",
+      "digest_subject": "OpenConstructionERP: 通知のまとめ（{count} 件）",
+      "digest_heading": "最近の通知："
+    },
+    "tender_xlsx": {
+      "comparison_title": "見積比較表",
+      "comparison_sheet": "比較",
+      "bidder_title": "見積用数量内訳書",
+      "bidder_sheet": "内訳書",
+      "project": "プロジェクト",
+      "package": "パッケージ",
+      "currency": "通貨",
+      "date": "日付",
+      "return_by": "提出期限",
+      "item": "項目番号",
+      "description": "名称",
+      "unit": "単位",
+      "quantity": "数量",
+      "unit_price": "単価",
+      "line_total": "明細金額",
+      "own_estimate": "自社積算",
+      "not_priced": "未入力",
+      "sum_priced_lines": "入力済み明細の合計",
+      "bid_total": "提出された入札総額",
+      "lines_priced": "入力済み明細",
+      "lines_priced_value": "{priced} / {total}",
+      "deviation": "自社積算との差異",
+      "not_comparable": "対象外",
+      "other_currency": "{currency} での見積のため、{reporting} の入札とは順位付けしていません。",
+      "legend": "凡例",
+      "legend_lowest": "緑：その明細の最安値の単価。",
+      "legend_high": "▲ 赤：その明細の中央値より {pct}% 以上高い単価。",
+      "legend_low": "▼ 黄色：その明細の中央値より {pct}% 以上低い単価。",
+      "legend_missing": "「{marker}」：入札者がその明細に単価を入力していません。",
+      "legend_incomplete": "未入力の明細がある入札は「入力済み明細」欄に表示され、合計額による最安値の順位付けの対象外となります。",
+      "legend_totals": "入札総額は入札者が提出した金額であり、入力済み明細の合計と異なる場合があります。",
+      "bidder": "入札者",
+      "bidder_note": "入札者のコメント",
+      "reference": "識別コード（編集不可）",
+      "total": "合計",
+      "instructions": "黄色のセルに各明細の単価を入力してください。数量と名称は固定で、明細金額と合計は自動計算されます。見積を出さない明細は空欄のままにしてください。"
+    },
+    "cost_plan": {
+      "sheet_plan": "NRM 1 コストプラン",
+      "sheet_unallocated": "未割当",
+      "title": "部位別コストプラン（NRM 1）",
+      "bill": "数量内訳書",
+      "currency": "通貨",
+      "gifa": "延床面積 (m2)",
+      "gifa_project": "プロジェクトの値",
+      "gifa_entered": "この出力のために入力",
+      "gifa_none": "未設定のため、m2 当たりの費用は表示しません",
+      "col_code": "コード",
+      "col_description": "部位",
+      "col_positions": "明細数",
+      "col_basis": "算定基準",
+      "col_total": "合計",
+      "col_per_m2": "延床面積 m2 当たり費用",
+      "col_share": "構成比 %",
+      "col_running": "累計",
+      "group_level": "グループ単位のため部位の指定なし",
+      "facilitating_works_estimate": "準備工事の概算",
+      "works_estimate": "建築工事の概算",
+      "addons_heading": "内訳書の明細として積算した NRM 1 グループ 9-14",
+      "unallocated": "部位に割り当てられていない項目",
+      "direct_cost": "内訳書の直接工事費",
+      "markups_heading": "諸経費等（内訳書の計算順）",
+      "markups_total": "諸経費等の合計",
+      "grand_total": "コストプラン総額",
+      "basis_direct": "直接工事費の {pct}%",
+      "basis_running": "累計小計の {pct}%",
+      "basis_lump": "一式",
+      "basis_banded": "段階別料率",
+      "basis_escalation": "指数による物価変動調整",
+      "basis_other": "{kind}",
+      "basis_scoped": "章単位",
+      "col_ordinal": "通し番号",
+      "col_position": "名称",
+      "col_written_code": "記載されたコード",
+      "col_reason": "理由",
+      "reason_no_code": "明細にもその章にも NRM コードがありません",
+      "reason_invalid_code": "コードが NRM の番号ではありません",
+      "reason_unknown_group": "NRM 1 にそのグループはありません",
+      "truncated": "一覧は {count} 件の明細のうち先頭の {shown} 件のみ表示しています。合計はすべての明細を含みます。"
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "要件",
+      "sheet_summary": "サマリー",
+      "sheet_legend": "凡例",
+      "summary_element": "部材",
+      "summary_count": "要件数",
+      "summary_total": "合計",
+      "legend_column": "列",
+      "legend_description": "説明",
+      "unspecified": "未指定",
+      "h01": "部材 / IFC クラス",
+      "h02": "分類",
+      "h03": "プロパティグループ",
+      "h04": "プロパティ名",
+      "h05": "データ型",
+      "h06": "必須",
+      "h07": "許容値",
+      "h08": "最小値",
+      "h09": "最大値",
+      "h10": "単位",
+      "h11": "パターン",
+      "h12": "フェーズ",
+      "h13": "担当者",
+      "h14": "ユースケース",
+      "h15": "出典",
+      "d01": "IFC エンティティクラス（例：IFCWALL、IFCBEAM）",
+      "d02": "分類体系とコード（例：Uniclass 2015：EF_25_10）",
+      "d03": "プロパティセット名（例：Pset_WallCommon）",
+      "d04": "必要なプロパティまたは属性の名前",
+      "d05": "IFC のデータ型（IFCLABEL、IFCREAL、IFCBOOLEAN など）",
+      "d06": "カーディナリティ：必須、任意、または禁止",
+      "d07": "許容される値のリスト（セミコロン区切り）",
+      "d08": "数値範囲の上限と下限",
+      "d09": "計量単位（m、m2、kg など）",
+      "d10": "値の検証に使う正規表現パターン",
+      "d11": "プロジェクトのフェーズまたはマイルストーン（LP3、RIBA ステージ 3 など）",
+      "d12": "責任者（建築設計者、構造設計者など）",
+      "d13": "この要件の目的またはユースケース",
+      "d14": "出典となる規格または文書"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "数量内訳書を作成しました",
+      "notifications.boq.created.body": "数量内訳書「{boq_name}」を保存しました。",
+      "notifications.meeting.action_assigned.title": "会議のアクション項目が割り当てられました",
+      "notifications.meeting.action_assigned.body": "会議 {meeting_number} より：{description}",
+      "notifications.cde.state_transitioned.title": "文書のステータスが変更されました",
+      "notifications.cde.state_transitioned.body": "コンテナが「{new_state}」に移行しました。",
+      "notifications.cde.linked_published.title": "関連する文書が公開されました",
+      "notifications.cde.linked_published.body": "{container_code} がリビジョン {revision_code} で公開されました。関連する記録：{records}。",
+      "notifications.rfi.assigned.title": "RFI が割り当てられました",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "RFI に回答がありました",
+      "notifications.rfi.responded.body": "ご提出の {code}（{title}）に回答がありました。",
+      "notifications.risk.assigned.title": "リスクが割り当てられました",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "コスト超過の警告",
+      "notifications.costmodel.overrun_alert.body": "{category} の費用が予算を超過しています。実績 {actual} {currency} が、計画 {planned} {currency} に対する警告しきい値 +{threshold_pct}% を超えています。",
+      "notifications.submittal.submitted.title": "承認図書の確認待ち",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "承認図書が承認されました",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "承認図書が差し戻されました",
+      "notifications.submittal.rejected.body": "{code}（{title}）。理由：{reason}",
+      "notifications.submittal.revise_resubmit.title": "承認図書の修正が必要です",
+      "notifications.submittal.revise_resubmit.body": "{code}（{title}）。理由：{reason}",
+      "notifications.transmittal.issued.title": "送付状が発行されました",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "送付状の受領が確認されました",
+      "notifications.transmittal.acknowledged.body": "受領者が {code}（{title}）を確認しました。",
+      "notifications.transmittal.responded.title": "送付状に回答がありました",
+      "notifications.transmittal.responded.body": "{code}（{title}）。{response_summary}",
+      "notification.rfi_assigned_title": "RFI が割り当てられました",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "新しいタスクが割り当てられました",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "請求書が承認されました",
+      "notification.invoice_approved_body": "請求書 {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "検査が予定されました",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}（{inspection_date}）",
+      "notification.submittal_status_changed_title": "承認図書のステータスが変更されました",
+      "notification.submittal_status_changed_body": "{submittal_number}（{title}）- {new_status}",
+      "notification.meeting_scheduled_title": "会議が予定されました",
+      "notification.meeting_scheduled_body": "{title}（{meeting_date}）",
+      "notification.ncr_created_title": "不適合が起票されました",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title}（{severity}）",
+      "notification.document_uploaded_title": "文書がアップロードされました",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "コメントでメンションされました",
+      "notifications.file_comments.mention.body": "「{excerpt}」",
+      "notifications.collaboration.comment_added.title": "ディスカッションに新しいコメント",
+      "notifications.collaboration.comment_added.body": "{entity_type} について：「{excerpt}」",
+      "notifications.clash.high_severity.title": "重大度の高い干渉を検出しました",
+      "notifications.clash.high_severity.body": "{severity}の干渉：{a_name} と {b_name}",
+      "notifications.validation.report.title": "検証で問題が見つかりました",
+      "notifications.validation.report.body": "この {target_type} にエラー {error_count} 件、警告 {warning_count} 件があります。",
+      "notifications.punchlist.auto_created.title": "是正項目が作成されました",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "通知のまとめ",
+      "notifications.digest.body": "{channel} チャンネルに新しい更新が {count} 件あります。",
+      "notifications.approval.overdue.title": "承認が期限を過ぎています",
+      "notifications.approval.overdue.body": "この {target_kind} のステップ {step_ordinal} が {hours_overdue} 時間超過しています。",
+      "notifications.approval.escalated.title": "承認がエスカレーションされました",
+      "notifications.approval.escalated.body": "この {target_kind} のステップ {step_ordinal} があなたにエスカレーションされました（レベル {level}）。",
+      "notifications.approval.reassigned.title": "承認の担当が変更されました",
+      "notifications.approval.reassigned.body": "この {target_kind} のステップ {step_ordinal} は、あなたが判断する担当になりました。",
+      "notifications.deadline.overdue.title": "期限超過：{title}",
+      "notifications.deadline.overdue.body": "{module} の項目「{title}」が期限を {days_overdue} 日過ぎています。",
+      "notifications.deadline.escalated.title": "期限超過の項目をエスカレーションしました",
+      "notifications.deadline.escalated.body": "{module} の項目「{title}」は期限を {days_overdue} 日過ぎても未完了のため、エスカレーションしました。",
+      "notifications.deadline.approaching.title": "まもなく期限：{title}",
+      "notifications.deadline.approaching.body": "{module} の項目「{title}」の期限は {due_date} です。",
+      "notifications.deadline.built.approaching.title": "まもなく期限：{title}",
+      "notifications.deadline.built.approaching.body": "{module}：「{title}」の期限は {due_date} です。",
+      "notifications.deadline.rfi.overdue.title": "期限超過：RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "{project} の RFI {reference}「{title}」は {due_date_display} が回答期限でしたが、{days_overdue} 日超過しています。回答が必要です。",
+      "notifications.deadline.rfi.escalated.title": "エスカレーション：RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "{project} の RFI {reference}「{title}」は未完了で、期限 {due_date_display} を {days_overdue} 日過ぎたため、あなたにエスカレーションされました。",
+      "notifications.deadline.rfi.approaching.title": "まもなく期限：RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "{project} の RFI {reference}「{title}」の期限は {due_date_display} です。回答が必要です。",
+      "notifications.deadline.submittals.overdue.title": "期限超過：承認図書 {reference}",
+      "notifications.deadline.submittals.overdue.body": "{project} の承認図書 {reference}「{title}」は {due_date_display} が期限でしたが、{days_overdue} 日超過しています。確認が必要です。",
+      "notifications.deadline.submittals.escalated.title": "エスカレーション：承認図書 {reference}",
+      "notifications.deadline.submittals.escalated.body": "{project} の承認図書 {reference}「{title}」は未完了で、期限 {due_date_display} を {days_overdue} 日過ぎたため、あなたにエスカレーションされました。",
+      "notifications.deadline.submittals.approaching.title": "まもなく期限：承認図書 {reference}",
+      "notifications.deadline.submittals.approaching.body": "{project} の承認図書 {reference}「{title}」の期限は {due_date_display} です。確認が必要です。",
+      "notifications.deadline.correspondence.overdue.title": "期限超過：文書 {reference}",
+      "notifications.deadline.correspondence.overdue.body": "{project} の文書 {reference}「{title}」は {due_date_display} までの返信が必要でしたが、{days_overdue} 日超過しています。返信が必要です。",
+      "notifications.deadline.correspondence.escalated.title": "エスカレーション：文書 {reference}",
+      "notifications.deadline.correspondence.escalated.body": "{project} の文書 {reference}「{title}」は未返信で、期限 {due_date_display} を {days_overdue} 日過ぎたため、あなたにエスカレーションされました。",
+      "notifications.deadline.correspondence.approaching.title": "まもなく期限：文書 {reference}",
+      "notifications.deadline.correspondence.approaching.body": "{project} の文書 {reference}「{title}」は {due_date_display} までの返信が必要です。返信が必要です。",
+      "notifications.deadline.variations.overdue.title": "期限超過：変更 {reference}",
+      "notifications.deadline.variations.overdue.body": "{project} の変更 {reference}「{title}」は {due_date_display} が期限でしたが、{days_overdue} 日超過しています。判断が必要です。",
+      "notifications.deadline.variations.escalated.title": "エスカレーション：変更 {reference}",
+      "notifications.deadline.variations.escalated.body": "{project} の変更 {reference}「{title}」は未完了で、期限 {due_date_display} を {days_overdue} 日過ぎたため、あなたにエスカレーションされました。",
+      "notifications.deadline.variations.approaching.title": "まもなく期限：変更 {reference}",
+      "notifications.deadline.variations.approaching.body": "{project} の変更 {reference}「{title}」の期限は {due_date_display} です。判断が必要です。",
+      "notifications.variation.submitted.title": "変更の判断待ち：{code}",
+      "notifications.variation.submitted.body": "{project} の変更 {code}「{title}」が提出され、判断待ちです。",
+      "notifications.variation.approved.title": "変更が承認されました：{code}",
+      "notifications.variation.approved.body": "{project} の変更 {code}「{title}」が承認されました。",
+      "notifications.variation.rejected.title": "変更が却下されました：{code}",
+      "notifications.variation.rejected.body": "{project} の変更 {code}「{title}」は却下され、差し戻されました。",
+      "notifications.variation.rejected_reason.body": "{project} の変更 {code}「{title}」は却下され、差し戻されました。理由：{reason}",
+      "notifications.changeorder.awaiting_approval.title": "変更指示の承認待ち：{code}",
+      "notifications.changeorder.awaiting_approval.body": "{project} の変更指示 {code}「{title}」が提出され、承認待ちです。",
+      "notifications.changeorder.approved.title": "変更指示が承認されました：{code}",
+      "notifications.changeorder.approved.body": "{project} の変更指示 {code}「{title}」が承認されました。",
+      "notifications.changeorder.rejected.title": "変更指示が却下されました：{code}",
+      "notifications.changeorder.rejected.body": "{project} の変更指示 {code}「{title}」が却下されました。",
+      "notifications.submittal.approved_as_noted.title": "承認図書が条件付きで承認されました",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "承認が必要な文書があります",
+      "notifications.file_approval.needs_approver.body": "{file_kind} があなたの承認を待っています。",
+      "notifications.file_approval.approved.title": "文書が承認されました",
+      "notifications.file_approval.approved.body": "{file_kind} はすべての承認ステップを通過しました。",
+      "notifications.file_approval.rejected.title": "文書が差し戻されました",
+      "notifications.file_approval.rejected.body": "{file_kind} は却下され、修正が必要です。",
+      "notifications.portal.user_invited.title": "ポータルユーザーを招待しました",
+      "notifications.portal.user_invited.body": "{portal_user_email} を {portal_role} として招待しました。",
+      "notifications.portal.message_received.title": "ポータルに新しいメッセージ",
+      "notifications.portal.message_received.body": "{buyer_name} からメッセージが届きました。"
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "アクティビティID",
+          "工程ID",
+          "工程コード",
+          "タスクID",
+          "ID",
+          "工程番号"
+        ],
+        "name": [
+          "工程名",
+          "タスク名",
+          "アクティビティ名",
+          "作業名"
+        ],
+        "wbs": [
+          "WBS",
+          "WBSコード",
+          "WBS番号",
+          "アウトライン番号"
+        ],
+        "outline_level": [
+          "アウトラインレベル",
+          "階層レベル",
+          "インデントレベル",
+          "階層"
+        ],
+        "start": [
+          "開始日",
+          "開始",
+          "着工日",
+          "予定開始日"
+        ],
+        "finish": [
+          "終了日",
+          "完了日",
+          "終了",
+          "予定終了日",
+          "竣工日"
+        ],
+        "duration": [
+          "工期",
+          "期間",
+          "所要日数",
+          "日数"
+        ],
+        "predecessors": [
+          "先行タスク",
+          "先行工程",
+          "先行作業",
+          "先行"
+        ],
+        "percent_complete": [
+          "進捗率",
+          "達成率",
+          "完了率",
+          "進捗(%)",
+          "% 完了"
+        ],
+        "milestone": [
+          "マイルストーン",
+          "マイルストーンフラグ"
+        ],
+        "resource": [
+          "リソース",
+          "リソース名",
+          "担当班",
+          "担当者",
+          "作業班"
+        ],
+        "notes": [
+          "備考",
+          "メモ",
+          "注記",
+          "コメント"
+        ],
+        "client_visible": [
+          "顧客に表示",
+          "顧客表示",
+          "施主に表示",
+          "顧客公開"
+        ]
+      },
+      "yes_words": [
+        "はい",
+        "有",
+        "真"
+      ],
+      "no_words": [
+        "いいえ",
+        "無",
+        "偽"
+      ],
+      "example_names": [
+        "躯体工事",
+        "掘削工事",
+        "基礎工事",
+        "基礎検査完了"
+      ]
+    },
+    "module_suggest": {
+      "link_labels": {
+        "contract": "契約",
+        "contact": "連絡先",
+        "schedule_activity": "工程",
+        "document": "書類",
+        "user": "担当者"
+      },
+      "keywords": {
+        "contract": [
+          "契約"
+        ],
+        "contact": [
+          "連絡先",
+          "取引先",
+          "協力会社",
+          "顧客",
+          "業者"
+        ],
+        "schedule_activity": [
+          "工程",
+          "タスク",
+          "作業"
+        ],
+        "document": [
+          "書類",
+          "文書",
+          "図面",
+          "添付"
+        ],
+        "user": [
+          "担当者",
+          "責任者",
+          "検査員",
+          "監督"
+        ],
+        "due": [
+          "期限",
+          "締切",
+          "締め切り",
+          "有効期限",
+          "納期"
+        ]
+      },
+      "state_labels": [
+        "未着手",
+        "進行中",
+        "完了"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "入札 {package} 補足資料 {number}",
+      "addendum_heading": "入札補足資料",
+      "greeting": "{company} 御中",
+      "greeting_generic": "ご担当者様",
+      "addendum_intro": "入札パッケージ {package} の補足資料 {number} を発行しました: {title}",
+      "addendum_deadline": "提出締切を {old} から {new} に変更しました。",
+      "addendum_boq": "数量内訳書が改訂されました（改訂 {revision}）。現在の版で単価をご入力ください。",
+      "addendum_documents": "発行資料: {documents}",
+      "addendum_ack": "本補足資料を受領された旨、ご確認ください。全ての補足資料を確認していない入札書類は、要件不適合と扱われる場合があります。",
+      "answer_subject": "入札 {package} に関する回答 {number}",
+      "answer_heading": "入札に関する回答",
+      "answer_intro": "入札パッケージ {package} に関するご質問への回答を掲載しました。この回答は全入札者に適用されます。",
+      "question_label": "質問",
+      "answer_label": "回答"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "開発総額（GDV）",
+      "total_development_cost": "開発総コスト",
+      "residual_land_value": "残余地価",
+      "developer_profit": "開発者利益",
+      "profit_on_cost": "コスト利益率",
+      "profit_on_gdv": "GDV 利益率",
+      "construction_cost": "建設費",
+      "professional_fees": "専門家報酬",
+      "contingency": "予備費",
+      "finance_cost": "金融費用",
+      "sales_costs": "販売費"
+    },
+    "status": {
+      "viable": "事業成立",
+      "unviable": "事業不成立",
+      "marginal": "境界域",
+      "pending": "未評価"
+    },
+    "figure": {
+      "gross_development_value": "計画内すべての住戸・区画の販売額の合計（単一通貨）。",
+      "total_development_cost": "土地を除く事業実施のすべての費用：建設費、専門家報酬、予備費、金融費用、販売費。",
+      "residual_land_value": "開発総額から開発総コストと目標開発者利益を差し引いた後に土地に残る金額。",
+      "developer_profit": "開発者が確保を目指す利益。開発総額に対する目標比率として設定します。",
+      "profit_on_cost": "開発者利益を開発総コストで割った比率。",
+      "profit_on_gdv": "開発者利益を開発総額（GDV）で割った比率。"
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "作業員宿舎",
+        "rental": "賃貸住宅",
+        "hotel": "ホテル"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "承認待ち",
+        "approved": "承認済み",
+        "rejected": "却下"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "適合",
+        "fail": "不適合",
+        "not_applicable": "対象外"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "図面",
+        "contract": "契約書",
+        "specification": "仕様書",
+        "photo": "写真",
+        "correspondence": "関連書類",
+        "reality_capture": "現況計測データ",
+        "other": "その他"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "承認待ち",
+        "approved": "承認済み",
+        "rejected": "却下",
+        "cancelled": "取消"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "下書き",
+        "submitted": "承認申請中",
+        "approved": "承認済み",
+        "posted": "元帳に転記済み"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "未対応",
+        "assigned": "担当者割当済み",
+        "in_progress": "対応中",
+        "resolved": "是正済み",
+        "verified": "確認済み",
+        "closed": "完了"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "指摘",
+        "minor": "軽微",
+        "major": "重大",
+        "critical": "致命的"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "個人",
+        "crew": "班",
+        "equipment": "機械",
+        "subcontractor": "協力会社"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI モデル名が古いか、利用できません。「設定 > AI」を開き、プロバイダーで現在有効なモデル名を指定してください。",
+      "not_configured": "AI が設定されていません。設定で AI プロバイダーを設定してください。"
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "確認済み",
+      "bound": "添付済み",
+      "empty": "未提出"
+    },
+    "package_status_labels": {
+      "draft": "下書き",
+      "in_progress": "作業中",
+      "ready": "準備完了",
+      "issued": "発行済み"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "阻害要因",
+      "critical": "重大",
+      "warning": "警告",
+      "suggestion": "提案"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "戦略",
+      "brief": "要件定義",
+      "concept": "基本構想",
+      "design": "基本設計",
+      "approval": "許認可",
+      "detail": "実施設計",
+      "tender": "入札",
+      "award": "契約",
+      "construction": "施工",
+      "handover": "引渡し",
+      "operation": "運用"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "piece_fits_stock": {
+        "fail": "部材 {ref} ({size} mm) はどの定尺にも収まりません",
+        "suggestion": "より長い、または大きい定尺を追加するか、切落としを減らすか、継手で部材を分割してください。"
+      },
+      "has_stock": {
+        "suggestion": "定尺の長さまたは板寸法を1つ以上追加するか、現場在庫の端材を再利用してください。",
+        "fail": "この作業には切り出し元の定尺がありません"
+      },
+      "yield_threshold": {
+        "suggestion": "別の定尺の長さや寸法を追加するか、回転を許可するか、この材料のしきい値を見直してください。",
+        "fail": "歩留まり {actual} % がしきい値 {threshold} % を下回っています"
+      },
+      "ok": "OK",
+      "kerf_set": {
+        "fail": "切断代 (鋸厚) が 0 です",
+        "suggestion": "刃厚または切断幅を入力してください。入力しないと、複数回切断する棒材の歩留まりが過大に出ます。"
+      },
+      "grain_allows_fit": {
+        "fail": "部材 {ref} は木目と直交に回転した場合のみ収まります",
+        "suggestion": "この部材の回転を許可するか、木目方向で収まる板寸法を追加してください。"
+      },
+      "has_pieces": {
+        "fail": "この作業には切断する部材がありません",
+        "suggestion": "部材を手入力・貼り付けするか、加工帳、拾い出し、内訳書の明細、ファイルから取り込んでください。"
+      },
+      "min_offcut_set": {
+        "fail": "最小使用可能端材が設定されていません",
+        "suggestion": "保管する価値のある最短の端材を設定すると、再利用可能な端材がロスに数えられません。"
+      },
+      "sheet_dimensions": {
+        "suggestion": "すべての板部材と板寸法に長さと幅の両方を指定してください。",
+        "fail": "{ref} に幅がありません"
+      },
+      "stock_priced": {
+        "fail": "定尺 {ref} に単価がありません",
+        "suggestion": "1個あたりの価格を入力すると、計画に費用が表示され、最も安い定尺が選ばれます。"
+      },
+      "stock_sufficient": {
+        "suggestion": "使用可能数量を増やすか、別の定尺を追加してください。",
+        "fail": "使用可能な定尺に配置できなかった部材: {count}"
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "手直し項目「{title}」が写真なしで完了されています",
+    "punch_no_photo_fix": "完了した作業の写真を追加してください",
+    "photo_weak": "「{title}」の写真{count}枚に位置または撮影時刻がありません",
+    "photo_weak_fix": "位置情報をオンにしてアプリで撮り直してください",
+    "defect_no_photo": "不具合「{reference}」が是正写真なしで完了されています",
+    "defect_no_photo_fix": "是正した作業の写真を添付してください"
+  },
+  "closeout_dossier": {
+    "more_items": "ほか{count}件は表示していません",
+    "category_missing": "必須カテゴリ「{category}」の証跡がありません",
+    "category_missing_fix": "このカテゴリのチェックリスト項目に書類を紐付けるか、追加してください",
+    "category_unverified": "「{category}」の証跡はまだ確認されていません",
+    "category_unverified_fix": "管理者に紐付けた証跡の確認と承認を依頼してください",
+    "punch_open": "手直し項目「{name}」はまだ未完了です",
+    "punch_open_fix": "項目を解決して完了するか、この引渡しファイルの対象範囲から除外してください",
+    "punch_no_photo": "是正済みの手直し項目「{name}」に写真がありません",
+    "punch_no_photo_fix": "完了した作業の写真を追加してください",
+    "system_pending": "システム「{name}」は試運転されていません",
+    "system_pending_fix": "試運転チェックリストを完了し、システムを試運転済みにしてください",
+    "critical_issues": "重大な試運転の課題が{count}件、まだ未解決です",
+    "critical_issues_fix": "引渡しの前に重大な課題を解決してください",
+    "acceptance_missing": "受入れ証明書が紐付けられていません",
+    "acceptance_missing_fix": "署名済みの受入れ証明書を、受入れチェックリスト項目に紐付けてください",
+    "acceptance_unsigned": "受入れ証明書の署名が揃っていません(状態: {status})",
+    "acceptance_unsigned_fix": "署名機能で未署名の分を集めてください",
+    "blocked": "引渡しファイルがチェックリストを満たしていません。指摘事項を修正するか、不完全として作成してください(管理者の承認)。",
+    "delivery_title": "引渡しファイル: {project}",
+    "delivery_body": "引渡しファイル「{title}」({scope})の準備ができました。下のリンクからダウンロードできます。有効期限は{expires}です。",
+    "pdf": {
+      "title": "引渡しファイル",
+      "scope": "対象範囲",
+      "built": "作成日時",
+      "status_passed": "チェックリストに合格しました",
+      "status_warnings": "チェックリストに警告付きで合格しました",
+      "status_errors": "不完全: チェックリストの指摘事項が未解決です",
+      "findings": "未解決のチェックリスト指摘事項",
+      "severity": "重大度",
+      "finding": "指摘事項",
+      "severity_error": "エラー",
+      "severity_warning": "警告",
+      "severity_info": "情報",
+      "contents": "目次",
+      "file": "ファイル",
+      "size": "サイズ",
+      "punch": "是正済み手直しリスト",
+      "item": "項目",
+      "status": "状態",
+      "photos": "写真",
+      "evidence": "写真の証跡"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "「{name}」の評価{rating}は、尺度「{scale}」のレベルではありません",
+    "rule_poor_without_action": "「{name}」は{rating}と評価されていますが、計画された保守対応がありません",
+    "rule_poor_without_action_fix": "計画を導出するか、この要素に対応を追加してください",
+    "rule_action_unpriced": "{year}年の「{name}」の対応に単価がありません",
+    "rule_action_unpriced_fix": "計画の合計に含めるため、単価を入力してください",
+    "rule_defect_incomplete": "「{name}」の評価は作業を要しますが、重大度や範囲が記録されていません"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}、{page}ページ",
+    "text_change": "「{old}」が「{new}」に変更されました",
+    "kind": {
+      "added": "追加",
+      "removed": "削除",
+      "modified": "変更",
+      "text": "文字変更"
+    },
+    "status": {
+      "open": "未処理",
+      "relevant": "要対応",
+      "not_relevant": "対応不要"
+    },
+    "errors": {
+      "revision_not_found": "このプロジェクトに図面の改訂版が見つかりません。",
+      "revision_not_parsed": "図面には、比較できる処理済みの版がまだありません。",
+      "comparison_not_found": "比較が見つかりません。",
+      "change_not_found": "変更が見つかりません。",
+      "same_revision": "比較する異なる改訂版またはページを2つ選択してください。",
+      "manual_points": "手動位置合わせには、各改訂版で異なる2点が必要です。",
+      "alignment_singular": "位置合わせを適用できません。シートが潰れてしまいます。",
+      "region_empty": "変更 {seq} にはサイズがありません。",
+      "region_off_sheet": "変更 {seq} はシートの外にあります。",
+      "module_missing": "この操作に必要なモジュールがインストールされていません。"
+    },
+    "rfi": {
+      "subject": "{sheet} の図面変更 {seq}",
+      "question": "{sheet} の改訂 {new} は、マークした範囲({kind})で改訂 {old} と異なります。変更の意図と、数量への影響の有無をご確認ください。"
+    },
+    "markup": {
+      "text": "改訂変更 {seq}:{kind}"
+    },
+    "report": {
+      "title": "図面改訂の比較",
+      "project": "プロジェクト",
+      "name": "比較",
+      "old_revision": "旧改訂",
+      "new_revision": "新改訂",
+      "alignment": "位置合わせ",
+      "alignment_none": "未調整(同一フレーム)",
+      "alignment_auto": "自動",
+      "alignment_manual": "手動(2点)",
+      "confidence": "信頼度 {value}",
+      "summary": "変更",
+      "summary_counts": "合計 {total} 件:追加 {added}、削除 {removed}、変更 {modified}、文字 {text}",
+      "generated_on": "作成日",
+      "generated": "作成日時 {timestamp}",
+      "page_of": "{total} ページ中 {page} ページ",
+      "no_changes": "2つの改訂版の間に変更は見つかりませんでした。",
+      "col_no": "番号",
+      "col_preview": "プレビュー",
+      "col_kind": "変更",
+      "col_location": "位置",
+      "col_detail": "詳細",
+      "col_status": "状態",
+      "col_comment": "コメント",
+      "col_follow_up": "フォローアップ",
+      "page_at": "{page}ページ、{coords}",
+      "layer": "レイヤー {layer}",
+      "entity_counts": "要素:追加 {added}、削除 {removed}、変更 {modified}",
+      "rfi": "RFI {number}",
+      "markup": "改訂雲",
+      "remeasure": "再積算:数量 {items} 件、BOQ 項目 {positions} 件"
+    },
+    "rules": {
+      "distinct_revisions_ok": "両側が異なる改訂版です。",
+      "distinct_revisions_fail": "この比較は、シートを自分自身と比較しています。",
+      "distinct_revisions_hint": "図面の旧改訂と新改訂を選択してください。",
+      "alignment_not_needed": "DWG の改訂版は図面単位が共通のため、位置合わせは不要です。",
+      "alignment_missing_matrix": "この比較には位置合わせがありません。",
+      "alignment_singular": "位置合わせによりシートが潰れるため、適用できません。",
+      "alignment_scale": "位置合わせによりシートが {scale} 倍に拡縮されます。同一図面の改訂版の差を超えています。",
+      "alignment_low_confidence": "自動位置合わせが不確かです(信頼度 {confidence})。",
+      "alignment_manual_points": "手動位置合わせには2組の点が必要です。",
+      "alignment_ok": "シートの位置合わせは妥当です。",
+      "alignment_hint": "両方の改訂版にある2つの目印(通り芯の交点など)で、手動でシートを位置合わせしてください。",
+      "region_empty": "変更 {seq} にはサイズがありません。",
+      "region_off_sheet": "変更 {seq} はシートの外にあります。",
+      "regions_ok": "変更された範囲はすべてシート上にあります。",
+      "triaged_ok": "すべての変更を確認済みです。",
+      "triaged_open": "未処理の変更が {count} 件あります。",
+      "triaged_hint": "各変更を「要対応」または「対応不要」にマークしてください。",
+      "followed_up_ok": "要対応の変更はすべてフォローアップ済みです。",
+      "followed_up_missing": "変更 {seq} は要対応ですが、コメント、RFI、改訂雲、再積算フラグがありません。",
+      "followed_up_hint": "変更にコメントするか、RFI または改訂雲を作成するか、内部の数量に再積算のフラグを付けてください。"
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "キャッシュフロー予測",
+      "portfolio_title": "ポートフォリオのキャッシュフロー予測",
+      "empty": "この選択にはキャッシュフロー予測がありません。",
+      "project": "プロジェクト",
+      "as_of": "基準日",
+      "currency": "通貨",
+      "delay_days": "入金遅延（日）",
+      "overrun_pct": "コスト超過（%）",
+      "closing_position": "期末残高",
+      "peak_funding": "最大資金需要",
+      "peak_period": "資金需要のピーク月",
+      "col": {
+        "period": "月",
+        "planned_in": "予定入金",
+        "actual_in": "実績入金",
+        "expected_in": "見込入金",
+        "planned_out": "予定出金",
+        "actual_out": "実績出金",
+        "expected_out": "見込出金",
+        "net": "差引",
+        "cumulative": "累計残高"
+      }
+    }
+  }
+}

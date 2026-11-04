@@ -1,0 +1,844 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for the markup stack of a bill.
+
+The markup stack is where a bill stops being a list of quantities and becomes
+a price. Until now nothing checked it: an estimator could put contingency on
+top of profit, leave two lines fighting over the same place in the order, or
+type 300 into a percentage box, and the bill would price all of it silently and
+export it to a client. These rules make those checkable.
+
+Every rule here is a WARNING, deliberately, and none of them rejects anything.
+A rule that rejects is a rule people route around, and the routes around a
+markup check are worse than the check: a percentage typed into the wrong box,
+a line deactivated to get past a gate and never turned back on. The estimator
+is told, in the language they read, on the screen where the number lives, and
+they decide. That is the platform's AI-augmented, human-confirmed principle
+applied to arithmetic rather than to a model.
+
+The rules:
+
+* ``boq.markup.contingency_not_on_profit`` - a contingency computed on a base
+  that already carries the general contractor's profit. The contractor is then
+  paid a margin on money set aside for risk that has not happened, which
+  inflates every bid by the product of the two rates. Some markets do this on
+  purpose (NRM1 places risk allowances after main contractor overheads and
+  profit; the Russian summary estimate takes unforeseen costs on the total of
+  the preceding chapters) so this is a flag naming the standard, never a
+  refusal.
+* ``boq.markup.order_is_declared`` - two lines claiming the same place in the
+  order. ``sort_order`` decides what compounds onto what, so a tie makes the
+  base of every cumulative line after it a matter of which row the database
+  returned first.
+* ``boq.markup.percentage_within_band`` - a rate far outside what its category
+  is ever plausibly worth. Bands are wide on purpose: this catches a decimal
+  point in the wrong place, not an aggressive margin.
+* ``boq.markup.cumulative_base_is_settled`` - a line that declares it compounds
+  on preceding markups while no markup precedes it. It computes on the direct
+  cost, which is correct arithmetic under a label that says otherwise, and the
+  next person to reorder the stack changes its base without touching it.
+
+There is no forward-reference rule here, and that absence is deliberate. In
+this model ``cumulative`` means "every line before me in the order" and names
+nothing, so a line cannot reference a later one and a rule saying it must not
+would pass on every bill that can exist. The engine that does have referenced
+steps, :mod:`app.modules.methodology.cascade`, already refuses forward
+references outright with ``CascadeError``. The checkable failure here is the
+one above: a base that is not settled.
+
+The rules are pure and database-free. They read plain dicts out of
+:class:`~app.core.validation.engine.ValidationContext` under the ``markups``
+key, which the BOQ validation endpoints put there, and every user-facing string
+resolves through :mod:`app.core.validation.messages`.
+"""
+
+from __future__ import annotations
+
+import logging
+from decimal import Decimal, InvalidOperation
+from typing import Any
+
+from app.core.validation.engine import (
+    RuleCategory,
+    RuleResult,
+    Severity,
+    ValidationContext,
+    ValidationRule,
+    rule_registry,
+)
+from app.core.validation.messages import DEFAULT_LOCALE, translate
+from app.modules.boq.resource_norms import REVIEW_CATEGORIES, UNIT_RATE_KEPT_KEY, untrusted_buildup_reason
+
+logger = logging.getLogger(__name__)
+
+#: The rule set these register under. ``boq_quality`` is the universal set
+#: every project falls back to, so a markup check runs whatever standard or
+#: region the project declares. A rule registered under a set nobody requests
+#: never runs, and a markup stack is not a regional concern.
+BOQ_MARKUP_RULE_SET = "boq_quality"
+
+#: Plausible ceilings per markup category, as a share of that line's own base.
+#: Wide on purpose - the target is a misplaced decimal point, not a bold bid.
+#: A tax line has no ceiling worth guessing (rates are set by law and some
+#: jurisdictions run high), so it is checked only for being negative or absurd.
+_PERCENTAGE_CEILING: dict[str, Decimal] = {
+    "overhead": Decimal("40"),
+    "profit": Decimal("30"),
+    "contingency": Decimal("30"),
+    "insurance": Decimal("15"),
+    "bond": Decimal("15"),
+    "tax": Decimal("50"),
+    "other": Decimal("50"),
+}
+
+#: The ceiling for a category nobody listed above.
+_DEFAULT_CEILING = Decimal("50")
+
+_CUMULATIVE = ("cumulative", "subtotal")
+
+#: Category of a bid quoted as a percentage above (+) or below (-) a schedule
+#: of rates. Mirrors ``schemas.TENDER_ADJUSTMENT_CATEGORY``.
+TENDER_ADJUSTMENT_CATEGORY = "tender_adjustment"
+
+#: Beyond this many percent either way a premium or rebate is usually a typo.
+_TENDER_ADJUSTMENT_BAND = Decimal("50")
+
+
+def _get_markups(context: ValidationContext) -> list[dict[str, Any]]:
+    """Pull the markup rows out of the validated payload.
+
+    Returns an empty list when the caller validated something that has no
+    markup stack, so every rule below passes vacuously rather than erroring on
+    a payload that was never about markups.
+    """
+    data = context.data
+    if isinstance(data, dict):
+        markups = data.get("markups")
+        if isinstance(markups, list):
+            return [m for m in markups if isinstance(m, dict)]
+    return []
+
+
+def _active(markups: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Active lines in evaluation order, ties broken the way the engine breaks them."""
+    live = [m for m in markups if m.get("is_active", True)]
+    return sorted(live, key=lambda m: (_int(m.get("sort_order")), str(m.get("name") or "")))
+
+
+def _int(value: object) -> int:
+    """Coerce a sort order to int; anything unreadable sorts first, like a zero."""
+    try:
+        return int(value)  # type: ignore[arg-type]
+    except (TypeError, ValueError):
+        return 0
+
+
+def _percentage(markup: dict[str, Any]) -> Decimal | None:
+    """Read a line's percentage as a Decimal, or None when it is not a number."""
+    try:
+        return Decimal(str(markup.get("percentage", "0") or "0"))
+    except (InvalidOperation, ValueError):
+        return None
+
+
+def _locale(context: ValidationContext) -> str:
+    """The caller's locale, defaulting to English exactly like the core rules."""
+    metadata = getattr(context, "metadata", None)
+    if isinstance(metadata, dict):
+        locale = metadata.get("locale")
+        if isinstance(locale, str) and locale.strip():
+            return locale.strip()
+    return DEFAULT_LOCALE
+
+
+def _scope(markup: dict[str, Any]) -> str:
+    """The scope key of a line: its position id, or empty for bill-wide."""
+    return str(markup.get("scope_position_id") or "")
+
+
+def _ref(markup: dict[str, Any]) -> str | None:
+    """Element reference for a finding: the markup id when there is one."""
+    value = markup.get("id")
+    return str(value) if value else None
+
+
+# ── Rules ───────────────────────────────────────────────────────────────────
+
+
+class MarkupContingencyNotOnProfit(ValidationRule):
+    """Contingency must not be computed on a base that already carries profit."""
+
+    rule_id = "boq.markup.contingency_not_on_profit"
+    name = "Contingency is not charged a profit margin"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLIANCE
+    description = (
+        "A cumulative contingency placed after the profit line pays the contractor "
+        "a margin on money reserved for risk that has not happened."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag each contingency line whose base contains a preceding profit line."""
+        locale = _locale(context)
+        results: list[RuleResult] = []
+
+        for scope in {_scope(m) for m in _get_markups(context)}:
+            ordered = [m for m in _active(_get_markups(context)) if _scope(m) == scope]
+            profit_before: list[str] = []
+            for markup in ordered:
+                cat = str(markup.get("category") or "").lower()
+                applies_to = str(markup.get("apply_to") or "direct_cost").lower()
+                if cat == "contingency" and applies_to in _CUMULATIVE and profit_before:
+                    results.append(
+                        RuleResult(
+                            rule_id=self.rule_id,
+                            rule_name=self.name,
+                            severity=self.severity,
+                            category=self.category,
+                            passed=False,
+                            message=translate(
+                                "boq_markup.contingency_not_on_profit.fail",
+                                locale,
+                                markup=str(markup.get("name") or ""),
+                                profit=profit_before[-1],
+                            ),
+                            element_ref=_ref(markup),
+                            suggestion=translate("boq_markup.contingency_not_on_profit.suggestion", locale),
+                            details={"apply_to": applies_to, "profit_lines": profit_before},
+                        )
+                    )
+                if cat == "profit":
+                    profit_before.append(str(markup.get("name") or ""))
+
+        return results
+
+
+class MarkupOrderIsDeclared(ValidationRule):
+    """Every markup line must claim a place in the order that no other claims."""
+
+    rule_id = "boq.markup.order_is_declared"
+    name = "Every markup declares its own place in the order"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.STRUCTURE
+    description = (
+        "Two markup lines sharing a sort_order leave the compounding order to "
+        "whichever row the database happened to return first."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag every line that shares its sort order with another in the same scope."""
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        seen: dict[tuple[str, int], list[dict[str, Any]]] = {}
+
+        for markup in _active(_get_markups(context)):
+            seen.setdefault((_scope(markup), _int(markup.get("sort_order"))), []).append(markup)
+
+        for (_scope_key, order), group in seen.items():
+            if len(group) < 2:
+                continue
+            names = ", ".join(str(m.get("name") or "") for m in group)
+            for markup in group:
+                results.append(
+                    RuleResult(
+                        rule_id=self.rule_id,
+                        rule_name=self.name,
+                        severity=self.severity,
+                        category=self.category,
+                        passed=False,
+                        message=translate(
+                            "boq_markup.order_is_declared.fail",
+                            locale,
+                            order=order,
+                            markups=names,
+                        ),
+                        element_ref=_ref(markup),
+                        suggestion=translate("boq_markup.order_is_declared.suggestion", locale),
+                        details={"sort_order": order, "markups": names},
+                    )
+                )
+
+        return results
+
+
+class MarkupPercentageWithinBand(ValidationRule):
+    """A percentage far outside its category's plausible band is flagged, not refused."""
+
+    rule_id = "boq.markup.percentage_within_band"
+    name = "Markup percentage is inside a plausible band"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = (
+        "A rate well outside what its category is ever worth is usually a decimal "
+        "point in the wrong place. It is reported and never rejected."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag each percentage line outside the ceiling for its category."""
+        locale = _locale(context)
+        results: list[RuleResult] = []
+
+        for markup in _active(_get_markups(context)):
+            if str(markup.get("markup_type") or "percentage").lower() != "percentage":
+                continue
+            pct = _percentage(markup)
+            if pct is None:
+                continue
+            cat = str(markup.get("category") or "other").lower()
+            if cat == TENDER_ADJUSTMENT_CATEGORY:
+                continue  # signed by design, judged by TenderAdjustmentIsPlausible
+            ceiling = _PERCENTAGE_CEILING.get(cat, _DEFAULT_CEILING)
+            if 0 <= pct <= ceiling:
+                continue
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        "boq_markup.percentage_within_band.fail",
+                        locale,
+                        markup=str(markup.get("name") or ""),
+                        percentage=f"{pct}",
+                        category=cat,
+                        ceiling=f"{ceiling}",
+                    ),
+                    element_ref=_ref(markup),
+                    suggestion=translate("boq_markup.percentage_within_band.suggestion", locale),
+                    details={"percentage": str(pct), "category": cat, "ceiling": str(ceiling)},
+                )
+            )
+
+        return results
+
+
+class MarkupCumulativeBaseIsSettled(ValidationRule):
+    """A cumulative line must have something in front of it to compound onto."""
+
+    rule_id = "boq.markup.cumulative_base_is_settled"
+    name = "A cumulative markup has a base to compound onto"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "A line declaring it applies to the direct cost plus preceding markups, "
+        "with no markup preceding it, computes on the direct cost under a label "
+        "that says otherwise."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag each cumulative line that is first in its own scope."""
+        locale = _locale(context)
+        results: list[RuleResult] = []
+
+        for scope in {_scope(m) for m in _get_markups(context)}:
+            ordered = [m for m in _active(_get_markups(context)) if _scope(m) == scope]
+            for index, markup in enumerate(ordered):
+                applies_to = str(markup.get("apply_to") or "direct_cost").lower()
+                if applies_to in _CUMULATIVE and index == 0:
+                    results.append(
+                        RuleResult(
+                            rule_id=self.rule_id,
+                            rule_name=self.name,
+                            severity=self.severity,
+                            category=self.category,
+                            passed=False,
+                            message=translate(
+                                "boq_markup.cumulative_base_is_settled.fail",
+                                locale,
+                                markup=str(markup.get("name") or ""),
+                                apply_to=applies_to,
+                            ),
+                            element_ref=_ref(markup),
+                            suggestion=translate("boq_markup.cumulative_base_is_settled.suggestion", locale),
+                            details={"apply_to": applies_to},
+                        )
+                    )
+
+        return results
+
+
+class EmbeddedExportRoundingGap(ValidationRule):
+    """A sale-rate export whose cent rounding drifts from the editor total."""
+
+    rule_id = "boq.export.embedding_rounding_gap"
+    name = "Sale-rate export stays within the rounding tolerance"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "With markups embedded in the unit rates each sale rate is rounded to the cent, so the "
+        "exported net can drift from the editor's net plus markups. Reported above the bill's tolerance."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag the gap when it exceeds the tolerance the preview carries."""
+        data = context.data if isinstance(context.data, dict) else {}
+        preview = data.get("export_embedding")
+        if not isinstance(preview, dict):
+            return []
+        try:
+            gap = Decimal(str(preview.get("rounding_gap", "0")))
+            tolerance = Decimal(str(preview.get("tolerance", "0")))
+        except (InvalidOperation, ValueError):
+            return []
+        if abs(gap) <= tolerance:
+            return []
+        locale = _locale(context)
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(
+                    "boq_export.embedding_rounding_gap.fail", locale, gap=f"{gap}", tolerance=f"{tolerance}"
+                ),
+                suggestion=translate("boq_export.embedding_rounding_gap.suggestion", locale),
+                details={"rounding_gap": str(gap), "tolerance": str(tolerance)},
+            )
+        ]
+
+
+# ── Resource buildup rules ──────────────────────────────────────────────────
+
+
+def _leaf_positions(context: ValidationContext) -> list[dict[str, Any]]:
+    """Leaf positions out of the payload, sections skipped, like the core rules.
+
+    A row is a section when its ``type`` says so or when another row names it
+    as parent. Sections carry no buildup, so a resource rule has nothing to say
+    about them and must not error on their empty fields.
+    """
+    data = context.data
+    positions: list[Any] = []
+    if isinstance(data, dict):
+        positions = data.get("positions") or []
+    elif isinstance(data, list):
+        positions = data
+    rows = [p for p in positions if isinstance(p, dict)]
+    parent_ids = {str(p["parent_id"]) for p in rows if p.get("parent_id")}
+    return [p for p in rows if (p.get("type") or "position") != "section" and str(p.get("id") or "") not in parent_ids]
+
+
+def _position_metadata(position: dict[str, Any]) -> dict[str, Any]:
+    for key in ("metadata", "metadata_"):
+        meta = position.get(key)
+        if isinstance(meta, dict):
+            return meta
+    return {}
+
+
+class UnitRateNotRederivedFromUntrustedBuildup(ValidationRule):
+    """The resource rows cannot price the line, so an edit will not re-derive the rate.
+
+    Fires in two situations, both of which a person has to look at:
+
+    * An edit touched the resources and the BOQ service kept the stored rate
+      instead of re-deriving it. The service stamps the position when it does
+      that; this is the finding that carries the stamp into the report, with
+      the rate it kept.
+    * The stored rows would make the service do the same on the next edit.
+      That is the same predicate the service uses, so the report and the
+      guard never disagree about a position: rows holding whole-position
+      quantities, an allowance split holding the position quantity, or a norm
+      the catalogue never stated and the estimator assumed.
+
+    The resource split check flags most of these positions too, on the
+    arithmetic alone. This finding names the cause and points at the review
+    path, which is what the split check cannot do.
+    """
+
+    rule_id = "boq.resources.unit_rate_not_rederived"
+    name = "Unit rate was not re-derived from an untrusted resource buildup"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "The resource rows of this position cannot price the line, so the stored unit "
+        "rate stands and the buildup needs a human look."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding per leaf position whose buildup is stamped or flagged."""
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for position in _leaf_positions(context):
+            meta = _position_metadata(position)
+            stamp = meta.get(UNIT_RATE_KEPT_KEY)
+            reason: str | None = None
+            kept_rate: str | None = None
+            if isinstance(stamp, dict):
+                reason = str(stamp.get("reason") or "") or None
+                kept_rate = str(stamp.get("kept_unit_rate") or "") or None
+            if reason is None:
+                reason = untrusted_buildup_reason(
+                    source=position.get("source"),
+                    metadata=meta,
+                    quantity=position.get("quantity"),
+                    resources=meta.get("resources"),
+                )
+            if reason is None:
+                continue
+            ordinal = str(position.get("ordinal") or "?")
+            # One message per reason, so each locale can say what the rows are
+            # instead of interpolating an English phrase into a translation.
+            key = f"boq_resources.unit_rate_not_rederived.{reason}" if reason in REVIEW_CATEGORIES else None
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(key or "boq_resources.unit_rate_not_rederived.fail", locale, ordinal=ordinal),
+                    element_ref=str(position.get("id")) if position.get("id") else None,
+                    suggestion=translate("boq_resources.unit_rate_not_rederived.suggestion", locale),
+                    details={
+                        "reason": reason,
+                        "kept_unit_rate": kept_rate,
+                        "stamped_by_edit": isinstance(stamp, dict),
+                    },
+                )
+            )
+        return results
+
+
+# ── Drawing traceability rules ──────────────────────────────────────────────
+
+
+def _drawing_refs(context: ValidationContext) -> dict[str, dict[str, Any]]:
+    """Position id -> drawing refs as :func:`drawing_refs.drawing_refs_for_boq` serialises them."""
+    data = context.data
+    refs = data.get("drawing_refs") if isinstance(data, dict) else None
+    return refs if isinstance(refs, dict) else {}
+
+
+class _DrawingRule(ValidationRule):
+    """Shared plumbing: one finding per leaf position the predicate picks."""
+
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    message_key = ""
+
+    def _hit(self, entry: dict[str, Any]) -> dict[str, Any] | None:
+        raise NotImplementedError
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Check every leaf position that has drawing refs."""
+        locale = _locale(context)
+        refs = _drawing_refs(context)
+        results: list[RuleResult] = []
+        for position in _leaf_positions(context):
+            entry = refs.get(str(position.get("id") or ""))
+            details = self._hit(entry) if entry else None
+            if details is None:
+                continue
+            ordinal = str(position.get("ordinal") or "?")
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(f"{self.message_key}.fail", locale, ordinal=ordinal, **details),
+                    element_ref=str(position.get("id")),
+                    suggestion=translate(f"{self.message_key}.suggestion", locale),
+                    details=details,
+                )
+            )
+        return results
+
+
+class TakeoffQuantityWithoutDrawingRevision(_DrawingRule):
+    """The quantity comes from takeoff on a drawing whose revision was never recorded."""
+
+    rule_id = "boq.drawing.takeoff_without_revision"
+    name = "Takeoff quantity without a drawing revision"
+    description = "A takeoff measurement linked to this position records no drawing revision."
+    message_key = "boq_drawing.takeoff_without_revision"
+
+    def _hit(self, entry: dict[str, Any]) -> dict[str, Any] | None:
+        count = int(entry.get("unrevised_measurements") or 0)
+        return {"count": count} if count else None
+
+
+class PositionOnSupersededDrawing(_DrawingRule):
+    """A source drawing of the position has a newer revision in the register."""
+
+    rule_id = "boq.drawing.superseded_revision"
+    name = "Position based on a superseded drawing revision"
+    description = "The drawing this quantity was taken from has been revised since."
+    message_key = "boq_drawing.superseded_revision"
+
+    def _hit(self, entry: dict[str, Any]) -> dict[str, Any] | None:
+        for ref in entry.get("refs") or []:
+            if ref.get("outdated"):
+                return {
+                    "drawing": str(ref.get("drawing_number") or ref.get("drawing_title") or "?"),
+                    "revision": str(ref.get("revision") or "?"),
+                    "current": str(ref.get("current_revision") or "?"),
+                }
+        manual = entry.get("manual") or {}
+        if entry.get("manual_outdated"):
+            return {
+                "drawing": str(manual.get("drawing_ref") or "?"),
+                "revision": str(manual.get("drawing_revision") or "?"),
+                "current": "?",
+            }
+        return None
+
+
+class ManualDrawingRefWithoutRevision(_DrawingRule):
+    """A drawing reference typed by hand names no revision."""
+
+    rule_id = "boq.drawing.manual_ref_without_revision"
+    name = "Manual drawing reference without a revision"
+    description = "A drawing number was entered by hand without its revision."
+    message_key = "boq_drawing.manual_ref_without_revision"
+
+    def _hit(self, entry: dict[str, Any]) -> dict[str, Any] | None:
+        manual = entry.get("manual") or {}
+        if manual.get("drawing_ref") and not manual.get("drawing_revision"):
+            return {"drawing": str(manual["drawing_ref"])}
+        return None
+
+
+# ── Registration ────────────────────────────────────────────────────────────
+
+
+class TenderAdjustmentIsPlausible(ValidationRule):
+    """A premium or rebate on a schedule of rates is one line per scope, inside a sane band."""
+
+    rule_id = "boq.markup.tender_adjustment_plausible"
+    name = "Tender premium or rebate is single and plausible"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = (
+        "A bid quoted as a percentage above or below a schedule of rates is one "
+        "line for the bill or for a section. Two lines on the same scope compound, "
+        "and a figure beyond 50% either way is usually a typo."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag duplicate tender adjustment lines per scope and out-of-band values."""
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        seen: dict[str, str] = {}
+        for markup in _active(_get_markups(context)):
+            if str(markup.get("category") or "").lower() != TENDER_ADJUSTMENT_CATEGORY:
+                continue
+            name = str(markup.get("name") or "")
+            scope = _scope(markup)
+            if scope in seen:
+                results.append(
+                    RuleResult(
+                        rule_id=self.rule_id,
+                        rule_name=self.name,
+                        severity=self.severity,
+                        category=self.category,
+                        passed=False,
+                        message=translate(
+                            "boq_markup.tender_adjustment_plausible.duplicate",
+                            locale,
+                            markup=name,
+                            other=seen[scope],
+                        ),
+                        element_ref=_ref(markup),
+                        suggestion=translate("boq_markup.tender_adjustment_plausible.suggestion", locale),
+                        details={"scope_position_id": scope or None},
+                    )
+                )
+            else:
+                seen[scope] = name
+            pct = _percentage(markup)
+            if pct is None or str(markup.get("markup_type") or "percentage").lower() != "percentage":
+                continue
+            if abs(pct) <= _TENDER_ADJUSTMENT_BAND:
+                continue
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        "boq_markup.tender_adjustment_plausible.fail",
+                        locale,
+                        markup=name,
+                        percentage=f"{pct}",
+                        band=f"{_TENDER_ADJUSTMENT_BAND}",
+                    ),
+                    element_ref=_ref(markup),
+                    suggestion=translate("boq_markup.tender_adjustment_plausible.suggestion", locale),
+                    details={"percentage": str(pct), "band": str(_TENDER_ADJUSTMENT_BAND)},
+                )
+            )
+        return results
+
+
+_BOQ_MARKUP_RULES: tuple[ValidationRule, ...] = (
+    MarkupContingencyNotOnProfit(),
+    MarkupOrderIsDeclared(),
+    MarkupPercentageWithinBand(),
+    MarkupCumulativeBaseIsSettled(),
+    TenderAdjustmentIsPlausible(),
+)
+
+_BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (
+    UnitRateNotRederivedFromUntrustedBuildup(),
+    EmbeddedExportRoundingGap(),
+    TakeoffQuantityWithoutDrawingRevision(),
+    PositionOnSupersededDrawing(),
+    ManualDrawingRefWithoutRevision(),
+)
+
+
+# ── Estimate branches ───────────────────────────────────────────────────────
+
+#: Days an open branch may run beside a main estimate that keeps changing
+#: before the drift is worth a warning.
+BRANCH_STALE_DAYS = 30
+
+#: Conflicting lines reported one by one; the rest are summed into the last.
+_MAX_CONFLICT_FINDINGS = 50
+
+
+def _branch(context: ValidationContext) -> dict[str, Any] | None:
+    """The ``branch`` block the validate endpoint adds for a bill that is a branch."""
+    data = context.data
+    if isinstance(data, dict) and isinstance(data.get("branch"), dict):
+        block = data["branch"]
+        if block.get("status") == "open":
+            return block
+    return None
+
+
+class BranchDivergedFromMain(ValidationRule):
+    """An open branch should not drift from a main estimate that keeps moving."""
+
+    rule_id = "boq.branch.diverged_from_main"
+    name = "Branch has not drifted too far from the main estimate"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "A branch open for weeks while the main estimate changes is priced against a "
+        "baseline that no longer exists; carry main's changes over or merge it."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag an open branch older than the threshold whose main changed since the fork."""
+        block = _branch(context)
+        if block is None:
+            return []
+        days = int(block.get("days_open") or 0)
+        changes = int(block.get("main_changes") or 0)
+        limit = int(block.get("stale_days") or BRANCH_STALE_DAYS)
+        if days < limit or changes <= 0:
+            return []
+        locale = _locale(context)
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate("boq_branch.diverged_from_main.fail", locale, days=days, changes=changes),
+                suggestion=translate("boq_branch.diverged_from_main.suggestion", locale),
+                details={"days_open": days, "main_changes": changes, "stale_days": limit},
+            )
+        ]
+
+
+class BranchConflictsUnresolved(ValidationRule):
+    """Lines changed both in the branch and in main since the fork must be decided before a merge."""
+
+    rule_id = "boq.branch.unresolved_conflicts"
+    name = "Branch has no unresolved merge conflicts"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "A position changed differently in the branch and in the main estimate since the "
+        "fork cannot be merged until someone decides which version stands."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding per conflicting position, capped."""
+        block = _branch(context)
+        if block is None:
+            return []
+        conflicts = [c for c in block.get("conflicts") or [] if isinstance(c, dict)]
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for item in conflicts[:_MAX_CONFLICT_FINDINGS]:
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        "boq_branch.unresolved_conflicts.fail",
+                        locale,
+                        ordinal=str(item.get("ordinal") or ""),
+                        description=str(item.get("description") or "")[:80],
+                    ),
+                    element_ref=str(item.get("ordinal") or "") or None,
+                    suggestion=translate("boq_branch.unresolved_conflicts.suggestion", locale),
+                    details={"key": item.get("key"), "total_conflicts": len(conflicts)},
+                )
+            )
+        return results
+
+
+_BOQ_BRANCH_RULES: tuple[ValidationRule, ...] = (
+    BranchDivergedFromMain(),
+    BranchConflictsUnresolved(),
+)
+
+
+def register_boq_markup_rules() -> None:
+    """Register the markup rules with the core rule registry.
+
+    Idempotent - the registry overwrites by rule id, so a re-import or a hot
+    reload re-registers cleanly. Called at import time below and again from the
+    module's ``on_startup`` hook, because the platform has two registration
+    routes and a rule that only takes one of them is dormant in the other
+    deployment.
+    """
+    for rule in _BOQ_MARKUP_RULES:
+        rule_registry.register(rule, [BOQ_MARKUP_RULE_SET])
+    logger.debug("Registered %d boq markup validation rules", len(_BOQ_MARKUP_RULES))
+
+
+def register_boq_resource_rules() -> None:
+    """Register the resource buildup rules under the same universal set."""
+    for rule in _BOQ_RESOURCE_RULES:
+        rule_registry.register(rule, [BOQ_MARKUP_RULE_SET])
+    logger.debug("Registered %d boq resource validation rules", len(_BOQ_RESOURCE_RULES))
+
+
+def register_boq_branch_rules() -> None:
+    """Register the estimate-branch rules under the same universal set."""
+    for rule in _BOQ_BRANCH_RULES:
+        rule_registry.register(rule, [BOQ_MARKUP_RULE_SET])
+    logger.debug("Registered %d boq branch validation rules", len(_BOQ_BRANCH_RULES))
+
+
+register_boq_markup_rules()
+register_boq_resource_rules()
+register_boq_branch_rules()

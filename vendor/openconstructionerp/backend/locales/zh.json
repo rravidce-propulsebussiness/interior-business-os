@@ -1,0 +1,2516 @@
+{
+  "costs.catalog_name_unavailable": "该名称不能用于新目录，请换一个名称。",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "开源建筑工程造价"
+  },
+  "nav": {
+    "dashboard": "仪表盘",
+    "assemblies": "组价分析",
+    "ai_estimate": "AI 估算",
+    "settings": "设置",
+    "5d_cost_model": "5D 成本模型",
+    "templates": "模板",
+    "reports": "报表",
+    "sustainability": "可持续性",
+    "group_estimation": "计价",
+    "group_planning": "计划",
+    "group_procurement": "采购",
+    "group_tools": "工具",
+    "architecture": "架构图"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "search": "搜索",
+    "filter": "筛选",
+    "export": "导出",
+    "import": "导入",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "confirm": "确认",
+    "back": "返回",
+    "next": "下一步",
+    "yes": "是",
+    "no": "否"
+  },
+  "auth": {
+    "login": "登录",
+    "logout": "退出",
+    "email": "电子邮箱",
+    "password": "密码"
+  },
+  "projects": {
+    "title": "项目",
+    "new_project": "新建项目",
+    "project_name": "项目名称",
+    "no_projects": "暂无项目"
+  },
+  "boq": {
+    "title": "工程量清单",
+    "position": "清单项",
+    "ordinal": "序号",
+    "description": "项目特征描述",
+    "quantity": "工程量",
+    "unit": "计量单位",
+    "unit_rate": "综合单价",
+    "total": "合计",
+    "add_position": "添加清单项",
+    "add_section": "添加分部",
+    "assembly": "组价",
+    "subtotal": "小计",
+    "grand_total": "总计",
+    "direct_cost": "直接费",
+    "net_total": "税前总计",
+    "gross_total": "税后总计",
+    "vat": "增值税",
+    "add_markups": "添加取费",
+    "validate": "校验",
+    "export": "导出",
+    "mvp": {
+      "title": "选择材料",
+      "subtitle_one": "{{count}} 项资源需要选择",
+      "subtitle_other": "{{count}} 项资源需要选择",
+      "bulk_label": "快速填充：",
+      "bulk_median": "全部取中位数",
+      "bulk_mean": "全部取平均值",
+      "bulk_cheapest": "全部取最低价",
+      "bulk_priciest": "全部取最高价",
+      "slot_variant_count": "{{n}} 个选项",
+      "selected_label": "已选：",
+      "default_mean": "平均单价",
+      "default_median": "中位单价",
+      "row_median": "中位单价 · {{price}}",
+      "row_mean": "平均单价 · {{price}}",
+      "subtotal_label": "清单项单价",
+      "apply": "应用并加入工程量清单",
+      "batch_progress": "第 {{current}} 项，共 {{total}} 项",
+      "toast_applied_one": "已选择 {{count}} 个方案",
+      "toast_applied_other": "已选择 {{count}} 个方案"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "交换报告"
+      },
+      "column": {
+        "severity": "严重程度",
+        "kind": "损失类型",
+        "position": "清单项",
+        "field": "字段",
+        "original": "原始值",
+        "written": "写入值",
+        "count": "数量",
+        "detail": "详情"
+      },
+      "severity": {
+        "error": "严重",
+        "warning": "警告",
+        "info": "提示"
+      },
+      "kind": {
+        "unsupported_element": "不支持的元素",
+        "truncated_text": "文本已截断",
+        "altered_text": "文本已更改",
+        "rounded_value": "数值已舍入",
+        "value_out_of_range": "数值超出范围",
+        "dropped_attribute": "属性已丢弃",
+        "unmapped_unit": "单位未映射",
+        "lost_hierarchy": "层级丢失",
+        "markup_not_representable": "加成无法表示",
+        "attachment_skipped": "已跳过附件",
+        "changed_identifier": "标识符已更改",
+        "exceeds_limit": "超出存储上限",
+        "rejected_row": "行被拒绝",
+        "skipped_row": "行已跳过",
+        "parser_warning": "读取器警告",
+        "roundtrip_mismatch": "往返不一致"
+      }
+    },
+    "branch": {
+      "base_snapshot": "分支点",
+      "base_snapshot_from": "分支点（来自快照“{snapshot}”）",
+      "before_cherry_pick": "应用“{source}”的变更之前",
+      "before_merge": "合并分支“{branch}”之前",
+      "errors": {
+        "branch_closed": "此分支已合并或已归档，无法再接受变更。",
+        "not_a_branch": "此工程量清单不是分支。",
+        "same_bill": "请选择两个不同的估算。",
+        "different_project": "两个估算必须属于同一项目。",
+        "different_tree": "两个估算必须是同一主估算的分支。",
+        "unresolved_conflicts": "有 {count} 个清单项在两个估算中都被修改。应用前请为每项决定保留哪个版本。",
+        "merge_forbidden": "您没有合并到主估算的权限。",
+        "confirm_required": "请确认合并：这会重写主估算。",
+        "design_options_unavailable": "未安装设计方案模块。",
+        "base_snapshot_in_use": "此快照是未关闭分支的分支点，无法删除。"
+      },
+      "export": {
+        "title_positions": "按清单项的估算比较",
+        "title_sections": "按章节的估算比较",
+        "title_cost_groups": "按成本组的估算比较",
+        "project": "项目",
+        "bill_a": "估算 A",
+        "bill_b": "估算 B",
+        "total_a": "合计 A",
+        "total_b": "合计 B",
+        "delta": "差额",
+        "counts": "变更",
+        "counts_value": "新增 {added} 项，移除 {removed} 项，更改 {changed} 项",
+        "col_ordinal": "序号",
+        "col_description": "说明",
+        "col_unit": "单位",
+        "col_change": "变更",
+        "col_qty_a": "数量 A",
+        "col_qty_b": "数量 B",
+        "col_rate_a": "单价 A",
+        "col_rate_b": "单价 B",
+        "col_total_a": "合计 A",
+        "col_total_b": "合计 B",
+        "col_delta": "差额",
+        "col_section": "章节",
+        "col_cost_group": "成本组",
+        "change_added": "新增",
+        "change_removed": "移除",
+        "change_changed": "更改",
+        "change_unchanged": "未更改",
+        "ungrouped": "未分组",
+        "empty": "两个估算完全相同。",
+        "total": "合计"
+      }
+    }
+  },
+  "costs": {
+    "title": "价格数据库",
+    "rate": "单价",
+    "material": "材料",
+    "labor": "人工",
+    "equipment": "机械",
+    "search_costs": "搜索价格..."
+  },
+  "assemblies": {
+    "title": "组价分析",
+    "description": "可复用的组价配方，将材料、人工和机械组合成即用模板",
+    "new_assembly": "新建组价分析",
+    "from_database": "从价格数据库",
+    "apply_to_boq": "应用到工程量清单",
+    "add_component": "添加组成",
+    "no_assemblies": "暂无组价分析",
+    "no_assemblies_hint": "从价格数据库或资源目录创建第一条组价分析",
+    "total_rate": "合计单价"
+  },
+  "catalog": {
+    "title": "资源目录",
+    "description": "浏览和管理材料、机械、人工单价和操作人员",
+    "add_resource": "添加资源",
+    "import_region": "导入地区",
+    "build_assembly": "创建组价分析",
+    "my_catalog": "我的目录"
+  },
+  "validation": {
+    "title": "校验",
+    "passed": "通过",
+    "warnings": "警告",
+    "errors": "错误",
+    "score": "质量评分",
+    "run_validation": "运行校验",
+    "missing_quantity": "清单项 {position} 缺少工程量",
+    "missing_rate": "清单项 {position} 缺少综合单价",
+    "missing_description": "清单项 {position} 缺少描述",
+    "missing_classification": "清单项 {position} 需要分类编码",
+    "duplicate_ordinal": "序号重复：{ordinal}",
+    "rate_anomaly": "综合单价 {rate} 超出阈值 ({threshold})",
+    "nl": {
+      "not_a_string": "输入必须是文本。",
+      "empty": "输入为空。",
+      "too_long": "输入超过 {max} 个字符。",
+      "ai_unparsable": "无法将 AI 返回内容解析为 DSL 文档。",
+      "no_pattern": "没有任何模式与输入语句匹配。",
+      "try": "请尝试：'{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D 进度计划",
+    "generated": {
+      "position_label": "项 {ordinal}",
+      "section_label": "节 {ordinal}",
+      "task_description": "根据工程量清单第 {ordinal} 项自动生成 ({quantity} {unit})",
+      "section_description": "摘要：工程量清单第 {ordinal} 节",
+      "start_milestone": "项目启动",
+      "start_milestone_description": "项目启动里程碑",
+      "completion_milestone": "项目完工",
+      "completion_milestone_description": "项目完工里程碑",
+      "labour_resource": "人工",
+      "machine_resource": "机械"
+    },
+    "progress_sheet": {
+      "sheet_title": "进度",
+      "title": "进度更新表",
+      "detail_schedule": "进度计划：{name}",
+      "detail_exported": "导出时间：{date}",
+      "instructions": "仅填写白色列。请勿更改灰色列、行顺序或隐藏列。",
+      "col": {
+        "activity_ref": "作业 ID",
+        "name": "作业",
+        "wbs_code": "WBS",
+        "responsible": "责任人",
+        "planned_start": "计划开始",
+        "planned_finish": "计划完成",
+        "percent_complete": "完成百分比",
+        "actual_start": "实际开始",
+        "actual_finish": "实际完成",
+        "remaining_duration": "剩余（工作日）",
+        "notes": "备注",
+        "row_key": "行标识",
+        "stamp": "标记"
+      }
+    }
+  },
+  "cad": {
+    "title": "CAD 导入",
+    "upload": "上传 CAD 文件",
+    "supported_formats": "支持格式：DWG、DGN、RVT、IFC、PDF",
+    "converting": "转换中...",
+    "elements_found": "发现 {count} 个构件"
+  },
+  "takeoff": {
+    "title": "工程量计算",
+    "auto_detect": "自动识别",
+    "manual_measure": "手动测量",
+    "confidence": "置信度"
+  },
+  "tendering": {
+    "title": "招标投标",
+    "create_tender": "创建招标",
+    "bid": "投标",
+    "award": "中标"
+  },
+  "modules": {
+    "title": "模块",
+    "installed": "已安装",
+    "available": "可用",
+    "install": "安装",
+    "uninstall": "卸载",
+    "update": "更新"
+  },
+  "dashboard": {
+    "welcome": "欢迎使用 OpenConstructionERP",
+    "subtitle": "开源建筑工程造价平台",
+    "recent_projects": "最近项目",
+    "system_status": "系统状态",
+    "modules_loaded": "已加载模块",
+    "validation_rules": "校验规则",
+    "languages": "语言",
+    "continue_estimate": "继续上次计价",
+    "getting_started": "快速入门",
+    "total_value": "总造价",
+    "active_estimates": "进行中的计价",
+    "schedule_status": "进度状态",
+    "quality_score": "质量评分",
+    "analytics": "分析",
+    "project_overview": "项目概览",
+    "step_load_db": "载入价格数据库",
+    "step_load_db_desc": "导入超过 55,000 条的地区价格数据",
+    "step_ai_search": "启用 AI 搜索",
+    "step_ai_search_desc": "生成语义向量以匹配价格",
+    "step_connect_ai": "连接 AI",
+    "step_connect_ai_desc": "添加 API 密钥以使用 AI 辅助计价",
+    "step_create_project": "创建项目",
+    "step_create_project_desc": "开始您的第一个计价项目",
+    "step_build_boq": "编制工程量清单",
+    "step_build_boq_desc": "在 AI 协助下创建工程量清单"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "个",
+    "lsum": "项",
+    "h": "小时",
+    "set": "套"
+  },
+  "contacts": {
+    "title": "联系人目录",
+    "new_contact": "新建联系人",
+    "contact_type": "联系人类型",
+    "client": "建设单位",
+    "subcontractor": "分包单位",
+    "supplier": "供应商",
+    "consultant": "咨询单位",
+    "internal": "内部",
+    "company_name": "单位名称",
+    "search_contacts": "搜索联系人...",
+    "no_contacts": "暂无联系人",
+    "prequalification": "资格预审",
+    "approved": "已通过",
+    "pending": "待审",
+    "expired": "已过期"
+  },
+  "tasks": {
+    "title": "任务",
+    "new_task": "新建任务",
+    "task": "任务",
+    "topic": "议题",
+    "information": "信息",
+    "decision": "决策",
+    "personal": "个人任务",
+    "my_tasks": "我的任务",
+    "open": "未处理",
+    "in_progress": "进行中",
+    "completed": "已完成",
+    "draft": "草稿",
+    "due_date": "截止日期",
+    "assignee": "负责人",
+    "priority": "优先级",
+    "checklist": "检查清单",
+    "focus_area": "关注领域"
+  },
+  "rfi": {
+    "title": "信息询问单",
+    "new_rfi": "新建询问单",
+    "subject": "主题",
+    "question": "问题",
+    "response": "答复",
+    "ball_in_court": "当前责任方",
+    "days_open": "未结天数",
+    "cost_impact": "费用影响",
+    "schedule_impact": "工期影响",
+    "respond": "提交答复",
+    "close": "关闭",
+    "overdue": "已逾期"
+  },
+  "finance": {
+    "title": "财务",
+    "budgets": "预算",
+    "invoices": "发票",
+    "payable": "应付账款",
+    "receivable": "应收账款",
+    "payments": "付款",
+    "evm": "挣值",
+    "invoice_number": "发票号",
+    "amount": "金额",
+    "status": "状态",
+    "approve": "审批",
+    "pay": "标记为已付",
+    "original_budget": "原始预算",
+    "revised_budget": "调整后预算",
+    "committed": "已签约",
+    "actual": "实际",
+    "forecast": "预测",
+    "variance": "偏差"
+  },
+  "procurement": {
+    "title": "采购",
+    "purchase_orders": "采购订单",
+    "goods_receipts": "收货单",
+    "new_po": "新建采购订单",
+    "po_number": "订单号",
+    "vendor": "供应商",
+    "issue": "下达",
+    "confirm": "确认收货"
+  },
+  "safety": {
+    "title": "安全",
+    "incidents": "事故",
+    "observations": "安全观察",
+    "new_incident": "新建事故",
+    "new_observation": "新建安全观察",
+    "severity": "严重程度",
+    "risk_score": "风险评分",
+    "days_lost": "损失工日",
+    "treatment": "医疗处置",
+    "corrective_action": "纠正措施"
+  },
+  "meetings": {
+    "title": "会议",
+    "new_meeting": "新建会议",
+    "meeting_type": "类型",
+    "attendees": "参会人员",
+    "agenda": "议程",
+    "action_items": "行动事项",
+    "minutes": "会议纪要",
+    "complete": "结束会议",
+    "present": "出席",
+    "absent": "缺席",
+    "excused": "请假",
+    "actions": {
+      "status": {
+        "open": "待办",
+        "completed": "已完成",
+        "cancelled": "已取消"
+      },
+      "flag": {
+        "overdue": "逾期",
+        "on_track": "按计划进行"
+      },
+      "label": {
+        "action_item": "行动项",
+        "completion_rate": "行动项完成率",
+        "open_vs_done": "待办与已完成",
+        "overdue": "逾期行动项"
+      },
+      "explain": {
+        "action_item": "行动项是会议中商定的任务，包含负责人和截止日期。",
+        "completion_rate": "行动项完成率 = 已完成行动项数 ÷ 行动项总数，取值范围 0 至 1。",
+        "open_vs_done": "待办行动项仍需继续处理。已完成行动项已结束，无需再做。",
+        "overdue": "行动项仍为待办状态且截止日期早于参考日期，即为逾期。"
+      }
+    },
+    "minutes_pdf": {
+      "title": "会议纪要",
+      "issued": "已发布",
+      "draft": "草稿",
+      "date": "日期：",
+      "location": "地点：",
+      "type": "类型：",
+      "number": "会议编号：",
+      "chairperson": "主持人：",
+      "next_meeting": "下次会议：",
+      "not_available": "不适用",
+      "not_scheduled": "未安排",
+      "attendance": "出席情况",
+      "present": "出席：",
+      "absent": "缺席／请假：",
+      "agenda": "议程、讨论与决议",
+      "required": "（必填）",
+      "discussion": "讨论：",
+      "decision": "决议：",
+      "decisions": "决议事项",
+      "open_questions": "未决问题",
+      "actions": "行动项",
+      "col_number": "#",
+      "col_action": "行动",
+      "col_owner": "负责人",
+      "col_due": "截止日期",
+      "col_status": "状态",
+      "brought_forward": "[结转]",
+      "overdue": "（已逾期）",
+      "status_open": "未开始",
+      "status_in_progress": "进行中",
+      "status_done": "已完成",
+      "status_cancelled": "已取消",
+      "summary": "摘要",
+      "generated": "生成时间：{stamp}",
+      "issued_at": "发布时间：{stamp}",
+      "running_head": "{project} - 会议纪要",
+      "type_progress": "进度",
+      "type_design": "设计",
+      "type_safety": "安全",
+      "type_subcontractor": "分包商",
+      "type_kickoff": "启动",
+      "type_closeout": "竣工",
+      "type_commercial": "商务"
+    }
+  },
+  "inspections": {
+    "title": "质量验收",
+    "new_inspection": "新建验收",
+    "inspector": "验收人",
+    "checklist": "检查清单",
+    "pass": "合格",
+    "fail": "不合格",
+    "partial": "部分合格",
+    "critical": "严重",
+    "intl": {
+      "status_labels": {
+        "scheduled": "已安排",
+        "in_progress": "进行中",
+        "completed": "已完成",
+        "failed": "不合格",
+        "cancelled": "已取消"
+      }
+    }
+  },
+  "ncr": {
+    "title": "不合格报告",
+    "new_ncr": "新建不合格项",
+    "root_cause": "根本原因",
+    "corrective_action": "纠正措施",
+    "preventive_action": "预防措施",
+    "material": "材料",
+    "workmanship": "施工工艺",
+    "design": "设计"
+  },
+  "submittals": {
+    "title": "报审文件",
+    "new_submittal": "新建报审",
+    "spec_section": "规范章节",
+    "revision": "版次",
+    "submit": "提交",
+    "review": "审查",
+    "approved_as_noted": "带意见通过",
+    "revise_resubmit": "修改后重报",
+    "intl": {
+      "status_labels": {
+        "draft": "草稿",
+        "submitted": "已提交",
+        "under_review": "审核中",
+        "approved": "已批准",
+        "approved_as_noted": "批准（附意见）",
+        "revise_and_resubmit": "修改后重新提交",
+        "rejected": "已驳回",
+        "closed": "已关闭"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "往来函件",
+    "new_entry": "新建记录",
+    "incoming": "来文",
+    "outgoing": "发文",
+    "letter": "函件",
+    "email": "电子邮件",
+    "notice": "通知函",
+    "date_sent": "发出日期",
+    "date_received": "收到日期"
+  },
+  "cde": {
+    "title": "公共数据环境",
+    "new_container": "新建容器",
+    "container_code": "容器编码",
+    "cde_state": "CDE 状态",
+    "wip": "工作中",
+    "shared": "已共享",
+    "published": "已发布",
+    "archived": "已归档",
+    "promote": "提升状态",
+    "suitability": "适用性",
+    "discipline": "专业",
+    "revisions": "版本记录",
+    "intl": {
+      "state_labels": {
+        "wip": "工作中",
+        "shared": "已共享",
+        "published": "已发布",
+        "archived": "已归档"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "文件传递单",
+    "new_transmittal": "新建传递单",
+    "purpose": "用途",
+    "for_approval": "供审批",
+    "for_information": "供参考",
+    "for_construction": "供施工",
+    "recipients": "接收方",
+    "acknowledge": "确认接收",
+    "locked": "已锁定",
+    "issue_transmittal": "签发",
+    "intl": {
+      "status_words": {
+        "draft": "草稿",
+        "issued": "已发出",
+        "responded": "已回复"
+      }
+    }
+  },
+  "notifications": {
+    "title": "通知",
+    "no_notifications": "暂无新通知",
+    "mark_all_read": "全部标为已读",
+    "unread": "未读"
+  },
+  "comments": {
+    "title": "评论",
+    "post": "发布",
+    "reply": "回复",
+    "edit": "编辑",
+    "delete": "删除",
+    "placeholder": "写下评论...",
+    "empty": "暂无评论，来开启讨论吧。",
+    "edited": "已编辑",
+    "deleted": "该评论已删除"
+  },
+  "bim": {
+    "title": "BIM 中心",
+    "models": "模型",
+    "elements": "构件",
+    "upload_model": "上传模型",
+    "processing": "处理中",
+    "active": "已启用",
+    "link_to_boq": "关联工程量清单",
+    "properties": "属性",
+    "quantities": "工程量",
+    "wireframe": "线框",
+    "section_box": "剖切框",
+    "measure": "测量",
+    "zoom_to_fit": "缩放至合适"
+  },
+  "reporting": {
+    "title": "报表与看板",
+    "kpi": "指标看板",
+    "generate_report": "生成报表",
+    "templates": "模板",
+    "project_status": "项目状态",
+    "cost_report": "造价报表",
+    "schedule_status": "进度状态",
+    "safety_report": "安全报表",
+    "explain": {
+      "report_total_one": "报告合计：{money}（{count} 行之和）。",
+      "report_total_other": "报告合计：{money}（{count} 行之和）。",
+      "percent_of_total": "{part} 占 {total} 的 {percent}（占合计比例）。",
+      "percent_zero_total": "{part} / {total}：合计为零，因此各项占比均显示为 0%。",
+      "breakdown_empty": "成本明细：无数据。",
+      "breakdown_one": "成本明细：{count} 个分组，报告合计 {money}。",
+      "breakdown_other": "成本明细：{count} 个分组，报告合计 {money}。",
+      "top_n_one": "前 {requested} 项：共 {shown} 行中显示 {shown} 行。",
+      "top_n_other": "前 {requested} 项：共 {shown} 行中显示 {shown} 行。"
+    }
+  },
+  "gantt": {
+    "title": "横道图",
+    "day": "日",
+    "week": "周",
+    "month": "月",
+    "critical_path": "关键线路",
+    "baseline": "基准计划",
+    "dependencies": "逻辑关系",
+    "today": "今天"
+  },
+  "settings": {
+    "regional": "区域设置",
+    "timezone": "时区",
+    "measurement": "度量制",
+    "paper_size": "纸张大小",
+    "date_format": "日期格式",
+    "number_format": "数字格式",
+    "currency": "货币",
+    "metric": "公制",
+    "imperial": "英制"
+  },
+  "users": {
+    "management": "用户管理",
+    "management_desc": "管理团队成员、角色和访问权限",
+    "invite_user": "邀请用户",
+    "invite": "邀请",
+    "full_name": "姓名",
+    "email": "电子邮箱",
+    "password": "密码",
+    "role": "角色",
+    "status": "状态",
+    "last_login": "最近登录",
+    "actions": "操作",
+    "name": "名称",
+    "total": "用户总数",
+    "active": "活跃",
+    "inactive": "未活跃",
+    "admins": "管理员",
+    "managers": "项目经理",
+    "search": "按姓名或邮箱搜索...",
+    "no_users": "未找到用户",
+    "updated": "用户已更新",
+    "invited": "邀请已发送",
+    "deactivate": "停用",
+    "activate": "启用",
+    "never": "从未",
+    "role_admin_desc": "拥有全部功能的完整权限",
+    "role_manager_desc": "项目与团队管理",
+    "role_editor_desc": "创建和编辑内容",
+    "role_viewer_desc": "只读权限"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "该快照已冻结。冻结的快照是正式记录，不能修改。",
+      "frozen_no_delete": "冻结的快照是正式记录，不能删除。",
+      "draft_open": "已有一份草稿快照处于打开状态。请先冻结或删除它，再新建快照。",
+      "no_line_method": "该条目没有单独设置的方法。",
+      "snapshot_missing": "未找到该快照。",
+      "line_missing": "该快照中没有此条目。",
+      "document_missing": "所关联的文件不属于本项目。",
+      "freeze_refused": "暂时无法冻结快照：有 {count} 个条目的变动超过阈值，但没有说明和依据。",
+      "no_frozen_snapshot": "目前还没有可供对比的已冻结快照。",
+      "no_ledger": "当前安装未提供发票台账。",
+      "no_snapshot": "目前还没有可供编制说明的快照。"
+    },
+    "export": {
+      "project": "项目",
+      "generated": "生成",
+      "currency": "币种",
+      "page": "页",
+      "generated_at": "生成时间",
+      "empty": "暂无内容。",
+      "total": "合计",
+      "cost_report": "成本报告",
+      "phase_comparison": "阶段对比",
+      "invoice_ledger": "发票台账",
+      "forecast_documentation": "预测说明文件",
+      "as_of": "截至",
+      "forecast_method": "预测方法",
+      "col_account": "科目",
+      "col_code": "编码",
+      "col_description": "说明",
+      "col_source": "来源",
+      "col_method": "方法",
+      "col_planned": "计划",
+      "col_committed": "合同承诺",
+      "col_pending": "待定变更",
+      "col_measured": "已计量",
+      "col_certified": "已核定付款",
+      "col_invoiced": "已开票",
+      "col_paid": "已支付",
+      "col_forecast": "预测",
+      "col_variance": "偏差",
+      "col_variance_pct": "偏差率",
+      "col_forecast_of_plan": "预测占计划 %",
+      "col_measured_of_committed": "计量占合同承诺 %",
+      "col_invoiced_of_committed": "开票占合同承诺 %",
+      "col_contract": "合同",
+      "col_contract_title": "合同名称",
+      "col_invoice": "发票",
+      "col_date": "日期",
+      "col_kind": "类型",
+      "col_release_status": "释放",
+      "col_net": "不含税",
+      "col_vat": "增值税",
+      "col_gross": "含税",
+      "col_retention": "质保金",
+      "col_release": "已释放质保金",
+      "col_discount": "折扣",
+      "col_payable": "应付",
+      "col_open": "未释放",
+      "col_previous": "上期",
+      "col_delta": "变动",
+      "col_delta_pct": "变动率",
+      "col_needs_evidence": "需要依据",
+      "col_comment": "备注",
+      "col_evidence": "依据",
+      "row_unassigned": "未归入成本科目的款项",
+      "row_loose_changes": "未归属合同的变更",
+      "row_no_contract": "无合同",
+      "contract_value": "合同金额",
+      "retention_held": "已扣留质保金",
+      "yes": "是",
+      "no": "否",
+      "snapshot_date": "快照日期",
+      "snapshot_status": "状态",
+      "previous_snapshot": "上一份冻结快照",
+      "method_explained": "预测如何取值",
+      "evidence_threshold": "超过以下变动需附依据",
+      "threshold_both": "变动超过 {parts}",
+      "threshold_any": "任何变动",
+      "frozen_at": "冻结时间"
+    },
+    "method": {
+      "best_available": "最佳可得来源",
+      "maximum": "最大值",
+      "evm_cpi": "挣值（CPI）",
+      "manual": "手动"
+    },
+    "method_help": {
+      "best_available": "每个条目取其最成熟的数字：先取竣工结算，没有则取已计量工程量，再取中标价，再取估算，最后取预算。",
+      "maximum": "每个条目取其各项数字（预算、估算、中标价、已计量、已开票）中的最高值，预测因此不会掩盖风险。",
+      "evm_cpi": "每个条目按进度推算完工成本：已花费的金额除以已完成工程量的比例。",
+      "manual": "由人工设定该条目的数字，并关联其依据文件。"
+    },
+    "source": {
+      "none": "无数据",
+      "budget": "预算",
+      "estimate": "估算",
+      "partly_awarded": "部分中标",
+      "awarded": "已中标",
+      "measured": "已计量",
+      "final": "竣工结算",
+      "manual": "手动",
+      "invoiced": "已开票",
+      "evm": "挣值"
+    },
+    "layer": {
+      "budget": "预算",
+      "estimate": "估算",
+      "tender": "最优投标",
+      "awarded": "已中标",
+      "changes": "已批准变更",
+      "committed": "合同承诺",
+      "pending": "待定变更",
+      "measured": "已计量",
+      "certified": "已核定付款",
+      "invoiced": "已开票",
+      "paid": "已支付",
+      "forecast": "预测"
+    },
+    "invoice_kind": {
+      "interim": "进度款",
+      "final": "结算款",
+      "daywork": "计日工",
+      "credit_note": "贷项通知单"
+    },
+    "release_status": {
+      "open": "未释放",
+      "released": "已释放"
+    },
+    "evidence_kind": {
+      "document": "文件",
+      "minutes": "会议纪要",
+      "other": "其他"
+    },
+    "snapshot_status": {
+      "draft": "草稿",
+      "frozen": "已冻结"
+    }
+  },
+  "document_forms": {
+    "submittals": {
+      "labels": {
+        "discipline": {
+          "plumbing": "给排水",
+          "fire_protection": "消防",
+          "civil": "土建",
+          "bms": "楼宇自控",
+          "hvac": "暖通空调",
+          "lighting": "照明",
+          "mechanical": "机械",
+          "architectural": "建筑",
+          "electrical": "电气",
+          "structural": "结构",
+          "elv": "弱电"
+        },
+        "type": {
+          "sample": "样品",
+          "method_statement": "施工方案",
+          "shop_drawing": "深化图纸",
+          "mock_up": "样板",
+          "certificate": "证书",
+          "test_report": "检测报告",
+          "calculation": "计算书",
+          "product_data": "产品资料",
+          "warranty": "质保书"
+        },
+        "status": {
+          "draft": "草稿",
+          "approved_as_noted": "带意见批准",
+          "revise_and_resubmit": "修改后重报",
+          "rejected": "退回",
+          "under_review": "审核中",
+          "closed": "已关闭",
+          "submitted": "已报审",
+          "approved": "已批准"
+        }
+      },
+      "strings": {
+        "review_history": "审核记录",
+        "submitted_by_org": "报审单位",
+        "doc_title": "报审单",
+        "col_on_site_needed_by": "进场 / 批复期限",
+        "col_drawings": "关联图纸",
+        "col_approval_late": "超期天数",
+        "col_needed_by": "批复期限",
+        "col_lead_time": "供货周期(周)",
+        "sig_reviewed": "审核人",
+        "col_model": "型号 / 参考",
+        "col_discipline": "专业",
+        "col_date_submitted": "报审日期",
+        "col_reviewer": "审核人",
+        "col_required_on_site": "进场需求日",
+        "register_title_method_statement": "施工方案台账",
+        "col_supplier": "供应商",
+        "hist_returned": "退回",
+        "col_review_code": "审核代码",
+        "col_origin": "原产国",
+        "register_filename_method_statement": "shigong-fangan-taizhang",
+        "sig_submitted": "报审人",
+        "col_long_lead": "长周期",
+        "drawings_missing_other": "{n}份关联图纸已不可用",
+        "col_product": "厂家 / 型号 / 产地",
+        "col_outcome": "审核结论",
+        "col_number": "报审编号",
+        "register_filename_product_data": "cailiao-baoyan-taizhang",
+        "col_manufacturer": "厂家 / 品牌",
+        "col_rev": "版次",
+        "register_filename_shop_drawing": "shenhua-tuzhi-taizhang",
+        "col_type": "类型",
+        "col_review_overdue": "逾期天数",
+        "weeks_other": "{n}周",
+        "hist_submitted": "报审",
+        "doc_title_product_data": "材料报验单",
+        "col_approver": "批准人",
+        "col_date_required": "需求日期",
+        "col_title": "标题",
+        "col_ball_in_court": "待办方",
+        "no_review_notes": "暂无审核意见记录。",
+        "sig_approved": "批准人",
+        "register_title": "报审台账",
+        "register_filename": "baoshen-taizhang",
+        "col_submitted_returned": "报审 / 退回",
+        "col_date_returned": "退回日期",
+        "col_review_due": "审核期限",
+        "col_spec": "规范章节",
+        "col_days_in_review_print": "审核天数",
+        "drawings_missing_one": "{n}份关联图纸已不可用",
+        "register_title_product_data": "材料报验台账",
+        "review_notes": "审核意见",
+        "resubmit_for_record": "修正后的文件须重新提交备案",
+        "col_days_in_review": "审核天数",
+        "weeks_one": "{n}周",
+        "register_title_shop_drawing": "深化图纸台账",
+        "col_review_period": "审核周期(天)"
+      }
+    },
+    "transmittals": {
+      "labels": {
+        "purpose": {
+          "for_construction": "供施工",
+          "for_approval": "供批准",
+          "for_review": "供审阅",
+          "for_information": "供参考",
+          "for_record": "供备案",
+          "for_tender": "供投标"
+        },
+        "status": {
+          "draft": "草稿",
+          "responded": "已回复",
+          "issued": "已发出"
+        }
+      },
+      "strings": {
+        "col_purpose": "用途",
+        "col_subject": "主题",
+        "doc_title": "文件传送单",
+        "cover_note": "说明",
+        "acknowledged": "已确认收到",
+        "sig_issued": "发出人",
+        "col_response_due": "回复期限",
+        "col_recipients": "收件方",
+        "col_item_count": "份数",
+        "item_description": "说明",
+        "col_issued": "发出日期",
+        "sender": "发件方",
+        "register_title": "文件传送台账",
+        "recipients": "收件方",
+        "responded": "回复日期",
+        "items": "传送文件",
+        "item_no": "序号",
+        "item_notes": "备注",
+        "col_number": "传送单编号",
+        "recipient": "收件方",
+        "action_required": "需采取的行动",
+        "no_cover_note": "无说明。",
+        "register_filename": "wenjian-chuansong-taizhang",
+        "sig_received": "接收人"
+      }
+    },
+    "furniture": {
+      "records": "记录",
+      "project_no": "项目编号",
+      "sig_prepared_by": "编制",
+      "signer_title": "职务",
+      "total": "合计",
+      "date": "日期",
+      "footer_generated": "生成于 {timestamp}",
+      "sig_checked_by": "复核",
+      "project": "项目",
+      "status": "状态",
+      "currency": "币种",
+      "yes": "是",
+      "signature": "签名",
+      "signatures": "签署",
+      "days_one": "{n}天",
+      "footer_page": "第 {page} 页，共 {total} 页",
+      "sig_approved_by": "批准",
+      "no": "否",
+      "days_other": "{n}天",
+      "empty_register": "暂无记录。",
+      "name": "姓名",
+      "generated_on": "生成日期"
+    },
+    "changeorders": {
+      "labels": {
+        "reason": {
+          "error": "错误或遗漏",
+          "regulatory": "法规要求",
+          "unforeseen": "不可预见条件",
+          "non_conformance": "不合格",
+          "design_change": "设计变更",
+          "client_request": "业主要求",
+          "value_engineering": "价值工程"
+        },
+        "instrument": {
+          "claim": "索赔",
+          "works_change": "变更指令",
+          "site_confirmation": "现场签证"
+        },
+        "change": {
+          "modified": "修改",
+          "added": "新增",
+          "removed": "删除"
+        },
+        "status": {
+          "draft": "草稿",
+          "executed": "已执行",
+          "rejected": "已驳回",
+          "submitted": "已提交",
+          "approved": "已批准"
+        }
+      },
+      "strings": {
+        "time_impact": "工期影响",
+        "item_original_rate": "原单价",
+        "doc_title": "变更令",
+        "col_code": "编码",
+        "approved_by": "批准人",
+        "col_approved_time": "批准工期(天)",
+        "item_new_rate": "新单价",
+        "col_approved": "批准日期",
+        "col_contractor_amount": "承包商金额",
+        "col_engineer_amount": "监理金额",
+        "no_description": "暂无说明记录。",
+        "col_submitted": "提交日期",
+        "approved_time": "批准工期",
+        "col_cost_impact": "费用影响",
+        "item_description": "说明",
+        "item_cost_delta": "费用差额",
+        "col_title": "标题",
+        "submitted_by": "提交人",
+        "register_title": "变更令台账",
+        "item_original_quantity": "原数量",
+        "items": "变更项目",
+        "col_instrument": "文件类型",
+        "col_time_impact": "工期影响(天)",
+        "col_reason": "原因",
+        "item_change": "变更",
+        "col_approved_amount": "批准金额",
+        "item_new_quantity": "新数量",
+        "register_filename": "biangeng-ling-taizhang",
+        "description": "说明",
+        "item_unit": "单位"
+      }
+    },
+    "variations": {
+      "labels": {
+        "notice_status": {
+          "responded": "已回复",
+          "acknowledged": "已确认收到",
+          "closed": "已关闭",
+          "issued": "已发出"
+        },
+        "request_status": {
+          "draft": "草稿",
+          "rejected": "已驳回",
+          "converted_to_vo": "已转为变更令",
+          "under_review": "审核中",
+          "submitted": "已提交",
+          "approved": "已批准"
+        },
+        "claim_type": {
+          "eot": "工期延长",
+          "disruption": "施工干扰"
+        },
+        "recipient_type": {
+          "owner": "业主",
+          "consultant": "咨询方",
+          "contractor": "承包商",
+          "architect": "建筑师",
+          "engineer": "工程师"
+        },
+        "urgency": {
+          "low": "低",
+          "med": "中",
+          "high": "高"
+        },
+        "classification": {
+          "other": "其他",
+          "regulatory": "法规要求",
+          "unforeseen": "不可预见条件",
+          "owner_change": "业主变更",
+          "design_dev": "设计深化",
+          "scope_change": "范围变更"
+        },
+        "claim_status": {
+          "draft": "草稿",
+          "granted": "已准许",
+          "rejected": "已驳回",
+          "agreed": "已达成一致",
+          "under_review": "审核中",
+          "submitted": "已提交"
+        }
+      },
+      "strings": {
+        "col_row": "序号",
+        "time_impact": "工期影响",
+        "doc_title": "变更申请",
+        "col_code": "编码",
+        "date_decided": "决定日期",
+        "col_decided_amount": "核定金额",
+        "variation_register_title": "变更台账",
+        "notice_register_title": "通知台账",
+        "decision_notes": "决定说明",
+        "col_classification": "类别",
+        "requested_by": "申请人",
+        "col_agreed_amount": "协商金额",
+        "col_recipient": "收件方",
+        "col_response_due": "回复期限",
+        "no_description": "暂无说明记录。",
+        "decided_by": "决定人",
+        "variation_register_filename": "biangeng-taizhang",
+        "claim_register_title": "索赔台账",
+        "col_days_granted": "准许天数",
+        "col_title": "标题",
+        "date_submitted": "提交日期",
+        "col_clause": "合同条款",
+        "col_raised": "提出日期",
+        "col_description": "说明",
+        "col_period_end": "期间止",
+        "col_requested": "申请日期",
+        "claim_register_filename": "suopei-taizhang",
+        "col_response_received": "收到回复",
+        "doc_title_credit": "变更申请(减项)",
+        "col_time_impact": "工期影响(天)",
+        "col_claimed_amount": "索赔金额",
+        "col_period_start": "期间起",
+        "notice_register_filename": "tongzhi-taizhang",
+        "description": "说明",
+        "no_decision_notes": "尚无决定记录。",
+        "col_recipient_type": "收件对象",
+        "col_target_response": "预期回复",
+        "col_days_requested": "申请天数",
+        "col_claim_type": "索赔类型",
+        "col_urgency": "紧急程度"
+      }
+    },
+    "correspondence": {
+      "labels": {
+        "direction": {
+          "outgoing": "发出",
+          "incoming": "收到"
+        },
+        "type": {
+          "letter": "函件",
+          "notice": "通知",
+          "memo": "备忘录",
+          "report": "报告",
+          "email": "邮件"
+        },
+        "status": {
+          "awaiting_response": "待回复",
+          "closed": "已关闭",
+          "responded": "已回复",
+          "open": "未结"
+        }
+      },
+      "strings": {
+        "col_to": "收件方",
+        "no_notes": "暂无备注记录。",
+        "col_subject": "主题",
+        "doc_title": "往来函件",
+        "register_title": "往来函件台账",
+        "col_clause": "合同条款",
+        "linked_documents": "关联文件",
+        "col_reference": "文号",
+        "col_date_received": "收文日期",
+        "notes": "备注",
+        "col_response_due": "回复期限",
+        "sig_prepared": "编制",
+        "attachments": "附件",
+        "col_date_sent": "发文日期",
+        "col_direction": "方向",
+        "register_filename": "wanglai-hanjian-taizhang",
+        "col_from": "发件方",
+        "col_type": "类型",
+        "sig_received": "接收人"
+      }
+    },
+    "claims_evidence": {
+      "labels": {
+        "basis": {
+          "delay": "延误 / 工期延长",
+          "valuation": "估价",
+          "dispute": "争议",
+          "general": "一般记录"
+        },
+        "section": {
+          "delay": "延误",
+          "rfis": "RFI",
+          "variations": "变更",
+          "other": "其他",
+          "notices": "通知",
+          "approvals": "批复",
+          "correspondence": "往来函件",
+          "timeline": "时间线"
+        },
+        "kind": {
+          "notice": "通知",
+          "variation_notice": "变更通知",
+          "correspondence": "往来函件",
+          "variation_order": "变更令",
+          "moc_entry": "变更记录",
+          "change_order": "变更令",
+          "variation_request": "变更申请"
+        }
+      },
+      "strings": {
+        "col_row": "序号",
+        "col_date": "日期",
+        "basis": "依据",
+        "col_summary": "摘要",
+        "register_title": "证据汇编",
+        "period_to": "最新记录",
+        "period_from": "最早记录",
+        "col_kind": "记录类型",
+        "subject": "主题",
+        "col_title": "标题",
+        "register_filename": "zhengju-huibian",
+        "col_reference": "编号",
+        "col_section": "分类",
+        "col_record_id": "记录编号",
+        "digest": "完整性校验码(SHA-256,前16位)"
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "col_subject": "主题",
+        "register_title": "RFI 台账",
+        "yes_with": "是 ({detail})",
+        "col_raised_by": "提出人",
+        "col_schedule_impact": "进度影响",
+        "col_date_required": "需求日期",
+        "col_assigned_to": "责任人",
+        "col_ball_in_court": "待办方",
+        "col_response_due": "回复期限",
+        "col_number": "RFI 编号",
+        "col_days_open": "未结天数",
+        "col_cost_impact": "费用影响",
+        "register_filename": "rfi-taizhang",
+        "col_response": "回复"
+      },
+      "labels": {
+        "status": {
+          "draft": "草稿",
+          "open": "未关闭",
+          "answered": "已回答",
+          "closed": "已关闭",
+          "void": "已作废"
+        }
+      }
+    },
+    "daily_diary": {
+      "labels": {
+        "condition": {
+          "rain_showers_violent": "强阵雨",
+          "drizzle_moderate": "中毛毛雨",
+          "fog": "雾",
+          "overcast": "阴天",
+          "snow_moderate": "中雪",
+          "snow_heavy": "大雪",
+          "rain_showers_moderate": "中阵雨",
+          "snow_showers_light": "小阵雪",
+          "rain_showers_light": "小阵雨",
+          "snow": "雪",
+          "fog_rime": "冻雾",
+          "partly_cloudy": "局部多云",
+          "thunderstorm": "雷暴",
+          "snow_light": "小雪",
+          "freezing_rain_heavy": "强冻雨",
+          "drizzle_light": "小毛毛雨",
+          "rain_light": "小雨",
+          "thunderstorm_hail_heavy": "雷暴伴大冰雹",
+          "drizzle_dense": "浓毛毛雨",
+          "rain": "雨",
+          "mainly_clear": "大部晴朗",
+          "clear": "晴",
+          "rain_heavy": "大雨",
+          "rain_moderate": "中雨",
+          "thunderstorm_hail_light": "雷暴伴小冰雹",
+          "cloudy": "多云",
+          "snow_showers_heavy": "大阵雪",
+          "freezing_rain_light": "小冻雨"
+        },
+        "source": {
+          "open_meteo": "气象服务",
+          "sensor": "现场传感器",
+          "manual": "手动录入"
+        },
+        "entry_type": {
+          "incident_summary": "安全与事故",
+          "event": "事件",
+          "visitor": "来访人员",
+          "inspection_summary": "检查验收",
+          "completion": "完成工作",
+          "delivery": "到场材料",
+          "photo_note": "照片备注",
+          "general": "一般事项"
+        },
+        "status": {
+          "closed": "已关闭",
+          "archived": "已归档",
+          "signed": "已签署",
+          "open": "填写中"
+        }
+      },
+      "strings": {
+        "summary_wind": "风速 {value} km/h",
+        "weather_temp": "气温(°C)",
+        "doc_title": "施工日志",
+        "summary_precipitation": "降水量 {value} mm",
+        "site_supervisor": "现场负责人",
+        "weather_precip": "降水量(mm)",
+        "summary_humidity": "湿度 {value} %",
+        "footer_supervisor": "现场负责人:{name}",
+        "sig_name": "姓名",
+        "footer_supervisor_missing": "现场负责人:未记录",
+        "footer_generated": "生成于:{timestamp}",
+        "percent": "{value}%",
+        "workforce_total": "合计",
+        "overview": "概况",
+        "workforce": "各单位出勤人数",
+        "workforce_count": "人数",
+        "not_recorded": "未记录",
+        "sig_prepared": "编制(现场负责人)",
+        "decimal_mark": ".",
+        "sig_approved": "批准(业主代表)",
+        "completeness": "完整度",
+        "sig_signature": "签名",
+        "signatures": "签署",
+        "running_title": "{title} · {date} · {project}",
+        "workforce_company": "单位",
+        "notes_empty": "无其他备注。",
+        "sig_title": "职务",
+        "weather": "天气",
+        "weather_wind": "风速(km/h)",
+        "weather_time": "时间",
+        "weather_empty": "当天未记录天气。",
+        "footer_page": "第 {page} 页,共 {total} 页",
+        "equipment_on_site": "现场设备",
+        "weather_source": "来源",
+        "workforce_unassigned": "未归属单位",
+        "sig_date": "日期",
+        "filename_prefix": "shigong-rizhi",
+        "labour_on_site": "现场劳务",
+        "weather_conditions": "天气状况",
+        "signed_note": "已在系统中签署:{signers}",
+        "notes": "备注",
+        "entries_empty": "本日志暂无记录条目。",
+        "site_record": "现场记录"
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "AI 生成",
+        "drawing": "图纸",
+        "cost_estimate": "COST ESTIMATE",
+        "summary": "SUMMARY",
+        "project": "Project:",
+        "boq": "BOQ:",
+        "date": "Date:",
+        "status": "Status:",
+        "prepared_by": "Prepared by:",
+        "pos": "Pos.",
+        "description": "Description",
+        "unit": "Unit",
+        "qty": "Qty",
+        "rate": "Rate",
+        "total": "Total",
+        "subtotal": "Subtotal:",
+        "other_positions": "Other",
+        "direct_cost": "Direct Cost:",
+        "net_total": "Net Total:",
+        "gross_total": "Gross Total",
+        "page": "Page",
+        "of": "of",
+        "generated": "Generated:"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "发票",
+        "date": "日期：{value}",
+        "due": "到期日：{value}",
+        "from": "开票方",
+        "bill_to": "受票方",
+        "vat_id": "增值税号：{value}",
+        "ref": "参考号：{value}",
+        "th_description": "品名",
+        "th_qty": "数量",
+        "th_unit": "单位",
+        "th_unit_price": "单价",
+        "th_net": "不含税金额（{currency}）",
+        "net_total": "不含税合计",
+        "vat_total": "增值税",
+        "grand_total": "含税总计",
+        "retention_prepaid": "质保金 / 预付款",
+        "amount_due": "应付金额",
+        "payment": "付款信息",
+        "iban": "IBAN：{value}",
+        "bic": "BIC：{value}",
+        "account_number": "账号：{value}",
+        "bank_code": "银行代码：{value}",
+        "account_holder": "账户名称：{value}",
+        "footer": "本 PDF 内嵌符合 EN 16931 标准的电子发票（Factur-X / ZUGFeRD）。以内嵌 XML 为准。",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "报告",
+        "meta_project": "项目",
+        "meta_type": "类型",
+        "meta_generated": "生成时间",
+        "meta_currency": "货币",
+        "field_column": "字段",
+        "value_column": "数值",
+        "yes": "是",
+        "no": "否",
+        "no_data_heading": "暂无数据",
+        "no_data_body": "本报告基于空的数据快照生成。请核实所选项目的源模块（财务、进度计划、安全等）是否返回了数据。",
+        "no_data_body_short": "本报告基于空的数据快照生成。请核实源模块是否返回了所选项目的数据。",
+        "footer_generated_by": "由 OpenConstructionERP 生成于 {timestamp}。",
+        "worksheet_name": "报告",
+        "pdf_subject": "项目报告",
+        "overall_progress": "总体进度",
+        "as_of": "截至",
+        "recorded_by": "记录人",
+        "period": "期间",
+        "entries_suffix": "（{count} 条记录）",
+        "site_photo_alt": "现场照片",
+        "ai_summary_heading": "摘要",
+        "ai_badge": "AI 生成",
+        "ai_note": "根据下方项目数据由 AI 生成。",
+        "ai_note_confidence": "根据下方项目数据由 AI 生成（置信度 {confidence}）。",
+        "ai_note_review": "提交给客户前请先审核。"
+      },
+      "labels": {
+        "field_labels": {
+          "name": "名称",
+          "status": "状态",
+          "phase": "阶段",
+          "planned_start": "计划开始",
+          "planned_end": "计划完成",
+          "schedule_progress_pct": "进度完成率（%）",
+          "cpi": "成本绩效指数（CPI）",
+          "spi": "进度绩效指数（SPI）",
+          "budget_consumed_pct": "预算消耗率（%）",
+          "as_of": "截至",
+          "progress_pct": "完成率（%）",
+          "risk_score_avg": "平均风险评分",
+          "open_rfis": "未关闭澄清请求（RFI）",
+          "open_submittals": "未关闭报审",
+          "open_defects": "未关闭缺陷",
+          "open_observations": "未关闭观察项",
+          "budget": "预算",
+          "committed": "已承诺金额",
+          "actual": "实际",
+          "payable": "应付",
+          "receivable": "应收",
+          "net_cash_flow": "净现金流"
+        },
+        "section_titles": {
+          "Project Overview": "项目概况",
+          "Key Performance Indicators": "关键绩效指标",
+          "Schedule Status": "进度状态",
+          "Risk Summary": "风险汇总",
+          "Open Issues": "未关闭问题",
+          "Cost Summary": "费用汇总",
+          "Cost Breakdown": "费用明细",
+          "Change Orders": "变更指令",
+          "Cash Flow": "现金流",
+          "Schedule Overview": "进度概览",
+          "Milestone Status": "里程碑状态",
+          "Critical Path": "关键路径",
+          "3-Week Lookahead": "未来三周滚动计划",
+          "Safety KPIs": "安全关键指标",
+          "Incident Log": "事故记录",
+          "Near-Miss Reports": "未遂事件报告",
+          "Safety Training": "安全培训",
+          "Inspection Summary": "检查汇总",
+          "By Inspection Type": "按检查类型",
+          "Punch List Status": "整改清单状态",
+          "Recent Inspections": "近期检查",
+          "Portfolio Overview": "项目组合概况",
+          "Project Statuses": "项目状态",
+          "KPI Comparison": "关键指标对比",
+          "Portfolio Risks": "项目组合风险",
+          "Field Progress": "现场进度",
+          "Top Risks": "主要风险",
+          "Site Photos": "现场照片",
+          "Summary": "摘要"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "采购订单",
+        "gr_title": "收货单",
+        "supplier": "供应商",
+        "po_type": "订单类型",
+        "issue_date": "开立日期",
+        "delivery_date": "交货日期",
+        "created_by": "编制人",
+        "order_total": "订单总额",
+        "line_items": "明细行",
+        "col_no": "序号",
+        "col_description": "品名",
+        "col_quantity": "数量",
+        "col_unit": "单位",
+        "col_unit_rate": "单价",
+        "col_amount": "金额",
+        "no_line_items": "无明细行。",
+        "totals": "合计",
+        "subtotal": "不含税金额",
+        "tax": "税额",
+        "total_gross": "含税总额",
+        "terms": "条款",
+        "payment_terms": "付款条件",
+        "retention": "质保金",
+        "retention_at": "质保金扣留时点",
+        "retention_at_receipt": "收货时",
+        "retention_at_invoice": "开票时",
+        "invoice_tolerance": "发票容差",
+        "supplier_confirmation": "供应商确认",
+        "supplier_reference": "供应商参考号",
+        "confirmed_delivery": "确认交货日期",
+        "acknowledged_on": "确认日期",
+        "not_confirmed": "供应商尚未确认。",
+        "notes": "备注",
+        "no_notes": "无备注。",
+        "sig_ordered_by": "订购人",
+        "purchase_order": "采购订单",
+        "receipt_date": "收货日期",
+        "received_by": "收货人",
+        "delivery_note": "送货单",
+        "col_ordered": "订购数量",
+        "col_received": "收货数量",
+        "col_rejected": "拒收数量",
+        "col_batch": "批次 / 批号",
+        "rejections": "拒收记录",
+        "col_reason": "原因",
+        "no_rejections": "无拒收。",
+        "sig_delivered_by": "送货人",
+        "counterparty_tax_id": "税号",
+        "counterparty_address": "地址"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "草稿",
+          "approved": "已批准",
+          "issued": "已下达",
+          "partially_received": "部分收货",
+          "completed": "已完成",
+          "cancelled": "已取消"
+        },
+        "gr_status": {
+          "draft": "草稿",
+          "confirmed": "已确认"
+        },
+        "po_type": {
+          "standard": "标准",
+          "blanket": "框架订单",
+          "service": "服务"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "发票",
+        "payment_title": "付款",
+        "direction": "方向",
+        "supplier": "供应商",
+        "client": "客户",
+        "invoice_date": "开票日期",
+        "due_date": "到期日",
+        "payment_terms": "付款条件",
+        "purchase_order": "采购订单",
+        "invoice_total": "发票总额",
+        "line_items": "明细行",
+        "col_no": "序号",
+        "col_description": "品名",
+        "col_quantity": "数量",
+        "col_unit": "单位",
+        "col_unit_rate": "单价",
+        "col_vat": "增值税",
+        "col_amount": "金额",
+        "no_line_items": "无明细行。",
+        "totals": "合计",
+        "subtotal": "不含税金额",
+        "tax": "税额",
+        "total_gross": "含税总额",
+        "retention": "质保金",
+        "amount_due": "扣除质保金后应付",
+        "payments": "付款记录",
+        "col_date": "日期",
+        "col_reference": "参考号",
+        "col_paid": "已付",
+        "col_withheld": "扣留",
+        "refund": "退款",
+        "no_payments": "无付款记录。",
+        "notes": "备注",
+        "no_notes": "无备注。",
+        "invoice": "发票",
+        "invoice_number": "发票号",
+        "payment_date": "付款日期",
+        "reference": "参考号",
+        "amount_paid": "已付金额",
+        "exchange_rate": "汇率",
+        "kind": "类型",
+        "kind_payment": "付款",
+        "kind_refund": "退款",
+        "withholding": "已扣留质保金",
+        "withheld_amount": "扣留金额",
+        "release_date": "质保金释放日期",
+        "gross_settled": "结算总额",
+        "no_withholding": "本次付款未扣留任何款项。",
+        "counterparty_tax_id": "税号",
+        "counterparty_address": "地址"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "草稿",
+          "pending": "待审批",
+          "approved": "已批准",
+          "sent": "已发送",
+          "paid": "已付款",
+          "cancelled": "已取消",
+          "credit_note_issued": "已开具贷项通知单"
+        },
+        "direction": {
+          "payable": "应付（供应商发票）",
+          "receivable": "应收（客户发票）"
+        },
+        "payment_status": {
+          "completed": "已完成",
+          "refunded": "已退款"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "第 {page} 页，共 {total} 页",
+    "page": "第 {page} 页",
+    "printed": "打印时间：{timestamp}",
+    "generated": "生成日期：{date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} 邀请您使用客户门户",
+      "login_subject": "您的客户门户登录链接",
+      "invite_heading": "欢迎使用客户门户",
+      "login_heading": "登录客户门户",
+      "greeting": "{name}，您好：",
+      "greeting_generic": "您好：",
+      "invite_body": "{sender} 已为您开通客户门户的访问权限。您可以在门户中查看项目进展报告、文件、发票以及后续里程碑。",
+      "login_body": "这是您申请的登录链接。",
+      "link_help": "点击下方按钮即可登录，无需密码。该链接仅可使用一次，{hours} 小时后失效。",
+      "ignore": "如果您并未申请此邮件，请直接忽略。没有此链接，任何人都无法获得访问权限。",
+      "invite_cta": "打开门户",
+      "login_cta": "登录",
+      "sender_generic": "您的项目团队"
+    },
+    "tender_invite": {
+      "subject": "投标邀请：{package}",
+      "heading": "投标邀请",
+      "greeting": "尊敬的{company}：",
+      "greeting_generic": "尊敬的先生/女士：",
+      "invite": "诚邀贵单位参加标段 {package} 的投标。",
+      "invite_project": "诚邀贵单位参加项目 {project} 中标段 {package} 的投标。",
+      "deadline": "投标截止时间：{deadline}",
+      "link_help": "点击下方按钮即可打开工程量清单。您可以在线填写各项单价，随时保存草稿，并在截止时间前提交报价。无需注册账户。",
+      "link_personal": "此链接仅限贵单位使用，请勿转发。",
+      "cta": "打开清单并填写报价",
+      "no_link": "请查阅标段详情，并在上述截止时间前回复贵单位的报价。"
+    },
+    "notification_email": {
+      "greeting": "{name}，您好：",
+      "greeting_generic": "您好：",
+      "cta": "在 OpenConstructionERP 中打开",
+      "footer": "您收到这封邮件，是因为您设置了通知提醒。您可以在个人资料中修改通知设置。",
+      "digest_subject": "OpenConstructionERP: 通知汇总（{count}）",
+      "digest_heading": "近期通知："
+    },
+    "tender_xlsx": {
+      "comparison_title": "报价对比表",
+      "comparison_sheet": "报价对比",
+      "bidder_title": "待报价工程量清单",
+      "bidder_sheet": "清单",
+      "project": "项目",
+      "package": "标段",
+      "currency": "币种",
+      "date": "日期",
+      "return_by": "截止日期",
+      "item": "编号",
+      "description": "项目名称",
+      "unit": "单位",
+      "quantity": "工程量",
+      "unit_price": "综合单价",
+      "line_total": "合价",
+      "own_estimate": "自有预算",
+      "not_priced": "未报价",
+      "sum_priced_lines": "已报价项合计",
+      "bid_total": "投标报价总额",
+      "lines_priced": "已报价项",
+      "lines_priced_value": "{priced} / {total}",
+      "deviation": "与自有预算偏差",
+      "not_comparable": "不适用",
+      "other_currency": "以 {currency} 报价，不与 {reporting} 报价比较。",
+      "legend": "图例",
+      "legend_lowest": "绿色：该项最低单价。",
+      "legend_high": "▲ 红色：高于该项中位价 {pct}% 以上。",
+      "legend_low": "▼ 黄色：低于该项中位价 {pct}% 以上。",
+      "legend_missing": "“{marker}”：投标人未对该项报价。",
+      "legend_incomplete": "含未报价项的投标在“已报价项”中标出，其总额不参与最低价排名。",
+      "legend_totals": "投标报价总额为投标人提交的金额，可能与已报价项合计不同。",
+      "bidder": "投标人",
+      "bidder_note": "投标人备注",
+      "reference": "标识（请勿修改）",
+      "total": "合计",
+      "instructions": "请在黄色单元格中填写每一项的单价。工程量和项目名称不可修改，合价和合计自动计算。不报价的项请留空。"
+    },
+    "cost_plan": {
+      "sheet_plan": "NRM 1 造价计划",
+      "sheet_unallocated": "未归类",
+      "title": "分部造价计划（NRM 1）",
+      "bill": "工程量清单",
+      "currency": "币种",
+      "gifa": "建筑面积 (m2)",
+      "gifa_project": "取自项目",
+      "gifa_entered": "本次导出时填写",
+      "gifa_none": "未设置，不显示每 m2 造价",
+      "col_code": "编码",
+      "col_description": "分部",
+      "col_positions": "清单项数",
+      "col_basis": "计算依据",
+      "col_total": "合计",
+      "col_per_m2": "每 m2 建筑面积造价",
+      "col_share": "占总额 %",
+      "col_running": "累计",
+      "group_level": "仅到组级，未指定分部",
+      "facilitating_works_estimate": "配套工程估算",
+      "works_estimate": "建筑工程估算",
+      "addons_heading": "按清单项计价的 NRM 1 第 9 至 14 组",
+      "unallocated": "未归入任何分部",
+      "direct_cost": "清单直接费用",
+      "markups_heading": "附加费用（按清单自身的计算顺序）",
+      "markups_total": "附加费用合计",
+      "grand_total": "造价计划总额",
+      "basis_direct": "按直接费用的 {pct}%",
+      "basis_running": "按累计小计的 {pct}%",
+      "basis_lump": "固定金额",
+      "basis_banded": "分档计费",
+      "basis_escalation": "指数调价",
+      "basis_other": "{kind}",
+      "basis_scoped": "限定章节",
+      "col_ordinal": "序号",
+      "col_position": "项目名称",
+      "col_written_code": "原始编码",
+      "col_reason": "原因",
+      "reason_no_code": "该清单项及其所在章节均无 NRM 编码",
+      "reason_invalid_code": "编码不是 NRM 编号",
+      "reason_unknown_group": "NRM 1 中没有该组",
+      "truncated": "列表仅显示 {count} 个清单项中的前 {shown} 个，合计已包含全部清单项。"
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "要求",
+      "sheet_summary": "汇总",
+      "sheet_legend": "说明",
+      "summary_element": "构件",
+      "summary_count": "要求数量",
+      "summary_total": "合计",
+      "legend_column": "列",
+      "legend_description": "说明",
+      "unspecified": "未指定",
+      "h01": "构件 / IFC 类",
+      "h02": "分类",
+      "h03": "属性组",
+      "h04": "属性名称",
+      "h05": "数据类型",
+      "h06": "必填",
+      "h07": "允许值",
+      "h08": "最小值",
+      "h09": "最大值",
+      "h10": "单位",
+      "h11": "匹配模式",
+      "h12": "阶段",
+      "h13": "责任方",
+      "h14": "应用场景",
+      "h15": "来源",
+      "d01": "IFC 实体类（如 IFCWALL、IFCBEAM）",
+      "d02": "分类体系及编码（如 Uniclass 2015：EF_25_10）",
+      "d03": "属性集名称（如 Pset_WallCommon）",
+      "d04": "所要求的属性或特性的名称",
+      "d05": "IFC 数据类型（IFCLABEL、IFCREAL、IFCBOOLEAN 等）",
+      "d06": "基数：必需、可选或禁止",
+      "d07": "允许取值列表，以分号分隔",
+      "d08": "数值范围的边界",
+      "d09": "计量单位（m、m2、kg 等）",
+      "d10": "用于校验取值的正则表达式",
+      "d11": "项目阶段或里程碑（LP3、RIBA 第 3 阶段等）",
+      "d12": "责任方（建筑师、结构工程师等）",
+      "d13": "该要求的目的或应用场景",
+      "d14": "来源标准或文件"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "工程量清单已创建",
+      "notifications.boq.created.body": "您的工程量清单“{boq_name}”已保存。",
+      "notifications.meeting.action_assigned.title": "会议待办事项已分配给您",
+      "notifications.meeting.action_assigned.body": "来自会议 {meeting_number}：{description}",
+      "notifications.cde.state_transitioned.title": "文件状态已变更",
+      "notifications.cde.state_transitioned.body": "容器已转为“{new_state}”。",
+      "notifications.cde.linked_published.title": "与您工作相关的文件已发布",
+      "notifications.cde.linked_published.body": "{container_code} 已以版本 {revision_code} 发布。与您关联的记录：{records}。",
+      "notifications.rfi.assigned.title": "RFI 已分配给您",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "RFI 已答复",
+      "notifications.rfi.responded.body": "您提出的 {code}（{title}）已有答复。",
+      "notifications.risk.assigned.title": "风险已分配给您",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "成本超支预警",
+      "notifications.costmodel.overrun_alert.body": "{category} 成本超出预算：实际 {actual} {currency}，超过计划 {planned} {currency} 的 +{threshold_pct}% 预警阈值。",
+      "notifications.submittal.submitted.title": "送审文件待审核",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "送审文件已批准",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "送审文件被退回",
+      "notifications.submittal.rejected.body": "{code}（{title}）。原因：{reason}",
+      "notifications.submittal.revise_resubmit.title": "送审文件需修改",
+      "notifications.submittal.revise_resubmit.body": "{code}（{title}）。原因：{reason}",
+      "notifications.transmittal.issued.title": "文件传送单已发给您",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "文件传送单已签收",
+      "notifications.transmittal.acknowledged.body": "收件人已确认 {code}（{title}）。",
+      "notifications.transmittal.responded.title": "文件传送单已答复",
+      "notifications.transmittal.responded.body": "{code}（{title}）。{response_summary}",
+      "notification.rfi_assigned_title": "RFI 已分配给您",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "新任务已分配给您",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "发票已批准",
+      "notification.invoice_approved_body": "发票 {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "检查已安排",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}，日期：{inspection_date}",
+      "notification.submittal_status_changed_title": "送审文件状态已变更",
+      "notification.submittal_status_changed_body": "{submittal_number}（{title}）- {new_status}",
+      "notification.meeting_scheduled_title": "会议已安排",
+      "notification.meeting_scheduled_body": "{title}，日期：{meeting_date}",
+      "notification.ncr_created_title": "已提出不合格项",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title}（{severity}）",
+      "notification.document_uploaded_title": "文件已上传",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "您在评论中被提及",
+      "notifications.file_comments.mention.body": "“{excerpt}”",
+      "notifications.collaboration.comment_added.title": "讨论中有新评论",
+      "notifications.collaboration.comment_added.body": "关于 {entity_type}：“{excerpt}”",
+      "notifications.clash.high_severity.title": "发现高严重度碰撞",
+      "notifications.clash.high_severity.body": "{severity}碰撞：{a_name} 与 {b_name}",
+      "notifications.validation.report.title": "校验发现问题",
+      "notifications.validation.report.body": "此 {target_type} 存在 {error_count} 个错误和 {warning_count} 个警告。",
+      "notifications.punchlist.auto_created.title": "整改项已创建",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "通知汇总",
+      "notifications.digest.body": "{channel} 渠道有 {count} 条新动态。",
+      "notifications.approval.overdue.title": "审批已逾期",
+      "notifications.approval.overdue.body": "此 {target_kind} 的第 {step_ordinal} 步已逾期 {hours_overdue} 小时。",
+      "notifications.approval.escalated.title": "审批已升级给您",
+      "notifications.approval.escalated.body": "此 {target_kind} 的第 {step_ordinal} 步已升级给您（级别 {level}）。",
+      "notifications.approval.reassigned.title": "审批已转交给您",
+      "notifications.approval.reassigned.body": "此 {target_kind} 的第 {step_ordinal} 步现由您负责审批。",
+      "notifications.deadline.overdue.title": "已逾期：{title}",
+      "notifications.deadline.overdue.body": "{module} 事项“{title}”已逾期 {days_overdue} 天。",
+      "notifications.deadline.escalated.title": "逾期事项已升级",
+      "notifications.deadline.escalated.body": "{module} 事项“{title}”逾期 {days_overdue} 天仍未处理，已升级。",
+      "notifications.deadline.approaching.title": "即将到期：{title}",
+      "notifications.deadline.approaching.body": "{module} 事项“{title}”将于 {due_date} 到期。",
+      "notifications.deadline.built.approaching.title": "即将到期：{title}",
+      "notifications.deadline.built.approaching.body": "{module}：“{title}”将于 {due_date} 到期。",
+      "notifications.deadline.rfi.overdue.title": "已逾期：RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "项目 {project} 的 RFI {reference}“{title}”应于 {due_date_display} 答复，已逾期 {days_overdue} 天，请尽快答复。",
+      "notifications.deadline.rfi.escalated.title": "已升级：RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "项目 {project} 的 RFI {reference}“{title}”仍未关闭，已超过 {due_date_display} 的到期日 {days_overdue} 天，现已升级给您。",
+      "notifications.deadline.rfi.approaching.title": "即将到期：RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "项目 {project} 的 RFI {reference}“{title}”将于 {due_date_display} 到期，请及时答复。",
+      "notifications.deadline.submittals.overdue.title": "已逾期：送审文件 {reference}",
+      "notifications.deadline.submittals.overdue.body": "项目 {project} 的送审文件 {reference}“{title}”应于 {due_date_display} 完成，已逾期 {days_overdue} 天，请尽快审核。",
+      "notifications.deadline.submittals.escalated.title": "已升级：送审文件 {reference}",
+      "notifications.deadline.submittals.escalated.body": "项目 {project} 的送审文件 {reference}“{title}”仍未关闭，已超过 {due_date_display} 的到期日 {days_overdue} 天，现已升级给您。",
+      "notifications.deadline.submittals.approaching.title": "即将到期：送审文件 {reference}",
+      "notifications.deadline.submittals.approaching.body": "项目 {project} 的送审文件 {reference}“{title}”将于 {due_date_display} 到期，请及时审核。",
+      "notifications.deadline.correspondence.overdue.title": "已逾期：往来函件 {reference}",
+      "notifications.deadline.correspondence.overdue.body": "项目 {project} 的往来函件 {reference}“{title}”须在 {due_date_display} 前回复，已逾期 {days_overdue} 天，请尽快回复。",
+      "notifications.deadline.correspondence.escalated.title": "已升级：往来函件 {reference}",
+      "notifications.deadline.correspondence.escalated.body": "项目 {project} 的往来函件 {reference}“{title}”仍未回复，已超过 {due_date_display} 的到期日 {days_overdue} 天，现已升级给您。",
+      "notifications.deadline.correspondence.approaching.title": "即将到期：往来函件 {reference}",
+      "notifications.deadline.correspondence.approaching.body": "项目 {project} 的往来函件 {reference}“{title}”须在 {due_date_display} 前回复，请及时回复。",
+      "notifications.deadline.variations.overdue.title": "已逾期：工程变更 {reference}",
+      "notifications.deadline.variations.overdue.body": "项目 {project} 的工程变更 {reference}“{title}”应于 {due_date_display} 完成，已逾期 {days_overdue} 天，请尽快作出决定。",
+      "notifications.deadline.variations.escalated.title": "已升级：工程变更 {reference}",
+      "notifications.deadline.variations.escalated.body": "项目 {project} 的工程变更 {reference}“{title}”仍未关闭，已超过 {due_date_display} 的到期日 {days_overdue} 天，现已升级给您。",
+      "notifications.deadline.variations.approaching.title": "即将到期：工程变更 {reference}",
+      "notifications.deadline.variations.approaching.body": "项目 {project} 的工程变更 {reference}“{title}”将于 {due_date_display} 到期，请及时作出决定。",
+      "notifications.variation.submitted.title": "工程变更待决定：{code}",
+      "notifications.variation.submitted.body": "项目 {project} 的工程变更 {code}“{title}”已提交，等待决定。",
+      "notifications.variation.approved.title": "工程变更已批准：{code}",
+      "notifications.variation.approved.body": "项目 {project} 的工程变更 {code}“{title}”已获批准。",
+      "notifications.variation.rejected.title": "工程变更已驳回：{code}",
+      "notifications.variation.rejected.body": "项目 {project} 的工程变更 {code}“{title}”已被驳回并退回给您。",
+      "notifications.variation.rejected_reason.body": "项目 {project} 的工程变更 {code}“{title}”已被驳回并退回给您。原因：{reason}",
+      "notifications.changeorder.awaiting_approval.title": "变更令待批准：{code}",
+      "notifications.changeorder.awaiting_approval.body": "项目 {project} 的变更令 {code}“{title}”已提交，等待批准。",
+      "notifications.changeorder.approved.title": "变更令已批准：{code}",
+      "notifications.changeorder.approved.body": "项目 {project} 的变更令 {code}“{title}”已获批准。",
+      "notifications.changeorder.rejected.title": "变更令已驳回：{code}",
+      "notifications.changeorder.rejected.body": "项目 {project} 的变更令 {code}“{title}”已被驳回。",
+      "notifications.submittal.approved_as_noted.title": "送审文件已批准（附意见）",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "有文件需要您审批",
+      "notifications.file_approval.needs_approver.body": "有一份{file_kind}等待您审批。",
+      "notifications.file_approval.approved.title": "您的文件已获批准",
+      "notifications.file_approval.approved.body": "您的{file_kind}已通过全部审批步骤。",
+      "notifications.file_approval.rejected.title": "您的文件已被退回",
+      "notifications.file_approval.rejected.body": "您的{file_kind}已被驳回，需要修改。",
+      "notifications.portal.user_invited.title": "门户用户已受邀",
+      "notifications.portal.user_invited.body": "已邀请 {portal_user_email}，角色：{portal_role}。",
+      "notifications.portal.message_received.title": "门户有新消息",
+      "notifications.portal.message_received.body": "{buyer_name} 发来一条消息。"
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "编号",
+          "活动编号",
+          "活动代码",
+          "任务编号",
+          "代码",
+          "序号"
+        ],
+        "name": [
+          "任务名称",
+          "活动名称",
+          "工序名称",
+          "名称"
+        ],
+        "wbs": [
+          "WBS",
+          "WBS 编码",
+          "WBS 代码",
+          "大纲编号"
+        ],
+        "outline_level": [
+          "大纲级别",
+          "层级",
+          "缩进级别",
+          "级别"
+        ],
+        "start": [
+          "开始时间",
+          "开始日期",
+          "计划开始",
+          "起始日期"
+        ],
+        "finish": [
+          "完成时间",
+          "完成日期",
+          "结束日期",
+          "计划完成",
+          "计划结束"
+        ],
+        "duration": [
+          "工期",
+          "工期（天）",
+          "持续时间",
+          "天数"
+        ],
+        "predecessors": [
+          "前置任务",
+          "紧前工作",
+          "前置活动",
+          "依赖关系",
+          "紧前任务"
+        ],
+        "percent_complete": [
+          "完成百分比",
+          "% 完成",
+          "进度",
+          "进度（%）",
+          "完成率"
+        ],
+        "milestone": [
+          "里程碑",
+          "是否里程碑"
+        ],
+        "resource": [
+          "资源名称",
+          "资源",
+          "班组",
+          "责任班组",
+          "分配给"
+        ],
+        "notes": [
+          "备注",
+          "说明",
+          "注释"
+        ],
+        "client_visible": [
+          "客户可见",
+          "对客户可见",
+          "向客户显示",
+          "与客户共享"
+        ]
+      },
+      "yes_words": [
+        "是",
+        "对",
+        "有"
+      ],
+      "no_words": [
+        "否",
+        "不是",
+        "无"
+      ],
+      "example_names": [
+        "主体结构",
+        "土方开挖",
+        "基础工程",
+        "基础验收"
+      ]
+    },
+    "module_suggest": {
+      "link_labels": {
+        "contract": "合同",
+        "contact": "联系人",
+        "schedule_activity": "进度任务",
+        "document": "文件",
+        "user": "负责人"
+      },
+      "keywords": {
+        "contract": [
+          "合同",
+          "契约"
+        ],
+        "contact": [
+          "联系人",
+          "供应商",
+          "分包商",
+          "客户"
+        ],
+        "schedule_activity": [
+          "任务",
+          "工序",
+          "作业"
+        ],
+        "document": [
+          "文件",
+          "文档",
+          "图纸",
+          "附件"
+        ],
+        "user": [
+          "负责人",
+          "责任人",
+          "检查员",
+          "监理"
+        ],
+        "due": [
+          "截止",
+          "到期",
+          "期限",
+          "有效期"
+        ]
+      },
+      "state_labels": [
+        "待处理",
+        "进行中",
+        "已完成"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "{package} 招标补遗 {number}",
+      "addendum_heading": "招标补遗",
+      "greeting": "{company} 尊敬的贵司：",
+      "greeting_generic": "尊敬的投标人：",
+      "addendum_intro": "招标包 {package} 补遗 {number} 已发布：{title}。",
+      "addendum_deadline": "投标截止时间已由 {old} 调整为 {new}。",
+      "addendum_boq": "工程量清单已修订（修订版 {revision}），请按现行版本报价。",
+      "addendum_documents": "已发布文件：{documents}",
+      "addendum_ack": "请确认已收到本补遗。未确认全部补遗的投标文件可能被视为不符合要求。",
+      "answer_subject": "招标 {package} 澄清 {number}",
+      "answer_heading": "招标澄清",
+      "answer_intro": "招标包 {package} 的一项提问已作答，答复适用于所有投标人。",
+      "question_label": "问题",
+      "answer_label": "答复"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "开发总价值（GDV）",
+      "total_development_cost": "开发总成本",
+      "residual_land_value": "土地剩余价值",
+      "developer_profit": "开发商利润",
+      "profit_on_cost": "成本利润率",
+      "profit_on_gdv": "GDV 利润率",
+      "construction_cost": "建安成本",
+      "professional_fees": "专业费用",
+      "contingency": "预备费",
+      "finance_cost": "财务成本",
+      "sales_costs": "销售费用"
+    },
+    "status": {
+      "viable": "可行",
+      "unviable": "不可行",
+      "marginal": "临界",
+      "pending": "尚未评估"
+    },
+    "figure": {
+      "gross_development_value": "项目中所有房源的销售总额，均以同一货币计。",
+      "total_development_cost": "项目实施的全部成本（不含土地本身）：建安、专业费用、预备费、财务成本和销售费用。",
+      "residual_land_value": "从开发总价值中扣除开发总成本和目标开发商利润后，余下可用于土地的金额。",
+      "developer_profit": "开发商希望保留的利润，以占开发总价值的目标比例设定。",
+      "profit_on_cost": "开发商利润除以开发总成本，以比率表示。",
+      "profit_on_gdv": "开发商利润除以开发总价值，以比率表示。"
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "工人宿舍",
+        "rental": "租赁住房",
+        "hotel": "酒店"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "待审批",
+        "approved": "已批准",
+        "rejected": "已驳回"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "符合",
+        "fail": "不符合",
+        "not_applicable": "不适用"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "图纸",
+        "contract": "合同",
+        "specification": "规范",
+        "photo": "照片",
+        "correspondence": "往来函件",
+        "reality_capture": "实景采集",
+        "other": "其他"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "待审批",
+        "approved": "已批准",
+        "rejected": "已驳回",
+        "cancelled": "已取消"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "草稿",
+        "submitted": "已提交审批",
+        "approved": "已批准",
+        "posted": "已过账至总账"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "待处理",
+        "assigned": "已指派",
+        "in_progress": "处理中",
+        "resolved": "已整改",
+        "verified": "已验证",
+        "closed": "已关闭"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "观察项",
+        "minor": "轻微",
+        "major": "严重",
+        "critical": "危急"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "人员",
+        "crew": "班组",
+        "equipment": "设备",
+        "subcontractor": "分包商"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI 模型名称已过期或不可用。请打开 设置 > AI，为您的服务商填写当前有效的模型名称。",
+      "not_configured": "尚未配置 AI。请在设置中配置 AI 服务商。"
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "已验证",
+      "bound": "已附加",
+      "empty": "未提交"
+    },
+    "package_status_labels": {
+      "draft": "草稿",
+      "in_progress": "进行中",
+      "ready": "就绪",
+      "issued": "已发出"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "阻断",
+      "critical": "严重",
+      "warning": "警告",
+      "suggestion": "建议"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "策略",
+      "brief": "需求简报",
+      "concept": "概念",
+      "design": "方案设计",
+      "approval": "报批",
+      "detail": "施工图设计",
+      "tender": "招标",
+      "award": "中标",
+      "construction": "施工",
+      "handover": "交付",
+      "operation": "运营"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "该任务没有需要切割的零件",
+        "suggestion": "手工添加零件、粘贴，或从钢筋弯曲明细表、算量、工程量清单行或文件导入。"
+      },
+      "has_stock": {
+        "fail": "该任务没有可供切割的库存",
+        "suggestion": "至少添加一个库存长度或板材规格，或复用现场库存中的余料。"
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} 没有宽度",
+        "suggestion": "为每个板材零件和每个板材规格同时填写长度和宽度。"
+      },
+      "piece_fits_stock": {
+        "fail": "零件 {ref}（{size} mm）放不进任何库存规格",
+        "suggestion": "添加更长或更大的库存规格，减小修边，或用接头将零件拆分。"
+      },
+      "grain_allows_fit": {
+        "fail": "零件 {ref} 只有旋转到与纹理垂直时才放得下",
+        "suggestion": "允许该零件旋转，或添加可沿纹理方向放下它的板材规格。"
+      },
+      "kerf_set": {
+        "fail": "锯缝宽度为零",
+        "suggestion": "请输入锯片或切割宽度，否则每根多次切割的棒材的利用率会被高估。"
+      },
+      "min_offcut_set": {
+        "fail": "未设置最小可用余料",
+        "suggestion": "设置值得保留的最短余料，这样可复用余料就不会被算作损耗。"
+      },
+      "stock_priced": {
+        "fail": "库存 {ref} 没有单价",
+        "suggestion": "填写单件价格，方案才能给出成本并选择最便宜的库存。"
+      },
+      "stock_sufficient": {
+        "fail": "可用库存上未排入的零件数：{count}",
+        "suggestion": "增加可用数量或添加另一个库存规格。"
+      },
+      "yield_threshold": {
+        "fail": "利用率 {actual} % 低于阈值 {threshold} %",
+        "suggestion": "添加其他库存长度或规格，允许旋转，或重新检查该材料的阈值。"
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "销项清单事项“{title}”未附照片即已关闭",
+    "punch_no_photo_fix": "请添加已完成工作的照片",
+    "photo_weak": "“{title}”上有 {count} 张照片缺少位置或拍摄时间",
+    "photo_weak_fix": "请开启定位后在应用中重新拍照",
+    "defect_no_photo": "缺陷“{reference}”未附整改照片即已关闭",
+    "defect_no_photo_fix": "请附上整改后工作的照片"
+  },
+  "closeout_dossier": {
+    "more_items": "另有 {count} 项未列出",
+    "category_missing": "必备类别“{category}”没有凭证",
+    "category_missing_fix": "请把文件关联到该类别的检查清单项，或新增一项",
+    "category_unverified": "“{category}”的凭证尚未核实",
+    "category_unverified_fix": "请经理审核并核实已关联的凭证",
+    "punch_open": "销项清单事项“{name}”仍未关闭",
+    "punch_open_fix": "请处理并关闭该事项，或将其排除在本档案范围之外",
+    "punch_no_photo": "已处理的销项清单事项“{name}”没有照片",
+    "punch_no_photo_fix": "请添加已完成工作的照片",
+    "system_pending": "系统“{name}”尚未调试",
+    "system_pending_fix": "请完成调试检查清单，并将系统标记为已调试",
+    "critical_issues": "仍有 {count} 个关键调试问题未关闭",
+    "critical_issues_fix": "移交前请关闭关键问题",
+    "acceptance_missing": "未关联验收证书",
+    "acceptance_missing_fix": "请把已签署的验收证书关联到验收检查清单项",
+    "acceptance_unsigned": "验收证书尚未全部签署（状态：{status}）",
+    "acceptance_unsigned_fix": "请在“签署”中收齐尚缺的签名",
+    "blocked": "档案未通过检查清单。请修正发现的问题，或仍然汇编并标记为不完整（需经理签批）。",
+    "delivery_title": "移交档案：{project}",
+    "delivery_body": "移交档案“{title}”（{scope}）已就绪。下方链接可下载，有效期至 {expires}。",
+    "pdf": {
+      "title": "移交档案",
+      "scope": "范围",
+      "built": "汇编时间",
+      "status_passed": "检查清单已通过",
+      "status_warnings": "检查清单已通过，但有警告",
+      "status_errors": "不完整：检查清单仍有未处理的发现",
+      "findings": "未处理的检查清单发现",
+      "severity": "严重程度",
+      "finding": "发现",
+      "severity_error": "错误",
+      "severity_warning": "警告",
+      "severity_info": "信息",
+      "contents": "目录",
+      "file": "文件",
+      "size": "大小",
+      "punch": "已处理的销项清单",
+      "item": "事项",
+      "status": "状态",
+      "photos": "照片",
+      "evidence": "照片凭证"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "“{name}”的评级 {rating} 不是量表“{scale}”的等级",
+    "rule_poor_without_action": "“{name}”被评为 {rating}，但没有计划的维护措施",
+    "rule_poor_without_action_fix": "请生成计划，或为该构件添加措施",
+    "rule_action_unpriced": "“{name}”在 {year} 年的措施没有单价",
+    "rule_action_unpriced_fix": "请输入单价，使其计入计划合计",
+    "rule_defect_incomplete": "“{name}”的评级要求施工，但未记录严重程度或范围"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label},第 {page} 页",
+    "text_change": "“{old}”已改为“{new}”",
+    "kind": {
+      "added": "新增",
+      "removed": "删除",
+      "modified": "修改",
+      "text": "文字变更"
+    },
+    "status": {
+      "open": "待处理",
+      "relevant": "相关",
+      "not_relevant": "不相关"
+    },
+    "errors": {
+      "revision_not_found": "在此项目中未找到图纸版本。",
+      "revision_not_parsed": "该图纸尚无可供比较的已处理版本。",
+      "comparison_not_found": "未找到比较。",
+      "change_not_found": "未找到变更。",
+      "same_revision": "请选择两个不同的版本或页面进行比较。",
+      "manual_points": "手动对齐需要在每个版本上选取两个不同的点。",
+      "alignment_singular": "无法应用该对齐:它会使图幅塌缩。",
+      "region_empty": "变更 {seq} 没有尺寸。",
+      "region_off_sheet": "变更 {seq} 位于图幅之外。",
+      "module_missing": "此操作所需的模块尚未安装。"
+    },
+    "rfi": {
+      "subject": "{sheet} 上的图纸变更 {seq}",
+      "question": "{sheet} 的版本 {new} 在标记区域({kind})与版本 {old} 不同。请确认变更意图,以及是否影响工程量。"
+    },
+    "markup": {
+      "text": "版本变更 {seq}:{kind}"
+    },
+    "report": {
+      "title": "图纸版本比较",
+      "project": "项目",
+      "name": "比较",
+      "old_revision": "旧版本",
+      "new_revision": "新版本",
+      "alignment": "对齐",
+      "alignment_none": "未对齐(同一图框)",
+      "alignment_auto": "自动",
+      "alignment_manual": "手动,两点",
+      "confidence": "置信度 {value}",
+      "summary": "变更",
+      "summary_counts": "共 {total} 项:新增 {added},删除 {removed},修改 {modified},文字 {text}",
+      "generated_on": "生成日期",
+      "generated": "生成于 {timestamp}",
+      "page_of": "第 {page} 页,共 {total} 页",
+      "no_changes": "两个版本之间未发现变更。",
+      "col_no": "序号",
+      "col_preview": "预览",
+      "col_kind": "变更",
+      "col_location": "位置",
+      "col_detail": "详情",
+      "col_status": "状态",
+      "col_comment": "备注",
+      "col_follow_up": "后续跟进",
+      "page_at": "第 {page} 页,位于 {coords}",
+      "layer": "图层 {layer}",
+      "entity_counts": "图元:新增 {added},删除 {removed},修改 {modified}",
+      "rfi": "RFI {number}",
+      "markup": "修订云线",
+      "remeasure": "重新计量:{items} 项工程量,{positions} 个 BOQ 清单项"
+    },
+    "rules": {
+      "distinct_revisions_ok": "两侧是不同的版本。",
+      "distinct_revisions_fail": "该比较是将图幅与其自身比较。",
+      "distinct_revisions_hint": "请选择图纸的旧版本和新版本。",
+      "alignment_not_needed": "DWG 版本共用图纸单位,无需对齐。",
+      "alignment_missing_matrix": "该比较没有对齐。",
+      "alignment_singular": "对齐会使图幅塌缩,无法应用。",
+      "alignment_scale": "对齐会将图幅缩放 {scale} 倍,超出同一图纸各版本之间的正常差异。",
+      "alignment_low_confidence": "自动对齐不确定(置信度 {confidence})。",
+      "alignment_manual_points": "手动对齐需要两对点。",
+      "alignment_ok": "图幅对齐合理。",
+      "alignment_hint": "请在两个版本共有的两个标记(如轴网交点)上手动对齐图幅。",
+      "region_empty": "变更 {seq} 没有尺寸。",
+      "region_off_sheet": "变更 {seq} 位于图幅之外。",
+      "regions_ok": "所有变更区域都在图幅上。",
+      "triaged_ok": "所有变更均已审核。",
+      "triaged_open": "仍有 {count} 项变更待处理。",
+      "triaged_hint": "请将每项变更标记为相关或不相关。",
+      "followed_up_ok": "所有相关变更均已跟进。",
+      "followed_up_missing": "变更 {seq} 已标记为相关,但没有备注、RFI、修订云线或重新计量标记。",
+      "followed_up_hint": "请为该变更添加备注、发起 RFI 或修订云线,或将其内的工程量标记为重新计量。"
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "现金流预测",
+      "portfolio_title": "投资组合现金流预测",
+      "empty": "此选择暂无现金流预测。",
+      "project": "项目",
+      "as_of": "截至",
+      "currency": "货币",
+      "delay_days": "回款延迟（天）",
+      "overrun_pct": "成本超支（%）",
+      "closing_position": "期末余额",
+      "peak_funding": "最大资金需求",
+      "peak_period": "资金需求峰值月份",
+      "col": {
+        "period": "月份",
+        "planned_in": "计划回款",
+        "actual_in": "实际回款",
+        "expected_in": "预计回款",
+        "planned_out": "计划付款",
+        "actual_out": "实际付款",
+        "expected_out": "预计付款",
+        "net": "净额",
+        "cumulative": "累计头寸"
+      }
+    }
+  }
+}

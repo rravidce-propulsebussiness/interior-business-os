@@ -1,0 +1,2540 @@
+{
+  "costs.catalog_name_unavailable": "Бұл атауды жаңа анықтамалық үшін пайдалануға болмайды. Басқа атау таңдаңыз.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Ашық бастапқы кодты құрылыс сметасын есептеу"
+  },
+  "nav": {
+    "dashboard": "Бақылау Тақтасы",
+    "assemblies": "Жинақтар",
+    "ai_estimate": "ИИ Сметасы",
+    "settings": "Баптаулар",
+    "5d_cost_model": "5D Шығын Моделі",
+    "templates": "Үлгілер",
+    "reports": "Есептер",
+    "sustainability": "Тұрақтылық",
+    "group_estimation": "Сметалау",
+    "group_planning": "Жоспарлау",
+    "group_procurement": "Сатып Алу",
+    "group_tools": "Құралдар",
+    "architecture": "Архитектура Картасы"
+  },
+  "common": {
+    "save": "Сақтау",
+    "cancel": "Бас тарту",
+    "delete": "Жою",
+    "edit": "Өңдеу",
+    "create": "Құру",
+    "search": "Іздеу",
+    "filter": "Сүзгі",
+    "export": "Экспорт",
+    "import": "Импорт",
+    "loading": "Жүктелуде...",
+    "error": "Қате",
+    "success": "Сәтті",
+    "confirm": "Растау",
+    "back": "Артқа",
+    "next": "Келесі",
+    "yes": "Иә",
+    "no": "Жоқ"
+  },
+  "auth": {
+    "login": "Кіру",
+    "logout": "Шығу",
+    "email": "Электрондық пошта",
+    "password": "Құпия сөз"
+  },
+  "projects": {
+    "title": "Жобалар",
+    "new_project": "Жаңа Жоба",
+    "project_name": "Жоба Атауы",
+    "no_projects": "Әзірге жоба жоқ"
+  },
+  "boq": {
+    "title": "Көлемдер Ведомостісі",
+    "position": "Позиция",
+    "ordinal": "Реттік нөмір",
+    "description": "Сипаттама",
+    "quantity": "Көлем",
+    "unit": "Бірлік",
+    "unit_rate": "Бірлік Бағасы",
+    "total": "Жиыны",
+    "add_position": "Позиция Қосу",
+    "add_section": "Бөлім Қосу",
+    "assembly": "Жинақ",
+    "subtotal": "Аралық сома",
+    "grand_total": "Жалпы Сома",
+    "direct_cost": "Тікелей Шығын",
+    "net_total": "Таза Сома",
+    "gross_total": "Жалпы Сома (ҚҚС-пен)",
+    "vat": "ҚҚС",
+    "add_markups": "Үстемелер Қосу",
+    "validate": "Тексеру",
+    "export": "Экспорт",
+    "mvp": {
+      "title": "Материалдарды таңдау",
+      "subtitle_one": "{{count}} ресурс таңдау қажет",
+      "subtitle_other": "{{count}} ресурс таңдау қажет",
+      "bulk_label": "Жылдам толтыру:",
+      "bulk_median": "Бәріне медианасы",
+      "bulk_mean": "Бәріне орташасы",
+      "bulk_cheapest": "Бәріне ең арзаны",
+      "bulk_priciest": "Бәріне ең қымбаты",
+      "slot_variant_count": "{{n}} нұсқа",
+      "selected_label": "Таңдалды:",
+      "default_mean": "орташа баға",
+      "default_median": "медиана баға",
+      "row_median": "Медиана баға · {{price}}",
+      "row_mean": "Орташа баға · {{price}}",
+      "subtotal_label": "Позиция бағасы",
+      "apply": "Қолдану және BOQ-қа қосу",
+      "batch_progress": "{{total}}-ден {{current}} позиция",
+      "toast_applied_one": "{{count}} нұсқа таңдалды",
+      "toast_applied_other": "{{count}} нұсқа таңдалды"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Алмасу есебі"
+      },
+      "column": {
+        "severity": "Маңыздылығы",
+        "kind": "Жоғалту түрі",
+        "position": "Позиция",
+        "field": "Өріс",
+        "original": "Бастапқы мән",
+        "written": "Жазылған мән",
+        "count": "Саны",
+        "detail": "Мәлімет"
+      },
+      "severity": {
+        "error": "Күрделі",
+        "warning": "Ескерту",
+        "info": "Ескертпе"
+      },
+      "kind": {
+        "unsupported_element": "Элемент қолдау таппайды",
+        "truncated_text": "Мәтін қысқартылды",
+        "altered_text": "Мәтін өзгертілді",
+        "rounded_value": "Мән дөңгелектенді",
+        "value_out_of_range": "Мән ауқымнан тыс",
+        "dropped_attribute": "Атрибут тасталды",
+        "unmapped_unit": "Өлшем бірлігі сәйкестендірілмеді",
+        "lost_hierarchy": "Иерархия деңгейі жоғалды",
+        "markup_not_representable": "Үстемеақыны көрсету мүмкін емес",
+        "attachment_skipped": "Тіркеме өткізіп жіберілді",
+        "changed_identifier": "Идентификатор өзгертілді",
+        "exceeds_limit": "Сақтау шегінен асты",
+        "rejected_row": "Жол қабылданбады",
+        "skipped_row": "Жол өткізіп жіберілді",
+        "parser_warning": "Оқу құралының ескертуі",
+        "roundtrip_mismatch": "Айналма тексеру сәйкессіздігі"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Тармақталу нүктесі",
+      "base_snapshot_from": "Тармақталу нүктесі («{snapshot}» көшірмесінен)",
+      "before_cherry_pick": "«{source}» өзгерістерін қолданғанға дейін",
+      "before_merge": "«{branch}» тармағын біріктіргенге дейін",
+      "errors": {
+        "branch_closed": "Бұл тармақ біріктірілген немесе мұрағатталған, енді өзгеріс қабылдамайды.",
+        "not_a_branch": "Бұл көлем ведомосы тармақ емес.",
+        "same_bill": "Екі түрлі смета таңдаңыз.",
+        "different_project": "Екі смета да бір жобаға тиесілі болуы керек.",
+        "different_tree": "Екі смета да бір негізгі сметаның тармақтары болуы керек.",
+        "unresolved_conflicts": "Екі сметада да өзгерген позициялар: {count}. Қолданар алдында әрқайсысы үшін қай нұсқаны сақтауды шешіңіз.",
+        "merge_forbidden": "Негізгі сметаға біріктіруге рұқсатыңыз жоқ.",
+        "confirm_required": "Біріктіруді растаңыз: ол негізгі сметаны қайта жазады.",
+        "design_options_unavailable": "Жобалық шешім нұсқалары модулі орнатылмаған.",
+        "base_snapshot_in_use": "Бұл көшірме ашық тармақтың тармақталу нүктесі, оны жоюға болмайды."
+      },
+      "export": {
+        "title_positions": "Сметаларды позициялар бойынша салыстыру",
+        "title_sections": "Сметаларды бөлімдер бойынша салыстыру",
+        "title_cost_groups": "Сметаларды шығын топтары бойынша салыстыру",
+        "project": "Жоба",
+        "bill_a": "Смета A",
+        "bill_b": "Смета B",
+        "total_a": "Барлығы A",
+        "total_b": "Барлығы B",
+        "delta": "Айырма",
+        "counts": "Өзгерістер",
+        "counts_value": "қосылған: {added}, жойылған: {removed}, өзгертілген: {changed}",
+        "col_ordinal": "Поз.",
+        "col_description": "Сипаттама",
+        "col_unit": "Бірл.",
+        "col_change": "Өзгеріс",
+        "col_qty_a": "Саны A",
+        "col_qty_b": "Саны B",
+        "col_rate_a": "Баға A",
+        "col_rate_b": "Баға B",
+        "col_total_a": "Барлығы A",
+        "col_total_b": "Барлығы B",
+        "col_delta": "Айырма",
+        "col_section": "Бөлім",
+        "col_cost_group": "Шығын тобы",
+        "change_added": "Қосылған",
+        "change_removed": "Жойылған",
+        "change_changed": "Өзгертілген",
+        "change_unchanged": "Өзгеріссіз",
+        "ungrouped": "Топсыз",
+        "empty": "Екі смета бірдей.",
+        "total": "Барлығы"
+      }
+    }
+  },
+  "costs": {
+    "title": "Шығын Дерекқоры",
+    "rate": "Баға",
+    "material": "Материал",
+    "labor": "Еңбек",
+    "equipment": "Техника",
+    "search_costs": "Шығын позицияларын іздеу..."
+  },
+  "assemblies": {
+    "title": "Жинақтар",
+    "description": "Қайта қолданылатын шығын рецептері — материалдарды, еңбекті және техниканы дайын үлгілерге біріктіріңіз",
+    "new_assembly": "Жаңа Жинақ",
+    "from_database": "Дерекқордан",
+    "apply_to_boq": "ЖКТ-ге қолдану",
+    "add_component": "Компонент Қосу",
+    "no_assemblies": "Әлі жинақ жоқ",
+    "no_assemblies_hint": "Алғашқы жинағыңызды Шығын Дерекқорынан немесе Ресурс Анықтамалығынан жасаңыз",
+    "total_rate": "Жалпы мөлшерлеме"
+  },
+  "catalog": {
+    "title": "Ресурс Анықтамалығы",
+    "description": "Материалдарды, техниканы, еңбекақыларды және операторларды қарау және басқару",
+    "add_resource": "Ресурс Қосу",
+    "import_region": "Өңірді Импорттау",
+    "build_assembly": "Жинақ Құру",
+    "my_catalog": "Менің Анықтамалығым"
+  },
+  "validation": {
+    "title": "Тексеру",
+    "passed": "Өтті",
+    "warnings": "Ескертулер",
+    "errors": "Қателер",
+    "score": "Сапа Ұпайы",
+    "run_validation": "Тексеруді Іске Қосу",
+    "missing_quantity": "{position} позициясында көлем жоқ",
+    "missing_rate": "{position} позициясында бірлік бағасы жоқ",
+    "missing_description": "{position} позициясында сипаттама жоқ",
+    "missing_classification": "{position} позициясына жіктеу коды қажет",
+    "duplicate_ordinal": "Қайталанған реттік нөмір: {ordinal}",
+    "rate_anomaly": "Бірлік бағасы {rate} шектен асты ({threshold})",
+    "nl": {
+      "not_a_string": "Енгізілген мәтін болуы керек.",
+      "empty": "Енгізу бос.",
+      "too_long": "Енгізу {max} таңбадан асып кетті.",
+      "ai_unparsable": "ЖИ жауабын DSL құжаты ретінде талдау мүмкін болмады.",
+      "no_pattern": "Енгізілген сөйлемге сәйкес келетін үлгі табылмады.",
+      "try": "Көріңіз: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D Кесте",
+    "generated": {
+      "position_label": "Позиция {ordinal}",
+      "section_label": "Бөлім {ordinal}",
+      "task_description": "BOQ позициясы {ordinal}-ден автоматты түрде жасалды ({quantity} {unit})",
+      "section_description": "Қысқаша мазмұны: BOQ бөлімі {ordinal}",
+      "start_milestone": "Жобаның басталуы",
+      "start_milestone_description": "Жобаның басталу кезеңі",
+      "completion_milestone": "Жобаның аяқталуы",
+      "completion_milestone_description": "Жобаның аяқталу кезеңі",
+      "labour_resource": "Жұмыс күші",
+      "machine_resource": "Машиналар"
+    },
+    "progress_sheet": {
+      "sheet_title": "Орындалу",
+      "title": "Орындалуды жаңарту парағы",
+      "detail_schedule": "Кесте: {name}",
+      "detail_exported": "Экспорттаған күні: {date}",
+      "instructions": "Тек ақ бағандарды толтырыңыз. Сұр бағандарды, жолдардың ретін және жасырын бағандарды өзгертпеңіз.",
+      "col": {
+        "activity_ref": "Жұмыс ID",
+        "name": "Жұмыс",
+        "wbs_code": "WBS",
+        "responsible": "Жауапты",
+        "planned_start": "Жоспарлы басталуы",
+        "planned_finish": "Жоспарлы аяқталуы",
+        "percent_complete": "% орындалуы",
+        "actual_start": "Нақты басталуы",
+        "actual_finish": "Нақты аяқталуы",
+        "remaining_duration": "Қалды (жұмыс күні)",
+        "notes": "Ескертпелер",
+        "row_key": "Жол кілті",
+        "stamp": "Мөр"
+      }
+    }
+  },
+  "cad": {
+    "title": "CAD Импорты",
+    "upload": "CAD Файлын Жүктеу",
+    "supported_formats": "Қолдау көрсетіледі: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Түрлендірілуде...",
+    "elements_found": "{count} элемент табылды"
+  },
+  "takeoff": {
+    "title": "Көлемді Өлшеу",
+    "auto_detect": "Автоматты Анықтау",
+    "manual_measure": "Қолмен Өлшеу",
+    "confidence": "Сенімділік"
+  },
+  "tendering": {
+    "title": "Тендерлеу",
+    "create_tender": "Тендер Құру",
+    "bid": "Ұсыныс",
+    "award": "Жеңімпаз Тағайындау"
+  },
+  "modules": {
+    "title": "Модульдер",
+    "installed": "Орнатылған",
+    "available": "Қолжетімді",
+    "install": "Орнату",
+    "uninstall": "Жою",
+    "update": "Жаңарту"
+  },
+  "dashboard": {
+    "welcome": "OpenConstructionERP-ке қош келдіңіз",
+    "subtitle": "Сіздің құрылыс сметалау жұмыс кеңістігіңіз",
+    "recent_projects": "Соңғы Жобалар",
+    "system_status": "Жүйе Мәртебесі",
+    "modules_loaded": "Жүктелген Модульдер",
+    "validation_rules": "Тексеру Ережелері",
+    "languages": "Тілдер",
+    "continue_estimate": "Соңғы сметаны жалғастыру",
+    "getting_started": "Жұмысты Бастау",
+    "total_value": "Жалпы Құн",
+    "active_estimates": "Белсенді Сметалар",
+    "schedule_status": "Кесте Мәртебесі",
+    "quality_score": "Сапа Ұпайы",
+    "analytics": "Аналитика",
+    "project_overview": "Жоба Шолуы",
+    "step_load_db": "Шығын Дерекқорын Жүктеу",
+    "step_load_db_desc": "55,000+ позициясы бар өңірлік баға деректерін импорттаңыз",
+    "step_ai_search": "ИИ Іздеуін Қосу",
+    "step_ai_search_desc": "Семантикалық шығын сәйкестендіру үшін вектор енгізулерін жасау",
+    "step_connect_ai": "ИИ-ды Қосу",
+    "step_connect_ai_desc": "ИИ бағалауы үшін API кілттеріңізді қосыңыз",
+    "step_create_project": "Жоба Құру",
+    "step_create_project_desc": "Алғашқы құрылыс сметалау жобаңызды бастаңыз",
+    "step_build_boq": "BOQ-ыңызды Құрыңыз",
+    "step_build_boq_desc": "ИИ көмегімен Көлемдер Ведомостісін құрыңыз"
+  },
+  "units": {
+    "m": "м",
+    "m2": "м²",
+    "m3": "м³",
+    "kg": "кг",
+    "t": "т",
+    "pcs": "дана",
+    "lsum": "жиынтық сома",
+    "h": "сағ",
+    "set": "жинақ"
+  },
+  "contacts": {
+    "title": "Байланыстар Анықтамалығы",
+    "new_contact": "Жаңа байланыс",
+    "contact_type": "Байланыс Түрі",
+    "client": "Клиент",
+    "subcontractor": "Қосалқы мердігер",
+    "supplier": "Жеткізуші",
+    "consultant": "Кеңесші",
+    "internal": "Ішкі",
+    "company_name": "Компания Атауы",
+    "search_contacts": "Байланыстарды іздеу...",
+    "no_contacts": "Әзірге байланыс жоқ",
+    "prequalification": "Алдын ала біліктілік",
+    "approved": "Бекітілген",
+    "pending": "Күтуде",
+    "expired": "Мерзімі өткен"
+  },
+  "tasks": {
+    "title": "Тапсырмалар",
+    "new_task": "Жаңа Тапсырма",
+    "task": "Тапсырма",
+    "topic": "Тақырып",
+    "information": "Ақпарат",
+    "decision": "Шешім",
+    "personal": "Жеке Тапсырма",
+    "my_tasks": "Менің Тапсырмаларым",
+    "open": "Ашық",
+    "in_progress": "Орындалуда",
+    "completed": "Аяқталды",
+    "draft": "Нобай",
+    "due_date": "Мерзімі",
+    "assignee": "Тағайындалған",
+    "priority": "Басымдық",
+    "checklist": "Тексеру Парағы",
+    "focus_area": "Назар Аймағы"
+  },
+  "rfi": {
+    "title": "Ақпарат Сұраулары",
+    "new_rfi": "Жаңа RFI",
+    "subject": "Тақырыбы",
+    "question": "Сұрақ",
+    "response": "Жауап",
+    "ball_in_court": "Кезек Кімде",
+    "days_open": "Ашық Күндер",
+    "cost_impact": "Шығынға Әсер",
+    "schedule_impact": "Кестеге Әсер",
+    "respond": "Жауап беру",
+    "close": "Жабу",
+    "overdue": "Мерзімі өткен"
+  },
+  "finance": {
+    "title": "Қаржы",
+    "budgets": "Бюджеттер",
+    "invoices": "Шот-фактуралар",
+    "payable": "Кредиторлық",
+    "receivable": "Дебиторлық",
+    "payments": "Төлемдер",
+    "evm": "Тапқан құн",
+    "invoice_number": "Шот-фактура №",
+    "amount": "Сома",
+    "status": "Мәртебе",
+    "approve": "Бекіту",
+    "pay": "Төленді деп белгілеу",
+    "original_budget": "Бастапқы Бюджет",
+    "revised_budget": "Түзетілген Бюджет",
+    "committed": "Міндеттелген",
+    "actual": "Нақты",
+    "forecast": "Болжам",
+    "variance": "Ауытқу"
+  },
+  "procurement": {
+    "title": "Сатып Алу",
+    "purchase_orders": "Сатып Алу Тапсырыстары",
+    "goods_receipts": "Тауар Қабылдаулары",
+    "new_po": "Жаңа Сатып Алу Тапсырысы",
+    "po_number": "PO №",
+    "vendor": "Жеткізуші",
+    "issue": "Шығару",
+    "confirm": "Қабылдауды Растау"
+  },
+  "safety": {
+    "title": "Қауіпсіздік",
+    "incidents": "Оқиғалар",
+    "observations": "Бақылаулар",
+    "new_incident": "Жаңа Оқиға",
+    "new_observation": "Жаңа Бақылау",
+    "severity": "Ауырлығы",
+    "risk_score": "Тәуекел Ұпайы",
+    "days_lost": "Жоғалтылған Күндер",
+    "treatment": "Емдеу",
+    "corrective_action": "Түзету Әрекеті"
+  },
+  "meetings": {
+    "title": "Жиналыстар",
+    "new_meeting": "Жаңа Жиналыс",
+    "meeting_type": "Түрі",
+    "attendees": "Қатысушылар",
+    "agenda": "Күн Тәртібі",
+    "action_items": "Әрекет Пункттері",
+    "minutes": "Хаттама",
+    "complete": "Жиналысты Аяқтау",
+    "present": "Қатысады",
+    "absent": "Қатыспайды",
+    "excused": "Дәлелді себеппен жоқ",
+    "actions": {
+      "status": {
+        "open": "Ашық",
+        "completed": "Аяқталған",
+        "cancelled": "Бас тартылған"
+      },
+      "flag": {
+        "overdue": "Мерзімі өткен",
+        "on_track": "Жоспар бойынша"
+      },
+      "label": {
+        "action_item": "Іс-шара",
+        "completion_rate": "Іс-шараларды орындау деңгейі",
+        "open_vs_done": "Ашық және орындалған",
+        "overdue": "Мерзімі өткен іс-шаралар"
+      },
+      "explain": {
+        "action_item": "Іс-шара — жиналыста келісілген, жауапты адамы мен мерзімі бар тапсырма.",
+        "completion_rate": "Орындалу деңгейі — орындалған іс-шаралардың жалпы санына қатынасы, 0-ден 1-ге дейін.",
+        "open_vs_done": "Ашық іс-шараларға әлі жұмыс қажет. Орындалған іс-шаралар аяқталған және одан әрі жұмыс талап етпейді.",
+        "overdue": "Іс-шара ашық күйде қалып, мерзімі анықтама күнінен бұрын болса, мерзімі өткен деп есептеледі."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Жиналыс хаттамасы",
+      "issued": "ШЫҒАРЫЛДЫ",
+      "draft": "ЖОБА",
+      "date": "Күні:",
+      "location": "Орны:",
+      "type": "Түрі:",
+      "number": "Жиналыс №:",
+      "chairperson": "Төраға:",
+      "next_meeting": "Келесі жиналыс:",
+      "not_available": "Қолжетімсіз",
+      "not_scheduled": "Жоспарланбаған",
+      "attendance": "Қатысушылар",
+      "present": "Қатысқандар:",
+      "absent": "Қатыспағандар / дәлелді себеппен:",
+      "agenda": "Күн тәртібі, талқылау және шешімдер",
+      "required": "(міндетті)",
+      "discussion": "Талқылау:",
+      "decision": "Шешім:",
+      "decisions": "Шешімдер",
+      "open_questions": "Ашық сұрақтар",
+      "actions": "Іс-шаралар",
+      "col_number": "#",
+      "col_action": "Іс-шара",
+      "col_owner": "Жауапты",
+      "col_due": "Мерзімі",
+      "col_status": "Мәртебесі",
+      "brought_forward": "[Өткен жиналыстан ауысқан]",
+      "overdue": "(мерзімі өткен)",
+      "status_open": "Ашық",
+      "status_in_progress": "Орындалуда",
+      "status_done": "Орындалды",
+      "status_cancelled": "Бас тартылды",
+      "summary": "Қысқаша мазмұны",
+      "generated": "Жасалған уақыты: {stamp}",
+      "issued_at": "Шығарылған уақыты {stamp}",
+      "running_head": "{project} - Хаттама",
+      "type_progress": "Барысы",
+      "type_design": "Жобалау",
+      "type_safety": "Қауіпсіздік",
+      "type_subcontractor": "Мердігер",
+      "type_kickoff": "Бастапқы",
+      "type_closeout": "Аяқтау",
+      "type_commercial": "Коммерциялық"
+    }
+  },
+  "inspections": {
+    "title": "Сапа тексерулері",
+    "new_inspection": "Жаңа Тексеру",
+    "inspector": "Тексеруші",
+    "checklist": "Тексеру Парағы",
+    "pass": "Өтті",
+    "fail": "Өтпеді",
+    "partial": "Ішінара",
+    "critical": "Сыни",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Жоспарланған",
+        "in_progress": "Орындалуда",
+        "completed": "Аяқталған",
+        "failed": "Сәтсіз",
+        "cancelled": "Бас тартылған"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Сәйкессіздік Хаттамалары",
+    "new_ncr": "Жаңа Сәйкессіздік Хаттамасы",
+    "root_cause": "Түпкі Себеп",
+    "corrective_action": "Түзету Әрекеті",
+    "preventive_action": "Алдын Алу Әрекеті",
+    "material": "Материал",
+    "workmanship": "Орындау сапасы",
+    "design": "Жобалау"
+  },
+  "submittals": {
+    "title": "Ұсынылған құжаттар",
+    "new_submittal": "Жаңа ұсыным",
+    "spec_section": "Спецификация Бөлімі",
+    "revision": "Ревизия",
+    "submit": "Тапсыру",
+    "review": "Қарау",
+    "approved_as_noted": "Ескертумен Бекітілді",
+    "revise_resubmit": "Түзету және Қайта Тапсыру",
+    "intl": {
+      "status_labels": {
+        "draft": "Жоба",
+        "submitted": "Ұсынылған",
+        "under_review": "Қаралуда",
+        "approved": "Мақұлданған",
+        "approved_as_noted": "Ескертпелермен мақұлданған",
+        "revise_and_resubmit": "Түзетіп, қайта ұсыну",
+        "rejected": "Қабылданбаған",
+        "closed": "Жабық"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Хат-хабар",
+    "new_entry": "Жаңа Жазба",
+    "incoming": "Кіріс",
+    "outgoing": "Шығыс",
+    "letter": "Хат",
+    "email": "Электрондық пошта",
+    "notice": "Хабарлама",
+    "date_sent": "Жіберілген Күні",
+    "date_received": "Алынған Күні"
+  },
+  "cde": {
+    "title": "Ортақ Деректер Ортасы",
+    "new_container": "Жаңа Контейнер",
+    "container_code": "Контейнер Коды",
+    "cde_state": "Ортақ Деректер Ортасының Мәртебесі",
+    "wip": "Орындалуда",
+    "shared": "Ортақ",
+    "published": "Жарияланған",
+    "archived": "Мұрағатталған",
+    "promote": "Жоғарылату",
+    "suitability": "Жарамдылық",
+    "discipline": "Сала",
+    "revisions": "Түзетулер",
+    "intl": {
+      "state_labels": {
+        "wip": "Жұмыс үстінде",
+        "shared": "Ортақ",
+        "published": "Жарияланған",
+        "archived": "Мұрағатталған"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Тапсыру Хаттары",
+    "new_transmittal": "Жаңа Тапсыру Хаты",
+    "purpose": "Мақсаты",
+    "for_approval": "Бекітуге",
+    "for_information": "Ақпарат үшін",
+    "for_construction": "Құрылысқа",
+    "recipients": "Алушылар",
+    "acknowledge": "Растау",
+    "locked": "Бұғатталған",
+    "issue_transmittal": "Шығару",
+    "intl": {
+      "status_words": {
+        "draft": "жоба",
+        "issued": "жіберілген",
+        "responded": "жауап берілген"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Хабарландырулар",
+    "no_notifications": "Жаңа хабарландырулар жоқ",
+    "mark_all_read": "Барлығын оқылды деп белгілеу",
+    "unread": "Оқылмаған"
+  },
+  "comments": {
+    "title": "Пікірлер",
+    "post": "Жариялау",
+    "reply": "Жауап беру",
+    "edit": "Өңдеу",
+    "delete": "Жою",
+    "placeholder": "Пікір жазу...",
+    "empty": "Әлі түсініктеме жоқ. Талқылауды бастаңыз.",
+    "edited": "өңделген",
+    "deleted": "Бұл пікір жойылды"
+  },
+  "bim": {
+    "title": "BIM Хабы",
+    "models": "Модельдер",
+    "elements": "Элементтер",
+    "upload_model": "Модель Жүктеу",
+    "processing": "Өңделуде",
+    "active": "Белсенді",
+    "link_to_boq": "BOQ-пен Байланыстыру",
+    "properties": "Қасиеттер",
+    "quantities": "Көлемдер",
+    "wireframe": "Сым қаңқа",
+    "section_box": "Қима Жәшігі",
+    "measure": "Өлшеу",
+    "zoom_to_fit": "Экранға Сыйдыру"
+  },
+  "reporting": {
+    "title": "Есептер және Бақылау Тақталары",
+    "kpi": "KPI Бақылау Тақтасы",
+    "generate_report": "Есеп Жасау",
+    "templates": "Үлгілер",
+    "project_status": "Жоба Мәртебесі",
+    "cost_report": "Шығын Есебі",
+    "schedule_status": "Кесте Мәртебесі",
+    "safety_report": "Қауіпсіздік Есебі",
+    "explain": {
+      "report_total_one": "Есеп жиыны: {money} ({count} жол қосындысы).",
+      "report_total_other": "Есеп жиыны: {money} ({count} жол қосындысы).",
+      "percent_of_total": "{part} — {total} мәнінің {percent} (жиынтықтан пайызы).",
+      "percent_zero_total": "{part} / {total}: жиыны нөл, сондықтан әрбір үлес 0 пайыз деп көрсетілді.",
+      "breakdown_empty": "Шығын бөлінісі: деректер жоқ.",
+      "breakdown_one": "Шығын бөлінісі: {count} топ, есеп жиыны {money}.",
+      "breakdown_other": "Шығын бөлінісі: {count} топ, есеп жиыны {money}.",
+      "top_n_one": "Алғашқы {requested}: {shown} / {shown} жол.",
+      "top_n_other": "Алғашқы {requested}: {shown} / {shown} жол."
+    }
+  },
+  "gantt": {
+    "title": "Гантт Диаграммасы",
+    "day": "Күн",
+    "week": "Апта",
+    "month": "Ай",
+    "critical_path": "Сыни Жол",
+    "baseline": "Негіз",
+    "dependencies": "Тәуелділіктер",
+    "today": "Бүгін"
+  },
+  "settings": {
+    "regional": "Өңірлік Баптаулар",
+    "timezone": "Уақыт Белдеуі",
+    "measurement": "Өлшем Жүйесі",
+    "paper_size": "Қағаз Өлшемі",
+    "date_format": "Күн Пішімі",
+    "number_format": "Сан Пішімі",
+    "currency": "Валюта",
+    "metric": "Метрлік Жүйе",
+    "imperial": "Ағылшын Жүйесі"
+  },
+  "users": {
+    "management": "Пайдаланушыларды Басқару",
+    "management_desc": "Топ мүшелерін, рөлдерді және қолжетімділікті басқару",
+    "invite_user": "Пайдаланушыны Шақыру",
+    "invite": "Шақыру",
+    "full_name": "Толық Аты",
+    "email": "Электрондық Пошта",
+    "password": "Құпия Сөз",
+    "role": "Рөл",
+    "status": "Мәртебе",
+    "last_login": "Соңғы Кіру",
+    "actions": "Әрекеттер",
+    "name": "Аты",
+    "total": "Барлық Пайдаланушылар",
+    "active": "Белсенді",
+    "inactive": "Белсенді Емес",
+    "admins": "Әкімшілер",
+    "managers": "Менеджерлер",
+    "search": "Аты немесе электрондық пошта бойынша іздеу...",
+    "no_users": "Пайдаланушы табылмады",
+    "updated": "Пайдаланушы жаңартылды",
+    "invited": "Пайдаланушы сәтті шақырылды",
+    "deactivate": "Тоқтату",
+    "activate": "Белсендіру",
+    "never": "Ешқашан",
+    "role_admin_desc": "Барлық функцияларға толық қолжетімділік",
+    "role_manager_desc": "Жоба мен топты басқару",
+    "role_editor_desc": "Мазмұнды құру және өңдеу",
+    "role_viewer_desc": "Тек оқу қолжетімділігі"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Бұл лездік көшірме қатырылған. Қатырылған лездік көшірме - жазба, оны өзгертуге болмайды.",
+      "frozen_no_delete": "Қатырылған лездік көшірме - жазба, оны жоюға болмайды.",
+      "draft_open": "Жоба нұсқасындағы лездік көшірме әлдеқашан ашық. Жаңасын бастамас бұрын оны қатырыңыз немесе жойыңыз.",
+      "no_line_method": "Бұл жолдың өз әдісі жоқ.",
+      "snapshot_missing": "Лездік көшірме табылмады.",
+      "line_missing": "Лездік көшірмеде мұндай жол жоқ.",
+      "document_missing": "Байланыстырылған құжат бұл жобаға жатпайды.",
+      "freeze_refused": "Лездік көшірмені әлі қатыруға болмайды: {count} жол пікірсіз және негіздеме құжатсыз шектен асып өзгерді.",
+      "no_frozen_snapshot": "Салыстыру үшін қатырылған лездік көшірме әлі жоқ.",
+      "no_ledger": "Шот-фактуралар тізілімі бұл орнатымда қолжетімсіз.",
+      "no_snapshot": "Құжаттауға лездік көшірме әлі жоқ."
+    },
+    "export": {
+      "project": "Жоба",
+      "generated": "Жасалған",
+      "currency": "Валюта",
+      "page": "Бет",
+      "generated_at": "Жасалған күні",
+      "empty": "Көрсетуге әлі ештеңе жоқ.",
+      "total": "Барлығы",
+      "cost_report": "Шығындар есебі",
+      "phase_comparison": "Кезеңдерді салыстыру",
+      "invoice_ledger": "Шот-фактуралар тізілімі",
+      "forecast_documentation": "Болжам құжаттамасы",
+      "as_of": "Күні бойынша",
+      "forecast_method": "Болжам әдісі",
+      "col_account": "Шот",
+      "col_code": "Код",
+      "col_description": "Сипаттама",
+      "col_source": "Дереккөз",
+      "col_method": "Әдіс",
+      "col_planned": "Жоспарланған",
+      "col_committed": "Міндеттемеге алынған",
+      "col_pending": "Күтілетін өзгерістер",
+      "col_measured": "Өлшенген",
+      "col_certified": "Расталған",
+      "col_invoiced": "Шот ұсынылған",
+      "col_paid": "Төленген",
+      "col_forecast": "Болжам",
+      "col_variance": "Ауытқу",
+      "col_variance_pct": "Ауытқу %",
+      "col_forecast_of_plan": "Болжам, жоспардан %",
+      "col_measured_of_committed": "Өлшенген, міндеттемеден %",
+      "col_invoiced_of_committed": "Шот ұсынылған, міндеттемеден %",
+      "col_contract": "Шарт",
+      "col_contract_title": "Шарт атауы",
+      "col_invoice": "Шот-фактура",
+      "col_date": "Күні",
+      "col_kind": "Түрі",
+      "col_release_status": "Босату",
+      "col_net": "Таза сома",
+      "col_vat": "ҚҚС",
+      "col_gross": "Жалпы сома",
+      "col_retention": "Ұсталған сома",
+      "col_release": "Босатылған ұсталған сома",
+      "col_discount": "Жеңілдік",
+      "col_payable": "Төленуге тиіс",
+      "col_open": "Ашық",
+      "col_previous": "Алдыңғы",
+      "col_delta": "Өзгеріс",
+      "col_delta_pct": "Өзгеріс %",
+      "col_needs_evidence": "Негіздеме қажет",
+      "col_comment": "Пікір",
+      "col_evidence": "Негіздеме құжаты",
+      "row_unassigned": "Шығын жолына байланбаған сома",
+      "row_loose_changes": "Шартсыз өзгерістер",
+      "row_no_contract": "Шарт жоқ",
+      "contract_value": "Шарт құны",
+      "retention_held": "Ұсталған сома",
+      "yes": "Иә",
+      "no": "Жоқ",
+      "snapshot_date": "Лездік көшірме күні",
+      "snapshot_status": "Күйі",
+      "previous_snapshot": "Алдыңғы қатырылған лездік көшірме",
+      "method_explained": "Болжамды қалай оқу керек",
+      "evidence_threshold": "Мына мөлшерден асқанда негіздеме қажет",
+      "threshold_both": "{parts} мөлшерінен асатын өзгеріс",
+      "threshold_any": "кез келген өзгеріс",
+      "frozen_at": "Қатырылған уақыты"
+    },
+    "method": {
+      "best_available": "Ең жақсы қолжетімді дереккөз",
+      "maximum": "Ең жоғары мән",
+      "evm_cpi": "Орындалған жұмыс құны (CPI)",
+      "manual": "Қолмен"
+    },
+    "method_help": {
+      "best_available": "Әр жол ең пысық мәнін алады: түпкілікті есеп, болмаса өлшенген жұмыс, болмаса тапсырыс, болмаса смета, болмаса бюджет.",
+      "maximum": "Әр жол өз мәндерінің ең жоғарысын алады (бюджет, смета, тапсырыс, өлшенген, шот ұсынылған), сондықтан болжам тәуекелді ешқашан жасырмайды.",
+      "evm_cpi": "Әр жол аяқталу құнын орындалу барысынан есептейді: осы уақытқа дейін жұмсалған қаражатты орындалған жұмыс үлесіне бөледі.",
+      "manual": "Адам жолдың мәнін белгілеп, оның негізіндегі құжатты байланыстырады."
+    },
+    "source": {
+      "none": "Мән жоқ",
+      "budget": "Бюджет",
+      "estimate": "Смета",
+      "partly_awarded": "Ішінара тапсырылған",
+      "awarded": "Тапсырылған",
+      "measured": "Өлшенген",
+      "final": "Түпкілікті есеп",
+      "manual": "Қолмен",
+      "invoiced": "Шот ұсынылған",
+      "evm": "Орындалған жұмыс құны"
+    },
+    "layer": {
+      "budget": "Бюджет",
+      "estimate": "Смета",
+      "tender": "Ең жақсы ұсыныс",
+      "awarded": "Тапсырылған",
+      "changes": "Бекітілген өзгерістер",
+      "committed": "Міндеттемеге алынған",
+      "pending": "Күтілетін өзгерістер",
+      "measured": "Өлшенген",
+      "certified": "Расталған",
+      "invoiced": "Шот ұсынылған",
+      "paid": "Төленген",
+      "forecast": "Болжам"
+    },
+    "invoice_kind": {
+      "interim": "Аралық",
+      "final": "Қорытынды",
+      "daywork": "Күндік жұмыс",
+      "credit_note": "Кредит-нота"
+    },
+    "release_status": {
+      "open": "Ашық",
+      "released": "Босатылған"
+    },
+    "evidence_kind": {
+      "document": "Құжат",
+      "minutes": "Хаттама",
+      "other": "Басқа"
+    },
+    "snapshot_status": {
+      "draft": "Жоба нұсқасы",
+      "frozen": "Қатырылған"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Жоба",
+      "project_no": "Жоба №",
+      "generated_on": "Жасалған күні",
+      "records": "Жазбалар",
+      "currency": "Валюта",
+      "status": "Мәртебесі",
+      "name": "Аты",
+      "signature": "Қолы",
+      "date": "Күні",
+      "signatures": "Қолтаңбалар",
+      "yes": "Иә",
+      "no": "Жоқ",
+      "days_one": "{n} күн",
+      "days_other": "{n} күн",
+      "empty_register": "Жазбалар жоқ.",
+      "total": "Барлығы",
+      "signer_title": "Лауазымы",
+      "sig_prepared_by": "Әзірлеген",
+      "sig_checked_by": "Тексерген",
+      "sig_approved_by": "Бекіткен",
+      "footer_generated": "Жасалған уақыты: {timestamp}",
+      "footer_page": "{page} / {total} бет"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Келісуге жіберілген құжаттар тізілімі",
+        "doc_title": "Келісуге жіберілген құжат",
+        "doc_title_product_data": "Материалды бекіту парағы",
+        "col_number": "Құжат №",
+        "col_title": "Атауы",
+        "col_type": "Түрі",
+        "col_spec": "Спецификация бөлімі",
+        "col_rev": "Нұсқа",
+        "col_date_submitted": "Жіберілген күні",
+        "col_date_required": "Талап етілетін күні",
+        "col_date_returned": "Қайтарылған күні",
+        "col_reviewer": "Қарастырушы",
+        "col_approver": "Бекітуші",
+        "col_ball_in_court": "Келесі әрекет етуші",
+        "submitted_by_org": "Жіберуші компания",
+        "review_notes": "Қарастырушының ескертулері",
+        "no_review_notes": "Қарастырушының ескертулері тіркелмеген.",
+        "sig_submitted": "Жіберген",
+        "sig_reviewed": "Қарастырған",
+        "sig_approved": "Бекіткен",
+        "register_filename": "kelisuge-zhiberilgen-qujattar-tizilimi",
+        "register_title_shop_drawing": "Жұмыс сызбалары тізілімі",
+        "register_title_product_data": "Материалдарды бекіту тізілімі",
+        "register_title_method_statement": "Жұмыс жүргізу әдістемелері тізілімі",
+        "register_filename_shop_drawing": "zhumys-syzbalary-tizilimi",
+        "register_filename_product_data": "materialdardy-bekitu-tizilimi",
+        "register_filename_method_statement": "zhumys-adistemeleri-tizilimi",
+        "col_discipline": "Бөлім",
+        "col_manufacturer": "Өндіруші / бренд",
+        "col_model": "Үлгі / артикул",
+        "col_origin": "Шыққан елі",
+        "col_supplier": "Жеткізуші",
+        "col_product": "Өндіруші / үлгі / шыққан елі",
+        "col_review_code": "Қарау коды",
+        "col_outcome": "Қарау нәтижесі",
+        "col_review_period": "Қарау мерзімі (күн)",
+        "col_review_due": "Қарау мерзімінің соңы",
+        "col_days_in_review": "Қарауда өткен күн",
+        "col_days_in_review_print": "Қарауда өткен күн",
+        "col_review_overdue": "Кешіккен күн",
+        "col_required_on_site": "Алаңда қажет",
+        "col_long_lead": "Ұзақ жеткізілім",
+        "col_lead_time": "Жеткізу мерзімі (апта)",
+        "col_needed_by": "Бекіту мерзімі",
+        "col_approval_late": "Мерзімнен кешіккен күн",
+        "col_drawings": "Байланысты сызбалар",
+        "col_submitted_returned": "Жіберілді / қайтарылды",
+        "col_on_site_needed_by": "Алаңда / бекіту мерзімі",
+        "resubmit_for_record": "Түзетілген данасын тіркеу үшін қайта жіберу керек",
+        "review_history": "Қарау тарихы",
+        "hist_submitted": "Жіберілді",
+        "hist_returned": "Қайтарылды",
+        "drawings_missing_one": "Байланысты {n} сызба енді қолжетімді емес",
+        "drawings_missing_other": "Байланысты {n} сызба енді қолжетімді емес",
+        "weeks_one": "{n} апта",
+        "weeks_other": "{n} апта"
+      },
+      "labels": {
+        "status": {
+          "draft": "Жоба",
+          "submitted": "Жіберілді",
+          "under_review": "Қарауда",
+          "approved": "Бекітілді",
+          "approved_as_noted": "Ескертулермен бекітілді",
+          "revise_and_resubmit": "Түзетіп қайта жіберу",
+          "rejected": "Қабылданбады",
+          "closed": "Жабылды"
+        },
+        "type": {
+          "shop_drawing": "Жұмыс сызбасы",
+          "product_data": "Өнім деректері",
+          "sample": "Үлгі",
+          "mock_up": "Макет",
+          "test_report": "Сынақ есебі",
+          "calculation": "Есептеу",
+          "method_statement": "Жұмыс жүргізу әдістемесі",
+          "certificate": "Сертификат",
+          "warranty": "Кепілдік"
+        },
+        "discipline": {
+          "mechanical": "Механика",
+          "hvac": "Жылыту және желдету",
+          "plumbing": "Сумен жабдықтау және кәріз",
+          "fire_protection": "Өрттен қорғау",
+          "electrical": "Электр жабдықтары",
+          "lighting": "Жарықтандыру",
+          "elv": "Әлсіз токты жүйелер",
+          "bms": "Ғимарат автоматикасы",
+          "architectural": "Сәулет",
+          "structural": "Құрылымдық бөлім",
+          "civil": "Құрылыс-инженерлік бөлім"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Өзгерту бұйрықтарының тізілімі",
+        "doc_title": "Өзгерту бұйрығы",
+        "col_code": "Коды",
+        "col_title": "Атауы",
+        "col_reason": "Себебі",
+        "col_instrument": "Құжат түрі",
+        "col_submitted": "Жіберілген күні",
+        "col_contractor_amount": "Мердігер сомасы",
+        "col_engineer_amount": "Инженер сомасы",
+        "col_approved_amount": "Бекітілген сома",
+        "col_cost_impact": "Құнға әсері",
+        "col_time_impact": "Мерзімге әсері (күн)",
+        "col_approved_time": "Бекітілген мерзім (күн)",
+        "time_impact": "Мерзімге әсері",
+        "approved_time": "Бекітілген мерзім",
+        "col_approved": "Бекітілген күні",
+        "submitted_by": "Жіберген",
+        "approved_by": "Бекіткен",
+        "description": "Сипаттамасы",
+        "no_description": "Сипаттама тіркелмеген.",
+        "items": "Өзгеріс позициялары",
+        "item_description": "Сипаттамасы",
+        "item_change": "Өзгеріс",
+        "item_unit": "Өлшем бірлігі",
+        "item_original_quantity": "Бастапқы саны",
+        "item_new_quantity": "Жаңа саны",
+        "item_original_rate": "Бастапқы баға",
+        "item_new_rate": "Жаңа баға",
+        "item_cost_delta": "Құн айырмасы",
+        "register_filename": "ozgertu-buiryqtary-tizilimi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Жоба",
+          "submitted": "Жіберілді",
+          "approved": "Бекітілді",
+          "rejected": "Қабылданбады",
+          "executed": "Орындалды"
+        },
+        "reason": {
+          "client_request": "Тапсырыс берушінің сұрауы",
+          "design_change": "Жобаның өзгеруі",
+          "unforeseen": "Күтпеген жағдайлар",
+          "regulatory": "Нормативтік талап",
+          "error": "Қате немесе қалып кету",
+          "non_conformance": "Сәйкессіздік",
+          "value_engineering": "Құнды инжиниринг"
+        },
+        "instrument": {
+          "works_change": "Нұсқау бойынша өзгеріс",
+          "site_confirmation": "Алаңдағы растау",
+          "claim": "Талап"
+        },
+        "change": {
+          "added": "Қосылды",
+          "removed": "Алынып тасталды",
+          "modified": "Өзгертілді"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Дәлелдемелер жиынтығы",
+        "subject": "Тақырыбы",
+        "basis": "Негіздеме",
+        "period_from": "Ең ерте жазба",
+        "period_to": "Ең соңғы жазба",
+        "digest": "Тұтастық коды (SHA-256, алғашқы 16 таңба)",
+        "col_row": "№",
+        "col_record_id": "Жазба ID",
+        "col_section": "Бөлім",
+        "col_date": "Күні",
+        "col_kind": "Жазба түрі",
+        "col_title": "Атауы",
+        "col_summary": "Қысқаша мазмұны",
+        "col_reference": "Сілтеме",
+        "register_filename": "dalelderemeler-zhiyntygy"
+      },
+      "labels": {
+        "section": {
+          "notices": "Хабарламалар",
+          "correspondence": "Хат-хабар",
+          "rfis": "Ақпарат сұраулары (RFI)",
+          "variations": "Өзгерістер",
+          "approvals": "Бекітулер",
+          "delay": "Кешігу",
+          "timeline": "Хронология",
+          "other": "Басқа"
+        },
+        "kind": {
+          "notice": "Хабарлама",
+          "variation_notice": "Өзгеріс туралы хабарлама",
+          "variation_request": "Өзгеріс сұрауы",
+          "variation_order": "Өзгеріс бұйрығы",
+          "change_order": "Өзгерту бұйрығы",
+          "moc_entry": "Өзгеріс жазбасы",
+          "correspondence": "Хат-хабар"
+        },
+        "basis": {
+          "dispute": "Дау",
+          "valuation": "Бағалау",
+          "delay": "Кешігу / мерзімді ұзарту",
+          "general": "Жалпы жазба"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Хат-хабар журналы",
+        "doc_title": "Хат-хабар",
+        "col_reference": "Сілтеме №",
+        "col_direction": "Бағыты",
+        "col_type": "Түрі",
+        "col_subject": "Тақырыбы",
+        "col_from": "Кімнен",
+        "col_to": "Кімге",
+        "col_date_sent": "Жіберілген күні",
+        "col_date_received": "Алынған күні",
+        "col_response_due": "Жауап беру мерзімі",
+        "col_clause": "Шарт тармағы",
+        "notes": "Ескертпелер",
+        "no_notes": "Ескертпелер тіркелмеген.",
+        "attachments": "Тіркелген файлдар",
+        "linked_documents": "Байланысты құжаттар",
+        "sig_prepared": "Әзірлеген",
+        "sig_received": "Қабылдаған",
+        "register_filename": "hat-habar-zhurnaly"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Кіріс",
+          "outgoing": "Шығыс"
+        },
+        "type": {
+          "letter": "Хат",
+          "email": "Эл. пошта",
+          "notice": "Хабарлама",
+          "memo": "Қызметтік жазба",
+          "report": "Есеп"
+        },
+        "status": {
+          "open": "Ашық",
+          "awaiting_response": "Жауап күтілуде",
+          "responded": "Жауап берілді",
+          "closed": "Жабылды"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Жолдама хаттар тізілімі",
+        "doc_title": "Жолдама хат",
+        "col_number": "Жолдама хат №",
+        "col_subject": "Тақырыбы",
+        "col_purpose": "Мақсаты",
+        "col_issued": "Берілген күні",
+        "col_response_due": "Жауап беру мерзімі",
+        "col_recipients": "Алушылар",
+        "col_item_count": "Позициялар",
+        "sender": "Жіберуші",
+        "cover_note": "Ілеспе хат",
+        "no_cover_note": "Ілеспе хат жоқ.",
+        "recipients": "Алушылар",
+        "recipient": "Алушы",
+        "action_required": "Қажетті әрекет",
+        "acknowledged": "Алғаны расталды",
+        "responded": "Жауап берілген күні",
+        "items": "Жолданған құжаттар",
+        "item_no": "№",
+        "item_description": "Сипаттамасы",
+        "item_notes": "Ескертпелер",
+        "sig_issued": "Берген",
+        "sig_received": "Қабылдаған",
+        "register_filename": "zholdama-hattar-tizilimi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Жоба",
+          "issued": "Берілді",
+          "responded": "Жауап берілді"
+        },
+        "purpose": {
+          "for_approval": "Бекіту үшін",
+          "for_review": "Қарау үшін",
+          "for_information": "Мәлімет үшін",
+          "for_construction": "Құрылыс үшін",
+          "for_tender": "Тендер үшін",
+          "for_record": "Тіркеу үшін"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Өзгерістер тізілімі",
+        "claim_register_title": "Талаптар тізілімі",
+        "notice_register_title": "Хабарламалар тізілімі",
+        "doc_title": "Өзгеріс сұрауы",
+        "doc_title_credit": "Өзгеріс сұрауы (жұмыс көлемін азайту)",
+        "time_impact": "Мерзімге әсері",
+        "col_code": "Коды",
+        "col_title": "Атауы",
+        "col_classification": "Түрі",
+        "col_urgency": "Шұғылдығы",
+        "col_requested": "Сұралған күні",
+        "col_claimed_amount": "Талап етілген сома",
+        "col_agreed_amount": "Келісілген сома",
+        "col_time_impact": "Мерзімге әсері (күн)",
+        "col_response_due": "Жауап беру мерзімі",
+        "col_clause": "Шарт тармағы",
+        "col_row": "№",
+        "col_claim_type": "Талап түрі",
+        "col_raised": "Мәлімделген күні",
+        "col_period_start": "Кезең басы",
+        "col_period_end": "Кезең соңы",
+        "col_description": "Сипаттамасы",
+        "col_decided_amount": "Шешілген сома",
+        "col_days_requested": "Сұралған күн",
+        "col_days_granted": "Берілген күн",
+        "col_recipient_type": "Кімге арналған",
+        "col_recipient": "Алушы",
+        "col_target_response": "Күтілетін жауап",
+        "col_response_received": "Жауап алынды",
+        "requested_by": "Сұраған",
+        "decided_by": "Шешім қабылдаған",
+        "date_submitted": "Жіберілген күні",
+        "date_decided": "Шешім күні",
+        "description": "Сипаттамасы",
+        "no_description": "Сипаттама тіркелмеген.",
+        "decision_notes": "Шешім ескертпелері",
+        "no_decision_notes": "Шешім әлі қабылданбаған.",
+        "variation_register_filename": "ozgerister-tizilimi",
+        "claim_register_filename": "talaptar-tizilimi",
+        "notice_register_filename": "habarlamalar-tizilimi"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Жоба",
+          "submitted": "Жіберілді",
+          "under_review": "Қарауда",
+          "approved": "Бекітілді",
+          "rejected": "Қабылданбады",
+          "converted_to_vo": "Бұйрыққа айналдырылды"
+        },
+        "claim_status": {
+          "draft": "Жоба",
+          "submitted": "Жіберілді",
+          "under_review": "Қарауда",
+          "agreed": "Келісілді",
+          "granted": "Қанағаттандырылды",
+          "rejected": "Қабылданбады"
+        },
+        "notice_status": {
+          "issued": "Берілді",
+          "acknowledged": "Алғаны расталды",
+          "responded": "Жауап берілді",
+          "closed": "Жабылды"
+        },
+        "classification": {
+          "scope_change": "Көлемнің өзгеруі",
+          "unforeseen": "Күтпеген жағдай",
+          "owner_change": "Тапсырыс берушінің өзгерісі",
+          "design_dev": "Жобаны пысықтау",
+          "regulatory": "Нормативтік талап",
+          "other": "Басқа"
+        },
+        "urgency": {
+          "low": "Төмен",
+          "med": "Орташа",
+          "high": "Жоғары"
+        },
+        "claim_type": {
+          "disruption": "Жұмыс барысының бұзылуы",
+          "eot": "Мерзімді ұзарту"
+        },
+        "recipient_type": {
+          "owner": "Тапсырыс беруші",
+          "contractor": "Мердігер",
+          "architect": "Сәулетші",
+          "engineer": "Инженер",
+          "consultant": "Кеңесші"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Құрылыс алаңының күнделігі",
+        "overview": "Шолу",
+        "site_supervisor": "Алаң жетекшісі",
+        "not_recorded": "Тіркелмеген",
+        "labour_on_site": "Алаңдағы жұмыс күші",
+        "equipment_on_site": "Алаңдағы техника",
+        "completeness": "Толықтығы",
+        "weather": "Ауа райы",
+        "weather_time": "Уақыты",
+        "weather_source": "Дереккөз",
+        "weather_temp": "Темп. (C)",
+        "weather_wind": "Жел (км/сағ)",
+        "weather_precip": "Жауын-шашын (мм)",
+        "weather_conditions": "Жағдайы",
+        "weather_empty": "Осы күнге ауа райы тіркелмеген.",
+        "site_record": "Алаң жазбасы",
+        "entries_empty": "Осы күнделікте жазбалар жоқ.",
+        "notes": "Ескертпелер",
+        "notes_empty": "Қосымша ескертпелер жоқ.",
+        "footer_supervisor": "Жетекші: {name}",
+        "footer_supervisor_missing": "Алаң жетекшісі: тіркелмеген",
+        "footer_generated": "Жасалған уақыты: {timestamp}",
+        "footer_page": "{page} / {total} бет",
+        "workforce": "Компаниялар бойынша жұмыс күші",
+        "workforce_company": "Компания",
+        "workforce_count": "Адам саны",
+        "workforce_unassigned": "Компанияға бекітілмеген",
+        "workforce_total": "Барлығы",
+        "signatures": "Қолтаңбалар",
+        "sig_prepared": "Әзірлеген (алаң басшысы)",
+        "sig_approved": "Бекіткен (жұмыс берушінің өкілі)",
+        "sig_name": "Аты-жөні",
+        "sig_title": "Лауазымы",
+        "sig_date": "Күні",
+        "sig_signature": "Қолы",
+        "signed_note": "Жүйеде қол қойылды: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "kundelik",
+        "summary_wind": "жел {value} км/сағ",
+        "summary_precipitation": "жауын-шашын {value} мм",
+        "summary_humidity": "ылғалдылық {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Келушілер",
+          "event": "Оқиғалар",
+          "delivery": "Жеткізілген материалдар",
+          "completion": "Орындалған жұмыстар",
+          "incident_summary": "Қауіпсіздік және оқиғалар",
+          "inspection_summary": "Тексерулер",
+          "photo_note": "Фото ескертпелер",
+          "general": "Жалпы ескертпелер"
+        },
+        "status": {
+          "open": "Ашық",
+          "closed": "Жабық",
+          "signed": "Қол қойылған",
+          "archived": "Мұрағатталған"
+        },
+        "condition": {
+          "clear": "ашық",
+          "mainly_clear": "негізінен ашық",
+          "partly_cloudy": "ауыспалы бұлтты",
+          "cloudy": "бұлтты",
+          "overcast": "қалың бұлтты",
+          "fog": "тұман",
+          "fog_rime": "қырау түсіретін тұман",
+          "drizzle_light": "әлсіз сіркіреген жаңбыр",
+          "drizzle_moderate": "орташа сіркіреген жаңбыр",
+          "drizzle_dense": "қою сіркіреген жаңбыр",
+          "rain": "жаңбыр",
+          "rain_light": "әлсіз жаңбыр",
+          "rain_moderate": "орташа жаңбыр",
+          "rain_heavy": "қатты жаңбыр",
+          "freezing_rain_light": "әлсіз қатқан жаңбыр",
+          "freezing_rain_heavy": "қатты қатқан жаңбыр",
+          "snow": "қар",
+          "snow_light": "әлсіз қар",
+          "snow_moderate": "орташа қар",
+          "snow_heavy": "қалың қар",
+          "rain_showers_light": "әлсіз қысқа жаңбыр",
+          "rain_showers_moderate": "орташа қысқа жаңбыр",
+          "rain_showers_violent": "қатты нөсер",
+          "snow_showers_light": "әлсіз қысқа мерзімді қар",
+          "snow_showers_heavy": "қалың қысқа мерзімді қар",
+          "thunderstorm": "найзағай",
+          "thunderstorm_hail_light": "әлсіз бұршақты найзағай",
+          "thunderstorm_hail_heavy": "қатты бұршақты найзағай"
+        },
+        "source": {
+          "manual": "Қолмен енгізілген",
+          "open_meteo": "Метеорологиялық қызмет",
+          "sensor": "Алаңдағы датчик"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Ақпарат сұраулары журналы (RFI)",
+        "col_number": "RFI №",
+        "col_subject": "Тақырыбы",
+        "col_raised_by": "Жіберген",
+        "col_assigned_to": "Жауапты",
+        "col_ball_in_court": "Келесі әрекет етуші",
+        "col_date_required": "Талап етілетін күні",
+        "col_response_due": "Жауап беру мерзімі",
+        "col_days_open": "Ашық күн саны",
+        "col_cost_impact": "Құнға әсері",
+        "col_schedule_impact": "Кестеге әсері",
+        "col_response": "Жауап",
+        "yes_with": "Иә ({detail})",
+        "register_filename": "rfi-zhurnaly"
+      },
+      "labels": {
+        "status": {
+          "draft": "Жоба",
+          "open": "Ашық",
+          "answered": "Жауап берілді",
+          "closed": "Жабылды",
+          "void": "Күші жойылды"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "ЖИ арқылы жасалған",
+        "drawing": "Сызба",
+        "cost_estimate": "ШЫҒЫНДАР СМЕТАСЫ",
+        "summary": "ҚОРЫТЫНДЫ",
+        "project": "Жоба:",
+        "boq": "ЖКВ:",
+        "date": "Күні:",
+        "status": "Мәртебесі:",
+        "prepared_by": "Дайындаған:",
+        "approved_by": "Бекіткен:",
+        "signature_hint": "Аты-жөні / Қолы / Күні",
+        "contents": "Бөлімдер / Позициялар:",
+        "pos": "Р/с",
+        "description": "Сипаттамасы",
+        "unit": "Өлшем бірлігі",
+        "qty": "Саны",
+        "rate": "Бағасы",
+        "total": "Сомасы",
+        "subtotal": "Аралық жиынтық:",
+        "other_positions": "Басқа позициялар",
+        "direct_cost": "Тікелей шығын:",
+        "markups": "Үстемелер (салықсыз):",
+        "net_total": "Таза жиынтық (салықсыз):",
+        "gross_total": "Жалпы жиынтық",
+        "page": "Бет",
+        "of": "/",
+        "generated": "Жасалған уақыты:",
+        "summary_report": "Қорытынды есеп",
+        "positions_omitted": "{count} позиция (өнімділік үшін толық мәлімет көрсетілмеген)",
+        "section": "Бөлім",
+        "items": "Позициялар",
+        "cost_summary": "Шығындар қорытындысы",
+        "table_of_contents": "Мазмұны",
+        "resources_omitted": "Ресурстар тізбегі басылмады: бұл ведомосте бір PDF үшін тым көп ресурс жолдары бар.",
+        "status_draft": "Жоба",
+        "status_final": "Соңғы",
+        "status_archived": "Мұрағатталған",
+        "subject": "Жұмыс көлемдерінің ведомосі",
+        "tax_vat": "ҚҚС"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "ШОТ-ФАКТУРА",
+        "date": "Күні: {value}",
+        "due": "Төлем мерзімі: {value}",
+        "from": "Жеткізуші",
+        "bill_to": "Төлеуші",
+        "vat_id": "ҚҚС нөмірі: {value}",
+        "ref": "Анықтама: {value}",
+        "th_description": "Сипаттамасы",
+        "th_qty": "Саны",
+        "th_unit": "Өлшем бірлігі",
+        "th_unit_price": "Бірлік бағасы",
+        "th_net": "Таза ({currency})",
+        "net_total": "Таза сома",
+        "vat_total": "ҚҚС",
+        "grand_total": "Жалпы сома",
+        "retention_prepaid": "Ұстап қалу / алдын ала төлем",
+        "amount_due": "Төленуге жататын сома",
+        "payment": "Төлем",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Шот нөмірі: {value}",
+        "bank_code": "Банк коды: {value}",
+        "account_holder": "Шот иесі: {value}",
+        "footer": "Бұл PDF құжатына EN 16931 стандартына сәйкес е-шот-фактура (Factur-X / ZUGFeRD) енгізілген. Енгізілген XML құжаты ресми болып табылады.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Есеп",
+        "meta_project": "Жоба",
+        "meta_type": "Түрі",
+        "meta_generated": "Жасалған күні",
+        "meta_currency": "Валюта",
+        "field_column": "Өріс",
+        "value_column": "Мән",
+        "yes": "Иә",
+        "no": "Жоқ",
+        "no_data_heading": "Деректер жоқ",
+        "no_data_body": "Бұл есеп бос деректер суретімен жасалған. Таңдалған жоба үшін бастапқы модульдердің (қаржы, кесте, қауіпсіздік және т.б.) деректер қайтарғанын тексеріңіз.",
+        "no_data_body_short": "Бұл есеп бос деректер суретімен жасалған. Таңдалған жоба үшін бастапқы модульдердің деректер қайтарғанын тексеріңіз.",
+        "footer_generated_by": "{timestamp} уақытында OpenConstructionERP арқылы жасалған.",
+        "worksheet_name": "Есеп",
+        "pdf_subject": "Жоба есебі",
+        "overall_progress": "Жалпы орындалу барысы",
+        "as_of": "Күніне",
+        "recorded_by": "Тіркеген",
+        "period": "Кезең",
+        "entries_suffix": "({count} жазба)",
+        "site_photo_alt": "Объект фотосы",
+        "ai_summary_heading": "Қорытынды",
+        "ai_badge": "ЖИ арқылы жасалған",
+        "ai_note": "Төмендегі жоба деректері бойынша ЖИ арқылы жасалған.",
+        "ai_note_confidence": "Төмендегі жоба деректері бойынша ЖИ арқылы жасалған (сенімділік {confidence}).",
+        "ai_note_review": "Клиентке жібермес бұрын тексеріңіз."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Атауы",
+          "status": "Мәртебесі",
+          "phase": "Кезең",
+          "planned_start": "Жоспарлы басталуы",
+          "planned_end": "Жоспарлы аяқталуы",
+          "schedule_progress_pct": "Кесте бойынша орындалу, %",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Бюджеттің игерілуі, %",
+          "as_of": "Күніне",
+          "progress_pct": "Орындалу, %",
+          "risk_score_avg": "Орташа тәуекел балы",
+          "open_rfis": "Ашық RFI",
+          "open_submittals": "Ашық құжаттар",
+          "open_defects": "Ашық ақаулар",
+          "open_observations": "Ашық бақылаулар",
+          "budget": "Бюджет",
+          "committed": "Міндеттемелер",
+          "actual": "Нақты шығын",
+          "payable": "Төленетін",
+          "receivable": "Алынатын",
+          "net_cash_flow": "Таза ақша ағыны"
+        },
+        "section_titles": {
+          "Project Overview": "Жоба шолуы",
+          "Key Performance Indicators": "Негізгі көрсеткіштер",
+          "Schedule Status": "Кесте мәртебесі",
+          "Risk Summary": "Тәуекелдер қорытындысы",
+          "Open Issues": "Ашық мәселелер",
+          "Cost Summary": "Шығындар қорытындысы",
+          "Cost Breakdown": "Шығындар бөлінісі",
+          "Change Orders": "Өзгерістер тапсырыстары",
+          "Cash Flow": "Ақша ағыны",
+          "Schedule Overview": "Кесте шолуы",
+          "Milestone Status": "Кезеңдік оқиғалар мәртебесі",
+          "Critical Path": "Сыни жол",
+          "3-Week Lookahead": "3 апталық болжам",
+          "Safety KPIs": "Еңбек қауіпсіздігінің көрсеткіштері",
+          "Incident Log": "Оқиғалар журналы",
+          "Near-Miss Reports": "Апатқа айналмаған оқиғалар туралы есептер",
+          "Safety Training": "Қауіпсіздік бойынша оқыту",
+          "Inspection Summary": "Тексеру қорытындысы",
+          "By Inspection Type": "Тексеру түрі бойынша",
+          "Punch List Status": "Түзетулер тізімінің мәртебесі",
+          "Recent Inspections": "Соңғы тексерулер",
+          "Portfolio Overview": "Портфель шолуы",
+          "Project Statuses": "Жобалар мәртебесі",
+          "KPI Comparison": "KPI салыстыруы",
+          "Portfolio Risks": "Портфель тәуекелдері",
+          "Field Progress": "Объектідегі орындалу барысы",
+          "Top Risks": "Негізгі тәуекелдер",
+          "Site Photos": "Объект фотолары",
+          "Summary": "Қорытынды"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Сатып алу тапсырысы",
+        "gr_title": "Тауарды қабылдау актісі",
+        "supplier": "Жеткізуші",
+        "po_type": "Тапсырыс түрі",
+        "issue_date": "Шығарылған күні",
+        "delivery_date": "Жеткізу күні",
+        "created_by": "Дайындаған",
+        "order_total": "Тапсырыс сомасы",
+        "line_items": "Позициялар",
+        "col_no": "№",
+        "col_description": "Сипаттамасы",
+        "col_quantity": "Саны",
+        "col_unit": "Өлшем бірлігі",
+        "col_unit_rate": "Бірлік бағасы",
+        "col_amount": "Сомасы",
+        "no_line_items": "Позициялар жоқ.",
+        "totals": "Жиынтық",
+        "subtotal": "Таза сома",
+        "tax": "Салық",
+        "total_gross": "Салықпен қоса жалпы сома",
+        "terms": "Шарттар",
+        "payment_terms": "Төлем шарттары",
+        "retention": "Ұстап қалу",
+        "retention_at": "Ұстап қалу кезеңі",
+        "retention_at_receipt": "Тауарды қабылдау",
+        "retention_at_invoice": "Шот-фактура",
+        "invoice_tolerance": "Шот-фактурадағы рұқсат етілген ауытқу",
+        "supplier_confirmation": "Жеткізушінің растауы",
+        "supplier_reference": "Жеткізушінің анықтамасы",
+        "confirmed_delivery": "Расталған жеткізу күні",
+        "acknowledged_on": "Растаған күні",
+        "not_confirmed": "Жеткізуші әлі растаған жоқ.",
+        "notes": "Ескертпелер",
+        "no_notes": "Ескертпелер енгізілмеген.",
+        "sig_ordered_by": "Тапсырыс берген",
+        "purchase_order": "Сатып алу тапсырысы",
+        "receipt_date": "Қабылдау күні",
+        "received_by": "Қабылдаған",
+        "delivery_note": "Жеткізу жүкқұжаты",
+        "col_ordered": "Тапсырыс берілген",
+        "col_received": "Қабылданған",
+        "col_rejected": "Қайтарылған",
+        "col_batch": "Партия / лот",
+        "rejections": "Қайтарылғандар",
+        "col_reason": "Себебі",
+        "no_rejections": "Ештеңе қайтарылмады.",
+        "sig_delivered_by": "Жеткізген",
+        "counterparty_tax_id": "Салық төлеуші нөмірі (СТН)",
+        "counterparty_address": "Мекенжайы"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Жоба",
+          "approved": "Бекітілген",
+          "issued": "Шығарылған",
+          "partially_received": "Ішінара қабылданған",
+          "completed": "Аяқталған",
+          "cancelled": "Бас тартылған"
+        },
+        "gr_status": {
+          "draft": "Жоба",
+          "confirmed": "Расталған"
+        },
+        "po_type": {
+          "standard": "Стандартты",
+          "blanket": "Жалпы тапсырыс",
+          "service": "Қызметтер"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Шот",
+        "payment_title": "Төлем",
+        "direction": "Бағыты",
+        "supplier": "Жеткізуші",
+        "client": "Тапсырыс беруші",
+        "invoice_date": "Шот күні",
+        "due_date": "Төлем мерзімі",
+        "payment_terms": "Төлем шарттары",
+        "purchase_order": "Сатып алу тапсырысы",
+        "invoice_total": "Шоттың жалпы сомасы",
+        "line_items": "Позициялар",
+        "col_no": "№",
+        "col_description": "Сипаттамасы",
+        "col_quantity": "Саны",
+        "col_unit": "Өлшем бірлігі",
+        "col_unit_rate": "Бірлік бағасы",
+        "col_vat": "ҚҚС",
+        "col_amount": "Сомасы",
+        "no_line_items": "Позициялар жоқ.",
+        "totals": "Жиынтық",
+        "subtotal": "Таза сома",
+        "tax": "Салық",
+        "total_gross": "Салықпен қоса жалпы сома",
+        "retention": "Ұстап қалу",
+        "amount_due": "Ұстап қалудан кейін төленетін сома",
+        "payments": "Төлемдер",
+        "col_date": "Күні",
+        "col_reference": "Анықтама",
+        "col_paid": "Төленді",
+        "col_withheld": "Ұсталды",
+        "refund": "Қайтару",
+        "no_payments": "Төлемдер тіркелмеген.",
+        "notes": "Ескертпелер",
+        "no_notes": "Ескертпелер енгізілмеген.",
+        "invoice": "Шот",
+        "invoice_number": "Шот №",
+        "payment_date": "Төлем күні",
+        "reference": "Анықтама",
+        "amount_paid": "Төленген сома",
+        "exchange_rate": "Бағам",
+        "kind": "Түрі",
+        "kind_payment": "Төлем",
+        "kind_refund": "Қайтару",
+        "withholding": "Ұстап қалу",
+        "withheld_amount": "Ұсталған сома",
+        "release_date": "Босату күні",
+        "gross_settled": "Жалпы өтелген сома",
+        "no_withholding": "Бұл төлемнен ештеңе ұсталмады.",
+        "counterparty_tax_id": "Салық төлеуші нөмірі (СТН)",
+        "counterparty_address": "Мекенжайы"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Жоба",
+          "pending": "Бекітуді күтуде",
+          "approved": "Бекітілген",
+          "sent": "Жіберілген",
+          "paid": "Төленген",
+          "cancelled": "Бас тартылған",
+          "credit_note_issued": "Кредит-нота шығарылған"
+        },
+        "direction": {
+          "payable": "Төленетін (жеткізушінің шоты)",
+          "receivable": "Алынатын (тапсырыс берушінің шоты)"
+        },
+        "payment_status": {
+          "completed": "Аяқталған",
+          "refunded": "Қайтарылған"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "{page}-бет / {total}",
+    "page": "{page}-бет",
+    "printed": "Басып шығарылды: {timestamp}",
+    "generated": "Жасалған: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} сізді клиент порталына шақырды",
+      "login_subject": "Клиент порталына кіру сілтемесі",
+      "invite_heading": "Клиент порталына қош келдіңіз",
+      "login_heading": "Клиент порталына кіру",
+      "greeting": "Сәлеметсіз бе, {name}!",
+      "greeting_generic": "Сәлеметсіз бе!",
+      "invite_body": "{sender} сізге клиент порталына кіру мүмкіндігін берді. Онда жобаңыздың барысын қадағалай аласыз: орындалу туралы есептер, құжаттар, шот-фактуралар және алдағы маңызды кезеңдер.",
+      "login_body": "Сіз сұраған кіру сілтемесі төменде берілген.",
+      "link_help": "Төмендегі батырма сізді порталға кіргізеді. Құпиясөз қажет емес. Сілтеме бір рет қана жұмыс істейді және {hours} сағаттан кейін күшін жояды.",
+      "ignore": "Егер бұл хатты күтпеген болсаңыз, оны елемей-ақ қойыңыз. Бұл сілтемесіз ешкім кіре алмайды.",
+      "invite_cta": "Порталды ашу",
+      "login_cta": "Кіру",
+      "sender_generic": "Жоба тобыңыз"
+    },
+    "tender_invite": {
+      "subject": "Тендерге шақыру: {package}",
+      "heading": "Тендерге шақыру",
+      "greeting": "Құрметті {company},",
+      "greeting_generic": "Құрметті әріптес,",
+      "invite": "Сізді {package} тендер пакеті бойынша ұсыныс беруге шақырамыз.",
+      "invite_project": "Сізді {project} жобасы бойынша {package} тендер пакетіне ұсыныс беруге шақырамыз.",
+      "deadline": "Ұсыныс берудің соңғы мерзімі: {deadline}",
+      "link_help": "Төмендегі батырма жұмыс көлемдерінің ведомосін ашады. Бірлік бағаларын онлайн енгізіп, нобайды кез келген уақытта сақтап, мерзімнен бұрын ұсынысыңызды тапсыра аласыз. Аккаунт қажет емес.",
+      "link_personal": "Бұл сілтеме тек сіздің компанияңызға арналған. Өтінеміз, оны басқаларға жібермеңіз.",
+      "cta": "Ведомосты ашып, баға енгізу",
+      "no_link": "Өтінеміз, пакеттің мәліметтерімен танысып, жоғарыда көрсетілген мерзімнен бұрын ұсынысыңызды жіберіңіз."
+    },
+    "notification_email": {
+      "greeting": "Сәлеметсіз бе, {name}!",
+      "greeting_generic": "Сәлеметсіз бе!",
+      "cta": "OpenConstructionERP жүйесінде ашу",
+      "footer": "Бұл хатты хабарландыру параметрлеріңізге сәйкес аласыз. Оларды профильде өзгерте аласыз.",
+      "digest_subject": "OpenConstructionERP: Хабарландырулар жиынтығы ({count})",
+      "digest_heading": "Соңғы хабарландырулар:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Бағаларды салыстыру",
+      "comparison_sheet": "Салыстыру",
+      "bidder_title": "Баға қоюға арналған ведомос",
+      "bidder_sheet": "Ведомос",
+      "project": "Жоба",
+      "package": "Пакет",
+      "currency": "Валюта",
+      "date": "Күні",
+      "return_by": "Қайтару мерзімі",
+      "item": "Позиция",
+      "description": "Сипаттама",
+      "unit": "Өлшем бірлігі",
+      "quantity": "Көлемі",
+      "unit_price": "Бірлік бағасы",
+      "line_total": "Позиция сомасы",
+      "own_estimate": "Өз сметамыз",
+      "not_priced": "баға қойылмаған",
+      "sum_priced_lines": "Баға қойылған позициялардың сомасы",
+      "bid_total": "Тапсырылған ұсыныстың сомасы",
+      "lines_priced": "Баға қойылған позициялар",
+      "lines_priced_value": "{priced} / {total}",
+      "deviation": "Өз сметамыздан ауытқу",
+      "not_comparable": "жоқ",
+      "other_currency": "Ұсыныс {currency} валютасында берілген, {reporting} валютасындағы ұсыныстармен қатарға қойылған жоқ.",
+      "legend": "Шартты белгілер",
+      "legend_lowest": "Жасыл: позициядағы ең төмен бірлік бағасы.",
+      "legend_high": "▲ қызыл: позициядағы медиана бағасынан {pct}% артық жоғары.",
+      "legend_low": "▼ сары: позициядағы медиана бағасынан {pct}% артық төмен.",
+      "legend_missing": "«{marker}»: қатысушы бұл позицияға баға қойған жоқ.",
+      "legend_incomplete": "Баға қойылмаған позициялары бар ұсыныс «Баға қойылған позициялар» бағанында белгіленеді және жалпы сомасы бойынша ең арзан деп саналмайды.",
+      "legend_totals": "Ұсыныс сомасы қатысушы тапсырған сан; ол баға қойылған позициялардың сомасынан өзгеше болуы мүмкін.",
+      "bidder": "Қатысушы",
+      "bidder_note": "Қатысушының ескертпесі",
+      "reference": "Сілтеме (өзгертпеңіз)",
+      "total": "Жиыны",
+      "instructions": "Сары ұяшықтарға әр позиция үшін бірлік бағасын енгізіңіз. Көлемдер мен сипаттамалар өзгермейді, позициялардың сомасы мен жиыны өздігінен есептеледі. Баға қоймаған позицияның ұяшығын бос қалдырыңыз."
+    },
+    "cost_plan": {
+      "sheet_plan": "NRM 1 шығын жоспары",
+      "sheet_unallocated": "Бөлінбеген",
+      "title": "Элементтер бойынша шығын жоспары (NRM 1)",
+      "bill": "Жұмыс көлемдерінің ведомосі",
+      "currency": "Валюта",
+      "gifa": "Жалпы ішкі аудан, GIFA (m2)",
+      "gifa_project": "жобадан алынған",
+      "gifa_entered": "осы экспорт үшін енгізілген",
+      "gifa_none": "көрсетілмеген, m2 үшін шығын көрсетілмейді",
+      "col_code": "Код",
+      "col_description": "Элемент",
+      "col_positions": "Позициялар",
+      "col_basis": "Негіз",
+      "col_total": "Жиыны",
+      "col_per_m2": "GIFA m2 үшін шығын",
+      "col_share": "Жиындағы үлесі, %",
+      "col_running": "Жинақталған жиын",
+      "group_level": "Топ деңгейі, элемент көрсетілмеген",
+      "facilitating_works_estimate": "Дайындық жұмыстарының сметасы",
+      "works_estimate": "Құрылыс жұмыстарының сметасы",
+      "addons_heading": "Ведомос позициялары ретінде баға қойылған NRM 1 топтары 9-14",
+      "unallocated": "Элементке бөлінбеген",
+      "direct_cost": "Ведомостың тікелей шығыны",
+      "markups_heading": "Үстеме шығындар (ведомостың өз есептеу тәртібімен)",
+      "markups_total": "Үстеме шығындардың жиыны",
+      "grand_total": "Шығын жоспарының жиыны",
+      "basis_direct": "Тікелей шығыннан {pct}%",
+      "basis_running": "Аралық жиыннан {pct}%",
+      "basis_lump": "Тұрақты сома",
+      "basis_banded": "Сатылы тариф",
+      "basis_escalation": "Индекс бойынша бағаның өсуі",
+      "basis_other": "{kind}",
+      "basis_scoped": "бөліммен шектелген",
+      "col_ordinal": "Реттік нөмір",
+      "col_position": "Сипаттама",
+      "col_written_code": "Жазылған код",
+      "col_reason": "Себебі",
+      "reason_no_code": "Позицияда немесе оның бөлімдерінде NRM коды жоқ",
+      "reason_invalid_code": "Код NRM нөмірі емес",
+      "reason_unknown_group": "NRM 1-де мұндай топ жоқ",
+      "truncated": "Тізім {count} позицияның алғашқы {shown} позициясына дейін қысқартылды; жиын барлық позицияларды қамтиды."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Талаптар",
+      "sheet_summary": "Қысқаша мәлімет",
+      "sheet_legend": "Шартты белгілер",
+      "summary_element": "Элемент",
+      "summary_count": "Талаптар саны",
+      "summary_total": "Жиыны",
+      "legend_column": "Баған",
+      "legend_description": "Сипаттама",
+      "unspecified": "Көрсетілмеген",
+      "h01": "Элемент / IFC класы",
+      "h02": "Жіктеу",
+      "h03": "Қасиеттер тобы",
+      "h04": "Қасиет атауы",
+      "h05": "Деректер түрі",
+      "h06": "Міндетті",
+      "h07": "Рұқсат етілген мәндер",
+      "h08": "Мин",
+      "h09": "Макс",
+      "h10": "Өлшем бірлігі",
+      "h11": "Үлгі",
+      "h12": "Кезең",
+      "h13": "Жауапты тарап",
+      "h14": "Қолдану мақсаты",
+      "h15": "Дереккөз",
+      "d01": "IFC объект класы (мыс. IFCWALL, IFCBEAM)",
+      "d02": "Жіктеу жүйесі және коды (мыс. Uniclass 2015: EF_25_10)",
+      "d03": "Қасиеттер жиынының атауы (мыс. Pset_WallCommon)",
+      "d04": "Талап етілетін қасиеттің немесе атрибуттың атауы",
+      "d05": "IFC деректер түрі (IFCLABEL, IFCREAL, IFCBOOLEAN т.б.)",
+      "d06": "Міндеттілік дәрежесі: міндетті, міндетті емес немесе тыйым салынған",
+      "d07": "Нүктелі үтірмен бөлінген рұқсат етілген мәндер тізімі",
+      "d08": "Сандық ауқымның шектері",
+      "d09": "Өлшем бірлігі (m, m2, kg т.б.)",
+      "d10": "Мәнді тексеруге арналған тұрақты өрнек үлгісі",
+      "d11": "Жоба кезеңі немесе маңызды кезең (LP3, RIBA 3-кезең т.б.)",
+      "d12": "Жауапты тарап (Сәулетші, Конструктор инженер т.б.)",
+      "d13": "Талаптың мақсаты немесе қолдану жағдайы",
+      "d14": "Дереккөз стандарт немесе құжат"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Көлем ведомосі жасалды",
+      "notifications.boq.created.body": "'{boq_name}' көлем ведомосіңіз сақталды.",
+      "notifications.meeting.action_assigned.title": "Сізге міндет жүктелді",
+      "notifications.meeting.action_assigned.body": "Жиналыс {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Құжат күйі өзгерді",
+      "notifications.cde.state_transitioned.body": "Контейнердің жаңа күйі: '{new_state}'.",
+      "notifications.cde.linked_published.title": "Жұмысыңызбен байланысты құжат жарияланды",
+      "notifications.cde.linked_published.body": "Құжат {container_code} жарияланды, редакция: {revision_code}. Байланысты жазбаларыңыз: {records}.",
+      "notifications.rfi.assigned.title": "Сізге ақпарат сауалы (RFI) жүктелді",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "Ақпарат сауалына (RFI) жауап берілді",
+      "notifications.rfi.responded.body": "Сіздің сауалыңыз {code} ({title}) бойынша жауап бар.",
+      "notifications.risk.assigned.title": "Сізге тәуекел жүктелді",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Шығынның асып кетуі туралы ескерту",
+      "notifications.costmodel.overrun_alert.body": "{category} бойынша шығын бюджеттен асты: нақты {actual} {currency}, жоспарланған {planned} {currency} үшін +{threshold_pct}% ескерту шегінен асты.",
+      "notifications.submittal.submitted.title": "Бекітуге арналған құжат тексеруді күтуде",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Бекітуге арналған құжат бекітілді",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Бекітуге арналған құжат қабылданбады",
+      "notifications.submittal.rejected.body": "{code} ({title}). Себебі: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Бекітуге арналған құжатты түзету керек",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Себебі: {reason}",
+      "notifications.transmittal.issued.title": "Сізге жолдама хат берілді",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Жолдама хат қабылданды",
+      "notifications.transmittal.acknowledged.body": "Алушы {code} ({title}) қабылдағанын растады.",
+      "notifications.transmittal.responded.title": "Жолдама хатқа жауап берілді",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "Сізге ақпарат сауалы (RFI) жүктелді",
+      "notification.rfi_assigned_body": "Ақпарат сауалы (RFI) {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Жаңа тапсырма жүктелді",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Шот-фактура бекітілді",
+      "notification.invoice_approved_body": "Шот-фактура {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Тексеру жоспарланды",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, күні: {inspection_date}",
+      "notification.submittal_status_changed_title": "Бекітуге арналған құжаттың күйі өзгерді",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Жиналыс жоспарланды",
+      "notification.meeting_scheduled_body": "{title}, күні: {meeting_date}",
+      "notification.ncr_created_title": "Сәйкессіздік тіркелді",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Құжат жүктелді",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Пікірде сізді атады",
+      "notifications.file_comments.mention.body": "«{excerpt}»",
+      "notifications.collaboration.comment_added.title": "Талқылауда жаңа пікір",
+      "notifications.collaboration.comment_added.body": "Жазба түрі {entity_type}: «{excerpt}»",
+      "notifications.clash.high_severity.title": "Маңызды қиылысу анықталды",
+      "notifications.clash.high_severity.body": "Маңыздылығы {severity}, қиылысатын элементтер: {a_name} / {b_name}",
+      "notifications.validation.report.title": "Тексеру мәселелерді анықтады",
+      "notifications.validation.report.body": "Жазба түрі {target_type}: {error_count} қате және {warning_count} ескерту табылды.",
+      "notifications.punchlist.auto_created.title": "Кемшіліктер тізіміне жазба жасалды",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Хабарландырулар жиынтығы",
+      "notifications.digest.body": "Арна: {channel}. Сізде {count} жаңа ақпарат бар.",
+      "notifications.approval.overdue.title": "Бекіту мерзімі өтті",
+      "notifications.approval.overdue.body": "Жазба түрі {target_kind}, қадам {step_ordinal}: бекіту кешігуде, кешігу: {hours_overdue} сағат.",
+      "notifications.approval.escalated.title": "Бекіту сізге жоғарылатылды",
+      "notifications.approval.escalated.body": "Жазба түрі {target_kind}, қадам {step_ordinal}: бекіту сізге жоғарылатылды (деңгей {level}).",
+      "notifications.approval.reassigned.title": "Бекіту сізге тапсырылды",
+      "notifications.approval.reassigned.body": "Жазба түрі {target_kind}, қадам {step_ordinal}: шешім қабылдау енді сізде.",
+      "notifications.deadline.overdue.title": "Мерзімі өтті: {title}",
+      "notifications.deadline.overdue.body": "Дереккөз: {module}. «{title}» жазбасы кешігуде, кешігу: {days_overdue} күн.",
+      "notifications.deadline.escalated.title": "Мерзімі өткен жазба жоғары басшылыққа жолданды",
+      "notifications.deadline.escalated.body": "Дереккөз: {module}. «{title}» жазбасы әлі ашық, кешігу: {days_overdue} күн, жоғары басшылыққа жолданды.",
+      "notifications.deadline.approaching.title": "Мерзім таяп қалды: {title}",
+      "notifications.deadline.approaching.body": "Дереккөз: {module}. «{title}» жазбасының мерзімі: {due_date}.",
+      "notifications.deadline.built.approaching.title": "Мерзім таяп қалды: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: «{title}», мерзімі: {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Мерзімі өтті: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "{project} жобасында RFI {reference} «{title}» кешігуде: мерзімі {due_date_display}, кешігу {days_overdue} күн. Жауап қажет.",
+      "notifications.deadline.rfi.escalated.title": "Жоғары басшылыққа жолданды: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "{project} жобасында RFI {reference} «{title}» әлі ашық: мерзімі {due_date_display}, кешігу {days_overdue} күн. Жазба сізге жолданды.",
+      "notifications.deadline.rfi.approaching.title": "Мерзім таяп қалды: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "{project} жобасында RFI {reference} «{title}» үшін мерзім {due_date_display}. Жауап қажет.",
+      "notifications.deadline.submittals.overdue.title": "Мерзімі өтті: бекітуге арналған құжат {reference}",
+      "notifications.deadline.submittals.overdue.body": "{project} жобасында бекітуге арналған құжат {reference} «{title}» кешігуде: мерзімі {due_date_display}, кешігу {days_overdue} күн. Тексеру қажет.",
+      "notifications.deadline.submittals.escalated.title": "Жоғары басшылыққа жолданды: бекітуге арналған құжат {reference}",
+      "notifications.deadline.submittals.escalated.body": "{project} жобасында бекітуге арналған құжат {reference} «{title}» әлі ашық: мерзімі {due_date_display}, кешігу {days_overdue} күн. Жазба сізге жолданды.",
+      "notifications.deadline.submittals.approaching.title": "Мерзім таяп қалды: бекітуге арналған құжат {reference}",
+      "notifications.deadline.submittals.approaching.body": "{project} жобасында бекітуге арналған құжат {reference} «{title}» үшін мерзім {due_date_display}. Тексеру қажет.",
+      "notifications.deadline.correspondence.overdue.title": "Мерзімі өтті: хат алмасу {reference}",
+      "notifications.deadline.correspondence.overdue.body": "{project} жобасында хат алмасу {reference} «{title}» кешігуде: жауап беру мерзімі {due_date_display}, кешігу {days_overdue} күн. Жауап қажет.",
+      "notifications.deadline.correspondence.escalated.title": "Жоғары басшылыққа жолданды: хат алмасу {reference}",
+      "notifications.deadline.correspondence.escalated.body": "{project} жобасында хат алмасу {reference} «{title}» әлі жауапсыз: мерзімі {due_date_display}, кешігу {days_overdue} күн. Жазба сізге жолданды.",
+      "notifications.deadline.correspondence.approaching.title": "Мерзім таяп қалды: хат алмасу {reference}",
+      "notifications.deadline.correspondence.approaching.body": "{project} жобасында хат алмасу {reference} «{title}» бойынша жауапты {due_date_display} дейін беру керек. Жауап қажет.",
+      "notifications.deadline.variations.overdue.title": "Мерзімі өтті: қосымша жұмыс {reference}",
+      "notifications.deadline.variations.overdue.body": "{project} жобасында қосымша жұмыс {reference} «{title}» кешігуде: мерзімі {due_date_display}, кешігу {days_overdue} күн. Шешім қажет.",
+      "notifications.deadline.variations.escalated.title": "Жоғары басшылыққа жолданды: қосымша жұмыс {reference}",
+      "notifications.deadline.variations.escalated.body": "{project} жобасында қосымша жұмыс {reference} «{title}» әлі ашық: мерзімі {due_date_display}, кешігу {days_overdue} күн. Жазба сізге жолданды.",
+      "notifications.deadline.variations.approaching.title": "Мерзім таяп қалды: қосымша жұмыс {reference}",
+      "notifications.deadline.variations.approaching.body": "{project} жобасында қосымша жұмыс {reference} «{title}» үшін мерзім {due_date_display}. Шешім қажет.",
+      "notifications.variation.submitted.title": "Қосымша жұмыс шешімді күтуде: {code}",
+      "notifications.variation.submitted.body": "{project} жобасында қосымша жұмыс {code} «{title}» тапсырылды және шешімді күтуде.",
+      "notifications.variation.approved.title": "Қосымша жұмыс бекітілді: {code}",
+      "notifications.variation.approved.body": "{project} жобасында қосымша жұмыс {code} «{title}» бекітілді.",
+      "notifications.variation.rejected.title": "Қосымша жұмыс қабылданбады: {code}",
+      "notifications.variation.rejected.body": "{project} жобасында қосымша жұмыс {code} «{title}» қабылданбай, сізге қайтарылды.",
+      "notifications.variation.rejected_reason.body": "{project} жобасында қосымша жұмыс {code} «{title}» қабылданбай, сізге қайтарылды. Себебі: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Өзгерту бұйрығы бекітуді күтуде: {code}",
+      "notifications.changeorder.awaiting_approval.body": "{project} жобасында өзгерту бұйрығы {code} «{title}» тапсырылды және бекітуді күтуде.",
+      "notifications.changeorder.approved.title": "Өзгерту бұйрығы бекітілді: {code}",
+      "notifications.changeorder.approved.body": "{project} жобасында өзгерту бұйрығы {code} «{title}» бекітілді.",
+      "notifications.changeorder.rejected.title": "Өзгерту бұйрығы қабылданбады: {code}",
+      "notifications.changeorder.rejected.body": "{project} жобасында өзгерту бұйрығы {code} «{title}» қабылданбады.",
+      "notifications.submittal.approved_as_noted.title": "Бекітуге арналған құжат ескертулермен бекітілді",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Құжат сіздің бекітуіңізді күтуде",
+      "notifications.file_approval.needs_approver.body": "{file_kind} сіздің бекітуіңізді күтуде.",
+      "notifications.file_approval.approved.title": "Құжатыңыз бекітілді",
+      "notifications.file_approval.approved.body": "Сіздің {file_kind} барлық бекіту қадамдарынан өтті.",
+      "notifications.file_approval.rejected.title": "Құжатыңыз қайтарылды",
+      "notifications.file_approval.rejected.body": "Сіздің {file_kind} қабылданбады, түзетулер қажет.",
+      "notifications.portal.user_invited.title": "Порталға пайдаланушы шақырылды",
+      "notifications.portal.user_invited.body": "{portal_user_email} шақырылды, рөлі: {portal_role}.",
+      "notifications.portal.message_received.title": "Порталдан жаңа хабарлама",
+      "notifications.portal.message_received.body": "{buyer_name} хабарлама жіберді."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "ID",
+          "Жұмыс ID",
+          "Жұмыс коды",
+          "Код",
+          "Нөмірі"
+        ],
+        "name": [
+          "Атауы",
+          "Жұмыс атауы",
+          "Тапсырма атауы",
+          "Жұмыс",
+          "Тапсырма"
+        ],
+        "wbs": [
+          "WBS",
+          "WBS коды",
+          "WBS нөмірі",
+          "Құрылым коды"
+        ],
+        "outline_level": [
+          "Құрылым деңгейі",
+          "Деңгей",
+          "Шегініс деңгейі",
+          "Шегініс"
+        ],
+        "start": [
+          "Басталуы",
+          "Басталу күні",
+          "Бастау",
+          "Жоспарланған басталуы"
+        ],
+        "finish": [
+          "Аяқталуы",
+          "Аяқталу күні",
+          "Бітуі",
+          "Бітетін күні",
+          "Жоспарланған аяқталуы",
+          "Мерзімі"
+        ],
+        "duration": [
+          "Ұзақтығы",
+          "Ұзақтығы (күн)",
+          "Күндер саны",
+          "Бастапқы ұзақтығы"
+        ],
+        "predecessors": [
+          "Алдыңғы жұмыстар",
+          "Бұрынғы жұмыстар",
+          "Тәуелділік",
+          "Байланыстар"
+        ],
+        "percent_complete": [
+          "% орындалуы",
+          "Орындалған, %",
+          "Дайындығы, %",
+          "Прогресс (%)",
+          "Орындалу пайызы"
+        ],
+        "milestone": [
+          "Маңызды кезең",
+          "Негізгі кезең",
+          "Майлстоун"
+        ],
+        "resource": [
+          "Ресурс",
+          "Ресурстар",
+          "Ресурстар атаулары",
+          "Бригада",
+          "Орындаушы"
+        ],
+        "notes": [
+          "Ескертпелер",
+          "Ескертпе",
+          "Пікір",
+          "Пікірлер",
+          "Сипаттама",
+          "Белгі"
+        ],
+        "client_visible": [
+          "Клиентке көрінеді",
+          "Клиент үшін көрінетін",
+          "Клиентке көрсету",
+          "Клиентпен бөлісу"
+        ]
+      },
+      "yes_words": [
+        "иә",
+        "дұрыс"
+      ],
+      "no_words": [
+        "жоқ",
+        "жалған"
+      ],
+      "example_names": [
+        "Қаңқа және өзек",
+        "Қазаншұңқыр қазу",
+        "Іргетас",
+        "Іргетас қабылданды"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "келісімшарт*",
+          "шарт",
+          "шарттар",
+          "контракт*"
+        ],
+        "contact": [
+          "контакт*",
+          "жеткізуші*",
+          "мердігер*",
+          "қосалқы мердігер*",
+          "клиент*",
+          "сатушы*"
+        ],
+        "schedule_activity": [
+          "тапсырма*",
+          "wbs",
+          "кесте*",
+          "белсенділік*"
+        ],
+        "document": [
+          "құжат*",
+          "сызба*",
+          "тіркеме*"
+        ],
+        "user": [
+          "жауапты*",
+          "орындаушы*",
+          "инспектор*",
+          "прораб*",
+          "тағайындалған*"
+        ],
+        "due": [
+          "мерзім*",
+          "соңғы күн",
+          "жарамды*",
+          "ұзарту*",
+          "аяқтау мерзімі"
+        ]
+      },
+      "link_labels": {
+        "contract": "Келісімшарт",
+        "contact": "Байланыс",
+        "schedule_activity": "Кесте жұмысы",
+        "document": "Құжат",
+        "user": "Жауапты"
+      },
+      "state_labels": [
+        "Ашық",
+        "Орындалуда",
+        "Орындалды"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "{package} тендеріне Қосымша {number}",
+      "addendum_heading": "Тендерге қосымша",
+      "greeting": "Құрметті {company},",
+      "greeting_generic": "Құрметті әріптес,",
+      "addendum_intro": "{package} тендерлік пакетіне Қосымша {number} шығарылды: {title}.",
+      "addendum_deadline": "Тапсыру мерзімі {old} күнінен {new} күніне ауыстырылды.",
+      "addendum_boq": "Көлемдер ведомосі өзгерді (қайта қарау {revision}). Қолданыстағы қайта қаралған нұсқаға баға қойыңыз.",
+      "addendum_documents": "Шығарылған құжаттар: {documents}",
+      "addendum_ack": "Осы қосымшаны алғаныңызды растаңыз. Барлық қосымшаны растамаған ұсыныс талаптарға сай емес деп танылуы мүмкін.",
+      "answer_subject": "{package} тендеріне түсіндірме {number}",
+      "answer_heading": "Тендерге түсіндірме",
+      "answer_intro": "{package} тендерлік пакетіне қатысты сұраққа жауап берілді. Бұл жауап барлық қатысушыларға қатысты.",
+      "question_label": "Сұрақ",
+      "answer_label": "Жауап"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Дамытудың жалпы құны (GDV)",
+      "total_development_cost": "Дамытудың жалпы шығыны",
+      "residual_land_value": "Жердің қалдық құны",
+      "developer_profit": "Девелопер пайдасы",
+      "profit_on_cost": "Шығынға қатынасты пайда",
+      "profit_on_gdv": "GDV-ге қатынасты пайда",
+      "construction_cost": "Құрылыс құны",
+      "professional_fees": "Кәсіби сыйақылар",
+      "contingency": "Күтпеген шығыстар қоры",
+      "finance_cost": "Қаржыландыру шығыны",
+      "sales_costs": "Сату шығыны"
+    },
+    "status": {
+      "viable": "Орындалуы мүмкін",
+      "unviable": "Орындалуы мүмкін емес",
+      "marginal": "Шекаралық",
+      "pending": "Әлі бағаланбаған"
+    },
+    "figure": {
+      "gross_development_value": "Схемадағы барлық бірліктердің сатылым құнының жиыны, бәрі бір валютада.",
+      "total_development_cost": "Жерді қоспағанда схеманы іске асырудың барлық шығыны: құрылыс, сыйақылар, күтпеген шығыстар қоры, қаржыландыру және сату шығыны.",
+      "residual_land_value": "Дамытудың жалпы құнынан дамытудың жалпы шығыны мен девелоперге арналған мақсатты пайда алынғаннан кейін жерге қалатын құн.",
+      "developer_profit": "Девелопер сақтауды көздейтін пайда, дамытудың жалпы құнына қатысты мақсатты үлес ретінде белгіленеді.",
+      "profit_on_cost": "Девелопер пайдасын дамытудың жалпы шығынына бөлген қатынас.",
+      "profit_on_gdv": "Девелопер пайдасын дамытудың жалпы құнына бөлген қатынас."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Жұмысшылар лагері",
+        "rental": "Жалға берілетін тұрғын үй",
+        "hotel": "Қонақүй"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Күтуде",
+        "approved": "Мақұлданған",
+        "rejected": "Қабылданбаған"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Сай келеді",
+        "fail": "Сай келмейді",
+        "not_applicable": "Қолданылмайды"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Сызба",
+        "contract": "Шарт",
+        "specification": "Техникалық сипаттама",
+        "photo": "Фотосурет",
+        "correspondence": "Хат алмасу",
+        "reality_capture": "Нақты жағдайды түсіру",
+        "other": "Басқа"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Күтуде",
+        "approved": "Мақұлданған",
+        "rejected": "Қабылданбаған",
+        "cancelled": "Бас тартылған"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Жоба",
+        "submitted": "Мақұлдауға жіберілген",
+        "approved": "Мақұлданған",
+        "posted": "Кітапқа жазылған"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Ашық",
+        "assigned": "Тағайындалған",
+        "in_progress": "Орындалуда",
+        "resolved": "Түзетілген",
+        "verified": "Тексерілген",
+        "closed": "Жабық"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "ескерту",
+        "minor": "шағын",
+        "major": "маңызды",
+        "critical": "сыни"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Адам",
+        "crew": "Бригада",
+        "equipment": "Техника",
+        "subcontractor": "Субмердігер"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "ЖИ моделінің атауы ескірген немесе қолжетімді емес. Параметрлер > ЖИ бөліміне кіріп, провайдеріңіз үшін қазіргі жарамды модель атауын енгізіңіз.",
+      "not_configured": "ЖИ конфигурацияланбаған. Параметрлерде ЖИ провайдерін орнатыңыз."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "тексерілген",
+      "bound": "тіркелген",
+      "empty": "жоқ"
+    },
+    "package_status_labels": {
+      "draft": "жоба",
+      "in_progress": "орындалуда",
+      "ready": "дайын",
+      "issued": "берілген"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "кедергі",
+      "critical": "сыни",
+      "warning": "ескерту",
+      "suggestion": "ұсыныс"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Стратегия",
+      "brief": "Техникалық тапсырма",
+      "concept": "Тұжырымдама",
+      "design": "Жобалау",
+      "approval": "Рұқсат алу",
+      "detail": "Егжей-тегжейлі жобалау",
+      "tender": "Тендер",
+      "award": "Келісімшарт беру",
+      "construction": "Құрылыс",
+      "handover": "Тапсыру",
+      "operation": "Пайдалану"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "piece_fits_stock": {
+        "fail": "{ref} бөлшегі ({size} мм) ешбір қор өлшеміне сыймайды",
+        "suggestion": "Ұзынырақ немесе үлкенірек қор өлшемін қосыңыз, қиып тастауды азайтыңыз немесе бөлшекті жалғаумен бөліңіз."
+      },
+      "has_stock": {
+        "suggestion": "Кемінде бір қор ұзындығын немесе парақ өлшемін қосыңыз, не нысан қоймасының қалдықтарын қайта пайдаланыңыз.",
+        "fail": "Жұмыста кесуге арналған қор жоқ"
+      },
+      "yield_threshold": {
+        "suggestion": "Тағы бір қор ұзындығын немесе өлшемін қосыңыз, бұруға рұқсат беріңіз немесе осы материалдың шегін қайта қарастырыңыз.",
+        "fail": "{actual} % шығым {threshold} % шегінен төмен"
+      },
+      "ok": "Жарайды",
+      "kerf_set": {
+        "fail": "Ара кесігінің ені нөлге тең",
+        "suggestion": "Жүздің немесе кесудің енін енгізіңіз, әйтпесе бірнеше кесімі бар әр өзектің шығымы артық көрсетіледі."
+      },
+      "grain_allows_fit": {
+        "fail": "{ref} бөлшегі тек талшыққа көлденең бұрғанда ғана сыяды",
+        "suggestion": "Осы бөлшек үшін бұруға рұқсат беріңіз немесе талшық бойымен сыятын парақ өлшемін қосыңыз."
+      },
+      "has_pieces": {
+        "fail": "Жұмыста кесілетін бөлшек жоқ",
+        "suggestion": "Бөлшектерді қолмен қосыңыз, қойыңыз немесе иілу кестесінен, көлем есебінен, смета жолынан не файлдан импорттаңыз."
+      },
+      "min_offcut_set": {
+        "fail": "Ең кіші жарамды қалдық белгіленбеген",
+        "suggestion": "Сақтауға тұратын ең қысқа қалдықты белгілеңіз, сонда қайта пайдаланылатын қалдықтар қалдыққа есептелмейді."
+      },
+      "sheet_dimensions": {
+        "suggestion": "Әр парақ бөлшегі мен парақ өлшемі үшін ұзындығы мен енін көрсетіңіз.",
+        "fail": "{ref} енсіз"
+      },
+      "stock_priced": {
+        "fail": "{ref} қорының бірлік құны жоқ",
+        "suggestion": "Бір данасының бағасын енгізіңіз, сонда жоспар құнын көрсетіп, ең арзан қорды таңдайды."
+      },
+      "stock_sufficient": {
+        "suggestion": "Қолжетімді санды көбейтіңіз немесе тағы бір қор өлшемін қосыңыз.",
+        "fail": "Қолжетімді қорға орналаспаған бөлшектер: {count}"
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "'{title}' ақаулар тізімінің тармағы фотосыз жабылған",
+    "punch_no_photo_fix": "Орындалған жұмыстың фотосын қосыңыз",
+    "photo_weak": "'{title}' бойынша {count} фотода орны немесе түсіру уақыты жоқ",
+    "photo_weak_fix": "Фотоны қолданбада орынды қосып, қайта түсіріңіз",
+    "defect_no_photo": "'{reference}' ақауы түзетудің фотосынсыз жабылған",
+    "defect_no_photo_fix": "Түзетілген жұмыстың фотосын тіркеңіз"
+  },
+  "closeout_dossier": {
+    "more_items": "Тағы {count} тармақ көрсетілмеген",
+    "category_missing": "Қажетті '{category}' санаты бойынша дәлел жоқ",
+    "category_missing_fix": "Осы санаттағы чек-парақ тармағына құжатты байланыстырыңыз немесе біреуін қосыңыз",
+    "category_unverified": "'{category}' дәлелі әлі расталмаған",
+    "category_unverified_fix": "Менеджерден тіркелген дәлелді қарап, растауын сұраңыз",
+    "punch_open": "'{name}' ақаулар тізімінің тармағы әлі ашық",
+    "punch_open_fix": "Тармақты шешіп, жабыңыз немесе оны осы досье аумағынан шығарыңыз",
+    "punch_no_photo": "Шешілген '{name}' ақаулар тізімі тармағында фото жоқ",
+    "punch_no_photo_fix": "Орындалған жұмыстың фотосын қосыңыз",
+    "system_pending": "'{name}' жүйесі іске қосылмаған",
+    "system_pending_fix": "Іске қосу-реттеу чек-парақтарын аяқтап, жүйені іске қосылған деп белгілеңіз",
+    "critical_issues": "{count} сыни іске қосу-реттеу мәселесі әлі ашық",
+    "critical_issues_fix": "Тапсырғанға дейін сыни мәселелерді жабыңыз",
+    "acceptance_missing": "Қабылдау сертификаты тіркелмеген",
+    "acceptance_missing_fix": "Қол қойылған қабылдау сертификатын қабылдау чек-парағының тармағына байланыстырыңыз",
+    "acceptance_unsigned": "Қабылдау сертификатына толық қол қойылмаған (күйі: {status})",
+    "acceptance_unsigned_fix": "Қалған қолдарды Қол қою бөлімінде жинаңыз",
+    "blocked": "Досье чек-парақтан өтпеді. Табылғандарды түзетіңіз немесе бәрібір толық емес деп құрастырыңыз (менеджердің келісімімен).",
+    "delivery_title": "Тапсыру досьесі: {project}",
+    "delivery_body": "'{title}' ({scope}) тапсыру досьесі дайын. Төмендегі сілтеме оны жүктейді және {expires} дейін жарамды.",
+    "pdf": {
+      "title": "Тапсыру досьесі",
+      "scope": "Аумақ",
+      "built": "Құрастырылған уақыты",
+      "status_passed": "Чек-парақ өтті",
+      "status_warnings": "Чек-парақ ескертулермен өтті",
+      "status_errors": "Толық емес: чек-парақ бойынша ашық ескертпелер",
+      "findings": "Чек-парақтың ашық ескертпелері",
+      "severity": "Маңыздылығы",
+      "finding": "Ескертпе",
+      "severity_error": "Қате",
+      "severity_warning": "Ескерту",
+      "severity_info": "Ақпарат",
+      "contents": "Мазмұны",
+      "file": "Файл",
+      "size": "Өлшемі",
+      "punch": "Шешілген ақаулар тізімі",
+      "item": "Тармақ",
+      "status": "Күйі",
+      "photos": "Фотолар",
+      "evidence": "Фото дәлелдер"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "'{name}' үшін {rating} бағасы '{scale}' шкаласының деңгейі емес",
+    "rule_poor_without_action": "'{name}' {rating} деп бағаланған, бірақ жоспарланған қызмет көрсету әрекеті жоқ",
+    "rule_poor_without_action_fix": "Жоспарды шығарыңыз немесе осы элемент үшін әрекет қосыңыз",
+    "rule_action_unpriced": "{year} жылы '{name}' әрекетінің бірлік құны жоқ",
+    "rule_action_unpriced_fix": "Жоспар жиынына кіруі үшін бірлік құнын енгізіңіз",
+    "rule_defect_incomplete": "'{name}' бағасы жұмысты талап етеді, бірақ ауырлығы немесе көлемі жазылмаған"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, {page}-бет",
+    "text_change": "«{old}» мәні «{new}» болып өзгертілді",
+    "kind": {
+      "added": "Қосылды",
+      "removed": "Жойылды",
+      "modified": "Өзгертілді",
+      "text": "Мәтін өзгертілді"
+    },
+    "status": {
+      "open": "Ашық",
+      "relevant": "Маңызды",
+      "not_relevant": "Маңызды емес"
+    },
+    "errors": {
+      "revision_not_found": "Сызбаның редакциясы бұл жобада табылмады.",
+      "revision_not_parsed": "Сызбаның салыстыруға арналған өңделген нұсқасы әлі жоқ.",
+      "comparison_not_found": "Салыстыру табылмады.",
+      "change_not_found": "Өзгеріс табылмады.",
+      "same_revision": "Салыстыру үшін екі түрлі редакцияны немесе бетті таңдаңыз.",
+      "manual_points": "Қолмен туралау үшін әр редакцияда екі түрлі нүкте қажет.",
+      "alignment_singular": "Туралауды қолдануға болмайды: ол парақты жиырып жібереді.",
+      "region_empty": "{seq} өзгерісінің өлшемі жоқ.",
+      "region_off_sheet": "{seq} өзгерісі парақтан тыс жерде орналасқан.",
+      "module_missing": "Бұл әрекет үшін қажетті модуль орнатылмаған."
+    },
+    "rfi": {
+      "subject": "{sheet} парағындағы сызба өзгерісі {seq}",
+      "question": "{sheet} парағының {new} редакциясы белгіленген аймақта ({kind}) {old} редакциясынан өзгеше. Өзгерістің мақсатын және көлемдерге әсер ететінін растаңыз."
+    },
+    "markup": {
+      "text": "Редакция өзгерісі {seq}: {kind}"
+    },
+    "report": {
+      "title": "Сызба редакцияларын салыстыру",
+      "project": "Жоба",
+      "name": "Салыстыру",
+      "old_revision": "Ескі редакция",
+      "new_revision": "Жаңа редакция",
+      "alignment": "Туралау",
+      "alignment_none": "Тураланбаған (бір жақтау)",
+      "alignment_auto": "Автоматты",
+      "alignment_manual": "Қолмен, екі нүкте",
+      "confidence": "сенімділік {value}",
+      "summary": "Өзгерістер",
+      "summary_counts": "Барлығы {total}: қосылған {added}, жойылған {removed}, өзгертілген {modified}, мәтін {text}",
+      "generated_on": "Жасалған күні",
+      "generated": "Жасалды: {timestamp}",
+      "page_of": "{page}-бет, барлығы {total}",
+      "no_changes": "Екі редакция арасында өзгерістер табылмады.",
+      "col_no": "№",
+      "col_preview": "Алдын ала қарау",
+      "col_kind": "Өзгеріс",
+      "col_location": "Орны",
+      "col_detail": "Мәліметтер",
+      "col_status": "Күйі",
+      "col_comment": "Пікір",
+      "col_follow_up": "Келесі әрекет",
+      "page_at": "{page}-бет, {coords}",
+      "layer": "Қабат {layer}",
+      "entity_counts": "Нысандар: қосылған {added}, жойылған {removed}, өзгертілген {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Редакция бұлты",
+      "remeasure": "Қайта өлшеу: {items} көлем, {positions} BOQ позициясы"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Екі жағы да әртүрлі редакциялар.",
+      "distinct_revisions_fail": "Салыстыру парақты өзімен өзін салыстырып тұр.",
+      "distinct_revisions_hint": "Сызбаның ескі және жаңа редакцияларын таңдаңыз.",
+      "alignment_not_needed": "DWG редакциялары сызба бірліктерін ортақ пайдаланады; туралау қажет емес.",
+      "alignment_missing_matrix": "Салыстыруда туралау жоқ.",
+      "alignment_singular": "Туралау парақты жиырып жібереді және оны қолдануға болмайды.",
+      "alignment_scale": "Туралау парақ масштабын {scale} есе өзгертеді, бұл бір сызба редакцияларының айырмасынан көп.",
+      "alignment_low_confidence": "Автоматты туралау сенімсіз (сенімділік {confidence}).",
+      "alignment_manual_points": "Қолмен туралау үшін екі жұп нүкте қажет.",
+      "alignment_ok": "Парақты туралау ақылға қонымды.",
+      "alignment_hint": "Парақтарды екі редакцияға да ортақ екі белгі бойынша, мысалы осьтер қиылысы бойынша, қолмен туралаңыз.",
+      "region_empty": "{seq} өзгерісінің өлшемі жоқ.",
+      "region_off_sheet": "{seq} өзгерісі парақтан тыс жерде орналасқан.",
+      "regions_ok": "Әрбір өзгерген аймақ парақта орналасқан.",
+      "triaged_ok": "Әрбір өзгеріс қаралды.",
+      "triaged_open": "Ашық өзгерістер саны: {count}.",
+      "triaged_hint": "Әр өзгерісті маңызды немесе маңызды емес деп белгілеңіз.",
+      "followed_up_ok": "Әрбір маңызды өзгеріс бойынша келесі әрекет жасалған.",
+      "followed_up_missing": "{seq} өзгерісі маңызды деп белгіленген, бірақ оған пікір, RFI, бұлт немесе қайта өлшеу белгісі қойылмаған.",
+      "followed_up_hint": "Өзгеріске пікір жазыңыз, RFI немесе бұлт жасаңыз не ондағы көлемдерді қайта өлшеуге белгілеңіз."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Ақша ағыны болжамы",
+      "portfolio_title": "Портфель бойынша ақша ағыны болжамы",
+      "empty": "Бұл таңдау үшін ақша ағыны болжамы жоқ.",
+      "project": "Жоба",
+      "as_of": "Күніне",
+      "currency": "Валюта",
+      "delay_days": "Түсімдер кешіктірілген (күн)",
+      "overrun_pct": "Шығын асып кету (%)",
+      "closing_position": "Соңғы қалдық",
+      "peak_funding": "Ең жоғары қаржыландыру қажеттілігі",
+      "peak_period": "Қаржыландыру қажеттілігі ең жоғары ай",
+      "col": {
+        "period": "Ай",
+        "planned_in": "Жоспарланған түсім",
+        "actual_in": "Нақты түсім",
+        "expected_in": "Күтілетін түсім",
+        "planned_out": "Жоспарланған шығыс",
+        "actual_out": "Нақты шығыс",
+        "expected_out": "Күтілетін шығыс",
+        "net": "Таза",
+        "cumulative": "Жинақталған қалдық"
+      }
+    }
+  }
+}

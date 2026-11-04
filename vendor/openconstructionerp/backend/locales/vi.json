@@ -1,0 +1,2535 @@
+{
+  "costs.catalog_name_unavailable": "Không thể dùng tên này cho danh mục mới. Hãy chọn tên khác.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Dự toán chi phí xây dựng mã nguồn mở"
+  },
+  "nav": {
+    "dashboard": "Bảng điều khiển",
+    "assemblies": "Tổ hợp định mức",
+    "ai_estimate": "Dự toán bằng AI",
+    "settings": "Cài đặt",
+    "5d_cost_model": "Mô hình chi phí 5D",
+    "templates": "Mẫu",
+    "reports": "Báo cáo",
+    "sustainability": "Bền vững",
+    "group_estimation": "Dự toán",
+    "group_planning": "Kế hoạch",
+    "group_procurement": "Mua sắm",
+    "group_tools": "Công cụ",
+    "architecture": "Bản đồ kiến trúc"
+  },
+  "common": {
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "create": "Tạo",
+    "search": "Tìm kiếm",
+    "filter": "Lọc",
+    "export": "Xuất",
+    "import": "Nhập",
+    "loading": "Đang tải...",
+    "error": "Lỗi",
+    "success": "Thành công",
+    "confirm": "Xác nhận",
+    "back": "Quay lại",
+    "next": "Tiếp theo",
+    "yes": "Có",
+    "no": "Không"
+  },
+  "auth": {
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "email": "Email",
+    "password": "Mật khẩu"
+  },
+  "projects": {
+    "title": "Dự án",
+    "new_project": "Dự án mới",
+    "project_name": "Tên dự án",
+    "no_projects": "Chưa có dự án nào"
+  },
+  "boq": {
+    "title": "Bảng khối lượng",
+    "position": "Hạng mục",
+    "ordinal": "Số thứ tự",
+    "description": "Mô tả",
+    "quantity": "Khối lượng",
+    "unit": "Đơn vị",
+    "unit_rate": "Đơn giá",
+    "total": "Tổng",
+    "add_position": "Thêm hạng mục",
+    "add_section": "Thêm mục",
+    "assembly": "Tổ hợp",
+    "subtotal": "Tổng phụ",
+    "grand_total": "Tổng cộng",
+    "direct_cost": "Chi phí trực tiếp",
+    "net_total": "Tổng chưa thuế",
+    "gross_total": "Tổng có thuế",
+    "vat": "Thuế GTGT",
+    "add_markups": "Thêm phụ phí",
+    "validate": "Xác thực",
+    "export": "Xuất",
+    "mvp": {
+      "title": "Chọn vật liệu",
+      "subtitle_one": "{{count}} tài nguyên cần lựa chọn",
+      "subtitle_other": "{{count}} tài nguyên cần lựa chọn",
+      "bulk_label": "Điền nhanh:",
+      "bulk_median": "Trung vị cho tất cả",
+      "bulk_mean": "Trung bình cho tất cả",
+      "bulk_cheapest": "Rẻ nhất cho tất cả",
+      "bulk_priciest": "Đắt nhất cho tất cả",
+      "slot_variant_count": "{{n}} tùy chọn",
+      "selected_label": "Đã chọn:",
+      "default_mean": "đơn giá trung bình",
+      "default_median": "đơn giá trung vị",
+      "row_median": "Đơn giá trung vị · {{price}}",
+      "row_mean": "Đơn giá trung bình · {{price}}",
+      "subtotal_label": "Đơn giá hạng mục",
+      "apply": "Áp dụng và thêm vào bảng khối lượng",
+      "batch_progress": "Hạng mục {{current}} / {{total}}",
+      "toast_applied_one": "Đã chọn {{count}} phương án",
+      "toast_applied_other": "Đã chọn {{count}} phương án"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Báo cáo trao đổi"
+      },
+      "column": {
+        "severity": "Mức độ nghiêm trọng",
+        "kind": "Loại mất mát",
+        "position": "Hạng mục",
+        "field": "Trường",
+        "original": "Giá trị gốc",
+        "written": "Giá trị đã ghi",
+        "count": "Số lượng",
+        "detail": "Chi tiết"
+      },
+      "severity": {
+        "error": "Nghiêm trọng",
+        "warning": "Cảnh báo",
+        "info": "Ghi chú"
+      },
+      "kind": {
+        "unsupported_element": "Phần tử không được hỗ trợ",
+        "truncated_text": "Văn bản bị cắt",
+        "altered_text": "Văn bản bị thay đổi",
+        "rounded_value": "Giá trị bị làm tròn",
+        "value_out_of_range": "Giá trị ngoài phạm vi",
+        "dropped_attribute": "Thuộc tính bị bỏ",
+        "unmapped_unit": "Đơn vị chưa ánh xạ",
+        "lost_hierarchy": "Mất cấp phân cấp",
+        "markup_not_representable": "Phụ phí không thể biểu diễn",
+        "attachment_skipped": "Bỏ qua tệp đính kèm",
+        "changed_identifier": "Mã định danh bị đổi",
+        "exceeds_limit": "Vượt giới hạn lưu trữ",
+        "rejected_row": "Dòng bị từ chối",
+        "skipped_row": "Dòng bị bỏ qua",
+        "parser_warning": "Cảnh báo của trình đọc",
+        "roundtrip_mismatch": "Lệch khi khứ hồi"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Điểm rẽ nhánh",
+      "base_snapshot_from": "Điểm rẽ nhánh (từ bản chụp \"{snapshot}\")",
+      "before_cherry_pick": "Trước khi áp dụng thay đổi từ \"{source}\"",
+      "before_merge": "Trước khi hợp nhất nhánh \"{branch}\"",
+      "errors": {
+        "branch_closed": "Nhánh này đã được hợp nhất hoặc lưu trữ nên không thể nhận thêm thay đổi.",
+        "not_a_branch": "Bảng khối lượng này không phải là nhánh.",
+        "same_bill": "Hãy chọn hai dự toán khác nhau.",
+        "different_project": "Hai dự toán phải thuộc cùng một dự án.",
+        "different_tree": "Hai dự toán phải là nhánh của cùng một dự toán chính.",
+        "unresolved_conflicts": "{count} hạng mục đã bị thay đổi ở cả hai dự toán. Hãy quyết định giữ bản nào cho từng hạng mục trước khi áp dụng.",
+        "merge_forbidden": "Bạn không có quyền hợp nhất vào dự toán chính.",
+        "confirm_required": "Hãy xác nhận hợp nhất: thao tác này ghi đè dự toán chính.",
+        "design_options_unavailable": "Chưa cài mô-đun phương án thiết kế.",
+        "base_snapshot_in_use": "Bản chụp này là điểm rẽ nhánh của một nhánh đang mở nên không thể xóa."
+      },
+      "export": {
+        "title_positions": "So sánh dự toán theo hạng mục",
+        "title_sections": "So sánh dự toán theo phần",
+        "title_cost_groups": "So sánh dự toán theo nhóm chi phí",
+        "project": "Dự án",
+        "bill_a": "Dự toán A",
+        "bill_b": "Dự toán B",
+        "total_a": "Tổng A",
+        "total_b": "Tổng B",
+        "delta": "Chênh lệch",
+        "counts": "Thay đổi",
+        "counts_value": "{added} thêm, {removed} xóa, {changed} đổi",
+        "col_ordinal": "STT",
+        "col_description": "Mô tả",
+        "col_unit": "Đơn vị",
+        "col_change": "Thay đổi",
+        "col_qty_a": "KL A",
+        "col_qty_b": "KL B",
+        "col_rate_a": "Đơn giá A",
+        "col_rate_b": "Đơn giá B",
+        "col_total_a": "Tổng A",
+        "col_total_b": "Tổng B",
+        "col_delta": "Chênh lệch",
+        "col_section": "Phần",
+        "col_cost_group": "Nhóm chi phí",
+        "change_added": "Đã thêm",
+        "change_removed": "Đã xóa",
+        "change_changed": "Đã đổi",
+        "change_unchanged": "Không đổi",
+        "ungrouped": "Chưa phân nhóm",
+        "empty": "Hai dự toán giống hệt nhau.",
+        "total": "Tổng"
+      }
+    }
+  },
+  "costs": {
+    "title": "Cơ sở dữ liệu chi phí",
+    "rate": "Đơn giá",
+    "material": "Vật liệu",
+    "labor": "Nhân công",
+    "equipment": "Máy thi công",
+    "search_costs": "Tìm kiếm hạng mục chi phí..."
+  },
+  "assemblies": {
+    "title": "Tổ hợp định mức",
+    "description": "Công thức chi phí có thể tái sử dụng — kết hợp vật liệu, nhân công và máy thi công thành các mẫu sẵn dùng",
+    "new_assembly": "Tổ hợp mới",
+    "from_database": "Từ cơ sở dữ liệu",
+    "apply_to_boq": "Áp dụng vào BOQ",
+    "add_component": "Thêm thành phần",
+    "no_assemblies": "Chưa có tổ hợp nào",
+    "no_assemblies_hint": "Tạo tổ hợp đầu tiên của bạn từ Cơ sở dữ liệu chi phí hoặc Danh mục tài nguyên",
+    "total_rate": "Đơn giá tổng"
+  },
+  "catalog": {
+    "title": "Danh mục tài nguyên",
+    "description": "Duyệt và quản lý vật liệu, máy thi công, đơn giá nhân công và người vận hành",
+    "add_resource": "Thêm tài nguyên",
+    "import_region": "Nhập theo khu vực",
+    "build_assembly": "Xây dựng tổ hợp",
+    "my_catalog": "Danh mục của tôi"
+  },
+  "validation": {
+    "title": "Xác thực",
+    "passed": "Đạt",
+    "warnings": "Cảnh báo",
+    "errors": "Lỗi",
+    "score": "Điểm chất lượng",
+    "run_validation": "Chạy xác thực",
+    "missing_quantity": "Hạng mục {position} chưa có khối lượng",
+    "missing_rate": "Hạng mục {position} chưa có đơn giá",
+    "missing_description": "Hạng mục {position} thiếu mô tả",
+    "missing_classification": "Hạng mục {position} cần mã phân loại",
+    "duplicate_ordinal": "Số thứ tự trùng lặp: {ordinal}",
+    "rate_anomaly": "Đơn giá {rate} vượt ngưỡng ({threshold})",
+    "nl": {
+      "not_a_string": "Dữ liệu nhập phải là văn bản.",
+      "empty": "Dữ liệu nhập đang trống.",
+      "too_long": "Dữ liệu nhập vượt quá {max} ký tự.",
+      "ai_unparsable": "Không thể phân tích phản hồi của AI thành tài liệu DSL.",
+      "no_pattern": "Không có mẫu nào khớp với câu đã nhập.",
+      "try": "Hãy thử: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "Tiến độ 4D",
+    "generated": {
+      "position_label": "Mục {ordinal}",
+      "section_label": "Phần {ordinal}",
+      "task_description": "Được tạo tự động từ mục {ordinal} trong BOQ ({quantity} {unit})",
+      "section_description": "Tóm tắt: phần {ordinal} trong BOQ",
+      "start_milestone": "Khởi công dự án",
+      "start_milestone_description": "Mốc khởi công dự án",
+      "completion_milestone": "Hoàn thành dự án",
+      "completion_milestone_description": "Mốc hoàn thành dự án",
+      "labour_resource": "Nhân công",
+      "machine_resource": "Máy thi công"
+    },
+    "progress_sheet": {
+      "sheet_title": "Tiến độ",
+      "title": "Bảng cập nhật tiến độ",
+      "detail_schedule": "Tiến độ: {name}",
+      "detail_exported": "Đã xuất: {date}",
+      "instructions": "Chỉ điền các cột màu trắng. Không thay đổi các cột màu xám, thứ tự dòng hoặc các cột ẩn.",
+      "col": {
+        "activity_ref": "ID công việc",
+        "name": "Công việc",
+        "wbs_code": "WBS",
+        "responsible": "Người phụ trách",
+        "planned_start": "Bắt đầu kế hoạch",
+        "planned_finish": "Kết thúc kế hoạch",
+        "percent_complete": "% hoàn thành",
+        "actual_start": "Bắt đầu thực tế",
+        "actual_finish": "Kết thúc thực tế",
+        "remaining_duration": "Còn lại (ngày làm việc)",
+        "notes": "Ghi chú",
+        "row_key": "Khóa dòng",
+        "stamp": "Dấu"
+      }
+    }
+  },
+  "cad": {
+    "title": "Nhập CAD",
+    "upload": "Tải lên tệp CAD",
+    "supported_formats": "Hỗ trợ: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Đang chuyển đổi...",
+    "elements_found": "Tìm thấy {count} đối tượng"
+  },
+  "takeoff": {
+    "title": "Bóc khối lượng",
+    "auto_detect": "Phát hiện tự động",
+    "manual_measure": "Đo thủ công",
+    "confidence": "Độ tin cậy"
+  },
+  "tendering": {
+    "title": "Đấu thầu",
+    "create_tender": "Tạo gói thầu",
+    "bid": "Đặt giá",
+    "award": "Trao thầu"
+  },
+  "modules": {
+    "title": "Mô-đun",
+    "installed": "Đã cài đặt",
+    "available": "Có sẵn",
+    "install": "Cài đặt",
+    "uninstall": "Gỡ cài đặt",
+    "update": "Cập nhật"
+  },
+  "dashboard": {
+    "welcome": "Chào mừng đến với OpenConstructionERP",
+    "subtitle": "Không gian làm việc dự toán xây dựng của bạn",
+    "recent_projects": "Dự án gần đây",
+    "system_status": "Trạng thái hệ thống",
+    "modules_loaded": "Mô-đun đã tải",
+    "validation_rules": "Quy tắc xác thực",
+    "languages": "Ngôn ngữ",
+    "continue_estimate": "Tiếp tục dự toán gần nhất",
+    "getting_started": "Bắt đầu",
+    "total_value": "Tổng giá trị",
+    "active_estimates": "Dự toán đang hoạt động",
+    "schedule_status": "Trạng thái tiến độ",
+    "quality_score": "Điểm chất lượng",
+    "analytics": "Phân tích",
+    "project_overview": "Tổng quan dự án",
+    "step_load_db": "Tải cơ sở dữ liệu chi phí",
+    "step_load_db_desc": "Nhập dữ liệu giá vùng với hơn 55.000 hạng mục",
+    "step_ai_search": "Bật tìm kiếm AI",
+    "step_ai_search_desc": "Tạo nhúng vector cho việc khớp chi phí ngữ nghĩa",
+    "step_connect_ai": "Kết nối AI",
+    "step_connect_ai_desc": "Thêm khóa API của bạn để dự toán bằng AI",
+    "step_create_project": "Tạo dự án",
+    "step_create_project_desc": "Bắt đầu dự án dự toán xây dựng đầu tiên của bạn",
+    "step_build_boq": "Xây dựng BOQ của bạn",
+    "step_build_boq_desc": "Tạo Bảng khối lượng với sự hỗ trợ của AI"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "cái",
+    "lsum": "trọn gói",
+    "h": "giờ",
+    "set": "bộ"
+  },
+  "contacts": {
+    "title": "Danh bạ liên hệ",
+    "new_contact": "Liên hệ mới",
+    "contact_type": "Loại liên hệ",
+    "client": "Khách hàng",
+    "subcontractor": "Nhà thầu phụ",
+    "supplier": "Nhà cung cấp",
+    "consultant": "Tư vấn",
+    "internal": "Nội bộ",
+    "company_name": "Tên công ty",
+    "search_contacts": "Tìm kiếm liên hệ...",
+    "no_contacts": "Chưa có liên hệ nào",
+    "prequalification": "Sơ tuyển",
+    "approved": "Đã duyệt",
+    "pending": "Chờ xử lý",
+    "expired": "Hết hạn"
+  },
+  "tasks": {
+    "title": "Nhiệm vụ",
+    "new_task": "Nhiệm vụ mới",
+    "task": "Nhiệm vụ",
+    "topic": "Chủ đề",
+    "information": "Thông tin",
+    "decision": "Quyết định",
+    "personal": "Nhiệm vụ cá nhân",
+    "my_tasks": "Nhiệm vụ của tôi",
+    "open": "Đang mở",
+    "in_progress": "Đang thực hiện",
+    "completed": "Đã hoàn thành",
+    "draft": "Bản nháp",
+    "due_date": "Ngày đến hạn",
+    "assignee": "Người được giao",
+    "priority": "Mức ưu tiên",
+    "checklist": "Danh sách kiểm tra",
+    "focus_area": "Lĩnh vực trọng tâm"
+  },
+  "rfi": {
+    "title": "Yêu cầu thông tin",
+    "new_rfi": "RFI mới",
+    "subject": "Chủ đề",
+    "question": "Câu hỏi",
+    "response": "Phản hồi",
+    "ball_in_court": "Bên xử lý",
+    "days_open": "Số ngày mở",
+    "cost_impact": "Ảnh hưởng chi phí",
+    "schedule_impact": "Ảnh hưởng tiến độ",
+    "respond": "Trả lời",
+    "close": "Đóng",
+    "overdue": "Quá hạn"
+  },
+  "finance": {
+    "title": "Tài chính",
+    "budgets": "Ngân sách",
+    "invoices": "Hóa đơn",
+    "payable": "Phải trả",
+    "receivable": "Phải thu",
+    "payments": "Thanh toán",
+    "evm": "Giá trị thu được",
+    "invoice_number": "Số hóa đơn",
+    "amount": "Số tiền",
+    "status": "Trạng thái",
+    "approve": "Phê duyệt",
+    "pay": "Đánh dấu đã thanh toán",
+    "original_budget": "Ngân sách ban đầu",
+    "revised_budget": "Ngân sách điều chỉnh",
+    "committed": "Đã cam kết",
+    "actual": "Thực tế",
+    "forecast": "Dự báo",
+    "variance": "Chênh lệch"
+  },
+  "procurement": {
+    "title": "Mua sắm",
+    "purchase_orders": "Đơn đặt hàng",
+    "goods_receipts": "Phiếu nhập kho",
+    "new_po": "PO mới",
+    "po_number": "Số PO",
+    "vendor": "Nhà cung cấp",
+    "issue": "Phát hành",
+    "confirm": "Xác nhận nhận hàng"
+  },
+  "safety": {
+    "title": "An toàn",
+    "incidents": "Sự cố",
+    "observations": "Quan sát",
+    "new_incident": "Sự cố mới",
+    "new_observation": "Quan sát mới",
+    "severity": "Mức độ nghiêm trọng",
+    "risk_score": "Điểm rủi ro",
+    "days_lost": "Số ngày mất",
+    "treatment": "Xử lý",
+    "corrective_action": "Hành động khắc phục"
+  },
+  "meetings": {
+    "title": "Cuộc họp",
+    "new_meeting": "Cuộc họp mới",
+    "meeting_type": "Loại",
+    "attendees": "Người tham dự",
+    "agenda": "Chương trình",
+    "action_items": "Hạng mục hành động",
+    "minutes": "Biên bản",
+    "complete": "Hoàn tất cuộc họp",
+    "present": "Có mặt",
+    "absent": "Vắng mặt",
+    "excused": "Có lý do",
+    "actions": {
+      "status": {
+        "open": "Đang mở",
+        "completed": "Hoàn thành",
+        "cancelled": "Đã hủy"
+      },
+      "flag": {
+        "overdue": "Quá hạn",
+        "on_track": "Đúng tiến độ"
+      },
+      "label": {
+        "action_item": "Hạng mục hành động",
+        "completion_rate": "Tỷ lệ hoàn thành hành động",
+        "open_vs_done": "Đang mở so với đã xong",
+        "overdue": "Hành động quá hạn"
+      },
+      "explain": {
+        "action_item": "Hạng mục hành động là công việc đã thống nhất trong cuộc họp, có người phụ trách và hạn hoàn thành.",
+        "completion_rate": "Tỷ lệ hoàn thành hành động là số hành động đã hoàn thành chia cho tổng số hành động, từ 0 đến 1.",
+        "open_vs_done": "Hành động đang mở vẫn cần xử lý. Hành động đã xong đã hoàn thành và không cần thực hiện thêm.",
+        "overdue": "Hành động được coi là quá hạn khi vẫn đang mở và hạn hoàn thành trước ngày tham chiếu."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Biên bản họp",
+      "issued": "ĐÃ BAN HÀNH",
+      "draft": "BẢN NHÁP",
+      "date": "Ngày:",
+      "location": "Địa điểm:",
+      "type": "Loại:",
+      "number": "Cuộc họp số:",
+      "chairperson": "Chủ trì:",
+      "next_meeting": "Cuộc họp tiếp theo:",
+      "not_available": "Không áp dụng",
+      "not_scheduled": "Chưa lên lịch",
+      "attendance": "Thành phần tham dự",
+      "present": "Có mặt:",
+      "absent": "Vắng mặt / có lý do:",
+      "agenda": "Chương trình, thảo luận và quyết định",
+      "required": "(bắt buộc)",
+      "discussion": "Thảo luận:",
+      "decision": "Quyết định:",
+      "decisions": "Các quyết định",
+      "open_questions": "Vấn đề còn mở",
+      "actions": "Công việc cần thực hiện",
+      "col_number": "#",
+      "col_action": "Công việc",
+      "col_owner": "Người phụ trách",
+      "col_due": "Hạn hoàn thành",
+      "col_status": "Trạng thái",
+      "brought_forward": "[Chuyển từ kỳ trước]",
+      "overdue": "(quá hạn)",
+      "status_open": "Đang mở",
+      "status_in_progress": "Đang thực hiện",
+      "status_done": "Hoàn thành",
+      "status_cancelled": "Đã hủy",
+      "summary": "Tóm tắt",
+      "generated": "Tạo lúc: {stamp}",
+      "issued_at": "Ban hành lúc {stamp}",
+      "running_head": "{project} - Biên bản",
+      "type_progress": "Tiến độ",
+      "type_design": "Thiết kế",
+      "type_safety": "An toàn",
+      "type_subcontractor": "Nhà thầu phụ",
+      "type_kickoff": "Khởi công",
+      "type_closeout": "Bàn giao",
+      "type_commercial": "Thương mại"
+    }
+  },
+  "inspections": {
+    "title": "Kiểm tra chất lượng",
+    "new_inspection": "Cuộc kiểm tra mới",
+    "inspector": "Người kiểm tra",
+    "checklist": "Danh sách kiểm tra",
+    "pass": "Đạt",
+    "fail": "Không đạt",
+    "partial": "Một phần",
+    "critical": "Nghiêm trọng",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Đã lên lịch",
+        "in_progress": "Đang thực hiện",
+        "completed": "Hoàn thành",
+        "failed": "Không đạt",
+        "cancelled": "Đã hủy"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Báo cáo không phù hợp",
+    "new_ncr": "NCR mới",
+    "root_cause": "Nguyên nhân gốc",
+    "corrective_action": "Hành động khắc phục",
+    "preventive_action": "Hành động phòng ngừa",
+    "material": "Vật liệu",
+    "workmanship": "Tay nghề",
+    "design": "Thiết kế"
+  },
+  "submittals": {
+    "title": "Hồ sơ trình duyệt",
+    "new_submittal": "Hồ sơ trình duyệt mới",
+    "spec_section": "Mục đặc tả",
+    "revision": "Phiên bản",
+    "submit": "Gửi",
+    "review": "Xem xét",
+    "approved_as_noted": "Duyệt với ghi chú",
+    "revise_resubmit": "Sửa và gửi lại",
+    "intl": {
+      "status_labels": {
+        "draft": "Nháp",
+        "submitted": "Đã nộp",
+        "under_review": "Đang xem xét",
+        "approved": "Đã phê duyệt",
+        "approved_as_noted": "Phê duyệt có ghi chú",
+        "revise_and_resubmit": "Chỉnh sửa và nộp lại",
+        "rejected": "Đã từ chối",
+        "closed": "Đã đóng"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Thư từ",
+    "new_entry": "Mục mới",
+    "incoming": "Đến",
+    "outgoing": "Đi",
+    "letter": "Thư",
+    "email": "Email",
+    "notice": "Thông báo",
+    "date_sent": "Ngày gửi",
+    "date_received": "Ngày nhận"
+  },
+  "cde": {
+    "title": "Môi trường dữ liệu chung",
+    "new_container": "Bộ chứa mới",
+    "container_code": "Mã bộ chứa",
+    "cde_state": "Trạng thái CDE",
+    "wip": "Đang thực hiện",
+    "shared": "Đã chia sẻ",
+    "published": "Đã phát hành",
+    "archived": "Đã lưu trữ",
+    "promote": "Nâng cấp",
+    "suitability": "Tính phù hợp",
+    "discipline": "Chuyên ngành",
+    "revisions": "Phiên bản",
+    "intl": {
+      "state_labels": {
+        "wip": "Đang thực hiện",
+        "shared": "Đã chia sẻ",
+        "published": "Đã phát hành",
+        "archived": "Đã lưu trữ"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Phiếu chuyển giao",
+    "new_transmittal": "Phiếu chuyển giao mới",
+    "purpose": "Mục đích",
+    "for_approval": "Để phê duyệt",
+    "for_information": "Để biết",
+    "for_construction": "Để thi công",
+    "recipients": "Người nhận",
+    "acknowledge": "Xác nhận đã nhận",
+    "locked": "Đã khóa",
+    "issue_transmittal": "Phát hành",
+    "intl": {
+      "status_words": {
+        "draft": "nháp",
+        "issued": "đã gửi",
+        "responded": "đã phản hồi"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Thông báo",
+    "no_notifications": "Không có thông báo mới",
+    "mark_all_read": "Đánh dấu tất cả đã đọc",
+    "unread": "Chưa đọc"
+  },
+  "comments": {
+    "title": "Bình luận",
+    "post": "Đăng",
+    "reply": "Trả lời",
+    "edit": "Chỉnh sửa",
+    "delete": "Xóa",
+    "placeholder": "Viết bình luận...",
+    "empty": "Chưa có bình luận. Hãy bắt đầu thảo luận.",
+    "edited": "đã chỉnh sửa",
+    "deleted": "Bình luận này đã bị xóa"
+  },
+  "bim": {
+    "title": "BIM Hub",
+    "models": "Mô hình",
+    "elements": "Đối tượng",
+    "upload_model": "Tải lên mô hình",
+    "processing": "Đang xử lý",
+    "active": "Đang hoạt động",
+    "link_to_boq": "Liên kết với BOQ",
+    "properties": "Thuộc tính",
+    "quantities": "Khối lượng",
+    "wireframe": "Khung dây",
+    "section_box": "Hộp cắt",
+    "measure": "Đo",
+    "zoom_to_fit": "Thu phóng vừa khít"
+  },
+  "reporting": {
+    "title": "Báo cáo & Bảng điều khiển",
+    "kpi": "Bảng điều khiển KPI",
+    "generate_report": "Tạo báo cáo",
+    "templates": "Mẫu",
+    "project_status": "Trạng thái dự án",
+    "cost_report": "Báo cáo chi phí",
+    "schedule_status": "Trạng thái tiến độ",
+    "safety_report": "Báo cáo an toàn",
+    "explain": {
+      "report_total_one": "Tổng báo cáo: {money} (tổng của {count} dòng).",
+      "report_total_other": "Tổng báo cáo: {money} (tổng của {count} dòng).",
+      "percent_of_total": "{part} bằng {percent} của {total} (phần trăm trên tổng).",
+      "percent_zero_total": "{part} trên {total}: tổng bằng không, nên mọi tỷ trọng được báo cáo là 0 phần trăm.",
+      "breakdown_empty": "Chi tiết chi phí: không có dữ liệu.",
+      "breakdown_one": "Chi tiết chi phí: {count} nhóm, tổng báo cáo {money}.",
+      "breakdown_other": "Chi tiết chi phí: {count} nhóm, tổng báo cáo {money}.",
+      "top_n_one": "Top {requested}: {shown} trên {shown} dòng.",
+      "top_n_other": "Top {requested}: {shown} trên {shown} dòng."
+    }
+  },
+  "gantt": {
+    "title": "Biểu đồ Gantt",
+    "day": "Ngày",
+    "week": "Tuần",
+    "month": "Tháng",
+    "critical_path": "Đường găng",
+    "baseline": "Đường cơ sở",
+    "dependencies": "Phụ thuộc",
+    "today": "Hôm nay"
+  },
+  "settings": {
+    "regional": "Cài đặt vùng",
+    "timezone": "Múi giờ",
+    "measurement": "Hệ đo lường",
+    "paper_size": "Khổ giấy",
+    "date_format": "Định dạng ngày",
+    "number_format": "Định dạng số",
+    "currency": "Tiền tệ",
+    "metric": "Hệ mét",
+    "imperial": "Hệ đế quốc"
+  },
+  "users": {
+    "management": "Quản lý người dùng",
+    "management_desc": "Quản lý thành viên nhóm, vai trò và quyền truy cập",
+    "invite_user": "Mời người dùng",
+    "invite": "Mời",
+    "full_name": "Họ và tên",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "role": "Vai trò",
+    "status": "Trạng thái",
+    "last_login": "Đăng nhập gần nhất",
+    "actions": "Hành động",
+    "name": "Tên",
+    "total": "Tổng người dùng",
+    "active": "Đang hoạt động",
+    "inactive": "Không hoạt động",
+    "admins": "Quản trị viên",
+    "managers": "Quản lý",
+    "search": "Tìm kiếm theo tên hoặc email...",
+    "no_users": "Không tìm thấy người dùng",
+    "updated": "Đã cập nhật người dùng",
+    "invited": "Đã mời người dùng thành công",
+    "deactivate": "Vô hiệu hóa",
+    "activate": "Kích hoạt",
+    "never": "Chưa bao giờ",
+    "role_admin_desc": "Toàn quyền truy cập tất cả tính năng",
+    "role_manager_desc": "Quản lý dự án và nhóm",
+    "role_editor_desc": "Tạo và chỉnh sửa nội dung",
+    "role_viewer_desc": "Truy cập chỉ đọc"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Bản chốt này đã bị khóa. Bản chốt đã khóa là một bản ghi và không thể thay đổi.",
+      "frozen_no_delete": "Bản chốt đã khóa là một bản ghi và không thể xóa.",
+      "draft_open": "Đã có một bản chốt nháp đang mở. Hãy khóa hoặc xóa bản đó trước khi tạo bản mới.",
+      "no_line_method": "Dòng này không có phương pháp riêng.",
+      "snapshot_missing": "Không tìm thấy bản chốt.",
+      "line_missing": "Bản chốt này không có dòng đó.",
+      "document_missing": "Tài liệu được liên kết không thuộc dự án này.",
+      "freeze_refused": "Chưa thể khóa bản chốt: {count} dòng thay đổi vượt ngưỡng mà chưa có ghi chú và tài liệu chứng minh.",
+      "no_frozen_snapshot": "Chưa có bản chốt đã khóa để so sánh.",
+      "no_ledger": "Sổ hóa đơn không khả dụng trong bản cài đặt này.",
+      "no_snapshot": "Chưa có bản chốt nào để lập tài liệu."
+    },
+    "export": {
+      "project": "Dự án",
+      "generated": "Ngày lập",
+      "currency": "Tiền tệ",
+      "page": "Trang",
+      "generated_at": "Lập ngày",
+      "empty": "Chưa có gì để hiển thị.",
+      "total": "Tổng cộng",
+      "cost_report": "Báo cáo chi phí",
+      "phase_comparison": "So sánh các giai đoạn",
+      "invoice_ledger": "Sổ hóa đơn",
+      "forecast_documentation": "Hồ sơ dự báo",
+      "as_of": "Tính đến ngày",
+      "forecast_method": "Phương pháp dự báo",
+      "col_account": "Tài khoản",
+      "col_code": "Mã",
+      "col_description": "Mô tả",
+      "col_source": "Nguồn",
+      "col_method": "Phương pháp",
+      "col_planned": "Kế hoạch",
+      "col_committed": "Đã cam kết",
+      "col_pending": "Thay đổi chờ duyệt",
+      "col_measured": "Đã đo bóc",
+      "col_certified": "Đã xác nhận thanh toán",
+      "col_invoiced": "Đã xuất hóa đơn",
+      "col_paid": "Đã thanh toán",
+      "col_forecast": "Dự báo",
+      "col_variance": "Chênh lệch",
+      "col_variance_pct": "Chênh lệch %",
+      "col_forecast_of_plan": "Dự báo % so với kế hoạch",
+      "col_measured_of_committed": "Đã đo bóc % so với cam kết",
+      "col_invoiced_of_committed": "Đã xuất hóa đơn % so với cam kết",
+      "col_contract": "Hợp đồng",
+      "col_contract_title": "Tên hợp đồng",
+      "col_invoice": "Hóa đơn",
+      "col_date": "Ngày",
+      "col_kind": "Loại",
+      "col_release_status": "Hoàn trả",
+      "col_net": "Chưa thuế",
+      "col_vat": "VAT",
+      "col_gross": "Gồm thuế",
+      "col_retention": "Tiền giữ lại",
+      "col_release": "Tiền giữ lại đã hoàn trả",
+      "col_discount": "Chiết khấu",
+      "col_payable": "Phải trả",
+      "col_open": "Còn mở",
+      "col_previous": "Trước đó",
+      "col_delta": "Thay đổi",
+      "col_delta_pct": "Thay đổi %",
+      "col_needs_evidence": "Cần tài liệu chứng minh",
+      "col_comment": "Ghi chú",
+      "col_evidence": "Tài liệu chứng minh",
+      "row_unassigned": "Tiền chưa gắn dòng chi phí",
+      "row_loose_changes": "Thay đổi chưa gắn hợp đồng",
+      "row_no_contract": "Chưa có hợp đồng",
+      "contract_value": "Giá trị hợp đồng",
+      "retention_held": "Tiền giữ lại hiện có",
+      "yes": "Có",
+      "no": "Không",
+      "snapshot_date": "Ngày chốt",
+      "snapshot_status": "Trạng thái",
+      "previous_snapshot": "Bản chốt đã khóa trước đó",
+      "method_explained": "Cách đọc dự báo",
+      "evidence_threshold": "Cần tài liệu chứng minh khi vượt",
+      "threshold_both": "mức thay đổi lớn hơn {parts}",
+      "threshold_any": "mọi thay đổi",
+      "frozen_at": "Khóa lúc"
+    },
+    "method": {
+      "best_available": "Nguồn tốt nhất hiện có",
+      "maximum": "Giá trị lớn nhất",
+      "evm_cpi": "Giá trị thực hiện (CPI)",
+      "manual": "Nhập tay"
+    },
+    "method_help": {
+      "best_available": "Mỗi dòng lấy con số đáng tin nhất của nó: quyết toán, nếu chưa có thì khối lượng đã đo bóc, rồi giá trúng thầu, rồi dự toán, rồi ngân sách.",
+      "maximum": "Mỗi dòng lấy con số cao nhất trong các số liệu của nó (ngân sách, dự toán, trúng thầu, đo bóc, hóa đơn), nên dự báo không bao giờ che giấu rủi ro.",
+      "evm_cpi": "Mỗi dòng suy ra chi phí khi hoàn thành từ tiến độ: số tiền đã chi chia cho tỷ lệ công việc đã làm.",
+      "manual": "Một người đặt con số cho dòng và liên kết tài liệu làm căn cứ."
+    },
+    "source": {
+      "none": "Chưa có số liệu",
+      "budget": "Ngân sách",
+      "estimate": "Dự toán",
+      "partly_awarded": "Trúng thầu một phần",
+      "awarded": "Đã trúng thầu",
+      "measured": "Đã đo bóc",
+      "final": "Quyết toán",
+      "manual": "Nhập tay",
+      "invoiced": "Đã xuất hóa đơn",
+      "evm": "Giá trị thực hiện"
+    },
+    "layer": {
+      "budget": "Ngân sách",
+      "estimate": "Dự toán",
+      "tender": "Hồ sơ dự thầu tốt nhất",
+      "awarded": "Đã trúng thầu",
+      "changes": "Thay đổi đã duyệt",
+      "committed": "Đã cam kết",
+      "pending": "Thay đổi chờ duyệt",
+      "measured": "Đã đo bóc",
+      "certified": "Đã xác nhận thanh toán",
+      "invoiced": "Đã xuất hóa đơn",
+      "paid": "Đã thanh toán",
+      "forecast": "Dự báo"
+    },
+    "invoice_kind": {
+      "interim": "Tạm ứng theo đợt",
+      "final": "Quyết toán",
+      "daywork": "Công nhật",
+      "credit_note": "Giấy báo có"
+    },
+    "release_status": {
+      "open": "Còn mở",
+      "released": "Đã hoàn trả"
+    },
+    "evidence_kind": {
+      "document": "Tài liệu",
+      "minutes": "Biên bản",
+      "other": "Khác"
+    },
+    "snapshot_status": {
+      "draft": "Nháp",
+      "frozen": "Đã khóa"
+    }
+  },
+  "document_forms": {
+    "submittals": {
+      "labels": {
+        "discipline": {
+          "plumbing": "Cấp thoát nước",
+          "fire_protection": "PCCC",
+          "civil": "Xây dựng",
+          "bms": "Tự động hóa tòa nhà",
+          "hvac": "Điều hòa thông gió",
+          "lighting": "Chiếu sáng",
+          "mechanical": "Cơ khí",
+          "architectural": "Kiến trúc",
+          "electrical": "Điện",
+          "structural": "Kết cấu",
+          "elv": "Điện nhẹ"
+        },
+        "type": {
+          "sample": "Mẫu vật liệu",
+          "method_statement": "Biện pháp thi công",
+          "shop_drawing": "Bản vẽ thi công",
+          "mock_up": "Mô hình mẫu",
+          "certificate": "Chứng chỉ",
+          "test_report": "Báo cáo thử nghiệm",
+          "calculation": "Bản tính",
+          "product_data": "Hồ sơ sản phẩm",
+          "warranty": "Phiếu bảo hành"
+        },
+        "status": {
+          "draft": "Nháp",
+          "approved_as_noted": "Duyệt có ghi chú",
+          "revise_and_resubmit": "Sửa và trình lại",
+          "rejected": "Từ chối",
+          "under_review": "Đang xem xét",
+          "closed": "Đã đóng",
+          "submitted": "Đã trình",
+          "approved": "Đã duyệt"
+        }
+      },
+      "strings": {
+        "review_history": "Lịch sử xem xét",
+        "submitted_by_org": "Đơn vị trình",
+        "doc_title": "Hồ sơ trình duyệt",
+        "col_on_site_needed_by": "Vào công trường / hạn duyệt",
+        "col_drawings": "Bản vẽ liên quan",
+        "col_approval_late": "Số ngày quá hạn",
+        "col_needed_by": "Hạn cần duyệt",
+        "col_lead_time": "Thời gian đặt hàng (tuần)",
+        "sig_reviewed": "Người xem xét",
+        "col_model": "Mẫu mã / tham chiếu",
+        "col_discipline": "Chuyên ngành",
+        "col_date_submitted": "Ngày trình",
+        "col_reviewer": "Người xem xét",
+        "col_required_on_site": "Ngày cần tại công trường",
+        "register_title_method_statement": "Sổ theo dõi biện pháp thi công",
+        "col_supplier": "Nhà cung cấp",
+        "hist_returned": "Trả lại",
+        "col_review_code": "Mã xem xét",
+        "col_origin": "Xuất xứ",
+        "register_filename_method_statement": "so-theo-doi-bien-phap-thi-cong",
+        "sig_submitted": "Người trình",
+        "col_long_lead": "Đặt hàng dài ngày",
+        "drawings_missing_other": "{n} bản vẽ liên quan không còn khả dụng",
+        "col_product": "Hãng / mẫu / xuất xứ",
+        "col_outcome": "Kết quả xem xét",
+        "col_number": "Số hồ sơ",
+        "register_filename_product_data": "so-theo-doi-duyet-vat-tu",
+        "col_manufacturer": "Nhà sản xuất / nhãn hiệu",
+        "col_rev": "Lần sửa",
+        "register_filename_shop_drawing": "so-theo-doi-ban-ve-thi-cong",
+        "col_type": "Loại",
+        "col_review_overdue": "Số ngày quá hạn",
+        "weeks_other": "{n} tuần",
+        "hist_submitted": "Đã trình",
+        "doc_title_product_data": "Phiếu duyệt vật tư",
+        "col_approver": "Người duyệt",
+        "col_date_required": "Ngày yêu cầu",
+        "col_title": "Tiêu đề",
+        "col_ball_in_court": "Bên xử lý",
+        "no_review_notes": "Chưa có ý kiến xem xét.",
+        "sig_approved": "Người duyệt",
+        "register_title": "Sổ theo dõi hồ sơ trình duyệt",
+        "register_filename": "so-theo-doi-ho-so-trinh-duyet",
+        "col_submitted_returned": "Trình / trả lại",
+        "col_date_returned": "Ngày trả lại",
+        "col_review_due": "Hạn xem xét",
+        "col_spec": "Mục chỉ dẫn kỹ thuật",
+        "col_days_in_review_print": "Số ngày xem xét",
+        "drawings_missing_one": "{n} bản vẽ liên quan không còn khả dụng",
+        "register_title_product_data": "Sổ theo dõi duyệt vật tư",
+        "review_notes": "Ý kiến xem xét",
+        "resubmit_for_record": "Trình lại bản đã chỉnh sửa để lưu hồ sơ",
+        "col_days_in_review": "Số ngày xem xét",
+        "weeks_one": "{n} tuần",
+        "register_title_shop_drawing": "Sổ theo dõi bản vẽ thi công",
+        "col_review_period": "Thời hạn xem xét (ngày)"
+      }
+    },
+    "transmittals": {
+      "labels": {
+        "purpose": {
+          "for_construction": "Để thi công",
+          "for_approval": "Để phê duyệt",
+          "for_review": "Để xem xét",
+          "for_information": "Để biết",
+          "for_record": "Để lưu hồ sơ",
+          "for_tender": "Để đấu thầu"
+        },
+        "status": {
+          "draft": "Nháp",
+          "responded": "Đã phản hồi",
+          "issued": "Đã phát hành"
+        }
+      },
+      "strings": {
+        "col_purpose": "Mục đích",
+        "col_subject": "Chủ đề",
+        "doc_title": "Phiếu chuyển tài liệu",
+        "cover_note": "Ghi chú kèm theo",
+        "acknowledged": "Đã xác nhận nhận",
+        "sig_issued": "Người phát hành",
+        "col_response_due": "Hạn phản hồi",
+        "col_recipients": "Nơi nhận",
+        "col_item_count": "Số mục",
+        "item_description": "Mô tả",
+        "col_issued": "Ngày phát hành",
+        "sender": "Người gửi",
+        "register_title": "Sổ theo dõi phiếu chuyển tài liệu",
+        "recipients": "Nơi nhận",
+        "responded": "Ngày phản hồi",
+        "items": "Tài liệu chuyển",
+        "item_no": "STT",
+        "item_notes": "Ghi chú",
+        "col_number": "Số phiếu chuyển",
+        "recipient": "Người nhận",
+        "action_required": "Việc cần thực hiện",
+        "no_cover_note": "Không có ghi chú kèm theo.",
+        "register_filename": "so-theo-doi-phieu-chuyen-tai-lieu",
+        "sig_received": "Người nhận"
+      }
+    },
+    "furniture": {
+      "records": "Bản ghi",
+      "project_no": "Mã dự án",
+      "sig_prepared_by": "Lập bởi",
+      "signer_title": "Chức vụ",
+      "total": "Tổng",
+      "date": "Ngày",
+      "footer_generated": "Tạo lúc {timestamp}",
+      "sig_checked_by": "Kiểm tra bởi",
+      "project": "Dự án",
+      "status": "Trạng thái",
+      "currency": "Tiền tệ",
+      "yes": "Có",
+      "signature": "Chữ ký",
+      "signatures": "Chữ ký",
+      "days_one": "{n} ngày",
+      "footer_page": "Trang {page} / {total}",
+      "sig_approved_by": "Duyệt bởi",
+      "no": "Không",
+      "days_other": "{n} ngày",
+      "empty_register": "Không có bản ghi.",
+      "name": "Họ tên",
+      "generated_on": "Ngày tạo"
+    },
+    "changeorders": {
+      "labels": {
+        "reason": {
+          "error": "Sai sót hoặc thiếu sót",
+          "regulatory": "Quy định pháp lý",
+          "unforeseen": "Điều kiện không lường trước",
+          "non_conformance": "Không phù hợp",
+          "design_change": "Thay đổi thiết kế",
+          "client_request": "Yêu cầu của chủ đầu tư",
+          "value_engineering": "Tối ưu giá trị (VE)"
+        },
+        "instrument": {
+          "claim": "Yêu cầu bồi thường",
+          "works_change": "Lệnh thay đổi",
+          "site_confirmation": "Xác nhận hiện trường"
+        },
+        "change": {
+          "modified": "Sửa đổi",
+          "added": "Bổ sung",
+          "removed": "Loại bỏ"
+        },
+        "status": {
+          "draft": "Nháp",
+          "executed": "Đã thực hiện",
+          "rejected": "Từ chối",
+          "submitted": "Đã trình",
+          "approved": "Đã duyệt"
+        }
+      },
+      "strings": {
+        "time_impact": "Tác động thời gian",
+        "item_original_rate": "Đơn giá gốc",
+        "doc_title": "Lệnh thay đổi",
+        "col_code": "Mã",
+        "approved_by": "Duyệt bởi",
+        "col_approved_time": "Thời gian duyệt (ngày)",
+        "item_new_rate": "Đơn giá mới",
+        "col_approved": "Ngày duyệt",
+        "col_contractor_amount": "Giá trị nhà thầu",
+        "col_engineer_amount": "Giá trị tư vấn",
+        "no_description": "Chưa có mô tả.",
+        "col_submitted": "Ngày trình",
+        "approved_time": "Thời gian được duyệt",
+        "col_cost_impact": "Tác động chi phí",
+        "item_description": "Mô tả",
+        "item_cost_delta": "Chênh lệch chi phí",
+        "col_title": "Tiêu đề",
+        "submitted_by": "Trình bởi",
+        "register_title": "Sổ theo dõi lệnh thay đổi",
+        "item_original_quantity": "SL gốc",
+        "items": "Hạng mục thay đổi",
+        "col_instrument": "Loại văn bản",
+        "col_time_impact": "Tác động thời gian (ngày)",
+        "col_reason": "Lý do",
+        "item_change": "Thay đổi",
+        "col_approved_amount": "Giá trị được duyệt",
+        "item_new_quantity": "SL mới",
+        "register_filename": "so-theo-doi-lenh-thay-doi",
+        "description": "Mô tả",
+        "item_unit": "Đơn vị"
+      }
+    },
+    "variations": {
+      "labels": {
+        "notice_status": {
+          "responded": "Đã phản hồi",
+          "acknowledged": "Đã xác nhận nhận",
+          "closed": "Đã đóng",
+          "issued": "Đã phát hành"
+        },
+        "request_status": {
+          "draft": "Nháp",
+          "rejected": "Từ chối",
+          "converted_to_vo": "Đã chuyển thành lệnh",
+          "under_review": "Đang xem xét",
+          "submitted": "Đã trình",
+          "approved": "Đã duyệt"
+        },
+        "claim_type": {
+          "eot": "Gia hạn thời gian",
+          "disruption": "Gián đoạn thi công"
+        },
+        "recipient_type": {
+          "owner": "Chủ đầu tư",
+          "consultant": "Tư vấn",
+          "contractor": "Nhà thầu",
+          "architect": "Kiến trúc sư",
+          "engineer": "Kỹ sư"
+        },
+        "urgency": {
+          "low": "Thấp",
+          "med": "Trung bình",
+          "high": "Cao"
+        },
+        "classification": {
+          "other": "Khác",
+          "regulatory": "Quy định pháp lý",
+          "unforeseen": "Điều kiện không lường trước",
+          "owner_change": "Chủ đầu tư thay đổi",
+          "design_dev": "Phát triển thiết kế",
+          "scope_change": "Thay đổi phạm vi"
+        },
+        "claim_status": {
+          "draft": "Nháp",
+          "granted": "Chấp thuận",
+          "rejected": "Từ chối",
+          "agreed": "Đã thống nhất",
+          "under_review": "Đang xem xét",
+          "submitted": "Đã trình"
+        }
+      },
+      "strings": {
+        "col_row": "STT",
+        "time_impact": "Tác động thời gian",
+        "doc_title": "Đề nghị phát sinh",
+        "col_code": "Mã",
+        "date_decided": "Ngày quyết định",
+        "col_decided_amount": "Giá trị quyết định",
+        "variation_register_title": "Sổ theo dõi phát sinh",
+        "notice_register_title": "Sổ theo dõi thông báo",
+        "decision_notes": "Ghi chú quyết định",
+        "col_classification": "Loại",
+        "requested_by": "Đề nghị bởi",
+        "col_agreed_amount": "Giá trị thống nhất",
+        "col_recipient": "Người nhận",
+        "col_response_due": "Hạn phản hồi",
+        "no_description": "Chưa có mô tả.",
+        "decided_by": "Quyết định bởi",
+        "variation_register_filename": "so-theo-doi-phat-sinh",
+        "claim_register_title": "Sổ theo dõi yêu cầu bồi thường",
+        "col_days_granted": "Số ngày chấp thuận",
+        "col_title": "Tiêu đề",
+        "date_submitted": "Ngày trình",
+        "col_clause": "Điều khoản HĐ",
+        "col_raised": "Ngày đưa ra",
+        "col_description": "Mô tả",
+        "col_period_end": "Đến ngày",
+        "col_requested": "Ngày đề nghị",
+        "claim_register_filename": "so-theo-doi-yeu-cau-boi-thuong",
+        "col_response_received": "Phản hồi nhận được",
+        "doc_title_credit": "Đề nghị phát sinh (giảm trừ)",
+        "col_time_impact": "Tác động thời gian (ngày)",
+        "col_claimed_amount": "Giá trị yêu cầu",
+        "col_period_start": "Từ ngày",
+        "notice_register_filename": "so-theo-doi-thong-bao",
+        "description": "Mô tả",
+        "no_decision_notes": "Chưa ghi nhận quyết định.",
+        "col_recipient_type": "Gửi đến",
+        "col_target_response": "Dự kiến phản hồi",
+        "col_days_requested": "Số ngày đề nghị",
+        "col_claim_type": "Loại yêu cầu",
+        "col_urgency": "Mức khẩn"
+      }
+    },
+    "correspondence": {
+      "labels": {
+        "direction": {
+          "outgoing": "Đi",
+          "incoming": "Đến"
+        },
+        "type": {
+          "letter": "Công văn",
+          "notice": "Thông báo",
+          "memo": "Bản ghi nhớ",
+          "report": "Báo cáo",
+          "email": "Email"
+        },
+        "status": {
+          "awaiting_response": "Chờ phản hồi",
+          "closed": "Đã đóng",
+          "responded": "Đã phản hồi",
+          "open": "Đang mở"
+        }
+      },
+      "strings": {
+        "col_to": "Gửi đến",
+        "no_notes": "Chưa có ghi chú.",
+        "col_subject": "Chủ đề",
+        "doc_title": "Công văn trao đổi",
+        "register_title": "Sổ công văn",
+        "col_clause": "Điều khoản HĐ",
+        "linked_documents": "Tài liệu liên quan",
+        "col_reference": "Số hiệu",
+        "col_date_received": "Ngày nhận",
+        "notes": "Ghi chú",
+        "col_response_due": "Hạn phản hồi",
+        "sig_prepared": "Lập bởi",
+        "attachments": "Tệp đính kèm",
+        "col_date_sent": "Ngày gửi",
+        "col_direction": "Hướng",
+        "register_filename": "so-cong-van",
+        "col_from": "Từ",
+        "col_type": "Loại",
+        "sig_received": "Người nhận"
+      }
+    },
+    "claims_evidence": {
+      "labels": {
+        "basis": {
+          "delay": "Chậm tiến độ / gia hạn thời gian",
+          "valuation": "Định giá",
+          "dispute": "Tranh chấp",
+          "general": "Hồ sơ chung"
+        },
+        "section": {
+          "delay": "Chậm tiến độ",
+          "rfis": "RFI",
+          "variations": "Phát sinh",
+          "other": "Khác",
+          "notices": "Thông báo",
+          "approvals": "Phê duyệt",
+          "correspondence": "Công văn trao đổi",
+          "timeline": "Dòng thời gian"
+        },
+        "kind": {
+          "notice": "Thông báo",
+          "variation_notice": "Thông báo phát sinh",
+          "correspondence": "Công văn trao đổi",
+          "variation_order": "Lệnh phát sinh",
+          "moc_entry": "Ghi nhận thay đổi",
+          "change_order": "Lệnh thay đổi",
+          "variation_request": "Đề nghị phát sinh"
+        }
+      },
+      "strings": {
+        "col_row": "STT",
+        "col_date": "Ngày",
+        "basis": "Cơ sở",
+        "col_summary": "Tóm tắt",
+        "register_title": "Bộ chứng cứ",
+        "period_to": "Bản ghi mới nhất",
+        "period_from": "Bản ghi sớm nhất",
+        "col_kind": "Loại bản ghi",
+        "subject": "Chủ đề",
+        "col_title": "Tiêu đề",
+        "register_filename": "bo-chung-cu",
+        "col_reference": "Số hiệu",
+        "col_section": "Phần",
+        "col_record_id": "Mã bản ghi",
+        "digest": "Mã toàn vẹn (SHA-256, 16 ký tự đầu)"
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "col_subject": "Chủ đề",
+        "register_title": "Sổ theo dõi RFI",
+        "yes_with": "Có ({detail})",
+        "col_raised_by": "Người nêu",
+        "col_schedule_impact": "Tác động tiến độ",
+        "col_date_required": "Ngày yêu cầu",
+        "col_assigned_to": "Người phụ trách",
+        "col_ball_in_court": "Bên xử lý",
+        "col_response_due": "Hạn phản hồi",
+        "col_number": "Số RFI",
+        "col_days_open": "Số ngày tồn",
+        "col_cost_impact": "Tác động chi phí",
+        "register_filename": "so-theo-doi-rfi",
+        "col_response": "Phản hồi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Bản nháp",
+          "open": "Đang mở",
+          "answered": "Đã trả lời",
+          "closed": "Đã đóng",
+          "void": "Vô hiệu"
+        }
+      }
+    },
+    "daily_diary": {
+      "labels": {
+        "condition": {
+          "rain_showers_violent": "mưa rào rất to",
+          "drizzle_moderate": "mưa phùn vừa",
+          "fog": "sương mù",
+          "overcast": "u ám",
+          "snow_moderate": "tuyết vừa",
+          "snow_heavy": "tuyết dày",
+          "rain_showers_moderate": "mưa rào vừa",
+          "snow_showers_light": "tuyết rơi nhẹ từng đợt",
+          "rain_showers_light": "mưa rào nhẹ",
+          "snow": "tuyết",
+          "fog_rime": "sương mù đóng băng",
+          "partly_cloudy": "có mây rải rác",
+          "thunderstorm": "dông",
+          "snow_light": "tuyết nhẹ",
+          "freezing_rain_heavy": "mưa băng nặng",
+          "drizzle_light": "mưa phùn nhẹ",
+          "rain_light": "mưa nhẹ",
+          "thunderstorm_hail_heavy": "dông kèm mưa đá lớn",
+          "drizzle_dense": "mưa phùn dày",
+          "rain": "mưa",
+          "mainly_clear": "phần lớn quang đãng",
+          "clear": "quang đãng",
+          "rain_heavy": "mưa to",
+          "rain_moderate": "mưa vừa",
+          "thunderstorm_hail_light": "dông kèm mưa đá nhỏ",
+          "cloudy": "nhiều mây",
+          "snow_showers_heavy": "tuyết rơi dày từng đợt",
+          "freezing_rain_light": "mưa băng nhẹ"
+        },
+        "source": {
+          "open_meteo": "Dịch vụ thời tiết",
+          "sensor": "Cảm biến công trường",
+          "manual": "Nhập tay"
+        },
+        "entry_type": {
+          "incident_summary": "An toàn và sự cố",
+          "event": "Sự kiện",
+          "visitor": "Khách thăm",
+          "inspection_summary": "Kiểm tra",
+          "completion": "Công việc đã làm",
+          "delivery": "Vật tư nhập về",
+          "photo_note": "Ghi chú ảnh",
+          "general": "Ghi chú chung"
+        },
+        "status": {
+          "closed": "Đã đóng",
+          "archived": "Đã lưu trữ",
+          "signed": "Đã ký",
+          "open": "Đang mở"
+        }
+      },
+      "strings": {
+        "summary_wind": "gió {value} km/h",
+        "weather_temp": "Nhiệt độ (°C)",
+        "doc_title": "Nhật ký công trường",
+        "summary_precipitation": "lượng mưa {value} mm",
+        "site_supervisor": "Chỉ huy trưởng",
+        "weather_precip": "Mưa (mm)",
+        "summary_humidity": "độ ẩm {value} %",
+        "footer_supervisor": "Chỉ huy trưởng: {name}",
+        "sig_name": "Họ tên",
+        "footer_supervisor_missing": "Chỉ huy trưởng: chưa ghi nhận",
+        "footer_generated": "Tạo lúc: {timestamp}",
+        "percent": "{value}%",
+        "workforce_total": "Tổng",
+        "overview": "Tổng quan",
+        "workforce": "Nhân lực theo đơn vị",
+        "workforce_count": "Số người",
+        "not_recorded": "Chưa ghi nhận",
+        "sig_prepared": "Lập bởi (chỉ huy trưởng)",
+        "decimal_mark": ",",
+        "sig_approved": "Duyệt bởi (đại diện chủ đầu tư)",
+        "completeness": "Mức đầy đủ",
+        "sig_signature": "Chữ ký",
+        "signatures": "Chữ ký",
+        "running_title": "{title} · {date} · {project}",
+        "workforce_company": "Đơn vị",
+        "notes_empty": "Không có ghi chú bổ sung.",
+        "sig_title": "Chức vụ",
+        "weather": "Thời tiết",
+        "weather_wind": "Gió (km/h)",
+        "weather_time": "Giờ",
+        "weather_empty": "Chưa ghi nhận thời tiết cho ngày này.",
+        "footer_page": "Trang {page} / {total}",
+        "equipment_on_site": "Thiết bị tại công trường",
+        "weather_source": "Nguồn",
+        "workforce_unassigned": "Chưa gán đơn vị",
+        "sig_date": "Ngày",
+        "filename_prefix": "nhat-ky",
+        "labour_on_site": "Lao động tại công trường",
+        "weather_conditions": "Tình trạng",
+        "signed_note": "Đã ký trong hệ thống: {signers}",
+        "notes": "Ghi chú",
+        "entries_empty": "Nhật ký này chưa có mục ghi nào.",
+        "site_record": "Hồ sơ công trường"
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Do AI tạo",
+        "drawing": "Bản vẽ",
+        "cost_estimate": "DỰ TOÁN CHI PHÍ",
+        "summary": "TÓM TẮT",
+        "project": "Dự án:",
+        "boq": "BOQ:",
+        "date": "Ngày:",
+        "status": "Trạng thái:",
+        "prepared_by": "Lập bởi:",
+        "approved_by": "Phê duyệt bởi:",
+        "signature_hint": "Họ tên / Chữ ký / Ngày",
+        "contents": "Phần / Hạng mục:",
+        "pos": "STT",
+        "description": "Mô tả",
+        "unit": "Đơn vị",
+        "qty": "Khối lượng",
+        "rate": "Đơn giá",
+        "total": "Thành tiền",
+        "subtotal": "Cộng:",
+        "other_positions": "Các hạng mục khác",
+        "direct_cost": "Chi phí trực tiếp:",
+        "markups": "Chi phí chung và lợi nhuận (chưa thuế):",
+        "net_total": "Tổng cộng chưa thuế:",
+        "gross_total": "Tổng cộng",
+        "page": "Trang",
+        "of": "trên",
+        "generated": "Được tạo:",
+        "summary_report": "Báo cáo tóm tắt",
+        "positions_omitted": "{count} hạng mục (đã lược bỏ chi tiết đầy đủ để đảm bảo hiệu năng)",
+        "section": "Phần",
+        "items": "Hạng mục",
+        "cost_summary": "Tổng hợp chi phí",
+        "table_of_contents": "Mục lục",
+        "resources_omitted": "Không in chi tiết cấu thành tài nguyên: bảng khối lượng có quá nhiều dòng tài nguyên cho một tệp PDF.",
+        "status_draft": "Bản nháp",
+        "status_final": "Chính thức",
+        "status_archived": "Lưu trữ",
+        "subject": "Bảng khối lượng",
+        "tax_vat": "Thuế GTGT"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "HÓA ĐƠN",
+        "date": "Ngày: {value}",
+        "due": "Hạn thanh toán: {value}",
+        "from": "Người bán",
+        "bill_to": "Người mua",
+        "vat_id": "Mã VAT: {value}",
+        "ref": "Tham chiếu: {value}",
+        "th_description": "Diễn giải",
+        "th_qty": "SL",
+        "th_unit": "ĐVT",
+        "th_unit_price": "Đơn giá",
+        "th_net": "Thành tiền chưa thuế ({currency})",
+        "net_total": "Tổng tiền chưa thuế",
+        "vat_total": "Thuế GTGT",
+        "grand_total": "Tổng cộng thanh toán",
+        "retention_prepaid": "Giữ lại bảo hành / đã tạm ứng",
+        "amount_due": "Số tiền phải thanh toán",
+        "payment": "Thanh toán",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Số tài khoản: {value}",
+        "bank_code": "Mã ngân hàng: {value}",
+        "account_holder": "Chủ tài khoản: {value}",
+        "footer": "Tệp PDF này có kèm hóa đơn điện tử EN 16931 (Factur-X / ZUGFeRD). Tệp XML nhúng là chứng từ có hiệu lực.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ".",
+        "group_separator": ","
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Báo cáo",
+        "meta_project": "Dự án",
+        "meta_type": "Loại",
+        "meta_generated": "Ngày tạo",
+        "meta_currency": "Tiền tệ",
+        "field_column": "Trường",
+        "value_column": "Giá trị",
+        "yes": "Có",
+        "no": "Không",
+        "no_data_heading": "Không có dữ liệu",
+        "no_data_body": "Báo cáo này được tạo từ ảnh chụp dữ liệu rỗng. Hãy kiểm tra xem các module nguồn (tài chính, tiến độ, an toàn, v.v.) có trả về dữ liệu cho dự án đã chọn hay không.",
+        "no_data_body_short": "Báo cáo này được tạo từ ảnh chụp dữ liệu rỗng. Hãy kiểm tra xem các module nguồn có trả về dữ liệu cho dự án đã chọn hay không.",
+        "footer_generated_by": "Được tạo bởi OpenConstructionERP lúc {timestamp}.",
+        "worksheet_name": "Báo cáo",
+        "pdf_subject": "Báo cáo dự án",
+        "overall_progress": "Tiến độ tổng thể",
+        "as_of": "Tính đến",
+        "recorded_by": "Ghi nhận bởi",
+        "period": "Kỳ",
+        "entries_suffix": "({count} mục)",
+        "site_photo_alt": "Ảnh công trường",
+        "ai_summary_heading": "Tóm tắt",
+        "ai_badge": "Do AI tạo",
+        "ai_note": "Do AI tạo từ dữ liệu dự án bên dưới.",
+        "ai_note_confidence": "Do AI tạo từ dữ liệu dự án bên dưới (độ tin cậy {confidence}).",
+        "ai_note_review": "Hãy xem xét trước khi chia sẻ với chủ đầu tư."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Tên",
+          "status": "Trạng thái",
+          "phase": "Giai đoạn",
+          "planned_start": "Bắt đầu theo kế hoạch",
+          "planned_end": "Kết thúc theo kế hoạch",
+          "schedule_progress_pct": "Tiến độ theo lịch (%)",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Tỷ lệ ngân sách đã dùng (%)",
+          "as_of": "Tính đến",
+          "progress_pct": "Tiến độ (%)",
+          "risk_score_avg": "Điểm rủi ro trung bình",
+          "open_rfis": "RFI đang mở",
+          "open_submittals": "Hồ sơ trình duyệt đang mở",
+          "open_defects": "Khiếm khuyết đang mở",
+          "open_observations": "Ghi nhận đang mở",
+          "budget": "Ngân sách",
+          "committed": "Cam kết",
+          "actual": "Thực tế",
+          "payable": "Phải trả",
+          "receivable": "Phải thu",
+          "net_cash_flow": "Dòng tiền thuần"
+        },
+        "section_titles": {
+          "Project Overview": "Tổng quan dự án",
+          "Key Performance Indicators": "Các chỉ số hiệu quả chính",
+          "Schedule Status": "Tình trạng tiến độ",
+          "Risk Summary": "Tóm tắt rủi ro",
+          "Open Issues": "Các vấn đề đang mở",
+          "Cost Summary": "Tổng hợp chi phí",
+          "Cost Breakdown": "Cơ cấu chi phí",
+          "Change Orders": "Lệnh thay đổi",
+          "Cash Flow": "Dòng tiền",
+          "Schedule Overview": "Tổng quan tiến độ",
+          "Milestone Status": "Tình trạng các mốc quan trọng",
+          "Critical Path": "Đường găng",
+          "3-Week Lookahead": "Kế hoạch 3 tuần tới",
+          "Safety KPIs": "Chỉ số an toàn",
+          "Incident Log": "Nhật ký sự cố",
+          "Near-Miss Reports": "Báo cáo suýt xảy ra sự cố",
+          "Safety Training": "Huấn luyện an toàn",
+          "Inspection Summary": "Tóm tắt kiểm tra",
+          "By Inspection Type": "Theo loại kiểm tra",
+          "Punch List Status": "Tình trạng danh sách hoàn thiện",
+          "Recent Inspections": "Các lần kiểm tra gần đây",
+          "Portfolio Overview": "Tổng quan danh mục dự án",
+          "Project Statuses": "Tình trạng các dự án",
+          "KPI Comparison": "So sánh các chỉ số",
+          "Portfolio Risks": "Rủi ro danh mục dự án",
+          "Field Progress": "Tiến độ tại công trường",
+          "Top Risks": "Các rủi ro chính",
+          "Site Photos": "Ảnh công trường",
+          "Summary": "Tóm tắt"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Đơn đặt hàng",
+        "gr_title": "Phiếu nhập kho",
+        "supplier": "Nhà cung cấp",
+        "po_type": "Loại đơn hàng",
+        "issue_date": "Ngày phát hành",
+        "delivery_date": "Ngày giao hàng",
+        "created_by": "Lập bởi",
+        "order_total": "Tổng giá trị đơn hàng",
+        "line_items": "Các dòng hàng",
+        "col_no": "STT",
+        "col_description": "Diễn giải",
+        "col_quantity": "SL",
+        "col_unit": "ĐVT",
+        "col_unit_rate": "Đơn giá",
+        "col_amount": "Thành tiền",
+        "no_line_items": "Không có dòng hàng.",
+        "totals": "Tổng cộng",
+        "subtotal": "Giá trị chưa thuế",
+        "tax": "Thuế",
+        "total_gross": "Tổng gồm thuế",
+        "terms": "Điều khoản",
+        "payment_terms": "Điều kiện thanh toán",
+        "retention": "Giữ lại bảo hành",
+        "retention_at": "Giữ lại bảo hành tại",
+        "retention_at_receipt": "Nhập kho",
+        "retention_at_invoice": "Hóa đơn",
+        "invoice_tolerance": "Dung sai hóa đơn",
+        "supplier_confirmation": "Xác nhận của nhà cung cấp",
+        "supplier_reference": "Số tham chiếu của nhà cung cấp",
+        "confirmed_delivery": "Ngày giao hàng đã xác nhận",
+        "acknowledged_on": "Đã xác nhận ngày",
+        "not_confirmed": "Nhà cung cấp chưa xác nhận.",
+        "notes": "Ghi chú",
+        "no_notes": "Không có ghi chú.",
+        "sig_ordered_by": "Người đặt hàng",
+        "purchase_order": "Đơn đặt hàng",
+        "receipt_date": "Ngày nhận",
+        "received_by": "Người nhận",
+        "delivery_note": "Phiếu giao hàng",
+        "col_ordered": "Đặt",
+        "col_received": "Đã nhận",
+        "col_rejected": "Từ chối",
+        "col_batch": "Lô / mẻ",
+        "rejections": "Hàng từ chối",
+        "col_reason": "Lý do",
+        "no_rejections": "Không có hàng bị từ chối.",
+        "sig_delivered_by": "Người giao hàng",
+        "counterparty_tax_id": "Mã số thuế",
+        "counterparty_address": "Địa chỉ"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Bản nháp",
+          "approved": "Đã phê duyệt",
+          "issued": "Đã phát hành",
+          "partially_received": "Đã nhận một phần",
+          "completed": "Hoàn thành",
+          "cancelled": "Đã hủy"
+        },
+        "gr_status": {
+          "draft": "Bản nháp",
+          "confirmed": "Đã xác nhận"
+        },
+        "po_type": {
+          "standard": "Tiêu chuẩn",
+          "blanket": "Đơn khung",
+          "service": "Dịch vụ"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Hóa đơn",
+        "payment_title": "Thanh toán",
+        "direction": "Chiều",
+        "supplier": "Nhà cung cấp",
+        "client": "Chủ đầu tư",
+        "invoice_date": "Ngày hóa đơn",
+        "due_date": "Hạn thanh toán",
+        "payment_terms": "Điều kiện thanh toán",
+        "purchase_order": "Đơn đặt hàng",
+        "invoice_total": "Tổng hóa đơn",
+        "line_items": "Các dòng hàng",
+        "col_no": "STT",
+        "col_description": "Diễn giải",
+        "col_quantity": "SL",
+        "col_unit": "ĐVT",
+        "col_unit_rate": "Đơn giá",
+        "col_vat": "Thuế GTGT",
+        "col_amount": "Thành tiền",
+        "no_line_items": "Không có dòng hàng.",
+        "totals": "Tổng cộng",
+        "subtotal": "Giá trị chưa thuế",
+        "tax": "Thuế",
+        "total_gross": "Tổng gồm thuế",
+        "retention": "Giữ lại bảo hành",
+        "amount_due": "Phải thanh toán sau khi giữ lại bảo hành",
+        "payments": "Các khoản thanh toán",
+        "col_date": "Ngày",
+        "col_reference": "Tham chiếu",
+        "col_paid": "Đã thanh toán",
+        "col_withheld": "Giữ lại",
+        "refund": "Hoàn tiền",
+        "no_payments": "Chưa ghi nhận khoản thanh toán nào.",
+        "notes": "Ghi chú",
+        "no_notes": "Không có ghi chú.",
+        "invoice": "Hóa đơn",
+        "invoice_number": "Số hóa đơn",
+        "payment_date": "Ngày thanh toán",
+        "reference": "Tham chiếu",
+        "amount_paid": "Số tiền đã thanh toán",
+        "exchange_rate": "Tỷ giá",
+        "kind": "Loại",
+        "kind_payment": "Thanh toán",
+        "kind_refund": "Hoàn tiền",
+        "withholding": "Giữ lại bảo hành",
+        "withheld_amount": "Số tiền giữ lại",
+        "release_date": "Ngày giải ngân",
+        "gross_settled": "Tổng giá trị đã quyết toán",
+        "no_withholding": "Không giữ lại khoản nào từ lần thanh toán này.",
+        "counterparty_tax_id": "Mã số thuế",
+        "counterparty_address": "Địa chỉ"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Bản nháp",
+          "pending": "Chờ phê duyệt",
+          "approved": "Đã phê duyệt",
+          "sent": "Đã gửi",
+          "paid": "Đã thanh toán",
+          "cancelled": "Đã hủy",
+          "credit_note_issued": "Đã phát hành hóa đơn điều chỉnh giảm"
+        },
+        "direction": {
+          "payable": "Phải trả (hóa đơn nhà cung cấp)",
+          "receivable": "Phải thu (hóa đơn chủ đầu tư)"
+        },
+        "payment_status": {
+          "completed": "Hoàn thành",
+          "refunded": "Đã hoàn tiền"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Trang {page} / {total}",
+    "page": "Trang {page}",
+    "printed": "Đã in: {timestamp}",
+    "generated": "Tạo ngày: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} đã mời bạn vào cổng thông tin khách hàng",
+      "login_subject": "Liên kết đăng nhập của bạn vào cổng thông tin khách hàng",
+      "invite_heading": "Chào mừng đến với cổng thông tin khách hàng",
+      "login_heading": "Đăng nhập vào cổng thông tin khách hàng",
+      "greeting": "Kính gửi {name},",
+      "greeting_generic": "Kính gửi Quý khách,",
+      "invite_body": "{sender} đã cấp cho bạn quyền truy cập cổng thông tin khách hàng. Tại đây bạn có thể theo dõi dự án của mình: báo cáo tiến độ, tài liệu, hóa đơn và các cột mốc sắp tới.",
+      "login_body": "Dưới đây là liên kết đăng nhập mà bạn đã yêu cầu.",
+      "link_help": "Nút bên dưới sẽ đăng nhập cho bạn. Không cần mật khẩu. Liên kết chỉ dùng được một lần và hết hạn sau {hours} giờ.",
+      "ignore": "Nếu bạn không mong đợi email này, bạn có thể bỏ qua. Không ai có thể truy cập nếu thiếu liên kết này.",
+      "invite_cta": "Mở cổng thông tin",
+      "login_cta": "Đăng nhập",
+      "sender_generic": "Nhóm dự án của bạn"
+    },
+    "tender_invite": {
+      "subject": "Thư mời thầu: {package}",
+      "heading": "Thư mời thầu",
+      "greeting": "Kính gửi {company},",
+      "greeting_generic": "Kính gửi Quý công ty,",
+      "invite": "Quý công ty được mời nộp hồ sơ dự thầu cho gói thầu {package}.",
+      "invite_project": "Quý công ty được mời nộp hồ sơ dự thầu cho gói thầu {package} thuộc dự án {project}.",
+      "deadline": "Thời hạn nộp hồ sơ: {deadline}",
+      "link_help": "Nút bên dưới mở bảng tiên lượng. Hãy nhập đơn giá trực tuyến, lưu bản nháp bất cứ lúc nào và nộp trước thời hạn. Không cần tài khoản.",
+      "link_personal": "Liên kết này dành riêng cho công ty của Quý vị. Vui lòng không chuyển tiếp.",
+      "cta": "Mở bảng tiên lượng và nhập đơn giá",
+      "no_link": "Vui lòng xem chi tiết gói thầu và gửi chào giá của Quý vị trước thời hạn nêu trên."
+    },
+    "notification_email": {
+      "greeting": "Kính gửi {name},",
+      "greeting_generic": "Kính gửi Quý khách,",
+      "cta": "Mở trong OpenConstructionERP",
+      "footer": "Bạn nhận được email này theo cài đặt thông báo của mình. Bạn có thể thay đổi cài đặt trong hồ sơ cá nhân.",
+      "digest_subject": "OpenConstructionERP: Tổng hợp thông báo ({count})",
+      "digest_heading": "Thông báo gần đây:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "So sánh giá",
+      "comparison_sheet": "So sánh",
+      "bidder_title": "Bảng tiên lượng để chào giá",
+      "bidder_sheet": "Tiên lượng",
+      "project": "Dự án",
+      "package": "Gói thầu",
+      "currency": "Tiền tệ",
+      "date": "Ngày",
+      "return_by": "Hạn nộp lại",
+      "item": "Hạng mục",
+      "description": "Mô tả",
+      "unit": "Đơn vị",
+      "quantity": "Khối lượng",
+      "unit_price": "Đơn giá",
+      "line_total": "Thành tiền",
+      "own_estimate": "Dự toán nội bộ",
+      "not_priced": "chưa chào giá",
+      "sum_priced_lines": "Tổng các dòng đã chào giá",
+      "bid_total": "Tổng giá dự thầu đã nộp",
+      "lines_priced": "Số dòng đã chào giá",
+      "lines_priced_value": "{priced} trên {total}",
+      "deviation": "Chênh lệch so với dự toán nội bộ",
+      "not_comparable": "không áp dụng",
+      "other_currency": "Chào giá bằng {currency}, không xếp hạng cùng các hồ sơ dự thầu bằng {reporting}.",
+      "legend": "Chú giải",
+      "legend_lowest": "Xanh lá: đơn giá thấp nhất của dòng.",
+      "legend_high": "▲ đỏ: cao hơn giá trung vị của dòng quá {pct}%.",
+      "legend_low": "▼ hổ phách: thấp hơn giá trung vị của dòng quá {pct}%.",
+      "legend_missing": "\"{marker}\": nhà thầu không ghi giá cho dòng này.",
+      "legend_incomplete": "Hồ sơ dự thầu còn dòng chưa chào giá được đánh dấu ở cột \"Số dòng đã chào giá\" và không được xếp thấp nhất theo tổng giá.",
+      "legend_totals": "Tổng giá dự thầu là con số nhà thầu đã nộp; con số này có thể khác tổng các dòng đã chào giá.",
+      "bidder": "Nhà thầu",
+      "bidder_note": "Ghi chú của nhà thầu",
+      "reference": "Tham chiếu (không chỉnh sửa)",
+      "total": "Tổng cộng",
+      "instructions": "Nhập đơn giá cho từng dòng vào các ô màu vàng. Khối lượng và mô tả đã cố định, thành tiền và tổng cộng tự động tính. Để trống ô nếu bạn không chào giá dòng đó."
+    },
+    "cost_plan": {
+      "sheet_plan": "Kế hoạch chi phí NRM 1",
+      "sheet_unallocated": "Chưa phân bổ",
+      "title": "Kế hoạch chi phí theo cấu kiện (NRM 1)",
+      "bill": "Bảng tiên lượng",
+      "currency": "Tiền tệ",
+      "gifa": "GIFA, tổng diện tích sàn bên trong (m2)",
+      "gifa_project": "lấy từ dự án",
+      "gifa_entered": "nhập cho lần xuất này",
+      "gifa_none": "chưa thiết lập, không hiển thị chi phí trên m2",
+      "col_code": "Mã",
+      "col_description": "Cấu kiện",
+      "col_positions": "Số hạng mục",
+      "col_basis": "Cơ sở",
+      "col_total": "Tổng",
+      "col_per_m2": "Chi phí trên m2 GIFA",
+      "col_share": "% trên tổng",
+      "col_running": "Tổng lũy kế",
+      "group_level": "Cấp nhóm, chưa chỉ định cấu kiện",
+      "facilitating_works_estimate": "Dự toán công tác chuẩn bị",
+      "works_estimate": "Dự toán công tác xây dựng công trình",
+      "addons_heading": "Nhóm 9-14 của NRM 1 được tính giá như các hạng mục của bảng tiên lượng",
+      "unallocated": "Chưa phân bổ vào cấu kiện nào",
+      "direct_cost": "Chi phí trực tiếp của bảng tiên lượng",
+      "markups_heading": "Các khoản phụ phí (theo thứ tự tính của bảng tiên lượng)",
+      "markups_total": "Tổng phụ phí",
+      "grand_total": "Tổng kế hoạch chi phí",
+      "basis_direct": "{pct}% trên chi phí trực tiếp",
+      "basis_running": "{pct}% trên tổng phụ lũy kế",
+      "basis_lump": "Trọn gói",
+      "basis_banded": "Thang bậc",
+      "basis_escalation": "Trượt giá theo chỉ số",
+      "basis_other": "{kind}",
+      "basis_scoped": "giới hạn theo phần",
+      "col_ordinal": "Số thứ tự",
+      "col_position": "Mô tả",
+      "col_written_code": "Mã như đã ghi",
+      "col_reason": "Lý do",
+      "reason_no_code": "Hạng mục hoặc các phần của nó không có mã NRM",
+      "reason_invalid_code": "Mã không phải số hiệu NRM",
+      "reason_unknown_group": "NRM 1 không có nhóm này",
+      "truncated": "Danh sách được rút gọn còn {shown} hạng mục đầu tiên trong {count} hạng mục; tổng cộng đã tính đủ tất cả."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Yêu cầu",
+      "sheet_summary": "Tóm tắt",
+      "sheet_legend": "Chú giải",
+      "summary_element": "Cấu kiện",
+      "summary_count": "Số lượng yêu cầu",
+      "summary_total": "Tổng cộng",
+      "legend_column": "Cột",
+      "legend_description": "Mô tả",
+      "unspecified": "Chưa xác định",
+      "h01": "Cấu kiện / Lớp IFC",
+      "h02": "Phân loại",
+      "h03": "Nhóm thuộc tính",
+      "h04": "Tên thuộc tính",
+      "h05": "Kiểu dữ liệu",
+      "h06": "Bắt buộc",
+      "h07": "Giá trị cho phép",
+      "h08": "Tối thiểu",
+      "h09": "Tối đa",
+      "h10": "Đơn vị",
+      "h11": "Mẫu",
+      "h12": "Giai đoạn",
+      "h13": "Bên chịu trách nhiệm",
+      "h14": "Trường hợp sử dụng",
+      "h15": "Nguồn",
+      "d01": "Lớp thực thể IFC (ví dụ IFCWALL, IFCBEAM)",
+      "d02": "Hệ thống phân loại và mã (ví dụ Uniclass 2015: EF_25_10)",
+      "d03": "Tên bộ thuộc tính (ví dụ Pset_WallCommon)",
+      "d04": "Tên thuộc tính hoặc đặc tính được yêu cầu",
+      "d05": "Kiểu dữ liệu IFC (IFCLABEL, IFCREAL, IFCBOOLEAN, v.v.)",
+      "d06": "Tính bắt buộc: bắt buộc, tùy chọn hoặc cấm",
+      "d07": "Danh sách giá trị cho phép, phân cách bằng dấu chấm phẩy",
+      "d08": "Giới hạn của khoảng giá trị số",
+      "d09": "Đơn vị đo (m, m2, kg, v.v.)",
+      "d10": "Mẫu biểu thức chính quy để kiểm tra giá trị",
+      "d11": "Giai đoạn hoặc cột mốc của dự án (LP3, RIBA Stage 3, v.v.)",
+      "d12": "Bên chịu trách nhiệm (Kiến trúc sư, Kỹ sư kết cấu, v.v.)",
+      "d13": "Mục đích hoặc trường hợp sử dụng của yêu cầu",
+      "d14": "Tiêu chuẩn hoặc tài liệu nguồn"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Đã tạo BOQ",
+      "notifications.boq.created.body": "Bảng tiên lượng '{boq_name}' của bạn đã được lưu.",
+      "notifications.meeting.action_assigned.title": "Bạn được giao một việc cần xử lý",
+      "notifications.meeting.action_assigned.body": "Từ cuộc họp {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Trạng thái tài liệu đã thay đổi",
+      "notifications.cde.state_transitioned.body": "Container đã chuyển sang trạng thái '{new_state}'.",
+      "notifications.cde.linked_published.title": "Một tài liệu liên quan đến công việc của bạn đã được phát hành",
+      "notifications.cde.linked_published.body": "{container_code} đã được phát hành ở phiên bản {revision_code}. Các bản ghi liên kết của bạn: {records}.",
+      "notifications.rfi.assigned.title": "Bạn được giao một RFI",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "RFI đã được trả lời",
+      "notifications.rfi.responded.body": "Yêu cầu {code} ({title}) của bạn đã có phản hồi.",
+      "notifications.risk.assigned.title": "Bạn được giao một rủi ro",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Cảnh báo vượt chi phí",
+      "notifications.costmodel.overrun_alert.body": "Chi phí {category} vượt ngân sách: thực tế {actual} {currency} vượt ngưỡng cảnh báo +{threshold_pct}% so với kế hoạch {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Hồ sơ trình duyệt (submittal) đang chờ xem xét",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Hồ sơ trình duyệt (submittal) đã được phê duyệt",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Hồ sơ trình duyệt (submittal) bị từ chối",
+      "notifications.submittal.rejected.body": "{code} ({title}). Lý do: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Hồ sơ trình duyệt (submittal) cần chỉnh sửa",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Lý do: {reason}",
+      "notifications.transmittal.issued.title": "Phiếu chuyển giao (transmittal) đã được phát hành cho bạn",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Phiếu chuyển giao (transmittal) đã được xác nhận nhận",
+      "notifications.transmittal.acknowledged.body": "Bên nhận đã xác nhận {code} ({title}).",
+      "notifications.transmittal.responded.title": "Phiếu chuyển giao (transmittal) đã được phản hồi",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "Bạn được giao một RFI",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Bạn được giao công việc mới",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Hóa đơn đã được phê duyệt",
+      "notification.invoice_approved_body": "Hóa đơn {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Đã lên lịch nghiệm thu, kiểm tra",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title} vào {inspection_date}",
+      "notification.submittal_status_changed_title": "Trạng thái hồ sơ trình duyệt (submittal) đã thay đổi",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Đã lên lịch cuộc họp",
+      "notification.meeting_scheduled_body": "{title} vào {meeting_date}",
+      "notification.ncr_created_title": "Đã lập biên bản không phù hợp",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Đã tải tài liệu lên",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Bạn được nhắc đến trong một bình luận",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "Bình luận mới trong một cuộc thảo luận",
+      "notifications.collaboration.comment_added.body": "Trên {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "Phát hiện xung đột mức độ nghiêm trọng cao",
+      "notifications.clash.high_severity.body": "Xung đột {severity}: {a_name} và {b_name}",
+      "notifications.validation.report.title": "Kiểm tra hợp lệ phát hiện vấn đề",
+      "notifications.validation.report.body": "Trên {target_type} này, số lỗi: {error_count}, số cảnh báo: {warning_count}.",
+      "notifications.punchlist.auto_created.title": "Đã tạo hạng mục tồn đọng (punch list)",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Tổng hợp thông báo",
+      "notifications.digest.body": "Cập nhật mới cho bạn trên kênh {channel}: {count}.",
+      "notifications.approval.overdue.title": "Phê duyệt quá hạn",
+      "notifications.approval.overdue.body": "Bước {step_ordinal} của {target_kind} này đã quá hạn {hours_overdue} giờ.",
+      "notifications.approval.escalated.title": "Phê duyệt được chuyển lên bạn",
+      "notifications.approval.escalated.body": "Bước {step_ordinal} của {target_kind} này được chuyển lên bạn (cấp {level}).",
+      "notifications.approval.reassigned.title": "Phê duyệt được giao lại cho bạn",
+      "notifications.approval.reassigned.body": "Quyết định ở bước {step_ordinal} của {target_kind} này nay thuộc về bạn.",
+      "notifications.deadline.overdue.title": "Quá hạn: {title}",
+      "notifications.deadline.overdue.body": "Mục \"{title}\" của {module} đã quá hạn. Số ngày quá hạn: {days_overdue}.",
+      "notifications.deadline.escalated.title": "Mục quá hạn đã được chuyển cấp",
+      "notifications.deadline.escalated.body": "Mục \"{title}\" của {module} vẫn chưa đóng. Số ngày quá hạn: {days_overdue}, và đã được chuyển cấp.",
+      "notifications.deadline.approaching.title": "Sắp đến hạn: {title}",
+      "notifications.deadline.approaching.body": "Mục \"{title}\" của {module} đến hạn vào {due_date}.",
+      "notifications.deadline.built.approaching.title": "Sắp đến hạn: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: \"{title}\" đến hạn vào {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Quá hạn: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "RFI {reference} \"{title}\" của dự án {project} đến hạn vào {due_date_display}. Số ngày quá hạn: {days_overdue}. Cần trả lời.",
+      "notifications.deadline.rfi.escalated.title": "Đã chuyển cấp: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "RFI {reference} \"{title}\" của dự án {project} vẫn chưa đóng. Hạn là {due_date_display}, số ngày quá hạn: {days_overdue}, và đã được chuyển lên bạn.",
+      "notifications.deadline.rfi.approaching.title": "Sắp đến hạn: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "RFI {reference} \"{title}\" của dự án {project} đến hạn vào {due_date_display}. Cần trả lời.",
+      "notifications.deadline.submittals.overdue.title": "Quá hạn: submittal {reference}",
+      "notifications.deadline.submittals.overdue.body": "Submittal {reference} \"{title}\" của dự án {project} đến hạn vào {due_date_display}. Số ngày quá hạn: {days_overdue}. Cần xem xét.",
+      "notifications.deadline.submittals.escalated.title": "Đã chuyển cấp: submittal {reference}",
+      "notifications.deadline.submittals.escalated.body": "Submittal {reference} \"{title}\" của dự án {project} vẫn chưa đóng. Hạn là {due_date_display}, số ngày quá hạn: {days_overdue}, và đã được chuyển lên bạn.",
+      "notifications.deadline.submittals.approaching.title": "Sắp đến hạn: submittal {reference}",
+      "notifications.deadline.submittals.approaching.body": "Submittal {reference} \"{title}\" của dự án {project} đến hạn vào {due_date_display}. Cần xem xét.",
+      "notifications.deadline.correspondence.overdue.title": "Quá hạn: công văn {reference}",
+      "notifications.deadline.correspondence.overdue.body": "Công văn {reference} \"{title}\" của dự án {project} cần được trả lời trước {due_date_display}. Số ngày quá hạn: {days_overdue}. Cần trả lời.",
+      "notifications.deadline.correspondence.escalated.title": "Đã chuyển cấp: công văn {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Công văn {reference} \"{title}\" của dự án {project} vẫn chưa được trả lời. Hạn là {due_date_display}, số ngày quá hạn: {days_overdue}, và đã được chuyển lên bạn.",
+      "notifications.deadline.correspondence.approaching.title": "Sắp đến hạn: công văn {reference}",
+      "notifications.deadline.correspondence.approaching.body": "Công văn {reference} \"{title}\" của dự án {project} cần được trả lời trước {due_date_display}. Cần trả lời.",
+      "notifications.deadline.variations.overdue.title": "Quá hạn: phát sinh {reference}",
+      "notifications.deadline.variations.overdue.body": "Phát sinh {reference} \"{title}\" của dự án {project} đến hạn vào {due_date_display}. Số ngày quá hạn: {days_overdue}. Cần quyết định.",
+      "notifications.deadline.variations.escalated.title": "Đã chuyển cấp: phát sinh {reference}",
+      "notifications.deadline.variations.escalated.body": "Phát sinh {reference} \"{title}\" của dự án {project} vẫn chưa đóng. Hạn là {due_date_display}, số ngày quá hạn: {days_overdue}, và đã được chuyển lên bạn.",
+      "notifications.deadline.variations.approaching.title": "Sắp đến hạn: phát sinh {reference}",
+      "notifications.deadline.variations.approaching.body": "Phát sinh {reference} \"{title}\" của dự án {project} đến hạn vào {due_date_display}. Cần quyết định.",
+      "notifications.variation.submitted.title": "Phát sinh đang chờ quyết định: {code}",
+      "notifications.variation.submitted.body": "Phát sinh {code} \"{title}\" của dự án {project} đã được trình và đang chờ quyết định.",
+      "notifications.variation.approved.title": "Phát sinh đã được duyệt: {code}",
+      "notifications.variation.approved.body": "Phát sinh {code} \"{title}\" của dự án {project} đã được duyệt.",
+      "notifications.variation.rejected.title": "Phát sinh bị từ chối: {code}",
+      "notifications.variation.rejected.body": "Phát sinh {code} \"{title}\" của dự án {project} đã bị từ chối và trả lại cho bạn.",
+      "notifications.variation.rejected_reason.body": "Phát sinh {code} \"{title}\" của dự án {project} đã bị từ chối và trả lại cho bạn. Lý do: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Lệnh thay đổi đang chờ phê duyệt: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Lệnh thay đổi {code} \"{title}\" của dự án {project} đã được trình và đang chờ phê duyệt.",
+      "notifications.changeorder.approved.title": "Lệnh thay đổi đã được phê duyệt: {code}",
+      "notifications.changeorder.approved.body": "Lệnh thay đổi {code} \"{title}\" của dự án {project} đã được phê duyệt.",
+      "notifications.changeorder.rejected.title": "Lệnh thay đổi bị từ chối: {code}",
+      "notifications.changeorder.rejected.body": "Lệnh thay đổi {code} \"{title}\" của dự án {project} đã bị từ chối.",
+      "notifications.submittal.approved_as_noted.title": "Hồ sơ trình duyệt (submittal) được duyệt kèm ghi chú",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Một tài liệu cần bạn phê duyệt",
+      "notifications.file_approval.needs_approver.body": "Một {file_kind} đang chờ bạn phê duyệt.",
+      "notifications.file_approval.approved.title": "Tài liệu của bạn đã được phê duyệt",
+      "notifications.file_approval.approved.body": "{file_kind} của bạn đã qua mọi bước phê duyệt.",
+      "notifications.file_approval.rejected.title": "Tài liệu của bạn bị trả lại",
+      "notifications.file_approval.rejected.body": "{file_kind} của bạn bị từ chối và cần chỉnh sửa.",
+      "notifications.portal.user_invited.title": "Đã mời người dùng cổng thông tin",
+      "notifications.portal.user_invited.body": "{portal_user_email} đã được mời với vai trò {portal_role}.",
+      "notifications.portal.message_received.title": "Tin nhắn mới trên cổng thông tin",
+      "notifications.portal.message_received.body": "{buyer_name} đã gửi một tin nhắn."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "Mã công việc",
+          "ID",
+          "Mã hoạt động",
+          "ID công việc",
+          "STT"
+        ],
+        "name": [
+          "Tên công việc",
+          "Tên hoạt động",
+          "Công việc",
+          "Hoạt động",
+          "Tên"
+        ],
+        "wbs": [
+          "WBS",
+          "Mã WBS",
+          "Số WBS",
+          "Số phân cấp"
+        ],
+        "outline_level": [
+          "Cấp phân cấp",
+          "Cấp",
+          "Cấp thụt lề",
+          "Thụt lề"
+        ],
+        "start": [
+          "Bắt đầu",
+          "Ngày bắt đầu",
+          "Khởi công",
+          "Bắt đầu kế hoạch"
+        ],
+        "finish": [
+          "Kết thúc",
+          "Ngày kết thúc",
+          "Ngày hoàn thành",
+          "Kết thúc kế hoạch"
+        ],
+        "duration": [
+          "Thời lượng",
+          "Thời lượng (ngày)",
+          "Số ngày",
+          "Thời lượng gốc"
+        ],
+        "predecessors": [
+          "Công việc trước",
+          "Tiền nhiệm",
+          "Phụ thuộc vào",
+          "Quan hệ phụ thuộc"
+        ],
+        "percent_complete": [
+          "% hoàn thành",
+          "Phần trăm hoàn thành",
+          "Tiến độ",
+          "Tiến độ (%)"
+        ],
+        "milestone": [
+          "Cột mốc",
+          "Là cột mốc"
+        ],
+        "resource": [
+          "Nguồn lực",
+          "Tên nguồn lực",
+          "Tổ đội",
+          "Người phụ trách"
+        ],
+        "notes": [
+          "Ghi chú",
+          "Chú thích",
+          "Nhận xét",
+          "Diễn giải"
+        ],
+        "client_visible": [
+          "Khách hàng xem được",
+          "Hiển thị cho khách hàng",
+          "Chia sẻ với khách hàng"
+        ]
+      },
+      "yes_words": [
+        "có",
+        "đúng"
+      ],
+      "no_words": [
+        "không",
+        "sai"
+      ],
+      "example_names": [
+        "Phần thô và lõi",
+        "Đào đất",
+        "Móng",
+        "Nghiệm thu móng"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "hợp đồng",
+          "thỏa thuận",
+          "cam kết"
+        ],
+        "contact": [
+          "liên hệ",
+          "nhà cung cấp",
+          "nhà thầu phụ",
+          "nhà thầu",
+          "khách hàng",
+          "đối tác"
+        ],
+        "schedule_activity": [
+          "hoạt động",
+          "công việc",
+          "đầu việc",
+          "wbs"
+        ],
+        "document": [
+          "tài liệu",
+          "hồ sơ",
+          "bản vẽ",
+          "đính kèm"
+        ],
+        "user": [
+          "người phụ trách",
+          "người chịu trách nhiệm",
+          "người được giao",
+          "giám sát",
+          "chỉ huy trưởng",
+          "đội trưởng"
+        ],
+        "due": [
+          "đến hạn",
+          "hạn chót",
+          "thời hạn",
+          "hết hạn",
+          "có hiệu lực đến",
+          "ngày mục tiêu",
+          "gia hạn"
+        ]
+      },
+      "link_labels": {
+        "contract": "Hợp đồng",
+        "contact": "Liên hệ",
+        "schedule_activity": "Hoạt động tiến độ",
+        "document": "Tài liệu",
+        "user": "Người phụ trách"
+      },
+      "state_labels": [
+        "Mở",
+        "Đang thực hiện",
+        "Hoàn thành"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Phụ lục {number} gói thầu {package}",
+      "addendum_heading": "Phụ lục gói thầu",
+      "greeting": "Kính gửi {company},",
+      "greeting_generic": "Kính gửi Quý nhà thầu,",
+      "addendum_intro": "Phụ lục {number} cho gói thầu {package} đã được phát hành: {title}.",
+      "addendum_deadline": "Hạn nộp hồ sơ đã được dời từ {old} sang {new}.",
+      "addendum_boq": "Bảng khối lượng mời thầu đã thay đổi (bản {revision}). Đề nghị chào giá theo bản hiện hành.",
+      "addendum_documents": "Tài liệu đã phát hành: {documents}",
+      "addendum_ack": "Đề nghị xác nhận đã nhận phụ lục này. Hồ sơ dự thầu không xác nhận đầy đủ các phụ lục có thể bị coi là không đáp ứng yêu cầu.",
+      "answer_subject": "Làm rõ {number} gói thầu {package}",
+      "answer_heading": "Làm rõ gói thầu",
+      "answer_intro": "Câu hỏi về gói thầu {package} đã được trả lời. Câu trả lời áp dụng cho tất cả nhà thầu.",
+      "question_label": "Câu hỏi",
+      "answer_label": "Trả lời"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Tổng giá trị phát triển (GDV)",
+      "total_development_cost": "Tổng chi phí phát triển",
+      "residual_land_value": "Giá trị đất còn lại",
+      "developer_profit": "Lợi nhuận chủ đầu tư",
+      "profit_on_cost": "Lợi nhuận trên chi phí",
+      "profit_on_gdv": "Lợi nhuận trên GDV",
+      "construction_cost": "Chi phí xây dựng",
+      "professional_fees": "Phí chuyên môn",
+      "contingency": "Dự phòng",
+      "finance_cost": "Chi phí tài chính",
+      "sales_costs": "Chi phí bán hàng"
+    },
+    "status": {
+      "viable": "Khả thi",
+      "unviable": "Không khả thi",
+      "marginal": "Ranh giới",
+      "pending": "Chưa thẩm định"
+    },
+    "figure": {
+      "gross_development_value": "Tổng giá trị bán của mọi căn trong dự án, quy đổi về cùng một tiền tệ.",
+      "total_development_cost": "Mọi chi phí thực hiện dự án ngoài tiền sử dụng đất: xây dựng, phí chuyên môn, dự phòng, chi phí tài chính và chi phí bán hàng.",
+      "residual_land_value": "Phần còn lại dành cho đất sau khi trừ tổng chi phí phát triển và lợi nhuận mục tiêu của chủ đầu tư khỏi tổng giá trị phát triển.",
+      "developer_profit": "Lợi nhuận chủ đầu tư muốn giữ lại, đặt làm tỷ lệ mục tiêu trên tổng giá trị phát triển.",
+      "profit_on_cost": "Lợi nhuận chủ đầu tư chia cho tổng chi phí phát triển, biểu thị dưới dạng tỷ lệ.",
+      "profit_on_gdv": "Lợi nhuận chủ đầu tư chia cho tổng giá trị phát triển, biểu thị dưới dạng tỷ lệ."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Lán trại công nhân",
+        "rental": "Nhà ở cho thuê",
+        "hotel": "Khách sạn"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Đang chờ",
+        "approved": "Đã phê duyệt",
+        "rejected": "Đã từ chối"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Đạt",
+        "fail": "Không đạt",
+        "not_applicable": "Không áp dụng"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Bản vẽ",
+        "contract": "Hợp đồng",
+        "specification": "Chỉ dẫn kỹ thuật",
+        "photo": "Hình ảnh",
+        "correspondence": "Thư từ",
+        "reality_capture": "Thu thập hiện trạng",
+        "other": "Khác"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Đang chờ",
+        "approved": "Đã phê duyệt",
+        "rejected": "Đã từ chối",
+        "cancelled": "Đã hủy"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Nháp",
+        "submitted": "Đã gửi duyệt",
+        "approved": "Đã phê duyệt",
+        "posted": "Đã ghi sổ cái"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Mở",
+        "assigned": "Đã giao",
+        "in_progress": "Đang xử lý",
+        "resolved": "Đã khắc phục",
+        "verified": "Đã xác nhận",
+        "closed": "Đã đóng"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "quan sát",
+        "minor": "nhỏ",
+        "major": "lớn",
+        "critical": "nghiêm trọng"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Nhân sự",
+        "crew": "Tổ đội",
+        "equipment": "Thiết bị",
+        "subcontractor": "Nhà thầu phụ"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Tên mô hình AI đã cũ hoặc không khả dụng. Hãy mở Cài đặt > AI và nhập tên mô hình hợp lệ hiện tại của nhà cung cấp.",
+      "not_configured": "AI chưa được cấu hình. Vui lòng thiết lập nhà cung cấp AI trong Cài đặt."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "đã xác nhận",
+      "bound": "đã đính kèm",
+      "empty": "còn thiếu"
+    },
+    "package_status_labels": {
+      "draft": "nháp",
+      "in_progress": "đang thực hiện",
+      "ready": "sẵn sàng",
+      "issued": "đã phát hành"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "cản trở",
+      "critical": "nghiêm trọng",
+      "warning": "cảnh báo",
+      "suggestion": "gợi ý"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Chiến lược",
+      "brief": "Yêu cầu dự án",
+      "concept": "Ý tưởng",
+      "design": "Thiết kế",
+      "approval": "Cấp phép",
+      "detail": "Thiết kế chi tiết",
+      "tender": "Đấu thầu",
+      "award": "Trao thầu",
+      "construction": "Thi công",
+      "handover": "Bàn giao",
+      "operation": "Vận hành"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Công việc chưa có chi tiết nào để cắt",
+        "suggestion": "Thêm chi tiết thủ công, dán vào hoặc nhập từ bảng thống kê uốn thép, bóc tách, một dòng tiên lượng hoặc một tệp."
+      },
+      "has_stock": {
+        "fail": "Công việc chưa có phôi để cắt",
+        "suggestion": "Thêm ít nhất một chiều dài phôi hoặc kích thước tấm, hoặc tái sử dụng phần thừa trong kho công trường."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} chưa có chiều rộng",
+        "suggestion": "Nhập cả chiều dài và chiều rộng cho mọi chi tiết dạng tấm và mọi kích thước tấm."
+      },
+      "piece_fits_stock": {
+        "fail": "Chi tiết {ref} ({size} mm) không vừa mục phôi nào",
+        "suggestion": "Thêm kích thước phôi dài hơn hoặc lớn hơn, giảm phần cắt bỏ hoặc chia chi tiết bằng một mối nối."
+      },
+      "grain_allows_fit": {
+        "fail": "Chi tiết {ref} chỉ vừa khi xoay ngang thớ",
+        "suggestion": "Cho phép xoay chi tiết này hoặc thêm kích thước tấm mà chi tiết vừa theo chiều thớ."
+      },
+      "kerf_set": {
+        "fail": "Bề rộng mạch cưa bằng không",
+        "suggestion": "Nhập bề dày lưỡi cưa hoặc bề rộng nhát cắt, nếu không tỷ lệ sử dụng của mỗi thanh có nhiều nhát cắt sẽ bị tính cao hơn thực tế."
+      },
+      "min_offcut_set": {
+        "fail": "Chưa đặt phần thừa tối thiểu dùng được",
+        "suggestion": "Đặt phần thừa ngắn nhất đáng giữ lại, để phần thừa tái sử dụng không bị tính là hao hụt."
+      },
+      "stock_priced": {
+        "fail": "Phôi {ref} chưa có đơn giá",
+        "suggestion": "Nhập giá mỗi chiếc để phương án báo chi phí và chọn phôi rẻ nhất."
+      },
+      "stock_sufficient": {
+        "fail": "Số chi tiết chưa xếp được trên phôi hiện có: {count}",
+        "suggestion": "Tăng số lượng hiện có hoặc thêm một kích thước phôi khác."
+      },
+      "yield_threshold": {
+        "fail": "Tỷ lệ sử dụng {actual} % thấp hơn ngưỡng {threshold} %",
+        "suggestion": "Thêm chiều dài hoặc kích thước phôi khác, cho phép xoay hoặc xem lại ngưỡng cho vật liệu này."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Hạng mục punch list '{title}' được đóng mà không có ảnh",
+    "punch_no_photo_fix": "Thêm ảnh công việc đã hoàn thành",
+    "photo_weak": "{count} ảnh trên '{title}' thiếu vị trí hoặc thời gian chụp",
+    "photo_weak_fix": "Chụp lại ảnh trong ứng dụng khi bật định vị",
+    "defect_no_photo": "Lỗi '{reference}' được đóng mà không có ảnh khắc phục",
+    "defect_no_photo_fix": "Đính kèm ảnh công việc đã khắc phục"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} hạng mục khác không được liệt kê",
+    "category_missing": "Không có bằng chứng cho nhóm bắt buộc '{category}'",
+    "category_missing_fix": "Liên kết một tài liệu với hạng mục danh mục kiểm tra thuộc nhóm này, hoặc thêm mới",
+    "category_unverified": "Bằng chứng cho '{category}' chưa được xác minh",
+    "category_unverified_fix": "Nhờ quản lý xem xét và xác minh bằng chứng đã đính kèm",
+    "punch_open": "Hạng mục punch list '{name}' vẫn đang mở",
+    "punch_open_fix": "Xử lý và đóng hạng mục, hoặc loại khỏi phạm vi hồ sơ này",
+    "punch_no_photo": "Hạng mục punch list '{name}' đã xử lý nhưng không có ảnh",
+    "punch_no_photo_fix": "Thêm ảnh công việc đã hoàn thành",
+    "system_pending": "Hệ thống '{name}' chưa được chạy thử",
+    "system_pending_fix": "Hoàn tất danh mục kiểm tra chạy thử và đánh dấu hệ thống đã chạy thử",
+    "critical_issues": "{count} vấn đề chạy thử nghiêm trọng vẫn đang mở",
+    "critical_issues_fix": "Đóng các vấn đề nghiêm trọng trước khi bàn giao",
+    "acceptance_missing": "Chưa liên kết biên bản nghiệm thu",
+    "acceptance_missing_fix": "Liên kết biên bản nghiệm thu đã ký với hạng mục danh mục kiểm tra nghiệm thu",
+    "acceptance_unsigned": "Biên bản nghiệm thu chưa được ký đầy đủ (trạng thái: {status})",
+    "acceptance_unsigned_fix": "Thu thập các chữ ký còn thiếu trong mục Ký",
+    "blocked": "Hồ sơ không đạt danh mục kiểm tra. Hãy sửa các phát hiện, hoặc vẫn tập hợp và đánh dấu chưa đầy đủ (quản lý phê duyệt).",
+    "delivery_title": "Hồ sơ bàn giao: {project}",
+    "delivery_body": "Hồ sơ bàn giao '{title}' ({scope}) đã sẵn sàng. Liên kết bên dưới tải hồ sơ xuống và có hiệu lực đến {expires}.",
+    "pdf": {
+      "title": "Hồ sơ bàn giao",
+      "scope": "Phạm vi",
+      "built": "Thời điểm tập hợp",
+      "status_passed": "Danh mục kiểm tra đạt",
+      "status_warnings": "Danh mục kiểm tra đạt kèm cảnh báo",
+      "status_errors": "Chưa đầy đủ: còn phát hiện của danh mục kiểm tra chưa xử lý",
+      "findings": "Phát hiện đang mở của danh mục kiểm tra",
+      "severity": "Mức độ",
+      "finding": "Phát hiện",
+      "severity_error": "Lỗi",
+      "severity_warning": "Cảnh báo",
+      "severity_info": "Thông tin",
+      "contents": "Mục lục",
+      "file": "Tệp",
+      "size": "Kích thước",
+      "punch": "Punch list đã xử lý",
+      "item": "Hạng mục",
+      "status": "Trạng thái",
+      "photos": "Ảnh",
+      "evidence": "Bằng chứng ảnh"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Đánh giá {rating} của '{name}' không phải một mức của thang '{scale}'",
+    "rule_poor_without_action": "'{name}' được đánh giá {rating} nhưng chưa có hành động bảo trì nào được lên kế hoạch",
+    "rule_poor_without_action_fix": "Hãy suy ra kế hoạch, hoặc thêm hành động cho cấu kiện này",
+    "rule_action_unpriced": "Hành động cho '{name}' năm {year} chưa có đơn giá",
+    "rule_action_unpriced_fix": "Nhập đơn giá để tổng của kế hoạch bao gồm hành động này",
+    "rule_defect_incomplete": "Đánh giá của '{name}' đòi hỏi công việc nhưng không ghi mức độ nghiêm trọng hoặc phạm vi"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, trang {page}",
+    "text_change": "\"{old}\" đã đổi thành \"{new}\"",
+    "kind": {
+      "added": "Đã thêm",
+      "removed": "Đã xóa",
+      "modified": "Đã sửa",
+      "text": "Văn bản đã đổi"
+    },
+    "status": {
+      "open": "Đang mở",
+      "relevant": "Liên quan",
+      "not_relevant": "Không liên quan"
+    },
+    "errors": {
+      "revision_not_found": "Không tìm thấy phiên bản bản vẽ trong dự án này.",
+      "revision_not_parsed": "Bản vẽ chưa có phiên bản đã xử lý để so sánh.",
+      "comparison_not_found": "Không tìm thấy bản so sánh.",
+      "change_not_found": "Không tìm thấy thay đổi.",
+      "same_revision": "Chọn hai phiên bản hoặc hai trang khác nhau để so sánh.",
+      "manual_points": "Căn chỉnh thủ công cần hai điểm khác nhau trên mỗi phiên bản.",
+      "alignment_singular": "Không thể áp dụng căn chỉnh: nó làm xẹp tờ bản vẽ.",
+      "region_empty": "Thay đổi {seq} không có kích thước.",
+      "region_off_sheet": "Thay đổi {seq} nằm ngoài tờ bản vẽ.",
+      "module_missing": "Mô-đun cần cho thao tác này chưa được cài đặt."
+    },
+    "rfi": {
+      "subject": "Thay đổi bản vẽ {seq} trên {sheet}",
+      "question": "Phiên bản {new} của {sheet} khác phiên bản {old} ở vùng được đánh dấu ({kind}). Vui lòng xác nhận mục đích thay đổi và liệu khối lượng có bị ảnh hưởng không."
+    },
+    "markup": {
+      "text": "Thay đổi phiên bản {seq}: {kind}"
+    },
+    "report": {
+      "title": "So sánh các phiên bản bản vẽ",
+      "project": "Dự án",
+      "name": "So sánh",
+      "old_revision": "Phiên bản cũ",
+      "new_revision": "Phiên bản mới",
+      "alignment": "Căn chỉnh",
+      "alignment_none": "Chưa căn chỉnh (cùng khung)",
+      "alignment_auto": "Tự động",
+      "alignment_manual": "Thủ công, hai điểm",
+      "confidence": "độ tin cậy {value}",
+      "summary": "Thay đổi",
+      "summary_counts": "Tổng {total}: {added} thêm, {removed} xóa, {modified} sửa, {text} văn bản",
+      "generated_on": "Ngày tạo",
+      "generated": "Tạo lúc {timestamp}",
+      "page_of": "Trang {page} / {total}",
+      "no_changes": "Không tìm thấy thay đổi nào giữa hai phiên bản.",
+      "col_no": "STT",
+      "col_preview": "Xem trước",
+      "col_kind": "Thay đổi",
+      "col_location": "Vị trí",
+      "col_detail": "Chi tiết",
+      "col_status": "Trạng thái",
+      "col_comment": "Ghi chú",
+      "col_follow_up": "Xử lý tiếp",
+      "page_at": "Trang {page} tại {coords}",
+      "layer": "Lớp {layer}",
+      "entity_counts": "Đối tượng: {added} thêm, {removed} xóa, {modified} sửa",
+      "rfi": "RFI {number}",
+      "markup": "Đám mây phiên bản",
+      "remeasure": "Đo lại: {items} khối lượng, {positions} hạng mục BOQ"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Hai bên là các phiên bản khác nhau.",
+      "distinct_revisions_fail": "Phép so sánh đang so sánh một tờ bản vẽ với chính nó.",
+      "distinct_revisions_hint": "Chọn phiên bản cũ và phiên bản mới của bản vẽ.",
+      "alignment_not_needed": "Các phiên bản DWG dùng chung đơn vị bản vẽ; không cần căn chỉnh.",
+      "alignment_missing_matrix": "Phép so sánh chưa có căn chỉnh.",
+      "alignment_singular": "Căn chỉnh làm xẹp tờ bản vẽ và không thể áp dụng.",
+      "alignment_scale": "Căn chỉnh thay đổi tỷ lệ tờ bản vẽ {scale} lần, nhiều hơn mức các phiên bản của một bản vẽ thường khác nhau.",
+      "alignment_low_confidence": "Căn chỉnh tự động chưa chắc chắn (độ tin cậy {confidence}).",
+      "alignment_manual_points": "Căn chỉnh thủ công cần hai cặp điểm.",
+      "alignment_ok": "Căn chỉnh tờ bản vẽ là hợp lý.",
+      "alignment_hint": "Căn chỉnh thủ công các tờ theo hai dấu chung của cả hai phiên bản, chẳng hạn giao điểm lưới trục.",
+      "region_empty": "Thay đổi {seq} không có kích thước.",
+      "region_off_sheet": "Thay đổi {seq} nằm ngoài tờ bản vẽ.",
+      "regions_ok": "Mọi vùng thay đổi đều nằm trên tờ bản vẽ.",
+      "triaged_ok": "Mọi thay đổi đã được xem xét.",
+      "triaged_open": "Còn {count} thay đổi đang mở.",
+      "triaged_hint": "Đánh dấu từng thay đổi là liên quan hoặc không liên quan.",
+      "followed_up_ok": "Mọi thay đổi liên quan đều đã được xử lý tiếp.",
+      "followed_up_missing": "Thay đổi {seq} được đánh dấu liên quan nhưng chưa có ghi chú, RFI, đám mây hay cờ đo lại.",
+      "followed_up_hint": "Ghi chú vào thay đổi, tạo RFI hoặc đám mây, hoặc đánh dấu các khối lượng bên trong để đo lại."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Dự báo dòng tiền",
+      "portfolio_title": "Dự báo dòng tiền danh mục",
+      "empty": "Không có dự báo dòng tiền cho lựa chọn này.",
+      "project": "Dự án",
+      "as_of": "Tính đến",
+      "currency": "Tiền tệ",
+      "delay_days": "Thu tiền chậm (ngày)",
+      "overrun_pct": "Vượt chi phí (%)",
+      "closing_position": "Số dư cuối kỳ",
+      "peak_funding": "Nhu cầu vốn cao nhất",
+      "peak_period": "Tháng có nhu cầu vốn cao nhất",
+      "col": {
+        "period": "Tháng",
+        "planned_in": "Thu dự kiến theo kế hoạch",
+        "actual_in": "Thu thực tế",
+        "expected_in": "Thu dự kiến",
+        "planned_out": "Chi dự kiến theo kế hoạch",
+        "actual_out": "Chi thực tế",
+        "expected_out": "Chi dự kiến",
+        "net": "Ròng",
+        "cumulative": "Số dư lũy kế"
+      }
+    }
+  }
+}

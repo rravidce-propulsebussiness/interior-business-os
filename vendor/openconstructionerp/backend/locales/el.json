@@ -1,0 +1,2539 @@
+{
+  "costs.catalog_name_unavailable": "Αυτό το όνομα δεν μπορεί να χρησιμοποιηθεί για νέο κατάλογο. Επιλέξτε άλλο όνομα.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Εκτίμηση κόστους κατασκευής ανοιχτού κώδικα"
+  },
+  "nav": {
+    "dashboard": "Πίνακας ελέγχου",
+    "assemblies": "Σύνθετα άρθρα",
+    "ai_estimate": "Εκτίμηση AI",
+    "settings": "Ρυθμίσεις",
+    "5d_cost_model": "Μοντέλο κόστους 5D",
+    "templates": "Πρότυπα",
+    "reports": "Αναφορές",
+    "sustainability": "Βιωσιμότητα",
+    "group_estimation": "Εκτίμηση",
+    "group_planning": "Προγραμματισμός",
+    "group_procurement": "Προμήθειες",
+    "group_tools": "Εργαλεία",
+    "architecture": "Χάρτης Αρχιτεκτονικής"
+  },
+  "common": {
+    "save": "Αποθήκευση",
+    "cancel": "Ακύρωση",
+    "delete": "Διαγραφή",
+    "edit": "Επεξεργασία",
+    "create": "Δημιουργία",
+    "search": "Αναζήτηση",
+    "filter": "Φίλτρο",
+    "export": "Εξαγωγή",
+    "import": "Εισαγωγή",
+    "loading": "Φόρτωση...",
+    "error": "Σφάλμα",
+    "success": "Επιτυχία",
+    "confirm": "Επιβεβαίωση",
+    "back": "Πίσω",
+    "next": "Επόμενο",
+    "yes": "Ναι",
+    "no": "Όχι"
+  },
+  "auth": {
+    "login": "Σύνδεση",
+    "logout": "Αποσύνδεση",
+    "email": "Ηλ. ταχυδρομείο",
+    "password": "Κωδικός"
+  },
+  "projects": {
+    "title": "Έργα",
+    "new_project": "Νέο Έργο",
+    "project_name": "Όνομα Έργου",
+    "no_projects": "Δεν υπάρχουν ακόμα έργα"
+  },
+  "boq": {
+    "title": "Πίνακας Ποσοτήτων",
+    "position": "Θέση",
+    "ordinal": "Τακτικός αριθμός",
+    "description": "Περιγραφή",
+    "quantity": "Ποσότητα",
+    "unit": "Μονάδα",
+    "unit_rate": "Τιμή Μονάδας",
+    "total": "Σύνολο",
+    "add_position": "Προσθήκη Θέσης",
+    "add_section": "Προσθήκη Ενότητας",
+    "assembly": "Συναρμολόγημα",
+    "subtotal": "Υποσύνολο",
+    "grand_total": "Γενικό σύνολο",
+    "direct_cost": "Άμεσο Κόστος",
+    "net_total": "Καθαρό Σύνολο",
+    "gross_total": "Μικτό Σύνολο",
+    "vat": "ΦΠΑ",
+    "add_markups": "Προσθήκη Επιβαρύνσεων",
+    "validate": "Επικύρωση",
+    "export": "Εξαγωγή",
+    "mvp": {
+      "title": "Επιλογή υλικών",
+      "subtitle_one": "{{count}} πόρος χρειάζεται επιλογή",
+      "subtitle_other": "{{count}} πόροι χρειάζονται επιλογή",
+      "bulk_label": "Γρήγορη συμπλήρωση:",
+      "bulk_median": "Διάμεσος για όλα",
+      "bulk_mean": "Μέσος όρος για όλα",
+      "bulk_cheapest": "Φθηνότερο για όλα",
+      "bulk_priciest": "Ακριβότερο για όλα",
+      "slot_variant_count": "{{n}} επιλογές",
+      "selected_label": "Επιλέχθηκε:",
+      "default_mean": "μέση τιμή",
+      "default_median": "διάμεση τιμή",
+      "row_median": "Διάμεση τιμή · {{price}}",
+      "row_mean": "Μέση τιμή · {{price}}",
+      "subtotal_label": "Τιμή θέσης",
+      "apply": "Εφαρμογή & προσθήκη στο BOQ",
+      "batch_progress": "Είδος {{current}} από {{total}}",
+      "toast_applied_one": "{{count}} παραλλαγή επιλέχθηκε",
+      "toast_applied_other": "{{count}} παραλλαγές επιλέχθηκαν"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Αναφορά ανταλλαγής"
+      },
+      "column": {
+        "severity": "Σοβαρότητα",
+        "kind": "Είδος απώλειας",
+        "position": "Θέση",
+        "field": "Πεδίο",
+        "original": "Αρχική τιμή",
+        "written": "Τιμή που γράφτηκε",
+        "count": "Πλήθος",
+        "detail": "Λεπτομέρειες"
+      },
+      "severity": {
+        "error": "Κρίσιμο",
+        "warning": "Προειδοποίηση",
+        "info": "Σημείωση"
+      },
+      "kind": {
+        "unsupported_element": "Μη υποστηριζόμενο στοιχείο",
+        "truncated_text": "Κείμενο περικομμένο",
+        "altered_text": "Κείμενο τροποποιημένο",
+        "rounded_value": "Τιμή στρογγυλεμένη",
+        "value_out_of_range": "Τιμή εκτός εύρους",
+        "dropped_attribute": "Χαρακτηριστικό απορρίφθηκε",
+        "unmapped_unit": "Μονάδα χωρίς αντιστοίχιση",
+        "lost_hierarchy": "Χάθηκε επίπεδο ιεραρχίας",
+        "markup_not_representable": "Επιβάρυνση που δεν αποδίδεται",
+        "attachment_skipped": "Συνημμένο παραλείφθηκε",
+        "changed_identifier": "Αναγνωριστικό άλλαξε",
+        "exceeds_limit": "Υπέρβαση ορίου αποθήκευσης",
+        "rejected_row": "Γραμμή απορρίφθηκε",
+        "skipped_row": "Γραμμή παραλείφθηκε",
+        "parser_warning": "Προειδοποίηση αναγνώστη",
+        "roundtrip_mismatch": "Απόκλιση κύκλου εξαγωγής-εισαγωγής"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Σημείο διακλάδωσης",
+      "base_snapshot_from": "Σημείο διακλάδωσης (από το στιγμιότυπο «{snapshot}»)",
+      "before_cherry_pick": "Πριν την εφαρμογή αλλαγών από το «{source}»",
+      "before_merge": "Πριν τη συγχώνευση του κλάδου «{branch}»",
+      "errors": {
+        "branch_closed": "Αυτός ο κλάδος έχει συγχωνευθεί ή αρχειοθετηθεί και δεν δέχεται άλλες αλλαγές.",
+        "not_a_branch": "Αυτό το τιμολόγιο ποσοτήτων δεν είναι κλάδος.",
+        "same_bill": "Επιλέξτε δύο διαφορετικούς προϋπολογισμούς.",
+        "different_project": "Και οι δύο προϋπολογισμοί πρέπει να ανήκουν στο ίδιο έργο.",
+        "different_tree": "Και οι δύο προϋπολογισμοί πρέπει να είναι κλάδοι του ίδιου κύριου προϋπολογισμού.",
+        "unresolved_conflicts": "Θέσεις που άλλαξαν και στους δύο προϋπολογισμούς: {count}. Πριν την εφαρμογή αποφασίστε ποια έκδοση θα κρατηθεί για καθεμία.",
+        "merge_forbidden": "Δεν έχετε δικαίωμα συγχώνευσης στον κύριο προϋπολογισμό.",
+        "confirm_required": "Επιβεβαιώστε τη συγχώνευση: αντικαθιστά τον κύριο προϋπολογισμό.",
+        "design_options_unavailable": "Η ενότητα εναλλακτικών μελέτης δεν είναι εγκατεστημένη.",
+        "base_snapshot_in_use": "Αυτό το στιγμιότυπο είναι σημείο διακλάδωσης ανοικτού κλάδου και δεν μπορεί να διαγραφεί."
+      },
+      "export": {
+        "title_positions": "Σύγκριση προϋπολογισμών ανά θέση",
+        "title_sections": "Σύγκριση προϋπολογισμών ανά ενότητα",
+        "title_cost_groups": "Σύγκριση προϋπολογισμών ανά ομάδα κόστους",
+        "project": "Έργο",
+        "bill_a": "Προϋπολογισμός Α",
+        "bill_b": "Προϋπολογισμός Β",
+        "total_a": "Σύνολο Α",
+        "total_b": "Σύνολο Β",
+        "delta": "Διαφορά",
+        "counts": "Αλλαγές",
+        "counts_value": "προστέθηκαν: {added}, αφαιρέθηκαν: {removed}, άλλαξαν: {changed}",
+        "col_ordinal": "Α/Α",
+        "col_description": "Περιγραφή",
+        "col_unit": "Μον.",
+        "col_change": "Αλλαγή",
+        "col_qty_a": "Ποσ. Α",
+        "col_qty_b": "Ποσ. Β",
+        "col_rate_a": "Τιμή Α",
+        "col_rate_b": "Τιμή Β",
+        "col_total_a": "Σύνολο Α",
+        "col_total_b": "Σύνολο Β",
+        "col_delta": "Διαφορά",
+        "col_section": "Ενότητα",
+        "col_cost_group": "Ομάδα κόστους",
+        "change_added": "Προστέθηκε",
+        "change_removed": "Αφαιρέθηκε",
+        "change_changed": "Άλλαξε",
+        "change_unchanged": "Αμετάβλητο",
+        "ungrouped": "Χωρίς ομάδα",
+        "empty": "Οι δύο προϋπολογισμοί είναι ίδιοι.",
+        "total": "Σύνολο"
+      }
+    }
+  },
+  "costs": {
+    "title": "Βάση Δεδομένων Κόστους",
+    "rate": "Τιμή",
+    "material": "Υλικό",
+    "labor": "Εργατικά",
+    "equipment": "Εξοπλισμός",
+    "search_costs": "Αναζήτηση στοιχείων κόστους..."
+  },
+  "assemblies": {
+    "title": "Σύνθετα άρθρα",
+    "description": "Επαναχρησιμοποιήσιμες συνταγές κόστους — συνδυάστε υλικά, εργατικά και μηχανήματα σε έτοιμα προς χρήση πρότυπα",
+    "new_assembly": "Νέα Συναρμολόγηση",
+    "from_database": "Από Βάση Δεδομένων",
+    "apply_to_boq": "Εφαρμογή στο BOQ",
+    "add_component": "Προσθήκη Στοιχείου",
+    "no_assemblies": "Δεν υπάρχουν σύνολα ακόμη",
+    "no_assemblies_hint": "Δημιουργήστε το πρώτο σας συναρμολόγημα από τη Βάση Δεδομένων Κόστους ή τον Κατάλογο Πόρων",
+    "total_rate": "Συνολική Τιμή"
+  },
+  "catalog": {
+    "title": "Κατάλογος πόρων",
+    "description": "Περιηγηθείτε και διαχειριστείτε υλικά, μηχανήματα, τιμές εργατικών και χειριστές",
+    "add_resource": "Προσθήκη Πόρου",
+    "import_region": "Εισαγωγή Περιοχής",
+    "build_assembly": "Δημιουργία Συναρμολόγησης",
+    "my_catalog": "Ο Κατάλογός μου"
+  },
+  "validation": {
+    "title": "Επικύρωση",
+    "passed": "Πέρασε",
+    "warnings": "Προειδοποιήσεις",
+    "errors": "Σφάλματα",
+    "score": "Βαθμολογία Ποιότητας",
+    "run_validation": "Εκτέλεση επικύρωσης",
+    "missing_quantity": "Η θέση {position} δεν έχει ποσότητα",
+    "missing_rate": "Η θέση {position} δεν έχει τιμή μονάδας",
+    "missing_description": "Η θέση {position} δεν έχει περιγραφή",
+    "missing_classification": "Η θέση {position} χρειάζεται κωδικό ταξινόμησης",
+    "duplicate_ordinal": "Διπλός τακτικός αριθμός: {ordinal}",
+    "rate_anomaly": "Η τιμή μονάδας {rate} υπερβαίνει το όριο ({threshold})",
+    "nl": {
+      "not_a_string": "Η είσοδος πρέπει να είναι κείμενο.",
+      "empty": "Η είσοδος είναι κενή.",
+      "too_long": "Η είσοδος υπερβαίνει τους {max} χαρακτήρες.",
+      "ai_unparsable": "Η απάντηση της AI δεν μπόρεσε να αναλυθεί ως έγγραφο DSL.",
+      "no_pattern": "Κανένα μοτίβο δεν ταίριαξε με την πρόταση εισόδου.",
+      "try": "Δοκιμάστε: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "Χρονοδιάγραμμα 4D",
+    "generated": {
+      "position_label": "Θέση {ordinal}",
+      "section_label": "Ενότητα {ordinal}",
+      "task_description": "Αυτόματη δημιουργία από τη θέση {ordinal} του BOQ ({quantity} {unit})",
+      "section_description": "Σύνοψη: ενότητα {ordinal} του BOQ",
+      "start_milestone": "Έναρξη έργου",
+      "start_milestone_description": "Ορόσημο έναρξης έργου",
+      "completion_milestone": "Ολοκλήρωση έργου",
+      "completion_milestone_description": "Ορόσημο ολοκλήρωσης έργου",
+      "labour_resource": "Εργατικά",
+      "machine_resource": "Μηχανήματα"
+    },
+    "progress_sheet": {
+      "sheet_title": "Πρόοδος",
+      "title": "Φύλλο ενημέρωσης προόδου",
+      "detail_schedule": "Χρονοδιάγραμμα: {name}",
+      "detail_exported": "Εξαγωγή: {date}",
+      "instructions": "Συμπληρώστε μόνο τις λευκές στήλες. Μην αλλάξετε τις γκρι στήλες, τη σειρά των γραμμών ή τις κρυφές στήλες.",
+      "col": {
+        "activity_ref": "Κωδ. δραστηριότητας",
+        "name": "Δραστηριότητα",
+        "wbs_code": "WBS",
+        "responsible": "Υπεύθυνος",
+        "planned_start": "Προγρ. έναρξη",
+        "planned_finish": "Προγρ. λήξη",
+        "percent_complete": "% ολοκλήρωσης",
+        "actual_start": "Πραγματική έναρξη",
+        "actual_finish": "Πραγματική λήξη",
+        "remaining_duration": "Υπολειπόμενο (εργάσιμες ημέρες)",
+        "notes": "Σημειώσεις",
+        "row_key": "Κλειδί γραμμής",
+        "stamp": "Σφραγίδα"
+      }
+    }
+  },
+  "cad": {
+    "title": "Εισαγωγή CAD",
+    "upload": "Μεταφόρτωση Αρχείου CAD",
+    "supported_formats": "Υποστηρίζονται: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Μετατροπή...",
+    "elements_found": "Βρέθηκαν {count} στοιχεία"
+  },
+  "takeoff": {
+    "title": "Επιμέτρηση Ποσοτήτων",
+    "auto_detect": "Αυτόματος Εντοπισμός",
+    "manual_measure": "Χειροκίνητη Μέτρηση",
+    "confidence": "Εμπιστοσύνη"
+  },
+  "tendering": {
+    "title": "Διαγωνισμοί",
+    "create_tender": "Δημιουργία Διαγωνισμού",
+    "bid": "Προσφορά",
+    "award": "Ανάθεση"
+  },
+  "modules": {
+    "title": "Ενότητες",
+    "installed": "Εγκαταστάθηκε",
+    "available": "Διαθέσιμο",
+    "install": "Εγκατάσταση",
+    "uninstall": "Απεγκατάσταση",
+    "update": "Ενημέρωση"
+  },
+  "dashboard": {
+    "welcome": "Καλώς ήρθατε στο OpenConstructionERP",
+    "subtitle": "Ο χώρος εργασίας εκτίμησης κατασκευής σας",
+    "recent_projects": "Πρόσφατα Έργα",
+    "system_status": "Κατάσταση Συστήματος",
+    "modules_loaded": "Φορτωμένες Ενότητες",
+    "validation_rules": "Κανόνες Επικύρωσης",
+    "languages": "Γλώσσες",
+    "continue_estimate": "Συνέχιση τελευταίας εκτίμησης",
+    "getting_started": "Ξεκινώντας",
+    "total_value": "Συνολική Αξία",
+    "active_estimates": "Ενεργές Εκτιμήσεις",
+    "schedule_status": "Κατάσταση Χρονοδιαγράμματος",
+    "quality_score": "Βαθμολογία Ποιότητας",
+    "analytics": "Αναλυτικά στοιχεία",
+    "project_overview": "Επισκόπηση Έργου",
+    "step_load_db": "Φόρτωση Βάσης Δεδομένων Κόστους",
+    "step_load_db_desc": "Εισαγάγετε περιφερειακά δεδομένα τιμών με 55.000+ στοιχεία",
+    "step_ai_search": "Ενεργοποίηση Αναζήτησης AI",
+    "step_ai_search_desc": "Δημιουργήστε διανυσματικές ενσωματώσεις για σημασιολογική αντιστοίχιση κόστους",
+    "step_connect_ai": "Σύνδεση AI",
+    "step_connect_ai_desc": "Προσθέστε τα κλειδιά API σας για εκτίμηση με τεχνολογία AI",
+    "step_create_project": "Δημιουργία Έργου",
+    "step_create_project_desc": "Ξεκινήστε το πρώτο σας έργο εκτίμησης κατασκευής",
+    "step_build_boq": "Δημιουργήστε το BOQ σας",
+    "step_build_boq_desc": "Δημιουργήστε Πίνακα Ποσοτήτων με βοήθεια AI"
+  },
+  "units": {
+    "m": "μ",
+    "m2": "τ.μ.",
+    "m3": "κ.μ.",
+    "kg": "κιλό",
+    "t": "τόνος",
+    "pcs": "τεμ.",
+    "lsum": "κατ' αποκοπή",
+    "h": "ώ",
+    "set": "σετ"
+  },
+  "contacts": {
+    "title": "Κατάλογος Επαφών",
+    "new_contact": "Νέα Επαφή",
+    "contact_type": "Τύπος Επαφής",
+    "client": "Πελάτης",
+    "subcontractor": "Υπεργολάβος",
+    "supplier": "Προμηθευτής",
+    "consultant": "Σύμβουλος",
+    "internal": "Εσωτερικό",
+    "company_name": "Επωνυμία Εταιρείας",
+    "search_contacts": "Αναζήτηση επαφών...",
+    "no_contacts": "Δεν υπάρχουν ακόμη επαφές",
+    "prequalification": "Προεπιλογή",
+    "approved": "Εγκρίθηκε",
+    "pending": "Εκκρεμεί",
+    "expired": "Έληξε"
+  },
+  "tasks": {
+    "title": "Εργασίες",
+    "new_task": "Νέα Εργασία",
+    "task": "Εργασία",
+    "topic": "Θέμα",
+    "information": "Πληροφορία",
+    "decision": "Απόφαση",
+    "personal": "Προσωπική Εργασία",
+    "my_tasks": "Οι Εργασίες μου",
+    "open": "Ανοιχτό",
+    "in_progress": "Σε εξέλιξη",
+    "completed": "Ολοκληρώθηκε",
+    "draft": "Πρόχειρο",
+    "due_date": "Ημερομηνία λήξης",
+    "assignee": "Υπεύθυνος",
+    "priority": "Προτεραιότητα",
+    "checklist": "Λίστα ελέγχου",
+    "focus_area": "Περιοχή Εστίασης"
+  },
+  "rfi": {
+    "title": "Αιτήματα Πληροφοριών",
+    "new_rfi": "Νέο RFI",
+    "subject": "Θέμα",
+    "question": "Ερώτηση",
+    "response": "Απάντηση",
+    "ball_in_court": "Εν Αναμονή Απάντησης",
+    "days_open": "Ημέρες Ανοιχτό",
+    "cost_impact": "Επίδραση στο Κόστος",
+    "schedule_impact": "Επίδραση στο Χρονοδιάγραμμα",
+    "respond": "Απάντηση",
+    "close": "Κλείσιμο",
+    "overdue": "Εκπρόθεσμο"
+  },
+  "finance": {
+    "title": "Οικονομικά",
+    "budgets": "Προϋπολογισμοί",
+    "invoices": "Τιμολόγια",
+    "payable": "Πληρωτέα",
+    "receivable": "Εισπρακτέα",
+    "payments": "Πληρωμές",
+    "evm": "Κερδισμένη αξία",
+    "invoice_number": "Αρ. Τιμολογίου",
+    "amount": "Ποσό",
+    "status": "Κατάσταση",
+    "approve": "Έγκριση",
+    "pay": "Σήμανση ως Πληρωμένο",
+    "original_budget": "Αρχικός Προϋπολογισμός",
+    "revised_budget": "Αναθεωρημένος Προϋπολογισμός",
+    "committed": "Δεσμευμένο",
+    "actual": "Πραγματικό",
+    "forecast": "Πρόβλεψη",
+    "variance": "Απόκλιση"
+  },
+  "procurement": {
+    "title": "Προμήθειες",
+    "purchase_orders": "Παραγγελίες Αγοράς",
+    "goods_receipts": "Παραλαβές Υλικών",
+    "new_po": "Νέα Παραγγελία Αγοράς",
+    "po_number": "Αρ. PO",
+    "vendor": "Προμηθευτής",
+    "issue": "Ζήτημα",
+    "confirm": "Επιβεβαίωση Παραλαβής"
+  },
+  "safety": {
+    "title": "Ασφάλεια",
+    "incidents": "Περιστατικά",
+    "observations": "Παρατηρήσεις",
+    "new_incident": "Νέο Περιστατικό",
+    "new_observation": "Νέα Παρατήρηση",
+    "severity": "Σοβαρότητα",
+    "risk_score": "Βαθμολογία Κινδύνου",
+    "days_lost": "Χαμένες Ημέρες",
+    "treatment": "Αντιμετώπιση",
+    "corrective_action": "Διορθωτική Ενέργεια"
+  },
+  "meetings": {
+    "title": "Συναντήσεις",
+    "new_meeting": "Νέα Συνάντηση",
+    "meeting_type": "Τύπος",
+    "attendees": "Συμμετέχοντες",
+    "agenda": "Ημερήσια Διάταξη",
+    "action_items": "Ενέργειες Παρακολούθησης",
+    "minutes": "Πρακτικά",
+    "complete": "Ολοκλήρωση Συνάντησης",
+    "present": "Παρών",
+    "absent": "Απών",
+    "excused": "Δικαιολογημένη Απουσία",
+    "actions": {
+      "status": {
+        "open": "Ανοιχτό",
+        "completed": "Ολοκληρωμένο",
+        "cancelled": "Ακυρωμένο"
+      },
+      "flag": {
+        "overdue": "Εκπρόθεσμο",
+        "on_track": "Εντός προγράμματος"
+      },
+      "label": {
+        "action_item": "Ενέργεια",
+        "completion_rate": "Ποσοστό ολοκλήρωσης ενεργειών",
+        "open_vs_done": "Ανοιχτές έναντι ολοκληρωμένων",
+        "overdue": "Εκπρόθεσμες ενέργειες"
+      },
+      "explain": {
+        "action_item": "Μια ενέργεια είναι ένα καθήκον που συμφωνήθηκε σε συνάντηση, με υπεύθυνο και προθεσμία.",
+        "completion_rate": "Το ποσοστό ολοκλήρωσης ενεργειών είναι οι ολοκληρωμένες ενέργειες διαιρεμένες με το σύνολο των ενεργειών, από 0 έως 1.",
+        "open_vs_done": "Οι ανοιχτές ενέργειες απαιτούν ακόμη εργασία. Οι ολοκληρωμένες έχουν ολοκληρωθεί και δεν χρειάζονται άλλη εργασία.",
+        "overdue": "Μια ενέργεια είναι εκπρόθεσμη όταν παραμένει ανοιχτή και η προθεσμία της είναι πριν από την ημερομηνία αναφοράς."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Πρακτικά σύσκεψης",
+      "issued": "ΕΚΔΟΘΗΚΕ",
+      "draft": "ΠΡΟΣΧΕΔΙΟ",
+      "date": "Ημερομηνία:",
+      "location": "Τοποθεσία:",
+      "type": "Τύπος:",
+      "number": "Αρ. σύσκεψης:",
+      "chairperson": "Πρόεδρος:",
+      "next_meeting": "Επόμενη σύσκεψη:",
+      "not_available": "Μ/Δ",
+      "not_scheduled": "Δεν έχει προγραμματιστεί",
+      "attendance": "Παρουσίες",
+      "present": "Παρόντες:",
+      "absent": "Απόντες / δικαιολογημένοι:",
+      "agenda": "Ημερήσια διάταξη, συζήτηση και αποφάσεις",
+      "required": "(απαιτείται)",
+      "discussion": "Συζήτηση:",
+      "decision": "Απόφαση:",
+      "decisions": "Αποφάσεις",
+      "open_questions": "Ανοιχτά ερωτήματα",
+      "actions": "Ενέργειες",
+      "col_number": "#",
+      "col_action": "Ενέργεια",
+      "col_owner": "Υπεύθυνος",
+      "col_due": "Προθεσμία",
+      "col_status": "Κατάσταση",
+      "brought_forward": "[Μεταφέρθηκε]",
+      "overdue": "(εκπρόθεσμο)",
+      "status_open": "Ανοιχτό",
+      "status_in_progress": "Σε εξέλιξη",
+      "status_done": "Ολοκληρώθηκε",
+      "status_cancelled": "Ακυρώθηκε",
+      "summary": "Περίληψη",
+      "generated": "Δημιουργήθηκε: {stamp}",
+      "issued_at": "Εκδόθηκε {stamp}",
+      "running_head": "{project} - Πρακτικά",
+      "type_progress": "Πρόοδος",
+      "type_design": "Μελέτη",
+      "type_safety": "Ασφάλεια",
+      "type_subcontractor": "Υπεργολάβος",
+      "type_kickoff": "Έναρξη",
+      "type_closeout": "Παράδοση",
+      "type_commercial": "Εμπορική"
+    }
+  },
+  "inspections": {
+    "title": "Επιθεωρήσεις Ποιότητας",
+    "new_inspection": "Νέα Επιθεώρηση",
+    "inspector": "Επιθεωρητής",
+    "checklist": "Λίστα ελέγχου",
+    "pass": "Επιτυχία",
+    "fail": "Αποτυχία",
+    "partial": "Μερικό",
+    "critical": "Κρίσιμη",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Προγραμματισμένη",
+        "in_progress": "Σε εξέλιξη",
+        "completed": "Ολοκληρώθηκε",
+        "failed": "Αποτυχία",
+        "cancelled": "Ακυρώθηκε"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Αναφορές Μη Συμμόρφωσης",
+    "new_ncr": "Νέο NCR",
+    "root_cause": "Βασική Αιτία",
+    "corrective_action": "Διορθωτική Ενέργεια",
+    "preventive_action": "Προληπτική Ενέργεια",
+    "material": "Υλικό",
+    "workmanship": "Εκτέλεση εργασιών",
+    "design": "Σχεδιασμός"
+  },
+  "submittals": {
+    "title": "Υποβολές",
+    "new_submittal": "Νέα Υποβολή",
+    "spec_section": "Ενότητα Προδιαγραφής",
+    "revision": "Αναθεώρηση",
+    "submit": "Υποβολή",
+    "review": "Έλεγχος",
+    "approved_as_noted": "Εγκρίθηκε με Παρατηρήσεις",
+    "revise_resubmit": "Αναθεώρηση & Επανυποβολή",
+    "intl": {
+      "status_labels": {
+        "draft": "Πρόχειρο",
+        "submitted": "Υποβλήθηκε",
+        "under_review": "Υπό έλεγχο",
+        "approved": "Εγκρίθηκε",
+        "approved_as_noted": "Εγκρίθηκε με παρατηρήσεις",
+        "revise_and_resubmit": "Αναθεώρηση και νέα υποβολή",
+        "rejected": "Απορρίφθηκε",
+        "closed": "Κλειστό"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Αλληλογραφία",
+    "new_entry": "Νέα Εγγραφή",
+    "incoming": "Εισερχόμενη",
+    "outgoing": "Εξερχόμενη",
+    "letter": "Επιστολή",
+    "email": "Ηλ. ταχυδρομείο",
+    "notice": "Ειδοποίηση",
+    "date_sent": "Ημερομηνία Αποστολής",
+    "date_received": "Ημερομηνία Παραλαβής"
+  },
+  "cde": {
+    "title": "Κοινό Περιβάλλον Δεδομένων",
+    "new_container": "Νέο Κοντέινερ",
+    "container_code": "Κωδικός Κοντέινερ",
+    "cde_state": "Κατάσταση CDE",
+    "wip": "Σε Εξέλιξη",
+    "shared": "Κοινόχρηστος",
+    "published": "Δημοσιευμένο",
+    "archived": "Αρχειοθετημένο",
+    "promote": "Προαγωγή",
+    "suitability": "Καταλληλότητα",
+    "discipline": "Ειδικότητα",
+    "revisions": "Εκδόσεις",
+    "intl": {
+      "state_labels": {
+        "wip": "Σε εξέλιξη",
+        "shared": "Κοινοποιημένο",
+        "published": "Δημοσιευμένο",
+        "archived": "Αρχειοθετημένο"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Διαβιβαστικά",
+    "new_transmittal": "Νέο Διαβιβαστικό",
+    "purpose": "Σκοπός",
+    "for_approval": "Προς Έγκριση",
+    "for_information": "Προς Ενημέρωση",
+    "for_construction": "Προς Κατασκευή",
+    "recipients": "Παραλήπτες",
+    "acknowledge": "Επιβεβαίωση",
+    "locked": "Κλειδωμένο",
+    "issue_transmittal": "Ζήτημα",
+    "intl": {
+      "status_words": {
+        "draft": "πρόχειρο",
+        "issued": "εκδόθηκε",
+        "responded": "απαντήθηκε"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Ειδοποιήσεις",
+    "no_notifications": "Δεν υπάρχουν νέες ειδοποιήσεις",
+    "mark_all_read": "Σήμανση όλων ως αναγνωσμένα",
+    "unread": "Μη αναγνωσμένα"
+  },
+  "comments": {
+    "title": "Σχόλια",
+    "post": "Δημοσίευση",
+    "reply": "Απάντηση",
+    "edit": "Επεξεργασία",
+    "delete": "Διαγραφή",
+    "placeholder": "Γράψτε σχόλιο...",
+    "empty": "Δεν υπάρχουν σχόλια ακόμη. Ξεκινήστε τη συζήτηση.",
+    "edited": "επεξεργάστηκε",
+    "deleted": "Αυτό το σχόλιο διαγράφηκε"
+  },
+  "bim": {
+    "title": "Κόμβος BIM",
+    "models": "Μοντέλα",
+    "elements": "Στοιχεία",
+    "upload_model": "Ανέβασμα Μοντέλου",
+    "processing": "Επεξεργασία",
+    "active": "Ενεργό",
+    "link_to_boq": "Σύνδεση με BOQ",
+    "properties": "Ιδιότητες",
+    "quantities": "Ποσότητες",
+    "wireframe": "Σύρμα",
+    "section_box": "Πλαίσιο Τομής",
+    "measure": "Μέτρηση",
+    "zoom_to_fit": "Προσαρμογή στην Οθόνη"
+  },
+  "reporting": {
+    "title": "Αναφορές & Πίνακες Ελέγχου",
+    "kpi": "Πίνακας Ελέγχου KPI",
+    "generate_report": "Δημιουργία Αναφοράς",
+    "templates": "Πρότυπα",
+    "project_status": "Κατάσταση Έργου",
+    "cost_report": "Αναφορά Κόστους",
+    "schedule_status": "Κατάσταση Χρονοδιαγράμματος",
+    "safety_report": "Αναφορά Ασφαλείας",
+    "explain": {
+      "report_total_one": "Σύνολο αναφοράς: {money} (άθροισμα {count} γραμμής).",
+      "report_total_other": "Σύνολο αναφοράς: {money} (άθροισμα {count} γραμμών).",
+      "percent_of_total": "Το {part} είναι {percent} του {total} (ποσοστό του συνόλου).",
+      "percent_zero_total": "{part} από {total}: το σύνολο είναι μηδέν, οπότε κάθε μερίδιο αναφέρεται ως 0 τοις εκατό.",
+      "breakdown_empty": "Ανάλυση κόστους: δεν υπάρχουν δεδομένα.",
+      "breakdown_one": "Ανάλυση κόστους: {count} ομάδα, σύνολο αναφοράς {money}.",
+      "breakdown_other": "Ανάλυση κόστους: {count} ομάδες, σύνολο αναφοράς {money}.",
+      "top_n_one": "Πρώτα {requested}: {shown} από {shown} γραμμή.",
+      "top_n_other": "Πρώτα {requested}: {shown} από {shown} γραμμές."
+    }
+  },
+  "gantt": {
+    "title": "Διάγραμμα Gantt",
+    "day": "Ημέρα",
+    "week": "Εβδομάδα",
+    "month": "Μήνας",
+    "critical_path": "Κρίσιμη Διαδρομή",
+    "baseline": "Βάση αναφοράς",
+    "dependencies": "Εξαρτήσεις",
+    "today": "Σήμερα"
+  },
+  "settings": {
+    "regional": "Περιφερειακές Ρυθμίσεις",
+    "timezone": "Ζώνη Ώρας",
+    "measurement": "Σύστημα Μέτρησης",
+    "paper_size": "Μέγεθος Χαρτιού",
+    "date_format": "Μορφή Ημερομηνίας",
+    "number_format": "Μορφή Αριθμών",
+    "currency": "Νόμισμα",
+    "metric": "Μετρικό",
+    "imperial": "Αγγλοσαξονικό"
+  },
+  "users": {
+    "management": "Διαχείριση Χρηστών",
+    "management_desc": "Διαχειριστείτε μέλη ομάδας, ρόλους και πρόσβαση",
+    "invite_user": "Πρόσκληση Χρήστη",
+    "invite": "Πρόσκληση",
+    "full_name": "Πλήρες Όνομα",
+    "email": "Ηλ. ταχυδρομείο",
+    "password": "Κωδικός Πρόσβασης",
+    "role": "Ρόλος",
+    "status": "Κατάσταση",
+    "last_login": "Τελευταία Σύνδεση",
+    "actions": "Ενέργειες",
+    "name": "Όνομα",
+    "total": "Σύνολο Χρηστών",
+    "active": "Ενεργό",
+    "inactive": "Ανενεργός",
+    "admins": "Διαχειριστές",
+    "managers": "Διευθυντές",
+    "search": "Αναζήτηση κατά όνομα ή email...",
+    "no_users": "Δεν βρέθηκαν χρήστες",
+    "updated": "Ο χρήστης ενημερώθηκε",
+    "invited": "Ο χρήστης προσκλήθηκε επιτυχώς",
+    "deactivate": "Απενεργοποίηση",
+    "activate": "Ενεργοποίηση",
+    "never": "Ποτέ",
+    "role_admin_desc": "Πλήρης πρόσβαση σε όλες τις λειτουργίες",
+    "role_manager_desc": "Διαχείριση έργων και ομάδας",
+    "role_editor_desc": "Δημιουργία και επεξεργασία περιεχομένου",
+    "role_viewer_desc": "Πρόσβαση μόνο για ανάγνωση"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Αυτό το στιγμιότυπο είναι παγωμένο. Ένα παγωμένο στιγμιότυπο είναι καταγραφή και δεν μπορεί να αλλάξει.",
+      "frozen_no_delete": "Ένα παγωμένο στιγμιότυπο είναι καταγραφή και δεν μπορεί να διαγραφεί.",
+      "draft_open": "Υπάρχει ήδη ανοιχτό στιγμιότυπο πρόχειρου. Παγώστε ή διαγράψτε το πριν ξεκινήσετε άλλο.",
+      "no_line_method": "Αυτή η γραμμή δεν έχει δική της μέθοδο.",
+      "snapshot_missing": "Το στιγμιότυπο δεν βρέθηκε.",
+      "line_missing": "Το στιγμιότυπο δεν έχει τέτοια γραμμή.",
+      "document_missing": "Το συνδεδεμένο έγγραφο δεν ανήκει σε αυτό το έργο.",
+      "freeze_refused": "Το στιγμιότυπο δεν μπορεί να παγώσει ακόμη: {count} γραμμή(ές) ξεπέρασαν το όριο χωρίς σχόλιο και τεκμηρίωση.",
+      "no_frozen_snapshot": "Δεν υπάρχει ακόμη παγωμένο στιγμιότυπο για σύγκριση.",
+      "no_ledger": "Το μητρώο τιμολογίων δεν είναι διαθέσιμο σε αυτή την εγκατάσταση.",
+      "no_snapshot": "Δεν υπάρχει ακόμη στιγμιότυπο προς τεκμηρίωση."
+    },
+    "export": {
+      "project": "Έργο",
+      "generated": "Δημιουργήθηκε",
+      "currency": "Νόμισμα",
+      "page": "Σελίδα",
+      "generated_at": "Ημερομηνία δημιουργίας",
+      "empty": "Δεν υπάρχει ακόμη τίποτα για εμφάνιση.",
+      "total": "Σύνολο",
+      "cost_report": "Έκθεση κόστους",
+      "phase_comparison": "Σύγκριση φάσεων",
+      "invoice_ledger": "Μητρώο τιμολογίων",
+      "forecast_documentation": "Τεκμηρίωση πρόβλεψης",
+      "as_of": "Κατά την",
+      "forecast_method": "Μέθοδος πρόβλεψης",
+      "col_account": "Λογαριασμός",
+      "col_code": "Κωδικός",
+      "col_description": "Περιγραφή",
+      "col_source": "Πηγή",
+      "col_method": "Μέθοδος",
+      "col_planned": "Προϋπολογισμένο",
+      "col_committed": "Δεσμευμένο",
+      "col_pending": "Εκκρεμείς αλλαγές",
+      "col_measured": "Επιμετρημένο",
+      "col_certified": "Πιστοποιημένο",
+      "col_invoiced": "Τιμολογημένο",
+      "col_paid": "Πληρωμένο",
+      "col_forecast": "Πρόβλεψη",
+      "col_variance": "Απόκλιση",
+      "col_variance_pct": "Απόκλιση %",
+      "col_forecast_of_plan": "Πρόβλεψη % του προϋπολογισμού",
+      "col_measured_of_committed": "Επιμετρημένο % του δεσμευμένου",
+      "col_invoiced_of_committed": "Τιμολογημένο % του δεσμευμένου",
+      "col_contract": "Σύμβαση",
+      "col_contract_title": "Τίτλος σύμβασης",
+      "col_invoice": "Τιμολόγιο",
+      "col_date": "Ημερομηνία",
+      "col_kind": "Είδος",
+      "col_release_status": "Αποδέσμευση",
+      "col_net": "Καθαρό",
+      "col_vat": "ΦΠΑ",
+      "col_gross": "Μικτό",
+      "col_retention": "Κρατήσεις",
+      "col_release": "Αποδεσμευμένες κρατήσεις",
+      "col_discount": "Έκπτωση",
+      "col_payable": "Πληρωτέο",
+      "col_open": "Ανοιχτό",
+      "col_previous": "Προηγούμενο",
+      "col_delta": "Μεταβολή",
+      "col_delta_pct": "Μεταβολή %",
+      "col_needs_evidence": "Απαιτείται τεκμηρίωση",
+      "col_comment": "Σχόλιο",
+      "col_evidence": "Τεκμηρίωση",
+      "row_unassigned": "Ποσά χωρίς γραμμή κόστους",
+      "row_loose_changes": "Αλλαγές χωρίς σύμβαση",
+      "row_no_contract": "Χωρίς σύμβαση",
+      "contract_value": "Αξία σύμβασης",
+      "retention_held": "Κρατήσεις που διακρατούνται",
+      "yes": "Ναι",
+      "no": "Όχι",
+      "snapshot_date": "Ημερομηνία στιγμιότυπου",
+      "snapshot_status": "Κατάσταση",
+      "previous_snapshot": "Προηγούμενο παγωμένο στιγμιότυπο",
+      "method_explained": "Πώς διαβάζεται η πρόβλεψη",
+      "evidence_threshold": "Απαιτείται τεκμηρίωση πάνω από",
+      "threshold_both": "μεταβολή μεγαλύτερη από {parts}",
+      "threshold_any": "οποιαδήποτε μεταβολή",
+      "frozen_at": "Πάγωσε"
+    },
+    "method": {
+      "best_available": "Καλύτερη διαθέσιμη πηγή",
+      "maximum": "Μέγιστη τιμή",
+      "evm_cpi": "Κερδισμένη αξία (CPI)",
+      "manual": "Χειροκίνητη"
+    },
+    "method_help": {
+      "best_available": "Κάθε γραμμή παίρνει το πιο ώριμο μέγεθός της: τον τελικό λογαριασμό, αλλιώς το επιμετρημένο έργο, αλλιώς την κατακύρωση, αλλιώς την εκτίμηση, αλλιώς τον προϋπολογισμό.",
+      "maximum": "Κάθε γραμμή παίρνει το υψηλότερο από τα μεγέθη της (προϋπολογισμός, εκτίμηση, κατακύρωση, επιμετρημένο, τιμολογημένο), ώστε η πρόβλεψη να μην κρύβει ποτέ κίνδυνο.",
+      "evm_cpi": "Κάθε γραμμή προβάλλει το κόστος περαίωσης από την πρόοδο: τα χρήματα που έχουν δαπανηθεί διά του ποσοστού του εκτελεσμένου έργου.",
+      "manual": "Ένα πρόσωπο ορίζει το μέγεθος της γραμμής και συνδέει το έγγραφο που το στηρίζει."
+    },
+    "source": {
+      "none": "Χωρίς μέγεθος",
+      "budget": "Προϋπολογισμός",
+      "estimate": "Εκτίμηση",
+      "partly_awarded": "Μερικώς κατακυρωμένο",
+      "awarded": "Κατακυρωμένο",
+      "measured": "Επιμετρημένο",
+      "final": "Τελικός λογαριασμός",
+      "manual": "Χειροκίνητη",
+      "invoiced": "Τιμολογημένο",
+      "evm": "Κερδισμένη αξία"
+    },
+    "layer": {
+      "budget": "Προϋπολογισμός",
+      "estimate": "Εκτίμηση",
+      "tender": "Καλύτερη προσφορά",
+      "awarded": "Κατακυρωμένο",
+      "changes": "Εγκεκριμένες αλλαγές",
+      "committed": "Δεσμευμένο",
+      "pending": "Εκκρεμείς αλλαγές",
+      "measured": "Επιμετρημένο",
+      "certified": "Πιστοποιημένο",
+      "invoiced": "Τιμολογημένο",
+      "paid": "Πληρωμένο",
+      "forecast": "Πρόβλεψη"
+    },
+    "invoice_kind": {
+      "interim": "Ενδιάμεσο",
+      "final": "Τελικό",
+      "daywork": "Ημερομίσθιο",
+      "credit_note": "Πιστωτικό τιμολόγιο"
+    },
+    "release_status": {
+      "open": "Ανοιχτό",
+      "released": "Αποδεσμευμένο"
+    },
+    "evidence_kind": {
+      "document": "Έγγραφο",
+      "minutes": "Πρακτικό",
+      "other": "Άλλο"
+    },
+    "snapshot_status": {
+      "draft": "Πρόχειρο",
+      "frozen": "Παγωμένο"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Έργο",
+      "project_no": "Αρ. έργου",
+      "generated_on": "Ημερομηνία έκδοσης",
+      "records": "Εγγραφές",
+      "currency": "Νόμισμα",
+      "status": "Κατάσταση",
+      "name": "Όνομα",
+      "signature": "Υπογραφή",
+      "date": "Ημερομηνία",
+      "signatures": "Υπογραφές",
+      "yes": "Ναι",
+      "no": "Όχι",
+      "days_one": "{n} ημέρα",
+      "days_other": "{n} ημέρες",
+      "empty_register": "Δεν υπάρχουν εγγραφές.",
+      "total": "Σύνολο",
+      "signer_title": "Ιδιότητα",
+      "sig_prepared_by": "Σύνταξη",
+      "sig_checked_by": "Έλεγχος",
+      "sig_approved_by": "Έγκριση",
+      "footer_generated": "Εκδόθηκε {timestamp}",
+      "footer_page": "Σελίδα {page} από {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Μητρώο υποβολών προς έγκριση",
+        "doc_title": "Υποβολή προς έγκριση",
+        "doc_title_product_data": "Έντυπο έγκρισης υλικού",
+        "col_number": "Αρ. υποβολής",
+        "col_title": "Τίτλος",
+        "col_type": "Τύπος",
+        "col_spec": "Ενότητα προδιαγραφών",
+        "col_rev": "Αναθ.",
+        "col_date_submitted": "Ημ. υποβολής",
+        "col_date_required": "Απαιτούμενη ημ.",
+        "col_date_returned": "Ημ. επιστροφής",
+        "col_reviewer": "Ελεγκτής",
+        "col_approver": "Εγκρίνων",
+        "col_ball_in_court": "Υπεύθυνος ενέργειας",
+        "submitted_by_org": "Εταιρεία υποβολής",
+        "review_notes": "Σχόλια ελεγκτή",
+        "no_review_notes": "Δεν έχουν καταχωριστεί σχόλια ελεγκτή.",
+        "sig_submitted": "Υποβολή",
+        "sig_reviewed": "Έλεγχος",
+        "sig_approved": "Έγκριση",
+        "register_filename": "mitroo-ypovolon-egkrisis",
+        "register_title_shop_drawing": "Μητρώο εργοταξιακών σχεδίων",
+        "register_title_product_data": "Μητρώο εγκρίσεων υλικών",
+        "register_title_method_statement": "Μητρώο μεθοδολογιών εργασιών",
+        "register_filename_shop_drawing": "mitroo-ergotaxiakon-schedion",
+        "register_filename_product_data": "mitroo-egkriseon-ylikon",
+        "register_filename_method_statement": "mitroo-methodologion-ergasion",
+        "col_discipline": "Ειδικότητα",
+        "col_manufacturer": "Κατασκευαστής / μάρκα",
+        "col_model": "Μοντέλο / κωδικός",
+        "col_origin": "Χώρα προέλευσης",
+        "col_supplier": "Προμηθευτής",
+        "col_product": "Κατασκευαστής / μοντέλο / προέλευση",
+        "col_review_code": "Κωδικός ελέγχου",
+        "col_outcome": "Αποτέλεσμα ελέγχου",
+        "col_review_period": "Διάρκεια ελέγχου (ημέρες)",
+        "col_review_due": "Προθεσμία ελέγχου",
+        "col_days_in_review": "Ημέρες σε έλεγχο",
+        "col_days_in_review_print": "Ημέρες σε έλεγχο",
+        "col_review_overdue": "Ημέρες καθυστέρησης",
+        "col_required_on_site": "Απαιτείται στο έργο",
+        "col_long_lead": "Μεγάλος χρόνος παράδοσης",
+        "col_lead_time": "Χρόνος παράδοσης (εβδομάδες)",
+        "col_needed_by": "Έγκριση έως",
+        "col_approval_late": "Ημέρες πέραν προθεσμίας",
+        "col_drawings": "Συνδεδεμένα σχέδια",
+        "col_submitted_returned": "Υποβλήθηκε / επιστράφηκε",
+        "col_on_site_needed_by": "Στο έργο / έγκριση έως",
+        "resubmit_for_record": "Να υποβληθεί εκ νέου διορθωμένο αντίγραφο για το αρχείο",
+        "review_history": "Ιστορικό ελέγχου",
+        "hist_submitted": "Υποβλήθηκε",
+        "hist_returned": "Επιστράφηκε",
+        "drawings_missing_one": "{n} συνδεδεμένο σχέδιο δεν είναι πλέον διαθέσιμο",
+        "drawings_missing_other": "{n} συνδεδεμένα σχέδια δεν είναι πλέον διαθέσιμα",
+        "weeks_one": "{n} εβδομάδα",
+        "weeks_other": "{n} εβδομάδες"
+      },
+      "labels": {
+        "status": {
+          "draft": "Πρόχειρο",
+          "submitted": "Υποβλήθηκε",
+          "under_review": "Υπό έλεγχο",
+          "approved": "Εγκρίθηκε",
+          "approved_as_noted": "Εγκρίθηκε με παρατηρήσεις",
+          "revise_and_resubmit": "Αναθεώρηση και επανυποβολή",
+          "rejected": "Απορρίφθηκε",
+          "closed": "Κλειστό"
+        },
+        "type": {
+          "shop_drawing": "Εργοταξιακό σχέδιο",
+          "product_data": "Τεχνικό φυλλάδιο προϊόντος",
+          "sample": "Δείγμα",
+          "mock_up": "Πρότυπο δείγμα (mock-up)",
+          "test_report": "Έκθεση δοκιμών",
+          "calculation": "Υπολογισμός",
+          "method_statement": "Μεθοδολογία εργασιών",
+          "certificate": "Πιστοποιητικό",
+          "warranty": "Εγγύηση"
+        },
+        "discipline": {
+          "mechanical": "Μηχανολογικά",
+          "hvac": "Κλιματισμός και αερισμός",
+          "plumbing": "Ύδρευση και αποχέτευση",
+          "fire_protection": "Πυροπροστασία",
+          "electrical": "Ηλεκτρολογικά",
+          "lighting": "Φωτισμός",
+          "elv": "Ασθενή ρεύματα",
+          "bms": "Αυτοματισμός κτιρίου",
+          "architectural": "Αρχιτεκτονικά",
+          "structural": "Στατικά",
+          "civil": "Πολιτικά έργα"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Μητρώο εντολών αλλαγής",
+        "doc_title": "Εντολή αλλαγής",
+        "col_code": "Κωδικός",
+        "col_title": "Τίτλος",
+        "col_reason": "Αιτία",
+        "col_instrument": "Τύπος εγγράφου",
+        "col_submitted": "Ημ. υποβολής",
+        "col_contractor_amount": "Ποσό αναδόχου",
+        "col_engineer_amount": "Ποσό μηχανικού",
+        "col_approved_amount": "Εγκεκριμένο ποσό",
+        "col_cost_impact": "Επίπτωση κόστους",
+        "col_time_impact": "Επίπτωση χρόνου (ημέρες)",
+        "col_approved_time": "Εγκεκριμένος χρόνος (ημέρες)",
+        "time_impact": "Επίπτωση χρόνου",
+        "approved_time": "Εγκεκριμένος χρόνος",
+        "col_approved": "Ημ. έγκρισης",
+        "submitted_by": "Υποβολή από",
+        "approved_by": "Έγκριση από",
+        "description": "Περιγραφή",
+        "no_description": "Δεν έχει καταχωριστεί περιγραφή.",
+        "items": "Στοιχεία αλλαγής",
+        "item_description": "Περιγραφή",
+        "item_change": "Αλλαγή",
+        "item_unit": "Μονάδα",
+        "item_original_quantity": "Αρχ. ποσότητα",
+        "item_new_quantity": "Νέα ποσότητα",
+        "item_original_rate": "Αρχ. τιμή",
+        "item_new_rate": "Νέα τιμή",
+        "item_cost_delta": "Διαφορά κόστους",
+        "register_filename": "mitroo-entolon-allagis"
+      },
+      "labels": {
+        "status": {
+          "draft": "Πρόχειρο",
+          "submitted": "Υποβλήθηκε",
+          "approved": "Εγκρίθηκε",
+          "rejected": "Απορρίφθηκε",
+          "executed": "Εκτελέστηκε"
+        },
+        "reason": {
+          "client_request": "Αίτημα κυρίου του έργου",
+          "design_change": "Αλλαγή μελέτης",
+          "unforeseen": "Απρόβλεπτες συνθήκες",
+          "regulatory": "Κανονιστική απαίτηση",
+          "error": "Σφάλμα ή παράλειψη",
+          "non_conformance": "Μη συμμόρφωση",
+          "value_engineering": "Βελτιστοποίηση κόστους (value engineering)"
+        },
+        "instrument": {
+          "works_change": "Εντολή αλλαγής εργασιών",
+          "site_confirmation": "Επιβεβαίωση στο έργο",
+          "claim": "Απαίτηση"
+        },
+        "change": {
+          "added": "Προστέθηκε",
+          "removed": "Αφαιρέθηκε",
+          "modified": "Τροποποιήθηκε"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Φάκελος τεκμηρίωσης",
+        "subject": "Θέμα",
+        "basis": "Βάση",
+        "period_from": "Παλαιότερη εγγραφή",
+        "period_to": "Πιο πρόσφατη εγγραφή",
+        "digest": "Κωδικός ακεραιότητας (SHA-256, πρώτοι 16 χαρακτήρες)",
+        "col_row": "Αρ.",
+        "col_record_id": "ID εγγραφής",
+        "col_section": "Ενότητα",
+        "col_date": "Ημερομηνία",
+        "col_kind": "Τύπος εγγραφής",
+        "col_title": "Τίτλος",
+        "col_summary": "Περίληψη",
+        "col_reference": "Αναφορά",
+        "register_filename": "fakelos-tekmiriosis"
+      },
+      "labels": {
+        "section": {
+          "notices": "Ειδοποιήσεις",
+          "correspondence": "Αλληλογραφία",
+          "rfis": "Αιτήματα πληροφόρησης (RFI)",
+          "variations": "Τροποποιήσεις",
+          "approvals": "Εγκρίσεις",
+          "delay": "Καθυστέρηση",
+          "timeline": "Χρονολόγιο",
+          "other": "Λοιπά"
+        },
+        "kind": {
+          "notice": "Ειδοποίηση",
+          "variation_notice": "Ειδοποίηση τροποποίησης",
+          "variation_request": "Αίτημα τροποποίησης",
+          "variation_order": "Εντολή τροποποίησης",
+          "change_order": "Εντολή αλλαγής",
+          "moc_entry": "Εγγραφή αλλαγής",
+          "correspondence": "Αλληλογραφία"
+        },
+        "basis": {
+          "dispute": "Διαφορά",
+          "valuation": "Αποτίμηση",
+          "delay": "Καθυστέρηση / παράταση προθεσμίας",
+          "general": "Γενική καταγραφή"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Μητρώο αλληλογραφίας",
+        "doc_title": "Αλληλογραφία",
+        "col_reference": "Αρ. αναφοράς",
+        "col_direction": "Κατεύθυνση",
+        "col_type": "Τύπος",
+        "col_subject": "Θέμα",
+        "col_from": "Από",
+        "col_to": "Προς",
+        "col_date_sent": "Ημ. αποστολής",
+        "col_date_received": "Ημ. παραλαβής",
+        "col_response_due": "Προθεσμία απάντησης",
+        "col_clause": "Άρθρο σύμβασης",
+        "notes": "Σημειώσεις",
+        "no_notes": "Δεν υπάρχουν σημειώσεις.",
+        "attachments": "Συνημμένα αρχεία",
+        "linked_documents": "Συνδεδεμένα έγγραφα",
+        "sig_prepared": "Σύνταξη",
+        "sig_received": "Παραλαβή",
+        "register_filename": "mitroo-allilografias"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Εισερχόμενο",
+          "outgoing": "Εξερχόμενο"
+        },
+        "type": {
+          "letter": "Επιστολή",
+          "email": "Email",
+          "notice": "Ειδοποίηση",
+          "memo": "Υπηρεσιακό σημείωμα",
+          "report": "Έκθεση"
+        },
+        "status": {
+          "open": "Ανοιχτό",
+          "awaiting_response": "Αναμονή απάντησης",
+          "responded": "Απαντήθηκε",
+          "closed": "Κλειστό"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Μητρώο διαβιβαστικών",
+        "doc_title": "Διαβιβαστικό",
+        "col_number": "Αρ. διαβιβαστικού",
+        "col_subject": "Θέμα",
+        "col_purpose": "Σκοπός",
+        "col_issued": "Ημ. έκδοσης",
+        "col_response_due": "Προθεσμία απάντησης",
+        "col_recipients": "Παραλήπτες",
+        "col_item_count": "Στοιχεία",
+        "sender": "Αποστολέας",
+        "cover_note": "Συνοδευτική σημείωση",
+        "no_cover_note": "Δεν υπάρχει συνοδευτική σημείωση.",
+        "recipients": "Παραλήπτες",
+        "recipient": "Παραλήπτης",
+        "action_required": "Απαιτούμενη ενέργεια",
+        "acknowledged": "Επιβεβαίωση παραλαβής",
+        "responded": "Ημ. απάντησης",
+        "items": "Διαβιβαζόμενα στοιχεία",
+        "item_no": "Αρ.",
+        "item_description": "Περιγραφή",
+        "item_notes": "Σημειώσεις",
+        "sig_issued": "Έκδοση",
+        "sig_received": "Παραλαβή",
+        "register_filename": "mitroo-diavivastikon"
+      },
+      "labels": {
+        "status": {
+          "draft": "Πρόχειρο",
+          "issued": "Εκδόθηκε",
+          "responded": "Απαντήθηκε"
+        },
+        "purpose": {
+          "for_approval": "Για έγκριση",
+          "for_review": "Για έλεγχο",
+          "for_information": "Για ενημέρωση",
+          "for_construction": "Για κατασκευή",
+          "for_tender": "Για διαγωνισμό",
+          "for_record": "Για το αρχείο"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Μητρώο τροποποιήσεων",
+        "claim_register_title": "Μητρώο απαιτήσεων",
+        "notice_register_title": "Μητρώο ειδοποιήσεων",
+        "doc_title": "Αίτημα τροποποίησης",
+        "doc_title_credit": "Αίτημα τροποποίησης (αφαίρεση εργασιών)",
+        "time_impact": "Επίπτωση χρόνου",
+        "col_code": "Κωδικός",
+        "col_title": "Τίτλος",
+        "col_classification": "Τύπος",
+        "col_urgency": "Επείγον",
+        "col_requested": "Ημ. αιτήματος",
+        "col_claimed_amount": "Αιτούμενο ποσό",
+        "col_agreed_amount": "Συμφωνηθέν ποσό",
+        "col_time_impact": "Επίπτωση χρόνου (ημέρες)",
+        "col_response_due": "Προθεσμία απάντησης",
+        "col_clause": "Άρθρο σύμβασης",
+        "col_row": "Αρ.",
+        "col_claim_type": "Τύπος απαίτησης",
+        "col_raised": "Ημ. υποβολής",
+        "col_period_start": "Περίοδος από",
+        "col_period_end": "Περίοδος έως",
+        "col_description": "Περιγραφή",
+        "col_decided_amount": "Ποσό απόφασης",
+        "col_days_requested": "Αιτούμενες ημέρες",
+        "col_days_granted": "Εγκεκριμένες ημέρες",
+        "col_recipient_type": "Απευθύνεται σε",
+        "col_recipient": "Παραλήπτης",
+        "col_target_response": "Αναμενόμενη απάντηση",
+        "col_response_received": "Ληφθείσα απάντηση",
+        "requested_by": "Αίτηση από",
+        "decided_by": "Απόφαση από",
+        "date_submitted": "Ημ. υποβολής",
+        "date_decided": "Ημ. απόφασης",
+        "description": "Περιγραφή",
+        "no_description": "Δεν έχει καταχωριστεί περιγραφή.",
+        "decision_notes": "Σημειώσεις απόφασης",
+        "no_decision_notes": "Δεν έχει ληφθεί ακόμη απόφαση.",
+        "variation_register_filename": "mitroo-tropopoiiseon",
+        "claim_register_filename": "mitroo-apaitiseon",
+        "notice_register_filename": "mitroo-eidopoiiseon"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Πρόχειρο",
+          "submitted": "Υποβλήθηκε",
+          "under_review": "Υπό έλεγχο",
+          "approved": "Εγκρίθηκε",
+          "rejected": "Απορρίφθηκε",
+          "converted_to_vo": "Μετατράπηκε σε εντολή"
+        },
+        "claim_status": {
+          "draft": "Πρόχειρο",
+          "submitted": "Υποβλήθηκε",
+          "under_review": "Υπό έλεγχο",
+          "agreed": "Συμφωνήθηκε",
+          "granted": "Εγκρίθηκε",
+          "rejected": "Απορρίφθηκε"
+        },
+        "notice_status": {
+          "issued": "Εκδόθηκε",
+          "acknowledged": "Επιβεβαιώθηκε η λήψη",
+          "responded": "Απαντήθηκε",
+          "closed": "Κλειστό"
+        },
+        "classification": {
+          "scope_change": "Αλλαγή αντικειμένου",
+          "unforeseen": "Απρόβλεπτη συνθήκη",
+          "owner_change": "Αλλαγή κυρίου του έργου",
+          "design_dev": "Εξέλιξη μελέτης",
+          "regulatory": "Κανονιστική απαίτηση",
+          "other": "Λοιπά"
+        },
+        "urgency": {
+          "low": "Χαμηλή",
+          "med": "Μέτρια",
+          "high": "Υψηλή"
+        },
+        "claim_type": {
+          "disruption": "Διατάραξη προόδου",
+          "eot": "Παράταση προθεσμίας"
+        },
+        "recipient_type": {
+          "owner": "Κύριος του έργου",
+          "contractor": "Ανάδοχος",
+          "architect": "Αρχιτέκτονας",
+          "engineer": "Μηχανικός",
+          "consultant": "Σύμβουλος"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Ημερολόγιο έργου",
+        "overview": "Επισκόπηση",
+        "site_supervisor": "Επιβλέπων έργου",
+        "not_recorded": "Δεν καταχωρίστηκε",
+        "labour_on_site": "Εργατικό δυναμικό στο έργο",
+        "equipment_on_site": "Εξοπλισμός στο έργο",
+        "completeness": "Πληρότητα",
+        "weather": "Καιρός",
+        "weather_time": "Ώρα",
+        "weather_source": "Πηγή",
+        "weather_temp": "Θερμ. (C)",
+        "weather_wind": "Άνεμος (km/h)",
+        "weather_precip": "Υετός (mm)",
+        "weather_conditions": "Συνθήκες",
+        "weather_empty": "Δεν έχει καταχωριστεί καιρός για αυτή την ημέρα.",
+        "site_record": "Καταγραφή έργου",
+        "entries_empty": "Δεν υπάρχουν καταχωρίσεις σε αυτό το ημερολόγιο.",
+        "notes": "Σημειώσεις",
+        "notes_empty": "Δεν υπάρχουν πρόσθετες σημειώσεις.",
+        "footer_supervisor": "Επιβλέπων: {name}",
+        "footer_supervisor_missing": "Επιβλέπων έργου: δεν καταχωρίστηκε",
+        "footer_generated": "Εκδόθηκε: {timestamp}",
+        "footer_page": "Σελίδα {page} από {total}",
+        "workforce": "Εργατικό δυναμικό ανά εταιρεία",
+        "workforce_company": "Εταιρεία",
+        "workforce_count": "Άτομα",
+        "workforce_unassigned": "Χωρίς ανάθεση σε εταιρεία",
+        "workforce_total": "Σύνολο",
+        "signatures": "Υπογραφές",
+        "sig_prepared": "Σύνταξη (υπεύθυνος έργου)",
+        "sig_approved": "Έγκριση (εκπρόσωπος εργοδότη)",
+        "sig_name": "Όνομα",
+        "sig_title": "Ιδιότητα",
+        "sig_date": "Ημερομηνία",
+        "sig_signature": "Υπογραφή",
+        "signed_note": "Υπογράφηκε στο σύστημα: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "imerologio",
+        "summary_wind": "άνεμος {value} km/h",
+        "summary_precipitation": "υετός {value} mm",
+        "summary_humidity": "υγρασία {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Επισκέπτες",
+          "event": "Συμβάντα",
+          "delivery": "Υλικά που παραδόθηκαν",
+          "completion": "Εργασίες που εκτελέστηκαν",
+          "incident_summary": "Ασφάλεια και περιστατικά",
+          "inspection_summary": "Επιθεωρήσεις",
+          "photo_note": "Σημειώσεις φωτογραφιών",
+          "general": "Γενικές σημειώσεις"
+        },
+        "status": {
+          "open": "Ανοιχτό",
+          "closed": "Κλειστό",
+          "signed": "Υπογεγραμμένο",
+          "archived": "Αρχειοθετημένο"
+        },
+        "condition": {
+          "clear": "αίθριος",
+          "mainly_clear": "κυρίως αίθριος",
+          "partly_cloudy": "μερική συννεφιά",
+          "cloudy": "νεφελώδης",
+          "overcast": "σκεπασμένος",
+          "fog": "ομίχλη",
+          "fog_rime": "παγωμένη ομίχλη",
+          "drizzle_light": "ασθενής ψιχάλα",
+          "drizzle_moderate": "μέτρια ψιχάλα",
+          "drizzle_dense": "έντονη ψιχάλα",
+          "rain": "βροχή",
+          "rain_light": "ασθενής βροχή",
+          "rain_moderate": "μέτρια βροχή",
+          "rain_heavy": "ισχυρή βροχή",
+          "freezing_rain_light": "ασθενής παγωμένη βροχή",
+          "freezing_rain_heavy": "ισχυρή παγωμένη βροχή",
+          "snow": "χιόνι",
+          "snow_light": "ασθενής χιονόπτωση",
+          "snow_moderate": "μέτρια χιονόπτωση",
+          "snow_heavy": "ισχυρή χιονόπτωση",
+          "rain_showers_light": "ασθενείς μπόρες",
+          "rain_showers_moderate": "μέτριες μπόρες",
+          "rain_showers_violent": "ισχυρές καταιγιδοφόρες μπόρες",
+          "snow_showers_light": "ασθενείς χιονοπτώσεις με διαλείμματα",
+          "snow_showers_heavy": "ισχυρές χιονοπτώσεις με διαλείμματα",
+          "thunderstorm": "καταιγίδα",
+          "thunderstorm_hail_light": "καταιγίδα με ασθενή χαλάζι",
+          "thunderstorm_hail_heavy": "καταιγίδα με ισχυρό χαλάζι"
+        },
+        "source": {
+          "manual": "Χειροκίνητη καταχώριση",
+          "open_meteo": "Μετεωρολογική υπηρεσία",
+          "sensor": "Αισθητήρας έργου"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Μητρώο αιτημάτων πληροφόρησης (RFI)",
+        "col_number": "RFI αρ.",
+        "col_subject": "Θέμα",
+        "col_raised_by": "Υποβολή από",
+        "col_assigned_to": "Ανάθεση σε",
+        "col_ball_in_court": "Υπεύθυνος ενέργειας",
+        "col_date_required": "Απαιτούμενη ημ.",
+        "col_response_due": "Προθεσμία απάντησης",
+        "col_days_open": "Ημέρες ανοιχτό",
+        "col_cost_impact": "Επίπτωση κόστους",
+        "col_schedule_impact": "Επίπτωση χρονοδιαγράμματος",
+        "col_response": "Απάντηση",
+        "yes_with": "Ναι ({detail})",
+        "register_filename": "mitroo-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Πρόχειρο",
+          "open": "Ανοιχτό",
+          "answered": "Απαντήθηκε",
+          "closed": "Έκλεισε",
+          "void": "Άκυρο"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Δημιουργήθηκε από AI",
+        "drawing": "Σχέδιο",
+        "cost_estimate": "ΠΡΟΫΠΟΛΟΓΙΣΜΟΣ ΚΟΣΤΟΥΣ",
+        "summary": "ΣΥΝΟΨΗ",
+        "project": "Έργο:",
+        "boq": "BOQ:",
+        "date": "Ημερομηνία:",
+        "status": "Κατάσταση:",
+        "prepared_by": "Συντάχθηκε από:",
+        "approved_by": "Εγκρίθηκε από:",
+        "signature_hint": "Όνομα / Υπογραφή / Ημερομηνία",
+        "contents": "Κεφάλαια / Θέσεις:",
+        "pos": "Α/Α",
+        "description": "Περιγραφή",
+        "unit": "Μον.",
+        "qty": "Ποσ.",
+        "rate": "Τιμή",
+        "total": "Σύνολο",
+        "subtotal": "Μερικό σύνολο:",
+        "other_positions": "Λοιπές θέσεις",
+        "direct_cost": "Άμεσο κόστος:",
+        "markups": "Επιβαρύνσεις (χωρίς ΦΠΑ):",
+        "net_total": "Καθαρό σύνολο (χωρίς ΦΠΑ):",
+        "gross_total": "Ολικό σύνολο",
+        "page": "Σελίδα",
+        "of": "από",
+        "generated": "Δημιουργήθηκε:",
+        "summary_report": "Συνοπτική αναφορά",
+        "positions_omitted": "{count} θέσεις (πλήρης ανάλυση παραλείπεται για λόγους απόδοσης)",
+        "section": "Κεφάλαιο",
+        "items": "Θέσεις",
+        "cost_summary": "Σύνοψη κόστους",
+        "table_of_contents": "Πίνακας περιεχομένων",
+        "resources_omitted": "Η ανάλυση πόρων δεν εκτυπώνεται: ο προϋπολογισμός έχει πολύ γραμμές πόρων για ένα PDF.",
+        "status_draft": "Προσχέδιο",
+        "status_final": "Οριστικό",
+        "status_archived": "Αρχειοθετημένο",
+        "subject": "Προϋπολογισμός ποσοτήτων",
+        "tax_vat": "ΦΠΑ"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "ΤΙΜΟΛΟΓΙΟ",
+        "date": "Ημερομηνία: {value}",
+        "due": "Λήξη: {value}",
+        "from": "Από",
+        "bill_to": "Τιμολογείται προς",
+        "vat_id": "ΑΦΜ ΦΠΑ: {value}",
+        "ref": "Αρ. αναφοράς: {value}",
+        "th_description": "Περιγραφή",
+        "th_qty": "Ποσ.",
+        "th_unit": "Μον.",
+        "th_unit_price": "Τιμή μονάδας",
+        "th_net": "Καθαρή αξία ({currency})",
+        "net_total": "Καθαρή αξία",
+        "vat_total": "ΦΠΑ",
+        "grand_total": "Γενικό σύνολο",
+        "retention_prepaid": "Παρακράτηση / προκαταβολή",
+        "amount_due": "Ποσό προς πληρωμή",
+        "payment": "Πληρωμή",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Λογαριασμός: {value}",
+        "bank_code": "Κωδικός τράπεζας: {value}",
+        "account_holder": "Δικαιούχος λογαριασμού: {value}",
+        "footer": "Το παρόν PDF φέρει ενσωματωμένο ηλεκτρονικό τιμολόγιο EN 16931 (Factur-X / ZUGFeRD). Το ενσωματωμένο XML είναι το ισχύον έγγραφο.",
+        "date_format": "%d-%m-%Y",
+        "decimal_separator": ",",
+        "group_separator": "."
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Αναφορά",
+        "meta_project": "Έργο",
+        "meta_type": "Τύπος",
+        "meta_generated": "Δημιουργήθηκε",
+        "meta_currency": "Νόμισμα",
+        "field_column": "Πεδίο",
+        "value_column": "Τιμή",
+        "yes": "Ναι",
+        "no": "Όχι",
+        "no_data_heading": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+        "no_data_body": "Η αναφορά δημιουργήθηκε με κενό στιγμιότυπο δεδομένων. Ελέγξτε ότι οι πηγαίες ενότητες (οικονομικά, χρονοδιάγραμμα, ασφάλεια κ.λπ.) επέστρεψαν δεδομένα για το επιλεγμένο έργο.",
+        "no_data_body_short": "Η αναφορά δημιουργήθηκε με κενό στιγμιότυπο δεδομένων. Ελέγξτε ότι οι πηγαίες ενότητες επέστρεψαν δεδομένα για το επιλεγμένο έργο.",
+        "footer_generated_by": "Δημιουργήθηκε από το OpenConstructionERP στις {timestamp}.",
+        "worksheet_name": "Αναφορά",
+        "pdf_subject": "Αναφορά έργου",
+        "overall_progress": "Συνολική πρόοδος",
+        "as_of": "Κατά την",
+        "recorded_by": "Καταχωρήθηκε από",
+        "period": "Περίοδος",
+        "entries_suffix": "({count} εγγραφές)",
+        "site_photo_alt": "Φωτογραφία εργοταξίου",
+        "ai_summary_heading": "Σύνοψη",
+        "ai_badge": "Δημιουργήθηκε από AI",
+        "ai_note": "Δημιουργήθηκε από AI με βάση τα δεδομένα του έργου που ακολουθούν.",
+        "ai_note_confidence": "Δημιουργήθηκε από AI με βάση τα δεδομένα του έργου που ακολουθούν (βαθμός εμπιστοσύνης {confidence}).",
+        "ai_note_review": "Ελέγξτε πριν από την κοινοποίηση στον πελάτη."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Όνομα",
+          "status": "Κατάσταση",
+          "phase": "Φάση",
+          "planned_start": "Προγραμματισμένη έναρξη",
+          "planned_end": "Προγραμματισμένη λήξη",
+          "schedule_progress_pct": "Πρόοδος χρονοδιαγράμματος (%)",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Κατανάλωση προϋπολογισμού (%)",
+          "as_of": "Κατά την",
+          "progress_pct": "Πρόοδος (%)",
+          "risk_score_avg": "Μέσος δείκτης κινδύνου",
+          "open_rfis": "Ανοιχτά RFI",
+          "open_submittals": "Ανοιχτές υποβολές",
+          "open_defects": "Ανοιχτά ελαττώματα",
+          "open_observations": "Ανοιχτές παρατηρήσεις",
+          "budget": "Προϋπολογισμός",
+          "committed": "Δεσμευμένα",
+          "actual": "Πραγματικά",
+          "payable": "Πληρωτέα",
+          "receivable": "Απαιτήσεις",
+          "net_cash_flow": "Καθαρή ταμειακή ροή"
+        },
+        "section_titles": {
+          "Project Overview": "Επισκόπηση έργου",
+          "Key Performance Indicators": "Βασικοί δείκτες απόδοσης",
+          "Schedule Status": "Κατάσταση χρονοδιαγράμματος",
+          "Risk Summary": "Σύνοψη κινδύνων",
+          "Open Issues": "Ανοιχτά θέματα",
+          "Cost Summary": "Σύνοψη κόστους",
+          "Cost Breakdown": "Ανάλυση κόστους",
+          "Change Orders": "Εντολές αλλαγής",
+          "Cash Flow": "Ταμειακή ροή",
+          "Schedule Overview": "Επισκόπηση χρονοδιαγράμματος",
+          "Milestone Status": "Κατάσταση ορόσημων",
+          "Critical Path": "Κρίσιμη διαδρομή",
+          "3-Week Lookahead": "Πρόγραμμα 3 εβδομάδων",
+          "Safety KPIs": "Δείκτες ασφάλειας",
+          "Incident Log": "Αρχείο περιστατικών",
+          "Near-Miss Reports": "Αναφορές παρ' ολίγον ατυχημάτων",
+          "Safety Training": "Εκπαίδευση ασφάλειας",
+          "Inspection Summary": "Σύνοψη επιθεωρήσεων",
+          "By Inspection Type": "Ανά τύπο επιθεώρησης",
+          "Punch List Status": "Κατάσταση καταλόγου ελέγχου",
+          "Recent Inspections": "Πρόσφατες επιθεωρήσεις",
+          "Portfolio Overview": "Επισκόπηση χαρτοφυλακίου",
+          "Project Statuses": "Καταστάσεις έργων",
+          "KPI Comparison": "Σύγκριση δεικτών απόδοσης",
+          "Portfolio Risks": "Κίνδυνοι χαρτοφυλακίου",
+          "Field Progress": "Πρόοδος εργοταξίου",
+          "Top Risks": "Κυριότεροι κίνδυνοι",
+          "Site Photos": "Φωτογραφίες εργοταξίου",
+          "Summary": "Σύνοψη"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Εντολή αγοράς",
+        "gr_title": "Παραλαβή αγαθών",
+        "supplier": "Προμηθευτής",
+        "po_type": "Είδος παραγγελίας",
+        "issue_date": "Ημερομηνία έκδοσης",
+        "delivery_date": "Ημερομηνία παράδοσης",
+        "created_by": "Συντάχθηκε από",
+        "order_total": "Σύνολο παραγγελίας",
+        "line_items": "Γραμμές παραγγελίας",
+        "col_no": "Α/Α",
+        "col_description": "Περιγραφή",
+        "col_quantity": "Ποσ.",
+        "col_unit": "Μον.",
+        "col_unit_rate": "Τιμή μονάδας",
+        "col_amount": "Ποσό",
+        "no_line_items": "Δεν υπάρχουν γραμμές.",
+        "totals": "Σύνολα",
+        "subtotal": "Καθαρή αξία",
+        "tax": "Φόρος",
+        "total_gross": "Σύνολο με φόρο",
+        "terms": "Όροι",
+        "payment_terms": "Όροι πληρωμής",
+        "retention": "Παρακράτηση",
+        "retention_at": "Παρακράτηση κατά",
+        "retention_at_receipt": "Παραλαβή αγαθών",
+        "retention_at_invoice": "Τιμολόγιο",
+        "invoice_tolerance": "Ανοχή τιμολογίου",
+        "supplier_confirmation": "Επιβεβαίωση προμηθευτή",
+        "supplier_reference": "Αριθμός αναφοράς προμηθευτή",
+        "confirmed_delivery": "Επιβεβαιωμένη ημερομηνία παράδοσης",
+        "acknowledged_on": "Αποδεκτή στις",
+        "not_confirmed": "Δεν έχει επιβεβαιωθεί ακόμη από τον προμηθευτή.",
+        "notes": "Σημειώσεις",
+        "no_notes": "Δεν έχουν καταχωρηθεί σημειώσεις.",
+        "sig_ordered_by": "Παραγγέλθηκε από",
+        "purchase_order": "Εντολή αγοράς",
+        "receipt_date": "Ημερομηνία παραλαβής",
+        "received_by": "Παραλήφθηκε από",
+        "delivery_note": "Δελτίο αποστολής",
+        "col_ordered": "Παραγγελθέν",
+        "col_received": "Παραληφθέν",
+        "col_rejected": "Απορριφθέν",
+        "col_batch": "Παρτίδα / παρτίδα παραγωγής",
+        "rejections": "Απορρίψεις",
+        "col_reason": "Αιτιολογία",
+        "no_rejections": "Δεν απορρίφθηκε τίποτα.",
+        "sig_delivered_by": "Παραδόθηκε από",
+        "counterparty_tax_id": "ΑΦΜ",
+        "counterparty_address": "Διεύθυνση"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Προσχέδιο",
+          "approved": "Εγκεκριμένη",
+          "issued": "Εκδόθηκε",
+          "partially_received": "Μερικώς παραληφθείσα",
+          "completed": "Ολοκληρωμένη",
+          "cancelled": "Ακυρωμένη"
+        },
+        "gr_status": {
+          "draft": "Προσχέδιο",
+          "confirmed": "Επιβεβαιωμένη"
+        },
+        "po_type": {
+          "standard": "Τυπική",
+          "blanket": "Παραγγελία πλαισίου",
+          "service": "Υπηρεσίες"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Τιμολόγιο",
+        "payment_title": "Πληρωμή",
+        "direction": "Κατεύθυνση",
+        "supplier": "Προμηθευτής",
+        "client": "Πελάτης",
+        "invoice_date": "Ημερομηνία τιμολογίου",
+        "due_date": "Ημερομηνία λήξης",
+        "payment_terms": "Όροι πληρωμής",
+        "purchase_order": "Εντολή αγοράς",
+        "invoice_total": "Σύνολο τιμολογίου",
+        "line_items": "Γραμμές τιμολογίου",
+        "col_no": "Α/Α",
+        "col_description": "Περιγραφή",
+        "col_quantity": "Ποσ.",
+        "col_unit": "Μον.",
+        "col_unit_rate": "Τιμή μονάδας",
+        "col_vat": "ΦΠΑ",
+        "col_amount": "Ποσό",
+        "no_line_items": "Δεν υπάρχουν γραμμές.",
+        "totals": "Σύνολα",
+        "subtotal": "Καθαρή αξία",
+        "tax": "Φόρος",
+        "total_gross": "Σύνολο με φόρο",
+        "retention": "Παρακράτηση",
+        "amount_due": "Πληρωτέο μετά την παρακράτηση",
+        "payments": "Πληρωμές",
+        "col_date": "Ημερομηνία",
+        "col_reference": "Αναφορά",
+        "col_paid": "Καταβλήθηκε",
+        "col_withheld": "Παρακρατήθηκε",
+        "refund": "Επιστροφή",
+        "no_payments": "Δεν έχουν καταχωρηθεί πληρωμές.",
+        "notes": "Σημειώσεις",
+        "no_notes": "Δεν έχουν καταχωρηθεί σημειώσεις.",
+        "invoice": "Τιμολόγιο",
+        "invoice_number": "Αρ. τιμολογίου",
+        "payment_date": "Ημερομηνία πληρωμής",
+        "reference": "Αναφορά",
+        "amount_paid": "Ποσό πληρωμής",
+        "exchange_rate": "Συναλλαγματική ισοτιμία",
+        "kind": "Τύπος",
+        "kind_payment": "Πληρωμή",
+        "kind_refund": "Επιστροφή",
+        "withholding": "Παρακράτηση",
+        "withheld_amount": "Παρακρατηθέν ποσό",
+        "release_date": "Ημερομηνία απελευθέρωσης",
+        "gross_settled": "Ακαθάριστο διακανονισμένο ποσό",
+        "no_withholding": "Δεν παρακρατήθηκε τίποτα από την πληρωμή αυτή.",
+        "counterparty_tax_id": "ΑΦΜ",
+        "counterparty_address": "Διεύθυνση"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Προσχέδιο",
+          "pending": "Σε αναμονή έγκρισης",
+          "approved": "Εγκεκριμένο",
+          "sent": "Εστάλη",
+          "paid": "Εξοφλήθηκε",
+          "cancelled": "Ακυρώθηκε",
+          "credit_note_issued": "Εκδόθηκε πιστωτικό σημείωμα"
+        },
+        "direction": {
+          "payable": "Πληρωτέο (τιμολόγιο προμηθευτή)",
+          "receivable": "Απαιτήσεις (τιμολόγιο πελάτη)"
+        },
+        "payment_status": {
+          "completed": "Ολοκληρώθηκε",
+          "refunded": "Επεστράφη"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Σελίδα {page} από {total}",
+    "page": "Σελίδα {page}",
+    "printed": "Εκτυπώθηκε: {timestamp}",
+    "generated": "Δημιουργήθηκε: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "Πρόσκληση στην πύλη πελατών: {sender}",
+      "login_subject": "Ο σύνδεσμος σύνδεσής σας στην πύλη πελατών",
+      "invite_heading": "Καλώς ήρθατε στην πύλη πελατών",
+      "login_heading": "Σύνδεση στην πύλη πελατών",
+      "greeting": "Γεια σας, {name},",
+      "greeting_generic": "Καλησπέρα σας,",
+      "invite_body": "Πρόσβαση στην πύλη πελατών σάς παραχωρήθηκε από: {sender}. Εκεί μπορείτε να παρακολουθείτε το έργο σας: εκθέσεις προόδου, έγγραφα, τιμολόγια και τα επόμενα ορόσημα.",
+      "login_body": "Ακολουθεί ο σύνδεσμος σύνδεσης που ζητήσατε.",
+      "link_help": "Το κουμπί παρακάτω σας συνδέει στην πύλη. Δεν απαιτείται κωδικός πρόσβασης. Ο σύνδεσμος ισχύει για μία χρήση. Διάρκεια ισχύος σε ώρες: {hours}.",
+      "ignore": "Αν δεν περιμένατε αυτό το μήνυμα, μπορείτε να το αγνοήσετε. Χωρίς αυτόν τον σύνδεσμο κανείς δεν αποκτά πρόσβαση.",
+      "invite_cta": "Άνοιγμα της πύλης",
+      "login_cta": "Σύνδεση",
+      "sender_generic": "Η ομάδα του έργου σας"
+    },
+    "tender_invite": {
+      "subject": "Πρόσκληση υποβολής προσφοράς: {package}",
+      "heading": "Πρόσκληση υποβολής προσφοράς",
+      "greeting": "Αξιότιμοι κύριοι της εταιρείας {company},",
+      "greeting_generic": "Αξιότιμοι κύριοι,",
+      "invite": "Σας καλούμε να υποβάλετε προσφορά για το πακέτο διαγωνισμού {package}.",
+      "invite_project": "Σας καλούμε να υποβάλετε προσφορά για το πακέτο διαγωνισμού {package} του έργου {project}.",
+      "deadline": "Προθεσμία υποβολής: {deadline}",
+      "link_help": "Το κουμπί παρακάτω ανοίγει το τιμολόγιο ποσοτήτων. Καταχωρίστε online τις τιμές μονάδας, αποθηκεύστε πρόχειρο όποτε θέλετε και υποβάλετε την προσφορά πριν από την προθεσμία. Δεν απαιτείται λογαριασμός.",
+      "link_personal": "Αυτός ο σύνδεσμος είναι προσωπικός για την εταιρεία σας. Παρακαλούμε μην τον προωθήσετε.",
+      "cta": "Άνοιγμα τιμολογίου και καταχώριση τιμών",
+      "no_link": "Παρακαλούμε εξετάστε τα στοιχεία του πακέτου και στείλτε την προσφορά σας πριν από την προθεσμία που αναφέρεται παραπάνω."
+    },
+    "notification_email": {
+      "greeting": "Γεια σας, {name},",
+      "greeting_generic": "Καλησπέρα σας,",
+      "cta": "Άνοιγμα στο OpenConstructionERP",
+      "footer": "Λαμβάνετε αυτό το μήνυμα λόγω των ρυθμίσεων ειδοποιήσεών σας. Μπορείτε να τις αλλάξετε στο προφίλ σας.",
+      "digest_subject": "OpenConstructionERP: Σύνοψη ειδοποιήσεων ({count})",
+      "digest_heading": "Πρόσφατες ειδοποιήσεις:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Σύγκριση τιμών",
+      "comparison_sheet": "Σύγκριση",
+      "bidder_title": "Τιμολόγιο για τιμολόγηση",
+      "bidder_sheet": "Τιμολόγιο",
+      "project": "Έργο",
+      "package": "Πακέτο",
+      "currency": "Νόμισμα",
+      "date": "Ημερομηνία",
+      "return_by": "Επιστροφή έως",
+      "item": "Α/Α",
+      "description": "Περιγραφή",
+      "unit": "Μονάδα",
+      "quantity": "Ποσότητα",
+      "unit_price": "Τιμή μονάδας",
+      "line_total": "Αξία είδους",
+      "own_estimate": "Ίδια εκτίμηση",
+      "not_priced": "χωρίς τιμή",
+      "sum_priced_lines": "Σύνολο τιμολογημένων ειδών",
+      "bid_total": "Σύνολο προσφοράς όπως υποβλήθηκε",
+      "lines_priced": "Τιμολογημένα είδη",
+      "lines_priced_value": "{priced} από {total}",
+      "deviation": "Απόκλιση από την ίδια εκτίμηση",
+      "not_comparable": "μ/δ",
+      "other_currency": "Προσφορά σε {currency}, δεν κατατάσσεται έναντι προσφορών σε {reporting}.",
+      "legend": "Υπόμνημα",
+      "legend_lowest": "Πράσινο: η χαμηλότερη τιμή μονάδας στο είδος.",
+      "legend_high": "▲ κόκκινο: περισσότερο από {pct}% πάνω από τη διάμεση τιμή του είδους.",
+      "legend_low": "▼ κεχριμπαρί: περισσότερο από {pct}% κάτω από τη διάμεση τιμή του είδους.",
+      "legend_missing": "\"{marker}\": ο προσφέρων δεν έδωσε τιμή για το είδος.",
+      "legend_incomplete": "Προσφορά με μη τιμολογημένα είδη επισημαίνεται στη στήλη \"Τιμολογημένα είδη\" και δεν κατατάσσεται ως η χαμηλότερη βάσει συνόλου.",
+      "legend_totals": "Το σύνολο της προσφοράς είναι το ποσό που υπέβαλε ο προσφέρων. Μπορεί να διαφέρει από το άθροισμα των τιμολογημένων ειδών.",
+      "bidder": "Προσφέρων",
+      "bidder_note": "Σημείωση προσφέροντος",
+      "reference": "Αναφορά (μην τροποποιείται)",
+      "total": "Σύνολο",
+      "instructions": "Καταχωρίστε τιμή μονάδας για κάθε είδος στα κίτρινα κελιά. Οι ποσότητες και οι περιγραφές είναι σταθερές, οι αξίες των ειδών και το σύνολο υπολογίζονται αυτόματα. Αφήστε το κελί κενό αν δεν τιμολογείτε το είδος."
+    },
+    "cost_plan": {
+      "sheet_plan": "Σχέδιο κόστους NRM 1",
+      "sheet_unallocated": "Μη κατανεμημένα",
+      "title": "Σχέδιο κόστους ανά στοιχείο (NRM 1)",
+      "bill": "Τιμολόγιο ποσοτήτων",
+      "currency": "Νόμισμα",
+      "gifa": "Μικτή εσωτερική επιφάνεια (m2)",
+      "gifa_project": "από το έργο",
+      "gifa_entered": "καταχωρίστηκε για αυτή την εξαγωγή",
+      "gifa_none": "δεν έχει οριστεί, το κόστος ανά m2 δεν εμφανίζεται",
+      "col_code": "Κωδικός",
+      "col_description": "Στοιχείο",
+      "col_positions": "Είδη",
+      "col_basis": "Βάση",
+      "col_total": "Σύνολο",
+      "col_per_m2": "Κόστος ανά m2 μικτής εσωτερικής επιφάνειας",
+      "col_share": "% του συνόλου",
+      "col_running": "Σωρευτικό σύνολο",
+      "group_level": "Επίπεδο ομάδας, χωρίς καθορισμένο στοιχείο",
+      "facilitating_works_estimate": "Εκτίμηση προπαρασκευαστικών εργασιών",
+      "works_estimate": "Εκτίμηση οικοδομικών εργασιών",
+      "addons_heading": "Ομάδες 9-14 του NRM 1 τιμολογημένες ως είδη τιμολογίου",
+      "unallocated": "Δεν έχει κατανεμηθεί σε στοιχείο",
+      "direct_cost": "Άμεσο κόστος του τιμολογίου",
+      "markups_heading": "Προσαυξήσεις (η διαδοχή του τιμολογίου, με τη σειρά)",
+      "markups_total": "Σύνολο προσαυξήσεων",
+      "grand_total": "Γενικό σύνολο σχεδίου κόστους",
+      "basis_direct": "{pct}% επί του άμεσου κόστους",
+      "basis_running": "{pct}% επί του σωρευτικού υποσυνόλου",
+      "basis_lump": "Κατ' αποκοπή ποσό",
+      "basis_banded": "Κλιμακωτή διαβάθμιση",
+      "basis_escalation": "Αναθεώρηση βάσει δείκτη",
+      "basis_other": "{kind}",
+      "basis_scoped": "ανά ενότητα",
+      "col_ordinal": "Α/Α",
+      "col_position": "Περιγραφή",
+      "col_written_code": "Κωδικός όπως γράφτηκε",
+      "col_reason": "Αιτία",
+      "reason_no_code": "Δεν υπάρχει κωδικός NRM στο είδος ή στις ενότητές του",
+      "reason_invalid_code": "Ο κωδικός δεν είναι αριθμός NRM",
+      "reason_unknown_group": "Το NRM 1 δεν έχει τέτοια ομάδα",
+      "truncated": "Η λίστα περιορίστηκε στα πρώτα {shown} από {count} είδη. Το σύνολο περιλαμβάνει όλα."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Απαιτήσεις",
+      "sheet_summary": "Σύνοψη",
+      "sheet_legend": "Υπόμνημα",
+      "summary_element": "Στοιχείο",
+      "summary_count": "Πλήθος απαιτήσεων",
+      "summary_total": "Σύνολο",
+      "legend_column": "Στήλη",
+      "legend_description": "Περιγραφή",
+      "unspecified": "Μη καθορισμένο",
+      "h01": "Στοιχείο / κλάση IFC",
+      "h02": "Ταξινόμηση",
+      "h03": "Ομάδα ιδιοτήτων",
+      "h04": "Όνομα ιδιότητας",
+      "h05": "Τύπος δεδομένων",
+      "h06": "Υποχρεωτικό",
+      "h07": "Επιτρεπόμενες τιμές",
+      "h08": "Ελάχ.",
+      "h09": "Μέγ.",
+      "h10": "Μονάδα",
+      "h11": "Μοτίβο",
+      "h12": "Φάση",
+      "h13": "Συντελεστής",
+      "h14": "Περίπτωση χρήσης",
+      "h15": "Πηγή",
+      "d01": "Κλάση οντότητας IFC (π.χ. IFCWALL, IFCBEAM)",
+      "d02": "Σύστημα ταξινόμησης και κωδικός (π.χ. Uniclass 2015: EF_25_10)",
+      "d03": "Όνομα ομάδας ιδιοτήτων (π.χ. Pset_WallCommon)",
+      "d04": "Όνομα της απαιτούμενης ιδιότητας ή του χαρακτηριστικού",
+      "d05": "Τύπος δεδομένων IFC (IFCLABEL, IFCREAL, IFCBOOLEAN κ.λπ.)",
+      "d06": "Πληθικότητα: υποχρεωτικό, προαιρετικό ή απαγορευμένο",
+      "d07": "Λίστα επιτρεπόμενων τιμών χωρισμένων με ερωτηματικό",
+      "d08": "Όρια αριθμητικού εύρους",
+      "d09": "Μονάδα μέτρησης (m, m2, kg κ.λπ.)",
+      "d10": "Κανονική έκφραση για επικύρωση της τιμής",
+      "d11": "Φάση ή ορόσημο του έργου (LP3, RIBA Stage 3 κ.λπ.)",
+      "d12": "Υπεύθυνο μέρος (αρχιτέκτονας, πολιτικός μηχανικός κ.λπ.)",
+      "d13": "Σκοπός ή περίπτωση χρήσης της απαίτησης",
+      "d14": "Πρότυπο ή έγγραφο προέλευσης"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Δημιουργήθηκε τιμολόγιο ποσοτήτων",
+      "notifications.boq.created.body": "Το τιμολόγιο ποσοτήτων '{boq_name}' αποθηκεύτηκε.",
+      "notifications.meeting.action_assigned.title": "Σας ανατέθηκε ενέργεια από σύσκεψη",
+      "notifications.meeting.action_assigned.body": "Από τη σύσκεψη {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Η κατάσταση του εγγράφου άλλαξε",
+      "notifications.cde.state_transitioned.body": "Ο φάκελος μεταφέρθηκε στην κατάσταση '{new_state}'.",
+      "notifications.cde.linked_published.title": "Δημοσιεύθηκε έγγραφο που σχετίζεται με την εργασία σας",
+      "notifications.cde.linked_published.body": "Το {container_code} δημοσιεύθηκε στην αναθεώρηση {revision_code}. Οι συνδεδεμένες καταχωρίσεις σας: {records}.",
+      "notifications.rfi.assigned.title": "Σας ανατέθηκε αίτημα RFI",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "Το αίτημα RFI απαντήθηκε",
+      "notifications.rfi.responded.body": "Το αίτημά σας {code} ({title}) έλαβε απάντηση.",
+      "notifications.risk.assigned.title": "Σας ανατέθηκε κίνδυνος",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Ειδοποίηση υπέρβασης κόστους",
+      "notifications.costmodel.overrun_alert.body": "Το κόστος της κατηγορίας {category} υπερβαίνει τον προϋπολογισμό: το πραγματικό ποσό {actual} {currency} ξεπερνά το όριο ειδοποίησης +{threshold_pct}% επί του προγραμματισμένου {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Υποβολή προς έγκριση αναμένει έλεγχο",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Η υποβολή εγκρίθηκε",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Η υποβολή απορρίφθηκε",
+      "notifications.submittal.rejected.body": "{code} ({title}). Αιτία: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Η υποβολή χρειάζεται αναθεώρηση",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Αιτία: {reason}",
+      "notifications.transmittal.issued.title": "Εκδόθηκε προς εσάς διαβιβαστικό εγγράφων",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Η παραλαβή των εγγράφων επιβεβαιώθηκε",
+      "notifications.transmittal.acknowledged.body": "Ο παραλήπτης επιβεβαίωσε το {code} ({title}).",
+      "notifications.transmittal.responded.title": "Το διαβιβαστικό έλαβε απάντηση",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "Σας ανατέθηκε αίτημα RFI",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Ανατέθηκε νέα εργασία",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Το τιμολόγιο εγκρίθηκε",
+      "notification.invoice_approved_body": "Τιμολόγιο {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Προγραμματίστηκε επιθεώρηση",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, ημερομηνία: {inspection_date}",
+      "notification.submittal_status_changed_title": "Η κατάσταση της υποβολής άλλαξε",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Προγραμματίστηκε σύσκεψη",
+      "notification.meeting_scheduled_body": "{title}, ημερομηνία: {meeting_date}",
+      "notification.ncr_created_title": "Καταγράφηκε μη συμμόρφωση",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Μεταφορτώθηκε έγγραφο",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Αναφερθήκατε σε σχόλιο",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "Νέο σχόλιο σε συζήτηση",
+      "notifications.collaboration.comment_added.body": "Στο στοιχείο {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "Εντοπίστηκε σύγκρουση υψηλής σοβαρότητας",
+      "notifications.clash.high_severity.body": "Σύγκρουση, σοβαρότητα {severity}: {a_name} και {b_name}",
+      "notifications.validation.report.title": "Ο έλεγχος εντόπισε προβλήματα",
+      "notifications.validation.report.body": "Σφάλματα: {error_count}, προειδοποιήσεις: {warning_count} ({target_type}).",
+      "notifications.punchlist.auto_created.title": "Δημιουργήθηκε εκκρεμότητα στη λίστα εκκρεμοτήτων",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Σύνοψη ειδοποιήσεων",
+      "notifications.digest.body": "Νέες ειδοποιήσεις στο κανάλι {channel}: {count}.",
+      "notifications.approval.overdue.title": "Εκπρόθεσμη έγκριση",
+      "notifications.approval.overdue.body": "Το βήμα {step_ordinal} ({target_kind}) καθυστερεί (ώρες): {hours_overdue}.",
+      "notifications.approval.escalated.title": "Έγκριση που κλιμακώθηκε σε εσάς",
+      "notifications.approval.escalated.body": "Το βήμα {step_ordinal} ({target_kind}) κλιμακώθηκε σε εσάς (επίπεδο {level}).",
+      "notifications.approval.reassigned.title": "Έγκριση που σας ανατέθηκε εκ νέου",
+      "notifications.approval.reassigned.body": "Η απόφαση για το βήμα {step_ordinal} ({target_kind}) ανήκει πλέον σε εσάς.",
+      "notifications.deadline.overdue.title": "Εκπρόθεσμο: {title}",
+      "notifications.deadline.overdue.body": "Η προθεσμία για το \"{title}\" ({module}) έχει παρέλθει. Ημέρες καθυστέρησης: {days_overdue}.",
+      "notifications.deadline.escalated.title": "Εκπρόθεσμο στοιχείο που κλιμακώθηκε",
+      "notifications.deadline.escalated.body": "Το στοιχείο \"{title}\" ({module}) παραμένει ανοιχτό, ημέρες καθυστέρησης: {days_overdue}, και έχει κλιμακωθεί.",
+      "notifications.deadline.approaching.title": "Λήγει σύντομα: {title}",
+      "notifications.deadline.approaching.body": "Η προθεσμία για το \"{title}\" ({module}) είναι {due_date}.",
+      "notifications.deadline.built.approaching.title": "Λήγει σύντομα: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: η προθεσμία για το \"{title}\" είναι {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Εκπρόθεσμο: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "Η προθεσμία για το RFI {reference} \"{title}\" του έργου {project} ήταν {due_date_display}. Ημέρες καθυστέρησης: {days_overdue}. Απαιτείται απάντηση.",
+      "notifications.deadline.rfi.escalated.title": "Κλιμακώθηκε: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "Το RFI {reference} \"{title}\" του έργου {project} παραμένει ανοιχτό, η προθεσμία ήταν {due_date_display}, ημέρες καθυστέρησης: {days_overdue}. Έχει κλιμακωθεί σε εσάς.",
+      "notifications.deadline.rfi.approaching.title": "Λήγει σύντομα: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "Η προθεσμία για το RFI {reference} \"{title}\" του έργου {project} είναι {due_date_display}. Απαιτείται απάντηση.",
+      "notifications.deadline.submittals.overdue.title": "Εκπρόθεσμο: υποβολή {reference}",
+      "notifications.deadline.submittals.overdue.body": "Η προθεσμία για την υποβολή {reference} \"{title}\" του έργου {project} ήταν {due_date_display}. Ημέρες καθυστέρησης: {days_overdue}. Απαιτείται έλεγχος.",
+      "notifications.deadline.submittals.escalated.title": "Κλιμακώθηκε: υποβολή {reference}",
+      "notifications.deadline.submittals.escalated.body": "Η υποβολή {reference} \"{title}\" του έργου {project} παραμένει ανοιχτή, η προθεσμία ήταν {due_date_display}, ημέρες καθυστέρησης: {days_overdue}. Έχει κλιμακωθεί σε εσάς.",
+      "notifications.deadline.submittals.approaching.title": "Λήγει σύντομα: υποβολή {reference}",
+      "notifications.deadline.submittals.approaching.body": "Η προθεσμία για την υποβολή {reference} \"{title}\" του έργου {project} είναι {due_date_display}. Απαιτείται έλεγχος.",
+      "notifications.deadline.correspondence.overdue.title": "Εκπρόθεσμο: αλληλογραφία {reference}",
+      "notifications.deadline.correspondence.overdue.body": "Η αλληλογραφία {reference} \"{title}\" του έργου {project} έπρεπε να απαντηθεί έως {due_date_display}. Ημέρες καθυστέρησης: {days_overdue}. Απαιτείται απάντηση.",
+      "notifications.deadline.correspondence.escalated.title": "Κλιμακώθηκε: αλληλογραφία {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Η αλληλογραφία {reference} \"{title}\" του έργου {project} παραμένει αναπάντητη, η προθεσμία ήταν {due_date_display}, ημέρες καθυστέρησης: {days_overdue}. Έχει κλιμακωθεί σε εσάς.",
+      "notifications.deadline.correspondence.approaching.title": "Λήγει σύντομα: αλληλογραφία {reference}",
+      "notifications.deadline.correspondence.approaching.body": "Η αλληλογραφία {reference} \"{title}\" του έργου {project} πρέπει να απαντηθεί έως {due_date_display}. Απαιτείται απάντηση.",
+      "notifications.deadline.variations.overdue.title": "Εκπρόθεσμο: τροποποίηση {reference}",
+      "notifications.deadline.variations.overdue.body": "Η προθεσμία για την τροποποίηση {reference} \"{title}\" του έργου {project} ήταν {due_date_display}. Ημέρες καθυστέρησης: {days_overdue}. Απαιτείται απόφαση.",
+      "notifications.deadline.variations.escalated.title": "Κλιμακώθηκε: τροποποίηση {reference}",
+      "notifications.deadline.variations.escalated.body": "Η τροποποίηση {reference} \"{title}\" του έργου {project} παραμένει ανοιχτή, η προθεσμία ήταν {due_date_display}, ημέρες καθυστέρησης: {days_overdue}. Έχει κλιμακωθεί σε εσάς.",
+      "notifications.deadline.variations.approaching.title": "Λήγει σύντομα: τροποποίηση {reference}",
+      "notifications.deadline.variations.approaching.body": "Η προθεσμία για την τροποποίηση {reference} \"{title}\" του έργου {project} είναι {due_date_display}. Απαιτείται απόφαση.",
+      "notifications.variation.submitted.title": "Τροποποίηση σε αναμονή απόφασης: {code}",
+      "notifications.variation.submitted.body": "Η τροποποίηση {code} \"{title}\" του έργου {project} υποβλήθηκε και αναμένει απόφαση.",
+      "notifications.variation.approved.title": "Η τροποποίηση εγκρίθηκε: {code}",
+      "notifications.variation.approved.body": "Η τροποποίηση {code} \"{title}\" του έργου {project} εγκρίθηκε.",
+      "notifications.variation.rejected.title": "Η τροποποίηση απορρίφθηκε: {code}",
+      "notifications.variation.rejected.body": "Η τροποποίηση {code} \"{title}\" του έργου {project} απορρίφθηκε και σας επιστράφηκε.",
+      "notifications.variation.rejected_reason.body": "Η τροποποίηση {code} \"{title}\" του έργου {project} απορρίφθηκε και σας επιστράφηκε. Αιτία: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Εντολή αλλαγής σε αναμονή έγκρισης: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Η εντολή αλλαγής {code} \"{title}\" του έργου {project} υποβλήθηκε και αναμένει έγκριση.",
+      "notifications.changeorder.approved.title": "Η εντολή αλλαγής εγκρίθηκε: {code}",
+      "notifications.changeorder.approved.body": "Η εντολή αλλαγής {code} \"{title}\" του έργου {project} εγκρίθηκε.",
+      "notifications.changeorder.rejected.title": "Η εντολή αλλαγής απορρίφθηκε: {code}",
+      "notifications.changeorder.rejected.body": "Η εντολή αλλαγής {code} \"{title}\" του έργου {project} απορρίφθηκε.",
+      "notifications.submittal.approved_as_noted.title": "Η υποβολή εγκρίθηκε με παρατηρήσεις",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Ένα έγγραφο χρειάζεται την έγκρισή σας",
+      "notifications.file_approval.needs_approver.body": "Ένα αρχείο τύπου {file_kind} αναμένει την έγκρισή σας.",
+      "notifications.file_approval.approved.title": "Το έγγραφό σας εγκρίθηκε",
+      "notifications.file_approval.approved.body": "Το αρχείο σας τύπου {file_kind} πέρασε από όλα τα στάδια έγκρισης.",
+      "notifications.file_approval.rejected.title": "Το έγγραφό σας επιστράφηκε",
+      "notifications.file_approval.rejected.body": "Το αρχείο σας τύπου {file_kind} απορρίφθηκε και χρειάζεται αλλαγές.",
+      "notifications.portal.user_invited.title": "Προσκλήθηκε χρήστης της πύλης",
+      "notifications.portal.user_invited.body": "Ο χρήστης {portal_user_email} προσκλήθηκε με ρόλο: {portal_role}.",
+      "notifications.portal.message_received.title": "Νέο μήνυμα στην πύλη",
+      "notifications.portal.message_received.body": "Μήνυμα από: {buyer_name}."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "ID",
+          "ID δραστηριότητας",
+          "Κωδικός δραστηριότητας",
+          "Κωδικός",
+          "Α/Α",
+          "Αριθμός"
+        ],
+        "name": [
+          "Όνομα",
+          "Όνομα εργασίας",
+          "Όνομα δραστηριότητας",
+          "Δραστηριότητα",
+          "Εργασία"
+        ],
+        "wbs": [
+          "WBS",
+          "Κωδικός WBS",
+          "Αριθμός WBS",
+          "Δομικός αριθμός"
+        ],
+        "outline_level": [
+          "Επίπεδο δομής",
+          "Επίπεδο",
+          "Επίπεδο εσοχής",
+          "Εσοχή"
+        ],
+        "start": [
+          "Έναρξη",
+          "Ημερομηνία έναρξης",
+          "Αρχή",
+          "Προγραμματισμένη έναρξη"
+        ],
+        "finish": [
+          "Λήξη",
+          "Ολοκλήρωση",
+          "Ημερομηνία λήξης",
+          "Προγραμματισμένη λήξη",
+          "Προθεσμία"
+        ],
+        "duration": [
+          "Διάρκεια",
+          "Διάρκεια (ημέρες)",
+          "Ημέρες",
+          "Αρχική διάρκεια"
+        ],
+        "predecessors": [
+          "Προηγούμενες",
+          "Προηγούμενη",
+          "Εξαρτάται από",
+          "Εξαρτήσεις"
+        ],
+        "percent_complete": [
+          "% ολοκλήρωσης",
+          "Ποσοστό ολοκλήρωσης",
+          "Πρόοδος",
+          "Πρόοδος (%)",
+          "% εκτέλεσης"
+        ],
+        "milestone": [
+          "Ορόσημο",
+          "Είναι ορόσημο",
+          "Κομβικό σημείο"
+        ],
+        "resource": [
+          "Πόρος",
+          "Πόροι",
+          "Ονόματα πόρων",
+          "Συνεργείο",
+          "Υπεύθυνος εκτέλεσης"
+        ],
+        "notes": [
+          "Σημειώσεις",
+          "Σημείωση",
+          "Σχόλια",
+          "Σχόλιο",
+          "Παρατηρήσεις"
+        ],
+        "client_visible": [
+          "Ορατό στον πελάτη",
+          "Ορατό στον κύριο του έργου",
+          "Εμφάνιση στον πελάτη",
+          "Κοινοποίηση στον πελάτη"
+        ]
+      },
+      "yes_words": [
+        "ναι"
+      ],
+      "no_words": [
+        "όχι"
+      ],
+      "example_names": [
+        "Φέρων οργανισμός και κέλυφος",
+        "Εκσκαφές",
+        "Θεμελίωση",
+        "Παραλαβή θεμελίωσης"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "σύμβασ*",
+          "συμβάσε*",
+          "συμβολαι*",
+          "συμφωνητικ*"
+        ],
+        "contact": [
+          "επαφ*",
+          "προμηθευτ*",
+          "υπεργολάβ*",
+          "πελάτ*",
+          "εργολάβ*",
+          "κύριος του έργου"
+        ],
+        "schedule_activity": [
+          "δραστηριότητ*",
+          "δραστηριοτήτ*",
+          "εργασί*",
+          "wbs"
+        ],
+        "document": [
+          "έγγραφ*",
+          "σχέδι*",
+          "συνημμέν*"
+        ],
+        "user": [
+          "υπεύθυν*",
+          "υπευθυν*",
+          "ανατεθειμέν*",
+          "επιθεωρητ*",
+          "εργοδηγ*",
+          "επιβλέπ*"
+        ],
+        "due": [
+          "προθεσμί*",
+          "λήξ*",
+          "λήγ*",
+          "ισχύει έως",
+          "ημερομηνία στόχος",
+          "ανανέωση"
+        ]
+      },
+      "link_labels": {
+        "contract": "Σύμβαση",
+        "contact": "Επαφή",
+        "schedule_activity": "Δραστηριότητα προγράμματος",
+        "document": "Έγγραφο",
+        "user": "Υπεύθυνος"
+      },
+      "state_labels": [
+        "Ανοιχτό",
+        "Σε εξέλιξη",
+        "Ολοκληρωμένο"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Τροποποίηση {number} της διακήρυξης {package}",
+      "addendum_heading": "Τροποποίηση διακήρυξης",
+      "greeting": "Αξιότιμη εταιρεία {company},",
+      "greeting_generic": "Αξιότιμοι κύριοι,",
+      "addendum_intro": "Εκδόθηκε η τροποποίηση {number} για το πακέτο διαγωνισμού {package}: {title}.",
+      "addendum_deadline": "Η προθεσμία υποβολής μετακινήθηκε από {old} σε {new}.",
+      "addendum_boq": "Ο προϋπολογισμός ποσοτήτων άλλαξε (αναθεώρηση {revision}). Τιμολογήστε την τρέχουσα αναθεώρηση.",
+      "addendum_documents": "Εκδοθέντα έγγραφα: {documents}",
+      "addendum_ack": "Επιβεβαιώστε την παραλαβή αυτής της τροποποίησης. Προσφορά που δεν επιβεβαιώνει όλες τις τροποποιήσεις ενδέχεται να θεωρηθεί μη συμμορφούμενη.",
+      "answer_subject": "Διευκρίνιση {number} της διακήρυξης {package}",
+      "answer_heading": "Διευκρίνιση διαγωνισμού",
+      "answer_intro": "Απαντήθηκε ερώτηση για το πακέτο διαγωνισμού {package}. Η απάντηση ισχύει για όλους τους προσφέροντες.",
+      "question_label": "Ερώτηση",
+      "answer_label": "Απάντηση"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Ακαθάριστη αξία ανάπτυξης (GDV)",
+      "total_development_cost": "Συνολικό κόστος ανάπτυξης",
+      "residual_land_value": "Υπολειμματική αξία γης",
+      "developer_profit": "Κέρδος επενδυτή-ανάπτυξης",
+      "profit_on_cost": "Κέρδος επί του κόστους",
+      "profit_on_gdv": "Κέρδος επί του GDV",
+      "construction_cost": "Κόστος κατασκευής",
+      "professional_fees": "Αμοιβές επαγγελματιών",
+      "contingency": "Απρόβλεπτα",
+      "finance_cost": "Χρηματοοικονομικό κόστος",
+      "sales_costs": "Έξοδα πωλήσεων"
+    },
+    "status": {
+      "viable": "Βιώσιμο",
+      "unviable": "Μη βιώσιμο",
+      "marginal": "Οριακό",
+      "pending": "Δεν έχει αξιολογηθεί ακόμη"
+    },
+    "figure": {
+      "gross_development_value": "Η συνολική αξία πώλησης όλων των μονάδων του σχεδίου, σε ένα νόμισμα.",
+      "total_development_cost": "Όλα τα κόστη υλοποίησης του σχεδίου εκτός από το ίδιο το οικόπεδο: κατασκευή, αμοιβές, απρόβλεπτα, χρηματοδότηση και έξοδα πωλήσεων.",
+      "residual_land_value": "Το υπόλοιπο για το οικόπεδο, αφού από την ακαθάριστη αξία ανάπτυξης αφαιρεθούν το συνολικό κόστος ανάπτυξης και το στόχος κέρδους του επενδυτή.",
+      "developer_profit": "Το κέρδος που στοχεύει να διατηρήσει ο επενδυτής, ορισμένο ως ποσοστιαίος στόχος της ακαθάριστης αξίας ανάπτυξης.",
+      "profit_on_cost": "Το κέρδος του επενδυτή διαιρεμένο με το συνολικό κόστος ανάπτυξης, εκφρασμένο ως λόγος.",
+      "profit_on_gdv": "Το κέρδος του επενδυτή διαιρεμένο με την ακαθάριστη αξία ανάπτυξης, εκφρασμένο ως λόγος."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Καταυλισμός εργατών",
+        "rental": "Ενοικιαζόμενη στέγη",
+        "hotel": "Ξενοδοχείο"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Σε εκκρεμότητα",
+        "approved": "Εγκρίθηκε",
+        "rejected": "Απορρίφθηκε"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Ικανοποιείται",
+        "fail": "Δεν ικανοποιείται",
+        "not_applicable": "Δεν ισχύει"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Σχέδιο",
+        "contract": "Σύμβαση",
+        "specification": "Προδιαγραφή",
+        "photo": "Φωτογραφία",
+        "correspondence": "Αλληλογραφία",
+        "reality_capture": "Καταγραφή πραγματικότητας",
+        "other": "Άλλο"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Σε εκκρεμότητα",
+        "approved": "Εγκρίθηκε",
+        "rejected": "Απορρίφθηκε",
+        "cancelled": "Ακυρώθηκε"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Πρόχειρο",
+        "submitted": "Υποβλήθηκε για έγκριση",
+        "approved": "Εγκρίθηκε",
+        "posted": "Καταχωρήθηκε στο καθολικό"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Ανοιχτό",
+        "assigned": "Ανατέθηκε",
+        "in_progress": "Σε εξέλιξη",
+        "resolved": "Επιλύθηκε",
+        "verified": "Επαληθεύτηκε",
+        "closed": "Κλειστό"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "παρατήρηση",
+        "minor": "μικρό",
+        "major": "σημαντικό",
+        "critical": "κρίσιμο"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Άτομο",
+        "crew": "Συνεργείο",
+        "equipment": "Εξοπλισμός",
+        "subcontractor": "Υπεργολάβος"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Το όνομα του μοντέλου AI είναι παρωχημένο ή μη διαθέσιμο. Ανοίξτε Ρυθμίσεις > AI και ορίστε ένα ισχύον όνομα μοντέλου για τον πάροχό σας.",
+      "not_configured": "Η AI δεν έχει ρυθμιστεί. Ορίστε έναν πάροχο AI στις Ρυθμίσεις."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "επαληθεύτηκε",
+      "bound": "επισυνάφθηκε",
+      "empty": "εκκρεμεί"
+    },
+    "package_status_labels": {
+      "draft": "πρόχειρο",
+      "in_progress": "σε εξέλιξη",
+      "ready": "έτοιμο",
+      "issued": "εκδόθηκε"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "κρίσιμο εμπόδιο",
+      "critical": "κρίσιμο",
+      "warning": "προειδοποίηση",
+      "suggestion": "πρόταση"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Στρατηγική",
+      "brief": "Σύνταξη απαιτήσεων",
+      "concept": "Σύλληψη ιδέας",
+      "design": "Σχεδιασμός",
+      "approval": "Άδεια",
+      "detail": "Λεπτομερής σχεδιασμός",
+      "tender": "Διαγωνισμός",
+      "award": "Ανάθεση",
+      "construction": "Κατασκευή",
+      "handover": "Παράδοση",
+      "operation": "Λειτουργία"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Η εργασία δεν έχει τεμάχια προς κοπή",
+        "suggestion": "Προσθέστε τεμάχια με το χέρι, επικολλήστε τα ή εισαγάγετέ τα από πίνακα οπλισμού, επιμέτρηση, γραμμή προϋπολογισμού ή αρχείο."
+      },
+      "has_stock": {
+        "fail": "Η εργασία δεν διαθέτει απόθεμα για κοπή",
+        "suggestion": "Προσθέστε τουλάχιστον ένα μήκος αποθέματος ή μέγεθος φύλλου ή επαναχρησιμοποιήστε υπολείμματα από την αποθήκη του εργοταξίου."
+      },
+      "sheet_dimensions": {
+        "fail": "Το {ref} δεν έχει πλάτος",
+        "suggestion": "Δώστε μήκος και πλάτος για κάθε τεμάχιο φύλλου και κάθε μέγεθος φύλλου."
+      },
+      "piece_fits_stock": {
+        "fail": "Το τεμάχιο {ref} ({size} mm) δεν χωρά σε καμία διάσταση αποθέματος",
+        "suggestion": "Προσθέστε μεγαλύτερη διάσταση αποθέματος, μειώστε την κοπή άκρων ή χωρίστε το τεμάχιο με ένωση."
+      },
+      "grain_allows_fit": {
+        "fail": "Το τεμάχιο {ref} χωρά μόνο αν περιστραφεί κάθετα στην ίνα",
+        "suggestion": "Επιτρέψτε την περιστροφή αυτού του τεμαχίου ή προσθέστε μέγεθος φύλλου όπου χωρά κατά μήκος της ίνας."
+      },
+      "kerf_set": {
+        "fail": "Το πλάτος κοπής είναι μηδέν",
+        "suggestion": "Εισαγάγετε το πλάτος της λεπίδας ή της κοπής, αλλιώς η απόδοση κάθε ράβδου με πολλές κοπές εμφανίζεται υπερεκτιμημένη."
+      },
+      "min_offcut_set": {
+        "fail": "Δεν έχει οριστεί ελάχιστο αξιοποιήσιμο υπόλειμμα",
+        "suggestion": "Ορίστε το μικρότερο υπόλειμμα που αξίζει να κρατηθεί, ώστε τα επαναχρησιμοποιήσιμα υπολείμματα να μην μετρούν ως απώλειες."
+      },
+      "stock_priced": {
+        "fail": "Το απόθεμα {ref} δεν έχει τιμή μονάδας",
+        "suggestion": "Εισαγάγετε τιμή ανά τεμάχιο, ώστε το σχέδιο να αναφέρει το κόστος του και να επιλέγει το φθηνότερο απόθεμα."
+      },
+      "stock_sufficient": {
+        "fail": "Τεμάχια που δεν τοποθετήθηκαν στο διαθέσιμο απόθεμα: {count}",
+        "suggestion": "Αυξήστε τη διαθέσιμη ποσότητα ή προσθέστε άλλη διάσταση αποθέματος."
+      },
+      "yield_threshold": {
+        "fail": "Η απόδοση {actual} % είναι κάτω από το όριο {threshold} %",
+        "suggestion": "Προσθέστε άλλο μήκος ή διάσταση αποθέματος, επιτρέψτε περιστροφή ή ελέγξτε το όριο για αυτό το υλικό."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Η εκκρεμότητα '{title}' έχει κλείσει χωρίς φωτογραφία",
+    "punch_no_photo_fix": "Προσθέστε φωτογραφία της ολοκληρωμένης εργασίας",
+    "photo_weak": "{count} φωτογραφία(ες) στο '{title}' χωρίς τοποθεσία ή ώρα λήψης",
+    "photo_weak_fix": "Τραβήξτε ξανά τη φωτογραφία στην εφαρμογή με ενεργή τοποθεσία",
+    "defect_no_photo": "Το ελάττωμα '{reference}' έχει κλείσει χωρίς φωτογραφία της αποκατάστασης",
+    "defect_no_photo_fix": "Επισυνάψτε φωτογραφία της αποκατεστημένης εργασίας"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} ακόμη στοιχεία δεν εμφανίζονται",
+    "category_missing": "Δεν υπάρχει τεκμήριο για την απαιτούμενη κατηγορία '{category}'",
+    "category_missing_fix": "Συνδέστε ένα έγγραφο με σημείο της λίστας ελέγχου αυτής της κατηγορίας ή προσθέστε ένα",
+    "category_unverified": "Το τεκμήριο για την '{category}' δεν έχει επαληθευτεί ακόμη",
+    "category_unverified_fix": "Ζητήστε από υπεύθυνο να ελέγξει και να επαληθεύσει το συνδεδεμένο τεκμήριο",
+    "punch_open": "Η εκκρεμότητα '{name}' είναι ακόμη ανοιχτή",
+    "punch_open_fix": "Επιλύστε και κλείστε το στοιχείο ή εξαιρέστε το από το πεδίο αυτού του φακέλου",
+    "punch_no_photo": "Η επιλυμένη εκκρεμότητα '{name}' δεν έχει φωτογραφία",
+    "punch_no_photo_fix": "Προσθέστε φωτογραφία της ολοκληρωμένης εργασίας",
+    "system_pending": "Το σύστημα '{name}' δεν έχει τεθεί σε λειτουργία",
+    "system_pending_fix": "Ολοκληρώστε τις λίστες ελέγχου θέσης σε λειτουργία και σημειώστε το σύστημα ως τεθέν σε λειτουργία",
+    "critical_issues": "{count} κρίσιμα ζητήματα θέσης σε λειτουργία παραμένουν ανοιχτά",
+    "critical_issues_fix": "Κλείστε τα κρίσιμα ζητήματα πριν από την παράδοση",
+    "acceptance_missing": "Δεν έχει συνδεθεί πρωτόκολλο παραλαβής",
+    "acceptance_missing_fix": "Συνδέστε το υπογεγραμμένο πρωτόκολλο παραλαβής με το σημείο παραλαβής της λίστας ελέγχου",
+    "acceptance_unsigned": "Το πρωτόκολλο παραλαβής δεν είναι πλήρως υπογεγραμμένο (κατάσταση: {status})",
+    "acceptance_unsigned_fix": "Συγκεντρώστε τις εκκρεμείς υπογραφές στις Υπογραφές",
+    "blocked": "Ο φάκελος δεν πληροί τη λίστα ελέγχου του. Διορθώστε τα ευρήματα ή συντάξτε τον παρόλα αυτά ως ελλιπή (έγκριση υπευθύνου).",
+    "delivery_title": "Φάκελος παράδοσης: {project}",
+    "delivery_body": "Ο φάκελος παράδοσης '{title}' ({scope}) είναι έτοιμος. Ο παρακάτω σύνδεσμος τον κατεβάζει και ισχύει έως {expires}.",
+    "pdf": {
+      "title": "Φάκελος παράδοσης",
+      "scope": "Πεδίο",
+      "built": "Συντάχθηκε",
+      "status_passed": "Η λίστα ελέγχου πέρασε",
+      "status_warnings": "Η λίστα ελέγχου πέρασε με προειδοποιήσεις",
+      "status_errors": "Ελλιπής: ανοιχτά ευρήματα της λίστας ελέγχου",
+      "findings": "Ανοιχτά ευρήματα της λίστας ελέγχου",
+      "severity": "Σοβαρότητα",
+      "finding": "Εύρημα",
+      "severity_error": "Σφάλμα",
+      "severity_warning": "Προειδοποίηση",
+      "severity_info": "Πληροφορία",
+      "contents": "Περιεχόμενα",
+      "file": "Αρχείο",
+      "size": "Μέγεθος",
+      "punch": "Επιλυμένη λίστα εκκρεμοτήτων",
+      "item": "Στοιχείο",
+      "status": "Κατάσταση",
+      "photos": "Φωτογραφίες",
+      "evidence": "Φωτογραφικά τεκμήρια"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Η βαθμολογία {rating} του '{name}' δεν είναι επίπεδο της κλίμακας '{scale}'",
+    "rule_poor_without_action": "Το '{name}' βαθμολογείται {rating} αλλά δεν έχει προγραμματισμένη ενέργεια συντήρησης",
+    "rule_poor_without_action_fix": "Εξαγάγετε το σχέδιο ή προσθέστε μια ενέργεια για αυτό το στοιχείο",
+    "rule_action_unpriced": "Η ενέργεια για το '{name}' το {year} δεν έχει τιμή μονάδας",
+    "rule_action_unpriced_fix": "Εισαγάγετε τιμή μονάδας ώστε τα σύνολα του σχεδίου να την περιλαμβάνουν",
+    "rule_defect_incomplete": "Η βαθμολογία του '{name}' απαιτεί εργασίες αλλά δεν καταγράφει σοβαρότητα ή έκταση"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, σελίδα {page}",
+    "text_change": "Το «{old}» άλλαξε σε «{new}»",
+    "kind": {
+      "added": "Προστέθηκε",
+      "removed": "Αφαιρέθηκε",
+      "modified": "Τροποποιήθηκε",
+      "text": "Άλλαξε το κείμενο"
+    },
+    "status": {
+      "open": "Ανοιχτό",
+      "relevant": "Σχετικό",
+      "not_relevant": "Μη σχετικό"
+    },
+    "errors": {
+      "revision_not_found": "Η αναθεώρηση του σχεδίου δεν βρέθηκε σε αυτό το έργο.",
+      "revision_not_parsed": "Το σχέδιο δεν έχει ακόμη επεξεργασμένη έκδοση για σύγκριση.",
+      "comparison_not_found": "Η σύγκριση δεν βρέθηκε.",
+      "change_not_found": "Η αλλαγή δεν βρέθηκε.",
+      "same_revision": "Επιλέξτε δύο διαφορετικές αναθεωρήσεις ή σελίδες για σύγκριση.",
+      "manual_points": "Η χειροκίνητη ευθυγράμμιση απαιτεί δύο διακριτά σημεία σε κάθε αναθεώρηση.",
+      "alignment_singular": "Η ευθυγράμμιση δεν μπορεί να εφαρμοστεί: συμπιέζει το φύλλο.",
+      "region_empty": "Η αλλαγή {seq} δεν έχει μέγεθος.",
+      "region_off_sheet": "Η αλλαγή {seq} βρίσκεται εκτός φύλλου.",
+      "module_missing": "Η ενότητα που απαιτείται για αυτή την ενέργεια δεν είναι εγκατεστημένη."
+    },
+    "rfi": {
+      "subject": "Αλλαγή σχεδίου {seq} στο {sheet}",
+      "question": "Η αναθεώρηση {new} του {sheet} διαφέρει από την αναθεώρηση {old} στην επισημασμένη περιοχή ({kind}). Επιβεβαιώστε τον σκοπό της αλλαγής και αν επηρεάζονται οι ποσότητες."
+    },
+    "markup": {
+      "text": "Αλλαγή αναθεώρησης {seq}: {kind}"
+    },
+    "report": {
+      "title": "Σύγκριση αναθεωρήσεων σχεδίου",
+      "project": "Έργο",
+      "name": "Σύγκριση",
+      "old_revision": "Παλαιότερη αναθεώρηση",
+      "new_revision": "Νεότερη αναθεώρηση",
+      "alignment": "Ευθυγράμμιση",
+      "alignment_none": "Δεν ευθυγραμμίστηκε (ίδιο πλαίσιο)",
+      "alignment_auto": "Αυτόματη",
+      "alignment_manual": "Χειροκίνητη, δύο σημεία",
+      "confidence": "βεβαιότητα {value}",
+      "summary": "Αλλαγές",
+      "summary_counts": "Σύνολο {total}: {added} προστέθηκαν, {removed} αφαιρέθηκαν, {modified} τροποποιήθηκαν, {text} κειμένου",
+      "generated_on": "Ημερομηνία δημιουργίας",
+      "generated": "Δημιουργήθηκε {timestamp}",
+      "page_of": "Σελίδα {page} από {total}",
+      "no_changes": "Δεν βρέθηκαν αλλαγές ανάμεσα στις δύο αναθεωρήσεις.",
+      "col_no": "Α/Α",
+      "col_preview": "Προεπισκόπηση",
+      "col_kind": "Αλλαγή",
+      "col_location": "Θέση",
+      "col_detail": "Λεπτομέρειες",
+      "col_status": "Κατάσταση",
+      "col_comment": "Σχόλιο",
+      "col_follow_up": "Παρακολούθηση",
+      "page_at": "Σελίδα {page} στο {coords}",
+      "layer": "Layer {layer}",
+      "entity_counts": "Οντότητες: {added} προστέθηκαν, {removed} αφαιρέθηκαν, {modified} τροποποιήθηκαν",
+      "rfi": "RFI {number}",
+      "markup": "Νέφος αναθεώρησης",
+      "remeasure": "Επαναμέτρηση: {items} ποσότητες, {positions} άρθρα επιμέτρησης"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Οι δύο πλευρές είναι διαφορετικές αναθεωρήσεις.",
+      "distinct_revisions_fail": "Η σύγκριση συγκρίνει ένα φύλλο με τον εαυτό του.",
+      "distinct_revisions_hint": "Επιλέξτε την παλαιότερη και τη νεότερη αναθεώρηση του σχεδίου.",
+      "alignment_not_needed": "Οι αναθεωρήσεις DWG έχουν κοινές μονάδες σχεδίου· δεν χρειάζεται ευθυγράμμιση.",
+      "alignment_missing_matrix": "Η σύγκριση δεν έχει ευθυγράμμιση.",
+      "alignment_singular": "Η ευθυγράμμιση συμπιέζει το φύλλο και δεν μπορεί να εφαρμοστεί.",
+      "alignment_scale": "Η ευθυγράμμιση αλλάζει την κλίμακα του φύλλου κατά {scale}, περισσότερο από όσο διαφέρουν οι αναθεωρήσεις ενός σχεδίου.",
+      "alignment_low_confidence": "Η αυτόματη ευθυγράμμιση είναι αβέβαιη (βεβαιότητα {confidence}).",
+      "alignment_manual_points": "Η χειροκίνητη ευθυγράμμιση απαιτεί δύο ζεύγη σημείων.",
+      "alignment_ok": "Η ευθυγράμμιση του φύλλου είναι εύλογη.",
+      "alignment_hint": "Ευθυγραμμίστε τα φύλλα με το χέρι σε δύο σημάδια κοινά και στις δύο αναθεωρήσεις, όπως τομές κάνναβου.",
+      "region_empty": "Η αλλαγή {seq} δεν έχει μέγεθος.",
+      "region_off_sheet": "Η αλλαγή {seq} βρίσκεται εκτός φύλλου.",
+      "regions_ok": "Κάθε τροποποιημένη περιοχή βρίσκεται πάνω στο φύλλο.",
+      "triaged_ok": "Κάθε αλλαγή έχει ελεγχθεί.",
+      "triaged_open": "Παραμένουν ανοιχτές {count} αλλαγές.",
+      "triaged_hint": "Επισημάνετε κάθε αλλαγή ως σχετική ή μη σχετική.",
+      "followed_up_ok": "Κάθε σχετική αλλαγή έχει παρακολούθηση.",
+      "followed_up_missing": "Η αλλαγή {seq} είναι σημειωμένη ως σχετική αλλά δεν έχει σχόλιο, RFI, νέφος ή σήμανση επαναμέτρησης.",
+      "followed_up_hint": "Σχολιάστε την αλλαγή, δημιουργήστε RFI ή νέφος, ή σημειώστε τις ποσότητες μέσα σε αυτή για επαναμέτρηση."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Πρόβλεψη ταμειακών ροών",
+      "portfolio_title": "Πρόβλεψη ταμειακών ροών χαρτοφυλακίου",
+      "empty": "Δεν υπάρχει πρόβλεψη ταμειακών ροών για αυτή την επιλογή.",
+      "project": "Έργο",
+      "as_of": "Από",
+      "currency": "Νόμισμα",
+      "delay_days": "Καθυστέρηση εισπράξεων (ημέρες)",
+      "overrun_pct": "Υπέρβαση κόστους (%)",
+      "closing_position": "Τελικό υπόλοιπο",
+      "peak_funding": "Μέγιστη ανάγκη χρηματοδότησης",
+      "peak_period": "Μήνας μέγιστης ανάγκης χρηματοδότησης",
+      "col": {
+        "period": "Μήνας",
+        "planned_in": "Προγραμματισμένες εισπράξεις",
+        "actual_in": "Πραγματικές εισπράξεις",
+        "expected_in": "Αναμενόμενες εισπράξεις",
+        "planned_out": "Προγραμματισμένες πληρωμές",
+        "actual_out": "Πραγματικές πληρωμές",
+        "expected_out": "Αναμενόμενες πληρωμές",
+        "net": "Καθαρό",
+        "cumulative": "Σωρευτική θέση"
+      }
+    }
+  }
+}

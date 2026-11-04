@@ -1,0 +1,186 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""The printed RFI log, in the reader's language.
+
+The RFI log of ``GET /export/`` is a workbook with English headings, English
+status words and "Yes"/"No" cells whatever language the workspace runs in,
+and it has no PDF form. This module describes the same twelve columns once,
+translated, for both a workbook and a printable PDF with the project, the
+generation date and "page x of y" on it.
+
+The log's strings live in ``backend/locales/<code>.json`` under
+``document_forms.rfi_register``, with the status words in the same block, so a
+heading and a status never disagree and the log can be printed in every
+language a PDF can draw. The single-RFI form keeps its own catalogue in
+:mod:`app.modules.rfi.pdf_translations`. A key a language has not translated
+reads English, and a language outside the catalogue renders in English with
+the route saying so in ``Content-Language``.
+
+The builder is pure: RFI rows plus already-resolved names in, a register
+description out.
+"""
+
+from __future__ import annotations
+
+from collections.abc import Mapping, Sequence
+from decimal import Decimal, InvalidOperation
+from typing import Any
+
+from app.core.document_forms_i18n import register_form_catalogue
+from app.core.regional_format import NBSP
+from app.core.register_export import (
+    ProjectHeader,
+    RegisterColumn,
+    RegisterDocument,
+    export_filename,
+    format_amount,
+    person_name,
+    printed_currency,
+)
+from app.modules.rfi.intl import localize_status
+
+__all__ = [
+    "CATALOGUE",
+    "SUPPORTED_REGISTER_LOCALES",
+    "resolve_register_locale",
+    "rfi_register",
+    "rfi_register_filename",
+]
+
+#: Strings and the status words come from ``backend/locales/<code>.json`` under
+#: ``document_forms.rfi_register``; English is the fallback for any gap. "Yes" and
+#: the amount or the days in brackets are one fact, so ``yes_with`` joins them with
+#: a no-break space and the bracket never starts a line of its own.
+CATALOGUE = register_form_catalogue("rfi_register")
+
+#: Languages the RFI log can render; anything else is English.
+SUPPORTED_REGISTER_LOCALES: tuple[str, ...] = CATALOGUE.supported
+
+
+def resolve_register_locale(locale_param: str | None, accept_language: str | None) -> str:
+    """Pick the log's language: ``?locale=``, then ``Accept-Language``, then English."""
+    return CATALOGUE.resolve(locale_param, accept_language)
+
+
+def rfi_register_filename(locale: str, extension: str) -> str:
+    """Download filename for the log; the English name is the one it always had."""
+    return export_filename(CATALOGUE.tr(locale, "register_filename"), "rfi_log", extension)
+
+
+def _status_word(status: Any, locale: str) -> str:
+    """The status in the log's language; a code outside the log's table reads like the RFI screens do in English."""
+    code = str(status or "draft").strip().lower()
+    return CATALOGUE.labels["status"][locale].get(code) or localize_status(code, "en")
+
+
+def _impact(flag: Any, detail: str | None, locale: str) -> str:
+    if not flag:
+        return CATALOGUE.tr(locale, "no")
+    return CATALOGUE.tr(locale, "yes_with", detail=detail) if detail else CATALOGUE.tr(locale, "yes")
+
+
+def _cost_detail(value: Any, project: ProjectHeader, locale: str) -> str | None:
+    """The cost impact amount in the project's separators, or as typed when it is not a number."""
+    text = str(value if value is not None else "").strip()
+    if not text:
+        return None
+    try:
+        amount = Decimal(text)
+    except (InvalidOperation, ValueError):
+        return f"{text} {printed_currency(project.currency, locale)}".strip()
+    if not amount.is_finite():
+        return f"{text} {printed_currency(project.currency, locale)}".strip()
+    return format_amount(amount, project.number_style, project.currency, locale=locale)
+
+
+def rfi_register(
+    rfis: Sequence[Any],
+    *,
+    project: ProjectHeader,
+    people: Mapping[str, str] | None = None,
+    days_open: Mapping[Any, int] | None = None,
+    locale: str = "en",
+    generated: str = "",
+) -> RegisterDocument:
+    """Describe the RFI log of one project.
+
+    Args:
+        rfis: :class:`~app.modules.rfi.models.RFI` rows, or objects with the
+            same attributes, in print order.
+        project: The project the log belongs to.
+        people: Display names keyed by ``str(user_id)``.
+        days_open: Days each RFI has been open, keyed by RFI id. The caller
+            computes it with the helper the list and detail views use, so the
+            three agree.
+        locale: Document language; unsupported values fall back to English.
+        generated: The timestamp printed in the footer.
+
+    Returns:
+        The log, ready for the PDF or the workbook renderer.
+    """
+    locale = CATALOGUE.normalize(locale)
+    tr = CATALOGUE.tr
+    columns = [
+        RegisterColumn(tr(locale, "col_number"), weight=1.0, xlsx_width=10, nobreak=True),
+        RegisterColumn(tr(locale, "col_subject"), weight=3.4, xlsx_width=45, wrap=True),
+        RegisterColumn(tr(locale, "status"), weight=1.0, xlsx_width=12),
+        # Who raised an RFI and who it was assigned to are workbook only. On
+        # paper the log names who has to act next (ball in court); three
+        # columns of names took the width the subject and the response need,
+        # and every row ran to four lines or more because of it. Both names
+        # are on the form of each RFI.
+        RegisterColumn(tr(locale, "col_raised_by"), weight=1.4, xlsx_width=22, pdf=False),
+        RegisterColumn(tr(locale, "col_assigned_to"), weight=1.4, xlsx_width=22, pdf=False),
+        RegisterColumn(tr(locale, "col_ball_in_court"), weight=1.4, xlsx_width=22),
+        RegisterColumn(tr(locale, "col_date_required"), kind="date", weight=1.3, xlsx_width=14),
+        RegisterColumn(tr(locale, "col_response_due"), kind="date", weight=1.3, xlsx_width=14),
+        RegisterColumn(tr(locale, "col_days_open"), kind="count", weight=0.8, xlsx_width=10),
+        RegisterColumn(tr(locale, "col_cost_impact"), weight=1.6, xlsx_width=22),
+        RegisterColumn(tr(locale, "col_schedule_impact"), weight=1.3, xlsx_width=16),
+        RegisterColumn(tr(locale, "col_response"), weight=4.2, xlsx_width=60, wrap=True),
+    ]
+    open_days = days_open or {}
+    rows = []
+    for item in rfis:
+        schedule_days = getattr(item, "schedule_impact_days", None)
+        rows.append(
+            [
+                getattr(item, "rfi_number", ""),
+                getattr(item, "subject", ""),
+                _status_word(getattr(item, "status", None), locale),
+                person_name(getattr(item, "raised_by", None), people),
+                person_name(getattr(item, "assigned_to", None), people),
+                person_name(getattr(item, "ball_in_court", None), people),
+                getattr(item, "date_required", None),
+                getattr(item, "response_due_date", None),
+                open_days.get(getattr(item, "id", None)),
+                _impact(
+                    getattr(item, "cost_impact", False),
+                    _cost_detail(getattr(item, "cost_impact_value", None), project, locale),
+                    locale,
+                ),
+                _impact(
+                    getattr(item, "schedule_impact", False),
+                    # The count stays with its unit: "3" at the end of a line and
+                    # "days" on the next reads as two facts.
+                    CATALOGUE.days(schedule_days, locale).replace(" ", NBSP)
+                    if isinstance(schedule_days, int)
+                    else None,
+                    locale,
+                ),
+                getattr(item, "official_response", None),
+            ]
+        )
+    return RegisterDocument(
+        title=tr(locale, "register_title"),
+        columns=columns,
+        rows=rows,
+        details=CATALOGUE.register_details(locale, project, count=len(rows)),
+        locale=locale,
+        number_style=project.number_style,
+        generated=generated,
+        empty_text=tr(locale, "empty_register"),
+        sheet_title="RFI Log" if locale == "en" else tr(locale, "register_title"),
+        doc_type="rfi",
+        **CATALOGUE.furniture(locale, project),
+    )

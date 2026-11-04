@@ -1,0 +1,2540 @@
+{
+  "costs.catalog_name_unavailable": "Това име не може да се използва за нов каталог. Изберете друго име.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Остойностяване на строителството с отворен код"
+  },
+  "nav": {
+    "dashboard": "Табло",
+    "assemblies": "Анализни цени",
+    "ai_estimate": "ИИ оценка",
+    "settings": "Настройки",
+    "5d_cost_model": "5D модел на разходите",
+    "templates": "Шаблони",
+    "reports": "Отчети",
+    "sustainability": "Устойчивост",
+    "group_estimation": "Остойностяване",
+    "group_planning": "Планиране",
+    "group_procurement": "Доставки",
+    "group_tools": "Инструменти",
+    "architecture": "Карта на архитектурата"
+  },
+  "common": {
+    "save": "Запазване",
+    "cancel": "Отказ",
+    "delete": "Изтриване",
+    "edit": "Редактиране",
+    "create": "Създаване",
+    "search": "Търсене",
+    "filter": "Филтър",
+    "export": "Експорт",
+    "import": "Импорт",
+    "loading": "Зареждане...",
+    "error": "Грешка",
+    "success": "Успешно",
+    "confirm": "Потвърждаване",
+    "back": "Назад",
+    "next": "Напред",
+    "yes": "Да",
+    "no": "Не"
+  },
+  "auth": {
+    "login": "Вход",
+    "logout": "Изход",
+    "email": "Имейл",
+    "password": "Парола"
+  },
+  "projects": {
+    "title": "Проекти",
+    "new_project": "Нов проект",
+    "project_name": "Име на проекта",
+    "no_projects": "Все още няма проекти"
+  },
+  "boq": {
+    "title": "Количествено-стойностна сметка",
+    "position": "Позиция",
+    "ordinal": "Пореден номер",
+    "description": "Описание",
+    "quantity": "Количество",
+    "unit": "Мярка",
+    "unit_rate": "Единична цена",
+    "total": "Общо",
+    "add_position": "Добавяне на позиция",
+    "add_section": "Добавяне на раздел",
+    "assembly": "Анализна цена",
+    "subtotal": "Междинна сума",
+    "grand_total": "Обща сума",
+    "direct_cost": "Преки разходи",
+    "net_total": "Сума без ДДС",
+    "gross_total": "Сума с ДДС",
+    "vat": "ДДС",
+    "add_markups": "Добавяне на надбавки",
+    "validate": "Проверка",
+    "export": "Експорт",
+    "mvp": {
+      "title": "Изберете материали",
+      "subtitle_one": "{{count}} ресурс изисква избор",
+      "subtitle_other": "{{count}} ресурса изискват избор",
+      "bulk_label": "Бързо попълване:",
+      "bulk_median": "Медианна за всички",
+      "bulk_mean": "Средна за всички",
+      "bulk_cheapest": "Най-евтина за всички",
+      "bulk_priciest": "Най-скъпа за всички",
+      "slot_variant_count": "{{n}} възможности",
+      "selected_label": "Избрано:",
+      "default_mean": "средна цена",
+      "default_median": "медианна цена",
+      "row_median": "Медианна цена · {{price}}",
+      "row_mean": "Средна цена · {{price}}",
+      "subtotal_label": "Цена на позицията",
+      "apply": "Прилагане и добавяне към сметката",
+      "batch_progress": "Позиция {{current}} от {{total}}",
+      "toast_applied_one": "Избран е {{count}} вариант",
+      "toast_applied_other": "Избрани са {{count}} варианта"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Отчет за обмена"
+      },
+      "column": {
+        "severity": "Сериозност",
+        "kind": "Вид загуба",
+        "position": "Позиция",
+        "field": "Поле",
+        "original": "Оригинална стойност",
+        "written": "Записана стойност",
+        "count": "Брой",
+        "detail": "Подробности"
+      },
+      "severity": {
+        "error": "Критично",
+        "warning": "Предупреждение",
+        "info": "Забележка"
+      },
+      "kind": {
+        "unsupported_element": "Неподдържан елемент",
+        "truncated_text": "Съкратен текст",
+        "altered_text": "Променен текст",
+        "rounded_value": "Закръглена стойност",
+        "value_out_of_range": "Стойност извън обхвата",
+        "dropped_attribute": "Отпаднал атрибут",
+        "unmapped_unit": "Неразпозната мерна единица",
+        "lost_hierarchy": "Загубено йерархично ниво",
+        "markup_not_representable": "Надбавка, която не може да се представи",
+        "attachment_skipped": "Пропуснато приложение",
+        "changed_identifier": "Променен идентификатор",
+        "exceeds_limit": "Превишен лимит на паметта",
+        "rejected_row": "Отхвърлен ред",
+        "skipped_row": "Пропуснат ред",
+        "parser_warning": "Предупреждение от четеца",
+        "roundtrip_mismatch": "Отклонение при кръгов обмен"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Точка на разклоняване",
+      "base_snapshot_from": "Точка на разклоняване (от снимка „{snapshot}“)",
+      "before_cherry_pick": "Преди прилагане на промените от „{source}“",
+      "before_merge": "Преди сливане на клон „{branch}“",
+      "errors": {
+        "branch_closed": "Този клон е слят или архивиран и не може да приема нови промени.",
+        "not_a_branch": "Тази количествена сметка не е клон.",
+        "same_bill": "Изберете две различни сметки.",
+        "different_project": "Двете сметки трябва да принадлежат към един и същ проект.",
+        "different_tree": "Двете сметки трябва да са клонове на една и съща основна сметка.",
+        "unresolved_conflicts": "Позиции, променени и в двете сметки: {count}. Преди прилагане решете коя версия да се запази за всяка.",
+        "merge_forbidden": "Нямате право да сливате в основната сметка.",
+        "confirm_required": "Потвърдете сливането: то презаписва основната сметка.",
+        "design_options_unavailable": "Модулът за варианти на проектни решения не е инсталиран.",
+        "base_snapshot_in_use": "Тази снимка е точка на разклоняване на отворен клон и не може да бъде изтрита."
+      },
+      "export": {
+        "title_positions": "Сравнение на сметки по позиции",
+        "title_sections": "Сравнение на сметки по раздели",
+        "title_cost_groups": "Сравнение на сметки по групи разходи",
+        "project": "Проект",
+        "bill_a": "Сметка A",
+        "bill_b": "Сметка B",
+        "total_a": "Общо A",
+        "total_b": "Общо B",
+        "delta": "Разлика",
+        "counts": "Промени",
+        "counts_value": "добавени: {added}, премахнати: {removed}, променени: {changed}",
+        "col_ordinal": "Поз.",
+        "col_description": "Описание",
+        "col_unit": "Мярка",
+        "col_change": "Промяна",
+        "col_qty_a": "Кол. A",
+        "col_qty_b": "Кол. B",
+        "col_rate_a": "Ед. цена A",
+        "col_rate_b": "Ед. цена B",
+        "col_total_a": "Общо A",
+        "col_total_b": "Общо B",
+        "col_delta": "Разлика",
+        "col_section": "Раздел",
+        "col_cost_group": "Група разходи",
+        "change_added": "Добавено",
+        "change_removed": "Премахнато",
+        "change_changed": "Променено",
+        "change_unchanged": "Непроменено",
+        "ungrouped": "Без група",
+        "empty": "Двете сметки са идентични.",
+        "total": "Общо"
+      }
+    }
+  },
+  "costs": {
+    "title": "База с цени",
+    "rate": "Цена",
+    "material": "Материали",
+    "labor": "Труд",
+    "equipment": "Механизация",
+    "search_costs": "Търсене на ценови позиции..."
+  },
+  "assemblies": {
+    "title": "Анализни цени",
+    "description": "Многократно използваеми рецепти за цена — комбинирайте материали, труд и механизация в готови шаблони",
+    "new_assembly": "Нова анализна цена",
+    "from_database": "От базата",
+    "apply_to_boq": "Прилагане към сметката",
+    "add_component": "Добавяне на съставка",
+    "no_assemblies": "Все още няма анализни цени",
+    "no_assemblies_hint": "Създайте първата си анализна цена от Базата с цени или Каталога на ресурсите",
+    "total_rate": "Обща цена"
+  },
+  "catalog": {
+    "title": "Каталог на ресурсите",
+    "description": "Преглед и управление на материали, механизация, цени на труда и оператори",
+    "add_resource": "Добавяне на ресурс",
+    "import_region": "Импорт на регион",
+    "build_assembly": "Съставяне на анализна цена",
+    "my_catalog": "Моят каталог"
+  },
+  "validation": {
+    "title": "Проверка",
+    "passed": "Премината",
+    "warnings": "Предупреждения",
+    "errors": "Грешки",
+    "score": "Оценка на качеството",
+    "run_validation": "Стартиране на проверката",
+    "missing_quantity": "Позиция {position} е без количество",
+    "missing_rate": "Позиция {position} е без единична цена",
+    "missing_description": "Позиция {position} е без описание",
+    "missing_classification": "Позиция {position} изисква класификационен код",
+    "duplicate_ordinal": "Дублиран пореден номер: {ordinal}",
+    "rate_anomaly": "Единичната цена {rate} надхвърля прага ({threshold})",
+    "nl": {
+      "not_a_string": "Входните данни трябва да са текст.",
+      "empty": "Входните данни са празни.",
+      "too_long": "Входните данни надвишават {max} знака.",
+      "ai_unparsable": "Отговорът на ИИ не може да бъде анализиран като DSL документ.",
+      "no_pattern": "Никой шаблон не съвпадна с въведеното изречение.",
+      "try": "Опитайте: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D график",
+    "generated": {
+      "position_label": "Позиция {ordinal}",
+      "section_label": "Раздел {ordinal}",
+      "task_description": "Автоматично генерирано от позиция {ordinal} от сметката ({quantity} {unit})",
+      "section_description": "Обобщение: раздел {ordinal} от сметката",
+      "start_milestone": "Начало на проекта",
+      "start_milestone_description": "Крайъгълен камък за начало на проекта",
+      "completion_milestone": "Завършване на проекта",
+      "completion_milestone_description": "Крайъгълен камък за завършване на проекта",
+      "labour_resource": "Труд",
+      "machine_resource": "Машини"
+    },
+    "progress_sheet": {
+      "sheet_title": "Напредък",
+      "title": "Лист за актуализация на напредъка",
+      "detail_schedule": "График: {name}",
+      "detail_exported": "Експортиран: {date}",
+      "instructions": "Попълвайте само белите колони. Не променяйте сивите колони, реда на редовете и скритите колони.",
+      "col": {
+        "activity_ref": "ИД на дейността",
+        "name": "Дейност",
+        "wbs_code": "WBS",
+        "responsible": "Отговорник",
+        "planned_start": "Планирано начало",
+        "planned_finish": "Планиран край",
+        "percent_complete": "% завършеност",
+        "actual_start": "Фактическо начало",
+        "actual_finish": "Фактически край",
+        "remaining_duration": "Оставащо (работни дни)",
+        "notes": "Бележки",
+        "row_key": "Ключ на реда",
+        "stamp": "Печат"
+      }
+    }
+  },
+  "cad": {
+    "title": "Импорт на CAD",
+    "upload": "Качване на CAD файл",
+    "supported_formats": "Поддържани: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Преобразуване...",
+    "elements_found": "Намерени са {count} елемента"
+  },
+  "takeoff": {
+    "title": "Изчисляване на количества",
+    "auto_detect": "Автоматично разпознаване",
+    "manual_measure": "Ръчно измерване",
+    "confidence": "Достоверност"
+  },
+  "tendering": {
+    "title": "Търгове",
+    "create_tender": "Създаване на търг",
+    "bid": "Оферта",
+    "award": "Възлагане"
+  },
+  "modules": {
+    "title": "Модули",
+    "installed": "Инсталирани",
+    "available": "Налични",
+    "install": "Инсталиране",
+    "uninstall": "Деинсталиране",
+    "update": "Обновяване"
+  },
+  "dashboard": {
+    "welcome": "Добре дошли в OpenConstructionERP",
+    "subtitle": "Вашето работно място за остойностяване",
+    "recent_projects": "Последни проекти",
+    "system_status": "Състояние на системата",
+    "modules_loaded": "Заредени модули",
+    "validation_rules": "Правила за проверка",
+    "languages": "Езици",
+    "continue_estimate": "Продължаване на последната сметка",
+    "getting_started": "Начални стъпки",
+    "total_value": "Обща стойност",
+    "active_estimates": "Активни сметки",
+    "schedule_status": "Състояние на графика",
+    "quality_score": "Оценка на качеството",
+    "analytics": "Анализи",
+    "project_overview": "Преглед на проектите",
+    "step_load_db": "Зареждане на база с цени",
+    "step_load_db_desc": "Импортирайте регионални цени с над 55 000 позиции",
+    "step_ai_search": "Включване на ИИ търсене",
+    "step_ai_search_desc": "Генерирайте векторни представяния за семантично съпоставяне на цени",
+    "step_connect_ai": "Свързване на ИИ",
+    "step_connect_ai_desc": "Добавете своите API ключове за оценка с ИИ",
+    "step_create_project": "Създаване на проект",
+    "step_create_project_desc": "Започнете първия си проект за остойностяване",
+    "step_build_boq": "Изготвяне на сметката",
+    "step_build_boq_desc": "Изгответе количествено-стойностна сметка с помощта на ИИ"
+  },
+  "units": {
+    "m": "м",
+    "m2": "м²",
+    "m3": "м³",
+    "kg": "кг",
+    "t": "т",
+    "pcs": "бр",
+    "lsum": "глобално",
+    "h": "ч",
+    "set": "компл"
+  },
+  "contacts": {
+    "title": "Указател с контакти",
+    "new_contact": "Нов контакт",
+    "contact_type": "Вид контакт",
+    "client": "Възложител",
+    "subcontractor": "Подизпълнител",
+    "supplier": "Доставчик",
+    "consultant": "Консултант",
+    "internal": "Вътрешен",
+    "company_name": "Име на фирмата",
+    "search_contacts": "Търсене на контакти...",
+    "no_contacts": "Все още няма контакти",
+    "prequalification": "Предварителен подбор",
+    "approved": "Одобрен",
+    "pending": "В процес",
+    "expired": "Изтекъл"
+  },
+  "tasks": {
+    "title": "Задачи",
+    "new_task": "Нова задача",
+    "task": "Задача",
+    "topic": "Тема",
+    "information": "Информация",
+    "decision": "Решение",
+    "personal": "Лична задача",
+    "my_tasks": "Моите задачи",
+    "open": "Отворена",
+    "in_progress": "В процес",
+    "completed": "Завършена",
+    "draft": "Чернова",
+    "due_date": "Краен срок",
+    "assignee": "Отговорник",
+    "priority": "Приоритет",
+    "checklist": "Контролен списък",
+    "focus_area": "Фокусна област"
+  },
+  "rfi": {
+    "title": "Запитвания за информация",
+    "new_rfi": "Ново запитване",
+    "subject": "Предмет",
+    "question": "Въпрос",
+    "response": "Отговор",
+    "ball_in_court": "На ход е",
+    "days_open": "Дни отворено",
+    "cost_impact": "Влияние върху цената",
+    "schedule_impact": "Влияние върху графика",
+    "respond": "Отговаряне",
+    "close": "Затваряне",
+    "overdue": "Просрочено"
+  },
+  "finance": {
+    "title": "Финанси",
+    "budgets": "Бюджети",
+    "invoices": "Фактури",
+    "payable": "Задължения",
+    "receivable": "Вземания",
+    "payments": "Плащания",
+    "evm": "Усвоена стойност",
+    "invoice_number": "Фактура №",
+    "amount": "Сума",
+    "status": "Статус",
+    "approve": "Одобряване",
+    "pay": "Отбелязване като платена",
+    "original_budget": "Първоначален бюджет",
+    "revised_budget": "Актуализиран бюджет",
+    "committed": "Договорено",
+    "actual": "Действително",
+    "forecast": "Прогноза",
+    "variance": "Отклонение"
+  },
+  "procurement": {
+    "title": "Доставки",
+    "purchase_orders": "Заявки за покупка",
+    "goods_receipts": "Приемане на доставки",
+    "new_po": "Нова заявка",
+    "po_number": "Заявка №",
+    "vendor": "Доставчик",
+    "issue": "Издаване",
+    "confirm": "Потвърждаване на получаването"
+  },
+  "safety": {
+    "title": "Безопасност",
+    "incidents": "Инциденти",
+    "observations": "Наблюдения",
+    "new_incident": "Нов инцидент",
+    "new_observation": "Ново наблюдение",
+    "severity": "Тежест",
+    "risk_score": "Оценка на риска",
+    "days_lost": "Загубени дни",
+    "treatment": "Медицинска помощ",
+    "corrective_action": "Коригиращо действие"
+  },
+  "meetings": {
+    "title": "Срещи",
+    "new_meeting": "Нова среща",
+    "meeting_type": "Вид",
+    "attendees": "Участници",
+    "agenda": "Дневен ред",
+    "action_items": "Задачи от срещата",
+    "minutes": "Протокол",
+    "complete": "Приключване на срещата",
+    "present": "Присъства",
+    "absent": "Отсъства",
+    "excused": "Извинено отсъствие",
+    "actions": {
+      "status": {
+        "open": "Отворено",
+        "completed": "Завършено",
+        "cancelled": "Отменено"
+      },
+      "flag": {
+        "overdue": "Просрочено",
+        "on_track": "По график"
+      },
+      "label": {
+        "action_item": "Точка за действие",
+        "completion_rate": "Процент изпълнени действия",
+        "open_vs_done": "Отворени срещу изпълнени",
+        "overdue": "Просрочени действия"
+      },
+      "explain": {
+        "action_item": "Точката за действие е задача, съгласувана на среща, с отговорник и краен срок.",
+        "completion_rate": "Процентът изпълнени действия е броят изпълнени действия, разделен на общия брой действия, от 0 до 1.",
+        "open_vs_done": "Отворените действия все още изискват работа. Изпълнените действия са завършени и не изискват повече работа.",
+        "overdue": "Действие е просрочено, когато е още отворено и крайният му срок е преди референтната дата."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Протокол от съвещание",
+      "issued": "ИЗДАДЕН",
+      "draft": "ЧЕРНОВА",
+      "date": "Дата:",
+      "location": "Място:",
+      "type": "Вид:",
+      "number": "Съвещание №:",
+      "chairperson": "Председател:",
+      "next_meeting": "Следващо съвещание:",
+      "not_available": "Няма данни",
+      "not_scheduled": "Не е насрочено",
+      "attendance": "Присъствие",
+      "present": "Присъстващи:",
+      "absent": "Отсъстващи / извинени:",
+      "agenda": "Дневен ред, обсъждане и решения",
+      "required": "(задължително)",
+      "discussion": "Обсъждане:",
+      "decision": "Решение:",
+      "decisions": "Решения",
+      "open_questions": "Открити въпроси",
+      "actions": "Задачи за изпълнение",
+      "col_number": "#",
+      "col_action": "Действие",
+      "col_owner": "Отговорник",
+      "col_due": "Срок",
+      "col_status": "Статус",
+      "brought_forward": "[Пренесено]",
+      "overdue": "(просрочено)",
+      "status_open": "Отворена",
+      "status_in_progress": "В изпълнение",
+      "status_done": "Изпълнена",
+      "status_cancelled": "Отказана",
+      "summary": "Резюме",
+      "generated": "Генерирано: {stamp}",
+      "issued_at": "Издаден на {stamp}",
+      "running_head": "{project} - Протокол",
+      "type_progress": "Напредък",
+      "type_design": "Проектиране",
+      "type_safety": "Безопасност",
+      "type_subcontractor": "Подизпълнител",
+      "type_kickoff": "Начално",
+      "type_closeout": "Приключване",
+      "type_commercial": "Търговско"
+    }
+  },
+  "inspections": {
+    "title": "Контрол на качеството",
+    "new_inspection": "Нов контрол",
+    "inspector": "Инспектор",
+    "checklist": "Контролен списък",
+    "pass": "Приет",
+    "fail": "Отхвърлен",
+    "partial": "Частично",
+    "critical": "Критично",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Планирана",
+        "in_progress": "В процес",
+        "completed": "Завършена",
+        "failed": "Неуспешна",
+        "cancelled": "Отменена"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Протоколи за несъответствие",
+    "new_ncr": "Нов протокол",
+    "root_cause": "Основна причина",
+    "corrective_action": "Коригиращо действие",
+    "preventive_action": "Превантивно действие",
+    "material": "Материал",
+    "workmanship": "Качество на изпълнение",
+    "design": "Проектно решение"
+  },
+  "submittals": {
+    "title": "Документи за съгласуване",
+    "new_submittal": "Нов документ",
+    "spec_section": "Раздел от спецификацията",
+    "revision": "Редакция",
+    "submit": "Подаване",
+    "review": "Преглед",
+    "approved_as_noted": "Одобрено със забележки",
+    "revise_resubmit": "Коригиране и повторно подаване",
+    "intl": {
+      "status_labels": {
+        "draft": "Чернова",
+        "submitted": "Представен",
+        "under_review": "На преглед",
+        "approved": "Одобрен",
+        "approved_as_noted": "Одобрен с бележки",
+        "revise_and_resubmit": "За корекция и повторно представяне",
+        "rejected": "Отхвърлен",
+        "closed": "Затворен"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Кореспонденция",
+    "new_entry": "Нов запис",
+    "incoming": "Входяща",
+    "outgoing": "Изходяща",
+    "letter": "Писмо",
+    "email": "Имейл",
+    "notice": "Уведомление",
+    "date_sent": "Дата на изпращане",
+    "date_received": "Дата на получаване"
+  },
+  "cde": {
+    "title": "Обща среда за данни",
+    "new_container": "Нов контейнер",
+    "container_code": "Код на контейнера",
+    "cde_state": "Състояние в средата",
+    "wip": "В процес на работа",
+    "shared": "Споделено",
+    "published": "Публикувано",
+    "archived": "Архивирано",
+    "promote": "Преминаване към следващо състояние",
+    "suitability": "Пригодност",
+    "discipline": "Част",
+    "revisions": "Редакции",
+    "intl": {
+      "state_labels": {
+        "wip": "В процес на работа",
+        "shared": "Споделен",
+        "published": "Публикуван",
+        "archived": "Архивиран"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Съпроводителни писма",
+    "new_transmittal": "Ново съпроводително писмо",
+    "purpose": "Предназначение",
+    "for_approval": "За одобрение",
+    "for_information": "За сведение",
+    "for_construction": "За изпълнение",
+    "recipients": "Получатели",
+    "acknowledge": "Потвърждаване на получаването",
+    "locked": "Заключено",
+    "issue_transmittal": "Издаване",
+    "intl": {
+      "status_words": {
+        "draft": "чернова",
+        "issued": "изпратен",
+        "responded": "отговорено"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Известия",
+    "no_notifications": "Няма нови известия",
+    "mark_all_read": "Отбелязване на всички като прочетени",
+    "unread": "Непрочетени"
+  },
+  "comments": {
+    "title": "Коментари",
+    "post": "Публикуване",
+    "reply": "Отговор",
+    "edit": "Редактиране",
+    "delete": "Изтриване",
+    "placeholder": "Напишете коментар...",
+    "empty": "Все още няма коментари. Започнете дискусията.",
+    "edited": "редактиран",
+    "deleted": "Този коментар беше изтрит"
+  },
+  "bim": {
+    "title": "BIM център",
+    "models": "Модели",
+    "elements": "Елементи",
+    "upload_model": "Качване на модел",
+    "processing": "Обработка",
+    "active": "Активен",
+    "link_to_boq": "Свързване със сметката",
+    "properties": "Свойства",
+    "quantities": "Количества",
+    "wireframe": "Телена рамка",
+    "section_box": "Сечение",
+    "measure": "Измерване",
+    "zoom_to_fit": "Побиране в екрана"
+  },
+  "reporting": {
+    "title": "Отчети и табла",
+    "kpi": "Табло с KPI",
+    "generate_report": "Генериране на отчет",
+    "templates": "Шаблони",
+    "project_status": "Състояние на проекта",
+    "cost_report": "Отчет за разходите",
+    "schedule_status": "Състояние на графика",
+    "safety_report": "Отчет за безопасността",
+    "explain": {
+      "report_total_one": "Общо в отчета: {money} (сума от {count} ред).",
+      "report_total_other": "Общо в отчета: {money} (сума от {count} реда).",
+      "percent_of_total": "{part} е {percent} от {total} (процент от общото).",
+      "percent_zero_total": "{part} от {total}: общото е нула, затова всеки дял е отчетен като 0 процента.",
+      "breakdown_empty": "Разбивка на разходите: няма данни.",
+      "breakdown_one": "Разбивка на разходите: {count} група, общо в отчета {money}.",
+      "breakdown_other": "Разбивка на разходите: {count} групи, общо в отчета {money}.",
+      "top_n_one": "Топ {requested}: {shown} от {shown} ред.",
+      "top_n_other": "Топ {requested}: {shown} от {shown} реда."
+    }
+  },
+  "gantt": {
+    "title": "Диаграма на Гант",
+    "day": "Ден",
+    "week": "Седмица",
+    "month": "Месец",
+    "critical_path": "Критичен път",
+    "baseline": "Базов план",
+    "dependencies": "Зависимости",
+    "today": "Днес"
+  },
+  "settings": {
+    "regional": "Регионални настройки",
+    "timezone": "Часова зона",
+    "measurement": "Мерна система",
+    "paper_size": "Формат на хартията",
+    "date_format": "Формат на датата",
+    "number_format": "Формат на числата",
+    "currency": "Валута",
+    "metric": "Метрична",
+    "imperial": "Имперска"
+  },
+  "users": {
+    "management": "Управление на потребителите",
+    "management_desc": "Управлявайте членовете на екипа, ролите и достъпа",
+    "invite_user": "Покана за потребител",
+    "invite": "Покани",
+    "full_name": "Пълно име",
+    "email": "Имейл",
+    "password": "Парола",
+    "role": "Роля",
+    "status": "Статус",
+    "last_login": "Последно влизане",
+    "actions": "Действия",
+    "name": "Име",
+    "total": "Общо потребители",
+    "active": "Активни",
+    "inactive": "Неактивни",
+    "admins": "Администратори",
+    "managers": "Мениджъри",
+    "search": "Търсене по име или имейл...",
+    "no_users": "Няма намерени потребители",
+    "updated": "Потребителят е обновен",
+    "invited": "Потребителят е поканен успешно",
+    "deactivate": "Деактивиране",
+    "activate": "Активиране",
+    "never": "Никога",
+    "role_admin_desc": "Пълен достъп до всички функции",
+    "role_manager_desc": "Управление на проекти и екип",
+    "role_editor_desc": "Създаване и редактиране на съдържание",
+    "role_viewer_desc": "Достъп само за четене"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Този срез е замразен. Замразеният срез е фиксиран запис и не може да се променя.",
+      "frozen_no_delete": "Замразеният срез е фиксиран запис и не може да се изтрива.",
+      "draft_open": "Вече има отворена чернова на срез. Замразете я или я изтрийте, преди да започнете нова.",
+      "no_line_method": "Този ред няма собствен метод.",
+      "snapshot_missing": "Срезът не е намерен.",
+      "line_missing": "В този срез няма такъв ред.",
+      "document_missing": "Свързаният документ не принадлежи към този проект.",
+      "freeze_refused": "Срезът още не може да бъде замразен: {count} реда надвишават прага без коментар и подкрепящ документ.",
+      "no_frozen_snapshot": "Още няма замразен срез за сравнение.",
+      "no_ledger": "Дневникът на фактурите не е достъпен в тази инсталация.",
+      "no_snapshot": "Още няма срез за документиране."
+    },
+    "export": {
+      "project": "Проект",
+      "generated": "Генерирано",
+      "currency": "Валута",
+      "page": "Страница",
+      "generated_at": "Генерирано на",
+      "empty": "Още няма какво да се покаже.",
+      "total": "Общо",
+      "cost_report": "Отчет за разходите",
+      "phase_comparison": "Сравнение по фази",
+      "invoice_ledger": "Дневник на фактурите",
+      "forecast_documentation": "Документация на прогнозата",
+      "as_of": "Към дата",
+      "forecast_method": "Метод на прогнозата",
+      "col_account": "Сметка",
+      "col_code": "Код",
+      "col_description": "Описание",
+      "col_source": "Източник",
+      "col_method": "Метод",
+      "col_planned": "Планирано",
+      "col_committed": "Договорено",
+      "col_pending": "Предстоящи промени",
+      "col_measured": "Остойностено",
+      "col_certified": "Удостоверено",
+      "col_invoiced": "Фактурирано",
+      "col_paid": "Платено",
+      "col_forecast": "Прогноза",
+      "col_variance": "Отклонение",
+      "col_variance_pct": "Отклонение %",
+      "col_forecast_of_plan": "Прогноза % от плана",
+      "col_measured_of_committed": "Остойностено % от договореното",
+      "col_invoiced_of_committed": "Фактурирано % от договореното",
+      "col_contract": "Договор",
+      "col_contract_title": "Наименование на договора",
+      "col_invoice": "Фактура",
+      "col_date": "Дата",
+      "col_kind": "Вид",
+      "col_release_status": "Освобождаване",
+      "col_net": "Без ДДС",
+      "col_vat": "ДДС",
+      "col_gross": "С ДДС",
+      "col_retention": "Гаранционно удържане",
+      "col_release": "Освободено удържане",
+      "col_discount": "Отстъпка",
+      "col_payable": "За плащане",
+      "col_open": "Отворено",
+      "col_previous": "Предишно",
+      "col_delta": "Промяна",
+      "col_delta_pct": "Промяна %",
+      "col_needs_evidence": "Нужен е документ",
+      "col_comment": "Коментар",
+      "col_evidence": "Подкрепящ документ",
+      "row_unassigned": "Суми без разходен ред",
+      "row_loose_changes": "Промени без договор",
+      "row_no_contract": "Без договор",
+      "contract_value": "Стойност на договора",
+      "retention_held": "Удържана гаранция",
+      "yes": "Да",
+      "no": "Не",
+      "snapshot_date": "Дата на среза",
+      "snapshot_status": "Статус",
+      "previous_snapshot": "Предишен замразен срез",
+      "method_explained": "Как се чете прогнозата",
+      "evidence_threshold": "Документ е нужен при промяна над",
+      "threshold_both": "{parts}",
+      "threshold_any": "всяка промяна",
+      "frozen_at": "Замразен на"
+    },
+    "method": {
+      "best_available": "Най-добър наличен източник",
+      "maximum": "Максимална стойност",
+      "evm_cpi": "Усвоена стойност (CPI)",
+      "manual": "Ръчно"
+    },
+    "method_help": {
+      "best_available": "Всеки ред взема най-узрялата си стойност: окончателното остойностяване, иначе измерените работи, иначе договорената сума след възлагане, иначе количествено-стойностната сметка, иначе бюджета.",
+      "maximum": "Всеки ред взема най-високата от стойностите си (бюджет, сметка, възлагане, измерено, фактурирано), за да не скрива прогнозата риск.",
+      "evm_cpi": "Всеки ред изчислява разхода при завършване от напредъка: досега изразходваните средства, разделени на дела изпълнена работа.",
+      "manual": "Стойността на реда се задава от човек, който свързва и документа зад нея."
+    },
+    "source": {
+      "none": "Няма стойност",
+      "budget": "Бюджет",
+      "estimate": "Сметка",
+      "partly_awarded": "Частично възложено",
+      "awarded": "Възложено",
+      "measured": "Остойностено",
+      "final": "Окончателно остойностяване",
+      "manual": "Ръчно",
+      "invoiced": "Фактурирано",
+      "evm": "Усвоена стойност"
+    },
+    "layer": {
+      "budget": "Бюджет",
+      "estimate": "Сметка",
+      "tender": "Най-добра оферта",
+      "awarded": "Възложено",
+      "changes": "Одобрени промени",
+      "committed": "Договорено",
+      "pending": "Предстоящи промени",
+      "measured": "Остойностено",
+      "certified": "Удостоверено",
+      "invoiced": "Фактурирано",
+      "paid": "Платено",
+      "forecast": "Прогноза"
+    },
+    "invoice_kind": {
+      "interim": "Междинна",
+      "final": "Окончателна",
+      "daywork": "Почасови работи",
+      "credit_note": "Кредитно известие"
+    },
+    "release_status": {
+      "open": "Отворено",
+      "released": "Освободено"
+    },
+    "evidence_kind": {
+      "document": "Документ",
+      "minutes": "Протокол",
+      "other": "Друго"
+    },
+    "snapshot_status": {
+      "draft": "Чернова",
+      "frozen": "Замразен"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Проект",
+      "project_no": "№ на проекта",
+      "generated_on": "Дата на генериране",
+      "records": "Записи",
+      "currency": "Валута",
+      "status": "Статус",
+      "name": "Име",
+      "signature": "Подпис",
+      "date": "Дата",
+      "signatures": "Подписи",
+      "yes": "Да",
+      "no": "Не",
+      "days_one": "{n} ден",
+      "days_other": "{n} дн.",
+      "empty_register": "Няма записи.",
+      "total": "Общо",
+      "signer_title": "Длъжност",
+      "sig_prepared_by": "Изготвено от",
+      "sig_checked_by": "Проверено от",
+      "sig_approved_by": "Одобрено от",
+      "footer_generated": "Генерирано на {timestamp}",
+      "footer_page": "Страница {page} от {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Регистър на документите за одобрение",
+        "doc_title": "Документ за одобрение",
+        "doc_title_product_data": "Бланка за одобрение на материали",
+        "col_number": "№ на документа",
+        "col_title": "Заглавие",
+        "col_type": "Вид",
+        "col_spec": "Раздел от спецификацията",
+        "col_rev": "Ред.",
+        "col_date_submitted": "Дата на внасяне",
+        "col_date_required": "Необходим до",
+        "col_date_returned": "Дата на връщане",
+        "col_reviewer": "Проверяващ",
+        "col_approver": "Одобряващ",
+        "col_ball_in_court": "Следващо действие от",
+        "submitted_by_org": "Внасяща фирма",
+        "review_notes": "Бележки на проверяващия",
+        "no_review_notes": "Няма записани бележки на проверяващия.",
+        "sig_submitted": "Внесено от",
+        "sig_reviewed": "Проверено от",
+        "sig_approved": "Одобрено от",
+        "register_filename": "registar-na-dokumentite-za-odobrenie",
+        "register_title_shop_drawing": "Регистър на работните чертежи",
+        "register_title_product_data": "Регистър на одобренията на материали",
+        "register_title_method_statement": "Регистър на методиките за изпълнение",
+        "register_filename_shop_drawing": "registar-na-rabotnite-chertezhi",
+        "register_filename_product_data": "registar-na-odobreniyata-na-materiali",
+        "register_filename_method_statement": "registar-na-metodikite-za-izpalnenie",
+        "col_discipline": "Част",
+        "col_manufacturer": "Производител / марка",
+        "col_model": "Модел / референция",
+        "col_origin": "Страна на произход",
+        "col_supplier": "Доставчик",
+        "col_product": "Производител / модел / произход",
+        "col_review_code": "Код на проверката",
+        "col_outcome": "Резултат от проверката",
+        "col_review_period": "Срок за проверка (дни)",
+        "col_review_due": "Проверка до",
+        "col_days_in_review": "Дни в проверка",
+        "col_days_in_review_print": "Дни в проверка",
+        "col_review_overdue": "Дни просрочие",
+        "col_required_on_site": "Необходим на обекта",
+        "col_long_lead": "Дълъг срок на доставка",
+        "col_lead_time": "Срок на доставка (седм.)",
+        "col_needed_by": "Одобрение необходимо до",
+        "col_approval_late": "Дни след срока",
+        "col_drawings": "Свързани чертежи",
+        "col_submitted_returned": "Внесен / върнат",
+        "col_on_site_needed_by": "На обекта / одобрение до",
+        "resubmit_for_record": "Коригираното копие да се внесе отново за архива",
+        "review_history": "История на проверките",
+        "hist_submitted": "Внесен",
+        "hist_returned": "Върнат",
+        "drawings_missing_one": "{n} свързан чертеж вече не е наличен",
+        "drawings_missing_other": "Недостъпни свързани чертежи: {n}",
+        "weeks_one": "{n} седмица",
+        "weeks_other": "{n} седм."
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернова",
+          "submitted": "Внесен",
+          "under_review": "В проверка",
+          "approved": "Одобрен",
+          "approved_as_noted": "Одобрен с бележки",
+          "revise_and_resubmit": "За преработка и повторно внасяне",
+          "rejected": "Отхвърлен",
+          "closed": "Приключен"
+        },
+        "type": {
+          "shop_drawing": "Работен чертеж",
+          "product_data": "Технически данни на продукта",
+          "sample": "Образец",
+          "mock_up": "Мостра (мокъп)",
+          "test_report": "Протокол от изпитване",
+          "calculation": "Изчисление",
+          "method_statement": "Методика за изпълнение",
+          "certificate": "Сертификат",
+          "warranty": "Гаранция"
+        },
+        "discipline": {
+          "mechanical": "Механична",
+          "hvac": "ОВК",
+          "plumbing": "ВиК",
+          "fire_protection": "Пожарна безопасност",
+          "electrical": "Електрическа",
+          "lighting": "Осветление",
+          "elv": "Слаботокова",
+          "bms": "Автоматизация на сгради",
+          "architectural": "Архитектурна",
+          "structural": "Конструктивна",
+          "civil": "Строителна"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Регистър на нарежданията за промяна",
+        "doc_title": "Нареждане за промяна",
+        "col_code": "Код",
+        "col_title": "Заглавие",
+        "col_reason": "Причина",
+        "col_instrument": "Основание",
+        "col_submitted": "Дата на внасяне",
+        "col_contractor_amount": "Сума на изпълнителя",
+        "col_engineer_amount": "Сума на инженера",
+        "col_approved_amount": "Одобрена сума",
+        "col_cost_impact": "Ефект върху цената",
+        "col_time_impact": "Ефект върху срока (дни)",
+        "col_approved_time": "Одобрен срок (дни)",
+        "time_impact": "Ефект върху срока",
+        "approved_time": "Одобрен срок",
+        "col_approved": "Дата на одобрение",
+        "submitted_by": "Внесено от",
+        "approved_by": "Одобрено от",
+        "description": "Описание",
+        "no_description": "Няма записано описание.",
+        "items": "Позиции на промяната",
+        "item_description": "Описание",
+        "item_change": "Промяна",
+        "item_unit": "Мярка",
+        "item_original_quantity": "Перв. к-во",
+        "item_new_quantity": "Ново к-во",
+        "item_original_rate": "Перв. цена",
+        "item_new_rate": "Нова цена",
+        "item_cost_delta": "Разлика в стойността",
+        "register_filename": "registar-na-narezhdaniyata-za-promyana"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернова",
+          "submitted": "Внесено",
+          "approved": "Одобрено",
+          "rejected": "Отхвърлено",
+          "executed": "Изпълнено"
+        },
+        "reason": {
+          "client_request": "Искане на възложителя",
+          "design_change": "Промяна в проекта",
+          "unforeseen": "Непредвидени условия",
+          "regulatory": "Нормативни изисквания",
+          "error": "Грешка или пропуск",
+          "non_conformance": "Несъответствие",
+          "value_engineering": "Оптимизиране на стойността (VE)"
+        },
+        "instrument": {
+          "works_change": "Наредена промяна",
+          "site_confirmation": "Потвърждение на обекта",
+          "claim": "Претенция"
+        },
+        "change": {
+          "added": "Добавено",
+          "removed": "Премахнато",
+          "modified": "Променено"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Доказателствен пакет",
+        "subject": "Предмет",
+        "basis": "Основание",
+        "period_from": "Най-ранен запис",
+        "period_to": "Най-пресен запис",
+        "digest": "Код за цялост (SHA-256, първите 16 знака)",
+        "col_row": "№",
+        "col_record_id": "ID на записа",
+        "col_section": "Раздел",
+        "col_date": "Дата",
+        "col_kind": "Вид запис",
+        "col_title": "Заглавие",
+        "col_summary": "Резюме",
+        "col_reference": "Референция",
+        "register_filename": "dokazatelstven-paket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Уведомления",
+          "correspondence": "Кореспонденция",
+          "rfis": "Запитвания за информация (RFI)",
+          "variations": "Промени",
+          "approvals": "Одобрения",
+          "delay": "Забава",
+          "timeline": "Хронология",
+          "other": "Други"
+        },
+        "kind": {
+          "notice": "Уведомление",
+          "variation_notice": "Уведомление за промяна",
+          "variation_request": "Искане за промяна",
+          "variation_order": "Заповед за промяна",
+          "change_order": "Нареждане за промяна",
+          "moc_entry": "Запис за промяна",
+          "correspondence": "Кореспонденция"
+        },
+        "basis": {
+          "dispute": "Спор",
+          "valuation": "Остойностяване",
+          "delay": "Забава / удължаване на срока",
+          "general": "Общ запис"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Дневник на кореспонденцията",
+        "doc_title": "Кореспонденция",
+        "col_reference": "Референтен №",
+        "col_direction": "Посока",
+        "col_type": "Вид",
+        "col_subject": "Относно",
+        "col_from": "От",
+        "col_to": "До",
+        "col_date_sent": "Дата на изпращане",
+        "col_date_received": "Дата на получаване",
+        "col_response_due": "Срок за отговор",
+        "col_clause": "Клауза от договора",
+        "notes": "Бележки",
+        "no_notes": "Няма записани бележки.",
+        "attachments": "Приложени файлове",
+        "linked_documents": "Свързани документи",
+        "sig_prepared": "Изготвено от",
+        "sig_received": "Получено от",
+        "register_filename": "dnevnik-na-korespondentsiyata"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Входяща",
+          "outgoing": "Изходяща"
+        },
+        "type": {
+          "letter": "Писмо",
+          "email": "Имейл",
+          "notice": "Уведомление",
+          "memo": "Вътрешна бележка",
+          "report": "Доклад"
+        },
+        "status": {
+          "open": "Отворена",
+          "awaiting_response": "Очаква отговор",
+          "responded": "Отговорено",
+          "closed": "Приключена"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Регистър на предаванията на документи",
+        "doc_title": "Предаване на документи",
+        "col_number": "№ на предаването",
+        "col_subject": "Относно",
+        "col_purpose": "Цел",
+        "col_issued": "Дата на издаване",
+        "col_response_due": "Срок за отговор",
+        "col_recipients": "Получатели",
+        "col_item_count": "Позиции",
+        "sender": "Изпращач",
+        "cover_note": "Придружително писмо",
+        "no_cover_note": "Няма придружително писмо.",
+        "recipients": "Получатели",
+        "recipient": "Получател",
+        "action_required": "Необходимо действие",
+        "acknowledged": "Потвърдено получаване",
+        "responded": "Дата на отговор",
+        "items": "Предадени документи",
+        "item_no": "№",
+        "item_description": "Описание",
+        "item_notes": "Бележки",
+        "sig_issued": "Издадено от",
+        "sig_received": "Получено от",
+        "register_filename": "registar-na-predavaniyata-na-dokumenti"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернова",
+          "issued": "Издадено",
+          "responded": "Отговорено"
+        },
+        "purpose": {
+          "for_approval": "За одобрение",
+          "for_review": "За проверка",
+          "for_information": "За сведение",
+          "for_construction": "За изпълнение",
+          "for_tender": "За тръжна процедура",
+          "for_record": "За архив"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Регистър на промените",
+        "claim_register_title": "Регистър на претенциите",
+        "notice_register_title": "Регистър на уведомленията",
+        "doc_title": "Искане за промяна",
+        "doc_title_credit": "Искане за промяна (отпаднали работи)",
+        "time_impact": "Ефект върху срока",
+        "col_code": "Код",
+        "col_title": "Заглавие",
+        "col_classification": "Вид",
+        "col_urgency": "Спешност",
+        "col_requested": "Дата на искането",
+        "col_claimed_amount": "Претендирана сума",
+        "col_agreed_amount": "Договорена сума",
+        "col_time_impact": "Ефект върху срока (дни)",
+        "col_response_due": "Срок за отговор",
+        "col_clause": "Клауза от договора",
+        "col_row": "№",
+        "col_claim_type": "Вид претенция",
+        "col_raised": "Дата на предявяване",
+        "col_period_start": "Период от",
+        "col_period_end": "Период до",
+        "col_description": "Описание",
+        "col_decided_amount": "Присъдена сума",
+        "col_days_requested": "Поискани дни",
+        "col_days_granted": "Признати дни",
+        "col_recipient_type": "Адресирано до",
+        "col_recipient": "Получател",
+        "col_target_response": "Очакван отговор",
+        "col_response_received": "Получен отговор",
+        "requested_by": "Поискано от",
+        "decided_by": "Решено от",
+        "date_submitted": "Дата на внасяне",
+        "date_decided": "Дата на решението",
+        "description": "Описание",
+        "no_description": "Няма записано описание.",
+        "decision_notes": "Мотиви към решението",
+        "no_decision_notes": "Все още няма записано решение.",
+        "variation_register_filename": "registar-na-promenite",
+        "claim_register_filename": "registar-na-pretentsiite",
+        "notice_register_filename": "registar-na-uvedomleniyata"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Чернова",
+          "submitted": "Внесено",
+          "under_review": "В проверка",
+          "approved": "Одобрено",
+          "rejected": "Отхвърлено",
+          "converted_to_vo": "Преобразувано в заповед"
+        },
+        "claim_status": {
+          "draft": "Чернова",
+          "submitted": "Внесена",
+          "under_review": "В проверка",
+          "agreed": "Договорена",
+          "granted": "Уважена",
+          "rejected": "Отхвърлена"
+        },
+        "notice_status": {
+          "issued": "Издадено",
+          "acknowledged": "Получаването е потвърдено",
+          "responded": "Отговорено",
+          "closed": "Приключено"
+        },
+        "classification": {
+          "scope_change": "Промяна в обхвата",
+          "unforeseen": "Непредвидено условие",
+          "owner_change": "Промяна по искане на възложителя",
+          "design_dev": "Доразработване на проекта",
+          "regulatory": "Нормативни изисквания",
+          "other": "Друго"
+        },
+        "urgency": {
+          "low": "Ниска",
+          "med": "Средна",
+          "high": "Висока"
+        },
+        "claim_type": {
+          "disruption": "Нарушаване на хода на работите",
+          "eot": "Удължаване на срока"
+        },
+        "recipient_type": {
+          "owner": "Възложител",
+          "contractor": "Изпълнител",
+          "architect": "Архитект",
+          "engineer": "Инженер",
+          "consultant": "Консултант"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Дневен отчет от строителния обект",
+        "overview": "Общ преглед",
+        "site_supervisor": "Ръководител на обекта",
+        "not_recorded": "Не е записано",
+        "labour_on_site": "Работна ръка на обекта",
+        "equipment_on_site": "Техника на обекта",
+        "completeness": "Пълнота",
+        "weather": "Времето",
+        "weather_time": "Час",
+        "weather_source": "Източник",
+        "weather_temp": "Темп. (°C)",
+        "weather_wind": "Вятър (км/ч)",
+        "weather_precip": "Валежи (мм)",
+        "weather_conditions": "Условия",
+        "weather_empty": "Няма записани метеорологични данни за този ден.",
+        "site_record": "Запис от обекта",
+        "entries_empty": "Няма записани вписвания за този отчет.",
+        "notes": "Бележки",
+        "notes_empty": "Няма допълнителни бележки.",
+        "footer_supervisor": "Ръководител на обекта: {name}",
+        "footer_supervisor_missing": "Ръководител на обекта: не е записан",
+        "footer_generated": "Генерирано: {timestamp}",
+        "footer_page": "Страница {page} от {total}",
+        "workforce": "Персонал по фирми",
+        "workforce_company": "Фирма",
+        "workforce_count": "Хора",
+        "workforce_unassigned": "Без определена фирма",
+        "workforce_total": "Общо",
+        "signatures": "Подписи",
+        "sig_prepared": "Изготвено от (ръководител на обекта)",
+        "sig_approved": "Одобрено от (представител на възложителя)",
+        "sig_name": "Име",
+        "sig_title": "Длъжност",
+        "sig_date": "Дата",
+        "sig_signature": "Подпис",
+        "signed_note": "Подписано в системата: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "dneven-otchet",
+        "summary_wind": "вятър {value} км/ч",
+        "summary_precipitation": "валежи {value} мм",
+        "summary_humidity": "влажност {value} %",
+        "percent": "{value}%",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Посетители",
+          "event": "Събития",
+          "delivery": "Доставени материали",
+          "completion": "Изпълнени работи",
+          "incident_summary": "Безопасност и инциденти",
+          "inspection_summary": "Проверки",
+          "photo_note": "Снимкови бележки",
+          "general": "Общи бележки"
+        },
+        "status": {
+          "open": "Отворен",
+          "closed": "Приключен",
+          "signed": "Подписан",
+          "archived": "Архивиран"
+        },
+        "condition": {
+          "clear": "ясно",
+          "mainly_clear": "предимно ясно",
+          "partly_cloudy": "частична облачност",
+          "cloudy": "облачно",
+          "overcast": "мрачно",
+          "fog": "мъгла",
+          "fog_rime": "студена мъгла с измръзване",
+          "drizzle_light": "слаб ръмеж",
+          "drizzle_moderate": "умерен ръмеж",
+          "drizzle_dense": "силен ръмеж",
+          "rain": "дъжд",
+          "rain_light": "слаб дъжд",
+          "rain_moderate": "умерен дъжд",
+          "rain_heavy": "силен дъжд",
+          "freezing_rain_light": "слаб леден дъжд",
+          "freezing_rain_heavy": "силен леден дъжд",
+          "snow": "сняг",
+          "snow_light": "слаб сняг",
+          "snow_moderate": "умерен сняг",
+          "snow_heavy": "силен снеговалеж",
+          "rain_showers_light": "слаби превалявания",
+          "rain_showers_moderate": "умерени превалявания",
+          "rain_showers_violent": "поройни превалявания",
+          "snow_showers_light": "слаби превалявания от сняг",
+          "snow_showers_heavy": "силни превалявания от сняг",
+          "thunderstorm": "гръмотевична буря",
+          "thunderstorm_hail_light": "гръмотевична буря със слаб град",
+          "thunderstorm_hail_heavy": "гръмотевична буря със силен град"
+        },
+        "source": {
+          "manual": "Ръчно въвеждане",
+          "open_meteo": "Метеорологична услуга",
+          "sensor": "Сензор на обекта"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Регистър на запитванията за информация (RFI)",
+        "col_number": "№ на RFI",
+        "col_subject": "Относно",
+        "col_raised_by": "Иницииран от",
+        "col_assigned_to": "Възложен на",
+        "col_ball_in_court": "Следващо действие от",
+        "col_date_required": "Необходим до",
+        "col_response_due": "Срок за отговор",
+        "col_days_open": "Дни отворен",
+        "col_cost_impact": "Ефект върху цената",
+        "col_schedule_impact": "Ефект върху графика",
+        "col_response": "Отговор",
+        "yes_with": "Да ({detail})",
+        "register_filename": "registar-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Чернова",
+          "open": "Отворено",
+          "answered": "Отговорено",
+          "closed": "Затворено",
+          "void": "Анулирано"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Генерирано с ИИ",
+        "drawing": "Чертеж",
+        "cost_estimate": "КОСТОВА ОЦЕНКА",
+        "summary": "ОБОБЩЕНИЕ",
+        "project": "Проект:",
+        "boq": "Количествена сметка:",
+        "date": "Дата:",
+        "status": "Статус:",
+        "prepared_by": "Изготвил:",
+        "approved_by": "Одобрил:",
+        "signature_hint": "Име / Подпис / Дата",
+        "contents": "Раздели / Позиции:",
+        "pos": "Поз.",
+        "description": "Описание",
+        "unit": "Ед. мярка",
+        "qty": "Кол.",
+        "rate": "Единична цена",
+        "total": "Общо",
+        "subtotal": "Междинна сума:",
+        "other_positions": "Други позиции",
+        "direct_cost": "Пряка стойност:",
+        "markups": "Надбавки (без ДДС):",
+        "net_total": "Нетна стойност (без ДДС):",
+        "gross_total": "Обща стойност",
+        "page": "Страница",
+        "of": "от",
+        "generated": "Генерирано:",
+        "summary_report": "Обобщен отчет",
+        "positions_omitted": "{count} позиции (пълните детайли са пропуснати заради производителността)",
+        "section": "Раздел",
+        "items": "Позиции",
+        "cost_summary": "Обобщение на разходите",
+        "table_of_contents": "Съдържание",
+        "resources_omitted": "Разбивката на ресурсите не е отпечатана: тази сметка има твърде много ресурсни редове за един PDF.",
+        "status_draft": "Проект",
+        "status_final": "Окончателна",
+        "status_archived": "Архивирана",
+        "subject": "Количествена сметка",
+        "tax_vat": "ДДС"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "ФАКТУРА",
+        "date": "Дата: {value}",
+        "due": "Падеж: {value}",
+        "from": "От",
+        "bill_to": "Получател",
+        "vat_id": "ИН по ДДС: {value}",
+        "ref": "Реф.: {value}",
+        "th_description": "Описание",
+        "th_qty": "Кол.",
+        "th_unit": "Ед. мярка",
+        "th_unit_price": "Единична цена",
+        "th_net": "Нето ({currency})",
+        "net_total": "Нетна сума",
+        "vat_total": "ДДС",
+        "grand_total": "Обща сума",
+        "retention_prepaid": "Задържане / авансово плащане",
+        "amount_due": "Дължима сума",
+        "payment": "Плащане",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Сметка: {value}",
+        "bank_code": "Банков код: {value}",
+        "account_holder": "Титуляр на сметката: {value}",
+        "footer": "Този PDF съдържа вграден електронна фактура по EN 16931 (Factur-X / ZUGFeRD). Вграденият XML е официалният документ.",
+        "date_format": "%d.%m.%Y",
+        "decimal_separator": ",",
+        "group_separator": " "
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Отчет",
+        "meta_project": "Проект",
+        "meta_type": "Вид",
+        "meta_generated": "Генериран",
+        "meta_currency": "Валута",
+        "field_column": "Поле",
+        "value_column": "Стойност",
+        "yes": "Да",
+        "no": "Не",
+        "no_data_heading": "Няма налични данни",
+        "no_data_body": "Този отчет е генериран с празен набор от данни. Проверете дали изходните модули (финанси, график, безопасност и др.) са върнали данни за избрания проект.",
+        "no_data_body_short": "Този отчет е генериран с празен набор от данни. Проверете дали изходните модули са върнали данни за избрания проект.",
+        "footer_generated_by": "Генерирано от OpenConstructionERP на {timestamp}.",
+        "worksheet_name": "Отчет",
+        "pdf_subject": "Проектен отчет",
+        "overall_progress": "Общ напредък",
+        "as_of": "към",
+        "recorded_by": "Записал",
+        "period": "Период",
+        "entries_suffix": "({count} записа)",
+        "site_photo_alt": "Снимка от строителната площадка",
+        "ai_summary_heading": "Обобщение",
+        "ai_badge": "Генерирано с ИИ",
+        "ai_note": "Генерирано с ИИ от проектните данни по-долу.",
+        "ai_note_confidence": "Генерирано с ИИ от проектните данни по-долу (степен на увереност {confidence}).",
+        "ai_note_review": "Прегледайте преди споделяне с клиента."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Име",
+          "status": "Статус",
+          "phase": "Фаза",
+          "planned_start": "Планирано начало",
+          "planned_end": "Планиран край",
+          "schedule_progress_pct": "Напредък по график (%)",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Изразходван бюджет (%)",
+          "as_of": "към",
+          "progress_pct": "Напредък (%)",
+          "risk_score_avg": "Среден рисков рейтинг",
+          "open_rfis": "Отворени RFI",
+          "open_submittals": "Отворени одобрения",
+          "open_defects": "Отворени дефекти",
+          "open_observations": "Отворени наблюдения",
+          "budget": "Бюджет",
+          "committed": "Ангажирано",
+          "actual": "Фактично",
+          "payable": "Задължения",
+          "receivable": "Вземания",
+          "net_cash_flow": "Нетен паричен поток"
+        },
+        "section_titles": {
+          "Project Overview": "Преглед на проекта",
+          "Key Performance Indicators": "Ключови показатели за ефективност",
+          "Schedule Status": "Състояние на графика",
+          "Risk Summary": "Обобщение на рисковете",
+          "Open Issues": "Отворени въпроси",
+          "Cost Summary": "Обобщение на разходите",
+          "Cost Breakdown": "Разбивка на разходите",
+          "Change Orders": "Поръчки за промяна",
+          "Cash Flow": "Паричен поток",
+          "Schedule Overview": "Преглед на графика",
+          "Milestone Status": "Състояние на етапите",
+          "Critical Path": "Критичен път",
+          "3-Week Lookahead": "Прогноза за 3 седмици",
+          "Safety KPIs": "Ключови показатели за безопасност",
+          "Incident Log": "Регистър на инцидентите",
+          "Near-Miss Reports": "Доклади за почти инциденти",
+          "Safety Training": "Обучение по безопасност",
+          "Inspection Summary": "Обобщение на проверките",
+          "By Inspection Type": "По вид проверка",
+          "Punch List Status": "Състояние на списъка за дефекти",
+          "Recent Inspections": "Последни проверки",
+          "Portfolio Overview": "Преглед на портфейла",
+          "Project Statuses": "Състояния на проектите",
+          "KPI Comparison": "Сравнение на ключовите показатели",
+          "Portfolio Risks": "Рискове на портфейла",
+          "Field Progress": "Напредък на терен",
+          "Top Risks": "Основни рискове",
+          "Site Photos": "Снимки от строителната площадка",
+          "Summary": "Обобщение"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Поръчка за покупка",
+        "gr_title": "Приемателен протокол",
+        "supplier": "Доставчик",
+        "po_type": "Вид поръчка",
+        "issue_date": "Дата на издаване",
+        "delivery_date": "Дата на доставка",
+        "created_by": "Изготвил",
+        "order_total": "Обща стойност на поръчката",
+        "line_items": "Редове",
+        "col_no": "№",
+        "col_description": "Описание",
+        "col_quantity": "Кол.",
+        "col_unit": "Ед. мярка",
+        "col_unit_rate": "Единична цена",
+        "col_amount": "Сума",
+        "no_line_items": "Няма редове.",
+        "totals": "Суми",
+        "subtotal": "Нетна сума",
+        "tax": "Данък",
+        "total_gross": "Общо с ДДС",
+        "terms": "Условия",
+        "payment_terms": "Условия за плащане",
+        "retention": "Гаранционно задържане",
+        "retention_at": "Задържането се извършва при",
+        "retention_at_receipt": "Приемане на стоката",
+        "retention_at_invoice": "Фактуриране",
+        "invoice_tolerance": "Толеранс на фактурата",
+        "supplier_confirmation": "Потвърждение от доставчика",
+        "supplier_reference": "Референция на доставчика",
+        "confirmed_delivery": "Потвърдена дата на доставка",
+        "acknowledged_on": "Потвърдено на",
+        "not_confirmed": "Още не е потвърдено от доставчика.",
+        "notes": "Бележки",
+        "no_notes": "Няма записани бележки.",
+        "sig_ordered_by": "Поръчал",
+        "purchase_order": "Поръчка за покупка",
+        "receipt_date": "Дата на получаване",
+        "received_by": "Получил",
+        "delivery_note": "Стокова разписка",
+        "col_ordered": "Поръчани",
+        "col_received": "Получени",
+        "col_rejected": "Отхвърлени",
+        "col_batch": "Партида / лот",
+        "rejections": "Отхвърляния",
+        "col_reason": "Причина",
+        "no_rejections": "Нищо не е отхвърлено.",
+        "sig_delivered_by": "Доставил",
+        "counterparty_tax_id": "ИН по ДДС",
+        "counterparty_address": "Адрес"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Проект",
+          "approved": "Одобрена",
+          "issued": "Издадена",
+          "partially_received": "Частично получена",
+          "completed": "Завършена",
+          "cancelled": "Анулирана"
+        },
+        "gr_status": {
+          "draft": "Проект",
+          "confirmed": "Потвърдено"
+        },
+        "po_type": {
+          "standard": "Стандартна",
+          "blanket": "Рамкова поръчка",
+          "service": "Услуги"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Фактура",
+        "payment_title": "Плащане",
+        "direction": "Посока",
+        "supplier": "Доставчик",
+        "client": "Клиент",
+        "invoice_date": "Дата на фактурата",
+        "due_date": "Падеж",
+        "payment_terms": "Условия за плащане",
+        "purchase_order": "Поръчка за покупка",
+        "invoice_total": "Сума на фактурата",
+        "line_items": "Редове",
+        "col_no": "№",
+        "col_description": "Описание",
+        "col_quantity": "Кол.",
+        "col_unit": "Ед. мярка",
+        "col_unit_rate": "Единична цена",
+        "col_vat": "ДДС",
+        "col_amount": "Сума",
+        "no_line_items": "Няма редове.",
+        "totals": "Суми",
+        "subtotal": "Нетна сума",
+        "tax": "Данък",
+        "total_gross": "Общо с ДДС",
+        "retention": "Гаранционно задържане",
+        "amount_due": "Дължимо след задържане",
+        "payments": "Плащания",
+        "col_date": "Дата",
+        "col_reference": "Референция",
+        "col_paid": "Платено",
+        "col_withheld": "Задържано",
+        "refund": "Възстановяване",
+        "no_payments": "Няма записани плащания.",
+        "notes": "Бележки",
+        "no_notes": "Няма записани бележки.",
+        "invoice": "Фактура",
+        "invoice_number": "Фактура №",
+        "payment_date": "Дата на плащане",
+        "reference": "Референция",
+        "amount_paid": "Платена сума",
+        "exchange_rate": "Валутен курс",
+        "kind": "Вид",
+        "kind_payment": "Плащане",
+        "kind_refund": "Възстановяване",
+        "withholding": "Задържане",
+        "withheld_amount": "Задържана сума",
+        "release_date": "Дата на освобождаване",
+        "gross_settled": "Уредена брутна сума",
+        "no_withholding": "От това плащане не е удържано задържане.",
+        "counterparty_tax_id": "ИН по ДДС",
+        "counterparty_address": "Адрес"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Проект",
+          "pending": "Очаква одобрение",
+          "approved": "Одобрена",
+          "sent": "Изпратена",
+          "paid": "Платена",
+          "cancelled": "Анулирана",
+          "credit_note_issued": "Издадено кредитно известие"
+        },
+        "direction": {
+          "payable": "Задължение (фактура от доставчик)",
+          "receivable": "Вземане (фактура към клиент)"
+        },
+        "payment_status": {
+          "completed": "Завършено",
+          "refunded": "Възстановено"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Страница {page} от {total}",
+    "page": "Страница {page}",
+    "printed": "Отпечатано: {timestamp}",
+    "generated": "Създадено: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} ви покани в клиентския портал",
+      "login_subject": "Вашата връзка за вход в клиентския портал",
+      "invite_heading": "Добре дошли в клиентския портал",
+      "login_heading": "Вход в клиентския портал",
+      "greeting": "Здравейте, {name},",
+      "greeting_generic": "Здравейте,",
+      "invite_body": "{sender} ви предостави достъп до клиентския портал. В него можете да следите проекта си: отчети за напредъка, документи, фактури и предстоящите етапи.",
+      "login_body": "Ето връзката за вход, която поискахте.",
+      "link_help": "Бутонът по-долу ви вписва в портала. Не е необходима парола. Връзката може да се използва само веднъж и изтича след {hours} ч.",
+      "ignore": "Ако не очаквате това съобщение, можете да го пренебрегнете. Без тази връзка никой не получава достъп.",
+      "invite_cta": "Отваряне на портала",
+      "login_cta": "Вход",
+      "sender_generic": "Вашият проектен екип"
+    },
+    "tender_invite": {
+      "subject": "Покана за участие в търг: {package}",
+      "heading": "Покана за участие в търг",
+      "greeting": "Уважаеми представители на {company},",
+      "greeting_generic": "Уважаеми дами и господа,",
+      "invite": "Поканени сте да подадете оферта за пакета за търг {package}.",
+      "invite_project": "Поканени сте да подадете оферта за пакета за търг {package} по проект {project}.",
+      "deadline": "Краен срок за подаване: {deadline}",
+      "link_help": "Бутонът по-долу отваря количествената сметка. Въведете единичните си цени онлайн, запазвайте чернова, когато пожелаете, и подайте офертата преди крайния срок. Не е необходим акаунт.",
+      "link_personal": "Тази връзка е лична за вашата фирма. Моля, не я препращайте.",
+      "cta": "Отваряне на сметката и въвеждане на цени",
+      "no_link": "Моля, прегледайте данните за пакета и ни отговорете с вашата оферта преди посочения по-горе краен срок."
+    },
+    "notification_email": {
+      "greeting": "Здравейте, {name},",
+      "greeting_generic": "Здравейте,",
+      "cta": "Отваряне в OpenConstructionERP",
+      "footer": "Получавате това съобщение заради настройките ви за известия. Можете да ги промените в профила си.",
+      "digest_subject": "OpenConstructionERP: Обобщение на известията ({count})",
+      "digest_heading": "Последни известия:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Сравнение на цените",
+      "comparison_sheet": "Сравнение",
+      "bidder_title": "Количествена сметка за остойностяване",
+      "bidder_sheet": "Сметка",
+      "project": "Проект",
+      "package": "Пакет",
+      "currency": "Валута",
+      "date": "Дата",
+      "return_by": "Срок за връщане",
+      "item": "Поз.",
+      "description": "Описание",
+      "unit": "Мярка",
+      "quantity": "Количество",
+      "unit_price": "Единична цена",
+      "line_total": "Стойност",
+      "own_estimate": "Собствена оценка",
+      "not_priced": "без цена",
+      "sum_priced_lines": "Сума на остойностените позиции",
+      "bid_total": "Обща стойност на офертата, както е подадена",
+      "lines_priced": "Остойностени позиции",
+      "lines_priced_value": "{priced} от {total}",
+      "deviation": "Отклонение от собствената оценка",
+      "not_comparable": "няма",
+      "other_currency": "Оферирано във валута {currency}, не се класира спрямо офертите във валута {reporting}.",
+      "legend": "Легенда",
+      "legend_lowest": "Зелено: най-ниската единична цена за позицията.",
+      "legend_high": "▲ червено: повече от {pct}% над медианната цена за позицията.",
+      "legend_low": "▼ кехлибарено: повече от {pct}% под медианната цена за позицията.",
+      "legend_missing": "\"{marker}\": участникът не е посочил цена за позицията.",
+      "legend_incomplete": "Оферта с неостойностени позиции се отбелязва в колоната \"Остойностени позиции\" и не се класира като най-ниска по обща стойност.",
+      "legend_totals": "Общата стойност на офертата е сумата, подадена от участника; тя може да се различава от сбора на остойностените позиции.",
+      "bidder": "Участник",
+      "bidder_note": "Бележка на участника",
+      "reference": "Референция (не променяйте)",
+      "total": "Общо",
+      "instructions": "Въведете единична цена за всяка позиция в жълтите клетки. Количествата и описанията са фиксирани, стойностите по позиции и общата сума се изчисляват автоматично. Оставете клетката празна, ако не остойностявате позицията."
+    },
+    "cost_plan": {
+      "sheet_plan": "Разходен план NRM 1",
+      "sheet_unallocated": "Неразпределени",
+      "title": "Разходен план по елементи (NRM 1)",
+      "bill": "Количествена сметка",
+      "currency": "Валута",
+      "gifa": "РЗП (m2)",
+      "gifa_project": "от проекта",
+      "gifa_entered": "въведена за този износ",
+      "gifa_none": "не е зададена, разходът на m2 не се показва",
+      "col_code": "Код",
+      "col_description": "Елемент",
+      "col_positions": "Позиции",
+      "col_basis": "Основа",
+      "col_total": "Общо",
+      "col_per_m2": "Разход на m2 РЗП",
+      "col_share": "% от общата сума",
+      "col_running": "Натрупана сума",
+      "group_level": "Ниво група, без посочен елемент",
+      "facilitating_works_estimate": "Оценка на спомагателните работи",
+      "works_estimate": "Оценка на строителните работи",
+      "addons_heading": "Групи 9-14 по NRM 1, остойностени като позиции в сметката",
+      "unallocated": "Неразпределено по елемент",
+      "direct_cost": "Преки разходи по сметката",
+      "markups_heading": "Надбавки (каскадата на сметката, по ред)",
+      "markups_total": "Общо надбавки",
+      "grand_total": "Общо по разходния план",
+      "basis_direct": "{pct}% върху преките разходи",
+      "basis_running": "{pct}% върху натрупаната междинна сума",
+      "basis_lump": "Паушална сума",
+      "basis_banded": "Скала по диапазони",
+      "basis_escalation": "Индексно оскъпяване",
+      "basis_other": "{kind}",
+      "basis_scoped": "по раздели",
+      "col_ordinal": "Пореден номер",
+      "col_position": "Описание",
+      "col_written_code": "Код, както е записан",
+      "col_reason": "Причина",
+      "reason_no_code": "Няма код по NRM при позицията или нейните раздели",
+      "reason_invalid_code": "Кодът не е номер по NRM",
+      "reason_unknown_group": "В NRM 1 няма такава група",
+      "truncated": "Списъкът е съкратен до първите {shown} от {count} позиции; общата сума включва всички."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Изисквания",
+      "sheet_summary": "Обобщение",
+      "sheet_legend": "Легенда",
+      "summary_element": "Елемент",
+      "summary_count": "Брой изисквания",
+      "summary_total": "Общо",
+      "legend_column": "Колона",
+      "legend_description": "Описание",
+      "unspecified": "Неуточнено",
+      "h01": "Елемент / клас IFC",
+      "h02": "Класификация",
+      "h03": "Група свойства",
+      "h04": "Име на свойството",
+      "h05": "Тип данни",
+      "h06": "Задължително",
+      "h07": "Допустими стойности",
+      "h08": "Мин.",
+      "h09": "Макс.",
+      "h10": "Мерна единица",
+      "h11": "Шаблон",
+      "h12": "Фаза",
+      "h13": "Участник",
+      "h14": "Случай на употреба",
+      "h15": "Източник",
+      "d01": "Клас на IFC обект (напр. IFCWALL, IFCBEAM)",
+      "d02": "Класификационна система и код (напр. Uniclass 2015: EF_25_10)",
+      "d03": "Име на групата свойства (напр. Pset_WallCommon)",
+      "d04": "Име на изискваното свойство или атрибут",
+      "d05": "Тип данни по IFC (IFCLABEL, IFCREAL, IFCBOOLEAN и др.)",
+      "d06": "Кардиналност: задължително, по избор или забранено",
+      "d07": "Списък с допустими стойности, разделени с точка и запетая",
+      "d08": "Граници на числовия диапазон",
+      "d09": "Мерна единица (m, m2, kg и др.)",
+      "d10": "Регулярен израз за проверка на стойността",
+      "d11": "Фаза или етап на проекта (LP3, RIBA Stage 3 и др.)",
+      "d12": "Отговорна страна (архитект, конструктор и др.)",
+      "d13": "Цел или случай на употреба на изискването",
+      "d14": "Източник: стандарт или документ"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Количествената сметка е създадена",
+      "notifications.boq.created.body": "Вашата количествена сметка '{boq_name}' е запазена.",
+      "notifications.meeting.action_assigned.title": "Възложена ви е задача от среща",
+      "notifications.meeting.action_assigned.body": "От среща {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Статусът на документа е променен",
+      "notifications.cde.state_transitioned.body": "Контейнерът е преместен в статус '{new_state}'.",
+      "notifications.cde.linked_published.title": "Публикуван е документ, свързан с вашата работа",
+      "notifications.cde.linked_published.body": "{container_code} е публикуван в ревизия {revision_code}. Свързани ваши записи: {records}.",
+      "notifications.rfi.assigned.title": "Възложено ви е запитване RFI",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "Запитването RFI е получило отговор",
+      "notifications.rfi.responded.body": "По вашето запитване {code} ({title}) има отговор.",
+      "notifications.risk.assigned.title": "Възложен ви е риск",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Сигнал за надвишаване на разходите",
+      "notifications.costmodel.overrun_alert.body": "Разходите по категория {category} надвишават бюджета: действителните {actual} {currency} превишават прага за сигнал +{threshold_pct}% спрямо планираните {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Документ за одобрение очаква преглед",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Документът за одобрение е одобрен",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Документът за одобрение е отхвърлен",
+      "notifications.submittal.rejected.body": "{code} ({title}). Причина: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Документът за одобрение изисква преработка",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Причина: {reason}",
+      "notifications.transmittal.issued.title": "Издадено ви е придружително писмо с документи",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Получаването на документите е потвърдено",
+      "notifications.transmittal.acknowledged.body": "Получателят потвърди {code} ({title}).",
+      "notifications.transmittal.responded.title": "Получен е отговор по придружителното писмо",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "Възложено ви е запитване RFI",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Възложена е нова задача",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Фактурата е одобрена",
+      "notification.invoice_approved_body": "Фактура {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Насрочена е проверка",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, дата: {inspection_date}",
+      "notification.submittal_status_changed_title": "Статусът на документа за одобрение е променен",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Насрочена е среща",
+      "notification.meeting_scheduled_body": "{title}, дата: {meeting_date}",
+      "notification.ncr_created_title": "Регистрирано е несъответствие",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Качен е документ",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Споменати сте в коментар",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "Нов коментар в дискусия",
+      "notifications.collaboration.comment_added.body": "Към {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "Открита е колизия с висока степен на сериозност",
+      "notifications.clash.high_severity.body": "Колизия, сериозност {severity}: {a_name} и {b_name}",
+      "notifications.validation.report.title": "Проверката откри проблеми",
+      "notifications.validation.report.body": "Грешки: {error_count}, предупреждения: {warning_count} ({target_type}).",
+      "notifications.punchlist.auto_created.title": "Създадена е позиция в списъка с недовършени работи",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Обобщение на известията",
+      "notifications.digest.body": "Нови известия в канал {channel}: {count}.",
+      "notifications.approval.overdue.title": "Просрочено одобрение",
+      "notifications.approval.overdue.body": "Стъпка {step_ordinal} ({target_kind}) е просрочена с {hours_overdue} ч.",
+      "notifications.approval.escalated.title": "Одобрение, ескалирано към вас",
+      "notifications.approval.escalated.body": "Стъпка {step_ordinal} ({target_kind}) е ескалирана към вас (ниво {level}).",
+      "notifications.approval.reassigned.title": "Одобрение, пренасочено към вас",
+      "notifications.approval.reassigned.body": "Решението по стъпка {step_ordinal} ({target_kind}) вече е ваше.",
+      "notifications.deadline.overdue.title": "Просрочено: {title}",
+      "notifications.deadline.overdue.body": "Записът \"{title}\" ({module}) е с изтекъл срок. Дни просрочие: {days_overdue}.",
+      "notifications.deadline.escalated.title": "Ескалиран просрочен запис",
+      "notifications.deadline.escalated.body": "Записът \"{title}\" ({module}) все още е отворен, дни просрочие: {days_overdue}, и е ескалиран.",
+      "notifications.deadline.approaching.title": "Наближава срок: {title}",
+      "notifications.deadline.approaching.body": "Срокът на записа \"{title}\" ({module}) е {due_date}.",
+      "notifications.deadline.built.approaching.title": "Наближава срок: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: срокът на \"{title}\" е {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Просрочено: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "Срокът на RFI {reference} \"{title}\" по проект {project} беше {due_date_display}. Дни просрочие: {days_overdue}. Необходим е отговор.",
+      "notifications.deadline.rfi.escalated.title": "Ескалирано: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "RFI {reference} \"{title}\" по проект {project} все още е отворено, срокът му беше {due_date_display}, дни просрочие: {days_overdue}. Ескалирано е към вас.",
+      "notifications.deadline.rfi.approaching.title": "Наближава срок: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "Срокът на RFI {reference} \"{title}\" по проект {project} е {due_date_display}. Необходим е отговор.",
+      "notifications.deadline.submittals.overdue.title": "Просрочено: документ за одобрение {reference}",
+      "notifications.deadline.submittals.overdue.body": "Срокът на документ за одобрение {reference} \"{title}\" по проект {project} беше {due_date_display}. Дни просрочие: {days_overdue}. Необходим е преглед.",
+      "notifications.deadline.submittals.escalated.title": "Ескалирано: документ за одобрение {reference}",
+      "notifications.deadline.submittals.escalated.body": "Документ за одобрение {reference} \"{title}\" по проект {project} все още е отворен, срокът му беше {due_date_display}, дни просрочие: {days_overdue}. Ескалиран е към вас.",
+      "notifications.deadline.submittals.approaching.title": "Наближава срок: документ за одобрение {reference}",
+      "notifications.deadline.submittals.approaching.body": "Срокът на документ за одобрение {reference} \"{title}\" по проект {project} е {due_date_display}. Необходим е преглед.",
+      "notifications.deadline.correspondence.overdue.title": "Просрочено: кореспонденция {reference}",
+      "notifications.deadline.correspondence.overdue.body": "Кореспонденция {reference} \"{title}\" по проект {project} изискваше отговор до {due_date_display}. Дни просрочие: {days_overdue}. Необходим е отговор.",
+      "notifications.deadline.correspondence.escalated.title": "Ескалирано: кореспонденция {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Кореспонденция {reference} \"{title}\" по проект {project} все още е без отговор, срокът ѝ беше {due_date_display}, дни просрочие: {days_overdue}. Ескалирана е към вас.",
+      "notifications.deadline.correspondence.approaching.title": "Наближава срок: кореспонденция {reference}",
+      "notifications.deadline.correspondence.approaching.body": "Кореспонденция {reference} \"{title}\" по проект {project} изисква отговор до {due_date_display}. Необходим е отговор.",
+      "notifications.deadline.variations.overdue.title": "Просрочено: промяна {reference}",
+      "notifications.deadline.variations.overdue.body": "Срокът на промяна {reference} \"{title}\" по проект {project} беше {due_date_display}. Дни просрочие: {days_overdue}. Необходимо е решение.",
+      "notifications.deadline.variations.escalated.title": "Ескалирано: промяна {reference}",
+      "notifications.deadline.variations.escalated.body": "Промяна {reference} \"{title}\" по проект {project} все още е отворена, срокът ѝ беше {due_date_display}, дни просрочие: {days_overdue}. Ескалирана е към вас.",
+      "notifications.deadline.variations.approaching.title": "Наближава срок: промяна {reference}",
+      "notifications.deadline.variations.approaching.body": "Срокът на промяна {reference} \"{title}\" по проект {project} е {due_date_display}. Необходимо е решение.",
+      "notifications.variation.submitted.title": "Промяна, очакваща решение: {code}",
+      "notifications.variation.submitted.body": "Промяна {code} \"{title}\" по проект {project} е подадена и очаква решение.",
+      "notifications.variation.approved.title": "Промяната е одобрена: {code}",
+      "notifications.variation.approved.body": "Промяна {code} \"{title}\" по проект {project} е одобрена.",
+      "notifications.variation.rejected.title": "Промяната е отхвърлена: {code}",
+      "notifications.variation.rejected.body": "Промяна {code} \"{title}\" по проект {project} е отхвърлена и ви е върната.",
+      "notifications.variation.rejected_reason.body": "Промяна {code} \"{title}\" по проект {project} е отхвърлена и ви е върната. Причина: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Заповед за промяна, очакваща одобрение: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Заповед за промяна {code} \"{title}\" по проект {project} е подадена и очаква одобрение.",
+      "notifications.changeorder.approved.title": "Заповедта за промяна е одобрена: {code}",
+      "notifications.changeorder.approved.body": "Заповед за промяна {code} \"{title}\" по проект {project} е одобрена.",
+      "notifications.changeorder.rejected.title": "Заповедта за промяна е отхвърлена: {code}",
+      "notifications.changeorder.rejected.body": "Заповед за промяна {code} \"{title}\" по проект {project} е отхвърлена.",
+      "notifications.submittal.approved_as_noted.title": "Документът за одобрение е одобрен със забележки",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Документ очаква вашето одобрение",
+      "notifications.file_approval.needs_approver.body": "Файл от вид {file_kind} очаква вашето одобрение.",
+      "notifications.file_approval.approved.title": "Вашият документ е одобрен",
+      "notifications.file_approval.approved.body": "Вашият файл от вид {file_kind} премина през всички стъпки на одобрение.",
+      "notifications.file_approval.rejected.title": "Вашият документ е върнат",
+      "notifications.file_approval.rejected.body": "Вашият файл от вид {file_kind} е отхвърлен и изисква корекции.",
+      "notifications.portal.user_invited.title": "Поканен е потребител на портала",
+      "notifications.portal.user_invited.body": "{portal_user_email} е поканен с роля: {portal_role}.",
+      "notifications.portal.message_received.title": "Ново съобщение в портала",
+      "notifications.portal.message_received.body": "{buyer_name} изпрати съобщение."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "ID",
+          "ИД на дейност",
+          "Код на дейност",
+          "Код",
+          "№",
+          "Номер"
+        ],
+        "name": [
+          "Име",
+          "Име на задача",
+          "Име на дейност",
+          "Дейност",
+          "Задача"
+        ],
+        "wbs": [
+          "WBS",
+          "WBS код",
+          "WBS номер",
+          "Структурен номер"
+        ],
+        "outline_level": [
+          "Ниво на структура",
+          "Ниво",
+          "Ниво на отстъп",
+          "Отстъп"
+        ],
+        "start": [
+          "Начало",
+          "Начална дата",
+          "Старт",
+          "Планирано начало"
+        ],
+        "finish": [
+          "Край",
+          "Край на дейността",
+          "Крайна дата",
+          "Планиран край",
+          "Срок"
+        ],
+        "duration": [
+          "Продължителност",
+          "Продължителност (дни)",
+          "Дни",
+          "Прод.",
+          "Първоначална продължителност"
+        ],
+        "predecessors": [
+          "Предшественици",
+          "Предшественик",
+          "Зависи от",
+          "Зависимости"
+        ],
+        "percent_complete": [
+          "% завършеност",
+          "Процент завършеност",
+          "Напредък",
+          "Напредък (%)",
+          "% изпълнение"
+        ],
+        "milestone": [
+          "Ключов момент",
+          "Е ключов момент",
+          "Крайъгълен камък"
+        ],
+        "resource": [
+          "Ресурс",
+          "Ресурси",
+          "Имена на ресурси",
+          "Екип",
+          "Изпълнител"
+        ],
+        "notes": [
+          "Бележки",
+          "Бележка",
+          "Коментари",
+          "Коментар",
+          "Забележки"
+        ],
+        "client_visible": [
+          "Видимо за клиента",
+          "Видим за клиента",
+          "Показване на клиента",
+          "Споделяне с клиента"
+        ]
+      },
+      "yes_words": [
+        "да"
+      ],
+      "no_words": [
+        "не"
+      ],
+      "example_names": [
+        "Груб строеж",
+        "Изкопни работи",
+        "Основи",
+        "Основите са приети"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "договор*",
+          "контракт*",
+          "споразумени*"
+        ],
+        "contact": [
+          "контакт*",
+          "доставчик*",
+          "подизпълнител*",
+          "клиент*",
+          "възложител*",
+          "изпълнител*"
+        ],
+        "schedule_activity": [
+          "дейност*",
+          "дейности",
+          "задач*",
+          "wbs"
+        ],
+        "document": [
+          "документ*",
+          "чертеж*",
+          "приложени*"
+        ],
+        "user": [
+          "отговорник*",
+          "отговорно лице",
+          "отговорен",
+          "инспектор*",
+          "бригадир*",
+          "техническ* ръководител*"
+        ],
+        "due": [
+          "срок*",
+          "краен срок",
+          "падеж*",
+          "изтича*",
+          "валиден до",
+          "до дата",
+          "подновяване"
+        ]
+      },
+      "link_labels": {
+        "contract": "Договор",
+        "contact": "Контакт",
+        "schedule_activity": "Дейност от графика",
+        "document": "Документ",
+        "user": "Отговорник"
+      },
+      "state_labels": [
+        "Отворено",
+        "В процес",
+        "Приключено"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Допълнение {number} към търга {package}",
+      "addendum_heading": "Допълнение към търга",
+      "greeting": "Уважаеми {company},",
+      "greeting_generic": "Уважаеми дами и господа,",
+      "addendum_intro": "Издадено е допълнение {number} към пакета {package}: {title}.",
+      "addendum_deadline": "Крайният срок за подаване е променен от {old} на {new}.",
+      "addendum_boq": "Количествено-стойностната сметка е променена (ревизия {revision}). Моля, оценете текущата ревизия.",
+      "addendum_documents": "Издадени документи: {documents}",
+      "addendum_ack": "Моля, потвърдете получаването на това допълнение. Оферта, която не потвърждава всички допълнения, може да бъде приета за несъответстваща.",
+      "answer_subject": "Уточнение {number} по търга {package}",
+      "answer_heading": "Уточнение по търга",
+      "answer_intro": "На въпрос по търговия пакет {package} е даден отговор. Отговорът важи за всички участници.",
+      "question_label": "Въпрос",
+      "answer_label": "Отговор"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Брутна стойност на развитието (GDV)",
+      "total_development_cost": "Общ разход за развитие",
+      "residual_land_value": "Остатъчна стойност на земята",
+      "developer_profit": "Печалба на разработчика",
+      "profit_on_cost": "Печалба върху разхода",
+      "profit_on_gdv": "Печалба върху GDV",
+      "construction_cost": "Строителна цена",
+      "professional_fees": "Професионални такси",
+      "contingency": "Непредвидени разходи",
+      "finance_cost": "Финансови разходи",
+      "sales_costs": "Разходи за продажба"
+    },
+    "status": {
+      "viable": "Жизнеспособен",
+      "unviable": "Нежизнеспособен",
+      "marginal": "Граничен",
+      "pending": "Все още не е оценен"
+    },
+    "figure": {
+      "gross_development_value": "Общата продажна стойност на всички единици в схемата, в една валута.",
+      "total_development_cost": "Всички разходи за реализиране на схемата без самата земя: строеж, такси, непредвидени разходи, финансиране и разходи за продажба.",
+      "residual_land_value": "Остатъкът за земята след като от брутната стойност на развитието се извадят общият разход за развитие и целевата печалба на разработчика.",
+      "developer_profit": "Печалбата, която разработчикът цели да запази, зададена като целево съотношение към брутната стойност на развитието.",
+      "profit_on_cost": "Печалбата на разработчика, разделена на общия разход за развитие, представена като съотношение.",
+      "profit_on_gdv": "Печалбата на разработчика, разделена на брутната стойност на развитието, представена като съотношение."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Работнически лагер",
+        "rental": "Наемно жилище",
+        "hotel": "Хотел"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Чака",
+        "approved": "Одобрен",
+        "rejected": "Отхвърлен"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Изпълнено",
+        "fail": "Неизпълнено",
+        "not_applicable": "Не е приложимо"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Чертеж",
+        "contract": "Договор",
+        "specification": "Спецификация",
+        "photo": "Снимка",
+        "correspondence": "Кореспонденция",
+        "reality_capture": "Заснемане на реалността",
+        "other": "Други"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Чака",
+        "approved": "Одобрен",
+        "rejected": "Отхвърлен",
+        "cancelled": "Отменен"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Чернова",
+        "submitted": "Изпратен за одобрение",
+        "approved": "Одобрен",
+        "posted": "Осчетоводен"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Отворен",
+        "assigned": "Възложен",
+        "in_progress": "В процес",
+        "resolved": "Отстранен",
+        "verified": "Проверен",
+        "closed": "Затворен"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "наблюдение",
+        "minor": "незначително",
+        "major": "значително",
+        "critical": "критично"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Лице",
+        "crew": "Екип",
+        "equipment": "Техника",
+        "subcontractor": "Подизпълнител"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Името на модела на ИИ е остаряло или недостъпно. Отворете Настройки > ИИ и задайте актуално валидно име на модел за вашия доставчик.",
+      "not_configured": "ИИ не е конфигуриран. Моля, настройте доставчик на ИИ в Настройки."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "проверен",
+      "bound": "прикачен",
+      "empty": "липсва"
+    },
+    "package_status_labels": {
+      "draft": "чернова",
+      "in_progress": "в процес",
+      "ready": "готов",
+      "issued": "издаден"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "блокер",
+      "critical": "критичен",
+      "warning": "предупреждение",
+      "suggestion": "предложение"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Стратегия",
+      "brief": "Задание",
+      "concept": "Концепция",
+      "design": "Проектиране",
+      "approval": "Разрешение",
+      "detail": "Детайлно проектиране",
+      "tender": "Търг",
+      "award": "Възлагане",
+      "construction": "Строеж",
+      "handover": "Предаване",
+      "operation": "Експлоатация"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Задачата няма детайли за рязане",
+        "suggestion": "Добавете детайли ръчно, поставете ги или ги импортирайте от количествена сметка за огъване, измерване, ред от КСС или файл."
+      },
+      "has_stock": {
+        "fail": "Задачата не предлага заготовки, от които да се реже",
+        "suggestion": "Добавете поне една дължина на заготовка или размер на плоскост, или използвайте повторно остатъци от склада на обекта."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} няма ширина",
+        "suggestion": "Задайте дължина и ширина за всеки детайл от плоскост и всеки размер на плоскост."
+      },
+      "piece_fits_stock": {
+        "fail": "Детайл {ref} ({size} mm) не се събира в нито една заготовка",
+        "suggestion": "Добавете по-дълга или по-голяма заготовка, намалете подрязването или разделете детайла със снадка."
+      },
+      "grain_allows_fit": {
+        "fail": "Детайл {ref} се събира само при завъртане напреки на влакната",
+        "suggestion": "Разрешете въртене на този детайл или добавете размер на плоскост, в който се събира по влакната."
+      },
+      "kerf_set": {
+        "fail": "Ширината на реза е нула",
+        "suggestion": "Въведете ширината на диска или на реза, иначе добивът на всеки прът с няколко реза е завишен."
+      },
+      "min_offcut_set": {
+        "fail": "Не е зададен минимален годен остатък",
+        "suggestion": "Задайте най-късия остатък, който си струва да се запази, за да не се броят годните остатъци за отпадък."
+      },
+      "stock_priced": {
+        "fail": "Заготовка {ref} няма единична цена",
+        "suggestion": "Въведете цена за брой, за да отчете планът цената си и да избере най-евтината заготовка."
+      },
+      "stock_sufficient": {
+        "fail": "Детайли, неразположени върху наличните заготовки: {count}",
+        "suggestion": "Увеличете наличното количество или добавете друг размер заготовка."
+      },
+      "yield_threshold": {
+        "fail": "Добивът от {actual} % е под прага от {threshold} %",
+        "suggestion": "Добавете друга дължина или размер заготовка, разрешете въртене или прегледайте прага за този материал."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Забележка '{title}' е затворена без снимка",
+    "punch_no_photo_fix": "Добавете снимка на завършената работа",
+    "photo_weak": "Снимки без място или време на заснемане при '{title}': {count}",
+    "photo_weak_fix": "Заснемете отново в приложението с включено местоположение",
+    "defect_no_photo": "Дефект '{reference}' е затворен без снимка на отстраняването",
+    "defect_no_photo_fix": "Прикачете снимка на отстранения дефект"
+  },
+  "closeout_dossier": {
+    "more_items": "Още позиции, които не са изброени: {count}",
+    "category_missing": "Няма доказателство за задължителната категория '{category}'",
+    "category_missing_fix": "Свържете документ към точка от чеклиста в тази категория или добавете нов",
+    "category_unverified": "Доказателството за '{category}' още не е проверено",
+    "category_unverified_fix": "Помолете ръководител да прегледа и потвърди свързаното доказателство",
+    "punch_open": "Забележка '{name}' все още е отворена",
+    "punch_open_fix": "Решете и затворете позицията или я изключете от обхвата на това досие",
+    "punch_no_photo": "Решената забележка '{name}' няма снимка",
+    "punch_no_photo_fix": "Добавете снимка на завършената работа",
+    "system_pending": "Система '{name}' не е пусната в експлоатация",
+    "system_pending_fix": "Завършете чеклистовете за пускане в експлоатация и отбележете системата като пусната",
+    "critical_issues": "Отворени критични проблеми при пускането в експлоатация: {count}",
+    "critical_issues_fix": "Затворете критичните проблеми преди предаването",
+    "acceptance_missing": "Няма свързан протокол за приемане",
+    "acceptance_missing_fix": "Свържете подписания протокол за приемане към точката за приемане в чеклиста",
+    "acceptance_unsigned": "Протоколът за приемане не е напълно подписан (статус: {status})",
+    "acceptance_unsigned_fix": "Съберете липсващите подписи в Подписване",
+    "blocked": "Досието не отговаря на своя чеклист. Отстранете констатациите или го съставете въпреки това като непълно (одобрение от ръководител).",
+    "delivery_title": "Досие за предаване: {project}",
+    "delivery_body": "Досието за предаване '{title}' ({scope}) е готово. Връзката по-долу го изтегля и е валидна до {expires}.",
+    "pdf": {
+      "title": "Досие за предаване",
+      "scope": "Обхват",
+      "built": "Съставено",
+      "status_passed": "Чеклистът е преминат",
+      "status_warnings": "Чеклистът е преминат с предупреждения",
+      "status_errors": "Непълно: отворени констатации в чеклиста",
+      "findings": "Отворени констатации в чеклиста",
+      "severity": "Тежест",
+      "finding": "Констатация",
+      "severity_error": "Грешка",
+      "severity_warning": "Предупреждение",
+      "severity_info": "Инфо",
+      "contents": "Съдържание",
+      "file": "Файл",
+      "size": "Размер",
+      "punch": "Списък на решените забележки",
+      "item": "Позиция",
+      "status": "Статус",
+      "photos": "Снимки",
+      "evidence": "Фотодоказателство"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Оценка {rating} на '{name}' не е ниво на скалата '{scale}'",
+    "rule_poor_without_action": "'{name}' е оценен с {rating}, но няма планирано действие за поддръжка",
+    "rule_poor_without_action_fix": "Изведете плана или добавете действие за този елемент",
+    "rule_action_unpriced": "Действието за '{name}' през {year} г. няма единична цена",
+    "rule_action_unpriced_fix": "Въведете единична цена, за да я включат сумите на плана",
+    "rule_defect_incomplete": "Оценката на '{name}' изисква работа, но не записва тежест или обхват"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, страница {page}",
+    "text_change": "„{old}“ променено на „{new}“",
+    "kind": {
+      "added": "Добавено",
+      "removed": "Премахнато",
+      "modified": "Променено",
+      "text": "Текстът е променен"
+    },
+    "status": {
+      "open": "Отворено",
+      "relevant": "Съществено",
+      "not_relevant": "Несъществено"
+    },
+    "errors": {
+      "revision_not_found": "Ревизията на чертежа не е намерена в този проект.",
+      "revision_not_parsed": "Чертежът все още няма обработена версия за сравнение.",
+      "comparison_not_found": "Сравнението не е намерено.",
+      "change_not_found": "Промяната не е намерена.",
+      "same_revision": "Изберете две различни ревизии или страници за сравнение.",
+      "manual_points": "Ръчното подравняване изисква две различни точки на всяка ревизия.",
+      "alignment_singular": "Подравняването не може да се приложи: то свива листа.",
+      "region_empty": "Промяна {seq} няма размер.",
+      "region_off_sheet": "Промяна {seq} е извън листа.",
+      "module_missing": "Модулът, необходим за това действие, не е инсталиран."
+    },
+    "rfi": {
+      "subject": "Промяна на чертежа {seq} на {sheet}",
+      "question": "Ревизия {new} на {sheet} се различава от ревизия {old} в отбелязаната област ({kind}). Моля, потвърдете целта на промяната и засяга ли количествата."
+    },
+    "markup": {
+      "text": "Промяна на ревизия {seq}: {kind}"
+    },
+    "report": {
+      "title": "Сравнение на ревизии на чертеж",
+      "project": "Проект",
+      "name": "Сравнение",
+      "old_revision": "По-стара ревизия",
+      "new_revision": "По-нова ревизия",
+      "alignment": "Подравняване",
+      "alignment_none": "Неподравнено (същата рамка)",
+      "alignment_auto": "Автоматично",
+      "alignment_manual": "Ръчно, две точки",
+      "confidence": "достоверност {value}",
+      "summary": "Промени",
+      "summary_counts": "Общо {total}: добавени {added}, премахнати {removed}, променени {modified}, текст {text}",
+      "generated_on": "Дата на създаване",
+      "generated": "Създадено на {timestamp}",
+      "page_of": "Страница {page} от {total}",
+      "no_changes": "Между двете ревизии не са намерени промени.",
+      "col_no": "№",
+      "col_preview": "Преглед",
+      "col_kind": "Промяна",
+      "col_location": "Местоположение",
+      "col_detail": "Подробности",
+      "col_status": "Статус",
+      "col_comment": "Коментар",
+      "col_follow_up": "Последващо действие",
+      "page_at": "Страница {page} при {coords}",
+      "layer": "Слой {layer}",
+      "entity_counts": "Обекти: добавени {added}, премахнати {removed}, променени {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Облак на ревизия",
+      "remeasure": "За ново измерване: {items} количества, {positions} позиции от КСС"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Двете страни са различни ревизии.",
+      "distinct_revisions_fail": "Сравнението сравнява лист със самия себе си.",
+      "distinct_revisions_hint": "Изберете по-старата и по-новата ревизия на чертежа.",
+      "alignment_not_needed": "DWG ревизиите споделят единици на чертежа; не е нужно подравняване.",
+      "alignment_missing_matrix": "Сравнението няма подравняване.",
+      "alignment_singular": "Подравняването свива листа и не може да се приложи.",
+      "alignment_scale": "Подравняването променя мащаба на листа с {scale}, повече, отколкото се различават ревизиите на един чертеж.",
+      "alignment_low_confidence": "Автоматичното подравняване е несигурно (достоверност {confidence}).",
+      "alignment_manual_points": "Ръчното подравняване изисква две двойки точки.",
+      "alignment_ok": "Подравняването на листа е правдоподобно.",
+      "alignment_hint": "Подравнете листовете ръчно по две означения, общи за двете ревизии, например пресичания на осите.",
+      "region_empty": "Промяна {seq} няма размер.",
+      "region_off_sheet": "Промяна {seq} е извън листа.",
+      "regions_ok": "Всяка променена област е върху листа.",
+      "triaged_ok": "Всяка промяна е прегледана.",
+      "triaged_open": "Отворени промени: {count}.",
+      "triaged_hint": "Отбележете всяка промяна като съществена или несъществена.",
+      "followed_up_ok": "Всяка съществена промяна има последващо действие.",
+      "followed_up_missing": "Промяна {seq} е отбелязана като съществена, но няма коментар, RFI, облак или флаг за ново измерване.",
+      "followed_up_hint": "Коментирайте промяната, създайте RFI или облак, или отбележете количествата в нея за ново измерване."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Прогноза за паричния поток",
+      "portfolio_title": "Портфейлна прогноза за паричния поток",
+      "empty": "Няма прогноза за паричния поток за този избор.",
+      "project": "Проект",
+      "as_of": "Към",
+      "currency": "Валута",
+      "delay_days": "Забавяне на постъпленията с (дни)",
+      "overrun_pct": "Надвишение на разходите (%)",
+      "closing_position": "Краен баланс",
+      "peak_funding": "Максимална нужда от финансиране",
+      "peak_period": "Месец с най-голяма нужда от финансиране",
+      "col": {
+        "period": "Месец",
+        "planned_in": "Планирани постъпления",
+        "actual_in": "Реални постъпления",
+        "expected_in": "Очаквани постъпления",
+        "planned_out": "Планирани плащания",
+        "actual_out": "Реални плащания",
+        "expected_out": "Очаквани плащания",
+        "net": "Нето",
+        "cumulative": "Натрупана позиция"
+      }
+    }
+  }
+}

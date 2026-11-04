@@ -1,0 +1,2538 @@
+{
+  "costs.catalog_name_unavailable": "Dette navn kan ikke bruges til en ny katalog. Vælg et andet navn.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Byggekalkulation med åben kildekode"
+  },
+  "nav": {
+    "dashboard": "Oversigt",
+    "assemblies": "Sammensatte priser",
+    "ai_estimate": "AI-kalkule",
+    "settings": "Indstillinger",
+    "5d_cost_model": "5D Omkostningsmodel",
+    "templates": "Skabeloner",
+    "reports": "Rapporter",
+    "sustainability": "Bæredygtighed",
+    "group_estimation": "Kalkulation",
+    "group_planning": "Planlægning",
+    "group_procurement": "Indkøb",
+    "group_tools": "Værktøjer",
+    "architecture": "Arkitekturkort"
+  },
+  "common": {
+    "save": "Gem",
+    "cancel": "Annuller",
+    "delete": "Slet",
+    "edit": "Rediger",
+    "create": "Opret",
+    "search": "Søg",
+    "filter": "Filtrer",
+    "export": "Eksporter",
+    "import": "Importer",
+    "loading": "Indlæser...",
+    "error": "Fejl",
+    "success": "Gennemført",
+    "confirm": "Bekræft",
+    "back": "Tilbage",
+    "next": "Næste",
+    "yes": "Ja",
+    "no": "Nej"
+  },
+  "auth": {
+    "login": "Log ind",
+    "logout": "Log ud",
+    "email": "E-mail",
+    "password": "Adgangskode"
+  },
+  "projects": {
+    "title": "Projekter",
+    "new_project": "Nyt projekt",
+    "project_name": "Projektnavn",
+    "no_projects": "Ingen projekter endnu"
+  },
+  "boq": {
+    "title": "Tilbudsliste",
+    "position": "Post",
+    "ordinal": "Positionsnummer",
+    "description": "Beskrivelse",
+    "quantity": "Mængde",
+    "unit": "Enhed",
+    "unit_rate": "Enhedspris",
+    "total": "I alt",
+    "add_position": "Tilføj post",
+    "add_section": "Tilføj afsnit",
+    "assembly": "Sammensat pris",
+    "subtotal": "Subtotal",
+    "grand_total": "Total",
+    "direct_cost": "Direkte omkostning",
+    "net_total": "Netto i alt",
+    "gross_total": "Brutto i alt",
+    "vat": "Moms",
+    "add_markups": "Tilføj tillæg",
+    "validate": "Validere",
+    "export": "Eksporter",
+    "mvp": {
+      "title": "Vælg materialer",
+      "subtitle_one": "{{count}} ressource skal vælges",
+      "subtitle_other": "{{count}} ressourcer skal vælges",
+      "bulk_label": "Hurtig udfyldning:",
+      "bulk_median": "Median for alle",
+      "bulk_mean": "Gennemsnit for alle",
+      "bulk_cheapest": "Billigst for alle",
+      "bulk_priciest": "Dyrest for alle",
+      "slot_variant_count": "{{n}} muligheder",
+      "selected_label": "Valgt:",
+      "default_mean": "gennemsnitspris",
+      "default_median": "medianpris",
+      "row_median": "Medianpris · {{price}}",
+      "row_mean": "Gennemsnitspris · {{price}}",
+      "subtotal_label": "Postpris",
+      "apply": "Anvend og føj til tilbudslisten",
+      "batch_progress": "Post {{current}} af {{total}}",
+      "toast_applied_one": "{{count}} variant valgt",
+      "toast_applied_other": "{{count}} varianter valgt"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Udvekslingsrapport"
+      },
+      "column": {
+        "severity": "Alvorlighed",
+        "kind": "Type tab",
+        "position": "Post",
+        "field": "Felt",
+        "original": "Oprindelig værdi",
+        "written": "Skrevet værdi",
+        "count": "Antal",
+        "detail": "Detaljer"
+      },
+      "severity": {
+        "error": "Kritisk",
+        "warning": "Advarsel",
+        "info": "Bemærkning"
+      },
+      "kind": {
+        "unsupported_element": "Element understøttes ikke",
+        "truncated_text": "Tekst afkortet",
+        "altered_text": "Tekst ændret",
+        "rounded_value": "Værdi afrundet",
+        "value_out_of_range": "Værdi uden for intervallet",
+        "dropped_attribute": "Attribut droppet",
+        "unmapped_unit": "Enhed ikke tilordnet",
+        "lost_hierarchy": "Hierarkiniveau tabt",
+        "markup_not_representable": "Tillæg kan ikke gengives",
+        "attachment_skipped": "Bilag sprunget over",
+        "changed_identifier": "Identifikator ændret",
+        "exceeds_limit": "Lagergrænse overskredet",
+        "rejected_row": "Række afvist",
+        "skipped_row": "Række sprunget over",
+        "parser_warning": "Advarsel fra læseren",
+        "roundtrip_mismatch": "Afvigelse i round trip"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Forgreningspunkt",
+      "base_snapshot_from": "Forgreningspunkt (fra øjebliksbilledet \"{snapshot}\")",
+      "before_cherry_pick": "Før ændringer fra \"{source}\" anvendes",
+      "before_merge": "Før varianten \"{branch}\" flettes",
+      "errors": {
+        "branch_closed": "Denne variant er flettet eller arkiveret og kan ikke modtage flere ændringer.",
+        "not_a_branch": "Dette tilbudsskema er ikke en variant.",
+        "same_bill": "Vælg to forskellige overslag.",
+        "different_project": "Begge overslag skal tilhøre det samme projekt.",
+        "different_tree": "Begge overslag skal være varianter af det samme hovedoverslag.",
+        "unresolved_conflicts": "{count} positioner er ændret i begge overslag. Afgør for hver, hvilken version der beholdes, før du anvender.",
+        "merge_forbidden": "Du har ikke tilladelse til at flette ind i hovedoverslaget.",
+        "confirm_required": "Bekræft fletningen: den omskriver hovedoverslaget.",
+        "design_options_unavailable": "Modulet til projekteringsvalg er ikke installeret.",
+        "base_snapshot_in_use": "Dette øjebliksbillede er forgreningspunktet for en åben variant og kan ikke slettes."
+      },
+      "export": {
+        "title_positions": "Overslagssammenligning efter position",
+        "title_sections": "Overslagssammenligning efter afsnit",
+        "title_cost_groups": "Overslagssammenligning efter omkostningsgruppe",
+        "project": "Projekt",
+        "bill_a": "Overslag A",
+        "bill_b": "Overslag B",
+        "total_a": "Sum A",
+        "total_b": "Sum B",
+        "delta": "Forskel",
+        "counts": "Ændringer",
+        "counts_value": "{added} tilføjet, {removed} fjernet, {changed} ændret",
+        "col_ordinal": "Pos.",
+        "col_description": "Beskrivelse",
+        "col_unit": "Enhed",
+        "col_change": "Ændring",
+        "col_qty_a": "Mængde A",
+        "col_qty_b": "Mængde B",
+        "col_rate_a": "Pris A",
+        "col_rate_b": "Pris B",
+        "col_total_a": "Sum A",
+        "col_total_b": "Sum B",
+        "col_delta": "Forskel",
+        "col_section": "Afsnit",
+        "col_cost_group": "Omkostningsgruppe",
+        "change_added": "Tilføjet",
+        "change_removed": "Fjernet",
+        "change_changed": "Ændret",
+        "change_unchanged": "Uændret",
+        "ungrouped": "Ikke grupperet",
+        "empty": "De to overslag er identiske.",
+        "total": "Sum"
+      }
+    }
+  },
+  "costs": {
+    "title": "Prisdatabase",
+    "rate": "Pris",
+    "material": "Materiale",
+    "labor": "Arbejdskraft",
+    "equipment": "Maskinel",
+    "search_costs": "Søg efter priser..."
+  },
+  "assemblies": {
+    "title": "Sammensatte priser",
+    "description": "Genbrugelige prisopskrifter — kombinér materialer, arbejdskraft og maskinel i færdige skabeloner",
+    "new_assembly": "Ny sammensat pris",
+    "from_database": "Fra prisdatabasen",
+    "apply_to_boq": "Anvend på tilbudslisten",
+    "add_component": "Tilføj komponent",
+    "no_assemblies": "Ingen sammensatte priser endnu",
+    "no_assemblies_hint": "Opret din første sammensatte pris fra prisdatabasen eller ressourcekataloget",
+    "total_rate": "Samlet pris"
+  },
+  "catalog": {
+    "title": "Ressourcekatalog",
+    "description": "Gennemse og administrér materialer, maskinel, timepriser og operatører",
+    "add_resource": "Tilføj ressource",
+    "import_region": "Importér region",
+    "build_assembly": "Opret sammensat pris",
+    "my_catalog": "Mit katalog"
+  },
+  "validation": {
+    "title": "Validering",
+    "passed": "Bestået",
+    "warnings": "Advarsler",
+    "errors": "Fejl",
+    "score": "Kvalitetspoint",
+    "run_validation": "Kør validering",
+    "missing_quantity": "Post {position} mangler mængde",
+    "missing_rate": "Post {position} mangler enhedspris",
+    "missing_description": "Post {position} mangler beskrivelse",
+    "missing_classification": "Post {position} kræver en klassifikationskode",
+    "duplicate_ordinal": "Duplikeret positionsnummer: {ordinal}",
+    "rate_anomaly": "Enhedspris {rate} overskrider tærskelværdi ({threshold})",
+    "nl": {
+      "not_a_string": "Input skal være tekst.",
+      "empty": "Input er tomt.",
+      "too_long": "Input overskrider {max} tegn.",
+      "ai_unparsable": "AI-svaret kunne ikke læses som et DSL-dokument.",
+      "no_pattern": "Ingen mønster passede til den indtastede sætning.",
+      "try": "Prøv: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D Tidsplan",
+    "generated": {
+      "position_label": "Position {ordinal}",
+      "section_label": "Afsnit {ordinal}",
+      "task_description": "Automatisk genereret fra position {ordinal} i tilbudslisten ({quantity} {unit})",
+      "section_description": "Opsummering: afsnit {ordinal} i tilbudslisten",
+      "start_milestone": "Projektstart",
+      "start_milestone_description": "Milepæl for projektstart",
+      "completion_milestone": "Projektafslutning",
+      "completion_milestone_description": "Milepæl for projektafslutning",
+      "labour_resource": "Arbejdskraft",
+      "machine_resource": "Maskiner"
+    },
+    "progress_sheet": {
+      "sheet_title": "Fremdrift",
+      "title": "Ark til fremdriftsopdatering",
+      "detail_schedule": "Tidsplan: {name}",
+      "detail_exported": "Eksporteret: {date}",
+      "instructions": "Udfyld kun de hvide kolonner. Ret ikke de grå kolonner, rækkefølgen af rækker eller de skjulte kolonner.",
+      "col": {
+        "activity_ref": "Aktivitets-ID",
+        "name": "Aktivitet",
+        "wbs_code": "WBS",
+        "responsible": "Ansvarlig",
+        "planned_start": "Planlagt start",
+        "planned_finish": "Planlagt slut",
+        "percent_complete": "% færdig",
+        "actual_start": "Faktisk start",
+        "actual_finish": "Faktisk slut",
+        "remaining_duration": "Resterende (arbejdsdage)",
+        "notes": "Noter",
+        "row_key": "Rækkenøgle",
+        "stamp": "Stempel"
+      }
+    }
+  },
+  "cad": {
+    "title": "CAD-import",
+    "upload": "Upload CAD-fil",
+    "supported_formats": "Understøttet: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Konverterer...",
+    "elements_found": "{count} elementer fundet"
+  },
+  "takeoff": {
+    "title": "Mængdeberegning",
+    "auto_detect": "Automatisk registrering",
+    "manual_measure": "Manuel opmåling",
+    "confidence": "Pålidelighed"
+  },
+  "tendering": {
+    "title": "Udbud",
+    "create_tender": "Opret udbud",
+    "bid": "Tilbud",
+    "award": "Tildeling"
+  },
+  "modules": {
+    "title": "Moduler",
+    "installed": "Installeret",
+    "available": "Tilgængelige",
+    "install": "Installer",
+    "uninstall": "Afinstaller",
+    "update": "Opdater"
+  },
+  "dashboard": {
+    "welcome": "Velkommen til OpenConstructionERP",
+    "subtitle": "Byggekalkulation med åben kildekode",
+    "recent_projects": "Seneste projekter",
+    "system_status": "Systemstatus",
+    "modules_loaded": "Indlæste moduler",
+    "validation_rules": "Valideringsregler",
+    "languages": "Sprog",
+    "continue_estimate": "Fortsæt seneste kalkulation",
+    "getting_started": "Kom godt i gang",
+    "total_value": "Samlet værdi",
+    "active_estimates": "Aktive kalkulationer",
+    "schedule_status": "Tidsplanstatus",
+    "quality_score": "Kvalitetsscore",
+    "analytics": "Analyser",
+    "project_overview": "Projektoverblik",
+    "step_load_db": "Indlæs prisdatabasen",
+    "step_load_db_desc": "Importér regionale prisdata med mere end 55.000 poster",
+    "step_ai_search": "Aktivér AI-søgning",
+    "step_ai_search_desc": "Generér semantiske vektorer til prismatchning",
+    "step_connect_ai": "Forbind AI",
+    "step_connect_ai_desc": "Tilføj dine API-nøgler til AI-understøttet kalkulation",
+    "step_create_project": "Opret projekt",
+    "step_create_project_desc": "Start dit første kalkulationsprojekt",
+    "step_build_boq": "Byg din tilbudsliste",
+    "step_build_boq_desc": "Opret en tilbudsliste med hjælp fra AI"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "stk",
+    "lsum": "sum",
+    "h": "t",
+    "set": "sæt"
+  },
+  "contacts": {
+    "title": "Kontaktkartotek",
+    "new_contact": "Ny kontakt",
+    "contact_type": "Kontakttype",
+    "client": "Bygherre",
+    "subcontractor": "Underentreprenør",
+    "supplier": "Leverandør",
+    "consultant": "Rådgiver",
+    "internal": "Intern",
+    "company_name": "Firmanavn",
+    "search_contacts": "Søg kontakter...",
+    "no_contacts": "Ingen kontakter endnu",
+    "prequalification": "Prækvalifikation",
+    "approved": "Godkendt",
+    "pending": "Afventer",
+    "expired": "Udløbet"
+  },
+  "tasks": {
+    "title": "Opgaver",
+    "new_task": "Ny opgave",
+    "task": "Opgave",
+    "topic": "Emne",
+    "information": "Information",
+    "decision": "Beslutning",
+    "personal": "Personlig opgave",
+    "my_tasks": "Mine opgaver",
+    "open": "Åben",
+    "in_progress": "I gang",
+    "completed": "Afsluttet",
+    "draft": "Kladde",
+    "due_date": "Frist",
+    "assignee": "Ansvarlig",
+    "priority": "Prioritet",
+    "checklist": "Tjekliste",
+    "focus_area": "Fokusområde"
+  },
+  "rfi": {
+    "title": "Anmodninger om oplysninger",
+    "new_rfi": "Ny anmodning",
+    "subject": "Emne",
+    "question": "Spørgsmål",
+    "response": "Svar",
+    "ball_in_court": "Nuværende ansvarlig",
+    "days_open": "Dage åben",
+    "cost_impact": "Økonomisk konsekvens",
+    "schedule_impact": "Tidsmæssig konsekvens",
+    "respond": "Besvar",
+    "close": "Luk",
+    "overdue": "Overskredet"
+  },
+  "finance": {
+    "title": "Økonomi",
+    "budgets": "Budgetter",
+    "invoices": "Fakturaer",
+    "payable": "Kreditorer",
+    "receivable": "Debitorer",
+    "payments": "Betalinger",
+    "evm": "Indtjent værdi",
+    "invoice_number": "Fakturanr.",
+    "amount": "Beløb",
+    "status": "Status",
+    "approve": "Godkend",
+    "pay": "Markér som betalt",
+    "original_budget": "Oprindeligt budget",
+    "revised_budget": "Revideret budget",
+    "committed": "Bundet",
+    "actual": "Faktisk",
+    "forecast": "Prognose",
+    "variance": "Afvigelse"
+  },
+  "procurement": {
+    "title": "Indkøb",
+    "purchase_orders": "Indkøbsordrer",
+    "goods_receipts": "Varemodtagelser",
+    "new_po": "Ny indkøbsordre",
+    "po_number": "Ordrenr.",
+    "vendor": "Leverandør",
+    "issue": "Udsend",
+    "confirm": "Bekræft modtagelse"
+  },
+  "safety": {
+    "title": "Sikkerhed",
+    "incidents": "Hændelser",
+    "observations": "Observationer",
+    "new_incident": "Ny hændelse",
+    "new_observation": "Ny observation",
+    "severity": "Alvorlighed",
+    "risk_score": "Risikoscore",
+    "days_lost": "Fraværsdage",
+    "treatment": "Behandling",
+    "corrective_action": "Korrigerende handling"
+  },
+  "meetings": {
+    "title": "Møder",
+    "new_meeting": "Nyt møde",
+    "meeting_type": "Type",
+    "attendees": "Deltagere",
+    "agenda": "Dagsorden",
+    "action_items": "Handlingspunkter",
+    "minutes": "Referat",
+    "complete": "Afslut mødet",
+    "present": "Til stede",
+    "absent": "Fraværende",
+    "excused": "Meldt afbud",
+    "actions": {
+      "status": {
+        "open": "Åben",
+        "completed": "Afsluttet",
+        "cancelled": "Annulleret"
+      },
+      "flag": {
+        "overdue": "Forfalden",
+        "on_track": "Som planlagt"
+      },
+      "label": {
+        "action_item": "Handlingspunkt",
+        "completion_rate": "Lukningsgrad for handlingspunkter",
+        "open_vs_done": "Åbne mod afsluttede",
+        "overdue": "Forfaldne handlingspunkter"
+      },
+      "explain": {
+        "action_item": "Et handlingspunkt er en opgave, der er aftalt på et møde, med en ansvarlig og en frist.",
+        "completion_rate": "Lukningsgraden er afsluttede handlingspunkter divideret med alle handlingspunkter, fra 0 til 1.",
+        "open_vs_done": "Åbne handlingspunkter kræver stadig arbejde. Afsluttede handlingspunkter er lukket og kræver intet mere.",
+        "overdue": "Et handlingspunkt er forfaldent, når det stadig er åbent, og fristen ligger før referencedatoen."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Mødereferat",
+      "issued": "UDSTEDT",
+      "draft": "UDKAST",
+      "date": "Dato:",
+      "location": "Sted:",
+      "type": "Type:",
+      "number": "Møde nr.:",
+      "chairperson": "Mødeleder:",
+      "next_meeting": "Næste møde:",
+      "not_available": "Ikke relevant",
+      "not_scheduled": "Ikke planlagt",
+      "attendance": "Deltagelse",
+      "present": "Til stede:",
+      "absent": "Fraværende / afbud:",
+      "agenda": "Dagsorden, drøftelse og beslutninger",
+      "required": "(påkrævet)",
+      "discussion": "Drøftelse:",
+      "decision": "Beslutning:",
+      "decisions": "Beslutninger",
+      "open_questions": "Åbne spørgsmål",
+      "actions": "Handlingspunkter",
+      "col_number": "#",
+      "col_action": "Handling",
+      "col_owner": "Ansvarlig",
+      "col_due": "Frist",
+      "col_status": "Status",
+      "brought_forward": "[Overført]",
+      "overdue": "(forfalden)",
+      "status_open": "Åben",
+      "status_in_progress": "I gang",
+      "status_done": "Udført",
+      "status_cancelled": "Annulleret",
+      "summary": "Resumé",
+      "generated": "Oprettet: {stamp}",
+      "issued_at": "Udstedt {stamp}",
+      "running_head": "{project} - Referat",
+      "type_progress": "Byggemøde",
+      "type_design": "Projektering",
+      "type_safety": "Sikkerhed",
+      "type_subcontractor": "Underentreprenør",
+      "type_kickoff": "Opstart",
+      "type_closeout": "Afslutning",
+      "type_commercial": "Økonomi"
+    }
+  },
+  "inspections": {
+    "title": "Kvalitetskontroller",
+    "new_inspection": "Ny kontrol",
+    "inspector": "Kontrollant",
+    "checklist": "Tjekliste",
+    "pass": "Godkendt",
+    "fail": "Ikke godkendt",
+    "partial": "Delvis",
+    "critical": "Kritisk",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Planlagt",
+        "in_progress": "I gang",
+        "completed": "Gennemført",
+        "failed": "Ikke godkendt",
+        "cancelled": "Annulleret"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Afvigelsesrapporter",
+    "new_ncr": "Ny afvigelse",
+    "root_cause": "Grundårsag",
+    "corrective_action": "Korrigerende handling",
+    "preventive_action": "Forebyggende handling",
+    "material": "Materiale",
+    "workmanship": "Udførelse",
+    "design": "Projektering"
+  },
+  "submittals": {
+    "title": "Dokumenter til godkendelse",
+    "new_submittal": "Nyt dokument",
+    "spec_section": "Afsnit i beskrivelsen",
+    "revision": "Revision",
+    "submit": "Indsend",
+    "review": "Gennemgå",
+    "approved_as_noted": "Godkendt med bemærkninger",
+    "revise_resubmit": "Ret og indsend igen",
+    "intl": {
+      "status_labels": {
+        "draft": "Kladde",
+        "submitted": "Indsendt",
+        "under_review": "Under gennemsyn",
+        "approved": "Godkendt",
+        "approved_as_noted": "Godkendt med bemærkninger",
+        "revise_and_resubmit": "Revidér og indsend igen",
+        "rejected": "Afvist",
+        "closed": "Lukket"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Korrespondance",
+    "new_entry": "Ny registrering",
+    "incoming": "Indgående",
+    "outgoing": "Udgående",
+    "letter": "Brev",
+    "email": "E-mail",
+    "notice": "Meddelelse",
+    "date_sent": "Afsendelsesdato",
+    "date_received": "Modtagelsesdato"
+  },
+  "cde": {
+    "title": "Fælles datamiljø",
+    "new_container": "Ny container",
+    "container_code": "Containerkode",
+    "cde_state": "CDE-tilstand",
+    "wip": "Under udarbejdelse",
+    "shared": "Delt",
+    "published": "Publiceret",
+    "archived": "Arkiveret",
+    "promote": "Forfrem",
+    "suitability": "Egnethed",
+    "discipline": "Fagområde",
+    "revisions": "Revisioner",
+    "intl": {
+      "state_labels": {
+        "wip": "Under arbejde",
+        "shared": "Delt",
+        "published": "Udgivet",
+        "archived": "Arkiveret"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Følgesedler",
+    "new_transmittal": "Ny følgeseddel",
+    "purpose": "Formål",
+    "for_approval": "Til godkendelse",
+    "for_information": "Til orientering",
+    "for_construction": "Til udførelse",
+    "recipients": "Modtagere",
+    "acknowledge": "Bekræft modtagelse",
+    "locked": "Låst",
+    "issue_transmittal": "Udsend",
+    "intl": {
+      "status_words": {
+        "draft": "kladde",
+        "issued": "udsendt",
+        "responded": "besvaret"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Notifikationer",
+    "no_notifications": "Ingen nye notifikationer",
+    "mark_all_read": "Markér alle som læst",
+    "unread": "Ulæste"
+  },
+  "comments": {
+    "title": "Kommentarer",
+    "post": "Send",
+    "reply": "Svar",
+    "edit": "Redigér",
+    "delete": "Slet",
+    "placeholder": "Skriv en kommentar...",
+    "empty": "Ingen kommentarer endnu. Start diskussionen.",
+    "edited": "redigeret",
+    "deleted": "Denne kommentar er slettet"
+  },
+  "bim": {
+    "title": "BIM-hub",
+    "models": "Modeller",
+    "elements": "Elementer",
+    "upload_model": "Upload model",
+    "processing": "Behandler",
+    "active": "Aktiv",
+    "link_to_boq": "Sammenkæd med tilbudslisten",
+    "properties": "Egenskaber",
+    "quantities": "Mængder",
+    "wireframe": "Trådmodel",
+    "section_box": "Snitboks",
+    "measure": "Mål",
+    "zoom_to_fit": "Zoom til visning"
+  },
+  "reporting": {
+    "title": "Rapporter og dashboards",
+    "kpi": "KPI-dashboard",
+    "generate_report": "Generér rapport",
+    "templates": "Skabeloner",
+    "project_status": "Projektstatus",
+    "cost_report": "Omkostningsrapport",
+    "schedule_status": "Tidsplanstatus",
+    "safety_report": "Sikkerhedsrapport",
+    "explain": {
+      "report_total_one": "Rapportens total: {money} (sum af {count} linje).",
+      "report_total_other": "Rapportens total: {money} (sum af {count} linjer).",
+      "percent_of_total": "{part} er {percent} af {total} (procent af total).",
+      "percent_zero_total": "{part} af {total}: totalen er nul, så alle andele vises som 0 procent.",
+      "breakdown_empty": "Omkostningsfordeling: ingen data.",
+      "breakdown_one": "Omkostningsfordeling: {count} gruppe, rapportens total {money}.",
+      "breakdown_other": "Omkostningsfordeling: {count} grupper, rapportens total {money}.",
+      "top_n_one": "Top {requested}: {shown} af {shown} linje.",
+      "top_n_other": "Top {requested}: {shown} af {shown} linjer."
+    }
+  },
+  "gantt": {
+    "title": "Gantt-diagram",
+    "day": "Dag",
+    "week": "Uge",
+    "month": "Måned",
+    "critical_path": "Kritisk vej",
+    "baseline": "Basislinje",
+    "dependencies": "Afhængigheder",
+    "today": "I dag"
+  },
+  "settings": {
+    "regional": "Regionale indstillinger",
+    "timezone": "Tidszone",
+    "measurement": "Målesystem",
+    "paper_size": "Papirformat",
+    "date_format": "Datoformat",
+    "number_format": "Talformat",
+    "currency": "Valuta",
+    "metric": "Metrisk",
+    "imperial": "Imperialt"
+  },
+  "users": {
+    "management": "Brugeradministration",
+    "management_desc": "Administrer teammedlemmer, roller og adgang",
+    "invite_user": "Inviter bruger",
+    "invite": "Inviter",
+    "full_name": "Fulde navn",
+    "email": "E-mail",
+    "password": "Adgangskode",
+    "role": "Rolle",
+    "status": "Status",
+    "last_login": "Seneste login",
+    "actions": "Handlinger",
+    "name": "Navn",
+    "total": "Brugere i alt",
+    "active": "Aktiv",
+    "inactive": "Inaktiv",
+    "admins": "Administratorer",
+    "managers": "Ledere",
+    "search": "Søg på navn eller e-mail...",
+    "no_users": "Ingen brugere fundet",
+    "updated": "Bruger opdateret",
+    "invited": "Invitation sendt",
+    "deactivate": "Deaktiver",
+    "activate": "Aktiver",
+    "never": "Aldrig",
+    "role_admin_desc": "Fuld adgang til alle funktioner",
+    "role_manager_desc": "Projekt- og teamstyring",
+    "role_editor_desc": "Opret og rediger indhold",
+    "role_viewer_desc": "Skrivebeskyttet adgang"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Dette øjebliksbillede er frosset. Et frosset øjebliksbillede er en registrering og kan ikke ændres.",
+      "frozen_no_delete": "Et frosset øjebliksbillede er en registrering og kan ikke slettes.",
+      "draft_open": "Der er allerede et åbent kladdebillede. Frys eller slet det, før du starter et nyt.",
+      "no_line_method": "Denne linje har ingen egen metode.",
+      "snapshot_missing": "Øjebliksbilledet blev ikke fundet.",
+      "line_missing": "Øjebliksbilledet har ingen sådan linje.",
+      "document_missing": "Det tilknyttede dokument hører ikke til dette projekt.",
+      "freeze_refused": "Øjebliksbilledet kan ikke fryses endnu: {count} linje(r) har flyttet sig over tærsklen uden kommentar og dokumentation.",
+      "no_frozen_snapshot": "Der er endnu intet frosset øjebliksbillede at sammenligne med.",
+      "no_ledger": "Fakturaregisteret er ikke tilgængeligt i denne installation.",
+      "no_snapshot": "Der er endnu intet øjebliksbillede at dokumentere."
+    },
+    "export": {
+      "project": "Projekt",
+      "generated": "Oprettet",
+      "currency": "Valuta",
+      "page": "Side",
+      "generated_at": "Oprettet den",
+      "empty": "Intet at vise endnu.",
+      "total": "I alt",
+      "cost_report": "Økonomirapport",
+      "phase_comparison": "Fasesammenligning",
+      "invoice_ledger": "Fakturaregister",
+      "forecast_documentation": "Prognosedokumentation",
+      "as_of": "Pr.",
+      "forecast_method": "Prognosemetode",
+      "col_account": "Konto",
+      "col_code": "Kode",
+      "col_description": "Beskrivelse",
+      "col_source": "Kilde",
+      "col_method": "Metode",
+      "col_planned": "Budgetteret",
+      "col_committed": "Forpligtet",
+      "col_pending": "Afventende ændringer",
+      "col_measured": "Opmålt",
+      "col_certified": "Attesteret",
+      "col_invoiced": "Faktureret",
+      "col_paid": "Betalt",
+      "col_forecast": "Prognose",
+      "col_variance": "Afvigelse",
+      "col_variance_pct": "Afvigelse %",
+      "col_forecast_of_plan": "Prognose % af budget",
+      "col_measured_of_committed": "Opmålt % af forpligtet",
+      "col_invoiced_of_committed": "Faktureret % af forpligtet",
+      "col_contract": "Kontrakt",
+      "col_contract_title": "Kontraktens titel",
+      "col_invoice": "Faktura",
+      "col_date": "Dato",
+      "col_kind": "Type",
+      "col_release_status": "Frigivelse",
+      "col_net": "Netto",
+      "col_vat": "Moms",
+      "col_gross": "Brutto",
+      "col_retention": "Tilbageholdelse",
+      "col_release": "Frigivet tilbageholdelse",
+      "col_discount": "Rabat",
+      "col_payable": "Til betaling",
+      "col_open": "Åben",
+      "col_previous": "Forrige",
+      "col_delta": "Ændring",
+      "col_delta_pct": "Ændring %",
+      "col_needs_evidence": "Dokumentation påkrævet",
+      "col_comment": "Kommentar",
+      "col_evidence": "Dokumentation",
+      "row_unassigned": "Beløb uden omkostningslinje",
+      "row_loose_changes": "Ændringer uden kontrakt",
+      "row_no_contract": "Ingen kontrakt",
+      "contract_value": "Kontraktværdi",
+      "retention_held": "Tilbageholdt beløb",
+      "yes": "Ja",
+      "no": "Nej",
+      "snapshot_date": "Dato for øjebliksbillede",
+      "snapshot_status": "Status",
+      "previous_snapshot": "Forrige frosne øjebliksbillede",
+      "method_explained": "Sådan læses prognosen",
+      "evidence_threshold": "Dokumentation kræves over",
+      "threshold_both": "en ændring på mere end {parts}",
+      "threshold_any": "enhver ændring",
+      "frozen_at": "Frosset"
+    },
+    "method": {
+      "best_available": "Bedste tilgængelige kilde",
+      "maximum": "Højeste værdi",
+      "evm_cpi": "Indtjent værdi (CPI)",
+      "manual": "Manuel"
+    },
+    "method_help": {
+      "best_available": "Hver linje bruger sit mest modne tal: slutopgørelsen, ellers opmålt arbejde, ellers tildelingen, ellers overslaget, ellers budgettet.",
+      "maximum": "Hver linje bruger det højeste af sine tal (budget, overslag, tildeling, opmålt, faktureret), så prognosen aldrig skjuler en risiko.",
+      "evm_cpi": "Hver linje beregner sine slutomkostninger ud fra fremdriften: de hidtil brugte midler divideret med andelen af udført arbejde.",
+      "manual": "En person angiver linjens tal og knytter dokumentet bag det."
+    },
+    "source": {
+      "none": "Intet tal",
+      "budget": "Budget",
+      "estimate": "Overslag",
+      "partly_awarded": "Delvist tildelt",
+      "awarded": "Tildelt",
+      "measured": "Opmålt",
+      "final": "Slutopgørelse",
+      "manual": "Manuel",
+      "invoiced": "Faktureret",
+      "evm": "Indtjent værdi"
+    },
+    "layer": {
+      "budget": "Budget",
+      "estimate": "Overslag",
+      "tender": "Bedste tilbud",
+      "awarded": "Tildelt",
+      "changes": "Godkendte ændringer",
+      "committed": "Forpligtet",
+      "pending": "Afventende ændringer",
+      "measured": "Opmålt",
+      "certified": "Attesteret",
+      "invoiced": "Faktureret",
+      "paid": "Betalt",
+      "forecast": "Prognose"
+    },
+    "invoice_kind": {
+      "interim": "Acontofaktura",
+      "final": "Slutfaktura",
+      "daywork": "Timeløn",
+      "credit_note": "Kreditnota"
+    },
+    "release_status": {
+      "open": "Åben",
+      "released": "Frigivet"
+    },
+    "evidence_kind": {
+      "document": "Dokument",
+      "minutes": "Referat",
+      "other": "Andet"
+    },
+    "snapshot_status": {
+      "draft": "Kladde",
+      "frozen": "Frosset"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Projektnr.",
+      "generated_on": "Udarbejdet den",
+      "records": "Poster",
+      "currency": "Valuta",
+      "status": "Status",
+      "name": "Navn",
+      "signature": "Underskrift",
+      "date": "Dato",
+      "signatures": "Underskrifter",
+      "yes": "Ja",
+      "no": "Nej",
+      "days_one": "{n} dag",
+      "days_other": "{n} dage",
+      "empty_register": "Ingen poster.",
+      "total": "I alt",
+      "signer_title": "Titel",
+      "sig_prepared_by": "Udarbejdelse",
+      "sig_checked_by": "Kontrol",
+      "sig_approved_by": "Godkendelse",
+      "footer_generated": "Udarbejdet {timestamp}",
+      "footer_page": "Side {page} af {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Indsendelsesregister",
+        "doc_title": "Indsendelse til godkendelse",
+        "doc_title_product_data": "Materialegodkendelse",
+        "col_number": "Indsendelsesnr.",
+        "col_title": "Titel",
+        "col_type": "Type",
+        "col_spec": "Beskrivelsesafsnit",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Indsendt",
+        "col_date_required": "Ønsket dato",
+        "col_date_returned": "Returneret",
+        "col_reviewer": "Gennemgang",
+        "col_approver": "Godkender",
+        "col_ball_in_court": "Bolden hos",
+        "submitted_by_org": "Indsendende firma",
+        "review_notes": "Bemærkninger til gennemgang",
+        "no_review_notes": "Ingen bemærkninger registreret.",
+        "sig_submitted": "Indsendelse",
+        "sig_reviewed": "Gennemgang",
+        "sig_approved": "Godkendelse",
+        "register_filename": "indsendelsesregister",
+        "register_title_shop_drawing": "Register over værkstedstegninger",
+        "register_title_product_data": "Register over materialegodkendelser",
+        "register_title_method_statement": "Register over metodebeskrivelser",
+        "register_filename_shop_drawing": "register-over-vaerkstedstegninger",
+        "register_filename_product_data": "register-over-materialegodkendelser",
+        "register_filename_method_statement": "register-over-metodebeskrivelser",
+        "col_discipline": "Fag",
+        "col_manufacturer": "Fabrikat / mærke",
+        "col_model": "Model / type",
+        "col_origin": "Oprindelsesland",
+        "col_supplier": "Leverandør",
+        "col_product": "Fabrikat / model / oprindelse",
+        "col_review_code": "Gennemgangskode",
+        "col_outcome": "Resultat af gennemgang",
+        "col_review_period": "Gennemgangsfrist (dage)",
+        "col_review_due": "Gennemgang senest",
+        "col_days_in_review": "Dage i gennemgang",
+        "col_days_in_review_print": "Dage i gennemgang",
+        "col_review_overdue": "Dage over frist",
+        "col_required_on_site": "Behov på byggepladsen",
+        "col_long_lead": "Lang leveringstid",
+        "col_lead_time": "Leveringstid (uger)",
+        "col_needed_by": "Godkendelse senest",
+        "col_approval_late": "Dage efter frist",
+        "col_drawings": "Tilknyttede tegninger",
+        "col_submitted_returned": "Indsendt / returneret",
+        "col_on_site_needed_by": "På pladsen / godkendelse senest",
+        "resubmit_for_record": "Rettet eksemplar skal genindsendes til arkivering",
+        "review_history": "Gennemgangshistorik",
+        "hist_submitted": "Indsendt",
+        "hist_returned": "Returneret",
+        "drawings_missing_one": "{n} tilknyttet tegning er ikke længere tilgængelig",
+        "drawings_missing_other": "{n} tilknyttede tegninger er ikke længere tilgængelige",
+        "weeks_one": "{n} uge",
+        "weeks_other": "{n} uger"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kladde",
+          "submitted": "Indsendt",
+          "under_review": "Under gennemgang",
+          "approved": "Godkendt",
+          "approved_as_noted": "Godkendt med forbehold",
+          "revise_and_resubmit": "Rettes og genindsendes",
+          "rejected": "Afvist",
+          "closed": "Lukket"
+        },
+        "type": {
+          "shop_drawing": "Tegning",
+          "product_data": "Produktdata",
+          "sample": "Prøve",
+          "mock_up": "Mock-up",
+          "test_report": "Prøvningsrapport",
+          "calculation": "Beregning",
+          "method_statement": "Metodebeskrivelse",
+          "certificate": "Certifikat",
+          "warranty": "Garanti"
+        },
+        "discipline": {
+          "mechanical": "Mekanisk",
+          "hvac": "Ventilation og klima",
+          "plumbing": "VVS",
+          "fire_protection": "Brandsikring",
+          "electrical": "El",
+          "lighting": "Belysning",
+          "elv": "Svagstrøm",
+          "bms": "CTS-anlæg",
+          "architectural": "Arkitekt",
+          "structural": "Konstruktion",
+          "civil": "Anlæg"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Ændringsordreregister",
+        "doc_title": "Ændringsordre",
+        "col_code": "Kode",
+        "col_title": "Titel",
+        "col_reason": "Årsag",
+        "col_instrument": "Type",
+        "col_submitted": "Indsendt",
+        "col_contractor_amount": "Entreprenørens beløb",
+        "col_engineer_amount": "Rådgiverens beløb",
+        "col_approved_amount": "Godkendt beløb",
+        "col_cost_impact": "Økonomisk konsekvens",
+        "col_time_impact": "Tidskonsekvens (dage)",
+        "col_approved_time": "Godkendt tid (dage)",
+        "time_impact": "Tidskonsekvens",
+        "approved_time": "Godkendt tid",
+        "col_approved": "Godkendt den",
+        "submitted_by": "Indsendelse",
+        "approved_by": "Godkendelse",
+        "description": "Beskrivelse",
+        "no_description": "Ingen beskrivelse registreret.",
+        "items": "Ændringsposter",
+        "item_description": "Beskrivelse",
+        "item_change": "Ændring",
+        "item_unit": "Enhed",
+        "item_original_quantity": "Oprindeligt antal",
+        "item_new_quantity": "Nyt antal",
+        "item_original_rate": "Oprindelig pris",
+        "item_new_rate": "Ny pris",
+        "item_cost_delta": "Prisforskel",
+        "register_filename": "aendringsordreregister"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kladde",
+          "submitted": "Indsendt",
+          "approved": "Godkendt",
+          "rejected": "Afvist",
+          "executed": "Gennemført"
+        },
+        "reason": {
+          "client_request": "Bygherrens ønske",
+          "design_change": "Projektændring",
+          "unforeseen": "Uforudsete forhold",
+          "regulatory": "Myndighedskrav",
+          "error": "Fejl eller mangel",
+          "non_conformance": "Afvigelse",
+          "value_engineering": "Værdioptimering"
+        },
+        "instrument": {
+          "works_change": "Pålagt ændring",
+          "site_confirmation": "Byggepladsbekræftelse",
+          "claim": "Krav"
+        },
+        "change": {
+          "added": "Tilføjet",
+          "removed": "Fjernet",
+          "modified": "Ændret"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Dokumentationspakke",
+        "subject": "Emne",
+        "basis": "Grundlag",
+        "period_from": "Tidligste post",
+        "period_to": "Seneste post",
+        "digest": "Integritetskode (SHA-256, første 16 tegn)",
+        "col_row": "Nr.",
+        "col_record_id": "Post-ID",
+        "col_section": "Afsnit",
+        "col_date": "Dato",
+        "col_kind": "Posttype",
+        "col_title": "Titel",
+        "col_summary": "Resumé",
+        "col_reference": "Reference",
+        "register_filename": "dokumentationspakke"
+      },
+      "labels": {
+        "section": {
+          "notices": "Varsler",
+          "correspondence": "Korrespondance",
+          "rfis": "Afklaringsspørgsmål (RFI)",
+          "variations": "Tillægsarbejder",
+          "approvals": "Godkendelser",
+          "delay": "Forsinkelse",
+          "timeline": "Tidslinje",
+          "other": "Andet"
+        },
+        "kind": {
+          "notice": "Varsel",
+          "variation_notice": "Varsel om tillægsarbejde",
+          "variation_request": "Anmodning om tillægsarbejde",
+          "variation_order": "Tillægsarbejdsordre",
+          "change_order": "Ændringsordre",
+          "moc_entry": "Ændringspost",
+          "correspondence": "Korrespondance"
+        },
+        "basis": {
+          "dispute": "Tvist",
+          "valuation": "Værdiansættelse",
+          "delay": "Forsinkelse / tidsfristforlængelse",
+          "general": "Generel post"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Korrespondancelog",
+        "doc_title": "Korrespondance",
+        "col_reference": "Referencenr.",
+        "col_direction": "Retning",
+        "col_type": "Type",
+        "col_subject": "Emne",
+        "col_from": "Fra",
+        "col_to": "Til",
+        "col_date_sent": "Sendt",
+        "col_date_received": "Modtaget",
+        "col_response_due": "Svar senest",
+        "col_clause": "Kontraktbestemmelse",
+        "notes": "Bemærkninger",
+        "no_notes": "Ingen bemærkninger registreret.",
+        "attachments": "Vedhæftede filer",
+        "linked_documents": "Tilknyttede dokumenter",
+        "sig_prepared": "Udarbejdelse",
+        "sig_received": "Modtagelse",
+        "register_filename": "korrespondancelog"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Indgående",
+          "outgoing": "Udgående"
+        },
+        "type": {
+          "letter": "Brev",
+          "email": "E-mail",
+          "notice": "Varsel",
+          "memo": "Notat",
+          "report": "Rapport"
+        },
+        "status": {
+          "open": "Åben",
+          "awaiting_response": "Afventer svar",
+          "responded": "Besvaret",
+          "closed": "Lukket"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Fremsendelsesregister",
+        "doc_title": "Fremsendelse",
+        "col_number": "Fremsendelsesnr.",
+        "col_subject": "Emne",
+        "col_purpose": "Formål",
+        "col_issued": "Udstedt",
+        "col_response_due": "Svar senest",
+        "col_recipients": "Modtagere",
+        "col_item_count": "Poster",
+        "sender": "Afsender",
+        "cover_note": "Følgenotat",
+        "no_cover_note": "Intet følgenotat.",
+        "recipients": "Modtagere",
+        "recipient": "Modtager",
+        "action_required": "Handling påkrævet",
+        "acknowledged": "Modtagelse bekræftet",
+        "responded": "Besvaret den",
+        "items": "Fremsendte poster",
+        "item_no": "Nr.",
+        "item_description": "Beskrivelse",
+        "item_notes": "Bemærkninger",
+        "sig_issued": "Udstedelse",
+        "sig_received": "Modtagelse",
+        "register_filename": "fremsendelsesregister"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kladde",
+          "issued": "Udstedt",
+          "responded": "Besvaret"
+        },
+        "purpose": {
+          "for_approval": "Til godkendelse",
+          "for_review": "Til gennemgang",
+          "for_information": "Til orientering",
+          "for_construction": "Til udførelse",
+          "for_tender": "Til udbud",
+          "for_record": "Til arkivering"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Register over tillægsarbejder",
+        "claim_register_title": "Kravregister",
+        "notice_register_title": "Varselsregister",
+        "doc_title": "Anmodning om tillægsarbejde",
+        "doc_title_credit": "Anmodning om tillægsarbejde (fradrag)",
+        "time_impact": "Tidskonsekvens",
+        "col_code": "Kode",
+        "col_title": "Titel",
+        "col_classification": "Type",
+        "col_urgency": "Hastegrad",
+        "col_requested": "Anmodet den",
+        "col_claimed_amount": "Krævet beløb",
+        "col_agreed_amount": "Aftalt beløb",
+        "col_time_impact": "Tidskonsekvens (dage)",
+        "col_response_due": "Svar senest",
+        "col_clause": "Kontraktbestemmelse",
+        "col_row": "Nr.",
+        "col_claim_type": "Kravtype",
+        "col_raised": "Rejst den",
+        "col_period_start": "Periode fra",
+        "col_period_end": "Periode til",
+        "col_description": "Beskrivelse",
+        "col_decided_amount": "Afgjort beløb",
+        "col_days_requested": "Krævede dage",
+        "col_days_granted": "Tildelte dage",
+        "col_recipient_type": "Stilet til",
+        "col_recipient": "Modtager",
+        "col_target_response": "Forventet svar",
+        "col_response_received": "Svar modtaget",
+        "requested_by": "Anmodning",
+        "decided_by": "Afgørelse",
+        "date_submitted": "Indsendt den",
+        "date_decided": "Afgjort den",
+        "description": "Beskrivelse",
+        "no_description": "Ingen beskrivelse registreret.",
+        "decision_notes": "Bemærkninger til afgørelsen",
+        "no_decision_notes": "Ingen afgørelse registreret endnu.",
+        "variation_register_filename": "register-over-tillaegsarbejder",
+        "claim_register_filename": "kravregister",
+        "notice_register_filename": "varselsregister"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Kladde",
+          "submitted": "Indsendt",
+          "under_review": "Under gennemgang",
+          "approved": "Godkendt",
+          "rejected": "Afvist",
+          "converted_to_vo": "Omdannet til ordre"
+        },
+        "claim_status": {
+          "draft": "Kladde",
+          "submitted": "Indsendt",
+          "under_review": "Under gennemgang",
+          "agreed": "Aftalt",
+          "granted": "Imødekommet",
+          "rejected": "Afvist"
+        },
+        "notice_status": {
+          "issued": "Udstedt",
+          "acknowledged": "Bekræftet",
+          "responded": "Besvaret",
+          "closed": "Lukket"
+        },
+        "classification": {
+          "scope_change": "Ændret omfang",
+          "unforeseen": "Uforudset forhold",
+          "owner_change": "Bygherreændring",
+          "design_dev": "Projektudvikling",
+          "regulatory": "Myndighedskrav",
+          "other": "Andet"
+        },
+        "urgency": {
+          "low": "Lav",
+          "med": "Middel",
+          "high": "Høj"
+        },
+        "claim_type": {
+          "disruption": "Forstyrrelse",
+          "eot": "Tidsfristforlængelse"
+        },
+        "recipient_type": {
+          "owner": "Bygherre",
+          "contractor": "Entreprenør",
+          "architect": "Arkitekt",
+          "engineer": "Ingeniør",
+          "consultant": "Rådgiver"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Byggedagbog",
+        "overview": "Oversigt",
+        "site_supervisor": "Byggeleder",
+        "not_recorded": "Ikke registreret",
+        "labour_on_site": "Arbejdskraft på pladsen",
+        "equipment_on_site": "Materiel på pladsen",
+        "completeness": "Fuldstændighed",
+        "weather": "Vejr",
+        "weather_time": "Tid",
+        "weather_source": "Kilde",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Vind (km/t)",
+        "weather_precip": "Nedbør (mm)",
+        "weather_conditions": "Forhold",
+        "weather_empty": "Intet vejr registreret for denne dag.",
+        "site_record": "Pladsregistrering",
+        "entries_empty": "Ingen indførsler registreret i denne dagbog.",
+        "notes": "Bemærkninger",
+        "notes_empty": "Ingen yderligere bemærkninger.",
+        "footer_supervisor": "Byggeleder: {name}",
+        "footer_supervisor_missing": "Byggeleder: ikke registreret",
+        "footer_generated": "Udarbejdet: {timestamp}",
+        "footer_page": "Side {page} af {total}",
+        "workforce": "Mandskab pr. firma",
+        "workforce_company": "Firma",
+        "workforce_count": "Personer",
+        "workforce_unassigned": "Ikke tilknyttet et firma",
+        "workforce_total": "I alt",
+        "signatures": "Underskrifter",
+        "sig_prepared": "Udarbejdelse (byggeleder)",
+        "sig_approved": "Godkendelse (bygherrens repræsentant)",
+        "sig_name": "Navn",
+        "sig_title": "Titel",
+        "sig_date": "Dato",
+        "sig_signature": "Underskrift",
+        "signed_note": "Underskrevet i systemet: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "byggedagbog",
+        "summary_wind": "vind {value} km/t",
+        "summary_precipitation": "nedbør {value} mm",
+        "summary_humidity": "luftfugtighed {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Besøgende",
+          "event": "Hændelser",
+          "delivery": "Leverede materialer",
+          "completion": "Udført arbejde",
+          "incident_summary": "Sikkerhed og hændelser",
+          "inspection_summary": "Inspektioner",
+          "photo_note": "Fotonoter",
+          "general": "Generelle noter"
+        },
+        "status": {
+          "open": "Åben",
+          "closed": "Lukket",
+          "signed": "Underskrevet",
+          "archived": "Arkiveret"
+        },
+        "condition": {
+          "clear": "klart",
+          "mainly_clear": "overvejende klart",
+          "partly_cloudy": "delvist skyet",
+          "cloudy": "skyet",
+          "overcast": "overskyet",
+          "fog": "tåge",
+          "fog_rime": "isslettende tåge",
+          "drizzle_light": "let støvregn",
+          "drizzle_moderate": "moderat støvregn",
+          "drizzle_dense": "kraftig støvregn",
+          "rain": "regn",
+          "rain_light": "let regn",
+          "rain_moderate": "moderat regn",
+          "rain_heavy": "kraftig regn",
+          "freezing_rain_light": "let isslag",
+          "freezing_rain_heavy": "kraftigt isslag",
+          "snow": "sne",
+          "snow_light": "let snefald",
+          "snow_moderate": "moderat snefald",
+          "snow_heavy": "kraftigt snefald",
+          "rain_showers_light": "lette regnbyger",
+          "rain_showers_moderate": "moderate regnbyger",
+          "rain_showers_violent": "kraftige regnbyger",
+          "snow_showers_light": "lette snebyger",
+          "snow_showers_heavy": "kraftige snebyger",
+          "thunderstorm": "tordenvejr",
+          "thunderstorm_hail_light": "tordenvejr med let hagl",
+          "thunderstorm_hail_heavy": "tordenvejr med kraftigt hagl"
+        },
+        "source": {
+          "manual": "Manuel indtastning",
+          "open_meteo": "Vejrtjeneste",
+          "sensor": "Sensor på pladsen"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "RFI-log",
+        "col_number": "RFI-nr.",
+        "col_subject": "Emne",
+        "col_raised_by": "Rejst af",
+        "col_assigned_to": "Tildelt",
+        "col_ball_in_court": "Bolden hos",
+        "col_date_required": "Ønsket dato",
+        "col_response_due": "Svar senest",
+        "col_days_open": "Dage åben",
+        "col_cost_impact": "Økonomisk konsekvens",
+        "col_schedule_impact": "Tidskonsekvens",
+        "col_response": "Svar",
+        "yes_with": "Ja ({detail})",
+        "register_filename": "rfi-log"
+      },
+      "labels": {
+        "status": {
+          "draft": "Kladde",
+          "open": "Åben",
+          "answered": "Besvaret",
+          "closed": "Lukket",
+          "void": "Ugyldig"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "AI-genereret",
+        "drawing": "Tegning",
+        "cost_estimate": "OMKOSTNINGSOVERSLAG",
+        "summary": "SAMMENFATNING",
+        "project": "Projekt:",
+        "boq": "Mængdefortegnelse:",
+        "date": "Dato:",
+        "status": "Status:",
+        "prepared_by": "Udarbejdet af:",
+        "approved_by": "Godkendt af:",
+        "signature_hint": "Navn / Underskrift / Dato",
+        "contents": "Afsnit / Poster:",
+        "pos": "Pos.",
+        "description": "Beskrivelse",
+        "unit": "Enhed",
+        "qty": "Antal",
+        "rate": "Enhedspris",
+        "total": "Total",
+        "subtotal": "Subtotal:",
+        "other_positions": "Øvrige poster",
+        "direct_cost": "Direkte omkostninger:",
+        "markups": "Tillæg (ekskl. moms):",
+        "net_total": "Nettosum (ekskl. moms):",
+        "gross_total": "Bruttosum",
+        "page": "Side",
+        "of": "af",
+        "generated": "Genereret:",
+        "summary_report": "Sammenfatningsrapport",
+        "positions_omitted": "{count} poster (fuld detalje udeladt af hensyn til ydeevnen)",
+        "section": "Afsnit",
+        "items": "Poster",
+        "cost_summary": "Omkostningsoversigt",
+        "table_of_contents": "Indholdsfortegnelse",
+        "resources_omitted": "Ressourceopbygning er ikke udskrevet: denne mængdefortegnelse har for mange ressourcelinjer til én PDF.",
+        "status_draft": "Kladde",
+        "status_final": "Endelig",
+        "status_archived": "Arkiveret",
+        "subject": "Mængdefortegnelse",
+        "tax_vat": "Moms"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "FAKTURA",
+        "date": "Dato: {value}",
+        "due": "Forfald: {value}",
+        "from": "Fra",
+        "bill_to": "Faktureres til",
+        "vat_id": "Momsnr.: {value}",
+        "ref": "Reference: {value}",
+        "th_description": "Beskrivelse",
+        "th_qty": "Antal",
+        "th_unit": "Enhed",
+        "th_unit_price": "Enhedspris",
+        "th_net": "Netto ({currency})",
+        "net_total": "Nettobeløb",
+        "vat_total": "Moms",
+        "grand_total": "Samlet beløb",
+        "retention_prepaid": "Tilbageholdelse / forudbetalt",
+        "amount_due": "Skyldigt beløb",
+        "payment": "Betaling",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Kontonr.: {value}",
+        "bank_code": "Bankkode: {value}",
+        "account_holder": "Kontohaver: {value}",
+        "footer": "Denne PDF indeholder en indlejret EN 16931-e-faktura (Factur-X / ZUGFeRD). Den indlejrede XML er det gældende dokument.",
+        "date_format": "%Y-%m-%d",
+        "decimal_separator": ",",
+        "group_separator": "."
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Rapport",
+        "meta_project": "Projekt",
+        "meta_type": "Type",
+        "meta_generated": "Genereret",
+        "meta_currency": "Valuta",
+        "field_column": "Felt",
+        "value_column": "Værdi",
+        "yes": "Ja",
+        "no": "Nej",
+        "no_data_heading": "Ingen data tilgængelige",
+        "no_data_body": "Denne rapport blev genereret med et tomt datagrundlag. Kontrollér, at kildemodulerne (økonomi, tidsplan, sikkerhed osv.) returnerede data for det valgte projekt.",
+        "no_data_body_short": "Denne rapport blev genereret med et tomt datagrundlag. Kontrollér, at kildemodulerne returnerede data for det valgte projekt.",
+        "footer_generated_by": "Genereret af OpenConstructionERP kl. {timestamp}.",
+        "worksheet_name": "Rapport",
+        "pdf_subject": "Projektrapport",
+        "overall_progress": "Samlet fremdrift",
+        "as_of": "Pr.",
+        "recorded_by": "Registreret af",
+        "period": "Periode",
+        "entries_suffix": "({count} poster)",
+        "site_photo_alt": "Foto fra byggepladsen",
+        "ai_summary_heading": "Resumé",
+        "ai_badge": "AI-genereret",
+        "ai_note": "Genereret af AI ud fra projektdataene nedenfor.",
+        "ai_note_confidence": "Genereret af AI ud fra projektdataene nedenfor (konfidens {confidence}).",
+        "ai_note_review": "Gennemgå før deling med kunden."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Navn",
+          "status": "Status",
+          "phase": "Fase",
+          "planned_start": "Planlagt start",
+          "planned_end": "Planlagt slut",
+          "schedule_progress_pct": "Fremdrift iht. tidsplan (%)",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Forbrugt budget (%)",
+          "as_of": "Pr.",
+          "progress_pct": "Fremdrift (%)",
+          "risk_score_avg": "Gennemsnitlig risikoscore",
+          "open_rfis": "Åbne RFI'er",
+          "open_submittals": "Åbne materialeindsendelser",
+          "open_defects": "Åbne mangler",
+          "open_observations": "Åbne observationer",
+          "budget": "Budget",
+          "committed": "Bundet",
+          "actual": "Faktisk",
+          "payable": "Til betaling",
+          "receivable": "Tilgodehavende",
+          "net_cash_flow": "Netto pengestrøm"
+        },
+        "section_titles": {
+          "Project Overview": "Projektoversigt",
+          "Key Performance Indicators": "Nøgletal (KPI)",
+          "Schedule Status": "Tidsplanstatus",
+          "Risk Summary": "Risikooversigt",
+          "Open Issues": "Åbne forhold",
+          "Cost Summary": "Omkostningsoversigt",
+          "Cost Breakdown": "Omkostningsfordeling",
+          "Change Orders": "Ændringsordrer",
+          "Cash Flow": "Pengestrøm",
+          "Schedule Overview": "Tidsplanoversigt",
+          "Milestone Status": "Milepælsstatus",
+          "Critical Path": "Kritisk sti",
+          "3-Week Lookahead": "3-ugers-plan",
+          "Safety KPIs": "Sikkerhedsnøgletal",
+          "Incident Log": "Hændelseslog",
+          "Near-Miss Reports": "Nærved-hændelser",
+          "Safety Training": "Sikkerhedsuddannelse",
+          "Inspection Summary": "Inspektionsoversigt",
+          "By Inspection Type": "Efter inspektionstype",
+          "Punch List Status": "Status på mangelliste",
+          "Recent Inspections": "Seneste inspektioner",
+          "Portfolio Overview": "Porteføljeoversigt",
+          "Project Statuses": "Projektstatus",
+          "KPI Comparison": "Sammenligning af nøgletal",
+          "Portfolio Risks": "Porteføljerisici",
+          "Field Progress": "Fremdrift på byggepladsen",
+          "Top Risks": "Største risici",
+          "Site Photos": "Fotos fra byggepladsen",
+          "Summary": "Resumé"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Indkøbsordre",
+        "gr_title": "Modtagelse af varer",
+        "supplier": "Leverandør",
+        "po_type": "Ordretype",
+        "issue_date": "Udstedelsesdato",
+        "delivery_date": "Leveringsdato",
+        "created_by": "Udarbejdet af",
+        "order_total": "Ordresum",
+        "line_items": "Linjer",
+        "col_no": "Nr.",
+        "col_description": "Beskrivelse",
+        "col_quantity": "Antal",
+        "col_unit": "Enhed",
+        "col_unit_rate": "Enhedspris",
+        "col_amount": "Beløb",
+        "no_line_items": "Ingen linjer.",
+        "totals": "Summer",
+        "subtotal": "Nettobeløb",
+        "tax": "Moms",
+        "total_gross": "Total inkl. moms",
+        "terms": "Vilkår",
+        "payment_terms": "Betalingsvilkår",
+        "retention": "Tilbageholdelse",
+        "retention_at": "Tilbageholdelse tilbageholdes ved",
+        "retention_at_receipt": "Modtagelse af varer",
+        "retention_at_invoice": "Faktura",
+        "invoice_tolerance": "Fakturatolerance",
+        "supplier_confirmation": "Leverandørbekræftelse",
+        "supplier_reference": "Leverandørens reference",
+        "confirmed_delivery": "Bekræftet leveringsdato",
+        "acknowledged_on": "Bekræftet den",
+        "not_confirmed": "Endnu ikke bekræftet af leverandøren.",
+        "notes": "Noter",
+        "no_notes": "Ingen noter registreret.",
+        "sig_ordered_by": "Bestilt af",
+        "purchase_order": "Indkøbsordre",
+        "receipt_date": "Modtagelsesdato",
+        "received_by": "Modtaget af",
+        "delivery_note": "Følgeseddel",
+        "col_ordered": "Bestilt",
+        "col_received": "Modtaget",
+        "col_rejected": "Afvist",
+        "col_batch": "Batch / parti",
+        "rejections": "Afvisninger",
+        "col_reason": "Årsag",
+        "no_rejections": "Intet blev afvist.",
+        "sig_delivered_by": "Leveret af",
+        "counterparty_tax_id": "CVR-/momsnr.",
+        "counterparty_address": "Adresse"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Kladde",
+          "approved": "Godkendt",
+          "issued": "Udstedt",
+          "partially_received": "Delvist modtaget",
+          "completed": "Afsluttet",
+          "cancelled": "Annulleret"
+        },
+        "gr_status": {
+          "draft": "Kladde",
+          "confirmed": "Bekræftet"
+        },
+        "po_type": {
+          "standard": "Standard",
+          "blanket": "Rammeordre",
+          "service": "Ydelser"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Faktura",
+        "payment_title": "Betaling",
+        "direction": "Retning",
+        "supplier": "Leverandør",
+        "client": "Kunde",
+        "invoice_date": "Fakturadato",
+        "due_date": "Forfaldsdato",
+        "payment_terms": "Betalingsvilkår",
+        "purchase_order": "Indkøbsordre",
+        "invoice_total": "Fakturabeløb",
+        "line_items": "Linjer",
+        "col_no": "Nr.",
+        "col_description": "Beskrivelse",
+        "col_quantity": "Antal",
+        "col_unit": "Enhed",
+        "col_unit_rate": "Enhedspris",
+        "col_vat": "Moms",
+        "col_amount": "Beløb",
+        "no_line_items": "Ingen linjer.",
+        "totals": "Summer",
+        "subtotal": "Nettobeløb",
+        "tax": "Moms",
+        "total_gross": "Total inkl. moms",
+        "retention": "Tilbageholdelse",
+        "amount_due": "Til betaling efter tilbageholdelse",
+        "payments": "Betalinger",
+        "col_date": "Dato",
+        "col_reference": "Reference",
+        "col_paid": "Betalt",
+        "col_withheld": "Tilbageholdt",
+        "refund": "Tilbagebetaling",
+        "no_payments": "Ingen betalinger registreret.",
+        "notes": "Noter",
+        "no_notes": "Ingen noter registreret.",
+        "invoice": "Faktura",
+        "invoice_number": "Fakturanr.",
+        "payment_date": "Betalingsdato",
+        "reference": "Reference",
+        "amount_paid": "Betalt beløb",
+        "exchange_rate": "Valutakurs",
+        "kind": "Type",
+        "kind_payment": "Betaling",
+        "kind_refund": "Tilbagebetaling",
+        "withholding": "Tilbageholdelse",
+        "withheld_amount": "Tilbageholdt beløb",
+        "release_date": "Frigivelsesdato",
+        "gross_settled": "Bruttobeløb afregnet",
+        "no_withholding": "Der blev ikke tilbageholdt noget fra denne betaling.",
+        "counterparty_tax_id": "CVR-/momsnr.",
+        "counterparty_address": "Adresse"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Kladde",
+          "pending": "Afventer godkendelse",
+          "approved": "Godkendt",
+          "sent": "Sendt",
+          "paid": "Betalt",
+          "cancelled": "Annulleret",
+          "credit_note_issued": "Kreditnota udstedt"
+        },
+        "direction": {
+          "payable": "Kreditor (leverandørfaktura)",
+          "receivable": "Debitor (kundefaktura)"
+        },
+        "payment_status": {
+          "completed": "Gennemført",
+          "refunded": "Tilbagebetalt"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Side {page} af {total}",
+    "page": "Side {page}",
+    "printed": "Udskrevet: {timestamp}",
+    "generated": "Genereret: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} har inviteret dig til kundeportalen",
+      "login_subject": "Dit loginlink til kundeportalen",
+      "invite_heading": "Velkommen til kundeportalen",
+      "login_heading": "Log ind på kundeportalen",
+      "greeting": "Hej {name},",
+      "greeting_generic": "Hej,",
+      "invite_body": "{sender} har givet dig adgang til kundeportalen. Her kan du følge dit projekt: statusrapporter, dokumenter, fakturaer og de kommende milepæle.",
+      "login_body": "Her er det loginlink, du bad om.",
+      "link_help": "Knappen nedenfor logger dig ind. Du behøver ikke en adgangskode. Linket kan bruges én gang og udløber om {hours} timer.",
+      "ignore": "Hvis du ikke forventede denne e-mail, kan du blot se bort fra den. Ingen får adgang uden dette link.",
+      "invite_cta": "Åbn portalen",
+      "login_cta": "Log ind",
+      "sender_generic": "Dit projektteam"
+    },
+    "tender_invite": {
+      "subject": "Indbydelse til at afgive tilbud: {package}",
+      "heading": "Indbydelse til at afgive tilbud",
+      "greeting": "Kære {company},",
+      "greeting_generic": "Kære modtager,",
+      "invite": "I indbydes hermed til at afgive tilbud på udbudspakken {package}.",
+      "invite_project": "I indbydes hermed til at afgive tilbud på udbudspakken {package} i projektet {project}.",
+      "deadline": "Tilbudsfrist: {deadline}",
+      "link_help": "Knappen nedenfor åbner tilbudslisten. Indtast jeres enhedspriser online, gem en kladde, når I vil, og afgiv tilbuddet inden fristen. I behøver ingen konto.",
+      "link_personal": "Linket er personligt til jeres virksomhed. Del det venligst ikke videre.",
+      "cta": "Åbn tilbudslisten og indtast priser",
+      "no_link": "Gennemgå venligst oplysningerne om pakken, og send jeres tilbud inden tilbudsfristen ovenfor."
+    },
+    "notification_email": {
+      "greeting": "Hej {name},",
+      "greeting_generic": "Hej,",
+      "cta": "Åbn i OpenConstructionERP",
+      "footer": "Du modtager denne e-mail på grund af dine indstillinger for notifikationer. Du kan ændre dem i din profil.",
+      "digest_subject": "OpenConstructionERP: Samling af notifikationer ({count})",
+      "digest_heading": "Seneste notifikationer:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Prissammenligning",
+      "comparison_sheet": "Sammenligning",
+      "bidder_title": "Tilbudsliste til prissætning",
+      "bidder_sheet": "Tilbudsliste",
+      "project": "Projekt",
+      "package": "Pakke",
+      "currency": "Valuta",
+      "date": "Dato",
+      "return_by": "Skal returneres senest",
+      "item": "Post",
+      "description": "Beskrivelse",
+      "unit": "Enhed",
+      "quantity": "Mængde",
+      "unit_price": "Enhedspris",
+      "line_total": "Linjesum",
+      "own_estimate": "Eget overslag",
+      "not_priced": "ikke prissat",
+      "sum_priced_lines": "Sum af prissatte linjer",
+      "bid_total": "Tilbudssum som afgivet",
+      "lines_priced": "Prissatte linjer",
+      "lines_priced_value": "{priced} af {total}",
+      "deviation": "Afvigelse fra eget overslag",
+      "not_comparable": "ikke relevant",
+      "other_currency": "Afgivet i {currency}, rangeres ikke over for tilbud i {reporting}.",
+      "legend": "Forklaring",
+      "legend_lowest": "Grøn: laveste enhedspris på linjen.",
+      "legend_high": "▲ rød: mere end {pct}% over medianprisen på linjen.",
+      "legend_low": "▼ gul: mere end {pct}% under medianprisen på linjen.",
+      "legend_missing": "»{marker}«: tilbudsgiveren har ikke angivet nogen pris for linjen.",
+      "legend_incomplete": "Et tilbud med ikke-prissatte linjer er markeret i »Prissatte linjer« og rangeres ikke som laveste på sin totalsum.",
+      "legend_totals": "Tilbudssummen er det beløb, tilbudsgiveren har afgivet; det kan afvige fra summen af de prissatte linjer.",
+      "bidder": "Tilbudsgiver",
+      "bidder_note": "Bemærkning fra tilbudsgiver",
+      "reference": "Reference (må ikke redigeres)",
+      "total": "Sum",
+      "instructions": "Indtast en enhedspris for hver linje i de gule celler. Mængder og beskrivelser er låst, linjesummer og totalsum beregnes automatisk. Lad cellen stå tom, hvis I ikke prissætter linjen."
+    },
+    "cost_plan": {
+      "sheet_plan": "Omkostningsplan NRM 1",
+      "sheet_unallocated": "Ikke fordelt",
+      "title": "Omkostningsplan efter bygningsdele (NRM 1)",
+      "bill": "Tilbudsliste",
+      "currency": "Valuta",
+      "gifa": "BTA (m2)",
+      "gifa_project": "fra projektet",
+      "gifa_entered": "angivet til denne eksport",
+      "gifa_none": "ikke angivet, pris pr. m2 vises ikke",
+      "col_code": "Kode",
+      "col_description": "Bygningsdel",
+      "col_positions": "Poster",
+      "col_basis": "Grundlag",
+      "col_total": "Sum",
+      "col_per_m2": "Pris pr. m2 BTA",
+      "col_share": "% af totalen",
+      "col_running": "Løbende sum",
+      "group_level": "Gruppeniveau, ingen bygningsdel angivet",
+      "facilitating_works_estimate": "Overslag for forberedende arbejder",
+      "works_estimate": "Overslag for byggearbejder",
+      "addons_heading": "NRM 1 gruppe 9-14 prissat som poster i tilbudslisten",
+      "unallocated": "Ikke fordelt på bygningsdel",
+      "direct_cost": "Direkte omkostninger i tilbudslisten",
+      "markups_heading": "Tillæg (tilbudslistens egen tillægskæde, i rækkefølge)",
+      "markups_total": "Sum af tillæg",
+      "grand_total": "Sum for omkostningsplanen",
+      "basis_direct": "{pct}% af direkte omkostninger",
+      "basis_running": "{pct}% af løbende delsum",
+      "basis_lump": "Fast beløb",
+      "basis_banded": "Trappeskala",
+      "basis_escalation": "Indeksregulering",
+      "basis_other": "{kind}",
+      "basis_scoped": "afgrænset til afsnit",
+      "col_ordinal": "Løbenummer",
+      "col_position": "Beskrivelse",
+      "col_written_code": "Kode som skrevet",
+      "col_reason": "Årsag",
+      "reason_no_code": "Ingen NRM-kode på posten eller dens afsnit",
+      "reason_invalid_code": "Koden er ikke et NRM-nummer",
+      "reason_unknown_group": "NRM 1 har ingen sådan gruppe",
+      "truncated": "Listen er forkortet til de første {shown} af {count} poster; summen omfatter alle."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Krav",
+      "sheet_summary": "Oversigt",
+      "sheet_legend": "Forklaring",
+      "summary_element": "Bygningsdel",
+      "summary_count": "Antal krav",
+      "summary_total": "Sum",
+      "legend_column": "Kolonne",
+      "legend_description": "Beskrivelse",
+      "unspecified": "Uspecificeret",
+      "h01": "Bygningsdel / IFC-klasse",
+      "h02": "Klassifikation",
+      "h03": "Egenskabsgruppe",
+      "h04": "Egenskabsnavn",
+      "h05": "Datatype",
+      "h06": "Påkrævet",
+      "h07": "Tilladte værdier",
+      "h08": "Min",
+      "h09": "Maks",
+      "h10": "Enhed",
+      "h11": "Mønster",
+      "h12": "Fase",
+      "h13": "Aktør",
+      "h14": "Anvendelsestilfælde",
+      "h15": "Kilde",
+      "d01": "IFC-entitetsklasse (f.eks. IFCWALL, IFCBEAM)",
+      "d02": "Klassifikationssystem og kode (f.eks. DBK eller Uniclass 2015: EF_25_10)",
+      "d03": "Navn på egenskabssæt (f.eks. Pset_WallCommon)",
+      "d04": "Navn på den påkrævede egenskab eller attribut",
+      "d05": "IFC-datatype (IFCLABEL, IFCREAL, IFCBOOLEAN osv.)",
+      "d06": "Kardinalitet: påkrævet, valgfri eller forbudt",
+      "d07": "Liste over tilladte værdier, adskilt med semikolon",
+      "d08": "Grænser for talinterval",
+      "d09": "Måleenhed (m, m2, kg osv.)",
+      "d10": "Regulært udtryk til validering af værdien",
+      "d11": "Projektfase eller milepæl (LP3, RIBA Stage 3 osv.)",
+      "d12": "Ansvarlig part (arkitekt, rådgivende ingeniør osv.)",
+      "d13": "Formål eller anvendelsestilfælde for kravet",
+      "d14": "Kilde: standard eller dokument"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Tilbudsliste oprettet",
+      "notifications.boq.created.body": "Din tilbudsliste »{boq_name}« er gemt.",
+      "notifications.meeting.action_assigned.title": "Mødeopgave tildelt dig",
+      "notifications.meeting.action_assigned.body": "Fra møde {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Dokumentstatus ændret",
+      "notifications.cde.state_transitioned.body": "Containeren er flyttet til »{new_state}«.",
+      "notifications.cde.linked_published.title": "Et dokument i dit arbejde er udgivet",
+      "notifications.cde.linked_published.body": "{container_code} er udgivet i revision {revision_code}. Dine tilknyttede poster: {records}.",
+      "notifications.rfi.assigned.title": "RFI tildelt dig",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "RFI besvaret",
+      "notifications.rfi.responded.body": "Din forespørgsel {code} ({title}) har fået svar.",
+      "notifications.risk.assigned.title": "Risiko tildelt dig",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Advarsel om budgetoverskridelse",
+      "notifications.costmodel.overrun_alert.body": "Omkostningerne for {category} overskrider budgettet: faktisk {actual} {currency} overstiger advarselsgrænsen +{threshold_pct}% af planlagt {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Indsendelse afventer gennemgang",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Indsendelse godkendt",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Indsendelse afvist",
+      "notifications.submittal.rejected.body": "{code} ({title}). Årsag: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Indsendelse skal rettes",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Årsag: {reason}",
+      "notifications.transmittal.issued.title": "Fremsendelse udstedt til dig",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Fremsendelse kvitteret",
+      "notifications.transmittal.acknowledged.body": "Modtageren har bekræftet {code} ({title}).",
+      "notifications.transmittal.responded.title": "Fremsendelse besvaret",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "RFI tildelt dig",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Ny opgave tildelt",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Faktura godkendt",
+      "notification.invoice_approved_body": "Faktura {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Eftersyn planlagt",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, dato: {inspection_date}",
+      "notification.submittal_status_changed_title": "Status for indsendelse ændret",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Møde planlagt",
+      "notification.meeting_scheduled_body": "{title}, dato: {meeting_date}",
+      "notification.ncr_created_title": "Afvigelse registreret",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Dokument uploadet",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Du blev nævnt i en kommentar",
+      "notifications.file_comments.mention.body": "»{excerpt}«",
+      "notifications.collaboration.comment_added.title": "Ny kommentar i en diskussion",
+      "notifications.collaboration.comment_added.body": "Vedrører {entity_type}: »{excerpt}«",
+      "notifications.clash.high_severity.title": "Alvorlig kollision opdaget",
+      "notifications.clash.high_severity.body": "Kollision, alvorlighed {severity}: {a_name} mod {b_name}",
+      "notifications.validation.report.title": "Valideringen fandt problemer",
+      "notifications.validation.report.body": "Validering af {target_type}: fejl {error_count}, advarsler {warning_count}.",
+      "notifications.punchlist.auto_created.title": "Punkt på mangellisten oprettet",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Samling af notifikationer",
+      "notifications.digest.body": "Nye opdateringer i kanalen {channel}: {count}.",
+      "notifications.approval.overdue.title": "Godkendelse forsinket",
+      "notifications.approval.overdue.body": "Trin {step_ordinal} for {target_kind} er forsinket. Timer over fristen: {hours_overdue}.",
+      "notifications.approval.escalated.title": "Godkendelse eskaleret til dig",
+      "notifications.approval.escalated.body": "Trin {step_ordinal} for {target_kind} er eskaleret til dig (niveau {level}).",
+      "notifications.approval.reassigned.title": "Godkendelse omfordelt til dig",
+      "notifications.approval.reassigned.body": "Trin {step_ordinal} for {target_kind} skal nu afgøres af dig.",
+      "notifications.deadline.overdue.title": "Forsinket: {title}",
+      "notifications.deadline.overdue.body": "Post i {module} »{title}« har overskredet fristen. Antal dage: {days_overdue}.",
+      "notifications.deadline.escalated.title": "Eskaleret forsinket post",
+      "notifications.deadline.escalated.body": "Post i {module} »{title}« er stadig åben og forsinket og er blevet eskaleret. Antal dage: {days_overdue}.",
+      "notifications.deadline.approaching.title": "Forfalder snart: {title}",
+      "notifications.deadline.approaching.body": "Post i {module} »{title}« forfalder {due_date}.",
+      "notifications.deadline.built.approaching.title": "Forfalder snart: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: »{title}« forfalder {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Forsinket: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "RFI {reference} »{title}« i {project} skulle have været besvaret senest {due_date_display} og er forsinket. Antal dage: {days_overdue}. Svar påkrævet.",
+      "notifications.deadline.rfi.escalated.title": "Eskaleret: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "RFI {reference} »{title}« i {project} er stadig åben og har overskredet fristen {due_date_display}. Antal dage: {days_overdue}. Sagen er eskaleret til dig.",
+      "notifications.deadline.rfi.approaching.title": "Forfalder snart: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "RFI {reference} »{title}« i {project} forfalder {due_date_display}. Svar påkrævet.",
+      "notifications.deadline.submittals.overdue.title": "Forsinket: indsendelse {reference}",
+      "notifications.deadline.submittals.overdue.body": "Indsendelse {reference} »{title}« i {project} skulle have været gennemgået senest {due_date_display} og er forsinket. Antal dage: {days_overdue}. Gennemgang påkrævet.",
+      "notifications.deadline.submittals.escalated.title": "Eskaleret: indsendelse {reference}",
+      "notifications.deadline.submittals.escalated.body": "Indsendelse {reference} »{title}« i {project} er stadig åben og har overskredet fristen {due_date_display}. Antal dage: {days_overdue}. Sagen er eskaleret til dig.",
+      "notifications.deadline.submittals.approaching.title": "Forfalder snart: indsendelse {reference}",
+      "notifications.deadline.submittals.approaching.body": "Indsendelse {reference} »{title}« i {project} forfalder {due_date_display}. Gennemgang påkrævet.",
+      "notifications.deadline.correspondence.overdue.title": "Forsinket: korrespondance {reference}",
+      "notifications.deadline.correspondence.overdue.body": "Korrespondance {reference} »{title}« i {project} skulle have været besvaret senest {due_date_display} og er forsinket. Antal dage: {days_overdue}. Svar påkrævet.",
+      "notifications.deadline.correspondence.escalated.title": "Eskaleret: korrespondance {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Korrespondance {reference} »{title}« i {project} er stadig ubesvaret og har overskredet fristen {due_date_display}. Antal dage: {days_overdue}. Sagen er eskaleret til dig.",
+      "notifications.deadline.correspondence.approaching.title": "Forfalder snart: korrespondance {reference}",
+      "notifications.deadline.correspondence.approaching.body": "Korrespondance {reference} »{title}« i {project} skal besvares senest {due_date_display}. Svar påkrævet.",
+      "notifications.deadline.variations.overdue.title": "Forsinket: tillægsarbejde {reference}",
+      "notifications.deadline.variations.overdue.body": "Tillægsarbejde {reference} »{title}« i {project} skulle have været afgjort senest {due_date_display} og er forsinket. Antal dage: {days_overdue}. Beslutning påkrævet.",
+      "notifications.deadline.variations.escalated.title": "Eskaleret: tillægsarbejde {reference}",
+      "notifications.deadline.variations.escalated.body": "Tillægsarbejde {reference} »{title}« i {project} er stadig åbent og har overskredet fristen {due_date_display}. Antal dage: {days_overdue}. Sagen er eskaleret til dig.",
+      "notifications.deadline.variations.approaching.title": "Forfalder snart: tillægsarbejde {reference}",
+      "notifications.deadline.variations.approaching.body": "Tillægsarbejde {reference} »{title}« i {project} forfalder {due_date_display}. Beslutning påkrævet.",
+      "notifications.variation.submitted.title": "Tillægsarbejde afventer beslutning: {code}",
+      "notifications.variation.submitted.body": "Tillægsarbejde {code} »{title}« i {project} er indsendt og afventer en beslutning.",
+      "notifications.variation.approved.title": "Tillægsarbejde godkendt: {code}",
+      "notifications.variation.approved.body": "Tillægsarbejde {code} »{title}« i {project} er godkendt.",
+      "notifications.variation.rejected.title": "Tillægsarbejde afvist: {code}",
+      "notifications.variation.rejected.body": "Tillægsarbejde {code} »{title}« i {project} er afvist og sendt tilbage til dig.",
+      "notifications.variation.rejected_reason.body": "Tillægsarbejde {code} »{title}« i {project} er afvist og sendt tilbage til dig. Årsag: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Ændringsordre afventer godkendelse: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Ændringsordre {code} »{title}« i {project} er indsendt og afventer godkendelse.",
+      "notifications.changeorder.approved.title": "Ændringsordre godkendt: {code}",
+      "notifications.changeorder.approved.body": "Ændringsordre {code} »{title}« i {project} er godkendt.",
+      "notifications.changeorder.rejected.title": "Ændringsordre afvist: {code}",
+      "notifications.changeorder.rejected.body": "Ændringsordre {code} »{title}« i {project} er afvist.",
+      "notifications.submittal.approved_as_noted.title": "Indsendelse godkendt med bemærkninger",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Et dokument afventer din godkendelse",
+      "notifications.file_approval.needs_approver.body": "Et dokument ({file_kind}) afventer din godkendelse.",
+      "notifications.file_approval.approved.title": "Dit dokument er godkendt",
+      "notifications.file_approval.approved.body": "Dit dokument ({file_kind}) har gennemløbet alle godkendelsestrin.",
+      "notifications.file_approval.rejected.title": "Dit dokument er sendt tilbage",
+      "notifications.file_approval.rejected.body": "Dit dokument ({file_kind}) er afvist og skal rettes.",
+      "notifications.portal.user_invited.title": "Portalbruger inviteret",
+      "notifications.portal.user_invited.body": "{portal_user_email} er inviteret med rollen {portal_role}.",
+      "notifications.portal.message_received.title": "Ny portalbesked",
+      "notifications.portal.message_received.body": "{buyer_name} har sendt en besked."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "ID",
+          "Aktivitets-ID",
+          "Aktivitetskode",
+          "Opgave-ID",
+          "Kode",
+          "Nr",
+          "Nummer"
+        ],
+        "name": [
+          "Navn",
+          "Opgavenavn",
+          "Aktivitetsnavn",
+          "Aktivitet",
+          "Opgave"
+        ],
+        "wbs": [
+          "WBS",
+          "WBS-kode",
+          "WBS-nummer",
+          "Dispositionsnummer"
+        ],
+        "outline_level": [
+          "Dispositionsniveau",
+          "Niveau",
+          "Indrykningsniveau",
+          "Indrykning"
+        ],
+        "start": [
+          "Start",
+          "Startdato",
+          "Planlagt start"
+        ],
+        "finish": [
+          "Slut",
+          "Slutdato",
+          "Planlagt slut",
+          "Færdigdato"
+        ],
+        "duration": [
+          "Varighed",
+          "Varighed (dage)",
+          "Dage",
+          "Oprindelig varighed"
+        ],
+        "predecessors": [
+          "Forgængere",
+          "Forgænger",
+          "Afhænger af",
+          "Afhængigheder"
+        ],
+        "percent_complete": [
+          "% færdig",
+          "Procent færdig",
+          "% udført",
+          "Fremdrift",
+          "Fremdrift (%)"
+        ],
+        "milestone": [
+          "Milepæl",
+          "Er milepæl"
+        ],
+        "resource": [
+          "Ressource",
+          "Ressourcer",
+          "Ressourcenavn",
+          "Arbejdshold",
+          "Tildelt"
+        ],
+        "notes": [
+          "Noter",
+          "Bemærkning",
+          "Kommentarer",
+          "Kommentar",
+          "Bemærkninger"
+        ],
+        "client_visible": [
+          "Synlig for kunde",
+          "Vis for kunde",
+          "Del med kunde"
+        ]
+      },
+      "yes_words": [
+        "ja",
+        "sand"
+      ],
+      "no_words": [
+        "nej",
+        "falsk"
+      ],
+      "example_names": [
+        "Råhus",
+        "Udgravning",
+        "Fundering",
+        "Fundering godkendt"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "*aftale*",
+          "*kontrakt*"
+        ],
+        "contact": [
+          "kontakt*",
+          "*leverandør*",
+          "*underentreprenør*",
+          "*entreprenør*",
+          "*bygherre*",
+          "kunde*"
+        ],
+        "schedule_activity": [
+          "*aktivitet*",
+          "opgave*",
+          "wbs",
+          "arbejdsopgave*"
+        ],
+        "document": [
+          "*dokument*",
+          "tegning*",
+          "*bilag*",
+          "vedhæftning*"
+        ],
+        "user": [
+          "*ansvarlig*",
+          "tildelt*",
+          "kontrollant*",
+          "inspektør*",
+          "formand*",
+          "sagsbehandler*"
+        ],
+        "due": [
+          "*forfald*",
+          "*frist*",
+          "deadline*",
+          "udløbsdato*",
+          "gyldig til",
+          "måldato",
+          "fornyelse*"
+        ]
+      },
+      "link_labels": {
+        "contract": "Aftale",
+        "contact": "Kontakt",
+        "schedule_activity": "Aktivitet i tidsplanen",
+        "document": "Dokument",
+        "user": "Ansvarlig"
+      },
+      "state_labels": [
+        "Åben",
+        "I gang",
+        "Færdig"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Tillæg {number} til udbuddet {package}",
+      "addendum_heading": "Tillæg til udbuddet",
+      "greeting": "Kære {company},",
+      "greeting_generic": "Kære modtager,",
+      "addendum_intro": "Tillæg {number} til udbudspakken {package} er udsendt: {title}.",
+      "addendum_deadline": "Afleveringsfristen er flyttet fra {old} til {new}.",
+      "addendum_boq": "Mængdefortegnelsen er ændret (revision {revision}). Prisfastsæt venligst den aktuelle revision.",
+      "addendum_documents": "Udsendte dokumenter: {documents}",
+      "addendum_ack": "Bekræft venligst modtagelsen af dette tillæg. Et tilbud, der ikke bekræfter alle tillæg, kan blive betragtet som ikke-overensstemmende.",
+      "answer_subject": "Afklaring {number} til udbuddet {package}",
+      "answer_heading": "Udbudsafklaring",
+      "answer_intro": "Et spørgsmål til udbudspakken {package} er besvaret. Svaret gælder for alle bydere.",
+      "question_label": "Spørgsmål",
+      "answer_label": "Svar"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Bruttoudviklingsværdi (GDV)",
+      "total_development_cost": "Samlede udviklingsomkostninger",
+      "residual_land_value": "Residualværdi af grunden",
+      "developer_profit": "Udviklerfortjeneste",
+      "profit_on_cost": "Fortjeneste i forhold til omkostninger",
+      "profit_on_gdv": "Fortjeneste i forhold til GDV",
+      "construction_cost": "Byggeomkostninger",
+      "professional_fees": "Rådgiverhonorarer",
+      "contingency": "Uforudseelige udgifter",
+      "finance_cost": "Finansieringsomkostninger",
+      "sales_costs": "Salgsomkostninger"
+    },
+    "status": {
+      "viable": "Rentabelt",
+      "unviable": "Ikke rentabelt",
+      "marginal": "Marginalt",
+      "pending": "Endnu ikke vurderet"
+    },
+    "figure": {
+      "gross_development_value": "Den samlede salgsværdi af alle enheder i projektet, alt i én valuta.",
+      "total_development_cost": "Alle omkostninger ved at realisere projektet undtagen selve grunden: bygning, honorarer, uforudseet, finansiering og salgsomkostninger.",
+      "residual_land_value": "Det, der er tilbage til grunden, når de samlede udviklingsomkostninger og den målrettede udviklerfortjeneste trækkes fra bruttoudviklingsværdien.",
+      "developer_profit": "Den fortjeneste udvikleren sigter efter at beholde, angivet som en målsats af bruttoudviklingsværdien.",
+      "profit_on_cost": "Udviklerfortjeneste divideret med samlede udviklingsomkostninger, angivet som et forhold.",
+      "profit_on_gdv": "Udviklerfortjeneste divideret med bruttoudviklingsværdien, angivet som et forhold."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Arbejderlejr",
+        "rental": "Udlejningsboliger",
+        "hotel": "Hotel"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Afventer",
+        "approved": "Godkendt",
+        "rejected": "Afvist"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Opfyldt",
+        "fail": "Ikke opfyldt",
+        "not_applicable": "Ikke relevant"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Tegning",
+        "contract": "Kontrakt",
+        "specification": "Specifikation",
+        "photo": "Foto",
+        "correspondence": "Korrespondance",
+        "reality_capture": "Virkelighedsindfangning",
+        "other": "Andet"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Afventer",
+        "approved": "Godkendt",
+        "rejected": "Afvist",
+        "cancelled": "Annulleret"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Kladde",
+        "submitted": "Indsendt til godkendelse",
+        "approved": "Godkendt",
+        "posted": "Bogført"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Åben",
+        "assigned": "Tildelt",
+        "in_progress": "I gang",
+        "resolved": "Udbedret",
+        "verified": "Verificeret",
+        "closed": "Lukket"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "observation",
+        "minor": "mindre",
+        "major": "større",
+        "critical": "kritisk"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Person",
+        "crew": "Hold",
+        "equipment": "Udstyr",
+        "subcontractor": "Underentreprenør"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI-modelnavnet er forældet eller utilgængeligt. Åbn Indstillinger > AI, og angiv et aktuelt gyldigt modelnavn for din udbyder.",
+      "not_configured": "AI er ikke konfigureret. Opsæt venligst en AI-udbyder under Indstillinger."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "verificeret",
+      "bound": "vedhæftet",
+      "empty": "mangler"
+    },
+    "package_status_labels": {
+      "draft": "kladde",
+      "in_progress": "i gang",
+      "ready": "klar",
+      "issued": "udstedt"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "blokerende",
+      "critical": "kritisk",
+      "warning": "advarsel",
+      "suggestion": "forslag"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategi",
+      "brief": "Bygherrebrief",
+      "concept": "Koncept",
+      "design": "Projektering",
+      "approval": "Tilladelse",
+      "detail": "Detailprojektering",
+      "tender": "Udbud",
+      "award": "Tildeling",
+      "construction": "Udførelse",
+      "handover": "Aflevering",
+      "operation": "Drift"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Jobbet har ingen emner at skære til",
+        "suggestion": "Tilføj emner manuelt, indsæt dem eller importér dem fra en bukkeliste, opmåling, en tilbudslinje eller en fil."
+      },
+      "has_stock": {
+        "fail": "Jobbet har intet lager at skære fra",
+        "suggestion": "Tilføj mindst én lagerlængde eller pladestørrelse, eller genbrug afskær fra byggepladslageret."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} har ingen bredde",
+        "suggestion": "Angiv både længde og bredde for hvert pladeemne og hver pladestørrelse."
+      },
+      "piece_fits_stock": {
+        "fail": "Emne {ref} ({size} mm) passer ikke til nogen lagerstørrelse",
+        "suggestion": "Tilføj en længere eller større lagerstørrelse, reducér beskæringen, eller del emnet med en samling."
+      },
+      "grain_allows_fit": {
+        "fail": "Emne {ref} passer kun, når det drejes på tværs af fiberretningen",
+        "suggestion": "Tillad drejning af emnet, eller tilføj en pladestørrelse, hvor det passer langs fiberretningen."
+      },
+      "kerf_set": {
+        "fail": "Snitbredden er nul",
+        "suggestion": "Angiv klinge- eller snitbredden, ellers bliver udbyttet for hver stang med flere snit overvurderet."
+      },
+      "min_offcut_set": {
+        "fail": "Der er ikke angivet mindste brugbare afskær",
+        "suggestion": "Angiv det korteste afskær, der er værd at gemme, så genbrugelige afskær ikke tælles som spild."
+      },
+      "stock_priced": {
+        "fail": "Lager {ref} har ingen enhedspris",
+        "suggestion": "Angiv en pris pr. stk., så planen viser sin pris og vælger det billigste lager."
+      },
+      "stock_sufficient": {
+        "fail": "Emner der ikke er placeret på det tilgængelige lager: {count}",
+        "suggestion": "Forøg den tilgængelige mængde, eller tilføj en ekstra lagerstørrelse."
+      },
+      "yield_threshold": {
+        "fail": "Udbyttet på {actual} % er under grænsen på {threshold} %",
+        "suggestion": "Tilføj en ekstra lagerlængde eller -størrelse, tillad drejning, eller gennemgå grænsen for dette materiale."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Mangelpunktet '{title}' er lukket uden foto",
+    "punch_no_photo_fix": "Tilføj et foto af det udførte arbejde",
+    "photo_weak": "{count} foto(s) på '{title}' mangler sted eller optagelsestidspunkt",
+    "photo_weak_fix": "Tag fotoet igen i appen med placering slået til",
+    "defect_no_photo": "Manglen '{reference}' er lukket uden foto af udbedringen",
+    "defect_no_photo_fix": "Vedhæft et foto af det udbedrede arbejde"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} yderligere post(er) er ikke vist",
+    "category_missing": "Ingen dokumentation for den påkrævede kategori '{category}'",
+    "category_missing_fix": "Knyt et dokument til et tjeklistepunkt i denne kategori, eller tilføj et",
+    "category_unverified": "Dokumentationen for '{category}' er endnu ikke verificeret",
+    "category_unverified_fix": "Lad en leder gennemgå og verificere den tilknyttede dokumentation",
+    "punch_open": "Mangelpunktet '{name}' er stadig åbent",
+    "punch_open_fix": "Løs og luk punktet, eller udelad det fra denne dokumentations omfang",
+    "punch_no_photo": "Det løste mangelpunkt '{name}' har intet foto",
+    "punch_no_photo_fix": "Tilføj et foto af det udførte arbejde",
+    "system_pending": "Systemet '{name}' er ikke idriftsat",
+    "system_pending_fix": "Afslut tjeklisterne for idriftsættelse, og markér systemet som idriftsat",
+    "critical_issues": "{count} kritiske problemer ved idriftsættelsen er stadig åbne",
+    "critical_issues_fix": "Luk de kritiske problemer før afleveringen",
+    "acceptance_missing": "Ingen afleveringsprotokol er tilknyttet",
+    "acceptance_missing_fix": "Knyt den underskrevne afleveringsprotokol til afleveringspunktet i tjeklisten",
+    "acceptance_unsigned": "Afleveringsprotokollen er ikke fuldt underskrevet (status: {status})",
+    "acceptance_unsigned_fix": "Indhent de manglende underskrifter under Signering",
+    "blocked": "Dokumentationen opfylder ikke sin tjekliste. Ret bemærkningerne, eller saml den alligevel som ufuldstændig (lederens godkendelse).",
+    "delivery_title": "Afleveringsdokumentation: {project}",
+    "delivery_body": "Afleveringsdokumentationen '{title}' ({scope}) er klar. Linket nedenfor henter den og er gyldigt til {expires}.",
+    "pdf": {
+      "title": "Afleveringsdokumentation",
+      "scope": "Omfang",
+      "built": "Samlet",
+      "status_passed": "Tjekliste bestået",
+      "status_warnings": "Tjekliste bestået med advarsler",
+      "status_errors": "Ufuldstændig: åbne bemærkninger i tjeklisten",
+      "findings": "Åbne bemærkninger i tjeklisten",
+      "severity": "Alvorlighed",
+      "finding": "Bemærkning",
+      "severity_error": "Fejl",
+      "severity_warning": "Advarsel",
+      "severity_info": "Info",
+      "contents": "Indhold",
+      "file": "Fil",
+      "size": "Størrelse",
+      "punch": "Løst mangelliste",
+      "item": "Post",
+      "status": "Status",
+      "photos": "Fotos",
+      "evidence": "Fotodokumentation"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Vurdering {rating} af '{name}' er ikke et niveau på skalaen '{scale}'",
+    "rule_poor_without_action": "'{name}' er vurderet {rating}, men har ingen planlagt vedligeholdelseshandling",
+    "rule_poor_without_action_fix": "Udled planen, eller tilføj en handling for dette element",
+    "rule_action_unpriced": "Handlingen for '{name}' i {year} har ingen enhedspris",
+    "rule_action_unpriced_fix": "Angiv en enhedspris, så plantotalerne medtager den",
+    "rule_defect_incomplete": "Vurderingen af '{name}' kræver arbejde, men registrerer hverken alvorlighed eller omfang"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, side {page}",
+    "text_change": "\"{old}\" ændret til \"{new}\"",
+    "kind": {
+      "added": "Tilføjet",
+      "removed": "Fjernet",
+      "modified": "Ændret",
+      "text": "Tekst ændret"
+    },
+    "status": {
+      "open": "Åben",
+      "relevant": "Relevant",
+      "not_relevant": "Ikke relevant"
+    },
+    "errors": {
+      "revision_not_found": "Tegningsrevisionen blev ikke fundet i dette projekt.",
+      "revision_not_parsed": "Tegningen har endnu ingen behandlet version at sammenligne.",
+      "comparison_not_found": "Sammenligningen blev ikke fundet.",
+      "change_not_found": "Ændringen blev ikke fundet.",
+      "same_revision": "Vælg to forskellige revisioner eller sider at sammenligne.",
+      "manual_points": "Manuel justering kræver to forskellige punkter på hver revision.",
+      "alignment_singular": "Justeringen kan ikke anvendes: den klapper arket sammen.",
+      "region_empty": "Ændring {seq} har ingen størrelse.",
+      "region_off_sheet": "Ændring {seq} ligger uden for arket.",
+      "module_missing": "Modulet, der kræves til denne handling, er ikke installeret."
+    },
+    "rfi": {
+      "subject": "Tegningsændring {seq} på {sheet}",
+      "question": "Revision {new} af {sheet} afviger fra revision {old} i det markerede område ({kind}). Bekræft hensigten med ændringen, og om mængder berøres."
+    },
+    "markup": {
+      "text": "Revisionsændring {seq}: {kind}"
+    },
+    "report": {
+      "title": "Sammenligning af tegningsrevisioner",
+      "project": "Projekt",
+      "name": "Sammenligning",
+      "old_revision": "Ældre revision",
+      "new_revision": "Nyere revision",
+      "alignment": "Justering",
+      "alignment_none": "Ikke justeret (samme ramme)",
+      "alignment_auto": "Automatisk",
+      "alignment_manual": "Manuel, to punkter",
+      "confidence": "sikkerhed {value}",
+      "summary": "Ændringer",
+      "summary_counts": "I alt {total}: {added} tilføjet, {removed} fjernet, {modified} ændret, {text} tekst",
+      "generated_on": "Oprettelsesdato",
+      "generated": "Oprettet {timestamp}",
+      "page_of": "Side {page} af {total}",
+      "no_changes": "Der blev ikke fundet ændringer mellem de to revisioner.",
+      "col_no": "Nr.",
+      "col_preview": "Forhåndsvisning",
+      "col_kind": "Ændring",
+      "col_location": "Placering",
+      "col_detail": "Detalje",
+      "col_status": "Status",
+      "col_comment": "Kommentar",
+      "col_follow_up": "Opfølgning",
+      "page_at": "Side {page} ved {coords}",
+      "layer": "Lag {layer}",
+      "entity_counts": "Objekter: {added} tilføjet, {removed} fjernet, {modified} ændret",
+      "rfi": "RFI {number}",
+      "markup": "Revisionssky",
+      "remeasure": "Mål om: {items} mængder, {positions} poster i tilbudslisten"
+    },
+    "rules": {
+      "distinct_revisions_ok": "De to sider er forskellige revisioner.",
+      "distinct_revisions_fail": "Sammenligningen sammenligner et ark med sig selv.",
+      "distinct_revisions_hint": "Vælg den ældre og den nyere revision af tegningen.",
+      "alignment_not_needed": "DWG-revisioner deler tegningsenheder; justering er ikke nødvendig.",
+      "alignment_missing_matrix": "Sammenligningen har ingen justering.",
+      "alignment_singular": "Justeringen klapper arket sammen og kan ikke anvendes.",
+      "alignment_scale": "Justeringen skalerer arket med {scale}, mere end revisioner af én tegning afviger.",
+      "alignment_low_confidence": "Den automatiske justering er usikker (sikkerhed {confidence}).",
+      "alignment_manual_points": "En manuel justering kræver to punktpar.",
+      "alignment_ok": "Arkjusteringen er plausibel.",
+      "alignment_hint": "Juster arkene i hånden efter to mærker, som begge revisioner deler, f.eks. gitterskæringer.",
+      "region_empty": "Ændring {seq} har ingen størrelse.",
+      "region_off_sheet": "Ændring {seq} ligger uden for arket.",
+      "regions_ok": "Hvert ændret område ligger på arket.",
+      "triaged_ok": "Hver ændring er gennemgået.",
+      "triaged_open": "{count} ændringer er stadig åbne.",
+      "triaged_hint": "Markér hver ændring som relevant eller ikke relevant.",
+      "followed_up_ok": "Hver relevant ændring er fulgt op.",
+      "followed_up_missing": "Ændring {seq} er markeret som relevant, men har ingen kommentar, RFI, sky eller flag for omåling.",
+      "followed_up_hint": "Kommentér ændringen, opret en RFI eller sky, eller markér mængderne i den til omåling."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Likviditetsprognose",
+      "portfolio_title": "Porteføljens likviditetsprognose",
+      "empty": "Ingen likviditetsprognose for denne udvælgelse.",
+      "project": "Projekt",
+      "as_of": "Pr.",
+      "currency": "Valuta",
+      "delay_days": "Indbetalinger forsinket med (dage)",
+      "overrun_pct": "Omkostningsoverskridelse (%)",
+      "closing_position": "Slutsaldo",
+      "peak_funding": "Maksimalt finansieringsbehov",
+      "peak_period": "Måned med størst finansieringsbehov",
+      "col": {
+        "period": "Måned",
+        "planned_in": "Planlagte indbetalinger",
+        "actual_in": "Faktiske indbetalinger",
+        "expected_in": "Forventede indbetalinger",
+        "planned_out": "Planlagte udbetalinger",
+        "actual_out": "Faktiske udbetalinger",
+        "expected_out": "Forventede udbetalinger",
+        "net": "Netto",
+        "cumulative": "Akkumuleret position"
+      }
+    }
+  }
+}

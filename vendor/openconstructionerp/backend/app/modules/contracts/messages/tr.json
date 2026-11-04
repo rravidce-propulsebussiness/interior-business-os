@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "Tamam"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "{claim} numaralı hakedişin dönem bitiş tarihi yok; bu nedenle sözleşmenin hakedişleri arasında sıraya konulamıyor",
+      "suggestion": "Bu hakedişin kapsadığı dönemin son gününü girin"
+    },
+    "period_order": {
+      "fail": "{claim} numaralı hakediş {period_from} tarihinde başlıyor ve {period_to} tarihinde bitiyor; yani dönemi başlamadan önce bitiyor",
+      "suggestion": "Dönem başlangıcını veya bitişini, başlangıç önce gelecek şekilde düzeltin"
+    },
+    "period_overlap": {
+      "fail": "{claim} numaralı hakediş {period_from} tarihinde başlıyor, ancak önceki {previous} numaralı hakediş {previous_to} tarihine kadar sürüyor; iki hakediş aynı günleri faturalıyor",
+      "suggestion": "Bu hakedişi, önceki hakedişin döneminin bittiği günün ertesi günü başlatın"
+    },
+    "period_gap": {
+      "fail": "{claim} numaralı hakediş {period_from} tarihinde başlıyor, ancak önceki {previous} numaralı hakediş {previous_to} tarihinde bitmiş; aradaki günleri hiçbir hakediş faturalamıyor (faturalanmayan gün sayısı: {days})",
+      "suggestion": "Bu hakedişi, önceki hakedişin döneminin bittiği günün ertesi günü başlatın veya eksik bir hakediş olup olmadığını kontrol edin"
+    },
+    "period_unparsed": {
+      "fail": "{claim} numaralı hakedişte {field} '{value}' olarak kayıtlı; bu değer tarih olarak okunamıyor",
+      "suggestion": "Tarihi yıl, ay ve gün olarak girin; örneğin 2026-03-31",
+      "fields": {
+        "period_start": "dönem başlangıcı",
+        "period_end": "dönem bitişi",
+        "claim_date": "başvuru tarihi"
+      }
+    },
+    "line_overbilled": {
+      "fail": "{line} kalemi bugüne kadar {billed} olarak faturalandı; bu tutar kalemin {scheduled} olan sözleşme bedelini aşıyor. İlerlemeden doldur işlemini yeniden çalıştırın veya kalemin bu dönemki tutarını düşürün",
+      "suggestion": "İlerlemeden doldur işlemi her kalemi yalnızca önceki hakedişlerden sonra yapılan yeni iş kadar faturalar. Kalemin kapsamı gerçekten büyüdüyse, önce sözleşme bedelini artıran değişiklik emrini kaydedin"
+    },
+    "percent_regressed": {
+      "fail": "{line} kalemi bugüne kadar %{percent} tamamlanmış görünüyor; bu {requested} eder ve önceki hakedişlerde bu kalem için faturalanan {previous} tutarından azdır. Bu nedenle kalemde bu dönem hiçbir şey faturalanmıyor",
+      "suggestion": "Bu kalemin tamamlanma yüzdesini kontrol edin veya yüzdeyi fazla gösteren önceki hakedişi düzeltin"
+    },
+    "errors": {
+      "submission_blocked": "Bu ödeme başvurusu şunlar çözülmeden gönderilemez: {findings}",
+      "rules_unavailable": "Ödeme başvurusu kuralları bu kurulumda yüklü değil; bu nedenle hakediş gönderilmeden önce denetlenemiyor.",
+      "later_claim_already_issued": "{claims} numaralı hakediş bundan sonra geliyor ve çoktan gönderildi. Bu hakediş taslakken hazırlandığı için bu işi zaten talep ediyor. Bu taslağı silin veya dönemini gönderilen son hakedişten sonraya taşıyın"
+    },
+    "totals_match_lines": {
+      "fail": "{claim} numaralı hakediş {gross} talep ediyor, ancak arkasındaki kalemlerin toplamı {lines_total}: kalemler değiştikten sonra hakediş yeniden hesaplanmamış",
+      "suggestion": "Bu hakedişin herhangi bir kalemini kaydedin veya İlerlemeden doldur işlemini yeniden çalıştırın; toplamlar buna göre güncellenir"
+    },
+    "totals_below_lines": {
+      "fail": "{claim} numaralı hakediş kayıtlı maliyetten {gross} faturalıyor; bu tutar kendi kalemlerinin toplamı olan {lines_total} tutarından az: döküm, hakedişin talep ettiğinden fazlasını isteyemez",
+      "suggestion": "Maliyetten faturalanan bir hakedişte kalemler paranın kaynağı değil, dökümüdür. Tutarı fazla gösteren kalemleri düşürün veya kaldırın ya da ikisi uyuşsun diye hakedişi iş maliyetinden yeniden oluşturun"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "{claim} numaralı hakediş {line} kaleminde önceden faturalanan tutarı {stored} olarak taşıyor, ancak önceki hakedişler bu kalemde şu anda {now} faturalıyor",
+      "total_fail": "{claim} numaralı hakediş önceden onaylanan tutarı {stored} olarak taşıyor, ancak önceki hakedişler şu anda {now} onaylıyor",
+      "suggestion": "Bu hakedişi yeniden oluşturun; böylece kendisinden önceki hakedişlerin bugün faturaladığı tutarı okur"
+    },
+    "within_nte_cap": {
+      "fail": "{claim} numaralı hakediş, daha önce faturalanan {billed} tutarının üzerine {this} faturalıyor; bu, {cap} olan aşılmayacak üst sınırın üzerindedir",
+      "suggestion": "Bu hakedişte üst sınıra kadar faturalayın ve kalan kısım için bir değişiklik emri üzerinde anlaşın"
+    },
+    "retention_matches_policy": {
+      "fail": "{claim} numaralı hakediş {held} teminat kesintisi tutuyor, ancak kesinti kuralı şu anda {expected} veriyor: bu hakediş hesaplandıktan sonra önceki bir hakediş, bir iade veya kural değişmiş",
+      "suggestion": "İlerlemeden doldur işlemini yeniden çalıştırın veya bu hakedişin herhangi bir kalemini kaydedin; teminat kesintisi yeniden hesaplanır"
+    },
+    "retention_above_cap": {
+      "fail": "{claim} numaralı hakediş {held} teminat kesintisi tutuyor; bu, kesinti kuralının koyduğu %{percent} üst sınırın, yani bu sözleşmede {cap} tutarının üzerindedir",
+      "suggestion": "Hakedişi yeniden hesaplayın veya taraflar daha yüksek bir sınır üzerinde anlaştıysa sözleşmenin kesinti kuralındaki üst sınırı yükseltin",
+      "state_cap_unread": "{claim} numaralı hakediş: kesinti kuralı üst sınır koymuyor ve {country} teminat kesintisini eyalet yasasıyla sınırlıyor. Projede alt bölge kodu bulunmadığı için eyalet belirlenemedi; bu nedenle yasal üst sınır denetlenmedi",
+      "state_cap_suggestion": "Eyaletin sınırını sözleşmenin kesinti kuralına üst sınır olarak yazın; bu sözleşmedeki her hakediş buna göre denetlenir"
+    },
+    "retention_release_within_held": {
+      "fail": "{claim} numaralı hakedişe kadar faturalanan iadeler {released} geri ödüyor; bu, o tarihe kadar tutulan {accrued} teminat kesintisinden fazladır",
+      "suggestion": "Fazla büyük olan iadeyi iptal edin veya daha fazla teminat kesintisi tutulduktan sonra daha sonraki bir hakedişte faturalayın"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "İş kalemleri dökümünün toplamı {scheduled}, ancak bugünkü sözleşme bedeli {contract_sum}: bu hakedişin faturalandığı kalemler sözleşmenin {difference} tutarındaki kısmını kalemsiz bırakıyor",
+      "suggestion": "İş kalemleri dökümünün toplamı sözleşme bedeline eşit olana kadar kalem ekleyin veya kalemleri düzeltin",
+      "suggestion_reconcile": "Onaylanan {count} değişiklik emri veya değişiklik, iş kalemleri dökümüne ulaşmadan sözleşme bedelini değiştirdi. Her biri için bir kalem eklemek üzere sözleşmedeki Değişiklik emirlerini mutabık kıl işlemini kullanın"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Bu iade için {document} gerekiyor ve hiçbiri eklenmemiş",
+      "suggestion": "Belgeyi sözleşmeye kaydedin, iadeye ekleyin ve yeniden onaylayın"
+    },
+    "within_available": {
+      "fail": "Bu iade {amount} geri ödüyor, ancak hâlâ tutulan ve başka bir iadeye ayrılmamış teminat kesintisi yalnızca {available}",
+      "suggestion": "Bu iadeyi iptal edip yeniden önerin; böylece şu anda tutulan teminat kesintisine göre boyutlandırılır"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Bu iade, olaydan sonraki {days} günlük ipotek hakkı süresi dolduktan sonra ödenir ({reference}) ve bu sürenin ne zaman başladığını belirtmiyor",
+      "suggestion_no_start": "Sürenin başladığı günü, örneğin esaslı tamamlama belgesinin yayımlandığı tarihi girin ve iadeyi yeniden onaylayın",
+      "fail_early": "{started} tarihinde başlayan {days} günlük ipotek hakkı süresi {ends} tarihine kadar sürüyor ({reference}), bu nedenle bu iade henüz onaylanamaz",
+      "suggestion_early": "Teminata karşı hiçbir ipotek hakkının korunmadığını kontrol ettikten sonra, süre dolunca iadeyi onaylayın"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "geçici kabul tutanağı",
+      "acceptance_protocol": "kabul tutanağı",
+      "affidavit_payment_of_debts": "borçların ve taleplerin ödendiğine dair beyan",
+      "affidavit_release_of_liens": "rehin haklarından feragat beyanı",
+      "consent_of_surety": "kefilin muvafakati",
+      "final_lien_waiver": "kesin rehin feragatnamesi",
+      "final_invoice": "kesin fatura"
+    },
+    "errors": {
+      "approval_blocked": "Bu teminat kesintisi iadesi şunlar çözülmeden onaylanamaz: {findings}",
+      "rules_unavailable": "Teminat kesintisi iadesi kuralları bu kurulumda yüklü değil; bu nedenle iade onaylanmadan önce denetlenemiyor."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Hiçbir iş kaleminde yer almayan faturalanmış iş"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Değişiklik emirleri yalnızca yürürlükteki bir sözleşmenin iş kalemleri dökümüyle mutabık kılınır; bu sözleşmenin durumu: {status}",
+      "preview_stale": "Mutabık kılınacak değişiklik emirlerinin listesi, siz açtıktan sonra değişti. Önizlemeyi yeniden açın ve şu anda gösterdiğini onaylayın"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Bu sözleşme şunlar çözülmeden imzalanamaz: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "tamamlanma",
+      "approval": "onay"
+    },
+    "total_within_contract": {
+      "fail": "Taksitlerin toplamı {scheduled}; bu, {total} olan sözleşme bedelinden fazladır",
+      "suggestion": "Taksitleri, toplamları sözleşme bedelini aşmayacak şekilde azaltın"
+    },
+    "percent_sum": {
+      "fail": "Taksitlerin toplamı {total} olan sözleşme bedelinin {scheduled} tutarındaki kısmını karşılıyor (%{percent}); bedelin bir kısmının taksiti yok",
+      "suggestion": "Sözleşme bedelinin kalanı için bir taksit ekleyin veya tutarları düzeltin"
+    },
+    "completion_trigger_linked": {
+      "fail": "{milestone} taksitinin vadesi {trigger} ile geliyor, ancak bir iş programı faaliyetine bağlı değil; bu nedenle tarihi işle birlikte kaymaz",
+      "suggestion": "Taksiti, beklediği iş programı kilometre taşına bağlayın"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "İş programı {milestone} aşamasına ulaşıldığını gösteriyor, ancak {instalment} taksiti hâlâ beklemede; bu nedenle talep edilemiyor",
+      "suggestion": "Taksiti ulaşıldı olarak işaretleyin veya sözleşmenin neden yürürlükte olmadığını kontrol edin"
+    },
+    "client_visible_requires_active": {
+      "fail": "{milestone} taksiti müşteriye gösteriliyor, ancak sözleşmenin durumu {status}; müşteri yalnızca yürürlükteki veya tamamlanmış bir sözleşmenin planını görür",
+      "suggestion": "Sözleşme yürürlüğe girene kadar taksiti müşteriden gizleyin"
+    },
+    "consumer_deposit_cap": {
+      "fail": "{deposit} tutarındaki ön ödeme, {jurisdiction} için {reference} uyarınca izin verilen {ceiling} tutarının üzerindedir (kaynak: {source_url}, kontrol tarihi {checked_on}, bir avukat tarafından incelenmemiştir)",
+      "suggestion": "Ön ödemeyi azaltın veya bu sözleşme için bir istisnanın geçerli olduğunu hukuk danışmanıyla teyit edin",
+      "below_threshold": {
+        "fail": "Sözleşme bedeli, {jurisdiction} için {reference} uyarınca ön ödemelerin sınırlandığı tutara eşit veya bu tutarın altındadır; bu nedenle ön ödeme denetlenmedi (kaynak: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Sözleşme {currency} cinsinden, ancak {reference} sınırını {limit_currency} cinsinden belirtiyor; bu nedenle {jurisdiction} için ön ödeme denetlenmedi (kaynak: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Yasa bu sözleşme için geçerliyse ön ödemeyi elle denetleyin"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Bugüne kadar onaylanan iş tutarı {cumulative}; bu, {contract} olan sözleşme bedelini {over} aşıyor",
+      "suggestion": "Önce fazla işi karşılayan değişiklik emrini onaylatın veya bu hakedişteki miktarları düzeltin"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Bu hakediş önceki hakedişlerin toplamını {carried} olarak taşıyor, ancak {reference} numaralı hakediş {certified} olarak onaylandı",
+      "work_fail": "Yapılan işler listesinin önceki sütunu {carried} ediyor, ancak {reference} numaralı hakediş bugüne kadar {certified} iş tutarıyla onaylandı",
+      "suggestion": "İki hakediş arasında, ikisinin de göstermediği bir hakediş olup olmadığını kontrol edin ve bu hakedişi yeniden oluşturun"
+    },
+    "previous_unknown": {
+      "fail": "Önceki hakedişlerin toplam tutarı bilinmiyor",
+      "not_certified": "Önceki {reference} numaralı hakediş henüz onaylanmadı; bu nedenle toplam tutarı kesinleşmedi",
+      "suggestion": "Önce önceki hakedişi onaylayın. Hakedişler saklanmaya başlamadan önce onaylandıysa toplamını önceki hakedişler satırına girin"
+    },
+    "weights_sum": {
+      "fail": "Kalemlerin pursantajları toplamı %100 değil, %{total}",
+      "suggestion": "İş kalemlerinin bedellerini, payları sözleşmenin tamamını verecek şekilde düzeltin"
+    },
+    "percent_regressed": {
+      "fail": "{line} kalemi bu dönem eksi değerde; yani daha önce onaylanan işi geri alıyor",
+      "suggestion": "Önceki fazla ölçümü düzeltiyorsa olduğu gibi bırakın. Aksi halde bu hakedişteki miktarı veya yüzdeyi düzeltin"
+    },
+    "income_withholding_single_year": {
+      "fail": "Gelir vergisi stopajı seçildi, ancak sözleşme {start} ile {end} tarihleri arasında, tek bir takvim yılı içinde yürütülüyor. Stopaj, birden fazla takvim yılına yayılan inşaat işleriyle ilgilidir",
+      "suggestion": "İşin gerçekten birden fazla yıla yayılıp yayılmadığını mali müşavirinizle kontrol edin; yayılmıyorsa gelir vergisi stopajını uygulanmaz olarak işaretleyin"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Bugüne kadar mahsup edilen avans {recovered}; bu, ödenen {advance} tutarındaki avanstan fazladır",
+      "unknown": "Bugüne kadar {recovered} avans mahsup edildi, ancak sözleşmede ödenen avans belirtilmediği için mahsup bununla karşılaştırılamıyor",
+      "suggestion": "Bu hakedişteki mahsubu düşürün veya ödenen avansı sözleşmenin hakediş ayarlarında belirtin"
+    },
+    "retention_matches_config": {
+      "fail": "Hakediş {certificate} teminat kesintisi yapıyor (matrahının %{percent} oranı), ancak arkasındaki belge {stored} tutuyor",
+      "suggestion": "Belgeyi yeniden hesaplayın veya ikisi aynı kesintiyi göstersin diye sözleşmenin hakediş ayarlarındaki kesinti oranını ya da matrahını düzeltin"
+    },
+    "net_payable_negative": {
+      "fail": "Ödenecek tutar {payable}: kesintiler bu hakedişin tutarından büyük",
+      "suggestion": "Kesintileri, özellikle avans mahsubunu kontrol edin ve şimdi kesilemeyen kısmı sonraki hakedişe aktarın"
+    },
+    "taxes_stale": {
+      "fail": "Vergiler bu hakediş değişmeden önce hesaplandı; artık bu hakedişe ait değiller",
+      "suggestion": "Vergileri yeniden hesaplayın. Daha önce onaylandılarsa önce yeniden açın, ardından tekrar onaylayın"
+    },
+    "taxes_confirmed": {
+      "fail": "Bu hakedişin vergi tutarları onaylanmadı",
+      "suggestion": "Hakedişi onaylamadan önce her vergi satırını kontrol edin ve vergileri onaylayın"
+    },
+    "lines_complete": {
+      "fail": "{line} satırının tutarı henüz yok. {reason}",
+      "suggestion": "Tutarı girin veya satırı uygulanmaz olarak işaretleyip gerekçesini yazın"
+    },
+    "work_value_differs": {
+      "fail": "{line} kalemi bugüne kadar {stated} olarak kayıtlı, ancak miktarı veya yüzdesi {computed} veriyor",
+      "suggestion": "Satırın iki sütunu uyuşsun diye belgedeki miktarı veya tutarı düzeltin"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Yüzde {percent} oranındaki teminat kesintisi, kamu yapım işleri kanununun her hakedişte izin verdiği yüzde {limit} oranını aşıyor",
+      "suggestion": "Sözleşmedeki teminat kesintisini yasal orana düşürün"
+    },
+    "advance_above_cap": {
+      "fail": "Avans teminatı sözleşme bedelinin yüzde {percent} oranını karşılıyor, bu oran kamu yapım işlerinde maliye bakanının onayı olmadan izin verilen yüzde {limit} oranını aşıyor",
+      "suggestion": "Avansı azaltın veya ihaleden önce alınan onayı sözleşme koşullarına kaydedin"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Bir gecikme cezası maddesinde azami tutar yok, oysa kamu yapım işleri kanunu gecikme cezasını sözleşme bedelinin yüzde {limit} oranıyla sınırlıyor",
+      "suggestion": "Gecikme cezası maddesinin azami tutarını girin"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Bir gecikme cezası maddesi sözleşme bedelinin yüzde {percent} oranıyla sınırlı, bu oran kamu yapım işleri kanununun izin verdiği yüzde {limit} oranını aşıyor",
+      "suggestion": "Maddenin azami tutarını yasal sınıra düşürün"
+    },
+    "performance_security_missing": {
+      "fail": "Kayıtlı bir kesin teminat yok, oysa kamu yapım işleri sözleşme bedelinin yüzde {limit} oranında teminat istiyor",
+      "suggestion": "Kesin teminatı teminat mektubu veya banka teminatı olarak kaydedin"
+    },
+    "performance_security_below": {
+      "fail": "Kesin teminat sözleşme bedelinin yüzde {percent} oranını karşılıyor, bu oran kamu yapım işlerinin istediği yüzde {limit} oranının altında",
+      "suggestion": "Yasal oranın tamamı için bir kesin teminat kaydedin"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "{months} ay ve üzeri süreli kamu yapım işlerinde kanunen fiyat farkı verilmelidir, ancak sözleşmede değişken kalemleri için katsayı belirtilmemiş",
+        "suggestion": "Yüklenicinin teknik zarfta belirttiği katsayıları girin"
+      },
+      "duplicate_item": {
+        "fail": "{item} değişken kalemi fiyat farkı katsayıları arasında iki kez yer alıyor",
+        "suggestion": "Her değişken kalem için tek bir katsayı bırakın"
+      },
+      "coefficient_not_a_number": {
+        "fail": "{item} kaleminin fiyat farkı katsayısı bir sayı değil",
+        "suggestion": "Katsayıyı ondalık sayı olarak girin, örneğin 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "{item} kaleminin fiyat farkı katsayısı sıfır veya daha küçük, oysa kanun her katsayının sıfırdan büyük olmasını istiyor",
+        "suggestion": "Sıfırdan büyük bir katsayı girin veya kalemi kaldırın"
+      },
+      "coefficient_negative": {
+        "fail": "{item} kaleminin fiyat farkı katsayısı negatif",
+        "suggestion": "Sıfır veya daha büyük bir katsayı girin"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Fiyat farkı katsayılarının toplamı {item} ediyor, oysa kanun toplamın birin altında kalmasını istiyor",
+        "suggestion": "Fiyatın sabit bir kısmı kalacak şekilde katsayıları düşürün"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Fiyat farkı katsayılarının toplamı {item} ediyor, bu birden fazla",
+        "suggestion": "Toplamları bir veya daha az olacak şekilde katsayıları düşürün"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Hammaddelerin maliyetin önemli bir kısmını oluşturduğu {months} aydan uzun kamu yapım işleri bir fiyat revizyonu maddesi içerir ve sözleşmede revizyon ağırlıkları belirtilmemiştir",
+        "suggestion": "Revizyon formülünün ağırlıklarını özel şartlardan girin veya fiyatın sabit olduğunu kaydedin"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Fiyat farkı katsayılarının toplamı {item}, formül ise toplamın tam olarak bir olmasını gerektirir",
+        "suggestion": "Ağırlıkları sözleşme verilerine göre toplamları bir olacak şekilde düzeltin"
+      },
+      "unknown_regime": {
+        "fail": "Sözleşme, platformun tanımadığı {item} fiyat farkı rejimini belirtiyor",
+        "suggestion": "Listelenen fiyat farkı rejimlerinden birini seçin"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Fiyat farkına tabi olmayan pay {item} sıfır ile bir arasında değil",
+        "suggestion": "Payı sözleşme verilerinden ondalık olarak girin, örneğin 0.15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Avans sözleşme bedelinin yüzde {percent} oranındadır ve kamu ihale mevzuatının bu yüklenici ve idare için öngördüğü yüzde {limit} asgari oranın altındadır",
+      "suggestion": "Avansı asgari orana yükseltin veya yüklenici avanstan vazgeçtiyse sıfır girin"
+    },
+    "advance_above_maximum": {
+      "fail": "Avans sözleşme bedelinin yüzde {percent} oranındadır ve kamu ihale mevzuatının olağan üst sınır olarak belirlediği yüzde {limit} oranını aşmaktadır",
+      "suggestion": "Özel şartların daha yüksek avansa izin verdiğini kontrol edin ve gerekli teminatı kaydedin"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Bir gecikme cezası maddesi günlük {amount} uygulamaktadır, oysa genel şartlar günlük {expected}, yani sözleşme bedelinin {divisor}'de birini öngörmektedir",
+      "suggestion": "Genel şartların günlük oranını koruyun veya farklı oranı özel şartlardaki istisnalar arasında belirtin"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Bir gecikme cezası maddesinin üst sınırı sözleşme bedelinin yüzde {percent} oranıdır ve genel şartlardaki yüzde {limit} oranını aşmaktadır",
+      "suggestion": "Üst sınırı genel şartlardaki değere indirin veya özel şartlardaki istisnalar arasında belirtin"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "{amount} tutarındaki bu alt yüklenici sözleşmesi, kamu idaresinin doğrudan ödemesi için {limit} eşiğine ulaşmaktadır ve sözleşme bundan feragat etmektedir; kanun buna izin vermez",
+      "suggestion": "Kamu idaresinin alt yükleniciye doğrudan ödeme yaptığını kaydedin"
+    },
+    "direct_payment_unstated": {
+      "fail": "{amount} tutarındaki bu alt yüklenici sözleşmesi, kamu idaresinin doğrudan ödemesi için {limit} eşiğine ulaşmaktadır ve sözleşme bunu kaydetmemektedir",
+      "suggestion": "Alt yüklenicinin onaylanıp onaylanmadığını ve kamu idaresi tarafından doğrudan ödenip ödenmediğini kaydedin"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Özel yapım işlerine ait bu alt yüklenici sözleşmesinde ne banka teminatı ne de iş sahibine ödeme talimatı kayıtlıdır; bunlardan biri olmadan sözleşme iptal edilebilir",
+      "suggestion": "Ana yüklenicinin banka teminatını veya iş sahibine verilen ödeme talimatını kaydedin"
+    },
+    "private_retention_above_limit": {
+      "fail": "Yüzde {percent} oranındaki kesinti, kanunun özel yapım işlerinde izin verdiği yüzde {limit} oranını aşmaktadır",
+      "suggestion": "Sözleşmedeki kesintiyi yasal üst sınıra indirin"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "{contract} sözleşmesi {regime} KDV rejimini belirtiyor, ancak {country} için böyle bir rejim yok",
+      "suggestion": "Proje ülkesi için sunulan KDV rejimlerinden birini seçin veya seçimi kaldırın"
+    },
+    "country_unknown": {
+      "fail": "{contract} sözleşmesi {regime} KDV rejimini belirtiyor, ancak projesinde ülke belirtilmemiş, bu nedenle rejim denetlenemiyor",
+      "suggestion": "Projenin ülkesini belirleyin"
+    },
+    "contract_date_missing": {
+      "fail": "{regime} KDV rejimi yalnızca {cutoff} tarihinden önce imzalanan sözleşmeler içindir ve bu sözleşmede ne imza ne de başlangıç tarihi kayıtlı",
+      "suggestion": "Sözleşmenin imzalandığı tarihi girin"
+    },
+    "contract_too_late": {
+      "fail": "{regime} KDV rejimi yalnızca {cutoff} tarihinden önce imzalanan sözleşmeler içindir ve bu sözleşme {contract_date} tarihli",
+      "suggestion": "Bu sözleşme için genel KDV rejimini seçin"
+    },
+    "evidence_missing": {
+      "fail": "{regime} KDV rejimi {evidence} gerektiriyor ve sözleşmede bu belge kayıtlı değil",
+      "suggestion": "Belgenin numarasını ve düzenlenme tarihini sözleşmenin KDV rejimine kaydedin"
+    },
+    "evidence_date_missing": {
+      "fail": "{regime} KDV rejimi için kaydedilen belgenin ({evidence}) düzenlenme tarihi yok, bu nedenle {cutoff} tarihinden önce olduğu gösterilemiyor",
+      "suggestion": "Belgenin düzenlendiği tarihi girin"
+    },
+    "evidence_too_late": {
+      "fail": "{regime} KDV rejimi için kaydedilen belge ({evidence}) {issued_on} tarihinde düzenlenmiş, rejim ise {cutoff} tarihinden önce düzenlenmiş bir belge gerektiriyor",
+      "suggestion": "Daha önceki bir belge kaydedin veya genel KDV rejimini seçin"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Sözleşme bedeli {original_value} tutarından {current_value} tutarına çıktı ve sözleşmede izin verilen artış belirtilmemiş, bu nedenle {regime} KDV rejiminin hâlâ geçerli olup olmadığı değerlendirilemiyor",
+      "suggestion": "Sözleşmenin izin verdiği iş artışını kaydedin"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Sözleşme bedeli {original_value} tutarından {current_value} tutarına, sözleşmenin izin verdiği yüzde {allowed_increase_pct} artışın üzerine çıktı; KDV bakımından bu yeni bir sözleşmedir ve {regime} KDV rejimi artık uygulanmaz",
+      "suggestion": "Sözleşmeyi genel KDV rejimine geçirin"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "kontrol mühendisince onaylanmış bir hakediş belgesi",
+      "einvoice": "bir e-fatura veya e-makbuz",
+      "main_contractor_certificate": "ana yüklenicinin proje için KDV ödendiğine dair belgesi"
+    },
+    "not_in_force": {
+      "before": "{claim} hakedişi {on} tarihli, {regime} KDV rejimi ise ancak {effective_from} tarihinden itibaren geçerli; o gün geçerli olanlar: {instead}",
+      "after": "{claim} hakedişi {on} tarihli, {regime} KDV rejimi ise {effective_to} tarihinde sona erdi; o gün geçerli olanlar: {instead}",
+      "suggestion": "Sözleşmenin KDV rejimini hakediş tarihinde geçerli olan bir rejimle değiştirin veya hakediş tarihini düzeltin"
+    }
+  }
+}

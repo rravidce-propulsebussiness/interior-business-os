@@ -1,0 +1,2392 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Working-days calendar engine - Wave 28 of the worldwide-parameterisation audit.
+
+Provides:
+    is_working_day(date, country_code) -> bool
+    next_working_day(date, country_code) -> date
+    resolve_holidays(country_code, year) -> dict  (dates plus their provenance)
+
+Per-country rules are defined inline (public holidays and working weeks) and
+drawn from the regional-pack ``holidays`` config keys.
+
+Easter computation uses ``dateutil.easter`` (already a project dependency).
+Hijri (Islamic) holidays use the maintained ``hijridate`` library to convert
+Eid al-Fitr (1 Shawwal) and Eid al-Adha (10 Dhu al-Hijjah) to Gregorian for
+any requested year.  Japanese equinoxes use the standard integer
+approximation valid for 1980-2099.  Hindu holidays (Diwali, Holi) have no
+reliable lightweight panchang library, so they are served from a curated
+multi-year lookup table; years outside the table skip those holidays rather
+than crash.  Carnaval (Brazil) is derived from Easter.
+
+Sources:
+- DE: Bundesgesetzblatt, 2026 federal holidays for all states' common days
+- UK: HM Government bank holidays list (published annually)
+- US: 5 U.S.C. § 6103 (federal public holidays)
+- CA: Canada Labour Code s.166 (federal general holidays). Provincial days such as
+  Family Day and the August civic holiday are deliberately excluded.
+- AE: Federal Decree-Law No. 33/2021, Art. 28 (UAE)
+- SA: Saudi Ministry of Human Resources and Social Development
+- QA: Qatar Labour Law No. 14/2004, Art. 74
+- KW: Kuwait Civil Service Commission annual holiday circular
+- BH: Bahrain Labour Law No. 36/2012, Art. 62
+- OM: Oman Labour Law (Royal Decree 53/2023), Art. 68
+- CN: State Council national holiday measures. Statutory days only; the annual
+  working-day arrangement that bridges them is not modelled (see _holidays_cn).
+- IN: Gazette of India, 2026 gazetted holidays
+- JP: Cabinet Office Japan, 2026 national holidays
+- BR: Federal Law 9.093/95 and 10.607/02 (national holidays)
+- RU: Labour Code of the Russian Federation, Art. 112
+- NG: Public Holidays Act, Cap. P40, LFN 2004, and the Islamic dates it leaves
+  to Ministerial declaration. Two dates (Boxing Day, Democracy Day) rest on
+  corroboration rather than a primary text read in full; see _holidays_ng.
+- BG: Labour Code (Kodeks na truda), Art. 154. Art. 154(2) moves a holiday
+  landing on a Saturday or Sunday, with the Easter block exempted.
+- TR: Law 2429 (Ulusal Bayram ve Genel Tatiller Hakkında Kanun), Art. 1-2, for
+  the days; the Diyanet İşleri Başkanlığı yearly "Resmi Tatiller" pages for the
+  dates of Ramazan Bayramı and Kurban Bayramı. Half days are not modelled (see
+  _holidays_tr).
+- HU: Labour Code (2012. évi I. törvény a munka törvénykönyvéről), 102. § (1)
+  for the days and 97. § (2) for the week. The working-day rearrangement the
+  minister decrees each year under 102. § (5) is not modelled (see
+  _holidays_hu).
+- FR: Code du travail L3133-1 for the eleven national days, L3134-13 for the
+  two Alsace-Moselle days (subdivisions FR-57, FR-67, FR-68, FR-6AE).
+- ES: Real Decreto 2001/1983, art. 45, and Estatuto de los Trabajadores, art.
+  37.2: the national days no autonomous community may replace. The days a
+  community may replace, the community's own days and the two local days are
+  not modelled (see _holidays_es).
+- EG: Ministerial Decree 294/2025 under Labour Law 14/2025 for the days. The
+  per-year Thursday moves and announced lunar dates are rows in
+  ``country_data/holiday_observances.json`` (see _holidays_eg).
+- PL: ustawa o dniach wolnych od pracy (1951), art. 1, with Christmas Eve from
+  2025; Kodeks pracy art. 130 § 2 for the day off a Saturday holiday owes (see
+  _holidays_pl and holidays_owing_a_day_off).
+"""
+
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass
+from datetime import date, timedelta
+from typing import Any
+
+from dateutil.easter import EASTER_ORTHODOX, easter  # type: ignore[import]
+from hijridate import Gregorian, Hijri  # type: ignore[import]
+
+from app.core.holiday_observances import apply_observances
+from app.core.provenance import Provenance, declared, fell_back, unavailable, weakest
+from app.core.seeded_holidays import seeded_holiday_dates
+
+logger = logging.getLogger(__name__)
+
+
+# ── Internal helpers ──────────────────────────────────────────────────────────
+
+
+def _fixed_holiday(month: int, day: int, year: int) -> date:
+    """Return the date for a fixed-date holiday in ``year``."""
+    return date(year, month, day)
+
+
+def _nth_weekday(year: int, month: int, weekday: int, n: int) -> date:
+    """Return the n-th occurrence (1-based) of ``weekday`` in ``month``/``year``.
+
+    ``weekday`` follows Python's ``date.weekday()`` convention:
+    0=Monday, 6=Sunday.  ``n`` may be negative for last-occurrence (e.g. -1).
+    """
+    first = date(year, month, 1)
+    # How many days until the first occurrence of weekday?
+    offset = (weekday - first.weekday()) % 7
+    first_occurrence = first + timedelta(days=offset)
+    if n > 0:
+        return first_occurrence + timedelta(weeks=n - 1)
+    # Last occurrence: go to next month - 1 day, find last weekday
+    if month == 12:
+        last_of_month = date(year, 12, 31)
+    else:
+        last_of_month = date(year, month + 1, 1) - timedelta(days=1)
+    # Walk back to the weekday
+    diff = (last_of_month.weekday() - weekday) % 7
+    last_occurrence = last_of_month - timedelta(days=diff)
+    return last_occurrence + timedelta(weeks=n + 1)
+
+
+class HijriRangeError(RuntimeError):
+    """The Hijri converter cannot reach the requested Gregorian year at all.
+
+    Raised rather than returned as an empty list, because returning one made
+    every Islamic holiday vanish and the year read as a shorter calendar rather
+    than an unanswerable one.
+
+    The original argument for raising was weaker than that and was wrong. It
+    held that an empty list is also a legitimate answer, for a year in which an
+    Islamic date genuinely does not fall, and that a failure returning one would
+    be indistinguishable from it. That second case does not exist. The Hijri
+    year is about 354 days against 365, so consecutive occurrences of a fixed
+    Hijri date are always closer together than a Gregorian year is long and
+    cannot straddle one. Measured across the converter's whole window, 1925 to
+    2076, the four dates this module converts land once or twice in every year
+    and never zero. The eleven-day gap is the reason an empty result cannot
+    happen, not the reason it can, which makes raising simply correct rather
+    than a choice between two readings.
+    """
+
+    def __init__(self, year: int) -> None:
+        super().__init__(f"the Hijri converter does not cover {year}")
+        self.year = year
+
+
+#: The whole requested year converts, so every occurrence in it is visible and
+#: an empty result cannot happen. See :class:`HijriRangeError` for why not.
+HIJRI_COVERED = "covered"
+#: Only part of the year converts, so an Islamic date falling in the rest of it
+#: cannot be seen. The converter's window ends mid-November 2077 and begins in
+#: August 1924, so exactly those two years straddle it.
+#:
+#: This is the state worth understanding, not the one past the window. A year
+#: fully outside it lost every Islamic holiday and was obvious: the UAE
+#: returned four against a healthy thirteen. A straddling year returned twelve,
+#: which sits inside the ten to seventeen band ordinary lunar drift produces,
+#: so the year that was already wrong is the one that looked healthy. The cliff
+#: was findable by counting and the edge never was, because the edge is where
+#: the defect and the healthy signal overlap. Any instrument tuned to catch the
+#: obvious part of a defect reports that overlap as fine.
+HIJRI_EDGE = "edge"
+#: No part of the year converts. Nothing Islamic can be computed.
+HIJRI_OUT_OF_RANGE = "out_of_range"
+
+
+def _hijri_year_coverage(year: int) -> str:
+    """How much of a Gregorian year the Hijri converter can actually reach.
+
+    Asked of the year's two boundaries rather than of a hardcoded window, so the
+    answer tracks whatever range the installed converter actually supports
+    instead of a copy of it that would rot the next time it is upgraded.
+    """
+    reachable = 0
+    for boundary in (date(year, 1, 1), date(year, 12, 31)):
+        try:
+            Gregorian(boundary.year, boundary.month, boundary.day).to_hijri()
+        except (OverflowError, ValueError):
+            continue
+        reachable += 1
+    if reachable == 2:
+        return HIJRI_COVERED
+    return HIJRI_EDGE if reachable == 1 else HIJRI_OUT_OF_RANGE
+
+
+def _hijri_dates_in_gregorian_year(month: int, day: int, year: int) -> list[date]:
+    """Return every Gregorian date matching a fixed Hijri month/day in ``year``.
+
+    Converts the given Islamic-calendar day (e.g. 1 Shawwal for Eid al-Fitr,
+    10 Dhu al-Hijjah for Eid al-Adha) to Gregorian for each Hijri year that
+    can overlap the requested Gregorian year.
+
+    Because the Islamic (lunar) year is about 11 days shorter than the
+    Gregorian year, a single Islamic date lands in the requested Gregorian year
+    once or twice (the latter near the start/end of a year, e.g. Eid al-Fitr
+    falls in both January and December of 2033). All matches are returned so
+    callers can mark each one.
+
+    Never zero, and that is load-bearing rather than trivia. Consecutive
+    occurrences are about 354 days apart and a Gregorian year is 365, so they
+    cannot straddle one. This docstring used to claim zero was possible, which
+    is what made an empty return look like it might be an answer; measured over
+    the converter's whole window it never happens. So inside the window an
+    empty result has no innocent meaning, and outside it the function raises.
+
+    Args:
+        month: Hijri month (1-12), e.g. ``10`` for Shawwal.
+        day:   Hijri day of month (1-30), e.g. ``1`` for the 1st.
+        year:  Gregorian year to search.
+
+    Returns:
+        list[date] - Gregorian dates landing in ``year``, one or two of them.
+        This return used to be documented as empty when the year was outside the
+        converter's range *or* no match existed, which is one value standing for
+        a defect and an answer at the same time. The second case does not exist,
+        so the first one raises and this list is never empty.
+
+    Raises:
+        HijriRangeError: the converter cannot reach ``year`` at all.
+    """
+    if _hijri_year_coverage(year) == HIJRI_OUT_OF_RANGE:
+        raise HijriRangeError(year)
+
+    candidate_hijri_years: set[int] = set()
+    for boundary in (date(year, 1, 1), date(year, 12, 31)):
+        try:
+            hijri_year = Gregorian(boundary.year, boundary.month, boundary.day).to_hijri().year
+        except (OverflowError, ValueError):
+            # One boundary of an edge year. The other one answered, or the
+            # guard above would have raised, so this is a partial view of a
+            # reachable year rather than a failure. resolve_holidays reports it
+            # as a fallback on the year axis.
+            continue
+        candidate_hijri_years.update({hijri_year - 1, hijri_year, hijri_year + 1})
+
+    matches: list[date] = []
+    for hijri_year in sorted(candidate_hijri_years):
+        try:
+            g = Hijri(hijri_year, month, day).to_gregorian()
+        except (OverflowError, ValueError):
+            # Speculative candidate: the years either side of the requested one
+            # are probed on purpose and the outermost of them can fall off the
+            # end of the window. The year-level verdict came from the
+            # boundaries above, so this cannot hide an unreachable year.
+            continue
+        converted = date(g.year, g.month, g.day)
+        if converted.year == year:
+            matches.append(converted)
+    return matches
+
+
+def _equinox_day(year: int, *, spring: bool) -> int:
+    """Return the day-of-month of the Japanese spring or autumn equinox.
+
+    Uses the well-known integer approximation that is accurate for the years
+    1980-2099 (the range Japan's holiday law is published against):
+
+        spring = floor(20.8431 + 0.242194 * (year - 1980) - floor((year - 1980) / 4))
+        autumn = floor(23.2488 + 0.242194 * (year - 1980) - floor((year - 1980) / 4))
+
+    The equinox months are fixed: March for spring, September for autumn.
+
+    Args:
+        year:   Gregorian year (intended range 1980-2099).
+        spring: True for the vernal (March) equinox, False for the autumnal
+                (September) equinox.
+
+    Returns:
+        int - The day of the month on which the equinox falls.
+    """
+    base = 20.8431 if spring else 23.2488
+    offset = year - 1980
+    return int(base + 0.242194 * offset - offset // 4)
+
+
+# Curated Hindu festival dates (Gregorian). There is no reliable lightweight
+# panchang library, so these are taken from widely published almanac dates for
+# India. Holi is the day of Holika Dahan's following morning (Phalguna
+# Purnima); Diwali is the main Lakshmi Puja day (Kartik Amavasya). Years
+# outside this table skip the holiday rather than guessing. Extend the table as
+# authoritative dates are published.
+_HINDU_HOLIDAYS: dict[int, dict[str, tuple[int, int]]] = {
+    2024: {"holi": (3, 25), "diwali": (11, 1)},
+    2025: {"holi": (3, 14), "diwali": (10, 21)},
+    2026: {"holi": (3, 4), "diwali": (11, 8)},
+    2027: {"holi": (3, 22), "diwali": (10, 29)},
+    2028: {"holi": (3, 11), "diwali": (10, 17)},
+    2029: {"holi": (3, 1), "diwali": (11, 5)},
+    2030: {"holi": (3, 20), "diwali": (10, 26)},
+    2031: {"holi": (3, 9), "diwali": (11, 14)},
+    2032: {"holi": (3, 27), "diwali": (11, 2)},
+    2033: {"holi": (3, 16), "diwali": (10, 22)},
+    2034: {"holi": (3, 5), "diwali": (11, 10)},
+    2035: {"holi": (3, 24), "diwali": (10, 30)},
+}
+
+# Chinese festival dates, curated for the same reason ``_HINDU_HOLIDAYS`` is.
+# Spring Festival, Dragon Boat and Mid-Autumn are lunisolar, Qingming follows a
+# solar term, and none of the four can be computed from the standard library or
+# from the two date libraries this project already depends on.
+#
+# Each row holds the FIRST day of Spring Festival (lunar 1/1), Qingming, Dragon
+# Boat (lunar 5/5) and Mid-Autumn (lunar 8/15). New Year's Eve is derived as the
+# day before Spring Festival rather than stored, so the pair cannot drift apart.
+#
+# The window ends deliberately and ``_holidays_cn`` says so out loud rather than
+# returning a quietly shorter set for a year it does not cover. Extending it
+# means sourcing the dates, not extrapolating them: the festivals do not sit at a
+# fixed Gregorian offset year to year, and a leap month moves Mid-Autumn by about
+# thirty days without moving Dragon Boat at all. ``test_calendar.py`` asserts the
+# offsets every row must satisfy, which will catch a guessed row but cannot catch
+# a whole table shifted the same way.
+_CN_FESTIVALS: dict[int, dict[str, tuple[int, int]]] = {
+    2024: {"spring_festival": (2, 10), "qingming": (4, 4), "dragon_boat": (6, 10), "mid_autumn": (9, 17)},
+    2025: {"spring_festival": (1, 29), "qingming": (4, 4), "dragon_boat": (5, 31), "mid_autumn": (10, 6)},
+    2026: {"spring_festival": (2, 17), "qingming": (4, 5), "dragon_boat": (6, 19), "mid_autumn": (9, 25)},
+    2027: {"spring_festival": (2, 6), "qingming": (4, 5), "dragon_boat": (6, 9), "mid_autumn": (9, 15)},
+    2028: {"spring_festival": (1, 26), "qingming": (4, 4), "dragon_boat": (5, 28), "mid_autumn": (10, 3)},
+    2029: {"spring_festival": (2, 13), "qingming": (4, 4), "dragon_boat": (6, 16), "mid_autumn": (9, 22)},
+    2030: {"spring_festival": (2, 3), "qingming": (4, 5), "dragon_boat": (6, 5), "mid_autumn": (9, 12)},
+}
+
+_CN_FIRST_YEAR = min(_CN_FESTIVALS)
+_CN_LAST_YEAR = max(_CN_FESTIVALS)
+
+# The State Council raised the statutory total from 11 days to 13 with effect
+# from 1 January 2025: Spring Festival went from three days to four by making New
+# Year's Eve statutory, and Labour Day from one day to two.
+_CN_HOLIDAY_REFORM_YEAR = 2025
+
+# Türkiye: the first day of Ramazan Bayramı and of Kurban Bayramı, as (month,
+# day) in the Gregorian year. Law 2429 Art. 2 fixes the lengths, three days and
+# four days after the half day of the eve, and leaves the dates to the calendar
+# the Diyanet İşleri Başkanlığı computes and publishes. Those published dates
+# are the ones offices close on, so they are copied here rather than derived
+# from a Hijri converter, which follows a different sighting rule and can land
+# a day away.
+#
+# Source, one page per year, read 2026-10-10:
+# https://vakithesaplama.diyanet.gov.tr/icerik.php?icerik=157 (2025), 158
+# (2026), 159 (2027), 193 (2028), 194 (2029), 195 (2030), 196 (2031), 197
+# (2032), 198 (2033).
+#
+# Each feast is a tuple because the lunar year is shorter than the solar one:
+# in 2033 Ramazan Bayramı falls twice, in January and again in December.
+_TR_BAYRAMS: dict[int, dict[str, tuple[tuple[int, int], ...]]] = {
+    2025: {"ramazan": ((3, 30),), "kurban": ((6, 6),)},
+    2026: {"ramazan": ((3, 20),), "kurban": ((5, 27),)},
+    2027: {"ramazan": ((3, 9),), "kurban": ((5, 16),)},
+    2028: {"ramazan": ((2, 26),), "kurban": ((5, 5),)},
+    2029: {"ramazan": ((2, 14),), "kurban": ((4, 24),)},
+    2030: {"ramazan": ((2, 4),), "kurban": ((4, 13),)},
+    2031: {"ramazan": ((1, 24),), "kurban": ((4, 2),)},
+    2032: {"ramazan": ((1, 14),), "kurban": ((3, 22),)},
+    2033: {"ramazan": ((1, 2), (12, 23)), "kurban": ((3, 11),)},
+}
+
+_TR_RAMAZAN_DAYS = 3
+_TR_KURBAN_DAYS = 4
+
+
+# ── Per-country holiday calculators ──────────────────────────────────────────
+
+
+_SATURDAY_INDEX = 5
+
+
+def _holidays_de(year: int) -> set[date]:
+    """German federal holidays (common to all 16 Bundesländer).
+
+    Source: German Civil Code + Federal holiday statutes.
+    State-specific holidays (e.g. Tag der Deutschen Einheit for some only
+    vs all) are excluded; only *nationwide* fixed holidays are included.
+    """
+    e = easter(year)
+    return {
+        date(year, 1, 1),  # Neujahrstag
+        e - timedelta(days=2),  # Karfreitag (Good Friday)
+        e + timedelta(days=1),  # Ostermontag (Easter Monday)
+        date(year, 5, 1),  # Tag der Arbeit
+        e + timedelta(days=39),  # Christi Himmelfahrt (Ascension)
+        e + timedelta(days=50),  # Pfingstmontag (Whit Monday)
+        date(year, 10, 3),  # Tag der Deutschen Einheit
+        date(year, 12, 25),  # 1. Weihnachtstag
+        date(year, 12, 26),  # 2. Weihnachtstag
+    }
+
+
+def _holidays_uk(year: int) -> set[date]:
+    """England & Wales public (bank) holidays.
+
+    Source: GOV.UK bank holidays list (2026).
+    Scotland and Northern Ireland have minor differences; common set used.
+    """
+    e = easter(year)
+    # Early May bank holiday: first Monday in May
+    early_may = _nth_weekday(year, 5, 0, 1)
+    # Spring bank holiday: last Monday in May
+    spring_bank = _nth_weekday(year, 5, 0, -1)
+    # Summer bank holiday: last Monday in August
+    summer_bank = _nth_weekday(year, 8, 0, -1)
+
+    return {
+        date(year, 1, 1),  # New Year's Day
+        e - timedelta(days=2),  # Good Friday
+        e + timedelta(days=1),  # Easter Monday
+        early_may,  # Early May bank holiday
+        spring_bank,  # Spring bank holiday
+        summer_bank,  # Summer bank holiday
+        date(year, 12, 25),  # Christmas Day
+        date(year, 12, 26),  # Boxing Day
+    }
+
+
+def _holidays_us(year: int) -> set[date]:
+    """US federal public holidays (5 U.S.C. § 6103).
+
+    When a fixed holiday falls on Saturday, observed on Friday.
+    When on Sunday, observed on Monday.
+    """
+
+    def _observed(d: date) -> date:
+        if d.weekday() == 5:  # Saturday → Friday
+            return d - timedelta(days=1)
+        if d.weekday() == 6:  # Sunday → Monday
+            return d + timedelta(days=1)
+        return d
+
+    fixed = [
+        date(year, 1, 1),  # New Year's Day
+        date(year, 6, 19),  # Juneteenth
+        date(year, 7, 4),  # Independence Day
+        date(year, 11, 11),  # Veterans Day
+        date(year, 12, 25),  # Christmas Day
+    ]
+    computed = [
+        _nth_weekday(year, 1, 0, 3),  # MLK Day - 3rd Monday January
+        _nth_weekday(year, 2, 0, 3),  # Presidents' Day - 3rd Monday February
+        _nth_weekday(year, 5, 0, -1),  # Memorial Day - last Monday May
+        _nth_weekday(year, 9, 0, 1),  # Labor Day - 1st Monday September
+        _nth_weekday(year, 10, 0, 2),  # Columbus Day - 2nd Monday October
+        _nth_weekday(year, 11, 3, 4),  # Thanksgiving - 4th Thursday November
+    ]
+    return {_observed(d) for d in fixed} | set(computed)
+
+
+def _holidays_ca(year: int) -> set[date]:
+    """Canadian federal statutory holidays (Canada Labour Code, Part III).
+
+    Federally regulated workplaces. Family Day and the August civic holiday are
+    **provincial**, are observed on different days in different provinces, and
+    are deliberately out of scope for a function named for the country: an
+    accurate national list with a stated limit beats a fuller list that is wrong
+    in seven provinces. A caller needing provincial days has to supply them.
+
+    Weekend substitution moves **forward** to the next free weekday, which is
+    where this differs from :func:`_holidays_us` and the difference is
+    deliberate. The US rule observes a Saturday holiday on the preceding Friday;
+    Canada moves to the following working day in both directions, so Canada Day
+    on a Saturday is observed on the Monday rather than the Friday before it.
+    Applying the US rule here would put a checkable Canadian date three days
+    early, which is the precise failure this function exists to remove.
+
+    Christmas and Boxing Day are adjacent, so a substitution can land on a day
+    already taken. The later one then moves on to the next free weekday instead
+    of collapsing into its neighbour, which would silently cost the year a
+    holiday and overcount working days.
+    """
+    e = easter(year)
+    may_24 = date(year, 5, 24)
+
+    # Never fall on a weekend by construction, so no substitution applies.
+    days = {
+        e - timedelta(days=2),  # Good Friday
+        may_24 - timedelta(days=may_24.weekday()),  # Victoria Day - Monday before 25 May
+        _nth_weekday(year, 9, 0, 1),  # Labour Day - 1st Monday September
+        _nth_weekday(year, 10, 0, 2),  # Thanksgiving - 2nd Monday October
+    }
+
+    # Fixed dates, in calendar order so that an earlier holiday claims its
+    # observed day before a later one has to work around it.
+    for fixed in (
+        date(year, 1, 1),  # New Year's Day
+        date(year, 7, 1),  # Canada Day
+        date(year, 9, 30),  # National Day for Truth and Reconciliation
+        date(year, 11, 11),  # Remembrance Day
+        date(year, 12, 25),  # Christmas Day
+        date(year, 12, 26),  # Boxing Day
+    ):
+        observed = fixed
+        while observed.weekday() >= _SATURDAY_INDEX or observed in days:
+            observed += timedelta(days=1)
+        days.add(observed)
+
+    return days
+
+
+# ── Canadian provinces ────────────────────────────────────────────────────────
+#
+# Holidays are provincial law in Canada, and the federal list above is wrong for
+# every province in at least one day: Ontario keeps Family Day and does not keep
+# Remembrance Day or 30 September, Quebec keeps 24 June and not Boxing Day. A
+# project that records its province reads the province's own list instead of the
+# federal one, by asking for the ISO 3166-2 code ("CA-ON") where it would ask for
+# "CA". Each list is the province's general or statutory holidays as its
+# employment standards law names them; days a province leaves optional (Ontario's
+# Civic Holiday, Alberta's Heritage Day, Quebec's Easter Monday as the alternative
+# to Good Friday) are left out. Fixed dates that fall on a weekend move forward to
+# the next free weekday, the same rule the federal list uses.
+
+
+def _ca_province(year: int, *, family_day: bool, extra_fixed: tuple[date, ...], **flags: bool) -> set[date]:
+    e = easter(year)
+    may_24 = date(year, 5, 24)
+    days = {
+        e - timedelta(days=2),  # Good Friday
+        may_24 - timedelta(days=may_24.weekday()),  # Victoria Day / National Patriots' Day
+        _nth_weekday(year, 9, 0, 1),  # Labour Day
+        _nth_weekday(year, 10, 0, 2),  # Thanksgiving
+    }
+    if family_day:
+        days.add(_nth_weekday(year, 2, 0, 3))  # Family Day / Louis Riel Day - 3rd Monday February
+    if flags.get("august_civic"):
+        days.add(_nth_weekday(year, 8, 0, 1))  # BC Day - 1st Monday August
+    fixed = [date(year, 1, 1), date(year, 7, 1), *extra_fixed, date(year, 12, 25)]
+    if flags.get("truth_and_reconciliation"):
+        fixed.append(date(year, 9, 30))
+    if flags.get("remembrance"):
+        fixed.append(date(year, 11, 11))
+    if flags.get("boxing_day"):
+        fixed.append(date(year, 12, 26))
+    for day in sorted(fixed):
+        observed = day
+        while observed.weekday() >= _SATURDAY_INDEX or observed in days:
+            observed += timedelta(days=1)
+        days.add(observed)
+    return days
+
+
+def _holidays_ca_on(year: int) -> set[date]:
+    """Ontario public holidays (Employment Standards Act, 2000)."""
+    return _ca_province(year, family_day=True, extra_fixed=(), boxing_day=True)
+
+
+def _holidays_ca_qc(year: int) -> set[date]:
+    """Quebec statutory holidays (Act respecting labour standards; National Holiday Act)."""
+    return _ca_province(year, family_day=False, extra_fixed=(date(year, 6, 24),))
+
+
+def _holidays_ca_bc(year: int) -> set[date]:
+    """British Columbia statutory holidays (Employment Standards Act)."""
+    return _ca_province(
+        year,
+        family_day=True,
+        extra_fixed=(),
+        august_civic=True,
+        truth_and_reconciliation=year >= 2023,
+        remembrance=True,
+    )
+
+
+def _holidays_ca_ab(year: int) -> set[date]:
+    """Alberta general holidays (Employment Standards Code)."""
+    return _ca_province(year, family_day=True, extra_fixed=(), remembrance=True)
+
+
+def _holidays_ca_mb(year: int) -> set[date]:
+    """Manitoba general holidays (The Employment Standards Code)."""
+    return _ca_province(year, family_day=True, extra_fixed=(), truth_and_reconciliation=year >= 2023)
+
+
+def _holidays_fr(year: int) -> set[date]:
+    """France's eleven public holidays (Code du travail L3133-1).
+
+    Only 1 May is a non-working day for every employee by law (L3133-4); the
+    others are worked or not by collective agreement or usage. A construction
+    site is planned on all eleven, which is what the shipped French roster and
+    the building-trades agreements assume. Whit Monday is often the unpaid
+    journée de solidarité (L3133-7), set by agreement; the site is still closed
+    on it in the usual case, so it stays a holiday here.
+    """
+    e = easter(year)
+    return {
+        date(year, 1, 1),  # Jour de l'an
+        e + timedelta(days=1),  # Lundi de Pâques
+        date(year, 5, 1),  # Fête du Travail
+        date(year, 5, 8),  # Victoire 1945
+        e + timedelta(days=39),  # Ascension
+        e + timedelta(days=50),  # Lundi de Pentecôte
+        date(year, 7, 14),  # Fête nationale
+        date(year, 8, 15),  # Assomption
+        date(year, 11, 1),  # Toussaint
+        date(year, 11, 11),  # Armistice 1918
+        date(year, 12, 25),  # Noël
+    }
+
+
+def _holidays_fr_alsace_moselle(year: int) -> set[date]:
+    """Moselle, Bas-Rhin and Haut-Rhin: the national days plus Good Friday and 26 December.
+
+    Local law kept after 1918 (Code du travail L3134-13). Good Friday is in law
+    a holiday in communes with a Protestant church or a mixed church; in
+    practice it is observed across the three departments and the shipped
+    calendars treat it so, which is what this follows.
+    """
+    days = _holidays_fr(year)
+    days.add(easter(year) - timedelta(days=2))  # Vendredi saint
+    days.add(date(year, 12, 26))  # Saint-Étienne
+    return days
+
+
+#: ISO 3166-2 subdivisions with a holiday list of their own, which replaces the
+#: country's when a caller names the subdivision.
+#:
+#: France: FR-57 Moselle, FR-67 Bas-Rhin, FR-68 Haut-Rhin, and FR-6AE, the
+#: Collectivité européenne d'Alsace that has covered 67 and 68 since 2021. An
+#: address may resolve to either the department or the collectivity code, so
+#: both answer the same list.
+_SUBDIVISION_HOLIDAY_FUNCS: dict[str, Any] = {
+    "CA-ON": _holidays_ca_on,
+    "CA-QC": _holidays_ca_qc,
+    "CA-BC": _holidays_ca_bc,
+    "CA-AB": _holidays_ca_ab,
+    "CA-MB": _holidays_ca_mb,
+    "FR-57": _holidays_fr_alsace_moselle,
+    "FR-67": _holidays_fr_alsace_moselle,
+    "FR-68": _holidays_fr_alsace_moselle,
+    "FR-6AE": _holidays_fr_alsace_moselle,
+}
+
+
+def has_subdivision_holidays(code: str | None) -> bool:
+    """Whether ``code`` (ISO 3166-2) has a holiday list of its own."""
+    return (code or "").upper().strip() in _SUBDIVISION_HOLIDAY_FUNCS
+
+
+# Islamic observances that are a single day, given as (Hijri month, day). Only the
+# two Eids carry a multi-day span, and that span is policy rather than calendar.
+_HIJRI_NEW_YEAR = (1, 1)  # 1 Muharram
+_PROPHETS_BIRTHDAY = (3, 12)  # 12 Rabi al-Awwal
+
+
+def _hijri_span(month: int, day: int, length: int, year: int) -> set[date]:
+    """Every day of a ``length``-day run starting on a fixed Hijri date, inside ``year``.
+
+    An occurrence that starts at the end of the previous year and runs into
+    this one is included, which the Gulf expansion before it did not do, so a feast
+    beginning on 31 December still counts its 1 January. The previous year's
+    occurrences are asked of the converter too; at the very start of its window
+    there is no previous year to ask, and that alone is not a failure.
+    """
+    days: set[date] = set()
+    for probe_year in (year - 1, year):
+        try:
+            starts = _hijri_dates_in_gregorian_year(month, day, probe_year)
+        except HijriRangeError:
+            if probe_year == year:
+                raise
+            continue
+        for start in starts:
+            days.update(start + timedelta(days=offset) for offset in range(length))
+    return {d for d in days if d.year == year}
+
+
+@dataclass(frozen=True)
+class EidSpans:
+    """Where each Eid starts in the Hijri calendar and how many days it runs, for one country.
+
+    The dates are calendar facts and the converter has no policy in it, but the
+    first day and the length of each holiday are national law, so they are
+    data per country. ``sourced`` is False where the span is the placeholder
+    first written for the UAE and applied to its neighbours unchanged; those
+    countries report it on the extent axis (``SHARED_GCC_EID_SPAN``).
+    """
+
+    fitr_start: tuple[int, int]
+    fitr_days: int
+    adha_start: tuple[int, int]
+    adha_days: int
+    sourced: bool
+    source: str
+
+
+_UNSOURCED_GULF_SPAN = EidSpans(
+    fitr_start=(10, 1),
+    fitr_days=3,
+    adha_start=(12, 10),
+    adha_days=4,
+    sourced=False,
+    source="placeholder written for the UAE and shared unchanged; no national source checked",
+)
+
+#: Per-country Eid spans. A country is changed here only with a source.
+_EID_SPANS: dict[str, EidSpans] = {
+    **dict.fromkeys(("AE", "QA", "KW", "BH", "OM"), _UNSOURCED_GULF_SPAN),
+    # Saudi Labour Law Implementing Regulations Art. 24 (HRSD), as announced
+    # each year for the private sector: Eid al-Fitr four days from 1 Shawwal,
+    # Eid al-Adha four days from the Day of Arafah, 9 Dhu al-Hijjah.
+    # https://gulfnews.com/world/gulf/saudi/saudi-arabia-announces-eid-al-fitr-holidays-for-private-and-non-profit-sectors-1.500462986
+    "SA": EidSpans(
+        fitr_start=(10, 1),
+        fitr_days=4,
+        adha_start=(12, 9),
+        adha_days=4,
+        sourced=True,
+        source="Saudi Labour Law Implementing Regulations Art. 24 (HRSD private-sector announcements)",
+    ),
+    # Ministerial Decree 294/2025 under Egypt's Labour Law 14/2025: the first
+    # and second days of Shawwal, and Arafah Day with the first two days of
+    # Eid al-Adha.
+    "EG": EidSpans(
+        fitr_start=(10, 1),
+        fitr_days=2,
+        adha_start=(12, 9),
+        adha_days=3,
+        sourced=True,
+        source="Egypt Ministerial Decree 294/2025",
+    ),
+    # Pakistan: the Cabinet Division's yearly circular lists Eid-ul-Fitr and
+    # Eid-ul-Azha as three public holidays from the first day, 1 Shawwal and 10
+    # Dhu al-Hijjah. The Prime Minister extends them by press release in some
+    # years (four days in 2025 for Eid-ul-Azha); an extension is data.
+    "PK": EidSpans(
+        fitr_start=(10, 1),
+        fitr_days=3,
+        adha_start=(12, 10),
+        adha_days=3,
+        sourced=True,
+        source="Pakistan Cabinet Division yearly public holidays circular, press releases of 19 March and 2 June 2025",
+    ),
+}
+
+
+def _eid_days(country: str, year: int) -> dict[str, set[date]]:
+    """The two Eids for one country in one year, keyed for announced observances.
+
+    Built from the country's row in :data:`_EID_SPANS`. Each occurrence that
+    reaches into ``year`` counts, including one that began the previous
+    December, so a year boundary never drops or misfiles a day.
+    """
+    spans = _EID_SPANS[country]
+    return {
+        "eid_al_fitr": _hijri_span(*spans.fitr_start, spans.fitr_days, year),
+        "eid_al_adha": _hijri_span(*spans.adha_start, spans.adha_days, year),
+    }
+
+
+def _gcc_eids(year: int, country: str) -> set[date]:
+    """Both Eids for a Gulf country, as one set of dates.
+
+    The conversion is shared and has no policy content; the first day and the
+    length of each Eid come from the country's row in :data:`_EID_SPANS`. Five
+    of the six countries still carry the unsourced placeholder (three and four
+    days from 1 Shawwal and 10 Dhu al-Hijjah) and report it on the extent axis;
+    Saudi Arabia has its own sourced row. Until October 2026 all six shared the
+    placeholder, which gave Saudi Arabia one day of Eid al-Fitr too few and
+    started its Eid al-Adha a day late.
+    """
+    days: set[date] = set()
+    for feast in _eid_days(country, year).values():
+        days.update(feast)
+    return days
+
+
+def _holidays_ae(year: int) -> set[date]:
+    """United Arab Emirates federal public holidays.
+
+    The working week is Monday-Friday and is not defined here: see ``_WORKING_WEEK``.
+
+    Commemoration Day on 1 December and National Day on 2 and 3 December run
+    together but are separate holidays. Commemoration Day moved to 1 December in
+    2019, from 30 November.
+    """
+    days = _gcc_eids(year, "AE")
+    days.update(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year))
+    days.update(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year))
+    days.update(
+        {
+            date(year, 1, 1),  # New Year's Day (Gregorian)
+            date(year, 12, 1),  # Commemoration Day
+            date(year, 12, 2),  # National Day
+            date(year, 12, 3),  # National Day (2nd day)
+        }
+    )
+    return days
+
+
+def _holidays_sa(year: int) -> set[date]:
+    """Saudi Arabia national public holidays.
+
+    The working week is Sunday-Thursday: see ``_WORKING_WEEK``.
+
+    Saudi Arabia does **not** observe Gregorian New Year, and the shared set this
+    function replaces gave it one, along with the UAE's National Day. Both are
+    gone. This is the only country in the split whose set gets shorter, so it is
+    the only one where an existing caller can see a date disappear.
+
+    The Saudi public calendar is unusually short by design: the two Eids and the
+    two national days are the whole of it. Neither the Islamic New Year nor the
+    Prophet's Birthday is a public holiday, which is why they are absent here
+    while its neighbours have them.
+
+    Founding Day, 22 February, was established in 2022 and is a different holiday
+    from National Day, 23 September, which marks the 1932 unification.
+
+    The Eids are four days each, Eid al-Fitr from 1 Shawwal and Eid al-Adha from
+    the Day of Arafah (see ``_EID_SPANS``). The dates HRSD announces after the
+    moon sighting are rows in ``country_data/holiday_observances.json``. The
+    compensatory day for a national day falling on a weekend is not modelled.
+    """
+    return apply_observances(
+        "SA",
+        year,
+        {
+            **_eid_days("SA", year),
+            "founding_day": {date(year, 2, 22)},
+            "national_day": {date(year, 9, 23)},
+        },
+    )
+
+
+def _holidays_qa(year: int) -> set[date]:
+    """Qatar national public holidays.
+
+    The working week is Sunday-Thursday: see ``_WORKING_WEEK``.
+
+    Qatar does not observe Gregorian New Year as a public holiday, and the shared
+    set this function replaces gave it one along with the UAE's National Day.
+    National Sports Day is the second Tuesday of February, so it is computed
+    rather than fixed.
+    """
+    days = _gcc_eids(year, "QA")
+    days.update(
+        {
+            _nth_weekday(year, 2, 1, 2),  # National Sports Day - 2nd Tuesday February
+            date(year, 12, 18),  # National Day
+        }
+    )
+    return days
+
+
+def _holidays_kw(year: int) -> set[date]:
+    """Kuwait national public holidays.
+
+    The working week is Sunday-Thursday: see ``_WORKING_WEEK``.
+
+    National Day on 25 February and Liberation Day on 26 February, which marks the
+    end of the 1990-91 occupation, are adjacent but separate. Neither is the UAE
+    National Day that the shared set used to return for this country.
+    """
+    days = _gcc_eids(year, "KW")
+    days.update(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year))
+    days.update(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year))
+    days.update(
+        {
+            date(year, 1, 1),  # New Year's Day (Gregorian)
+            date(year, 2, 25),  # National Day
+            date(year, 2, 26),  # Liberation Day
+        }
+    )
+    return days
+
+
+def _holidays_bh(year: int) -> set[date]:
+    """Bahrain national public holidays.
+
+    The working week is Sunday-Thursday: see ``_WORKING_WEEK``.
+
+    This is new coverage rather than a split. Bahrain had a working week here and
+    no entry in ``_HOLIDAY_FUNCS`` at all, so every day that was not a weekend
+    counted as a working day and no Eid was ever reachable for it.
+
+    Stated limitation: Ashura, 9 and 10 Muharram, is a public holiday in Bahrain
+    and is **not** included, because its observed span is not sourced confidently
+    enough here to compute. The set is therefore short by two days rather than
+    wrong by two. Short is the direction that overcounts working days, which pulls
+    a derived deadline earlier, so this limitation is worth closing.
+    """
+    days = _gcc_eids(year, "BH")
+    days.update(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year))
+    days.update(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year))
+    days.update(
+        {
+            date(year, 1, 1),  # New Year's Day (Gregorian)
+            date(year, 5, 1),  # Labour Day
+            date(year, 12, 16),  # National Day
+            date(year, 12, 17),  # National Day (2nd day)
+        }
+    )
+    return days
+
+
+def _holidays_om(year: int) -> set[date]:
+    """Oman national public holidays.
+
+    The working week is Sunday-Thursday: see ``_WORKING_WEEK``.
+
+    New coverage rather than a split, on the same terms as Bahrain: Oman had a
+    working week and no holiday function behind it.
+
+    Stated limitation: the National Day holiday has been observed across both 18
+    and 19 November in some years and on 18 November alone in others, and
+    Renaissance Day has itself been moved. Only 18 November is claimed here, so
+    this set is short rather than wrong in a year that observed both.
+    """
+    days = _gcc_eids(year, "OM")
+    days.update(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year))
+    days.update(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year))
+    days.update(
+        {
+            date(year, 1, 1),  # New Year's Day (Gregorian)
+            date(year, 11, 18),  # National Day
+        }
+    )
+    return days
+
+
+def _holidays_in(year: int) -> set[date]:
+    """India gazetted national holidays (Central Government - Gazette of India).
+
+    Regional state holidays are excluded (too many variations). Diwali and
+    Holi are lunisolar; their Gregorian dates are served from the curated
+    ``_HINDU_HOLIDAYS`` table. Years outside the table simply omit those two
+    festivals rather than guessing an incorrect date.
+    """
+    holidays: set[date] = {
+        date(year, 1, 26),  # Republic Day
+        date(year, 8, 15),  # Independence Day
+        date(year, 10, 2),  # Gandhi Jayanti
+        date(year, 12, 25),  # Christmas Day
+    }
+    hindu = _HINDU_HOLIDAYS.get(year)
+    if hindu is not None:
+        holidays.add(date(year, *hindu["holi"]))  # Holi (Phalguna Purnima)
+        holidays.add(date(year, *hindu["diwali"]))  # Diwali (Kartik Amavasya)
+    else:
+        logger.info("No curated Hindu holiday dates for %d; Holi/Diwali omitted", year)
+
+    return holidays
+
+
+def _holidays_cn(year: int) -> set[date]:
+    """China statutory public holidays (State Council, national holiday measures).
+
+    Returns the STATUTORY days only, which is 13 a year from 2025 and 11 before
+    it. Read the limitation at the end of this docstring before using the result
+    to derive a deadline, because it does not err in the direction the other
+    stated limitations in this file do.
+
+    New Year's Day, Labour Day and the three National Day days are fixed
+    Gregorian. Spring Festival, Qingming, Dragon Boat and Mid-Autumn come from
+    ``_CN_FESTIVALS``, which covers 2024-2030 only. A year outside that window
+    logs a warning and returns just the fixed days, which is a deliberate and
+    documented shape rather than a silent shortfall.
+
+    Festivals can coincide with fixed days, so the set is sometimes smaller than
+    the statutory count without anything being wrong: in 2028 Mid-Autumn falls on
+    3 October, the third day of National Day, and China observes the two as one
+    longer break.
+
+    Known limitation, and it is the point of this docstring: China moves working
+    days. The State Council publishes an arrangement each year that stretches
+    these statutory days into longer breaks and pays for them by turning
+    particular Saturdays and Sundays into working days. It is announced annually,
+    it is not derivable, and it is not modelled here.
+
+    That omission does **not** have a safe direction, and this is where China
+    differs from the short Bahrain and Oman sets, which are conservative because
+    they can only overcount working days. The arrangement is a swap rather than a
+    grant, so it has two halves pulling opposite ways:
+
+    * The borrowed days off are not modelled, so days that are actually holidays
+      count as working. That overcounts working days and pulls a derived deadline
+      EARLIER, which is the dangerous direction.
+    * The bridging weekends are not modelled, so days that are actually working
+      count as weekend. That undercounts and pushes a deadline LATER.
+
+    Because the arrangement borrows roughly what it spends, the two approximately
+    cancel over a full year. What is wrong is therefore less the total than which
+    days carry it, and the sign of the error on any one span depends on where
+    that span begins and ends relative to a festival. Do not assume this function
+    is conservative.
+    """
+    holidays: set[date] = {
+        date(year, 1, 1),  # New Year's Day
+        date(year, 5, 1),  # Labour Day
+        date(year, 10, 1),  # National Day
+        date(year, 10, 2),  # National Day (2nd day)
+        date(year, 10, 3),  # National Day (3rd day)
+    }
+    if year >= _CN_HOLIDAY_REFORM_YEAR:
+        holidays.add(date(year, 5, 2))  # Labour Day (2nd day), added by the 2025 reform
+
+    festivals = _CN_FESTIVALS.get(year)
+    if festivals is None:
+        logger.warning(
+            "No curated Chinese festival dates for %d (table covers %d-%d); Spring Festival, "
+            "Qingming, Dragon Boat and Mid-Autumn are omitted and only the %d fixed Gregorian "
+            "days are returned",
+            year,
+            _CN_FIRST_YEAR,
+            _CN_LAST_YEAR,
+            len(holidays),
+        )
+        return holidays
+
+    spring_festival = date(year, *festivals["spring_festival"])
+    if year >= _CN_HOLIDAY_REFORM_YEAR:
+        holidays.add(spring_festival - timedelta(days=1))  # New Year's Eve, statutory from 2025
+    holidays.update(spring_festival + timedelta(days=offset) for offset in range(3))
+
+    holidays.add(date(year, *festivals["qingming"]))  # Qingming (solar term)
+    holidays.add(date(year, *festivals["dragon_boat"]))  # Dragon Boat (lunar 5/5)
+    holidays.add(date(year, *festivals["mid_autumn"]))  # Mid-Autumn (lunar 8/15)
+
+    return holidays
+
+
+def _holidays_jp(year: int) -> set[date]:
+    """Japan national holidays (Cabinet Office, Act on National Holidays).
+
+    Includes Golden Week cluster and special 2026 holidays.
+    Substitution rule: when a holiday falls on Sunday, the next Monday
+    is a substitute holiday.
+
+    Four holidays move under the Happy Monday System and are computed as an
+    n-th Monday rather than a fixed date: Coming of Age Day, Marine Day,
+    Respect for the Aged Day and Sports Day. Because they can never land on a
+    Sunday, the substitution rule above never fires for them.
+
+    Known limitation: the one-off moves for the 2020 Olympics, which shifted
+    Marine Day, Sports Day and Mountain Day in 2020 and again in 2021, are not
+    modelled. Those two years therefore return the standing rule rather than
+    the dates actually observed.
+    """
+
+    def _sub(d: date) -> set[date]:
+        if d.weekday() == 6:  # Sunday → substitute holiday on Monday
+            return {d, d + timedelta(days=1)}
+        return {d}
+
+    days: set[date] = set()
+    for d in [
+        date(year, 1, 1),  # New Year's Day (元旦)
+        _nth_weekday(year, 1, 0, 2),  # Coming of Age Day - 2nd Monday Jan
+        date(year, 2, 11),  # National Foundation Day (建国記念の日)
+        date(year, 2, 23),  # Emperor's Birthday (天皇誕生日)
+        date(year, 4, 29),  # Showa Day (昭和の日) - start of Golden Week
+        date(year, 5, 3),  # Constitution Memorial Day (憲法記念日)
+        date(year, 5, 4),  # Greenery Day (みどりの日)
+        date(year, 5, 5),  # Children's Day (こどもの日) - end of Golden Week
+        _nth_weekday(year, 7, 0, 3),  # Marine Day - 3rd Monday July
+        date(year, 8, 11),  # Mountain Day (山の日)
+        _nth_weekday(year, 9, 0, 3),  # Respect for the Aged Day - 3rd Monday Sep
+        _nth_weekday(year, 10, 0, 2),  # Sports Day - 2nd Monday Oct
+        date(year, 11, 3),  # Culture Day (文化の日)
+        date(year, 11, 23),  # Labour Thanksgiving Day (勤労感謝の日)
+    ]:
+        days |= _sub(d)
+    # Vernal Equinox (春分の日) and Autumnal Equinox (秋分の日): computed via the
+    # standard integer approximation (accurate for 1980-2099). See _equinox_day.
+    days |= _sub(date(year, 3, _equinox_day(year, spring=True)))
+    days |= _sub(date(year, 9, _equinox_day(year, spring=False)))
+    return days
+
+
+def _holidays_br(year: int) -> set[date]:
+    """Brazil national holidays (Lei 9.093/95 + Lei 10.607/02).
+
+    Carnaval is calculated relative to Easter (47 days before Easter Sunday).
+    """
+    e = easter(year)
+    carnaval_monday = e - timedelta(days=48)  # Monday
+    carnaval_tuesday = e - timedelta(days=47)  # Tuesday (Mardi Gras)
+    return {
+        date(year, 1, 1),  # Confraternização Universal (New Year's)
+        carnaval_monday,  # Carnaval (segunda-feira)
+        carnaval_tuesday,  # Carnaval (terça-feira)
+        e - timedelta(days=2),  # Paixão de Cristo (Good Friday)
+        date(year, 4, 21),  # Tiradentes
+        date(year, 5, 1),  # Dia do Trabalho
+        date(year, 9, 7),  # Independência do Brasil
+        date(year, 10, 12),  # Nossa Senhora Aparecida
+        date(year, 11, 2),  # Finados
+        date(year, 11, 15),  # Proclamação da República
+        date(year, 11, 20),  # Consciência Negra (national since 2023)
+        date(year, 12, 25),  # Natal
+    }
+
+
+def _holidays_ru(year: int) -> set[date]:
+    """Russian federal non-working days (Labour Code Art. 112)."""
+    return {
+        # New Year holidays (1–8 January)
+        date(year, 1, 1),
+        date(year, 1, 2),
+        date(year, 1, 3),
+        date(year, 1, 4),
+        date(year, 1, 5),
+        date(year, 1, 6),
+        date(year, 1, 7),  # Orthodox Christmas
+        date(year, 1, 8),
+        date(year, 2, 23),  # Defender of the Fatherland Day
+        date(year, 3, 8),  # International Women's Day
+        date(year, 5, 1),  # Spring and Labour Day
+        date(year, 5, 9),  # Victory Day
+        date(year, 6, 12),  # Russia Day
+        date(year, 11, 4),  # День народного единства
+    }
+
+
+def _holidays_tr(year: int) -> set[date]:
+    """Türkiye public holidays (Law 2429, Art. 1 and 2), whole days only.
+
+    Seven fixed days: 1 January, 23 April, 1 May, 19 May, 15 July (added by
+    Law 6752 in 2016), 30 August and 29 October. Ramazan Bayramı adds three
+    days and Kurban Bayramı four, on the dates in ``_TR_BAYRAMS``. A year
+    outside that table logs a warning and returns the fixed days alone, which
+    :func:`resolve_holidays` reports as a fallback on the year axis.
+
+    Three things the law provides are not in the set, and all three err the
+    same way: a day that is partly or wholly off is counted as a working day,
+    so a derived deadline can land earlier than the real one, never later.
+
+    * The half days. The eve (arife) of each feast and 28 October are
+      holidays from 13:00. A set of whole days cannot hold half a day, and
+      counting them as full holidays would err the other way on a site that
+      works the morning.
+    * The Saturday rule of Art. 2: where a holiday ends on a Friday evening,
+      the following Saturday is a full holiday for public offices. It does
+      not move a Monday to Friday calendar and does not bind private sites.
+    * Administrative leave. The government regularly bridges a feast to the
+      nearest weekend by circular, for public staff, announced weeks ahead.
+      It is not derivable.
+
+    Source: https://www.mevzuat.gov.tr/MevzuatMetin/1.5.2429.pdf
+    """
+    holidays: set[date] = {
+        date(year, 1, 1),  # Yılbaşı
+        date(year, 4, 23),  # Ulusal Egemenlik ve Çocuk Bayramı
+        date(year, 5, 1),  # Emek ve Dayanışma Günü
+        date(year, 5, 19),  # Atatürk'ü Anma, Gençlik ve Spor Bayramı
+        date(year, 7, 15),  # Demokrasi ve Millî Birlik Günü
+        date(year, 8, 30),  # Zafer Bayramı
+        date(year, 10, 29),  # Cumhuriyet Bayramı
+    }
+    bayrams = _TR_BAYRAMS.get(year)
+    if bayrams is None:
+        logger.warning(
+            "No curated Turkish feast dates for %d (table covers %d-%d); Ramazan Bayramı and "
+            "Kurban Bayramı are omitted and only the %d fixed days are returned",
+            year,
+            min(_TR_BAYRAMS),
+            max(_TR_BAYRAMS),
+            len(holidays),
+        )
+        return holidays
+
+    for name, length in (("ramazan", _TR_RAMAZAN_DAYS), ("kurban", _TR_KURBAN_DAYS)):
+        for month, day in bayrams[name]:
+            first = date(year, month, day)
+            holidays.update(first + timedelta(days=offset) for offset in range(length))
+    # A feast that starts in the last days of December runs into January. No
+    # year of the table does, and this keeps the answer to the year asked for
+    # if a later row ever does.
+    return {d for d in holidays if d.year == year}
+
+
+# Hungary: Good Friday became a public holiday by 2017. évi XIII. törvény 4. §,
+# in force from 24 March 2017, so 14 April 2017 was the first one observed.
+_HU_GOOD_FRIDAY_FIRST_YEAR = 2017
+
+
+def _holidays_hu(year: int) -> set[date]:
+    """Hungarian public holidays (Labour Code, 2012. évi I. törvény, 102. § (1)).
+
+    The eleven days the section names: 1 January, 15 March, Good Friday, Easter
+    Monday, 1 May, Whit Monday, 20 August, 23 October, 1 November and 25 and 26
+    December. Good Friday is returned from 2017, the year it was added; the
+    rest of the roster is the one in force today, applied whole to whatever
+    year is asked for, not the roster as the law stood in an earlier year.
+
+    Easter Sunday and Whit Sunday are not in the set. 102. § (4) applies the
+    rostering rules of a public holiday to them, and they are Sundays, so
+    leaving them out moves no working day on a Monday to Friday week.
+
+    A holiday that falls on a Saturday or Sunday is not moved to a weekday.
+    Hungarian law has no substitute day.
+
+    Known limitation, and the reason this set is not enough to schedule on:
+    Hungary moves working days. Under 102. § (5) the minister decrees each
+    year, by 31 October of the year before, a rearrangement around the public
+    holidays for employers on the general work schedule: a Friday or Monday
+    beside a holiday becomes a rest day and a named Saturday of the same month
+    becomes a working day. For 2025 the decree made 17 May, 18 October and 13
+    December working Saturdays and 2 May, 24 October and 24 December rest
+    days; for 2026 it made 10 January, 8 August and 12 December working
+    Saturdays and 2 January, 21 August and 24 December rest days. It is not
+    derivable, and it is not modelled here.
+
+    It cannot be modelled in this engine as it stands. :func:`is_working_day`
+    subtracts: a day is worked when its weekday is in the week and it is not
+    in this set. A rest day could be added to the set, but nothing can turn a
+    Saturday into a working day, and adding one half of a swap without the
+    other would count three working days a year fewer than there are. So
+    neither half is here, the same choice ``_holidays_cn`` makes, and the
+    omission has no safe direction for the same reason: a span that covers
+    the rest day and not its Saturday overcounts working days and lands a
+    deadline early, a span that covers the Saturday alone undercounts. Over a
+    month the two cancel, since the law keeps a swap inside one calendar
+    month.
+
+    Sources, read 2026-10-10 in the text consolidated to 2026-10-01:
+    https://njt.jog.gov.hu/jogszabaly/2012-1-00-00 (102. §)
+    https://njt.jog.gov.hu/jogszabaly/2024-11-20-2X (11/2024. (IV. 8.) NGM
+    rendelet, the 2025 rearrangement)
+    https://njt.jog.gov.hu/jogszabaly/2025-10-20-2X (10/2025. (IV. 30.) NGM
+    rendelet, the 2026 rearrangement)
+    No decree for 2027 was found on that date.
+    """
+    e = easter(year)
+    holidays: set[date] = {
+        date(year, 1, 1),  # Újév
+        date(year, 3, 15),  # Nemzeti ünnep, az 1848-as forradalom
+        e + timedelta(days=1),  # Húsvéthétfő
+        date(year, 5, 1),  # A munka ünnepe
+        e + timedelta(days=50),  # Pünkösdhétfő
+        date(year, 8, 20),  # Az államalapítás ünnepe
+        date(year, 10, 23),  # Nemzeti ünnep, az 1956-os forradalom
+        date(year, 11, 1),  # Mindenszentek
+        date(year, 12, 25),  # Karácsony
+        date(year, 12, 26),  # Karácsony másnapja
+    }
+    if year >= _HU_GOOD_FRIDAY_FIRST_YEAR:
+        holidays.add(e - timedelta(days=2))  # Nagypéntek
+    return holidays
+
+
+# Poland: Epiphany became a public holiday again from 2011 (the 2010 amendment
+# of the 1951 act), and Christmas Eve (Wigilia) became one from 2025 (the 2024
+# amendment). Each is returned from its first year, so a span that crosses the
+# change counts the days as they were.
+_PL_EPIPHANY_FIRST_YEAR = 2011
+_PL_WIGILIA_FIRST_YEAR = 2025
+
+
+def _holidays_pl(year: int) -> set[date]:
+    """Polish public holidays (ustawa z 18 stycznia 1951 r. o dniach wolnych od pracy, art. 1).
+
+    Fixed days: 1 January, 6 January (from 2011), 1 May, 3 May, 15 August,
+    1 November, 11 November, 24 December (from 2025), 25 and 26 December.
+    Movable days, all from Western Easter: Easter Sunday, Easter Monday,
+    Pentecost Sunday (Zielone Świątki, Easter + 49) and Corpus Christi (Boże
+    Ciało, Easter + 60). Easter Sunday and Pentecost Sunday are statutory days
+    and are kept in the set; they are Sundays, so they move no working day on a
+    Monday to Friday week.
+
+    A holiday on a Saturday or Sunday is not moved to another date. A Saturday
+    holiday does give each employee another day off, which the employer
+    chooses (Kodeks pracy art. 130 § 2); that day is not computable and is
+    therefore not in this set, see :func:`holidays_owing_a_day_off`.
+
+    The rest of the roster is the one in force today, applied whole to earlier
+    years, except Epiphany and Christmas Eve, which are returned only from the
+    year they were added. The earlier roster changes (before 2011) are not
+    modelled.
+
+    Sources (secondary texts quoting the act, read 2026-10-19; the statute
+    portal did not load):
+    https://www.infor.pl/prawo/nowosci-prawne/6794562,wigilia-2025-r-wolna-od-pracy-sklepy-otwarte-przez-trzy-niedziele-na-pracownika-dwie-niedziele-jak-dzis.html
+    https://forsal.pl/praca/aktualnosci/artykuly/11225415,dni-wolne-od-pracy-2026-i-2027-kalendarz-swiat-dlugie-weekendy-i-dn.html
+    The 2026 and 2027 rosters published there equal what this function returns.
+    """
+    e = easter(year)
+    holidays: set[date] = {
+        date(year, 1, 1),  # Nowy Rok
+        e,  # Wielkanoc
+        e + timedelta(days=1),  # Poniedziałek Wielkanocny
+        date(year, 5, 1),  # Święto Państwowe (Święto Pracy)
+        date(year, 5, 3),  # Święto Narodowe Trzeciego Maja
+        e + timedelta(days=49),  # Zielone Świątki
+        e + timedelta(days=60),  # Boże Ciało
+        date(year, 8, 15),  # Wniebowzięcie Najświętszej Maryi Panny
+        date(year, 11, 1),  # Wszystkich Świętych
+        date(year, 11, 11),  # Narodowe Święto Niepodległości
+        date(year, 12, 25),  # Boże Narodzenie, pierwszy dzień
+        date(year, 12, 26),  # Boże Narodzenie, drugi dzień
+    }
+    if year >= _PL_EPIPHANY_FIRST_YEAR:
+        holidays.add(date(year, 1, 6))  # Święto Trzech Króli
+    if year >= _PL_WIGILIA_FIRST_YEAR:
+        holidays.add(date(year, 12, 24))  # Wigilia Bożego Narodzenia
+    return holidays
+
+
+#: Countries whose labour law gives a day off in exchange for a public holiday
+#: that falls on a Saturday, and on what terms. A rule, not a date: the law
+#: obliges the employer to designate the day, so the engine can say which
+#: holidays owe one but never which day it is.
+_SATURDAY_HOLIDAY_COMPENSATION: dict[str, dict[str, str]] = {
+    "PL": {
+        "statute": "Kodeks pracy (ustawa z 26 czerwca 1974 r.), art. 130 § 2",
+        "rule": "employer_designates_day_in_settlement_period",
+        "detail": (
+            "Each public holiday falling on a day other than Sunday reduces working time by eight hours; "
+            "on a five-day Monday to Friday week that is a Saturday holiday, and the employer must give "
+            "another day off within the same settlement period. A Sunday holiday gives nothing."
+        ),
+        "source_url": (
+            "https://www.gazetaprawna.pl/praca/prawo-pracy/artykuly/11283996,jak-zyskac-az-28-dni-wolnego-"
+            "biorac-tylko-8-dni-urlopu-kalendarz-na-2027-rok-to-prawdziwy-hit.html"
+        ),
+        "read_date": "2026-10-19",
+    },
+}
+
+
+def saturday_holiday_compensation_rule(country_code: str) -> dict[str, str] | None:
+    """The Saturday-holiday compensation rule of a country, or ``None`` if it has none."""
+    rule = _SATURDAY_HOLIDAY_COMPENSATION.get((country_code or "").strip().upper())
+    return dict(rule) if rule else None
+
+
+def holidays_owing_a_day_off(country_code: str, year: int) -> list[date]:
+    """Public holidays of ``year`` that oblige the employer to give another day off.
+
+    In Poland a holiday on a Saturday reduces working time, and the employer
+    designates a replacement day off in the same settlement period (Kodeks
+    pracy art. 130 § 2). Which day that is belongs to the employer, so it is not
+    added to the holiday set: :func:`is_working_day` would otherwise remove a
+    day the law does not name, and a schedule would move for a choice nobody
+    has made. What the engine can say, and says here, is how many such days are
+    owed and for which holidays, so a planner can place them.
+
+    Returns:
+        The Saturday holidays in date order. Empty for a country without such a
+        rule, and for a year in which no holiday falls on a Saturday.
+    """
+    code = (country_code or "").strip().upper()
+    if code not in _SATURDAY_HOLIDAY_COMPENSATION:
+        return []
+    return sorted(d for d in _get_holidays(code, year) if d.weekday() == _SATURDAY_INDEX)
+
+
+def _holidays_es(year: int) -> set[date]:
+    """Spain's national holidays that no autonomous community may replace.
+
+    Nine days, from Real Decreto 2001/1983, art. 45.1 (a), (b) and (c): 12
+    October and 6 December (civic); 1 January, 1 May and 25 December (Estatuto
+    de los Trabajadores, art. 37.2); 15 August, 1 November, 8 December and
+    Good Friday (the 1979 agreement with the Holy See).
+
+    This is NOT the calendar of any place in Spain, and it is short on
+    purpose. A Spanish worker has up to fourteen holidays a year (Estatuto,
+    art. 37.2), and this function returns the nine that are the same
+    everywhere. Left out, because each depends on where the site is:
+
+    * Art. 45.1 (d): Holy Thursday, 6 January, and 19 March or 25 July. They
+      are national days, but art. 45.3 lets each community replace them with
+      days of its own, and several do.
+    * The Monday after a national holiday that falls on a Sunday. Art. 45.2
+      moves the rest to that Monday, and art. 45.3 lets a community put a
+      traditional day of its own in its place. The Sunday itself stays in the
+      set, where it changes nothing on a Monday to Friday week; the Monday is
+      not added. In 2026 that is 2 November and 7 December.
+    * The days each community declares for itself, and the two local days
+      each municipality sets, published in regional and provincial bulletins.
+
+    So the set errs one way: a day that is a holiday on site can be counted as
+    worked, and a derived deadline can land earlier than the real one, never
+    later. A project needing the true calendar of its site sets its own.
+
+    The yearly resolution of the Dirección General de Trabajo lists every
+    community's days and marks these nine as "Fiesta Nacional no sustituible"
+    in the years they fall on a weekday: eight in 2025 (12 October was a
+    Sunday) and seven in 2026 (1 November and 6 December are Sundays).
+
+    Sources, read 2026-10-10:
+    https://www.boe.es/buscar/act.php?id=BOE-A-1983-20906 (art. 45)
+    https://www.boe.es/buscar/act.php?id=BOE-A-2015-11430 (art. 37.2)
+    https://www.boe.es/diario_boe/txt.php?id=BOE-A-2024-21316 (2025)
+    https://www.boe.es/diario_boe/txt.php?id=BOE-A-2025-21667 (2026)
+    The resolution for 2027 was not yet published on that date.
+    """
+    e = easter(year)
+    return {
+        date(year, 1, 1),  # Año Nuevo
+        e - timedelta(days=2),  # Viernes Santo
+        date(year, 5, 1),  # Fiesta del Trabajo
+        date(year, 8, 15),  # Asunción de la Virgen
+        date(year, 10, 12),  # Fiesta Nacional de España
+        date(year, 11, 1),  # Todos los Santos
+        date(year, 12, 6),  # Día de la Constitución Española
+        date(year, 12, 8),  # Inmaculada Concepción
+        date(year, 12, 25),  # Natividad del Señor
+    }
+
+
+def _holidays_it(year: int) -> set[date]:
+    """Italy's national holidays (Law 260/1949 as amended, Law 54/1977, DPR 792/1985).
+
+    Easter Sunday is listed because the shipped Italian roster lists it; it
+    is a Sunday and changes no working day. Patron saints' days are local
+    and left out, so a site in Rome or Milan has one more day off than this
+    returns.
+
+    4 October, the feast of San Francesco d'Assisi, is a public holiday from
+    2026. Legge 8 ottobre 2025, n. 151 (Gazzetta Ufficiale n. 236 of 10
+    October 2025) adds it to the list of giorni festivi in art. 2 of Law
+    260/1949, the same list that carries 25 April and 1 May, and the act
+    enters into force on 1 January 2026. Text:
+    https://www.normattiva.it/eli/id/2025/10/10/25G00153/ORIGINAL
+    """
+    e = easter(year)
+    days = {
+        date(year, 1, 1),  # Capodanno
+        date(year, 1, 6),  # Epifania
+        e,  # Pasqua
+        e + timedelta(days=1),  # Lunedi dell'Angelo
+        date(year, 4, 25),  # Festa della Liberazione
+        date(year, 5, 1),  # Festa dei Lavoratori
+        date(year, 6, 2),  # Festa della Repubblica
+        date(year, 8, 15),  # Ferragosto
+        date(year, 11, 1),  # Tutti i Santi
+        date(year, 12, 8),  # Immacolata Concezione
+        date(year, 12, 25),  # Natale
+        date(year, 12, 26),  # Santo Stefano
+    }
+    if year >= 2026:
+        days.add(date(year, 10, 4))  # San Francesco d'Assisi
+    return days
+
+
+def _holidays_ng(year: int) -> set[date]:
+    """Nigerian federal public holidays (Public Holidays Act, Cap. P40, LFN 2004).
+
+    Six of the nine base dates in the Act's own Schedule are fixed or
+    Easter-relative: New Year's Day, Good Friday, Easter Monday, Workers' Day
+    (1 May), National Day (1 October) and Christmas Day. The remaining three -
+    Eid al-Fitr, Eid al-Kabir (Eid al-Adha) and the Prophet's Birthday - are
+    Minister-declared under the Act rather than fixed by statute, so this
+    function converts them from the Islamic calendar the same way
+    ``_gcc_eids`` does for the Gulf states. The Act leaves duration to that
+    declaration entirely, and a single converted day is what this function
+    asserts, which is a fact about the statute rather than a hedge: unlike
+    ``_gcc_eids``, no multi-day span is applied here, because there is no
+    sourced convention to apply one from.
+
+    Two dates are current practice but are not in the base 1979 Schedule text
+    this function's sourcing could retrieve directly. Both rest on
+    corroboration from multiple independent secondary sources rather than on
+    a primary instrument read in full:
+
+    - Boxing Day, 26 December, observed alongside Christmas Day.
+    - Democracy Day. Originally 29 May from 1999, moved to 12 June by
+      presidential proclamation in 2018 to mark the anniversary of the
+      annulled 12 June 1993 election, and understood to have been added to
+      the Schedule by the Public Holidays (Amendment) Act 2019. That
+      amendment's own text could not be retrieved for this function - its
+      source no longer resolves - so 12 June rests on corroboration, not on
+      the amending instrument having been read directly. A future reader with
+      access to the 2019 amendment's text can close this gap.
+
+    Section 5 of the Act is unusual among the countries in this file: a
+    single holiday falling on a Saturday or Sunday gets no substitute day by
+    default. Adjacent-pair rules exist in the Act for a Friday+Saturday,
+    Saturday+Sunday or Sunday+Monday holiday combination, and ad hoc
+    substitute days can be declared by the President or a state Governor
+    under Section 2, but neither is computed here. Short is the direction
+    that overcounts working days, which pulls a derived deadline earlier -
+    the same direction of error ``_holidays_bh`` names for its own
+    Minister-declared days.
+
+    Children's Day, 27 May, is deliberately excluded. It is a holiday for
+    primary and secondary school pupils, not a non-working day under the
+    Public Holidays Act, and answers a different question than this function
+    does.
+    """
+    days: set[date] = set()
+    days.update(_hijri_dates_in_gregorian_year(10, 1, year))  # Eid al-Fitr, 1 Shawwal
+    days.update(_hijri_dates_in_gregorian_year(12, 10, year))  # Eid al-Kabir, 10 Dhu al-Hijjah
+    days.update(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year))
+    e = easter(year)
+    days.update(
+        {
+            date(year, 1, 1),  # New Year's Day
+            e - timedelta(days=2),  # Good Friday
+            e + timedelta(days=1),  # Easter Monday
+            date(year, 5, 1),  # Workers' Day
+            date(year, 6, 12),  # Democracy Day (moved from 29 May in 2018; see docstring)
+            date(year, 10, 1),  # National Day (Independence Day)
+            date(year, 12, 25),  # Christmas Day
+            date(year, 12, 26),  # Boxing Day (see docstring)
+        }
+    )
+    return days
+
+
+def _holidays_bg(year: int) -> set[date]:
+    """Bulgarian public holidays (Labour Code, Art. 154).
+
+    Art. 154(1) lists the holidays; the four Easter-relative ones (Good
+    Friday, Holy Saturday, Easter Sunday, Easter Monday) always include a
+    Saturday and a Sunday by construction, since Easter Sunday is by
+    definition a Sunday.
+
+    Art. 154(2) moves every other holiday that falls on a Saturday or Sunday
+    forward: the first working day when one weekend day is occupied, the
+    first two working days when both are. The Easter block is explicitly
+    carved out of this ("with the exception of the Easter holidays") -
+    applying the rule to it regardless would add two non-working days after
+    every single Easter, every year, since two of the four days are on a
+    weekend by definition.
+
+    The substitute for each occupied date is found the same way
+    ``_holidays_ca`` finds one: scan forward, skipping weekend days and days
+    already claimed. Processing the fixed holidays in calendar order and
+    letting each substitute chain off the last is what turns "one weekend day
+    occupied" into one added day and "two occupied" into two, without
+    special-casing the pair: 24-26 December in a year where 24 December is a
+    Saturday puts Christmas Eve and Christmas Day's substitutes on 27 and 28
+    December, after Boxing Day, which is already a Monday holiday.
+    """
+    e = orthodox_easter(year)  # Bulgaria keeps the Orthodox Easter
+    easter_block = {
+        e - timedelta(days=2),  # Good Friday
+        e - timedelta(days=1),  # Holy Saturday
+        e,  # Easter Sunday
+        e + timedelta(days=1),  # Easter Monday
+    }
+
+    fixed = [
+        date(year, 1, 1),  # New Year's Day
+        date(year, 3, 3),  # Liberation Day
+        date(year, 5, 1),  # Labour Day
+        date(year, 5, 6),  # St George's Day, Day of the Bulgarian Army
+        date(year, 5, 24),  # Day of Bulgarian Education and Culture and of Slavonic Literature
+        date(year, 9, 6),  # Unification Day
+        date(year, 9, 22),  # Independence Day
+        date(year, 12, 24),  # Christmas Eve
+        date(year, 12, 25),  # Christmas Day
+        date(year, 12, 26),  # Second Day of Christmas
+    ]
+
+    days: set[date] = set(easter_block) | set(fixed)
+
+    for holiday in fixed:
+        if holiday.weekday() < _SATURDAY_INDEX:
+            continue
+        observed = holiday + timedelta(days=1)
+        while observed.weekday() >= _SATURDAY_INDEX or observed in days:
+            observed += timedelta(days=1)
+        days.add(observed)
+
+    return days
+
+
+# ── Country-neutral computations used by Egypt ───────────────────────────────
+
+
+def orthodox_easter(year: int) -> date:
+    """Orthodox Easter Sunday, as a Gregorian date.
+
+    The Julian computus, the one the Eastern churches keep, expressed in the
+    civil calendar. It coincides with Western Easter in some years (2025) and
+    falls one or five weeks after it in the others (2026, 2024). Delegates to
+    ``dateutil``'s Orthodox method, which is the same library the Western
+    Easter above comes from; the tests hold it to published dates rather than
+    to itself.
+    """
+    return easter(year, EASTER_ORTHODOX)
+
+
+def julian_christmas(year: int) -> date:
+    """25 December of the Julian calendar, falling in January of ``year``.
+
+    The Julian calendar is behind by one more day each Gregorian century year
+    that is not a leap year. For 25 December Julian of ``year - 1`` that gap is
+    13 days from 1901 to 2100 and 14 from 2101, so the feast is 7 January now
+    and 8 January from 2101. Computed rather than written as 7 January, so the
+    function cannot outlive its own constant.
+    """
+    previous = year - 1
+    gap = previous // 100 - previous // 400 - 2
+    return date(previous, 12, 25) + timedelta(days=gap)
+
+
+#: Labour Law 14/2025 and the holiday decree issued under it took effect on
+#: this day. A year that begins earlier is answered with this roster and says
+#: so on the year axis (see ``_ROSTER_EFFECTIVE``).
+_EG_ROSTER_EFFECTIVE = date(2025, 9, 1)
+
+
+def _holidays_eg_statutory(year: int) -> dict[str, set[date]]:
+    """Egyptian paid public holidays before any announced move, by holiday key.
+
+    Ministerial Decree 294/2025, issued under Labour Law 14/2025:
+
+    * Islamic: Hijri New Year (1 Muharram), the Prophet's Birthday (12 Rabi
+      al-Awwal), Eid al-Fitr (1 and 2 Shawwal), and Eid al-Adha held as Arafat
+      Day with the first two days of the feast (9 to 11 Dhu al-Hijjah); the
+      spans are Egypt's row in ``_EID_SPANS``.
+    * Coptic Christmas, 25 December Julian, which is 7 January.
+    * Sham el-Nessim, the Monday after Orthodox Easter.
+    * Fixed civil days: 25 January (Revolution and Police Day), 25 April (Sinai
+      Liberation), 1 May (Labour Day), 30 June and 23 July (Revolution days),
+      6 October (Armed Forces Day).
+
+    The keys are what a row in ``country_data/holiday_observances.json`` names
+    when the government moves a holiday or the moon sighting places a feast on
+    another day. Islamic dates here come from the ``hijridate`` converter, which
+    follows the Umm al-Qura tables; Egypt announces its own after the sighting,
+    and an announced date that differs is a row, not an edit here.
+    """
+    return {
+        "coptic_christmas": {julian_christmas(year)},
+        "revolution_25_january": {date(year, 1, 25)},
+        "sham_el_nessim": {orthodox_easter(year) + timedelta(days=1)},
+        "sinai_liberation_day": {date(year, 4, 25)},
+        "labour_day": {date(year, 5, 1)},
+        "revolution_30_june": {date(year, 6, 30)},
+        "revolution_23_july": {date(year, 7, 23)},
+        "armed_forces_day": {date(year, 10, 6)},
+        "hijri_new_year": set(_hijri_dates_in_gregorian_year(*_HIJRI_NEW_YEAR, year)),
+        "prophets_birthday": set(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year)),
+        **_eid_days("EG", year),
+    }
+
+
+def _holidays_eg(year: int) -> set[date]:
+    """Egyptian public holidays as observed: the statutory days with announced moves applied.
+
+    The working week is Sunday to Thursday: see ``_WORKING_WEEK``.
+
+    Since 2020 the government moves most midweek national days to the Thursday,
+    and Decree 294/2025 lets the Labour Minister replace any holiday with a day
+    at the start or end of the working week. Eid al-Fitr, Eid al-Adha and Coptic
+    Christmas are not moved in practice. Whether a holiday moves in a given year
+    is a decree, so it is data and never computed here: a year with no recorded
+    rows answers the statutory days. Public-sector Eid extensions are not
+    applied, because they do not bind private employers.
+    """
+    return apply_observances("EG", year, _holidays_eg_statutory(year))
+
+
+def _holidays_pk_statutory(year: int) -> dict[str, set[date]]:
+    """Pakistan's federal public holidays before any announced move, by holiday key.
+
+    From the Cabinet Division's yearly circular on public and optional holidays
+    (2025 circular No. 10-01/2024-Min-II of 23 December 2024; the 2026 list was
+    read in press coverage of the circular of January 2026):
+
+    * Fixed days: Kashmir Solidarity Day (5 February), Pakistan Day (23 March),
+      Labour Day (1 May), Youm-e-Takbeer (28 May), Independence Day (14
+      August), Allama Iqbal Day (9 November) and Quaid-e-Azam Day (25
+      December).
+    * Islamic: Eid-ul-Fitr and Eid-ul-Azha (three days each, Pakistan's row in
+      ``_EID_SPANS``), Ashura (9 and 10 Muharram) and Eid Milad-un-Nabi (12
+      Rabi al-Awwal).
+
+    Left out on purpose: the optional holidays of minorities (for example 26
+    December), provincial and local days, and the bank holidays (1 January, 1
+    July). The Islamic days here come from the ``hijridate`` converter, which
+    follows Umm al-Qura; Pakistan's own moon committee often places a day one
+    or two days later, and the Cabinet Division announces the dates. An
+    announced date that differs is a row in ``holiday_observances.json``, not
+    an edit here.
+    """
+    return {
+        "kashmir_day": {date(year, 2, 5)},
+        "pakistan_day": {date(year, 3, 23)},
+        "labour_day": {date(year, 5, 1)},
+        "youm_e_takbeer": {date(year, 5, 28)},
+        "independence_day": {date(year, 8, 14)},
+        "iqbal_day": {date(year, 11, 9)},
+        "quaid_e_azam_day": {date(year, 12, 25)},
+        "ashura": _hijri_span(1, 9, 2, year),
+        "eid_milad_un_nabi": set(_hijri_dates_in_gregorian_year(*_PROPHETS_BIRTHDAY, year)),
+        **_eid_days("PK", year),
+    }
+
+
+def _holidays_pk(year: int) -> set[date]:
+    """Pakistan's federal public holidays as observed: the statutory days with announced moves applied.
+
+    The working week is Monday to Friday, the federal office week; a site that
+    works Saturday sets its own calendar: see ``_WORKING_WEEK``.
+    """
+    return apply_observances("PK", year, _holidays_pk_statutory(year))
+
+
+# ── Working-week definitions (date.weekday(): 0=Mon, 6=Sun) ──────────────────
+#
+# Standard Mon–Fri work week: {0, 1, 2, 3, 4}
+# GCC Sun–Thu work week: {6, 0, 1, 2, 3}
+#
+# This is not the ISO numbering, which starts at Monday = 1. The platform holds
+# both conventions at once: i18n_foundation's ``WorkCalendar.work_days`` counts
+# Monday = 1 through Sunday = 7, and this table counts Monday = 0 through
+# Sunday = 6, because ``is_working_day`` below asks ``date.weekday()``. Reaching
+# for ``isoweekday()`` against this table shifts every day by one and pushes
+# Sunday out of the set entirely. Calling both of them ISO is the one word that
+# makes the two tables look interchangeable when they are not, and a Saudi row
+# written under the wrong one has already shipped a four-day week once.
+# ``tests/unit/test_work_calendar_weekdays_are_mon0.py`` guards the data. This
+# comment guards the reader.
+
+_WORKING_WEEK: dict[str, frozenset[int]] = {
+    "DE": frozenset({0, 1, 2, 3, 4}),
+    "AT": frozenset({0, 1, 2, 3, 4}),
+    "CH": frozenset({0, 1, 2, 3, 4}),
+    "GB": frozenset({0, 1, 2, 3, 4}),
+    "UK": frozenset({0, 1, 2, 3, 4}),
+    "US": frozenset({0, 1, 2, 3, 4}),
+    "CA": frozenset({0, 1, 2, 3, 4}),
+    "IN": frozenset({0, 1, 2, 3, 4}),
+    "BR": frozenset({0, 1, 2, 3, 4}),
+    "RU": frozenset({0, 1, 2, 3, 4}),
+    "JP": frozenset({0, 1, 2, 3, 4}),
+    "CN": frozenset({0, 1, 2, 3, 4}),
+    # The UAE moved from Sunday-Thursday to Monday-Friday in 2022, with a half-day
+    # Friday for the public sector. It is the only GCC state to have done so, so it
+    # sits here rather than in the block below.
+    "AE": frozenset({0, 1, 2, 3, 4}),
+    # Middle East - Sunday through Thursday
+    "SA": frozenset({6, 0, 1, 2, 3}),
+    "QA": frozenset({6, 0, 1, 2, 3}),
+    "KW": frozenset({6, 0, 1, 2, 3}),
+    "BH": frozenset({6, 0, 1, 2, 3}),
+    "OM": frozenset({6, 0, 1, 2, 3}),
+    # Egypt: Labour Law 14/2025 caps the day at 8 hours and the week at 48 and
+    # gives at least 24 hours of weekly rest, Friday by custom. No statute names
+    # Saturday; Sunday to Thursday is the government week and the common office
+    # week. A site working Saturday to Thursday sets its own calendar.
+    "EG": frozenset({6, 0, 1, 2, 3}),
+    # Pakistan: the Cabinet Division circulars distinguish offices that observe a
+    # five-day week from those on six days (the Eid-ul-Azha 2025 release names
+    # both), and the federal secretariat works Monday to Friday. Construction
+    # sites commonly work Saturday as well; a site sets its own calendar.
+    "PK": frozenset({0, 1, 2, 3, 4}),
+    # Bulgaria: Labour Code Art. 136, 40 hours a week, 8 hours a day, a
+    # direct statutory maximum rather than a convention.
+    "BG": frozenset({0, 1, 2, 3, 4}),
+    # Nigeria: Labour Act s.13 does not fix an economy-wide week; hours are
+    # left to agreement, collective bargaining or an industrial wages board.
+    # Monday-Friday here is the near-universal practical convention, not a
+    # statute naming these five days the way Bulgaria's does.
+    "NG": frozenset({0, 1, 2, 3, 4}),
+    # Türkiye: İş Kanunu 4857 Art. 63 caps the week at 45 hours and leaves the
+    # days to the contract; Art. 46 gives one rest day in seven and Law 2429
+    # Art. 3 names Sunday. So no statute makes Saturday a day off. Monday to
+    # Friday is the office convention and the one the shipped Turkish calendar
+    # uses; a site that works Saturdays sets its own calendar.
+    # https://www.mevzuat.gov.tr/MevzuatMetin/1.5.4857.pdf
+    "TR": frozenset({0, 1, 2, 3, 4}),
+    # Hungary: the Labour Code names the days. 97. § (2) defines the general
+    # work schedule as five days a week, Monday to Friday, and 92. § (1) sets
+    # the full day at eight hours. The yearly decree that turns a named
+    # Saturday into a working day is not expressible here (see _holidays_hu).
+    # https://njt.jog.gov.hu/jogszabaly/2012-1-00-00
+    "HU": frozenset({0, 1, 2, 3, 4}),
+    # Poland: Kodeks pracy art. 129 § 1, eight hours a day and an average of 40
+    # hours in an average five-day working week. The statute fixes five days,
+    # not which five; Monday to Friday is the common schedule and the one the
+    # shipped Polish calendar uses. A site that works Saturdays sets its own.
+    "PL": frozenset({0, 1, 2, 3, 4}),
+    # Spain: Estatuto de los Trabajadores art. 34.1 caps the week at 40 hours
+    # averaged over the year and art. 37.1 gives a rest of a day and a half,
+    # as a general rule Saturday afternoon or Monday morning and the whole of
+    # Sunday. So the statute names Sunday and half of Saturday, not a five-day
+    # week. Monday to Friday is the convention, the one the shipped Spanish
+    # calendar and the planning table use; a site that works Saturday morning
+    # sets its own calendar.
+    # https://www.boe.es/buscar/act.php?id=BOE-A-2015-11430
+    "ES": frozenset({0, 1, 2, 3, 4}),
+    "IT": frozenset({0, 1, 2, 3, 4}),
+    # France: 35 hours a week by law (Code du travail L3121-27), worked Monday
+    # to Friday at seven hours in the building trades and in the shipped
+    # French calendar. Sunday rest is the statute (L3132-3); Saturday is the
+    # convention, and a site working Saturdays sets its own calendar.
+    "FR": frozenset({0, 1, 2, 3, 4}),
+}
+
+_DEFAULT_WORKING_WEEK: frozenset[int] = frozenset({0, 1, 2, 3, 4})
+
+_HOLIDAY_FUNCS: dict[str, Any] = {
+    "DE": _holidays_de,
+    "AT": _holidays_de,  # Austrian federal holidays closely mirror Germany's
+    "CH": lambda y: {date(y, 1, 1), date(y, 8, 1), date(y, 12, 25)},  # simplified
+    "GB": _holidays_uk,
+    "UK": _holidays_uk,
+    "US": _holidays_us,
+    "CA": _holidays_ca,
+    "AE": _holidays_ae,
+    "SA": _holidays_sa,
+    "QA": _holidays_qa,
+    "KW": _holidays_kw,
+    "BH": _holidays_bh,
+    "OM": _holidays_om,
+    "CN": _holidays_cn,
+    "IN": _holidays_in,
+    "JP": _holidays_jp,
+    "BR": _holidays_br,
+    "RU": _holidays_ru,
+    "NG": _holidays_ng,
+    "BG": _holidays_bg,
+    "TR": _holidays_tr,
+    "HU": _holidays_hu,
+    "PL": _holidays_pl,
+    "ES": _holidays_es,
+    "IT": _holidays_it,
+    "EG": _holidays_eg,
+    "PK": _holidays_pk,
+    "FR": _holidays_fr,
+}
+
+
+# ── Cache (year-scoped per country) ───────────────────────────────────────────
+
+_holiday_cache: dict[tuple[str, int], dict[str, Any]] = {}
+
+
+#: The axes a holiday answer is resolved on. They fail independently - a fully
+#: covered country can still be asked for a year outside its curated lunisolar
+#: table - so they are reported separately and a caller wanting a single verdict
+#: asks :func:`app.core.provenance.weakest` rather than picking one.
+AXIS_JURISDICTION = "jurisdiction"
+AXIS_EFFECTIVE_YEAR = "effective_year"
+AXIS_HOLIDAY_EXTENT = "holiday_extent"
+
+#: What answers when no country table does: a working week with no public
+#: holidays at all. Named rather than left blank because an uncovered country is
+#: not ``UNAVAILABLE``. It has an answer, and the answer is simply not its own.
+#:
+#: Named for what the caller is holding rather than for the slot it fills. An
+#: earlier spelling of this was ``INTERNATIONAL``, which named a category: it
+#: would have been equally true of every international default in the tree, and
+#: it asserted a standard behind what is really an absence. There is no
+#: international convention that nobody has public holidays.
+NO_PUBLIC_HOLIDAYS = "NO_PUBLIC_HOLIDAYS"
+
+#: What answers for a year outside a curated lunisolar table: that country's
+#: fixed Gregorian days, without the moveable feasts.
+GREGORIAN_ONLY = "GREGORIAN_ONLY"
+
+#: What answers for the length of each Eid across the Gulf: one shared span,
+#: because the real length is announced annually by each government.
+SHARED_GCC_EID_SPAN = "SHARED_GCC_EID_SPAN"
+
+#: What answers for Switzerland: three fixed national days, under a function
+#: whose own comment reads "simplified".
+THREE_FIXED_DAYS = "THREE_FIXED_DAYS"
+
+#: What answers in a year that straddles the end of the Hijri converter's
+#: window: the part of the year the converter could still reach. An Islamic
+#: holiday falling in the rest of it is invisible rather than absent.
+HIJRI_WINDOW_EDGE = "HIJRI_WINDOW_EDGE"
+
+#: What answers for a Japanese equinox outside 1980-2099: the same integer
+#: formula, used beyond the range it was fitted to. Named for the extrapolation
+#: rather than for the size of the error, which is not something this module
+#: knows.
+EXTRAPOLATED_EQUINOX = "EXTRAPOLATED_EQUINOX"
+
+# Codes that are two spellings of one jurisdiction, as against one country
+# served by another's table. GB and UK name the same state, so neither is a
+# fallback for the other. AT is served by Germany's function under a comment
+# saying Austrian holidays "closely mirror" Germany's, which is an
+# approximation rather than a synonym, and is reported as one.
+_CODE_SYNONYMS: tuple[frozenset[str], ...] = (frozenset({"GB", "UK"}),)
+
+
+class HolidayCalculationError(RuntimeError):
+    """A holiday computation for a covered country failed.
+
+    Raised rather than returned as an empty set. An empty set is the honest
+    answer for a country nothing covers, so a failure that returned one would
+    be indistinguishable from it, and every non-weekend day of the year would
+    quietly count as working.
+
+    Carries the :class:`~app.core.provenance.Provenance` a caller needs to
+    record what happened, so that catching this does not mean rebuilding it by
+    hand and getting the source wrong. It is ``UNAVAILABLE`` and never
+    ``FALLBACK``: there is no answer here to compute dates from.
+
+    That last sentence was ruled on rather than assumed, and the argument for
+    it was not the obvious one. A shipped test used to assert the opposite
+    behaviour and its docstring called it degrading gracefully, so somebody did
+    notice and did choose. What decides it against them is that
+    :func:`is_working_day` is the only production consumer and it returns a
+    bare ``bool``. A ``FALLBACK`` here would be a correct label on an answer
+    that nothing in production reads, attached to a Gulf year missing every
+    Eid, so nobody downstream could act on the degradation being flagged.
+
+    What would reverse it: if :func:`is_working_day` ever grows a way to
+    surface a degraded answer to its caller, ``FALLBACK`` becomes the honest
+    choice and this should be reopened deliberately rather than re-derived from
+    nothing.
+    """
+
+    def __init__(self, country_code: str, year: int, detail: str = "") -> None:
+        super().__init__(f"Holiday calculation failed for {country_code}/{year}")
+        self.country_code = country_code
+        self.year = year
+        self.provenance = unavailable(
+            AXIS_JURISDICTION,
+            country_code,
+            detail or f"the holiday computation for {country_code} raised for {year}",
+        )
+
+
+# Countries whose holidays include lunisolar dates served from a curated table.
+# Membership is tested against the table itself rather than against its first
+# and last year: a range would call an interior gap complete, and the bounds
+# would be a second copy of a fact the table already states. The names are the
+# ones the per-country function leaves out when the year is not curated.
+_CURATED_TABLES: dict[str, tuple[dict[int, Any], tuple[str, ...]]] = {
+    "CN": (_CN_FESTIVALS, ("Spring Festival", "Qingming", "Dragon Boat", "Mid-Autumn")),
+    "IN": (_HINDU_HOLIDAYS, ("Holi", "Diwali")),
+    "TR": (_TR_BAYRAMS, ("Ramazan Bayramı", "Kurban Bayramı")),
+}
+
+#: Holidays whose dates are computed but whose length is not. The Gulf
+#: countries without a sourced row in ``_EID_SPANS`` share one span of three
+#: and four days, because nobody has sourced each government's own; the span
+#: is a stand-in, not a measurement.
+#:
+#: This is a sibling of the ``omitted`` names and not a kind of coverage.
+#: ``omitted`` says a row is missing from our data. This says a row is present
+#: with an extent we did not work out. Both are facts about what the producing
+#: function did.
+#:
+#: Named for the mechanism rather than for how wrong the result is, and the name
+#: is load-bearing. "Placeholder" has an absence meaning "no placeholder we know
+#: of", which is modest and true. A field called "approximate" or "unverified"
+#: would have an absence meaning "verified", and nothing here has been verified,
+#: least of all the tables nobody has ever questioned. How far off a given
+#: country's span runs is not recorded, because that is a judgement and this is
+#: not: closest to correct is still not computed.
+_GCC_PLACEHOLDER_SPANS: tuple[str, ...] = ("Eid al-Fitr", "Eid al-Adha")
+_PLACEHOLDER_SPANS: dict[str, tuple[str, ...]] = dict.fromkeys(
+    sorted(code for code, spans in _EID_SPANS.items() if not spans.sourced), _GCC_PLACEHOLDER_SPANS
+)
+
+#: The stand-in that answered for how far a country's holidays extend, for the
+#: countries where nothing computed it. This is the third axis, and it is a
+#: fallback rather than a kind of coverage: the dates are an answer and can be
+#: computed with, they are simply not worked out. Switzerland sits here beside
+#: the Gulf because a hardcoded three-date roster is as uncomputed as a
+#: hardcoded span, and marking one while leaving the other would make the
+#: absence of the mark mean less than it should.
+#:
+#: A country not listed here reports ``DECLARED`` on this axis, which says no
+#: stand-in we know of, not that anybody checked. Nobody has checked the German
+#: roster either.
+_EXTENT_STANDINS: dict[str, str] = {
+    **dict.fromkeys(_PLACEHOLDER_SPANS, SHARED_GCC_EID_SPAN),
+    "CH": THREE_FIXED_DAYS,
+}
+
+#: Countries whose holidays are computed through the Hijri converter, and which
+#: therefore inherit its window. Hand-written, and held to the source by a test
+#: that finds every holiday function reaching the converter either directly or
+#: through ``_gcc_eids``. That test is the point of the pair: Nigeria joined
+#: this set the day it was added and would have been missed by anybody writing
+#: the list from memory of which countries are "the Gulf ones".
+_HIJRI_DEPENDENT: frozenset[str] = frozenset({"AE", "BH", "EG", "KW", "NG", "OM", "PK", "QA", "SA"})
+
+#: What answers for a year that began before the country's holiday roster took
+#: effect: the later roster, applied to the whole year. Egypt's Decree 294/2025
+#: took effect with Labour Law 14/2025 on 2025-09-01, and the roster under the
+#: previous law is not modelled.
+ROSTER_FROM_LATER_DECREE = "ROSTER_FROM_LATER_DECREE"
+
+#: The day each such roster took effect.
+_ROSTER_EFFECTIVE: dict[str, date] = {"EG": _EG_ROSTER_EFFECTIVE}
+
+#: Countries whose dates come from a formula fitted to a stated range, and the
+#: range. Japan's equinox approximation states 1980-2099 in ``_equinox_day`` and
+#: was previously enforced nowhere.
+#:
+#: A window, not a membership table, and the difference is deliberate. A curated
+#: table can be missing a year in the middle, so ``_CURATED_TABLES`` is tested
+#: for membership and never for bounds. A formula's validity is continuous and
+#: cannot have an interior gap, so here the bound is the fact rather than a
+#: second copy of one. Do not unify these two on the grounds that they look
+#: alike.
+_FORMULA_WINDOWS: dict[str, tuple[int, int]] = {"JP": (1980, 2099)}
+
+_EXTENT_DETAIL: dict[str, str] = {
+    SHARED_GCC_EID_SPAN: (
+        "Eid lengths are announced annually by each government; one shared span of three and four days "
+        "stands in for the Gulf countries without a sourced span of their own"
+    ),
+    THREE_FIXED_DAYS: "three fixed national days stand in for the full Swiss calendar",
+}
+
+
+def _canonical_holiday_country(country_code: str) -> str:
+    """Return the country whose holiday function actually answers for this code.
+
+    ``_HOLIDAY_FUNCS`` points some codes at another country's function: AT is
+    served by Germany's, GB and UK share one. A caller told only what it asked
+    for cannot see that. Derived from the function's own name so that adding or
+    removing an alias needs no second edit here, and so a lambda (which carries
+    no country in its name) reports the code as asked for rather than guessing.
+    """
+    func = _HOLIDAY_FUNCS.get(country_code)
+    name = getattr(func, "__name__", "")
+    if name.startswith("_holidays_"):
+        return name.removeprefix("_holidays_").upper()
+    return country_code
+
+
+def _year_standin(resolved: str, year: int, partial: bool, omitted_names: tuple[str, ...]) -> tuple[str, str] | None:
+    """What stood in on the year axis, and why, or ``None`` if nothing did.
+
+    Four mechanisms can limit a year, and they are checked in a fixed order so
+    that the answer is stable rather than depending on which test happens to run
+    first. Egypt is the one country two of them can reach, the Hijri window and
+    its roster's effective date, and the order exists so that it and any other
+    such country answer the same way on every call.
+    """
+    if partial:
+        return GREGORIAN_ONLY, (
+            f"{year} is outside {resolved}'s curated lunisolar table; {', '.join(omitted_names)} omitted"
+        )
+
+    if resolved in _HIJRI_DEPENDENT and _hijri_year_coverage(year) == HIJRI_EDGE:
+        return HIJRI_WINDOW_EDGE, (
+            f"{year} straddles the end of the Hijri converter's window, so an Islamic holiday falling "
+            "in the part of the year it cannot reach is invisible rather than absent"
+        )
+
+    window = _FORMULA_WINDOWS.get(resolved)
+    if window is not None and not window[0] <= year <= window[1]:
+        # Two separate defects share this token and this axis, so they are two
+        # clauses a reader can tell apart rather than one sentence with a long
+        # explanation. The extrapolation applies at both ends of the window.
+        # The roster is only wrong below it, and asserting it for a year above
+        # it would be a true sentence about the wrong year.
+        detail = (
+            f"the equinox approximation was fitted to {window[0]}-{window[1]}, so {year}'s equinox "
+            "days are extrapolated past the range it was fitted to"
+        )
+        if year < window[0]:
+            detail += (
+                "; separately, the modern holiday roster is applied whole to a year that predates it, "
+                "rather than the roster as the law stood that year"
+            )
+        return EXTRAPOLATED_EQUINOX, detail
+
+    effective = _ROSTER_EFFECTIVE.get(resolved)
+    if effective is not None and date(year, 1, 1) < effective:
+        return ROSTER_FROM_LATER_DECREE, (
+            f"{resolved}'s holiday roster took effect on {effective.isoformat()}; it is applied to the whole "
+            f"of {year} rather than the roster in force before it"
+        )
+
+    return None
+
+
+def _same_jurisdiction(requested: str, used: str) -> bool:
+    """True when two codes name one state rather than one borrowing the other.
+
+    The distinction decides whether sharing a holiday function is reported as a
+    fallback. Britain answering to both GB and UK is a spelling; Austria
+    answered by Germany's table is an approximation, and only the second is
+    something a caller should be told about.
+    """
+    if requested == used:
+        return True
+    pair = {requested, used}
+    return any(pair <= group for group in _CODE_SYNONYMS)
+
+
+def resolve_holidays(country_code: str, year: int) -> dict[str, Any]:
+    """Resolve public holidays for a country and year, with how they were found.
+
+    The dates alone cannot answer the question a caller actually has, which is
+    whether a short or empty set means "there are no more holidays" or "we could
+    not work them out". The shape follows
+    :func:`app.modules.carbon.service.resolve_grid_factor`: the value sits beside
+    the fields describing where it came from, rather than inside a wrapper.
+
+    There are three provenances rather than one because the axes fail
+    independently. A country fully covered can still be asked for a year
+    outside its curated lunisolar table, and a country covered for both can
+    still hold a holiday whose length nobody computed. A single flag keyed on
+    the country would have painted all three of those green.
+
+    Args:
+        country_code: ISO 3166-1 alpha-2 code, case-insensitive.
+        year:         Gregorian year.
+
+    Returns:
+        A mapping of:
+
+        ``dates``           frozenset of holiday dates, possibly empty.
+        ``jurisdiction``    provenance on the country axis. ``DECLARED`` when a
+                            table answered for the country asked about,
+                            ``FALLBACK`` when another country's table answered
+                            or when nothing covers it at all.
+        ``effective_year``  provenance on the year axis. ``FALLBACK`` when the
+                            year falls outside a curated lunisolar table and the
+                            fixed Gregorian days answered alone.
+        ``holiday_extent``  provenance on the span axis. ``FALLBACK`` when a
+                            stand-in answered for how far the holidays extend
+                            rather than a computation: the Gulf Eid lengths,
+                            which are announced annually per country, and the
+                            simplified Swiss roster. The dates are still an
+                            answer and can be computed with, which is why this
+                            is a fallback and not a failure, and why coverage
+                            stays ``DECLARED`` on the other two axes.
+        ``omitted``         names of the holidays such a year leaves out. Empty
+                            unless ``effective_year`` is a fallback.
+        ``placeholder_spans``
+                            names of the holidays whose length is a stand-in.
+                            Data beside ``holiday_extent``, the way ``omitted``
+                            sits beside ``effective_year``. Branch on the
+                            provenance, never on this.
+        ``year``            the year asked for.
+
+        A caller wanting one verdict passes all three to
+        :func:`app.core.provenance.weakest` rather than reading whichever field
+        it happens to remember; :func:`holiday_provenance` does that for it.
+        That matters for the rule that nothing publishes as jurisdiction
+        specific while a dimension it uses falls back: without the third axis,
+        Saudi Arabia answered fully covered on a span its own source says runs
+        short, and the rule read the answer rather than the caveat.
+
+        Three empty sets mean three different things and are kept apart. A
+        country with genuinely no public holidays is ``DECLARED`` with no dates,
+        which is an answer. A country nothing covers is a ``FALLBACK`` to a week
+        with no public holidays, which is a weaker answer. A failed computation
+        is neither: it raises.
+
+    Raises:
+        HolidayCalculationError: the country is covered but its computation
+            failed. Never reported as an empty set, and never cached.
+    """
+    cc = (country_code or "").upper().strip()
+    key = (cc, year)
+    cached = _holiday_cache.get(key)
+    if cached is not None:
+        return cached
+
+    if "-" in cc:
+        return _resolve_subdivision_holidays(cc, year)
+
+    func = _HOLIDAY_FUNCS.get(cc)
+    try:
+        # Existing computed rules keep precedence. Only explicitly reviewed
+        # country/year seed bindings may fill an otherwise uncovered calendar.
+        dates = frozenset(func(year)) if func is not None else seeded_holiday_dates(cc, year)
+    except Exception as exc:
+        # Never cache a failed calculation or unreadable shipped roster as an
+        # empty answer: that would silently turn holidays into working days.
+        logger.exception("Holiday calculation failed for %s/%d", cc, year)
+        raise HolidayCalculationError(cc, year) from exc
+
+    if dates is None:
+        result: dict[str, Any] = {
+            "dates": frozenset(),
+            "jurisdiction": fell_back(
+                AXIS_JURISDICTION,
+                cc,
+                NO_PUBLIC_HOLIDAYS,
+                detail="no holiday table for this country; a working week with no public holidays answered",
+            ),
+            "effective_year": declared(AXIS_EFFECTIVE_YEAR, str(year)),
+            "holiday_extent": declared(AXIS_HOLIDAY_EXTENT, cc),
+            "omitted": (),
+            "placeholder_spans": (),
+            "year": year,
+        }
+        _holiday_cache[key] = result
+        return result
+
+    resolved = _canonical_holiday_country(cc)
+    table, omitted_names = _CURATED_TABLES.get(resolved, (None, ()))
+    partial = table is not None and year not in table
+
+    if _same_jurisdiction(cc, resolved):
+        jurisdiction = declared(AXIS_JURISDICTION, cc)
+    else:
+        jurisdiction = fell_back(
+            AXIS_JURISDICTION,
+            cc,
+            resolved,
+            detail=f"no holiday table for {cc}; {resolved}'s table answered",
+        )
+
+    # The curated window is described by naming what is missing rather than by
+    # quoting the table's first and last year. Bounds there would be a second
+    # copy of a fact the table already states, and would call an interior gap a
+    # covered year. The other two limits are true windows and do quote bounds;
+    # see _FORMULA_WINDOWS for why that is not a contradiction.
+    year_standin = _year_standin(resolved, year, partial, omitted_names)
+    if year_standin is None:
+        effective_year = declared(AXIS_EFFECTIVE_YEAR, str(year))
+    else:
+        token, year_detail = year_standin
+        effective_year = fell_back(AXIS_EFFECTIVE_YEAR, str(year), token, detail=year_detail)
+
+    standin = _EXTENT_STANDINS.get(resolved)
+    if standin is None:
+        holiday_extent = declared(AXIS_HOLIDAY_EXTENT, cc)
+    else:
+        holiday_extent = fell_back(
+            AXIS_HOLIDAY_EXTENT,
+            cc,
+            standin,
+            detail=_EXTENT_DETAIL[standin],
+        )
+
+    result = {
+        "dates": dates,
+        "jurisdiction": jurisdiction,
+        "effective_year": effective_year,
+        "holiday_extent": holiday_extent,
+        "omitted": omitted_names if partial else (),
+        "placeholder_spans": _PLACEHOLDER_SPANS.get(resolved, ()),
+        "year": year,
+    }
+    _holiday_cache[key] = result
+    return result
+
+
+def _resolve_subdivision_holidays(code: str, year: int) -> dict[str, Any]:
+    """:func:`resolve_holidays` for an ISO 3166-2 code.
+
+    A subdivision with a list of its own answers with it, declared for the
+    subdivision. One without answers with its country's list, and the
+    jurisdiction axis says the country answered, so a caller can tell the two.
+    """
+    country = code.split("-", 1)[0]
+    func = _SUBDIVISION_HOLIDAY_FUNCS.get(code)
+    if func is None:
+        base = resolve_holidays(country, year)
+        result = {
+            **base,
+            "jurisdiction": fell_back(
+                AXIS_JURISDICTION,
+                code,
+                country,
+                detail=f"no holiday table for {code}; {country}'s table answered",
+            ),
+        }
+    else:
+        try:
+            dates = frozenset(func(year))
+        except Exception as exc:
+            logger.exception("Holiday calculation failed for %s/%d", code, year)
+            raise HolidayCalculationError(code, year) from exc
+        result = {
+            "dates": dates,
+            "jurisdiction": declared(AXIS_JURISDICTION, code),
+            "effective_year": declared(AXIS_EFFECTIVE_YEAR, str(year)),
+            "holiday_extent": declared(AXIS_HOLIDAY_EXTENT, code),
+            "omitted": (),
+            "placeholder_spans": (),
+            "year": year,
+        }
+    _holiday_cache[(code, year)] = result
+    return result
+
+
+def holiday_provenance(country_code: str, year: int) -> Provenance:
+    """The weaker of the two axes, for a caller that wants a single verdict.
+
+    A holiday set is only as trustworthy as its worst axis, so a caller deciding
+    whether to present something as specific to a country asks this rather than
+    reading whichever field it happens to remember.
+
+    Raises:
+        HolidayCalculationError: as :func:`resolve_holidays`. There is no
+            provenance to weigh when nothing was computed.
+    """
+    resolved = resolve_holidays(country_code, year)
+    return weakest(
+        resolved[AXIS_JURISDICTION],
+        resolved[AXIS_EFFECTIVE_YEAR],
+        resolved[AXIS_HOLIDAY_EXTENT],
+    )
+
+
+def _get_holidays(country_code: str, year: int) -> frozenset[date]:
+    """Return the holiday dates for a country/year pair.
+
+    A narrow accessor over :func:`resolve_holidays`, for callers that only need
+    the dates. Anything that has to decide what a short set *means* must call
+    ``resolve_holidays`` and read its two provenance fields, or
+    :func:`holiday_provenance` for the weaker of them.
+
+    Deliberately still a ``frozenset`` rather than the mapping. Callers assert
+    on the truthiness of this return to prove a country has holidays at all, and
+    a non-empty mapping is truthy however empty the dates inside it are.
+    """
+    return resolve_holidays(country_code, year)["dates"]
+
+
+# ── Public API ────────────────────────────────────────────────────────────────
+
+
+def is_working_day(d: date, country_code: str) -> bool:
+    """Return True if ``d`` is a working day for the given country.
+
+    A day is non-working when:
+    * Its ``date.weekday()`` (0=Mon, 6=Sun, not ISO) is not in the country's working week, OR
+    * It falls on a public holiday.
+
+    Args:
+        d:            The date to check.
+        country_code: ISO 3166-1 alpha-2 upper-case country code (e.g. ``"DE"``).
+                      Unknown codes fall back to Mon–Fri with no holidays.
+
+    A country nothing covers is a different thing from a country whose holidays
+    could not be computed. The first is answered here as a working week with no
+    holidays, which is the honest reading of data we do not have. The second
+    raises, because answering it the same way would turn a broken computation
+    into a year in which every weekday is a working day. Callers that need to
+    tell a complete answer from a partial one should ask
+    :func:`resolve_holidays` directly.
+
+    Returns:
+        bool - True when the date is a scheduled working day.
+
+    Raises:
+        HolidayCalculationError: the country is covered but its holiday
+            computation failed.
+
+    Examples::
+
+        assert is_working_day(date(2026, 12, 25), "DE") is False  # Christmas
+        assert is_working_day(date(2026, 12, 24), "DE") is True   # Thursday
+        assert is_working_day(date(2026, 1,  4), "AE") is False   # Sunday (weekend)
+    """
+    cc = (country_code or "").upper().strip()
+    # An ISO 3166-2 code ("CA-ON") works its country's week and its own holidays.
+    working_week = _WORKING_WEEK.get(cc.split("-", 1)[0], _DEFAULT_WORKING_WEEK)
+    if d.weekday() not in working_week:
+        return False
+    holidays = _get_holidays(cc, d.year)
+    return d not in holidays
+
+
+def next_working_day(d: date, country_code: str) -> date:
+    """Return the next working day at or after ``d``.
+
+    If ``d`` itself is a working day, ``d`` is returned unchanged.
+
+    Args:
+        d:            Starting date.
+        country_code: ISO 3166-1 alpha-2 country code.
+
+    Returns:
+        date - The first working day >= ``d``.
+
+    Examples::
+
+        # Saturday → Monday
+        next_working_day(date(2026, 1, 3), "DE") == date(2026, 1, 5)
+        # Monday that is a holiday → next working day
+        next_working_day(date(2026, 12, 25), "DE") == date(2026, 12, 28)
+    """
+    current = d
+    # Safety cap: no country has more than 14 consecutive non-working days
+    for _ in range(60):
+        if is_working_day(current, country_code):
+            return current
+        current += timedelta(days=1)
+    # Should be unreachable; return the cap boundary
+    return current
+
+
+def add_working_days(start: date, working_days: int, country_code: str) -> date:
+    """Advance ``start`` by exactly ``working_days`` working days.
+
+    Used by the CPM engine when scheduling task finish dates.
+
+    Args:
+        start:        The start date (must itself be a working day; if not,
+                      the first working day from ``start`` is used).
+        working_days: Number of working days to add (must be >= 0).
+        country_code: ISO 3166-1 alpha-2 country code.
+
+    Returns:
+        date - The finish date (inclusive).
+    """
+    if working_days < 0:
+        raise ValueError("working_days must be >= 0")
+    current = next_working_day(start, country_code)
+    remaining = working_days
+    while remaining > 0:
+        current += timedelta(days=1)
+        current = next_working_day(current, country_code)
+        remaining -= 1
+    return current

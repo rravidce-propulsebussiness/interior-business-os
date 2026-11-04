@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Abschlagsrechnung {claim} hat kein Enddatum des Abrechnungszeitraums und lässt sich daher nicht in die Reihenfolge der Abschlagsrechnungen des Vertrags einordnen",
+      "suggestion": "Geben Sie den letzten Tag des Abrechnungszeitraums dieser Abschlagsrechnung ein"
+    },
+    "period_order": {
+      "fail": "Abschlagsrechnung {claim} beginnt am {period_from} und endet am {period_to}, der Abrechnungszeitraum endet also vor seinem Beginn",
+      "suggestion": "Korrigieren Sie Beginn oder Ende des Abrechnungszeitraums, sodass der Beginn zuerst liegt"
+    },
+    "period_overlap": {
+      "fail": "Abschlagsrechnung {claim} beginnt am {period_from}, die vorherige Abschlagsrechnung {previous} läuft aber bis zum {previous_to}, sodass beide dieselben Tage abrechnen",
+      "suggestion": "Lassen Sie diese Abschlagsrechnung am Tag nach dem Ende des vorherigen Abrechnungszeitraums beginnen"
+    },
+    "period_gap": {
+      "fail": "Abschlagsrechnung {claim} beginnt am {period_from}, die vorherige Abschlagsrechnung {previous} endete aber am {previous_to}, sodass die Tage dazwischen in keiner Abschlagsrechnung abgerechnet werden (nicht abgerechnete Tage: {days})",
+      "suggestion": "Lassen Sie diese Abschlagsrechnung am Tag nach dem Ende des vorherigen Abrechnungszeitraums beginnen, oder prüfen Sie, ob eine Abschlagsrechnung fehlt"
+    },
+    "period_unparsed": {
+      "fail": "Abschlagsrechnung {claim} enthält als {field} den Wert '{value}', der sich nicht als Datum lesen lässt",
+      "suggestion": "Geben Sie das Datum als Jahr, Monat und Tag ein, zum Beispiel 2026-03-31",
+      "fields": {
+        "period_start": "Beginn des Abrechnungszeitraums",
+        "period_end": "Ende des Abrechnungszeitraums",
+        "claim_date": "Rechnungsdatum"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Position {line} ist kumuliert mit {billed} abgerechnet, mehr als ihr Vertragswert von {scheduled}; führen Sie „Aus Leistungsstand befüllen“ erneut aus oder senken Sie den Betrag dieses Zeitraums auf der Position",
+      "suggestion": "„Aus Leistungsstand befüllen“ rechnet auf jeder Position nur ab, was seit den früheren Abschlagsrechnungen neu ist. Ist ihr Umfang tatsächlich gewachsen, erfassen Sie zuerst den Nachtrag, der ihren Vertragswert erhöht"
+    },
+    "percent_regressed": {
+      "fail": "Position {line} steht kumuliert bei {percent} % Fertigstellung, also {requested}, weniger als die {previous}, die frühere Abschlagsrechnungen auf ihr bereits abgerechnet haben, daher wird auf ihr in diesem Zeitraum nichts abgerechnet",
+      "suggestion": "Prüfen Sie den Fertigstellungsgrad dieser Position oder berichtigen Sie die frühere Abschlagsrechnung, die zu viel ausgewiesen hat"
+    },
+    "errors": {
+      "submission_blocked": "Diese Abschlagsrechnung kann erst eingereicht werden, wenn Folgendes behoben ist: {findings}",
+      "rules_unavailable": "Die Prüfregeln für Abschlagsrechnungen sind in dieser Installation nicht geladen, daher kann diese Abschlagsrechnung vor dem Einreichen nicht geprüft werden.",
+      "later_claim_already_issued": "Abschlagsrechnung {claims} folgt auf diese und ist bereits eingereicht. Sie wurde erstellt, als diese noch ein Entwurf war, und rechnet diese Leistung daher bereits ab. Löschen Sie diesen Entwurf oder legen Sie seinen Zeitraum hinter die letzte eingereichte Abschlagsrechnung"
+    },
+    "totals_match_lines": {
+      "fail": "Zahlungsantrag {claim} fordert {gross}, die zugehörigen Positionen ergeben aber {lines_total}: der Antrag wurde nach der Änderung seiner Positionen nicht neu berechnet",
+      "suggestion": "Speichern Sie eine beliebige Position dieses Antrags oder führen Sie die Übernahme aus dem Baufortschritt erneut aus, dann folgen die Summen"
+    },
+    "totals_below_lines": {
+      "fail": "Zahlungsantrag {claim} fordert {gross} auf Basis erfasster Kosten, weniger als die {lines_total}, die seine eigenen Positionen ergeben: die Aufgliederung kann nicht mehr fordern als der Antrag selbst",
+      "suggestion": "Bei einem auf Kostenbasis abgerechneten Antrag sind die Positionen eine Aufgliederung des Betrags und nicht dessen Quelle. Verringern oder entfernen Sie die Positionen, die ihn übersteigen, oder erzeugen Sie den Antrag erneut aus den erfassten Kosten, damit beide übereinstimmen"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Zahlungsantrag {claim} weist {stored} als bisher abgerechnet für Position {line} aus, die früheren Anträge rechnen dafür jetzt {now} ab",
+      "total_fail": "Zahlungsantrag {claim} weist {stored} als bisher bescheinigt aus, die früheren Anträge bescheinigen jetzt {now}",
+      "suggestion": "Erzeugen Sie diesen Antrag erneut, damit er den heutigen Stand der vorherigen Anträge übernimmt"
+    },
+    "within_nte_cap": {
+      "fail": "Zahlungsantrag {claim} fordert {this} zusätzlich zu den bereits abgerechneten {billed} und überschreitet damit die Höchstgrenze von {cap}",
+      "suggestion": "Rechnen Sie mit diesem Antrag bis zur Höchstgrenze ab und vereinbaren Sie für den Rest einen Nachtrag"
+    },
+    "retention_matches_policy": {
+      "fail": "Abschlagsrechnung {claim} weist {held} Sicherheitseinbehalt aus, nach der Einbehaltsregel sind es jetzt {expected}: Eine frühere Abschlagsrechnung, eine Freigabe oder die Regel hat sich geändert, nachdem diese Abschlagsrechnung berechnet wurde",
+      "suggestion": "Führen Sie „Aus Leistungsstand befüllen“ erneut aus oder speichern Sie eine beliebige Position dieser Abschlagsrechnung, dann wird der Einbehalt neu berechnet"
+    },
+    "retention_above_cap": {
+      "fail": "Abschlagsrechnung {claim} weist {held} Sicherheitseinbehalt aus und liegt damit über der in der Einbehaltsregel festgelegten Grenze von {percent}%, die bei diesem Vertrag {cap} beträgt",
+      "suggestion": "Berechnen Sie die Abschlagsrechnung neu oder heben Sie die Grenze in der Einbehaltsregel des Vertrags an, wenn die Parteien einen höheren Betrag vereinbart haben",
+      "state_cap_unread": "Abschlagsrechnung {claim}: Die Einbehaltsregel nennt keine Obergrenze, und in {country} begrenzt das Recht der Bundesstaaten den Einbehalt. Der Bundesstaat ließ sich nicht bestimmen, weil das Projekt keinen Subdivision-Code führt, daher wurde keine gesetzliche Obergrenze geprüft",
+      "state_cap_suggestion": "Tragen Sie die Grenze des Bundesstaats als Obergrenze in die Einbehaltsregel des Vertrags ein, dann wird jede Abschlagsrechnung dieses Vertrags daran geprüft"
+    },
+    "retention_release_within_held": {
+      "fail": "Die bis einschließlich Abschlagsrechnung {claim} abgerechneten Freigaben zahlen {released} aus, mehr als die bis dahin einbehaltenen {accrued}",
+      "suggestion": "Stornieren Sie die zu hohe Freigabe oder rechnen Sie sie in einer späteren Abschlagsrechnung ab, wenn mehr einbehalten ist"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Der Zahlungsplan ergibt {scheduled}, die Auftragssumme bis heute beträgt jedoch {contract_sum}: {difference} des Auftrags stehen auf keiner Position, gegen die abgerechnet wird",
+      "suggestion": "Ergänzen oder korrigieren Sie Positionen im Zahlungsplan, bis sie die Auftragssumme ergeben",
+      "suggestion_reconcile": "{count} genehmigte Nachträge oder Änderungen haben die Auftragssumme verändert, bevor sie in den Zahlungsplan gelangten. Nutzen Sie am Vertrag „Nachträge abgleichen“, um für jeden eine Position anzulegen"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Diese Freigabe benötigt folgendes Dokument: {document}; es ist keines angehängt",
+      "suggestion": "Erfassen Sie das Dokument am Vertrag, hängen Sie es an die Freigabe an und genehmigen Sie sie erneut"
+    },
+    "within_available": {
+      "fail": "Diese Freigabe zahlt {amount} aus, es sind aber nur noch {available} einbehalten und keiner anderen Freigabe zugeordnet",
+      "suggestion": "Stornieren Sie diese Freigabe und schlagen Sie sie erneut vor, damit sie nach dem jetzt einbehaltenen Betrag bemessen wird"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Diese Freigabe wird erst gezahlt, wenn die Frist von {days} Tagen für Sicherungsrechte nach dem Ereignis abgelaufen ist ({reference}), und sie nennt nicht, wann diese Frist begann",
+      "suggestion_no_start": "Tragen Sie den Tag ein, an dem die Frist begann, etwa das Datum der Veröffentlichung der Bescheinigung über die wesentliche Fertigstellung, und genehmigen Sie die Freigabe erneut",
+      "fail_early": "Die Frist von {days} Tagen für Sicherungsrechte, die am {started} begann, läuft bis zum {ends} ({reference}), daher kann diese Freigabe noch nicht genehmigt werden",
+      "suggestion_early": "Genehmigen Sie die Freigabe nach Ablauf der Frist, nachdem Sie geprüft haben, dass kein Sicherungsrecht gegen den Einbehalt geltend gemacht wurde"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "Bescheinigung der wesentlichen Fertigstellung",
+      "acceptance_protocol": "Abnahmeprotokoll",
+      "affidavit_payment_of_debts": "Erklärung über die Bezahlung von Verbindlichkeiten",
+      "affidavit_release_of_liens": "Erklärung über die Freigabe von Sicherungsrechten",
+      "consent_of_surety": "Zustimmung des Bürgen",
+      "final_lien_waiver": "abschließender Verzicht auf Sicherungsrechte",
+      "final_invoice": "Schlussrechnung"
+    },
+    "errors": {
+      "approval_blocked": "Diese Freigabe des Einbehalts kann erst genehmigt werden, wenn Folgendes behoben ist: {findings}",
+      "rules_unavailable": "Die Prüfregeln für Freigaben des Einbehalts sind in dieser Installation nicht geladen, daher kann diese Freigabe vor der Genehmigung nicht geprüft werden."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Abgerechnete Leistung ohne Position im Zahlungsplan"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Nachträge werden nur in den Zahlungsplan eines aktiven Vertrags übernommen; dieser Vertrag hat den Status {status}",
+      "preview_stale": "Die Liste der abzugleichenden Nachträge hat sich geändert, seit Sie sie geöffnet haben. Öffnen Sie die Vorschau erneut und bestätigen Sie den aktuellen Stand"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Dieser Vertrag kann erst unterschrieben werden, wenn Folgendes behoben ist: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "Fertigstellung",
+      "approval": "Abnahme"
+    },
+    "total_within_contract": {
+      "fail": "Die Raten ergeben zusammen {scheduled} und damit mehr als die Vertragssumme von {total}",
+      "suggestion": "Verringern Sie die Raten, sodass sie die Vertragssumme nicht übersteigen"
+    },
+    "percent_sum": {
+      "fail": "Die Raten ergeben zusammen {scheduled} von der Vertragssumme {total} ({percent} %), ein Teil des Preises hat also keine Rate",
+      "suggestion": "Legen Sie eine Rate für den Rest der Vertragssumme an oder passen Sie die Beträge an"
+    },
+    "completion_trigger_linked": {
+      "fail": "Rate {milestone} wird bei {trigger} fällig, ist aber mit keinem Vorgang im Terminplan verknüpft, daher verschiebt sich ihr Datum nicht mit der Arbeit",
+      "suggestion": "Verknüpfen Sie die Rate mit dem Meilenstein im Terminplan, auf den sie wartet"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Laut Terminplan ist {milestone} erreicht, die Rate {instalment} steht aber noch aus und kann nicht abgerechnet werden",
+      "suggestion": "Markieren Sie die Rate als erreicht oder prüfen Sie, warum der Vertrag nicht aktiv ist"
+    },
+    "client_visible_requires_active": {
+      "fail": "Rate {milestone} wird dem Auftraggeber angezeigt, der Vertrag ist aber {status}; der Auftraggeber sieht nur den Zahlungsplan eines aktiven oder abgeschlossenen Vertrags",
+      "suggestion": "Blenden Sie die Rate für den Auftraggeber aus, bis der Vertrag in Kraft ist"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Die Anzahlung von {deposit} liegt über den {ceiling}, die {reference} in {jurisdiction} erlaubt (Quelle: {source_url}, geprüft am {checked_on}, nicht juristisch geprüft)",
+      "suggestion": "Verringern Sie die Anzahlung oder lassen Sie rechtlich prüfen, ob für diesen Vertrag eine Ausnahme gilt",
+      "below_threshold": {
+        "fail": "Die Vertragssumme liegt bei oder unter dem Betrag, ab dem {reference} Anzahlungen in {jurisdiction} begrenzt, die Anzahlung wurde daher nicht geprüft (Quelle: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Der Vertrag lautet auf {currency}, {reference} nennt die Grenze aber in {limit_currency}, die Anzahlung in {jurisdiction} wurde daher nicht geprüft (Quelle: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Falls die Vorschrift für diesen Vertrag gilt, prüfen Sie die Anzahlung von Hand"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Die bisher bescheinigte Leistung beträgt {cumulative} und liegt damit {over} über der Auftragssumme von {contract}",
+      "suggestion": "Lassen Sie zuerst den Nachtrag genehmigen, der die Mehrleistung abdeckt, oder korrigieren Sie die Mengen dieser Abschlagsbescheinigung"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Diese Bescheinigung führt {carried} als Summe der vorherigen Bescheinigungen, die Bescheinigung {reference} wurde jedoch mit {certified} festgestellt",
+      "work_fail": "Die Spalte der Vorleistungen im Leistungsverzeichnis ergibt {carried}, die Bescheinigung {reference} wurde jedoch mit {certified} Leistung bis dahin festgestellt",
+      "suggestion": "Prüfen Sie, ob zwischen den beiden Bescheinigungen eine Abrechnung liegt, die keine von beiden zeigt, und erzeugen Sie diese dann neu"
+    },
+    "previous_unknown": {
+      "fail": "Die Summe der vorherigen Bescheinigungen ist nicht bekannt",
+      "not_certified": "Die vorherige Bescheinigung {reference} ist noch nicht festgestellt, ihre Summe steht daher nicht fest",
+      "suggestion": "Stellen Sie zuerst die vorherige Bescheinigung fest. Wurde sie festgestellt, bevor Bescheinigungen gespeichert wurden, tragen Sie ihre Summe in der Zeile der vorherigen Bescheinigungen ein"
+    },
+    "weights_sum": {
+      "fail": "Die Gewichte der Positionen ergeben {total} % statt 100 %",
+      "suggestion": "Korrigieren Sie die Werte der Positionen, sodass ihre Anteile den gesamten Vertrag ergeben"
+    },
+    "percent_regressed": {
+      "fail": "Die Position {line} ist in diesem Zeitraum negativ und nimmt damit bereits bescheinigte Leistung zurück",
+      "suggestion": "Belassen Sie es, wenn damit ein früheres Übermaß berichtigt wird. Andernfalls korrigieren Sie Menge oder Prozentsatz in dieser Bescheinigung"
+    },
+    "income_withholding_single_year": {
+      "fail": "Der Einkommensteuerabzug ist gewählt, der Vertrag läuft jedoch vom {start} bis zum {end}, also innerhalb eines Kalenderjahres. Der Abzug betrifft Bauleistungen, die sich über mehr als ein Kalenderjahr erstrecken",
+      "suggestion": "Klären Sie mit Ihrem Steuerberater, ob sich die Leistung tatsächlich über mehr als ein Jahr erstreckt; falls nicht, kennzeichnen Sie den Einkommensteuerabzug als nicht anwendbar"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Bisher wurden {recovered} der Vorauszahlung verrechnet, mehr als die gezahlte Vorauszahlung von {advance}",
+      "unknown": "Bisher wurden {recovered} der Vorauszahlung verrechnet, der Vertrag nennt die gezahlte Vorauszahlung jedoch nicht, sodass die Verrechnung nicht dagegen geprüft werden kann",
+      "suggestion": "Verringern Sie die Verrechnung in dieser Bescheinigung oder tragen Sie die gezahlte Vorauszahlung in den Bescheinigungseinstellungen des Vertrags ein"
+    },
+    "retention_matches_config": {
+      "fail": "Die Bescheinigung behält {certificate} als Sicherheit ein ({percent} % ihrer Bemessungsgrundlage), der zugrunde liegende Beleg behält jedoch {stored} ein",
+      "suggestion": "Berechnen Sie den Beleg neu oder korrigieren Sie Einbehaltssatz oder Bemessungsgrundlage in den Bescheinigungseinstellungen des Vertrags, damit beide denselben Einbehalt zeigen"
+    },
+    "net_payable_negative": {
+      "fail": "Der auszuzahlende Betrag ist {payable}: Die Abzüge sind größer als der Betrag dieser Bescheinigung",
+      "suggestion": "Prüfen Sie die Abzüge, vor allem die Verrechnung der Vorauszahlung, und übertragen Sie, was jetzt nicht abgezogen werden kann, in die nächste Bescheinigung"
+    },
+    "taxes_stale": {
+      "fail": "Die Steuern wurden berechnet, bevor sich diese Bescheinigung geändert hat, und gehören daher nicht mehr zu ihr",
+      "suggestion": "Berechnen Sie die Steuern neu. Waren sie bereits bestätigt, öffnen Sie sie zuerst wieder und bestätigen Sie sie danach erneut"
+    },
+    "taxes_confirmed": {
+      "fail": "Die Steuerbeträge dieser Bescheinigung sind nicht bestätigt",
+      "suggestion": "Prüfen Sie jede Steuerzeile und bestätigen Sie die Steuern vor der Feststellung"
+    },
+    "lines_complete": {
+      "fail": "Die Zeile {line} hat noch keinen Betrag. {reason}",
+      "suggestion": "Tragen Sie den Betrag ein oder kennzeichnen Sie die Zeile mit Begründung als nicht anwendbar"
+    },
+    "work_value_differs": {
+      "fail": "Die Position {line} ist bisher mit {stated} erfasst, Menge oder Prozentsatz ergeben jedoch {computed}",
+      "suggestion": "Korrigieren Sie Menge oder Betrag im Beleg, damit die beiden Spalten der Zeile übereinstimmen"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Der Sicherheitseinbehalt von {percent} Prozent liegt über den {limit} Prozent, die das Recht der öffentlichen Bauaufträge je Abschlagszahlung erlaubt",
+      "suggestion": "Senken Sie den Einbehalt des Vertrags auf den gesetzlichen Satz"
+    },
+    "advance_above_cap": {
+      "fail": "Die Vorauszahlungsbürgschaft deckt {percent} Prozent des Vertragswerts, über den {limit} Prozent, die öffentliche Bauaufträge ohne Genehmigung des Finanzministers zulassen",
+      "suggestion": "Verringern Sie die Vorauszahlung oder erfassen Sie in den Vertragsbedingungen die vor der Ausschreibung eingeholte Genehmigung"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Eine Verzugsschadenklausel hat keinen Höchstbetrag, obwohl das Recht der öffentlichen Bauaufträge den Verzugsschaden auf {limit} Prozent des Vertragswerts begrenzt",
+      "suggestion": "Geben Sie den Höchstbetrag der Verzugsschadenklausel ein"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Eine Verzugsschadenklausel ist auf {percent} Prozent des Vertragswerts begrenzt, über den {limit} Prozent, die das Recht der öffentlichen Bauaufträge erlaubt",
+      "suggestion": "Senken Sie den Höchstbetrag der Klausel auf die gesetzliche Obergrenze"
+    },
+    "performance_security_missing": {
+      "fail": "Es ist keine Vertragserfüllungssicherheit erfasst, obwohl öffentliche Bauaufträge eine Sicherheit von {limit} Prozent des Vertragswerts verlangen",
+      "suggestion": "Erfassen Sie die Endgarantie als Vertragserfüllungsbürgschaft oder Bankgarantie"
+    },
+    "performance_security_below": {
+      "fail": "Die Vertragserfüllungssicherheit deckt {percent} Prozent des Vertragswerts, unter den {limit} Prozent, die öffentliche Bauaufträge verlangen",
+      "suggestion": "Erfassen Sie eine Vertragserfüllungssicherheit in voller gesetzlicher Höhe"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Öffentliche Bauaufträge mit {months} Monaten Laufzeit oder mehr müssen per Gesetz preisgleitend angepasst werden, der Vertrag nennt aber keine Koeffizienten für seine veränderlichen Positionen",
+        "suggestion": "Erfassen Sie die Koeffizienten, die der Auftragnehmer im technischen Umschlag angegeben hat"
+      },
+      "duplicate_item": {
+        "fail": "Die veränderliche Position {item} ist unter den Preisanpassungskoeffizienten doppelt aufgeführt",
+        "suggestion": "Behalten Sie je veränderlicher Position nur einen Koeffizienten"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Der Preisanpassungskoeffizient von {item} ist keine Zahl",
+        "suggestion": "Geben Sie den Koeffizienten als Dezimalzahl ein, zum Beispiel 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Der Preisanpassungskoeffizient von {item} ist null oder kleiner, obwohl das Gesetz verlangt, dass jeder Koeffizient über null liegt",
+        "suggestion": "Geben Sie einen Koeffizienten über null ein oder entfernen Sie die Position"
+      },
+      "coefficient_negative": {
+        "fail": "Der Preisanpassungskoeffizient von {item} ist negativ",
+        "suggestion": "Geben Sie einen Koeffizienten von null oder mehr ein"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Die Preisanpassungskoeffizienten ergeben zusammen {item}, obwohl das Gesetz verlangt, dass ihre Summe unter eins bleibt",
+        "suggestion": "Senken Sie die Koeffizienten, sodass ein fester Preisanteil bleibt"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Die Preisanpassungskoeffizienten ergeben zusammen {item}, mehr als eins",
+        "suggestion": "Senken Sie die Koeffizienten, sodass sie zusammen höchstens eins ergeben"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Öffentliche Bauaufträge mit mehr als {months} Monaten Laufzeit enthalten eine Preisgleitklausel, wenn Rohstoffe einen erheblichen Teil der Kosten ausmachen, und der Vertrag nennt keine Gewichte für die Preisanpassung",
+        "suggestion": "Tragen Sie die Gewichte der Preisgleitformel aus den besonderen Vertragsbedingungen ein oder erfassen Sie, dass der Preis fest ist"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Die Gewichte der Preisgleitung ergeben {item}, die Formel verlangt eine Summe von genau eins",
+        "suggestion": "Gewichte aus den Vertragsdaten so korrigieren, dass sie eins ergeben"
+      },
+      "unknown_regime": {
+        "fail": "Der Vertrag nennt die Preisgleitungsregelung {item}, die die Plattform nicht kennt",
+        "suggestion": "Eine der aufgeführten Preisgleitungsregelungen wählen"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Der nicht gleitende Anteil {item} liegt nicht zwischen null und eins",
+        "suggestion": "Den Anteil laut Vertragsdaten als Dezimalzahl eingeben, zum Beispiel 0.15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Der Vorschuss beträgt {percent} Prozent des Vertragswerts und liegt unter dem Mindestsatz von {limit} Prozent, den das Vergaberecht für diesen Auftragnehmer und Auftraggeber vorschreibt",
+      "suggestion": "Heben Sie den Vorschuss auf den Mindestsatz an oder erfassen Sie null, wenn der Auftragnehmer darauf verzichtet hat"
+    },
+    "advance_above_maximum": {
+      "fail": "Der Vorschuss beträgt {percent} Prozent des Vertragswerts und liegt über den {limit} Prozent, die das Vergaberecht als übliche Obergrenze festlegt",
+      "suggestion": "Prüfen Sie, ob die besonderen Vertragsbedingungen den höheren Vorschuss zulassen, und erfassen Sie die dafür verlangte Sicherheit"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Eine Verzugsstrafklausel berechnet {amount} pro Tag, die allgemeinen Vertragsbedingungen dagegen {expected} pro Tag, ein {divisor}stel des Vertragswerts",
+      "suggestion": "Behalten Sie den Tagessatz der allgemeinen Vertragsbedingungen bei oder führen Sie den abweichenden Satz unter den Abweichungen der besonderen Vertragsbedingungen auf"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Eine Verzugsstrafklausel ist auf {percent} Prozent des Vertragswerts begrenzt, mehr als die {limit} Prozent der allgemeinen Vertragsbedingungen",
+      "suggestion": "Senken Sie die Obergrenze auf den Wert der allgemeinen Vertragsbedingungen oder führen Sie sie unter den Abweichungen der besonderen Vertragsbedingungen auf"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Dieser Nachunternehmervertrag über {amount} erreicht die Schwelle von {limit} für die Direktzahlung durch den öffentlichen Auftraggeber, und der Vertrag schließt sie aus, was das Gesetz verbietet",
+      "suggestion": "Erfassen Sie, dass der öffentliche Auftraggeber den Nachunternehmer direkt bezahlt"
+    },
+    "direct_payment_unstated": {
+      "fail": "Dieser Nachunternehmervertrag über {amount} erreicht die Schwelle von {limit} für die Direktzahlung durch den öffentlichen Auftraggeber, und der Vertrag hält sie nicht fest",
+      "suggestion": "Erfassen Sie, ob der Nachunternehmer zugelassen ist und direkt vom öffentlichen Auftraggeber bezahlt wird"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Dieser Nachunternehmervertrag über private Bauleistungen enthält weder eine Bankbürgschaft noch eine Zahlungsanweisung an den Bauherrn, ohne die der Vertrag für nichtig erklärt werden kann",
+      "suggestion": "Erfassen Sie die Bankbürgschaft des Hauptunternehmers oder die Zahlungsanweisung an den Bauherrn"
+    },
+    "private_retention_above_limit": {
+      "fail": "Ein Einbehalt von {percent} Prozent liegt über den {limit} Prozent, die das Gesetz bei privaten Bauleistungen zulässt",
+      "suggestion": "Senken Sie den Einbehalt des Vertrags auf die gesetzliche Obergrenze"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Vertrag {contract} nennt die Umsatzsteuerregelung {regime}, die es in {country} nicht gibt",
+      "suggestion": "Wählen Sie eine der für das Land des Projekts angebotenen Umsatzsteuerregelungen oder entfernen Sie die Auswahl"
+    },
+    "country_unknown": {
+      "fail": "Vertrag {contract} nennt die Umsatzsteuerregelung {regime}, aber sein Projekt nennt kein Land, daher kann die Regelung nicht geprüft werden",
+      "suggestion": "Legen Sie das Land des Projekts fest"
+    },
+    "contract_date_missing": {
+      "fail": "Die Umsatzsteuerregelung {regime} gilt nur für Verträge, die vor dem {cutoff} unterzeichnet wurden, und dieser Vertrag erfasst weder ein Unterschrifts- noch ein Beginndatum",
+      "suggestion": "Geben Sie das Datum der Vertragsunterzeichnung ein"
+    },
+    "contract_too_late": {
+      "fail": "Die Umsatzsteuerregelung {regime} gilt nur für Verträge, die vor dem {cutoff} unterzeichnet wurden, und dieser Vertrag stammt vom {contract_date}",
+      "suggestion": "Wählen Sie für diesen Vertrag die reguläre Umsatzsteuerregelung"
+    },
+    "evidence_missing": {
+      "fail": "Die Umsatzsteuerregelung {regime} verlangt {evidence}, und der Vertrag erfasst keinen solchen Nachweis",
+      "suggestion": "Erfassen Sie Referenz und Ausstellungsdatum des Dokuments bei der Umsatzsteuerregelung des Vertrags"
+    },
+    "evidence_date_missing": {
+      "fail": "Der Nachweis {evidence} zur Umsatzsteuerregelung {regime} hat kein Ausstellungsdatum, daher lässt sich nicht zeigen, dass er vor dem {cutoff} liegt",
+      "suggestion": "Geben Sie das Ausstellungsdatum des Dokuments ein"
+    },
+    "evidence_too_late": {
+      "fail": "Der Nachweis {evidence} zur Umsatzsteuerregelung {regime} wurde am {issued_on} ausgestellt, die Regelung verlangt jedoch einen vor dem {cutoff}",
+      "suggestion": "Erfassen Sie ein früheres Dokument oder wählen Sie die reguläre Umsatzsteuerregelung"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Der Vertragswert stieg von {original_value} auf {current_value}, und der Vertrag nennt keine zulässige Erhöhung, daher lässt sich nicht beurteilen, ob die Umsatzsteuerregelung {regime} noch gilt",
+      "suggestion": "Erfassen Sie die Leistungserweiterung, die der Vertrag zulässt"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Der Vertragswert stieg von {original_value} auf {current_value} und damit über die im Vertrag zugelassene Erhöhung von {allowed_increase_pct} Prozent, steuerlich ist es ein neuer Vertrag und die Umsatzsteuerregelung {regime} gilt nicht mehr",
+      "suggestion": "Stellen Sie den Vertrag auf die reguläre Umsatzsteuerregelung um"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "eine vom Bauüberwacher genehmigte Abschlagsrechnung",
+      "einvoice": "eine elektronische Rechnung oder Quittung",
+      "main_contractor_certificate": "die Bescheinigung des Hauptunternehmers, dass für das Projekt Umsatzsteuer gezahlt wurde"
+    },
+    "not_in_force": {
+      "before": "Abrechnung {claim} ist auf den {on} datiert, und die Umsatzsteuerregelung {regime} gilt erst ab dem {effective_from}; an diesem Tag gelten: {instead}",
+      "after": "Abrechnung {claim} ist auf den {on} datiert, und die Umsatzsteuerregelung {regime} endete am {effective_to}; an diesem Tag gelten: {instead}",
+      "suggestion": "Stellen Sie den Vertrag auf eine am Abrechnungsdatum geltende Umsatzsteuerregelung um oder korrigieren Sie das Datum"
+    }
+  }
+}

@@ -1,0 +1,431 @@
+# DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""Demo gates, laydown zones and deliveries for a demo project.
+
+Called from the demo project installer once the project's bill exists, so the
+site-logistics board opens with a working day on it instead of an empty page,
+and - the point of the module's link to the estimate - with deliveries booked
+against real positions of that project's own bill. Without this the coverage
+table has nothing to cover and the whole integration is invisible.
+
+Every window is anchored to the day the demo is installed rather than to a
+constant. A delivery board is about the next few days; a seed anchored to a
+fixed date would show a schedule that is months stale by the time anybody
+opens it.
+
+The data is written to satisfy the module's own rules, because a demo that
+trips its own validation teaches the wrong thing: every window sits inside its
+gate's operating hours, and no two approved deliveries overlap on one gate.
+Supplier names are supplied by the caller from the demo template's own vetted
+companies - this seeder invents no company names.
+"""
+
+from __future__ import annotations
+
+import logging
+import uuid
+from datetime import datetime, time, timedelta
+from decimal import Decimal
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from sqlalchemy.ext.asyncio import AsyncSession
+
+logger = logging.getLogger(__name__)
+
+# (name, open, close, capacity, note)
+_GATES: tuple[tuple[str, str, str, int, str], ...] = (
+    ("North gate", "07:00", "18:00", 2, "Main vehicle entrance. Banksman on duty for reversing."),
+    ("South gate", "07:30", "16:00", 1, "Narrow approach, rigid vehicles only. No articulated deliveries."),
+)
+
+# The same gates for a project in German, used when a project has no story of its own.
+_GATES_DE: tuple[tuple[str, str, str, int, str], ...] = (
+    ("Nordtor", "07:00", "18:00", 2, "Haupteinfahrt für Fahrzeuge. Beim Rückwärtsfahren ist ein Einweiser im Dienst."),
+    ("Südtor", "07:30", "16:00", 1, "Enge Zufahrt, nur Starrfahrzeuge. Keine Anlieferung mit Sattelzügen."),
+)
+
+# (name, capacity description, usage note)
+_ZONES: tuple[tuple[str, str, str], ...] = (
+    ("Laydown A - north", "420 m2 / 60 t", "Reinforcement and formwork. Keep the crane radius clear."),
+    ("Laydown B - compound", "180 m2", "Packaged materials and small plant. Covered storage at the east end."),
+)
+
+_ZONES_DE: tuple[tuple[str, str, str], ...] = (
+    ("Lagerfläche A - Nord", "420 m2 / 60 t", "Bewehrung und Schalung. Den Schwenkbereich des Krans freihalten."),
+    (
+        "Lagerfläche B - Baustelleneinrichtung",
+        "180 m2",
+        "Verpackte Materialien und Kleingeräte. Überdachte Lagerung am Ostende.",
+    ),
+)
+
+_VEHICLES = ("Articulated flatbed", "Rigid 18t")
+_VEHICLES_DE = ("Sattelzug mit Pritsche", "Starrer Lkw 18 t")
+
+# The one free-text cargo of the default board, in the languages the defaults come in.
+_CARGO_DE = {"Site welfare unit exchange": "Austausch des Sanitärcontainers"}
+
+# (day offset from today, start hour, duration in hours, gate index, status,
+#  share of the position quantity this drop carries, free-text cargo for the
+#  drop that no bill line prices)
+#
+# Read as a working week: two drops already unloaded, one on site now, two
+# approved and coming, one still waiting on the gate and one refused.
+_DELIVERIES: tuple[tuple[int, int, int, int, str, str, str | None], ...] = (
+    (-6, 8, 2, 0, "completed", "0.25", None),
+    (-3, 9, 2, 0, "completed", "0.20", None),
+    (0, 10, 2, 0, "arrived", "0.15", None),
+    (1, 8, 2, 0, "approved", "0.20", None),
+    (2, 13, 2, 1, "approved", "0.10", None),
+    (3, 9, 2, 0, "requested", "0.10", None),
+    (4, 8, 1, 1, "rejected", "0.05", "Site welfare unit exchange"),
+)
+
+
+# Start of construction of a demo project that still stands before its gate into construction,
+# in days from the seed day. Every other offset of that story is derived from it.
+DEMO_CONSTRUCTION_START_DAY = 190
+_FIRST_DELIVERY_DAY = DEMO_CONSTRUCTION_START_DAY + 1
+
+
+def planned_deliveries(
+    rows: tuple[tuple[int, int, int, int, str, str, str | None], ...] = _DELIVERIES,
+) -> tuple[tuple[int, int, int, int, str, str, str | None], ...]:
+    """The board of a site that does not run yet: the same drops, booked for its first week.
+
+    Nothing lies in the past and nothing has arrived. What the running site had
+    unloaded or approved is an approved booking, the rest is still requested.
+    """
+    booked = ("completed", "arrived", "approved")
+    return tuple(
+        (_FIRST_DELIVERY_DAY + index, hour, hours, gate, "approved" if status in booked else "requested", share, cargo)
+        for index, (_day, hour, hours, gate, status, share, cargo) in enumerate(rows)
+    )
+
+
+def _hhmm(value: object) -> bool:
+    """Whether ``value`` is a ``HH:MM`` clock time."""
+    if not isinstance(value, str) or len(value) != 5 or value[2] != ":":
+        return False
+    hh, mm = value[:2], value[3:]
+    return hh.isdigit() and mm.isdigit() and int(hh) < 24 and int(mm) < 60
+
+
+def resolve_site_content(
+    story: dict | None,
+    locale: str,
+    rows: tuple[tuple[int, int, int, int, str, str, str | None], ...] = _DELIVERIES,
+) -> tuple[tuple[tuple[str, str, str, int, str], ...], tuple[tuple[str, str, str], ...], tuple[str, str]]:
+    """Gates, laydown zones and vehicle types of a project, from its story where the story is sound.
+
+    The story keys ``gates`` (name, open, close, capacity, note), ``zones`` (name, capacity, note)
+    and ``vehicles`` (one vehicle type per gate, first gate first) each replace the matching default
+    as a whole. A key that is malformed, or a gate list whose hours do not contain every booked
+    delivery window, keeps the default for that key.
+    """
+    from app.modules.project_governance.public import story_text
+
+    if (locale or "").lower().startswith("de"):
+        gates, zones, vehicles = _GATES_DE, _ZONES_DE, _VEHICLES_DE
+    else:
+        gates, zones, vehicles = _GATES, _ZONES, _VEHICLES
+    if not isinstance(story, dict) or not story:
+        return gates, zones, vehicles
+
+    raw_gates = story.get("gates")
+    if isinstance(raw_gates, list) and len(raw_gates) >= 2 and all(isinstance(g, dict) for g in raw_gates):
+        cand = tuple(
+            (
+                story_text(g.get("name"), locale),
+                g.get("open"),
+                g.get("close"),
+                g.get("capacity"),
+                story_text(g.get("note"), locale),
+            )
+            for g in raw_gates
+        )
+        sound = all(
+            name and _hhmm(op) and _hhmm(cl) and op < cl and isinstance(cap, int) and not isinstance(cap, bool)
+            for name, op, cl, cap, _note in cand
+        ) and len({c[0] for c in cand}) == len(cand)
+        if sound:
+            for _day, hour, hours, gate_index, *_rest in rows:
+                _name, op, cl, *_tail = cand[gate_index % len(cand)]
+                if f"{hour:02d}:00" < op or f"{hour + hours:02d}:00" > cl:
+                    sound = False
+                    break
+        if sound:
+            gates = cand
+        else:
+            logger.info("site_logistics demo story: gates not usable, keeping the default gates")
+
+    raw_zones = story.get("zones")
+    if isinstance(raw_zones, list) and raw_zones and all(isinstance(z, dict) for z in raw_zones):
+        zcand = tuple(
+            (
+                story_text(z.get("name"), locale),
+                story_text(z.get("capacity"), locale),
+                story_text(z.get("note"), locale),
+            )
+            for z in raw_zones
+        )
+        if all(all(z) for z in zcand):
+            zones = zcand
+        else:
+            logger.info("site_logistics demo story: zones not usable, keeping the default zones")
+
+    raw_vehicles = story.get("vehicles")
+    if isinstance(raw_vehicles, list) and len(raw_vehicles) == 2:
+        named = [story_text(v, locale) for v in raw_vehicles]
+        if all(named):
+            vehicles = (named[0], named[1])
+    return gates, zones, vehicles
+
+
+def _window(base: datetime, day_offset: int, hour: int, hours: int) -> tuple[datetime, datetime]:
+    """Return a ``(start, end)`` window on the given day, on the hour."""
+    day = (base + timedelta(days=day_offset)).date()
+    start = datetime.combine(day, time(hour=hour))
+    return start, start + timedelta(hours=hours)
+
+
+async def seed_demo_site_logistics(
+    session: AsyncSession,
+    *,
+    project_id: uuid.UUID,
+    created_by: str | None = None,
+    suppliers: list[str] | None = None,
+    now: datetime | None = None,
+) -> int:
+    """Seed gates, laydown zones and bill-linked deliveries for one project.
+
+    Args:
+        session: Open async session; the caller owns the transaction.
+        project_id: Project to seed.
+        created_by: Acting user id recorded on every row.
+        suppliers: Company names to use as delivery suppliers, in order. The
+            caller passes the demo template's own companies so no new firm
+            name enters the product here.
+        now: Anchor for the delivery windows; defaults to the current day.
+
+    Returns:
+        How many deliveries were written. Zero means the project's bill had no
+        deliverable position, in which case nothing at all is written - a
+        delivery board with no bill behind it is the state this seeder exists
+        to avoid.
+    """
+    from sqlalchemy import select
+
+    from app.modules.boq.models import BOQ, Position
+    from app.modules.site_logistics import hosting
+    from app.modules.site_logistics.coverage import to_decimal
+    from app.modules.site_logistics.models import DeliveryBooking, DeliveryLine, Gate, LaydownZone
+
+    base = now or datetime.now()
+    # The board tells the story of where the project stands: before its gate into
+    # construction nothing has been delivered yet.
+    rows = planned_deliveries() if await hosting.before_construction(session, project_id) else _DELIVERIES
+    from app.core.demo_marker import demo_id_of
+    from app.modules.project_governance.public import demo_module_story, story_text
+    from app.modules.projects.models import Project
+
+    project = await session.get(Project, project_id)
+    story = demo_module_story(demo_id_of(getattr(project, "metadata_", None)), "site_logistics")
+    locale = getattr(project, "locale", None) or "en"
+    site_gates, site_zones, vehicles = resolve_site_content(story, locale, rows)
+    # Two texts of the board a story may word in its own language: the supplier used when the bill names none
+    # and the cargo of the rejected booking.
+    german = (locale or "").lower().startswith("de")
+    fallback_supplier = story_text(story.get("fallback_supplier"), locale) or (
+        "Generalunternehmer" if german else "Main Contractor"
+    )
+    rejected_cargo = story_text(story.get("rejected_cargo"), locale)
+    names = [s for s in (suppliers or []) if s] or [fallback_supplier]
+
+    # The material lines of this project's own bill: leaves, priced, in bill
+    # order. Section rows are excluded the same two ways the coverage query
+    # excludes them (see BillPositionRepository._deliverable_positions).
+    parents = (
+        select(Position.parent_id)
+        .join(BOQ, Position.boq_id == BOQ.id)
+        .where(BOQ.project_id == project_id, Position.parent_id.is_not(None))
+        .scalar_subquery()
+    )
+    stmt = (
+        select(Position)
+        .join(BOQ, Position.boq_id == BOQ.id)
+        .where(
+            BOQ.project_id == project_id,
+            Position.unit != "section",
+            Position.unit != "",
+            Position.id.not_in(parents),
+        )
+        .order_by(Position.boq_id.asc(), Position.sort_order.asc())
+        .limit(len(_DELIVERIES))
+    )
+    positions = list((await session.execute(stmt)).scalars().all())
+    if not positions:
+        logger.debug("Project %s has no deliverable bill position, skipping logistics seed", project_id)
+        return 0
+
+    gates: list[Gate] = []
+    for name, open_time, close_time, capacity, note in site_gates:
+        gate = Gate(
+            id=uuid.uuid4(),
+            project_id=project_id,
+            name=name,
+            open_time=open_time,
+            close_time=close_time,
+            capacity_per_slot=capacity,
+            notes=note,
+            created_by=created_by,
+            metadata_={"is_demo": True},
+        )
+        session.add(gate)
+        gates.append(gate)
+
+    for name, capacity_desc, usage_note in site_zones:
+        session.add(
+            LaydownZone(
+                id=uuid.uuid4(),
+                project_id=project_id,
+                name=name,
+                capacity_desc=capacity_desc,
+                usage_note=usage_note,
+                created_by=created_by,
+                metadata_={"is_demo": True},
+            )
+        )
+
+    # The gates have to exist before a delivery can name one. A booking carries
+    # its gate as a plain ``gate_id`` value rather than through a relationship,
+    # so the unit of work has no dependency to order the inserts by and is free
+    # to write the delivery first - which the foreign key then refuses.
+    await session.flush()
+
+    written = 0
+    for index, (day_offset, hour, hours, gate_index, status, share, extra_cargo) in enumerate(rows):
+        position = positions[index % len(positions)]
+        window_start, window_end = _window(base, day_offset, hour, hours)
+        quantity = (to_decimal(position.quantity) * Decimal(share)).quantize(Decimal("0.01"))
+        if quantity <= 0:
+            # A position priced at zero quantity cannot be delivered against.
+            continue
+        session.add(
+            DeliveryBooking(
+                id=uuid.uuid4(),
+                project_id=project_id,
+                gate_id=gates[gate_index % len(gates)].id,
+                supplier_name=names[index % len(names)],
+                vehicle_type=vehicles[0] if gate_index == 0 else vehicles[1],
+                materials_desc=(rejected_cargo or (_CARGO_DE.get(extra_cargo, extra_cargo) if german else extra_cargo))
+                if extra_cargo
+                else extra_cargo,
+                window_start=window_start,
+                window_end=window_end,
+                status=status,
+                created_by=created_by,
+                lines=[
+                    DeliveryLine(
+                        id=uuid.uuid4(),
+                        boq_position_id=position.id,
+                        position_ordinal=position.ordinal,
+                        description=position.description,
+                        quantity=quantity,
+                        unit=position.unit,
+                        sort_order=0,
+                    )
+                ],
+                metadata_={"is_demo": True},
+            )
+        )
+        written += 1
+
+    await session.flush()
+    logger.debug("Seeded %d demo deliveries for project %s", written, project_id)
+    return written
+
+
+async def seed_site_logistics_demo(session: AsyncSession, project_ids: list[uuid.UUID]) -> dict[str, int]:
+    """Seed the delivery board for every demo project that has none yet.
+
+    The installer seeds a project as it is created, which reaches new
+    installations only. Every estate that already exists - including the public
+    demo the module was built for - is filled by ``demo_enrichment``, which
+    re-runs over existing projects, so a module wired only into the installer
+    ships to an empty board on the very installations people look at.
+
+    Self-guards per project on an existing gate or delivery, so a re-run adds
+    nothing and a board somebody is already using is left alone.
+
+    Args:
+        session: Open async session; the caller commits.
+        project_ids: Projects to consider. The caller passes the demo estate
+            only - a delivery is a record a real project earns, and inventing
+            one inside a customer's live project is a data-integrity problem.
+
+    Returns:
+        ``{"projects": n, "deliveries": m}``, empty when nothing was written.
+    """
+    from sqlalchemy import select
+
+    from app.modules.projects.models import Project
+    from app.modules.site_logistics.models import DeliveryBooking, Gate
+
+    projects = 0
+    deliveries = 0
+    for project_id in project_ids:
+        has_gate = (
+            await session.execute(select(Gate.id).where(Gate.project_id == project_id).limit(1))
+        ).scalar_one_or_none()
+        has_delivery = (
+            await session.execute(select(DeliveryBooking.id).where(DeliveryBooking.project_id == project_id).limit(1))
+        ).scalar_one_or_none()
+        if has_gate is not None or has_delivery is not None:
+            continue
+
+        project = await session.get(Project, project_id)
+        if project is None:
+            continue
+        written = await seed_demo_site_logistics(
+            session,
+            project_id=project_id,
+            created_by=str(project.owner_id) if project.owner_id else None,
+            suppliers=_template_suppliers(project),
+        )
+        if written:
+            projects += 1
+            deliveries += written
+
+    # The logistics plan (stages, areas, media, transports, customs, neighbourhood)
+    # on the same demo projects; it guards itself per project on an existing stage.
+    from app.modules.site_logistics.demo_plan import seed_logistics_plan_demo
+
+    plan = await seed_logistics_plan_demo(session, list(project_ids))
+    if not deliveries and not plan["projects"]:
+        return {}
+    return {"projects": projects, "deliveries": deliveries, "plan_projects": plan["projects"]}
+
+
+def _template_suppliers(project: object) -> list[str]:
+    """Return the demo template's own tender companies as supplier names.
+
+    The same names the installer uses, resolved from the project's demo marker,
+    so the enrichment path and the install path invent no company name and do
+    not disagree about who delivers to a site. An unmarked project or a missing
+    template yields an empty list, which the seeder reads as "use the generic
+    contractor".
+    """
+    try:
+        from app.core.demo_projects import DEMO_TEMPLATES, _firms
+
+        metadata = getattr(project, "metadata_", None)
+        demo_id = str(metadata.get("demo_id") or "").strip() if isinstance(metadata, dict) else ""
+        template = DEMO_TEMPLATES.get(demo_id)
+        if template is None:
+            return []
+        return [name for name, _email in _firms(template)]
+    except Exception:
+        logger.debug("Could not resolve demo suppliers for project", exc_info=True)
+        return []

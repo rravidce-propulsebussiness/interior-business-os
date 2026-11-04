@@ -1,0 +1,2509 @@
+{
+  "costs.catalog_name_unavailable": "Это имя нельзя использовать для нового каталога. Выберите другое имя.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Open-source сметное дело"
+  },
+  "nav": {
+    "dashboard": "Панель управления",
+    "assemblies": "Калькуляции",
+    "ai_estimate": "ИИ Оценка",
+    "settings": "Настройки",
+    "5d_cost_model": "5D Модель стоимости",
+    "templates": "Шаблоны",
+    "reports": "Отчёты",
+    "sustainability": "Экология",
+    "group_estimation": "Сметное дело",
+    "group_planning": "Планирование",
+    "group_procurement": "Закупки",
+    "group_tools": "Инструменты",
+    "architecture": "Карта архитектуры"
+  },
+  "common": {
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "create": "Создать",
+    "search": "Поиск",
+    "filter": "Фильтр",
+    "export": "Экспорт",
+    "import": "Импорт",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "confirm": "Подтвердить",
+    "back": "Назад",
+    "next": "Далее",
+    "yes": "Да",
+    "no": "Нет"
+  },
+  "auth": {
+    "login": "Войти",
+    "logout": "Выйти",
+    "email": "Эл. почта",
+    "password": "Пароль"
+  },
+  "projects": {
+    "title": "Проекты",
+    "new_project": "Новый проект",
+    "project_name": "Название проекта",
+    "no_projects": "Нет проектов"
+  },
+  "boq": {
+    "title": "Смета",
+    "position": "Позиция",
+    "ordinal": "Номер",
+    "description": "Описание",
+    "quantity": "Количество",
+    "unit": "Ед. изм.",
+    "unit_rate": "Цена за единицу",
+    "total": "Итого",
+    "add_position": "Добавить позицию",
+    "add_section": "Добавить раздел",
+    "assembly": "Сборная расценка",
+    "subtotal": "Подитог",
+    "grand_total": "Общий итог",
+    "direct_cost": "Прямые затраты",
+    "net_total": "Итого нетто",
+    "gross_total": "Итого брутто",
+    "vat": "НДС",
+    "add_markups": "Добавить наценки",
+    "validate": "Проверить",
+    "export": "Экспорт",
+    "mvp": {
+      "title": "Выбор материалов",
+      "subtitle_one": "{{count}} ресурс требует выбора",
+      "subtitle_other": "{{count}} ресурса требует выбора",
+      "bulk_label": "Быстрая заливка:",
+      "bulk_median": "Медиана для всех",
+      "bulk_mean": "Среднее для всех",
+      "bulk_cheapest": "Самые дешёвые для всех",
+      "bulk_priciest": "Самые дорогие для всех",
+      "slot_variant_count": "{{n}} вариантов",
+      "selected_label": "Выбрано:",
+      "default_mean": "средняя расценка",
+      "default_median": "медианная расценка",
+      "row_median": "Медиана · {{price}}",
+      "row_mean": "Среднее · {{price}}",
+      "subtotal_label": "Расценка позиции",
+      "apply": "Применить и добавить в смету",
+      "batch_progress": "Элемент {{current}} из {{total}}",
+      "toast_applied_one": "Выбран {{count}} вариант",
+      "toast_applied_other": "Выбрано {{count}} варианта"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Отчёт об обмене"
+      },
+      "column": {
+        "severity": "Серьёзность",
+        "kind": "Вид потери",
+        "position": "Позиция",
+        "field": "Поле",
+        "original": "Исходное значение",
+        "written": "Записанное значение",
+        "count": "Количество",
+        "detail": "Подробности"
+      },
+      "severity": {
+        "error": "Критично",
+        "warning": "Предупреждение",
+        "info": "Примечание"
+      },
+      "kind": {
+        "unsupported_element": "Элемент не поддерживается",
+        "truncated_text": "Текст обрезан",
+        "altered_text": "Текст изменён",
+        "rounded_value": "Значение округлено",
+        "value_out_of_range": "Значение вне диапазона",
+        "dropped_attribute": "Атрибут отброшен",
+        "unmapped_unit": "Единица не сопоставлена",
+        "lost_hierarchy": "Уровень иерархии потерян",
+        "markup_not_representable": "Надбавка не представима",
+        "attachment_skipped": "Вложение пропущено",
+        "changed_identifier": "Идентификатор изменён",
+        "exceeds_limit": "Превышен предел хранения",
+        "rejected_row": "Строка отклонена",
+        "skipped_row": "Строка пропущена",
+        "parser_warning": "Предупреждение чтения",
+        "roundtrip_mismatch": "Расхождение при круговой проверке"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Точка ответвления",
+      "base_snapshot_from": "Точка ответвления (из снимка «{snapshot}»)",
+      "before_cherry_pick": "Перед применением изменений из «{source}»",
+      "before_merge": "Перед слиянием ветки «{branch}»",
+      "errors": {
+        "branch_closed": "Эта ветка уже влита или архивирована, вносить в неё изменения нельзя.",
+        "not_a_branch": "Этот сметный расчёт не является веткой.",
+        "same_bill": "Выберите две разные сметы.",
+        "different_project": "Обе сметы должны относиться к одному проекту.",
+        "different_tree": "Обе сметы должны быть ветками одной основной сметы.",
+        "unresolved_conflicts": "Позиций, изменённых в обеих сметах: {count}. Перед применением решите, какую версию оставить для каждой.",
+        "merge_forbidden": "У вас нет права на слияние с основной сметой.",
+        "confirm_required": "Подтвердите слияние: оно перезаписывает основную смету.",
+        "design_options_unavailable": "Модуль вариантов проектных решений не установлен.",
+        "base_snapshot_in_use": "Этот снимок - точка ответвления открытой ветки, его нельзя удалить."
+      },
+      "export": {
+        "title_positions": "Сравнение смет по позициям",
+        "title_sections": "Сравнение смет по разделам",
+        "title_cost_groups": "Сравнение смет по группам затрат",
+        "project": "Проект",
+        "bill_a": "Смета A",
+        "bill_b": "Смета B",
+        "total_a": "Итого A",
+        "total_b": "Итого B",
+        "delta": "Разница",
+        "counts": "Изменения",
+        "counts_value": "добавлено: {added}, удалено: {removed}, изменено: {changed}",
+        "col_ordinal": "Поз.",
+        "col_description": "Наименование",
+        "col_unit": "Ед.",
+        "col_change": "Изменение",
+        "col_qty_a": "Кол-во A",
+        "col_qty_b": "Кол-во B",
+        "col_rate_a": "Расценка A",
+        "col_rate_b": "Расценка B",
+        "col_total_a": "Итого A",
+        "col_total_b": "Итого B",
+        "col_delta": "Разница",
+        "col_section": "Раздел",
+        "col_cost_group": "Группа затрат",
+        "change_added": "Добавлено",
+        "change_removed": "Удалено",
+        "change_changed": "Изменено",
+        "change_unchanged": "Без изменений",
+        "ungrouped": "Без группы",
+        "empty": "Две сметы идентичны.",
+        "total": "Итого"
+      }
+    }
+  },
+  "costs": {
+    "title": "База расценок",
+    "rate": "Расценка",
+    "material": "Материал",
+    "labor": "Работа",
+    "equipment": "Механизмы",
+    "search_costs": "Поиск расценок..."
+  },
+  "assemblies": {
+    "title": "Калькуляции",
+    "description": "Сборные расценки — комбинируйте материалы, труд и технику в готовые шаблоны",
+    "new_assembly": "Новая калькуляция",
+    "from_database": "Из базы данных",
+    "apply_to_boq": "Применить к смете",
+    "add_component": "Добавить компонент",
+    "no_assemblies": "Нет калькуляций",
+    "no_assemblies_hint": "Создайте первую сборную расценку из Базы расценок или Каталога ресурсов",
+    "total_rate": "Итоговая расценка"
+  },
+  "catalog": {
+    "title": "Каталог ресурсов",
+    "description": "Материалы, оборудование, трудовые ресурсы и операторы",
+    "add_resource": "Добавить ресурс",
+    "import_region": "Импорт региона",
+    "build_assembly": "Создать калькуляцию",
+    "my_catalog": "Мой каталог"
+  },
+  "validation": {
+    "title": "Проверка",
+    "passed": "Пройдено",
+    "warnings": "Предупреждения",
+    "errors": "Ошибки",
+    "score": "Оценка качества",
+    "run_validation": "Запустить проверку",
+    "missing_quantity": "Позиция {position} без количества",
+    "missing_rate": "Позиция {position} без расценки",
+    "missing_description": "Позиция {position} без описания",
+    "missing_classification": "Позиция {position} без классификации",
+    "duplicate_ordinal": "Дублирующийся номер: {ordinal}",
+    "rate_anomaly": "Расценка {rate} превышает порог ({threshold})",
+    "nl": {
+      "not_a_string": "Ввод должен быть строкой.",
+      "empty": "Ввод пуст.",
+      "too_long": "Ввод превышает {max} символов.",
+      "ai_unparsable": "Ответ ИИ не удалось разобрать как документ DSL.",
+      "no_pattern": "Ни один шаблон не подошел к введенному предложению.",
+      "try": "Попробуйте: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "4D График",
+    "generated": {
+      "position_label": "Позиция {ordinal}",
+      "section_label": "Раздел {ordinal}",
+      "task_description": "Создано автоматически по позиции {ordinal} сметы ({quantity} {unit})",
+      "section_description": "Сводка: раздел {ordinal} сметы",
+      "start_milestone": "Начало проекта",
+      "start_milestone_description": "Контрольная точка начала проекта",
+      "completion_milestone": "Завершение проекта",
+      "completion_milestone_description": "Контрольная точка завершения проекта",
+      "labour_resource": "Трудозатраты",
+      "machine_resource": "Машины и механизмы"
+    },
+    "progress_sheet": {
+      "sheet_title": "Прогресс",
+      "title": "Лист обновления прогресса",
+      "detail_schedule": "График: {name}",
+      "detail_exported": "Выгружено: {date}",
+      "instructions": "Заполняйте только белые столбцы. Не меняйте серые столбцы, порядок строк и скрытые столбцы.",
+      "col": {
+        "activity_ref": "ID работы",
+        "name": "Работа",
+        "wbs_code": "WBS",
+        "responsible": "Ответственный",
+        "planned_start": "Плановое начало",
+        "planned_finish": "Плановое окончание",
+        "percent_complete": "% выполнения",
+        "actual_start": "Фактическое начало",
+        "actual_finish": "Фактическое окончание",
+        "remaining_duration": "Осталось (рабочих дней)",
+        "notes": "Примечания",
+        "row_key": "Ключ строки",
+        "stamp": "Метка"
+      }
+    }
+  },
+  "cad": {
+    "title": "Импорт CAD",
+    "upload": "Загрузить CAD-файл",
+    "supported_formats": "Поддерживаемые: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Конвертация...",
+    "elements_found": "Найдено элементов: {count}"
+  },
+  "takeoff": {
+    "title": "Подсчёт объёмов",
+    "auto_detect": "Автоопределение",
+    "manual_measure": "Ручной обмер",
+    "confidence": "Достоверность"
+  },
+  "tendering": {
+    "title": "Тендеры",
+    "create_tender": "Создать тендер",
+    "bid": "Коммерческое предложение",
+    "award": "Присуждение"
+  },
+  "modules": {
+    "title": "Модули",
+    "installed": "Установлено",
+    "available": "Доступно",
+    "install": "Установить",
+    "uninstall": "Удалить",
+    "update": "Обновить"
+  },
+  "dashboard": {
+    "welcome": "Добро пожаловать в OpenConstructionERP",
+    "subtitle": "Ваше рабочее пространство сметного дела",
+    "recent_projects": "Последние проекты",
+    "system_status": "Состояние системы",
+    "modules_loaded": "Загружено модулей",
+    "validation_rules": "Правила проверки",
+    "languages": "Языки",
+    "getting_started": "Начало работы",
+    "total_value": "Общая стоимость",
+    "active_estimates": "Активные сметы",
+    "schedule_status": "Статус графика",
+    "quality_score": "Оценка качества",
+    "analytics": "Аналитика",
+    "project_overview": "Обзор проектов",
+    "continue_estimate": "Продолжить смету",
+    "step_load_db": "Загрузить базу расценок",
+    "step_load_db_desc": "Импортируйте региональную базу с 55 000+ позициями",
+    "step_ai_search": "Включить ИИ-поиск",
+    "step_ai_search_desc": "Создайте векторные эмбеддинги для семантического поиска",
+    "step_connect_ai": "Подключить ИИ",
+    "step_connect_ai_desc": "Добавьте API-ключи для ИИ-оценки",
+    "step_create_project": "Создать проект",
+    "step_create_project_desc": "Начните первый проект строительной сметы",
+    "step_build_boq": "Составить смету",
+    "step_build_boq_desc": "Создайте смету с помощью ИИ"
+  },
+  "units": {
+    "m": "м",
+    "m2": "м²",
+    "m3": "м³",
+    "kg": "кг",
+    "t": "т",
+    "pcs": "шт",
+    "lsum": "паушально",
+    "h": "ч",
+    "set": "компл"
+  },
+  "contacts": {
+    "title": "Контактная база",
+    "new_contact": "Новый контакт",
+    "contact_type": "Тип контакта",
+    "client": "Заказчик",
+    "subcontractor": "Субподрядчик",
+    "supplier": "Поставщик",
+    "consultant": "Консультант",
+    "internal": "Внутренний",
+    "company_name": "Название организации",
+    "search_contacts": "Поиск контактов...",
+    "no_contacts": "Нет контактов",
+    "prequalification": "Предквалификация",
+    "approved": "Одобрен",
+    "pending": "На рассмотрении",
+    "expired": "Просрочен"
+  },
+  "tasks": {
+    "title": "Задачи",
+    "new_task": "Новая задача",
+    "task": "Задача",
+    "topic": "Тема",
+    "information": "Информация",
+    "decision": "Решение",
+    "personal": "Личная задача",
+    "my_tasks": "Мои задачи",
+    "open": "Открыта",
+    "in_progress": "В работе",
+    "completed": "Завершена",
+    "draft": "Черновик",
+    "due_date": "Срок",
+    "assignee": "Исполнитель",
+    "priority": "Приоритет",
+    "checklist": "Чеклист",
+    "focus_area": "Направление"
+  },
+  "rfi": {
+    "title": "Запросы информации",
+    "new_rfi": "Новый запрос",
+    "subject": "Тема",
+    "question": "Вопрос",
+    "response": "Ответ",
+    "ball_in_court": "Ответственный",
+    "days_open": "Дней открыт",
+    "cost_impact": "Влияние на стоимость",
+    "schedule_impact": "Влияние на сроки",
+    "respond": "Ответить",
+    "close": "Закрыть",
+    "overdue": "Просрочен"
+  },
+  "finance": {
+    "title": "Финансы",
+    "budgets": "Бюджеты",
+    "invoices": "Счета",
+    "payable": "К оплате",
+    "receivable": "К получению",
+    "payments": "Платежи",
+    "evm": "Освоенный объём",
+    "invoice_number": "Счёт №",
+    "amount": "Сумма",
+    "status": "Статус",
+    "approve": "Утвердить",
+    "pay": "Отметить оплату",
+    "original_budget": "Первоначальный бюджет",
+    "revised_budget": "Скорректированный бюджет",
+    "committed": "Обязательства",
+    "actual": "Факт",
+    "forecast": "Прогноз",
+    "variance": "Отклонение"
+  },
+  "procurement": {
+    "title": "Закупки",
+    "purchase_orders": "Заказы на закупку",
+    "goods_receipts": "Приёмка товаров",
+    "new_po": "Новый заказ",
+    "po_number": "Заказ №",
+    "vendor": "Поставщик",
+    "issue": "Выдать",
+    "confirm": "Подтвердить приёмку"
+  },
+  "safety": {
+    "title": "Охрана труда",
+    "incidents": "Инциденты",
+    "observations": "Наблюдения",
+    "new_incident": "Новый инцидент",
+    "new_observation": "Новое наблюдение",
+    "severity": "Тяжесть",
+    "risk_score": "Оценка риска",
+    "days_lost": "Дни нетрудоспособности",
+    "treatment": "Лечение",
+    "corrective_action": "Корректирующие действия"
+  },
+  "meetings": {
+    "title": "Совещания",
+    "new_meeting": "Новое совещание",
+    "meeting_type": "Тип",
+    "attendees": "Участники",
+    "agenda": "Повестка дня",
+    "action_items": "Поручения",
+    "minutes": "Протокол",
+    "complete": "Завершить совещание",
+    "present": "Присутствовал",
+    "absent": "Отсутствовал",
+    "excused": "По уважительной причине",
+    "actions": {
+      "status": {
+        "open": "Открыто",
+        "completed": "Выполнено",
+        "cancelled": "Отменено"
+      },
+      "flag": {
+        "overdue": "Просрочено",
+        "on_track": "В графике"
+      },
+      "label": {
+        "action_item": "Поручение",
+        "completion_rate": "Доля выполненных поручений",
+        "open_vs_done": "Открытые и выполненные",
+        "overdue": "Просроченные поручения"
+      },
+      "explain": {
+        "action_item": "Поручение - это задача, согласованная на встрече, с ответственным и сроком.",
+        "completion_rate": "Доля выполненных поручений - это число выполненных поручений, делённое на общее число поручений, от 0 до 1.",
+        "open_vs_done": "Открытые поручения ещё в работе. Выполненные поручения завершены.",
+        "overdue": "Поручение просрочено, если оно ещё открыто и его срок наступил раньше отчётной даты."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Протокол совещания",
+      "issued": "ВЫПУЩЕН",
+      "draft": "ЧЕРНОВИК",
+      "date": "Дата:",
+      "location": "Место:",
+      "type": "Тип:",
+      "number": "Совещание №:",
+      "chairperson": "Председатель:",
+      "next_meeting": "Следующее совещание:",
+      "not_available": "Нет данных",
+      "not_scheduled": "Не назначено",
+      "attendance": "Присутствие",
+      "present": "Присутствовали:",
+      "absent": "Отсутствовали / по уважительной причине:",
+      "agenda": "Повестка, обсуждение и решения",
+      "required": "(обязательно)",
+      "discussion": "Обсуждение:",
+      "decision": "Решение:",
+      "decisions": "Решения",
+      "open_questions": "Открытые вопросы",
+      "actions": "Поручения",
+      "col_number": "#",
+      "col_action": "Поручение",
+      "col_owner": "Ответственный",
+      "col_due": "Срок",
+      "col_status": "Статус",
+      "brought_forward": "[Перенесено]",
+      "overdue": "(просрочено)",
+      "status_open": "Открыто",
+      "status_in_progress": "В работе",
+      "status_done": "Выполнено",
+      "status_cancelled": "Отменено",
+      "summary": "Резюме",
+      "generated": "Сформировано: {stamp}",
+      "issued_at": "Выпущено {stamp}",
+      "running_head": "{project} - Протокол",
+      "type_progress": "Ход работ",
+      "type_design": "Проектное",
+      "type_safety": "Охрана труда",
+      "type_subcontractor": "Субподрядчик",
+      "type_kickoff": "Стартовое",
+      "type_closeout": "Сдача объекта",
+      "type_commercial": "Коммерческое"
+    }
+  },
+  "inspections": {
+    "title": "Проверки качества",
+    "new_inspection": "Новая проверка",
+    "inspector": "Проверяющий",
+    "checklist": "Чеклист",
+    "pass": "Пройдена",
+    "fail": "Не пройдена",
+    "partial": "Частично",
+    "critical": "Критически",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Запланирована",
+        "in_progress": "В работе",
+        "completed": "Завершена",
+        "failed": "Провалена",
+        "cancelled": "Отменена"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Акты о несоответствиях",
+    "new_ncr": "Новый акт",
+    "root_cause": "Коренная причина",
+    "corrective_action": "Корректирующие действия",
+    "preventive_action": "Предупредительные действия",
+    "material": "Материал",
+    "workmanship": "Качество работ",
+    "design": "Проектирование"
+  },
+  "submittals": {
+    "title": "Подачи документов",
+    "new_submittal": "Новая подача",
+    "spec_section": "Раздел спецификации",
+    "revision": "Ревизия",
+    "submit": "Подать",
+    "review": "На проверке",
+    "approved_as_noted": "Утверждено с замечаниями",
+    "revise_resubmit": "Доработать и подать повторно",
+    "intl": {
+      "status_labels": {
+        "draft": "Черновик",
+        "submitted": "Отправлено",
+        "under_review": "На рассмотрении",
+        "approved": "Утверждено",
+        "approved_as_noted": "Утверждено с замечаниями",
+        "revise_and_resubmit": "Доработать и подать снова",
+        "rejected": "Отклонено",
+        "closed": "Закрыто"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Переписка",
+    "new_entry": "Новая запись",
+    "incoming": "Входящие",
+    "outgoing": "Исходящие",
+    "letter": "Письмо",
+    "email": "Эл. почта",
+    "notice": "Уведомление",
+    "date_sent": "Дата отправки",
+    "date_received": "Дата получения"
+  },
+  "cde": {
+    "title": "Общая среда данных",
+    "new_container": "Новый контейнер",
+    "container_code": "Код контейнера",
+    "cde_state": "Статус CDE",
+    "wip": "В разработке",
+    "shared": "Общий доступ",
+    "published": "Опубликовано",
+    "archived": "Архив",
+    "promote": "Перевести",
+    "suitability": "Пригодность",
+    "discipline": "Раздел проекта",
+    "revisions": "Ревизии",
+    "intl": {
+      "state_labels": {
+        "wip": "В работе",
+        "shared": "Опубликовано для согласования",
+        "published": "Выпущено",
+        "archived": "Архив"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Сопроводительные",
+    "new_transmittal": "Новая передача",
+    "purpose": "Назначение",
+    "for_approval": "На утверждение",
+    "for_information": "Для сведения",
+    "for_construction": "Для производства работ",
+    "recipients": "Получатели",
+    "acknowledge": "Подтвердить",
+    "locked": "Заблокировано",
+    "issue_transmittal": "Выдать",
+    "intl": {
+      "status_words": {
+        "draft": "черновик",
+        "issued": "отправлено",
+        "responded": "отвечено"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Уведомления",
+    "no_notifications": "Нет новых уведомлений",
+    "mark_all_read": "Отметить все как прочитанные",
+    "unread": "Непрочитанные"
+  },
+  "comments": {
+    "title": "Комментарии",
+    "post": "Опубликовать",
+    "reply": "Ответить",
+    "edit": "Редактировать",
+    "delete": "Удалить",
+    "placeholder": "Напишите комментарий...",
+    "empty": "Пока нет комментариев. Начните обсуждение.",
+    "edited": "изменён",
+    "deleted": "Этот комментарий удалён"
+  },
+  "bim": {
+    "title": "Центр BIM",
+    "models": "Модели",
+    "elements": "Элементы",
+    "upload_model": "Загрузить модель",
+    "processing": "Обработка",
+    "active": "Активно",
+    "link_to_boq": "Связать со сметой",
+    "properties": "Свойства",
+    "quantities": "Объёмы",
+    "wireframe": "Каркас",
+    "section_box": "Сечение",
+    "measure": "Измерить",
+    "zoom_to_fit": "Вписать в вид"
+  },
+  "reporting": {
+    "title": "Отчёты и панели мониторинга",
+    "kpi": "Панель KPI",
+    "generate_report": "Сформировать отчёт",
+    "templates": "Шаблоны",
+    "project_status": "Статус проекта",
+    "cost_report": "Отчёт по стоимости",
+    "schedule_status": "Статус графика",
+    "safety_report": "Отчёт по охране труда",
+    "explain": {
+      "report_total_one": "Итого по отчету: {money} (сумма по позициям: {count}).",
+      "report_total_other": "Итого по отчету: {money} (сумма по позициям: {count}).",
+      "percent_of_total": "{part} составляет {percent} из {total} (процент от общей суммы).",
+      "percent_zero_total": "{part} из {total}: сумма равна нулю, поэтому каждая доля показана как 0 процентов.",
+      "breakdown_empty": "Разбивка затрат: нет данных.",
+      "breakdown_one": "Разбивка затрат: групп {count}, итого по отчету {money}.",
+      "breakdown_other": "Разбивка затрат: групп {count}, итого по отчету {money}.",
+      "top_n_one": "Топ {requested}: {shown} из {shown} позиций.",
+      "top_n_other": "Топ {requested}: {shown} из {shown} позиций."
+    }
+  },
+  "gantt": {
+    "title": "Диаграмма Ганта",
+    "day": "День",
+    "week": "Неделя",
+    "month": "Месяц",
+    "critical_path": "Критический путь",
+    "baseline": "Базовый план",
+    "dependencies": "Зависимости",
+    "today": "Сегодня"
+  },
+  "settings": {
+    "regional": "Региональные настройки",
+    "timezone": "Часовой пояс",
+    "measurement": "Система измерения",
+    "paper_size": "Формат бумаги",
+    "date_format": "Формат даты",
+    "number_format": "Формат чисел",
+    "currency": "Валюта",
+    "metric": "Метрическая",
+    "imperial": "Имперская"
+  },
+  "users": {
+    "management": "Управление пользователями",
+    "management_desc": "Управление участниками, ролями и доступом",
+    "invite_user": "Пригласить",
+    "invite": "Пригласить",
+    "full_name": "Полное имя",
+    "email": "Эл. почта",
+    "password": "Пароль",
+    "role": "Роль",
+    "status": "Статус",
+    "last_login": "Последний вход",
+    "actions": "Действия",
+    "name": "Имя",
+    "total": "Всего",
+    "active": "Активные",
+    "inactive": "Неактивные",
+    "admins": "Админы",
+    "managers": "Менеджеры",
+    "search": "Поиск по имени или email...",
+    "no_users": "Пользователи не найдены",
+    "updated": "Пользователь обновлён",
+    "invited": "Пользователь приглашён",
+    "deactivate": "Деактивировать",
+    "activate": "Активировать",
+    "never": "Никогда",
+    "role_admin_desc": "Полный доступ",
+    "role_manager_desc": "Управление проектами",
+    "role_editor_desc": "Создание и редактирование",
+    "role_viewer_desc": "Только просмотр"
+  },
+  "document_forms": {
+    "procurement": {
+      "strings": {
+        "po_title": "Заказ на поставку",
+        "gr_title": "Приёмка поставки",
+        "supplier": "Поставщик",
+        "po_type": "Тип заказа",
+        "issue_date": "Дата выдачи",
+        "delivery_date": "Срок поставки",
+        "created_by": "Составитель",
+        "order_total": "Сумма заказа",
+        "line_items": "Позиции",
+        "col_no": "№",
+        "col_description": "Наименование",
+        "col_quantity": "Кол-во",
+        "col_unit": "Ед. изм.",
+        "col_unit_rate": "Цена за ед.",
+        "col_amount": "Сумма",
+        "no_line_items": "Позиций нет.",
+        "totals": "Итоги",
+        "subtotal": "Сумма без налога",
+        "tax": "Налог",
+        "total_gross": "Всего с налогом",
+        "terms": "Условия",
+        "payment_terms": "Условия оплаты",
+        "retention": "Удержание",
+        "retention_at": "Момент удержания",
+        "retention_at_receipt": "Приёмка",
+        "retention_at_invoice": "Счёт",
+        "invoice_tolerance": "Допуск по счёту",
+        "supplier_confirmation": "Подтверждение поставщика",
+        "supplier_reference": "Номер у поставщика",
+        "confirmed_delivery": "Подтверждённый срок",
+        "acknowledged_on": "Дата подтверждения",
+        "not_confirmed": "Поставщик ещё не подтвердил заказ.",
+        "notes": "Примечания",
+        "no_notes": "Примечаний нет.",
+        "sig_ordered_by": "Заказчик",
+        "purchase_order": "Заказ на поставку",
+        "receipt_date": "Дата приёмки",
+        "received_by": "Приёмщик",
+        "delivery_note": "Накладная",
+        "col_ordered": "Заказано",
+        "col_received": "Принято",
+        "col_rejected": "Отклонено",
+        "col_batch": "Партия",
+        "rejections": "Отклонения",
+        "col_reason": "Причина",
+        "no_rejections": "Отклонений нет.",
+        "sig_delivered_by": "Сдающая сторона",
+        "counterparty_tax_id": "ИНН",
+        "counterparty_address": "Адрес"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Черновик",
+          "approved": "Утверждён",
+          "issued": "Выдан",
+          "partially_received": "Получен частично",
+          "completed": "Выполнен",
+          "cancelled": "Отменён"
+        },
+        "gr_status": {
+          "draft": "Черновик",
+          "confirmed": "Подтверждена"
+        },
+        "po_type": {
+          "standard": "Стандартный",
+          "blanket": "Рамочный",
+          "service": "Услуги"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Счёт",
+        "payment_title": "Платёж",
+        "direction": "Тип счёта",
+        "supplier": "Поставщик",
+        "client": "Заказчик",
+        "invoice_date": "Дата счёта",
+        "due_date": "Срок оплаты",
+        "payment_terms": "Условия оплаты",
+        "purchase_order": "Заказ на поставку",
+        "invoice_total": "Сумма счёта",
+        "line_items": "Позиции",
+        "col_no": "№",
+        "col_description": "Наименование",
+        "col_quantity": "Кол-во",
+        "col_unit": "Ед. изм.",
+        "col_unit_rate": "Цена за ед.",
+        "col_vat": "НДС",
+        "col_amount": "Сумма",
+        "no_line_items": "Позиций нет.",
+        "totals": "Итоги",
+        "subtotal": "Сумма без налога",
+        "tax": "Налог",
+        "total_gross": "Всего с налогом",
+        "retention": "Удержание",
+        "amount_due": "К оплате за вычетом удержания",
+        "payments": "Платежи",
+        "col_date": "Дата",
+        "col_reference": "Основание",
+        "col_paid": "Оплачено",
+        "col_withheld": "Удержано",
+        "refund": "Возврат",
+        "no_payments": "Платежей нет.",
+        "notes": "Примечания",
+        "no_notes": "Примечаний нет.",
+        "invoice": "Счёт",
+        "invoice_number": "№ счёта",
+        "payment_date": "Дата платежа",
+        "reference": "Основание",
+        "amount_paid": "Сумма платежа",
+        "exchange_rate": "Курс",
+        "kind": "Вид",
+        "kind_payment": "Оплата",
+        "kind_refund": "Возврат",
+        "withholding": "Удержание",
+        "withheld_amount": "Сумма удержания",
+        "release_date": "Дата возврата удержания",
+        "gross_settled": "Погашено всего",
+        "no_withholding": "Удержаний по этому платежу нет.",
+        "counterparty_tax_id": "ИНН",
+        "counterparty_address": "Адрес"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Черновик",
+          "pending": "На согласовании",
+          "approved": "Утверждён",
+          "sent": "Отправлен",
+          "paid": "Оплачен",
+          "cancelled": "Отменён",
+          "credit_note_issued": "Выставлена кредит-нота"
+        },
+        "direction": {
+          "payable": "Входящий счёт",
+          "receivable": "Исходящий счёт"
+        },
+        "payment_status": {
+          "completed": "Проведён",
+          "refunded": "Возвращён"
+        }
+      }
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Реестр документации на согласование",
+        "doc_title": "Документация на согласование",
+        "doc_title_product_data": "Лист согласования материала",
+        "col_number": "№ документа",
+        "col_title": "Наименование",
+        "col_type": "Тип",
+        "col_spec": "Раздел спецификации",
+        "col_rev": "Рев.",
+        "col_date_submitted": "Дата подачи",
+        "col_date_required": "Требуемая дата",
+        "col_date_returned": "Дата возврата",
+        "col_reviewer": "Проверяющий",
+        "col_approver": "Согласующий",
+        "col_ball_in_court": "Ход за",
+        "submitted_by_org": "Подающая организация",
+        "review_notes": "Замечания проверяющего",
+        "no_review_notes": "Замечания проверяющего не внесены.",
+        "sig_submitted": "Подано",
+        "sig_reviewed": "Проверено",
+        "sig_approved": "Согласовано",
+        "register_filename": "reestr-dokumentacii-na-soglasovanie",
+        "register_title_shop_drawing": "Реестр рабочих чертежей",
+        "register_title_product_data": "Реестр согласования материалов",
+        "register_title_method_statement": "Реестр описаний методов работ",
+        "register_filename_shop_drawing": "reestr-rabochih-chertezhej",
+        "register_filename_product_data": "reestr-soglasovaniya-materialov",
+        "register_filename_method_statement": "reestr-opisanij-metodov-rabot",
+        "col_discipline": "Раздел",
+        "col_manufacturer": "Производитель / марка",
+        "col_model": "Модель / артикул",
+        "col_origin": "Страна происхождения",
+        "col_supplier": "Поставщик",
+        "col_product": "Изготовитель / модель / страна",
+        "col_review_code": "Код проверки",
+        "col_outcome": "Результат проверки",
+        "col_review_period": "Срок проверки (дн.)",
+        "col_review_due": "Проверить до",
+        "col_days_in_review": "Дней на проверке",
+        "col_days_in_review_print": "Дней на проверке",
+        "col_review_overdue": "Дней просрочки",
+        "col_required_on_site": "Нужно на объекте",
+        "col_long_lead": "Длит. поставка",
+        "col_lead_time": "Срок поставки (нед.)",
+        "col_needed_by": "Согласовать до",
+        "col_approval_late": "Дней после срока",
+        "col_drawings": "Связанные чертежи",
+        "col_submitted_returned": "Подан / возвращён",
+        "col_on_site_needed_by": "На объекте / согласовать до",
+        "resubmit_for_record": "Исправленный экземпляр подать повторно для архива",
+        "review_history": "История проверки",
+        "hist_submitted": "Подан",
+        "hist_returned": "Возвращён",
+        "drawings_missing_one": "{n} связанный чертёж больше недоступен",
+        "drawings_missing_other": "Недоступно связанных чертежей: {n}",
+        "weeks_one": "{n} нед.",
+        "weeks_other": "{n} нед."
+      },
+      "labels": {
+        "status": {
+          "draft": "Черновик",
+          "submitted": "Подан",
+          "under_review": "На проверке",
+          "approved": "Согласован",
+          "approved_as_noted": "Согласован с замечаниями",
+          "revise_and_resubmit": "Доработать и подать повторно",
+          "rejected": "Отклонён",
+          "closed": "Закрыт"
+        },
+        "type": {
+          "shop_drawing": "Рабочие чертежи",
+          "product_data": "Технические данные изделия",
+          "sample": "Образец",
+          "mock_up": "Макет",
+          "test_report": "Протокол испытаний",
+          "calculation": "Расчёт",
+          "method_statement": "Описание метода работ",
+          "certificate": "Сертификат",
+          "warranty": "Гарантия"
+        },
+        "discipline": {
+          "mechanical": "Механическое оборудование",
+          "hvac": "ОВиК",
+          "plumbing": "Водоснабжение и канализация",
+          "fire_protection": "Пожарная защита",
+          "electrical": "Электроснабжение",
+          "lighting": "Освещение",
+          "elv": "Слаботочные системы",
+          "bms": "Автоматизация здания",
+          "architectural": "Архитектурные решения",
+          "structural": "Конструктивные решения",
+          "civil": "Общестроительные работы"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Реестр приказов об изменении",
+        "doc_title": "Приказ об изменении",
+        "col_code": "Код",
+        "col_title": "Наименование",
+        "col_reason": "Причина",
+        "col_instrument": "Основание",
+        "col_submitted": "Дата подачи",
+        "col_contractor_amount": "Сумма подрядчика",
+        "col_engineer_amount": "Сумма инженера",
+        "col_approved_amount": "Утверждённая сумма",
+        "col_cost_impact": "Влияние на стоимость",
+        "col_time_impact": "Влияние на срок (дн.)",
+        "col_approved_time": "Утверждённый срок (дн.)",
+        "time_impact": "Влияние на срок",
+        "approved_time": "Утверждённый срок",
+        "col_approved": "Дата утверждения",
+        "submitted_by": "Подано",
+        "approved_by": "Утверждено",
+        "description": "Описание",
+        "no_description": "Описание не внесено.",
+        "items": "Позиции изменения",
+        "item_description": "Описание",
+        "item_change": "Изменение",
+        "item_unit": "Ед. изм.",
+        "item_original_quantity": "Кол-во (было)",
+        "item_new_quantity": "Кол-во (стало)",
+        "item_original_rate": "Расценка (была)",
+        "item_new_rate": "Расценка (стала)",
+        "item_cost_delta": "Разница в стоимости",
+        "register_filename": "reestr-prikazov-ob-izmenenii"
+      },
+      "labels": {
+        "status": {
+          "draft": "Черновик",
+          "submitted": "Подан",
+          "approved": "Утверждён",
+          "rejected": "Отклонён",
+          "executed": "Исполнен"
+        },
+        "reason": {
+          "client_request": "Запрос заказчика",
+          "design_change": "Изменение проекта",
+          "unforeseen": "Непредвиденные условия",
+          "regulatory": "Требования регулирующих органов",
+          "error": "Ошибка или упущение",
+          "non_conformance": "Несоответствие",
+          "value_engineering": "Оптимизация стоимости"
+        },
+        "instrument": {
+          "works_change": "Письменное распоряжение",
+          "site_confirmation": "Подтверждение на объекте",
+          "claim": "Претензия"
+        },
+        "change": {
+          "added": "Добавлено",
+          "removed": "Исключено",
+          "modified": "Изменено"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Доказательный пакет",
+        "subject": "Предмет",
+        "basis": "Основание",
+        "period_from": "Самая ранняя запись",
+        "period_to": "Самая поздняя запись",
+        "digest": "Контрольный код (SHA-256, первые 16 символов)",
+        "col_row": "№",
+        "col_record_id": "ID записи",
+        "col_section": "Раздел",
+        "col_date": "Дата",
+        "col_kind": "Тип записи",
+        "col_title": "Наименование",
+        "col_summary": "Краткое содержание",
+        "col_reference": "Ссылка",
+        "register_filename": "dokazatelnyj-paket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Уведомления",
+          "correspondence": "Переписка",
+          "rfis": "Запросы (RFI)",
+          "variations": "Изменения",
+          "approvals": "Согласования",
+          "delay": "Задержка",
+          "timeline": "Хронология",
+          "other": "Прочее"
+        },
+        "kind": {
+          "notice": "Уведомление",
+          "variation_notice": "Уведомление об изменении",
+          "variation_request": "Запрос на изменение",
+          "variation_order": "Распоряжение об изменении",
+          "change_order": "Приказ об изменении",
+          "moc_entry": "Запись об изменении",
+          "correspondence": "Переписка"
+        },
+        "basis": {
+          "dispute": "Спор",
+          "valuation": "Оценка стоимости",
+          "delay": "Задержка / продление срока",
+          "general": "Общая запись"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Журнал переписки",
+        "doc_title": "Переписка",
+        "col_reference": "Исх./вх. №",
+        "col_direction": "Направление",
+        "col_type": "Тип",
+        "col_subject": "Тема",
+        "col_from": "От кого",
+        "col_to": "Кому",
+        "col_date_sent": "Дата отправки",
+        "col_date_received": "Дата получения",
+        "col_response_due": "Ответ требуется до",
+        "col_clause": "Пункт договора",
+        "notes": "Примечания",
+        "no_notes": "Примечания не внесены.",
+        "attachments": "Вложенные файлы",
+        "linked_documents": "Связанные документы",
+        "sig_prepared": "Составлено",
+        "sig_received": "Получено",
+        "register_filename": "zhurnal-perepiski"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Входящее",
+          "outgoing": "Исходящее"
+        },
+        "type": {
+          "letter": "Письмо",
+          "email": "Эл. письмо",
+          "notice": "Уведомление",
+          "memo": "Служебная записка",
+          "report": "Отчёт"
+        },
+        "status": {
+          "open": "Открыто",
+          "awaiting_response": "Ожидает ответа",
+          "responded": "Отвечено",
+          "closed": "Закрыто"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Реестр передаточных ведомостей",
+        "doc_title": "Передаточная ведомость",
+        "col_number": "№ ведомости",
+        "col_subject": "Тема",
+        "col_purpose": "Назначение",
+        "col_issued": "Дата выдачи",
+        "col_response_due": "Ответ до",
+        "col_recipients": "Получатели",
+        "col_item_count": "Позиций",
+        "sender": "Отправитель",
+        "cover_note": "Сопроводительное письмо",
+        "no_cover_note": "Сопроводительного письма нет.",
+        "recipients": "Получатели",
+        "recipient": "Получатель",
+        "action_required": "Требуемое действие",
+        "acknowledged": "Получение подтверждено",
+        "responded": "Дата ответа",
+        "items": "Передаваемые документы",
+        "item_no": "№",
+        "item_description": "Описание",
+        "item_notes": "Примечания",
+        "sig_issued": "Выдано",
+        "sig_received": "Получено",
+        "register_filename": "reestr-peredatochnyh-vedomostej"
+      },
+      "labels": {
+        "status": {
+          "draft": "Черновик",
+          "issued": "Выдана",
+          "responded": "Отвечено"
+        },
+        "purpose": {
+          "for_approval": "На согласование",
+          "for_review": "На рассмотрение",
+          "for_information": "К сведению",
+          "for_construction": "В производство работ",
+          "for_tender": "Для тендера",
+          "for_record": "Для архива"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Реестр изменений",
+        "claim_register_title": "Реестр претензий",
+        "notice_register_title": "Реестр уведомлений",
+        "doc_title": "Запрос на изменение",
+        "doc_title_credit": "Запрос на изменение (исключение работ)",
+        "time_impact": "Влияние на срок",
+        "col_code": "Код",
+        "col_title": "Наименование",
+        "col_classification": "Тип",
+        "col_urgency": "Срочность",
+        "col_requested": "Дата запроса",
+        "col_claimed_amount": "Заявленная сумма",
+        "col_agreed_amount": "Согласованная сумма",
+        "col_time_impact": "Влияние на срок (дн.)",
+        "col_response_due": "Ответ до",
+        "col_clause": "Пункт договора",
+        "col_row": "№",
+        "col_claim_type": "Тип претензии",
+        "col_raised": "Дата подачи",
+        "col_period_start": "Период с",
+        "col_period_end": "Период по",
+        "col_description": "Описание",
+        "col_decided_amount": "Присуждённая сумма",
+        "col_days_requested": "Запрошено дней",
+        "col_days_granted": "Предоставлено дней",
+        "col_recipient_type": "Адресат",
+        "col_recipient": "Получатель",
+        "col_target_response": "Ожидаемый ответ",
+        "col_response_received": "Ответ получен",
+        "requested_by": "Запрошено",
+        "decided_by": "Решение принято",
+        "date_submitted": "Дата подачи",
+        "date_decided": "Дата решения",
+        "description": "Описание",
+        "no_description": "Описание не внесено.",
+        "decision_notes": "Примечания к решению",
+        "no_decision_notes": "Решение пока не внесено.",
+        "variation_register_filename": "reestr-izmenenij",
+        "claim_register_filename": "reestr-pretenzij",
+        "notice_register_filename": "reestr-uvedomlenij"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Черновик",
+          "submitted": "Подан",
+          "under_review": "На рассмотрении",
+          "approved": "Одобрен",
+          "rejected": "Отклонён",
+          "converted_to_vo": "Преобразован в распоряжение"
+        },
+        "claim_status": {
+          "draft": "Черновик",
+          "submitted": "Подана",
+          "under_review": "На рассмотрении",
+          "agreed": "Согласована",
+          "granted": "Удовлетворена",
+          "rejected": "Отклонена"
+        },
+        "notice_status": {
+          "issued": "Направлено",
+          "acknowledged": "Получение подтверждено",
+          "responded": "Отвечено",
+          "closed": "Закрыто"
+        },
+        "classification": {
+          "scope_change": "Изменение объёма работ",
+          "unforeseen": "Непредвиденное условие",
+          "owner_change": "Изменение по инициативе заказчика",
+          "design_dev": "Развитие проектных решений",
+          "regulatory": "Требования регулирующих органов",
+          "other": "Прочее"
+        },
+        "urgency": {
+          "low": "Низкая",
+          "med": "Средняя",
+          "high": "Высокая"
+        },
+        "claim_type": {
+          "disruption": "Нарушение хода работ",
+          "eot": "Продление срока"
+        },
+        "recipient_type": {
+          "owner": "Заказчик",
+          "contractor": "Подрядчик",
+          "architect": "Архитектор",
+          "engineer": "Инженер",
+          "consultant": "Консультант"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Журнал ежедневных работ на объекте",
+        "overview": "Обзор",
+        "site_supervisor": "Руководитель работ на объекте",
+        "not_recorded": "Не внесено",
+        "labour_on_site": "Рабочая сила на объекте",
+        "equipment_on_site": "Техника на объекте",
+        "completeness": "Полнота заполнения",
+        "weather": "Погода",
+        "weather_time": "Время",
+        "weather_source": "Источник",
+        "weather_temp": "Темп. (°C)",
+        "weather_wind": "Ветер (км/ч)",
+        "weather_precip": "Осадки (мм)",
+        "weather_conditions": "Условия",
+        "weather_empty": "Погода за этот день не внесена.",
+        "site_record": "Запись по объекту",
+        "entries_empty": "В журнале нет записей.",
+        "notes": "Примечания",
+        "notes_empty": "Дополнительных примечаний нет.",
+        "footer_supervisor": "Руководитель работ: {name}",
+        "footer_supervisor_missing": "Руководитель работ: не внесён",
+        "footer_generated": "Сформировано: {timestamp}",
+        "footer_page": "Страница {page} из {total}",
+        "workforce": "Персонал по организациям",
+        "workforce_company": "Организация",
+        "workforce_count": "Человек",
+        "workforce_unassigned": "Без привязки к организации",
+        "workforce_total": "Итого",
+        "signatures": "Подписи",
+        "sig_prepared": "Составлено (руководитель работ)",
+        "sig_approved": "Утверждено (представитель заказчика)",
+        "sig_name": "ФИО",
+        "sig_title": "Должность",
+        "sig_date": "Дата",
+        "sig_signature": "Подпись",
+        "signed_note": "Подписано в системе: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "zhurnal",
+        "summary_wind": "ветер {value} км/ч",
+        "summary_precipitation": "осадки {value} мм",
+        "summary_humidity": "влажность {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Посетители",
+          "event": "События",
+          "delivery": "Поставленные материалы",
+          "completion": "Выполненные работы",
+          "incident_summary": "Охрана труда и происшествия",
+          "inspection_summary": "Проверки",
+          "photo_note": "Фотозаметки",
+          "general": "Общие примечания"
+        },
+        "status": {
+          "open": "Открыт",
+          "closed": "Закрыт",
+          "signed": "Подписан",
+          "archived": "В архиве"
+        },
+        "condition": {
+          "clear": "ясно",
+          "mainly_clear": "преимущественно ясно",
+          "partly_cloudy": "переменная облачность",
+          "cloudy": "облачно",
+          "overcast": "пасмурно",
+          "fog": "туман",
+          "fog_rime": "изморозь",
+          "drizzle_light": "слабая морось",
+          "drizzle_moderate": "умеренная морось",
+          "drizzle_dense": "сильная морось",
+          "rain": "дождь",
+          "rain_light": "слабый дождь",
+          "rain_moderate": "умеренный дождь",
+          "rain_heavy": "сильный дождь",
+          "freezing_rain_light": "слабый ледяной дождь",
+          "freezing_rain_heavy": "сильный ледяной дождь",
+          "snow": "снег",
+          "snow_light": "слабый снег",
+          "snow_moderate": "умеренный снег",
+          "snow_heavy": "сильный снег",
+          "rain_showers_light": "слабый ливневый дождь",
+          "rain_showers_moderate": "умеренный ливневый дождь",
+          "rain_showers_violent": "сильный ливень",
+          "snow_showers_light": "слабый снегопад",
+          "snow_showers_heavy": "сильный снегопад",
+          "thunderstorm": "гроза",
+          "thunderstorm_hail_light": "гроза со слабым градом",
+          "thunderstorm_hail_heavy": "гроза с сильным градом"
+        },
+        "source": {
+          "manual": "Ввод вручную",
+          "open_meteo": "Метеослужба",
+          "sensor": "Датчик на объекте"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Журнал запросов информации (RFI)",
+        "col_number": "№ RFI",
+        "col_subject": "Тема",
+        "col_raised_by": "Автор запроса",
+        "col_assigned_to": "Исполнитель",
+        "col_ball_in_court": "Ход за",
+        "col_date_required": "Требуемая дата",
+        "col_response_due": "Ответ до",
+        "col_days_open": "Дней открыт",
+        "col_cost_impact": "Влияние на стоимость",
+        "col_schedule_impact": "Влияние на сроки",
+        "col_response": "Ответ",
+        "yes_with": "Да ({detail})",
+        "register_filename": "zhurnal-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Черновик",
+          "open": "Открыт",
+          "answered": "Отвечен",
+          "closed": "Закрыт",
+          "void": "Аннулирован"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Создано ИИ",
+        "drawing": "Чертёж",
+        "cost_estimate": "СМЕТНЫЙ РАСЧЁТ",
+        "summary": "ИТОГИ",
+        "project": "Проект:",
+        "boq": "Смета:",
+        "date": "Дата:",
+        "status": "Статус:",
+        "prepared_by": "Составил:",
+        "approved_by": "Утвердил:",
+        "signature_hint": "ФИО / Подпись / Дата",
+        "contents": "Разделы / Позиции:",
+        "pos": "№ п/п",
+        "description": "Наименование",
+        "unit": "Ед. изм.",
+        "qty": "Кол-во",
+        "rate": "Цена",
+        "total": "Сумма",
+        "subtotal": "Итого по разделу:",
+        "other_positions": "Прочие позиции",
+        "direct_cost": "Прямые затраты:",
+        "markups": "Начисления (без НДС):",
+        "net_total": "Итого без НДС:",
+        "gross_total": "Всего с НДС",
+        "page": "Стр.",
+        "of": "из",
+        "generated": "Составлено:",
+        "summary_report": "Сводный отчёт",
+        "positions_omitted": "Позиций: {count} (детализация опущена для быстродействия)",
+        "section": "Раздел",
+        "items": "Позиций",
+        "cost_summary": "Сводка затрат",
+        "table_of_contents": "Содержание",
+        "resources_omitted": "Состав ресурсов не напечатан: в этой смете слишком много строк ресурсов для одного PDF.",
+        "status_draft": "Черновик",
+        "status_final": "Утверждена",
+        "status_archived": "В архиве",
+        "subject": "Смета",
+        "tax_vat": "НДС"
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Отчет",
+        "meta_project": "Проект",
+        "meta_type": "Тип",
+        "meta_generated": "Создан",
+        "meta_currency": "Валюта",
+        "field_column": "Поле",
+        "value_column": "Значение",
+        "yes": "Да",
+        "no": "Нет",
+        "no_data_heading": "Нет данных",
+        "no_data_body": "Отчет сформирован на пустом снимке данных. Проверьте, вернули ли исходные модули (финансы, календарный план, охрана труда и т. д.) данные по выбранному проекту.",
+        "no_data_body_short": "Отчет сформирован на пустом снимке данных. Проверьте, вернули ли исходные модули данные по выбранному проекту.",
+        "footer_generated_by": "Сформировано в OpenConstructionERP {timestamp}.",
+        "worksheet_name": "Отчет",
+        "pdf_subject": "Отчет по проекту",
+        "overall_progress": "Общий прогресс",
+        "as_of": "На дату",
+        "recorded_by": "Кто внес",
+        "period": "Период",
+        "entries_suffix": "(записей: {count})",
+        "site_photo_alt": "Фото со стройплощадки",
+        "ai_summary_heading": "Сводка",
+        "ai_badge": "Сформировано ИИ",
+        "ai_note": "Сформировано ИИ по приведенным ниже данным проекта.",
+        "ai_note_confidence": "Сформировано ИИ по приведенным ниже данным проекта (достоверность {confidence}).",
+        "ai_note_review": "Проверьте перед отправкой заказчику."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Наименование",
+          "status": "Статус",
+          "phase": "Фаза",
+          "planned_start": "Плановое начало",
+          "planned_end": "Плановое окончание",
+          "schedule_progress_pct": "Выполнение плана, %",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Освоение бюджета, %",
+          "as_of": "На дату",
+          "progress_pct": "Выполнение, %",
+          "risk_score_avg": "Средний балл риска",
+          "open_rfis": "Открытые запросы (RFI)",
+          "open_submittals": "Открытые согласования",
+          "open_defects": "Открытые дефекты",
+          "open_observations": "Открытые замечания",
+          "budget": "Бюджет",
+          "committed": "Законтрактовано",
+          "actual": "Факт",
+          "payable": "Кредиторская задолженность",
+          "receivable": "Дебиторская задолженность",
+          "net_cash_flow": "Чистый денежный поток"
+        },
+        "section_titles": {
+          "Project Overview": "Обзор проекта",
+          "Key Performance Indicators": "Ключевые показатели",
+          "Schedule Status": "Статус календарного плана",
+          "Risk Summary": "Сводка по рискам",
+          "Open Issues": "Открытые вопросы",
+          "Cost Summary": "Сводка затрат",
+          "Cost Breakdown": "Разбивка затрат",
+          "Change Orders": "Изменения к договору",
+          "Cash Flow": "Движение денежных средств",
+          "Schedule Overview": "Обзор календарного плана",
+          "Milestone Status": "Статус вех",
+          "Critical Path": "Критический путь",
+          "3-Week Lookahead": "План на три недели",
+          "Safety KPIs": "Показатели охраны труда",
+          "Incident Log": "Журнал происшествий",
+          "Near-Miss Reports": "Сообщения о предпосылках к происшествиям",
+          "Safety Training": "Обучение по охране труда",
+          "Inspection Summary": "Сводка по проверкам",
+          "By Inspection Type": "По типам проверок",
+          "Punch List Status": "Статус списка недоделок",
+          "Recent Inspections": "Последние проверки",
+          "Portfolio Overview": "Обзор портфеля",
+          "Project Statuses": "Статусы проектов",
+          "KPI Comparison": "Сравнение KPI",
+          "Portfolio Risks": "Риски портфеля",
+          "Field Progress": "Ход работ на объекте",
+          "Top Risks": "Основные риски",
+          "Site Photos": "Фотографии с объекта",
+          "Summary": "Сводка"
+        }
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "СЧЁТ",
+        "date": "Дата: {value}",
+        "due": "Срок оплаты: {value}",
+        "from": "От",
+        "bill_to": "Плательщик",
+        "vat_id": "НДС-номер: {value}",
+        "ref": "Ссылка покупателя: {value}",
+        "th_description": "Наименование",
+        "th_qty": "Кол-во",
+        "th_unit": "Ед.",
+        "th_unit_price": "Цена",
+        "th_net": "Сумма без НДС ({currency})",
+        "net_total": "Итого без НДС",
+        "vat_total": "НДС",
+        "grand_total": "Итого с НДС",
+        "retention_prepaid": "Удержание / предоплата",
+        "amount_due": "К оплате",
+        "payment": "Оплата",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Счёт: {value}",
+        "bank_code": "Код банка: {value}",
+        "account_holder": "Владелец счёта: {value}",
+        "footer": "Этот PDF содержит встроенный электронный счёт по EN 16931 (Factur-X / ZUGFeRD). Действующим документом является встроенный XML.",
+        "date_format": "%d.%m.%Y",
+        "decimal_separator": ",",
+        "group_separator": " "
+      }
+    },
+    "furniture": {
+      "footer_page": "Страница {page} из {total}"
+    }
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Этот срез заморожен. Замороженный срез - это зафиксированная запись, изменить его нельзя.",
+      "frozen_no_delete": "Замороженный срез - это зафиксированная запись, удалить его нельзя.",
+      "draft_open": "Черновик среза уже открыт. Заморозьте или удалите его, прежде чем начинать новый.",
+      "no_line_method": "У этой строки нет собственного метода.",
+      "snapshot_missing": "Срез не найден.",
+      "line_missing": "В этом срезе нет такой строки.",
+      "document_missing": "Связанный документ не относится к этому проекту.",
+      "freeze_refused": "Срез пока нельзя заморозить: у {count} строк(и) отклонение выше порога, а комментария и подтверждающего документа нет.",
+      "no_frozen_snapshot": "Замороженного среза для сравнения пока нет.",
+      "no_ledger": "Журнал счетов недоступен в этой установке.",
+      "no_snapshot": "Среза для оформления пока нет."
+    },
+    "export": {
+      "project": "Проект",
+      "generated": "Сформировано",
+      "currency": "Валюта",
+      "page": "Страница",
+      "generated_at": "Дата формирования",
+      "empty": "Пока нечего показывать.",
+      "total": "Итого",
+      "cost_report": "Отчёт по затратам",
+      "phase_comparison": "Сравнение по этапам",
+      "invoice_ledger": "Журнал счетов",
+      "forecast_documentation": "Обоснование прогноза",
+      "as_of": "На дату",
+      "forecast_method": "Метод прогноза",
+      "col_account": "Статья",
+      "col_code": "Код",
+      "col_description": "Наименование",
+      "col_source": "Источник",
+      "col_method": "Метод",
+      "col_planned": "План",
+      "col_committed": "Законтрактовано",
+      "col_pending": "Изменения на согласовании",
+      "col_measured": "Выполнено (по замерам)",
+      "col_certified": "Принято к оплате",
+      "col_invoiced": "Выставлено по счетам",
+      "col_paid": "Оплачено",
+      "col_forecast": "Прогноз",
+      "col_variance": "Отклонение",
+      "col_variance_pct": "Отклонение %",
+      "col_forecast_of_plan": "Прогноз % от плана",
+      "col_measured_of_committed": "Выполнено % от законтрактованного",
+      "col_invoiced_of_committed": "Выставлено % от законтрактованного",
+      "col_contract": "Договор",
+      "col_contract_title": "Название договора",
+      "col_invoice": "Счёт",
+      "col_date": "Дата",
+      "col_kind": "Вид",
+      "col_release_status": "Возврат",
+      "col_net": "Без НДС",
+      "col_vat": "НДС",
+      "col_gross": "С НДС",
+      "col_retention": "Гарантийное удержание",
+      "col_release": "Удержание возвращено",
+      "col_discount": "Скидка",
+      "col_payable": "К оплате",
+      "col_open": "Открыто",
+      "col_previous": "Прежнее",
+      "col_delta": "Изменение",
+      "col_delta_pct": "Изменение %",
+      "col_needs_evidence": "Нужен документ",
+      "col_comment": "Комментарий",
+      "col_evidence": "Подтверждающий документ",
+      "row_unassigned": "Суммы без статьи затрат",
+      "row_loose_changes": "Изменения вне договора",
+      "row_no_contract": "Без договора",
+      "contract_value": "Сумма договора",
+      "retention_held": "Удержано",
+      "yes": "Да",
+      "no": "Нет",
+      "snapshot_date": "Дата среза",
+      "snapshot_status": "Статус",
+      "previous_snapshot": "Предыдущий замороженный срез",
+      "method_explained": "Как читать прогноз",
+      "evidence_threshold": "Документ нужен при изменении выше",
+      "threshold_both": "{parts}",
+      "threshold_any": "любое изменение",
+      "frozen_at": "Заморожен"
+    },
+    "method": {
+      "best_available": "Лучший доступный источник",
+      "maximum": "Максимальное значение",
+      "evm_cpi": "Освоенный объём (CPI)",
+      "manual": "Вручную"
+    },
+    "method_help": {
+      "best_available": "Для каждой строки берётся самая надёжная цифра: итоговый расчёт, иначе выполненные по замерам работы, иначе сумма по результатам закупки, иначе смета, иначе бюджет.",
+      "maximum": "Для каждой строки берётся наибольшая из цифр (бюджет, смета, закупка, замеры, счета), чтобы прогноз не скрывал риск.",
+      "evm_cpi": "Для каждой строки стоимость на завершение считается по прогрессу: потраченные к настоящему моменту деньги делятся на долю выполненных работ.",
+      "manual": "Цифру строки задаёт человек и прикладывает документ, на котором она основана."
+    },
+    "source": {
+      "none": "Нет цифры",
+      "budget": "Бюджет",
+      "estimate": "Смета",
+      "partly_awarded": "Закуплено частично",
+      "awarded": "Закуплено",
+      "measured": "Выполнено по замерам",
+      "final": "Итоговый расчёт",
+      "manual": "Вручную",
+      "invoiced": "Выставлено по счетам",
+      "evm": "Освоенный объём"
+    },
+    "layer": {
+      "budget": "Бюджет",
+      "estimate": "Смета",
+      "tender": "Лучшее предложение",
+      "awarded": "Закуплено",
+      "changes": "Утверждённые изменения",
+      "committed": "Законтрактовано",
+      "pending": "Изменения на согласовании",
+      "measured": "Выполнено (по замерам)",
+      "certified": "Принято к оплате",
+      "invoiced": "Выставлено по счетам",
+      "paid": "Оплачено",
+      "forecast": "Прогноз"
+    },
+    "invoice_kind": {
+      "interim": "Промежуточный",
+      "final": "Итоговый",
+      "daywork": "Повременные работы",
+      "credit_note": "Кредит-нота"
+    },
+    "release_status": {
+      "open": "Открыто",
+      "released": "Возвращено"
+    },
+    "evidence_kind": {
+      "document": "Документ",
+      "minutes": "Протокол",
+      "other": "Другое"
+    },
+    "snapshot_status": {
+      "draft": "Черновик",
+      "frozen": "Заморожен"
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Страница {page} из {total}",
+    "page": "Страница {page}",
+    "printed": "Напечатано: {timestamp}",
+    "generated": "Сформировано: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} приглашает вас в клиентский портал",
+      "login_subject": "Ссылка для входа в клиентский портал",
+      "invite_heading": "Добро пожаловать в клиентский портал",
+      "login_heading": "Вход в клиентский портал",
+      "greeting": "Здравствуйте, {name}!",
+      "greeting_generic": "Здравствуйте!",
+      "invite_body": "{sender} открывает вам доступ к клиентскому порталу. В нём видно ход вашего проекта: отчёты о ходе работ, документы, счета и ближайшие вехи.",
+      "login_body": "Вот ссылка для входа, которую вы запросили.",
+      "link_help": "Кнопка ниже выполняет вход. Пароль не нужен. Ссылка срабатывает один раз и действует {hours} ч.",
+      "ignore": "Если вы не ждали этого письма, просто проигнорируйте его. Без этой ссылки доступ никто не получит.",
+      "invite_cta": "Открыть портал",
+      "login_cta": "Войти",
+      "sender_generic": "Ваша проектная команда"
+    },
+    "tender_invite": {
+      "subject": "Приглашение к участию в тендере: {package}",
+      "heading": "Приглашение к участию в тендере",
+      "greeting": "Уважаемые коллеги из {company}!",
+      "greeting_generic": "Уважаемые коллеги!",
+      "invite": "Приглашаем вас подать предложение по тендерному пакету {package}.",
+      "invite_project": "Приглашаем вас подать предложение по тендерному пакету {package} проекта {project}.",
+      "deadline": "Срок подачи предложений: {deadline}",
+      "link_help": "Кнопка ниже открывает ведомость объёмов работ. Укажите единичные расценки онлайн, сохраняйте черновик в любой момент и отправьте предложение до окончания срока. Учётная запись не нужна.",
+      "link_personal": "Эта ссылка предназначена только для вашей компании. Пожалуйста, не пересылайте её.",
+      "cta": "Открыть ведомость и указать цены",
+      "no_link": "Пожалуйста, ознакомьтесь с документацией и пришлите предложение до указанного срока."
+    },
+    "notification_email": {
+      "greeting": "Здравствуйте, {name}!",
+      "greeting_generic": "Здравствуйте!",
+      "cta": "Открыть в OpenConstructionERP",
+      "footer": "Вы получили это письмо согласно настройкам уведомлений. Изменить их можно в профиле.",
+      "digest_subject": "OpenConstructionERP: Сводка уведомлений ({count})",
+      "digest_heading": "Последние уведомления:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Сравнение предложений",
+      "comparison_sheet": "Сравнение",
+      "bidder_title": "Ведомость объёмов для оценки",
+      "bidder_sheet": "Ведомость",
+      "project": "Проект",
+      "package": "Пакет",
+      "currency": "Валюта",
+      "date": "Дата",
+      "return_by": "Подать до",
+      "item": "№",
+      "description": "Наименование",
+      "unit": "Ед. изм.",
+      "quantity": "Количество",
+      "unit_price": "Цена за единицу",
+      "line_total": "Стоимость",
+      "own_estimate": "Собственная смета",
+      "not_priced": "нет цены",
+      "sum_priced_lines": "Сумма оценённых позиций",
+      "bid_total": "Сумма предложения по заявке",
+      "lines_priced": "Оценено позиций",
+      "lines_priced_value": "{priced} из {total}",
+      "deviation": "Отклонение от собственной сметы",
+      "not_comparable": "н/д",
+      "other_currency": "Цены в {currency}, не сравниваются с предложениями в {reporting}.",
+      "legend": "Обозначения",
+      "legend_lowest": "Зелёный: самая низкая цена за единицу в позиции.",
+      "legend_high": "▲ красный: более чем на {pct}% выше медианы по позиции.",
+      "legend_low": "▼ жёлтый: более чем на {pct}% ниже медианы по позиции.",
+      "legend_missing": "«{marker}»: участник не указал цену по позиции.",
+      "legend_incomplete": "Предложение с позициями без цены отмечено в строке «Оценено позиций» и не считается самым дешёвым по сумме.",
+      "legend_totals": "Сумма предложения указана участником и может отличаться от суммы оценённых позиций.",
+      "bidder": "Участник",
+      "bidder_note": "Примечание участника",
+      "reference": "Идентификатор (не изменять)",
+      "total": "Итого",
+      "instructions": "Укажите цену за единицу для каждой позиции в жёлтых ячейках. Количества и наименования зафиксированы, стоимость и итог считаются сами. Оставьте ячейку пустой, если не оцениваете позицию."
+    },
+    "cost_plan": {
+      "sheet_plan": "План затрат NRM 1",
+      "sheet_unallocated": "Не распределено",
+      "title": "Поэлементный план затрат (NRM 1)",
+      "bill": "Ведомость объемов работ",
+      "currency": "Валюта",
+      "gifa": "Внутренняя площадь (м2)",
+      "gifa_project": "из проекта",
+      "gifa_entered": "введена для этого экспорта",
+      "gifa_none": "не задана, стоимость за м2 не показана",
+      "col_code": "Код",
+      "col_description": "Элемент",
+      "col_positions": "Позиций",
+      "col_basis": "База",
+      "col_total": "Сумма",
+      "col_per_m2": "Стоимость за м2",
+      "col_share": "% от итога",
+      "col_running": "Нарастающий итог",
+      "group_level": "Уровень группы, элемент не указан",
+      "facilitating_works_estimate": "Стоимость подготовительных работ",
+      "works_estimate": "Стоимость строительных работ",
+      "addons_heading": "Группы NRM 1 9-14, оцененные позициями ведомости",
+      "unallocated": "Не отнесено к элементу",
+      "direct_cost": "Прямые затраты ведомости",
+      "markups_heading": "Начисления (каскад ведомости по порядку)",
+      "markups_total": "Начисления всего",
+      "grand_total": "Итого по плану затрат",
+      "basis_direct": "{pct}% от прямых затрат",
+      "basis_running": "{pct}% от нарастающего итога",
+      "basis_lump": "Фиксированная сумма",
+      "basis_banded": "Ступенчатая шкала",
+      "basis_escalation": "Индексация",
+      "basis_other": "{kind}",
+      "basis_scoped": "только для раздела",
+      "col_ordinal": "Номер",
+      "col_position": "Описание",
+      "col_written_code": "Код как записан",
+      "col_reason": "Причина",
+      "reason_no_code": "Нет кода NRM у позиции и ее разделов",
+      "reason_invalid_code": "Код не является номером NRM",
+      "reason_unknown_group": "В NRM 1 нет такой группы",
+      "truncated": "Список сокращен до первых {shown} из {count} позиций; итог учитывает все."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Требования",
+      "sheet_summary": "Сводка",
+      "sheet_legend": "Легенда",
+      "summary_element": "Элемент",
+      "summary_count": "Количество требований",
+      "summary_total": "Итого",
+      "legend_column": "Столбец",
+      "legend_description": "Описание",
+      "unspecified": "Не указано",
+      "h01": "Элемент / класс IFC",
+      "h02": "Классификация",
+      "h03": "Группа свойств",
+      "h04": "Название свойства",
+      "h05": "Тип данных",
+      "h06": "Обязательно",
+      "h07": "Допустимые значения",
+      "h08": "Мин.",
+      "h09": "Макс.",
+      "h10": "Ед. изм.",
+      "h11": "Шаблон",
+      "h12": "Стадия",
+      "h13": "Исполнитель",
+      "h14": "Сценарий применения",
+      "h15": "Источник",
+      "d01": "Класс сущности IFC (например, IFCWALL, IFCBEAM)",
+      "d02": "Система классификации и код (например, Uniclass 2015: EF_25_10)",
+      "d03": "Название набора свойств (например, Pset_WallCommon)",
+      "d04": "Название требуемого свойства или атрибута",
+      "d05": "Тип данных IFC (IFCLABEL, IFCREAL, IFCBOOLEAN и т. д.)",
+      "d06": "Кратность: обязательное, необязательное или запрещенное",
+      "d07": "Список допустимых значений через точку с запятой",
+      "d08": "Границы числового диапазона",
+      "d09": "Единица измерения (m, m2, kg и т. д.)",
+      "d10": "Регулярное выражение для проверки значения",
+      "d11": "Стадия или веха проекта (LP3, RIBA Stage 3 и т. д.)",
+      "d12": "Ответственная сторона (архитектор, конструктор и т. д.)",
+      "d13": "Назначение или сценарий применения требования",
+      "d14": "Исходный стандарт или документ"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Ведомость объемов работ создана",
+      "notifications.boq.created.body": "Ваша ведомость объемов работ '{boq_name}' сохранена.",
+      "notifications.meeting.action_assigned.title": "Вам назначено поручение по итогам совещания",
+      "notifications.meeting.action_assigned.body": "По итогам совещания {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Статус документа изменен",
+      "notifications.cde.state_transitioned.body": "Контейнер переведен в статус '{new_state}'.",
+      "notifications.cde.linked_published.title": "Опубликован документ, связанный с вашей работой",
+      "notifications.cde.linked_published.body": "{container_code} опубликован в ревизии {revision_code}. Связанные с вами записи: {records}.",
+      "notifications.rfi.assigned.title": "Вам назначен запрос информации (RFI)",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "Запрос информации (RFI) получил ответ",
+      "notifications.rfi.responded.body": "На ваш запрос {code} ({title}) получен ответ.",
+      "notifications.risk.assigned.title": "Вам назначен риск",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Предупреждение о перерасходе",
+      "notifications.costmodel.overrun_alert.body": "Затраты по статье {category} превысили бюджет: фактические {actual} {currency} выше порога предупреждения +{threshold_pct}% от плановых {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Документ на согласование ожидает проверки",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Документ на согласование утвержден",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Документ на согласование отклонен",
+      "notifications.submittal.rejected.body": "{code} ({title}). Причина: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Документ на согласование требует доработки",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Причина: {reason}",
+      "notifications.transmittal.issued.title": "Вам направлено сопроводительное письмо",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Получение сопроводительного письма подтверждено",
+      "notifications.transmittal.acknowledged.body": "Получатель подтвердил получение {code} ({title}).",
+      "notifications.transmittal.responded.title": "Сопроводительное письмо получило ответ",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "Вам назначен запрос информации (RFI)",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Назначена новая задача",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Счет утвержден",
+      "notification.invoice_approved_body": "Счет {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Инспекция назначена",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, дата: {inspection_date}",
+      "notification.submittal_status_changed_title": "Статус документа на согласование изменен",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Совещание назначено",
+      "notification.meeting_scheduled_body": "{title}, дата: {meeting_date}",
+      "notification.ncr_created_title": "Зафиксировано несоответствие",
+      "notification.ncr_created_body": "Акт о несоответствии {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Документ загружен",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Вас упомянули в комментарии",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "Новый комментарий в обсуждении",
+      "notifications.collaboration.comment_added.body": "К объекту {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "Обнаружена коллизия высокой критичности",
+      "notifications.clash.high_severity.body": "Коллизия ({severity}): {a_name} и {b_name}",
+      "notifications.validation.report.title": "Проверка выявила замечания",
+      "notifications.validation.report.body": "Ошибок: {error_count}, предупреждений: {warning_count}. Объект: {target_type}.",
+      "notifications.punchlist.auto_created.title": "Создан пункт перечня замечаний",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Сводка уведомлений",
+      "notifications.digest.body": "Новых обновлений в канале {channel}: {count}.",
+      "notifications.approval.overdue.title": "Согласование просрочено",
+      "notifications.approval.overdue.body": "Шаг {step_ordinal} по объекту ({target_kind}) просрочен на {hours_overdue} ч.",
+      "notifications.approval.escalated.title": "Согласование эскалировано вам",
+      "notifications.approval.escalated.body": "Шаг {step_ordinal} по объекту ({target_kind}) передан вам (уровень {level}).",
+      "notifications.approval.reassigned.title": "Согласование передано вам",
+      "notifications.approval.reassigned.body": "Шаг {step_ordinal} по объекту ({target_kind}) теперь на вашем решении.",
+      "notifications.deadline.overdue.title": "Просрочено: {title}",
+      "notifications.deadline.overdue.body": "Запись \"{title}\" ({module}) просрочена на {days_overdue} дн.",
+      "notifications.deadline.escalated.title": "Эскалация просроченной записи",
+      "notifications.deadline.escalated.body": "Запись \"{title}\" ({module}) остается открытой, просрочка: {days_overdue} дн., вопрос эскалирован.",
+      "notifications.deadline.approaching.title": "Срок близится: {title}",
+      "notifications.deadline.approaching.body": "Запись \"{title}\" ({module}) со сроком {due_date}.",
+      "notifications.deadline.built.approaching.title": "Срок близится: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: \"{title}\", срок: {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Просрочено: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "Срок ответа на запрос информации (RFI) {reference} \"{title}\" по проекту {project} истек {due_date_display}, просрочка: {days_overdue} дн. Требуется ответ.",
+      "notifications.deadline.rfi.escalated.title": "Эскалация: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "Запрос информации (RFI) {reference} \"{title}\" по проекту {project} остается открытым, срок {due_date_display} превышен на {days_overdue} дн., вопрос передан вам.",
+      "notifications.deadline.rfi.approaching.title": "Срок близится: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "Срок ответа на запрос информации (RFI) {reference} \"{title}\" по проекту {project}: {due_date_display}. Требуется ответ.",
+      "notifications.deadline.submittals.overdue.title": "Просрочено: документ на согласование {reference}",
+      "notifications.deadline.submittals.overdue.body": "Документ на согласование {reference} \"{title}\" по проекту {project} подлежал проверке до {due_date_display}, просрочка: {days_overdue} дн. Требуется проверка.",
+      "notifications.deadline.submittals.escalated.title": "Эскалация: документ на согласование {reference}",
+      "notifications.deadline.submittals.escalated.body": "Документ на согласование {reference} \"{title}\" по проекту {project} остается открытым, срок {due_date_display} превышен на {days_overdue} дн., вопрос передан вам.",
+      "notifications.deadline.submittals.approaching.title": "Срок близится: документ на согласование {reference}",
+      "notifications.deadline.submittals.approaching.body": "Документ на согласование {reference} \"{title}\" по проекту {project} подлежит проверке до {due_date_display}. Требуется проверка.",
+      "notifications.deadline.correspondence.overdue.title": "Просрочено: переписка {reference}",
+      "notifications.deadline.correspondence.overdue.body": "На письмо {reference} \"{title}\" по проекту {project} требовалось ответить до {due_date_display}, просрочка: {days_overdue} дн. Требуется ответ.",
+      "notifications.deadline.correspondence.escalated.title": "Эскалация: переписка {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Письмо {reference} \"{title}\" по проекту {project} остается без ответа, срок {due_date_display} превышен на {days_overdue} дн., вопрос передан вам.",
+      "notifications.deadline.correspondence.approaching.title": "Срок близится: переписка {reference}",
+      "notifications.deadline.correspondence.approaching.body": "На письмо {reference} \"{title}\" по проекту {project} нужно ответить до {due_date_display}. Требуется ответ.",
+      "notifications.deadline.variations.overdue.title": "Просрочено: изменение объема работ {reference}",
+      "notifications.deadline.variations.overdue.body": "Изменение объема работ {reference} \"{title}\" по проекту {project} подлежало рассмотрению до {due_date_display}, просрочка: {days_overdue} дн. Требуется решение.",
+      "notifications.deadline.variations.escalated.title": "Эскалация: изменение объема работ {reference}",
+      "notifications.deadline.variations.escalated.body": "Изменение объема работ {reference} \"{title}\" по проекту {project} остается открытым, срок {due_date_display} превышен на {days_overdue} дн., вопрос передан вам.",
+      "notifications.deadline.variations.approaching.title": "Срок близится: изменение объема работ {reference}",
+      "notifications.deadline.variations.approaching.body": "Изменение объема работ {reference} \"{title}\" по проекту {project} подлежит рассмотрению до {due_date_display}. Требуется решение.",
+      "notifications.variation.submitted.title": "Изменение объема работ ожидает решения: {code}",
+      "notifications.variation.submitted.body": "Изменение объема работ {code} \"{title}\" по проекту {project} подано и ожидает решения.",
+      "notifications.variation.approved.title": "Изменение объема работ утверждено: {code}",
+      "notifications.variation.approved.body": "Изменение объема работ {code} \"{title}\" по проекту {project} утверждено.",
+      "notifications.variation.rejected.title": "Изменение объема работ отклонено: {code}",
+      "notifications.variation.rejected.body": "Изменение объема работ {code} \"{title}\" по проекту {project} отклонено и возвращено вам.",
+      "notifications.variation.rejected_reason.body": "Изменение объема работ {code} \"{title}\" по проекту {project} отклонено и возвращено вам. Причина: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Заказ на изменение ожидает утверждения: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Заказ на изменение {code} \"{title}\" по проекту {project} подан и ожидает утверждения.",
+      "notifications.changeorder.approved.title": "Заказ на изменение утвержден: {code}",
+      "notifications.changeorder.approved.body": "Заказ на изменение {code} \"{title}\" по проекту {project} утвержден.",
+      "notifications.changeorder.rejected.title": "Заказ на изменение отклонен: {code}",
+      "notifications.changeorder.rejected.body": "Заказ на изменение {code} \"{title}\" по проекту {project} отклонен.",
+      "notifications.submittal.approved_as_noted.title": "Документ на согласование утвержден с замечаниями",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Документ ожидает вашего согласования",
+      "notifications.file_approval.needs_approver.body": "Документ ({file_kind}) ожидает вашего согласования.",
+      "notifications.file_approval.approved.title": "Ваш документ утвержден",
+      "notifications.file_approval.approved.body": "Ваш документ ({file_kind}) прошел все шаги согласования.",
+      "notifications.file_approval.rejected.title": "Ваш документ возвращен",
+      "notifications.file_approval.rejected.body": "Ваш документ ({file_kind}) отклонен и требует доработки.",
+      "notifications.portal.user_invited.title": "Пользователь приглашен в портал",
+      "notifications.portal.user_invited.body": "Приглашение отправлено: {portal_user_email}, роль: {portal_role}.",
+      "notifications.portal.message_received.title": "Новое сообщение в портале",
+      "notifications.portal.message_received.body": "{buyer_name} отправил(а) сообщение."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "№",
+          "Код",
+          "Код работы",
+          "Номер"
+        ],
+        "name": [
+          "Наименование",
+          "Название",
+          "Название задачи",
+          "Наименование работ",
+          "Работа",
+          "Задача"
+        ],
+        "wbs": [
+          "Код СДР",
+          "СДР",
+          "ИСР",
+          "Структурный номер"
+        ],
+        "outline_level": [
+          "Уровень структуры",
+          "Уровень"
+        ],
+        "start": [
+          "Начало",
+          "Дата начала"
+        ],
+        "finish": [
+          "Окончание",
+          "Дата окончания",
+          "Конец",
+          "Завершение"
+        ],
+        "duration": [
+          "Длительность",
+          "Продолжительность",
+          "Дни",
+          "Дней"
+        ],
+        "predecessors": [
+          "Предшественники",
+          "Предшественник",
+          "Предшествующие",
+          "Зависимости"
+        ],
+        "percent_complete": [
+          "% Завершения",
+          "Процент завершения",
+          "Выполнено",
+          "Готовность",
+          "Прогресс"
+        ],
+        "milestone": [
+          "Веха",
+          "Контрольная точка"
+        ],
+        "resource": [
+          "Ресурс",
+          "Ресурсы",
+          "Названия ресурсов",
+          "Исполнитель",
+          "Бригада"
+        ],
+        "notes": [
+          "Примечание",
+          "Примечания",
+          "Комментарий",
+          "Описание"
+        ],
+        "client_visible": [
+          "Видно заказчику",
+          "Показывать заказчику"
+        ]
+      },
+      "yes_words": [
+        "да",
+        "д",
+        "истина"
+      ],
+      "no_words": [
+        "нет",
+        "н",
+        "ложь"
+      ],
+      "example_names": [
+        "Каркас",
+        "Земляные работы",
+        "Фундаменты",
+        "Приёмка фундаментов"
+      ]
+    },
+    "module_suggest": {
+      "link_labels": {
+        "contract": "Договор",
+        "contact": "Контакт",
+        "schedule_activity": "Работа графика",
+        "document": "Документ",
+        "user": "Ответственный"
+      },
+      "keywords": {
+        "contract": [
+          "договор*",
+          "контракт*"
+        ],
+        "contact": [
+          "контакт*",
+          "поставщик*",
+          "субподрядчик*",
+          "подрядчик*",
+          "заказчик*",
+          "клиент*"
+        ],
+        "schedule_activity": [
+          "задач*",
+          "работа графика",
+          "позиция графика"
+        ],
+        "document": [
+          "документ*",
+          "чертеж*",
+          "чертёж*",
+          "вложени*"
+        ],
+        "user": [
+          "ответственн*",
+          "исполнител*",
+          "инспектор*",
+          "прораб*",
+          "мастер"
+        ],
+        "due": [
+          "срок*",
+          "дедлайн*",
+          "действует до",
+          "действителен до",
+          "годен до",
+          "истечени*"
+        ]
+      },
+      "state_labels": [
+        "Открыто",
+        "В работе",
+        "Готово"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Дополнение {number} к закупке {package}",
+      "addendum_heading": "Дополнение к закупке",
+      "greeting": "Уважаемые коллеги из {company},",
+      "greeting_generic": "Уважаемые господа,",
+      "addendum_intro": "Опубликовано дополнение {number} к пакету закупки {package}: {title}.",
+      "addendum_deadline": "Срок подачи заявок перенесён с {old} на {new}.",
+      "addendum_boq": "Ведомость объёмов работ изменена (ревизия {revision}). Просим оценить актуальную ревизию.",
+      "addendum_documents": "Опубликованные документы: {documents}",
+      "addendum_ack": "Просим подтвердить получение настоящего дополнения. Заявка, в которой не подтверждены все дополнения, может быть признана не соответствующей требованиям.",
+      "answer_subject": "Разъяснение {number} к закупке {package}",
+      "answer_heading": "Разъяснение по закупке",
+      "answer_intro": "Дан ответ на вопрос по пакету закупки {package}. Ответ применяется ко всем участникам.",
+      "question_label": "Вопрос",
+      "answer_label": "Ответ"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Валовая стоимость девелопмента",
+      "total_development_cost": "Общие затраты на девелопмент",
+      "residual_land_value": "Остаточная стоимость земли",
+      "developer_profit": "Прибыль девелопера",
+      "profit_on_cost": "Прибыль к затратам",
+      "profit_on_gdv": "Прибыль к ВСД",
+      "construction_cost": "Стоимость строительства",
+      "professional_fees": "Профессиональные гонорары",
+      "contingency": "Резерв на непредвиденные расходы",
+      "finance_cost": "Финансовые издержки",
+      "sales_costs": "Затраты на продажи"
+    },
+    "status": {
+      "viable": "Жизнеспособный",
+      "unviable": "Нежизнеспособный",
+      "marginal": "Пограничный",
+      "pending": "Оценка не проведена"
+    },
+    "figure": {
+      "gross_development_value": "Общая стоимость продажи всех единиц проекта в одной валюте.",
+      "total_development_cost": "Все затраты на реализацию проекта, кроме самой земли: строительство, гонорары, резерв, финансирование и продажи.",
+      "residual_land_value": "Что остается на землю после вычета общих затрат на девелопмент и целевой прибыли девелопера из валовой стоимости девелопмента.",
+      "developer_profit": "Прибыль, которую девелопер намерен получить, заданная как целевая доля валовой стоимости девелопмента.",
+      "profit_on_cost": "Прибыль девелопера, деленная на общие затраты на девелопмент, в виде доли.",
+      "profit_on_gdv": "Прибыль девелопера, деленная на валовую стоимость девелопмента, в виде доли."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Рабочий городок",
+        "rental": "Арендное жилье",
+        "hotel": "Гостиница"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Ожидает",
+        "approved": "Одобрено",
+        "rejected": "Отклонено"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Vypolneno",
+        "fail": "Ne vypolneno",
+        "not_applicable": "Ne primenimo"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Чертеж",
+        "contract": "Договор",
+        "specification": "Спецификация",
+        "photo": "Фото",
+        "correspondence": "Переписка",
+        "reality_capture": "Съемка объекта",
+        "other": "Прочее"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "В ожидании",
+        "approved": "Одобрено",
+        "rejected": "Отклонено",
+        "cancelled": "Отменено"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Черновик",
+        "submitted": "Отправлено на утверждение",
+        "approved": "Утверждено",
+        "posted": "Проведено в учете"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Открыт",
+        "assigned": "Назначен",
+        "in_progress": "В работе",
+        "resolved": "Устранён",
+        "verified": "Проверен",
+        "closed": "Закрыт"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "nablyudenie",
+        "minor": "neznachitelnoe",
+        "major": "sushchestvennoe",
+        "critical": "kriticheskoe"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Сотрудник",
+        "crew": "Бригада",
+        "equipment": "Оборудование",
+        "subcontractor": "Субподрядчик"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Имя модели ИИ устарело или недоступно. Откройте Настройки > ИИ и укажите актуальное имя модели.",
+      "not_configured": "ИИ не настроен. Пожалуйста, добавьте API-ключ в Настройках."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "проверено",
+      "bound": "приложено",
+      "empty": "отсутствует"
+    },
+    "package_status_labels": {
+      "draft": "черновик",
+      "in_progress": "в работе",
+      "ready": "готов",
+      "issued": "выдан"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "блокер",
+      "critical": "критично",
+      "warning": "предупреждение",
+      "suggestion": "рекомендация"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Стратегия",
+      "brief": "Задание",
+      "concept": "Концепция",
+      "design": "Проект",
+      "approval": "Согласование",
+      "detail": "Рабочая документация",
+      "tender": "Тендер",
+      "award": "Заключение договора",
+      "construction": "Строительство",
+      "handover": "Передача",
+      "operation": "Эксплуатация"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "В задании нет деталей для раскроя",
+        "suggestion": "Добавьте детали вручную, вставьте их или импортируйте из ведомости гибки, обмера, строки сметы или файла."
+      },
+      "has_stock": {
+        "fail": "В задании нет заготовок для раскроя",
+        "suggestion": "Добавьте хотя бы одну длину заготовки или размер листа либо используйте остатки со склада объекта."
+      },
+      "sheet_dimensions": {
+        "fail": "У {ref} не задана ширина",
+        "suggestion": "Укажите длину и ширину для каждой листовой детали и каждого размера листа."
+      },
+      "piece_fits_stock": {
+        "fail": "Деталь {ref} ({size} mm) не помещается ни в одну заготовку",
+        "suggestion": "Добавьте более длинную или крупную заготовку, уменьшите обрезку или разделите деталь стыком."
+      },
+      "grain_allows_fit": {
+        "fail": "Деталь {ref} помещается только при повороте поперёк волокон",
+        "suggestion": "Разрешите поворот этой детали или добавьте размер листа, в который она войдёт вдоль волокон."
+      },
+      "kerf_set": {
+        "fail": "Ширина реза равна нулю",
+        "suggestion": "Укажите толщину пилы или реза, иначе выход годного для каждого стержня с несколькими резами будет завышен."
+      },
+      "min_offcut_set": {
+        "fail": "Не задан минимальный годный остаток",
+        "suggestion": "Задайте самый короткий остаток, который стоит сохранить, чтобы годные остатки не считались отходами."
+      },
+      "stock_priced": {
+        "fail": "У заготовки {ref} нет цены за единицу",
+        "suggestion": "Укажите цену за штуку, чтобы план показывал стоимость и выбирал самые дешёвые заготовки."
+      },
+      "stock_sufficient": {
+        "fail": "Деталей, не размещённых на доступных заготовках: {count}",
+        "suggestion": "Увеличьте количество в наличии или добавьте другой размер заготовки."
+      },
+      "yield_threshold": {
+        "fail": "Выход годного {actual} % ниже порога {threshold} %",
+        "suggestion": "Добавьте другую длину или размер заготовки, разрешите поворот или пересмотрите порог для этого материала."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Замечание '{title}' закрыто без фото",
+    "punch_no_photo_fix": "Добавьте фото выполненной работы",
+    "photo_weak": "Фото у '{title}' без места или времени съёмки: {count}",
+    "photo_weak_fix": "Переснимите фото в приложении с включённой геолокацией",
+    "defect_no_photo": "Дефект '{reference}' закрыт без фото устранения",
+    "defect_no_photo_fix": "Приложите фото устранённого дефекта"
+  },
+  "closeout_dossier": {
+    "more_items": "Ещё позиций, не показанных в списке: {count}",
+    "category_missing": "Нет подтверждения для обязательной категории '{category}'",
+    "category_missing_fix": "Привяжите документ к пункту чек-листа этой категории или добавьте его",
+    "category_unverified": "Подтверждение для '{category}' ещё не проверено",
+    "category_unverified_fix": "Попросите руководителя проверить и подтвердить привязанные материалы",
+    "punch_open": "Замечание '{name}' всё ещё открыто",
+    "punch_open_fix": "Устраните и закройте замечание или исключите его из объёма этого досье",
+    "punch_no_photo": "У закрытого замечания '{name}' нет фото",
+    "punch_no_photo_fix": "Добавьте фото выполненной работы",
+    "system_pending": "Система '{name}' не принята в наладке",
+    "system_pending_fix": "Завершите чек-листы наладки и отметьте систему как налаженную",
+    "critical_issues": "Открытых критических проблем наладки: {count}",
+    "critical_issues_fix": "Закройте критические проблемы до сдачи объекта",
+    "acceptance_missing": "Акт приёмки не привязан",
+    "acceptance_missing_fix": "Привяжите подписанный акт приёмки к пункту приёмки в чек-листе",
+    "acceptance_unsigned": "Акт приёмки подписан не полностью (статус: {status})",
+    "acceptance_unsigned_fix": "Соберите недостающие подписи в разделе «Подписание»",
+    "blocked": "Досье не проходит свой чек-лист. Устраните замечания или всё равно сформируйте его как не полное (подтверждение руководителя).",
+    "delivery_title": "Досье сдачи объекта: {project}",
+    "delivery_body": "Досье сдачи объекта '{title}' ({scope}) готово. Ссылка ниже скачивает его и действует до {expires}.",
+    "pdf": {
+      "title": "Досье сдачи объекта",
+      "scope": "Объём",
+      "built": "Сформировано",
+      "status_passed": "Чек-лист пройден",
+      "status_warnings": "Чек-лист пройден с предупреждениями",
+      "status_errors": "Не полное: есть открытые замечания чек-листа",
+      "findings": "Открытые замечания чек-листа",
+      "severity": "Серьёзность",
+      "finding": "Замечание",
+      "severity_error": "Ошибка",
+      "severity_warning": "Предупреждение",
+      "severity_info": "Инфо",
+      "contents": "Содержание",
+      "file": "Файл",
+      "size": "Размер",
+      "punch": "Список закрытых замечаний",
+      "item": "Позиция",
+      "status": "Статус",
+      "photos": "Фото",
+      "evidence": "Фотофиксация"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Оценка {rating} для '{name}' не является уровнем шкалы '{scale}'",
+    "rule_poor_without_action": "'{name}' оценено на {rating}, но запланированных действий по обслуживанию нет",
+    "rule_poor_without_action_fix": "Составьте план или добавьте действие для этого элемента",
+    "rule_action_unpriced": "У действия для '{name}' на {year} год нет единичной стоимости",
+    "rule_action_unpriced_fix": "Укажите единичную стоимость, чтобы итоги плана её учитывали",
+    "rule_defect_incomplete": "Оценка '{name}' требует работ, но серьёзность и доля поражения не записаны"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, страница {page}",
+    "text_change": "«{old}» изменено на «{new}»",
+    "kind": {
+      "added": "Добавлено",
+      "removed": "Удалено",
+      "modified": "Изменено",
+      "text": "Текст изменён"
+    },
+    "status": {
+      "open": "Открыто",
+      "relevant": "Значимо",
+      "not_relevant": "Незначимо"
+    },
+    "errors": {
+      "revision_not_found": "Ревизия чертежа не найдена в этом проекте.",
+      "revision_not_parsed": "У чертежа ещё нет обработанной версии для сравнения.",
+      "comparison_not_found": "Сравнение не найдено.",
+      "change_not_found": "Изменение не найдено.",
+      "same_revision": "Выберите две разные ревизии или страницы для сравнения.",
+      "manual_points": "Для ручного совмещения нужны две различные точки на каждой ревизии.",
+      "alignment_singular": "Совмещение применить нельзя: оно схлопывает лист.",
+      "region_empty": "У изменения {seq} нет размера.",
+      "region_off_sheet": "Изменение {seq} находится за пределами листа.",
+      "module_missing": "Модуль, необходимый для этого действия, не установлен."
+    },
+    "rfi": {
+      "subject": "Изменение чертежа {seq} на {sheet}",
+      "question": "Ревизия {new} листа {sheet} отличается от ревизии {old} в отмеченной области ({kind}). Подтвердите намерение изменения и затронуты ли объёмы."
+    },
+    "markup": {
+      "text": "Изменение ревизии {seq}: {kind}"
+    },
+    "report": {
+      "title": "Сравнение ревизий чертежа",
+      "project": "Проект",
+      "name": "Сравнение",
+      "old_revision": "Старая ревизия",
+      "new_revision": "Новая ревизия",
+      "alignment": "Совмещение",
+      "alignment_none": "Не совмещено (одна рамка)",
+      "alignment_auto": "Автоматическое",
+      "alignment_manual": "Ручное, по двум точкам",
+      "confidence": "достоверность {value}",
+      "summary": "Изменения",
+      "summary_counts": "Всего {total}: добавлено {added}, удалено {removed}, изменено {modified}, текст {text}",
+      "generated_on": "Дата формирования",
+      "generated": "Сформировано {timestamp}",
+      "page_of": "Страница {page} из {total}",
+      "no_changes": "Между двумя ревизиями изменений не найдено.",
+      "col_no": "№",
+      "col_preview": "Превью",
+      "col_kind": "Изменение",
+      "col_location": "Место",
+      "col_detail": "Подробности",
+      "col_status": "Статус",
+      "col_comment": "Комментарий",
+      "col_follow_up": "Дальнейшие действия",
+      "page_at": "Страница {page}, {coords}",
+      "layer": "Слой {layer}",
+      "entity_counts": "Объекты: добавлено {added}, удалено {removed}, изменено {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Облако ревизии",
+      "remeasure": "Переобмер: объёмов {items}, позиций BOQ {positions}"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Обе стороны являются разными ревизиями.",
+      "distinct_revisions_fail": "Сравнение сопоставляет лист с самим собой.",
+      "distinct_revisions_hint": "Выберите старую и новую ревизии чертежа.",
+      "alignment_not_needed": "Ревизии DWG используют одни единицы чертежа; совмещение не требуется.",
+      "alignment_missing_matrix": "У сравнения нет совмещения.",
+      "alignment_singular": "Совмещение схлопывает лист и не может быть применено.",
+      "alignment_scale": "Совмещение масштабирует лист в {scale} раз, больше, чем отличаются ревизии одного чертежа.",
+      "alignment_low_confidence": "Автоматическое совмещение ненадёжно (достоверность {confidence}).",
+      "alignment_manual_points": "Для ручного совмещения нужны две пары точек.",
+      "alignment_ok": "Совмещение листа выглядит правдоподобно.",
+      "alignment_hint": "Совместите листы вручную по двум меткам, общим для обеих ревизий, например по пересечениям осей.",
+      "region_empty": "У изменения {seq} нет размера.",
+      "region_off_sheet": "Изменение {seq} находится за пределами листа.",
+      "regions_ok": "Все изменённые области находятся на листе.",
+      "triaged_ok": "Все изменения проверены.",
+      "triaged_open": "Открытых изменений: {count}.",
+      "triaged_hint": "Отметьте каждое изменение как значимое или незначимое.",
+      "followed_up_ok": "По каждому значимому изменению есть дальнейшие действия.",
+      "followed_up_missing": "Изменение {seq} помечено как значимое, но у него нет комментария, RFI, облака ревизии или отметки о переобмере.",
+      "followed_up_hint": "Прокомментируйте изменение, создайте RFI или облако ревизии либо отметьте объёмы внутри него для переобмера."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Прогноз денежного потока",
+      "portfolio_title": "Прогноз денежного потока по портфелю",
+      "empty": "Для этого выбора прогноз денежного потока отсутствует.",
+      "project": "Проект",
+      "as_of": "На дату",
+      "currency": "Валюта",
+      "delay_days": "Задержка поступлений (дней)",
+      "overrun_pct": "Перерасход сметы (%)",
+      "closing_position": "Остаток на конец периода",
+      "peak_funding": "Пиковая потребность в финансировании",
+      "peak_period": "Месяц пиковой потребности в финансировании",
+      "col": {
+        "period": "Месяц",
+        "planned_in": "Плановые поступления",
+        "actual_in": "Фактические поступления",
+        "expected_in": "Ожидаемые поступления",
+        "planned_out": "Плановые платежи",
+        "actual_out": "Фактические платежи",
+        "expected_out": "Ожидаемые платежи",
+        "net": "Чистый поток",
+        "cumulative": "Нарастающий остаток"
+      }
+    }
+  }
+}

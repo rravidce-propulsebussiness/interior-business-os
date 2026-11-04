@@ -1,0 +1,2538 @@
+{
+  "costs.catalog_name_unavailable": "Ovaj naziv ne može se koristiti za novi katalog. Odaberite drugi naziv.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Open-source procjena građevinskih troškova"
+  },
+  "assemblies": {
+    "add_component": "Dodaj komponentu",
+    "apply_to_boq": "Primijeni na troškovnik",
+    "description": "Recepti troškova za višekratnu uporabu — kombinirajte materijale, rad i opremu u predloške spremne za primjenu",
+    "from_database": "Iz baze podataka",
+    "new_assembly": "Nova analitička cijena",
+    "no_assemblies": "Još nema analitičkih cijena",
+    "no_assemblies_hint": "Stvorite svoju prvu analitičku cijenu iz baze troškova ili kataloga resursa",
+    "title": "Analitičke cijene",
+    "total_rate": "Ukupna cijena"
+  },
+  "auth": {
+    "email": "E-pošta",
+    "login": "Prijava",
+    "logout": "Odjava",
+    "password": "Lozinka"
+  },
+  "bim": {
+    "active": "Aktivno",
+    "elements": "Elementi",
+    "link_to_boq": "Poveži s troškovnikom",
+    "measure": "Mjeri",
+    "models": "Modeli",
+    "processing": "Obrada",
+    "properties": "Svojstva",
+    "quantities": "Količine",
+    "section_box": "Presjek",
+    "title": "BIM centar",
+    "upload_model": "Učitaj model",
+    "wireframe": "Žičani prikaz",
+    "zoom_to_fit": "Prilagodi pogledu"
+  },
+  "boq": {
+    "add_markups": "Dodaj marže",
+    "add_position": "Dodaj stavku",
+    "add_section": "Dodaj odjeljak",
+    "assembly": "Analitička cijena",
+    "description": "Opis",
+    "direct_cost": "Direktni trošak",
+    "export": "Izvezi",
+    "grand_total": "Sveukupno",
+    "gross_total": "Bruto ukupno",
+    "mvp": {
+      "title": "Odaberi materijale",
+      "subtitle_one": "{{count}} resurs treba odabir",
+      "subtitle_other": "{{count}} resursa treba odabir",
+      "bulk_label": "Brzo popunjavanje:",
+      "bulk_median": "Medijan za sve",
+      "bulk_mean": "Prosjek za sve",
+      "bulk_cheapest": "Najjeftinije za sve",
+      "bulk_priciest": "Najskuplje za sve",
+      "slot_variant_count": "{{n}} opcija",
+      "selected_label": "Odabrano:",
+      "default_mean": "prosječna cijena",
+      "default_median": "medijalna cijena",
+      "row_median": "Medijalna cijena · {{price}}",
+      "row_mean": "Prosječna cijena · {{price}}",
+      "subtotal_label": "Cijena stavke",
+      "apply": "Primijeni i dodaj u troškovnik",
+      "batch_progress": "Stavka {{current}} od {{total}}",
+      "toast_applied_one": "Odabrana {{count}} varijanta",
+      "toast_applied_other": "Odabrano {{count}} varijanti"
+    },
+    "net_total": "Neto ukupno",
+    "ordinal": "Redni broj",
+    "position": "Stavka",
+    "quantity": "Količina",
+    "subtotal": "Međuzbroj",
+    "title": "Troškovnik",
+    "total": "Ukupno",
+    "unit": "Jedinica",
+    "unit_rate": "Jedinična cijena",
+    "validate": "Provjeri",
+    "vat": "PDV",
+    "fidelity": {
+      "sheet": {
+        "title": "Izvješće o razmjeni"
+      },
+      "column": {
+        "severity": "Ozbiljnost",
+        "kind": "Vrsta gubitka",
+        "position": "Pozicija",
+        "field": "Polje",
+        "original": "Izvorna vrijednost",
+        "written": "Upisana vrijednost",
+        "count": "Broj",
+        "detail": "Detalj"
+      },
+      "severity": {
+        "error": "Kritično",
+        "warning": "Upozorenje",
+        "info": "Napomena"
+      },
+      "kind": {
+        "unsupported_element": "Element nije podržan",
+        "truncated_text": "Tekst skraćen",
+        "altered_text": "Tekst izmijenjen",
+        "rounded_value": "Vrijednost zaokružena",
+        "value_out_of_range": "Vrijednost izvan raspona",
+        "dropped_attribute": "Svojstvo odbačeno",
+        "unmapped_unit": "Jedinica nije mapirana",
+        "lost_hierarchy": "Razina hijerarhije izgubljena",
+        "markup_not_representable": "Dodatak se ne može prikazati",
+        "attachment_skipped": "Prilog preskočen",
+        "changed_identifier": "Oznaka promijenjena",
+        "exceeds_limit": "Prekoračeno ograničenje pohrane",
+        "rejected_row": "Redak odbijen",
+        "skipped_row": "Redak preskočen",
+        "parser_warning": "Upozorenje čitača",
+        "roundtrip_mismatch": "Odstupanje povratnog testa"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Točka grananja",
+      "base_snapshot_from": "Točka grananja (iz snimke „{snapshot}”)",
+      "before_cherry_pick": "Prije primjene promjena iz „{source}”",
+      "before_merge": "Prije spajanja grane „{branch}”",
+      "errors": {
+        "branch_closed": "Ova grana je spojena ili arhivirana i ne prima daljnje promjene.",
+        "not_a_branch": "Ovaj troškovnik nije grana.",
+        "same_bill": "Odaberite dva različita troškovnika.",
+        "different_project": "Oba troškovnika moraju pripadati istom projektu.",
+        "different_tree": "Oba troškovnika moraju biti grane istog glavnog troškovnika.",
+        "unresolved_conflicts": "Broj stavki promijenjenih u oba troškovnika: {count}. Prije primjene odlučite koju verziju zadržati za svaku.",
+        "merge_forbidden": "Nemate dopuštenje za spajanje u glavni troškovnik.",
+        "confirm_required": "Potvrdite spajanje: ono prepisuje glavni troškovnik.",
+        "design_options_unavailable": "Modul varijanti projektnih rješenja nije instaliran.",
+        "base_snapshot_in_use": "Ova snimka je točka grananja otvorene grane i ne može se izbrisati."
+      },
+      "export": {
+        "title_positions": "Usporedba troškovnika po stavkama",
+        "title_sections": "Usporedba troškovnika po odjeljcima",
+        "title_cost_groups": "Usporedba troškovnika po grupama troškova",
+        "project": "Projekt",
+        "bill_a": "Troškovnik A",
+        "bill_b": "Troškovnik B",
+        "total_a": "Ukupno A",
+        "total_b": "Ukupno B",
+        "delta": "Razlika",
+        "counts": "Promjene",
+        "counts_value": "dodano: {added}, uklonjeno: {removed}, promijenjeno: {changed}",
+        "col_ordinal": "Br.",
+        "col_description": "Opis",
+        "col_unit": "Jed.",
+        "col_change": "Promjena",
+        "col_qty_a": "Kol. A",
+        "col_qty_b": "Kol. B",
+        "col_rate_a": "Cijena A",
+        "col_rate_b": "Cijena B",
+        "col_total_a": "Ukupno A",
+        "col_total_b": "Ukupno B",
+        "col_delta": "Razlika",
+        "col_section": "Odjeljak",
+        "col_cost_group": "Grupa troškova",
+        "change_added": "Dodano",
+        "change_removed": "Uklonjeno",
+        "change_changed": "Promijenjeno",
+        "change_unchanged": "Nepromijenjeno",
+        "ungrouped": "Bez grupe",
+        "empty": "Oba troškovnika su identična.",
+        "total": "Ukupno"
+      }
+    }
+  },
+  "cad": {
+    "converting": "Konverzija...",
+    "elements_found": "Pronađeno {count} elemenata",
+    "supported_formats": "Podržano: DWG, DGN, RVT, IFC, PDF",
+    "title": "CAD uvoz",
+    "upload": "Učitaj CAD datoteku"
+  },
+  "catalog": {
+    "add_resource": "Dodaj resurs",
+    "build_assembly": "Izgradi analitičku cijenu",
+    "description": "Pregledavajte i upravljajte materijalima, opremom, satnicama i operaterima",
+    "import_region": "Uvezi regiju",
+    "my_catalog": "Moj katalog",
+    "title": "Katalog resursa"
+  },
+  "cde": {
+    "archived": "Arhivirano",
+    "cde_state": "CDE stanje",
+    "container_code": "Šifra spremnika",
+    "discipline": "Struka",
+    "new_container": "Novi spremnik",
+    "promote": "Promakni",
+    "published": "Objavljeno",
+    "revisions": "Revizije",
+    "shared": "Podijeljeno",
+    "suitability": "Prikladnost",
+    "title": "Zajedničko podatkovno okruženje",
+    "wip": "U izradi",
+    "intl": {
+      "state_labels": {
+        "wip": "U izradi",
+        "shared": "Dijeljeno",
+        "published": "Objavljeno",
+        "archived": "Arhivirano"
+      }
+    }
+  },
+  "comments": {
+    "delete": "Obriši",
+    "deleted": "Ovaj komentar je obrisan",
+    "edit": "Uredi",
+    "edited": "uređeno",
+    "empty": "Još nema komentara. Pokrenite raspravu.",
+    "placeholder": "Napišite komentar...",
+    "post": "Objavi",
+    "reply": "Odgovori",
+    "title": "Komentari"
+  },
+  "common": {
+    "back": "Natrag",
+    "cancel": "Odustani",
+    "confirm": "Potvrdi",
+    "create": "Stvori",
+    "delete": "Obriši",
+    "edit": "Uredi",
+    "error": "Pogreška",
+    "export": "Izvezi",
+    "filter": "Filtriraj",
+    "import": "Uvezi",
+    "loading": "Učitavanje...",
+    "next": "Dalje",
+    "no": "Ne",
+    "save": "Spremi",
+    "search": "Pretraži",
+    "success": "Uspjeh",
+    "yes": "Da"
+  },
+  "contacts": {
+    "approved": "Odobreno",
+    "client": "Klijent",
+    "company_name": "Naziv tvrtke",
+    "consultant": "Konzultant",
+    "contact_type": "Vrsta kontakta",
+    "expired": "Isteklo",
+    "internal": "Interno",
+    "new_contact": "Novi kontakt",
+    "no_contacts": "Još nema kontakata",
+    "pending": "Na čekanju",
+    "prequalification": "Prekvalifikacija",
+    "search_contacts": "Pretraži kontakte...",
+    "subcontractor": "Podizvođač",
+    "supplier": "Dobavljač",
+    "title": "Imenik kontakata"
+  },
+  "correspondence": {
+    "date_received": "Datum primitka",
+    "date_sent": "Datum slanja",
+    "email": "E-pošta",
+    "incoming": "Dolazno",
+    "letter": "Dopis",
+    "new_entry": "Novi unos",
+    "notice": "Obavijest",
+    "outgoing": "Odlazno",
+    "title": "Korespondencija"
+  },
+  "costs": {
+    "equipment": "Oprema",
+    "labor": "Rad",
+    "material": "Materijal",
+    "rate": "Cijena",
+    "search_costs": "Pretraži stavke troškova...",
+    "title": "Baza troškova"
+  },
+  "dashboard": {
+    "active_estimates": "Aktivne procjene",
+    "analytics": "Analitika",
+    "continue_estimate": "Nastavi posljednju procjenu",
+    "getting_started": "Početak rada",
+    "languages": "Jezici",
+    "modules_loaded": "Učitani moduli",
+    "project_overview": "Pregled projekta",
+    "quality_score": "Ocjena kvalitete",
+    "recent_projects": "Nedavni projekti",
+    "schedule_status": "Status plana",
+    "step_ai_search": "Omogući AI pretragu",
+    "step_ai_search_desc": "Generirajte vektorska ugnježđenja za semantičko podudaranje troškova",
+    "step_build_boq": "Izgradi troškovnik",
+    "step_build_boq_desc": "Stvorite troškovnik uz pomoć AI-ja",
+    "step_connect_ai": "Poveži AI",
+    "step_connect_ai_desc": "Dodajte svoje API ključeve za procjenu pomoću AI-ja",
+    "step_create_project": "Stvori projekt",
+    "step_create_project_desc": "Pokrenite svoj prvi projekt građevinske procjene",
+    "step_load_db": "Učitaj bazu troškova",
+    "step_load_db_desc": "Uvezite regionalne podatke o cijenama s 55.000+ stavki",
+    "subtitle": "Vaš radni prostor za građevinsku procjenu",
+    "system_status": "Status sustava",
+    "total_value": "Ukupna vrijednost",
+    "validation_rules": "Pravila provjere",
+    "welcome": "Dobrodošli u OpenConstructionERP"
+  },
+  "finance": {
+    "actual": "Stvarno",
+    "amount": "Iznos",
+    "approve": "Odobri",
+    "budgets": "Proračuni",
+    "committed": "Ugovoreno",
+    "evm": "Ostvarena vrijednost",
+    "forecast": "Prognoza",
+    "invoice_number": "Br. računa",
+    "invoices": "Računi",
+    "original_budget": "Izvorni proračun",
+    "pay": "Označi kao plaćeno",
+    "payable": "Obveze",
+    "payments": "Plaćanja",
+    "receivable": "Potraživanja",
+    "revised_budget": "Revidirani proračun",
+    "status": "Status",
+    "title": "Financije",
+    "variance": "Odstupanje"
+  },
+  "gantt": {
+    "baseline": "Osnovna linija",
+    "critical_path": "Kritični put",
+    "day": "Dan",
+    "dependencies": "Ovisnosti",
+    "month": "Mjesec",
+    "title": "Gantogram",
+    "today": "Danas",
+    "week": "Tjedan"
+  },
+  "inspections": {
+    "checklist": "Kontrolna lista",
+    "critical": "Kritično",
+    "fail": "Nije prošlo",
+    "inspector": "Pregledatelj",
+    "new_inspection": "Novi pregled",
+    "partial": "Djelomično",
+    "pass": "Prošlo",
+    "title": "Pregledi kvalitete",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Zakazano",
+        "in_progress": "U tijeku",
+        "completed": "Završeno",
+        "failed": "Neuspjelo",
+        "cancelled": "Otkazano"
+      }
+    }
+  },
+  "meetings": {
+    "absent": "Odsutan",
+    "action_items": "Akcijske stavke",
+    "agenda": "Dnevni red",
+    "attendees": "Sudionici",
+    "complete": "Završi sastanak",
+    "excused": "Opravdano odsutan",
+    "meeting_type": "Vrsta",
+    "minutes": "Zapisnik",
+    "new_meeting": "Novi sastanak",
+    "present": "Prisutan",
+    "title": "Sastanci",
+    "actions": {
+      "status": {
+        "open": "Otvoreno",
+        "completed": "Završeno",
+        "cancelled": "Otkazano"
+      },
+      "flag": {
+        "overdue": "Kasni",
+        "on_track": "U tijeku"
+      },
+      "label": {
+        "action_item": "Zadatak",
+        "completion_rate": "Stopa izvršenja zadataka",
+        "open_vs_done": "Otvoreno naspram završeno",
+        "overdue": "Zadaci s prekoračenim rokom"
+      },
+      "explain": {
+        "action_item": "Zadatak je obveza dogovorena na sastanku, s odgovornom osobom i rokom.",
+        "completion_rate": "Stopa izvršenja zadataka je broj završenih zadataka podijeljen ukupnim brojem zadataka, od 0 do 1.",
+        "open_vs_done": "Otvoreni zadaci još zahtijevaju rad. Završeni zadaci su dovršeni i ne zahtijevaju daljnji rad.",
+        "overdue": "Zadatak kasni ako je još otvoren, a rok mu je prije referentnog datuma."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Zapisnik sa sastanka",
+      "issued": "IZDAN",
+      "draft": "NACRT",
+      "date": "Datum:",
+      "location": "Mjesto:",
+      "type": "Vrsta:",
+      "number": "Sastanak br.:",
+      "chairperson": "Voditelj:",
+      "next_meeting": "Sljedeći sastanak:",
+      "not_available": "N/P",
+      "not_scheduled": "Nije zakazano",
+      "attendance": "Prisutnost",
+      "present": "Prisutni:",
+      "absent": "Odsutni / opravdani:",
+      "agenda": "Dnevni red, rasprava i odluke",
+      "required": "(obavezno)",
+      "discussion": "Rasprava:",
+      "decision": "Odluka:",
+      "decisions": "Odluke",
+      "open_questions": "Otvorena pitanja",
+      "actions": "Zadaci",
+      "col_number": "#",
+      "col_action": "Zadatak",
+      "col_owner": "Odgovorna osoba",
+      "col_due": "Rok",
+      "col_status": "Status",
+      "brought_forward": "[Preneseno]",
+      "overdue": "(zakašnjelo)",
+      "status_open": "Otvoreno",
+      "status_in_progress": "U tijeku",
+      "status_done": "Završeno",
+      "status_cancelled": "Otkazano",
+      "summary": "Sažetak",
+      "generated": "Izrađeno: {stamp}",
+      "issued_at": "Izdano {stamp}",
+      "running_head": "{project} - Zapisnik",
+      "type_progress": "Napredak radova",
+      "type_design": "Projektiranje",
+      "type_safety": "Sigurnost",
+      "type_subcontractor": "Podizvođač",
+      "type_kickoff": "Početni",
+      "type_closeout": "Primopredaja",
+      "type_commercial": "Komercijalni"
+    }
+  },
+  "modules": {
+    "available": "Dostupno",
+    "install": "Instaliraj",
+    "installed": "Instalirano",
+    "title": "Moduli",
+    "uninstall": "Deinstaliraj",
+    "update": "Ažuriraj"
+  },
+  "nav": {
+    "5d_cost_model": "5D model troškova",
+    "ai_estimate": "AI procjena",
+    "architecture": "Karta arhitekture",
+    "assemblies": "Analitičke cijene",
+    "dashboard": "Nadzorna ploča",
+    "group_estimation": "Procjena",
+    "group_planning": "Planiranje",
+    "group_procurement": "Nabava",
+    "group_tools": "Alati",
+    "reports": "Izvještaji",
+    "settings": "Postavke",
+    "sustainability": "Održivost",
+    "templates": "Predlošci"
+  },
+  "ncr": {
+    "corrective_action": "Korektivna mjera",
+    "design": "Projektiranje",
+    "material": "Materijal",
+    "new_ncr": "Novi NCR",
+    "preventive_action": "Preventivna mjera",
+    "root_cause": "Glavni uzrok",
+    "title": "Izvještaji o nesukladnosti",
+    "workmanship": "Izvedba"
+  },
+  "notifications": {
+    "mark_all_read": "Označi sve kao pročitano",
+    "no_notifications": "Nema novih obavijesti",
+    "title": "Obavijesti",
+    "unread": "Nepročitano"
+  },
+  "procurement": {
+    "confirm": "Potvrdi primitak",
+    "goods_receipts": "Primke robe",
+    "issue": "Izdaj",
+    "new_po": "Nova narudžbenica",
+    "po_number": "Br. narudžbe",
+    "purchase_orders": "Narudžbenice",
+    "title": "Nabava",
+    "vendor": "Dobavljač"
+  },
+  "projects": {
+    "new_project": "Novi projekt",
+    "no_projects": "Još nema projekata",
+    "project_name": "Naziv projekta",
+    "title": "Projekti"
+  },
+  "reporting": {
+    "cost_report": "Izvještaj o troškovima",
+    "generate_report": "Generiraj izvještaj",
+    "kpi": "KPI nadzorna ploča",
+    "project_status": "Status projekta",
+    "safety_report": "Izvještaj o sigurnosti",
+    "schedule_status": "Status plana",
+    "templates": "Predlošci",
+    "title": "Izvještaji i nadzorne ploče",
+    "explain": {
+      "report_total_one": "Ukupno u izvješću: {money} (zbroj {count} retka).",
+      "report_total_other": "Ukupno u izvješću: {money} (zbroj {count} redaka).",
+      "percent_of_total": "{part} je {percent} od {total} (postotak ukupnog).",
+      "percent_zero_total": "{part} od {total}: ukupno je nula, pa je svaki udio prikazan kao 0 posto.",
+      "breakdown_empty": "Raščlamba troškova: nema podataka.",
+      "breakdown_one": "Raščlamba troškova: {count} skupina, ukupno u izvješću {money}.",
+      "breakdown_other": "Raščlamba troškova: {count} skupina, ukupno u izvješću {money}.",
+      "top_n_one": "Prvih {requested}: {shown} od {shown} retka.",
+      "top_n_other": "Prvih {requested}: {shown} od {shown} redaka."
+    }
+  },
+  "rfi": {
+    "ball_in_court": "Na potezu",
+    "close": "Zatvori",
+    "cost_impact": "Utjecaj na trošak",
+    "days_open": "Dana otvoreno",
+    "new_rfi": "Novi RFI",
+    "overdue": "Prekoračeno",
+    "question": "Pitanje",
+    "respond": "Odgovori",
+    "response": "Odgovor",
+    "schedule_impact": "Utjecaj na plan",
+    "subject": "Predmet",
+    "title": "Upiti za informacije"
+  },
+  "safety": {
+    "corrective_action": "Korektivna mjera",
+    "days_lost": "Izgubljeni dani",
+    "incidents": "Incidenti",
+    "new_incident": "Novi incident",
+    "new_observation": "Novo zapažanje",
+    "observations": "Zapažanja",
+    "risk_score": "Ocjena rizika",
+    "severity": "Ozbiljnost",
+    "title": "Sigurnost",
+    "treatment": "Postupanje"
+  },
+  "schedule": {
+    "title": "4D vremenski plan",
+    "generated": {
+      "position_label": "Stavka {ordinal}",
+      "section_label": "Poglavlje {ordinal}",
+      "task_description": "Automatski generirano iz stavke {ordinal} troškovnika ({quantity} {unit})",
+      "section_description": "Sažetak: poglavlje {ordinal} troškovnika",
+      "start_milestone": "Početak projekta",
+      "start_milestone_description": "Prekretnica početka projekta",
+      "completion_milestone": "Dovršetak projekta",
+      "completion_milestone_description": "Prekretnica dovršetka projekta",
+      "labour_resource": "Radna snaga",
+      "machine_resource": "Strojevi"
+    },
+    "progress_sheet": {
+      "sheet_title": "Napredak",
+      "title": "List za ažuriranje napretka",
+      "detail_schedule": "Plan: {name}",
+      "detail_exported": "Izvezeno: {date}",
+      "instructions": "Ispunite samo bijele stupce. Ne mijenjajte sive stupce, redoslijed redaka ni skrivene stupce.",
+      "col": {
+        "activity_ref": "ID aktivnosti",
+        "name": "Aktivnost",
+        "wbs_code": "WBS",
+        "responsible": "Odgovorna osoba",
+        "planned_start": "Planirani početak",
+        "planned_finish": "Planirani završetak",
+        "percent_complete": "% dovršenosti",
+        "actual_start": "Stvarni početak",
+        "actual_finish": "Stvarni završetak",
+        "remaining_duration": "Preostalo (radni dani)",
+        "notes": "Bilješke",
+        "row_key": "Ključ retka",
+        "stamp": "Pečat"
+      }
+    }
+  },
+  "settings": {
+    "currency": "Valuta",
+    "date_format": "Format datuma",
+    "imperial": "Imperijalni",
+    "measurement": "Mjerni sustav",
+    "metric": "Metrički",
+    "number_format": "Format broja",
+    "paper_size": "Veličina papira",
+    "regional": "Regionalne postavke",
+    "timezone": "Vremenska zona"
+  },
+  "submittals": {
+    "approved_as_noted": "Odobreno uz napomene",
+    "new_submittal": "Novi podnesak",
+    "review": "Pregledaj",
+    "revise_resubmit": "Doradi i ponovno pošalji",
+    "revision": "Revizija",
+    "spec_section": "Stavka specifikacije",
+    "submit": "Pošalji",
+    "title": "Podnesci",
+    "intl": {
+      "status_labels": {
+        "draft": "Nacrt",
+        "submitted": "Dostavljeno",
+        "under_review": "Na pregledu",
+        "approved": "Odobreno",
+        "approved_as_noted": "Odobreno uz napomene",
+        "revise_and_resubmit": "Doraditi i ponovno dostaviti",
+        "rejected": "Odbijeno",
+        "closed": "Zatvoreno"
+      }
+    }
+  },
+  "takeoff": {
+    "auto_detect": "Automatsko prepoznavanje",
+    "confidence": "Pouzdanost",
+    "manual_measure": "Ručno mjerenje",
+    "title": "Iskaz količina"
+  },
+  "tasks": {
+    "assignee": "Dodijeljen",
+    "checklist": "Kontrolna lista",
+    "completed": "Završeno",
+    "decision": "Odluka",
+    "draft": "Skica",
+    "due_date": "Rok",
+    "focus_area": "Područje fokusa",
+    "in_progress": "U tijeku",
+    "information": "Informacija",
+    "my_tasks": "Moji zadaci",
+    "new_task": "Novi zadatak",
+    "open": "Otvoreno",
+    "personal": "Osobni zadatak",
+    "priority": "Prioritet",
+    "task": "Zadatak",
+    "title": "Zadaci",
+    "topic": "Tema"
+  },
+  "tendering": {
+    "award": "Dodjela",
+    "bid": "Ponuda",
+    "create_tender": "Stvori natječaj",
+    "title": "Natječaji"
+  },
+  "transmittals": {
+    "acknowledge": "Potvrdi",
+    "for_approval": "Za odobrenje",
+    "for_construction": "Za izvedbu",
+    "for_information": "Za informaciju",
+    "issue_transmittal": "Izdaj",
+    "locked": "Zaključano",
+    "new_transmittal": "Nova otpremnica",
+    "purpose": "Svrha",
+    "recipients": "Primatelji",
+    "title": "Otpremnice",
+    "intl": {
+      "status_words": {
+        "draft": "nacrt",
+        "issued": "poslano",
+        "responded": "odgovoreno"
+      }
+    }
+  },
+  "units": {
+    "h": "h",
+    "kg": "kg",
+    "lsum": "paušal",
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "pcs": "kom",
+    "set": "set",
+    "t": "t"
+  },
+  "users": {
+    "actions": "Radnje",
+    "activate": "Aktiviraj",
+    "active": "Aktivan",
+    "admins": "Administratori",
+    "deactivate": "Deaktiviraj",
+    "email": "E-pošta",
+    "full_name": "Puno ime",
+    "inactive": "Neaktivan",
+    "invite": "Pozovi",
+    "invite_user": "Pozovi korisnika",
+    "invited": "Korisnik je uspješno pozvan",
+    "last_login": "Posljednja prijava",
+    "management": "Upravljanje korisnicima",
+    "management_desc": "Upravljajte članovima tima, ulogama i pristupom",
+    "managers": "Voditelji",
+    "name": "Ime",
+    "never": "Nikad",
+    "no_users": "Nije pronađen nijedan korisnik",
+    "password": "Lozinka",
+    "role": "Uloga",
+    "role_admin_desc": "Puni pristup svim funkcijama",
+    "role_editor_desc": "Stvaranje i uređivanje sadržaja",
+    "role_manager_desc": "Upravljanje projektima i timom",
+    "role_viewer_desc": "Pristup samo za čitanje",
+    "search": "Pretraga po imenu ili e-pošti...",
+    "status": "Status",
+    "total": "Ukupno korisnika",
+    "updated": "Korisnik ažuriran"
+  },
+  "validation": {
+    "duplicate_ordinal": "Dvostruki redni broj: {ordinal}",
+    "errors": "Pogreške",
+    "missing_classification": "Stavka {position} treba klasifikacijski kod",
+    "missing_description": "Stavci {position} nedostaje opis",
+    "missing_quantity": "Stavka {position} nema količinu",
+    "missing_rate": "Stavka {position} nema jediničnu cijenu",
+    "passed": "Prošlo",
+    "rate_anomaly": "Jedinična cijena {rate} prelazi prag ({threshold})",
+    "run_validation": "Pokreni provjeru",
+    "score": "Ocjena kvalitete",
+    "title": "Provjera",
+    "warnings": "Upozorenja",
+    "nl": {
+      "not_a_string": "Unos mora biti tekst.",
+      "empty": "Unos je prazan.",
+      "too_long": "Unos premašuje {max} znakova.",
+      "ai_unparsable": "Odgovor umjetne inteligencije nije se mogao raščlaniti kao DSL dokument.",
+      "no_pattern": "Nijedan obrazac ne odgovara unesenoj rečenici.",
+      "try": "Pokušajte: '{pattern}'"
+    }
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Ovaj snimak je zamrznut. Zamrznuti snimak je zapis i ne može se mijenjati.",
+      "frozen_no_delete": "Zamrznuti snimak je zapis i ne može se brisati.",
+      "draft_open": "Snimak u nacrtu već je otvoren. Zamrznite ga ili obrišite prije nego započnete novi.",
+      "no_line_method": "Ova stavka nema vlastitu metodu.",
+      "snapshot_missing": "Snimak nije pronađen.",
+      "line_missing": "Ovaj snimak nema takvu stavku.",
+      "document_missing": "Povezani dokument ne pripada ovom projektu.",
+      "freeze_refused": "Snimak se još ne može zamrznuti: {count} stavki premašilo je prag bez komentara i dokaznog dokumenta.",
+      "no_frozen_snapshot": "Još nema zamrznutog snimka za usporedbu.",
+      "no_ledger": "Knjiga računa nije dostupna u ovoj instalaciji.",
+      "no_snapshot": "Još nema snimka za dokumentiranje."
+    },
+    "export": {
+      "project": "Projekt",
+      "generated": "Izrađeno",
+      "currency": "Valuta",
+      "page": "Stranica",
+      "generated_at": "Izrađeno dana",
+      "empty": "Zasad nema ničega za prikaz.",
+      "total": "Ukupno",
+      "cost_report": "Izvješće o troškovima",
+      "phase_comparison": "Usporedba faza",
+      "invoice_ledger": "Knjiga računa",
+      "forecast_documentation": "Dokumentacija prognoze",
+      "as_of": "Na dan",
+      "forecast_method": "Metoda prognoze",
+      "col_account": "Konto",
+      "col_code": "Šifra",
+      "col_description": "Opis",
+      "col_source": "Izvor",
+      "col_method": "Metoda",
+      "col_planned": "Planirano",
+      "col_committed": "Ugovoreno",
+      "col_pending": "Izmjene na čekanju",
+      "col_measured": "Izmjereno",
+      "col_certified": "Ovjereno",
+      "col_invoiced": "Fakturirano",
+      "col_paid": "Plaćeno",
+      "col_forecast": "Prognoza",
+      "col_variance": "Odstupanje",
+      "col_variance_pct": "Odstupanje %",
+      "col_forecast_of_plan": "Prognoza % plana",
+      "col_measured_of_committed": "Izmjereno % ugovorenog",
+      "col_invoiced_of_committed": "Fakturirano % ugovorenog",
+      "col_contract": "Ugovor",
+      "col_contract_title": "Naziv ugovora",
+      "col_invoice": "Račun",
+      "col_date": "Datum",
+      "col_kind": "Vrsta",
+      "col_release_status": "Otpuštanje",
+      "col_net": "Neto",
+      "col_vat": "PDV",
+      "col_gross": "Bruto",
+      "col_retention": "Jamstveni zadržani iznos",
+      "col_release": "Zadržani iznos otpušten",
+      "col_discount": "Popust",
+      "col_payable": "Za plaćanje",
+      "col_open": "Otvoreno",
+      "col_previous": "Prethodno",
+      "col_delta": "Promjena",
+      "col_delta_pct": "Promjena %",
+      "col_needs_evidence": "Potreban dokument",
+      "col_comment": "Komentar",
+      "col_evidence": "Dokazni dokument",
+      "row_unassigned": "Iznosi bez troškovne stavke",
+      "row_loose_changes": "Izmjene bez ugovora",
+      "row_no_contract": "Bez ugovora",
+      "contract_value": "Vrijednost ugovora",
+      "retention_held": "Zadržani iznos",
+      "yes": "Da",
+      "no": "Ne",
+      "snapshot_date": "Datum snimka",
+      "snapshot_status": "Status",
+      "previous_snapshot": "Prethodni zamrznuti snimak",
+      "method_explained": "Kako se čita prognoza",
+      "evidence_threshold": "Dokument potreban iznad",
+      "threshold_both": "promjene veće od {parts}",
+      "threshold_any": "bilo koje promjene",
+      "frozen_at": "Zamrznuto"
+    },
+    "method": {
+      "best_available": "Najbolji dostupni izvor",
+      "maximum": "Najveća vrijednost",
+      "evm_cpi": "Ostvarena vrijednost (CPI)",
+      "manual": "Ručno"
+    },
+    "method_help": {
+      "best_available": "Svaka stavka uzima svoj najzreliji iznos: okončanu situaciju, inače izmjerene radove, inače ugovorenu vrijednost, inače procjenu, inače proračun.",
+      "maximum": "Svaka stavka uzima najveći od svojih iznosa (proračun, procjena, ugovoreno, izmjereno, fakturirano) kako prognoza nikad ne bi skrivala rizik.",
+      "evm_cpi": "Svaka stavka projicira trošak do završetka iz napretka: dosad potrošeni novac podijeljen udjelom izvedenih radova.",
+      "manual": "Iznos stavke određuje osoba i povezuje dokument na kojem se temelji."
+    },
+    "source": {
+      "none": "Nema iznosa",
+      "budget": "Proračun",
+      "estimate": "Procjena",
+      "partly_awarded": "Djelomično ugovoreno",
+      "awarded": "Ugovoreno",
+      "measured": "Izmjereno",
+      "final": "Okončani obračun",
+      "manual": "Ručno",
+      "invoiced": "Fakturirano",
+      "evm": "Ostvarena vrijednost"
+    },
+    "layer": {
+      "budget": "Proračun",
+      "estimate": "Procjena",
+      "tender": "Najbolja ponuda",
+      "awarded": "Ugovoreno",
+      "changes": "Odobrene izmjene",
+      "committed": "Ugovoreno",
+      "pending": "Izmjene na čekanju",
+      "measured": "Izmjereno",
+      "certified": "Ovjereno",
+      "invoiced": "Fakturirano",
+      "paid": "Plaćeno",
+      "forecast": "Prognoza"
+    },
+    "invoice_kind": {
+      "interim": "Privremena situacija",
+      "final": "Okončana situacija",
+      "daywork": "Radovi u režiji",
+      "credit_note": "Odobrenje"
+    },
+    "release_status": {
+      "open": "Otvoreno",
+      "released": "Otpušteno"
+    },
+    "evidence_kind": {
+      "document": "Dokument",
+      "minutes": "Zapisnik",
+      "other": "Ostalo"
+    },
+    "snapshot_status": {
+      "draft": "Nacrt",
+      "frozen": "Zamrznut"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Projekt",
+      "project_no": "Br. projekta",
+      "generated_on": "Datum izrade",
+      "records": "Zapisi",
+      "currency": "Valuta",
+      "status": "Status",
+      "name": "Ime i prezime",
+      "signature": "Potpis",
+      "date": "Datum",
+      "signatures": "Potpisi",
+      "yes": "Da",
+      "no": "Ne",
+      "days_one": "{n} dan",
+      "days_other": "{n} dana",
+      "empty_register": "Nema zapisa.",
+      "total": "Ukupno",
+      "signer_title": "Funkcija",
+      "sig_prepared_by": "Izrada",
+      "sig_checked_by": "Provjera",
+      "sig_approved_by": "Odobrenje",
+      "footer_generated": "Izrađeno {timestamp}",
+      "footer_page": "Stranica {page} od {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Evidencija zahtjeva za odobrenje",
+        "doc_title": "Zahtjev za odobrenje",
+        "doc_title_product_data": "Obrazac odobrenja materijala",
+        "col_number": "Br. zahtjeva",
+        "col_title": "Naziv",
+        "col_type": "Vrsta",
+        "col_spec": "Poglavlje specifikacije",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Datum predaje",
+        "col_date_required": "Traženi datum",
+        "col_date_returned": "Datum vraćanja",
+        "col_reviewer": "Pregledavatelj",
+        "col_approver": "Odobravatelj",
+        "col_ball_in_court": "Na potezu",
+        "submitted_by_org": "Tvrtka podnositelj",
+        "review_notes": "Primjedbe pregleda",
+        "no_review_notes": "Nema zabilježenih primjedbi pregleda.",
+        "sig_submitted": "Predaja",
+        "sig_reviewed": "Pregled",
+        "sig_approved": "Odobrenje",
+        "register_filename": "evidencija-zahtjeva-za-odobrenje",
+        "register_title_shop_drawing": "Evidencija radioničkih nacrta",
+        "register_title_product_data": "Evidencija odobrenja materijala",
+        "register_title_method_statement": "Evidencija izjava o metodi rada",
+        "register_filename_shop_drawing": "evidencija-radionickih-nacrta",
+        "register_filename_product_data": "evidencija-odobrenja-materijala",
+        "register_filename_method_statement": "evidencija-izjava-o-metodi-rada",
+        "col_discipline": "Struka",
+        "col_manufacturer": "Proizvođač / marka",
+        "col_model": "Model / oznaka",
+        "col_origin": "Zemlja porijekla",
+        "col_supplier": "Dobavljač",
+        "col_product": "Proizvođač / model / porijeklo",
+        "col_review_code": "Oznaka ocjene",
+        "col_outcome": "Ishod pregleda",
+        "col_review_period": "Rok pregleda (dani)",
+        "col_review_due": "Pregled do",
+        "col_days_in_review": "Dana u pregledu",
+        "col_days_in_review_print": "Dana u pregledu",
+        "col_review_overdue": "Dana kašnjenja",
+        "col_required_on_site": "Potrebno na gradilištu",
+        "col_long_lead": "Dug rok isporuke",
+        "col_lead_time": "Rok isporuke (tjedni)",
+        "col_needed_by": "Odobrenje potrebno do",
+        "col_approval_late": "Dana nakon roka",
+        "col_drawings": "Povezani nacrti",
+        "col_submitted_returned": "Predano / vraćeno",
+        "col_on_site_needed_by": "Na gradilištu / odobrenje do",
+        "resubmit_for_record": "Ispravljeni primjerak predati ponovno u evidenciju",
+        "review_history": "Povijest pregleda",
+        "hist_submitted": "Predano",
+        "hist_returned": "Vraćeno",
+        "drawings_missing_one": "{n} povezani nacrt više nije dostupan",
+        "drawings_missing_other": "{n} povezanih nacrta više nije dostupno",
+        "weeks_one": "{n} tjedan",
+        "weeks_other": "{n} tj."
+      },
+      "labels": {
+        "status": {
+          "draft": "Nacrt",
+          "submitted": "Predano",
+          "under_review": "U pregledu",
+          "approved": "Odobreno",
+          "approved_as_noted": "Odobreno uz primjedbe",
+          "revise_and_resubmit": "Izmijeniti i ponovno predati",
+          "rejected": "Odbijeno",
+          "closed": "Zatvoreno"
+        },
+        "type": {
+          "shop_drawing": "Radionički nacrt",
+          "product_data": "Podaci o proizvodu",
+          "sample": "Uzorak",
+          "mock_up": "Probni model",
+          "test_report": "Izvješće o ispitivanju",
+          "calculation": "Proračun",
+          "method_statement": "Izjava o metodi rada",
+          "certificate": "Certifikat",
+          "warranty": "Jamstvo"
+        },
+        "discipline": {
+          "mechanical": "Strojarstvo",
+          "hvac": "Grijanje, ventilacija i klimatizacija",
+          "plumbing": "Vodovod i odvodnja",
+          "fire_protection": "Zaštita od požara",
+          "electrical": "Elektroinstalacije",
+          "lighting": "Rasvjeta",
+          "elv": "Slaba struja",
+          "bms": "Automatika zgrade",
+          "architectural": "Arhitektura",
+          "structural": "Konstrukcija",
+          "civil": "Građevinski radovi"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Evidencija naloga za izmjenu",
+        "doc_title": "Nalog za izmjenu",
+        "col_code": "Šifra",
+        "col_title": "Naziv",
+        "col_reason": "Razlog",
+        "col_instrument": "Instrument",
+        "col_submitted": "Datum predaje",
+        "col_contractor_amount": "Iznos izvođača",
+        "col_engineer_amount": "Iznos nadzora",
+        "col_approved_amount": "Odobreni iznos",
+        "col_cost_impact": "Utjecaj na trošak",
+        "col_time_impact": "Utjecaj na rok (dani)",
+        "col_approved_time": "Odobreni rok (dani)",
+        "time_impact": "Utjecaj na rok",
+        "approved_time": "Odobreni rok",
+        "col_approved": "Datum odobrenja",
+        "submitted_by": "Predaja",
+        "approved_by": "Odobrenje",
+        "description": "Opis",
+        "no_description": "Nema zabilježenog opisa.",
+        "items": "Stavke izmjene",
+        "item_description": "Opis",
+        "item_change": "Izmjena",
+        "item_unit": "Jed. mjere",
+        "item_original_quantity": "Izvorna kol.",
+        "item_new_quantity": "Nova kol.",
+        "item_original_rate": "Izvorna cijena",
+        "item_new_rate": "Nova cijena",
+        "item_cost_delta": "Razlika troška",
+        "register_filename": "evidencija-naloga-za-izmjenu"
+      },
+      "labels": {
+        "status": {
+          "draft": "Nacrt",
+          "submitted": "Predano",
+          "approved": "Odobreno",
+          "rejected": "Odbijeno",
+          "executed": "Izvršeno"
+        },
+        "reason": {
+          "client_request": "Zahtjev naručitelja",
+          "design_change": "Izmjena projekta",
+          "unforeseen": "Nepredviđeni uvjeti",
+          "regulatory": "Zakonski zahtjev",
+          "error": "Greška ili propust",
+          "non_conformance": "Neusklađenost",
+          "value_engineering": "Optimizacija troška"
+        },
+        "instrument": {
+          "works_change": "Naložena izmjena",
+          "site_confirmation": "Potvrda na gradilištu",
+          "claim": "Potraživanje"
+        },
+        "change": {
+          "added": "Dodano",
+          "removed": "Uklonjeno",
+          "modified": "Izmijenjeno"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Dokazni paket",
+        "subject": "Predmet",
+        "basis": "Osnova",
+        "period_from": "Najraniji zapis",
+        "period_to": "Najnoviji zapis",
+        "digest": "Kontrolni kod (SHA-256, prvih 16 znakova)",
+        "col_row": "Br.",
+        "col_record_id": "ID zapisa",
+        "col_section": "Odjeljak",
+        "col_date": "Datum",
+        "col_kind": "Vrsta zapisa",
+        "col_title": "Naziv",
+        "col_summary": "Sažetak",
+        "col_reference": "Referenca",
+        "register_filename": "dokazni-paket"
+      },
+      "labels": {
+        "section": {
+          "notices": "Obavijesti",
+          "correspondence": "Korespondencija",
+          "rfis": "Upiti (RFI)",
+          "variations": "Izmjene",
+          "approvals": "Odobrenja",
+          "delay": "Kašnjenje",
+          "timeline": "Vremenski slijed",
+          "other": "Ostalo"
+        },
+        "kind": {
+          "notice": "Obavijest",
+          "variation_notice": "Obavijest o izmjeni",
+          "variation_request": "Zahtjev za izmjenu",
+          "variation_order": "Nalog za izmjenu",
+          "change_order": "Nalog za promjenu",
+          "moc_entry": "Zapis o promjeni",
+          "correspondence": "Korespondencija"
+        },
+        "basis": {
+          "dispute": "Spor",
+          "valuation": "Vrednovanje",
+          "delay": "Kašnjenje / produljenje roka",
+          "general": "Opći zapis"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Evidencija korespondencije",
+        "doc_title": "Korespondencija",
+        "col_reference": "Br. dokumenta",
+        "col_direction": "Smjer",
+        "col_type": "Vrsta",
+        "col_subject": "Predmet",
+        "col_from": "Od",
+        "col_to": "Za",
+        "col_date_sent": "Datum slanja",
+        "col_date_received": "Datum primitka",
+        "col_response_due": "Odgovor do",
+        "col_clause": "Članak ugovora",
+        "notes": "Napomene",
+        "no_notes": "Nema zabilježenih napomena.",
+        "attachments": "Priložene datoteke",
+        "linked_documents": "Povezani dokumenti",
+        "sig_prepared": "Izrada",
+        "sig_received": "Primitak",
+        "register_filename": "evidencija-korespondencije"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Dolazna",
+          "outgoing": "Odlazna"
+        },
+        "type": {
+          "letter": "Dopis",
+          "email": "E-pošta",
+          "notice": "Obavijest",
+          "memo": "Bilješka",
+          "report": "Izvješće"
+        },
+        "status": {
+          "open": "Otvoreno",
+          "awaiting_response": "Čeka odgovor",
+          "responded": "Odgovoreno",
+          "closed": "Zatvoreno"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Evidencija dostavnica",
+        "doc_title": "Dostavnica",
+        "col_number": "Br. dostavnice",
+        "col_subject": "Predmet",
+        "col_purpose": "Svrha",
+        "col_issued": "Datum izdavanja",
+        "col_response_due": "Odgovor do",
+        "col_recipients": "Primatelji",
+        "col_item_count": "Stavke",
+        "sender": "Pošiljatelj",
+        "cover_note": "Popratna napomena",
+        "no_cover_note": "Nema popratne napomene.",
+        "recipients": "Primatelji",
+        "recipient": "Primatelj",
+        "action_required": "Potrebna radnja",
+        "acknowledged": "Potvrda primitka",
+        "responded": "Datum odgovora",
+        "items": "Dostavljene stavke",
+        "item_no": "Br.",
+        "item_description": "Opis",
+        "item_notes": "Napomene",
+        "sig_issued": "Izdavanje",
+        "sig_received": "Primitak",
+        "register_filename": "evidencija-dostavnica"
+      },
+      "labels": {
+        "status": {
+          "draft": "Nacrt",
+          "issued": "Izdano",
+          "responded": "Odgovoreno"
+        },
+        "purpose": {
+          "for_approval": "Na odobrenje",
+          "for_review": "Na pregled",
+          "for_information": "Na znanje",
+          "for_construction": "Za građenje",
+          "for_tender": "Za natječaj",
+          "for_record": "Za evidenciju"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Evidencija izmjena",
+        "claim_register_title": "Evidencija potraživanja",
+        "notice_register_title": "Evidencija obavijesti",
+        "doc_title": "Zahtjev za izmjenu",
+        "doc_title_credit": "Zahtjev za izmjenu (umanjenje)",
+        "time_impact": "Utjecaj na rok",
+        "col_code": "Šifra",
+        "col_title": "Naziv",
+        "col_classification": "Vrsta",
+        "col_urgency": "Hitnost",
+        "col_requested": "Datum zahtjeva",
+        "col_claimed_amount": "Traženi iznos",
+        "col_agreed_amount": "Dogovoreni iznos",
+        "col_time_impact": "Utjecaj na rok (dani)",
+        "col_response_due": "Odgovor do",
+        "col_clause": "Članak ugovora",
+        "col_row": "Br.",
+        "col_claim_type": "Vrsta potraživanja",
+        "col_raised": "Datum podnošenja",
+        "col_period_start": "Razdoblje od",
+        "col_period_end": "Razdoblje do",
+        "col_description": "Opis",
+        "col_decided_amount": "Utvrđeni iznos",
+        "col_days_requested": "Traženi dani",
+        "col_days_granted": "Odobreni dani",
+        "col_recipient_type": "Upućeno",
+        "col_recipient": "Primatelj",
+        "col_target_response": "Očekivani odgovor",
+        "col_response_received": "Primljen odgovor",
+        "requested_by": "Zahtjev",
+        "decided_by": "Odluka",
+        "date_submitted": "Datum predaje",
+        "date_decided": "Datum odluke",
+        "description": "Opis",
+        "no_description": "Nema zabilježenog opisa.",
+        "decision_notes": "Napomene uz odluku",
+        "no_decision_notes": "Odluka još nije zabilježena.",
+        "variation_register_filename": "evidencija-izmjena",
+        "claim_register_filename": "evidencija-potrazivanja",
+        "notice_register_filename": "evidencija-obavijesti"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Nacrt",
+          "submitted": "Predano",
+          "under_review": "U pregledu",
+          "approved": "Odobreno",
+          "rejected": "Odbijeno",
+          "converted_to_vo": "Pretvoreno u nalog"
+        },
+        "claim_status": {
+          "draft": "Nacrt",
+          "submitted": "Predano",
+          "under_review": "U pregledu",
+          "agreed": "Dogovoreno",
+          "granted": "Odobreno",
+          "rejected": "Odbijeno"
+        },
+        "notice_status": {
+          "issued": "Izdano",
+          "acknowledged": "Potvrđeno",
+          "responded": "Odgovoreno",
+          "closed": "Zatvoreno"
+        },
+        "classification": {
+          "scope_change": "Promjena opsega",
+          "unforeseen": "Nepredviđeni uvjet",
+          "owner_change": "Izmjena naručitelja",
+          "design_dev": "Razrada projekta",
+          "regulatory": "Zakonski zahtjev",
+          "other": "Ostalo"
+        },
+        "urgency": {
+          "low": "Niska",
+          "med": "Srednja",
+          "high": "Visoka"
+        },
+        "claim_type": {
+          "disruption": "Poremećaj radova",
+          "eot": "Produljenje roka"
+        },
+        "recipient_type": {
+          "owner": "Naručitelj",
+          "contractor": "Izvođač",
+          "architect": "Arhitekt",
+          "engineer": "Inženjer",
+          "consultant": "Konzultant"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Dnevnik gradilišta",
+        "overview": "Pregled",
+        "site_supervisor": "Voditelj gradilišta",
+        "not_recorded": "Nije zabilježeno",
+        "labour_on_site": "Radna snaga na gradilištu",
+        "equipment_on_site": "Oprema na gradilištu",
+        "completeness": "Potpunost",
+        "weather": "Vrijeme",
+        "weather_time": "Sat",
+        "weather_source": "Izvor",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Vjetar (km/h)",
+        "weather_precip": "Oborine (mm)",
+        "weather_conditions": "Uvjeti",
+        "weather_empty": "Nema zabilježenog vremena za ovaj dan.",
+        "site_record": "Zapis s gradilišta",
+        "entries_empty": "Nema unosa u ovom dnevniku.",
+        "notes": "Napomene",
+        "notes_empty": "Nema dodatnih napomena.",
+        "footer_supervisor": "Voditelj: {name}",
+        "footer_supervisor_missing": "Voditelj gradilišta: nije zabilježeno",
+        "footer_generated": "Izrađeno: {timestamp}",
+        "footer_page": "Stranica {page} od {total}",
+        "workforce": "Radnici po tvrtkama",
+        "workforce_company": "Tvrtka",
+        "workforce_count": "Osobe",
+        "workforce_unassigned": "Nije dodijeljeno tvrtki",
+        "workforce_total": "Ukupno",
+        "signatures": "Potpisi",
+        "sig_prepared": "Izrada (voditelj gradilišta)",
+        "sig_approved": "Odobrenje (predstavnik naručitelja)",
+        "sig_name": "Ime i prezime",
+        "sig_title": "Funkcija",
+        "sig_date": "Datum",
+        "sig_signature": "Potpis",
+        "signed_note": "Potpisano u sustavu: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "dnevnik",
+        "summary_wind": "vjetar {value} km/h",
+        "summary_precipitation": "oborine {value} mm",
+        "summary_humidity": "vlaga {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Posjetitelji",
+          "event": "Događaji",
+          "delivery": "Isporučeni materijal",
+          "completion": "Izvedeni radovi",
+          "incident_summary": "Sigurnost i incidenti",
+          "inspection_summary": "Inspekcije",
+          "photo_note": "Foto bilješke",
+          "general": "Opće bilješke"
+        },
+        "status": {
+          "open": "Otvoreno",
+          "closed": "Zatvoreno",
+          "signed": "Potpisano",
+          "archived": "Arhivirano"
+        },
+        "condition": {
+          "clear": "vedro",
+          "mainly_clear": "pretežno vedro",
+          "partly_cloudy": "djelomično oblačno",
+          "cloudy": "oblačno",
+          "overcast": "prekriveno",
+          "fog": "magla",
+          "fog_rime": "ledena magla",
+          "drizzle_light": "slaba rosulja",
+          "drizzle_moderate": "umjerena rosulja",
+          "drizzle_dense": "jaka rosulja",
+          "rain": "kiša",
+          "rain_light": "slaba kiša",
+          "rain_moderate": "umjerena kiša",
+          "rain_heavy": "jaka kiša",
+          "freezing_rain_light": "slaba ledena kiša",
+          "freezing_rain_heavy": "jaka ledena kiša",
+          "snow": "snijeg",
+          "snow_light": "slab snijeg",
+          "snow_moderate": "umjeren snijeg",
+          "snow_heavy": "jak snijeg",
+          "rain_showers_light": "slabi pljuskovi kiše",
+          "rain_showers_moderate": "umjereni pljuskovi kiše",
+          "rain_showers_violent": "jaki pljuskovi kiše",
+          "snow_showers_light": "slabi pljuskovi snijega",
+          "snow_showers_heavy": "jaki pljuskovi snijega",
+          "thunderstorm": "grmljavina",
+          "thunderstorm_hail_light": "grmljavina sa slabom tučom",
+          "thunderstorm_hail_heavy": "grmljavina s jakom tučom"
+        },
+        "source": {
+          "manual": "Ručni unos",
+          "open_meteo": "Meteorološka služba",
+          "sensor": "Senzor na gradilištu"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Evidencija upita (RFI)",
+        "col_number": "Br. RFI",
+        "col_subject": "Predmet",
+        "col_raised_by": "Podnositelj",
+        "col_assigned_to": "Dodijeljeno",
+        "col_ball_in_court": "Na potezu",
+        "col_date_required": "Traženi datum",
+        "col_response_due": "Odgovor do",
+        "col_days_open": "Dana otvoreno",
+        "col_cost_impact": "Utjecaj na trošak",
+        "col_schedule_impact": "Utjecaj na rok",
+        "col_response": "Odgovor",
+        "yes_with": "Da ({detail})",
+        "register_filename": "evidencija-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Nacrt",
+          "open": "Otvoreno",
+          "answered": "Odgovoreno",
+          "closed": "Zatvoreno",
+          "void": "Ništavno"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Generirao AI",
+        "drawing": "Nacrt",
+        "cost_estimate": "PROCJENA TROŠKOVA",
+        "summary": "SAŽETAK",
+        "project": "Projekt:",
+        "boq": "Troškovnik:",
+        "date": "Datum:",
+        "status": "Status:",
+        "prepared_by": "Izradio:",
+        "approved_by": "Odobrio:",
+        "signature_hint": "Ime / Potpis / Datum",
+        "contents": "Skupine / Stavke:",
+        "pos": "Poz.",
+        "description": "Opis",
+        "unit": "Jed.",
+        "qty": "Količina",
+        "rate": "Cijena",
+        "total": "Ukupno",
+        "subtotal": "Međuzbroj:",
+        "other_positions": "Ostale stavke",
+        "direct_cost": "Izravni trošak:",
+        "markups": "Dodaci (bez PDV-a):",
+        "net_total": "Neto ukupno (bez PDV-a):",
+        "gross_total": "Bruto ukupno",
+        "page": "Stranica",
+        "of": "od",
+        "generated": "Generirano:",
+        "summary_report": "Sažeto izvješće",
+        "positions_omitted": "{count} stavki (puni detalji izostavljeni radi performansi)",
+        "section": "Skupina",
+        "items": "Stavke",
+        "cost_summary": "Sažetak troškova",
+        "table_of_contents": "Sadržaj",
+        "resources_omitted": "Razrada resursa nije ispisana: ovaj troškovnik ima previše redaka resursa za jedan PDF.",
+        "status_draft": "Nacrt",
+        "status_final": "Konačno",
+        "status_archived": "Arhivirano",
+        "subject": "Troškovnik",
+        "tax_vat": "PDV"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "RAČUN",
+        "date": "Datum: {value}",
+        "due": "Dospijeće: {value}",
+        "from": "Izdavatelj",
+        "bill_to": "Primatelj",
+        "vat_id": "OIB / PDV ID: {value}",
+        "ref": "Poziv na broj: {value}",
+        "th_description": "Opis",
+        "th_qty": "Količina",
+        "th_unit": "Jed.",
+        "th_unit_price": "Jedinična cijena",
+        "th_net": "Neto ({currency})",
+        "net_total": "Neto ukupno",
+        "vat_total": "PDV",
+        "grand_total": "Ukupno za platiti",
+        "retention_prepaid": "Zadržavanje / predujam",
+        "amount_due": "Iznos za platiti",
+        "payment": "Plaćanje",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Broj računa: {value}",
+        "bank_code": "Šifra banke: {value}",
+        "account_holder": "Vlasnik računa: {value}",
+        "footer": "Ovaj PDF sadrži ugrađeni e-račun prema normi EN 16931 (Factur-X / ZUGFeRD). Mjerodavan je ugrađeni XML.",
+        "date_format": "%d.%m.%Y.",
+        "decimal_separator": ",",
+        "group_separator": "."
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Izvješće",
+        "meta_project": "Projekt",
+        "meta_type": "Vrsta",
+        "meta_generated": "Generirano",
+        "meta_currency": "Valuta",
+        "field_column": "Polje",
+        "value_column": "Vrijednost",
+        "yes": "Da",
+        "no": "Ne",
+        "no_data_heading": "Nema dostupnih podataka",
+        "no_data_body": "Ovo izvješće generirano je s praznim skupom podataka. Provjerite jesu li izvorni moduli (financije, raspored, sigurnost itd.) vratili podatke za odabrani projekt.",
+        "no_data_body_short": "Ovo izvješće generirano je s praznim skupom podataka. Provjerite jesu li izvorni moduli vratili podatke za odabrani projekt.",
+        "footer_generated_by": "Generirao OpenConstructionERP, {timestamp}.",
+        "worksheet_name": "Izvješće",
+        "pdf_subject": "Izvješće o projektu",
+        "overall_progress": "Ukupni napredak",
+        "as_of": "Stanje na dan",
+        "recorded_by": "Evidentirao",
+        "period": "Razdoblje",
+        "entries_suffix": "({count} unosa)",
+        "site_photo_alt": "Fotografija gradilišta",
+        "ai_summary_heading": "Sažetak",
+        "ai_badge": "Generirao AI",
+        "ai_note": "Generirao AI na temelju podataka o projektu u nastavku.",
+        "ai_note_confidence": "Generirao AI na temelju podataka o projektu u nastavku (pouzdanost {confidence}).",
+        "ai_note_review": "Pregledajte prije dijeljenja s naručiteljem."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Naziv",
+          "status": "Status",
+          "phase": "Faza",
+          "planned_start": "Planirani početak",
+          "planned_end": "Planirani završetak",
+          "schedule_progress_pct": "Napredak prema rasporedu (%)",
+          "cpi": "CPI",
+          "spi": "SPI",
+          "budget_consumed_pct": "Potrošeni proračun (%)",
+          "as_of": "Stanje na dan",
+          "progress_pct": "Napredak (%)",
+          "risk_score_avg": "Prosječna ocjena rizika",
+          "open_rfis": "Otvoreni RFI-jevi",
+          "open_submittals": "Otvorena dostavljanja",
+          "open_defects": "Otvoreni nedostaci",
+          "open_observations": "Otvorene primjedbe",
+          "budget": "Proračun",
+          "committed": "Ugovoreno",
+          "actual": "Stvarno",
+          "payable": "Obveze",
+          "receivable": "Potraživanja",
+          "net_cash_flow": "Neto novčani tok"
+        },
+        "section_titles": {
+          "Project Overview": "Pregled projekta",
+          "Key Performance Indicators": "Ključni pokazatelji uspješnosti",
+          "Schedule Status": "Status rasporeda",
+          "Risk Summary": "Sažetak rizika",
+          "Open Issues": "Otvorena pitanja",
+          "Cost Summary": "Sažetak troškova",
+          "Cost Breakdown": "Raščlamba troškova",
+          "Change Orders": "Naložene izmjene",
+          "Cash Flow": "Novčani tok",
+          "Schedule Overview": "Pregled rasporeda",
+          "Milestone Status": "Status prekretnica",
+          "Critical Path": "Kritični put",
+          "3-Week Lookahead": "Pregled za sljedња 3 tjedna",
+          "Safety KPIs": "Pokazatelji sigurnosti",
+          "Incident Log": "Evidencija incidenata",
+          "Near-Miss Reports": "Izvješća o događajima bez ozljeda",
+          "Safety Training": "Obuka iz sigurnosti",
+          "Inspection Summary": "Sažetak inspekcija",
+          "By Inspection Type": "Prema vrsti inspekcije",
+          "Punch List Status": "Status liste nedostataka",
+          "Recent Inspections": "Nedavne inspekcije",
+          "Portfolio Overview": "Pregled portfelja",
+          "Project Statuses": "Statusi projekata",
+          "KPI Comparison": "Usporedba pokazatelja",
+          "Portfolio Risks": "Rizici portfelja",
+          "Field Progress": "Napredak na terenu",
+          "Top Risks": "Glavni rizici",
+          "Site Photos": "Fotografije gradilišta",
+          "Summary": "Sažetak"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Narudžbenica",
+        "gr_title": "Primka",
+        "supplier": "Dobavljač",
+        "po_type": "Vrsta narudžbe",
+        "issue_date": "Datum izdavanja",
+        "delivery_date": "Datum isporuke",
+        "created_by": "Izradio",
+        "order_total": "Ukupno narudžbe",
+        "line_items": "Stavke",
+        "col_no": "Br.",
+        "col_description": "Opis",
+        "col_quantity": "Količina",
+        "col_unit": "Jed.",
+        "col_unit_rate": "Jedinična cijena",
+        "col_amount": "Iznos",
+        "no_line_items": "Nema stavki.",
+        "totals": "Ukupno",
+        "subtotal": "Neto iznos",
+        "tax": "PDV",
+        "total_gross": "Ukupno s PDV-om",
+        "terms": "Uvjeti",
+        "payment_terms": "Uvjeti plaćanja",
+        "retention": "Zadržavanje",
+        "retention_at": "Zadržavanje se obračunava pri",
+        "retention_at_receipt": "Primki",
+        "retention_at_invoice": "Računu",
+        "invoice_tolerance": "Tolerancija računa",
+        "supplier_confirmation": "Potvrda dobavljača",
+        "supplier_reference": "Referenca dobavljača",
+        "confirmed_delivery": "Potvrđeni datum isporuke",
+        "acknowledged_on": "Potvrđeno dana",
+        "not_confirmed": "Dobavljač još nije potvrdio.",
+        "notes": "Napomene",
+        "no_notes": "Nema zabilježenih napomena.",
+        "sig_ordered_by": "Naručio",
+        "purchase_order": "Narudžbenica",
+        "receipt_date": "Datum primitka",
+        "received_by": "Primio",
+        "delivery_note": "Otpremnica",
+        "col_ordered": "Naručeno",
+        "col_received": "Primljeno",
+        "col_rejected": "Odbijeno",
+        "col_batch": "Serija / lot",
+        "rejections": "Odbijanja",
+        "col_reason": "Razlog",
+        "no_rejections": "Ništa nije odbijeno.",
+        "sig_delivered_by": "Isporučio",
+        "counterparty_tax_id": "OIB",
+        "counterparty_address": "Adresa"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Nacrt",
+          "approved": "Odobreno",
+          "issued": "Izdano",
+          "partially_received": "Djelomično primljeno",
+          "completed": "Dovršeno",
+          "cancelled": "Otkazano"
+        },
+        "gr_status": {
+          "draft": "Nacrt",
+          "confirmed": "Potvrđeno"
+        },
+        "po_type": {
+          "standard": "Standardna",
+          "blanket": "Okvirna narudžba",
+          "service": "Usluge"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Račun",
+        "payment_title": "Plaćanje",
+        "direction": "Smjer",
+        "supplier": "Dobavljač",
+        "client": "Naručitelj",
+        "invoice_date": "Datum računa",
+        "due_date": "Datum dospijeća",
+        "payment_terms": "Uvjeti plaćanja",
+        "purchase_order": "Narudžbenica",
+        "invoice_total": "Ukupno računa",
+        "line_items": "Stavke",
+        "col_no": "Br.",
+        "col_description": "Opis",
+        "col_quantity": "Količina",
+        "col_unit": "Jed.",
+        "col_unit_rate": "Jedinična cijena",
+        "col_vat": "PDV",
+        "col_amount": "Iznos",
+        "no_line_items": "Nema stavki.",
+        "totals": "Ukupno",
+        "subtotal": "Neto iznos",
+        "tax": "PDV",
+        "total_gross": "Ukupno s PDV-om",
+        "retention": "Zadržavanje",
+        "amount_due": "Iznos za plaćanje nakon zadržavanja",
+        "payments": "Uplate",
+        "col_date": "Datum",
+        "col_reference": "Referenca",
+        "col_paid": "Plaćeno",
+        "col_withheld": "Zadržano",
+        "refund": "Povrat",
+        "no_payments": "Nema evidentiranih uplata.",
+        "notes": "Napomene",
+        "no_notes": "Nema zabilježenih napomena.",
+        "invoice": "Račun",
+        "invoice_number": "Broj računa",
+        "payment_date": "Datum plaćanja",
+        "reference": "Referenca",
+        "amount_paid": "Plaćeni iznos",
+        "exchange_rate": "Tečaj",
+        "kind": "Vrsta",
+        "kind_payment": "Plaćanje",
+        "kind_refund": "Povrat",
+        "withholding": "Zadržano",
+        "withheld_amount": "Zadržani iznos",
+        "release_date": "Datum oslobađanja",
+        "gross_settled": "Bruto podmireni iznos",
+        "no_withholding": "Od ove uplate ništa nije zadržano.",
+        "counterparty_tax_id": "OIB",
+        "counterparty_address": "Adresa"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Nacrt",
+          "pending": "Čeka odobrenje",
+          "approved": "Odobreno",
+          "sent": "Poslano",
+          "paid": "Plaćeno",
+          "cancelled": "Otkazano",
+          "credit_note_issued": "Izdan odobrenje (kreditna nota)"
+        },
+        "direction": {
+          "payable": "Obveza (ulazni račun)",
+          "receivable": "Potraživanje (izlazni račun)"
+        },
+        "payment_status": {
+          "completed": "Završeno",
+          "refunded": "Vraćeno"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Stranica {page} od {total}",
+    "page": "Stranica {page}",
+    "printed": "Ispisano: {timestamp}",
+    "generated": "Generirano: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "Poziv u klijentski portal: {sender}",
+      "login_subject": "Vaša poveznica za prijavu u klijentski portal",
+      "invite_heading": "Dobro došli u klijentski portal",
+      "login_heading": "Prijava u klijentski portal",
+      "greeting": "Poštovani, {name},",
+      "greeting_generic": "Poštovani,",
+      "invite_body": "Pristup klijentskom portalu omogućio vam je: {sender}. U njemu možete pratiti svoj projekt: izvješća o napretku, dokumente, račune i sljedeće važne rokove.",
+      "login_body": "Ovdje je poveznica za prijavu koju ste zatražili.",
+      "link_help": "Gumb u nastavku prijavljuje vas u portal. Lozinka nije potrebna. Poveznica vrijedi samo jednom i istječe za {hours} sati.",
+      "ignore": "Ako ovu poruku niste očekivali, slobodno je zanemarite. Bez ove poveznice nitko ne dobiva pristup.",
+      "invite_cta": "Otvori portal",
+      "login_cta": "Prijava",
+      "sender_generic": "Vaš projektni tim"
+    },
+    "tender_invite": {
+      "subject": "Poziv na dostavu ponude: {package}",
+      "heading": "Poziv na dostavu ponude",
+      "greeting": "Poštovani, {company},",
+      "greeting_generic": "Poštovani,",
+      "invite": "Pozivamo vas da dostavite ponudu za paket nadmetanja {package}.",
+      "invite_project": "Pozivamo vas da dostavite ponudu za paket nadmetanja {package} na projektu {project}.",
+      "deadline": "Rok za dostavu ponude: {deadline}",
+      "link_help": "Gumb u nastavku otvara troškovnik. Jedinične cijene unesite online, nacrt možete spremiti u bilo kojem trenutku, a ponudu predajte prije isteka roka. Korisnički račun nije potreban.",
+      "link_personal": "Ova je poveznica osobna za vašu tvrtku. Molimo vas da je ne prosljeđujete.",
+      "cta": "Otvori troškovnik i unesi cijene",
+      "no_link": "Molimo pregledajte podatke o paketu i dostavite svoju ponudu prije gore navedenog roka."
+    },
+    "notification_email": {
+      "greeting": "Poštovani, {name},",
+      "greeting_generic": "Poštovani,",
+      "cta": "Otvori u OpenConstructionERP",
+      "footer": "Ovu poruku primate zbog svojih postavki obavijesti. Možete ih promijeniti u svom profilu.",
+      "digest_subject": "OpenConstructionERP: Sažetak obavijesti ({count})",
+      "digest_heading": "Nedavne obavijesti:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Usporedba cijena",
+      "comparison_sheet": "Usporedba",
+      "bidder_title": "Troškovnik za unos cijena",
+      "bidder_sheet": "Troškovnik",
+      "project": "Projekt",
+      "package": "Paket",
+      "currency": "Valuta",
+      "date": "Datum",
+      "return_by": "Rok za povrat",
+      "item": "Stavka",
+      "description": "Opis",
+      "unit": "Jedinica mjere",
+      "quantity": "Količina",
+      "unit_price": "Jedinična cijena",
+      "line_total": "Iznos stavke",
+      "own_estimate": "Vlastita procjena",
+      "not_priced": "bez cijene",
+      "sum_priced_lines": "Zbroj stavki s cijenom",
+      "bid_total": "Ukupna ponuda kako je predana",
+      "lines_priced": "Stavke s cijenom",
+      "lines_priced_value": "{priced} od {total}",
+      "deviation": "Odstupanje od vlastite procjene",
+      "not_comparable": "n/p",
+      "other_currency": "Ponuđeno u valuti {currency}, ne rangira se uz ponude u valuti {reporting}.",
+      "legend": "Legenda",
+      "legend_lowest": "Zeleno: najniža jedinična cijena za stavku.",
+      "legend_high": "▲ crveno: više od {pct}% iznad medijana cijene za stavku.",
+      "legend_low": "▼ jantarno: više od {pct}% ispod medijana cijene za stavku.",
+      "legend_missing": "\"{marker}\": ponuditelj nije dao cijenu za stavku.",
+      "legend_incomplete": "Ponuda s stavkama bez cijene označena je u stupcu \"Stavke s cijenom\" i ne rangira se kao najpovoljnija prema ukupnom iznosu.",
+      "legend_totals": "Ukupni iznos ponude je iznos koji je ponuditelj predao; može se razlikovati od zbroja stavki s cijenom.",
+      "bidder": "Ponuditelj",
+      "bidder_note": "Napomena ponuditelja",
+      "reference": "Referenca (ne mijenjati)",
+      "total": "Ukupno",
+      "instructions": "Unesite jediničnu cijenu za svaku stavku u žuta polja. Količine i opisi su zadani, iznosi stavki i ukupni iznos izračunavaju se automatski. Polje ostavite praznim ako stavku ne cijenite."
+    },
+    "cost_plan": {
+      "sheet_plan": "Plan troškova NRM 1",
+      "sheet_unallocated": "Neraspoređeno",
+      "title": "Plan troškova po elementima (NRM 1)",
+      "bill": "Troškovnik",
+      "currency": "Valuta",
+      "gifa": "BRP (m2)",
+      "gifa_project": "iz projekta",
+      "gifa_entered": "unesena za ovaj izvoz",
+      "gifa_none": "nije postavljena, trošak po m2 se ne prikazuje",
+      "col_code": "Šifra",
+      "col_description": "Element",
+      "col_positions": "Stavke",
+      "col_basis": "Osnovica",
+      "col_total": "Ukupno",
+      "col_per_m2": "Trošak po m2 BRP-a",
+      "col_share": "% ukupnog",
+      "col_running": "Kumulativni zbroj",
+      "group_level": "Razina skupine, element nije naveden",
+      "facilitating_works_estimate": "Procjena pripremnih radova",
+      "works_estimate": "Procjena građevinskih radova",
+      "addons_heading": "Skupine 9-14 prema NRM 1 iskazane kao stavke troškovnika",
+      "unallocated": "Nije raspoređeno na element",
+      "direct_cost": "Izravni trošak troškovnika",
+      "markups_heading": "Dodaci (kaskada troškovnika, redom)",
+      "markups_total": "Ukupno dodaci",
+      "grand_total": "Ukupno plan troškova",
+      "basis_direct": "{pct}% na izravni trošak",
+      "basis_running": "{pct}% na kumulativni međuzbroj",
+      "basis_lump": "Paušalni iznos",
+      "basis_banded": "Stupnjevana ljestvica",
+      "basis_escalation": "Indeksna eskalacija",
+      "basis_other": "{kind}",
+      "basis_scoped": "po odjeljcima",
+      "col_ordinal": "Redni broj",
+      "col_position": "Opis",
+      "col_written_code": "Šifra kako je upisana",
+      "col_reason": "Razlog",
+      "reason_no_code": "Nema NRM šifre na stavci ni na njezinim odjeljcima",
+      "reason_invalid_code": "Šifra nije NRM broj",
+      "reason_unknown_group": "NRM 1 nema takvu skupinu",
+      "truncated": "Popis je skraćen na prvih {shown} od {count} stavki; ukupni iznos obuhvaća sve stavke."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Zahtjevi",
+      "sheet_summary": "Sažetak",
+      "sheet_legend": "Legenda",
+      "summary_element": "Element",
+      "summary_count": "Broj zahtjeva",
+      "summary_total": "Ukupno",
+      "legend_column": "Stupac",
+      "legend_description": "Opis",
+      "unspecified": "Nenavedeno",
+      "h01": "Element / IFC klasa",
+      "h02": "Klasifikacija",
+      "h03": "Skupina svojstava",
+      "h04": "Naziv svojstva",
+      "h05": "Vrsta podataka",
+      "h06": "Obavezno",
+      "h07": "Dopuštene vrijednosti",
+      "h08": "Min.",
+      "h09": "Maks.",
+      "h10": "Jedinica",
+      "h11": "Uzorak",
+      "h12": "Faza",
+      "h13": "Sudionik",
+      "h14": "Slučaj uporabe",
+      "h15": "Izvor",
+      "d01": "IFC klasa entiteta (npr. IFCWALL, IFCBEAM)",
+      "d02": "Sustav klasifikacije i šifra (npr. Uniclass 2015: EF_25_10)",
+      "d03": "Naziv skupine svojstava (npr. Pset_WallCommon)",
+      "d04": "Naziv traženog svojstva ili atributa",
+      "d05": "IFC vrsta podataka (IFCLABEL, IFCREAL, IFCBOOLEAN itd.)",
+      "d06": "Kardinalnost: obavezno, neobavezno ili zabranjeno",
+      "d07": "Popis dopuštenih vrijednosti odvojenih točkom sa zarezom",
+      "d08": "Granice brojčanog raspona",
+      "d09": "Mjerna jedinica (m, m2, kg itd.)",
+      "d10": "Regularni izraz za provjeru vrijednosti",
+      "d11": "Faza ili prekretnica projekta (LP3, RIBA Stage 3 itd.)",
+      "d12": "Odgovorna strana (projektant arhitekture, projektant konstrukcije itd.)",
+      "d13": "Svrha ili slučaj uporabe zahtjeva",
+      "d14": "Izvorna norma ili dokument"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Troškovnik je izrađen",
+      "notifications.boq.created.body": "Vaš troškovnik '{boq_name}' je spremljen.",
+      "notifications.meeting.action_assigned.title": "Dodijeljen vam je zadatak sa sastanka",
+      "notifications.meeting.action_assigned.body": "Sa sastanka {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Status dokumenta je promijenjen",
+      "notifications.cde.state_transitioned.body": "Spremnik je prebačen u status '{new_state}'.",
+      "notifications.cde.linked_published.title": "Objavljen je dokument povezan s vašim radom",
+      "notifications.cde.linked_published.body": "{container_code} je objavljen u reviziji {revision_code}. Vaši povezani zapisi: {records}.",
+      "notifications.rfi.assigned.title": "Dodijeljen vam je RFI",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "RFI je dobio odgovor",
+      "notifications.rfi.responded.body": "Na vaš upit {code} ({title}) stigao je odgovor.",
+      "notifications.risk.assigned.title": "Dodijeljen vam je rizik",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Upozorenje o prekoračenju troškova",
+      "notifications.costmodel.overrun_alert.body": "Troškovi kategorije {category} prekoračuju proračun: stvarnih {actual} {currency} premašuje prag upozorenja +{threshold_pct}% u odnosu na planiranih {planned} {currency}.",
+      "notifications.submittal.submitted.title": "Dokumentacija za odobrenje čeka pregled",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Dokumentacija za odobrenje je odobrena",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Dokumentacija za odobrenje je odbijena",
+      "notifications.submittal.rejected.body": "{code} ({title}). Razlog: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Dokumentaciju za odobrenje treba ispraviti",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Razlog: {reason}",
+      "notifications.transmittal.issued.title": "Izdan vam je prijenosni list dokumenata",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Primitak dokumenata je potvrđen",
+      "notifications.transmittal.acknowledged.body": "Primatelj je potvrdio {code} ({title}).",
+      "notifications.transmittal.responded.title": "Na prijenosni list stigao je odgovor",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "Dodijeljen vam je RFI",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Dodijeljen je novi zadatak",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Račun je odobren",
+      "notification.invoice_approved_body": "Račun {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Zakazan je pregled",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, datum: {inspection_date}",
+      "notification.submittal_status_changed_title": "Status dokumentacije za odobrenje je promijenjen",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Zakazan je sastanak",
+      "notification.meeting_scheduled_body": "{title}, datum: {meeting_date}",
+      "notification.ncr_created_title": "Evidentirana je neusklađenost",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Dokument je učitan",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Spomenuti ste u komentaru",
+      "notifications.file_comments.mention.body": "\"{excerpt}\"",
+      "notifications.collaboration.comment_added.title": "Novi komentar u raspravi",
+      "notifications.collaboration.comment_added.body": "Uz {entity_type}: \"{excerpt}\"",
+      "notifications.clash.high_severity.title": "Otkriven je sudar visoke ozbiljnosti",
+      "notifications.clash.high_severity.body": "Sudar, ozbiljnost {severity}: {a_name} i {b_name}",
+      "notifications.validation.report.title": "Provjera je pronašla probleme",
+      "notifications.validation.report.body": "Pogreške: {error_count}, upozorenja: {warning_count} ({target_type}).",
+      "notifications.punchlist.auto_created.title": "Izrađena je stavka popisa nedostataka",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Sažetak obavijesti",
+      "notifications.digest.body": "Novih obavijesti na kanalu {channel}: {count}.",
+      "notifications.approval.overdue.title": "Odobrenje kasni",
+      "notifications.approval.overdue.body": "Korak {step_ordinal} ({target_kind}) kasni (sati): {hours_overdue}.",
+      "notifications.approval.escalated.title": "Odobrenje eskalirano na vas",
+      "notifications.approval.escalated.body": "Korak {step_ordinal} ({target_kind}) eskaliran je na vas (razina {level}).",
+      "notifications.approval.reassigned.title": "Odobrenje preusmjereno na vas",
+      "notifications.approval.reassigned.body": "Odluka o koraku {step_ordinal} ({target_kind}) sada je vaša.",
+      "notifications.deadline.overdue.title": "Rok je istekao: {title}",
+      "notifications.deadline.overdue.body": "Stavci \"{title}\" ({module}) rok je istekao. Dana kašnjenja: {days_overdue}.",
+      "notifications.deadline.escalated.title": "Eskalirana stavka s isteklim rokom",
+      "notifications.deadline.escalated.body": "Stavka \"{title}\" ({module}) i dalje je otvorena, dana kašnjenja: {days_overdue}, te je eskalirana.",
+      "notifications.deadline.approaching.title": "Rok uskoro istječe: {title}",
+      "notifications.deadline.approaching.body": "Rok za stavku \"{title}\" ({module}) je {due_date}.",
+      "notifications.deadline.built.approaching.title": "Rok uskoro istječe: {title}",
+      "notifications.deadline.built.approaching.body": "{module}: rok za \"{title}\" je {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Rok istekao: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "Rok za RFI {reference} \"{title}\" na projektu {project} bio je {due_date_display}. Dana kašnjenja: {days_overdue}. Potreban je odgovor.",
+      "notifications.deadline.rfi.escalated.title": "Eskalirano: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "RFI {reference} \"{title}\" na projektu {project} i dalje je otvoren, rok je bio {due_date_display}, dana kašnjenja: {days_overdue}. Eskaliran je na vas.",
+      "notifications.deadline.rfi.approaching.title": "Rok uskoro istječe: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "Rok za RFI {reference} \"{title}\" na projektu {project} je {due_date_display}. Potreban je odgovor.",
+      "notifications.deadline.submittals.overdue.title": "Rok istekao: dokumentacija za odobrenje {reference}",
+      "notifications.deadline.submittals.overdue.body": "Rok za dokumentaciju za odobrenje {reference} \"{title}\" na projektu {project} bio je {due_date_display}. Dana kašnjenja: {days_overdue}. Potreban je pregled.",
+      "notifications.deadline.submittals.escalated.title": "Eskalirano: dokumentacija za odobrenje {reference}",
+      "notifications.deadline.submittals.escalated.body": "Dokumentacija za odobrenje {reference} \"{title}\" na projektu {project} i dalje je otvorena, rok je bio {due_date_display}, dana kašnjenja: {days_overdue}. Eskalirana je na vas.",
+      "notifications.deadline.submittals.approaching.title": "Rok uskoro istječe: dokumentacija za odobrenje {reference}",
+      "notifications.deadline.submittals.approaching.body": "Rok za dokumentaciju za odobrenje {reference} \"{title}\" na projektu {project} je {due_date_display}. Potreban je pregled.",
+      "notifications.deadline.correspondence.overdue.title": "Rok istekao: korespondencija {reference}",
+      "notifications.deadline.correspondence.overdue.body": "Na korespondenciju {reference} \"{title}\" na projektu {project} trebalo je odgovoriti do {due_date_display}. Dana kašnjenja: {days_overdue}. Potreban je odgovor.",
+      "notifications.deadline.correspondence.escalated.title": "Eskalirano: korespondencija {reference}",
+      "notifications.deadline.correspondence.escalated.body": "Korespondencija {reference} \"{title}\" na projektu {project} i dalje je bez odgovora, rok je bio {due_date_display}, dana kašnjenja: {days_overdue}. Eskalirana je na vas.",
+      "notifications.deadline.correspondence.approaching.title": "Rok uskoro istječe: korespondencija {reference}",
+      "notifications.deadline.correspondence.approaching.body": "Na korespondenciju {reference} \"{title}\" na projektu {project} treba odgovoriti do {due_date_display}. Potreban je odgovor.",
+      "notifications.deadline.variations.overdue.title": "Rok istekao: izmjena {reference}",
+      "notifications.deadline.variations.overdue.body": "Rok za izmjenu {reference} \"{title}\" na projektu {project} bio je {due_date_display}. Dana kašnjenja: {days_overdue}. Potrebna je odluka.",
+      "notifications.deadline.variations.escalated.title": "Eskalirano: izmjena {reference}",
+      "notifications.deadline.variations.escalated.body": "Izmjena {reference} \"{title}\" na projektu {project} i dalje je otvorena, rok je bio {due_date_display}, dana kašnjenja: {days_overdue}. Eskalirana je na vas.",
+      "notifications.deadline.variations.approaching.title": "Rok uskoro istječe: izmjena {reference}",
+      "notifications.deadline.variations.approaching.body": "Rok za izmjenu {reference} \"{title}\" na projektu {project} je {due_date_display}. Potrebna je odluka.",
+      "notifications.variation.submitted.title": "Izmjena čeka odluku: {code}",
+      "notifications.variation.submitted.body": "Izmjena {code} \"{title}\" na projektu {project} je predana i čeka odluku.",
+      "notifications.variation.approved.title": "Izmjena je odobrena: {code}",
+      "notifications.variation.approved.body": "Izmjena {code} \"{title}\" na projektu {project} je odobrena.",
+      "notifications.variation.rejected.title": "Izmjena je odbijena: {code}",
+      "notifications.variation.rejected.body": "Izmjena {code} \"{title}\" na projektu {project} je odbijena i vraćena vama.",
+      "notifications.variation.rejected_reason.body": "Izmjena {code} \"{title}\" na projektu {project} je odbijena i vraćena vama. Razlog: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Radni nalog za izmjenu čeka odobrenje: {code}",
+      "notifications.changeorder.awaiting_approval.body": "Radni nalog za izmjenu {code} \"{title}\" na projektu {project} je predan i čeka odobrenje.",
+      "notifications.changeorder.approved.title": "Radni nalog za izmjenu je odobren: {code}",
+      "notifications.changeorder.approved.body": "Radni nalog za izmjenu {code} \"{title}\" na projektu {project} je odobren.",
+      "notifications.changeorder.rejected.title": "Radni nalog za izmjenu je odbijen: {code}",
+      "notifications.changeorder.rejected.body": "Radni nalog za izmjenu {code} \"{title}\" na projektu {project} je odbijen.",
+      "notifications.submittal.approved_as_noted.title": "Dokumentacija za odobrenje odobrena je uz napomene",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Dokument čeka vaše odobrenje",
+      "notifications.file_approval.needs_approver.body": "Datoteka vrste {file_kind} čeka vaše odobrenje.",
+      "notifications.file_approval.approved.title": "Vaš dokument je odobren",
+      "notifications.file_approval.approved.body": "Vaša datoteka vrste {file_kind} prošla je sve korake odobravanja.",
+      "notifications.file_approval.rejected.title": "Vaš dokument je vraćen",
+      "notifications.file_approval.rejected.body": "Vaša datoteka vrste {file_kind} je odbijena i treba izmjene.",
+      "notifications.portal.user_invited.title": "Korisnik portala je pozvan",
+      "notifications.portal.user_invited.body": "{portal_user_email} pozvan je s ulogom: {portal_role}.",
+      "notifications.portal.message_received.title": "Nova poruka u portalu",
+      "notifications.portal.message_received.body": "{buyer_name} je poslao poruku."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "ID",
+          "ID aktivnosti",
+          "Šifra aktivnosti",
+          "Šifra",
+          "Br.",
+          "Broj"
+        ],
+        "name": [
+          "Naziv",
+          "Naziv zadatka",
+          "Naziv aktivnosti",
+          "Aktivnost",
+          "Zadatak"
+        ],
+        "wbs": [
+          "WBS",
+          "WBS šifra",
+          "WBS broj",
+          "Strukturni broj"
+        ],
+        "outline_level": [
+          "Razina strukture",
+          "Razina",
+          "Razina uvlake",
+          "Uvlaka"
+        ],
+        "start": [
+          "Početak",
+          "Datum početka",
+          "Start",
+          "Planirani početak"
+        ],
+        "finish": [
+          "Završetak",
+          "Kraj",
+          "Datum završetka",
+          "Planirani završetak",
+          "Rok"
+        ],
+        "duration": [
+          "Trajanje",
+          "Trajanje (dani)",
+          "Dani",
+          "Izvorno trajanje"
+        ],
+        "predecessors": [
+          "Prethodnici",
+          "Prethodnik",
+          "Ovisi o",
+          "Ovisnosti"
+        ],
+        "percent_complete": [
+          "% završenosti",
+          "Postotak završenosti",
+          "Napredak",
+          "Napredak (%)",
+          "% izvršenja"
+        ],
+        "milestone": [
+          "Prekretnica",
+          "Je prekretnica",
+          "Ključna točka"
+        ],
+        "resource": [
+          "Resurs",
+          "Resursi",
+          "Nazivi resursa",
+          "Ekipa",
+          "Izvođač"
+        ],
+        "notes": [
+          "Bilješke",
+          "Bilješka",
+          "Komentari",
+          "Komentar",
+          "Napomene"
+        ],
+        "client_visible": [
+          "Vidljivo klijentu",
+          "Vidljivo naručitelju",
+          "Prikaži klijentu",
+          "Podijeli s klijentom"
+        ]
+      },
+      "yes_words": [
+        "da"
+      ],
+      "no_words": [
+        "ne"
+      ],
+      "example_names": [
+        "Grubi građevinski radovi",
+        "Iskop",
+        "Temelji",
+        "Temelji preuzeti"
+      ]
+    },
+    "module_suggest": {
+      "keywords": {
+        "contract": [
+          "ugovor*",
+          "sporazum*"
+        ],
+        "contact": [
+          "kontakt*",
+          "dobavljač*",
+          "podizvođač*",
+          "klijent*",
+          "naručitelj*",
+          "izvođač*"
+        ],
+        "schedule_activity": [
+          "aktivnost*",
+          "zadatak",
+          "zadaci",
+          "zadatc*",
+          "wbs"
+        ],
+        "document": [
+          "dokument*",
+          "nacrt*",
+          "prilog*"
+        ],
+        "user": [
+          "odgovorn*",
+          "zadužen*",
+          "nadzorn*",
+          "voditelj*",
+          "inspektor*",
+          "predradnik*"
+        ],
+        "due": [
+          "rok*",
+          "dospijeć*",
+          "istek*",
+          "vrijedi do",
+          "ciljani datum",
+          "obnova"
+        ]
+      },
+      "link_labels": {
+        "contract": "Ugovor",
+        "contact": "Kontakt",
+        "schedule_activity": "Aktivnost iz plana",
+        "document": "Dokument",
+        "user": "Odgovorna osoba"
+      },
+      "state_labels": [
+        "Otvoreno",
+        "U tijeku",
+        "Završeno"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Dodatak {number} natječaju {package}",
+      "addendum_heading": "Dodatak natječaju",
+      "greeting": "Poštovani {company},",
+      "greeting_generic": "Poštovani,",
+      "addendum_intro": "Izdan je dodatak {number} natječajnom paketu {package}: {title}.",
+      "addendum_deadline": "Rok za predaju ponuda pomaknut je s {old} na {new}.",
+      "addendum_boq": "Troškovnik je izmijenjen (revizija {revision}). Molimo ocijenite važeću reviziju.",
+      "addendum_documents": "Izdani dokumenti: {documents}",
+      "addendum_ack": "Molimo potvrdite primitak ovog dodatka. Ponuda koja ne potvrdi sve dodatke može se smatrati neusklađenom.",
+      "answer_subject": "Pojašnjenje {number} natječaja {package}",
+      "answer_heading": "Pojašnjenje natječaja",
+      "answer_intro": "Odgovoreno je na pitanje o natječajnom paketu {package}. Odgovor vrijedi za sve ponuditelje.",
+      "question_label": "Pitanje",
+      "answer_label": "Odgovor"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Bruto vrijednost razvoja (GDV)",
+      "total_development_cost": "Ukupni trošak razvoja",
+      "residual_land_value": "Preostala vrijednost zemljišta",
+      "developer_profit": "Dobit investitora",
+      "profit_on_cost": "Dobit na trošak",
+      "profit_on_gdv": "Dobit na GDV",
+      "construction_cost": "Trošak gradnje",
+      "professional_fees": "Honorari stručnjaka",
+      "contingency": "Rezerva za nepredviđeno",
+      "finance_cost": "Trošak financiranja",
+      "sales_costs": "Troškovi prodaje"
+    },
+    "status": {
+      "viable": "Održivo",
+      "unviable": "Neodrživo",
+      "marginal": "Granično",
+      "pending": "Još nije procijenjeno"
+    },
+    "figure": {
+      "gross_development_value": "Ukupna prodajna vrijednost svih jedinica u shemi, sve u jednoj valuti.",
+      "total_development_cost": "Svi troškovi izvedbe sheme osim samog zemljišta: gradnja, honorari, rezerva, financiranje i troškovi prodaje.",
+      "residual_land_value": "Ono što ostaje za zemljište nakon što se od bruto vrijednosti razvoja oduzmu ukupni trošak razvoja i ciljana dobit investitora.",
+      "developer_profit": "Dobit koju investitor želi zadržati, zadana kao ciljani omjer bruto vrijednosti razvoja.",
+      "profit_on_cost": "Dobit investitora podijeljena ukupnim troškom razvoja, izražena kao omjer.",
+      "profit_on_gdv": "Dobit investitora podijeljena bruto vrijednošću razvoja, izražena kao omjer."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Radnički kamp",
+        "rental": "Najamni smještaj",
+        "hotel": "Hotel"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Na čekanju",
+        "approved": "Odobreno",
+        "rejected": "Odbijeno"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Zadovoljeno",
+        "fail": "Nije zadovoljeno",
+        "not_applicable": "Nije primjenjivo"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Nacrt",
+        "contract": "Ugovor",
+        "specification": "Specifikacija",
+        "photo": "Fotografija",
+        "correspondence": "Korespondencija",
+        "reality_capture": "Snimanje stvarnog stanja",
+        "other": "Ostalo"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Na čekanju",
+        "approved": "Odobreno",
+        "rejected": "Odbijeno",
+        "cancelled": "Otkazano"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Nacrt",
+        "submitted": "Poslano na odobrenje",
+        "approved": "Odobreno",
+        "posted": "Knjiženo u glavnoj knjizi"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Otvoreno",
+        "assigned": "Dodijeljeno",
+        "in_progress": "U tijeku",
+        "resolved": "Riješeno",
+        "verified": "Provjereno",
+        "closed": "Zatvoreno"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "opažanje",
+        "minor": "manji",
+        "major": "veći",
+        "critical": "kritičan"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Osoba",
+        "crew": "Ekipa",
+        "equipment": "Oprema",
+        "subcontractor": "Podizvođač"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Naziv AI modela je zastario ili nije dostupan. Otvorite Postavke > AI i unesite važeći naziv modela za svog pružatelja.",
+      "not_configured": "AI nije konfiguriran. Postavite AI pružatelja u Postavkama."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "provjereno",
+      "bound": "priloženo",
+      "empty": "nedostaje"
+    },
+    "package_status_labels": {
+      "draft": "nacrt",
+      "in_progress": "u tijeku",
+      "ready": "spremno",
+      "issued": "izdano"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "blokator",
+      "critical": "kritično",
+      "warning": "upozorenje",
+      "suggestion": "prijedlog"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategija",
+      "brief": "Projektni zadatak",
+      "concept": "Koncept",
+      "design": "Projektiranje",
+      "approval": "Dozvola",
+      "detail": "Glavni projekt",
+      "tender": "Natječaj",
+      "award": "Dodjela",
+      "construction": "Izgradnja",
+      "handover": "Predaja",
+      "operation": "Korištenje"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "piece_fits_stock": {
+        "fail": "Komad {ref} ({size} mm) ne stane ni u jednu stavku zalihe",
+        "suggestion": "Dodajte dulju ili veću dimenziju zalihe, smanjite obrezivanje ili podijelite komad spojem."
+      },
+      "has_stock": {
+        "suggestion": "Dodajte barem jednu duljinu zalihe ili dimenziju ploče, ili ponovno upotrijebite ostatke iz skladišta gradilišta.",
+        "fail": "Posao nema zalihe iz koje bi se rezalo"
+      },
+      "yield_threshold": {
+        "suggestion": "Dodajte još jednu duljinu ili dimenziju zalihe, dopustite rotaciju ili preispitajte prag za ovaj materijal.",
+        "fail": "Iskorištenje {actual} % ispod je praga od {threshold} %"
+      },
+      "ok": "U redu",
+      "kerf_set": {
+        "fail": "Širina reza pile je nula",
+        "suggestion": "Unesite širinu lista ili reza, inače je iskorištenje svake šipke s više rezova precijenjeno."
+      },
+      "grain_allows_fit": {
+        "fail": "Komad {ref} stane samo kad se okrene poprijeko na žilu",
+        "suggestion": "Dopustite rotaciju za ovaj komad ili dodajte dimenziju ploče u koju stane uzduž žile."
+      },
+      "has_pieces": {
+        "fail": "Posao nema komada za rezanje",
+        "suggestion": "Dodajte komade ručno, zalijepite ih ili ih uvezite iz plana savijanja, predmjera, stavke troškovnika ili datoteke."
+      },
+      "min_offcut_set": {
+        "fail": "Nije postavljen najmanji upotrebljivi ostatak",
+        "suggestion": "Postavite najkraći ostatak koji vrijedi zadržati, kako se ostaci za ponovnu uporabu ne bi računali kao otpad."
+      },
+      "sheet_dimensions": {
+        "suggestion": "Zadajte i duljinu i širinu za svaki komad ploče i svaku dimenziju ploče.",
+        "fail": "{ref} nema širinu"
+      },
+      "stock_priced": {
+        "fail": "Zaliha {ref} nema jediničnu cijenu",
+        "suggestion": "Unesite cijenu po komadu kako bi plan prikazao trošak i odabrao najjeftiniju zalihu."
+      },
+      "stock_sufficient": {
+        "suggestion": "Povećajte dostupnu količinu ili dodajte još jednu dimenziju zalihe.",
+        "fail": "Komadi koji nisu raspoređeni na dostupnu zalihu: {count}"
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Stavka popisa nedostataka '{title}' zatvorena je bez fotografije",
+    "punch_no_photo_fix": "Dodajte fotografiju dovršenog rada",
+    "photo_weak": "Fotografija bez lokacije ili vremena snimanja kod '{title}': {count}",
+    "photo_weak_fix": "Snimite fotografiju ponovno u aplikaciji s uključenom lokacijom",
+    "defect_no_photo": "Nedostatak '{reference}' zatvoren je bez fotografije otklanjanja",
+    "defect_no_photo_fix": "Priložite fotografiju otklonjenog nedostatka"
+  },
+  "closeout_dossier": {
+    "more_items": "Dodatnih stavki koje nisu navedene: {count}",
+    "category_missing": "Nema dokaza za obveznu kategoriju '{category}'",
+    "category_missing_fix": "Povežite dokument sa stavkom kontrolnog popisa ove kategorije ili dodajte novi",
+    "category_unverified": "Dokaz za '{category}' još nije provjeren",
+    "category_unverified_fix": "Zatražite od voditelja da pregleda i provjeri povezani dokaz",
+    "punch_open": "Stavka popisa nedostataka '{name}' još je otvorena",
+    "punch_open_fix": "Riješite i zatvorite stavku ili je izuzmite iz opsega ove dokumentacije",
+    "punch_no_photo": "Riješena stavka popisa nedostataka '{name}' nema fotografiju",
+    "punch_no_photo_fix": "Dodajte fotografiju dovršenog rada",
+    "system_pending": "Sustav '{name}' nije pušten u rad",
+    "system_pending_fix": "Dovršite kontrolne popise puštanja u rad i označite sustav kao pušten u rad",
+    "critical_issues": "Otvorenih kritičnih problema pri puštanju u rad: {count}",
+    "critical_issues_fix": "Zatvorite kritične probleme prije primopredaje",
+    "acceptance_missing": "Nije povezan nijedan zapisnik o primopredaji",
+    "acceptance_missing_fix": "Povežite potpisani zapisnik o primopredaji sa stavkom primopredaje na kontrolnom popisu",
+    "acceptance_unsigned": "Zapisnik o primopredaji nije u potpunosti potpisan (status: {status})",
+    "acceptance_unsigned_fix": "Prikupite nedostajuće potpise u Potpisivanju",
+    "blocked": "Dokumentacija ne zadovoljava svoj kontrolni popis. Ispravite nalaze ili je svejedno sastavite kao nepotpunu (odobrenje voditelja).",
+    "delivery_title": "Primopredajna dokumentacija: {project}",
+    "delivery_body": "Primopredajna dokumentacija '{title}' ({scope}) je spremna. Poveznica u nastavku preuzima je i vrijedi do {expires}.",
+    "pdf": {
+      "title": "Primopredajna dokumentacija",
+      "scope": "Opseg",
+      "built": "Sastavljeno",
+      "status_passed": "Kontrolni popis zadovoljen",
+      "status_warnings": "Kontrolni popis zadovoljen s upozorenjima",
+      "status_errors": "Nepotpuno: otvoreni nalazi kontrolnog popisa",
+      "findings": "Otvoreni nalazi kontrolnog popisa",
+      "severity": "Ozbiljnost",
+      "finding": "Nalaz",
+      "severity_error": "Pogreška",
+      "severity_warning": "Upozorenje",
+      "severity_info": "Info",
+      "contents": "Sadržaj",
+      "file": "Datoteka",
+      "size": "Veličina",
+      "punch": "Riješeni popis nedostataka",
+      "item": "Stavka",
+      "status": "Status",
+      "photos": "Fotografije",
+      "evidence": "Fotodokaz"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Ocjena {rating} za '{name}' nije razina ljestvice '{scale}'",
+    "rule_poor_without_action": "'{name}' je ocijenjen s {rating}, ali nema planiranu radnju održavanja",
+    "rule_poor_without_action_fix": "Izvedite plan ili dodajte radnju za ovaj element",
+    "rule_action_unpriced": "Radnja za '{name}' u {year}. nema jediničnu cijenu",
+    "rule_action_unpriced_fix": "Unesite jediničnu cijenu kako bi je zbrojevi plana uključili",
+    "rule_defect_incomplete": "Ocjena za '{name}' zahtijeva radove, ali ne bilježi ozbiljnost ni opseg"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, stranica {page}",
+    "text_change": "„{old}” promijenjeno u „{new}”",
+    "kind": {
+      "added": "Dodano",
+      "removed": "Uklonjeno",
+      "modified": "Izmijenjeno",
+      "text": "Tekst promijenjen"
+    },
+    "status": {
+      "open": "Otvoreno",
+      "relevant": "Relevantno",
+      "not_relevant": "Nerelevantno"
+    },
+    "errors": {
+      "revision_not_found": "Revizija nacrta nije pronađena u ovom projektu.",
+      "revision_not_parsed": "Nacrt još nema obrađenu verziju za usporedbu.",
+      "comparison_not_found": "Usporedba nije pronađena.",
+      "change_not_found": "Promjena nije pronađena.",
+      "same_revision": "Odaberite dvije različite revizije ili stranice za usporedbu.",
+      "manual_points": "Ručno poravnanje zahtijeva dvije različite točke na svakoj reviziji.",
+      "alignment_singular": "Poravnanje se ne može primijeniti: urušava list.",
+      "region_empty": "Promjena {seq} nema veličinu.",
+      "region_off_sheet": "Promjena {seq} leži izvan lista.",
+      "module_missing": "Modul potreban za ovu radnju nije instaliran."
+    },
+    "rfi": {
+      "subject": "Promjena nacrta {seq} na {sheet}",
+      "question": "Revizija {new} lista {sheet} razlikuje se od revizije {old} u označenom području ({kind}). Potvrdite namjeru promjene i utječe li na količine."
+    },
+    "markup": {
+      "text": "Promjena revizije {seq}: {kind}"
+    },
+    "report": {
+      "title": "Usporedba revizija nacrta",
+      "project": "Projekt",
+      "name": "Usporedba",
+      "old_revision": "Starija revizija",
+      "new_revision": "Novija revizija",
+      "alignment": "Poravnanje",
+      "alignment_none": "Nije poravnato (isti okvir)",
+      "alignment_auto": "Automatsko",
+      "alignment_manual": "Ručno, dvije točke",
+      "confidence": "pouzdanost {value}",
+      "summary": "Promjene",
+      "summary_counts": "Ukupno {total}: dodano {added}, uklonjeno {removed}, izmijenjeno {modified}, tekst {text}",
+      "generated_on": "Datum izrade",
+      "generated": "Izrađeno {timestamp}",
+      "page_of": "Stranica {page} od {total}",
+      "no_changes": "Između dviju revizija nisu pronađene promjene.",
+      "col_no": "Br.",
+      "col_preview": "Pregled",
+      "col_kind": "Promjena",
+      "col_location": "Lokacija",
+      "col_detail": "Detalji",
+      "col_status": "Status",
+      "col_comment": "Komentar",
+      "col_follow_up": "Daljnji korak",
+      "page_at": "Stranica {page} na {coords}",
+      "layer": "Sloj {layer}",
+      "entity_counts": "Objekti: dodano {added}, uklonjeno {removed}, izmijenjeno {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Revizijski oblačić",
+      "remeasure": "Ponovno izmjeriti: {items} količina, {positions} stavki troškovnika"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Obje strane su različite revizije.",
+      "distinct_revisions_fail": "Usporedba uspoređuje list sam sa sobom.",
+      "distinct_revisions_hint": "Odaberite stariju i noviju reviziju nacrta.",
+      "alignment_not_needed": "DWG revizije dijele jedinice crteža; poravnanje nije potrebno.",
+      "alignment_missing_matrix": "Usporedba nema poravnanje.",
+      "alignment_singular": "Poravnanje urušava list i ne može se primijeniti.",
+      "alignment_scale": "Poravnanje mijenja mjerilo lista za {scale}, više nego se razlikuju revizije jednog nacrta.",
+      "alignment_low_confidence": "Automatsko poravnanje je nesigurno (pouzdanost {confidence}).",
+      "alignment_manual_points": "Ručno poravnanje zahtijeva dva para točaka.",
+      "alignment_ok": "Poravnanje lista je vjerodostojno.",
+      "alignment_hint": "Ručno poravnajte listove prema dvije oznake zajedničke objema revizijama, na primjer sjecištima osi.",
+      "region_empty": "Promjena {seq} nema veličinu.",
+      "region_off_sheet": "Promjena {seq} leži izvan lista.",
+      "regions_ok": "Svako promijenjeno područje leži na listu.",
+      "triaged_ok": "Svaka promjena je pregledana.",
+      "triaged_open": "Otvorenih promjena: {count}.",
+      "triaged_hint": "Označite svaku promjenu kao relevantnu ili nerelevantnu.",
+      "followed_up_ok": "Svaka relevantna promjena ima daljnji korak.",
+      "followed_up_missing": "Promjena {seq} označena je kao relevantna, ali nema komentar, RFI, oblačić niti oznaku za ponovno mjerenje.",
+      "followed_up_hint": "Komentirajte promjenu, izradite RFI ili oblačić ili označite količine unutar nje za ponovno mjerenje."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Prognoza novčanog toka",
+      "portfolio_title": "Prognoza novčanog toka portfelja",
+      "empty": "Za ovaj odabir nema prognoze novčanog toka.",
+      "project": "Projekt",
+      "as_of": "Na dan",
+      "currency": "Valuta",
+      "delay_days": "Naplate kasne (dana)",
+      "overrun_pct": "Prekoračenje troškova (%)",
+      "closing_position": "Završno stanje",
+      "peak_funding": "Najveća potreba za financiranjem",
+      "peak_period": "Mjesec najveće potrebe za financiranjem",
+      "col": {
+        "period": "Mjesec",
+        "planned_in": "Planirani priljevi",
+        "actual_in": "Stvarni priljevi",
+        "expected_in": "Očekivani priljevi",
+        "planned_out": "Planirani odljevi",
+        "actual_out": "Stvarni odljevi",
+        "expected_out": "Očekivani odljevi",
+        "net": "Neto",
+        "cumulative": "Kumulativni položaj"
+      }
+    }
+  }
+}

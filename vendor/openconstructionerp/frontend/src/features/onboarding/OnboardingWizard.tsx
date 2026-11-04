@@ -1,0 +1,5439 @@
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+// Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useNavigate, Link } from 'react-router-dom';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import i18n, { type TFunction } from 'i18next';
+import clsx from 'clsx';
+import {
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Sparkles,
+  Eye,
+  EyeOff,
+  ExternalLink,
+  Loader2,
+  CheckCircle2,
+  Database,
+  FolderOpen,
+  Rocket,
+  Package,
+  Building2,
+  Calculator,
+  ClipboardList,
+  Pencil,
+  Boxes,
+  Settings2,
+  Home,
+  Globe,
+  Languages,
+  Layers,
+  ChevronDown,
+  ChevronRight,
+  Search,
+  XCircle,
+  MinusCircle,
+  AlertTriangle,
+  HardHat,
+  Briefcase,
+  Box,
+  Construction,
+  Wrench,
+  PencilRuler,
+  House,
+  Handshake,
+  Truck,
+  CalendarClock,
+  Clock,
+  Hammer,
+  BadgeCheck,
+  ShieldCheck,
+  Leaf,
+  Building,
+  Landmark,
+  Palette,
+  X,
+  type LucideIcon,
+} from 'lucide-react';
+import { Logo, Button, CountryFlag, Badge } from '@/shared/ui';
+import { APP_VERSION } from '@/shared/lib/version';
+import {
+  detectCountry,
+  detectCountryForLanguage,
+  matchSupportedLanguage,
+  changeLanguage,
+  SUPPORTED_LANGUAGES,
+} from '@/app/i18n';
+import { sortLanguagesByName } from '@/shared/lib/languageOrder';
+import { adoptMarketCurrency, marketCurrencyFor } from './marketCurrency';
+import { useToastStore } from '@/stores/useToastStore';
+import { FlagshipDemoCards } from './FlagshipDemoCards';
+import { StepSolutionPackages } from '@/features/solution_packages/StepSolutionPackages';
+import { ReadyPackBrowser } from './ReadyPackBrowser';
+import { OnboardingStepper, STEP, nextStep, previousStep, STEP_COUNT } from './OnboardingStepper';
+import { foldText } from '@/features/modules/packs/packCatalog';
+import { useCompanyProfiles, type CompanyPresetAPI } from '@/features/modules/companyProfiles';
+import {
+  useBackgroundInstallStore,
+  type BgInstallStep,
+  type BgInstallStepStatus,
+  type BackgroundInstall,
+} from '@/stores/useBackgroundInstallStore';
+import { useUploadQueueStore } from '@/stores/useUploadQueueStore';
+import { useAuthStore } from '@/stores/useAuthStore';
+import { normalizeRole } from '@/shared/lib/roles';
+import { useModuleStore } from '@/stores/useModuleStore';
+import { useBrandingStore } from '@/stores/useBrandingStore';
+import { workspaceFor } from '@/app/layout/workspaces';
+import {
+  COMPANY_TYPE_STORAGE_KEY,
+  type MeOnboarding,
+} from '@/app/layout/useCompanyWorkspace';
+import { useMeOnboardingQueryKey } from '@/app/layout/meOnboardingQuery';
+import { aiApi, type AIProvider } from '@/features/ai/api';
+import { companyThumbFor } from '@/features/cases/caseFaces';
+import { apiGet, apiPost } from '@/shared/lib/api';
+import {
+  useBaseCatalog,
+  languageName,
+  loadBaseMarket,
+  textLanguageFallback,
+  type BaseVariant,
+} from '@/features/costs/baseCatalog';
+import { BaseCatalogBrowser } from '@/features/costs/BaseCatalogBrowser';
+import { BaseCatalogError } from '@/features/costs/BaseCatalogError';
+import {
+  ALL_MODULES,
+  MODULE_GROUPS,
+  CORE_MODULE_KEYS,
+  TOTAL_MODULE_COUNT,
+  type ModuleDef,
+} from './modules';
+import {
+  COUNTRY_PACKS,
+  DEFAULT_COUNTRY_PACK,
+  getCountryPack,
+  type CountryPack,
+} from './countryPacks';
+import {
+  modulesLeftOnByOneClick,
+  packSetupHref,
+  packToPreselect,
+  packVariantOf,
+  resolveCountryOffer,
+} from './countryOffer';
+import {
+  activeModuleCount,
+  companyTypeToSave,
+  groupProfilePresets,
+  packProfileToSave,
+} from './profileGroups';
+import { usePartnerPack, type PartnerPackResponse } from '@/shared/hooks/usePartnerPack';
+import { profileShapes } from '@/features/modules/profileDifference';
+import { packNameSlug } from '@/shared/lib/regionalPack';
+import { PackEmblem } from '@/shared/ui/PackEmblem';
+import {
+  fetchInstalledPacks,
+  fullInstallPackStream,
+  packCountryCode,
+  FULL_INSTALL_STEPS,
+  type InstalledPartnerPack,
+  type FullInstallStepName,
+  type FullInstallStepStatus,
+  packInstallFailureTitle,
+  PackInstallError,
+} from './partnerPacksApi';
+import {
+  provisionOnboarding,
+  fetchOnboardingStatus,
+  type OnboardingJobState,
+} from './onboardingApi';
+import {
+  costDbItemCount,
+  costDbLoadReport,
+  followCostDbLoad,
+  type CostDbLoadOutcome,
+} from './costDbLoad';
+import {
+  combineOutcomes,
+  countryProvisionToast,
+  failedItemCount,
+  jobOutcome,
+  type OnboardingProvisionResult,
+} from './provisionOutcome';
+import { SemanticModelCard } from './SemanticModelCard';
+import { StepLook } from './StepLook';
+import { SetupSummary } from './SetupSummary';
+import { onRadioGroupKeyDown, rovingTabIndex } from '@/shared/lib/rovingFocus';
+import { loadWizardProgress, saveWizardProgress, clearWizardProgress } from './wizardProgress';
+import { aiEstimatorApi } from '@/features/ai-estimator/api';
+import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { fmtList } from '@/shared/lib/formatters';
+
+// ── Constants ────────────────────────────────────────────────────────────────
+
+const TOTAL_STEPS = STEP_COUNT;
+
+// ── Language -> Region mapping ──────────────────────────────────────────────
+
+// Language → recommended CWICR region. Updated 2026-04-28 — most languages now
+// have a proper local database; previously several locales fell back to
+// DE_BERLIN/SP_BARCELONA/ZH_CHINA as approximations.
+/**
+ * A regional pack's name, in the language the reader is looking at.
+ *
+ * This replaced `packCountryName`, which read `metadata.country_name_en`. That
+ * field's name is literal. It is English, it is only ever English, and
+ * us-california, us-costdata and us-texas all fill it with the same "United
+ * States", so three tiles in the picker carried one word between them while
+ * their real names sat unread, and every install-progress line that names the
+ * pack said it in English whatever language the wizard was speaking.
+ *
+ * The key is a template literal written inline inside `t()` because
+ * scripts/check_i18n_computed_keys.py recognises a computed key in that shape
+ * and in no other. A helper that RETURNED the finished key would put one
+ * function hop between the gate and the call, and the gate would then report
+ * nothing for a family of fifteen names. A helper that CALLS t(), like this
+ * one, keeps the shape the gate reads while giving the eleven call sites in
+ * this file one place to read it from.
+ *
+ * `t` is passed rather than reached for, because this is module scope and the
+ * only correct `t` is the component's own.
+ */
+function packDisplayName(t: TFunction, pack: InstalledPartnerPack): string {
+  return t(`modules.pp_name_${packNameSlug(pack.slug)}`, {
+    defaultValue: pack.partner_name,
+  });
+}
+
+/**
+ * Marks a pack tile as a specialised variant of another pack.
+ *
+ * Two tiles for one country read as a duplicate unless one of them says what
+ * it is. The variant is never preselected (see `packToPreselect`), so this
+ * badge is what tells a reader the second tile is a deliberate choice.
+ */
+function PackVariantBadge({ pack }: { pack: InstalledPartnerPack }) {
+  const { t } = useTranslation();
+  if (!packVariantOf(pack)) return null;
+  return (
+    <span
+      data-testid={`pack-variant-${pack.slug}`}
+      className="rounded-full bg-surface-tertiary px-2 py-0.5 text-2xs font-medium text-content-secondary"
+    >
+      {t('onboarding.pp_variant_badge', { defaultValue: 'Specialised variant' })}
+    </span>
+  );
+}
+
+/**
+ * What a reader should know about the selected pack before a one-click setup.
+ *
+ * Two sentences, each shown only when it is true of the pack: that it is a
+ * variant of another pack, with the plain one named as the safe choice, and
+ * that it can switch modules off which this setup will leave on. The second
+ * used to be silent: the one-click install never sends the confirmation, the
+ * server reports the list as skipped, and nothing on this screen said so.
+ */
+function PackOneClickNotes({
+  pack,
+  packs,
+}: {
+  pack: InstalledPartnerPack;
+  packs: InstalledPartnerPack[];
+}) {
+  const { t } = useTranslation();
+  const parentSlug = packVariantOf(pack);
+  const parent = parentSlug ? packs.find((p) => p.slug === parentSlug) : undefined;
+  const leftOn = modulesLeftOnByOneClick(pack);
+  if (!parent && leftOn === 0) return null;
+  return (
+    <div
+      data-testid="pack-one-click-notes"
+      className="mt-2 space-y-1 text-center text-2xs text-content-tertiary"
+    >
+      {parent && (
+        <p>
+          {t('onboarding.pp_variant_hint', {
+            defaultValue:
+              '{{pack}} is built on {{base}} for one trade: the same country configuration with a shorter menu. If you are not sure, choose {{base}}.',
+            pack: packDisplayName(t, pack),
+            base: packDisplayName(t, parent),
+          })}
+        </p>
+      )}
+      {leftOn > 0 && (
+        <p>
+          {t('onboarding.pp_optional_disables', {
+            defaultValue:
+              'This pack can also switch off modules its users do not need ({{n}} in total). One-click setup leaves all of them on. To switch them off, open this pack on the Modules page, Packs tab, and tick the box in its setup dialog.',
+            n: leftOn,
+          })}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/**
+ * On Finish: says a one-click install left a pack's optional switch-offs on,
+ * and links to the dialog that can apply them.
+ *
+ * The same packs query the pickers use, so this reads the cache they filled
+ * and fetches nothing new on the usual path.
+ */
+function PackModulesLeftOnNote({ slug, onLeave }: { slug: string; onLeave: () => void }) {
+  const { t } = useTranslation();
+  const { data } = useQuery({
+    queryKey: ['partner-pack', 'installed'],
+    queryFn: fetchInstalledPacks,
+    staleTime: 60_000,
+  });
+  const pack = data?.installed?.find((p) => p.slug === slug);
+  const leftOn = pack ? modulesLeftOnByOneClick(pack) : 0;
+  if (leftOn === 0) return null;
+  return (
+    <p
+      data-testid="pack-modules-left-on"
+      className="mt-4 max-w-md text-center text-xs text-content-tertiary"
+    >
+      {t('onboarding.pp_modules_left_on', {
+        defaultValue:
+          'Modules this pack can switch off, all left on by the one-click setup: {{n}}. Nothing was switched off.',
+        n: leftOn,
+      })}{' '}
+      <Link
+        to={packSetupHref(slug)}
+        onClick={onLeave}
+        className="font-medium text-oe-blue hover:underline"
+      >
+        {t('onboarding.pp_modules_left_on_link', {
+          defaultValue: 'Open the pack in Modules to switch them off',
+        })}
+      </Link>
+    </p>
+  );
+}
+
+// Every value here is a global-market catalogue, never a national norm base. A
+// language is not a country: `es` serves both the Spain and Mexico packs and
+// `sv` also answers for no/da/fi, so this map cannot name one country's own
+// norm system without recommending it to speakers elsewhere. That is why `pt`
+// picks PT_SAOPAULO over BR_NATIONAL, `it` IT_ROME over IT_TOSCANA and `id`
+// ID_JAKARTA over ID_NATIONAL. `zh` and `tr` were the only two that broke the
+// rule: cdf7391c1 rewrote them to ZH_CHINA and TR_NATIONAL alongside the mirror
+// rename, so the language step recommended one base while the country pack for
+// the same market installed another, and which one a user got depended on the
+// step they came through. Held by test_country_preset_regions_resolve.py, which
+// takes an exception only if it is recorded there with a reason.
+const LANG_TO_REGION: Record<string, string> = {
+  de: 'DE_BERLIN',
+  fr: 'FR_PARIS',
+  es: 'SP_BARCELONA',
+  pt: 'PT_SAOPAULO',
+  ru: 'RU_STPETERSBURG',
+  zh: 'ZH_SHANGHAI',
+  ar: 'AR_DUBAI',
+  hi: 'HI_MUMBAI',
+  en: 'USA_USD',
+  tr: 'TR_ISTANBUL',
+  it: 'IT_ROME',
+  ja: 'JA_TOKYO',
+  ko: 'KO_SEOUL',
+  nl: 'NL_AMSTERDAM',
+  pl: 'PL_WARSAW',
+  cs: 'CS_PRAGUE',
+  hr: 'HR_ZAGREB',
+  sv: 'SV_STOCKHOLM',
+  no: 'SV_STOCKHOLM',
+  da: 'SV_STOCKHOLM',
+  fi: 'SV_STOCKHOLM',
+  bg: 'BG_SOFIA',
+  ro: 'RO_BUCHAREST',
+  th: 'TH_BANGKOK',
+  vi: 'VI_HANOI',
+  id: 'ID_JAKARTA',
+};
+
+// ── Language -> Demo project mapping ────────────────────────────────────────
+
+const LANG_TO_DEMO: Record<string, string> = {
+  de: 'residential-berlin',
+  en: 'medical-us',
+  fr: 'school-paris',
+  ar: 'warehouse-dubai',
+};
+const DEFAULT_DEMO = 'office-london';
+
+// ── CWICR Database definitions ──────────────────────────────────────────────
+
+interface CWICRDatabase {
+  id: string;
+  name: string;
+  city: string;
+  lang: string;
+  currency: string;
+  flagId: string;
+}
+
+const CWICR_DATABASES: CWICRDatabase[] = [
+  // Anglosphere
+  { id: 'USA_USD', name: 'United States', city: 'New York', lang: 'English', currency: 'USD', flagId: 'us' },
+  { id: 'UK_GBP', name: 'United Kingdom', city: 'London', lang: 'English', currency: 'GBP', flagId: 'gb' },
+  { id: 'ENG_TORONTO', name: 'Canada / International', city: 'Toronto', lang: 'English', currency: 'CAD', flagId: 'ca' },
+  { id: 'AU_SYDNEY', name: 'Australia', city: 'Sydney', lang: 'English', currency: 'AUD', flagId: 'au' },
+  { id: 'NZ_AUCKLAND', name: 'New Zealand', city: 'Auckland', lang: 'English', currency: 'NZD', flagId: 'nz' },
+  // Western Europe
+  { id: 'DE_BERLIN', name: 'Germany / DACH', city: 'Berlin', lang: 'Deutsch', currency: 'EUR', flagId: 'de' },
+  { id: 'FR_PARIS', name: 'France', city: 'Paris', lang: 'Fran\u00e7ais', currency: 'EUR', flagId: 'fr' },
+  { id: 'IT_ROME', name: 'Italy', city: 'Rome', lang: 'Italiano', currency: 'EUR', flagId: 'it' },
+  { id: 'SP_BARCELONA', name: 'Spain / Latin America', city: 'Barcelona', lang: 'Espa\u00f1ol', currency: 'EUR', flagId: 'es' },
+  { id: 'NL_AMSTERDAM', name: 'Netherlands', city: 'Amsterdam', lang: 'Nederlands', currency: 'EUR', flagId: 'nl' },
+  // Central / Eastern Europe
+  { id: 'PL_WARSAW', name: 'Poland', city: 'Warsaw', lang: 'Polski', currency: 'PLN', flagId: 'pl' },
+  { id: 'CS_PRAGUE', name: 'Czech Republic', city: 'Prague', lang: 'Cestina', currency: 'CZK', flagId: 'cz' },
+  { id: 'HR_ZAGREB', name: 'Croatia', city: 'Zagreb', lang: 'Hrvatski', currency: 'EUR', flagId: 'hr' },
+  { id: 'BG_SOFIA', name: 'Bulgaria', city: 'Sofia', lang: 'Balgarski', currency: 'BGN', flagId: 'bg' },
+  { id: 'RO_BUCHAREST', name: 'Romania', city: 'Bucharest', lang: 'Romana', currency: 'RON', flagId: 'ro' },
+  { id: 'SV_STOCKHOLM', name: 'Sweden', city: 'Stockholm', lang: 'Svenska', currency: 'SEK', flagId: 'se' },
+  { id: 'TR_ISTANBUL', name: 'T\u00fcrkiye', city: 'Istanbul', lang: 'T\u00fcrk\u00e7e', currency: 'TRY', flagId: 'tr' },
+  { id: 'RU_STPETERSBURG', name: 'Russia / CIS', city: 'St. Petersburg', lang: '\u0420\u0443\u0441\u0441\u043a\u0438\u0439', currency: 'RUB', flagId: 'ru' },
+  // Middle East / Africa
+  { id: 'AR_DUBAI', name: 'Middle East / Gulf', city: 'Dubai', lang: '\u0627\u0644\u0639\u0631\u0628\u064a\u0629', currency: 'AED', flagId: 'ae' },
+  { id: 'ZA_JOHANNESBURG', name: 'South Africa', city: 'Johannesburg', lang: 'English', currency: 'ZAR', flagId: 'za' },
+  { id: 'NG_LAGOS', name: 'Nigeria', city: 'Lagos', lang: 'English', currency: 'NGN', flagId: 'ng' },
+  // Asia-Pacific
+  { id: 'ZH_SHANGHAI', name: 'China', city: 'Shanghai', lang: '\u4e2d\u6587', currency: 'CNY', flagId: 'cn' },
+  { id: 'JA_TOKYO', name: 'Japan', city: 'Tokyo', lang: '\u65e5\u672c\u8a9e', currency: 'JPY', flagId: 'jp' },
+  { id: 'KO_SEOUL', name: 'South Korea', city: 'Seoul', lang: '\ud55c\uad6d\uc5b4', currency: 'KRW', flagId: 'kr' },
+  { id: 'TH_BANGKOK', name: 'Thailand', city: 'Bangkok', lang: '\u0e44\u0e17\u0e22', currency: 'THB', flagId: 'th' },
+  { id: 'VI_HANOI', name: 'Vietnam', city: 'Hanoi', lang: 'Ti\u1ebfng Vi\u1ec7t', currency: 'VND', flagId: 'vn' },
+  { id: 'ID_JAKARTA', name: 'Indonesia', city: 'Jakarta', lang: 'Bahasa Indonesia', currency: 'IDR', flagId: 'id' },
+  { id: 'HI_MUMBAI', name: 'India / South Asia', city: 'Mumbai', lang: 'Hindi', currency: 'INR', flagId: 'in' },
+  // Americas
+  { id: 'PT_SAOPAULO', name: 'Brazil / Portugal', city: 'S\u00e3o Paulo', lang: 'Portugu\u00eas', currency: 'BRL', flagId: 'br' },
+  { id: 'MX_MEXICOCITY', name: 'Mexico', city: 'Mexico City', lang: 'Espa\u00f1ol', currency: 'MXN', flagId: 'mx' },
+  // Authentic national / regional official bases (own local parquet, resource norms)
+  { id: 'ZH_CHINA', name: 'China (Dinge)', city: 'National', lang: '\u4e2d\u6587', currency: 'CNY', flagId: 'cn' },
+  { id: 'TR_NATIONAL', name: 'T\u00fcrkiye (Birim Fiyat)', city: 'National', lang: 'T\u00fcrk\u00e7e', currency: 'TRY', flagId: 'tr' },
+  { id: 'BR_NATIONAL', name: 'Brazil (SINAPI)', city: 'National', lang: 'Portugu\u00eas', currency: 'BRL', flagId: 'br' },
+  { id: 'ES_ANDALUCIA', name: 'Spain (BCCA)', city: 'Andaluc\u00eda', lang: 'Espa\u00f1ol', currency: 'EUR', flagId: 'es' },
+  { id: 'IT_TOSCANA', name: 'Italy (Toscana)', city: 'Toscana', lang: 'Italiano', currency: 'EUR', flagId: 'it' },
+  { id: 'VN_NATIONAL', name: 'Vietnam (Dinh Muc)', city: 'National', lang: 'Ti\u1ebfng Vi\u1ec7t', currency: 'VND', flagId: 'vn' },
+  { id: 'ID_NATIONAL', name: 'Indonesia (AHSP)', city: 'National', lang: 'Bahasa Indonesia', currency: 'IDR', flagId: 'id' },
+  { id: 'GR_NATIONAL', name: 'Greece (GGDE)', city: 'National', lang: '\u0395\u03bb\u03bb\u03b7\u03bd\u03b9\u03ba\u03ac', currency: 'EUR', flagId: 'gr' },
+];
+
+// ── AI Provider definitions ─────────────────────────────────────────────────
+
+interface ProviderOption {
+  id: AIProvider;
+  name: string;
+  nameKey?: string;
+  description: string;
+  docsUrl: string;
+  recommended?: boolean;
+}
+
+// The full provider catalogue, kept in step with the AIProvider union and the
+// Settings AI page so onboarding offers exactly the same choice of models. The
+// two local/self-hosted runtimes (Ollama, vLLM) need a base URL rather than a
+// key, so their doc link points at the runtime docs.
+const AI_PROVIDERS: ProviderOption[] = [
+  {
+    id: 'anthropic',
+    name: 'Anthropic Claude',
+    description: 'Best for construction estimation',
+    docsUrl: 'https://console.anthropic.com/settings/keys',
+    recommended: true,
+  },
+  {
+    id: 'openai',
+    name: 'OpenAI',
+    description: 'Widely supported',
+    docsUrl: 'https://platform.openai.com/api-keys',
+  },
+  {
+    id: 'gemini',
+    name: 'Google Gemini',
+    description: 'Multimodal capabilities',
+    docsUrl: 'https://aistudio.google.com/app/apikey',
+  },
+  {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    description: 'One key for many models',
+    docsUrl: 'https://openrouter.ai/keys',
+  },
+  {
+    id: 'mistral',
+    name: 'Mistral AI',
+    description: 'European open models',
+    docsUrl: 'https://console.mistral.ai/api-keys/',
+  },
+  {
+    id: 'groq',
+    name: 'Groq',
+    description: 'Very fast inference',
+    docsUrl: 'https://console.groq.com/keys',
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    description: 'Low cost, strong reasoning',
+    docsUrl: 'https://platform.deepseek.com/api_keys',
+  },
+  {
+    id: 'together',
+    name: 'Together AI',
+    description: 'Open models at scale',
+    docsUrl: 'https://api.together.ai/settings/api-keys',
+  },
+  {
+    id: 'fireworks',
+    name: 'Fireworks AI',
+    description: 'Fast hosted open models',
+    docsUrl: 'https://fireworks.ai/account/api-keys',
+  },
+  {
+    id: 'perplexity',
+    name: 'Perplexity',
+    description: 'Answers with sources',
+    docsUrl: 'https://www.perplexity.ai/settings/api',
+  },
+  {
+    id: 'cohere',
+    name: 'Cohere',
+    description: 'Enterprise language models',
+    docsUrl: 'https://dashboard.cohere.com/api-keys',
+  },
+  {
+    id: 'ai21',
+    name: 'AI21 Labs',
+    description: 'Jamba long-context models',
+    docsUrl: 'https://studio.ai21.com/account/api-key',
+  },
+  {
+    id: 'xai',
+    name: 'xAI Grok',
+    description: 'Grok models',
+    docsUrl: 'https://console.x.ai/',
+  },
+  {
+    id: 'zhipu',
+    name: 'Zhipu AI',
+    description: 'GLM models',
+    docsUrl: 'https://open.bigmodel.cn/usercenter/apikeys',
+  },
+  {
+    id: 'baidu',
+    name: 'Baidu ERNIE',
+    description: 'ERNIE models',
+    docsUrl: 'https://console.bce.baidu.com/',
+  },
+  {
+    id: 'yandex',
+    name: 'YandexGPT',
+    description: 'Yandex Cloud models',
+    docsUrl: 'https://yandex.cloud/en/docs/foundation-models/',
+  },
+  {
+    id: 'gigachat',
+    name: 'GigaChat',
+    description: 'Sber hosted models',
+    docsUrl: 'https://developers.sber.ru/portal/products/gigachat',
+  },
+  {
+    id: 'kimi',
+    name: 'Moonshot Kimi',
+    description: 'Long-context Chinese models',
+    docsUrl: 'https://platform.moonshot.cn/console/api-keys',
+  },
+  {
+    id: 'ollama',
+    name: 'Ollama (local)',
+    nameKey: 'settings.ai_name_ollama',
+    description: 'Runs models on your machine',
+    docsUrl: 'https://ollama.com/',
+  },
+  {
+    id: 'vllm',
+    name: 'OpenAI-compatible endpoint',
+    nameKey: 'settings.ai_name_openai_compatible',
+    description: 'Your own OpenAI-compatible server',
+    docsUrl: 'https://docs.vllm.ai/',
+  },
+];
+
+// ── Company Type Presets ────────────────────────────────────────────────────
+// The profile catalogue lives in the backend as the single source of truth
+// (``backend/app/core/onboarding_presets.py``, served by
+// ``GET /v1/users/onboarding-presets/``). The Modules page reads the same
+// endpoint, so onboarding and /modules can never drift. Each preset's module
+// keys match the ``ALL_MODULES`` catalogue in ./modules and the sidebar's
+// ``ROUTE_MODULE_KEY``, which is what lets a profile actually shape the menu.
+
+interface ApiCompanyPreset {
+  key: string;
+  label: string;
+  description: string;
+  icon: string;
+  tags: string[];
+  enabled_modules: string[];
+  module_count: number;
+}
+
+const PRESET_ICON_MAP: Record<string, LucideIcon> = {
+  Building2, Calculator, ClipboardList, Pencil, Home, Boxes, HardHat, Briefcase, Box,
+  Construction, Wrench, PencilRuler, House, Handshake, Truck, CalendarClock, Hammer,
+  BadgeCheck, ShieldCheck, Leaf, Building, Landmark,
+};
+
+function presetIcon(name: string): LucideIcon {
+  return PRESET_ICON_MAP[name] ?? Boxes;
+}
+
+/** Localised label/description for a preset, falling back to the backend's
+ *  English copy when a locale string is not present. */
+function usePresetText() {
+  const { t } = useTranslation();
+  return {
+    label: (p: ApiCompanyPreset) =>
+      t(`onboarding.company_${p.key}`, { defaultValue: p.label }),
+    description: (p: ApiCompanyPreset) =>
+      t(`onboarding.company_${p.key}_desc`, { defaultValue: p.description }),
+  };
+}
+
+// Minimal fallback used only if the presets endpoint is unreachable. The SPA is
+// served by the same backend, so in practice the fetch always succeeds and the
+// live nine profiles are shown.
+const FALLBACK_PRESETS: ApiCompanyPreset[] = [
+  {
+    key: 'full_enterprise',
+    label: 'Full Enterprise',
+    description: 'Every module across the full construction lifecycle.',
+    icon: 'Boxes',
+    tags: [],
+    enabled_modules: ALL_MODULES.filter((m) => !m.core).map((m) => m.key),
+    module_count: ALL_MODULES.filter((m) => !m.core).length,
+  },
+];
+
+/** Fetch the company-type presets (shares the Modules-page query cache). */
+function useOnboardingPresets(): ApiCompanyPreset[] {
+  const { data } = useQuery({
+    queryKey: ['onboarding-presets'],
+    queryFn: () => apiGet<ApiCompanyPreset[]>('/v1/users/onboarding-presets/'),
+    staleTime: 5 * 60 * 1000,
+  });
+  return data && data.length > 0 ? data : FALLBACK_PRESETS;
+}
+
+/** The module keys a preset enables (full_enterprise = every non-core module). */
+function presetModuleSet(preset: ApiCompanyPreset): Set<string> {
+  if (preset.key === 'full_enterprise') {
+    return new Set(ALL_MODULES.filter((m) => !m.core).map((m) => m.key));
+  }
+  return new Set(preset.enabled_modules);
+}
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+function maskApiKey(key: string): string {
+  if (key.length <= 8) return '\u2022'.repeat(key.length);
+  return key.slice(0, 8) + '\u2022'.repeat(Math.min(key.length - 8, 24));
+}
+
+/**
+ * Window event fired the moment onboarding is marked completed (any exit
+ * path: finish, skip-all, skip-setup, country-pack install). The global
+ * ProductTour listens for this so its first-run auto-start can fire the
+ * instant onboarding ends instead of only on the next reload, and, more
+ * importantly, so the tour never mounts while onboarding is still open.
+ */
+export const ONBOARDING_COMPLETED_EVENT = 'oe:onboarding-completed';
+
+/** Mark onboarding as completed (local fast-path + best-effort server sync). */
+export function markOnboardingCompleted(): Promise<MeOnboarding | null> {
+  clearWizardProgress();
+  try {
+    localStorage.setItem('oe_onboarding_completed', 'true');
+    localStorage.setItem('oe_onboarding_completed_version', APP_VERSION);
+  } catch {
+    // Storage unavailable -- ignore.
+  }
+  // Notify the global ProductTour (gated to start only AFTER onboarding) that
+  // it may now auto-start. Dispatched on every completion path because they
+  // all funnel through this helper. Guarded for non-browser (SSR/test) envs.
+  try {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent(ONBOARDING_COMPLETED_EVENT));
+    }
+  } catch {
+    // CustomEvent unavailable -- ignore; the tour falls back to its
+    // route/storage re-evaluation on the next dashboard mount.
+  }
+  // Best-effort server sync so the per-user completed flag is set on every
+  // exit path (skip, the explore-all link, apply-a-pack), not just the full
+  // "finish" save. Fire-and-forget: the local flag already stops a re-prompt
+  // on this browser, and the dashboard first-run redirect reads the server
+  // flag for fresh browsers and brand-new accounts.
+  return apiPost<MeOnboarding>('/v1/users/me/onboarding/complete/', undefined).catch(() => null);
+}
+
+/**
+ * Gate decision from the server record: completed there means completed on
+ * every browser, and not completed clears a stale local cache. A failed fetch
+ * (null) falls back to the local flag.
+ */
+export function resolveCompletedGate(server: { completed?: boolean } | null): boolean {
+  if (server == null) return isOnboardingCompleted();
+  try {
+    if (server.completed) {
+      localStorage.setItem('oe_onboarding_completed', 'true');
+    } else {
+      localStorage.removeItem('oe_onboarding_completed');
+      localStorage.removeItem('oe_onboarding_completed_version');
+    }
+  } catch {
+    // Storage unavailable -- the server answer still decides.
+  }
+  return !!server.completed;
+}
+
+/** Check whether onboarding has been completed. */
+export function isOnboardingCompleted(): boolean {
+  try {
+    return localStorage.getItem('oe_onboarding_completed') === 'true';
+  } catch {
+    return false;
+  }
+}
+
+// ── Background ready-pack install driver ────────────────────────────────────
+//
+// The ready-made pack install used to BLOCK: it streamed every step server-side
+// (apply pack -> language -> cost databases -> sample projects) and only let the
+// user continue once everything finished, which spun for a long time with no
+// useful status. The founder wants the LANGUAGE applied first and fast, the user
+// continuing into the app the moment language + a minimal workspace are ready,
+// and the heavy provisioning to keep running in the BACKGROUND with a small,
+// non-blocking progress indicator.
+//
+// ``startBackgroundReadyPackInstall`` drives the SAME fail-soft SSE stream the
+// blocking path used, but: (1) it is module-scoped, not tied to any component,
+// so it survives the navigation into the app; (2) it writes live progress into
+// the global ``useBackgroundInstallStore`` so the root-mounted
+// ``BackgroundInstallBanner`` can render it from anywhere; and (3) it resolves a
+// "language is ready" promise the instant the ``locale`` step lands, so the
+// caller can route the user in immediately while the rest keeps loading.
+
+/** Turn a finished step's detail payload into a short human string for the banner. */
+function bgStepDetail(step: string, detail: Record<string, unknown>): string | undefined {
+  const num = (k: string): number | undefined => {
+    const v = detail[k];
+    return typeof v === 'number' && Number.isFinite(v) ? v : undefined;
+  };
+  if (step === 'cost_db') {
+    const items = num('items');
+    if (items && items > 0) return items.toLocaleString(getNumberLocale());
+  }
+  if (step === 'resources' || step === 'catalog') {
+    const resources = num('resources');
+    if (resources && resources > 0) return resources.toLocaleString(getNumberLocale());
+  }
+  if (step === 'demos') {
+    const installed = detail['installed'];
+    if (Array.isArray(installed) && installed.length > 0) return String(installed.length);
+  }
+  return undefined;
+}
+
+/**
+ * Start a ready-made pack install that keeps provisioning in the background.
+ *
+ * Resolves the returned promise as soon as the LANGUAGE step lands (the critical
+ * fast piece) so the caller can route the user into the app, then keeps the SSE
+ * stream running on its own. ``onLanguageReady`` fires with the resolved locale
+ * the moment language is applied. The global background-install store is updated
+ * throughout so the banner reflects live progress; the stream is fail-soft and
+ * always reaches a terminal state, so the banner never spins forever.
+ *
+ * @returns A promise that resolves ``true`` once language is ready (the user may
+ *   continue), or ``false`` if the install failed before language was applied
+ *   (apply step errored) so the caller can fall back to the step-by-step flow.
+ */
+function startBackgroundReadyPackInstall(
+  slug: string,
+  country: string,
+  opts: {
+    onLanguageReady: (locale: string) => void;
+    demoCount?: number;
+  },
+): Promise<boolean> {
+  const store = useBackgroundInstallStore.getState();
+  // Seed a minimal checklist up front so the banner has rows before the stream's
+  // ``start`` frame arrives; the real labels replace these on ``start``.
+  const seed: BgInstallStep[] = [
+    { step: 'apply_pack', label: i18n.t('onboarding.pp_step_apply', { defaultValue: 'Apply pack' }), status: 'pending' },
+    { step: 'locale', label: i18n.t('onboarding.pp_step_locale', { defaultValue: 'Language' }), status: 'pending' },
+    { step: 'cost_db', label: i18n.t('onboarding.pp_step_cost_db', { defaultValue: 'Cost database' }), status: 'pending' },
+    { step: 'demos', label: i18n.t('onboarding.pp_step_demos', { defaultValue: 'Example projects' }), status: 'pending' },
+  ];
+  store.begin(slug, country, seed);
+  store.setRetryCostBase(() => retryBackgroundCostBase(slug));
+
+  return new Promise<boolean>((resolve) => {
+    let settled = false;
+    let applyFailed = false;
+    let localeApplied = false;
+
+    const finishLanguage = (ok: boolean) => {
+      if (settled) return;
+      settled = true;
+      resolve(ok);
+    };
+
+    void fullInstallPackStream(
+      slug,
+      (evt) => {
+        const s = useBackgroundInstallStore.getState();
+        if (evt.type === 'start') {
+          // Replace the seed with the server's real, localized step list.
+          const steps: BgInstallStep[] = evt.steps.map((d) => ({
+            step: d.step,
+            label: i18n.t(d.label_key, { defaultValue: d.label }),
+            status: 'pending',
+          }));
+          s.begin(slug, country, steps);
+          s.setRetryCostBase(() => retryBackgroundCostBase(slug));
+        } else if (evt.type === 'step_start') {
+          s.markRunning(evt.step);
+        } else if (evt.type === 'step_done') {
+          s.markDone(evt.step, evt.status, bgStepDetail(evt.step, evt.detail));
+          if (evt.step === 'apply_pack' && evt.status === 'error') {
+            // Apply failed before language could be applied -- the whole install
+            // cannot proceed. Tell the caller to fall back to step-by-step.
+            applyFailed = true;
+          }
+          if (evt.step === 'locale') {
+            // Language is the fast critical piece. Apply it client-side and let
+            // the caller route the user in, even though cost DBs / demos are
+            // still loading in the background.
+            if (!applyFailed) {
+              const locale =
+                typeof evt.detail['locale'] === 'string' ? (evt.detail['locale'] as string) : null;
+              if (locale && !localeApplied) {
+                localeApplied = true;
+                opts.onLanguageReady(locale);
+              }
+              finishLanguage(true);
+            }
+          }
+        } else if (evt.type === 'done') {
+          const hadError = evt.steps.some((st) => st.status === 'error');
+          s.finish(hadError);
+          // If the stream ended without ever applying language (e.g. a pack with
+          // no locale, or an early apply error), release the caller now so it is
+          // never left awaiting forever.
+          finishLanguage(!applyFailed && evt.ok);
+        }
+      },
+      { demoCount: opts.demoCount ?? 2 },
+    ).catch(() => {
+      // Transport failure: mark any still-running rows as errored and release
+      // the caller so onboarding does not hang.
+      const s = useBackgroundInstallStore.getState();
+      const inst = s.install;
+      if (inst) {
+        for (const row of inst.steps) {
+          if (row.status === 'running' || row.status === 'pending') {
+            s.markDone(row.step, 'error');
+          }
+        }
+        s.finish(true);
+      }
+      finishLanguage(localeApplied);
+    });
+  });
+}
+
+/**
+ * Re-run only the cost database step of a background pack install, from the
+ * banner's Retry button. The server reruns ``resources`` with it and skips a
+ * base that is already in, so this is safe to press more than once.
+ */
+function retryBackgroundCostBase(slug: string): void {
+  const store = useBackgroundInstallStore.getState();
+  if (!store.install || store.install.slug !== slug) return;
+  store.reopen();
+  const settle = () => {
+    const s = useBackgroundInstallStore.getState();
+    const hadError = (s.install?.steps ?? []).some((row) => row.status === 'error');
+    s.finish(hadError);
+  };
+  void fullInstallPackStream(
+    slug,
+    (evt) => {
+      const s = useBackgroundInstallStore.getState();
+      if (evt.type === 'step_start') {
+        s.markRunning(evt.step);
+      } else if (evt.type === 'step_done') {
+        s.markDone(evt.step, evt.status, bgStepDetail(evt.step, evt.detail));
+      } else if (evt.type === 'done') {
+        settle();
+      }
+    },
+    { demoCount: 0, onlySteps: ['cost_db'] },
+  ).catch(() => {
+    const s = useBackgroundInstallStore.getState();
+    for (const row of s.install?.steps ?? []) {
+      if (row.status === 'running') s.markDone(row.step, 'error');
+    }
+    settle();
+  });
+}
+
+// ── Background onboarding provisioning (region cost base + sample projects) ──
+//
+// The country-pack picker used to BLOCK on the raw cost-base import and sample
+// install, spinning a card for tens of seconds. This drives the SAME idea as
+// the ready-pack SSE stream but for the plain region + demo path: it POSTs the
+// work to the onboarding job API, writes live progress into the global
+// background-install store so the root banner renders it, and resolves the
+// moment the work is done OR a short grace window elapses, so the caller can
+// route the user on and let the rest finish in the background. Module-scoped so
+// it survives the navigation into the app, exactly like the ready-pack driver.
+
+const ONBOARDING_POLL_MS = 1500;
+const ONBOARDING_GRACE_MS = 30_000;
+const ONBOARDING_TERMINAL_STATES = new Set(['success', 'failed', 'cancelled']);
+
+/** Map a finished job onto a banner row status: by its outcome, not its state. */
+function onboardingJobToBgStatus(job: OnboardingJobState): BgInstallStepStatus {
+  const outcome = jobOutcome(job);
+  if (outcome === 'failed') return job.state === 'cancelled' ? 'skipped' : 'error';
+  if (outcome === 'completed' || outcome === 'partial') return 'ok';
+  return job.state === 'started' ? 'running' : 'pending';
+}
+
+/** The detail a finished cost base row shows: items loaded, and items left out. */
+function costDbDetail(job: OnboardingJobState): string | undefined {
+  const outcome = jobOutcome(job);
+  if (outcome === 'partial') {
+    return i18n.t('onboarding.bg_cost_db_left_out', {
+      defaultValue: 'Left out: {{items}}',
+      items: (job.failed_items ?? 0).toLocaleString(getNumberLocale()),
+    });
+  }
+  if (outcome === 'completed' && job.total != null && job.total > 0) {
+    return job.total.toLocaleString(getNumberLocale());
+  }
+  return undefined;
+}
+
+/**
+ * Provision a region cost base and/or sample projects in the background.
+ *
+ * Resolves with phase ``'done'`` when every job finished within the grace
+ * window, or ``'backgrounded'`` once the grace window elapses with work still
+ * running (the caller routes the user on; the root banner keeps tracking to
+ * completion). ``outcome`` says how the finished jobs ended - completed,
+ * partial or failed - so the caller never reads "finished" as "ready". A submit
+ * failure rejects so the caller can fall back to a retry. Never leaves the
+ * banner spinning forever: it always reaches a terminal state.
+ */
+export async function startBackgroundOnboardingProvision(opts: {
+  region?: string | null;
+  demoIds?: string[];
+  country: string;
+  graceMs?: number;
+}): Promise<OnboardingProvisionResult> {
+  const region = opts.region || null;
+  const demoIds = (opts.demoIds ?? []).filter((d) => Boolean(d));
+  const graceMs = opts.graceMs ?? ONBOARDING_GRACE_MS;
+  const store = useBackgroundInstallStore.getState();
+
+  // Seed only the rows we are actually provisioning.
+  const seed: BgInstallStep[] = [];
+  if (region) {
+    seed.push({
+      step: 'cost_db',
+      label: i18n.t('onboarding.pp_step_cost_db', { defaultValue: 'Cost database' }),
+      status: 'pending',
+    });
+  }
+  if (demoIds.length > 0) {
+    seed.push({
+      step: 'demos',
+      label: i18n.t('onboarding.pp_step_demos', { defaultValue: 'Example projects' }),
+      status: 'pending',
+    });
+  }
+  if (seed.length === 0) return { phase: 'done', outcome: 'completed', failedItems: 0 };
+  store.begin(`onboarding:${region ?? 'demo'}`, opts.country, seed);
+
+  let jobs: OnboardingJobState[];
+  try {
+    jobs = await provisionOnboarding({ region, demo_ids: demoIds });
+  } catch (err) {
+    // Submit failed outright - clear the seeded banner and let the caller fall
+    // back (e.g. re-enable the card so the user can retry).
+    store.dismiss();
+    throw err;
+  }
+  const ids = jobs.map((j) => j.id);
+  if (ids.length === 0) {
+    store.finish(false);
+    return { phase: 'done', outcome: 'completed', failedItems: 0 };
+  }
+
+  return new Promise<OnboardingProvisionResult>((resolve) => {
+    let settled = false;
+    const startedAt = Date.now();
+
+    const settle = (phase: 'done' | 'backgrounded', states: OnboardingJobState[] = []) => {
+      if (settled) return;
+      settled = true;
+      resolve({
+        phase,
+        outcome: phase === 'done' ? combineOutcomes(states) : null,
+        failedItems: failedItemCount(states),
+      });
+    };
+
+    const applyStates = (states: OnboardingJobState[]): void => {
+      const s = useBackgroundInstallStore.getState();
+      if (!s.install) return;
+      if (region) {
+        const cwicr = states.find((j) => j.kind === 'onboarding.load_cwicr');
+        if (cwicr) {
+          if (cwicr.state === 'started') s.markRunning('cost_db');
+          else if (ONBOARDING_TERMINAL_STATES.has(cwicr.state)) {
+            s.markDone('cost_db', onboardingJobToBgStatus(cwicr), costDbDetail(cwicr));
+          }
+        }
+      }
+      if (demoIds.length > 0) {
+        const demoJobs = states.filter((j) => j.kind === 'onboarding.install_demo');
+        if (demoJobs.length > 0) {
+          const allTerminal = demoJobs.every((j) => ONBOARDING_TERMINAL_STATES.has(j.state));
+          if (allTerminal) {
+            const hadError = demoJobs.some((j) => onboardingJobToBgStatus(j) === 'error');
+            const okCount = demoJobs.filter((j) => onboardingJobToBgStatus(j) === 'ok').length;
+            s.markDone(
+              'demos',
+              hadError ? 'error' : okCount > 0 ? 'ok' : 'skipped',
+              okCount > 0 ? String(okCount) : undefined,
+            );
+          } else if (demoJobs.some((j) => j.state === 'started')) {
+            s.markRunning('demos');
+          }
+        }
+      }
+    };
+
+    const poll = async (): Promise<void> => {
+      let states: OnboardingJobState[] = [];
+      try {
+        states = await fetchOnboardingStatus(ids);
+      } catch {
+        // Transient poll error - keep the banner and try again next tick.
+      }
+
+      if (states.length > 0) applyStates(states);
+
+      // The user dismissed the banner - stop polling and release the caller.
+      if (!useBackgroundInstallStore.getState().install) {
+        settle('backgrounded');
+        return;
+      }
+
+      const allTerminal =
+        states.length > 0 && states.every((j) => ONBOARDING_TERMINAL_STATES.has(j.state));
+      if (allTerminal) {
+        // Anything short of complete keeps the banner up, so the user sees it.
+        useBackgroundInstallStore.getState().finish(combineOutcomes(states) !== 'completed');
+        settle('done', states);
+        return;
+      }
+
+      // Grace elapsed: let the caller advance while work keeps running here.
+      if (Date.now() - startedAt >= graceMs) settle('backgrounded');
+
+      window.setTimeout(() => void poll(), ONBOARDING_POLL_MS);
+    };
+
+    void poll();
+  });
+}
+
+/** Get the suggested region for the current language */
+function getSuggestedRegion(lang?: string): string {
+  const code = lang || i18n.language || 'en';
+  const base = code.split('-')[0] ?? 'en';
+  return LANG_TO_REGION[base] ?? 'ENG_TORONTO';
+}
+
+/**
+ * The cost database and the country preset the data step leads with.
+ *
+ * The country the browser names comes first, then the UI language. Keying on
+ * the language alone offered every English reader the United States base and
+ * the first English preset, so an en-CA browser was never offered Canada
+ * although its region said Canada. The country is looked up in the data we
+ * ship rather than in a table here: the curated preset for that country
+ * (through `resolveCountryOffer`, which knows GB is filed as `uk`) names both
+ * its preset and its base, and a country without a preset still gets its own
+ * base when `CWICR_DATABASES` carries one for its flag. A country with neither
+ * (Austria, Iceland) falls back to the language's suggestion, which is where
+ * every reader was before; the preset and base are an offer the reader
+ * changes with one click, never an install.
+ *
+ * @param country lower-case ISO 3166-1 alpha-2 from `detectCountry`, or null.
+ * @param lang the UI language the reader picked on the first step.
+ */
+export function suggestDataSetup(
+  country: string | null | undefined,
+  lang: string,
+): { region: string; packId: string } {
+  const offer = resolveCountryOffer(country, []);
+  const preset = offer?.kind === 'preset' ? offer.preset : null;
+  const code = country?.toLowerCase() ?? '';
+  const ownBase =
+    preset && CWICR_DATABASES.some((db) => db.id === preset.region)
+      ? preset.region
+      : code && code !== 'xx'
+        ? CWICR_DATABASES.find((db) => db.flagId === code)?.id
+        : undefined;
+  const region = ownBase ?? getSuggestedRegion(lang);
+  if (preset) return { region, packId: preset.id };
+  const base = lang.split('-')[0] ?? 'en';
+  // Country before language: a country's own base names its market, the
+  // language only guesses one (Arabic would otherwise always mean the UAE).
+  const byLocale = COUNTRY_PACKS.find((p) => p.locale === base);
+  const byRegion = COUNTRY_PACKS.find((p) => p.region === region);
+  const pick = ownBase ? (byRegion ?? byLocale) : (byLocale ?? byRegion);
+  return { region, packId: (pick ?? DEFAULT_COUNTRY_PACK).id };
+}
+
+/** Get the suggested demo project IDs for the current language */
+function getSuggestedDemo(lang?: string): string {
+  const code = lang || i18n.language || 'en';
+  const base = code.split('-')[0] ?? 'en';
+  return LANG_TO_DEMO[base] ?? DEFAULT_DEMO;
+}
+
+// ── Fade wrapper for step transitions ───────────────────────────────────────
+
+function StepTransition({ children, stepKey }: { children: ReactNode; stepKey: number }) {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    // Trigger fade-in on mount
+    const frame = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  return (
+    <div
+      key={stepKey}
+      className={clsx(
+        'transition-all duration-300 ease-out',
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3',
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+// ── Toggle Switch component ─────────────────────────────────────────────────
+
+function ToggleSwitch({
+  enabled,
+  onToggle,
+  disabled,
+  label,
+}: {
+  enabled: boolean;
+  onToggle: () => void;
+  disabled?: boolean;
+  /** What the switch turns on, read out by assistive tech. A row of unnamed
+   *  switches is announced as "switch, on" over and over. */
+  label?: string;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={enabled}
+      aria-label={label}
+      onClick={onToggle}
+      disabled={disabled}
+      className={clsx(
+        'group relative inline-flex h-[26px] w-[48px] shrink-0 cursor-pointer rounded-full p-[3px] transition-all duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/50',
+        enabled
+          ? 'bg-gradient-to-r from-oe-blue to-blue-500 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.1)]'
+          : 'bg-gray-200 dark:bg-gray-700 shadow-[inset_0_1px_3px_rgba(0,0,0,0.1)]',
+        disabled && 'opacity-50 cursor-not-allowed',
+      )}
+    >
+      <span
+        className={clsx(
+          'pointer-events-none flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-lg ring-0 transition-all duration-300 ease-in-out',
+          enabled ? 'translate-x-[22px] rtl:-translate-x-[22px] scale-[1.05]' : 'translate-x-0 scale-100',
+        )}
+      >
+        {enabled && <Check size={11} className="text-oe-blue" strokeWidth={3} />}
+      </span>
+    </button>
+  );
+}
+
+// ── Step 1: Welcome + Language ───────────────────────────────────────────────
+
+function StepWelcome({
+  onNext,
+  onLanguageChange,
+}: {
+  onNext: () => void;
+  onLanguageChange: (lang: string) => void;
+}) {
+  const { t } = useTranslation();
+  const [selected, setSelected] = useState(
+    () => matchSupportedLanguage(navigator.language) ?? 'en',
+  );
+
+  // A language bundle is fetched on first use and can take seconds on a slow
+  // link; the picked card shows that it is loading instead of looking dead.
+  const [loadingLang, setLoadingLang] = useState<string | null>(null);
+  const handleSelect = useCallback(
+    (code: string) => {
+      setSelected(code);
+      setLoadingLang(code);
+      void changeLanguage(code).finally(() => setLoadingLang((cur) => (cur === code ? null : cur)));
+      onLanguageChange(code);
+    },
+    [onLanguageChange],
+  );
+
+  // BUG-LANG-AUTODETECT: ``i18nextLng`` may already hold a stale value
+  // from a previous tester / demo session even on a fresh admin
+  // registration, so a US-Windows en-US browser landed in Polish UI.
+  // The fix splits "explicit user choice" from "any past i18next
+  // default" — only ``oe_lang_explicit`` (set when the user clicks Next
+  // on the language step, see ``onSelect`` below) blocks re-detection.
+  useEffect(() => {
+    const explicit = localStorage.getItem('oe_lang_explicit');
+    if (explicit) return;
+    // Region first: a pt-BR browser must land on the card that says
+    // Português (Brasil), not the one that says Português. This used to strip
+    // the region before looking, so the wizard pre-selected European
+    // Portuguese and the user's click on Next made that the explicit choice.
+    const target = matchSupportedLanguage(navigator.language) ?? 'en';
+    if (target !== i18n.language) {
+      void changeLanguage(target);
+      onLanguageChange(target);
+    }
+    setSelected(target);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return (
+    <div className="flex flex-col items-center text-center">
+      {/* Logo with a soft decorative halo behind it. */}
+      <div className="relative mb-3">
+        <div
+          className="absolute inset-0 -m-6 rounded-full blur-2xl opacity-60"
+          style={{
+            background:
+              'radial-gradient(circle, rgba(37, 99, 235, 0.35), transparent 70%)',
+          }}
+          aria-hidden
+        />
+        <div className="relative">
+          <Logo size="lg" animate />
+        </div>
+      </div>
+
+      <Badge variant="blue" size="sm" className="mb-2">
+        <Sparkles size={11} className="me-1" />
+        {t('onboarding.welcome_eyebrow', { defaultValue: 'Construction estimation, reimagined' })}
+      </Badge>
+
+      <h1 className="text-2xl sm:text-3xl font-bold text-content-primary tracking-tight">
+        {t('onboarding.welcome_title', { defaultValue: 'Welcome to OpenConstructionERP' })}
+      </h1>
+
+      <p className="mt-2 max-w-md text-sm sm:text-base text-content-secondary leading-relaxed">
+        {t('onboarding.welcome_subtitle', {
+          defaultValue:
+            'The professional construction cost estimation platform. Set up your workspace in a few simple steps.',
+        })}
+      </p>
+
+      {/* Language grid — 24 languages, flag + native name. */}
+      <div className="mt-5 w-full">
+        <div className="mb-2 flex items-center justify-center gap-2 text-xs font-medium text-content-tertiary uppercase tracking-wider">
+          <span className="h-px w-8 bg-border-light" aria-hidden />
+          {t('onboarding.welcome_pick_language', { defaultValue: 'Pick your language' })}
+          <span className="h-px w-8 bg-border-light" aria-hidden />
+        </div>
+        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+          {sortLanguagesByName(SUPPORTED_LANGUAGES).map((lang) => {
+            const isSelected = selected === lang.code;
+            return (
+              <button
+                key={lang.code}
+                onClick={() => handleSelect(lang.code)}
+                aria-pressed={isSelected}
+                aria-busy={loadingLang === lang.code}
+                className={clsx(
+                  'relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-start',
+                  'backdrop-blur-md transition-all duration-normal ease-oe',
+                  isSelected
+                    ? 'bg-oe-blue-subtle/70 ring-2 ring-oe-blue/50 shadow-sm shadow-oe-blue/15'
+                    : 'bg-surface-elevated/50 ring-1 ring-white/50 dark:ring-white/10 shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/30 hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/[0.06] active:scale-[0.98]',
+                )}
+              >
+                <CountryFlag code={lang.country} size={24} className="shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-content-primary truncate">
+                    {lang.name}
+                  </div>
+                  <div className="text-2xs text-content-tertiary uppercase tracking-wide">
+                    {lang.code}
+                  </div>
+                </div>
+                {isSelected && loadingLang === lang.code ? (
+                  <Loader2 size={14} className="text-oe-blue shrink-0 animate-spin" aria-hidden />
+                ) : (
+                  isSelected && <CheckCircle2 size={14} className="text-oe-blue shrink-0" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <Button
+        variant="primary"
+        size="lg"
+        onClick={() => {
+          // BUG-LANG-AUTODETECT — record that the user explicitly committed
+          // to a language via the wizard. The auto-detect useEffect above
+          // checks this flag to distinguish "real choice" from "stale
+          // ``i18nextLng`` left over from a previous tester or demo
+          // session". Without this set, an English-Windows browser whose
+          // ``i18nextLng`` happens to read ``pl`` (because someone else
+          // demoed the build in Polish) would silently switch back to
+          // Polish on the next page load.
+          localStorage.setItem('oe_lang_explicit', '1');
+          onNext();
+        }}
+        icon={<ArrowRight size={18} />}
+        iconPosition="right"
+        className="mt-5 shadow-lg shadow-oe-blue/20"
+      >
+        {t('onboarding.get_started', { defaultValue: 'Get Started' })}
+      </Button>
+    </div>
+  );
+}
+
+/**
+ * Whether this user may install a ready-made partner pack. Every install
+ * route under `/v1/partner-pack/` requires the admin role on the server, so
+ * offering the pack to anyone else led to a 403, a "Could not finish" toast
+ * and a trip back to the start cards.
+ */
+function useCanInstallPartnerPacks(): boolean {
+  return normalizeRole(useAuthStore((s) => s.userRole)) === 'admin';
+}
+
+// ── Step 2: "How would you like to start?" ──────────────────────────────────
+
+function StepStartChoice({
+  onQuickStart,
+  onChooseProfile,
+  onReadyPack,
+  onBack,
+}: {
+  onQuickStart: () => void;
+  onChooseProfile: () => void;
+  /** Open the ready-made pack picker (a turnkey country starter pack). */
+  onReadyPack: () => void;
+  onBack: () => void;
+}) {
+  const { t } = useTranslation();
+  const canInstallPacks = useCanInstallPartnerPacks();
+
+  return (
+    <div className="flex flex-col items-center">
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.start_choice_title', { defaultValue: 'How would you like to start?' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.start_choice_subtitle', {
+          defaultValue: 'Choose a quick setup or customize your experience.',
+        })}
+      </p>
+
+      <div
+        className={clsx(
+          'mt-10 w-full grid grid-cols-1 gap-5',
+          canInstallPacks ? 'max-w-5xl sm:grid-cols-3' : 'max-w-3xl sm:grid-cols-2',
+        )}
+      >
+        {/* Quick Start card */}
+        <button
+          onClick={onQuickStart}
+          className={clsx(
+            'group relative flex flex-col items-start rounded-3xl p-8 text-left min-h-[340px]',
+            'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
+            'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
+            'transition-all duration-300 ease-oe active:scale-[0.98]',
+          )}
+        >
+          <Badge variant="blue" size="sm" className="mb-4">
+            {t('onboarding.recommended', { defaultValue: 'Recommended' })}
+          </Badge>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Sparkles size={26} />
+          </div>
+          <h3 className="text-xl font-bold text-content-primary">
+            {t('onboarding.quick_start', { defaultValue: 'Quick Start' })}
+          </h3>
+          <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
+            {t('onboarding.quick_start_desc', {
+              defaultValue: 'All essential modules pre-activated. Start working immediately.',
+            })}
+          </p>
+        </button>
+
+        {/* Ready-made pack card — a turnkey country starter pack that
+            provisions modules, regional config and sample data in one click,
+            then skips straight to the finish step. Offered to admins only:
+            the server refuses the install to anyone else. */}
+        {canInstallPacks && (
+        <button
+          onClick={onReadyPack}
+          className={clsx(
+            'group relative flex flex-col items-start rounded-3xl p-8 text-left min-h-[340px]',
+            'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
+            'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
+            'transition-all duration-300 ease-oe active:scale-[0.98]',
+          )}
+        >
+          <Badge variant="blue" size="sm" className="mb-4">
+            {t('onboarding.turnkey', { defaultValue: 'Turnkey' })}
+          </Badge>
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Boxes size={26} />
+          </div>
+          <h3 className="text-xl font-bold text-content-primary">
+            {t('onboarding.ready_pack', { defaultValue: 'Ready-made Pack' })}
+          </h3>
+          <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
+            {t('onboarding.ready_pack_desc', {
+              defaultValue:
+                'Pick a country starter pack. It installs the language, cost databases, modules and sample projects for you.',
+            })}
+          </p>
+        </button>
+        )}
+
+        {/* Choose profile card */}
+        <button
+          onClick={onChooseProfile}
+          className={clsx(
+            'group relative flex flex-col items-start rounded-3xl p-8 text-left min-h-[340px]',
+            'bg-surface-elevated/70 backdrop-blur-md shadow-sm shadow-black/[0.04]',
+            'hover:bg-oe-blue-subtle/30 hover:shadow-2xl hover:shadow-oe-blue/10 hover:-translate-y-1',
+            'transition-all duration-300 ease-oe active:scale-[0.98]',
+          )}
+        >
+          <div className="h-[22px] mb-4" aria-hidden />
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-surface-secondary text-content-secondary mb-5 transition-all duration-300 group-hover:bg-oe-blue group-hover:text-white group-hover:shadow-lg group-hover:shadow-oe-blue/20">
+            <Settings2 size={26} />
+          </div>
+          <h3 className="text-xl font-bold text-content-primary">
+            {t('onboarding.choose_profile', { defaultValue: 'Choose Your Profile' })}
+          </h3>
+          <p className="mt-2.5 text-sm text-content-secondary leading-relaxed">
+            {t('onboarding.choose_profile_company_desc', {
+              defaultValue: 'Tell us what your company does and review the modules it needs.',
+            })}
+          </p>
+        </button>
+      </div>
+
+      <div className="mt-5">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Step 2b: Ready-made pack picker ─────────────────────────────────────────
+//
+// A turnkey starter pack: the user picks one country pack from a clean icon
+// grid, we run the same one-click full-install the country picker uses
+// (``fullInstallPack`` -> apply pack + locale + cost DB + vector DB + demos),
+// then skip the remaining onboarding steps and jump straight to Finish. The
+// completion path (``markOnboardingCompleted``, run by the caller via
+// ``onInstalled``) is identical to the normal Finish, so the tour-gating event
+// still fires. On failure we fall back to the normal multi-step flow with a
+// clear message (``onFallback``).
+
+// Exported for its test, which renders the pack grid against the packs the
+// community wheel ships.
+export function ReadyPackPicker({
+  onActivateLocale,
+  onInstalled,
+  onFallback,
+  onBack,
+  installingSlug = null,
+  installedSlug: doneSlug = null,
+  onInstallStarted,
+  onInstallAborted,
+  onCompanyApplied,
+  onAdjustAppearance,
+  onFinish,
+}: {
+  /** Activate the pack's locale client-side (shared with the wizard). */
+  onActivateLocale: (locale: string) => void;
+  /** Called once the pack's language is ready; the wizard records the slug.
+   *  It does not move the reader: they choose between adjusting the look and
+   *  finishing (``onAdjustAppearance`` / ``onFinish``). */
+  onInstalled: (slug: string) => void;
+  /** Called when install fails so the wizard can drop back to the normal
+   *  multi-step flow with a clear message. */
+  onFallback: () => void;
+  /** Return to the start-choice cards. */
+  onBack: () => void;
+  /** The install the wizard already knows about. The picker can be left and
+   *  reopened while it runs, so the lock on a second install lives with the
+   *  wizard, not in this component's state. */
+  installingSlug?: string | null;
+  /** Slug recorded once the install's language was ready. */
+  installedSlug?: string | null;
+  /** An install began (``slug`` is ``country:<id>`` for a market preset). */
+  onInstallStarted?: (slug: string) => void;
+  /** An install that began failed before it could be used. */
+  onInstallAborted?: () => void;
+  /** The company type chosen beside the pack was written for the reader. */
+  onCompanyApplied?: (preset: CompanyPresetAPI) => void;
+  /** After the install: open the appearance step. */
+  onAdjustAppearance?: () => void;
+  /** After the install: go to the Finish step. */
+  onFinish?: () => void;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const {
+    data,
+    isLoading,
+    isError: packsFailed,
+    isFetching: packsRefetching,
+    refetch: refetchPacks,
+  } = useQuery({
+    queryKey: ['partner-pack', 'installed'],
+    queryFn: fetchInstalledPacks,
+    staleTime: 60_000,
+  });
+
+  const packs: InstalledPartnerPack[] = data?.installed ?? [];
+
+  const companies = useCompanyProfiles();
+  const [companyKey, setCompanyKey] = useState<string | null>(null);
+
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [localInstalling, setInstalling] = useState(false);
+  const [localInstalledSlug, setInstalledSlug] = useState<string | null>(null);
+  // An install the wizard already tracks locks this picker too, including after
+  // the reader left the step and came back to it.
+  const installing = localInstalling || installingSlug !== null;
+  const installedSlug = localInstalledSlug ?? doneSlug;
+  // Which curated country pack (if any) is being set up right now, so its card
+  // shows a spinner. Country packs are the always-available fallback when no
+  // pip-installed partner pack ships with this deployment.
+  const [countryInstallingId, setCountryInstallingId] = useState<string | null>(null);
+  // Live progress for the in-flight install, mirrored from the global
+  // background-install store the driver writes to. The picker renders the
+  // prominent progress UI from this while it waits for language to be ready;
+  // the same store keeps driving the root banner after the user routes in.
+  const bgInstall = useBackgroundInstallStore((s) => s.install);
+
+  // What we can offer for the country this browser suggests. Read once: the
+  // browser's language does not change under the reader mid-wizard, and
+  // re-reading it after they pick a UI language on the previous step would
+  // make the offer chase that choice rather than where they actually are.
+  const detectedCountry = useMemo(() => detectCountry(), []);
+  const countryOffer = useMemo(
+    () => resolveCountryOffer(detectedCountry, packs),
+    [detectedCountry, packs],
+  );
+
+  // Curated presets for the markets no installed pack serves.
+  //
+  // The two grids answer the same question - "which market do you work in" -
+  // and a market present in both answers it twice with two different buttons.
+  // Unfiltered, a first-run reader in the United States is offered "US
+  // Construction Pack" and "United States" a row apart, and the difference
+  // between them is not visible from the tiles. The pack wins every such tie
+  // because it carries the market's cost data, classifications and vocabulary
+  // rather than a starting configuration, so its market leaves this list.
+  //
+  // Matched on flagId, which is the ISO 3166-1 code. The preset `id` is NOT:
+  // the United Kingdom's preset is filed under `uk` while the pack that serves
+  // it tags itself GB, and matching on the id would have left Britain with
+  // both tiles showing.
+  const presetsWithoutPack = useMemo(() => {
+    const covered = new Set(
+      packs.map((p) => packCountryCode(p)).filter((c): c is string => !!c && c !== 'xx'),
+    );
+    return COUNTRY_PACKS.filter((preset) => !covered.has(preset.flagId.toLowerCase()));
+  }, [packs]);
+
+  // Default-select the pack for the reader's own country and nothing else.
+  // Falling back to packs[0] meant a Brazilian, and later every Canadian, first
+  // run opened with Australia selected, because the list is ordered by slug
+  // and nothing about the reader entered into it. See `packToPreselect`.
+  useEffect(() => {
+    if (!selectedSlug && packs.length > 0) {
+      const own = packToPreselect(detectedCountry, packs);
+      if (own) setSelectedSlug(own);
+    }
+  }, [packs, selectedSlug, detectedCountry]);
+
+  const selectedPack = packs.find((p) => p.slug === selectedSlug) ?? null;
+  const chosenCompany = companyKey ? ((companies.presets ?? []).find((p) => p.key === companyKey) ?? null) : null;
+  // The name the progress panel gives the running install: the pack the wizard
+  // knows by slug (the picker may have been reopened), or a market preset.
+  const runningSlug = installingSlug ?? localInstalledSlug ?? selectedSlug;
+  const installName = (() => {
+    if (runningSlug?.startsWith('country:')) {
+      const preset = getCountryPack(runningSlug.slice('country:'.length));
+      return preset ? t(preset.labelKey, { defaultValue: preset.labelDefault }) : '';
+    }
+    const running = packs.find((p) => p.slug === runningSlug) ?? selectedPack;
+    return running ? packDisplayName(t, running) : '';
+  })();
+
+  const handleSelect = useCallback(
+    (slug: string) => {
+      if (installing) return;
+      setSelectedSlug(slug);
+    },
+    [installing],
+  );
+
+  const handleInstall = useCallback(
+    async (pack: InstalledPartnerPack) => {
+      if (installing) return;
+      setInstalling(true);
+      setInstalledSlug(null);
+      onInstallStarted?.(pack.slug);
+
+      // Kick off the background install. This applies the pack and the LANGUAGE
+      // first and fast, then keeps loading the cost databases and sample
+      // projects on its own while the user is already in the app. The promise
+      // resolves the moment language is ready, so we route the user in
+      // immediately instead of making them wait for everything. Live progress
+      // for the heavy steps shows in the root-mounted background banner.
+      try {
+        const ready = await startBackgroundReadyPackInstall(pack.slug, packDisplayName(t, pack), {
+          demoCount: 2,
+          onLanguageReady: (locale) => onActivateLocale(locale),
+        });
+
+        if (ready) {
+          setInstalledSlug(pack.slug);
+          // Fallback: if the stream finished before it could report a locale,
+          // still surface the pack's declared default locale.
+          onActivateLocale(pack.default_locale);
+          addToast({
+            type: 'success',
+            title: t('onboarding.pp_language_ready', {
+              defaultValue: '{{country}} is ready, finishing setup in the background',
+              country: packDisplayName(t, pack),
+            }),
+          });
+          // A company type chosen beside the pack is written now, through the
+          // same switch the Modules page uses, so the menu already follows it
+          // when the reader lands in the app. A failure toasts on its own and
+          // leaves the pack as installed.
+          const chosen = companyKey ? (companies.presets ?? []).find((p) => p.key === companyKey) : undefined;
+          if (chosen && (await companies.switchProfile(chosen))) onCompanyApplied?.(chosen);
+          // The rest of the install keeps running in the background and the
+          // reader stays here to pick the next step.
+          onInstalled(pack.slug);
+        } else {
+          // Apply failed before language could be applied -- fall back to the
+          // normal multi-step flow. The background banner already shows the
+          // failed step.
+          addToast({
+            type: 'error',
+            title: t('onboarding.ready_pack_failed', {
+              defaultValue: 'Could not finish the ready-made pack',
+            }),
+            message: t('onboarding.ready_pack_fallback', {
+              defaultValue: 'Continuing with step-by-step setup instead.',
+            }),
+          });
+          // Abandon the pack: clear the background banner so it does not linger
+          // with a failed install while the user does step-by-step setup.
+          useBackgroundInstallStore.getState().dismiss();
+          setInstalling(false);
+          onInstallAborted?.();
+          onFallback();
+        }
+      } catch (err) {
+        addToast({
+          type: 'error',
+          title: t('onboarding.ready_pack_failed', {
+            defaultValue: 'Could not finish the ready-made pack',
+          }),
+          message: err instanceof Error ? err.message : t('onboarding.ready_pack_fallback', {
+            defaultValue: 'Continuing with step-by-step setup instead.',
+          }),
+        });
+        useBackgroundInstallStore.getState().dismiss();
+        setInstalling(false);
+        onInstallAborted?.();
+        onFallback();
+      }
+    },
+    [
+      installing,
+      onActivateLocale,
+      onInstalled,
+      onFallback,
+      onInstallStarted,
+      onInstallAborted,
+      onCompanyApplied,
+      companyKey,
+      companies,
+      addToast,
+      t,
+    ],
+  );
+
+  // Install a curated Country Pack (no pip pack required): apply the language
+  // immediately, then load its CWICR cost database and, when one exists, a
+  // representative built-in demo project. This is the same region + locale +
+  // demo path the step-by-step Data Setup uses, surfaced here so the ready-made
+  // pack picker is never an empty dead end on a plain install.
+  const handleInstallCountry = useCallback(
+    async (pack: CountryPack, withCompany: string | null = null) => {
+      if (installing) return;
+      setInstalling(true);
+      setCountryInstallingId(pack.id);
+      onInstallStarted?.(`country:${pack.id}`);
+
+      // Language first so the app is usable right away, mirroring the partner
+      // pack flow.
+      onActivateLocale(pack.locale);
+
+      const country = t(pack.labelKey, { defaultValue: pack.labelDefault });
+      try {
+        // Import the cost base (and a representative sample project) in the
+        // BACKGROUND. Resolves as soon as the work is done, or after a short
+        // grace window if it runs long, so the user is never stuck on a
+        // spinner: the root background banner keeps showing live progress after
+        // they route into the app.
+        const result = await startBackgroundOnboardingProvision({
+          region: pack.region,
+          // Every preset carries a demo now, so this is never the empty list
+          // that used to make the provision step a no-op for sixteen markets.
+          demoIds: [pack.demoId],
+          country,
+        });
+
+        // Say how it really ended: a load that failed used to read "is ready".
+        addToast(countryProvisionToast(result, country));
+        // Record a synthetic slug so the wizard treats this as a completed pack
+        // install and advances to Finish, whatever the outcome: the language
+        // is set and the user can load a cost base later. The rest keeps
+        // loading in the banner.
+        setInstalledSlug(`country:${pack.id}`);
+        const chosen = withCompany ? (companies.presets ?? []).find((p) => p.key === withCompany) : undefined;
+        if (chosen && (await companies.switchProfile(chosen))) onCompanyApplied?.(chosen);
+        onInstalled(`country:${pack.id}`);
+      } catch (err) {
+        addToast({
+          type: 'error',
+          title: t('onboarding.ready_pack_failed', {
+            defaultValue: 'Could not finish the ready-made pack',
+          }),
+          message: err instanceof Error ? err.message : undefined,
+        });
+        setInstalling(false);
+        setCountryInstallingId(null);
+        onInstallAborted?.();
+      }
+    },
+    [installing, onActivateLocale, onInstalled, onInstallStarted, onInstallAborted, onCompanyApplied, companies, addToast, t],
+  );
+
+  const renderPresetTile = (pack: CountryPack, withCompany: string | null) => {
+    const label = t(pack.labelKey, { defaultValue: pack.labelDefault });
+    return (
+      <button
+        key={pack.id}
+        type="button"
+        onClick={() => handleInstallCountry(pack, withCompany)}
+        title={label}
+        data-testid={`ready-pack-preset-${pack.id}`}
+        className="group relative flex min-w-0 flex-col items-center gap-2 rounded-xl bg-surface-secondary/70 p-3 text-center ring-1 ring-transparent transition-all duration-200 hover:-translate-y-0.5 hover:bg-surface-secondary hover:shadow-sm"
+      >
+        <CountryFlag code={pack.flagId} size={30} className="rounded-sm shadow-sm" />
+        <span className="line-clamp-2 min-w-0 break-words text-sm font-semibold text-content-primary">{label}</span>
+        <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-2xs text-content-quaternary">
+          <span className="inline-flex items-center gap-1">
+            <Languages size={11} />
+            {pack.locale.toUpperCase()}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <Database size={11} />
+            {pack.classification}
+          </span>
+        </div>
+      </button>
+    );
+  };
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle text-oe-blue-text mb-4">
+        <Boxes size={24} />
+      </div>
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.ready_pack_title', { defaultValue: 'Pick a ready-made pack' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.ready_pack_subtitle', {
+          defaultValue:
+            'One click sets up the language, cost databases, modules and sample projects. You can change anything later.',
+        })}
+      </p>
+
+      {isLoading && (
+        <div className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-content-tertiary">
+          <Loader2 size={16} className="animate-spin text-oe-blue" />
+          {t('onboarding.pp_loading', { defaultValue: 'Loading available country packs…' })}
+        </div>
+      )}
+
+      {/* A failed list read as "this deployment has no packs" and showed the
+          presets alone, with no way to try again. */}
+      {!isLoading && packsFailed && (
+        <div
+          role="alert"
+          data-testid="ready-pack-load-error"
+          className="mt-6 flex w-full max-w-lg items-center gap-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 px-4 py-3 text-xs text-amber-700 dark:text-amber-400"
+        >
+          <AlertTriangle size={15} className="shrink-0" />
+          <span className="flex-1">
+            {t('onboarding.pp_load_error', {
+              defaultValue: 'Could not load country packs. You can still pick a country below.',
+            })}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => void refetchPacks()}
+            loading={packsRefetching}
+            disabled={packsRefetching}
+          >
+            {t('costs.load_failed_retry', { defaultValue: 'Retry' })}
+          </Button>
+        </div>
+      )}
+
+      {/* The reader's own market, led with.
+
+          Only rendered for the preset case. When their country has a real
+          pack, resolveCountryOffer has already preselected it above and the
+          confirm panel below names it, so a second card here would say the
+          same thing twice. When it resolves to nothing - the browser gave no
+          country, or gave one we have neither pack nor preset for - this
+          renders nothing at all rather than a card that shrugs. */}
+      {!isLoading && countryOffer?.kind === 'preset' && (
+        <div className="mt-6 flex w-full max-w-lg flex-col items-center gap-3 rounded-xl bg-oe-blue-subtle/40 p-4 ring-1 ring-oe-blue/20">
+          <div className="flex items-center gap-2">
+            <CountryFlag code={countryOffer.preset.flagId} size={20} className="rounded-sm shadow-sm" />
+            <span className="text-sm font-semibold text-content-primary">
+              {t(countryOffer.preset.labelKey, { defaultValue: countryOffer.preset.labelDefault })}
+            </span>
+          </div>
+          <Button
+            onClick={() => handleInstallCountry(countryOffer.preset)}
+            disabled={installing}
+            icon={<ArrowRight size={16} />}
+            iconPosition="right"
+          >
+            {t('onboarding.ready_pack_set_up_here', { defaultValue: 'Set this up for me' })}
+          </Button>
+        </div>
+      )}
+
+      {/* Browse: search, type chips, packs grouped by market band and by type,
+          then the company types as a second optional choice. Hidden once an
+          install runs: the reader keeps setting up in the other steps and the
+          pack they chose is not swapped under a running install. */}
+      {!isLoading && !installing && packs.length > 0 && (
+        <ReadyPackBrowser
+          packs={packs}
+          selectedSlug={selectedSlug}
+          onSelect={handleSelect}
+          renderTile={(entry) => {
+            const pack = entry.pack as unknown as InstalledPartnerPack;
+            // The tile used to be titled packCountryName(pack). See
+            // packDisplayName above for what that field was and why three of
+            // these tiles read "United States" until now. entry.name is the
+            // same translated string.
+            const flag = packCountryCode(pack);
+            return (
+              <>
+                <PackLogo pack={pack} />
+                <div className="flex w-full min-w-0 items-start justify-center gap-1.5">
+                  {flag && <CountryFlag code={flag} size={14} className="mt-0.5 shrink-0" />}
+                  <span
+                    className="line-clamp-2 min-w-0 break-words text-sm font-semibold text-content-primary"
+                    title={entry.name}
+                  >
+                    {entry.name}
+                  </span>
+                </div>
+                <PackVariantBadge pack={pack} />
+                <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 text-2xs text-content-quaternary">
+                  <span className="inline-flex items-center gap-1">
+                    <Languages size={11} />
+                    {pack.default_locale.toUpperCase()}
+                  </span>
+                  <span className="inline-flex items-center gap-1">
+                    <Database size={11} />
+                    {pack.default_currency}
+                  </span>
+                </div>
+              </>
+            );
+          }}
+          companies={companies}
+          companyKey={companyKey}
+          onCompanyChange={(preset) => setCompanyKey(preset?.key ?? null)}
+        >
+          {(query, typeFilter) => {
+            // Curated market presets for the countries no pack serves. They
+            // follow the search text and sit with the country packs; a filter
+            // on another pack type or on company types leaves them out.
+            if (typeFilter !== 'all' && typeFilter !== 'country') return null;
+            const shownPresets = presetsWithoutPack.filter((preset) =>
+              query
+                ? foldText(
+                    `${t(preset.labelKey, { defaultValue: preset.labelDefault })} ${preset.locale} ${preset.classification}`,
+                  ).includes(query)
+                : true,
+            );
+            if (shownPresets.length === 0) return null;
+            return (
+              <section aria-labelledby="ready-pack-presets-title" data-testid="ready-pack-presets">
+                <h3 id="ready-pack-presets-title" className="mb-3 text-sm font-semibold text-content-primary">
+                  {t('onboarding.ready_pack_other_markets', { defaultValue: 'Or start from a market preset' })}
+                </h3>
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                  {shownPresets.map((pack) => renderPresetTile(pack, companyKey))}
+                </div>
+              </section>
+            );
+          }}
+        </ReadyPackBrowser>
+      )}
+
+      {/* No pack at all on this deployment: the curated presets are the whole
+          step, and the Back row below is theirs. */}
+      {!isLoading && packs.length === 0 && !installing && presetsWithoutPack.length > 0 && (
+        <div className="mt-7 w-full max-w-5xl">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {presetsWithoutPack.map((pack) => renderPresetTile(pack, null))}
+          </div>
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+              {t('common.back', { defaultValue: 'Back' })}
+            </Button>
+            <Button variant="ghost" onClick={onFallback} icon={<ArrowRight size={16} />} iconPosition="right">
+              {t('onboarding.ready_pack_continue_steps', { defaultValue: 'Set up step by step' })}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* A market preset is installing: say so in the same words as before. */}
+      {countryInstallingId && (
+        <p className="mt-4 text-center text-xs text-content-tertiary">
+          {t('onboarding.ready_pack_installing_country', {
+            defaultValue:
+              'Setting up {{country}}. The language is applied first, the cost database keeps loading in the background.',
+            country: t(getCountryPack(countryInstallingId)?.labelKey ?? '', {
+              defaultValue: getCountryPack(countryInstallingId)?.labelDefault ?? '',
+            }),
+          })}
+        </p>
+      )}
+
+      {/* The chosen pack and company type, with the action. Sticky so the
+          button stays in reach however far the reader scrolled the grid. Once
+          an install runs it becomes the progress panel and the two ways on. */}
+      {!isLoading && (selectedPack || installing) && (
+        <div
+          className={clsx(
+            'mt-6 w-full max-w-lg',
+            !installing &&
+              'sticky bottom-3 z-[5] rounded-2xl bg-surface-primary/95 p-3 shadow-lg ring-1 ring-border-light backdrop-blur',
+          )}
+          data-testid="ready-pack-confirm"
+        >
+          {installing && (
+            <ReadyPackProgressPanel
+              install={bgInstall}
+              country={installName}
+              languageReady={installedSlug !== null}
+            />
+          )}
+
+          {installing ? (
+            <div className="space-y-2">
+              <p className="text-center text-xs text-content-tertiary">
+                {t('onboarding.ready_pack_keep_going', {
+                  defaultValue:
+                    'You can keep going while it finishes. Progress stays visible in the corner of the page.',
+                })}
+              </p>
+              {(onAdjustAppearance || onFinish) && (
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  {onAdjustAppearance && (
+                    <Button
+                      variant="secondary"
+                      onClick={onAdjustAppearance}
+                      icon={<Palette size={16} />}
+                      className="w-full"
+                      data-testid="ready-pack-adjust-look"
+                    >
+                      {t('onboarding.ready_pack_adjust_look', { defaultValue: 'Adjust appearance' })}
+                    </Button>
+                  )}
+                  {onFinish && (
+                    <Button
+                      variant="primary"
+                      onClick={onFinish}
+                      disabled={installedSlug === null}
+                      icon={<CheckCircle2 size={16} />}
+                      className="w-full"
+                      data-testid="ready-pack-finish"
+                    >
+                      {t('onboarding.step_finish', { defaultValue: 'Finish' })}
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            selectedPack && (
+              <>
+                {chosenCompany && (
+                  <p className="mb-2 flex items-center justify-center gap-1.5 text-xs text-content-secondary">
+                    <Briefcase size={13} aria-hidden />
+                    <span className="min-w-0 truncate" title={companies.profileName(chosenCompany)}>
+                      {t('onboarding.ready_pack_company_chosen', {
+                        defaultValue: 'Company type: {{name}}',
+                        name: companies.profileName(chosenCompany),
+                      })}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setCompanyKey(null)}
+                      aria-label={t('onboarding.ready_pack_company_clear', { defaultValue: 'Clear company type' })}
+                      className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary"
+                    >
+                      <X size={12} aria-hidden />
+                    </button>
+                  </p>
+                )}
+                <Button
+                  variant="primary"
+                  onClick={() => handleInstall(selectedPack)}
+                  icon={<Rocket size={16} />}
+                  className="w-full"
+                  data-testid="ready-pack-install"
+                >
+                  {chosenCompany
+                    ? t('onboarding.ready_pack_install_with_company', {
+                        defaultValue: 'Set up {{country}} and {{company}}',
+                        country: packDisplayName(t, selectedPack),
+                        company: companies.profileName(chosenCompany),
+                      })
+                    : t('onboarding.ready_pack_install', {
+                        defaultValue: 'Set up {{country}}',
+                        country: packDisplayName(t, selectedPack),
+                      })}
+                </Button>
+                <p className="mt-2 text-center text-2xs text-content-tertiary">
+                  {t('onboarding.ready_pack_install_hint_bg', {
+                    defaultValue:
+                      'The language is applied first so you can start right away. Cost databases and sample projects keep loading in the background.',
+                  })}
+                </p>
+                <PackOneClickNotes pack={selectedPack} packs={packs} />
+              </>
+            )
+          )}
+        </div>
+      )}
+
+      {/* A company type without a pack: it needs a market to go with. */}
+      {!isLoading && !installing && !selectedPack && chosenCompany && (
+        <p className="mt-4 max-w-md text-center text-xs text-content-secondary" data-testid="ready-pack-company-needs-pack">
+          {t('onboarding.ready_pack_company_needs_pack', {
+            defaultValue: 'Now pick a market or industry pack to set up together with {{company}}.',
+            company: companies.profileName(chosenCompany),
+          })}
+        </p>
+      )}
+
+      {(packs.length > 0 || installing) && (
+        <div className="mt-5">
+          <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+            {t('common.back', { defaultValue: 'Back' })}
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Lucide icon for any stream step id (superset of the five §5 steps). */
+function streamStepIcon(step: string): LucideIcon {
+  switch (step) {
+    case 'apply_pack':
+      return Package;
+    case 'locale':
+      return Languages;
+    case 'cost_db':
+      return Database;
+    case 'resources':
+      return Layers;
+    case 'vector_db':
+      return Boxes;
+    case 'demos':
+      return FolderOpen;
+    default:
+      return Package;
+  }
+}
+
+/**
+ * Prominent, large progress panel shown while a ready-made pack is being set up
+ * on the onboarding step. Renders a tall determinate progress bar, a big
+ * percent + status line, and a legible per-step checklist that flips each row
+ * to its final state as the server works through it.
+ *
+ * It reads from the live ``useBackgroundInstallStore`` snapshot (``install``),
+ * so it keeps reflecting real progress for the steps that finish in the
+ * background after the user has continued into the app.
+ */
+function ReadyPackProgressPanel({
+  install,
+  country,
+  languageReady,
+}: {
+  install: BackgroundInstall | null;
+  country: string;
+  languageReady: boolean;
+}) {
+  const { t } = useTranslation();
+
+  const steps = install?.steps ?? [];
+  const total = steps.length;
+  const finished = steps.filter(
+    (s) => s.status === 'ok' || s.status === 'skipped' || s.status === 'error',
+  ).length;
+  const pct = total > 0 ? Math.round((finished / total) * 100) : languageReady ? 100 : 5;
+  const runningStep = steps.find((s) => s.status === 'running');
+
+  return (
+    <div className="mb-5 rounded-2xl border border-border-light/70 bg-surface-secondary/40 p-5 dark:border-white/10">
+      {/* Big status headline + prominent percent. */}
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          {languageReady ? (
+            <CheckCircle2 size={20} className="shrink-0 text-semantic-success" />
+          ) : (
+            <Loader2 size={20} className="shrink-0 animate-spin text-oe-blue" />
+          )}
+          <span className="truncate text-base font-semibold text-content-primary">
+            {languageReady
+              ? t('onboarding.pp_language_ready_short', {
+                  defaultValue: '{{country}} is ready',
+                  country,
+                })
+              : t('onboarding.pp_checklist_running', {
+                  defaultValue: 'Setting up {{country}}…',
+                  country,
+                })}
+          </span>
+        </div>
+        <span className="shrink-0 text-2xl font-bold tabular-nums text-content-primary">
+          {pct}%
+        </span>
+      </div>
+
+      {/* Tall determinate progress bar. */}
+      <div className="h-3 w-full overflow-hidden rounded-full bg-surface-secondary">
+        <div
+          className="h-full rounded-full bg-oe-blue transition-all duration-500 ease-out"
+          style={{ width: `${Math.max(pct, 5)}%` }}
+        />
+      </div>
+
+      {/* Current-step caption. */}
+      <p className="mt-2 min-h-[1.25rem] text-sm text-content-secondary">
+        {languageReady
+          ? t('onboarding.pp_continue_hint', {
+              defaultValue: 'You can continue now. The rest keeps loading in the background.',
+            })
+          : runningStep
+            ? runningStep.label
+            : t('onboarding.pp_starting', { defaultValue: 'Starting setup…' })}
+      </p>
+
+      {/* Large, legible per-step checklist. */}
+      {steps.length > 0 && (
+        <ul className="mt-4 space-y-2.5">
+          {steps.map((s) => {
+            const StepIcon = streamStepIcon(s.step);
+            return (
+              <li key={s.step} className="flex items-center gap-3 text-sm">
+                <ChecklistGlyph state={s.status} />
+                <StepIcon size={16} className="shrink-0 text-content-quaternary" />
+                <span
+                  className={clsx(
+                    'flex-1',
+                    s.status === 'ok'
+                      ? 'font-medium text-content-primary'
+                      : s.status === 'error'
+                        ? 'text-semantic-error'
+                        : s.status === 'running'
+                          ? 'font-medium text-content-primary'
+                          : 'text-content-secondary',
+                  )}
+                >
+                  {s.label}
+                </span>
+                {s.detail && (
+                  <span className="shrink-0 text-xs text-content-tertiary tabular-nums">
+                    {s.detail}
+                  </span>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+// ── Step 2: Company profile ─────────────────────────────────────────────────
+// "What does your company do?" is the one first cut. A card per kind of
+// business, grouped and ordered by ./profileGroups, with the job profiles
+// folded into a secondary group underneath for the person setting the tool up
+// for their own job. Picking a card writes the companyType / enabledModules
+// state the module step then shows for review.
+//
+// It replaced a first cut by team size (solo, small, mid-sized, large). Size
+// says how many people use the tool, not which tools they use: a five-person
+// MEP installer and a five-person cost consultancy need different menus, and
+// the size tiers handed both the same one. The size presets are still served
+// by the backend, because accounts that picked one keep that key as their
+// company_type; nothing in the wizard offers them any more.
+
+// Wizard key -> its i18n label key, so a preset's ``enabled_modules`` can be
+// rendered as friendly, translated module names on the cards and the preview.
+const MODULE_LABEL_KEY_BY_KEY: Record<string, string> = Object.fromEntries(
+  ALL_MODULES.map((m) => [m.key, m.labelKey]),
+);
+
+// A short, recognisable foundation every profile gets, so the preview can say
+// that the basics are on whatever the reader picks.
+const PROFILE_FOUNDATION_KEYS = ['projects', 'dashboards', 'costs', 'catalog'];
+
+// How many module names a card names, and how many chips the preview shows
+// before collapsing the rest into "+N more".
+const PROFILE_CARD_HIGHLIGHTS = 3;
+const PROFILE_PREVIEW_CHIP_CAP = 18;
+
+function prettifyModuleKey(key: string): string {
+  return key.replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+/** A module key as the reader sees it, in the wizard's own vocabulary. */
+function useModuleLabel(): (key: string) => string {
+  const { t } = useTranslation();
+  return useCallback(
+    (key: string) => {
+      const labelKey = MODULE_LABEL_KEY_BY_KEY[key];
+      return labelKey
+        ? t(labelKey, { defaultValue: prettifyModuleKey(key) })
+        : prettifyModuleKey(key);
+    },
+    [t],
+  );
+}
+
+/** How many modules the module step reports active once this preset is
+ *  picked: its own modules plus the core ones everybody has, each counted
+ *  once (several presets re-list a core key). */
+function presetActiveCount(preset: ApiCompanyPreset): number {
+  return activeModuleCount(presetModuleSet(preset));
+}
+
+/**
+ * The mark on a company-profile card: a photograph of the kind of site this
+ * profile works on when one exists for the preset key (the same picture the
+ * Cases hub puts on its "My company" tiles, so a user meets the same image
+ * twice), and the preset's glyph when it does not. Decorative either way -
+ * the profile is named in words directly beside it - so the image is alt=""
+ * and adds no string to translate.
+ */
+function ProfileMark({
+  presetKey,
+  icon: Icon,
+  selected,
+}: {
+  presetKey: string;
+  icon: LucideIcon;
+  selected: boolean;
+}) {
+  const thumb = companyThumbFor(presetKey);
+  return (
+    <div
+      className={clsx(
+        'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-300',
+        thumb && 'overflow-hidden',
+        selected
+          ? 'bg-oe-blue text-white shadow-lg shadow-oe-blue/20'
+          : 'bg-surface-secondary text-content-secondary group-hover:bg-surface-tertiary',
+      )}
+    >
+      {thumb ? (
+        <img
+          src={thumb}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          width={128}
+          height={128}
+          draggable={false}
+          className="h-full w-full object-cover"
+        />
+      ) : (
+        <Icon size={20} />
+      )}
+    </div>
+  );
+}
+
+/** One profile card: what the business is, and what picking it switches on. */
+function ProfileCard({
+  preset,
+  selected,
+  onSelect,
+  highlights,
+}: {
+  preset: ApiCompanyPreset;
+  selected: boolean;
+  onSelect: (key: string) => void;
+  /** Module keys worth naming on the card, already chosen by the caller. */
+  highlights: string[];
+}) {
+  const { t } = useTranslation();
+  const text = usePresetText();
+  const moduleLabel = useModuleLabel();
+  const Icon = presetIcon(preset.icon);
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(preset.key)}
+      aria-pressed={selected}
+      data-testid={`profile-card-${preset.key}`}
+      className={clsx(
+        'group relative flex min-w-0 flex-col items-start rounded-2xl p-5 text-start',
+        'transition-all duration-300 ease-oe',
+        selected
+          ? 'bg-oe-blue-subtle/40 ring-2 ring-oe-blue/45 shadow-lg shadow-oe-blue/10'
+          : 'bg-surface-elevated shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/15 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]',
+      )}
+    >
+      <div className="mb-3 flex w-full items-center gap-2">
+        <ProfileMark presetKey={preset.key} icon={Icon} selected={selected} />
+        {preset.key === 'general_contractor' && (
+          <Badge variant="blue" size="sm">
+            {t('onboarding.popular', { defaultValue: 'Popular' })}
+          </Badge>
+        )}
+        {selected && <CheckCircle2 size={16} className="ms-auto shrink-0 text-oe-blue" />}
+      </div>
+
+      <h3
+        className={clsx(
+          'text-base font-bold break-words transition-colors',
+          selected ? 'text-oe-blue' : 'text-content-primary',
+        )}
+      >
+        {text.label(preset)}
+      </h3>
+      <p className="mt-1 text-sm leading-snug text-content-secondary break-words">
+        {text.description(preset)}
+      </p>
+
+      <div className="mt-3 flex flex-wrap items-center gap-1.5">
+        <span className="inline-flex items-center rounded-full bg-surface-tertiary px-2.5 py-0.5 text-2xs font-medium text-content-secondary">
+          {presetActiveCount(preset)} {t('onboarding.modules_label', { defaultValue: 'modules' })}
+        </span>
+      </div>
+      {highlights.length > 0 && (
+        <p className="mt-2 text-2xs leading-snug text-content-tertiary break-words">
+          {t('onboarding.bizprofile_highlights', {
+            defaultValue: 'Includes {{list}}',
+            list: fmtList(highlights.map(moduleLabel)),
+          })}
+        </p>
+      )}
+    </button>
+  );
+}
+
+function StepCompanyProfile({
+  onNext,
+  onBack,
+  presets,
+  selectedType,
+  onSelectType,
+  onConfigureIndividually,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  presets: ApiCompanyPreset[];
+  selectedType: string | null;
+  onSelectType: (key: string) => void;
+  onConfigureIndividually: () => void;
+}) {
+  const { t } = useTranslation();
+  const text = usePresetText();
+  const moduleLabel = useModuleLabel();
+
+  const { companies, roles, everything } = useMemo(() => groupProfilePresets(presets), [presets]);
+
+  // The job profiles start folded away. A reader coming back from the module
+  // step with one of them picked finds the group open, so the selection is
+  // never on a card they cannot see. After that the toggle alone decides: it
+  // used to be held open while a job profile was picked, so the button did
+  // nothing when clicked, and the preview below names the pick either way.
+  const selectedIsRole = selectedType !== null && roles.some((p) => p.key === selectedType);
+  const [rolesOpen, setRolesOpen] = useState(selectedIsRole);
+  const showRoles = rolesOpen;
+
+  // What each card names: the modules few other profiles carry, the same
+  // signature the Modules page prints, so the two screens describe a profile
+  // alike. A profile with no such module names its first few instead.
+  const shapes = useMemo(
+    () => profileShapes(presets, Array.from(CORE_MODULE_KEYS)),
+    [presets],
+  );
+  const highlightsFor = useCallback(
+    (preset: ApiCompanyPreset): string[] => {
+      const shape = shapes.get(preset.key);
+      if (!shape) return [];
+      const named = shape.rare.length > 0 ? shape.rare : shape.modules;
+      return named.slice(0, PROFILE_CARD_HIGHLIGHTS);
+    },
+    [shapes],
+  );
+
+  const selectedPreset = presets.find((p) => p.key === selectedType) ?? null;
+  const previewKeys = selectedPreset
+    ? Array.from(presetModuleSet(selectedPreset)).filter((k) => !CORE_MODULE_KEYS.has(k))
+    : [];
+  const previewShown = previewKeys.slice(0, PROFILE_PREVIEW_CHIP_CAP);
+  const previewExtra = previewKeys.length - previewShown.length;
+
+  return (
+    <div className="flex flex-col items-center">
+      <h2 className="text-center text-2xl font-bold text-content-primary">
+        {t('onboarding.bizprofile_title', { defaultValue: 'What does your company do?' })}
+      </h2>
+      <p className="mt-2 max-w-lg text-center text-sm text-content-secondary">
+        {t('onboarding.bizprofile_subtitle', {
+          defaultValue:
+            'Pick the profile closest to your business. We switch on the modules it works with, and you review them on the next step.',
+        })}
+      </p>
+
+      {/* Businesses: three columns on desktop, two on tablet, one on mobile. */}
+      <div
+        className="mt-6 grid w-full max-w-5xl grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+        data-testid="profile-companies"
+      >
+        {companies.map((preset) => (
+          <ProfileCard
+            key={preset.key}
+            preset={preset}
+            selected={selectedType === preset.key}
+            onSelect={onSelectType}
+            highlights={highlightsFor(preset)}
+          />
+        ))}
+      </div>
+
+      {/* Everything: one wide card under the businesses. */}
+      {everything && (() => {
+        const isSelected = selectedType === everything.key;
+        const Icon = presetIcon(everything.icon);
+        return (
+          <button
+            type="button"
+            onClick={() => onSelectType(everything.key)}
+            aria-pressed={isSelected}
+            data-testid={`profile-card-${everything.key}`}
+            className={clsx(
+              'group relative mt-3 flex w-full max-w-2xl items-center gap-4 rounded-2xl p-5 text-start',
+              'transition-all duration-300 ease-oe',
+              isSelected
+                ? 'bg-oe-blue-subtle/40 ring-2 ring-oe-blue/45 shadow-lg shadow-oe-blue/10'
+                : 'bg-surface-elevated shadow-sm shadow-black/[0.04] hover:bg-oe-blue-subtle/15 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99]',
+            )}
+          >
+            <ProfileMark presetKey={everything.key} icon={Icon} selected={isSelected} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h3
+                  className={clsx(
+                    'text-base font-bold break-words transition-colors',
+                    isSelected ? 'text-oe-blue' : 'text-content-primary',
+                  )}
+                >
+                  {text.label(everything)}
+                </h3>
+                {isSelected && <CheckCircle2 size={16} className="shrink-0 text-oe-blue" />}
+              </div>
+              <p className="mt-0.5 text-sm text-content-secondary break-words">
+                {text.description(everything)}
+              </p>
+            </div>
+            <span
+              className={clsx(
+                'shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold transition-all',
+                isSelected ? 'bg-oe-blue text-white' : 'bg-surface-secondary text-content-tertiary',
+              )}
+            >
+              {t('onboarding.all_modules', {
+                defaultValue: 'All {{count}} modules',
+                count: TOTAL_MODULE_COUNT,
+              })}
+            </span>
+          </button>
+        );
+      })()}
+
+      {/* Job profiles: for one person setting the tool up for their own job. */}
+      {roles.length > 0 && (
+        <div className="mt-5 flex w-full max-w-5xl flex-col items-center">
+          <button
+            type="button"
+            onClick={() => setRolesOpen((open) => !open)}
+            aria-expanded={showRoles}
+            aria-controls="onboarding-role-profiles"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-oe-blue transition-colors hover:underline"
+          >
+            {showRoles ? (
+              <ChevronDown size={15} className="shrink-0" aria-hidden />
+            ) : (
+              <ChevronRight size={15} className="shrink-0 rtl:rotate-180" aria-hidden />
+            )}
+            {t('onboarding.bizprofile_roles_toggle', { defaultValue: 'Or pick by your role' })}
+          </button>
+          {showRoles && (
+            <div id="onboarding-role-profiles" className="mt-3 w-full">
+              <p className="mb-3 text-center text-xs text-content-tertiary">
+                {t('onboarding.bizprofile_roles_hint', {
+                  defaultValue:
+                    'For one person setting up the tool for their own job, such as a planner or a site manager.',
+                })}
+              </p>
+              <div
+                className="grid w-full grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+                data-testid="profile-roles"
+              >
+                {roles.map((preset) => (
+                  <ProfileCard
+                    key={preset.key}
+                    preset={preset}
+                    selected={selectedType === preset.key}
+                    onSelect={onSelectType}
+                    highlights={highlightsFor(preset)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* What the picked profile switches on, in module names. */}
+      {selectedPreset && previewShown.length > 0 && (
+        <div
+          className="mt-6 w-full max-w-3xl rounded-2xl border border-border-light bg-surface-secondary/40 p-5 text-start"
+          data-testid="profile-preview"
+        >
+          <div className="flex items-center gap-2">
+            <Package size={16} className="shrink-0 text-oe-blue" />
+            <h4 className="min-w-0 text-sm font-semibold text-content-primary break-words">
+              {t('onboarding.bizprofile_you_get', {
+                defaultValue: 'What {{name}} switches on',
+                name: text.label(selectedPreset),
+              })}
+            </h4>
+            <span className="ms-auto shrink-0 rounded-full bg-surface-tertiary px-2.5 py-0.5 text-2xs font-medium text-content-secondary">
+              {presetActiveCount(selectedPreset)}{' '}
+              {t('onboarding.modules_label', { defaultValue: 'modules' })}
+            </span>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {previewShown.map((key) => (
+              <span
+                key={key}
+                className="inline-flex items-center gap-1 rounded-lg bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary shadow-sm shadow-black/[0.03]"
+              >
+                <Check size={12} className="shrink-0 text-oe-blue" />
+                {moduleLabel(key)}
+              </span>
+            ))}
+            {previewExtra > 0 && (
+              <span className="inline-flex items-center rounded-lg px-2.5 py-1 text-xs font-medium text-content-tertiary">
+                +{previewExtra} {t('onboarding.more', { defaultValue: 'more' })}
+              </span>
+            )}
+          </div>
+
+          <p className="mt-4 flex items-start gap-1.5 text-2xs text-content-quaternary">
+            <CheckCircle2 size={12} className="mt-0.5 shrink-0 text-content-tertiary" />
+            <span>
+              {t('onboarding.bizprofile_foundation', {
+                defaultValue: 'Always included: {{list}}',
+                list: fmtList(PROFILE_FOUNDATION_KEYS.map(moduleLabel)),
+              })}
+            </span>
+          </p>
+        </div>
+      )}
+
+      {/* Straight to the module list, for a reader who would rather choose
+          module by module than start from a profile. */}
+      <button
+        type="button"
+        onClick={onConfigureIndividually}
+        className="mt-4 text-sm font-medium text-oe-blue transition-colors hover:underline"
+      >
+        {t('onboarding.configure_individually', { defaultValue: 'Configure individually' })}
+      </button>
+
+      <p className="mt-2 text-center text-xs text-content-tertiary">
+        {t('onboarding.bizprofile_change_note', {
+          defaultValue: 'You can switch profile or turn modules on and off later in Settings.',
+        })}
+      </p>
+
+      <div className="mt-6 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button
+          variant="primary"
+          onClick={onNext}
+          disabled={!selectedType}
+          icon={<ArrowRight size={16} />}
+          iconPosition="right"
+        >
+          {t('common.continue', { defaultValue: 'Continue' })}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Step 4: Module Configuration (toggle list) ─────────────────────────────
+
+function StepModuleConfig({
+  onNext,
+  onBack,
+  enabledModules,
+  onToggleModule,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  enabledModules: Set<string>;
+  onToggleModule: (key: string) => void;
+}) {
+  const { t } = useTranslation();
+  const enabledCount = activeModuleCount(enabledModules);
+  const totalCount = ALL_MODULES.length;
+
+  // The profile step already picked a preset, so this list arrives pre-filled
+  // and the job here is review, not data entry. Nineteen group headers is a
+  // page you can read; 154 toggle rows in one scroll box is the wall that
+  // made people scroll past this step without looking at it. Groups start
+  // closed and carry their own count, so opening one is a deliberate act.
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [query, setQuery] = useState('');
+  const needle = query.trim().toLowerCase();
+
+  const groups = useMemo(() => {
+    return MODULE_GROUPS.map((group) => {
+      const all = ALL_MODULES.filter((m) => m.group === group.id);
+      const label = t(group.labelKey, { defaultValue: group.id });
+      const visible = needle
+        ? all.filter(
+            (m) =>
+              t(m.labelKey, { defaultValue: m.key }).toLowerCase().includes(needle) ||
+              m.key.toLowerCase().includes(needle) ||
+              label.toLowerCase().includes(needle),
+          )
+        : all;
+      return { group, label, all, visible };
+    }).filter((g) => g.visible.length > 0);
+  }, [needle, t]);
+
+  const toggleGroup = useCallback((id: string) => {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  /** Turn a whole group on or off in one click, skipping core (always on). */
+  const setGroup = useCallback(
+    (ids: ModuleDef[], on: boolean) => {
+      for (const mod of ids) {
+        if (mod.core) continue;
+        if (on !== enabledModules.has(mod.key)) onToggleModule(mod.key);
+      }
+    },
+    [enabledModules, onToggleModule],
+  );
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-oe-blue-subtle mb-4">
+        <Package size={24} className="text-oe-blue" />
+      </div>
+
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.modules_title', { defaultValue: 'Your Modules' })}
+      </h2>
+      {/* Say what this step actually changes. These toggles set which entries
+          appear in YOUR menu; installing and removing modules for the whole
+          instance is Settings -> Modules, and conflating the two is what made
+          a module look "off" here and still be running. */}
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.modules_subtitle_switch', {
+          defaultValue:
+            'We picked a set that matches your profile. It decides which modules are switched on for you - nothing is deleted, and you can change it any time in Settings.',
+        })}
+      </p>
+
+      <div className="mt-2 text-sm font-medium text-oe-blue">
+        {enabledCount} / {totalCount}{' '}
+        {t('onboarding.modules_active', { defaultValue: 'modules active' })}
+      </div>
+
+      {/* AI Tools toggle */}
+      <div className="mt-4 w-full max-w-2xl">
+        <div className="flex items-center justify-between rounded-xl bg-surface-elevated shadow-sm shadow-black/[0.04] px-4 py-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-50 dark:bg-violet-950/30 shrink-0">
+              <Sparkles size={18} className="text-violet-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-content-primary">
+                {t('onboarding.ai_tools', { defaultValue: 'AI-Powered Tools' })}
+              </p>
+              <p className="text-xs text-content-tertiary truncate">
+                {t('onboarding.ai_tools_desc', {
+                  defaultValue: 'AI estimation, cost advisor, project intelligence. Requires API key (Anthropic, OpenAI, or Gemini).',
+                })}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              const aiKeys = ALL_MODULES.filter((m) => m.group === 'ai').map((m) => m.key);
+              const anyEnabled = aiKeys.some((k) => enabledModules.has(k));
+              for (const k of aiKeys) {
+                if (anyEnabled && enabledModules.has(k)) onToggleModule(k);
+                if (!anyEnabled && !enabledModules.has(k)) onToggleModule(k);
+              }
+            }}
+            role="switch"
+            aria-checked={ALL_MODULES.filter((m) => m.group === 'ai').some((m) => enabledModules.has(m.key))}
+            aria-label={t('onboarding.ai_tools', { defaultValue: 'AI-Powered Tools' })}
+            className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
+              ALL_MODULES.filter((m) => m.group === 'ai').some((m) => enabledModules.has(m.key))
+                ? 'bg-oe-blue'
+                : 'bg-gray-300 dark:bg-gray-600'
+            }`}
+          >
+            <span
+              className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out ${
+                ALL_MODULES.filter((m) => m.group === 'ai').some((m) => enabledModules.has(m.key))
+                  ? 'translate-x-5 rtl:-translate-x-5'
+                  : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* Search — the fastest route to one known module, and it opens every
+          matching group so a hit is never hidden behind a closed header. */}
+      <div className="mt-4 w-full max-w-2xl relative">
+        <Search
+          size={15}
+          className="pointer-events-none absolute start-3 top-1/2 -translate-y-1/2 text-content-quaternary"
+          aria-hidden
+        />
+        <input
+          type="search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t('onboarding.modpick_search', { defaultValue: 'Search modules' })}
+          aria-label={t('onboarding.modpick_search', { defaultValue: 'Search modules' })}
+          className="w-full rounded-xl border border-border-light bg-surface-primary py-2 ps-9 pe-3 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue focus:outline-none"
+        />
+      </div>
+
+      {/* Module list grouped by what the person does, one closed row per group */}
+      <div className="mt-3 w-full max-w-2xl max-h-[50vh] overflow-y-auto pr-1 space-y-2 scrollbar-thin">
+        {groups.map(({ group, label, all, visible }) => {
+          const isOpen = expanded.has(group.id) || !!needle;
+          const onCount = all.filter((m) => m.core || enabledModules.has(m.key)).length;
+          const optional = all.filter((m) => !m.core);
+          const allOn = optional.length > 0 && optional.every((m) => enabledModules.has(m.key));
+
+          return (
+            <div
+              key={group.id}
+              className="rounded-xl bg-surface-elevated shadow-sm shadow-black/[0.04] overflow-hidden"
+            >
+              <div className="flex items-center gap-2 px-4 py-2.5">
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(group.id)}
+                  aria-expanded={isOpen}
+                  className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                >
+                  {isOpen ? (
+                    <ChevronDown size={15} className="shrink-0 text-content-tertiary" aria-hidden />
+                  ) : (
+                    <ChevronRight size={15} className="shrink-0 text-content-tertiary" aria-hidden />
+                  )}
+                  <span className="truncate text-sm font-semibold text-content-primary">
+                    {label}
+                  </span>
+                  <span className="shrink-0 text-xs tabular-nums text-content-tertiary">
+                    {onCount} / {all.length}
+                  </span>
+                </button>
+                {optional.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setGroup(optional, !allOn)}
+                    className="shrink-0 text-xs font-medium text-oe-blue hover:underline"
+                  >
+                    {allOn
+                      ? t('onboarding.modpick_clear', { defaultValue: 'Clear' })
+                      : t('onboarding.modpick_select_all', { defaultValue: 'Select all' })}
+                  </button>
+                )}
+              </div>
+
+              {isOpen && (
+                <div className="divide-y divide-border-light/40 border-t border-border-light/40">
+                  {visible.map((mod) => {
+                    const isCore = !!mod.core;
+                    const isEnabled = isCore || enabledModules.has(mod.key);
+                    const modLabel = t(mod.labelKey, { defaultValue: mod.key });
+                    return (
+                      <div
+                        key={mod.key}
+                        className="flex items-center justify-between py-2.5 px-4 gap-3 overflow-hidden"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-content-primary truncate">
+                              {modLabel}
+                            </span>
+                            {isCore && (
+                              <Badge variant="blue" size="sm">
+                                {t('onboarding.core', { defaultValue: 'Core' })}
+                              </Badge>
+                            )}
+                          </div>
+                          <p className="text-xs text-content-tertiary mt-0.5 truncate">
+                            {t(mod.descriptionKey, { defaultValue: '' })}
+                          </p>
+                        </div>
+                        <ToggleSwitch
+                          enabled={isEnabled}
+                          onToggle={() => !isCore && onToggleModule(mod.key)}
+                          disabled={isCore}
+                          label={modLabel}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+        {groups.length === 0 && (
+          <p className="py-6 text-center text-sm text-content-tertiary">
+            {t('onboarding.modpick_no_results', { defaultValue: 'No module matches your search.' })}
+          </p>
+        )}
+      </div>
+
+      <div className="mt-6 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button
+          variant="primary"
+          onClick={onNext}
+          icon={<ArrowRight size={16} />}
+          iconPosition="right"
+        >
+          {t('common.continue', { defaultValue: 'Continue' })}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Country Pack picker (Step 5 lead experience) ────────────────────────────
+
+/**
+ * Per-component install status used by the Country Pack card. ``pending`` is a
+ * cost base load the wizard lost track of: it may still finish on the server.
+ */
+type PackComponentState = 'idle' | 'running' | 'pending' | 'done' | 'error' | 'skipped';
+
+/** The card state for a finished cost base load. Losing the server is not a failure. */
+export function packDbStateFor(outcome: CostDbLoadOutcome): PackComponentState {
+  if (outcome === 'failed') return 'error';
+  if (outcome === 'unconfirmed') return 'pending';
+  return 'done';
+}
+
+/** Small status glyph for a Country Pack component (locale / DB / demo). */
+function PackStatusGlyph({ state }: { state: PackComponentState }) {
+  if (state === 'running') {
+    return <Loader2 size={15} className="animate-spin text-oe-blue shrink-0" aria-hidden />;
+  }
+  if (state === 'done') {
+    return <CheckCircle2 size={15} className="text-semantic-success shrink-0" aria-hidden />;
+  }
+  if (state === 'skipped') {
+    return <span className="text-2xs text-content-quaternary shrink-0">—</span>;
+  }
+  if (state === 'pending') {
+    return <Clock size={15} className="text-semantic-warning shrink-0" aria-hidden />;
+  }
+  if (state === 'error') {
+    return <span className="text-2xs font-semibold text-semantic-error shrink-0">!</span>;
+  }
+  return (
+    <span className="h-2 w-2 rounded-full bg-border-light dark:bg-white/15 shrink-0" aria-hidden />
+  );
+}
+
+// ── Partner-pack one-click installer (primary "Set up by country") ──────────
+
+/** Lucide icon to render for each ``full-install`` step in the checklist. */
+const FULL_INSTALL_STEP_ICONS: Record<FullInstallStepName, LucideIcon> = {
+  apply_pack: Package,
+  locale: Languages,
+  cost_db: Database,
+  vector_db: Boxes,
+  demos: FolderOpen,
+};
+
+/** Per-step UI state while/after the orchestrated install runs. */
+type ChecklistState = 'pending' | 'running' | FullInstallStepStatus;
+
+/**
+ * A small square emblem for a pack in the picker grid.
+ *
+ * A country pack shows its flag, which is the one mark that answers "whose
+ * rules is this" at 40px. Everything else keeps the older behaviour and the
+ * reason it exists: these packs ship wide wordmark logos, roughly 5:1, drawn
+ * for the co-brand strip, and one jammed into a 40px square renders as an
+ * illegible sliver that briefly shows raw alt text on a slow first paint. So
+ * a pack with no country falls to its own logo and then to a monogram, which
+ * can never 404 and is always legible at this size.
+ *
+ * The decision itself lives in ``PackEmblem`` and not here, so the picker,
+ * the packs page and the co-brand strip cannot disagree about what a pack
+ * looks like.
+ */
+function PackLogo({ pack }: { pack: InstalledPartnerPack }) {
+  return <PackEmblem pack={pack} size={40} className="ring-1 ring-black/5 dark:ring-white/10" />;
+}
+
+/**
+ * Frosted-glass card showing the selected pack's description, clamped to a
+ * few lines with a keyboard-accessible Show more / Show less toggle.
+ *
+ * Matches the app's glass treatment (semi-transparent elevated surface +
+ * ``backdrop-blur`` + hairline border, radius lg). Collapses to 3 lines via
+ * ``line-clamp-3``; the toggle only renders when the text is actually long
+ * enough to be clipped, so short descriptions never grow a dead button.
+ */
+function PackDescriptionCard({ description }: { description: string }) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+
+  const text = description?.trim();
+  if (!text) return null;
+
+  // Heuristic: only offer expand/collapse when the copy is long enough to be
+  // clipped by line-clamp-3 (≈ 150+ chars at this width). Avoids a useless
+  // "Show more" on a one-liner.
+  const isLong = text.length > 150;
+
+  return (
+    <div className="mb-4 rounded-lg border border-border-light/70 dark:border-white/10 bg-surface-elevated/70 dark:bg-white/[0.04] backdrop-blur-md p-3 shadow-sm shadow-black/[0.03]">
+      <p
+        className={clsx(
+          'text-xs leading-relaxed text-content-secondary',
+          !expanded && isLong && 'line-clamp-3',
+        )}
+      >
+        {text}
+      </p>
+      {isLong && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          aria-expanded={expanded}
+          className="mt-1.5 inline-flex items-center gap-1 text-2xs font-semibold text-oe-blue hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40 rounded"
+        >
+          {expanded
+            ? t('onboarding.pp_show_less', { defaultValue: 'Show less' })
+            : t('onboarding.pp_show_more', { defaultValue: 'Show more' })}
+          <ChevronDown
+            size={12}
+            className={clsx('transition-transform duration-200', expanded && 'rotate-180')}
+            aria-hidden
+          />
+        </button>
+      )}
+    </div>
+  );
+}
+
+/** Status glyph for one row of the orchestrated-install checklist. */
+function ChecklistGlyph({ state }: { state: ChecklistState }) {
+  if (state === 'running') {
+    return <Loader2 size={16} className="animate-spin text-oe-blue shrink-0" aria-hidden />;
+  }
+  if (state === 'ok') {
+    return <CheckCircle2 size={16} className="text-semantic-success shrink-0" aria-hidden />;
+  }
+  if (state === 'skipped') {
+    return <MinusCircle size={16} className="text-content-quaternary shrink-0" aria-hidden />;
+  }
+  if (state === 'error') {
+    return <XCircle size={16} className="text-semantic-error shrink-0" aria-hidden />;
+  }
+  // pending
+  return (
+    <span className="h-2.5 w-2.5 rounded-full bg-border-light dark:bg-white/15 shrink-0" aria-hidden />
+  );
+}
+
+function PartnerPackInstaller({
+  onActivateLocale,
+}: {
+  /** Activate the pack's locale client-side (shared with the wizard). */
+  onActivateLocale: (locale: string) => void;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const addToast = useToastStore((s) => s.addToast);
+
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
+    queryKey: ['partner-pack', 'installed'],
+    queryFn: fetchInstalledPacks,
+    staleTime: 60_000,
+  });
+
+  const packs: InstalledPartnerPack[] = data?.installed ?? [];
+
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [installing, setInstalling] = useState(false);
+  // Per-step checklist state, keyed by the five §5 step names.
+  const [stepStates, setStepStates] = useState<Record<FullInstallStepName, ChecklistState>>(
+    () => ({ apply_pack: 'pending', locale: 'pending', cost_db: 'pending', vector_db: 'pending', demos: 'pending' }),
+  );
+  const [installedSlug, setInstalledSlug] = useState<string | null>(null);
+  const [installFailed, setInstallFailed] = useState(false);
+
+  // Default-select the reader's own country's pack once they load, never
+  // simply the first one (`packToPreselect`).
+  useEffect(() => {
+    if (!selectedSlug && packs.length > 0) {
+      const own = packToPreselect(detectCountry(), packs);
+      if (own) setSelectedSlug(own);
+    }
+  }, [packs, selectedSlug]);
+
+  const selectedPack = packs.find((p) => p.slug === selectedSlug) ?? null;
+
+  const resetChecklist = useCallback(() => {
+    setStepStates({
+      apply_pack: 'pending',
+      locale: 'pending',
+      cost_db: 'pending',
+      vector_db: 'pending',
+      demos: 'pending',
+    });
+    setInstalledSlug(null);
+    setInstallFailed(false);
+  }, []);
+
+  const handleSelect = useCallback(
+    (slug: string) => {
+      if (installing) return;
+      setSelectedSlug(slug);
+      resetChecklist();
+    },
+    [installing, resetChecklist],
+  );
+
+  const handleInstall = useCallback(
+    async (pack: InstalledPartnerPack) => {
+      if (installing) return;
+      setInstalling(true);
+      setInstallFailed(false);
+      setInstalledSlug(null);
+      // Reset the checklist to pending; the SSE stream below flips each row to
+      // running and then to its final status as the server runs the steps, so
+      // the user watches real per-step progress instead of one frozen spinner.
+      setStepStates({
+        apply_pack: 'pending',
+        locale: 'pending',
+        cost_db: 'pending',
+        vector_db: 'skipped',
+        demos: 'pending',
+      });
+
+      let ok = false;
+      try {
+        await fullInstallPackStream(
+          pack.slug,
+          (evt) => {
+            if (evt.type === 'step_start') {
+              const k = evt.step as FullInstallStepName;
+              setStepStates((prev) => (k in prev ? { ...prev, [k]: 'running' } : prev));
+            } else if (evt.type === 'step_done') {
+              const k = evt.step as FullInstallStepName;
+              setStepStates((prev) => (k in prev ? { ...prev, [k]: evt.status } : prev));
+            } else if (evt.type === 'done') {
+              ok = evt.ok;
+            }
+          },
+          { demoCount: 2 },
+        );
+
+        if (ok) {
+          setInstalledSlug(pack.slug);
+          // Activate the pack's locale client-side, then send the user to
+          // their freshly installed country projects.
+          onActivateLocale(pack.default_locale);
+          addToast({
+            type: 'success',
+            title: t('onboarding.pp_install_success', {
+              defaultValue: '{{country}} workspace installed',
+              country: packDisplayName(t, pack),
+            }),
+          });
+          // Brief pause so the green checklist is visible before routing.
+          window.setTimeout(() => {
+            markOnboardingCompleted();
+            navigate('/projects');
+          }, 900);
+        } else {
+          setInstallFailed(true);
+          addToast({
+            type: 'error',
+            title: t('onboarding.pp_install_partial', {
+              defaultValue: 'Some setup steps did not complete',
+            }),
+            message: t('onboarding.pp_install_partial_desc', {
+              defaultValue: 'Review the checklist below. Completed steps are kept.',
+            }),
+          });
+        }
+      } catch (err) {
+        // A thrown error (timeout / network) marks every still-running step
+        // as failed so nothing spins forever.
+        setStepStates((prev) => {
+          const next = { ...prev };
+          for (const k of FULL_INSTALL_STEPS) {
+            if (next[k] === 'running') next[k] = 'error';
+          }
+          return next;
+        });
+        setInstallFailed(true);
+        addToast({
+          type: 'error',
+          title: t('onboarding.pp_install_error', {
+            defaultValue: 'Failed to install the country workspace',
+          }),
+          message:
+            err instanceof PackInstallError
+              ? packInstallFailureTitle(t, err.kind)
+              : err instanceof Error
+                ? err.message
+                : undefined,
+        });
+      } finally {
+        setInstalling(false);
+      }
+    },
+    [installing, onActivateLocale, addToast, t, navigate],
+  );
+
+  const stepLabel = useCallback(
+    (step: FullInstallStepName): string => {
+      switch (step) {
+        case 'apply_pack':
+          return t('onboarding.pp_step_apply', { defaultValue: 'Apply pack' });
+        case 'locale':
+          return t('onboarding.pp_step_locale', { defaultValue: 'Language' });
+        case 'cost_db':
+          return t('onboarding.pp_step_cost_db', { defaultValue: 'Cost database' });
+        case 'vector_db':
+          return t('onboarding.pp_step_vector_db', { defaultValue: 'Vector database' });
+        case 'demos':
+          return t('onboarding.pp_step_demos', { defaultValue: 'Example projects' });
+      }
+    },
+    [t],
+  );
+
+  const showChecklist = installing || installedSlug !== null || installFailed;
+
+  return (
+    <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
+          <Globe size={20} />
+        </div>
+        <div className="min-w-0">
+          <h3 className="text-base font-bold text-content-primary">
+            {t('onboarding.country_pack_title', { defaultValue: 'Set up by country' })}
+          </h3>
+          <p className="text-xs text-content-tertiary">
+            {t('onboarding.pp_subtitle', {
+              defaultValue: 'Install a complete localized workspace - language, both cost databases, and example projects - in one click',
+            })}
+          </p>
+        </div>
+      </div>
+
+      {isLoading && (
+        <div className="flex items-center justify-center gap-2 py-8 text-sm text-content-tertiary">
+          <Loader2 size={16} className="animate-spin text-oe-blue" />
+          {t('onboarding.pp_loading', { defaultValue: 'Loading available country packs…' })}
+        </div>
+      )}
+
+      {!isLoading && isError && (
+        <div className="flex items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 px-3 py-3 text-xs text-amber-700 dark:text-amber-400">
+          <AlertTriangle size={15} className="shrink-0" />
+          <span className="flex-1">
+            {t('onboarding.pp_load_error', {
+              defaultValue: 'Could not load country packs. You can still pick a country below.',
+            })}
+          </span>
+          <Button variant="secondary" size="sm" onClick={() => void refetch()} loading={isFetching}>
+            {t('costs.load_failed_retry', { defaultValue: 'Retry' })}
+          </Button>
+        </div>
+      )}
+
+      {!isLoading && !isError && packs.length === 0 && (
+        <div className="rounded-xl bg-surface-secondary/50 px-3 py-4 text-center text-xs text-content-tertiary">
+          {t('onboarding.pp_none_installed', {
+            defaultValue: 'No partner packs are installed yet. Pick a country below to set up language and classification.',
+          })}
+        </div>
+      )}
+
+      {/* Pack grid */}
+      {!isLoading && packs.length > 0 && (
+        <div
+          role="radiogroup"
+          aria-label={t('onboarding.pp_grid_label', { defaultValue: 'Partner packs' })}
+          onKeyDown={onRadioGroupKeyDown}
+          className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2"
+        >
+          {packs.map((pack, index) => {
+            const isSelected = selectedSlug === pack.slug;
+            // Same title, same reason as the first-run picker above.
+            const name = packDisplayName(t, pack);
+            const flag = packCountryCode(pack);
+            return (
+              <button
+                key={pack.slug}
+                type="button"
+                onClick={() => handleSelect(pack.slug)}
+                disabled={installing}
+                role="radio"
+                aria-checked={isSelected}
+                tabIndex={rovingTabIndex(isSelected, index, packs.some((p) => p.slug === selectedSlug))}
+                className={clsx(
+                  'flex items-start gap-3 rounded-xl p-3 text-left transition-all duration-200',
+                  isSelected
+                    ? 'bg-oe-blue-subtle/50 ring-2 ring-oe-blue/40 shadow-sm'
+                    : 'bg-surface-secondary/70 hover:bg-surface-secondary hover:shadow-sm',
+                  installing && 'opacity-60 cursor-not-allowed',
+                )}
+              >
+                <PackLogo pack={pack} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    {flag && <CountryFlag code={flag} size={16} className="shrink-0" />}
+                    <span className="truncate text-sm font-semibold text-content-primary">
+                      {name}
+                    </span>
+                    {isSelected && <Check size={14} className="ms-auto shrink-0 text-oe-blue" />}
+                  </div>
+                  <div className="truncate text-2xs text-content-tertiary">
+                    {pack.partner_name}
+                  </div>
+                  <PackVariantBadge pack={pack} />
+                  <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-2xs text-content-quaternary">
+                    <span className="inline-flex items-center gap-1">
+                      <Languages size={11} />
+                      {pack.default_locale.toUpperCase()}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Database size={11} />
+                      {pack.default_currency}
+                    </span>
+                  </div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Selected pack description — frosted-glass, expandable */}
+      {!isLoading && selectedPack && (
+        <PackDescriptionCard description={selectedPack.description} />
+      )}
+      {!isLoading && selectedPack && !installing && (
+        <PackOneClickNotes pack={selectedPack} packs={packs} />
+      )}
+
+      {/* Progress checklist — the five orchestrated steps */}
+      {showChecklist && selectedPack && (
+        <div className="mb-4 rounded-xl bg-surface-secondary/50 p-3" data-testid="pp-checklist">
+          {/* The rows only change glyphs, which a screen reader never hears;
+              announce the step that is running and how the install ended. */}
+          <span className="sr-only" role="status" aria-live="polite">
+            {(() => {
+              const running = installing ? FULL_INSTALL_STEPS.find((k) => stepStates[k] === 'running') : undefined;
+              return running ? stepLabel(running) : '';
+            })()}
+          </span>
+          <div className="mb-2 text-xs font-semibold text-content-secondary" role="status">
+            {installedSlug
+              ? t('onboarding.pp_checklist_done', { defaultValue: 'Workspace ready' })
+              : installFailed
+                ? t('onboarding.pp_checklist_partial', { defaultValue: 'Setup finished with issues' })
+                : t('onboarding.pp_checklist_running', {
+                    defaultValue: 'Setting up {{country}}…',
+                    country: packDisplayName(t, selectedPack),
+                  })}
+          </div>
+          <ul className="space-y-1.5">
+            {FULL_INSTALL_STEPS.map((step) => {
+              const StepIcon = FULL_INSTALL_STEP_ICONS[step];
+              const state = stepStates[step];
+              return (
+                <li key={step} className="flex items-center gap-2.5 text-xs">
+                  <ChecklistGlyph state={state} />
+                  <StepIcon size={13} className="shrink-0 text-content-quaternary" />
+                  <span
+                    className={clsx(
+                      'flex-1',
+                      state === 'ok'
+                        ? 'text-content-primary'
+                        : state === 'error'
+                          ? 'text-semantic-error'
+                          : 'text-content-secondary',
+                    )}
+                  >
+                    {stepLabel(step)}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+
+      {/* Primary one-click install */}
+      {!isLoading && packs.length > 0 && selectedPack && (
+        <Button
+          variant="primary"
+          onClick={() => handleInstall(selectedPack)}
+          loading={installing}
+          disabled={installing || installedSlug === selectedPack.slug}
+          icon={installedSlug === selectedPack.slug ? <CheckCircle2 size={16} /> : <Rocket size={16} />}
+          className="w-full"
+        >
+          {installedSlug === selectedPack.slug
+            ? t('onboarding.pp_installed', {
+                defaultValue: '{{country}} workspace installed',
+                country: packDisplayName(t, selectedPack),
+              })
+            : installing
+              ? t('onboarding.pp_installing', {
+                  defaultValue: 'Installing {{country}} workspace…',
+                  country: packDisplayName(t, selectedPack),
+                })
+              : t('onboarding.pp_install', {
+                  defaultValue: 'Install {{country}} workspace',
+                  country: packDisplayName(t, selectedPack),
+                })}
+        </Button>
+      )}
+
+      {installedSlug && (
+        <p className="mt-2 text-center text-2xs text-content-tertiary">
+          {t('onboarding.pp_redirecting', {
+            defaultValue: 'Opening your example projects…',
+          })}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** A single à-la-carte component row inside the customize panel. */
+function PackComponentRow({
+  icon,
+  label,
+  detail,
+  state,
+  actionLabel,
+  doneLabel,
+  skippedLabel,
+  onAction,
+  disabled,
+}: {
+  icon: ReactNode;
+  label: string;
+  detail: string;
+  state: PackComponentState;
+  actionLabel: string;
+  doneLabel: string;
+  skippedLabel: string;
+  onAction: () => void;
+  disabled?: boolean;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl bg-surface-secondary/60 px-3 py-2.5">
+      <div className="flex min-w-0 items-center gap-2.5">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-elevated text-content-secondary">
+          {icon}
+        </span>
+        <div className="min-w-0">
+          <div className="truncate text-sm font-medium text-content-primary">{label}</div>
+          <div className="truncate text-2xs text-content-tertiary">{detail}</div>
+        </div>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        {state === 'done' ? (
+          <span className="flex items-center gap-1 text-2xs font-medium text-semantic-success">
+            <CheckCircle2 size={13} />
+            {doneLabel}
+          </span>
+        ) : state === 'skipped' ? (
+          <span className="text-2xs text-content-quaternary">{skippedLabel}</span>
+        ) : state === 'pending' ? (
+          <span className="flex items-center gap-1 text-2xs font-medium text-semantic-warning">
+            <Clock size={13} />
+            {t('onboarding.pack_still_loading', { defaultValue: 'Still loading, check later' })}
+          </span>
+        ) : (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onAction}
+            disabled={disabled || state === 'running'}
+            aria-busy={state === 'running' || undefined}
+            icon={state === 'running' ? <Loader2 size={12} className="animate-spin" aria-hidden /> : undefined}
+          >
+            {state === 'running' ? t('onboarding.installing_label', { defaultValue: 'Installing…' }) : actionLabel}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Secondary "Other countries" picker — for markets without a dedicated
+// partner pack. Generic presets cover language + classification (+ an optional
+// relational cost DB); they intentionally install NO demo projects (the
+// partner-pack installer above owns the fully-worked country demos). See
+// docs/country-pack-oneclick/DESIGN.md §7.
+function CountryPackCard({
+  packs,
+  selectedPack,
+  onSelectPack,
+  onInstallPack,
+  onPackLocale,
+  onPackDb,
+  onPackDemo,
+  installing,
+  localeState,
+  dbState,
+  demoState,
+  customizeOpen,
+  onToggleCustomize,
+  recordedClassification,
+}: {
+  packs: CountryPack[];
+  selectedPack: CountryPack;
+  onSelectPack: (pack: CountryPack) => void;
+  onInstallPack: (pack: CountryPack) => void;
+  onPackLocale: (pack: CountryPack) => void;
+  onPackDb: (pack: CountryPack) => void;
+  onPackDemo: (pack: CountryPack) => void;
+  installing: boolean;
+  localeState: PackComponentState;
+  dbState: PackComponentState;
+  demoState: PackComponentState;
+  customizeOpen: boolean;
+  onToggleCustomize: () => void;
+  recordedClassification: string | null;
+}) {
+  const { t } = useTranslation();
+  const [packQuery, setPackQuery] = useState('');
+
+  const filteredPacks = (() => {
+    const q = packQuery.trim().toLowerCase();
+    if (!q) return packs;
+    return packs.filter(
+      (p) =>
+        t(p.labelKey, { defaultValue: p.labelDefault }).toLowerCase().includes(q) ||
+        p.labelDefault.toLowerCase().includes(q) ||
+        p.region.toLowerCase().includes(q) ||
+        p.classification.toLowerCase().includes(q) ||
+        p.id.toLowerCase().includes(q),
+    );
+  })();
+
+  const packLabel = t(selectedPack.labelKey, { defaultValue: selectedPack.labelDefault });
+  // The example project counts. Reporting the pack as fully installed while the
+  // demo is still running, or has failed, is how the card came to promise more
+  // than the button delivered.
+  const allDone = localeState === 'done' && dbState === 'done' && demoState === 'done';
+
+  return (
+    <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface-secondary text-content-secondary">
+          <Globe size={20} />
+        </div>
+        <div className="min-w-0">
+          <h3 className="text-base font-bold text-content-primary">
+            {t('onboarding.other_countries_title', { defaultValue: 'Other countries' })}
+          </h3>
+          <p className="text-xs text-content-tertiary">
+            {t('onboarding.other_countries_subtitle', {
+              defaultValue: 'No partner pack yet? Set the language and classification for your market',
+            })}
+          </p>
+        </div>
+      </div>
+
+      {/* Country filter */}
+      <div className="mb-2">
+        <input
+          type="search"
+          value={packQuery}
+          onChange={(e) => setPackQuery(e.target.value)}
+          placeholder={t('onboarding.country_pack_filter_placeholder', {
+            defaultValue: 'Find your country…',
+          })}
+          aria-label={t('onboarding.country_pack_filter_placeholder', {
+            defaultValue: 'Find your country…',
+          })}
+          disabled={installing}
+          className="w-full rounded-lg bg-surface-secondary/70 px-3 py-1.5 text-xs text-content-primary placeholder:text-content-quaternary border border-transparent focus:border-oe-blue/40 focus:outline-none focus:bg-surface-secondary disabled:opacity-50"
+        />
+      </div>
+
+      {/* Country grid */}
+      <div
+        role="radiogroup"
+        aria-label={t('onboarding.country_pack_grid_label', { defaultValue: 'Countries' })}
+        onKeyDown={onRadioGroupKeyDown}
+        className="mb-4 grid max-h-56 grid-cols-2 gap-2 overflow-y-auto pr-1 -mr-1 sm:grid-cols-3"
+      >
+        {filteredPacks.length === 0 && (
+          <div className="col-span-full py-6 text-center text-xs text-content-tertiary">
+            {t('onboarding.country_pack_no_results', {
+              defaultValue: 'No countries match "{{q}}"',
+              q: packQuery,
+            })}
+          </div>
+        )}
+        {filteredPacks.map((pack, index) => {
+          const isSelected = selectedPack.id === pack.id;
+          return (
+            <button
+              key={pack.id}
+              type="button"
+              onClick={() => !installing && onSelectPack(pack)}
+              disabled={installing}
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={rovingTabIndex(isSelected, index, filteredPacks.some((p) => p.id === selectedPack.id))}
+              className={clsx(
+                'flex items-center gap-2 rounded-xl px-3 py-2 text-left transition-all duration-200',
+                isSelected
+                  ? 'bg-oe-blue-subtle/50 ring-2 ring-oe-blue/40 shadow-sm'
+                  : 'bg-surface-secondary/70 hover:bg-surface-secondary hover:shadow-sm',
+                installing && 'opacity-60 cursor-not-allowed',
+              )}
+            >
+              <CountryFlag code={pack.flagId} size={18} className="shrink-0" />
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-xs font-medium text-content-primary">
+                  {t(pack.labelKey, { defaultValue: pack.labelDefault })}
+                </div>
+                <div className="text-2xs text-content-quaternary">{pack.classification}</div>
+              </div>
+              {isSelected && <Check size={14} className="shrink-0 text-oe-blue" />}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* What the selected pack includes — at-a-glance chips with live status */}
+      <div className="mb-4 rounded-xl bg-surface-secondary/50 p-3">
+        <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-content-secondary">
+          <CountryFlag code={selectedPack.flagId} size={16} className="shrink-0" />
+          {t('onboarding.country_pack_includes', {
+            defaultValue: '{{country}} pack includes',
+            country: packLabel,
+          })}
+        </div>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-2xs text-content-tertiary">
+          <span className="inline-flex items-center gap-1.5">
+            <PackStatusGlyph state={localeState} />
+            <Languages size={12} className="text-content-quaternary" />
+            {t('onboarding.country_pack_locale', { defaultValue: 'Language' })}: {selectedPack.locale.toUpperCase()}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <PackStatusGlyph state={dbState} />
+            <Database size={12} className="text-content-quaternary" />
+            {t('onboarding.country_pack_db', { defaultValue: 'Cost database' })}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <PackStatusGlyph state={demoState} />
+            <Building2 size={12} className="text-content-quaternary" />
+            {t('onboarding.country_pack_demo', { defaultValue: 'Demo project' })}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Layers size={12} className="text-content-quaternary" />
+            {selectedPack.classification}
+          </span>
+        </div>
+      </div>
+
+      {(() => {
+        // A preset whose base is a neighbour's says so, so nobody reads Dubai prices as their own.
+        const base = CWICR_DATABASES.find((d) => d.id === selectedPack.region);
+        if (!base || base.flagId === selectedPack.flagId) return null;
+        return (
+          <p data-testid="country-pack-standin-base" className="mb-3 text-xs text-content-tertiary">
+            {t('onboarding.country_pack_standin_base', {
+              defaultValue: 'Closest available: {{base}} ({{city}}) prices, {{currency}}. No cost base for {{country}} yet.',
+              base: base.name,
+              city: base.city,
+              currency: base.currency,
+              country: packLabel,
+            })}
+          </p>
+        );
+      })()}
+
+      {/* Primary one-click install */}
+      <Button
+        variant="primary"
+        onClick={() => onInstallPack(selectedPack)}
+        loading={installing}
+        disabled={installing || allDone}
+        icon={allDone ? <CheckCircle2 size={16} /> : <Rocket size={16} />}
+        className="w-full"
+      >
+        {allDone
+          ? t('onboarding.country_pack_installed', {
+              defaultValue: '{{country}} pack installed',
+              country: packLabel,
+            })
+          : installing
+            ? t('onboarding.country_pack_installing', {
+                defaultValue: 'Installing {{country}} pack…',
+                country: packLabel,
+              })
+            : t('onboarding.country_pack_install', {
+                defaultValue: 'Install {{country}} pack',
+                country: packLabel,
+              })}
+      </Button>
+
+      {recordedClassification && (
+        <p className="mt-2 text-center text-2xs text-content-tertiary">
+          {t('onboarding.country_pack_classification_set', {
+            defaultValue: 'Classification set to {{standard}}',
+            standard: recordedClassification,
+          })}
+        </p>
+      )}
+
+      {/* Customize / install separately */}
+      <button
+        type="button"
+        onClick={onToggleCustomize}
+        aria-expanded={customizeOpen}
+        className="mt-3 flex w-full items-center justify-center gap-1.5 text-xs font-medium text-oe-blue hover:underline"
+      >
+        {customizeOpen
+          ? t('onboarding.country_pack_hide_customize', { defaultValue: 'Hide options' })
+          : t('onboarding.country_pack_customize', { defaultValue: 'Customize / install separately' })}
+        <ChevronDown
+          size={13}
+          className={clsx('transition-transform duration-200', customizeOpen && 'rotate-180')}
+        />
+      </button>
+
+      {customizeOpen && (
+        <div className="mt-3 space-y-2">
+          <PackComponentRow
+            icon={<Languages size={15} />}
+            label={t('onboarding.country_pack_locale', { defaultValue: 'Language' })}
+            detail={selectedPack.locale.toUpperCase()}
+            state={localeState}
+            actionLabel={t('onboarding.country_pack_apply', { defaultValue: 'Apply' })}
+            doneLabel={t('onboarding.country_pack_applied', { defaultValue: 'Applied' })}
+            skippedLabel="—"
+            onAction={() => onPackLocale(selectedPack)}
+            disabled={installing}
+          />
+          <PackComponentRow
+            icon={<Database size={15} />}
+            label={t('onboarding.country_pack_db', { defaultValue: 'Cost database' })}
+            detail={selectedPack.region}
+            state={dbState}
+            actionLabel={t('onboarding.load_database', { defaultValue: 'Load Database' })}
+            doneLabel={t('onboarding.demo_installed', { defaultValue: 'Installed' })}
+            skippedLabel="—"
+            onAction={() => onPackDb(selectedPack)}
+            disabled={installing}
+          />
+          {/* The example project needs its own runner, not just a slot in the
+              one-click sequence. Without it a user who assembles the pack from
+              these rows can never reach the finished state, because the demo
+              would sit at idle forever with no control able to move it. */}
+          <PackComponentRow
+            icon={<Building2 size={15} />}
+            label={t('onboarding.country_pack_demo', { defaultValue: 'Demo project' })}
+            detail={selectedPack.demoId}
+            state={demoState}
+            actionLabel={t('onboarding.install_demo', { defaultValue: 'Install Demo Project' })}
+            doneLabel={t('onboarding.demo_installed', { defaultValue: 'Installed' })}
+            skippedLabel="—"
+            onAction={() => onPackDemo(selectedPack)}
+            disabled={installing}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Step 5: Data Setup (combined) ───────────────────────────────────────────
+
+// Exported for its test. The step decides on its own whether to ask the server
+// for the encoder, and that decision is not reachable from the wizard's other
+// steps, so the test renders this one directly rather than driving the whole
+// wizard to reach it.
+export function StepDataSetup({
+  onNext,
+  onBack,
+  selectedLang,
+  backgroundLoad,
+}: {
+  onNext: () => void;
+  onBack: () => void;
+  selectedLang: string;
+  backgroundLoad?: boolean;
+}) {
+  const { t } = useTranslation();
+  const addToast = useToastStore((s) => s.addToast);
+  const canInstallPartnerPacks = useCanInstallPartnerPacks();
+
+  // The browser's country while the reader keeps the browser's language, else
+  // the chosen language's own country (`detectCountryForLanguage`).
+  const suggestion = useMemo(
+    () => suggestDataSetup(detectCountryForLanguage(selectedLang), selectedLang),
+    [selectedLang],
+  );
+  const suggestedRegion = suggestion.region;
+  const suggestedDemoId = getSuggestedDemo(selectedLang);
+
+  // ── Cost Database state ──
+  const [selectedRegion, setSelectedRegion] = useState(suggestedRegion);
+  // The national market card picked in the base browser, if any. Its region is
+  // the base's, so the region alone cannot tell it from the home card.
+  const [selectedMarket, setSelectedMarket] = useState<BaseVariant | null>(null);
+  // The market step that runs after the base job, while it runs or once it failed.
+  const [marketStep, setMarketStep] = useState<{
+    variant: BaseVariant;
+    status: 'running' | 'failed';
+    reason?: string;
+  } | null>(null);
+  const [loadingDb, setLoadingDb] = useState(false);
+  const [loadedDb, setLoadedDb] = useState<{ id: string; count: number } | null>(null);
+  const [dbProgress, setDbProgress] = useState(0);
+
+  // ── Demo Project state ──
+  const [installDemo, setInstallDemo] = useState(true);
+  const [installingDemo, setInstallingDemo] = useState(false);
+  const [demoInstalled, setDemoInstalled] = useState(false);
+
+  // ── AI state ──
+  const [selectedProvider, setSelectedProvider] = useState<AIProvider>('anthropic');
+  const [apiKey, setApiKey] = useState('');
+  const [showKey, setShowKey] = useState(false);
+
+  // ── Semantic search model state ──
+  // Unticked unless an operator opted the deployment in. The tick is the
+  // user's consent to a ~470 MB download, so a click-through of the wizard
+  // must never start it, desktop included. Shares its query key with the card
+  // below, so the two read one cache entry and not two requests.
+  const { data: semanticStatus } = useQuery({
+    queryKey: ['embedding-model-status'],
+    queryFn: aiEstimatorApi.embeddingModelStatus,
+    retry: false,
+  });
+  const [semanticChoice, setSemanticChoice] = useState<boolean | null>(null);
+  const installSemanticModel = semanticChoice ?? semanticStatus?.enabled ?? false;
+
+  // ── Country Pack state ──
+  // Default-select the preset for the browser's country, else the one for the
+  // language (picking French in step 1 pre-selects France), else the first
+  // showcase preset. See `suggestDataSetup`.
+  const [selectedPackId, setSelectedPackId] = useState<string>(suggestion.packId);
+  // Per-component status for the active generic preset (locale + cost DB only;
+  // demos are handled exclusively by the partner-pack installer).
+  const [packLocaleState, setPackLocaleState] = useState<PackComponentState>('idle');
+  const [packDbState, setPackDbState] = useState<PackComponentState>('idle');
+  const [packDemoState, setPackDemoState] = useState<PackComponentState>('idle');
+  const [packInstalling, setPackInstalling] = useState(false);
+  // À la carte: expandable "Customize / install separately" panel.
+  const [packCustomizeOpen, setPackCustomizeOpen] = useState(false);
+  // Record the classification standard chosen via the pack (stored locally so
+  // it can be read by the workspace; mirrors how loaded databases are tracked).
+  const [recordedClassification, setRecordedClassification] = useState<string | null>(null);
+
+  const selectedPack = getCountryPack(selectedPackId) ?? DEFAULT_COUNTRY_PACK;
+
+  // The bar follows the import job itself. A timer used to run it to 95% in
+  // half a minute while the job was still at 15%.
+  useEffect(() => {
+    if (!loadingDb) setDbProgress(0);
+  }, [loadingDb]);
+
+  const addQueueTask = useUploadQueueStore((s) => s.addTask);
+  const updateQueueTask = useUploadQueueStore((s) => s.updateTask);
+
+  // Generalized cost-DB loader. Loads an explicit ``region`` (defaults to the
+  // currently selected one) and returns how the load ended so callers that
+  // chain components (the Country Pack "install all" flow) can react. Shared
+  // by the region grid (manual path) and the Country Pack picker.
+  const loadCostDb = useCallback(
+    async (region: string): Promise<CostDbLoadOutcome> => {
+      if (loadedDb && loadedDb.id === region) return 'completed';
+      // Another load is running; its own toast reports how it ends.
+      if (loadingDb) return 'unconfirmed';
+      setLoadingDb(true);
+
+      const dbName = CWICR_DATABASES.find((d) => d.id === region)?.name ?? region;
+      const taskId = `db-${region}-${Date.now()}`;
+
+      // Add to global queue so FloatingQueuePanel shows progress
+      addQueueTask({
+        id: taskId,
+        type: 'import',
+        filename: t('onboarding.db_queue_name', { defaultValue: '{{name}} cost database', name: dbName }),
+        status: 'processing',
+        progress: 10,
+        message: t('onboarding.db_loading_status', { defaultValue: 'Loading cost database...' }),
+      });
+
+      try {
+        // Run as a provisioning job and follow it to its end. A direct request
+        // aborted after five minutes, so a large region read "Connection error"
+        // while the import carried on and finished on the server.
+        const result = await followCostDbLoad(region, {
+          onProgress: (job) => {
+            setDbProgress(Math.max(0, Math.min(99, Math.round(job.pct))));
+            updateQueueTask(taskId, {
+              progress: Math.max(10, Math.min(95, job.pct)),
+              message: t('onboarding.db_importing', { defaultValue: 'Importing items...' }),
+            });
+          },
+        });
+        const report = costDbLoadReport(result, dbName);
+        const loaded = result.outcome === 'completed' || result.outcome === 'partial';
+
+        if (loaded) {
+          setDbProgress(100);
+          setLoadedDb({ id: region, count: costDbItemCount(result.job) });
+          updateQueueTask(taskId, { status: 'completed', progress: 100, message: report.queueLine });
+          try {
+            const existing = JSON.parse(
+              localStorage.getItem('oe_loaded_databases') || '[]',
+            ) as string[];
+            if (!existing.includes(region)) {
+              localStorage.setItem(
+                'oe_loaded_databases',
+                JSON.stringify([...existing, region]),
+              );
+            }
+          } catch {
+            // ignore
+          }
+        } else {
+          updateQueueTask(taskId, { status: 'error', progress: 0, error: report.queueLine });
+        }
+        addToast(report.toast);
+        return result.outcome;
+      } finally {
+        setLoadingDb(false);
+      }
+    },
+    [loadingDb, loadedDb, addToast, t, addQueueTask, updateQueueTask],
+  );
+
+  // Region-grid (manual path) load button: load whatever region is selected.
+  // A national market card then prices the loaded base into its market and
+  // switches the text to its language; the provisioning job only knows the
+  // region, so without this step the pick installed the plain home base.
+  const priceMarket = useCallback(
+    async (market: BaseVariant) => {
+      setMarketStep({ variant: market, status: 'running' });
+      try {
+        const data = await loadBaseMarket(market);
+        setMarketStep(null);
+        const fellBackTo = textLanguageFallback(data);
+        addToast({
+          type: fellBackTo ? 'warning' : 'success',
+          title: t('costs.market_priced_title', { defaultValue: 'Priced into {{market}}', market: market.market }),
+          message: fellBackTo
+            ? t('costs.market_text_fallback', {
+                defaultValue: 'The work items are in {{language}}: this base has no {{requested}} version.',
+                language: languageName(fellBackTo, i18n.language),
+                requested: languageName(market.lang_code, i18n.language),
+              })
+            : undefined,
+        });
+      } catch (err: unknown) {
+        // The base is in, the market is not. Keep that visible with its
+        // reason and a retry: the Load button is gone once the base loaded.
+        const reason = err instanceof Error ? err.message : '';
+        setMarketStep({ variant: market, status: 'failed', reason });
+        addToast({
+          type: 'error',
+          title: t('costs.market_failed_title', {
+            defaultValue: 'Could not price into {{market}}',
+            market: market.market,
+          }),
+          message: reason || undefined,
+        });
+      }
+    },
+    [addToast, t],
+  );
+
+  // Named on the button, so a reader who only opened another family sees which
+  // base the click loads (the browser pre-picks one from the UI language).
+  const selectedBaseName =
+    selectedMarket?.market ?? CWICR_DATABASES.find((d) => d.id === selectedRegion)?.name ?? null;
+
+  const handleLoadDb = useCallback(async () => {
+    const market = selectedMarket;
+    const outcome = await loadCostDb(selectedRegion);
+    if (!market || (outcome !== 'completed' && outcome !== 'partial')) return;
+    await priceMarket(market);
+  }, [loadCostDb, selectedRegion, selectedMarket, priceMarket]);
+
+  // Generalized demo installer. Installs an explicit ``demoId`` and returns
+  // ``true`` on success. Built-in demo ids only — POST /api/demo/install/{id}.
+  const installDemoProject = useCallback(
+    async (demoId: string): Promise<boolean> => {
+      setInstallingDemo(true);
+      try {
+        await apiPost(`/demo/install/${demoId}`, undefined, { longRunning: true });
+        setDemoInstalled(true);
+        addToast({
+          type: 'success',
+          title: t('onboarding.demo_installed', { defaultValue: 'Demo project installed' }),
+        });
+        return true;
+      } catch {
+        addToast({
+          type: 'error',
+          title: t('onboarding.demo_install_error', {
+            defaultValue: 'Failed to install demo project',
+          }),
+        });
+        return false;
+      } finally {
+        setInstallingDemo(false);
+      }
+    },
+    [addToast, t],
+  );
+
+  // Manual path: install the language-suggested demo.
+  const handleInstallDemo = useCallback(() => {
+    void installDemoProject(suggestedDemoId);
+  }, [installDemoProject, suggestedDemoId]);
+
+  // ── Country Pack component runners ──────────────────────────────────────
+
+  /** Set the UI locale and persist it as an explicit user choice. */
+  const applyLocale = useCallback((locale: string) => {
+    void changeLanguage(locale);
+    try {
+      localStorage.setItem('oe_lang_explicit', '1');
+    } catch {
+      // storage unavailable — locale still applied for this session
+    }
+  }, []);
+
+  /** Record the workspace cost-classification standard locally. */
+  const recordClassification = useCallback((classification: string) => {
+    setRecordedClassification(classification);
+    try {
+      localStorage.setItem('oe_classification', classification);
+    } catch {
+      // ignore — non-critical preference
+    }
+  }, []);
+
+  // À la carte: set just the pack's locale.
+  const handlePackLocale = useCallback(
+    (pack: CountryPack) => {
+      setPackLocaleState('running');
+      applyLocale(pack.locale);
+      recordClassification(pack.classification);
+      setPackLocaleState('done');
+    },
+    [applyLocale, recordClassification],
+  );
+
+  // À la carte: load just the pack's cost database.
+  const handlePackDb = useCallback(
+    async (pack: CountryPack) => {
+      setSelectedRegion(pack.region);
+      setSelectedMarket(null);
+      setPackDbState('running');
+      setPackDbState(packDbStateFor(await loadCostDb(pack.region)));
+    },
+    [loadCostDb],
+  );
+
+  // À la carte: install just the pack's example project. Idempotent on the
+  // server, which returns the existing project with ``already_installed`` set
+  // rather than failing, so pressing this twice is harmless.
+  const handlePackDemo = useCallback(
+    async (pack: CountryPack) => {
+      setPackDemoState('running');
+      const ok = await installDemoProject(pack.demoId);
+      setPackDemoState(ok ? 'done' : 'error');
+    },
+    [installDemoProject],
+  );
+
+  // One-click (generic preset): language + classification, the relational cost
+  // DB, and the preset's worked example project. Endpoints called:
+  //   - POST /api/v1/onboarding/provision {region}, then its job is polled
+  //   - POST /api/demo/install/{demoId}
+  // Locale + classification are applied client-side.
+  //
+  // This used to stop after the cost database, on the rule that fully-worked
+  // demos belong to the partner-pack installer alone. That rule was written
+  // against a real gap: the per-module seed blocks were keyed by demo id and
+  // fell back to an empty list, so a pack demo installed here would arrive as a
+  // bare bill with no contacts, documents, inspections or invoices behind it,
+  // and an empty example teaches a new user the wrong thing about the product.
+  // That gap is closed. Every block now reads ``_HAND.get(demo_id) or
+  // generated[...]``, there is not one empty-list fallback left in
+  // demo_projects.py, and a pack demo installs with the same module depth as a
+  // built-in. The reason for withholding is gone, so the preset no longer
+  // withholds: what the card lists is what the button installs.
+  const handleInstallPack = useCallback(
+    async (pack: CountryPack) => {
+      if (packInstalling) return;
+      setPackInstalling(true);
+
+      // 1) Locale + classification — instant, client-side.
+      setPackLocaleState('running');
+      applyLocale(pack.locale);
+      recordClassification(pack.classification);
+      setPackLocaleState('done');
+
+      // 2) Cost database, started and not awaited here. A large region takes
+      // many minutes, and the example project used to wait for all of them;
+      // the load reports its own ending in a toast.
+      setPackDbState('running');
+      const dbDone = loadCostDb(pack.region).then((outcome) => setPackDbState(packDbStateFor(outcome)));
+
+      // 3) Example project. Independent of the cost database on purpose: a
+      // demo carries its own priced bill, so a slow or failed catalogue import
+      // is no reason to leave the workspace with nothing in it.
+      setPackDemoState('running');
+      const demoOk = await installDemoProject(pack.demoId);
+      setPackDemoState(demoOk ? 'done' : 'error');
+
+      // The card stays locked until the load ends too, so switching the
+      // country cannot land this load's state on another pack.
+      await dbDone;
+      setPackInstalling(false);
+    },
+    [packInstalling, applyLocale, recordClassification, loadCostDb, installDemoProject],
+  );
+
+  // When the user switches the active preset, reset its per-component status and
+  // align the manual region grid with the preset's region for consistency.
+  const handleSelectPack = useCallback((pack: CountryPack) => {
+    setSelectedPackId(pack.id);
+    setSelectedRegion(pack.region);
+    setSelectedMarket(null);
+    setPackLocaleState('idle');
+    setPackDbState('idle');
+    setPackDemoState('idle');
+  }, []);
+
+  const testMutation = useMutation({
+    mutationFn: () => aiApi.testConnection(selectedProvider),
+    onSuccess: (result) => {
+      if (result.success) {
+        addToast({
+          type: 'success',
+          title: t('onboarding.ai_test_success', { defaultValue: 'Connection successful!' }),
+          message: result.latency_ms ? `${result.latency_ms}ms response time` : undefined,
+        });
+      } else {
+        addToast({
+          type: 'error',
+          title: t('onboarding.ai_test_failed', { defaultValue: 'Connection failed' }),
+          message: result.message,
+        });
+      }
+    },
+    onError: (err: Error) => {
+      addToast({
+        type: 'error',
+        title: t('onboarding.ai_test_error', { defaultValue: 'Test failed' }),
+        message: err.message,
+      });
+    },
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: () => {
+      if (!apiKey.trim()) return Promise.resolve(null);
+      const keyField = `${selectedProvider}_api_key`;
+      return aiApi.updateSettings({
+        provider: selectedProvider,
+        [keyField]: apiKey.trim(),
+      } as Parameters<typeof aiApi.updateSettings>[0]);
+    },
+    onSuccess: () => {
+      if (apiKey.trim()) {
+        addToast({
+          type: 'success',
+          title: t('onboarding.ai_saved', { defaultValue: 'AI settings saved' }),
+        });
+      }
+    },
+    onError: (err: Error) => {
+      addToast({ type: 'error', title: t('onboarding.ai_save_failed', { defaultValue: 'Failed to save AI settings' }), message: err.message });
+    },
+  });
+
+  const handleContinue = useCallback(async () => {
+    // If the user neither picked a generic preset nor loaded a DB manually,
+    // fall back to background-loading the active preset's region so a fresh
+    // workspace still gets a sensible cost database. The preset flow already
+    // owns its own progress, so only kick this off when nothing is in flight.
+    const dbUntouched =
+      packDbState === 'idle' && packLocaleState === 'idle' && !loadedDb && !loadingDb;
+    if (backgroundLoad && dbUntouched && selectedRegion) {
+      // Fire and forget — don't await, just start in background.
+      void handleLoadDb();
+      // The language stays the one picked on the first step: the preset's
+      // locale here switched an English reader in India to Hindi.
+      recordClassification(selectedPack.classification);
+      addToast({
+        type: 'info',
+        title: t('onboarding.db_loading_bg', { defaultValue: 'Loading database in background...' }),
+        message: t('onboarding.db_loading_bg_desc', {
+          defaultValue: 'You can continue working. We\'ll notify you when it\'s ready.',
+        }),
+      });
+    }
+    // Independent of the base: the untouched path used to skip the demo the
+    // toggle had on.
+    if (installDemo && !demoInstalled && !installingDemo && packDemoState === 'idle') {
+      handleInstallDemo();
+    }
+    const baseId = loadedDb?.id ?? selectedRegion;
+    // A national market card names its own market; otherwise the chosen country decides.
+    void adoptMarketCurrency(
+      selectedMarket?.currency ??
+        marketCurrencyFor(selectedPack.flagId, CWICR_DATABASES.find((d) => d.id === baseId)?.currency),
+    );
+    // Ask for the semantic search model if the user left it ticked and nothing
+    // has fetched it yet. Deliberately not awaited and deliberately not
+    // reported: the server answers as soon as the transfer is scheduled, a
+    // failure here costs the user nothing, and this must never be the reason
+    // the wizard does not finish.
+    if (installSemanticModel && semanticStatus?.state === 'not_requested') {
+      void aiEstimatorApi.installEmbeddingModel().catch(() => undefined);
+    }
+    // Save AI key if provided
+    if (apiKey.trim()) {
+      saveMutation.mutate();
+    }
+    onNext();
+  }, [
+    installSemanticModel,
+    semanticStatus,
+    backgroundLoad,
+    selectedRegion,
+    loadedDb,
+    loadingDb,
+    handleLoadDb,
+    packDbState,
+    packLocaleState,
+    packDemoState,
+    selectedPack,
+    selectedMarket,
+    recordClassification,
+    installDemo,
+    demoInstalled,
+    installingDemo,
+    handleInstallDemo,
+    apiKey,
+    saveMutation,
+    onNext,
+  ]);
+
+  // Show all regions
+  const [aiExpanded, setAiExpanded] = useState(false);
+
+  // The full base catalog (9 families, 38 cost bases) with real work-item
+  // counts, shared with the import page and database setup. The browser has its
+  // own search, so no local region filter is needed here.
+  const { data: baseCatalog, error: baseCatalogError, refetch: refetchBaseCatalog } = useBaseCatalog();
+
+  return (
+    <div className="flex flex-col items-center">
+      <h2 className="text-2xl font-bold text-content-primary">
+        {t('onboarding.data_setup_title', { defaultValue: 'Data Setup' })}
+      </h2>
+      <p className="mt-2 text-sm text-content-secondary text-center max-w-md">
+        {t('onboarding.data_setup_subtitle', {
+          defaultValue: 'Optional setup steps. You can skip any or all of these.',
+        })}
+      </p>
+
+      <div className="mt-6 w-full max-w-2xl space-y-4">
+        {/* Cost base first: pick the regional pricing base(s) you estimate
+            with. This leads the step so the choice of bases comes before
+            anything else; the ready-made country packs just below can set the
+            same thing up in one click once the region is known. */}
+        {/* Card 1: Cost Database - full width */}
+        <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
+              <Database size={20} />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-content-primary">
+                {t('onboarding.load_cost_db', { defaultValue: 'Load Cost Database' })}
+              </h3>
+              <p className="text-xs text-content-tertiary">
+                {t('onboarding.cost_db_optional', { defaultValue: '55,000+ pricing items' })}
+              </p>
+            </div>
+          </div>
+
+          {/* All 9 base families (30 global markets + 8 national bases) with
+              real work-item counts. Selecting one arms the Load button below;
+              the browser carries its own search across every base. */}
+          {!loadedDb &&
+            (baseCatalog ? (
+              <div className="max-h-96 overflow-y-auto pr-1 -mr-1 mb-3">
+                <BaseCatalogBrowser
+                  catalog={baseCatalog}
+                  mode="select"
+                  selectedRegion={selectedMarket?.variant_id ?? selectedRegion}
+                  onSelect={(v) => {
+                    if (loadingDb) return;
+                    // A market card shares its base's region; keep the card
+                    // itself, or the pick reads as (and loads) the home base.
+                    setSelectedRegion(v.base_region);
+                    setSelectedMarket(v.market_catalog ? v : null);
+                  }}
+                  loadingRegion={loadingDb ? (selectedMarket?.variant_id ?? selectedRegion) : null}
+                />
+              </div>
+            ) : baseCatalogError ? (
+              <BaseCatalogError error={baseCatalogError} onRetry={() => void refetchBaseCatalog()} />
+            ) : (
+              <div className="flex items-center justify-center gap-2 py-8 text-xs text-content-tertiary">
+                <Loader2 size={14} className="animate-spin" />
+                {t('onboarding.base_loading_catalog', { defaultValue: 'Loading cost bases...' })}
+              </div>
+            ))}
+
+          {/* Load button / progress / success */}
+          <div>
+            {loadedDb && marketStep?.status === 'running' ? (
+              <div className="flex items-center gap-2 text-sm text-content-secondary">
+                <Loader2 size={14} className="animate-spin text-oe-blue" />
+                <span>
+                  {t('costs.base_loading', { defaultValue: 'Loading' })} {marketStep.variant.market}
+                </span>
+              </div>
+            ) : loadedDb && marketStep?.status === 'failed' ? (
+              <div className="flex flex-col items-start gap-2" data-testid="onboarding-market-failed">
+                <p className="text-sm text-semantic-error">
+                  {t('costs.market_failed_title', {
+                    defaultValue: 'Could not price into {{market}}',
+                    market: marketStep.variant.market,
+                  })}
+                  {marketStep.reason ? `: ${marketStep.reason}` : ''}
+                </p>
+                <Button variant="secondary" size="sm" onClick={() => void priceMarket(marketStep.variant)}>
+                  {t('costs.load_failed_retry', { defaultValue: 'Retry' })}
+                </Button>
+              </div>
+            ) : loadedDb ? (
+              <div className="flex items-center gap-2 text-sm text-semantic-success">
+                <CheckCircle2 size={16} />
+                <span className="font-medium">
+                  {loadedDb.count.toLocaleString(getNumberLocale())}{' '}
+                  {t('onboarding.items_loaded', { defaultValue: 'items loaded' })}
+                </span>
+              </div>
+            ) : loadingDb ? (
+              <div>
+                <div className="flex items-center gap-2 text-sm text-content-secondary mb-2">
+                  <Loader2 size={14} className="animate-spin text-oe-blue" />
+                  <span>{dbProgress}%</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-secondary">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-oe-blue to-blue-500 transition-all duration-500 ease-out"
+                    style={{ width: `${dbProgress}%` }}
+                  />
+                </div>
+              </div>
+            ) : (
+              <Button variant="secondary" size="sm" onClick={handleLoadDb} disabled={!selectedRegion}>
+                {selectedBaseName
+                  ? t('onboarding.load_database_named', { defaultValue: 'Load {{name}}', name: selectedBaseName })
+                  : t('onboarding.load_database', { defaultValue: 'Load Database' })}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        {/* Or install a ready-made country pack: language, cost database and a
+            worked example project in one click. Offered after the manual base
+            picker so the user chooses bases first. The example project is not
+            decoration here, it is the only part of the install a new user can
+            actually read on arrival. The partner pack installer is offered
+            to admins only, like the Ready-made Pack card on the start step. */}
+        {canInstallPartnerPacks && <PartnerPackInstaller onActivateLocale={applyLocale} />}
+        <FlagshipDemoCards country={selectedPack.flagId} />
+        <CountryPackCard
+          packs={COUNTRY_PACKS}
+          selectedPack={selectedPack}
+          onSelectPack={handleSelectPack}
+          onInstallPack={handleInstallPack}
+          onPackLocale={handlePackLocale}
+          onPackDb={handlePackDb}
+          onPackDemo={handlePackDemo}
+          installing={packInstalling}
+          localeState={packLocaleState}
+          dbState={packDbState}
+          demoState={packDemoState}
+          customizeOpen={packCustomizeOpen}
+          onToggleCustomize={() => setPackCustomizeOpen((v) => !v)}
+          recordedClassification={recordedClassification}
+        />
+
+        {/* Advanced: optional demo project and AI provider. The cost-base
+            picker used to live here; it now leads the step above. */}
+        <details className="group rounded-2xl bg-surface-elevated/60 shadow-sm shadow-black/[0.04]">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 p-4 text-sm font-medium text-content-secondary hover:text-content-primary transition-colors">
+            <span className="flex items-center gap-2">
+              <Settings2 size={16} className="text-content-tertiary" />
+              {t('onboarding.advanced_extras_setup', {
+                defaultValue: 'Advanced - install a demo project or connect AI',
+              })}
+            </span>
+            <ChevronDown
+              size={16}
+              className="text-content-tertiary transition-transform duration-200 group-open:rotate-180"
+            />
+          </summary>
+
+          <div className="space-y-4 p-4 pt-0">
+        {/* Card 2: Demo Project - full width, simple toggle */}
+        <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04] p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
+                <FolderOpen size={20} />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-content-primary">
+                  {t('onboarding.install_demo', { defaultValue: 'Install Demo Project' })}
+                </h3>
+                <p className="text-xs text-content-tertiary">
+                  {t('onboarding.demo_optional', { defaultValue: 'Sample project to explore' })}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              {demoInstalled ? (
+                <div className="flex items-center gap-2 text-sm text-semantic-success">
+                  <CheckCircle2 size={16} />
+                  <span className="font-medium">
+                    {t('onboarding.demo_installed', { defaultValue: 'Installed' })}
+                  </span>
+                </div>
+              ) : installingDemo ? (
+                <div role="status" aria-busy="true" className="flex items-center gap-2 text-sm text-content-secondary">
+                  <Loader2 size={14} className="animate-spin text-oe-blue" aria-hidden />
+                  <span>{t('onboarding.installing_label', { defaultValue: 'Installing…' })}</span>
+                </div>
+              ) : (
+                <ToggleSwitch
+                  enabled={installDemo}
+                  onToggle={() => setInstallDemo(!installDemo)}
+                  label={t('onboarding.install_demo', { defaultValue: 'Install Demo Project' })}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2b: Semantic search model - an optional background download.
+            It never gates Continue: the request below is fired and forgotten,
+            and the card renders whatever state the server reports. */}
+        <SemanticModelCard
+          enabled={installSemanticModel}
+          onToggle={setSemanticChoice}
+        />
+
+        {/* Card 3: AI Provider — collapsible */}
+        <div className="rounded-2xl bg-surface-elevated shadow-sm shadow-black/[0.04]">
+          <button
+            type="button"
+            onClick={() => setAiExpanded(!aiExpanded)}
+            aria-expanded={aiExpanded}
+            className="w-full flex items-center justify-between p-6"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
+                <Sparkles size={20} />
+              </div>
+              <div className="text-start">
+                <h3 className="text-base font-bold text-content-primary">
+                  {t('onboarding.connect_ai', { defaultValue: 'Connect AI Provider' })}
+                </h3>
+                <p className="text-xs text-content-tertiary">
+                  {t('onboarding.ai_optional', { defaultValue: 'Optional - smart estimation features' })}
+                </p>
+              </div>
+            </div>
+            <ArrowRight
+              size={16}
+              className={clsx(
+                'text-content-tertiary transition-transform duration-200 shrink-0',
+                aiExpanded ? 'rotate-90' : 'rtl:rotate-180',
+              )}
+            />
+          </button>
+
+          {aiExpanded && (
+            <div className="px-6 pb-6 pt-0 space-y-3">
+              {/* Provider selector */}
+              <select
+                value={selectedProvider}
+                onChange={(e) => {
+                  setSelectedProvider(e.target.value as AIProvider);
+                  setApiKey('');
+                  setShowKey(false);
+                }}
+                className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm text-content-primary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+              >
+                {AI_PROVIDERS.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.nameKey ? t(p.nameKey, { defaultValue: p.name }) : p.name}
+                    {p.recommended ? ' *' : ''}
+                  </option>
+                ))}
+              </select>
+
+              {/* API key input */}
+              <div className="relative">
+                <input
+                  type="text"
+                  value={showKey ? apiKey : apiKey ? maskApiKey(apiKey) : ''}
+                  onChange={(e) => {
+                    if (showKey) {
+                      setApiKey(e.target.value);
+                    } else {
+                      setApiKey(e.target.value);
+                      setShowKey(true);
+                    }
+                  }}
+                  onFocus={() => {
+                    if (apiKey && !showKey) setShowKey(true);
+                  }}
+                  placeholder={t('onboarding.api_key_placeholder', {
+                    defaultValue: 'Paste API key...',
+                  })}
+                  className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 pe-8 font-mono text-xs text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowKey(!showKey)}
+                  className="absolute inset-y-0 end-0 flex items-center px-2 text-content-tertiary hover:text-content-primary transition-colors"
+                  tabIndex={-1}
+                >
+                  {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
+                </button>
+              </div>
+
+              {/* Test and docs link */}
+              <div className="flex items-center justify-between">
+                <a
+                  href={AI_PROVIDERS.find((p) => p.id === selectedProvider)?.docsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1 text-2xs text-oe-blue hover:underline"
+                >
+                  {t('onboarding.get_api_key', { defaultValue: 'Get key' })}
+                  <ExternalLink size={10} />
+                </a>
+                {apiKey.trim() && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => testMutation.mutate()}
+                    disabled={testMutation.isPending}
+                    icon={
+                      testMutation.isPending ? (
+                        <Loader2 size={12} className="animate-spin" />
+                      ) : undefined
+                    }
+                  >
+                    {testMutation.isPending
+                      ? t('onboarding.testing', { defaultValue: 'Testing...' })
+                      : t('onboarding.test', { defaultValue: 'Test' })}
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+          </div>
+        </details>
+      </div>
+
+      <p className="mt-4 text-xs text-content-tertiary text-center max-w-md">
+        {t('onboarding.data_setup_hint', {
+          defaultValue: 'All of these can be configured later in Settings.',
+        })}
+      </p>
+
+      <div className="mt-6 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button variant="secondary" onClick={onNext}>
+          {t('onboarding.skip', { defaultValue: 'Skip - set up later' })}
+        </Button>
+        <Button
+          variant="primary"
+          onClick={handleContinue}
+          loading={saveMutation.isPending || installingDemo || packInstalling}
+          icon={<ArrowRight size={16} />}
+          iconPosition="right"
+        >
+          {t('common.continue', { defaultValue: 'Continue' })}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+// ── Step 6: Summary + Finish ────────────────────────────────────────────────
+
+export function StepFinish({
+  onBack,
+  companyType,
+  enabledModules,
+  presets,
+  packInstalled = false,
+  installedPackSlug = null,
+  packProfileMode = 'pack-default',
+  onEdit,
+}: {
+  /** Jump back to a step from the summary's Change buttons. */
+  onEdit?: (step: number) => void;
+  /** Which profile a pack install saves for the reader: the one the pack names
+   *  (``pack-default``), the one chosen beside the pack, already saved
+   *  (``keep``), or what the reader set on the Profile and Modules steps
+   *  after the install (``wizard``). */
+  packProfileMode?: 'pack-default' | 'keep' | 'wizard';
+  onBack: () => void;
+  companyType: string | null;
+  enabledModules: Set<string>;
+  presets: ApiCompanyPreset[];
+  /** Slug of the partner pack the one-click path installed, when it was one
+   *  (a curated market preset records ``country:<id>`` and is not a pack). */
+  installedPackSlug?: string | null;
+  /** A ready-made pack already provisioned modules + regional config + sample
+   *  data server-side. When true, Finish must NOT overwrite those module
+   *  preferences or re-POST a generic onboarding payload, and it lands on the
+   *  freshly seeded projects. */
+  packInstalled?: boolean;
+}) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const onboardingQueryKey = useMeOnboardingQueryKey();
+  const syncFromServer = useModuleStore((s) => s.syncFromServer);
+  const text = usePresetText();
+  const [saving, setSaving] = useState(false);
+  // The profile Finish saves, which is not always the one picked: Full
+  // Enterprise with modules switched off, or modules chosen without a
+  // profile, are saved as no profile so the server keeps them as chosen
+  // (see `companyTypeToSave`). Everything below describes what is saved.
+  const savedCompanyType = companyTypeToSave(companyType, enabledModules);
+  // The same lookup the sidebar makes, so this step can say what the menu will
+  // show before the user sees it.
+  const workspace = packInstalled ? null : workspaceFor(savedCompanyType);
+
+  const selectedPreset = savedCompanyType
+    ? presets.find((p) => p.key === savedCompanyType)
+    : undefined;
+  const presetLabel = selectedPreset ? text.label(selectedPreset) : null;
+
+  const enabledCount = activeModuleCount(enabledModules);
+
+  const handleFinish = useCallback(async () => {
+    setSaving(true);
+
+    // The Simple / Advanced mode is not set here. It used to be forced to
+    // Simple on every finish, which overrode a mode the user had picked.
+    // A user who has picked one keeps it (it is stored per user on the
+    // server); anybody else gets the default the saved profile implies
+    // (`app/layout/useViewModeDefault.ts`): Simple for a profile with a
+    // workspace, which is that workspace, Advanced for any other profile.
+    // They can switch any time from Settings > Interface Mode. The POST below
+    // carries no `interface_mode` either: that onboarding field was written as
+    // 'advanced' whatever the user had, and the mode is not read from it.
+
+    if (packInstalled) {
+      // The ready-made pack already configured modules, locale, classification
+      // and sample data on the server. Don't clobber that here -- just mark
+      // onboarding complete (which fires the tour-gating event) and open the
+      // seeded projects.
+      //
+      // One thing the install does not do is choose a company profile, because
+      // the pack jumps past that step. When the pack names the profile its
+      // users start in, save it for the person who installed it, the way the
+      // profile step would have. This writes that user's own preferences, not
+      // the installation's module state the pack just set. A pack that names
+      // no profile saves nothing, as before.
+      try {
+        let toSave: { company_type: string | null; enabled_modules: string[] } | null = null;
+        if (packProfileMode === 'wizard') {
+          // The reader changed the profile or the modules after the install:
+          // that is the last word, saved the way the step-by-step path saves it.
+          toSave = { company_type: savedCompanyType, enabled_modules: Array.from(enabledModules) };
+        } else if (packProfileMode === 'pack-default') {
+          const current = await apiGet<PartnerPackResponse>('/v1/partner-pack/current');
+          toSave = packProfileToSave(
+            current.active ? current.manifest?.default_company_profile : null,
+            presets,
+          );
+        }
+        if (toSave) {
+          const saved = await apiPost<MeOnboarding>('/v1/users/me/onboarding/', {
+            ...toSave,
+            completed: true,
+          });
+          queryClient.setQueryData(onboardingQueryKey, saved);
+          await syncFromServer();
+          try {
+            if (toSave.company_type) localStorage.setItem(COMPANY_TYPE_STORAGE_KEY, toSave.company_type);
+            else localStorage.removeItem(COMPANY_TYPE_STORAGE_KEY);
+          } catch {
+            // Storage unavailable -- the server copy above is the one that counts.
+          }
+        }
+      } catch {
+        // Non-critical -- the pack's profile still reaches this user as the
+        // default of anybody who has chosen none.
+      }
+      markOnboardingCompleted();
+      setSaving(false);
+      navigate('/projects');
+      return;
+    }
+
+    // 1. Persist the onboarding state. The backend turns the chosen profile
+    //    into the canonical module_preferences map, which is what the sidebar,
+    //    module routes and Project Journey read back to reshape the menu.
+    try {
+      const saved = await apiPost<MeOnboarding>('/v1/users/me/onboarding/', {
+        company_type: savedCompanyType,
+        enabled_modules: Array.from(enabledModules),
+        completed: true,
+      });
+      // The sidebar picks its workspace from this cache entry. The dashboard
+      // filled it before sending the user here, with no profile and not
+      // completed, so without this write the menu would keep the old answer
+      // until the entry went stale.
+      queryClient.setQueryData(onboardingQueryKey, saved);
+      // 2. Reconcile the reactive module store straight from the server, the
+      //    same sequence the Modules > Company Profiles switch uses. This is
+      //    what actually rebuilds the menu to the picked profile. The old
+      //    per-key setModuleEnabled loop scheduled a debounced PATCH that raced
+      //    this POST on the same JSON and left the menu unchanged.
+      await syncFromServer();
+    } catch {
+      // Non-critical -- the profile choice is still remembered locally below.
+    }
+
+    // 3. Remember the active profile so the Modules page opens on it too.
+    //    With no profile saved there is none to open on, and a key left over
+    //    from an earlier run would open it on the wrong one.
+    try {
+      if (savedCompanyType) localStorage.setItem(COMPANY_TYPE_STORAGE_KEY, savedCompanyType);
+      else localStorage.removeItem(COMPANY_TYPE_STORAGE_KEY);
+    } catch {
+      // Storage unavailable -- the server copy above is the one that counts.
+    }
+
+    // 4. Mark completed locally (fires the guided-tour gating event).
+    markOnboardingCompleted();
+
+    setSaving(false);
+    navigate('/');
+  }, [
+    savedCompanyType,
+    enabledModules,
+    navigate,
+    packInstalled,
+    packProfileMode,
+    presets,
+    queryClient,
+    onboardingQueryKey,
+    syncFromServer,
+  ]);
+
+  return (
+    <div className="flex flex-col items-center justify-center text-center">
+      {/* Confetti-like animation via pulsing rings */}
+      <div className="relative mb-6">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="h-24 w-24 rounded-full bg-semantic-success/5 animate-ping" />
+        </div>
+        <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-semantic-success-bg/60 ring-4 ring-semantic-success/10">
+          <Rocket size={32} className="text-semantic-success" />
+        </div>
+      </div>
+
+      <h2 className="text-3xl font-bold text-content-primary">
+        {t('onboarding.finish_title', { defaultValue: "You're All Set!" })}
+      </h2>
+
+      <p className="mt-3 max-w-md text-base text-content-secondary leading-relaxed">
+        {packInstalled
+          ? t('onboarding.finish_subtitle_pack', {
+              defaultValue:
+                'Your ready-made pack is installed. Language, cost databases, modules and sample projects are all set up.',
+            })
+          : t('onboarding.finish_subtitle', {
+              defaultValue: 'Your workspace is configured and ready to use.',
+            })}
+      </p>
+
+      {workspace && (
+        <p
+          className="mt-4 max-w-md text-sm text-content-secondary leading-relaxed"
+          data-testid="onboarding-finish-workspace"
+        >
+          {t('onboarding.finish_workspace', {
+            defaultValue:
+              'The sidebar opens on your {{name}} workspace. Every other screen is one click away under More modules.',
+            name: t(workspace.labelKey, { defaultValue: workspace.defaultLabel }),
+          })}
+        </p>
+      )}
+
+      <p className="mt-5 text-xs text-content-tertiary max-w-md">
+        {t('onboarding.finish_hint', {
+          defaultValue: 'You can adjust all settings later from the Settings page.',
+        })}
+      </p>
+
+      {onEdit && (
+        <SetupSummary
+          packInstalled={packInstalled}
+          presetLabel={presetLabel}
+          enabledCount={enabledCount}
+          language={i18n.language}
+          onEdit={onEdit}
+          onLeave={markOnboardingCompleted}
+        />
+      )}
+
+      <div className="mt-8 flex items-center gap-3">
+        <Button variant="ghost" onClick={onBack} icon={<ArrowLeft size={16} />}>
+          {t('common.back', { defaultValue: 'Back' })}
+        </Button>
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={handleFinish}
+          loading={saving}
+          icon={<ArrowRight size={18} />}
+          iconPosition="right"
+        >
+          {t('onboarding.start_working', { defaultValue: 'Start Working' })}
+        </Button>
+      </div>
+
+      {installedPackSlug && !installedPackSlug.startsWith('country:') && (
+        <PackModulesLeftOnNote slug={installedPackSlug} onLeave={markOnboardingCompleted} />
+      )}
+
+      {/* Explore-all CTA — links to /modules so users can see the full
+          88-module marketplace post-onboarding. Persists onboarding-complete
+          before navigation so users don't get bounced back into the wizard. */}
+      <div className="mt-6">
+        <Link
+          to="/modules"
+          onClick={markOnboardingCompleted}
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-oe-blue hover:underline transition-colors"
+        >
+          <Package size={14} />
+          {t('onboarding.explore_all_modules', {
+            defaultValue: 'Explore all {{count}} modules',
+            count: TOTAL_MODULE_COUNT,
+          })}
+          <ArrowRight size={12} />
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Wizard ──────────────────────────────────────────────────────────────
+
+export function OnboardingWizard() {
+  const { t, i18n: i18nInstance } = useTranslation();
+  const navigate = useNavigate();
+
+  // The wizard renders outside the app layout, which is what sets the tab
+  // title everywhere else, so the tab kept the previous page's title
+  // ("Dashboard", after the first-run redirect). Same suffix as the layout,
+  // and re-translated on a language switch in step 1.
+  const brandName = useBrandingStore((s) => (s.companyName.trim() ? s.companyName.trim() : null));
+  useEffect(() => {
+    document.title = `${t('onboarding.page_title', { defaultValue: 'Getting started' })} | ${brandName ?? 'OpenConstructionERP'}`;
+  }, [t, i18nInstance.language, brandName]);
+  const [restored] = useState(() => loadWizardProgress(TOTAL_STEPS));
+  const [step, setStep] = useState(() => restored?.step ?? 0);
+  const [selectedLang, setSelectedLang] = useState(() => i18n.language?.split('-')[0] || 'en');
+  const presets = useOnboardingPresets();
+  const [companyType, setCompanyType] = useState<string | null>(() => restored?.companyType ?? null);
+  const [enabledModules, setEnabledModules] = useState<Set<string>>(
+    () => new Set(restored?.enabledModules ?? ALL_MODULES.filter((m) => !m.core).map((m) => m.key)),
+  );
+
+  /* ONBOARD-MODAL: the wizard itself had NO completed-flag guard — it
+     always rendered step 0 ("Welcome to OpenConstructionERP"). It is only
+     mounted at the /onboarding route, but anything that routes there
+     (the dashboard first-run redirect, a stale bookmark, a back-button,
+     QA navigation) re-showed the welcome modal even for users who already
+     finished onboarding. Gate the wizard on the SAME localStorage flag
+     the dashboard redirect uses (`oe_onboarding_completed`, via the
+     shared `isOnboardingCompleted()` helper) and bounce completed users
+     straight to the app. The Settings "restart onboarding" action removes
+     that flag *before* navigating here, so an intentional re-run still
+     works (flag absent → guard passes → wizard shows). Computed once at
+     mount so finishing the wizard (which sets the flag) doesn't yank the
+     UI out from under the success step. */
+  // The server flag decides, decided once on its first answer so finishing the
+  // wizard does not yank the success step; the local flag only covers a failed fetch.
+  const gateKey = useMeOnboardingQueryKey();
+  const { data: serverOnboarding, isFetchedAfterMount: gateFresh } = useQuery({
+    queryKey: gateKey,
+    queryFn: () => apiGet<{ completed: boolean }>('/v1/users/me/onboarding/').catch(() => null),
+    retry: false,
+    staleTime: 0,
+  });
+  const [alreadyCompleted, setAlreadyCompleted] = useState<boolean | null>(null);
+  useEffect(() => {
+    // A cached record can predate a restart made a moment ago, so wait for a fresh read.
+    if (alreadyCompleted !== null || !gateFresh || serverOnboarding === undefined) return;
+    setAlreadyCompleted(resolveCompletedGate(serverOnboarding));
+  }, [alreadyCompleted, gateFresh, serverOnboarding]);
+
+  useEffect(() => {
+    if (alreadyCompleted) {
+      navigate('/', { replace: true });
+    }
+  }, [alreadyCompleted, navigate]);
+
+  /* A company that installed a pack naming its profile has already answered
+     everything this wizard asks: the language, the market and the menu. The
+     people who join that installation afterwards (site staff, mostly) have
+     nothing to set up and cannot install anything, and the card the wizard
+     recommends to them, Quick Start, would save the catch-all profile and
+     hand them the whole catalogue instead of the company's menu. So anyone
+     who is not an admin is marked as set up and sent on; the menu then
+     follows the pack's profile (`effectiveCompanyPresetKey`), and they can
+     still pick their own on Modules > Company Profiles. An admin, and any
+     installation whose pack names no profile, gets the wizard as before. */
+  const canInstallPacks = useCanInstallPartnerPacks();
+  const { data: activePack } = usePartnerPack();
+  const packProfile = activePack?.active ? (activePack.manifest?.default_company_profile ?? null) : null;
+  const passQueryClient = useQueryClient();
+  const passOnboardingKey = useMeOnboardingQueryKey();
+  useEffect(() => {
+    if (alreadyCompleted !== false || canInstallPacks || !packProfile) return;
+    let cancelled = false;
+    // The dashboard sends back here anyone whose server record is not
+    // completed, and it reads that record from the shared cache entry. So the
+    // flag is written on the server first and its answer put into that entry
+    // before leaving; leaving on the local flag alone would bounce between the
+    // two screens. If the write fails the wizard simply stays.
+    void apiPost<MeOnboarding>('/v1/users/me/onboarding/complete/', undefined)
+      .then((saved) => {
+        if (cancelled) return;
+        passQueryClient.setQueryData(passOnboardingKey, saved);
+        markOnboardingCompleted();
+        navigate('/', { replace: true });
+      })
+      .catch(() => {
+        /* stay on the wizard */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [alreadyCompleted, canInstallPacks, packProfile, navigate, passQueryClient, passOnboardingKey]);
+
+  // Track whether user chose "Quick Start" (skip profile + modules, go to data)
+  const [, setQuickStart] = useState(false);
+  // Track whether module config step should be shown
+  const [, setShowModuleConfig] = useState(false);
+  // Ready-made pack flow: when true, step 1 swaps its choice cards for the
+  // pack picker. ``packInstalledSlug`` records the slug once a pack is fully
+  // installed so the Finish step shows pack-appropriate copy and does not
+  // overwrite the modules the pack just configured.
+  const [readyPackView, setReadyPackView] = useState(false);
+  const [packInstalledSlug, setPackInstalledSlug] = useState<string | null>(null);
+  // The pack install the reader started, from the moment it begins. It is the
+  // wizard's, not the picker's, so leaving the step and coming back neither
+  // loses it nor offers a second install. Set while the install runs and after
+  // it, cleared only if it failed.
+  const [packInstallingSlug, setPackInstallingSlug] = useState<string | null>(null);
+  // The company type applied beside the pack, and whether the reader has since
+  // changed the profile or the modules on their own steps.
+  const [packCompanyKey, setPackCompanyKey] = useState<string | null>(null);
+  const [profileTouched, setProfileTouched] = useState(false);
+  const packFlow = packInstallingSlug !== null;
+  const packReady = packInstalledSlug !== null;
+
+  // Which steps the reader has been on. The stepper opens those, and Back
+  // returns to the nearest earlier one.
+  const [maxReached, setMaxReached] = useState(() => Math.max(0, ...(restored?.visited ?? [])));
+  const [visited, setVisited] = useState<ReadonlySet<number>>(() => new Set([0, ...(restored?.visited ?? [])]));
+  useEffect(() => {
+    setMaxReached((m) => Math.max(m, step));
+    setVisited((v) => (v.has(step) ? v : new Set(v).add(step)));
+  }, [step]);
+
+  // A reload mid-way returns here. The pack flow is not kept: its install
+  // state lives in the running request, which a reload ends.
+  useEffect(() => {
+    if (alreadyCompleted || isOnboardingCompleted()) return;
+    if (packFlow) {
+      clearWizardProgress();
+      return;
+    }
+    saveWizardProgress({
+      step,
+      visited: [...visited],
+      companyType,
+      enabledModules: [...enabledModules],
+    });
+  }, [alreadyCompleted, packFlow, step, visited, companyType, enabledModules]);
+
+  // Persistent escape hatch (top-right, every step): switch the whole app to
+  // English, mark the language choice as explicit so the locale auto-detect
+  // never overrides it, complete onboarding exactly like the finish path, and
+  // drop the user straight on the dashboard. No confirmation dialog.
+  const handleSkipAll = useCallback(() => {
+    void changeLanguage('en');
+    try {
+      localStorage.setItem('oe_lang_explicit', '1');
+    } catch {
+      // Storage unavailable -- ignore.
+    }
+    // The dashboard redirects on the cached server flag, which still says "not
+    // completed" here, so Skip bounced straight back to the welcome screen.
+    passQueryClient.setQueryData<MeOnboarding | undefined>(passOnboardingKey, (old) =>
+      old ? { ...old, completed: true } : old,
+    );
+    void markOnboardingCompleted().then((saved) => {
+      if (saved) passQueryClient.setQueryData(passOnboardingKey, saved);
+    });
+    navigate('/dashboard');
+  }, [navigate, passQueryClient, passOnboardingKey]);
+
+  // Next and Back walk the same order the stepper shows. Next skips Data
+  // after a pack install (the pack brings its own); Back returns to the
+  // nearest earlier step the reader was actually on.
+  // A step change replaces the whole card, so keyboard and screen-reader users
+  // were left on <body>. Move focus to the new step's heading (not on mount).
+  const stepBodyRef = useRef<HTMLDivElement>(null);
+  const shownStep = useRef(step);
+  useEffect(() => {
+    if (shownStep.current === step) return;
+    shownStep.current = step;
+    const frame = requestAnimationFrame(() => {
+      const heading = stepBodyRef.current?.querySelector<HTMLElement>('h1, h2');
+      if (!heading) return;
+      if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+      heading.focus({ preventScroll: true });
+      heading.scrollIntoView?.({ block: 'nearest' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [step]);
+
+  const goNext = useCallback(() => {
+    setStep((s) => nextStep(s, packFlow));
+  }, [packFlow]);
+
+  const goBack = useCallback(() => {
+    setStep((s) => previousStep(s, visited, packFlow));
+  }, [visited, packFlow]);
+
+  const handleLanguageChange = useCallback((lang: string) => {
+    setSelectedLang(lang);
+  }, []);
+
+  const handleSelectCompanyType = useCallback(
+    (key: string) => {
+      setCompanyType(key);
+      setProfileTouched(true);
+      // Apply the preset's module set (full_enterprise = every non-core module).
+      const preset = presets.find((p) => p.key === key);
+      if (preset) setEnabledModules(presetModuleSet(preset));
+    },
+    [presets],
+  );
+
+  const handleToggleModule = useCallback((key: string) => {
+    setProfileTouched(true);
+    setEnabledModules((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  }, []);
+
+  // Step 2 handlers
+  const handleQuickStart = useCallback(() => {
+    setQuickStart(true);
+    setShowModuleConfig(false);
+    // Set all modules enabled (full enterprise quick start)
+    setEnabledModules(new Set(ALL_MODULES.filter((m) => !m.core).map((m) => m.key)));
+    setCompanyType('full_enterprise');
+    // Jump to step 5 (data setup) -- step indices: 0=welcome, 1=choice, 2=profile, 3=modules, 4=look, 5=data, 6=finish
+    setStep(5);
+  }, []);
+
+  const handleChooseProfile = useCallback(() => {
+    setQuickStart(false);
+    setShowModuleConfig(false);
+    // Go to step 2 (profile)
+    setStep(2);
+  }, []);
+
+  // ── Ready-made pack handlers ──────────────────────────────────────────────
+
+  /** Set the UI locale and persist it as an explicit user choice (shared with
+   *  the country-pack data step). */
+  const applyLocale = useCallback((locale: string) => {
+    void changeLanguage(locale);
+    try {
+      localStorage.setItem('oe_lang_explicit', '1');
+    } catch {
+      // storage unavailable -- locale still applied for this session
+    }
+  }, []);
+
+  /** "Ready-made Pack" card -> swap the step-1 cards for the pack picker. */
+  const handleReadyPack = useCallback(() => {
+    setReadyPackView(true);
+  }, []);
+
+  /** The pack's language is ready -> record the slug. The reader stays where
+   *  they are: the picker offers Adjust appearance and Finish, and the stepper
+   *  opens the rest. ``markOnboardingCompleted`` (and its tour-gating event)
+   *  runs from the Finish step's primary action, so the completion path
+   *  matches the normal flow exactly. */
+  const handleReadyPackInstalled = useCallback((slug: string) => {
+    setPackInstalledSlug(slug);
+  }, []);
+
+  const handleInstallStarted = useCallback((slug: string) => {
+    setPackInstallingSlug(slug);
+  }, []);
+
+  const handleInstallAborted = useCallback(() => {
+    setPackInstallingSlug(null);
+    setPackInstalledSlug(null);
+    setPackCompanyKey(null);
+  }, []);
+
+  /** The company type chosen beside the pack was saved for the reader; show it
+   *  as the profile step's selection too. */
+  const handleCompanyApplied = useCallback(
+    (preset: CompanyPresetAPI) => {
+      setPackCompanyKey(preset.key);
+      setCompanyType(preset.key);
+      const known = presets.find((p) => p.key === preset.key);
+      if (known) setEnabledModules(presetModuleSet(known));
+    },
+    [presets],
+  );
+
+  /** Install failed -> fall back to the normal multi-step flow (the picker
+   *  already surfaced a clear toast explaining the fallback). */
+  const handleReadyPackFallback = useCallback(() => {
+    setReadyPackView(false);
+    setPackInstallingSlug(null);
+    setPackInstalledSlug(null);
+    setPackCompanyKey(null);
+    setQuickStart(false);
+    setShowModuleConfig(false);
+    setStep(2); // company profile
+  }, []);
+
+  const handleConfigureIndividually = useCallback(() => {
+    setShowModuleConfig(true);
+    setStep(3);
+  }, []);
+
+  // Handle next from step 2 (profile) -- ALWAYS show modules so user can review/customize
+  const handleNextFromProfile = useCallback(() => {
+    setShowModuleConfig(true);
+    setStep(3); // always go to module review
+  }, []);
+
+  // Solution packages are the default way through the Profile step; the
+  // single company profile stays one click away.
+  const [useProfiles, setUseProfiles] = useState(false);
+  const handlePackagesInstalled = useCallback((modules: string[]) => {
+    setCompanyType(null);
+    setProfileTouched(true);
+    setEnabledModules(new Set(modules));
+    setShowModuleConfig(true);
+    setStep(3);
+  }, []);
+
+  // Onboarding already finished: render nothing while the effect above
+  // redirects to the app. Returning null (instead of the wizard) is what
+  // actually stops the "Welcome to OpenConstructionERP" modal from
+  // flashing on top of /settings & friends. (ONBOARD-MODAL)
+  if (alreadyCompleted !== false) {
+    return null;
+  }
+
+  return (
+    <div className="relative flex min-h-screen flex-col bg-surface-primary overflow-hidden">
+      {/* ── Decorative background: soft mesh + subtle grid ──────────────
+          Pure decoration, no interaction. Respects prefers-reduced-motion
+          because the gradients are static: this block runs no keyframe
+          animation at all. It used to claim a bundled `animate-oe-pulse`
+          ran here, and no utility by that name has ever existed. The
+          live-pulse dot is `oe-pulse`, without the prefix, defined in an
+          inline <style> in features/auth/LoginPageNext.tsx and used only
+          on that page. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        {/* Soft radial mesh — two offset blobs with the brand palette. */}
+        <div
+          className="absolute -top-40 -start-40 h-[520px] w-[520px] rounded-full blur-3xl opacity-[0.35] dark:opacity-[0.22]"
+          style={{
+            background:
+              'radial-gradient(circle at center, rgba(37, 99, 235, 0.55), transparent 70%)',
+          }}
+        />
+        <div
+          className="absolute top-1/3 -end-32 h-[460px] w-[460px] rounded-full blur-3xl opacity-[0.30] dark:opacity-[0.18]"
+          style={{
+            background:
+              'radial-gradient(circle at center, rgba(168, 85, 247, 0.45), transparent 70%)',
+          }}
+        />
+        <div
+          className="absolute bottom-[-160px] start-1/3 h-[420px] w-[420px] rounded-full blur-3xl opacity-[0.25] dark:opacity-[0.15]"
+          style={{
+            background:
+              'radial-gradient(circle at center, rgba(14, 165, 233, 0.40), transparent 70%)',
+          }}
+        />
+        {/* Fine grid overlay — 1px lines every 40px, 4% opacity. Works in
+            both light and dark themes. */}
+        <div
+          className="absolute inset-0 opacity-[0.02] dark:opacity-[0.035]"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, currentColor 1px, transparent 1px), linear-gradient(to bottom, currentColor 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+          }}
+        />
+      </div>
+
+      {/* ── Sticky glass header with progress + skip ────────────────── */}
+      <div className="sticky top-0 z-10 bg-surface-primary/85 backdrop-blur-xl">
+        <div className="max-w-3xl mx-auto w-full px-6 sm:px-8 py-4">
+          <div className="flex items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-2 shrink-0">
+              <Logo size="sm" />
+              <span className="text-[11px] font-semibold text-content-tertiary uppercase tracking-wider hidden sm:inline">
+                {t('onboarding.setup_label', { defaultValue: 'Setup wizard' })}
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs tabular-nums text-content-tertiary hidden sm:inline">
+                {t('onboarding.progress_step_x_of_y', {
+                  defaultValue: 'Step {{current}} of {{total}}',
+                  current: step + 1,
+                  total: TOTAL_STEPS,
+                })}
+              </span>
+              {step > 0 && step < TOTAL_STEPS - 1 && (!packFlow || packReady) && (
+                <button
+                  type="button"
+                  onClick={() => setStep(TOTAL_STEPS - 1)}
+                  className="text-xs font-medium text-content-tertiary hover:text-content-secondary transition-colors"
+                >
+                  {t('onboarding.skip_setup', { defaultValue: 'Skip setup' })}
+                </button>
+              )}
+              {/* Persistent escape hatch on every step: open the app now in
+                  English. A quiet secondary pill so it never competes with the
+                  wizard's primary CTA. */}
+              <button
+                type="button"
+                onClick={handleSkipAll}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border-light bg-surface-elevated/70 px-3 py-1 text-xs font-medium text-content-tertiary backdrop-blur-sm transition-colors hover:border-oe-blue/40 hover:bg-surface-elevated hover:text-content-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
+              >
+                <Globe size={13} strokeWidth={2} />
+                {t('onboarding.skip_all', { defaultValue: 'Skip setup - open in English' })}
+              </button>
+            </div>
+          </div>
+          <OnboardingStepper
+            reach={{ current: step, maxReached, packFlow, packReady }}
+            onGo={setStep}
+          />
+        </div>
+      </div>
+
+      {/* ── Main content — sits on the glass card over the mesh ──────
+          Tight vertical padding so a 6-step wizard fits without scroll
+          on ~768-viewport laptops. Previously ``pt-10 pb-24`` + card
+          ``py-8 sm:py-12`` added ~150px of shell chrome alone. */}
+      <div className="relative flex flex-1 items-start justify-center px-4 sm:px-6 pt-4 pb-8">
+        <div className="w-full max-w-[960px]">
+          <div ref={stepBodyRef} className="px-6 sm:px-10 py-6 sm:py-8">
+            <StepTransition stepKey={step}>
+              {step === 0 && (
+                <StepWelcome onNext={goNext} onLanguageChange={handleLanguageChange} />
+              )}
+              {step === 1 && !readyPackView && !packFlow && (
+                <StepStartChoice
+                  onQuickStart={handleQuickStart}
+                  onChooseProfile={handleChooseProfile}
+                  onReadyPack={handleReadyPack}
+                  onBack={goBack}
+                />
+              )}
+              {step === 1 && (readyPackView || packFlow) && (
+                <ReadyPackPicker
+                  onActivateLocale={applyLocale}
+                  onInstalled={handleReadyPackInstalled}
+                  onFallback={handleReadyPackFallback}
+                  onBack={() => (packFlow ? goBack() : setReadyPackView(false))}
+                  installingSlug={packInstallingSlug}
+                  installedSlug={packInstalledSlug}
+                  onInstallStarted={handleInstallStarted}
+                  onInstallAborted={handleInstallAborted}
+                  onCompanyApplied={handleCompanyApplied}
+                  onAdjustAppearance={() => setStep(STEP.look)}
+                  onFinish={() => setStep(STEP.finish)}
+                />
+              )}
+              {step === 2 && !useProfiles && (
+                <StepSolutionPackages
+                  onInstalled={handlePackagesInstalled}
+                  onUseProfiles={() => setUseProfiles(true)}
+                  onBack={goBack}
+                />
+              )}
+              {step === 2 && useProfiles && (
+                <StepCompanyProfile
+                  onNext={handleNextFromProfile}
+                  onBack={goBack}
+                  presets={presets}
+                  selectedType={companyType}
+                  onSelectType={handleSelectCompanyType}
+                  onConfigureIndividually={handleConfigureIndividually}
+                />
+              )}
+              {step === 3 && (
+                <StepModuleConfig
+                  onNext={goNext}
+                  onBack={goBack}
+                  enabledModules={enabledModules}
+                  onToggleModule={handleToggleModule}
+                />
+              )}
+              {step === 4 && <StepLook onNext={goNext} onBack={goBack} />}
+              {step === 5 && (
+                <StepDataSetup
+                  onNext={() => {
+                    // Move to finish — background loading happens inside StepDataSetup
+                    setStep(6);
+                  }}
+                  onBack={goBack}
+                  selectedLang={selectedLang}
+                  backgroundLoad
+                />
+              )}
+              {step === 6 && (
+                <StepFinish
+                  onBack={goBack}
+                  onEdit={setStep}
+                  packProfileMode={profileTouched ? 'wizard' : packCompanyKey ? 'keep' : 'pack-default'}
+                  companyType={companyType}
+                  enabledModules={enabledModules}
+                  presets={presets}
+                  packInstalled={packInstalledSlug !== null}
+                  installedPackSlug={packInstalledSlug}
+                />
+              )}
+            </StepTransition>
+          </div>
+
+          {/* Trust footer — small line directly below the card. */}
+          <p className="mt-3 text-center text-[11px] text-content-tertiary">
+            {t('onboarding.footer_trust', {
+              defaultValue:
+                'Free and open-source · Your data stays on your server · AGPL-3.0',
+            })}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}

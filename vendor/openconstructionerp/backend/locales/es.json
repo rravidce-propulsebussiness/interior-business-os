@@ -1,0 +1,2519 @@
+{
+  "costs.catalog_name_unavailable": "Este nombre no se puede usar para un nuevo catálogo. Elige otro nombre.",
+  "app": {
+    "name": "OpenConstructionERP",
+    "tagline": "Presupuesto de construcción de código abierto"
+  },
+  "nav": {
+    "dashboard": "Panel de control",
+    "assemblies": "Precios descompuestos",
+    "ai_estimate": "Estimación IA",
+    "settings": "Configuración",
+    "5d_cost_model": "Modelo de costes 5D",
+    "templates": "Plantillas",
+    "reports": "Informes",
+    "sustainability": "Sostenibilidad",
+    "group_estimation": "Presupuestación",
+    "group_planning": "Planificación",
+    "group_procurement": "Compras",
+    "group_tools": "Herramientas",
+    "architecture": "Mapa de arquitectura"
+  },
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "logout": "Cerrar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña"
+  },
+  "projects": {
+    "title": "Proyectos",
+    "new_project": "Nuevo proyecto",
+    "project_name": "Nombre del proyecto",
+    "no_projects": "Aún no hay proyectos"
+  },
+  "boq": {
+    "title": "Presupuesto",
+    "position": "Partida",
+    "ordinal": "Número de orden",
+    "description": "Descripción",
+    "quantity": "Medición",
+    "unit": "Unidad",
+    "unit_rate": "Precio unitario",
+    "total": "Total",
+    "add_position": "Añadir partida",
+    "add_section": "Añadir capítulo",
+    "assembly": "Precio descompuesto",
+    "subtotal": "Subtotal",
+    "grand_total": "Total general",
+    "direct_cost": "Coste directo",
+    "net_total": "Total neto",
+    "gross_total": "Total bruto",
+    "vat": "IVA",
+    "add_markups": "Añadir recargos",
+    "validate": "Validar",
+    "export": "Exportar",
+    "mvp": {
+      "title": "Elegir materiales",
+      "subtitle_one": "{{count}} recurso necesita una elección",
+      "subtitle_other": "{{count}} recursos necesitan una elección",
+      "bulk_label": "Relleno rápido:",
+      "bulk_median": "Mediana para todos",
+      "bulk_mean": "Media para todos",
+      "bulk_cheapest": "El más barato para todos",
+      "bulk_priciest": "El más caro para todos",
+      "slot_variant_count": "{{n}} opciones",
+      "selected_label": "Elegido:",
+      "default_mean": "precio medio",
+      "default_median": "precio mediano",
+      "row_median": "Precio mediano · {{price}}",
+      "row_mean": "Precio medio · {{price}}",
+      "subtotal_label": "Precio de la partida",
+      "apply": "Aplicar y añadir al presupuesto",
+      "batch_progress": "Partida {{current}} de {{total}}",
+      "toast_applied_one": "{{count}} variante elegida",
+      "toast_applied_other": "{{count}} variantes elegidas"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Informe de intercambio"
+      },
+      "column": {
+        "severity": "Gravedad",
+        "kind": "Tipo de pérdida",
+        "position": "Partida",
+        "field": "Campo",
+        "original": "Valor original",
+        "written": "Valor escrito",
+        "count": "Recuento",
+        "detail": "Detalle"
+      },
+      "severity": {
+        "error": "Crítico",
+        "warning": "Advertencia",
+        "info": "Nota"
+      },
+      "kind": {
+        "unsupported_element": "Elemento no admitido",
+        "truncated_text": "Texto truncado",
+        "altered_text": "Texto alterado",
+        "rounded_value": "Valor redondeado",
+        "value_out_of_range": "Valor fuera de rango",
+        "dropped_attribute": "Atributo descartado",
+        "unmapped_unit": "Unidad sin correspondencia",
+        "lost_hierarchy": "Nivel de jerarquía perdido",
+        "markup_not_representable": "Recargo no representable",
+        "attachment_skipped": "Adjunto omitido",
+        "changed_identifier": "Identificador cambiado",
+        "exceeds_limit": "Supera el límite de almacenamiento",
+        "rejected_row": "Fila rechazada",
+        "skipped_row": "Fila omitida",
+        "parser_warning": "Advertencia del lector",
+        "roundtrip_mismatch": "Diferencia en la ida y vuelta"
+      }
+    },
+    "branch": {
+      "base_snapshot": "Punto de bifurcación",
+      "base_snapshot_from": "Punto de bifurcación (de la instantánea «{snapshot}»)",
+      "before_cherry_pick": "Antes de aplicar cambios de «{source}»",
+      "before_merge": "Antes de fusionar la variante «{branch}»",
+      "errors": {
+        "branch_closed": "Esta variante se ha fusionado o archivado y no admite más cambios.",
+        "not_a_branch": "Este presupuesto de mediciones no es una variante.",
+        "same_bill": "Elija dos presupuestos distintos.",
+        "different_project": "Ambos presupuestos deben pertenecer al mismo proyecto.",
+        "different_tree": "Ambos presupuestos deben ser variantes del mismo presupuesto principal.",
+        "unresolved_conflicts": "{count} partidas se modificaron en ambos presupuestos. Decida qué versión conservar en cada una antes de aplicar.",
+        "merge_forbidden": "No tiene permiso para fusionar en el presupuesto principal.",
+        "confirm_required": "Confirme la fusión: reescribe el presupuesto principal.",
+        "design_options_unavailable": "El módulo de opciones de diseño no está instalado.",
+        "base_snapshot_in_use": "Esta instantánea es el punto de bifurcación de una variante abierta y no se puede eliminar."
+      },
+      "export": {
+        "title_positions": "Comparación de presupuestos por partida",
+        "title_sections": "Comparación de presupuestos por capítulo",
+        "title_cost_groups": "Comparación de presupuestos por grupo de costes",
+        "project": "Proyecto",
+        "bill_a": "Presupuesto A",
+        "bill_b": "Presupuesto B",
+        "total_a": "Total A",
+        "total_b": "Total B",
+        "delta": "Diferencia",
+        "counts": "Cambios",
+        "counts_value": "{added} añadidas, {removed} quitadas, {changed} modificadas",
+        "col_ordinal": "Pos.",
+        "col_description": "Descripción",
+        "col_unit": "Unidad",
+        "col_change": "Cambio",
+        "col_qty_a": "Cant. A",
+        "col_qty_b": "Cant. B",
+        "col_rate_a": "Precio A",
+        "col_rate_b": "Precio B",
+        "col_total_a": "Total A",
+        "col_total_b": "Total B",
+        "col_delta": "Diferencia",
+        "col_section": "Capítulo",
+        "col_cost_group": "Grupo de costes",
+        "change_added": "Añadida",
+        "change_removed": "Quitada",
+        "change_changed": "Modificada",
+        "change_unchanged": "Sin cambios",
+        "ungrouped": "Sin agrupar",
+        "empty": "Los dos presupuestos son idénticos.",
+        "total": "Total"
+      }
+    }
+  },
+  "costs": {
+    "title": "Base de precios",
+    "rate": "Precio",
+    "material": "Material",
+    "labor": "Mano de obra",
+    "equipment": "Maquinaria",
+    "search_costs": "Buscar precios..."
+  },
+  "assemblies": {
+    "title": "Precios descompuestos",
+    "description": "Recetas de precios reutilizables — combine materiales, mano de obra y maquinaria en plantillas listas para usar",
+    "new_assembly": "Nuevo precio descompuesto",
+    "from_database": "Desde la base de precios",
+    "apply_to_boq": "Aplicar al presupuesto",
+    "add_component": "Añadir componente",
+    "no_assemblies": "Aún no hay precios descompuestos",
+    "no_assemblies_hint": "Cree su primer precio descompuesto desde la base de precios o el catálogo de recursos",
+    "total_rate": "Precio total"
+  },
+  "catalog": {
+    "title": "Catálogo de recursos",
+    "description": "Consulte y gestione materiales, maquinaria, precios de mano de obra y operarios",
+    "add_resource": "Añadir recurso",
+    "import_region": "Importar región",
+    "build_assembly": "Crear precio descompuesto",
+    "my_catalog": "Mi catálogo"
+  },
+  "validation": {
+    "title": "Validación",
+    "passed": "Aprobado",
+    "warnings": "Advertencias",
+    "errors": "Errores",
+    "score": "Puntuación de calidad",
+    "run_validation": "Ejecutar validación",
+    "missing_quantity": "La partida {position} no tiene medición",
+    "missing_rate": "La partida {position} no tiene precio unitario",
+    "missing_description": "La partida {position} no tiene descripción",
+    "missing_classification": "La partida {position} necesita un código de clasificación",
+    "duplicate_ordinal": "Número de orden duplicado: {ordinal}",
+    "rate_anomaly": "El precio unitario {rate} supera el umbral ({threshold})",
+    "nl": {
+      "not_a_string": "La entrada debe ser texto.",
+      "empty": "La entrada está vacía.",
+      "too_long": "La entrada supera los {max} caracteres.",
+      "ai_unparsable": "La respuesta de la IA no se pudo interpretar como documento DSL.",
+      "no_pattern": "Ningún patrón coincide con la frase introducida.",
+      "try": "Pruebe: '{pattern}'"
+    }
+  },
+  "schedule": {
+    "title": "Planificación 4D",
+    "generated": {
+      "position_label": "Partida {ordinal}",
+      "section_label": "Capítulo {ordinal}",
+      "task_description": "Generado automáticamente a partir de la partida {ordinal} del presupuesto ({quantity} {unit})",
+      "section_description": "Resumen: capítulo {ordinal} del presupuesto",
+      "start_milestone": "Inicio del proyecto",
+      "start_milestone_description": "Hito de inicio del proyecto",
+      "completion_milestone": "Finalización del proyecto",
+      "completion_milestone_description": "Hito de finalización del proyecto",
+      "labour_resource": "Mano de obra",
+      "machine_resource": "Maquinaria"
+    },
+    "progress_sheet": {
+      "sheet_title": "Avance",
+      "title": "Hoja de actualización de avance",
+      "detail_schedule": "Cronograma: {name}",
+      "detail_exported": "Exportado: {date}",
+      "instructions": "Complete solo las columnas blancas. No cambie las columnas grises, el orden de las filas ni las columnas ocultas.",
+      "col": {
+        "activity_ref": "ID de actividad",
+        "name": "Actividad",
+        "wbs_code": "EDT",
+        "responsible": "Responsable",
+        "planned_start": "Inicio planificado",
+        "planned_finish": "Fin planificado",
+        "percent_complete": "% completado",
+        "actual_start": "Inicio real",
+        "actual_finish": "Fin real",
+        "remaining_duration": "Restante (días laborables)",
+        "notes": "Notas",
+        "row_key": "Clave de fila",
+        "stamp": "Sello"
+      }
+    }
+  },
+  "cad": {
+    "title": "Importación CAD",
+    "upload": "Subir archivo CAD",
+    "supported_formats": "Formatos: DWG, DGN, RVT, IFC, PDF",
+    "converting": "Convirtiendo...",
+    "elements_found": "{count} elementos encontrados"
+  },
+  "takeoff": {
+    "title": "Mediciones",
+    "auto_detect": "Detección automática",
+    "manual_measure": "Medición manual",
+    "confidence": "Confianza"
+  },
+  "tendering": {
+    "title": "Licitación",
+    "create_tender": "Crear licitación",
+    "bid": "Oferta",
+    "award": "Adjudicación"
+  },
+  "modules": {
+    "title": "Módulos",
+    "installed": "Instalados",
+    "available": "Disponibles",
+    "install": "Instalar",
+    "uninstall": "Desinstalar",
+    "update": "Actualizar"
+  },
+  "dashboard": {
+    "welcome": "Bienvenido a OpenConstructionERP",
+    "subtitle": "Plataforma de presupuestos de construcción de código abierto",
+    "recent_projects": "Proyectos recientes",
+    "system_status": "Estado del sistema",
+    "modules_loaded": "Módulos cargados",
+    "validation_rules": "Reglas de validación",
+    "languages": "Idiomas",
+    "continue_estimate": "Continuar el último presupuesto",
+    "getting_started": "Primeros pasos",
+    "total_value": "Valor total",
+    "active_estimates": "Presupuestos activos",
+    "schedule_status": "Estado de la planificación",
+    "quality_score": "Puntuación de calidad",
+    "analytics": "Analítica",
+    "project_overview": "Resumen del proyecto",
+    "step_load_db": "Cargar la base de precios",
+    "step_load_db_desc": "Importe datos de precios regionales con más de 55.000 partidas",
+    "step_ai_search": "Activar la búsqueda con IA",
+    "step_ai_search_desc": "Genere vectores semánticos para la correspondencia de precios",
+    "step_connect_ai": "Conectar la IA",
+    "step_connect_ai_desc": "Añada sus claves de API para el presupuesto asistido por IA",
+    "step_create_project": "Crear proyecto",
+    "step_create_project_desc": "Inicie su primer proyecto de presupuesto de construcción",
+    "step_build_boq": "Elaborar su presupuesto",
+    "step_build_boq_desc": "Cree un presupuesto con la asistencia de la IA"
+  },
+  "units": {
+    "m": "m",
+    "m2": "m²",
+    "m3": "m³",
+    "kg": "kg",
+    "t": "t",
+    "pcs": "ud",
+    "lsum": "p.a.",
+    "h": "h",
+    "set": "jgo"
+  },
+  "contacts": {
+    "title": "Directorio de contactos",
+    "new_contact": "Nuevo contacto",
+    "contact_type": "Tipo de contacto",
+    "client": "Cliente",
+    "subcontractor": "Subcontratista",
+    "supplier": "Proveedor",
+    "consultant": "Consultor",
+    "internal": "Interno",
+    "company_name": "Razón social",
+    "search_contacts": "Buscar contactos...",
+    "no_contacts": "Aún no hay contactos",
+    "prequalification": "Precalificación",
+    "approved": "Aprobado",
+    "pending": "Pendiente",
+    "expired": "Caducado"
+  },
+  "tasks": {
+    "title": "Tareas",
+    "new_task": "Nueva tarea",
+    "task": "Tarea",
+    "topic": "Tema",
+    "information": "Información",
+    "decision": "Decisión",
+    "personal": "Tarea personal",
+    "my_tasks": "Mis tareas",
+    "open": "Abierta",
+    "in_progress": "En curso",
+    "completed": "Completada",
+    "draft": "Borrador",
+    "due_date": "Fecha límite",
+    "assignee": "Responsable",
+    "priority": "Prioridad",
+    "checklist": "Lista de comprobación",
+    "focus_area": "Área de enfoque"
+  },
+  "rfi": {
+    "title": "Solicitudes de información",
+    "new_rfi": "Nueva solicitud",
+    "subject": "Asunto",
+    "question": "Pregunta",
+    "response": "Respuesta",
+    "ball_in_court": "Responsable actual",
+    "days_open": "Días abierta",
+    "cost_impact": "Impacto en coste",
+    "schedule_impact": "Impacto en plazo",
+    "respond": "Responder",
+    "close": "Cerrar",
+    "overdue": "Vencida"
+  },
+  "finance": {
+    "title": "Finanzas",
+    "budgets": "Presupuestos",
+    "invoices": "Facturas",
+    "payable": "Cuentas a pagar",
+    "receivable": "Cuentas a cobrar",
+    "payments": "Pagos",
+    "evm": "Valor ganado",
+    "invoice_number": "N.º de factura",
+    "amount": "Importe",
+    "status": "Estado",
+    "approve": "Aprobar",
+    "pay": "Marcar como pagada",
+    "original_budget": "Presupuesto original",
+    "revised_budget": "Presupuesto revisado",
+    "committed": "Comprometido",
+    "actual": "Real",
+    "forecast": "Previsión",
+    "variance": "Desviación"
+  },
+  "procurement": {
+    "title": "Compras",
+    "purchase_orders": "Pedidos de compra",
+    "goods_receipts": "Albaranes de recepción",
+    "new_po": "Nuevo pedido",
+    "po_number": "N.º de pedido",
+    "vendor": "Proveedor",
+    "issue": "Emitir",
+    "confirm": "Confirmar recepción"
+  },
+  "safety": {
+    "title": "Seguridad",
+    "incidents": "Incidentes",
+    "observations": "Observaciones",
+    "new_incident": "Nuevo incidente",
+    "new_observation": "Nueva observación",
+    "severity": "Gravedad",
+    "risk_score": "Índice de riesgo",
+    "days_lost": "Días perdidos",
+    "treatment": "Tratamiento",
+    "corrective_action": "Acción correctiva"
+  },
+  "meetings": {
+    "title": "Reuniones",
+    "new_meeting": "Nueva reunión",
+    "meeting_type": "Tipo",
+    "attendees": "Asistentes",
+    "agenda": "Orden del día",
+    "action_items": "Acciones acordadas",
+    "minutes": "Acta",
+    "complete": "Cerrar la reunión",
+    "present": "Presente",
+    "absent": "Ausente",
+    "excused": "Excusado",
+    "actions": {
+      "status": {
+        "open": "Abierta",
+        "completed": "Completada",
+        "cancelled": "Cancelada"
+      },
+      "flag": {
+        "overdue": "Vencida",
+        "on_track": "En plazo"
+      },
+      "label": {
+        "action_item": "Acción",
+        "completion_rate": "Tasa de cumplimiento de acciones",
+        "open_vs_done": "Abiertas frente a completadas",
+        "overdue": "Acciones vencidas"
+      },
+      "explain": {
+        "action_item": "Una acción es una tarea acordada en una reunión, con un responsable y una fecha límite.",
+        "completion_rate": "La tasa de cumplimiento de acciones es el número de acciones completadas dividido entre el total de acciones, de 0 a 1.",
+        "open_vs_done": "Las acciones abiertas aún requieren trabajo. Las acciones completadas están terminadas y no necesitan más trabajo.",
+        "overdue": "Una acción está vencida cuando sigue abierta y su fecha límite es anterior a la fecha de referencia."
+      }
+    },
+    "minutes_pdf": {
+      "title": "Acta de reunión",
+      "issued": "EMITIDA",
+      "draft": "BORRADOR",
+      "date": "Fecha:",
+      "location": "Lugar:",
+      "type": "Tipo:",
+      "number": "Reunión n.º:",
+      "chairperson": "Presidente:",
+      "next_meeting": "Próxima reunión:",
+      "not_available": "N/D",
+      "not_scheduled": "Sin programar",
+      "attendance": "Asistencia",
+      "present": "Presentes:",
+      "absent": "Ausentes / excusados:",
+      "agenda": "Orden del día, debate y decisiones",
+      "required": "(obligatorio)",
+      "discussion": "Debate:",
+      "decision": "Decisión:",
+      "decisions": "Decisiones",
+      "open_questions": "Preguntas abiertas",
+      "actions": "Acciones",
+      "col_number": "#",
+      "col_action": "Acción",
+      "col_owner": "Responsable",
+      "col_due": "Vencimiento",
+      "col_status": "Estado",
+      "brought_forward": "[Arrastrado]",
+      "overdue": "(vencido)",
+      "status_open": "Abierta",
+      "status_in_progress": "En curso",
+      "status_done": "Hecha",
+      "status_cancelled": "Cancelada",
+      "summary": "Resumen",
+      "generated": "Generado: {stamp}",
+      "issued_at": "Emitida {stamp}",
+      "running_head": "{project} - Acta",
+      "type_progress": "Seguimiento de obra",
+      "type_design": "Diseño",
+      "type_safety": "Seguridad",
+      "type_subcontractor": "Subcontratista",
+      "type_kickoff": "Inicio",
+      "type_closeout": "Cierre",
+      "type_commercial": "Comercial"
+    }
+  },
+  "inspections": {
+    "title": "Inspecciones de calidad",
+    "new_inspection": "Nueva inspección",
+    "inspector": "Inspector",
+    "checklist": "Lista de comprobación",
+    "pass": "Conforme",
+    "fail": "No conforme",
+    "partial": "Parcial",
+    "critical": "Crítico",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Programada",
+        "in_progress": "En curso",
+        "completed": "Completada",
+        "failed": "Fallida",
+        "cancelled": "Cancelada"
+      }
+    }
+  },
+  "ncr": {
+    "title": "Informes de no conformidad",
+    "new_ncr": "Nueva no conformidad",
+    "root_cause": "Causa raíz",
+    "corrective_action": "Acción correctiva",
+    "preventive_action": "Acción preventiva",
+    "material": "Material",
+    "workmanship": "Ejecución",
+    "design": "Diseño"
+  },
+  "submittals": {
+    "title": "Documentos para aprobación",
+    "new_submittal": "Nuevo documento",
+    "spec_section": "Apartado del pliego",
+    "revision": "Revisión",
+    "submit": "Enviar",
+    "review": "Revisar",
+    "approved_as_noted": "Aprobado con observaciones",
+    "revise_resubmit": "Revisar y reenviar",
+    "intl": {
+      "status_labels": {
+        "draft": "Borrador",
+        "submitted": "Enviado",
+        "under_review": "En revisión",
+        "approved": "Aprobado",
+        "approved_as_noted": "Aprobado con observaciones",
+        "revise_and_resubmit": "Revisar y reenviar",
+        "rejected": "Rechazado",
+        "closed": "Cerrado"
+      }
+    }
+  },
+  "correspondence": {
+    "title": "Correspondencia",
+    "new_entry": "Nueva entrada",
+    "incoming": "Entrante",
+    "outgoing": "Saliente",
+    "letter": "Carta",
+    "email": "Correo electrónico",
+    "notice": "Aviso",
+    "date_sent": "Fecha de envío",
+    "date_received": "Fecha de recepción"
+  },
+  "cde": {
+    "title": "Entorno común de datos",
+    "new_container": "Nuevo contenedor",
+    "container_code": "Código del contenedor",
+    "cde_state": "Estado CDE",
+    "wip": "Trabajo en curso",
+    "shared": "Compartido",
+    "published": "Publicado",
+    "archived": "Archivado",
+    "promote": "Promover",
+    "suitability": "Idoneidad",
+    "discipline": "Disciplina",
+    "revisions": "Revisiones",
+    "intl": {
+      "state_labels": {
+        "wip": "En curso",
+        "shared": "Compartido",
+        "published": "Publicado",
+        "archived": "Archivado"
+      }
+    }
+  },
+  "transmittals": {
+    "title": "Notas de envío",
+    "new_transmittal": "Nueva nota de envío",
+    "purpose": "Finalidad",
+    "for_approval": "Para aprobación",
+    "for_information": "Para información",
+    "for_construction": "Para ejecución",
+    "recipients": "Destinatarios",
+    "acknowledge": "Acusar recibo",
+    "locked": "Bloqueada",
+    "issue_transmittal": "Emitir",
+    "intl": {
+      "status_words": {
+        "draft": "borrador",
+        "issued": "emitido",
+        "responded": "respondido"
+      }
+    }
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "no_notifications": "No hay notificaciones nuevas",
+    "mark_all_read": "Marcar todas como leídas",
+    "unread": "Sin leer"
+  },
+  "comments": {
+    "title": "Comentarios",
+    "post": "Publicar",
+    "reply": "Responder",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "placeholder": "Escriba un comentario...",
+    "empty": "Aún no hay comentarios. Inicie la conversación.",
+    "edited": "editado",
+    "deleted": "Este comentario se ha eliminado"
+  },
+  "bim": {
+    "title": "Centro BIM",
+    "models": "Modelos",
+    "elements": "Elementos",
+    "upload_model": "Subir modelo",
+    "processing": "Procesando",
+    "active": "Activo",
+    "link_to_boq": "Vincular al presupuesto",
+    "properties": "Propiedades",
+    "quantities": "Mediciones",
+    "wireframe": "Alámbrico",
+    "section_box": "Caja de sección",
+    "measure": "Medir",
+    "zoom_to_fit": "Ajustar a la vista"
+  },
+  "reporting": {
+    "title": "Informes y paneles",
+    "kpi": "Panel de indicadores",
+    "generate_report": "Generar informe",
+    "templates": "Plantillas",
+    "project_status": "Estado del proyecto",
+    "cost_report": "Informe de costes",
+    "schedule_status": "Estado de la planificación",
+    "safety_report": "Informe de seguridad",
+    "explain": {
+      "report_total_one": "Total del informe: {money} (suma de {count} línea).",
+      "report_total_other": "Total del informe: {money} (suma de {count} líneas).",
+      "percent_of_total": "{part} es el {percent} de {total} (porcentaje del total).",
+      "percent_zero_total": "{part} de {total}: el total es cero, por lo que cada parte se muestra como 0 por ciento.",
+      "breakdown_empty": "Desglose de costes: sin datos.",
+      "breakdown_one": "Desglose de costes: {count} grupo, total del informe {money}.",
+      "breakdown_other": "Desglose de costes: {count} grupos, total del informe {money}.",
+      "top_n_one": "Top {requested}: {shown} de {shown} línea.",
+      "top_n_other": "Top {requested}: {shown} de {shown} líneas."
+    }
+  },
+  "gantt": {
+    "title": "Diagrama de Gantt",
+    "day": "Día",
+    "week": "Semana",
+    "month": "Mes",
+    "critical_path": "Camino crítico",
+    "baseline": "Línea base",
+    "dependencies": "Dependencias",
+    "today": "Hoy"
+  },
+  "settings": {
+    "regional": "Configuración regional",
+    "timezone": "Zona horaria",
+    "measurement": "Sistema de medida",
+    "paper_size": "Tamaño de papel",
+    "date_format": "Formato de fecha",
+    "number_format": "Formato de número",
+    "currency": "Moneda",
+    "metric": "Métrico",
+    "imperial": "Imperial"
+  },
+  "users": {
+    "management": "Gestión de usuarios",
+    "management_desc": "Gestione los miembros del equipo, los roles y el acceso",
+    "invite_user": "Invitar usuario",
+    "invite": "Invitar",
+    "full_name": "Nombre completo",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "role": "Rol",
+    "status": "Estado",
+    "last_login": "Último acceso",
+    "actions": "Acciones",
+    "name": "Nombre",
+    "total": "Total de usuarios",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "admins": "Administradores",
+    "managers": "Gestores",
+    "search": "Buscar por nombre o correo...",
+    "no_users": "No se han encontrado usuarios",
+    "updated": "Usuario actualizado",
+    "invited": "Invitación enviada",
+    "deactivate": "Desactivar",
+    "activate": "Activar",
+    "never": "Nunca",
+    "role_admin_desc": "Acceso completo a todas las funciones",
+    "role_manager_desc": "Gestión de proyectos y equipo",
+    "role_editor_desc": "Crear y editar contenido",
+    "role_viewer_desc": "Acceso de solo lectura"
+  },
+  "cost_control": {
+    "errors": {
+      "snapshot_frozen": "Esta instantánea está congelada. Una instantánea congelada es un registro y no se puede modificar.",
+      "frozen_no_delete": "Una instantánea congelada es un registro y no se puede eliminar.",
+      "draft_open": "Ya hay una instantánea en borrador abierta. Congélela o elimínela antes de iniciar otra.",
+      "no_line_method": "Esta partida no tiene método propio.",
+      "snapshot_missing": "Instantánea no encontrada.",
+      "line_missing": "Esta instantánea no tiene esa partida.",
+      "document_missing": "El documento vinculado no pertenece a este proyecto.",
+      "freeze_refused": "La instantánea aún no se puede congelar: {count} partida(s) superan el umbral sin comentario ni justificante.",
+      "no_frozen_snapshot": "Todavía no hay una instantánea congelada con la que comparar.",
+      "no_ledger": "El registro de facturas no está disponible en esta instalación.",
+      "no_snapshot": "Todavía no hay ninguna instantánea que documentar."
+    },
+    "export": {
+      "project": "Proyecto",
+      "generated": "Generado",
+      "currency": "Moneda",
+      "page": "Página",
+      "generated_at": "Generado el",
+      "empty": "Aún no hay nada que mostrar.",
+      "total": "Total",
+      "cost_report": "Informe de costes",
+      "phase_comparison": "Comparación de fases",
+      "invoice_ledger": "Registro de facturas",
+      "forecast_documentation": "Documentación de la previsión",
+      "as_of": "A fecha de",
+      "forecast_method": "Método de previsión",
+      "col_account": "Cuenta",
+      "col_code": "Código",
+      "col_description": "Descripción",
+      "col_source": "Origen",
+      "col_method": "Método",
+      "col_planned": "Previsto",
+      "col_committed": "Comprometido",
+      "col_pending": "Modificados pendientes",
+      "col_measured": "Medido",
+      "col_certified": "Certificado",
+      "col_invoiced": "Facturado",
+      "col_paid": "Pagado",
+      "col_forecast": "Previsión",
+      "col_variance": "Desviación",
+      "col_variance_pct": "Desviación %",
+      "col_forecast_of_plan": "Previsión % del plan",
+      "col_measured_of_committed": "Medido % de lo comprometido",
+      "col_invoiced_of_committed": "Facturado % de lo comprometido",
+      "col_contract": "Contrato",
+      "col_contract_title": "Título del contrato",
+      "col_invoice": "Factura",
+      "col_date": "Fecha",
+      "col_kind": "Tipo",
+      "col_release_status": "Liberación",
+      "col_net": "Base",
+      "col_vat": "IVA",
+      "col_gross": "Total",
+      "col_retention": "Retención",
+      "col_release": "Retención liberada",
+      "col_discount": "Descuento",
+      "col_payable": "A pagar",
+      "col_open": "Abierto",
+      "col_previous": "Anterior",
+      "col_delta": "Variación",
+      "col_delta_pct": "Variación %",
+      "col_needs_evidence": "Requiere justificante",
+      "col_comment": "Comentario",
+      "col_evidence": "Justificante",
+      "row_unassigned": "Importes sin partida de coste",
+      "row_loose_changes": "Modificados sin contrato",
+      "row_no_contract": "Sin contrato",
+      "contract_value": "Importe del contrato",
+      "retention_held": "Retención practicada",
+      "yes": "Sí",
+      "no": "No",
+      "snapshot_date": "Fecha de la instantánea",
+      "snapshot_status": "Estado",
+      "previous_snapshot": "Instantánea congelada anterior",
+      "method_explained": "Cómo se lee la previsión",
+      "evidence_threshold": "Justificante necesario por encima de",
+      "threshold_both": "una variación de más de {parts}",
+      "threshold_any": "cualquier variación",
+      "frozen_at": "Congelada el"
+    },
+    "method": {
+      "best_available": "Mejor fuente disponible",
+      "maximum": "Valor máximo",
+      "evm_cpi": "Valor ganado (CPI)",
+      "manual": "Manual"
+    },
+    "method_help": {
+      "best_available": "Cada partida toma su cifra más madura: la liquidación final, si no la obra medida, si no la adjudicación, si no la estimación, si no el presupuesto.",
+      "maximum": "Cada partida toma la mayor de sus cifras (presupuesto, estimación, adjudicación, medido, facturado), para que la previsión nunca oculte un riesgo.",
+      "evm_cpi": "Cada partida proyecta su coste a la finalización a partir del avance: el dinero gastado hasta ahora dividido entre la parte de obra ejecutada.",
+      "manual": "Una persona fija la cifra de la partida y vincula el documento que la respalda."
+    },
+    "source": {
+      "none": "Sin cifra",
+      "budget": "Presupuesto",
+      "estimate": "Estimación",
+      "partly_awarded": "Adjudicada en parte",
+      "awarded": "Adjudicada",
+      "measured": "Medido",
+      "final": "Liquidación final",
+      "manual": "Manual",
+      "invoiced": "Facturado",
+      "evm": "Valor ganado"
+    },
+    "layer": {
+      "budget": "Presupuesto",
+      "estimate": "Estimación",
+      "tender": "Mejor oferta",
+      "awarded": "Adjudicado",
+      "changes": "Modificados aprobados",
+      "committed": "Comprometido",
+      "pending": "Modificados pendientes",
+      "measured": "Medido",
+      "certified": "Certificado",
+      "invoiced": "Facturado",
+      "paid": "Pagado",
+      "forecast": "Previsión"
+    },
+    "invoice_kind": {
+      "interim": "Parcial",
+      "final": "Final",
+      "daywork": "Trabajos por administración",
+      "credit_note": "Abono"
+    },
+    "release_status": {
+      "open": "Abierta",
+      "released": "Liberada"
+    },
+    "evidence_kind": {
+      "document": "Documento",
+      "minutes": "Acta",
+      "other": "Otro"
+    },
+    "snapshot_status": {
+      "draft": "Borrador",
+      "frozen": "Congelada"
+    }
+  },
+  "document_forms": {
+    "furniture": {
+      "project": "Proyecto",
+      "project_no": "N.º de proyecto",
+      "generated_on": "Fecha de emisión",
+      "records": "Registros",
+      "currency": "Moneda",
+      "status": "Estado",
+      "name": "Nombre",
+      "signature": "Firma",
+      "date": "Fecha",
+      "signatures": "Firmas",
+      "yes": "Sí",
+      "no": "No",
+      "days_one": "{n} día",
+      "days_other": "{n} días",
+      "empty_register": "Sin registros.",
+      "total": "Total",
+      "signer_title": "Cargo",
+      "sig_prepared_by": "Elaborado por",
+      "sig_checked_by": "Revisado por",
+      "sig_approved_by": "Aprobado por",
+      "footer_generated": "Generado el {timestamp}",
+      "footer_page": "Página {page} de {total}"
+    },
+    "submittals": {
+      "strings": {
+        "register_title": "Registro de documentos para aprobación",
+        "doc_title": "Documento para aprobación",
+        "doc_title_product_data": "Ficha de aprobación de materiales",
+        "col_number": "N.º de documento",
+        "col_title": "Título",
+        "col_type": "Tipo",
+        "col_spec": "Apartado del pliego",
+        "col_rev": "Rev.",
+        "col_date_submitted": "Fecha de presentación",
+        "col_date_required": "Fecha requerida",
+        "col_date_returned": "Fecha de devolución",
+        "col_reviewer": "Revisor",
+        "col_approver": "Aprobador",
+        "col_ball_in_court": "Pendiente de",
+        "submitted_by_org": "Empresa remitente",
+        "review_notes": "Comentarios del revisor",
+        "no_review_notes": "No se registraron comentarios del revisor.",
+        "sig_submitted": "Presentado por",
+        "sig_reviewed": "Revisado por",
+        "sig_approved": "Aprobado por",
+        "register_filename": "registro-documentos-para-aprobacion",
+        "register_title_shop_drawing": "Registro de planos de taller",
+        "register_title_product_data": "Registro de aprobación de materiales",
+        "register_title_method_statement": "Registro de procedimientos de ejecución",
+        "register_filename_shop_drawing": "registro-planos-de-taller",
+        "register_filename_product_data": "registro-aprobacion-de-materiales",
+        "register_filename_method_statement": "registro-procedimientos-de-ejecucion",
+        "col_discipline": "Disciplina",
+        "col_manufacturer": "Fabricante / marca",
+        "col_model": "Modelo / referencia",
+        "col_origin": "País de origen",
+        "col_supplier": "Proveedor",
+        "col_product": "Fabricante / modelo / origen",
+        "col_review_code": "Código de revisión",
+        "col_outcome": "Resultado de la revisión",
+        "col_review_period": "Plazo de revisión (días)",
+        "col_review_due": "Revisión antes del",
+        "col_days_in_review": "Días en revisión",
+        "col_days_in_review_print": "Días en revisión",
+        "col_review_overdue": "Días de retraso",
+        "col_required_on_site": "Necesario en obra",
+        "col_long_lead": "Plazo largo",
+        "col_lead_time": "Plazo de entrega (sem.)",
+        "col_needed_by": "Aprobación necesaria antes del",
+        "col_approval_late": "Días fuera de plazo",
+        "col_drawings": "Planos vinculados",
+        "col_submitted_returned": "Presentado / devuelto",
+        "col_on_site_needed_by": "En obra / aprobación antes del",
+        "resubmit_for_record": "Copia corregida a presentar de nuevo para archivo",
+        "review_history": "Historial de revisión",
+        "hist_submitted": "Presentado",
+        "hist_returned": "Devuelto",
+        "drawings_missing_one": "{n} plano vinculado ya no está disponible",
+        "drawings_missing_other": "{n} planos vinculados ya no están disponibles",
+        "weeks_one": "{n} semana",
+        "weeks_other": "{n} semanas"
+      },
+      "labels": {
+        "status": {
+          "draft": "Borrador",
+          "submitted": "Presentado",
+          "under_review": "En revisión",
+          "approved": "Aprobado",
+          "approved_as_noted": "Aprobado con observaciones",
+          "revise_and_resubmit": "Corregir y volver a presentar",
+          "rejected": "Rechazado",
+          "closed": "Cerrado"
+        },
+        "type": {
+          "shop_drawing": "Plano de taller",
+          "product_data": "Ficha técnica",
+          "sample": "Muestra",
+          "mock_up": "Maqueta",
+          "test_report": "Informe de ensayo",
+          "calculation": "Cálculo",
+          "method_statement": "Procedimiento de ejecución",
+          "certificate": "Certificado",
+          "warranty": "Garantía"
+        },
+        "discipline": {
+          "mechanical": "Mecánica",
+          "hvac": "Climatización",
+          "plumbing": "Fontanería y saneamiento",
+          "fire_protection": "Protección contra incendios",
+          "electrical": "Electricidad",
+          "lighting": "Iluminación",
+          "elv": "Corrientes débiles",
+          "bms": "Automatización del edificio",
+          "architectural": "Arquitectura",
+          "structural": "Estructuras",
+          "civil": "Obra civil"
+        }
+      }
+    },
+    "changeorders": {
+      "strings": {
+        "register_title": "Registro de órdenes de cambio",
+        "doc_title": "Orden de cambio",
+        "col_code": "Código",
+        "col_title": "Título",
+        "col_reason": "Motivo",
+        "col_instrument": "Instrumento",
+        "col_submitted": "Fecha de presentación",
+        "col_contractor_amount": "Importe del contratista",
+        "col_engineer_amount": "Importe del ingeniero",
+        "col_approved_amount": "Importe aprobado",
+        "col_cost_impact": "Impacto en coste",
+        "col_time_impact": "Impacto en plazo (días)",
+        "col_approved_time": "Plazo aprobado (días)",
+        "time_impact": "Impacto en plazo",
+        "approved_time": "Plazo aprobado",
+        "col_approved": "Fecha de aprobación",
+        "submitted_by": "Presentado por",
+        "approved_by": "Aprobado por",
+        "description": "Descripción",
+        "no_description": "No se registró descripción.",
+        "items": "Partidas modificadas",
+        "item_description": "Descripción",
+        "item_change": "Cambio",
+        "item_unit": "Unidad",
+        "item_original_quantity": "Cant. original",
+        "item_new_quantity": "Cant. nueva",
+        "item_original_rate": "Precio original",
+        "item_new_rate": "Precio nuevo",
+        "item_cost_delta": "Diferencia de coste",
+        "register_filename": "registro-ordenes-de-cambio"
+      },
+      "labels": {
+        "status": {
+          "draft": "Borrador",
+          "submitted": "Presentada",
+          "approved": "Aprobada",
+          "rejected": "Rechazada",
+          "executed": "Ejecutada"
+        },
+        "reason": {
+          "client_request": "Solicitud del cliente",
+          "design_change": "Cambio de diseño",
+          "unforeseen": "Condiciones imprevistas",
+          "regulatory": "Requisito normativo",
+          "error": "Error u omisión",
+          "non_conformance": "No conformidad",
+          "value_engineering": "Ingeniería de valor"
+        },
+        "instrument": {
+          "works_change": "Orden de modificación",
+          "site_confirmation": "Confirmación en obra",
+          "claim": "Reclamación"
+        },
+        "change": {
+          "added": "Añadido",
+          "removed": "Eliminado",
+          "modified": "Modificado"
+        }
+      }
+    },
+    "claims_evidence": {
+      "strings": {
+        "register_title": "Dossier probatorio",
+        "subject": "Asunto",
+        "basis": "Fundamento",
+        "period_from": "Registro más antiguo",
+        "period_to": "Registro más reciente",
+        "digest": "Código de integridad (SHA-256, primeros 16 caracteres)",
+        "col_row": "N.º",
+        "col_record_id": "ID de registro",
+        "col_section": "Sección",
+        "col_date": "Fecha",
+        "col_kind": "Tipo de registro",
+        "col_title": "Título",
+        "col_summary": "Resumen",
+        "col_reference": "Referencia",
+        "register_filename": "dossier-probatorio"
+      },
+      "labels": {
+        "section": {
+          "notices": "Notificaciones",
+          "correspondence": "Correspondencia",
+          "rfis": "Solicitudes de información (RFI)",
+          "variations": "Modificaciones",
+          "approvals": "Aprobaciones",
+          "delay": "Retraso",
+          "timeline": "Cronología",
+          "other": "Otros"
+        },
+        "kind": {
+          "notice": "Notificación",
+          "variation_notice": "Aviso de modificación",
+          "variation_request": "Solicitud de modificación",
+          "variation_order": "Orden de modificación",
+          "change_order": "Orden de cambio",
+          "moc_entry": "Registro de cambio",
+          "correspondence": "Correspondencia"
+        },
+        "basis": {
+          "dispute": "Disputa",
+          "valuation": "Valoración",
+          "delay": "Retraso / ampliación de plazo",
+          "general": "Registro general"
+        }
+      }
+    },
+    "correspondence": {
+      "strings": {
+        "register_title": "Registro de correspondencia",
+        "doc_title": "Correspondencia",
+        "col_reference": "N.º de referencia",
+        "col_direction": "Sentido",
+        "col_type": "Tipo",
+        "col_subject": "Asunto",
+        "col_from": "De",
+        "col_to": "Para",
+        "col_date_sent": "Fecha de envío",
+        "col_date_received": "Fecha de recepción",
+        "col_response_due": "Respuesta requerida antes del",
+        "col_clause": "Cláusula contractual",
+        "notes": "Observaciones",
+        "no_notes": "No se registraron observaciones.",
+        "attachments": "Archivos adjuntos",
+        "linked_documents": "Documentos vinculados",
+        "sig_prepared": "Elaborado por",
+        "sig_received": "Recibido por",
+        "register_filename": "registro-correspondencia"
+      },
+      "labels": {
+        "direction": {
+          "incoming": "Entrada",
+          "outgoing": "Salida"
+        },
+        "type": {
+          "letter": "Carta",
+          "email": "Correo electrónico",
+          "notice": "Notificación",
+          "memo": "Memorando",
+          "report": "Informe"
+        },
+        "status": {
+          "open": "Abierto",
+          "awaiting_response": "Pendiente de respuesta",
+          "responded": "Respondido",
+          "closed": "Cerrado"
+        }
+      }
+    },
+    "transmittals": {
+      "strings": {
+        "register_title": "Registro de remisiones de documentos",
+        "doc_title": "Remisión de documentos",
+        "col_number": "N.º de remisión",
+        "col_subject": "Asunto",
+        "col_purpose": "Finalidad",
+        "col_issued": "Fecha de emisión",
+        "col_response_due": "Respuesta antes del",
+        "col_recipients": "Destinatarios",
+        "col_item_count": "Documentos",
+        "sender": "Remitente",
+        "cover_note": "Nota de envío",
+        "no_cover_note": "Sin nota de envío.",
+        "recipients": "Destinatarios",
+        "recipient": "Destinatario",
+        "action_required": "Acción requerida",
+        "acknowledged": "Recepción confirmada",
+        "responded": "Fecha de respuesta",
+        "items": "Documentos remitidos",
+        "item_no": "N.º",
+        "item_description": "Descripción",
+        "item_notes": "Observaciones",
+        "sig_issued": "Emitido por",
+        "sig_received": "Recibido por",
+        "register_filename": "registro-remisiones"
+      },
+      "labels": {
+        "status": {
+          "draft": "Borrador",
+          "issued": "Emitida",
+          "responded": "Respondida"
+        },
+        "purpose": {
+          "for_approval": "Para aprobación",
+          "for_review": "Para revisión",
+          "for_information": "Para información",
+          "for_construction": "Para construcción",
+          "for_tender": "Para licitación",
+          "for_record": "Para archivo"
+        }
+      }
+    },
+    "variations": {
+      "strings": {
+        "variation_register_title": "Registro de modificaciones",
+        "claim_register_title": "Registro de reclamaciones",
+        "notice_register_title": "Registro de notificaciones",
+        "doc_title": "Solicitud de modificación",
+        "doc_title_credit": "Solicitud de modificación (reducción)",
+        "time_impact": "Impacto en plazo",
+        "col_code": "Código",
+        "col_title": "Título",
+        "col_classification": "Tipo",
+        "col_urgency": "Urgencia",
+        "col_requested": "Fecha de solicitud",
+        "col_claimed_amount": "Importe reclamado",
+        "col_agreed_amount": "Importe acordado",
+        "col_time_impact": "Impacto en plazo (días)",
+        "col_response_due": "Respuesta antes del",
+        "col_clause": "Cláusula contractual",
+        "col_row": "N.º",
+        "col_claim_type": "Tipo de reclamación",
+        "col_raised": "Fecha de presentación",
+        "col_period_start": "Periodo desde",
+        "col_period_end": "Periodo hasta",
+        "col_description": "Descripción",
+        "col_decided_amount": "Importe resuelto",
+        "col_days_requested": "Días solicitados",
+        "col_days_granted": "Días concedidos",
+        "col_recipient_type": "Dirigida a",
+        "col_recipient": "Destinatario",
+        "col_target_response": "Respuesta prevista",
+        "col_response_received": "Respuesta recibida",
+        "requested_by": "Solicitado por",
+        "decided_by": "Resuelto por",
+        "date_submitted": "Fecha de presentación",
+        "date_decided": "Fecha de resolución",
+        "description": "Descripción",
+        "no_description": "No se registró descripción.",
+        "decision_notes": "Motivación de la decisión",
+        "no_decision_notes": "Aún no se ha registrado ninguna decisión.",
+        "variation_register_filename": "registro-modificaciones",
+        "claim_register_filename": "registro-reclamaciones",
+        "notice_register_filename": "registro-notificaciones"
+      },
+      "labels": {
+        "request_status": {
+          "draft": "Borrador",
+          "submitted": "Presentada",
+          "under_review": "En revisión",
+          "approved": "Aprobada",
+          "rejected": "Rechazada",
+          "converted_to_vo": "Convertida en orden"
+        },
+        "claim_status": {
+          "draft": "Borrador",
+          "submitted": "Presentada",
+          "under_review": "En revisión",
+          "agreed": "Acordada",
+          "granted": "Concedida",
+          "rejected": "Rechazada"
+        },
+        "notice_status": {
+          "issued": "Emitida",
+          "acknowledged": "Acuse de recibo",
+          "responded": "Respondida",
+          "closed": "Cerrada"
+        },
+        "classification": {
+          "scope_change": "Cambio de alcance",
+          "unforeseen": "Condición imprevista",
+          "owner_change": "Cambio del propietario",
+          "design_dev": "Desarrollo del diseño",
+          "regulatory": "Requisito normativo",
+          "other": "Otro"
+        },
+        "urgency": {
+          "low": "Baja",
+          "med": "Media",
+          "high": "Alta"
+        },
+        "claim_type": {
+          "disruption": "Alteración del ritmo de obra",
+          "eot": "Ampliación de plazo"
+        },
+        "recipient_type": {
+          "owner": "Propietario",
+          "contractor": "Contratista",
+          "architect": "Arquitecto",
+          "engineer": "Ingeniero",
+          "consultant": "Consultor"
+        }
+      }
+    },
+    "daily_diary": {
+      "strings": {
+        "doc_title": "Parte diario de obra",
+        "overview": "Resumen",
+        "site_supervisor": "Jefe de obra",
+        "not_recorded": "No registrado",
+        "labour_on_site": "Mano de obra en obra",
+        "equipment_on_site": "Maquinaria en obra",
+        "completeness": "Grado de cumplimentación",
+        "weather": "Clima",
+        "weather_time": "Hora",
+        "weather_source": "Fuente",
+        "weather_temp": "Temp. (°C)",
+        "weather_wind": "Viento (km/h)",
+        "weather_precip": "Precip. (mm)",
+        "weather_conditions": "Condiciones",
+        "weather_empty": "No se registró el clima de este día.",
+        "site_record": "Registro de obra",
+        "entries_empty": "No hay anotaciones registradas en este parte.",
+        "notes": "Observaciones",
+        "notes_empty": "Sin observaciones adicionales.",
+        "footer_supervisor": "Jefe de obra: {name}",
+        "footer_supervisor_missing": "Jefe de obra: no registrado",
+        "footer_generated": "Generado: {timestamp}",
+        "footer_page": "Página {page} de {total}",
+        "workforce": "Personal por empresa",
+        "workforce_company": "Empresa",
+        "workforce_count": "Personas",
+        "workforce_unassigned": "Sin empresa asignada",
+        "workforce_total": "Total",
+        "signatures": "Firmas",
+        "sig_prepared": "Elaborado por (jefe de obra)",
+        "sig_approved": "Aprobado por (representante de la propiedad)",
+        "sig_name": "Nombre",
+        "sig_title": "Cargo",
+        "sig_date": "Fecha",
+        "sig_signature": "Firma",
+        "signed_note": "Firmado en el sistema: {signers}",
+        "running_title": "{title} · {date} · {project}",
+        "filename_prefix": "parte-diario",
+        "summary_wind": "viento {value} km/h",
+        "summary_precipitation": "precipitación {value} mm",
+        "summary_humidity": "humedad {value} %",
+        "percent": "{value} %",
+        "decimal_mark": ","
+      },
+      "labels": {
+        "entry_type": {
+          "visitor": "Visitas",
+          "event": "Eventos",
+          "delivery": "Materiales recibidos",
+          "completion": "Trabajos realizados",
+          "incident_summary": "Seguridad e incidencias",
+          "inspection_summary": "Inspecciones",
+          "photo_note": "Notas fotográficas",
+          "general": "Observaciones generales"
+        },
+        "status": {
+          "open": "Abierto",
+          "closed": "Cerrado",
+          "signed": "Firmado",
+          "archived": "Archivado"
+        },
+        "condition": {
+          "clear": "despejado",
+          "mainly_clear": "mayormente despejado",
+          "partly_cloudy": "parcialmente nublado",
+          "cloudy": "nublado",
+          "overcast": "cubierto",
+          "fog": "niebla",
+          "fog_rime": "niebla engelante",
+          "drizzle_light": "llovizna ligera",
+          "drizzle_moderate": "llovizna moderada",
+          "drizzle_dense": "llovizna intensa",
+          "rain": "lluvia",
+          "rain_light": "lluvia ligera",
+          "rain_moderate": "lluvia moderada",
+          "rain_heavy": "lluvia intensa",
+          "freezing_rain_light": "lluvia engelante ligera",
+          "freezing_rain_heavy": "lluvia engelante intensa",
+          "snow": "nieve",
+          "snow_light": "nevada ligera",
+          "snow_moderate": "nevada moderada",
+          "snow_heavy": "nevada intensa",
+          "rain_showers_light": "chubascos ligeros",
+          "rain_showers_moderate": "chubascos moderados",
+          "rain_showers_violent": "chubascos violentos",
+          "snow_showers_light": "chubascos de nieve ligeros",
+          "snow_showers_heavy": "chubascos de nieve intensos",
+          "thunderstorm": "tormenta",
+          "thunderstorm_hail_light": "tormenta con granizo ligero",
+          "thunderstorm_hail_heavy": "tormenta con granizo fuerte"
+        },
+        "source": {
+          "manual": "Entrada manual",
+          "open_meteo": "Servicio meteorológico",
+          "sensor": "Sensor de obra"
+        }
+      }
+    },
+    "rfi_register": {
+      "strings": {
+        "register_title": "Registro de solicitudes de información (RFI)",
+        "col_number": "N.º de RFI",
+        "col_subject": "Asunto",
+        "col_raised_by": "Emitida por",
+        "col_assigned_to": "Asignada a",
+        "col_ball_in_court": "Pendiente de",
+        "col_date_required": "Fecha requerida",
+        "col_response_due": "Respuesta antes del",
+        "col_days_open": "Días abierta",
+        "col_cost_impact": "Impacto en coste",
+        "col_schedule_impact": "Impacto en plazo",
+        "col_response": "Respuesta",
+        "yes_with": "Sí ({detail})",
+        "register_filename": "registro-rfi"
+      },
+      "labels": {
+        "status": {
+          "draft": "Borrador",
+          "open": "Abierto",
+          "answered": "Respondido",
+          "closed": "Cerrado",
+          "void": "Anulado"
+        }
+      }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Generado por IA",
+        "drawing": "Plano",
+        "cost_estimate": "PRESUPUESTO",
+        "summary": "RESUMEN",
+        "project": "Proyecto:",
+        "boq": "Presupuesto:",
+        "date": "Fecha:",
+        "status": "Estado:",
+        "prepared_by": "Preparado por:",
+        "approved_by": "Aprobado por:",
+        "signature_hint": "Nombre / Firma / Fecha",
+        "contents": "Capítulos / Partidas:",
+        "pos": "Pos.",
+        "description": "Descripción",
+        "unit": "Unidad",
+        "qty": "Cant.",
+        "rate": "PU",
+        "total": "Total",
+        "subtotal": "Subtotal:",
+        "other_positions": "Otras partidas",
+        "direct_cost": "Coste directo:",
+        "markups": "Recargos (sin IVA):",
+        "net_total": "Total neto (sin IVA):",
+        "gross_total": "Total bruto",
+        "page": "Página",
+        "of": "de",
+        "generated": "Generado:",
+        "summary_report": "Informe resumido",
+        "positions_omitted": "{count} partidas (detalle omitido por rendimiento)",
+        "section": "Capítulo",
+        "items": "Partidas",
+        "cost_summary": "Resumen de costes",
+        "table_of_contents": "Índice",
+        "resources_omitted": "Desglose de recursos no impreso: este presupuesto tiene demasiadas líneas de recursos para un solo PDF.",
+        "status_draft": "Borrador",
+        "status_final": "Aprobado",
+        "status_archived": "Archivado",
+        "subject": "Presupuesto y mediciones",
+        "tax_vat": "IVA"
+      }
+    },
+    "einvoice_pdf": {
+      "strings": {
+        "doc_title": "FACTURA",
+        "date": "Fecha: {value}",
+        "due": "Vencimiento: {value}",
+        "from": "De",
+        "bill_to": "Facturar a",
+        "vat_id": "NIF-IVA: {value}",
+        "ref": "Ref.: {value}",
+        "th_description": "Descripción",
+        "th_qty": "Cant.",
+        "th_unit": "Ud.",
+        "th_unit_price": "Precio unitario",
+        "th_net": "Neto ({currency})",
+        "net_total": "Total neto",
+        "vat_total": "IVA",
+        "grand_total": "Total general",
+        "retention_prepaid": "Retención / anticipo",
+        "amount_due": "Importe a pagar",
+        "payment": "Pago",
+        "iban": "IBAN: {value}",
+        "bic": "BIC: {value}",
+        "account_number": "Cuenta: {value}",
+        "bank_code": "Código de entidad: {value}",
+        "account_holder": "Titular de la cuenta: {value}",
+        "footer": "Este PDF incluye una factura electrónica EN 16931 integrada (Factur-X / ZUGFeRD). El XML integrado es el documento válido.",
+        "date_format": "%d/%m/%Y",
+        "decimal_separator": ",",
+        "group_separator": "."
+      }
+    },
+    "report": {
+      "strings": {
+        "meta_report": "Informe",
+        "meta_project": "Proyecto",
+        "meta_type": "Tipo",
+        "meta_generated": "Generado",
+        "meta_currency": "Moneda",
+        "field_column": "Campo",
+        "value_column": "Valor",
+        "yes": "Sí",
+        "no": "No",
+        "no_data_heading": "No hay datos disponibles",
+        "no_data_body": "Este informe se generó con una instantánea de datos vacía. Compruebe que los módulos de origen (finanzas, programación, seguridad, etc.) devolvieron datos para el proyecto seleccionado.",
+        "no_data_body_short": "Este informe se generó con una instantánea de datos vacía. Compruebe que los módulos de origen devolvieron datos para el proyecto seleccionado.",
+        "footer_generated_by": "Generado por OpenConstructionERP el {timestamp}.",
+        "worksheet_name": "Informe",
+        "pdf_subject": "Informe de proyecto",
+        "overall_progress": "Avance general",
+        "as_of": "A fecha",
+        "recorded_by": "Registrado por",
+        "period": "Periodo",
+        "entries_suffix": "({count} registros)",
+        "site_photo_alt": "Foto de obra",
+        "ai_summary_heading": "Resumen",
+        "ai_badge": "Generado por IA",
+        "ai_note": "Generado por IA a partir de los datos del proyecto que figuran a continuación.",
+        "ai_note_confidence": "Generado por IA a partir de los datos del proyecto que figuran a continuación (confianza {confidence}).",
+        "ai_note_review": "Revise el contenido antes de compartirlo con el cliente."
+      },
+      "labels": {
+        "field_labels": {
+          "name": "Nombre",
+          "status": "Estado",
+          "phase": "Fase",
+          "planned_start": "Inicio previsto",
+          "planned_end": "Fin previsto",
+          "schedule_progress_pct": "Avance del programa (%)",
+          "cpi": "IRC",
+          "spi": "IRP",
+          "budget_consumed_pct": "Presupuesto consumido (%)",
+          "as_of": "A fecha",
+          "progress_pct": "Avance (%)",
+          "risk_score_avg": "Puntuación media de riesgo",
+          "open_rfis": "RFI abiertas",
+          "open_submittals": "Documentos de envío abiertos",
+          "open_defects": "Defectos abiertos",
+          "open_observations": "Observaciones abiertas",
+          "budget": "Presupuesto",
+          "committed": "Comprometido",
+          "actual": "Real",
+          "payable": "A pagar",
+          "receivable": "A cobrar",
+          "net_cash_flow": "Flujo de caja neto"
+        },
+        "section_titles": {
+          "Project Overview": "Resumen del proyecto",
+          "Key Performance Indicators": "Indicadores clave de rendimiento",
+          "Schedule Status": "Estado del programa",
+          "Risk Summary": "Resumen de riesgos",
+          "Open Issues": "Incidencias abiertas",
+          "Cost Summary": "Resumen de costes",
+          "Cost Breakdown": "Desglose de costes",
+          "Change Orders": "Órdenes de cambio",
+          "Cash Flow": "Flujo de caja",
+          "Schedule Overview": "Resumen del programa",
+          "Milestone Status": "Estado de los hitos",
+          "Critical Path": "Ruta crítica",
+          "3-Week Lookahead": "Programa de tres semanas",
+          "Safety KPIs": "Indicadores de seguridad",
+          "Incident Log": "Registro de accidentes",
+          "Near-Miss Reports": "Informes de casi accidentes",
+          "Safety Training": "Formación en seguridad",
+          "Inspection Summary": "Resumen de inspecciones",
+          "By Inspection Type": "Por tipo de inspección",
+          "Punch List Status": "Estado de la lista de defectos",
+          "Recent Inspections": "Inspecciones recientes",
+          "Portfolio Overview": "Resumen de la cartera",
+          "Project Statuses": "Estado de los proyectos",
+          "KPI Comparison": "Comparativa de indicadores",
+          "Portfolio Risks": "Riesgos de la cartera",
+          "Field Progress": "Avance en obra",
+          "Top Risks": "Principales riesgos",
+          "Site Photos": "Fotos de obra",
+          "Summary": "Resumen"
+        }
+      }
+    },
+    "procurement": {
+      "strings": {
+        "po_title": "Pedido de compra",
+        "gr_title": "Recepción de mercancía",
+        "supplier": "Proveedor",
+        "po_type": "Tipo de pedido",
+        "issue_date": "Fecha de emisión",
+        "delivery_date": "Fecha de entrega",
+        "created_by": "Elaborado por",
+        "order_total": "Importe total del pedido",
+        "line_items": "Líneas de pedido",
+        "col_no": "Nº",
+        "col_description": "Descripción",
+        "col_quantity": "Cant.",
+        "col_unit": "Ud.",
+        "col_unit_rate": "Precio unitario",
+        "col_amount": "Importe",
+        "no_line_items": "Sin líneas de pedido.",
+        "totals": "Totales",
+        "subtotal": "Importe neto",
+        "tax": "Impuesto",
+        "total_gross": "Total con impuestos",
+        "terms": "Condiciones",
+        "payment_terms": "Condiciones de pago",
+        "retention": "Retención",
+        "retention_at": "Retención aplicada en",
+        "retention_at_receipt": "Recepción de mercancía",
+        "retention_at_invoice": "Factura",
+        "invoice_tolerance": "Tolerancia de factura",
+        "supplier_confirmation": "Confirmación del proveedor",
+        "supplier_reference": "Referencia del proveedor",
+        "confirmed_delivery": "Fecha de entrega confirmada",
+        "acknowledged_on": "Acuse de recibo el",
+        "not_confirmed": "El proveedor aún no ha confirmado el pedido.",
+        "notes": "Observaciones",
+        "no_notes": "No hay observaciones registradas.",
+        "sig_ordered_by": "Pedido por",
+        "purchase_order": "Pedido de compra",
+        "receipt_date": "Fecha de recepción",
+        "received_by": "Recibido por",
+        "delivery_note": "Albarán de entrega",
+        "col_ordered": "Pedido",
+        "col_received": "Recibido",
+        "col_rejected": "Rechazado",
+        "col_batch": "Lote",
+        "rejections": "Rechazos",
+        "col_reason": "Motivo",
+        "no_rejections": "No se rechazó ningún material.",
+        "sig_delivered_by": "Entregado por",
+        "counterparty_tax_id": "NIF/CIF",
+        "counterparty_address": "Dirección"
+      },
+      "labels": {
+        "po_status": {
+          "draft": "Borrador",
+          "approved": "Aprobado",
+          "issued": "Emitido",
+          "partially_received": "Recibido parcialmente",
+          "completed": "Completado",
+          "cancelled": "Anulado"
+        },
+        "gr_status": {
+          "draft": "Borrador",
+          "confirmed": "Confirmado"
+        },
+        "po_type": {
+          "standard": "Estándar",
+          "blanket": "Pedido marco",
+          "service": "Servicios"
+        }
+      }
+    },
+    "finance": {
+      "strings": {
+        "invoice_title": "Factura",
+        "payment_title": "Pago",
+        "direction": "Sentido",
+        "supplier": "Proveedor",
+        "client": "Cliente",
+        "invoice_date": "Fecha de factura",
+        "due_date": "Fecha de vencimiento",
+        "payment_terms": "Condiciones de pago",
+        "purchase_order": "Pedido de compra",
+        "invoice_total": "Importe total de la factura",
+        "line_items": "Líneas de factura",
+        "col_no": "Nº",
+        "col_description": "Descripción",
+        "col_quantity": "Cant.",
+        "col_unit": "Ud.",
+        "col_unit_rate": "Precio unitario",
+        "col_vat": "IVA",
+        "col_amount": "Importe",
+        "no_line_items": "Sin líneas de factura.",
+        "totals": "Totales",
+        "subtotal": "Importe neto",
+        "tax": "Impuesto",
+        "total_gross": "Total con impuestos",
+        "retention": "Retención",
+        "amount_due": "Pagadero tras la retención",
+        "payments": "Pagos",
+        "col_date": "Fecha",
+        "col_reference": "Referencia",
+        "col_paid": "Pagado",
+        "col_withheld": "Retenido",
+        "refund": "Reembolso",
+        "no_payments": "No hay pagos registrados.",
+        "notes": "Observaciones",
+        "no_notes": "No hay observaciones registradas.",
+        "invoice": "Factura",
+        "invoice_number": "Nº de factura",
+        "payment_date": "Fecha de pago",
+        "reference": "Referencia",
+        "amount_paid": "Importe pagado",
+        "exchange_rate": "Tipo de cambio",
+        "kind": "Tipo",
+        "kind_payment": "Pago",
+        "kind_refund": "Reembolso",
+        "withholding": "Retención practicada",
+        "withheld_amount": "Importe retenido",
+        "release_date": "Fecha de liberación",
+        "gross_settled": "Importe bruto liquidado",
+        "no_withholding": "No se practicó ninguna retención en este pago.",
+        "counterparty_tax_id": "NIF/CIF",
+        "counterparty_address": "Dirección"
+      },
+      "labels": {
+        "invoice_status": {
+          "draft": "Borrador",
+          "pending": "Pendiente de aprobación",
+          "approved": "Aprobada",
+          "sent": "Enviada",
+          "paid": "Pagada",
+          "cancelled": "Anulada",
+          "credit_note_issued": "Abono emitido"
+        },
+        "direction": {
+          "payable": "A pagar (factura de proveedor)",
+          "receivable": "A cobrar (factura de cliente)"
+        },
+        "payment_status": {
+          "completed": "Completado",
+          "refunded": "Reembolsado"
+        }
+      }
+    }
+  },
+  "pdf_footer": {
+    "page_of": "Página {page} de {total}",
+    "page": "Página {page}",
+    "printed": "Impreso: {timestamp}",
+    "generated": "Generado: {date}"
+  },
+  "document_catalogue": {
+    "portal_login": {
+      "invite_subject": "{sender} le ha invitado al portal de clientes",
+      "login_subject": "Su enlace de acceso al portal de clientes",
+      "invite_heading": "Bienvenido al portal de clientes",
+      "login_heading": "Acceso al portal de clientes",
+      "greeting": "Hola, {name}:",
+      "greeting_generic": "Hola:",
+      "invite_body": "{sender} le ha dado acceso al portal de clientes. Allí puede seguir su proyecto: informes de avance, documentos, facturas y los próximos hitos.",
+      "login_body": "Aquí tiene el enlace de acceso que ha solicitado.",
+      "link_help": "El botón de abajo inicia la sesión. No necesita contraseña. El enlace funciona una sola vez y caduca en {hours} horas.",
+      "ignore": "Si no esperaba este correo, puede ignorarlo. Nadie obtiene acceso sin este enlace.",
+      "invite_cta": "Abrir el portal",
+      "login_cta": "Iniciar sesión",
+      "sender_generic": "Su equipo de proyecto"
+    },
+    "tender_invite": {
+      "subject": "Invitación a licitar: {package}",
+      "heading": "Invitación a licitar",
+      "greeting": "Estimados señores de {company}:",
+      "greeting_generic": "Estimados señores:",
+      "invite": "Les invitamos a presentar una oferta para el paquete de licitación {package}.",
+      "invite_project": "Les invitamos a presentar una oferta para el paquete de licitación {package} del proyecto {project}.",
+      "deadline": "Plazo de presentación: {deadline}",
+      "link_help": "El botón de abajo abre el presupuesto con las mediciones. Introduzca sus precios unitarios en línea, guarde un borrador cuando quiera y envíe su oferta antes del plazo. No necesita una cuenta.",
+      "link_personal": "Este enlace es personal para su empresa. Por favor, no lo reenvíe.",
+      "cta": "Abrir el presupuesto e introducir precios",
+      "no_link": "Revisen la documentación y envíennos su oferta antes del plazo indicado."
+    },
+    "notification_email": {
+      "greeting": "Hola, {name}:",
+      "greeting_generic": "Hola:",
+      "cta": "Abrir en OpenConstructionERP",
+      "footer": "Recibe este correo por su configuración de notificaciones. Puede cambiarla en su perfil.",
+      "digest_subject": "OpenConstructionERP: Resumen de notificaciones ({count})",
+      "digest_heading": "Notificaciones recientes:"
+    },
+    "tender_xlsx": {
+      "comparison_title": "Comparativo de ofertas",
+      "comparison_sheet": "Comparativo",
+      "bidder_title": "Presupuesto para cotizar",
+      "bidder_sheet": "Presupuesto",
+      "project": "Proyecto",
+      "package": "Paquete",
+      "currency": "Moneda",
+      "date": "Fecha",
+      "return_by": "Entregar antes de",
+      "item": "Partida",
+      "description": "Descripción",
+      "unit": "Unidad",
+      "quantity": "Cantidad",
+      "unit_price": "Precio unitario",
+      "line_total": "Importe",
+      "own_estimate": "Estimación propia",
+      "not_priced": "sin precio",
+      "sum_priced_lines": "Suma de partidas con precio",
+      "bid_total": "Total de la oferta presentada",
+      "lines_priced": "Partidas con precio",
+      "lines_priced_value": "{priced} de {total}",
+      "deviation": "Desviación respecto a la estimación propia",
+      "not_comparable": "n/d",
+      "other_currency": "Cotizada en {currency}, no se compara con las ofertas en {reporting}.",
+      "legend": "Leyenda",
+      "legend_lowest": "Verde: el precio unitario más bajo de la partida.",
+      "legend_high": "▲ rojo: más de un {pct} % por encima de la mediana de la partida.",
+      "legend_low": "▼ ámbar: más de un {pct} % por debajo de la mediana de la partida.",
+      "legend_missing": "\"{marker}\": el licitador no dio precio para la partida.",
+      "legend_incomplete": "Una oferta con partidas sin precio se marca en \"Partidas con precio\" y no se clasifica como la más baja por su total.",
+      "legend_totals": "El total de la oferta es la cifra presentada por el licitador; puede diferir de la suma de sus partidas con precio.",
+      "bidder": "Licitador",
+      "bidder_note": "Nota del licitador",
+      "reference": "Referencia (no editar)",
+      "total": "Total",
+      "instructions": "Introduzca un precio unitario para cada partida en las celdas amarillas. Las cantidades y descripciones son fijas, los importes y el total se calculan solos. Deje la celda vacía si no cotiza la partida."
+    },
+    "cost_plan": {
+      "sheet_plan": "Plan de costes NRM 1",
+      "sheet_unallocated": "Sin asignar",
+      "title": "Plan de costes por elementos (NRM 1)",
+      "bill": "Presupuesto",
+      "currency": "Moneda",
+      "gifa": "Superficie construida (m2)",
+      "gifa_project": "tomada del proyecto",
+      "gifa_entered": "introducida para esta exportación",
+      "gifa_none": "sin definir, no se muestra el coste por m2",
+      "col_code": "Código",
+      "col_description": "Elemento",
+      "col_positions": "Partidas",
+      "col_basis": "Base de cálculo",
+      "col_total": "Total",
+      "col_per_m2": "Coste por m2 de superficie construida",
+      "col_share": "% del total",
+      "col_running": "Total acumulado",
+      "group_level": "Nivel de grupo, sin elemento indicado",
+      "facilitating_works_estimate": "Estimación de obras preparatorias",
+      "works_estimate": "Estimación de obras de edificación",
+      "addons_heading": "Grupos NRM 1 9-14 valorados como partidas del presupuesto",
+      "unallocated": "Sin asignar a un elemento",
+      "direct_cost": "Coste directo del presupuesto",
+      "markups_heading": "Recargos (cascada propia del presupuesto, en orden)",
+      "markups_total": "Total de recargos",
+      "grand_total": "Total del plan de costes",
+      "basis_direct": "{pct} % sobre el coste directo",
+      "basis_running": "{pct} % sobre el subtotal acumulado",
+      "basis_lump": "Importe fijo",
+      "basis_banded": "Escala por tramos",
+      "basis_escalation": "Revisión por índice",
+      "basis_other": "{kind}",
+      "basis_scoped": "limitado a un capítulo",
+      "col_ordinal": "N.º de orden",
+      "col_position": "Descripción",
+      "col_written_code": "Código tal como figura",
+      "col_reason": "Motivo",
+      "reason_no_code": "Sin código NRM en la partida ni en sus capítulos",
+      "reason_invalid_code": "El código no es un número NRM",
+      "reason_unknown_group": "NRM 1 no tiene ese grupo",
+      "truncated": "Lista reducida a las primeras {shown} de {count} partidas; el total incluye todas."
+    },
+    "bim_requirements_excel": {
+      "sheet_requirements": "Requisitos",
+      "sheet_summary": "Resumen",
+      "sheet_legend": "Leyenda",
+      "summary_element": "Elemento",
+      "summary_count": "Número de requisitos",
+      "summary_total": "Total",
+      "legend_column": "Columna",
+      "legend_description": "Descripción",
+      "unspecified": "Sin especificar",
+      "h01": "Elemento / clase IFC",
+      "h02": "Clasificación",
+      "h03": "Grupo de propiedades",
+      "h04": "Nombre de la propiedad",
+      "h05": "Tipo de dato",
+      "h06": "Obligatorio",
+      "h07": "Valores permitidos",
+      "h08": "Mín.",
+      "h09": "Máx.",
+      "h10": "Unidad",
+      "h11": "Patrón",
+      "h12": "Fase",
+      "h13": "Agente",
+      "h14": "Caso de uso",
+      "h15": "Fuente",
+      "d01": "Clase de entidad IFC (p. ej. IFCWALL, IFCBEAM)",
+      "d02": "Sistema de clasificación y código (p. ej. Uniclass 2015: EF_25_10)",
+      "d03": "Nombre del conjunto de propiedades (p. ej. Pset_WallCommon)",
+      "d04": "Nombre de la propiedad o atributo exigido",
+      "d05": "Tipo de dato IFC (IFCLABEL, IFCREAL, IFCBOOLEAN, etc.)",
+      "d06": "Cardinalidad: obligatorio, opcional o prohibido",
+      "d07": "Lista de valores permitidos separados por punto y coma",
+      "d08": "Límites del rango numérico",
+      "d09": "Unidad de medida (m, m2, kg, etc.)",
+      "d10": "Expresión regular para validar el valor",
+      "d11": "Fase o hito del proyecto (LP3, RIBA Stage 3, etc.)",
+      "d12": "Parte responsable (arquitecto, ingeniero de estructuras, etc.)",
+      "d13": "Finalidad o caso de uso del requisito",
+      "d14": "Norma o documento de origen"
+    },
+    "notification_templates": {
+      "notifications.boq.created.title": "Presupuesto creado",
+      "notifications.boq.created.body": "Se ha guardado su presupuesto '{boq_name}'.",
+      "notifications.meeting.action_assigned.title": "Se le ha asignado una acción",
+      "notifications.meeting.action_assigned.body": "De la reunión {meeting_number}: {description}",
+      "notifications.cde.state_transitioned.title": "Cambio de estado del documento",
+      "notifications.cde.state_transitioned.body": "El contenedor ha pasado al estado '{new_state}'.",
+      "notifications.cde.linked_published.title": "Se ha publicado un documento vinculado a su trabajo",
+      "notifications.cde.linked_published.body": "{container_code} está publicado en la revisión {revision_code}. Sus registros vinculados: {records}.",
+      "notifications.rfi.assigned.title": "Se le ha asignado una solicitud de información (RFI)",
+      "notifications.rfi.assigned.body": "{code} - {title}",
+      "notifications.rfi.responded.title": "Solicitud de información (RFI) respondida",
+      "notifications.rfi.responded.body": "Su solicitud {code} ({title}) ha recibido respuesta.",
+      "notifications.risk.assigned.title": "Se le ha asignado un riesgo",
+      "notifications.risk.assigned.body": "{code} - {title}",
+      "notifications.costmodel.overrun_alert.title": "Alerta de sobrecoste",
+      "notifications.costmodel.overrun_alert.body": "El coste de la categoría {category} supera el presupuesto: el coste real de {actual} {currency} sobrepasa el umbral de alerta de +{threshold_pct} % sobre los {planned} {currency} previstos.",
+      "notifications.submittal.submitted.title": "Documento de aprobación pendiente de revisión",
+      "notifications.submittal.submitted.body": "{code} - {title}",
+      "notifications.submittal.approved.title": "Documento de aprobación aprobado",
+      "notifications.submittal.approved.body": "{code} - {title}",
+      "notifications.submittal.rejected.title": "Documento de aprobación rechazado",
+      "notifications.submittal.rejected.body": "{code} ({title}). Motivo: {reason}",
+      "notifications.submittal.revise_resubmit.title": "Documento de aprobación que requiere corrección",
+      "notifications.submittal.revise_resubmit.body": "{code} ({title}). Motivo: {reason}",
+      "notifications.transmittal.issued.title": "Se le ha remitido una transmisión de documentos",
+      "notifications.transmittal.issued.body": "{code} - {title}",
+      "notifications.transmittal.acknowledged.title": "Transmisión de documentos recibida",
+      "notifications.transmittal.acknowledged.body": "El destinatario ha confirmado la recepción de {code} ({title}).",
+      "notifications.transmittal.responded.title": "Transmisión de documentos respondida",
+      "notifications.transmittal.responded.body": "{code} ({title}). {response_summary}",
+      "notification.rfi_assigned_title": "Se le ha asignado una solicitud de información (RFI)",
+      "notification.rfi_assigned_body": "RFI {rfi_number} - {subject}",
+      "notification.task_assigned_title": "Nueva tarea asignada",
+      "notification.task_assigned_body": "{task_title}",
+      "notification.invoice_approved_title": "Factura aprobada",
+      "notification.invoice_approved_body": "Factura {invoice_number} - {amount_total} {currency_code}",
+      "notification.inspection_scheduled_title": "Inspección programada",
+      "notification.inspection_scheduled_body": "{inspection_number} - {title}, el {inspection_date}",
+      "notification.submittal_status_changed_title": "Cambio de estado del documento de aprobación",
+      "notification.submittal_status_changed_body": "{submittal_number} ({title}) - {new_status}",
+      "notification.meeting_scheduled_title": "Reunión programada",
+      "notification.meeting_scheduled_body": "{title}, el {meeting_date}",
+      "notification.ncr_created_title": "No conformidad registrada",
+      "notification.ncr_created_body": "NCR {ncr_number} - {title} ({severity})",
+      "notification.document_uploaded_title": "Documento subido",
+      "notification.document_uploaded_body": "{document_name}",
+      "notifications.file_comments.mention.title": "Le han mencionado en un comentario",
+      "notifications.file_comments.mention.body": "«{excerpt}»",
+      "notifications.collaboration.comment_added.title": "Nuevo comentario en un debate",
+      "notifications.collaboration.comment_added.body": "En {entity_type}: «{excerpt}»",
+      "notifications.clash.high_severity.title": "Detectada una colisión de gravedad alta",
+      "notifications.clash.high_severity.body": "Colisión de gravedad {severity}: {a_name} contra {b_name}",
+      "notifications.validation.report.title": "La validación ha detectado incidencias",
+      "notifications.validation.report.body": "{error_count} error(es) y {warning_count} advertencia(s) en este elemento ({target_type}).",
+      "notifications.punchlist.auto_created.title": "Elemento de repaso creado",
+      "notifications.punchlist.auto_created.body": "{title}",
+      "notifications.digest.title": "Resumen de notificaciones",
+      "notifications.digest.body": "Tiene {count} novedades nuevas en el canal {channel}.",
+      "notifications.approval.overdue.title": "Aprobación fuera de plazo",
+      "notifications.approval.overdue.body": "El paso {step_ordinal} de este elemento ({target_kind}) lleva {hours_overdue} h de retraso.",
+      "notifications.approval.escalated.title": "Aprobación escalada a usted",
+      "notifications.approval.escalated.body": "El paso {step_ordinal} de este elemento ({target_kind}) se ha escalado a usted (nivel {level}).",
+      "notifications.approval.reassigned.title": "Aprobación reasignada a usted",
+      "notifications.approval.reassigned.body": "El paso {step_ordinal} de este elemento ({target_kind}) queda ahora bajo su decisión.",
+      "notifications.deadline.overdue.title": "Vencido: {title}",
+      "notifications.deadline.overdue.body": "Elemento del módulo {module} \"{title}\": plazo superado en {days_overdue} día(s).",
+      "notifications.deadline.escalated.title": "Elemento vencido escalado",
+      "notifications.deadline.escalated.body": "Elemento del módulo {module} \"{title}\": sigue abierto con {days_overdue} día(s) de retraso y se ha escalado.",
+      "notifications.deadline.approaching.title": "Próximo vencimiento: {title}",
+      "notifications.deadline.approaching.body": "Elemento del módulo {module} \"{title}\": vence el {due_date}.",
+      "notifications.deadline.built.approaching.title": "Próximo vencimiento: {title}",
+      "notifications.deadline.built.approaching.body": "Módulo {module}: \"{title}\", vence el {due_date}.",
+      "notifications.deadline.rfi.overdue.title": "Vencida: RFI {reference}",
+      "notifications.deadline.rfi.overdue.body": "La RFI {reference} \"{title}\" del proyecto {project} vencía el {due_date_display} y lleva {days_overdue} día(s) de retraso. Se requiere respuesta.",
+      "notifications.deadline.rfi.escalated.title": "Escalada: RFI {reference}",
+      "notifications.deadline.rfi.escalated.body": "La RFI {reference} \"{title}\" del proyecto {project} sigue abierta, {days_overdue} día(s) después de su vencimiento el {due_date_display}, y se ha escalado a usted.",
+      "notifications.deadline.rfi.approaching.title": "Próximo vencimiento: RFI {reference}",
+      "notifications.deadline.rfi.approaching.body": "La RFI {reference} \"{title}\" del proyecto {project} vence el {due_date_display}. Se requiere respuesta.",
+      "notifications.deadline.submittals.overdue.title": "Vencido: documento de aprobación {reference}",
+      "notifications.deadline.submittals.overdue.body": "El documento de aprobación {reference} \"{title}\" del proyecto {project} vencía el {due_date_display} y lleva {days_overdue} día(s) de retraso. Se requiere revisión.",
+      "notifications.deadline.submittals.escalated.title": "Escalado: documento de aprobación {reference}",
+      "notifications.deadline.submittals.escalated.body": "El documento de aprobación {reference} \"{title}\" del proyecto {project} sigue abierto, {days_overdue} día(s) después de su vencimiento el {due_date_display}, y se ha escalado a usted.",
+      "notifications.deadline.submittals.approaching.title": "Próximo vencimiento: documento de aprobación {reference}",
+      "notifications.deadline.submittals.approaching.body": "El documento de aprobación {reference} \"{title}\" del proyecto {project} vence el {due_date_display}. Se requiere revisión.",
+      "notifications.deadline.correspondence.overdue.title": "Vencida: correspondencia {reference}",
+      "notifications.deadline.correspondence.overdue.body": "La correspondencia {reference} \"{title}\" del proyecto {project} requería respuesta antes del {due_date_display} y lleva {days_overdue} día(s) de retraso. Se requiere respuesta.",
+      "notifications.deadline.correspondence.escalated.title": "Escalada: correspondencia {reference}",
+      "notifications.deadline.correspondence.escalated.body": "La correspondencia {reference} \"{title}\" del proyecto {project} sigue sin respuesta, {days_overdue} día(s) después de su vencimiento el {due_date_display}, y se ha escalado a usted.",
+      "notifications.deadline.correspondence.approaching.title": "Próximo vencimiento: correspondencia {reference}",
+      "notifications.deadline.correspondence.approaching.body": "La correspondencia {reference} \"{title}\" del proyecto {project} requiere respuesta antes del {due_date_display}. Se requiere respuesta.",
+      "notifications.deadline.variations.overdue.title": "Vencida: modificación {reference}",
+      "notifications.deadline.variations.overdue.body": "La modificación {reference} \"{title}\" del proyecto {project} vencía el {due_date_display} y lleva {days_overdue} día(s) de retraso. Se requiere decisión.",
+      "notifications.deadline.variations.escalated.title": "Escalada: modificación {reference}",
+      "notifications.deadline.variations.escalated.body": "La modificación {reference} \"{title}\" del proyecto {project} sigue abierta, {days_overdue} día(s) después de su vencimiento el {due_date_display}, y se ha escalado a usted.",
+      "notifications.deadline.variations.approaching.title": "Próximo vencimiento: modificación {reference}",
+      "notifications.deadline.variations.approaching.body": "La modificación {reference} \"{title}\" del proyecto {project} vence el {due_date_display}. Se requiere decisión.",
+      "notifications.variation.submitted.title": "Modificación pendiente de decisión: {code}",
+      "notifications.variation.submitted.body": "La modificación {code} \"{title}\" del proyecto {project} se ha presentado y está pendiente de decisión.",
+      "notifications.variation.approved.title": "Modificación aprobada: {code}",
+      "notifications.variation.approved.body": "La modificación {code} \"{title}\" del proyecto {project} ha sido aprobada.",
+      "notifications.variation.rejected.title": "Modificación rechazada: {code}",
+      "notifications.variation.rejected.body": "La modificación {code} \"{title}\" del proyecto {project} ha sido rechazada y se le ha devuelto.",
+      "notifications.variation.rejected_reason.body": "La modificación {code} \"{title}\" del proyecto {project} ha sido rechazada y se le ha devuelto. Motivo: {reason}",
+      "notifications.changeorder.awaiting_approval.title": "Orden de cambio pendiente de aprobación: {code}",
+      "notifications.changeorder.awaiting_approval.body": "La orden de cambio {code} \"{title}\" del proyecto {project} se ha presentado y está pendiente de aprobación.",
+      "notifications.changeorder.approved.title": "Orden de cambio aprobada: {code}",
+      "notifications.changeorder.approved.body": "La orden de cambio {code} \"{title}\" del proyecto {project} ha sido aprobada.",
+      "notifications.changeorder.rejected.title": "Orden de cambio rechazada: {code}",
+      "notifications.changeorder.rejected.body": "La orden de cambio {code} \"{title}\" del proyecto {project} ha sido rechazada.",
+      "notifications.submittal.approved_as_noted.title": "Documento de aprobación aprobado con observaciones",
+      "notifications.submittal.approved_as_noted.body": "{code} - {title}",
+      "notifications.file_approval.needs_approver.title": "Un documento requiere su aprobación",
+      "notifications.file_approval.needs_approver.body": "Hay un documento pendiente de su aprobación, tipo: {file_kind}.",
+      "notifications.file_approval.approved.title": "Su documento ha sido aprobado",
+      "notifications.file_approval.approved.body": "Su documento (tipo: {file_kind}) ha superado todos los pasos de aprobación.",
+      "notifications.file_approval.rejected.title": "Se le ha devuelto su documento",
+      "notifications.file_approval.rejected.body": "Su documento (tipo: {file_kind}) ha sido rechazado y requiere cambios.",
+      "notifications.portal.user_invited.title": "Usuario del portal invitado",
+      "notifications.portal.user_invited.body": "{portal_user_email} invitado con el rol {portal_role}.",
+      "notifications.portal.message_received.title": "Nuevo mensaje en el portal",
+      "notifications.portal.message_received.body": "{buyer_name} ha enviado un mensaje."
+    },
+    "schedule_headers": {
+      "headers": {
+        "id": [
+          "Código",
+          "Id",
+          "Nº",
+          "Número",
+          "Código de actividad"
+        ],
+        "name": [
+          "Nombre de tarea",
+          "Nombre",
+          "Actividad",
+          "Tarea"
+        ],
+        "wbs": [
+          "EDT",
+          "Código EDT",
+          "Número de esquema"
+        ],
+        "outline_level": [
+          "Nivel de esquema",
+          "Nivel"
+        ],
+        "start": [
+          "Comienzo",
+          "Inicio",
+          "Fecha de inicio",
+          "Fecha inicio"
+        ],
+        "finish": [
+          "Fin",
+          "Fecha de fin",
+          "Fecha fin"
+        ],
+        "duration": [
+          "Duración",
+          "Días"
+        ],
+        "predecessors": [
+          "Predecesoras",
+          "Predecesores",
+          "Predecesora",
+          "Dependencias"
+        ],
+        "percent_complete": [
+          "% Completado",
+          "Porcentaje completado",
+          "Avance",
+          "Progreso"
+        ],
+        "milestone": [
+          "Hito"
+        ],
+        "resource": [
+          "Recurso",
+          "Recursos",
+          "Nombres de los recursos",
+          "Cuadrilla"
+        ],
+        "notes": [
+          "Notas",
+          "Comentarios",
+          "Descripción",
+          "Observaciones"
+        ],
+        "client_visible": [
+          "Visible para el cliente",
+          "Visible al cliente"
+        ]
+      },
+      "yes_words": [
+        "sí",
+        "si",
+        "s"
+      ],
+      "no_words": [
+        "no",
+        "falso"
+      ],
+      "example_names": [
+        "Estructura",
+        "Excavación",
+        "Cimentación",
+        "Cimentación aceptada"
+      ]
+    },
+    "module_suggest": {
+      "link_labels": {
+        "contract": "Contrato",
+        "contact": "Contacto",
+        "schedule_activity": "Actividad",
+        "document": "Documento",
+        "user": "Responsable"
+      },
+      "keywords": {
+        "contract": [
+          "contrato*"
+        ],
+        "contact": [
+          "contacto*",
+          "proveedor*",
+          "subcontratista*",
+          "cliente*"
+        ],
+        "schedule_activity": [
+          "actividad*",
+          "tarea*"
+        ],
+        "document": [
+          "documento*",
+          "plano",
+          "planos",
+          "adjunto*"
+        ],
+        "user": [
+          "responsable*",
+          "asignado*",
+          "inspector*",
+          "supervisor*",
+          "encargado*"
+        ],
+        "due": [
+          "vencimiento*",
+          "fecha límite",
+          "plazo*",
+          "caducidad*",
+          "válido hasta",
+          "valido hasta"
+        ]
+      },
+      "state_labels": [
+        "Abierto",
+        "En curso",
+        "Terminado"
+      ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Adenda {number} al concurso {package}",
+      "addendum_heading": "Adenda al concurso",
+      "greeting": "Estimados señores de {company}:",
+      "greeting_generic": "Estimados señores:",
+      "addendum_intro": "Se ha emitido la adenda {number} al paquete de licitación {package}: {title}.",
+      "addendum_deadline": "La fecha límite de presentación se ha modificado de {old} a {new}.",
+      "addendum_boq": "El presupuesto de partidas ha cambiado (revisión {revision}). Le rogamos que presupueste la revisión vigente.",
+      "addendum_documents": "Documentos emitidos: {documents}",
+      "addendum_ack": "Le rogamos que confirme la recepción de esta adenda. Una oferta que no confirme todas las adendas podrá considerarse no conforme.",
+      "answer_subject": "Aclaración {number} al concurso {package}",
+      "answer_heading": "Aclaración del concurso",
+      "answer_intro": "Se ha respondido una consulta sobre el paquete de licitación {package}. La respuesta es aplicable a todos los licitadores.",
+      "question_label": "Consulta",
+      "answer_label": "Respuesta"
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "El nombre del modelo de IA está desactualizado o no disponible. Abra Configuración > IA e indique un nombre de modelo válido.",
+      "not_configured": "IA no configurada. Agregue su clave API en Configuración."
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Valor bruto de desarrollo (GDV)",
+      "total_development_cost": "Coste total de desarrollo",
+      "residual_land_value": "Valor residual del suelo",
+      "developer_profit": "Beneficio del promotor",
+      "profit_on_cost": "Beneficio sobre coste",
+      "profit_on_gdv": "Beneficio sobre GDV",
+      "construction_cost": "Coste de construcción",
+      "professional_fees": "Honorarios profesionales",
+      "contingency": "Contingencia",
+      "finance_cost": "Coste financiero",
+      "sales_costs": "Costes de venta"
+    },
+    "status": {
+      "viable": "Viable",
+      "unviable": "No viable",
+      "marginal": "Marginal",
+      "pending": "Aún sin evaluar"
+    },
+    "figure": {
+      "gross_development_value": "El valor de venta total de todas las unidades del proyecto, en una sola moneda.",
+      "total_development_cost": "Todos los costes de ejecución del proyecto excepto el propio suelo: construcción, honorarios, contingencia, financiación y costes de venta.",
+      "residual_land_value": "Lo que queda para el suelo después de restar el coste total de desarrollo y el beneficio objetivo del promotor del valor bruto de desarrollo.",
+      "developer_profit": "El beneficio que el promotor pretende conservar, fijado como porcentaje objetivo del valor bruto de desarrollo.",
+      "profit_on_cost": "El beneficio del promotor dividido por el coste total de desarrollo, expresado como ratio.",
+      "profit_on_gdv": "El beneficio del promotor dividido por el valor bruto de desarrollo, expresado como ratio."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Campamento de obra",
+        "rental": "Vivienda de alquiler",
+        "hotel": "Hotel"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Pendiente",
+        "approved": "Aprobado",
+        "rejected": "Rechazado"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Cumplido",
+        "fail": "No cumplido",
+        "not_applicable": "No aplicable"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Plano",
+        "contract": "Contrato",
+        "specification": "Especificación",
+        "photo": "Foto",
+        "correspondence": "Correspondencia",
+        "reality_capture": "Captura de realidad",
+        "other": "Otros"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Pendiente",
+        "approved": "Aprobado",
+        "rejected": "Rechazado",
+        "cancelled": "Cancelado"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Borrador",
+        "submitted": "Enviado para aprobación",
+        "approved": "Aprobado",
+        "posted": "Contabilizado"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Abierto",
+        "assigned": "Asignado",
+        "in_progress": "En curso",
+        "resolved": "Resuelto",
+        "verified": "Verificado",
+        "closed": "Cerrado"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "observación",
+        "minor": "menor",
+        "major": "mayor",
+        "critical": "crítica"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Persona",
+        "crew": "Cuadrilla",
+        "equipment": "Equipo",
+        "subcontractor": "Subcontratista"
+      }
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "verificado",
+      "bound": "adjunto",
+      "empty": "pendiente"
+    },
+    "package_status_labels": {
+      "draft": "borrador",
+      "in_progress": "en curso",
+      "ready": "listo",
+      "issued": "emitido"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "bloqueante",
+      "critical": "crítico",
+      "warning": "aviso",
+      "suggestion": "sugerencia"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Estrategia",
+      "brief": "Programa",
+      "concept": "Concepto",
+      "design": "Diseño",
+      "approval": "Licencia",
+      "detail": "Proyecto de ejecución",
+      "tender": "Licitación",
+      "award": "Adjudicación",
+      "construction": "Obra",
+      "handover": "Entrega",
+      "operation": "Explotación"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "El trabajo no tiene piezas que cortar",
+        "suggestion": "Añada piezas a mano, péguelas o impórtelas desde una planilla de doblado, una medición, una partida del presupuesto o un archivo."
+      },
+      "has_stock": {
+        "fail": "El trabajo no ofrece stock del que cortar",
+        "suggestion": "Añada al menos una longitud de stock o un tamaño de tablero, o reutilice retales del inventario de obra."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} no tiene ancho",
+        "suggestion": "Indique longitud y ancho para cada pieza de tablero y cada tamaño de tablero."
+      },
+      "piece_fits_stock": {
+        "fail": "La pieza {ref} ({size} mm) no cabe en ningún stock",
+        "suggestion": "Añada un stock más largo o más grande, reduzca el recorte o divida la pieza con una junta."
+      },
+      "grain_allows_fit": {
+        "fail": "La pieza {ref} solo cabe girada contra la veta",
+        "suggestion": "Permita girar esta pieza o añada un tamaño de tablero donde quepa en el sentido de la veta."
+      },
+      "kerf_set": {
+        "fail": "El ancho de corte es cero",
+        "suggestion": "Introduzca el ancho de la hoja o del corte; de lo contrario el rendimiento de cada barra con varios cortes se sobreestima."
+      },
+      "min_offcut_set": {
+        "fail": "No se ha definido un retal útil mínimo",
+        "suggestion": "Defina el retal más corto que vale la pena conservar, para que los retales reutilizables no cuenten como desperdicio."
+      },
+      "stock_priced": {
+        "fail": "El stock {ref} no tiene coste unitario",
+        "suggestion": "Introduzca un precio por pieza para que el plan indique su coste y elija el stock más barato."
+      },
+      "stock_sufficient": {
+        "fail": "Piezas sin colocar en el stock disponible: {count}",
+        "suggestion": "Aumente la cantidad disponible o añada otro tamaño de stock."
+      },
+      "yield_threshold": {
+        "fail": "El rendimiento de {actual} % es inferior al umbral de {threshold} %",
+        "suggestion": "Añada otra longitud o tamaño de stock, permita girar o revise el umbral para este material."
+      }
+    }
+  },
+  "field_evidence": {
+    "punch_no_photo": "El elemento pendiente '{title}' está cerrado sin foto",
+    "punch_no_photo_fix": "Añada una foto del trabajo terminado",
+    "photo_weak": "{count} foto(s) de '{title}' sin ubicación u hora de captura",
+    "photo_weak_fix": "Repita la foto en la aplicación con la ubicación activada",
+    "defect_no_photo": "El defecto '{reference}' está cerrado sin foto de la subsanación",
+    "defect_no_photo_fix": "Adjunte una foto del trabajo subsanado"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} elemento(s) más no listados",
+    "category_missing": "Sin evidencia para la categoría requerida '{category}'",
+    "category_missing_fix": "Vincule un documento a un punto de la lista de verificación de esta categoría, o añada uno",
+    "category_unverified": "La evidencia de '{category}' aún no está verificada",
+    "category_unverified_fix": "Pida a un responsable que revise y verifique la evidencia vinculada",
+    "punch_open": "El elemento pendiente '{name}' sigue abierto",
+    "punch_open_fix": "Resuelva y cierre el elemento, o exclúyalo del alcance de este expediente",
+    "punch_no_photo": "El elemento pendiente resuelto '{name}' no tiene foto",
+    "punch_no_photo_fix": "Añada una foto del trabajo terminado",
+    "system_pending": "El sistema '{name}' no está puesto en marcha",
+    "system_pending_fix": "Complete las listas de verificación de puesta en marcha y marque el sistema como puesto en marcha",
+    "critical_issues": "{count} incidencia(s) crítica(s) de puesta en marcha siguen abiertas",
+    "critical_issues_fix": "Cierre las incidencias críticas antes de la entrega",
+    "acceptance_missing": "No hay ningún acta de recepción vinculada",
+    "acceptance_missing_fix": "Vincule el acta de recepción firmada al punto de recepción de la lista de verificación",
+    "acceptance_unsigned": "El acta de recepción no está totalmente firmada (estado: {status})",
+    "acceptance_unsigned_fix": "Recoja las firmas pendientes en Firma",
+    "blocked": "El expediente no cumple su lista de verificación. Corrija los hallazgos o prepárelo igualmente como incompleto (aprobación del responsable).",
+    "delivery_title": "Expediente de entrega: {project}",
+    "delivery_body": "El expediente de entrega '{title}' ({scope}) está listo. El enlace siguiente lo descarga y es válido hasta {expires}.",
+    "pdf": {
+      "title": "Expediente de entrega",
+      "scope": "Alcance",
+      "built": "Preparado",
+      "status_passed": "Lista de verificación superada",
+      "status_warnings": "Lista de verificación superada con advertencias",
+      "status_errors": "Incompleto: hallazgos de la lista de verificación abiertos",
+      "findings": "Hallazgos abiertos de la lista de verificación",
+      "severity": "Gravedad",
+      "finding": "Hallazgo",
+      "severity_error": "Error",
+      "severity_warning": "Advertencia",
+      "severity_info": "Info",
+      "contents": "Contenido",
+      "file": "Archivo",
+      "size": "Tamaño",
+      "punch": "Lista de pendientes resueltos",
+      "item": "Elemento",
+      "status": "Estado",
+      "photos": "Fotos",
+      "evidence": "Evidencia fotográfica"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "La valoración {rating} de '{name}' no es un nivel de la escala '{scale}'",
+    "rule_poor_without_action": "'{name}' está valorado {rating} pero no tiene ninguna acción de mantenimiento planificada",
+    "rule_poor_without_action_fix": "Derive el plan o añada una acción para este elemento",
+    "rule_action_unpriced": "La acción de '{name}' en {year} no tiene coste unitario",
+    "rule_action_unpriced_fix": "Introduzca un coste unitario para que los totales del plan lo incluyan",
+    "rule_defect_incomplete": "La valoración de '{name}' exige trabajos pero no registra gravedad ni extensión"
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, página {page}",
+    "text_change": "«{old}» cambiado a «{new}»",
+    "kind": {
+      "added": "Añadido",
+      "removed": "Eliminado",
+      "modified": "Modificado",
+      "text": "Texto cambiado"
+    },
+    "status": {
+      "open": "Abierto",
+      "relevant": "Relevante",
+      "not_relevant": "No relevante"
+    },
+    "errors": {
+      "revision_not_found": "No se encontró la revisión del plano en este proyecto.",
+      "revision_not_parsed": "El plano aún no tiene una versión procesada para comparar.",
+      "comparison_not_found": "Comparación no encontrada.",
+      "change_not_found": "Cambio no encontrado.",
+      "same_revision": "Elija dos revisiones o páginas distintas para comparar.",
+      "manual_points": "La alineación manual necesita dos puntos distintos en cada revisión.",
+      "alignment_singular": "No se puede aplicar la alineación: colapsa la hoja.",
+      "region_empty": "El cambio {seq} no tiene tamaño.",
+      "region_off_sheet": "El cambio {seq} queda fuera de la hoja.",
+      "module_missing": "El módulo necesario para esta acción no está instalado."
+    },
+    "rfi": {
+      "subject": "Cambio de plano {seq} en {sheet}",
+      "question": "La revisión {new} de {sheet} difiere de la revisión {old} en la zona marcada ({kind}). Confirme la intención del cambio y si afecta a las mediciones."
+    },
+    "markup": {
+      "text": "Cambio de revisión {seq}: {kind}"
+    },
+    "report": {
+      "title": "Comparación de revisiones de plano",
+      "project": "Proyecto",
+      "name": "Comparación",
+      "old_revision": "Revisión anterior",
+      "new_revision": "Revisión nueva",
+      "alignment": "Alineación",
+      "alignment_none": "Sin alinear (mismo marco)",
+      "alignment_auto": "Automática",
+      "alignment_manual": "Manual, dos puntos",
+      "confidence": "confianza {value}",
+      "summary": "Cambios",
+      "summary_counts": "{total} en total: {added} añadidos, {removed} eliminados, {modified} modificados, {text} de texto",
+      "generated_on": "Fecha de generación",
+      "generated": "Generado el {timestamp}",
+      "page_of": "Página {page} de {total}",
+      "no_changes": "No se encontraron cambios entre las dos revisiones.",
+      "col_no": "N.º",
+      "col_preview": "Vista previa",
+      "col_kind": "Cambio",
+      "col_location": "Ubicación",
+      "col_detail": "Detalle",
+      "col_status": "Estado",
+      "col_comment": "Comentario",
+      "col_follow_up": "Seguimiento",
+      "page_at": "Página {page} en {coords}",
+      "layer": "Capa {layer}",
+      "entity_counts": "Entidades: {added} añadidas, {removed} eliminadas, {modified} modificadas",
+      "rfi": "RFI {number}",
+      "markup": "Nube de revisión",
+      "remeasure": "Volver a medir: {items} mediciones, {positions} partidas del presupuesto"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Ambos lados son revisiones distintas.",
+      "distinct_revisions_fail": "La comparación compara una hoja consigo misma.",
+      "distinct_revisions_hint": "Elija la revisión anterior y la nueva del plano.",
+      "alignment_not_needed": "Las revisiones DWG comparten unidades de dibujo; no hace falta alinear.",
+      "alignment_missing_matrix": "La comparación no tiene alineación.",
+      "alignment_singular": "La alineación colapsa la hoja y no se puede aplicar.",
+      "alignment_scale": "La alineación reescala la hoja en {scale}, más de lo que difieren las revisiones de un mismo plano.",
+      "alignment_low_confidence": "La alineación automática es incierta (confianza {confidence}).",
+      "alignment_manual_points": "Una alineación manual necesita dos pares de puntos.",
+      "alignment_ok": "La alineación de la hoja es verosímil.",
+      "alignment_hint": "Alinee las hojas a mano con dos marcas comunes a ambas revisiones, como intersecciones de ejes.",
+      "region_empty": "El cambio {seq} no tiene tamaño.",
+      "region_off_sheet": "El cambio {seq} queda fuera de la hoja.",
+      "regions_ok": "Todas las zonas modificadas están dentro de la hoja.",
+      "triaged_ok": "Todos los cambios han sido revisados.",
+      "triaged_open": "Aún hay {count} cambios abiertos.",
+      "triaged_hint": "Marque cada cambio como relevante o no relevante.",
+      "followed_up_ok": "Todo cambio relevante tiene seguimiento.",
+      "followed_up_missing": "El cambio {seq} está marcado como relevante pero no tiene comentario, RFI, marca ni indicador de nueva medición.",
+      "followed_up_hint": "Comente el cambio, emita una RFI o una marca, o señale las mediciones afectadas para volver a medir."
+    }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Previsión de flujo de caja",
+      "portfolio_title": "Previsión de flujo de caja de la cartera",
+      "empty": "No hay previsión de flujo de caja para esta selección.",
+      "project": "Proyecto",
+      "as_of": "A fecha",
+      "currency": "Moneda",
+      "delay_days": "Cobros retrasados (días)",
+      "overrun_pct": "Sobrecoste (%)",
+      "closing_position": "Posición de cierre",
+      "peak_funding": "Necesidad máxima de financiación",
+      "peak_period": "Mes de mayor necesidad de financiación",
+      "col": {
+        "period": "Mes",
+        "planned_in": "Cobros previstos",
+        "actual_in": "Cobros reales",
+        "expected_in": "Cobros esperados",
+        "planned_out": "Pagos previstos",
+        "actual_out": "Pagos reales",
+        "expected_out": "Pagos esperados",
+        "net": "Neto",
+        "cumulative": "Posición acumulada"
+      }
+    }
+  }
+}

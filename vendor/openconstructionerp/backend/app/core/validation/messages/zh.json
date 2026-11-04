@@ -1,0 +1,1438 @@
+{
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "已承诺的金额未分配到任何成本行。",
+      "suggestion": "请将合同或订单行关联到成本行,这样金额才会显示在正确的位置。"
+    },
+    "certified_over_committed": {
+      "fail": "已确认的工程量超出了合同授予额加已批准变更之和。",
+      "suggestion": "请批准涵盖额外工作的变更,或核查付款申请。"
+    },
+    "forecast_over_plan": {
+      "fail": "预测高于计划金额。",
+      "suggestion": "请核查预测的来源;如预计会有节省,请登记手动预测并注明原因。"
+    },
+    "partly_awarded": {
+      "fail": "计划金额中只有一部分已发包,预测可能遗漏了尚未发包的工作。",
+      "suggestion": "如果该成本行上还有未发包的工作,请录入手动预测。"
+    },
+    "pending_changes": {
+      "fail": "变更单正在等待决定。",
+      "suggestion": "请对待处理的变更单作出决定;预测目前尚未包含它们。"
+    },
+    "snapshot_stale": {
+      "fail": "已有一个多月没有保存预测。",
+      "suggestion": "请保存一份预测快照,以便成本历史保持可读。"
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "科目编码 {code} 在成本结构中出现了多次。",
+      "suggestion": "每个编码只保留一个科目,并把其成本行移到该科目下。"
+    },
+    "mixed_standard": {
+      "fail": "成本结构混用了多种编码体系:{standards}。",
+      "suggestion": "请只用一种编码体系搭建结构,并把其他编码映射过去。"
+    },
+    "account_parent_cycle": {
+      "fail": "科目 {code} 通过 {count} 个科目成为了自己的上级。",
+      "suggestion": "请为其中一个科目指定循环之外的上级科目。"
+    },
+    "account_too_deep": {
+      "fail": "科目 {code} 位于第 {level} 级,超过了其编码体系的 {max} 级。",
+      "suggestion": "请把该科目挂到不超过编码体系层级深度的上级科目下。"
+    },
+    "no_account": {
+      "fail": "{count} 个成本行(合计 {amount})不属于任何科目(第一个:{code})。",
+      "suggestion": "请给这些清单项赋予结构编码体系中的编码,或把成本行分配到某个科目。"
+    },
+    "invalid_account": {
+      "fail": "{count} 个成本行(合计 {amount})位于已关闭或不接受记账的科目上(第一个:{code})。",
+      "suggestion": "请把成本行移到可记账的开放科目。"
+    },
+    "own_amount_on_parent": {
+      "fail": "科目 {code} 既有下级科目,又有自身金额 {amount}。",
+      "suggestion": "请把自身金额移到某个下级科目,或将其作为有意设置的备用金保留。"
+    },
+    "rollup_mismatch": {
+      "fail": "结构合计 {reported} 与各部分之和 {expected} 相差 {difference}。",
+      "suggestion": "请重新加载结构;如果差额仍在,请检查缺少上级的科目。"
+    },
+    "allocation_incomplete": {
+      "fail": "清单项 {ordinal} 的各份额合计为 {total}{unit},而不是 {expected}{unit}。",
+      "suggestion": "请调整份额,使整个清单项恰好分配完,不多也不少。"
+    },
+    "allocation_mixed_modes": {
+      "fail": "清单项 {ordinal} 一部分按百分比拆分,一部分按数量拆分。",
+      "suggestion": "清单项只能用一种方式拆分。"
+    },
+    "vector_not_inherited": {
+      "fail": "合同行 {code} 所在的成本行并未分配其对应的工程量清单项。",
+      "suggestion": "请把该行放回清单项对应的成本行,或登记例外并注明原因。"
+    }
+  },
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "风险预备费“{markup}”的计算基数已包含利润项“{profit}”，因此对预留的风险资金也计取了利润。",
+      "suggestion": "将此项计取于直接费，除非当地通行计价方法明确要求在管理费和利润之后计取风险费用。"
+    },
+    "order_is_declared": {
+      "fail": "多个附加费项使用了同一顺序号 {order}：{markups}",
+      "suggestion": "为每个附加费项分配唯一的顺序号，明确各项费用的累加计取关系。"
+    },
+    "percentage_within_band": {
+      "fail": "“{markup}”作为 {category} 类费用的费率为 {percentage}%，超出 0 至 {ceiling}% 的合理范围。",
+      "suggestion": "请检查小数点位置。无论如何，系统都会按输入的原值计算此项费用。"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "“{markup}”的计取基数为“{apply_to}”，但它之前没有其他费用项，因此仅按直接费计算。",
+      "suggestion": "将其移至应纳入计取基数的费用项之后，或改为按直接费计取。"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" 相对单价表报价 {percentage}%，超出 ±{band}% 的合理范围",
+      "duplicate": "\"{markup}\" 与 \"{other}\" 针对同一范围的第二个投标上浮或下浮，两者会叠加计算",
+      "suggestion": "每份清单或分部只保留一个上浮或下浮，并核对正负号和小数点。无论如何，该项均按输入值计价"
+    }
+  },
+  "common": {
+    "ok": "通过"
+  },
+  "export": {
+    "generated": "生成时间",
+    "content_digest": "内容摘要"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "工人 {worker} 当日记录了 {hours} 小时，超过 {max} 小时的上限。",
+      "suggestion": "提交前，请将工时分配到正确的日期或工人名下。"
+    },
+    "line_complete": {
+      "fail": "第 {line} 行信息不完整：{reason}",
+      "labour_xor_plant": "必须记录人工或机械中的一种，不可同时记录或均不记录",
+      "hours_positive": "工时必须大于零",
+      "cost_code_required": "必须填写成本编码",
+      "suggestion": "提交工时表前，请补全此行。"
+    },
+    "cost_code_resolves": {
+      "fail": "第 {line} 行的编码“{code}”不对应此项目中的任何工程量清单项或 WBS。",
+      "suggestion": "请选择项目工程量清单中已有的成本编码或 WBS。"
+    },
+    "daywork_needs_variation": {
+      "fail": "第 {line} 行计日工未关联尚未关闭的变更。",
+      "suggestion": "请将计日工关联至下达该施工指令的变更。"
+    },
+    "plant_needs_equipment": {
+      "fail": "第 {line} 行机械工时未指定设备。",
+      "suggestion": "请关联具体机械设备，以便计算机械使用费用。"
+    },
+    "approved_immutable": {
+      "fail": "此工时表的状态为 {status}，不能编辑。",
+      "suggestion": "请提交冲销工时表，以更正已批准的工时。"
+    },
+    "offline_clock_plausible": {
+      "fail": "记录当日工时的设备时钟比服务器快 {minutes} 分钟。",
+      "suggestion": "请校准设备时钟，确保记录的时间顺序正确。"
+    },
+    "offline_sync_delay": {
+      "fail": "此记录对应 {date} 的作业，但在 {days} 天后才传至办公室。",
+      "suggestion": "批准前，请核对实际作业当日的工时；对应计价期间可能已经结算。"
+    },
+    "outdoor_heat_ban": {
+      "fail": "第 {line} 行记录了 {date} 从 {start} 到 {end} 的工作，落在 {ban_from} 至 {ban_to} 的正午户外作业禁止时段内",
+      "suggestion": "如果该工作为烈日下的户外作业，请调整到禁止时段之外；室内作业和豁免行业不受影响"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} 于 {time} 打卡，位置距工地围栏 {distance} 米，且未经任何主管批准",
+      "suggestion": "请主管批准或驳回该打卡记录，并注明原因"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} 的班次时间重叠，分别始于 {first} 和 {second}",
+      "suggestion": "更正上班或下班打卡时间，使班次不再重叠"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} 于 {time} 上班打卡，但从未下班打卡",
+      "suggestion": "补录下班打卡时间，或在工时表中手动登记该班次"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "仍有 {count} 条工程量提取建议等待审核，尚未纳入此处计价。",
+      "suggestion": "请完成待审核队列，确保确认的工程量与图纸一致。"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "清单项 {ordinal} 的工程量不得为零或缺失。",
+      "suggestion": "请填写大于 0 的工程量。"
+    },
+    "position_has_unit_rate": {
+      "fail": "清单项 {ordinal} 应设置单价。",
+      "suggestion": "请从造价数据库中选取单价。"
+    },
+    "position_has_description": {
+      "fail": "清单项 {ordinal} 的描述不能为空。"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "有 {count} 个清单项使用了重复的序号“{ordinal}”。"
+    },
+    "unit_rate_in_range": {
+      "fail": "清单项 {ordinal}：单价 {rate} 大于 {threshold}（中位数的 5 倍）。",
+      "suggestion": "请核实此单价，其数值异常偏高。"
+    },
+    "negative_values": {
+      "fail": "清单项 {ordinal} 的 {details} 为负值。",
+      "suggestion": "请更正负值，使用正数。"
+    },
+    "unrealistic_rate": {
+      "fail": "清单项 {ordinal}：{details}",
+      "suggestion": "请核实此数值，其数值可能高得不合理。",
+      "not_assessed_no_currency": "有 {count} 个清单项未评估：清单未注明币种，无法将以 {reference} 表示的金额阈值换算为清单币种。",
+      "not_assessed_no_currency_suggestion": "请设置项目币种，或在清单项中注明币种。",
+      "not_assessed_no_rate": "有 {count} 个以 {currency} 计价的清单项未评估：未记录从 {reference} 到 {currency} 的汇率，无法将金额阈值换算至此清单。",
+      "not_assessed_no_rate_suggestion": "请在汇率登记表或项目汇率中添加从 {reference} 到 {currency} 的汇率。"
+    },
+    "total_mismatch": {
+      "fail": "清单项 {ordinal}：计算值 {computed} 不等于已存储值 {stored}（差额为 {diff}）。",
+      "suggestion": "请重新计算：合价 = 工程量 × 单价。"
+    },
+    "resource_split_mismatch": {
+      "fail": "清单项 {ordinal}：资源费用小计 {subtotal} 与单价 {rate} 相差 {diff}。",
+      "suggestion": "请核查资源用量和价格；按单位工程量汇总的资源费用应与清单项单价一致。"
+    },
+    "empty_unit": {
+      "fail": "清单项 {ordinal} 的计量单位为空或缺失。",
+      "suggestion": "请指定计量单位（m、m2、m3、kg、pcs、lsum 等）。"
+    },
+    "section_without_items": {
+      "fail": "分部 {ordinal}（{title}）没有子项。",
+      "suggestion": "请在此分部下添加清单项，或删除空分部。"
+    },
+    "rate_vs_benchmark": {
+      "fail": "清单项 {ordinal}：单价 {rate}/{unit} 超出基准阈值 {threshold}/{unit}，可能不合理。",
+      "suggestion": "请核实此单价；以 {unit} 计量的通常单价应低于 {threshold}。请检查单位或小数点是否有误。",
+      "not_assessed_no_currency": "有 {count} 个清单项未评估：清单未注明币种，无法将以 {reference} 表示的基准阈值换算为清单币种。",
+      "not_assessed_no_currency_suggestion": "请设置项目币种，或在清单项中注明币种。",
+      "not_assessed_no_rate": "有 {count} 个以 {currency} 计价的清单项未评估：未记录从 {reference} 到 {currency} 的汇率，无法将基准阈值换算至此清单。",
+      "not_assessed_no_rate_suggestion": "请在汇率登记表或项目汇率中添加从 {reference} 到 {currency} 的汇率。"
+    },
+    "lump_sum_ratio": {
+      "fail": "共 {total_count} 个清单项中，有 {lsum_count} 个采用总价计价（{percent}），超过 {threshold} 的阈值。",
+      "suggestion": "请将总价项目细分为可计量的工程量（m、m2、m3、kg、pcs），以提高估算准确性。"
+    },
+    "cost_concentration": {
+      "fail": "清单项 {ordinal} 占清单总价的 {share}（总价 {grand_total} 中的 {value}），超过 {threshold} 的阈值。",
+      "suggestion": "请拆分此清单项或核实其费用；不应由单个清单项占据估算总价的过大比例。"
+    },
+    "currency_consistency": {
+      "fail": "发现混用币种：{currencies}",
+      "suggestion": "请在整份工程量清单中使用同一币种。"
+    },
+    "measurement_consistency": {
+      "fail": "工程量清单混用了公制与英制单位，请统一单位制。",
+      "suggestion": "请将所有工程量统一换算为公制或英制单位。"
+    },
+    "revision_cost_impact_review": {
+      "fail": "此次修订产生的 {amount} 费用影响尚未记录为变更。",
+      "suggestion": "请根据此次修订对比创建变更申请草稿，以跟踪费用变化。"
+    },
+    "base_date_readable": {
+      "fail": "基准日期“{base_date}”无效，因此清单使用当前税率，而非其基准日期对应的税率。",
+      "suggestion": "请以日、月、季度或年份注明价格基准期（{shapes}）。"
+    },
+    "tax_date_readable": {
+      "fail": "计税日期“{tax_date}”无效，因此清单使用当前税率，而非其计税日期对应的税率。",
+      "suggestion": "请以日、月、季度或年份注明计税日期（{shapes}），或清空该字段以按清单基准日期计税。"
+    },
+    "exchange_fidelity": {
+      "fail_import": "从 {format} 导入：清单项 {ordinal}，{field} 未完整到达（文件：{original}，清单：{written}）",
+      "fail_export": "导出至 {format}：清单项 {ordinal}，{field} 未完整输出（清单：{original}，文件：{written}）",
+      "suggestion": "打开此文件的交换报告，更正该行或来源，然后重复交换"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "清单项 {ordinal} 缺少 DIN 276 费用组 KG。",
+      "suggestion": "请指定三位数的 DIN 276 Kostengruppe 费用组编码（例如墙体为 330）。"
+    },
+    "valid_cost_group": {
+      "fail": "清单项 {ordinal} 中的 DIN 276 编码“{code}”无效。"
+    },
+    "hierarchy": {
+      "fail": "清单项 {ordinal}：KG {child} 不属于上级 KG {parent}（应以前缀“{prefix}”开头）。",
+      "suggestion": "请将清单项移至正确的上级分组，或调整 KG 编码以符合上级层级（{prefix}xx）。"
+    },
+    "completeness": {
+      "fail": "工程量清单缺少 KG 费用组 {group} - {group_name}。",
+      "suggestion": "请添加 KG {group}（{group_name}）对应的清单项，以确保覆盖完整。"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "序号“{ordinal}”不符合此文件的 GAEB OZ-Maske 编码格式。",
+      "suggestion": "请使用文件指定的 OZ-Maske 格式，例如 001.001.0010 或 01.02.0030。"
+    },
+    "lv_structure": {
+      "fail": "清单项 {ordinal}：末级清单项没有上级分部；GAEB LV 层级要求其隶属于 Leistungsgruppe。",
+      "suggestion": "请为此清单项指定上级分部（Leistungsgruppe / Titel）。"
+    },
+    "einheitspreis_sanity": {
+      "negative": "清单项 {ordinal}：单价 Einheitspreis {rate} 为负值（单位为“{unit}”），GAEB 不支持传输负单价。",
+      "zero": "清单项 {ordinal}：单价 Einheitspreis 为 0.00（单位为“{unit}”），请确认这是有意报出的零价，而非漏填单价。",
+      "suggestion": "请提供正数单价 Einheitspreis，或将该项标记为 Bedarfsposition（可选范围）或总价项目（unit='lsum'）。"
+    },
+    "trade_section_code": {
+      "fail": "顶层分部“{ordinal}”缺少 GAEB Leistungsbereich 专业编码（应为三位数，例如“012”）。",
+      "suggestion": "请为分部添加三位数专业编码 Leistungsbereich，例如土方工程为“012”，砌筑工程为“013”。"
+    },
+    "quantity_decimals": {
+      "fail": "清单项 {ordinal}：工程量 {quantity} 有 {decimals} 位小数，GAEB X83 约定最多保留 3 位。",
+      "suggestion": "请按 GAEB X83 将工程量四舍五入至最多 3 位小数。"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "清单项 {ordinal} 缺少 NRM 构件分类编码。",
+      "suggestion": "请指定 NRM 1/2 构件分类编码（例如外墙为 2.6.1）。"
+    },
+    "valid_element": {
+      "fail": "清单项 {ordinal} 中的 NRM 编码“{code}”无效。"
+    },
+    "completeness": {
+      "fail": "工程量清单缺少 NRM 分组 {group} - {group_name}。",
+      "suggestion": "请添加 NRM 分组 {group}（{group_name}）对应的清单项。"
+    },
+    "base_date_declared": {
+      "fail": "造价计划未注明其单价所对应的基准日期。",
+      "suggestion": "请在清单中记录基准日期，否则无法判断单价是否过时，以及还需计入多少通胀调整。"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "造价计划未注明其编制所对应的设计阶段。",
+      "suggestion": "请记录设计阶段。造价计划可达到的精度取决于编制阶段；未注明阶段会导致使用者产生错误预期。"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "造价计划未计入总承包商的开办及现场一般费用，既无分组 {group}，也无相应附加费项。",
+      "overheads_and_profit": "造价计划未计入总承包商的管理费和利润，既无分组 {group}，也无相应附加费项。",
+      "suggestion": "请将其作为 NRM 分组项或已计量工程上的附加费项列入。两种方式均可；漏计将导致工程造价不完整。"
+    },
+    "risk_allowance_present": {
+      "fail": "造价计划未计入风险预备费。",
+      "suggestion": "请以 NRM 第 13 组或预备费项计入风险预备费。没有风险预备费的造价计划，相当于将单一估算值当作确定金额。"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "清单项 {ordinal} 缺少 MasterFormat 编码。",
+      "suggestion": "请指定 MasterFormat 编码（例如现浇混凝土工程为 03 30 00）。"
+    },
+    "valid_division": {
+      "fail": "清单项 {ordinal} 中的 MasterFormat 编码“{code}”无效。",
+      "suggestion": "请使用六位数 MasterFormat 格式：XX XX XX（例如 03 30 00）。"
+    },
+    "completeness": {
+      "fail": "工程量清单缺少分部 {division} - {division_name}。",
+      "suggestion": "请添加分部 {division}（{division_name}）对应的清单项。"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "清单项 {ordinal} 缺少 SINAPI 编码。",
+      "suggestion": "请指定 SINAPI 组价编码（例如 C30 混凝土为 87878）。"
+    },
+    "valid_code": {
+      "fail": "清单项 {ordinal} 中的 SINAPI 编码“{code}”无效。"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "清单项 {ordinal} 缺少 NBR 12721 分部。",
+      "suggestion": "请为清单项标注 NBR 12721 分部（S1 为前期工程，S2 为下部结构，……，S11 为附属工程）。"
+    },
+    "valid_section": {
+      "fail": "清单项 {ordinal} 的 NBR 12721 分部“{code}”不在 S1 至 S11 范围内。",
+      "suggestion": "请使用 S1 至 S11 编码（例如上部结构为 S3）。"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "清单项 {ordinal} 缺少 ГЭСН/ФЕР 编码。",
+      "suggestion": "请指定 ГЭСН 编码（例如混凝土为 06-01-001-01）。"
+    },
+    "valid_code": {
+      "fail": "ГЭСН 编码“{code}”不符合 XX-XX-XXX-XX 格式。",
+      "suggestion": "请使用 NN-NN-NNN-NN 格式（例如 06-01-001-01）。"
+    },
+    "resource_breakdown": {
+      "fail": "清单项 {ordinal} 引用了定额 {code}，但没有资源组成明细。",
+      "suggestion": "请导入定额中的人工、机械和材料消耗量，或说明此清单项偏离定额的原因。"
+    },
+    "labour_hours_present": {
+      "fail": "清单项 {ordinal}（{code}）的资源组成明细中没有人工工时。",
+      "suggestion": "请补充定额人工工时；管理费和估算利润按人工费基数计取，缺少人工工时将无法计算。"
+    },
+    "price_level_declared": {
+      "fail": "估算未注明所采用的价格水平。",
+      "suggestion": "请注明价格基准期及采用的换算指数，以便审核人员复核出相同的总价。"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "清单项 {ordinal} 未分配至任何专业标段 Lot technique。",
+      "suggestion": "请指定专业标段 Lot technique（例如 Lot 01 Gros Œuvre，主体工程）。"
+    },
+    "pricing_complete": {
+      "fail": "仅 {priced}/{total} 个清单项已计价（{percent}），低于 80% 的阈值。",
+      "suggestion": "提交 DPGF 前，请完成所有清单项的计价。"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "序号“{ordinal}”不符合 ÖNORM 的 XX.XX.XXXXA 格式。",
+      "suggestion": "请使用 ÖNORM B 2063 格式（例如 01.02.01A）。"
+    },
+    "description_length": {
+      "fail": "清单项 {ordinal}：描述过短（{length} 个字符，至少需要 20 个）。",
+      "suggestion": "请按 ÖNORM B 2063 补充清单项描述。"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "清单项 {ordinal} 缺少 GB/T 50500 编码。",
+      "suggestion": "请指定九位数的 GB/T 50500 编码（例如 010101001）。"
+    },
+    "valid_code": {
+      "fail": "GB/T 50500 编码“{code}”无效，应为 9 位或 12 位数字。"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "清单项 {ordinal} 缺少 CPWD/DSR 编码。",
+      "suggestion": "请指定 CPWD DSR 项目编号（例如 4.1.1）。"
+    },
+    "measurement_units": {
+      "fail": "清单项 {ordinal} 的单位“{unit}”不符合 IS 1200 标准。",
+      "suggestion": "请使用 IS 1200 标准单位：m、m2、m3、kg、nos、rm 等。"
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "清单项 {ordinal} 未填写匈牙利项目编码。",
+      "invalid": "清单项 {ordinal} 的编码“{code}”不符合两种项目编码体系中的任何一种。",
+      "suggestion": "建筑工程使用 MA-CC-SS-II 格式（章节为 01 至 17）；基础设施工程使用项目编码字典中的六位或七位项目编号。"
+    },
+    "chapter_recognised": {
+      "fail": "清单项 {ordinal} 的章节 {chapter} 不属于项目编码体系的十七个章节。"
+    },
+    "material_fee_split": {
+      "fail": "清单项 {ordinal}：材料费 {material} 与作业费 {fee} 之和不等于单价 {rate}。",
+      "suggestion": "请更正材料及作业费的单位价格，或调整单价，使费用组成与单价一致。"
+    },
+    "item_number_unique": {
+      "fail": "项目编号 {number} 被 {count} 个清单项共用，但必须唯一标识一个清单项。",
+      "suggestion": "将清单发送给客户前，请为每个清单项分配唯一的项目编号。"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "清单项 {ordinal} 的编码“{code}”未标明其价格表来源。",
+      "suggestion": "官方 voce 编码以价格表的地区和版本年份开头，例如 TOS25_01.A03.001.001（托斯卡纳 2025 年版）。请原样复制地区价格表中的编码、从价格表导入该项，或将新编价格编号为 NP.01。"
+    },
+    "voce_reference_present": {
+      "fail": "清单项 {ordinal} 未引用 prezzario 价格表条目。",
+      "suggestion": "请从已导入的地区价格表中选取条目，或将其标记为有单价分析依据的 nuovo prezzo（NP，新编价格）。"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "清单未单独列出不适用投标折扣的安全费用。",
+      "suggestion": "请将 oneri della sicurezza 安全费用作为独立分部或附加费项，依据价格表的安全章节或安全计划计价。"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "清单项 {ordinal}（{code}）未注明人工费用占比。",
+      "suggestion": "请采用价格表中的 incidenza della manodopera 人工占比，或添加人工资源，以便在投标中单独列明人工费。"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "地区价格表的单价已包含一般管理费（13–17%）和利润（10%）。重复计取将使总价增加约 {percent}%。",
+      "suggestion": "请从此清单中删除一般管理费和利润附加项，或仅对自行分析组价的清单项（NP）保留这些费用。"
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "清单项 {ordinal} 未指定 deviz general 总概算章节。",
+      "suggestion": "请按 HG 907/2016 对应的章和节归类，例如建筑安装工程为 4.1，施工现场组织费用为 5.1。"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "清单项 {ordinal} 的 deviz 编码“{code}”不属于 deviz general 总概算的章或节。",
+      "suggestion": "请使用 HG 907/2016 deviz general 第 1 至第 6 章的编码，例如 1.2、2、3.5、4.1、5.1 或 6.2。"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "清单项 {ordinal} 未注明统一价格表（ΝΕΤ）条目。",
+      "suggestion": "请注明用于计价的 ΝΕΤ 条目，例如 ΟΙΚ 32.01.06；新编条目可使用 ΝΑΟΙΚ。"
+    },
+    "net_article_valid": {
+      "invalid": "清单项 {ordinal} 的条目“{code}”不符合 ΝΕΤ 条目格式。",
+      "chapter": "清单项 {ordinal} 的条目“{code}”以章节 {chapter} 开头，但建筑工程价格表中没有该章节。",
+      "suggestion": "请填写价格表前缀和条目编号，例如 ΟΙΚ 38.20.02、ΟΔΟ Α-2 或 ΑΤΗΕ 8151.1。"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "清单项 {ordinal} 未指定总概算章节。",
+      "suggestion": "请将此项归入 зведений кошторисний розрахунок 总概算的第 1 至第 12 章；主体工程的建筑工程归入第 2 章。"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "清单项 {ordinal} 的章节 {chapter} 不属于总概算的十二个章节。",
+      "suggestion": "请使用 1 至 12 的章节编号。"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "清单项 {ordinal} 缺少 birim fiyat 单价条目编号 poz。",
+      "suggestion": "请指定 Bayındırlık 的 poz 编号（例如 04.013/1）。"
+    },
+    "valid_poz": {
+      "fail": "Poz 编码“{code}”既不符合现行单价册编号格式（XX.XXX.XXXX），也不符合旧版格式（XX.XXX/X）。",
+      "suggestion": "请使用单价册编号，例如 15.140.1002；旧合同可使用 04.013/1。自行分析组价的项目请编号为 ÖZEL-1。"
+    },
+    "chapter_recognised": {
+      "fail": "清单项 {ordinal} 的 poz '{code}' 以 {chapter} 开头，它不是本检查所知任何单价表的章",
+      "suggestion": "部委手册将建筑工程编为 15，机械安装编为 25，电气安装编为 35，资源价格编在 10 以下，机械分析编在 19 以下。请对照取号的单价表核对编号，或将自有项目编为 ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "清单项 {ordinal} 的单位 '{unit}' 不是单价表所用的计量单位",
+      "suggestion": "请使用单价表为该项目给出的单位，例如 m、m²、m³、Ad、Tk、Kg、Ton、Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "poz '{code}' 在本工程量清单中以 {count} 种不同单位计量 ({units})",
+      "suggestion": "一个 poz 编号只定义一种单位。请将各行统一为单价表的单位，或给不同的工作另编独立编号"
+    },
+    "poz_rate_consistent": {
+      "fail": "poz '{code}' 在本工程量清单中按 {count} 种不同单价计价 ({rates})",
+      "suggestion": "一个 poz 编号在清单中只有一个单价。请统一为一个单价，或将不同的项目另编为自有项目"
+    },
+    "own_item_analysed": {
+      "fail": "清单项 {ordinal} 的自有项目 '{code}' 没有单价分析",
+      "suggestion": "单价表中没有的项目按自身分析计价。请在该行下补充人工、材料和机械资源，或把分析写入备注"
+    },
+    "profit_overhead_once": {
+      "fail": "承包商利润和管理费已用于 {count} 行，合计 {total} 个百分点，超过唯一的 {limit} 个百分点",
+      "suggestion": "这 25% 只加一次。请保留一行；若单价为已公布的单价，其中已含此项，则应全部删除"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "第 {ordinal} 项的 poz“{code}”按“{unit}”计量，但已安装的单价册将其定义为“{book_unit}”",
+      "suggestion": "一个 poz 编号只定义一种单位。请按单价册的单位计量该行，或把不同的工作作为自建条目（ÖZEL-1）编号",
+      "not_installed": "国家单价库（{region}）未安装，因此 {count} 个 poz 编号的单位和单价未与已发布的单价册核对。请从成本数据库导入页面加载",
+      "unavailable": "无法读取国家单价库（{region}），因此 {count} 个 poz 编号的单位和单价未与已发布的单价册核对"
+    },
+    "unit_rate_within_published_price": {
+      "below": "第 {ordinal} 项的 poz“{code}”：单价 {rate} 比已安装单价册中的发布价 {published} 低 {percent}%",
+      "above": "第 {ordinal} 项的 poz“{code}”：单价 {rate} 比已安装单价册中的发布价 {published} 高 {percent}%",
+      "fail": "这超出了本检查设定的 {limit}%",
+      "suggestion": "比较使用此处已安装的单价库，该库不记录单价册的年份。建筑、机械和电气各章的发布价已包含 {markup}% 的承包商利润和综合管理费。投标让利后单价低于发布价属常见情况，请确认该差异是有意为之",
+      "repriced": "国家单价库（{region}）已切换到其他市场或币种，因此单价未与发布价比较。请将该库恢复到其原属市场后再运行本检查",
+      "currency_differs": "{count} 行的单价币种为 {currency}，而单价册币种为 {book_currency}，因此未与发布价比较",
+      "currency_unknown": "{count} 行的币种未记录，因此其单价未与 {book_currency} 的发布价比较"
+    }
+  },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "税务行“{line}”按百分之 {rate} 计征 KDV，这不是土耳其法律规定的税率；KDV 税率为百分之 20、10 或 1",
+      "fail_superseded": "税务行“{line}”按百分之 {rate} 计征 KDV，该税率已于 2023 年 7 月 10 日被取代；KDV 现为百分之 20、10 或 1",
+      "suggestion": "请将 KDV 行设为百分之 20；符合条件的供应可设为百分之 10 或 1，免税供应设为 0"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "清单项 {ordinal} 缺少日本積算编码。",
+      "suggestion": "请指定積算基準项目编码。"
+    },
+    "metric_units": {
+      "fail": "清单项 {ordinal} 的单位“{unit}”不是标准单位。",
+      "suggestion": "请使用标准公制单位：m、m2、m3、kg、t、式等。"
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "清单项 {ordinal} 缺少 FIEBDC-3 项目编码。",
+      "suggestion": "请指定 FIEBDC-3 编码（例如 E04CM040 或 01.02.01）。"
+    },
+    "valid_code": {
+      "fail": "清单项 {ordinal} 中的 FIEBDC-3 编码“{code}”无效。",
+      "suggestion": "请使用 FIEBDC-3 字母数字格式（例如 E04CM040、01.02.01、CAP01#）。"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "清单项 {ordinal} 的 APU 单价分析不完整，缺少费用组成：{missing}",
+      "suggestion": "请在单价分析中补充缺少的直接费组成 costo directo（人工 mano de obra、材料 materiales、机械 maquinaria）。"
+    },
+    "iva_rate_valid": {
+      "fail": "清单项 {ordinal} 的 IVA 税率 {rate} 无效；墨西哥 IVA 税率为 16%、8%（边境地区）或 0%。",
+      "suggestion": "请将 IVA 税率设为 16%（标准税率）、8%（边境地区）或 0%。"
+    },
+    "subcontract_retencion": {
+      "fail": "分包清单项 {ordinal} 未记录是否适用 IVA/ISR 代扣税款。",
+      "suggestion": "请记录分包清单项适用的 IVA 和 ISR 代扣税款，或注明不适用。"
+    },
+    "cfdi_rfc_present": {
+      "missing": "用于投标导出的 CFDI 开票方资料不完整，缺少：{missing}",
+      "invalid_rfc": "RFC“{rfc}”不是有效的 CFDI RFC（企业为 12 个字符，个人为 13 个字符）。",
+      "suggestion": "请在项目资料中设置开票方 RFC、regimen fiscal 税制和 uso CFDI 发票用途，以便开具 CFDI 4.0 发票。"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "以下产生外部影响的节点缺少控制关卡：{nodes}",
+      "suggestion": "发布前，请在从触发器或 AI 节点到每个写入节点的所有路径上添加校验关卡或人工审批关卡。"
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "开发项目需要符合监管机构“{regulator}”要求的有效资金监管账户。",
+      "suggestion": "请在“合规 → 资金监管账户”中，通过监管机构许可的银行开设资金监管账户。"
+    },
+    "escrow_iban_valid": {
+      "fail": "资金监管账户 {account}：IBAN“{iban}”未通过 ISO 13616 结构检查。",
+      "suggestion": "请更正 IBAN：国家代码、长度和校验位必须符合 ISO 13616。"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "资金监管账户 {account}：账面余额 {ledger} 与交易合计 {transactions} 相差 {drift}。",
+      "suggestion": "请核对资金监管账户，检查未登记的收款或遗漏的支出。"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "合同 {contract}：所有权份额合计为 {total}%（必须恰好为 100%）。",
+      "suggestion": "请调整各方比例，使其合计为 100.00%。"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "合同 {contract}：分期付款合计 {instalments} 与合同金额 {contract_value} 不一致（差额为 {drift}）。",
+      "suggestion": "请调整付款计划，使各期付款金额之和等于合同总金额。"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "预订 {reservation}：到期时间 expires_at {expires} 不是未来时间。",
+      "suggestion": "请延长预订期限，或将其状态改为已到期或已取消。"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "佣金协议 {agreement}：{issue}",
+      "suggestion": "请使用 0.1% 至 15% 的费率、固定金额，或非空的阶梯费率表。"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "价格矩阵 {matrix}：规则“{factor}”的系数 {multiplier} 超出 [-0.50, 2.00] 范围。",
+      "suggestion": "请将调整幅度限制在 -50% 至 +200% 之间，避免地块价格失真。"
+    },
+    "escrow_release_within_progress": {
+      "fail": "托管账户 {account}：已释放 {released} 超过上限 {cap}（已收资金的认证进度为 {progress}%）",
+      "suggestion": "在下一份进度证书出具前暂停后续释放，或登记可提高进度的证书"
+    }
+  },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "清单项 {ordinal}“{description}”（{amount}）在工程量清单中已计价，但没有任何活动承载它，因此其费用不在进度计划中",
+      "suggestion": "为清单项填写工程量或将其关联到某个活动，然后重新生成进度计划。"
+    },
+    "cost_reconciliation": {
+      "fail": "进度计划承载了工程量清单 {bill} 中的 {planned}：已计价工程中有 {difference} 不在任何活动上",
+      "suggestion": "检查覆盖检查列出的清单项，然后重新生成进度计划。"
+    },
+    "duration_vs_norm": {
+      "fail": "活动“{activity}”持续 {duration} 个工作日，而人工和机械定额给出的是 {norm}",
+      "suggestion": "检查清单项的工程量、班组和定额工时，或手动修改过的工期。"
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "活动“{activity}”缺少{ends}逻辑关系，形成开口或悬空活动。",
+      "both": "紧前或紧后",
+      "predecessor": "紧前",
+      "successor": "紧后",
+      "suggestion": "请为活动添加紧前和紧后关系，将其纳入网络计划；或将其设为开始或完成里程碑。"
+    },
+    "negative_lag": {
+      "fail": "关系 {predecessor} -> {successor} 使用了负时滞（{lag} 天），这相当于提前量，会扭曲关键路径。",
+      "suggestion": "请用明确的活动或 SS/FF 关系替代提前量，使施工顺序具有可核查的依据。"
+    },
+    "excessive_lag": {
+      "fail": "关系 {predecessor} -> {successor} 的时滞为 {lag} 天，超过 {threshold} 天的阈值。",
+      "suggestion": "请将等待时间单独建模为活动（采购、养护或审批），以便跟踪状态和进行资源平衡。"
+    },
+    "hard_constraints": {
+      "fail": "活动“{activity}”设置了强制日期约束（{constraint}），覆盖了网络逻辑关系。",
+      "suggestion": "请使用软约束（开始不早于某日），或通过逻辑关系推算日期，以便紧前活动延期时本活动能相应调整。"
+    },
+    "negative_float": {
+      "fail": "活动“{activity}”的总时差为负值（{float} 天），按当前逻辑关系无法实现计划。",
+      "suggestion": "请调整施工顺序、放宽强制约束，或补充有记录的赶工方案，使总时差恢复为零或正值。"
+    },
+    "high_float": {
+      "fail": "活动“{activity}”的总时差过大（{float} 天），超过 {threshold} 天的阈值。",
+      "suggestion": "请检查是否缺少紧后关系；时差过大通常意味着活动与网络计划的联系不充分。"
+    },
+    "missing_duration": {
+      "fail": "活动“{activity}”不是里程碑，但其工期（{duration} 天）无效。",
+      "suggestion": "请设置大于零的工作日工期；若确为零工期事件，则将此项设为里程碑。"
+    },
+    "duration_on_project_week": {
+      "fail": "活动“{activity}”存储的工期为 {stored} 个工作日，这是按周一至周五计算 {start} 至 {end} 的结果；按项目工作周 {calendar} 计算，这段日期应为 {expected} 个工作日。",
+      "suggestion": "请重新保存活动日期，以按项目工作周重新计算工期，或明确手动填写工期。"
+    },
+    "dates_match_source": {
+      "fail": "{activity} 的完成日期与导入文件中的完成日期（{source}）相差 {days} 天。",
+      "suggestion": "将重新计算的日期与源文件进行对比，然后接受它们或恢复源文件日期。"
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "图纸 {sheet} 已列入图纸目录，但不在上传的图纸集中。",
+      "suggestion": "请上传缺失图纸，或确认该图纸已从本次发图中撤回。"
+    },
+    "extra": {
+      "fail": "图纸 {sheet} 已上传，但未列入图纸目录。",
+      "suggestion": "请将其补充到目录或发图登记表，或删除误上传的图纸。"
+    },
+    "revision_mismatch": {
+      "fail": "图纸 {sheet} 当前为修订版 {actual_rev}，但目录要求 {expected_rev}。",
+      "suggestion": "请发布所需修订版，或将目录更新为当前修订版。"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "此采购订单没有明细行，因此未计入已承诺金额。",
+      "suggestion": "批准采购订单前，请添加订购物项。"
+    },
+    "po_line_amount": {
+      "fail": "第 {line} 行的合价为 {actual}，但数量乘以单价应为 {expected}。",
+      "suggestion": "请更正数量、单价或行金额，使三者一致。"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "小计为 {actual}，但各行合计为 {expected}。",
+      "suggestion": "请按当前明细行重新计算小计。"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "总额为 {actual}，但小计加税额应为 {expected}。",
+      "suggestion": "请重新计算总额，使其等于小计加税额。"
+    },
+    "po_no_negative_line": {
+      "fail": "第 {line} 行的数量不大于零，或单价为负值。",
+      "suggestion": "如需冲销，请开具贷项通知单，而非使用负数明细行。"
+    },
+    "po_currency_set": {
+      "fail": "此采购订单未注明币种，无法汇总或支付其金额。",
+      "suggestion": "请设置币种，通常采用项目币种。"
+    },
+    "po_vendor_assigned": {
+      "fail": "此采购订单未指定供应商。",
+      "suggestion": "批准采购承诺前，请选择供应商。"
+    },
+    "po_retention_within_bounds": {
+      "fail": "保留金比例 {percent}% 超出 0 至 {max}% 的合理范围。",
+      "suggestion": "请以百分数填写保留金比例，例如百分之五填写 5。"
+    },
+    "po_delivery_after_issue": {
+      "fail": "交货日期 {delivery} 早于签发日期 {issue}。",
+      "suggestion": "请将交货日期改为签发当日或之后。"
+    },
+    "po_line_cost_coded": {
+      "fail": "第 {line} 行未指定 WBS、成本类别或成本明细项，因此不会出现在成本分解中。",
+      "suggestion": "请指定成本编码，使已承诺费用可对应到预算。"
+    },
+    "invoice_within_order": {
+      "fail": "发票 {invoice} 超出订单 {po} 的未结余额 {remaining}，超出金额为 {excess}。",
+      "suggestion": "请将发票与订单核对；如额外费用已经约定，请先将其记录为订单变更，再予批准。"
+    },
+    "invoice_quantity_received": {
+      "fail": "第 {line} 行的累计开票数量将达到 {invoiced}，但实际仅收到 {received}。",
+      "suggestion": "批准此数量前，请等待送货单或确认收货。"
+    },
+    "invoice_value_received": {
+      "fail": "订单 {po} 的累计发票金额将达到 {invoiced}，但按订单单价计算的已收货物价值仅为 {received}。",
+      "suggestion": "批准此金额前，请等待送货单或确认收货。"
+    },
+    "requisition_quantity_positive": {
+      "fail": "第 {line} 行请购 {quantity},但请购单的行数量必须大于零",
+      "suggestion": "请填写所需数量,或删除该行"
+    },
+    "requisition_source_unit": {
+      "fail": "第 {line} 行的单位是 {unit},但其某个 BOQ 来源的单位是 {source_unit}",
+      "suggestion": "请使用 BOQ 资源的单位,或拆分该行,使每种单位各占一行"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "需求日期 {date} 已经过去(今天是 {today})",
+      "suggestion": "请设置材料在现场实际需要的日期"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "供应商 {vendor} 不在供应商名录中",
+      "suggestion": "请从供应商名录中选择供应商"
+    },
+    "requisition_vendor_active": {
+      "fail": "供应商 {vendor} 在供应商名录中未启用,因此无法向其下单",
+      "suggestion": "请选择已启用的供应商,或先在供应商名录中重新启用该供应商"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "请购单 {req} 未指定供应商,而采购订单必须有供应商",
+      "suggestion": "转换前请从供应商名录中选择供应商"
+    },
+    "requisition_single_currency": {
+      "fail": "请购单 {req} 有以 {currencies} 计价的行,但一张采购订单只能用一种币种",
+      "suggestion": "请将所有行统一为一种币种计价,或把这些行拆分到不同的请购单"
+    },
+    "requisition_line_cost_line": {
+      "fail": "第 {line} 行未关联成本行,因此其订单不会显示为对预算的已占用金额",
+      "suggestion": "请从 BOQ 生成该行,或在下单前将其关联到成本行"
+    },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "第 {line} 行建议的供应商 {vendor} 不在供应商名录中",
+      "suggestion": "请从供应商名录中选择建议的供应商,或清除该建议"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "第 {line} 行建议的供应商 {vendor} 在供应商名录中未启用",
+      "suggestion": "请建议一个已启用的供应商,或把选择交给采购人员"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "第 {line} 行的 BOQ 来源建议了 {count} 个不同的供应商",
+      "suggestion": "请为该行选定一个供应商,或拆分该行,使每个供应商各有一行"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "第 {line} 行建议 {vendor},但该请购单要向另一家供应商下单",
+      "suggestion": "请确认所选供应商能供应该行,或将其单独下单"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "第 {line} 行要求在 {date} 前到货,该日期已经过去(今天是 {today})",
+      "suggestion": "请填写材料在现场实际需要的日期"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "第 {line} 行是按开始于 {anchor} 的工序计划的,但该工序现在开始于 {start}",
+      "suggestion": "请对照当前进度计划检查该行的需求日期,必要时修改"
+    },
+    "requisition_approver_not_requester": {
+      "fail": "请购单 {req} 的创建人同时也是其指定的第 {step} 级审批人",
+      "suggestion": "请为该步骤另指定审批人,使决定由请购人以外的人做出"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "第 {line} 行已下单 {ordered} {unit},超过请购的 {requested} {unit}",
+      "suggestion": "请确认多出的数量是否有意为之,或减少订单行"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "订单 {order} 中第 {line} 行的单位是 {unit},无法换算为该行的单位 {line_unit}",
+      "suggestion": "请更正订单行上的单位,使其数量计入已订购"
+    },
+    "requisition_sources_reconcile": {
+      "fail": "第 {line} 行请购 {quantity} {unit},但其 BOQ 来源合计为 {sources} {unit}",
+      "suggestion": "将数量设为其来源之和,或删除该行未涵盖的来源"
+    },
+    "requisition_over_allocated": {
+      "fail": "第 {line} 行超出 BOQ 需求 {excess} {unit}(共需 {demand} {unit},其中 {covered} {unit} 已被其他请购单占用)",
+      "suggestion": "减少数量;若超量是有意为之,请在该行注明原因"
+    },
+    "receipt_certificate_present": {
+      "fail": "第{line}行订购的是{required}，但送货内容为{delivered}",
+      "suggestion": "请附上订单要求的证书；若供应商尚未提供，请先拒收该行"
+    },
+    "receipt_certificate_batch": {
+      "fail": "第{line}行的证书{certificate}对应批次{certificate_batch}，但实际到货批次为{batch}",
+      "suggestion": "请核对材料上的批号或炉号，并向供应商索取到货批次的证书"
+    },
+    "receipt_route_approved": {
+      "fail": "订单{po}的收货单{receipt}正在审批流程中，尚未批准",
+      "suggestion": "请等收货单审批流程完成后再放行付款"
+    },
+    "receipt_inspection_closed": {
+      "fail": "订单{po}的收货单{receipt}的入库检验尚未通过",
+      "suggestion": "请完成检验，或记录为何该材料可以在检验前付款"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "此协议没有工作包，付款申请因而没有可申报的对应范围。",
+      "suggestion": "启用协议前，请将合同范围划分为工作包。"
+    },
+    "package_scope_described": {
+      "fail": "工作包 {package} 有名称，但未描述其涵盖的工作内容。",
+      "suggestion": "请写明工作包所包含的内容，为日后处理变更争议提供依据。"
+    },
+    "agreement_value_positive": {
+      "fail": "合同金额为 {value}，保留金和合同价值分解表缺少计算依据。",
+      "suggestion": "启用协议前，请填写约定的合同金额。"
+    },
+    "packages_within_value": {
+      "fail": "工作包总价为 {planned}，但合同金额为 {total}。",
+      "suggestion": "请重新确定工作包价格，或提高合同金额，使协议金额覆盖其工作范围。"
+    },
+    "agreement_dates_ordered": {
+      "fail": "协议结束日期 {end} 早于开始日期 {start}。",
+      "suggestion": "请更正开始或结束日期，使合同期间顺序正确。"
+    },
+    "agreement_currency_set": {
+      "fail": "此协议未注明币种，无法汇总或支付协议项下款项。",
+      "suggestion": "请设置币种，通常采用项目币种。"
+    },
+    "retention_within_bounds": {
+      "fail": "保留金比例 {percent}% 超出 0 至 {max}% 的合理范围。",
+      "suggestion": "请按每笔付款的百分比填写保留金，而不是填写金额。"
+    },
+    "insurance_valid_at_start": {
+      "fail": "分包商保险于 {expiry} 到期，早于开工日期 {reference}。",
+      "suggestion": "允许分包商进场前，请取得有效的保险凭证。"
+    },
+    "unlinked_contract_twin": {
+      "fail": "分包协议 {agreement} 与合同 {contract} 似乎对应同一分包，可能导致财务重复计入。",
+      "suggestion": "如属同一分包，请将两者关联；否则请标记为不同分包。"
+    },
+    "contact_linked": {
+      "fail": "联系人 {contact} 未关联到联系人目录，因此同一人可能被重复录入",
+      "suggestion": "为联系人添加电子邮件地址，以便与目录进行匹配"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "此报审资料未指定审核人，提交后无人负责处理。",
+      "suggestion": "提交前，请指定负责答复的审核人。"
+    },
+    "required_date_present": {
+      "fail": "此报审资料未设置要求完成日期，因此无法判定逾期。",
+      "suggestion": "请根据依赖此报审结果才能开展的工作，设置审核应完成的日期。"
+    },
+    "required_date_after_submitted": {
+      "fail": "要求审核完成日期 {required} 早于报审提交日期 {submitted}。",
+      "suggestion": "请将要求完成日期调整为提交后的工作日。"
+    },
+    "review_window_sufficient": {
+      "fail": "审核人可用时间为 {days} 天，少于通常所需的 {minimum} 天。",
+      "suggestion": "请预留通常的审核周期，或事先与审核人商定更短的周期。"
+    },
+    "spec_section_present": {
+      "fail": "此报审资料未注明技术规范章节，登记表无法归类。",
+      "suggestion": "请填写此报审资料所对应的技术规范章节。"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "审核人和批准人均为同一人（{person}），缺少独立复核。",
+      "suggestion": "请指定与审核人不同的批准人。"
+    },
+    "linked_scope_present": {
+      "fail": "此报审资料未关联任何工作范围项，因此无法归集到工作包。",
+      "suggestion": "请关联此报审资料涵盖的工程量清单项。"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "此询价单既无工作范围也无描述，供应商无法报价。",
+      "suggestion": "发布前，请描述工作范围，以确保收到的报价具有可比性。"
+    },
+    "deadline_present": {
+      "fail": "此询价单未注明提交截止时间，报价将无法截止。",
+      "suggestion": "请设置报价必须送达的截止日期和时间。"
+    },
+    "deadline_parseable": {
+      "fail": "提交截止时间 {value} 无法被系统识别为日期，所有报价都将被拒收。",
+      "suggestion": "请以日期格式填写截止时间，例如 2026-08-31。"
+    },
+    "deadline_in_future": {
+      "fail": "截至今日 {today}，提交截止日期 {deadline} 已过，因此询价单一经发布即已截止。",
+      "suggestion": "发布前，请将截止日期调整为未来日期。"
+    },
+    "has_recipients": {
+      "fail": "此询价单未指定接收供应商，发布后不会通知任何人。",
+      "suggestion": "请添加本次询价的接收供应商。"
+    },
+    "currency_set": {
+      "fail": "此询价单未注明币种，各报价无法相互比较排序。",
+      "suggestion": "请设置报价使用的币种。"
+    },
+    "bid_currency_matches": {
+      "fail": "报价 {bid} 使用 {bid_currency} 计价，但询价单使用 {rfq_currency}。",
+      "suggestion": "请要求报价人按询价币种重新报价，或记录双方约定的换算方式。"
+    },
+    "bid_amounts_parseable": {
+      "fail": "报价 {bid} 的金额 {value} 不是可用于排序的有效数值。",
+      "suggestion": "授标前，请更正报价金额。"
+    },
+    "bids_still_valid": {
+      "fail": "报价 {bid} 已于 {expired} 失效，今日为 {today}，其价格不再具有约束力。",
+      "suggestion": "授标前，请要求报价人确认价格。"
+    },
+    "award_has_competition": {
+      "fail": "本次授标依据 {count} 份报价，少于竞争性比较所需的 {minimum} 份。",
+      "suggestion": "请记录采用单一来源授标的正当理由，或邀请更多报价人。"
+    }
+  },
+  "errors": {
+    "resource_not_found": "未找到资源。",
+    "project_not_found": "未找到项目。",
+    "vendor_not_found": "未找到供应商。",
+    "template_not_found": "未找到模板。",
+    "position_not_found": "未找到清单项。",
+    "boq_not_found": "未找到工程量清单。",
+    "session_not_found": "未找到会话。",
+    "document_not_found": "未找到文档。",
+    "documents_batch_delete_referenced": "其他位置的记录仍引用此批次中的文档。请检查删除将断开的关联，并通过 acknowledge_references 确认。",
+    "invitation_not_found": "未找到邀请。",
+    "agreement_not_found": "未找到协议。",
+    "rejection_not_found": "未找到驳回记录。",
+    "claim_not_found": "未找到进度款申请。",
+    "gaeb_x89_final_account_unsupported": "目前尚不支持将最终结算或部分最终结算导出为 GAEB X89。最终结算需要按累计完成工程额扣除先前付款，而进度款申请只能生成单个期间的进度发票。请将该申请导出为进度发票。",
+    "xpwe_native_file_refused": "这是某造价软件的专有项目文件，仅可由该软件打开。请从原造价软件将估算导出为 XPWE，再上传 .xpwe 文件。",
+    "xpwe_unreadable": "无法将此文件读取为 XPWE。文件可能已损坏或属于其他类型。请重新将估算导出为 XPWE，并上传 .xpwe 文件。",
+    "plot_not_found": "未找到地块。",
+    "survey_not_found": "未找到无人机测绘记录。",
+    "diary_video_not_found": "未找到施工日志视频。",
+    "diary_photo_not_found": "未找到施工日志照片。",
+    "bidder_not_found": "未找到报价人。",
+    "webhook_not_found": "未找到 Webhook。",
+    "submission_not_found": "未找到提交记录。",
+    "measurement_not_found": "未找到现场测量记录。",
+    "salescontract_not_found": "未找到销售合同。",
+    "prompt_not_found": "未找到提示词模板。",
+    "prequalification_not_found": "未找到资格预审记录。",
+    "purchase_requisition_not_found": "未找到采购申请。",
+    "purchase_order_not_found": "未找到采购订单。",
+    "group_not_found": "未找到分组。",
+    "final_account_not_found": "未找到最终结算。",
+    "estimate_job_not_found": "未找到估算任务。",
+    "escrow_not_found": "未找到资金监管交易。",
+    "commission_accrual_not_found": "未找到佣金计提记录。",
+    "baseline_not_found": "未找到基准版本。",
+    "fx_rate_set_locked": "{date} 的欧洲央行汇率已锁定，本次刷新未覆盖这些汇率。如需采用新发布的汇率，请先解锁该组汇率。",
+    "boq_locked": "工程量清单已锁定，无法修改。请创建修订版后再进行更改。",
+    "boq_link_owner_locked": "编码“{code}”由已锁定清单“{bill}”中的一行定义，关联该编码会修改该清单。请先解锁清单，或使用新编码录入此行。"
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "此变更清单的第 {line} 行无来源关联，既未关联合同价值分解表条目，也未关联估算清单项。",
+      "suggestion": "请指定此变更影响的合同条目，或工作范围来源的估算清单项，以便核实该金额的依据。"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "此申请中的估算金额为 {estimate}，但其已计价清单的合计为 {priced}。",
+      "suggestion": "请将清单计价合计同步至申请，或更正清单，使金额一致。"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "第 {line} 行标记为删减范围，却记录了正工程量 {quantity}；删减项应以负工程量从合同中扣除。",
+      "added_negative": "第 {line} 行标记为新增范围，却记录了负工程量 {quantity}；从合同中扣除的范围应标记为删减，而非新增。",
+      "removed_needs_contract_line": "第 {line} 行标记为删减范围，但未关联合同价值分解表条目，因此没有可删减的已签约项目。",
+      "modified_needs_contract_line": "第 {line} 行标记为修改范围，但未关联合同价值分解表条目，因此没有可修改的已签约项目。",
+      "suggestion": "请更正此行来源记录中的变更类型或工程量，或指定变更影响的合同条目。"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "此案例尚无步骤，读者无法按步骤操作。",
+      "suggestion": "请至少添加一个步骤，注明要打开的页面及要执行的操作。"
+    },
+    "step_titled": {
+      "fail": "有 {count} 个步骤缺少标题或要打开的页面。",
+      "suggestion": "请为每个步骤填写简短标题，并选择要打开的页面。"
+    },
+    "step_purpose": {
+      "fail": "共 {total} 个步骤中，有 {count} 个未说明其作用，使案例变成点击操作清单而非解释。",
+      "suggestion": "请为每个步骤补充一句用途说明，这是新用户需要的信息。"
+    },
+    "distinct_screens": {
+      "fail": "有 {count} 个步骤打开的页面与前一步相同，读者看不到变化，也无法区分这些步骤。",
+      "suggestion": "请将其合并为一个步骤，或将后一步指向实际继续工作的页面。"
+    },
+    "duration_plausible": {
+      "fail": "此案例声称 {steps} 个步骤仅需 {minutes} 分钟。读者若无法跟上，将不再信任其余时间估算。",
+      "suggestion": "请将预计时长提高至至少 {minimum} 分钟，或减少步骤。"
+    },
+    "described": {
+      "fail": "此案例没有摘要，列表中只能显示标题。",
+      "suggestion": "请用一句话说明读者完成案例后将取得什么结果。"
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "估算未注明计价依据的合同形式。",
+      "suggestion": "请记录合同形式。开办及现场一般费用、风险和付款条件在不同合同形式下的计价不同，缺少该信息则金额缺乏明确含义。"
+    },
+    "payment_regime_declared": {
+      "fail": "付款机制不完整，尚未记录：{missing}",
+      "suggestion": "请记录这两个日期。建设合同未约定它们，并不意味着无需遵守；Scheme for Construction Contracts 将补充这两个日期，双方的付款条件将由法定文件而非所签合同确定。"
+    },
+    "retention_declared": {
+      "fail": "估算未注明适用的保留金。",
+      "suggestion": "请记录保留金比例及返还条件，或注明不适用保留金。保留金是承包商已经赚取但尚不能支取的款项；估算对此不作说明，也就没有反映相应的营运资金需求。"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "未记录 CDM 2015 规定的责任承担方，缺少：{missing}",
+      "suggestion": "请记录任命情况。当一个项目有多家承包商参与时，业主必须书面任命 principal designer（主要设计责任方）和 principal contractor（主要施工责任方）；否则由业主自行承担这些职责。"
+    },
+    "hrb_regime_declared": {
+      "fail": "是否属于较高风险建筑尚未确定：{reason}",
+      "unanswered": "估算未说明是否属于较高风险建筑",
+      "disagrees": "估算中声明的较高风险建筑状态为 {declared}，但按其自身尺寸推导的结果为 {derived}",
+      "suggestion": "建筑高度至少为 18 米或至少有 7 层，并且包含至少两个住宅单元时，属于较高风险建筑。两部分条件缺一不可：没有住宅的高层建筑不属于此类，将其误列会增加不必要的 gateway 阶段审批计划。"
+    },
+    "vat_treatment_declared": {
+      "fail": "估算未注明增值税处理方式。",
+      "suggestion": "请记录处理方式：标准税率、符合条件工程适用的优惠税率或零税率，或适用供应范围内的境内反向征税。反向征税将增值税缴纳义务转移至客户，并改变承包商可开票的金额。"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "项目未注明国家，无法确定价格依据、税率或工作日历。",
+      "suggestion": "请在项目设置中选择国家。国家决定各项数值所依据的地区数据包、税制和日历。"
+    },
+    "currency_set": {
+      "fail": "项目未注明币种，无法汇总其清单、附加费和合同金额。",
+      "suggestion": "请在项目设置中选择币种。所有清单和合同均以该币种计价，所有合计金额也以该币种表示。"
+    },
+    "currency_matches_bill": {
+      "fail": "项目使用 {project_currency} 计价，但此清单的行项目使用 {bill_currencies}。",
+      "suggestion": "请按注明的汇率将行项目换算为项目币种，或在项目中记录汇率，以得到统一币种的清单合计。"
+    },
+    "priced_bill_present": {
+      "fail": "项目没有包含清单项的工程量清单，因此缺少估算依据。",
+      "suggestion": "请创建工程量清单并添加清单项，或从 CAD 模型、电子表格或交换文件中导入清单。"
+    },
+    "bill_base_date_set": {
+      "fail": "清单“{bill}”未注明其单价所对应的基准日期。",
+      "suggestion": "请在清单中记录基准日期，否则无法进行价格指数调整、按对应日期计税或与其他估算比较。"
+    },
+    "classification_standard_set": {
+      "fail": "项目未设置分类标准，其清单项编码无法核查。",
+      "suggestion": "请选用项目编码所依据的分类标准。该标准也决定校验时执行哪些国家规则集。"
+    },
+    "planned_dates_set": {
+      "both_missing": "项目既未设置计划开始日期，也未设置计划结束日期。",
+      "start_missing": "项目已设置计划结束日期，但未设置计划开始日期。",
+      "end_missing": "项目已设置计划开始日期，但未设置计划结束日期。",
+      "unreadable": "计划日期“{value}”无法识别为有效日期。",
+      "suggestion": "请在项目中以日期格式填写计划开始和结束日期。工期相关费用、价格上涨调整和进度计划均在此期间内计算。"
+    },
+    "planned_dates_ordered": {
+      "fail": "项目计划于 {start} 开始、{end} 结束，但结束日期早于开始日期。",
+      "suggestion": "请调换或更正计划日期，使开始日期早于结束日期。"
+    },
+    "client_recorded": {
+      "fail": "项目未记录客户，也没有任何合同指定发包人。",
+      "suggestion": "请在项目中记录客户，或将发包人作为合同一方添加，以明确估算的接收方。"
+    },
+    "procurement_started": {
+      "fail": "项目处于 {phase} 阶段，但既无合同，也无招标包。",
+      "suggestion": "请根据清单创建招标包、录入合同，或将项目阶段改回其实际所处的估算阶段。"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "清单项 {ordinal}：资源明细无法用于组价，因此未据此重新计算单价。",
+      "fallback_allowance": "清单项 {ordinal}：资源明细是估计费用的分摊，记录的是清单项总工程量，因此未据此重新计算单价。",
+      "assumed_norm": "清单项 {ordinal}：资源明细中的消耗定额并未在目录中给出，因此未据此重新计算单价。",
+      "norm_collapsed": "清单项 {ordinal}：资源明细丢失了目录中的消耗定额，改为记录清单项总工程量，因此未据此重新计算单价。",
+      "whole_position_quantities": "清单项 {ordinal}：资源明细记录的是整个清单项的用量，而非单位工程量的消耗定额，因此未据此重新计算单价。",
+      "suggestion": "请核查组价，通过资源定额审核从目录条目重新推导清单项，或手动更正资源明细。"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "清单项 {ordinal} 未引用 KNR 定额目录表。",
+      "suggestion": "请在 podstawa 依据字段中注明消耗定额来源的目录表，例如 KNR 2-02 0201-01；自行计算计价的行项目请填写 kalkulacja indywidualna。"
+    },
+    "knr_reference_recognised": {
+      "fail": "清单项 {ordinal} 的引用“{code}”未注明 KNR 目录系列。",
+      "suggestion": "请以目录系列名称开头，例如 KNR、KNNR、KNR-W 或 KSNR，或将该项标记为 kalkulacja indywidualna。"
+    }
+  },
+  "bim_rules": {
+    "filter_not_object": "属性条件必须为每个属性写明所需的值。",
+    "unknown_operator": "\"{prop}\" 的条件使用了此版本不认识的比较方式。请从列表中选择一个。",
+    "value_not_allowed": "\"{prop}\" 的条件用于检查属性是否为空,不接受数值。",
+    "value_required": "\"{prop}\" 的条件需要一个值。",
+    "value_too_long": "\"{prop}\" 的条件值过长,最多 500 个字符。",
+    "value_not_number": "\"{prop}\" 的条件比较的是数字,而 \"{value}\" 不是数字。请输入数字,需要时可加单位,如 mm、m、m2、m3 或 kg。",
+    "group_not_found": "此规则取构件所用的已保存分组或 Smart View 不在本项目中。请选择其他项或清除。"
+  },
+  "bim_versions": {
+    "parent_not_found": "本次上传应作为其新版本的模型不在此项目中。请另选一个，或将其作为独立模型上传。",
+    "parent_not_ready": "“{name}”尚未导入完成，暂时无法接收新版本。请等待其就绪，或将本文件作为独立模型上传。",
+    "parent_superseded": "“{name}”已有更新的版本 {version}。请改为将本文件作为最新版本的新版本上传。"
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "合同{code}价值{amount},但没有明细行,所以它的金额不在任何成本行上。",
+      "suggestion": "请在成本控制中为该合同设置一个科目,或添加它的明细行。"
+    },
+    "contract_sum_differs": {
+      "fail": "合同{code}价值{total},但其明细行合计为{lines}(相差{difference})。",
+      "suggestion": "请修正合同金额或明细行,使两者一致。"
+    },
+    "change_without_agreed_amount": {
+      "fail": "变更{code}已批准,但没有商定金额。",
+      "suggestion": "批准变更之前,请先记录与承包商商定的金额。"
+    },
+    "change_without_approval_date": {
+      "fail": "变更{code}已批准,但没有批准日期。",
+      "suggestion": "请记录该变更的批准时间。"
+    },
+    "billed_before_approval": {
+      "fail": "合同{contract}已为变更{code}开票{amount},但该变更状态为{status},尚未批准。",
+      "suggestion": "请先批准该变更,或把这笔开票从付款申请中撤下。"
+    },
+    "contract_over_target": {
+      "fail": "合同{code}承诺{committed},比其发包所依据的工程量清单{target}高出{difference}(超过{tolerance} %)。",
+      "suggestion": "请对照工程量清单核对发包和变更,并记录工程造价偏高的原因。"
+    },
+    "account_over_plan": {
+      "fail": "科目{code}的承诺额为{committed},比计划{planned}高出{difference}(超过{tolerance} %)。",
+      "suggestion": "请检查该科目上的承诺,或附上原因更新计划。"
+    },
+    "quantity_overrun": {
+      "fail": "合同{contract}的第{code}行计量为{measured}{unit},合同量为{contracted}{unit},超出{over} %(允许{tolerance} %)。",
+      "suggestion": "请核对计量,或把多出的数量作为变更商定。"
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "合同{code}的计量额为{measured},比含已批准变更的合同价{committed}高出{difference}。",
+      "suggestion": "请批准涵盖额外工作的变更,或核对计量。"
+    },
+    "invoice_without_contract": {
+      "fail": "供应商发票{number}({amount})不属于任何合同或订单。",
+      "suggestion": "请把它的明细行关联到某个合同,或作为直接成本记入一个科目。"
+    }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "合同{contract}的发票{number}累计金额为{net},低于上一张发票{previous_number}的{previous},而该合同按累计方式开票。",
+      "suggestion": "如果发票只结算新增工程量,则合同按增量方式开票;如果发票使合计减少,请录入为贷项通知单。"
+    },
+    "invoice_after_final": {
+      "fail": "合同{contract}的发票{number}排在最终发票{final}之后。",
+      "suggestion": "请将之后的工作录入为计日工或贷项通知单,或把正确的发票标记为最终发票。"
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "合同{contract}的发票{number}由索赔生成且只结算一个期间,但该合同按累计方式开票。",
+      "suggestion": "每个合同只使用一种开票方式:把合同改为增量开票,或改为录入承包商的累计发票。"
+    },
+    "release_differs": {
+      "fail": "合同{contract}的发票{number}已确认的放款金额为{stored},但按合同条款今天算出的是{computed}。",
+      "suggestion": "请检查放款之后有什么变化(条款、发票金额、扣款),然后重新打开放款并再次确认。"
+    },
+    "rounding_out_of_range": {
+      "fail": "发票{number}的尾数调整为{rounding},超出了约定的取整步长{step}。",
+      "suggestion": "取整只会让放款金额减少不到一个步长;请在付款条款中启用取整,或重新打开放款。"
+    },
+    "final_retention_without_warranty": {
+      "fail": "合同{contract}的最终发票{number}扣留了{amount}质保金,但并未约定质保期保留金。",
+      "suggestion": "请在付款条款中约定质保期保留金,或重新打开放款,把全部保留金随最终发票一并支付。"
+    },
+    "posting_exceeds_held": {
+      "fail": "合同{contract}退还的保留金多于已扣留的金额,多退了{amount}。",
+      "suggestion": "请作废过高的保留金退还记账,按实际扣留的金额重新记账。"
+    },
+    "posting_before_event": {
+      "fail": "合同{contract}的{amount}保留金已于{posted}退还,早于其释放事件的到期日{due}。",
+      "suggestion": "请核对释放事件的日期,或在事件发生后再记账释放。"
+    },
+    "posting_without_event_date": {
+      "fail": "合同{contract}的{amount}保留金已退还,但未记录其释放事件的日期。",
+      "suggestion": "请记录释放事件达成的日期,以便将该笔付款与之核对。"
+    },
+    "retention_still_held": {
+      "fail": "合同{contract}已完工,但仍扣留着{amount}保留金。",
+      "suggestion": "请在保留金台账中按其事件释放保留金,或继续扣留至质保期结束。"
+    },
+    "discount_not_agreed": {
+      "fail": "合同{contract}的发票{number}放款时扣减了{amount}提前付款折扣,但合同不允许折扣。",
+      "suggestion": "请在付款条款中启用提前付款折扣,或在不含折扣的情况下重新打开放款。"
+    },
+    "discount_after_deadline": {
+      "fail": "发票{number}已扣留{amount}折扣,但{paid_on}的付款晚于折扣截止日{until}。",
+      "suggestion": "请连同折扣金额一并支付,或记录承包商接受逾期折扣的原因。"
+    },
+    "invoiced_over_measured": {
+      "fail": "合同{contract}已开票{invoiced},比已计量的{measured}(数量乘单价)多出{difference}。",
+      "suggestion": "在继续放款之前请核对计量,或在下次放款时扣留差额。"
+    },
+    "invoiced_over_contract": {
+      "fail": "合同{contract}已开票{invoiced},比合同价值{value}多出{difference},且没有任何计量。",
+      "suggestion": "在继续放款之前,请先录入能覆盖超出金额的计量或变更。"
+    },
+    "reverse_charge_with_vat": {
+      "fail": "发票{number}适用反向征税,却带有{vat}增值税。",
+      "suggestion": "反向征税的发票不含增值税;请更正增值税金额或其明细行的增值税类别。"
+    },
+    "line_without_vat_rate": {
+      "fail": "发票{number}含增值税,但有{count}个明细行没有填写税率。",
+      "suggestion": "请在每个明细行填写增值税税率,以便扣款和导出使用正确的税额。"
+    },
+    "duplicate_number": {
+      "fail": "同一承包商的发票号{number}被录入了{count}次。",
+      "suggestion": "请作废重复的那张,或者若是不同的发票,请更正发票号。"
+    },
+    "possible_duplicate": {
+      "fail": "发票{number}与发票{other}的承包商、金额({amount})和日期({on})相同。",
+      "suggestion": "请核对是不是同一张发票以另一个号码重复录入。"
+    },
+    "certificate_missing": {
+      "fail": "合同 {contract} 的发票 {number}：收款方在 {on} 没有有效的{certificate}，而 {reference} 要求在付款放行前具备。",
+      "suggestion": "请将证书登记到收款方的分包商记录中，或在出示证书前暂缓付款。"
+    },
+    "split_payment_annotation_missing": {
+      "fail": "发票{number}包含建筑工程或其他适用split payment的货物,且超过{threshold},但未带有注记“{annotation}”。",
+      "suggestion": "请供应商开具带注记的更正发票,并无论如何都通过split payment支付:以此方式付款的义务不取决于注记。"
+    },
+    "split_payment_not_used": {
+      "fail": "发票{number}适用split payment,但其付款以另一种方式记录。买方还需额外承担{sanction},即其增值税的30%。",
+      "suggestion": "此类发票应从增值税账户通过split payment支付,并在付款上将方式记录为split_payment。"
+    },
+    "split_payment_annex_unknown": {
+      "fail": "发票{number}超过{threshold},且未记录其是否包含split payment附件所列的货物或服务。",
+      "suggestion": "请在发票上记录其是否包含附件所列的货物或服务(annex_15)或其编码(pkwiu_codes),以便核查付款方式。"
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "发票{number}对全部价款按{rate}%计征增值税,但该住宅的使用面积为{area_m2} m2,优惠税率仅适用至{limit_m2} m2({reference})。",
+      "suggestion": "请对价款的{reduced_share_percent}%适用优惠税率,其余部分适用标准税率。"
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "发票{number}按{rate}%的住房优惠税率计征,但项目中未记录其对应哪套住宅及其使用面积({reference})。",
+      "suggestion": "请在项目中记录住宅类型和使用面积(vat_housing),以便核查税率及其面积上限。"
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "发票{number}对{object}按{rate}%的住房优惠税率计征,但其不符合适用条件({reference})。",
+      "suggestion": "请适用标准税率,或更正项目中记录的住宅。"
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "发票{number}对{count}个明细行适用反向征税,但建筑服务的国内反向征税在该国已经终止。",
+      "suggestion": "除非供应商设立于境外,否则请索取含增值税的发票;此类发票通过split payment支付。"
+    },
+    "payment_term_over_cap": {
+      "fail": "合同{contract}约定付款期限为{days}天,超过逾期付款法允许企业之间的{cap}天。",
+      "suggestion": "请将期限缩短至{cap}天,或记录为何明确约定较长期限且对分包商并非严重不公平。"
+    }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code}：预测 {forecast} 低于已承诺或在待定变更中提出的 {owed}（低 {difference}），且没有任何说明。",
+      "suggestion": "请附上支撑较低数字的文件（贷项通知单、结算协议、会议纪要），或在该条目中说明其方法为何得出较少金额。"
+    },
+    "move_without_evidence": {
+      "fail": "{code}：自上一份冻结快照以来，预测从 {previous} 变为 {current}（{delta}），超过项目阈值，且尚无说明和依据。",
+      "suggestion": "冻结快照前，请写明数字变动的原因，并关联相应的文件或会议纪要。"
+    },
+    "method_override_without_comment": {
+      "fail": "{code} 采用{method}而非项目的{project_method}进行预测，且没有说明原因的备注。",
+      "suggestion": "请在该条目的方法上补一条简短备注，或将该条目改回项目的方法。"
+    },
+    "method": {
+      "best_available": "最佳可得来源",
+      "maximum": "最大值",
+      "evm_cpi": "成本绩效（CPI）",
+      "manual": "手动金额"
+    }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "社会保险无欠费证明",
+    "construction_tax_exemption": "建筑税免税证明",
+    "employers_liability_clearance": "雇主责任无欠费证明",
+    "insurance": "保险证明",
+    "license": "承包商执照"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "销售单价导出与编辑器总额相差 {gap}，超过容差 {tolerance}",
+      "suggestion": "请在导出预览中检查舍入，或提高此清单的容差"
+    }
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "清单项 {ordinal} 缺少分类编码，因而无法归入其所属的工作项类别",
+      "suggestion": "为该清单项指定分类编码（巴基斯坦默认采用 MasterFormat），以便工程量按工作项类别汇总"
+    },
+    "sales_tax_line_present": {
+      "fail": "账单中没有销售税行",
+      "suggestion": "在小计之后将销售税单列为一行：建筑合同适用省级服务税，供货适用联邦商品销售税"
+    },
+    "sales_tax_rate_known": {
+      "fail": "销售税行按{percent}%计税，这不是巴基斯坦建筑业适用的税率",
+      "suggestion": "请按省份和付款方核对税率，例如旁遮普省16%、信德省15%，政府土木工程适用减免税率，或商品适用18%联邦销售税"
+    }
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "未找到价目表",
+    "catalog_item_not_found": "未找到目录项",
+    "entry_not_found": "所选供应商价格不存在",
+    "entry_other_vendor": "所选价格属于其他供应商的价目表",
+    "price_list_expired": "价目表“{name}”已于 {valid_to} 过期。请导入最新价目表，或手动录入协商价格。",
+    "import_unreadable": "无法将该文件作为价目表读取 ({reason})",
+    "import_needs_price_column": "请选择价格所在的列",
+    "duplicate_vendor_sku": "以下供应商料号在文件中出现多次: {skus}",
+    "valid_to_before_valid_from": "结束日期早于开始日期",
+    "category_not_found": "未找到项目分类",
+    "net_above_gross": "净价 {net} 高于标价 {gross}",
+    "discount_not_found": "未找到折扣协议",
+    "discount_basis": "请填写折扣百分比或固定净价（固定净价需要指定项目）",
+    "attachment_not_found": "未找到附件",
+    "price_missing": "清单行“{line}”没有当前有效价格：请输入单价或导入供应商价目表"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "清单项 {ordinal}：{count} 条算量记录给出了工程量，但未记录图纸修订版",
+      "suggestion": "在项目文件中设置图纸修订版，然后重新量取或调整该量取记录，使其记录图纸编号和修订版"
+    },
+    "superseded_revision": {
+      "fail": "清单项 {ordinal}：工程量取自图纸 {drawing} 修订版 {revision}，但当前有效版本已是 {current}",
+      "suggestion": "比对两个修订版并更新工程量，或就差额提出变更单"
+    },
+    "manual_ref_without_revision": {
+      "fail": "清单项 {ordinal}：图纸 {drawing} 录入时未填写修订版",
+      "suggestion": "补充该工程量据以计价的图纸修订版"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "字段“{field}”在设备和服务器上都被修改过，且尚未选择处理方式",
+      "suggestion": "请为该字段选择我的值、服务器的值或手动输入的值，然后重新发送合并"
+    }
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "第 {row} 行：此进度计划中没有 ID 为 {ref} 的作业。",
+      "duplicate": "第 {row} 行：作业 {ref} 在表格中出现多次。",
+      "suggestion": "请导出新表格，不要添加、复制或重新排序行。"
+    },
+    "values_in_range": {
+      "percent_not_a_number": "第 {row} 行：完成百分比不是数字。",
+      "actual_start_not_a_date": "第 {row} 行：实际开始不是日期。",
+      "actual_finish_not_a_date": "第 {row} 行：实际完成不是日期。",
+      "remaining_not_a_whole_number": "第 {row} 行：剩余工期不是整数天。",
+      "percent_out_of_range": "第 {row} 行：完成百分比为 {value}，必须介于 0 和 100 之间。",
+      "remaining_negative": "第 {row} 行：剩余工期为 {value}，不能为负数。",
+      "suggestion": "请输入 0 到 100 的完成百分比，日期使用日期格式，剩余工期使用整数工作日。"
+    },
+    "date_logic": {
+      "finish_before_start": "第 {row} 行：实际完成 {finish} 早于实际开始 {start}。",
+      "finish_without_start": "第 {row} 行：填写了实际完成 {finish}，但没有实际开始。",
+      "after_status_date": "第 {row} 行：实际日期 {value} 晚于状态日期 {status_date}。",
+      "finish_needs_complete": "第 {row} 行：填写了实际完成，但作业仅完成 {percent}%。",
+      "suggestion": "实际日期必须按顺序，且不得晚于状态日期；有实际完成日期即表示已完成 100%。"
+    },
+    "unchanged_since_export": {
+      "fail": "第 {row} 行：{activity} 在表格导出后已在应用中被更改。",
+      "suggestion": "应用此行之前请检查当前值，或导出新表格。"
+    },
+    "plausibility": {
+      "progress_decreased": "第 {row} 行：进度从 {old}% 降至 {new}%。",
+      "complete_without_finish": "第 {row} 行：已完成 100% 但没有实际完成日期；将使用状态日期作为完成日期。",
+      "started_without_start": "第 {row} 行：填写了进度，但没有实际开始。",
+      "suggestion": "应用之前请与现场核对此行。"
+    }
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "此分支已开启 {days} 天，自创建以来主估算已有 {changes} 个清单项发生变更",
+      "suggestion": "将主估算的变更带入分支、合并该分支，或将其归档"
+    },
+    "unresolved_conflicts": {
+      "fail": "清单项 {ordinal}“{description}”在此分支和主估算中都被修改",
+      "suggestion": "打开合并对话框，决定保留该清单项的哪个版本"
+    }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "{period} 现金头寸将降至负 {amount}，低于 {threshold} 的资金阈值。",
+      "suggestion": "请在 {period} 前安排资金，提前回款或推迟付款。"
+    },
+    "receipt_overdue": {
+      "fail": "{document}：{amount} 应于 {due} 到期，目前仍未收回（逾期 {days} 天）。",
+      "suggestion": "向客户催收款项，或在预测中调整预计日期。"
+    },
+    "forecast_missing": {
+      "fail": "{project} 已启动，但没有合同、发票、采购订单、分包合同或计划，无法据此预测现金流。",
+      "suggestion": "录入客户合同及其付款计划，或在成本模型中录入计划现金流。"
+    }
+  }
+}

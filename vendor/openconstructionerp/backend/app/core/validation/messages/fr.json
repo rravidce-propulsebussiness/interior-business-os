@@ -1,0 +1,1438 @@
+{
+  "cost_control": {
+    "unassigned_money": {
+      "fail": "Des montants engagés ne sont affectés à aucune ligne de coût.",
+      "suggestion": "Rattachez les lignes du contrat ou de la commande à des lignes de coût pour que les montants apparaissent au bon endroit."
+    },
+    "certified_over_committed": {
+      "fail": "Les travaux certifiés dépassent le marché attribué augmenté des modifications approuvées.",
+      "suggestion": "Approuvez la modification qui couvre les travaux supplémentaires ou vérifiez la demande de paiement."
+    },
+    "forecast_over_plan": {
+      "fail": "La prévision dépasse le montant prévu.",
+      "suggestion": "Vérifiez l'origine de la prévision ; saisissez une prévision manuelle avec un motif si vous attendez des économies."
+    },
+    "partly_awarded": {
+      "fail": "Seule une partie du montant prévu est attribuée ; la prévision peut omettre des travaux restant à attribuer.",
+      "suggestion": "S'il reste des travaux à attribuer sur cette ligne, saisissez une prévision manuelle."
+    },
+    "pending_changes": {
+      "fail": "Des avenants attendent une décision.",
+      "suggestion": "Statuez sur les avenants en attente ; la prévision ne les inclut pas encore."
+    },
+    "snapshot_stale": {
+      "fail": "Aucune prévision n'a été enregistrée depuis plus d'un mois.",
+      "suggestion": "Enregistrez un instantané de la prévision pour que l'historique des coûts reste lisible."
+    }
+  },
+  "cost_structure": {
+    "account_code_duplicate": {
+      "fail": "Le code de compte {code} apparaît plusieurs fois dans la structure de coûts.",
+      "suggestion": "Conservez un seul compte par code et reportez-y ses lignes de coût."
+    },
+    "mixed_standard": {
+      "fail": "La structure de coûts mélange plusieurs nomenclatures : {standards}.",
+      "suggestion": "Construisez la structure à partir d'une seule nomenclature ; faites correspondre les autres codes à celle-ci."
+    },
+    "account_parent_cycle": {
+      "fail": "Le compte {code} est son propre ascendant via {count} comptes.",
+      "suggestion": "Donnez à l'un de ces comptes un parent situé en dehors de la boucle."
+    },
+    "account_too_deep": {
+      "fail": "Le compte {code} se trouve au niveau {level}, plus profond que les {max} niveaux de sa nomenclature.",
+      "suggestion": "Rattachez le compte à un parent dans la limite de profondeur de la nomenclature."
+    },
+    "no_account": {
+      "fail": "{count} lignes de coût d'un montant de {amount} ne sont sur aucun compte (première : {code}).",
+      "suggestion": "Donnez à ces postes un code de la nomenclature de la structure, ou affectez les lignes de coût à un compte."
+    },
+    "invalid_account": {
+      "fail": "{count} lignes de coût d'un montant de {amount} sont sur un compte clos ou n'acceptant pas d'imputations (première : {code}).",
+      "suggestion": "Reportez les lignes de coût sur un compte ouvert acceptant les imputations."
+    },
+    "own_amount_on_parent": {
+      "fail": "Le compte {code} a des sous-comptes et également un montant propre de {amount}.",
+      "suggestion": "Reportez le montant propre sur un sous-compte, ou conservez-le comme provision volontaire."
+    },
+    "rollup_mismatch": {
+      "fail": "Le total de la structure {reported} diffère de la somme de ses parties {expected} de {difference}.",
+      "suggestion": "Rechargez la structure ; si l'écart persiste, vérifiez les comptes sans parent."
+    },
+    "allocation_incomplete": {
+      "fail": "Les parts du poste {ordinal} totalisent {total}{unit} au lieu de {expected}{unit}.",
+      "suggestion": "Ajustez les parts pour que tout le poste soit réparti, ni plus ni moins."
+    },
+    "allocation_mixed_modes": {
+      "fail": "Le poste {ordinal} est réparti en partie en pourcentage et en partie en quantité.",
+      "suggestion": "Répartissez le poste d'une seule manière."
+    },
+    "vector_not_inherited": {
+      "fail": "La ligne de contrat {code} est sur une ligne de coût à laquelle son poste du bordereau n'est pas affecté.",
+      "suggestion": "Remettez la ligne sur les lignes de coût du poste, ou enregistrez la dérogation avec un motif."
+    }
+  },
+  "boq_markup": {
+    "contingency_not_on_profit": {
+      "fail": "La provision pour risques « {markup} » est calculée sur une base qui comprend déjà le bénéfice « {profit} » ; une marge est donc appliquée aux fonds réservés aux risques",
+      "suggestion": "Appliquez cette ligne au coût direct, sauf si la méthode usuelle du marché place délibérément les risques après les frais généraux et le bénéfice"
+    },
+    "order_is_declared": {
+      "fail": "Le rang {order} est attribué à plusieurs lignes de majoration : {markups}",
+      "suggestion": "Attribuez un rang distinct à chaque majoration pour définir précisément leur cumul"
+    },
+    "percentage_within_band": {
+      "fail": "« {markup} » vaut {percentage}% dans la catégorie {category}, hors de la plage plausible de 0 à {ceiling}%",
+      "suggestion": "Vérifiez le séparateur décimal. Dans tous les cas, le calcul utilise exactement la valeur saisie"
+    },
+    "cumulative_base_is_settled": {
+      "fail": "« {markup} » s'applique à « {apply_to} », mais aucune ligne ne la précède ; le calcul porte donc uniquement sur le coût direct",
+      "suggestion": "Placez-la après les lignes sur lesquelles elle doit se cumuler, ou appliquez-la au coût direct"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" propose {percentage}% par rapport au bordereau de prix, hors de la fourchette plausible de plus ou moins {band}%",
+      "duplicate": "\"{markup}\" est une seconde majoration ou remise sur le même périmètre que \"{other}\", les deux se cumulent donc",
+      "suggestion": "Ne gardez qu'une majoration ou une remise par lot ou section, et vérifiez le signe et le séparateur décimal. La ligne est de toute façon chiffrée exactement comme saisie"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "export": {
+    "generated": "Généré",
+    "content_digest": "Empreinte du contenu"
+  },
+  "field_time": {
+    "hours_per_day_max": {
+      "fail": "{hours} h sont imputées au salarié {worker} pour cette journée, au-delà de la limite de {max} h",
+      "suggestion": "Réaffectez les heures au bon jour ou au bon salarié avant l'envoi"
+    },
+    "line_complete": {
+      "fail": "La ligne {line} est incomplète : {reason}",
+      "labour_xor_plant": "il faut imputer soit de la main-d'œuvre, soit du matériel, mais pas les deux ni aucun des deux",
+      "hours_positive": "le nombre d'heures doit être supérieur à zéro",
+      "cost_code_required": "un code de coût est obligatoire",
+      "suggestion": "Complétez la ligne avant d'envoyer la feuille d'heures"
+    },
+    "cost_code_resolves": {
+      "fail": "Le code « {code} » de la ligne {line} ne correspond à aucun poste du bordereau ni à aucun élément WBS du projet",
+      "suggestion": "Choisissez un code de coût ou un élément WBS existant dans le bordereau du projet"
+    },
+    "daywork_needs_variation": {
+      "fail": "La ligne de travaux en régie {line} n'est liée à aucune modification ouverte",
+      "suggestion": "Rattachez les travaux en régie à la modification au titre de laquelle ils ont été prescrits"
+    },
+    "plant_needs_equipment": {
+      "fail": "La ligne de matériel {line} ne désigne aucun équipement",
+      "suggestion": "Associez l'engin pour permettre le chiffrage des heures de matériel"
+    },
+    "approved_immutable": {
+      "fail": "Cette feuille d'heures est à l'état {status} et ne peut pas être modifiée",
+      "suggestion": "Enregistrez une feuille d'heures d'extourne pour corriger les heures approuvées"
+    },
+    "offline_clock_plausible": {
+      "fail": "L'appareil ayant enregistré cette journée avançait de {minutes} minutes par rapport à l'horloge du serveur",
+      "suggestion": "Réglez l'horloge de l'appareil pour conserver l'ordre des heures enregistrées"
+    },
+    "offline_sync_delay": {
+      "fail": "Cette journée a été travaillée le {date} et n'est parvenue au bureau que {days} jours plus tard",
+      "suggestion": "Vérifiez les heures de cette journée avant de les approuver ; la situation correspondante peut déjà être clôturée"
+    },
+    "outdoor_heat_ban": {
+      "fail": "La ligne {line} enregistre du travail de {start} à {end} le {date}, pendant l'interdiction de travail en extérieur du midi, de {ban_from} à {ban_to}",
+      "suggestion": "Si ce travail s'est fait en extérieur en plein soleil, déplacez-le hors des heures d'interdiction ; les travaux en intérieur et les secteurs exemptés ne sont pas concernés"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} a pointé à {time}, à {distance} m hors de la clôture du chantier, sans approbation d'un superviseur",
+      "suggestion": "Demandez à un superviseur d'approuver ou de rejeter le pointage en indiquant un motif"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} a des postes qui se chevauchent, commençant à {first} et à {second}",
+      "suggestion": "Corrigez les heures de pointage d'arrivée ou de départ pour que les postes ne se chevauchent plus"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} a pointé à {time} et n'a jamais pointé son départ",
+      "suggestion": "Saisissez l'heure de départ ou reportez le poste à la main sur la feuille de temps"
+    }
+  },
+  "ai_takeoff": {
+    "unreviewed_proposals": {
+      "fail": "{count} propositions de métré attendent encore leur examen et ne sont pas chiffrées ici",
+      "suggestion": "Traitez la file d'examen pour que les quantités confirmées correspondent au plan"
+    }
+  },
+  "boq_quality": {
+    "position_has_quantity": {
+      "fail": "Le poste {ordinal} ne doit pas avoir une quantité nulle ou absente",
+      "suggestion": "Saisissez une quantité supérieure à 0"
+    },
+    "position_has_unit_rate": {
+      "fail": "Un prix unitaire devrait être attribué au poste {ordinal}",
+      "suggestion": "Attribuez un prix provenant de la base de coûts"
+    },
+    "position_has_description": {
+      "fail": "La description du poste {ordinal} ne peut pas être vide"
+    },
+    "no_duplicate_ordinals": {
+      "fail": "Le numéro « {ordinal} » est répété dans {count} postes"
+    },
+    "unit_rate_in_range": {
+      "fail": "Poste {ordinal} : le prix {rate} dépasse {threshold} (5 fois la médiane)",
+      "suggestion": "Vérifiez ce prix unitaire : il est inhabituellement élevé"
+    },
+    "negative_values": {
+      "fail": "Le poste {ordinal} présente des valeurs négatives : {details}",
+      "suggestion": "Corrigez les valeurs négatives en utilisant des nombres positifs"
+    },
+    "unrealistic_rate": {
+      "fail": "Poste {ordinal} : {details}",
+      "suggestion": "Vérifiez cette valeur : elle semble excessivement élevée",
+      "not_assessed_no_currency": "{count} poste(s) non évalué(s) : aucune devise n'est indiquée dans le bordereau ; les seuils monétaires exprimés en {reference} n'ont donc pas pu être convertis",
+      "not_assessed_no_currency_suggestion": "Définissez la devise du projet ou indiquez une devise sur les postes",
+      "not_assessed_no_rate": "{count} poste(s) en {currency} non évalué(s) : aucun taux de {reference} vers {currency} n'est enregistré ; les seuils monétaires n'ont donc pas pu être convertis pour ce bordereau",
+      "not_assessed_no_rate_suggestion": "Ajoutez un taux de {reference} vers {currency} au registre des taux de change ou aux taux du projet"
+    },
+    "total_mismatch": {
+      "fail": "Poste {ordinal} : montant calculé {computed} != montant enregistré {stored} (écart={diff})",
+      "suggestion": "Recalculez le total = quantité × prix unitaire"
+    },
+    "resource_split_mismatch": {
+      "fail": "Poste {ordinal} : le sous-total des ressources {subtotal} diffère du prix unitaire {rate} de {diff}",
+      "suggestion": "Vérifiez les quantités et les prix des ressources : leur somme par unité doit correspondre au prix unitaire du poste"
+    },
+    "empty_unit": {
+      "fail": "L'unité du poste {ordinal} est vide ou absente",
+      "suggestion": "Attribuez une unité de mesure (m, m2, m3, kg, pcs, lsum, etc.)"
+    },
+    "section_without_items": {
+      "fail": "La section {ordinal} ({title}) ne contient aucun poste",
+      "suggestion": "Ajoutez des postes à cette section ou supprimez la section vide"
+    },
+    "rate_vs_benchmark": {
+      "fail": "Poste {ordinal} : le prix unitaire {rate}/{unit} dépasse le seuil de référence {threshold}/{unit} et pourrait être irréaliste",
+      "suggestion": "Vérifiez ce prix : les prix habituels par {unit} devraient être inférieurs à {threshold}. Recherchez une erreur d'unité ou de décimale.",
+      "not_assessed_no_currency": "{count} poste(s) non évalué(s) : aucune devise n'est indiquée dans le bordereau ; les seuils de référence exprimés en {reference} n'ont donc pas pu être convertis",
+      "not_assessed_no_currency_suggestion": "Définissez la devise du projet ou indiquez une devise sur les postes",
+      "not_assessed_no_rate": "{count} poste(s) en {currency} non évalué(s) : aucun taux de {reference} vers {currency} n'est enregistré ; les seuils de référence n'ont donc pas pu être convertis pour ce bordereau",
+      "not_assessed_no_rate_suggestion": "Ajoutez un taux de {reference} vers {currency} au registre des taux de change ou aux taux du projet"
+    },
+    "lump_sum_ratio": {
+      "fail": "{lsum_count} postes sur {total_count} ({percent}) sont forfaitaires, au-delà du seuil de {threshold}",
+      "suggestion": "Décomposez les postes forfaitaires en quantités mesurées (m, m2, m3, kg, pcs) pour améliorer la précision de l'estimation"
+    },
+    "cost_concentration": {
+      "fail": "Le poste {ordinal} représente {share} du coût total du bordereau ({value} sur {grand_total}), au-delà du seuil de {threshold}",
+      "suggestion": "Décomposez ce poste ou vérifiez son coût : un seul poste ne devrait pas dominer l'estimation"
+    },
+    "currency_consistency": {
+      "fail": "Plusieurs devises ont été détectées : {currencies}",
+      "suggestion": "Utilisez une seule devise dans tout le bordereau"
+    },
+    "measurement_consistency": {
+      "fail": "Le bordereau mélange unités métriques et impériales ; utilisez un seul système de manière cohérente",
+      "suggestion": "Convertissez toutes les quantités en unités métriques ou toutes en unités impériales"
+    },
+    "revision_cost_impact_review": {
+      "fail": "L'incidence financière de la révision, soit {amount}, n'est pas encore enregistrée comme modification",
+      "suggestion": "Créez une demande de modification à l'état de brouillon depuis cette comparaison de révisions pour suivre l'évolution du coût"
+    },
+    "base_date_readable": {
+      "fail": "La date de référence « {base_date} » n'est pas une date valide ; le bordereau utilise donc le taux fiscal d'aujourd'hui plutôt que celui de sa date de référence",
+      "suggestion": "Indiquez la date de référence des prix sous forme de jour, mois, trimestre ou année ({shapes})"
+    },
+    "tax_date_readable": {
+      "fail": "La date fiscale « {tax_date} » n'est pas une date valide ; le bordereau utilise donc le taux fiscal d'aujourd'hui plutôt que celui de sa date fiscale",
+      "suggestion": "Indiquez la date fiscale sous forme de jour, mois, trimestre ou année ({shapes}), ou effacez-la pour appliquer la fiscalité à la date de référence du bordereau"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import depuis {format} : le poste {ordinal}, {field} n'est pas arrivé intact (fichier : {original}, métré : {written})",
+      "fail_export": "Export vers {format} : le poste {ordinal}, {field} n'est pas parti intact (métré : {original}, fichier : {written})",
+      "suggestion": "Ouvrez le rapport d'échange de ce fichier, corrigez la ligne ou la source, puis recommencez l'échange"
+    }
+  },
+  "din276": {
+    "cost_group_required": {
+      "fail": "Le poste {ordinal} n'a pas de groupe de coûts DIN 276 (KG)",
+      "suggestion": "Attribuez un groupe de coûts DIN 276 à 3 chiffres (par exemple 330 pour les murs)"
+    },
+    "valid_cost_group": {
+      "fail": "Le code DIN 276 « {code} » du poste {ordinal} est invalide"
+    },
+    "hierarchy": {
+      "fail": "Poste {ordinal} : le KG {child} n'appartient pas au KG parent {parent} (préfixe attendu : « {prefix} »)",
+      "suggestion": "Déplacez le poste sous le bon parent ou adaptez son code KG à la hiérarchie du parent ({prefix}xx)"
+    },
+    "completeness": {
+      "fail": "Le groupe KG {group} — {group_name} est absent du bordereau",
+      "suggestion": "Ajoutez des postes pour le KG {group} ({group_name}) afin d'assurer une couverture complète"
+    }
+  },
+  "gaeb": {
+    "ordinal_format": {
+      "fail": "Le numéro « {ordinal} » ne respecte pas le masque GAEB OZ-Maske de ce fichier",
+      "suggestion": "Utilisez le masque OZ-Maske du fichier, par exemple 001.001.0010 ou 01.02.0030"
+    },
+    "lv_structure": {
+      "fail": "Poste {ordinal} : ce poste terminal n'a pas de section parente ; la hiérarchie GAEB LV exige un parent Leistungsgruppe",
+      "suggestion": "Rattachez ce poste à une section parente (Leistungsgruppe / Titel)"
+    },
+    "einheitspreis_sanity": {
+      "negative": "Poste {ordinal} : le prix unitaire Einheitspreis {rate} est négatif (unité='{unit}') ; un prix négatif ne peut pas être transféré au format GAEB",
+      "zero": "Poste {ordinal} : le prix unitaire Einheitspreis est de 0,00 (unité='{unit}') ; confirmez qu'il s'agit d'un prix proposé nul et non d'un prix manquant",
+      "suggestion": "Indiquez un prix unitaire Einheitspreis positif, ou marquez le poste comme Bedarfsposition (prestation optionnelle) ou forfaitaire (unité='lsum')"
+    },
+    "trade_section_code": {
+      "fail": "La section de premier niveau « {ordinal} » n'a pas de code GAEB Leistungsbereich (code de corps d'état à 3 chiffres attendu, par exemple « 012 »)",
+      "suggestion": "Ajoutez un code de corps d'état à 3 chiffres (Leistungsbereich) à la section, par exemple « 012 » pour les terrassements et « 013 » pour la maçonnerie"
+    },
+    "quantity_decimals": {
+      "fail": "Poste {ordinal} : la quantité {quantity} comporte {decimals} décimales ; la convention GAEB X83 en autorise au maximum 3",
+      "suggestion": "Arrondissez la quantité à 3 décimales au maximum conformément à GAEB X83"
+    }
+  },
+  "nrm": {
+    "classification_required": {
+      "fail": "Le poste {ordinal} n'a pas de code d'élément NRM",
+      "suggestion": "Attribuez un code d'élément NRM 1/2 (par exemple 2.6.1 pour les murs extérieurs)"
+    },
+    "valid_element": {
+      "fail": "Le code NRM « {code} » du poste {ordinal} est invalide"
+    },
+    "completeness": {
+      "fail": "Le groupe NRM {group} — {group_name} est absent du bordereau",
+      "suggestion": "Ajoutez des postes pour le groupe NRM {group} ({group_name})"
+    },
+    "base_date_declared": {
+      "fail": "Le plan de coûts n'indique pas la date de référence de ses prix",
+      "suggestion": "Enregistrez la date de référence sur le bordereau. Sans elle, il est impossible de savoir si un prix est périmé ou quelle inflation reste à ajouter"
+    },
+    "cost_plan_stage_declared": {
+      "fail": "Le plan de coûts n'indique pas la phase de conception pour laquelle il a été établi",
+      "suggestion": "Indiquez la phase. La précision attendue d'un plan de coûts dépend de sa phase d'élaboration ; l'omettre entraîne des attentes erronées"
+    },
+    "contractor_costs_present": {
+      "preliminaries": "Le plan de coûts ne comprend pas les frais de chantier de l'entreprise principale, ni dans le groupe {group} ni dans une ligne de majoration",
+      "overheads_and_profit": "Le plan de coûts ne comprend pas les frais généraux et le bénéfice de l'entreprise principale, ni dans le groupe {group} ni dans une ligne de majoration",
+      "suggestion": "Ajoutez-les comme élément d'un groupe NRM ou comme majoration des travaux mesurés. Les deux méthodes conviennent ; leur omission rend le coût des travaux incomplet"
+    },
+    "risk_allowance_present": {
+      "fail": "Le plan de coûts ne comprend aucune provision pour risques",
+      "suggestion": "Ajoutez une provision pour risques dans le groupe NRM 13 ou dans une ligne de provision. Sans elle, le plan de coûts présente une estimation ponctuelle comme une certitude"
+    }
+  },
+  "masterformat": {
+    "classification_required": {
+      "fail": "Le poste {ordinal} n'a pas de code MasterFormat",
+      "suggestion": "Attribuez un code MasterFormat (par exemple 03 30 00 pour le béton coulé en place)"
+    },
+    "valid_division": {
+      "fail": "Le code MasterFormat « {code} » du poste {ordinal} est invalide",
+      "suggestion": "Utilisez le format MasterFormat à 6 chiffres : XX XX XX (par exemple 03 30 00)"
+    },
+    "completeness": {
+      "fail": "La division {division} — {division_name} est absente du bordereau",
+      "suggestion": "Ajoutez des postes pour la division {division} ({division_name})"
+    }
+  },
+  "sinapi": {
+    "code_required": {
+      "fail": "Le poste {ordinal} n'a pas de code SINAPI",
+      "suggestion": "Attribuez un code de composition SINAPI (par exemple 87878 pour le béton C30)"
+    },
+    "valid_code": {
+      "fail": "Le code SINAPI « {code} » du poste {ordinal} est invalide"
+    }
+  },
+  "nbr": {
+    "classification_required": {
+      "fail": "Le poste {ordinal} n'a pas de section NBR 12721",
+      "suggestion": "Attribuez une section NBR 12721 au poste (S1 = preliminares, S2 = infra-estrutura, ..., S11 = serviços complementares)"
+    },
+    "valid_section": {
+      "fail": "La section NBR 12721 « {code} » du poste {ordinal} n'appartient pas à la plage S1..S11",
+      "suggestion": "Utilisez les codes S1 à S11 (par exemple S3 pour supra-estrutura)"
+    }
+  },
+  "gesn": {
+    "code_required": {
+      "fail": "Le poste {ordinal} n'a pas de code ГЭСН/ФЕР",
+      "suggestion": "Attribuez un code ГЭСН (par exemple 06-01-001-01 pour le béton)"
+    },
+    "valid_code": {
+      "fail": "Le code ГЭСН « {code} » ne respecte pas le format XX-XX-XXX-XX",
+      "suggestion": "Utilisez le format NN-NN-NNN-NN (par exemple 06-01-001-01)"
+    },
+    "resource_breakdown": {
+      "fail": "Le poste {ordinal} cite la norme {code}, mais ne comporte aucune décomposition des ressources",
+      "suggestion": "Importez les quantités de main-d'œuvre, de matériel et de matériaux de la norme, ou justifiez les écarts de cette ligne"
+    },
+    "labour_hours_present": {
+      "fail": "La décomposition des ressources du poste {ordinal} ({code}) ne comporte aucune heure de main-d'œuvre",
+      "suggestion": "Ajoutez les heures de main-d'œuvre prévues par la norme ; les frais généraux et le bénéfice estimé sont calculés sur la masse salariale et ne peuvent pas être calculés sans elles"
+    },
+    "price_level_declared": {
+      "fail": "L'estimation n'indique pas le niveau de prix de ses montants",
+      "suggestion": "Indiquez le niveau de prix (une date) et l'indice de conversion appliqué pour permettre au vérificateur de retrouver le même total"
+    }
+  },
+  "dpgf": {
+    "lot_required": {
+      "fail": "Le poste {ordinal} n'est affecté à aucun lot technique",
+      "suggestion": "Attribuez un lot technique (par exemple Lot 01 Gros Œuvre)"
+    },
+    "pricing_complete": {
+      "fail": "Seuls {priced}/{total} postes ({percent}) sont chiffrés, en dessous du seuil de 80%",
+      "suggestion": "Complétez le chiffrage de tous les postes avant de remettre la DPGF"
+    }
+  },
+  "onorm": {
+    "position_format": {
+      "fail": "Le numéro « {ordinal} » ne respecte pas le format ÖNORM XX.XX.XXXXA",
+      "suggestion": "Utilisez le format ÖNORM B 2063 (par exemple 01.02.01A)"
+    },
+    "description_length": {
+      "fail": "Poste {ordinal} : description trop courte ({length} caractères, minimum 20)",
+      "suggestion": "Précisez la description du poste conformément à ÖNORM B 2063"
+    }
+  },
+  "gbt50500": {
+    "code_required": {
+      "fail": "Le poste {ordinal} n'a pas de code GB/T 50500",
+      "suggestion": "Attribuez un code GB/T 50500 à 9 chiffres (par exemple 010101001)"
+    },
+    "valid_code": {
+      "fail": "Le code GB/T 50500 « {code} » est invalide : 9 ou 12 chiffres attendus"
+    }
+  },
+  "cpwd": {
+    "code_required": {
+      "fail": "Le poste {ordinal} n'a pas de code CPWD/DSR",
+      "suggestion": "Attribuez une référence d'article CPWD DSR (par exemple 4.1.1)"
+    },
+    "measurement_units": {
+      "fail": "L'unité « {unit} » du poste {ordinal} n'est pas conforme à IS 1200",
+      "suggestion": "Utilisez les unités normalisées IS 1200 : m, m2, m3, kg, nos, rm, etc."
+    }
+  },
+  "hungary": {
+    "item_code_required": {
+      "fail": "Le poste {ordinal} ne comporte aucun code d'article hongrois",
+      "invalid": "Le code d'article « {code} » du poste {ordinal} ne correspond à aucune des deux nomenclatures",
+      "suggestion": "Les travaux de bâtiment utilisent MA-CC-SS-II (chapitres 01 à 17) ; les infrastructures utilisent le numéro d'article à six ou sept chiffres du dictionnaire de codes du projet"
+    },
+    "chapter_recognised": {
+      "fail": "Le chapitre {chapter} du poste {ordinal} ne figure pas parmi les dix-sept chapitres de la nomenclature"
+    },
+    "material_fee_split": {
+      "fail": "Poste {ordinal} : les matériaux {material} et les frais {fee} ne totalisent pas le prix {rate}",
+      "suggestion": "Corrigez les prix unitaires des matériaux et des frais, ou le prix total, pour réconcilier la décomposition"
+    },
+    "item_number_unique": {
+      "fail": "Le numéro d'article {number} est utilisé sur {count} postes alors qu'il doit en identifier un seul",
+      "suggestion": "Attribuez à chaque poste un numéro d'article propre au projet avant d'envoyer le bordereau au client"
+    }
+  },
+  "prezzario": {
+    "voce_code_format_valid": {
+      "fail": "Le code « {code} » du poste {ordinal} n'identifie pas le catalogue de prix dont il provient",
+      "suggestion": "Un code voce officiel commence par la région et l'année d'édition du catalogue, par exemple TOS25_01.A03.001.001 (Toscana 2025). Recopiez exactement le code du catalogue régional, importez la ligne depuis ce catalogue ou numérotez un nouveau prix NP.01"
+    },
+    "voce_reference_present": {
+      "fail": "Le poste {ordinal} ne cite aucune voce du prezzario",
+      "suggestion": "Choisissez la ligne dans un catalogue régional importé, ou indiquez qu'il s'agit d'un nuovo prezzo (NP) justifié par une analyse de prix"
+    },
+    "costi_sicurezza_separated": {
+      "fail": "Le bordereau ne comporte aucune ligne distincte pour les coûts de sécurité non soumis au rabais de l'offre",
+      "suggestion": "Ajoutez les oneri della sicurezza dans une section ou une majoration distincte, chiffrés à partir du chapitre sécurité du catalogue ou du plan de sécurité"
+    },
+    "incidenza_manodopera_documented": {
+      "fail": "Le poste {ordinal} ({code}) n'indique pas sa part de main-d'œuvre",
+      "suggestion": "Reprenez l'incidenza della manodopera du catalogue ou ajoutez une ressource de main-d'œuvre pour en indiquer séparément le coût dans l'offre"
+    },
+    "overheads_not_applied_twice": {
+      "fail": "Les prix des catalogues régionaux incluent déjà les frais généraux (13–17%) et le bénéfice (10%). Les appliquer à nouveau augmente le total d'environ {percent}%.",
+      "suggestion": "Supprimez les majorations de frais généraux et de bénéfice de ce bordereau, ou conservez-les uniquement sur les lignes chiffrées par votre propre analyse (NP)."
+    }
+  },
+  "romania": {
+    "deviz_chapter_required": {
+      "fail": "Le poste {ordinal} n'indique aucun chapitre du deviz general",
+      "suggestion": "Classez la ligne dans son chapitre et sous-chapitre HG 907/2016, par exemple 4.1 pour les travaux de construction et d'installation ou 5.1 pour l'organisation du chantier"
+    },
+    "deviz_chapter_recognised": {
+      "fail": "Le code deviz « {code} » du poste {ordinal} n'est ni un chapitre ni un sous-chapitre du deviz general",
+      "suggestion": "Utilisez un code des chapitres 1 à 6 du deviz general HG 907/2016, comme 1.2, 2, 3.5, 4.1, 5.1 ou 6.2"
+    }
+  },
+  "greece": {
+    "net_article_required": {
+      "fail": "Le poste {ordinal} ne comporte aucun article du catalogue de prix unifié (ΝΕΤ)",
+      "suggestion": "Indiquez l'article ΝΕΤ utilisé pour chiffrer la ligne, par exemple ΟΙΚ 32.01.06, ou ΝΑΟΙΚ pour un nouvel article"
+    },
+    "net_article_valid": {
+      "invalid": "L'article « {code} » du poste {ordinal} ne respecte pas le format d'un article ΝΕΤ",
+      "chapter": "L'article « {code} » du poste {ordinal} relève du chapitre {chapter}, absent du catalogue de prix des travaux de bâtiment",
+      "suggestion": "Indiquez le préfixe du catalogue et le numéro d'article, par exemple ΟΙΚ 38.20.02, ΟΔΟ Α-2 ou ΑΤΗΕ 8151.1"
+    }
+  },
+  "ukraine": {
+    "zkr_chapter_required": {
+      "fail": "Le poste {ordinal} n'indique aucun chapitre de l'estimation récapitulative",
+      "suggestion": "Classez la ligne dans son chapitre du зведений кошторисний розрахунок, de 1 à 12 ; les travaux du bâtiment principal relèvent du chapitre 2"
+    },
+    "zkr_chapter_recognised": {
+      "fail": "Le chapitre {chapter} du poste {ordinal} ne figure pas parmi les douze chapitres de l'estimation récapitulative",
+      "suggestion": "Utilisez un numéro de chapitre de 1 à 12"
+    }
+  },
+  "birimfiyat": {
+    "code_required": {
+      "fail": "Le poste {ordinal} n'a pas de numéro de position birim fiyat",
+      "suggestion": "Attribuez un numéro de position Bayındırlık (par exemple 04.013/1)"
+    },
+    "valid_poz": {
+      "fail": "La position « {code} » ne correspond ni au format actuel du recueil de prix unitaires (XX.XXX.XXXX) ni à l'ancien format (XX.XXX/X)",
+      "suggestion": "Utilisez le numéro du recueil, par exemple 15.140.1002, ou 04.013/1 pour un ancien contrat ; numérotez vos propres prix analysés sous la forme ÖZEL-1"
+    },
+    "chapter_recognised": {
+      "fail": "Le poz '{code}' de la position {ordinal} commence par {chapter}, qui n'est pas un chapitre d'un bordereau de prix unitaires connu de ce contrôle",
+      "suggestion": "Le recueil du Ministère numérote les travaux de bâtiment 15, les installations mécaniques 25 et les installations électriques 35, les prix de ressources sous 10 et les analyses de matériel sous 19. Vérifier le numéro par rapport au bordereau d'origine, ou numéroter son propre article ÖZEL-1"
+    },
+    "unit_recognised": {
+      "fail": "L'unité '{unit}' de la position {ordinal} n'est pas une unité de mesure des bordereaux de prix unitaires",
+      "suggestion": "Utiliser l'unité donnée par le bordereau pour l'article, par exemple m, m², m³, Ad, Tk, Kg, Ton, Sa"
+    },
+    "poz_unit_consistent": {
+      "fail": "Le poz '{code}' est mesuré dans {count} unités différentes dans ce bordereau ({units})",
+      "suggestion": "Un numéro poz est défini dans une seule unité. Ramener les lignes à l'unité du bordereau, ou donner un numéro propre à l'ouvrage différent"
+    },
+    "poz_rate_consistent": {
+      "fail": "Le poz '{code}' est chiffré à {count} prix unitaires différents dans ce bordereau ({rates})",
+      "suggestion": "Un numéro poz a un seul prix unitaire dans un bordereau. Utiliser un seul prix, ou numéroter l'article différent à part comme article propre"
+    },
+    "own_item_analysed": {
+      "fail": "L'article propre '{code}' de la position {ordinal} n'a pas de sous-détail de prix",
+      "suggestion": "Un article absent du bordereau est chiffré par son propre sous-détail de prix. Ajouter les ressources main-d'œuvre, matériaux et matériel sous la ligne, ou écrire le sous-détail dans sa note"
+    },
+    "profit_overhead_once": {
+      "fail": "Le bénéfice et les frais généraux de l'entreprise sont appliqués sur {count} lignes, {total} pour cent au total, au-dessus des {limit} pour cent uniques",
+      "suggestion": "Les 25 pour cent ne s'ajoutent qu'une fois. Garder une seule ligne, et la supprimer entièrement quand les prix sont des prix unitaires publiés, qui les contiennent déjà"
+    },
+    "unit_matches_poz_definition": {
+      "fail": "Le poz « {code} » du poste {ordinal} est métré en « {unit} », mais le recueil de prix unitaires installé le définit en « {book_unit} »",
+      "suggestion": "Un numéro de poz est défini dans une seule unité. Métrez la ligne dans l'unité du recueil, ou numérotez le travail différent comme un article propre (ÖZEL-1)",
+      "not_installed": "La base nationale de prix unitaires ({region}) n'est pas installée, donc les unités et les prix de {count} numéros de poz n'ont pas été comparés au recueil publié. Chargez-la depuis la page d'import de la base de coûts",
+      "unavailable": "La base nationale de prix unitaires ({region}) n'a pas pu être lue, donc les unités et les prix de {count} numéros de poz n'ont pas été comparés au recueil publié"
+    },
+    "unit_rate_within_published_price": {
+      "below": "Poz « {code} » du poste {ordinal} : le prix {rate} est inférieur de {percent} pour cent au prix publié de {published} dans le recueil de prix unitaires installé",
+      "above": "Poz « {code} » du poste {ordinal} : le prix {rate} est supérieur de {percent} pour cent au prix publié de {published} dans le recueil de prix unitaires installé",
+      "fail": "Cet écart dépasse les {limit} pour cent fixés pour ce contrôle",
+      "suggestion": "La comparaison utilise la base de prix unitaires installée ici, qui n'enregistre pas l'année de son recueil. Les prix publiés des chapitres bâtiment, mécanique et électricité contiennent déjà {markup} pour cent de bénéfice de l'entreprise et de frais généraux. Un prix inférieur au prix publié est courant après un rabais d'appel d'offres ; vérifiez que l'écart est voulu",
+      "repriced": "La base nationale de prix unitaires ({region}) a été basculée vers un autre marché ou une autre devise, donc les prix n'ont pas été comparés aux prix publiés. Remettez la base sur son marché d'origine pour lancer ce contrôle",
+      "currency_differs": "Les prix de {count} lignes sont en {currency} alors que le recueil de prix unitaires est en {book_currency}, donc ils n'ont pas été comparés aux prix publiés",
+      "currency_unknown": "La devise de {count} lignes n'est pas enregistrée, donc leurs prix n'ont pas été comparés aux prix publiés en {book_currency}"
+    }
+  },
+  "turkey": {
+    "kdv_rate_in_force": {
+      "fail": "La ligne de taxe '{line}' applique la KDV à {rate} pour cent, un taux que la loi turque ne prévoit pas ; la KDV est de 20, 10 ou 1 pour cent",
+      "fail_superseded": "La ligne de taxe '{line}' applique la KDV à {rate} pour cent, un taux remplacé le 10 juillet 2023 ; la KDV est désormais de 20, 10 ou 1 pour cent",
+      "suggestion": "Réglez la ligne KDV sur 20 pour cent, ou sur 10 ou 1 pour cent lorsque la fourniture y est éligible, ou sur 0 pour une fourniture exonérée"
+    }
+  },
+  "sekisan": {
+    "code_required": {
+      "fail": "Le poste {ordinal} n'a pas de code 積算",
+      "suggestion": "Attribuez un code d'article 積算基準"
+    },
+    "metric_units": {
+      "fail": "L'unité « {unit} » du poste {ordinal} n'est pas normalisée",
+      "suggestion": "Utilisez les unités métriques normalisées : m, m2, m3, kg, t, 式, etc."
+    }
+  },
+  "bc3": {
+    "code_required": {
+      "fail": "Le poste {ordinal} n'a pas de code de concept FIEBDC-3",
+      "suggestion": "Attribuez un code FIEBDC-3 (par exemple E04CM040 ou 01.02.01)"
+    },
+    "valid_code": {
+      "fail": "Le code FIEBDC-3 « {code} » du poste {ordinal} est invalide",
+      "suggestion": "Utilisez le format alphanumérique FIEBDC-3 (par exemple E04CM040, 01.02.01, CAP01#)"
+    }
+  },
+  "mexico": {
+    "apu_completeness": {
+      "fail": "L'analyse de prix unitaires APU du poste {ordinal} est incomplète ; composantes de coût manquantes : {missing}",
+      "suggestion": "Ajoutez les composantes manquantes du coût direct (mano de obra, materiales, maquinaria) à l'analyse de prix unitaires"
+    },
+    "iva_rate_valid": {
+      "fail": "Le taux d'IVA {rate} du poste {ordinal} est invalide ; l'IVA mexicaine est de 16, 8 (zone frontalière) ou 0 pour cent",
+      "suggestion": "Définissez le taux d'IVA à 16 pour cent (normal), 8 pour cent (zone frontalière) ou 0 pour cent"
+    },
+    "subcontract_retencion": {
+      "fail": "Le poste de sous-traitance {ordinal} n'indique pas si les retenues IVA/ISR s'appliquent",
+      "suggestion": "Enregistrez les retenues IVA et ISR de la ligne de sous-traitance, ou indiquez qu'aucune ne s'applique"
+    },
+    "cfdi_rfc_present": {
+      "missing": "Les données de l'émetteur CFDI sont incomplètes pour l'export de l'offre ; données manquantes : {missing}",
+      "invalid_rfc": "Le RFC « {rfc} » n'est pas un RFC CFDI valide (12 caractères pour une société, 13 pour un particulier)",
+      "suggestion": "Renseignez le RFC de l'émetteur, le regimen fiscal et l'uso CFDI dans le profil du projet pour la facturation CFDI 4.0"
+    }
+  },
+  "pipeline": {
+    "side_effecting_requires_gate": {
+      "fail": "Nœud(s) produisant des effets de bord sans contrôle préalable : {nodes}",
+      "suggestion": "Ajoutez un contrôle de validation ou d'approbation humaine sur chaque chemin allant d'un déclencheur ou d'un nœud IA à chaque nœud d'écriture avant de publier."
+    }
+  },
+  "property_dev": {
+    "escrow_account_required": {
+      "fail": "L'opération immobilière nécessite un compte séquestre actif pour le régulateur « {regulator} »",
+      "suggestion": "Ouvrez un compte séquestre auprès d'une banque agréée par le régulateur dans Conformité → Comptes séquestres"
+    },
+    "escrow_iban_valid": {
+      "fail": "Compte séquestre {account} : l'IBAN « {iban} » échoue au contrôle structurel ISO 13616",
+      "suggestion": "Corrigez l'IBAN : code pays, longueur et clé de contrôle doivent respecter ISO 13616"
+    },
+    "escrow_balance_reconciled": {
+      "fail": "Compte séquestre {account} : le solde comptable {ledger} présente un écart de {drift} par rapport à la somme des transactions {transactions}",
+      "suggestion": "Rapprochez le compte séquestre ; recherchez des encaissements non enregistrés ou des débits manquants"
+    },
+    "sales_contract_party_ownership_sums_to_100": {
+      "fail": "Contrat {contract} : les quotes-parts de propriété totalisent {total}% (exactement 100% requis)",
+      "suggestion": "Ajustez les pourcentages des parties pour obtenir un total de 100,00%"
+    },
+    "payment_schedule_instalments_sum_to_contract_value": {
+      "fail": "Contrat {contract} : le total des échéances {instalments} diffère du montant du contrat {contract_value} (écart {drift})",
+      "suggestion": "Rééquilibrez l'échéancier pour que la somme des échéances corresponde au montant total du contrat"
+    },
+    "reservation_expiry_in_future": {
+      "fail": "Réservation {reservation} : la date d'expiration expires_at {expires} n'est pas dans le futur",
+      "suggestion": "Prolongez la réservation ou passez-la à l'état expiré ou annulé"
+    },
+    "broker_commission_rate_within_bounds": {
+      "fail": "Convention de commission {agreement} : {issue}",
+      "suggestion": "Utilisez un taux compris entre 0,1% et 15%, un montant forfaitaire ou un barème par paliers non vide"
+    },
+    "price_matrix_no_negative_modifier": {
+      "fail": "Matrice de prix {matrix} : le multiplicateur {multiplier} de la règle « {factor} » est hors de l'intervalle [-0,50 ; 2,00]",
+      "suggestion": "Limitez les modificateurs entre -50% et +200% pour éviter des prix de parcelles irréalistes"
+    },
+    "escrow_release_within_progress": {
+      "fail": "Compte séquestre {account} : le montant libéré {released} dépasse le plafond {cap} (avancement certifié de {progress}% des fonds encaissés)",
+      "suggestion": "Suspendez les libérations suivantes jusqu'au prochain certificat d'avancement, ou enregistrez le certificat qui fait progresser l'avancement"
+    }
+  },
+  "schedule_5d": {
+    "boq_coverage": {
+      "fail": "Le poste {ordinal} « {description} » ({amount}) est chiffré dans le bordereau, mais aucune activité ne le porte, son coût n'est donc pas dans le planning",
+      "suggestion": "Donnez une quantité au poste ou rattachez-le à une activité, puis régénérez le planning."
+    },
+    "cost_reconciliation": {
+      "fail": "Le planning porte {planned} sur {bill} du bordereau : {difference} des travaux chiffrés ne figurent dans aucune activité",
+      "suggestion": "Vérifiez les postes listés par le contrôle de couverture, puis régénérez le planning."
+    },
+    "duration_vs_norm": {
+      "fail": "L'activité « {activity} » dure {duration} jours ouvrés, alors que les normes de main-d'œuvre et de matériel donnent {norm}",
+      "suggestion": "Vérifiez la quantité, l'équipe et les heures normées du poste, ou une durée modifiée à la main."
+    }
+  },
+  "schedule_quality": {
+    "open_ends": {
+      "fail": "L'activité « {activity} » n'a pas de liaison logique de type {ends} (extrémité ouverte / activité non rattachée)",
+      "both": "prédécesseur ou successeur",
+      "predecessor": "prédécesseur",
+      "successor": "successeur",
+      "suggestion": "Rattachez l'activité au réseau par des liaisons avec un prédécesseur et un successeur, ou définissez-la comme jalon de début ou de fin"
+    },
+    "negative_lag": {
+      "fail": "La liaison {predecessor} -> {successor} utilise un décalage négatif ({lag} jours), ce qui constitue une avance et fausse le chemin critique",
+      "suggestion": "Remplacez l'avance par une activité explicite ou une liaison début-début / fin-fin pour conserver un enchaînement justifiable"
+    },
+    "excessive_lag": {
+      "fail": "La liaison {predecessor} -> {successor} présente un décalage de {lag} jours, supérieur au seuil de {threshold} jours",
+      "suggestion": "Modélisez l'attente comme une activité distincte (approvisionnement, cure, approbation) afin de pouvoir suivre son état et niveler les ressources"
+    },
+    "hard_constraints": {
+      "fail": "L'activité « {activity} » a une contrainte de date impérative ({constraint}) qui prime sur la logique du réseau",
+      "suggestion": "Utilisez une contrainte souple (début au plus tôt) ou faites découler la date des liaisons pour que l'activité puisse se décaler en cas de retard des prédécesseurs"
+    },
+    "negative_float": {
+      "fail": "L'activité « {activity} » a une marge totale négative ({float} jours) ; le planning n'est donc pas réalisable avec ses liaisons actuelles",
+      "suggestion": "Réorganisez les travaux, assouplissez une contrainte impérative ou ajoutez un plan de rattrapage documenté pour ramener la marge à zéro ou plus"
+    },
+    "high_float": {
+      "fail": "L'activité « {activity} » a une marge totale très élevée ({float} jours), supérieure au seuil de {threshold} jours",
+      "suggestion": "Vérifiez s'il manque une liaison vers un successeur ; une marge élevée signale souvent une activité faiblement rattachée au réseau"
+    },
+    "missing_duration": {
+      "fail": "L'activité « {activity} » a une durée invalide ({duration} jours) pour une tâche qui n'est pas un jalon",
+      "suggestion": "Indiquez une durée positive en jours ouvrés, ou définissez la ligne comme jalon s'il s'agit bien d'un événement de durée nulle"
+    },
+    "duration_on_project_week": {
+      "fail": "L'activité « {activity} » est enregistrée avec une durée de {stored} jours ouvrés, comptés du lundi au vendredi entre {start} et {end} ; selon la semaine du projet, {calendar}, ces dates représentent {expected}",
+      "suggestion": "Enregistrez à nouveau les dates de l'activité pour recalculer sa durée selon la semaine de travail du projet, ou saisissez délibérément la durée"
+    },
+    "dates_match_source": {
+      "fail": "{activity} se termine à {days} jours d'écart de la fin du fichier importé ({source}).",
+      "suggestion": "Comparez les dates recalculées avec le fichier source, puis acceptez-les ou rétablissez les dates source."
+    }
+  },
+  "sheet_completeness": {
+    "missing": {
+      "fail": "La feuille {sheet} figure dans l'index des plans, mais pas dans le jeu téléversé",
+      "suggestion": "Téléversez la feuille manquante ou confirmez qu'elle a été retirée de cette diffusion"
+    },
+    "extra": {
+      "fail": "La feuille {sheet} figure dans le jeu téléversé, mais pas dans l'index des plans",
+      "suggestion": "Ajoutez-la à l'index ou au registre de diffusion, ou supprimez la feuille superflue"
+    },
+    "revision_mismatch": {
+      "fail": "La feuille {sheet} porte la révision {actual_rev}, alors que l'index attend {expected_rev}",
+      "suggestion": "Diffusez la révision attendue ou mettez l'index à jour avec la révision actuelle"
+    }
+  },
+  "procurement": {
+    "po_has_lines": {
+      "fail": "Ce bon de commande n'a aucune ligne ; son montant engagé n'est donc pas pris en compte",
+      "suggestion": "Ajoutez les articles commandés avant d'approuver le bon de commande"
+    },
+    "po_line_amount": {
+      "fail": "La ligne {line} totalise {actual}, alors que sa quantité multipliée par son prix unitaire donne {expected}",
+      "suggestion": "Corrigez la quantité, le prix unitaire ou le montant de la ligne pour assurer leur cohérence"
+    },
+    "po_subtotal_matches_lines": {
+      "fail": "Le sous-total est de {actual}, alors que la somme des lignes est de {expected}",
+      "suggestion": "Recalculez le sous-total à partir des lignes actuelles"
+    },
+    "po_total_matches_subtotal": {
+      "fail": "Le total est de {actual}, alors que le sous-total augmenté de la taxe est de {expected}",
+      "suggestion": "Recalculez le total pour qu'il corresponde au sous-total augmenté de la taxe"
+    },
+    "po_no_negative_line": {
+      "fail": "La ligne {line} a une quantité nulle ou négative, ou un prix unitaire négatif",
+      "suggestion": "Émettez un avoir pour une annulation au lieu d'utiliser une ligne négative"
+    },
+    "po_currency_set": {
+      "fail": "Ce bon de commande n'a pas de devise ; son montant ne peut donc être ni consolidé ni payé",
+      "suggestion": "Définissez la devise, généralement celle du projet"
+    },
+    "po_vendor_assigned": {
+      "fail": "Ce bon de commande ne désigne aucun fournisseur",
+      "suggestion": "Sélectionnez le fournisseur avant d'approuver l'engagement"
+    },
+    "po_retention_within_bounds": {
+      "fail": "La retenue de {percent}% est hors de la plage plausible de 0 à {max}%",
+      "suggestion": "Saisissez la retenue en pourcentage, par exemple 5 pour cinq pour cent"
+    },
+    "po_delivery_after_issue": {
+      "fail": "La livraison est prévue le {delivery}, avant la date d'émission {issue}",
+      "suggestion": "Fixez la livraison à la date d'émission ou à une date ultérieure"
+    },
+    "po_line_cost_coded": {
+      "fail": "La ligne {line} n'a ni WBS, ni catégorie de coût, ni ligne de coût ; elle n'apparaîtra donc pas dans la décomposition des coûts",
+      "suggestion": "Attribuez un code de coût pour rattacher l'engagement à un budget"
+    },
+    "invoice_within_order": {
+      "fail": "La facture {invoice} dépasse de {excess} le solde ouvert de {remaining} sur la commande {po}",
+      "suggestion": "Comparez la facture à la commande ; si le supplément a été convenu, enregistrez-le comme modification de la commande avant approbation"
+    },
+    "invoice_quantity_received": {
+      "fail": "La ligne {line} porterait la quantité totale facturée à {invoiced}, alors que seulement {received} ont été réceptionnés",
+      "suggestion": "Attendez le bon de livraison ou confirmez la réception avant d'approuver cette quantité"
+    },
+    "invoice_value_received": {
+      "fail": "Sur la commande {po}, les factures totaliseraient {invoiced}, alors que les marchandises réceptionnées ne valent que {received} aux prix de la commande",
+      "suggestion": "Attendez le bon de livraison ou confirmez la réception avant d'approuver ce montant"
+    },
+    "requisition_quantity_positive": {
+      "fail": "La ligne {line} demande {quantity}, mais une ligne de demande d'achat doit avoir une quantité supérieure à zéro",
+      "suggestion": "Saisissez la quantité nécessaire ou supprimez la ligne"
+    },
+    "requisition_source_unit": {
+      "fail": "La ligne {line} est en {unit} mais l'une de ses sources BOQ est en {source_unit}",
+      "suggestion": "Utilisez l'unité de la ressource BOQ, ou scindez la ligne pour que chaque unité soit sur sa propre ligne"
+    },
+    "requisition_needed_by_not_past": {
+      "fail": "La date de besoin {date} est déjà dépassée (aujourd'hui : {today})",
+      "suggestion": "Indiquez la date à laquelle le matériau est réellement nécessaire sur le chantier"
+    },
+    "requisition_vendor_in_directory": {
+      "fail": "Le fournisseur {vendor} n'est pas dans l'annuaire des fournisseurs",
+      "suggestion": "Choisissez le fournisseur dans l'annuaire des fournisseurs"
+    },
+    "requisition_vendor_active": {
+      "fail": "Le fournisseur {vendor} n'est pas actif dans l'annuaire des fournisseurs, on ne peut donc rien lui commander",
+      "suggestion": "Choisissez un fournisseur actif, ou réactivez d'abord celui-ci dans l'annuaire des fournisseurs"
+    },
+    "requisition_vendor_chosen": {
+      "fail": "La demande de matériaux {req} ne désigne aucun fournisseur, alors qu'un bon de commande en exige un",
+      "suggestion": "Choisissez le fournisseur dans l'annuaire des fournisseurs avant de convertir"
+    },
+    "requisition_single_currency": {
+      "fail": "La demande de matériaux {req} a des lignes chiffrées en {currencies}, mais un bon de commande ne porte qu'une devise",
+      "suggestion": "Chiffrez toutes les lignes dans une seule devise, ou répartissez les lignes en demandes distinctes"
+    },
+    "requisition_line_cost_line": {
+      "fail": "La ligne {line} n'est pas liée à une ligne de coût, sa commande n'apparaîtra donc pas comme engagée sur le budget",
+      "suggestion": "Créez la ligne depuis le BOQ, ou liez-la à une ligne de coût avant de commander"
+    },
+    "requisition_suggested_vendor_in_directory": {
+      "fail": "La ligne {line} suggère le fournisseur {vendor}, qui n'est pas dans l'annuaire des fournisseurs",
+      "suggestion": "Choisissez le fournisseur suggéré dans l'annuaire des fournisseurs, ou supprimez la suggestion"
+    },
+    "requisition_suggested_vendor_active": {
+      "fail": "La ligne {line} suggère {vendor}, un fournisseur qui n'est pas actif dans l'annuaire des fournisseurs",
+      "suggestion": "Suggérez un fournisseur actif, ou laissez le choix à l'acheteur"
+    },
+    "requisition_suggestion_conflict": {
+      "fail": "Les sources BOQ de la ligne {line} suggèrent {count} fournisseurs différents",
+      "suggestion": "Choisissez un seul fournisseur pour la ligne, ou scindez-la pour que chaque fournisseur ait sa propre ligne"
+    },
+    "requisition_suggested_vendor_differs": {
+      "fail": "La ligne {line} suggère {vendor}, mais la demande d'achat doit être commandée chez un autre fournisseur",
+      "suggestion": "Vérifiez que le fournisseur choisi peut livrer cette ligne, ou commandez-la séparément"
+    },
+    "requisition_line_needed_by_not_past": {
+      "fail": "La ligne {line} est nécessaire pour le {date}, date déjà dépassée (aujourd'hui : {today})",
+      "suggestion": "Indiquez la date à laquelle le matériau est réellement nécessaire sur le chantier"
+    },
+    "requisition_line_schedule_moved": {
+      "fail": "La ligne {line} était prévue pour une tâche débutant le {anchor}, mais la tâche débute maintenant le {start}",
+      "suggestion": "Comparez la date de besoin de la ligne au planning actuel et modifiez-la si nécessaire"
+    },
+    "requisition_approver_not_requester": {
+      "fail": "La personne qui a créé la demande d'achat {req} est aussi son approbateur désigné numéro {step}",
+      "suggestion": "Désignez un autre approbateur pour cette étape, afin que la décision revienne à quelqu'un d'autre que le demandeur"
+    },
+    "requisition_line_over_ordered": {
+      "fail": "La ligne {line} compte {ordered} {unit} en commandes, soit plus que les {requested} {unit} demandées",
+      "suggestion": "Vérifiez si la quantité excédentaire est voulue, ou réduisez la ligne de commande"
+    },
+    "requisition_order_unit_mismatch": {
+      "fail": "La commande {order} reprend la ligne {line} en {unit}, ce qui ne peut pas être converti dans l'unité de la ligne {line_unit}",
+      "suggestion": "Corrigez l'unité sur la ligne de commande pour que sa quantité compte comme commandée"
+    },
+    "requisition_sources_reconcile": {
+      "fail": "La ligne {line} demande {quantity} {unit}, mais ses sources BOQ totalisent {sources} {unit}",
+      "suggestion": "Fixez la quantité à la somme de ses sources, ou retirez les sources que la ligne ne couvre pas"
+    },
+    "requisition_over_allocated": {
+      "fail": "La ligne {line} réclame {excess} {unit} de plus que le BOQ n'en requiert ({demand} {unit} au total, dont {covered} {unit} déjà retenus par d'autres demandes d'achat)",
+      "suggestion": "Réduisez la quantité, ou indiquez un motif sur la ligne si le surplus est voulu"
+    },
+    "receipt_certificate_present": {
+      "fail": "La ligne {line} a été commandée avec {required}, mais la livraison comporte {delivered}",
+      "suggestion": "Joignez le certificat exigé par la commande, ou refusez la ligne tant que le fournisseur ne l'a pas transmis"
+    },
+    "receipt_certificate_batch": {
+      "fail": "Le certificat {certificate} de la ligne {line} concerne le lot {certificate_batch}, or c'est le lot {batch} qui a été livré",
+      "suggestion": "Vérifiez le numéro de lot ou de coulée sur le matériau et demandez au fournisseur le certificat du lot reçu"
+    },
+    "receipt_route_approved": {
+      "fail": "Le bon de réception {receipt} de la commande {po} est en circuit de validation et n'est pas encore validé",
+      "suggestion": "Attendez la fin du circuit de validation du bon de réception avant de libérer le paiement"
+    },
+    "receipt_inspection_closed": {
+      "fail": "Le contrôle à réception du bon de réception {receipt} de la commande {po} n'est pas encore validé",
+      "suggestion": "Terminez le contrôle, ou consignez la raison pour laquelle le matériau peut être payé avant"
+    }
+  },
+  "subcontract": {
+    "agreement_has_scope": {
+      "fail": "Ce contrat ne comporte aucun lot de travaux ; une demande de paiement ne peut donc se rattacher à aucune prestation",
+      "suggestion": "Décomposez les prestations contractuelles en lots de travaux avant d'activer le contrat"
+    },
+    "package_scope_described": {
+      "fail": "Le lot de travaux {package} porte un nom, mais ne décrit pas les travaux qu'il couvre",
+      "suggestion": "Décrivez ce que comprend le lot pour disposer d'une référence en cas de désaccord ultérieur sur une modification"
+    },
+    "agreement_value_positive": {
+      "fail": "Le montant du contrat est de {value} ; la retenue et la décomposition des valeurs n'ont donc aucune base de calcul",
+      "suggestion": "Saisissez le montant convenu avant d'activer le contrat"
+    },
+    "packages_within_value": {
+      "fail": "Les lots de travaux valent {planned}, mais le montant du contrat est de {total}",
+      "suggestion": "Réévaluez les lots ou augmentez le montant du contrat pour couvrir ses prestations"
+    },
+    "agreement_dates_ordered": {
+      "fail": "Le contrat se termine le {end}, avant son début le {start}",
+      "suggestion": "Corrigez la date de début ou de fin pour que la période contractuelle soit chronologique"
+    },
+    "agreement_currency_set": {
+      "fail": "Ce contrat n'a pas de devise ; les paiements correspondants ne peuvent donc être ni consolidés ni effectués",
+      "suggestion": "Définissez la devise, généralement celle du projet"
+    },
+    "retention_within_bounds": {
+      "fail": "La retenue de {percent}% est hors de la plage plausible de 0 à {max}%",
+      "suggestion": "Saisissez la retenue en pourcentage de chaque paiement et non sous forme de montant"
+    },
+    "insurance_valid_at_start": {
+      "fail": "L'assurance du sous-traitant a expiré le {expiry}, avant le début des travaux le {reference}",
+      "suggestion": "Obtenez une attestation en cours de validité avant d'autoriser le sous-traitant à intervenir sur le chantier"
+    },
+    "unlinked_contract_twin": {
+      "fail": "Le contrat de sous-traitance {agreement} et le contrat {contract} semblent correspondre au même engagement ; celui-ci pourrait donc être comptabilisé deux fois",
+      "suggestion": "Reliez-les s'il s'agit du même contrat de sous-traitance, ou indiquez qu'ils sont distincts"
+    },
+    "contact_linked": {
+      "fail": "Le contact {contact} n'est pas lié au répertoire des contacts, la même personne risque donc d'être saisie deux fois",
+      "suggestion": "Renseignez une adresse e-mail pour ce contact afin de pouvoir le rapprocher du répertoire"
+    }
+  },
+  "submittal": {
+    "reviewer_assigned": {
+      "fail": "Ce dossier soumis pour visa ne désigne aucun examinateur ; personne n'est donc chargé d'y répondre",
+      "suggestion": "Attribuez le dossier à l'examinateur chargé d'y répondre avant de le soumettre"
+    },
+    "required_date_present": {
+      "fail": "Ce dossier soumis pour visa n'a pas de date requise ; aucun retard ne peut donc être signalé",
+      "suggestion": "Fixez la date à laquelle l'examen est nécessaire en fonction des travaux qu'il permet de démarrer"
+    },
+    "required_date_after_submitted": {
+      "fail": "L'examen est requis le {required}, avant le dépôt du dossier le {submitted}",
+      "suggestion": "Reportez la date requise à un jour ouvré postérieur au dépôt"
+    },
+    "review_window_sufficient": {
+      "fail": "L'examinateur dispose de {days} jours, soit moins que les {minimum} jours normalement nécessaires",
+      "suggestion": "Prévoyez le délai d'examen habituel, ou convenez d'abord d'un délai plus court avec l'examinateur"
+    },
+    "spec_section_present": {
+      "fail": "Ce dossier soumis pour visa ne cite aucune section du cahier des charges ; le registre ne peut donc pas le classer",
+      "suggestion": "Indiquez la section du cahier des charges à laquelle répond ce dossier"
+    },
+    "approver_distinct_from_reviewer": {
+      "fail": "La même personne ({person}) examine et approuve le dossier ; il n'y a donc pas de second regard",
+      "suggestion": "Désignez un approbateur distinct de l'examinateur"
+    },
+    "linked_scope_present": {
+      "fail": "Ce dossier soumis pour visa n'est lié à aucune prestation ; il n'est donc rattaché à aucun lot dans les synthèses",
+      "suggestion": "Reliez les postes du bordereau couverts par ce dossier"
+    }
+  },
+  "rfq": {
+    "scope_described": {
+      "fail": "Cette demande ne décrit ni les prestations ni leur objet ; le fournisseur n'a donc rien à chiffrer",
+      "suggestion": "Décrivez les prestations avant publication pour obtenir des offres comparables"
+    },
+    "deadline_present": {
+      "fail": "Cette demande n'indique aucune date limite de remise ; la consultation ne se clôture donc jamais",
+      "suggestion": "Fixez la date et l'heure limites de réception des offres"
+    },
+    "deadline_parseable": {
+      "fail": "La date limite de remise {value} n'est pas interprétable par le système ; toutes les offres seront refusées",
+      "suggestion": "Saisissez une date limite valide, par exemple 2026-08-31"
+    },
+    "deadline_in_future": {
+      "fail": "La date limite de remise {deadline} est déjà dépassée au {today} ; la demande arrive donc déjà clôturée",
+      "suggestion": "Reportez la date limite à une date future avant publication"
+    },
+    "has_recipients": {
+      "fail": "Cette demande n'est adressée à aucun fournisseur ; sa publication ne notifiera donc personne",
+      "suggestion": "Ajoutez les fournisseurs destinataires de cette demande"
+    },
+    "currency_set": {
+      "fail": "Cette demande n'indique aucune devise ; les offres ne peuvent donc pas être comparées et classées",
+      "suggestion": "Définissez la devise dans laquelle les offres doivent être chiffrées"
+    },
+    "bid_currency_matches": {
+      "fail": "L'offre {bid} est chiffrée en {bid_currency}, mais la demande est en {rfq_currency}",
+      "suggestion": "Demandez au soumissionnaire une nouvelle offre dans la devise demandée, ou enregistrez la conversion convenue"
+    },
+    "bid_amounts_parseable": {
+      "fail": "Le montant {value} de l'offre {bid} n'est pas un nombre permettant son classement",
+      "suggestion": "Corrigez le montant de l'offre avant l'attribution"
+    },
+    "bids_still_valid": {
+      "fail": "L'offre {bid} a expiré le {expired} et nous sommes le {today} ; son prix n'est donc plus ferme",
+      "suggestion": "Demandez au soumissionnaire de confirmer son prix avant l'attribution"
+    },
+    "award_has_competition": {
+      "fail": "Cette attribution repose sur {count} offres, soit moins que les {minimum} nécessaires à une comparaison concurrentielle",
+      "suggestion": "Justifiez le recours à un fournisseur unique, ou consultez d'autres soumissionnaires"
+    }
+  },
+  "errors": {
+    "resource_not_found": "Ressource introuvable",
+    "project_not_found": "Projet introuvable",
+    "vendor_not_found": "Fournisseur introuvable",
+    "template_not_found": "Modèle introuvable",
+    "position_not_found": "Poste introuvable",
+    "boq_not_found": "Bordereau introuvable",
+    "session_not_found": "Session introuvable",
+    "document_not_found": "Document introuvable",
+    "documents_batch_delete_referenced": "D'autres enregistrements référencent encore des documents de ce lot. Examinez les liens que la suppression romprait et confirmez avec acknowledge_references.",
+    "invitation_not_found": "Invitation introuvable",
+    "agreement_not_found": "Contrat introuvable",
+    "rejection_not_found": "Rejet introuvable",
+    "claim_not_found": "Demande de paiement d'avancement introuvable",
+    "gaeb_x89_final_account_unsupported": "Un décompte final ou partiellement final ne peut pas encore être exporté en GAEB X89. Il doit facturer les travaux cumulés après déduction des paiements antérieurs, alors qu'une demande de paiement produit uniquement une facture d'avancement pour une période. Exportez la demande sous forme de facture d'avancement.",
+    "xpwe_native_file_refused": "Il s'agit d'un fichier de projet propre à un logiciel de chiffrage, que seul ce logiciel peut ouvrir. Exportez l'estimation au format XPWE depuis votre logiciel de chiffrage, puis téléversez le fichier .xpwe.",
+    "xpwe_unreadable": "Ce fichier ne peut pas être lu comme XPWE. Il est peut-être endommagé ou d'un autre type. Exportez de nouveau le devis en XPWE et chargez le fichier .xpwe.",
+    "plot_not_found": "Parcelle introuvable",
+    "survey_not_found": "Relevé par drone introuvable",
+    "diary_video_not_found": "Vidéo du journal introuvable",
+    "diary_photo_not_found": "Photo du journal introuvable",
+    "bidder_not_found": "Soumissionnaire introuvable",
+    "webhook_not_found": "Webhook introuvable",
+    "submission_not_found": "Dossier soumis introuvable",
+    "measurement_not_found": "Métré de chantier introuvable",
+    "salescontract_not_found": "Contrat de vente introuvable",
+    "prompt_not_found": "Modèle d'invite introuvable",
+    "prequalification_not_found": "Préqualification introuvable",
+    "purchase_requisition_not_found": "Demande d'achat introuvable",
+    "purchase_order_not_found": "Bon de commande introuvable",
+    "group_not_found": "Groupe introuvable",
+    "final_account_not_found": "Décompte final introuvable",
+    "estimate_job_not_found": "Tâche d'estimation introuvable",
+    "escrow_not_found": "Transaction de séquestre introuvable",
+    "commission_accrual_not_found": "Commission à comptabiliser introuvable",
+    "baseline_not_found": "Référence initiale introuvable",
+    "fx_rate_set_locked": "Les taux de la BCE du {date} sont verrouillés ; cette actualisation ne les a donc pas remplacés. Déverrouillez d'abord ce jeu de taux s'il doit reprendre la nouvelle publication.",
+    "boq_locked": "Le bordereau est verrouillé et ne peut pas être modifié. Créez une révision pour apporter des changements.",
+    "boq_link_owner_locked": "Le code « {code} » est défini par une ligne du bordereau verrouillé « {bill} » ; y rattacher une ligne modifierait ce bordereau. Déverrouillez-le d'abord ou saisissez la ligne sous un nouveau code."
+  },
+  "variations": {
+    "boq_lines_are_traced": {
+      "fail": "La ligne {line} du bordereau de cette modification n'est rattachée à aucune origine : ni ligne de la décomposition des valeurs ni poste d'estimation",
+      "suggestion": "Indiquez la ligne contractuelle concernée ou le poste d'estimation dont proviennent les prestations pour justifier le montant"
+    },
+    "boq_total_matches_estimate": {
+      "fail": "L'estimation affichée sur cette demande est de {estimate}, mais son bordereau chiffré totalise {priced}",
+      "suggestion": "Reportez le total chiffré sur la demande ou corrigez le bordereau pour obtenir un montant unique"
+    },
+    "change_kind_matches_numbers": {
+      "removed_positive": "La ligne {line} est marquée comme prestation supprimée, mais comporte une quantité positive de {quantity} ; une suppression doit être déduite du contrat par une quantité négative",
+      "added_negative": "La ligne {line} est marquée comme prestation ajoutée, mais comporte une quantité négative de {quantity} ; une prestation retirée du contrat est supprimée, non ajoutée",
+      "removed_needs_contract_line": "La ligne {line} est marquée comme prestation supprimée, mais n'est liée à aucune ligne de la décomposition des valeurs ; aucun poste contractuel ne peut donc être supprimé",
+      "modified_needs_contract_line": "La ligne {line} est marquée comme prestation modifiée, mais n'est liée à aucune ligne de la décomposition des valeurs ; aucun poste contractuel ne peut donc être modifié",
+      "suggestion": "Corrigez le type de modification ou la quantité dans la traçabilité de la ligne, ou indiquez la ligne contractuelle concernée"
+    }
+  },
+  "cases": {
+    "has_steps": {
+      "fail": "Ce cas ne comporte encore aucune étape ; le lecteur n'a donc aucun parcours à suivre.",
+      "suggestion": "Ajoutez au moins une étape indiquant l'écran à ouvrir et l'action à y effectuer."
+    },
+    "step_titled": {
+      "fail": "{count} étape(s) n'ont pas de titre ou d'écran à ouvrir.",
+      "suggestion": "Donnez un titre court à chaque étape et choisissez l'écran qu'elle ouvre."
+    },
+    "step_purpose": {
+      "fail": "{count} étape(s) sur {total} n'expliquent pas leur utilité ; le cas ressemble donc à une liste de clics plutôt qu'à une explication.",
+      "suggestion": "Ajoutez une phrase par étape pour expliquer son objectif ; c'est ce dont un nouvel utilisateur a besoin."
+    },
+    "distinct_screens": {
+      "fail": "{count} étape(s) ouvrent le même écran que l'étape précédente ; le lecteur ne voit aucun changement et ne peut pas les distinguer.",
+      "suggestion": "Fusionnez-les en une seule étape ou faites pointer la seconde vers l'écran où le travail se poursuit réellement."
+    },
+    "duration_plausible": {
+      "fail": "Ce cas prévoit {minutes} minute(s) pour {steps} étape(s). Un lecteur qui ne peut pas suivre ce rythme perd confiance dans le reste de l'estimation.",
+      "suggestion": "Portez l'estimation à au moins {minimum} minutes ou supprimez certaines étapes."
+    },
+    "described": {
+      "fail": "Ce cas n'a pas de résumé ; la liste affiche donc uniquement un titre.",
+      "suggestion": "Ajoutez une phrase indiquant ce que le lecteur aura accompli à la fin."
+    }
+  },
+  "uk": {
+    "contract_form_declared": {
+      "fail": "L'estimation n'indique pas la forme de contrat sur laquelle repose le chiffrage",
+      "suggestion": "Indiquez la forme de contrat. Les frais de chantier, les risques et les conditions de paiement se chiffrent différemment selon cette forme ; sans elle, le montant a peu de sens"
+    },
+    "payment_regime_declared": {
+      "fail": "Le mécanisme de paiement est incomplet : {missing} non renseigné",
+      "suggestion": "Renseignez les deux dates. Un contrat de construction qui ne les fixe pas n'en est pas exempté : le Scheme for Construction Contracts les fournit toutes deux. Les parties trouvent alors leurs conditions de paiement dans un texte réglementaire plutôt que dans le contrat signé"
+    },
+    "retention_declared": {
+      "fail": "L'estimation n'indique pas la retenue applicable",
+      "suggestion": "Indiquez le pourcentage de retenue et ses conditions de libération, ou précisez qu'aucune retenue ne s'applique. La retenue est une somme acquise à l'entreprise mais indisponible ; son omission masque un besoin de fonds de roulement"
+    },
+    "cdm_duty_holders_declared": {
+      "fail": "Les responsables au titre du CDM 2015 ne sont pas renseignés : {missing} manquant",
+      "suggestion": "Enregistrez les désignations. Lorsque plusieurs entreprises interviennent sur un projet, le maître d'ouvrage doit désigner par écrit un principal designer et un principal contractor ; à défaut, il assume lui-même ces obligations"
+    },
+    "hrb_regime_declared": {
+      "fail": "La qualification de bâtiment à risque accru n'est pas résolue : {reason}",
+      "unanswered": "l'estimation n'indique pas s'il s'agit d'un bâtiment à risque accru",
+      "disagrees": "l'estimation indique {declared} pour le risque accru, mais ses propres dimensions donnent {derived}",
+      "suggestion": "Un bâtiment est à risque accru s'il mesure au moins 18 m de haut ou compte au moins 7 niveaux ET contient au moins deux logements. Les deux conditions comptent : un bâtiment élevé sans logements n'est pas à risque accru ; le traiter comme tel impose inutilement un calendrier de procédures gateway"
+    },
+    "vat_treatment_declared": {
+      "fail": "L'estimation n'indique pas le traitement de la TVA",
+      "suggestion": "Indiquez le traitement : taux normal, taux réduit ou nul si les travaux y sont éligibles, ou autoliquidation nationale si la prestation en relève. L'autoliquidation transfère la TVA au client et modifie ce que l'entreprise peut facturer"
+    }
+  },
+  "project_completeness": {
+    "country_set": {
+      "fail": "Le projet n'indique aucun pays ; il est donc impossible de déterminer sa base de prix, son taux fiscal ou son calendrier de travail",
+      "suggestion": "Définissez le pays dans les paramètres du projet. Il détermine le pack régional, la fiscalité et le calendrier applicables aux montants"
+    },
+    "currency_set": {
+      "fail": "Le projet n'indique aucune devise ; ses bordereaux, majorations et contrats ne peuvent donc pas être additionnés",
+      "suggestion": "Choisissez la devise dans les paramètres du projet. Chaque bordereau et contrat, ainsi que chaque total, est exprimé dans cette devise"
+    },
+    "currency_matches_bill": {
+      "fail": "Le projet est chiffré en {project_currency}, mais des lignes de ce bordereau sont chiffrées en {bill_currencies}",
+      "suggestion": "Convertissez les lignes dans la devise du projet à un taux indiqué, ou enregistrez le taux de change du projet pour obtenir un total unique"
+    },
+    "priced_bill_present": {
+      "fail": "Le projet n'a aucun bordereau quantitatif contenant des postes ; il n'existe donc aucune base d'estimation",
+      "suggestion": "Créez un bordereau quantitatif et ajoutez des postes, ou importez-en un depuis une maquette CAO, un tableur ou un fichier d'échange"
+    },
+    "bill_base_date_set": {
+      "fail": "Le bordereau « {bill} » n'indique pas la date de référence de ses prix",
+      "suggestion": "Enregistrez la date de référence sur le bordereau. Sans elle, les prix ne peuvent être ni indexés, ni soumis à la fiscalité de leur date, ni comparés à une autre estimation"
+    },
+    "classification_standard_set": {
+      "fail": "Le projet n'a aucune norme de classification ; les codes de ses postes ne peuvent donc pas être vérifiés",
+      "suggestion": "Choisissez la norme de classification utilisée pour coder le projet. Elle détermine également les règles nationales exécutées lors de la validation"
+    },
+    "planned_dates_set": {
+      "both_missing": "Le projet n'a ni date de début prévue ni date de fin prévue",
+      "start_missing": "Le projet a une date de fin prévue, mais aucune date de début prévue",
+      "end_missing": "Le projet a une date de début prévue, mais aucune date de fin prévue",
+      "unreadable": "La date prévue « {value} » ne peut pas être interprétée comme une date",
+      "suggestion": "Saisissez les dates de début et de fin prévues du projet sous forme de dates. Elles délimitent le calcul des coûts liés au temps, de l'actualisation des prix et du planning"
+    },
+    "planned_dates_ordered": {
+      "fail": "Le projet est prévu du {start} au {end}, avec une fin antérieure au début",
+      "suggestion": "Inversez ou corrigez les dates prévues pour que le début précède la fin"
+    },
+    "client_recorded": {
+      "fail": "Le projet ne renseigne aucun client et aucun contrat ne désigne de maître d'ouvrage",
+      "suggestion": "Renseignez le client du projet ou ajoutez le maître d'ouvrage aux parties du contrat pour donner un destinataire à l'estimation"
+    },
+    "procurement_started": {
+      "fail": "Le projet est en phase {phase}, mais ne comporte ni contrat ni dossier d'appel d'offres",
+      "suggestion": "Créez un dossier d'appel d'offres à partir du bordereau, enregistrez le contrat ou ramenez la phase au stade d'estimation réel du projet"
+    }
+  },
+  "boq_resources": {
+    "unit_rate_not_rederived": {
+      "fail": "Poste {ordinal} : les lignes de ressources ne permettent pas de chiffrer le poste ; le prix unitaire n'a donc pas été recalculé à partir de ces lignes",
+      "fallback_allowance": "Poste {ordinal} : les lignes de ressources sont une répartition estimative portant la quantité du poste ; le prix unitaire n'a donc pas été recalculé à partir de ces lignes",
+      "assumed_norm": "Poste {ordinal} : les lignes de ressources utilisent des normes de consommation absentes du catalogue ; le prix unitaire n'a donc pas été recalculé à partir de ces lignes",
+      "norm_collapsed": "Poste {ordinal} : les lignes de ressources ont perdu leur norme de consommation du catalogue et portent à la place la quantité du poste ; le prix unitaire n'a donc pas été recalculé à partir de ces lignes",
+      "whole_position_quantities": "Poste {ordinal} : les lignes de ressources portent les quantités du poste entier au lieu des normes de consommation par unité ; le prix unitaire n'a donc pas été recalculé à partir de ces lignes",
+      "suggestion": "Vérifiez la décomposition : recalculez le poste à partir de son article de catalogue via l'examen des normes de ressources, ou corrigez les lignes manuellement"
+    }
+  },
+  "poland": {
+    "knr_reference_required": {
+      "fail": "Le poste {ordinal} ne cite aucune table du catalogue KNR",
+      "suggestion": "Indiquez dans la podstawa la table de catalogue dont proviennent les normes, par exemple KNR 2-02 0201-01, ou écrivez kalkulacja indywidualna pour une ligne chiffrée par votre propre calcul"
+    },
+    "knr_reference_recognised": {
+      "fail": "La référence « {code} » du poste {ordinal} ne désigne aucune famille de catalogues KNR",
+      "suggestion": "Commencez la référence par sa famille de catalogues, comme KNR, KNNR, KNR-W ou KSNR, ou indiquez kalkulacja indywidualna pour la ligne"
+    }
+  },
+  "bim_rules": {
+    "filter_not_object": "Les conditions sur les propriétés doivent nommer chaque propriété avec la valeur attendue.",
+    "unknown_operator": "La condition sur \"{prop}\" utilise une comparaison inconnue de cette version. Choisissez-en une dans la liste.",
+    "value_not_allowed": "La condition sur \"{prop}\" vérifie si la propriété est vide et n'accepte aucune valeur.",
+    "value_required": "La condition sur \"{prop}\" exige une valeur.",
+    "value_too_long": "La valeur de la condition sur \"{prop}\" est trop longue, 500 caractères au maximum.",
+    "value_not_number": "La condition sur \"{prop}\" compare des nombres, et \"{value}\" n'est pas un nombre. Saisissez un nombre, avec une unité comme mm, m, m2, m3 ou kg si nécessaire.",
+    "group_not_found": "Le groupe enregistré ou la Smart View dont cette règle tire ses éléments n'existe pas dans ce projet. Choisissez-en un autre ou videz le champ."
+  },
+  "bim_versions": {
+    "parent_not_found": "Le modèle dont cet import devrait être une nouvelle version n'existe pas dans ce projet. Choisissez-en un autre ou importez ce fichier comme modèle distinct.",
+    "parent_not_ready": "L'import de « {name} » n'est pas terminé, il ne peut donc pas encore recevoir de nouvelle version. Attendez qu'il soit prêt ou importez ce fichier comme modèle distinct.",
+    "parent_superseded": "« {name} » possède déjà une version plus récente, {version}. Importez plutôt ce fichier comme nouvelle version de la plus récente."
+  },
+  "cost_chain": {
+    "contract_without_schedule": {
+      "fail": "Le contrat {code} vaut {amount} mais n'a aucune ligne d'échéancier, son montant n'est donc sur aucune ligne de coût.",
+      "suggestion": "Donnez au contrat un compte dans le contrôle des coûts, ou ajoutez ses lignes d'échéancier."
+    },
+    "contract_sum_differs": {
+      "fail": "Le contrat {code} vaut {total}, mais ses lignes d'échéancier totalisent {lines} (écart de {difference}).",
+      "suggestion": "Corrigez la valeur du contrat ou les lignes d'échéancier pour qu'elles concordent."
+    },
+    "change_without_agreed_amount": {
+      "fail": "L'avenant {code} est approuvé sans montant convenu.",
+      "suggestion": "Saisissez le montant convenu avec l'entreprise avant d'approuver l'avenant."
+    },
+    "change_without_approval_date": {
+      "fail": "L'avenant {code} est approuvé sans date d'approbation.",
+      "suggestion": "Saisissez la date d'approbation de l'avenant."
+    },
+    "billed_before_approval": {
+      "fail": "{amount} sont facturés sur le contrat {contract} pour l'avenant {code}, qui est au statut {status} et non approuvé.",
+      "suggestion": "Approuvez d'abord l'avenant, ou retirez la facturation de la situation de travaux."
+    },
+    "contract_over_target": {
+      "fail": "Le contrat {code} engage {committed}, soit {difference} de plus que les {target} du bordereau dont il est issu (plus de {tolerance} %).",
+      "suggestion": "Vérifiez l'attribution et ses avenants par rapport au bordereau, et notez pourquoi les travaux coûtent plus cher."
+    },
+    "account_over_plan": {
+      "fail": "Le compte {code} porte {committed} d'engagements, soit {difference} de plus que son budget de {planned} (plus de {tolerance} %).",
+      "suggestion": "Vérifiez les engagements de ce compte, ou mettez à jour le budget en indiquant la raison."
+    },
+    "quantity_overrun": {
+      "fail": "La ligne {code} du contrat {contract} est métrée à {measured} {unit} pour {contracted} {unit} au marché, soit {over} % de plus (toléré {tolerance} %).",
+      "suggestion": "Vérifiez le métré, ou convenez de la quantité supplémentaire par avenant."
+    },
+    "measurement_exceeds_commitment": {
+      "fail": "Le contrat {code} est métré à {measured}, soit {difference} de plus que sa valeur avec avenants approuvés de {committed}.",
+      "suggestion": "Approuvez l'avenant qui couvre les travaux en plus, ou vérifiez le métré."
+    },
+    "invoice_without_contract": {
+      "fail": "La facture fournisseur {number} de {amount} n'est rattachée à aucun contrat ni commande.",
+      "suggestion": "Rattachez ses lignes à un contrat, ou enregistrez-la en coût direct sur un compte."
+    }
+  },
+  "payment_release": {
+    "cumulative_total_fell": {
+      "fail": "La facture {number} du contrat {contract} indique {net} à ce jour, soit moins que les {previous} de la facture précédente {previous_number}, alors que le contrat est facturé en cumulé.",
+      "suggestion": "Si la facture ne facture que les travaux nouveaux, le contrat est facturé en incrémental ; si elle réduit le total, saisissez-la comme avoir."
+    },
+    "invoice_after_final": {
+      "fail": "La facture {number} du contrat {contract} est postérieure à la facture finale {final}.",
+      "suggestion": "Saisissez les travaux ultérieurs en régie ou en avoir, ou marquez la bonne facture comme finale."
+    },
+    "claim_invoice_in_cumulative": {
+      "fail": "La facture {number} du contrat {contract} est issue d'une réclamation et facture une seule période, mais le contrat est facturé en cumulé.",
+      "suggestion": "Utilisez un seul mode de facturation par contrat : passez le contrat en facturation incrémentale, ou saisissez à la place les factures cumulées de l'entreprise."
+    },
+    "release_differs": {
+      "fail": "La libération confirmée pour la facture {number} du contrat {contract} est de {stored}, mais les conditions du contrat donnent aujourd'hui {computed}.",
+      "suggestion": "Vérifiez ce qui a changé depuis la libération (conditions, montants de la facture, déductions), puis rouvrez la libération et confirmez-la de nouveau."
+    },
+    "rounding_out_of_range": {
+      "fail": "La facture {number} est arrondie de {rounding}, hors du pas d'arrondi convenu de {step}.",
+      "suggestion": "L'arrondi ne réduit une libération que de moins d'un pas ; activez l'arrondi dans les conditions de paiement ou rouvrez la libération."
+    },
+    "final_retention_without_warranty": {
+      "fail": "La facture finale {number} du contrat {contract} retient {amount} de retenue, mais aucune retenue de garantie n'est convenue.",
+      "suggestion": "Convenez d'une retenue de garantie dans les conditions de paiement, ou rouvrez la libération pour que toute la retenue soit payée avec la facture finale."
+    },
+    "posting_exceeds_held": {
+      "fail": "Sur le contrat {contract}, plus de retenue a été restituée que retenue : {amount} en trop.",
+      "suggestion": "Annulez l'écriture de retenue trop élevée et comptabilisez le montant réellement retenu."
+    },
+    "posting_before_event": {
+      "fail": "{amount} de retenue du contrat {contract} ont été restitués le {posted}, avant l'événement de libération prévu le {due}.",
+      "suggestion": "Vérifiez la date de l'événement de libération, ou comptabilisez la libération une fois l'événement survenu."
+    },
+    "posting_without_event_date": {
+      "fail": "{amount} de retenue du contrat {contract} ont été restitués, mais la date de l'événement de libération n'est pas saisie.",
+      "suggestion": "Saisissez la date à laquelle l'événement de libération a été atteint, pour pouvoir y comparer le paiement."
+    },
+    "retention_still_held": {
+      "fail": "Le contrat {contract} est terminé et retient encore {amount} de retenue.",
+      "suggestion": "Libérez la retenue à son événement dans le registre des retenues, ou conservez-la pendant la période de garantie."
+    },
+    "discount_not_agreed": {
+      "fail": "La libération de la facture {number} du contrat {contract} déduit un escompte de {amount}, mais le contrat n'en prévoit aucun.",
+      "suggestion": "Activez l'escompte pour paiement anticipé dans les conditions de paiement, ou rouvrez la libération sans lui."
+    },
+    "discount_after_deadline": {
+      "fail": "Un escompte de {amount} a été retenu sur la facture {number}, mais le paiement du {paid_on} est postérieur à la date d'escompte {until}.",
+      "suggestion": "Payez aussi le montant de l'escompte, ou consignez pourquoi l'entreprise a accepté l'escompte tardif."
+    },
+    "invoiced_over_measured": {
+      "fail": "Le contrat {contract} est facturé à {invoiced}, soit {difference} au-dessus des {measured} métrés (quantité fois prix).",
+      "suggestion": "Vérifiez le métré avant de libérer davantage d'argent, ou retenez l'écart à la prochaine libération."
+    },
+    "invoiced_over_contract": {
+      "fail": "Le contrat {contract} est facturé à {invoiced}, soit {difference} au-dessus de sa valeur de {value}, et rien n'est métré dessus.",
+      "suggestion": "Saisissez le métré ou l'avenant qui couvre le surplus avant de libérer davantage."
+    },
+    "reverse_charge_with_vat": {
+      "fail": "La facture {number} est en autoliquidation mais porte {vat} de TVA.",
+      "suggestion": "Une facture en autoliquidation ne porte pas de TVA ; corrigez le montant de TVA ou la catégorie de TVA de ses lignes."
+    },
+    "line_without_vat_rate": {
+      "fail": "La facture {number} porte de la TVA, mais {count} de ses lignes n'indiquent pas de taux de TVA.",
+      "suggestion": "Saisissez le taux de TVA sur chaque ligne pour que les déductions et les exports appliquent la bonne taxe."
+    },
+    "duplicate_number": {
+      "fail": "Le numéro de facture {number} de la même entreprise est saisi {count} fois.",
+      "suggestion": "Annulez la copie, ou corrigez le numéro de facture s'il s'agit de factures différentes."
+    },
+    "possible_duplicate": {
+      "fail": "La facture {number} a la même entreprise, le même montant ({amount}) et la même date ({on}) que la facture {other}.",
+      "suggestion": "Vérifiez qu'il ne s'agit pas de la même facture saisie deux fois sous un autre numéro."
+    },
+    "certificate_missing": {
+      "fail": "Facture {number} du contrat {contract} : le bénéficiaire ne détient aucun justificatif valide au {on} ({certificate}), que {reference} exige avant la libération du paiement.",
+      "suggestion": "Enregistrez le justificatif sur la fiche sous-traitant du bénéficiaire, ou retenez le paiement jusqu'à sa présentation."
+    },
+    "split_payment_annotation_missing": {
+      "fail": "La facture {number} porte sur des travaux de construction ou d'autres biens soumis au split payment et dépasse {threshold}, mais elle ne comporte pas la mention «{annotation}».",
+      "suggestion": "Demandez au fournisseur une facture corrigée avec la mention, et payez-la dans tous les cas par split payment : l'obligation de payer ainsi ne dépend pas de la mention."
+    },
+    "split_payment_not_used": {
+      "fail": "La facture {number} relève du split payment, mais un paiement a été enregistré avec un autre mode. L'acheteur devient redevable en plus de {sanction}, soit 30 pour cent de sa TVA.",
+      "suggestion": "Payez ces factures depuis le compte TVA par split payment et enregistrez le mode sur le paiement : split_payment."
+    },
+    "split_payment_annex_unknown": {
+      "fail": "La facture {number} dépasse {threshold}, et il n'est pas indiqué si elle porte sur des biens ou services de l'annexe du split payment.",
+      "suggestion": "Indiquez sur la facture si elle porte sur des biens ou services de l'annexe (annex_15), ou leurs codes (pkwiu_codes), afin de pouvoir vérifier le mode de paiement."
+    },
+    "reduced_rate_above_area_limit": {
+      "fail": "La facture {number} applique {rate} pour cent de TVA sur la totalité du prix, mais le logement a {area_m2} m2 de surface utile et le taux réduit vaut jusqu'à {limit_m2} m2 ({reference}).",
+      "suggestion": "Appliquez le taux réduit à {reduced_share_percent} pour cent du prix et le taux normal au reste."
+    },
+    "reduced_rate_object_unknown": {
+      "fail": "La facture {number} applique le taux réduit de {rate} pour cent pour le logement, mais le projet n'indique ni de quel logement il s'agit ni sa surface utile ({reference}).",
+      "suggestion": "Renseignez le type de logement et la surface utile sur le projet (vat_housing) afin de pouvoir vérifier le taux et sa limite de surface."
+    },
+    "reduced_rate_not_eligible": {
+      "fail": "La facture {number} applique le taux réduit de {rate} pour cent pour le logement à {object}, qui n'y est pas éligible ({reference}).",
+      "suggestion": "Appliquez le taux normal, ou corrigez le logement enregistré sur le projet."
+    },
+    "domestic_reverse_charge_ended": {
+      "fail": "La facture {number} applique l'autoliquidation à {count} ligne(s), alors que l'autoliquidation nationale pour les travaux de construction a pris fin dans ce pays.",
+      "suggestion": "Sauf si le fournisseur est établi à l'étranger, demandez une facture avec TVA ; ces factures se paient par split payment."
+    },
+    "payment_term_over_cap": {
+      "fail": "Le contrat {contract} convient d'un délai de paiement de {days} jours, plus long que les {cap} jours autorisés entre entreprises par la loi sur les retards de paiement.",
+      "suggestion": "Ramenez le délai à {cap} jours, ou consignez pourquoi le délai plus long est expressément convenu et non manifestement abusif envers le sous-traitant."
+    }
+  },
+  "cost_forecast": {
+    "below_commitment": {
+      "fail": "{code} : la prévision de {forecast} est inférieure aux {owed} déjà engagés ou demandés dans des avenants en attente (soit {difference} de moins), et rien ne l'explique.",
+      "suggestion": "Joignez le document à l'origine du chiffre plus bas (avoir, protocole d'accord, compte rendu), ou indiquez sur la ligne pourquoi sa méthode donne moins."
+    },
+    "move_without_evidence": {
+      "fail": "{code} : la prévision est passée de {previous} à {current} ({delta}) depuis le dernier instantané figé, au-delà du seuil du projet, et n'a encore ni commentaire ni justificatif.",
+      "suggestion": "Expliquez la variation et joignez le document ou le compte rendu correspondant avant de figer l'instantané."
+    },
+    "method_override_without_comment": {
+      "fail": "{code} est prévu avec la méthode {method} au lieu de la méthode du projet ({project_method}), sans commentaire qui explique pourquoi.",
+      "suggestion": "Ajoutez un bref commentaire sur la méthode de la ligne, ou remettez la ligne sur la méthode du projet."
+    },
+    "method": {
+      "best_available": "meilleure source disponible",
+      "maximum": "valeur maximale",
+      "evm_cpi": "performance des coûts (CPI)",
+      "manual": "montant manuel"
+    }
+  },
+  "payment_release_certificate_types": {
+    "social_security_clearance": "attestation de régularité auprès de l'assurance sociale",
+    "construction_tax_exemption": "attestation d'exonération de la taxe de construction",
+    "employers_liability_clearance": "attestation de régularité de la responsabilité des employeurs",
+    "insurance": "attestation d'assurance",
+    "license": "licence d'entrepreneur"
+  },
+  "boq_export": {
+    "embedding_rounding_gap": {
+      "fail": "L'export aux prix de vente diffère du total de l'éditeur de {gap}, au-delà de la tolérance de {tolerance}",
+      "suggestion": "Vérifiez l'arrondi dans l'aperçu d'export ou augmentez la tolérance de ce devis"
+    }
+  },
+  "pakistan": {
+    "item_classified": {
+      "fail": "Le poste {ordinal} n'a pas de code de classification, il ne peut donc pas être regroupé dans la classe d'ouvrage à laquelle il appartient",
+      "suggestion": "Attribuez un code de classification au poste (MasterFormat est la valeur par défaut pour le Pakistan) afin que les quantités soient regroupées par classe d'ouvrage"
+    },
+    "sales_tax_line_present": {
+      "fail": "La facture ne comporte aucune ligne de taxe de vente",
+      "suggestion": "Ajoutez la taxe de vente sur une ligne distincte après le sous-total : la taxe provinciale sur les services pour un marché de travaux, ou la taxe fédérale de vente sur les biens pour une fourniture"
+    },
+    "sales_tax_rate_known": {
+      "fail": "La ligne de taxe de vente applique {percent} pour cent, ce qui n'est pas un taux applicable à la construction au Pakistan",
+      "suggestion": "Vérifiez le taux selon la province et le payeur, par exemple 16 pour cent au Pendjab ou 15 pour cent au Sind, un taux réduit pour les travaux publics de l'État, ou 18 pour cent de taxe fédérale de vente sur les biens"
+    }
+  },
+  "supplier_catalogs": {
+    "price_list_not_found": "Liste de prix introuvable",
+    "catalog_item_not_found": "Article du catalogue introuvable",
+    "entry_not_found": "Le prix fournisseur choisi n'existe pas",
+    "entry_other_vendor": "Le prix choisi appartient à la liste de prix d'un autre fournisseur",
+    "price_list_expired": "La liste de prix « {name} » a expiré le {valid_to}. Importez la liste à jour ou saisissez à la main le prix convenu.",
+    "import_unreadable": "Le fichier ne peut pas être lu comme liste de prix ({reason})",
+    "import_needs_price_column": "Choisissez la colonne contenant le prix",
+    "duplicate_vendor_sku": "Ces références fournisseur apparaissent plusieurs fois dans le fichier : {skus}",
+    "valid_to_before_valid_from": "La date de fin est antérieure à la date de début",
+    "category_not_found": "Catégorie d'article introuvable",
+    "net_above_gross": "Le prix net {net} est supérieur au prix catalogue {gross}",
+    "discount_not_found": "Accord de remise introuvable",
+    "discount_basis": "Indiquez soit un pourcentage de remise, soit un prix net fixe (un prix net fixe nécessite un article)",
+    "attachment_not_found": "Pièce jointe introuvable",
+    "price_missing": "Aucun prix en vigueur pour la ligne « {line} » : saisissez un prix unitaire ou importez la liste de prix du fournisseur"
+  },
+  "boq_drawing": {
+    "takeoff_without_revision": {
+      "fail": "Poste {ordinal} : {count} mesure(s) de métré donnent la quantité sans indice de plan enregistré",
+      "suggestion": "Renseigner l'indice du plan dans les fichiers du projet, puis refaire ou déplacer la mesure pour enregistrer la feuille et l'indice"
+    },
+    "superseded_revision": {
+      "fail": "Poste {ordinal} : la quantité a été relevée sur le plan {drawing} indice {revision}, mais l'indice {current} est désormais en vigueur",
+      "suggestion": "Comparer les deux indices et corriger la quantité, ou émettre un ordre de changement pour l'écart"
+    },
+    "manual_ref_without_revision": {
+      "fail": "Poste {ordinal} : le plan {drawing} est saisi sans indice",
+      "suggestion": "Ajouter l'indice du plan à partir duquel la quantité a été chiffrée"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Le champ '{field}' a été modifié à la fois sur l'appareil et sur le serveur et n'a pas de résolution",
+      "suggestion": "Choisissez votre valeur, celle du serveur ou une valeur manuelle pour ce champ, puis renvoyez la fusion"
+    }
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Ligne {row} : aucune activité de ce planning n'a l'ID {ref}.",
+      "duplicate": "Ligne {row} : l'activité {ref} apparaît plusieurs fois dans la feuille.",
+      "suggestion": "Exportez une nouvelle feuille et n'ajoutez, ne copiez ni ne réordonnez des lignes."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Ligne {row} : % d'avancement n'est pas un nombre.",
+      "actual_start_not_a_date": "Ligne {row} : le début réel n'est pas une date.",
+      "actual_finish_not_a_date": "Ligne {row} : la fin réelle n'est pas une date.",
+      "remaining_not_a_whole_number": "Ligne {row} : la durée restante n'est pas un nombre entier de jours.",
+      "percent_out_of_range": "Ligne {row} : % d'avancement vaut {value}, il doit être compris entre 0 et 100.",
+      "remaining_negative": "Ligne {row} : la durée restante est {value}, elle ne peut pas être négative.",
+      "suggestion": "Saisissez un % d'avancement de 0 à 100, des dates au format date et la durée restante en jours ouvrés entiers."
+    },
+    "date_logic": {
+      "finish_before_start": "Ligne {row} : la fin réelle {finish} précède le début réel {start}.",
+      "finish_without_start": "Ligne {row} : une fin réelle {finish} est saisie sans début réel.",
+      "after_status_date": "Ligne {row} : la date réelle {value} est postérieure à la date d'état {status_date}.",
+      "finish_needs_complete": "Ligne {row} : une fin réelle est saisie mais l'activité n'est avancée qu'à {percent} %.",
+      "suggestion": "Les dates réelles doivent être cohérentes, ne pas dépasser la date d'état, et une fin réelle implique 100 % d'avancement."
+    },
+    "unchanged_since_export": {
+      "fail": "Ligne {row} : {activity} a été modifiée dans l'application après l'export de la feuille.",
+      "suggestion": "Vérifiez les valeurs actuelles avant d'appliquer cette ligne, ou exportez une nouvelle feuille."
+    },
+    "plausibility": {
+      "progress_decreased": "Ligne {row} : l'avancement baisse de {old} % à {new} %.",
+      "complete_without_finish": "Ligne {row} : 100 % d'avancement sans fin réelle ; la date d'état sera utilisée comme fin.",
+      "started_without_start": "Ligne {row} : l'avancement est saisi sans début réel.",
+      "suggestion": "Vérifiez la ligne avec le chantier avant de l'appliquer."
+    }
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Cette variante est ouverte depuis {days} jours et l'estimatif principal a changé sur {changes} postes depuis sa création",
+      "suggestion": "Reportez les modifications de l'estimatif principal dans la variante, fusionnez la variante ou archivez-la"
+    },
+    "unresolved_conflicts": {
+      "fail": "Le poste {ordinal} « {description} » a été modifié à la fois dans cette variante et dans l'estimatif principal",
+      "suggestion": "Ouvrez la boîte de fusion et décidez quelle version du poste conserver"
+    }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "La trésorerie tombe à moins {amount} en {period}, sous le seuil de financement de {threshold}.",
+      "suggestion": "Organiser le financement avant {period}, avancer les encaissements ou reporter les paiements."
+    },
+    "receipt_overdue": {
+      "fail": "{document} : {amount} était dû le {due} et reste impayé ({days} jours de retard).",
+      "suggestion": "Relancer le client pour le paiement, ou modifier la date prévue dans la prévision."
+    },
+    "forecast_missing": {
+      "fail": "{project} est actif mais n'a ni contrat, ni facture, ni commande, ni sous-traitance, ni planning à partir duquel prévoir la trésorerie.",
+      "suggestion": "Saisir le contrat client avec son échéancier de paiement, ou un flux de trésorerie prévu dans le modèle de coût."
+    }
+  }
+}
