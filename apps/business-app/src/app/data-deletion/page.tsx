@@ -4,7 +4,7 @@ import { LegalPage } from '../legal-page';
 export const metadata: Metadata = {
   title: 'Data Deletion | ProPulse Business OS',
   description:
-    'Instructions for requesting deletion of ProPulse Business OS account or connected WhatsApp data.',
+    'Request removal of ProPulse Business OS and connected account data.',
   robots: { index: true, follow: true },
   alternates: { canonical: 'https://sghomesinterior.in/data-deletion' },
 };
