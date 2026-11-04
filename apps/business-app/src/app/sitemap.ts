@@ -11,5 +11,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `https://sghomesinterior.in/solutions/procurement`, changeFrequency: 'monthly' as const, priority: 0.7 },
     { url: `https://sghomesinterior.in/solutions/client-portal`, changeFrequency: 'monthly' as const, priority: 0.7 },
     { url: `https://sghomesinterior.in/solutions/website-builder`, changeFrequency: 'monthly' as const, priority: 0.7 },
+    { url: 'https://sghomesinterior.in/privacy-policy', changeFrequency: 'yearly', priority: 0.3 },
+    { url: 'https://sghomesinterior.in/terms-of-service', changeFrequency: 'yearly', priority: 0.3 },
+    { url: 'https://sghomesinterior.in/data-deletion', changeFrequency: 'yearly', priority: 0.3 },
   ];
 }
