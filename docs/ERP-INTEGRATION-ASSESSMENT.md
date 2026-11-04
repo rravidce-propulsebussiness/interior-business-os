@@ -291,3 +291,22 @@ The adapter must not call ERP project creation as a side effect of a browser-sup
 For tenant-facing calls, the adapter should resolve the ERP project from the server-side mapping using the active organization and Business OS project, then pass the mapped ID internally. It must reject arbitrary ERP project IDs supplied by clients. The ERP admin bypass must be removed from the tenant request path or replaced with a separate, narrowly scoped service principal that cannot invoke host-wide project listing, demo cleanup, migration, converter administration or other platform controls.
 
 This additional review reinforces the current disposition: no project lifecycle, file, backup/restore or admin route is approved for proxying before explicit organization partitioning and two-organization adversarial tests are implemented.
+
+## File manager, bundle transfer and background-job review (2026-11-04)
+
+The next pass traced project file aggregation, archive transfer and the generic background-job API:
+
+- The project file manager aggregates documents, photos, sheets, BIM, DWG and takeoff records by ERP `project_id`. It applies folder and module permission filters, and intentionally has an internal/system mode when `user_id is None`. That internal mode must never be reachable through the tenant adapter. Project IDs in storage paths reduce accidental collisions but are not an organization partition.
+- DWG uploads use a flat `dwg_uploads` directory rather than a project-specific directory. Any adapter-side file handling must resolve files only through an authorized parent record and must not expose raw paths. This storage layout needs a partition-safe migration or an explicit verified mapping from every DWG record to its owning project.
+- Bundle export queries rows and attachments using ERP project IDs. The exported manifest includes the ERP project ID and attachment references. It is therefore a project-scoped archive, not an organization-safe export until project-to-organization ownership is guaranteed and export is authorized at request time.
+- Bundle import supports new-project, merge-into-existing and replace-existing modes. Merge/replace accept a target project ID and replace mode deletes bundle-managed rows for that project. The adapter must not expose these modes until the target mapping is server-resolved, the caller is re-authorized, and import is constrained to the same organization partition. Client-supplied target IDs cannot authorize a write.
+- Generic background jobs have an interim admin-only gate for get/list/cancel because the job row lacks per-row owner authorization. The source comments identify cross-tenant IDOR risk and note that tenant RLS is not enabled for these rows. An ERP admin role is not a safe substitute for Business OS membership; keep all generic job endpoints out of tenant-facing integration.
+- Task routes do check ERP project access for project-scoped CRUD/import/export, but their access helper is still ERP-user/project based. Some similarity-search paths explicitly treat a missing allowed-project list as admin/unrestricted. Do not proxy task search, export, import or job-related operations until organization partition predicates are mandatory and the unrestricted sentinel is removed from tenant paths.
+
+### Additional adapter prohibitions
+
+Do not expose file-manager aggregation, raw document/photo/BIM/DWG downloads, bundle import/export/replace, generic job get/list/cancel, or cross-project task similarity in the first adapter. A later allowlist must resolve the parent Business OS project through the active verified organization, enforce partition scope in the database query, and repeat authorization when a file or job result is retrieved.
+
+## CI status note (2026-11-04)
+
+The latest Foundation checks run for commit `ebd630dea7e76c4129c21185acf4592c57b7517f` completed with failure at `pnpm check`. The targeted tests, acceptance tests, dependency security step, database verification/type/seed checks, application build, and workspace typecheck/build all completed successfully. Later audit, Playwright installation and recovery-test steps were skipped because the formatting check failed. Earlier runs show the same repository-wide Prettier failure (hundreds of files); do not treat the pipeline as green or mass-format the imported upstream snapshot to conceal existing formatting debt. The formatting gate remains a release blocker until the repository's baseline is addressed deliberately.
