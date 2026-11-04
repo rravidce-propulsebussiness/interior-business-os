@@ -116,3 +116,27 @@ OpenConstructionERP declares AGPL-3.0-or-later. Preserve the original licence, n
 - No shared admin or demo identity used for organization tenancy.
 - No ERP quantity silently overwrites approved Business OS estimates or quotations.
 - No production deployment or merge to `main`.
+
+
+## Additional takeoff isolation findings (reviewed 2026-11-04)
+
+The takeoff repository confirms that project checks alone are not a sufficient organization boundary:
+
+- `TakeoffRepository.get_by_id(doc_id)` loads a document by primary key without an owner or project predicate. Callers must prove access before invoking it; the repository does not independently enforce that proof.
+- `TakeoffRepository.list_for_user(owner_id, project_id=...)` scopes document lists to an ERP owner ID, optionally narrowed by ERP project ID.
+- `get_by_source_document_id(source_document_id, project_id=...)` scopes the idempotency lookup to an ERP project, not a Business OS organization.
+- `update_fields(doc_id, ...)` and `delete(doc_id)` operate by document ID. They rely on the service/router layer to authorize the row first.
+- Measurement reads are project-scoped in methods such as `list_for_project`, `count_for_document` and `list_all_for_document`; their safety therefore depends on the project ID being independently authorized and correctly mapped.
+- `TakeoffDocument` stores `owner_id`, `project_id` and a server filesystem `file_path`. It has no organization key. A document path is not a tenant isolation mechanism.
+- CAD extraction sessions store `user_id`, `project_id` and `created_by` as user/project-oriented fields. Session ownership and any persisted extraction payload must be included in the same isolation review.
+
+### Required remediation before takeoff can be enabled
+
+1. Add a durable organization scope to every tenant-owned ERP resource (documents, measurements, CAD sessions, BOQs, assemblies, exports and background jobs), with non-null constraints for newly created tenant-owned rows.
+2. Ensure every repository read, update and delete either includes the organization predicate or accepts a previously authorized resource object through a narrowly scoped transaction boundary. Primary-key-only helpers must not be callable from untrusted request paths without an authorization guard.
+3. Bind document and CAD file storage to an organization/project-specific opaque storage key. Resolve paths server-side; never accept a filesystem path from the client. Authorize downloads independently of upload/list permissions.
+4. Add database constraints/indexes that prevent cross-organization relationships (for example, a measurement cannot reference a document in another organization even if both UUIDs are valid).
+5. Test direct-ID access, list/filter/count/export, source-document idempotency, update/delete, file download, CAD session retrieval, background processing and concurrent operations with two organizations. Include a privileged ERP administrator test to prove no application route accidentally inherits a global bypass.
+6. Until those changes land, the safe integration surface remains typed contracts and documentation only; no takeoff proxy or UI feature flag should be enabled.
+
+These findings are a code-level review of the takeoff models/repository, not a claim that every route is exploitable. Router/service authorization still needs endpoint-by-endpoint tracing and adversarial tests before any exposure.
