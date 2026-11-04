@@ -168,3 +168,50 @@ Required automated test matrix must include:
 - unscoped conversion endpoints and host-level converter controls blocked from the tenant-facing gateway.
 
 The upstream checks provide a useful starting point for user-level access control, but they do not establish organization-level isolation. This distinction is now explicit in the integration gate.
+
+
+## Business OS tenancy architecture review (2026-11-04)
+
+The Business OS side already has a stronger organization-aware identity foundation than the imported ERP:
+
+- `packages/auth/src/server.ts` creates request-scoped Supabase services, resolves the active organization from a verified membership, and treats a selected organization cookie as a selector only: `requireOrganizationMembership` must still authorize it. Workspace slug and custom-hostname resolution also end by requiring membership.
+- `packages/auth/src/actions.ts` validates organization switching through the authorization service before writing the HTTP-only organization selector cookie. A customer hostname is not allowed to switch companies.
+- `packages/auth/src/index.ts` exposes a pure policy check that requires an active membership, exact organization match, required entitlement and a matching organization/branch grant. It explicitly expects the caller to load trusted membership and grants server-side.
+- `packages/core/src/index.ts` defines the tenant access context as user ID + organization ID + membership status + permission grants + entitlements.
+- The identity migration `20260928000000_identity_tenancy.sql` defines organizations, branches, organization memberships, organization-scoped roles/permissions, membership-role assignments, platform roles and entitlements. Composite foreign keys tie branch/role/membership assignments back to the same organization. RLS is enabled and forced on the identity tables; direct application writes are revoked in favor of checked operations.
+
+### Consequence for the ERP adapter
+
+Do not add a second organization selector or trust a new client-supplied `organizationId`. The adapter must obtain the active organization and authenticated user from the existing server-side authorization path for every request. It must then authorize the specific permission and Business OS project within that organization before resolving an ERP resource mapping.
+
+The organization cookie, route slug, hostname, request body and URL path are selectors only. None is proof of membership or project access. An ERP mapping lookup must be constrained by the already-authorized organization and project, not used to discover or choose the organization.
+
+### Proposed mapping and isolation model (design only)
+
+Use an isolated ERP PostgreSQL database for the first deployment phase. Introduce a server-managed mapping registry with at least:
+
+- `organization_id`: Business OS organization UUID;
+- `business_project_id`: Business OS project UUID;
+- `erp_project_id`: ERP project UUID;
+- `erp_partition_id`: immutable organization partition/principal identifier;
+- `status`, creation/update timestamps and audit actor.
+
+Enforce unique mapping for each (organization, Business OS project) and unique ERP project ownership within the ERP partition. Every lookup must use the full organization + Business OS project key. Do not accept ERP project IDs from browser payloads as authority. Prefer composite foreign keys and database-enforced organization partition keys on all ERP tenant-owned rows over application-only filters.
+
+If the upstream ERP cannot be safely changed to enforce a partition key on every relevant table, repository, file path, export, job and background worker, do not use it as a shared multi-organization service. A separate database/schema/instance per organization is the safer interim isolation boundary, though it increases operational cost. A shared ERP global administrator must never be the tenant identity.
+
+### Migration sequence
+
+1. Inventory every ERP table and relationship, including BOQ, assemblies, drawing/takeoff, resource pricing, exports, audit, cache and job tables. Classify global reference data separately from organization-owned data.
+2. Define the organization partition/principal and migration backfill strategy. Existing ERP records must be assigned to an explicit organization after ownership review; never infer ownership from a shared admin or default user.
+3. Add nullable organization/partition columns and composite keys/FKs in an isolated ERP migration branch; backfill and validate; then enforce NOT NULL for tenant-owned records. Keep global catalogues explicitly read-only/shared or copy them into tenant-owned snapshots with provenance.
+4. Update every service/repository query and background task to require organization context. Remove or isolate global-admin bypasses from tenant-facing routes. Add database RLS or equivalent database-level controls as a second line of defense.
+5. Isolate uploads, generated files, exports, caches, search indexes and job queues by organization and project. Re-check authorization at download and job-result retrieval time.
+6. Add two-organization adversarial integration tests covering read, write, list, count, search, export, import, delete, file download, background job and race conditions. Include same-user multi-organization membership and privileged platform-user cases.
+7. Rehearse migrations and rollback on a disposable PostgreSQL instance with representative data. Only then implement the signed server-to-server adapter and UI behind a disabled-by-default feature flag.
+
+### Source-of-truth boundary
+
+Business OS remains authoritative for identity, membership, organization/project ownership, customer/commercial records and final quotation totals. The ERP may own specialist BOQ/takeoff working records only after tenant isolation is proven. An ERP BOQ or takeoff result is an input proposal; it must be reviewed, version-checked and explicitly imported into the existing Business OS quotation/execution workflow. It cannot directly mutate a signed quotation, contract, approved execution estimate or invoice.
+
+This review confirms that the Business OS identity foundation is suitable to anchor the integration, but it does not make the upstream ERP tenant-safe. The ERP-side partitioning and adversarial test gates remain blocking.
