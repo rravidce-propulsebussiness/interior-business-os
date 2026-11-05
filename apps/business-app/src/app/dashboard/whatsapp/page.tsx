@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { automationServices } from '../automations/service';
 import { WhatsAppSetup } from './setup';
+import { WhatsAppWorkspace } from './workspace';
 
 export const dynamic = 'force-dynamic';
 
@@ -65,20 +66,14 @@ export default async function WhatsAppPage() {
         }))}
       />
 
-      <section className="rounded-xl border border-orange-100 bg-orange-50/60 p-5">
-        <h2 className="font-semibold">Next: build message automations</h2>
-        <p className="mt-1 text-sm text-neutral-700">
-          The existing automation builder is available after your channel is
-          connected. WhatsApp-specific triggers and send-message actions are the
-          next integration layer.
-        </p>
-        <Link
-          className="mt-3 inline-block font-medium underline"
-          href="/dashboard/automations"
-        >
-          Open automations
-        </Link>
-      </section>
+      <WhatsAppWorkspace
+        connections={connections.map((connection) => ({
+          id: connection.id,
+          name: connection.business_name || connection.verified_name || 'WhatsApp Business',
+          phone: connection.display_phone_number || connection.phone_number_id,
+          status: connection.status,
+        }))}
+      />
     </main>
   );
 }
