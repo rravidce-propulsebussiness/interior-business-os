@@ -4,6 +4,7 @@ import { createDecipheriv } from 'node:crypto';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import { DomainError } from '@business-os/shared';
+import { isAllowedWebsiteUploadOrigin } from '@/app/dashboard/website/upload-origin';
 
 export const privateHeaders = {
   'Cache-Control': 'private, no-store',
@@ -78,6 +79,5 @@ export async function graphRequest<T>(
 }
 
 export function validSameOrigin(request: Request) {
-  const origin = request.headers.get('origin');
-  return Boolean(origin && origin === new URL(request.url).origin);
+  return isAllowedWebsiteUploadOrigin(request);
 }
