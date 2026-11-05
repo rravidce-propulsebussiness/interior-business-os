@@ -24,8 +24,8 @@ export async function GET(request: Request) {
     const result = await services.client.rpc('whatsapp_workspace_read', {
       p_organization_id: services.context.organizationId,
       p_section: section,
-      p_connection_id: connectionId ?? undefined,
-      p_wa_id: waId ?? undefined,
+      ...(connectionId ? { p_connection_id: connectionId } : {}),
+      ...(waId ? { p_wa_id: waId } : {}),
       p_search: search,
       p_page: page,
     });
