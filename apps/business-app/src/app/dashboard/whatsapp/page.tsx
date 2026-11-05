@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { automationServices } from '../automations/service';
 import { WhatsAppSetup } from './setup';
 import { WhatsAppWorkspace } from './workspace';
+import { WhatsAppTestSender } from './test-sender';
+import { serverServices } from '@business-os/auth/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +23,14 @@ export default async function WhatsAppPage() {
     process.env.META_GRAPH_API_VERSION,
   );
   const connections = error ? [] : (data ?? []);
+  let canUseMetaTestSender = false;
+  try {
+    const { authorization } = await serverServices();
+    await authorization.requirePlatformRole('platform_super_admin');
+    canUseMetaTestSender = true;
+  } catch {
+    // The developer test sender is platform-admin-only.
+  }
 
   return (
     <main
@@ -77,6 +87,12 @@ export default async function WhatsAppPage() {
           status: connection.status,
         }))}
       />
+      {canUseMetaTestSender && <WhatsAppTestSender configured={Boolean(
+        process.env.WHATSAPP_TEST_PHONE_NUMBER_ID &&
+        process.env.WHATSAPP_TEST_ACCESS_TOKEN &&
+        process.env.WHATSAPP_TEST_RECIPIENTS &&
+        process.env.META_GRAPH_API_VERSION,
+      )} />}
     </main>
   );
 }

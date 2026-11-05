@@ -11,3 +11,6 @@ onlyBuiltDependencies:
   - '@tailwindcss/oxide'
 patchedDependencies:
   braces@3.0.3: patches/braces@3.0.3.patch
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
