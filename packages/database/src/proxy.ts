@@ -26,9 +26,13 @@ export async function refreshSessionWithRewrite(
     );
   const requestId = crypto.randomUUID();
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
+  // The Meta SDK needs a cross-origin login bridge only on the WhatsApp
+  // connection page. Keep those origins out of the rest of the workspace CSP.
+  const isWhatsAppSignupPage = request.nextUrl.pathname === '/dashboard/whatsapp';
   const policy = adminContentSecurityPolicy(
     nonce,
     process.env.NODE_ENV === 'development',
+    isWhatsAppSignupPage,
   );
   request.headers.set('x-request-id', requestId);
   request.headers.set('x-nonce', nonce);
