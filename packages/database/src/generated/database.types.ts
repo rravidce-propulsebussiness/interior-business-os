@@ -10797,6 +10797,90 @@ export interface Database {
         };
         Returns: Json;
       };
+      whatsapp_workspace_read: {
+        Args: {
+          p_organization_id: string;
+          p_section?: string;
+          p_connection_id?: string | null;
+          p_wa_id?: string | null;
+          p_search?: string;
+          p_page?: number;
+        };
+        Returns: Json;
+      };
+      whatsapp_message_ingest: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_change: Json;
+        };
+        Returns: number;
+      };
+      whatsapp_message_log_outbound: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_to: string;
+          p_provider_id: string;
+          p_body: string;
+          p_type?: string;
+        };
+        Returns: string;
+      };
+      whatsapp_contact_state: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+          p_action: string;
+        };
+        Returns: undefined;
+      };
+      whatsapp_window_open: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+        };
+        Returns: boolean;
+      };
+      whatsapp_contact_opted_out: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+        };
+        Returns: boolean;
+      };
+      whatsapp_automation_save: {
+        Args: {
+          p_organization_id: string;
+          p_id: string | null;
+          p_version: number;
+          p_input: Json;
+        };
+        Returns: Json;
+      };
+      whatsapp_automation_match: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_message_id: string;
+          p_wa_id: string;
+          p_text: string;
+        };
+        Returns: Json;
+      };
+      whatsapp_automation_finish: {
+        Args: {
+          p_organization_id: string;
+          p_run_id: string;
+          p_status: string;
+          p_provider_id?: string | null;
+          p_error?: string;
+        };
+        Returns: undefined;
+      };
       brochure_asset_read: {
         Args: {
           p_organization_id: string;

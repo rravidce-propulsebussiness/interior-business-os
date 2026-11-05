@@ -4,20 +4,16 @@ import { createDecipheriv } from 'node:crypto';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import { DomainError } from '@business-os/shared';
-import { isAllowedWebsiteUploadOrigin } from '@/app/dashboard/website/upload-origin';
 
 export const privateHeaders = {
   'Cache-Control': 'private, no-store',
 };
 
-export async function whatsappContext() {
+export async function whatsappContext(permission = 'automation.manage') {
   const context = await activeOrganization();
   if (!context) throw new DomainError('FORBIDDEN');
   const { authorization, client } = await serverServices();
-  await authorization.requirePermission(
-    context.organizationId,
-    'automation.manage',
-  );
+  await authorization.requirePermission(context.organizationId, permission);
   return { organizationId: context.organizationId, client };
 }
 
@@ -79,5 +75,6 @@ export async function graphRequest<T>(
 }
 
 export function validSameOrigin(request: Request) {
-  return isAllowedWebsiteUploadOrigin(request);
+  const origin = request.headers.get('origin');
+  return Boolean(origin && origin === new URL(request.url).origin);
 }
