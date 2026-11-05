@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 20081)
+Total output lines: 1138
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName, OwnerShell } from '../owner-shell';
@@ -583,10 +586,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
 
         {startingPayments.length>0&&<div className="pv2-stage-payment-start">
           <strong>Payment milestone at stage start</strong>
-          {startingPayments.map((p,i)=><p key={i}>{p.name} · {p.percent}% of accepted quotation</p>)}
-          <p className="pv2-hint">Review this agreed payment before starting work. Invoices,
-           payment requests and verified receipts stay in Finance. An invoice alone is not proof of payment.</p>
-          {d.permissions.finance&&<Link href={cur(d.project.id,'payments')}>
+          {startingPayments.map((p,i)=><p key={i}>{p.name} ·…81 tokens truncated…)}>
            Check invoice and verified payment status
           </Link>}
          </div>}
@@ -1002,14 +1002,14 @@ function Procurement({d}:{d:WorkspaceData}){
       window:stringValue(m.expected_delivery_window)||null
     }} canOrder={d.materialAccess.canOrder}
        canReceive={site?.canManage===true||['site_engineer','manager','procurement'].includes(site?.role??'')}/>
-    {site?.stage==='execution'&&site.role&&['manager','procurement'].includes(site.role)&&
+    {site?.stage==='execution'&&(site.canManage||['manager','procurement'].includes(site.role??''))&&
      <MaterialUpdateForm id={d.project.id} material={{
       id:m.id,status:stringValue(m.status),source:stringValue(m.source),
       vendorReference:stringValue(m.vendor_reference),
      }}/>}
    </article>)}</div>:
     <Blank title="No material requests" detail="Site engineers and procurement staff can add requests throughout the project."/>}
-   {site?.stage==='execution'&&['manager','procurement','site_engineer'].includes(site.role)&&
+   {site?.stage==='execution'&&(site.canManage||['manager','procurement','site_engineer'].includes(site.role??''))&&
     <details className="pv2-edit-drawer"><summary>＋ Request Material</summary><MaterialRequestForm id={d.project.id}/></details>}
   </section>
   <section className="pv2-panel">
