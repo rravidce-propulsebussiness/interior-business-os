@@ -10373,6 +10373,150 @@ export interface Database {
           },
         ];
       };
+      whatsapp_automation_rules: {
+        Row: {
+          id: string;
+          organization_id: string;
+          connection_id: string;
+          name: string;
+          trigger_type: string;
+          keyword: string;
+          reply_text: string;
+          status: string;
+          version: number;
+          created_by: string;
+          updated_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          connection_id: string;
+          name: string;
+          trigger_type: string;
+          keyword?: string;
+          reply_text: string;
+          status?: string;
+          version?: number;
+          created_by: string;
+          updated_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          connection_id?: string;
+          name?: string;
+          trigger_type?: string;
+          keyword?: string;
+          reply_text?: string;
+          status?: string;
+          version?: number;
+          created_by?: string;
+          updated_by?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_automation_rules_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_automation_rules_organization_id_connection_id_fkey';
+            columns: ['organization_id', 'connection_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_business_connections';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_automation_rules_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_automation_rules_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      whatsapp_automation_runs: {
+        Row: {
+          id: string;
+          organization_id: string;
+          connection_id: string;
+          rule_id: string;
+          inbound_message_id: string;
+          contact_wa_id: string;
+          reply_text: string;
+          status: string;
+          provider_message_id: string | null;
+          error_code: string;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          connection_id: string;
+          rule_id: string;
+          inbound_message_id: string;
+          contact_wa_id: string;
+          reply_text: string;
+          status?: string;
+          provider_message_id?: string | null;
+          error_code?: string;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          connection_id?: string;
+          rule_id?: string;
+          inbound_message_id?: string;
+          contact_wa_id?: string;
+          reply_text?: string;
+          status?: string;
+          provider_message_id?: string | null;
+          error_code?: string;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_automation_runs_organization_id_connection_id_fkey';
+            columns: ['organization_id', 'connection_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_business_connections';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_automation_runs_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_automation_runs_organization_id_rule_id_fkey';
+            columns: ['organization_id', 'rule_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_automation_rules';
+            referencedColumns: ['organization_id', 'id'];
+          },
+        ];
+      };
       whatsapp_business_connections: {
         Row: {
           id: string;
@@ -10425,6 +10569,143 @@ export interface Database {
         Relationships: [
           {
             foreignKeyName: 'whatsapp_business_connections_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      whatsapp_contacts: {
+        Row: {
+          id: string;
+          organization_id: string;
+          connection_id: string;
+          wa_id: string;
+          display_name: string;
+          opted_out_at: string | null;
+          last_message_at: string;
+          last_read_at: string | null;
+          created_at: string;
+          updated_at: string;
+          template_opted_in_at: string | null;
+          template_opt_in_source: string;
+          template_opt_in_recorded_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          connection_id: string;
+          wa_id: string;
+          display_name?: string;
+          opted_out_at?: string | null;
+          last_message_at?: string;
+          last_read_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          template_opted_in_at?: string | null;
+          template_opt_in_source?: string;
+          template_opt_in_recorded_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          connection_id?: string;
+          wa_id?: string;
+          display_name?: string;
+          opted_out_at?: string | null;
+          last_message_at?: string;
+          last_read_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+          template_opted_in_at?: string | null;
+          template_opt_in_source?: string;
+          template_opt_in_recorded_by?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_contacts_organization_id_connection_id_fkey';
+            columns: ['organization_id', 'connection_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_business_connections';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_contacts_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_contacts_template_opt_in_recorded_by_fkey';
+            columns: ['template_opt_in_recorded_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      whatsapp_messages: {
+        Row: {
+          id: string;
+          organization_id: string;
+          connection_id: string;
+          contact_id: string;
+          provider_message_id: string;
+          direction: string;
+          message_type: string;
+          body: string;
+          status: string;
+          error_code: string;
+          occurred_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          connection_id: string;
+          contact_id: string;
+          provider_message_id: string;
+          direction: string;
+          message_type?: string;
+          body?: string;
+          status?: string;
+          error_code?: string;
+          occurred_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          connection_id?: string;
+          contact_id?: string;
+          provider_message_id?: string;
+          direction?: string;
+          message_type?: string;
+          body?: string;
+          status?: string;
+          error_code?: string;
+          occurred_at?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_messages_organization_id_connection_id_fkey';
+            columns: ['organization_id', 'connection_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_business_connections';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_messages_organization_id_contact_id_fkey';
+            columns: ['organization_id', 'contact_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_contacts';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_messages_organization_id_fkey';
             columns: ['organization_id'];
             isOneToOne: false;
             referencedRelation: 'organizations';
@@ -10796,90 +11077,6 @@ export interface Database {
           p_event_id: string;
         };
         Returns: Json;
-      };
-      whatsapp_workspace_read: {
-        Args: {
-          p_organization_id: string;
-          p_section?: string;
-          p_connection_id?: string | null;
-          p_wa_id?: string | null;
-          p_search?: string;
-          p_page?: number;
-        };
-        Returns: Json;
-      };
-      whatsapp_message_ingest: {
-        Args: {
-          p_organization_id: string;
-          p_connection_id: string;
-          p_change: Json;
-        };
-        Returns: number;
-      };
-      whatsapp_message_log_outbound: {
-        Args: {
-          p_organization_id: string;
-          p_connection_id: string;
-          p_to: string;
-          p_provider_id: string;
-          p_body: string;
-          p_type?: string;
-        };
-        Returns: string;
-      };
-      whatsapp_contact_state: {
-        Args: {
-          p_organization_id: string;
-          p_connection_id: string;
-          p_wa_id: string;
-          p_action: string;
-        };
-        Returns: undefined;
-      };
-      whatsapp_window_open: {
-        Args: {
-          p_organization_id: string;
-          p_connection_id: string;
-          p_wa_id: string;
-        };
-        Returns: boolean;
-      };
-      whatsapp_contact_opted_out: {
-        Args: {
-          p_organization_id: string;
-          p_connection_id: string;
-          p_wa_id: string;
-        };
-        Returns: boolean;
-      };
-      whatsapp_automation_save: {
-        Args: {
-          p_organization_id: string;
-          p_id: string | null;
-          p_version: number;
-          p_input: Json;
-        };
-        Returns: Json;
-      };
-      whatsapp_automation_match: {
-        Args: {
-          p_organization_id: string;
-          p_connection_id: string;
-          p_message_id: string;
-          p_wa_id: string;
-          p_text: string;
-        };
-        Returns: Json;
-      };
-      whatsapp_automation_finish: {
-        Args: {
-          p_organization_id: string;
-          p_run_id: string;
-          p_status: string;
-          p_provider_id?: string | null;
-          p_error?: string;
-        };
-        Returns: undefined;
       };
       brochure_asset_read: {
         Args: {
@@ -12813,6 +13010,35 @@ export interface Database {
         };
         Returns: number;
       };
+      whatsapp_automation_finish: {
+        Args: {
+          p_organization_id: string;
+          p_run_id: string;
+          p_status: string;
+          p_provider_id?: string;
+          p_error?: string;
+        };
+        Returns: undefined;
+      };
+      whatsapp_automation_match: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_message_id: string;
+          p_wa_id: string;
+          p_text: string;
+        };
+        Returns: Json;
+      };
+      whatsapp_automation_save: {
+        Args: {
+          p_organization_id: string;
+          p_id: string;
+          p_version: number;
+          p_input: Json;
+        };
+        Returns: Json;
+      };
       whatsapp_connection_save: {
         Args: {
           p_organization_id: string;
@@ -12826,6 +13052,79 @@ export interface Database {
           p_token_tag: string;
         };
         Returns: string;
+      };
+      whatsapp_contact_create: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+          p_display_name: string;
+          p_consent_source: string;
+        };
+        Returns: string;
+      };
+      whatsapp_contact_opted_out: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+        };
+        Returns: boolean;
+      };
+      whatsapp_contact_state: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+          p_action: string;
+        };
+        Returns: undefined;
+      };
+      whatsapp_contact_template_opted_in: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+        };
+        Returns: boolean;
+      };
+      whatsapp_message_ingest: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_change: Json;
+        };
+        Returns: number;
+      };
+      whatsapp_message_log_outbound: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_to: string;
+          p_provider_id: string;
+          p_body: string;
+          p_type?: string;
+        };
+        Returns: string;
+      };
+      whatsapp_window_open: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+        };
+        Returns: boolean;
+      };
+      whatsapp_workspace_read: {
+        Args: {
+          p_organization_id: string;
+          p_section?: string;
+          p_connection_id?: string;
+          p_wa_id?: string;
+          p_search?: string;
+          p_page?: number;
+        };
+        Returns: Json;
       };
       work_queue: {
         Args: { p_organization_id: string; p_group?: string; p_page?: number };

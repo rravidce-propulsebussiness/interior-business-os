@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     const services = await automationServices('automation.manage');
     const result = await services.client.rpc('whatsapp_automation_save', {
       p_organization_id: services.context.organizationId,
-      p_id: input.data.id ?? null,
+      p_id: input.data.id ?? (null as unknown as string),
       p_version: input.data.version,
       p_input: {
         connection_id: input.data.connectionId,

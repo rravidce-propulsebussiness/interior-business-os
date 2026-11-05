@@ -16,6 +16,8 @@ type Contact = {
   wa_id: string;
   name: string;
   opted_out: boolean;
+  template_opted_in_at?: string | null;
+  template_opt_in_source?: string;
   unread?: boolean;
   last_message_at: string;
   last_message: string;
@@ -149,7 +151,7 @@ export function WhatsAppHub({
 
   const tabs: Array<{ id: Tab; label: string; detail: string }> = [
     { id: 'inbox', label: 'Inbox', detail: 'Messages and replies' },
-    { id: 'contacts', label: 'Contacts', detail: 'People who messaged you' },
+    { id: 'contacts', label: 'Contacts', detail: 'Saved recipients and consent' },
     { id: 'automations', label: 'Automations', detail: 'Automatic replies' },
     {
       id: 'templates',
@@ -222,7 +224,9 @@ export function WhatsAppHub({
         {tab === 'inbox' && (
           <InboxPanel connectionId={connectionId} canManage={canManage} />
         )}
-        {tab === 'contacts' && <ContactsPanel connectionId={connectionId} />}
+        {tab === 'contacts' && (
+          <ContactsPanel connectionId={connectionId} canManage={canManage} />
+        )}
         {tab === 'automations' && (
           <AutomationsPanel connectionId={connectionId} canManage={canManage} />
         )}
@@ -614,49 +618,173 @@ function setStateSearch(set: (value: string) => void, value: string) {
   set(value);
 }
 
-function ContactsPanel({ connectionId }: { connectionId: string }) {
+function ContactsPanel({
+  connectionId,
+  canManage,
+}: {
+  connectionId: string;
+  canManage: boolean;
+}) {
   const state = useWorkspaceRows('contacts', connectionId);
+  const [showAdd, setShowAdd] = useState(false);
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [consentSource, setConsentSource] = useState('');
+  const [confirmOptIn, setConfirmOptIn] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [notice, setNotice] = useState('');
+
+  async function addContact(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSaving(true);
+    setNotice('Saving contact and consent record…');
+    try {
+      const response = await fetch('/api/whatsapp/inbox', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_contact',
+          connectionId,
+          waId: phone.replace(/\D/g, ''),
+          name,
+          consentSource,
+          confirmOptIn,
+        }),
+      });
+      const result = (await response.json()) as { message?: string };
+      if (!response.ok)
+        throw new Error(result.message ?? 'Could not save this contact.');
+      setNotice('Contact saved with its opt-in record.');
+      setName('');
+      setPhone('');
+      setConsentSource('');
+      setConfirmOptIn(false);
+      setShowAdd(false);
+      await state.reload();
+    } catch (error) {
+      setNotice(friendlyError(error, 'Could not save this contact.'));
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
-    <div>
+    <div className="space-y-5">
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
         <div>
-          <h3 className="text-lg font-bold text-stone-900">
-            WhatsApp contacts
-          </h3>
+          <h3 className="text-lg font-bold text-stone-900">WhatsApp contacts</h3>
           <p className="mt-1 text-sm text-stone-500">
-            Contacts are added when a person messages the connected business
-            number.
+            Add recipients only when you have their WhatsApp opt-in. New inbound
+            messages also create contacts automatically.
           </p>
         </div>
-        <input
-          className={`${field} sm:max-w-xs`}
-          value={state.search}
-          onChange={(event) =>
-            setStateSearch(state.setSearch, event.target.value)
-          }
-          placeholder="Search contacts"
-          aria-label="Search contacts"
-        />
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <input
+            className={`${field} sm:max-w-xs`}
+            value={state.search}
+            onChange={(event) =>
+              setStateSearch(state.setSearch, event.target.value)
+            }
+            placeholder="Search contacts"
+            aria-label="Search contacts"
+          />
+          {canManage && (
+            <button
+              type="button"
+              className={primaryButton}
+              onClick={() => {
+                setShowAdd((current) => !current);
+                setNotice('');
+              }}
+            >
+              {showAdd ? 'Cancel' : 'Add contact'}
+            </button>
+          )}
+        </div>
       </div>
+      {showAdd && canManage && (
+        <form
+          onSubmit={addContact}
+          className="grid gap-3 rounded-2xl border border-[#BD5C3F]/20 bg-[#fffaf7] p-4 md:grid-cols-2"
+        >
+          <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
+            Contact name <span className="font-normal">(optional)</span>
+            <input
+              className={field}
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              maxLength={120}
+              placeholder="Customer name"
+            />
+          </label>
+          <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
+            WhatsApp number
+            <input
+              className={field}
+              type="tel"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              placeholder="+919876543210"
+              pattern="\+?[1-9]\d{7,14}"
+              required
+            />
+          </label>
+          <label className="block space-y-1.5 text-xs font-semibold text-stone-600 md:col-span-2">
+            Where did they opt in?
+            <input
+              className={field}
+              value={consentSource}
+              onChange={(event) => setConsentSource(event.target.value)}
+              minLength={3}
+              maxLength={200}
+              placeholder="Website enquiry form, signed form, or WhatsApp START"
+              required
+            />
+          </label>
+          <label className="flex items-start gap-2 text-sm text-stone-700 md:col-span-2">
+            <input
+              type="checkbox"
+              checked={confirmOptIn}
+              onChange={(event) => setConfirmOptIn(event.target.checked)}
+              required
+            />
+            <span>
+              I confirm this person expressly agreed to receive WhatsApp
+              messages from this business.
+            </span>
+          </label>
+          <button className={primaryButton} disabled={saving || !confirmOptIn}>
+            {saving ? 'Saving…' : 'Save contact'}
+          </button>
+        </form>
+      )}
+      {notice && (
+        <p
+          role="status"
+          className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900"
+        >
+          {notice}
+        </p>
+      )}
       {state.error && (
         <p
           role="status"
-          className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800"
+          className="rounded-xl bg-red-50 p-3 text-sm text-red-800"
         >
           {state.error}
         </p>
       )}
-      <div className="mt-5 overflow-hidden rounded-2xl border border-stone-200">
-        <div className="grid grid-cols-[minmax(150px,1.2fr)_minmax(120px,.8fr)_minmax(160px,1.4fr)_110px] gap-3 bg-stone-50 px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-stone-500">
+      <div className="overflow-hidden rounded-2xl border border-stone-200">
+        <div className="grid grid-cols-[minmax(150px,1.2fr)_minmax(120px,.8fr)_minmax(160px,1.4fr)_120px] gap-3 bg-stone-50 px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-stone-500">
           <span>Name</span>
           <span>WhatsApp number</span>
           <span>Latest message</span>
-          <span>Consent</span>
+          <span>Message consent</span>
         </div>
         {state.rows.map((row) => (
           <div
             key={row.id}
-            className="grid grid-cols-[minmax(150px,1.2fr)_minmax(120px,.8fr)_minmax(160px,1.4fr)_110px] items-center gap-3 border-t border-stone-100 px-4 py-3 text-sm"
+            className="grid grid-cols-[minmax(150px,1.2fr)_minmax(120px,.8fr)_minmax(160px,1.4fr)_120px] items-center gap-3 border-t border-stone-100 px-4 py-3 text-sm"
           >
             <div className="truncate font-semibold text-stone-900">
               {row.name || 'Unknown contact'}
@@ -667,16 +795,28 @@ function ContactsPanel({ connectionId }: { connectionId: string }) {
             </div>
             <div>
               <span
-                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${row.opted_out ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}
+                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                  row.opted_out
+                    ? 'bg-red-50 text-red-700'
+                    : row.template_opted_in_at
+                      ? 'bg-emerald-50 text-emerald-700'
+                      : 'bg-amber-50 text-amber-800'
+                }`}
+                title={row.template_opt_in_source || undefined}
               >
-                {row.opted_out ? 'Opted out' : 'Service replies'}
+                {row.opted_out
+                  ? 'Opted out'
+                  : row.template_opted_in_at
+                    ? 'Opted in'
+                    : 'No opt-in'}
               </span>
             </div>
           </div>
         ))}
         {!state.busy && state.rows.length === 0 && (
           <p className="p-8 text-center text-sm text-stone-500">
-            Contacts will appear after the first inbound WhatsApp message.
+            No contacts yet. Add a recipient with recorded opt-in or wait for
+            someone to message this business number.
           </p>
         )}
       </div>
