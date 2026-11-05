@@ -105,10 +105,11 @@ export async function POST(request: Request) {
         { status: 202, headers: privateHeaders },
       );
     }
+    const templateRequest = parsed.data as z.infer<typeof templateSchema>;
     const optedOut = await client.rpc('whatsapp_contact_opted_out', {
       p_organization_id: organizationId,
       p_connection_id: connection.id,
-      p_wa_id: parsed.data.to.replace(/^\+/, ''),
+      p_wa_id: templateRequest.to.replace(/^\+/, ''),
     });
     if (optedOut.error || optedOut.data)
       return Response.json(
@@ -131,8 +132,8 @@ export async function POST(request: Request) {
     );
     const approved = templates.data?.some(
       (template) =>
-        template.name === parsed.data.templateName &&
-        template.language === parsed.data.language &&
+        template.name === templateRequest.templateName &&
+        template.language === templateRequest.language &&
         template.status === 'APPROVED',
     );
     if (!approved)
@@ -142,8 +143,8 @@ export async function POST(request: Request) {
       );
     const approvedTemplate = templates.data?.find(
       (template) =>
-        template.name === parsed.data.templateName &&
-        template.language === parsed.data.language &&
+        template.name === templateRequest.templateName &&
+        template.language === templateRequest.language &&
         template.status === 'APPROVED',
     );
     const bodyText = approvedTemplate?.components?.find(
@@ -157,7 +158,7 @@ export async function POST(request: Request) {
           ),
         )
       : 0;
-    if (parsed.data.parameters.length !== requiredParameters)
+    if (templateRequest.parameters.length !== requiredParameters)
       return Response.json(
         {
           message: `This template needs ${requiredParameters} value${requiredParameters === 1 ? '' : 's'}, one for each placeholder.`,
@@ -171,17 +172,17 @@ export async function POST(request: Request) {
       body: JSON.stringify({
         messaging_product: 'whatsapp',
         recipient_type: 'individual',
-        to: parsed.data.to.replace(/^\+/, ''),
+        to: templateRequest.to.replace(/^\+/, ''),
         type: 'template',
         template: {
-          name: parsed.data.templateName,
-          language: { code: parsed.data.language },
-          ...(parsed.data.parameters.length
+          name: templateRequest.templateName,
+          language: { code: templateRequest.language },
+          ...(templateRequest.parameters.length
             ? {
                 components: [
                   {
                     type: 'body',
-                    parameters: parsed.data.parameters.map((text) => ({
+                    parameters: templateRequest.parameters.map((text) => ({
                       type: 'text',
                       text,
                     })),
@@ -199,9 +200,9 @@ export async function POST(request: Request) {
       {
         p_organization_id: organizationId,
         p_connection_id: connection.id,
-        p_to: parsed.data.to.replace(/^\+/, ''),
+        p_to: templateRequest.to.replace(/^\+/, ''),
         p_provider_id: messageId,
-        p_body: `Template · ${parsed.data.templateName}`,
+        p_body: `Template · ${templateRequest.templateName}`,
         p_type: 'template',
       },
     );
