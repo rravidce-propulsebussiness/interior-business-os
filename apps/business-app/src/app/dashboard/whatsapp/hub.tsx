@@ -1871,7 +1871,16 @@ function TemplatesPanel({
   const [newBody, setNewBody] = useState('');
   const [newCategory, setNewCategory] = useState('UTILITY');
   const [busy, setBusy] = useState(false);
-  const approved = templates.filter((item) => item.status === 'APPROVED');
+  const [refreshing, setRefreshing] = useState(false);
+  const approved = templates.filter((item) =>
+    ['APPROVED', 'ACTIVE'].includes(item.status.toUpperCase()),
+  );
+  const pending = templates.filter((item) =>
+    ['PENDING', 'IN_REVIEW'].includes(item.status.toUpperCase()),
+  );
+  const rejected = templates.filter((item) =>
+    ['REJECTED'].includes(item.status.toUpperCase()),
+  );
 
   function useStarter(item: (typeof starterTemplates)[number]) {
     setNewName(item.name);
@@ -1905,17 +1914,37 @@ function TemplatesPanel({
       if (!response.ok)
         throw new Error(data.message ?? 'Template could not be submitted.');
       setNotice(
-        'Template submitted to Meta. It will be available to send after approval.',
+        'Template submitted to Meta. Its current review status is shown below.',
       );
       setNewName('');
       setNewBody('');
-      await loadTemplates();
+      try {
+        await loadTemplates();
+      } catch {
+        setNotice(
+          'Template submitted to Meta, but its status could not be refreshed. Use Refresh status below.',
+        );
+      }
     } catch (error) {
       setNotice(friendlyError(error, 'Template could not be submitted.'));
     } finally {
       setBusy(false);
     }
   }
+  async function refreshStatus() {
+    setRefreshing(true);
+    try {
+      await loadTemplates();
+      setNotice('Template status refreshed from Meta.');
+    } catch (error) {
+      setNotice(
+        friendlyError(error, 'Could not refresh template status from Meta.'),
+      );
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
   async function sendTemplate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
@@ -2148,6 +2177,89 @@ function TemplatesPanel({
           messages or manage template submissions.
         </p>
       )}
+      <section className="space-y-4 rounded-2xl border border-stone-200 p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-bold text-stone-900">
+              Template approval status
+            </h3>
+            <p className="mt-1 text-sm text-stone-500">
+              Status is read from Meta for the selected WhatsApp number.
+            </p>
+          </div>
+          <button
+            type="button"
+            className={softButton}
+            onClick={() => void refreshStatus()}
+            disabled={refreshing || busy}
+          >
+            {refreshing ? 'Refreshing…' : 'Refresh status'}
+          </button>
+        </div>
+        <div className="flex flex-wrap gap-2 text-xs font-semibold">
+          <span className="rounded-full bg-amber-50 px-3 py-1.5 text-amber-900">
+            Pending · {pending.length}
+          </span>
+          <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-800">
+            Approved · {approved.length}
+          </span>
+          <span className="rounded-full bg-rose-50 px-3 py-1.5 text-rose-800">
+            Rejected · {rejected.length}
+          </span>
+          <span className="rounded-full bg-stone-100 px-3 py-1.5 text-stone-600">
+            {templates.length} total
+          </span>
+        </div>
+        {templates.length ? (
+          <ul className="divide-y divide-stone-100 rounded-xl border border-stone-200">
+            {[...templates]
+              .sort((left, right) => left.name.localeCompare(right.name))
+              .map((item) => {
+                const status = item.status.toUpperCase();
+                const isPending = ['PENDING', 'IN_REVIEW'].includes(status);
+                const isApproved = ['APPROVED', 'ACTIVE'].includes(status);
+                const isRejected = status === 'REJECTED';
+                const label = isPending
+                  ? 'Pending'
+                  : isApproved
+                    ? 'Approved'
+                    : status.replaceAll('_', ' ').toLowerCase();
+                const badge = isPending
+                  ? 'bg-amber-50 text-amber-900'
+                  : isApproved
+                    ? 'bg-emerald-50 text-emerald-800'
+                    : isRejected
+                      ? 'bg-rose-50 text-rose-800'
+                      : 'bg-stone-100 text-stone-700';
+                return (
+                  <li
+                    key={item.id}
+                    className="flex flex-wrap items-center justify-between gap-3 px-3 py-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="break-all text-sm font-semibold text-stone-900">
+                        {item.name}
+                      </p>
+                      <p className="mt-0.5 text-xs text-stone-500">
+                        {item.category ?? 'Template'} · {item.language}
+                      </p>
+                    </div>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-bold ${badge}`}
+                    >
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
+          </ul>
+        ) : (
+          <p className="rounded-xl bg-stone-50 p-4 text-sm text-stone-600">
+            Meta has not returned any templates for this number yet. After
+            submitting, use Refresh status to check again.
+          </p>
+        )}
+      </section>
       {notice && (
         <p
           role="status"
