@@ -13015,7 +13015,7 @@ export interface Database {
           p_organization_id: string;
           p_run_id: string;
           p_status: string;
-          p_provider_id?: string | null;
+          p_provider_id?: string;
           p_error?: string;
         };
         Returns: undefined;
@@ -13033,7 +13033,7 @@ export interface Database {
       whatsapp_automation_save: {
         Args: {
           p_organization_id: string;
-          p_id: string | null;
+          p_id: string;
           p_version: number;
           p_input: Json;
         };
@@ -13119,8 +13119,8 @@ export interface Database {
         Args: {
           p_organization_id: string;
           p_section?: string;
-          p_connection_id?: string | null;
-          p_wa_id?: string | null;
+          p_connection_id?: string;
+          p_wa_id?: string;
           p_search?: string;
           p_page?: number;
         };
