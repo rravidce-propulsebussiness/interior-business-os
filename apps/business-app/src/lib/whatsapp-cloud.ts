@@ -74,7 +74,4 @@ export async function graphRequest<T>(
   return result;
 }
 
-export function validSameOrigin(request: Request) {
-  const origin = request.headers.get('origin');
-  return Boolean(origin && origin === new URL(request.url).origin);
-}
+export { validSameOrigin } from './whatsapp-origin';
