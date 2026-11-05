@@ -44,7 +44,9 @@ export default async function WhatsAppPage() {
         initialMessage={
           error ? 'WhatsApp connection status is temporarily unavailable.' : ''
         }
-        connections={connections.map((connection) => ({
+        connections={connections
+          .filter((connection) => connection.status === 'connected')
+          .map((connection) => ({
           id: connection.id,
           businessName: connection.business_name,
           wabaId: connection.waba_id,
