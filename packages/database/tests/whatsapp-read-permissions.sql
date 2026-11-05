@@ -31,9 +31,9 @@ begin
   end if;
   if not has_function_privilege(
     'authenticated',
-    'public.whatsapp_contact_save(uuid,uuid,text,text)',
+    'public.whatsapp_contact_create(uuid,uuid,text,text,text)',
     'EXECUTE'
   ) then
-    raise exception 'Authenticated members must be able to save WhatsApp contacts';
+    raise exception 'Authenticated members must be able to record WhatsApp opt-in';
   end if;
 end $$;
