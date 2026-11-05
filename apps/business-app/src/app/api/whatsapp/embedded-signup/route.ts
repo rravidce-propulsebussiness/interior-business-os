@@ -2,6 +2,7 @@ import { createCipheriv, randomBytes } from 'node:crypto';
 import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
+import { isAllowedWebsiteUploadOrigin } from '@/app/dashboard/website/upload-origin';
 
 export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'private, no-store' };
@@ -61,8 +62,7 @@ async function graph<T>(
 
 export async function POST(request: Request) {
   try {
-    const origin = request.headers.get('origin');
-    if (!origin || origin !== new URL(request.url).origin)
+    if (!isAllowedWebsiteUploadOrigin(request))
       return Response.json(
         { message: 'Request origin was not accepted.' },
         { status: 403, headers },
