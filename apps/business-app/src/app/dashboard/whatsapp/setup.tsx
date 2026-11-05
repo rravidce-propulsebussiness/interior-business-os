@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 type MetaLoginResponse = {
   authResponse?: { code?: string };
@@ -56,8 +57,11 @@ export function WhatsAppSetup({
   initialMessage: string;
   connections: Connection[];
 }) {
+  const router = useRouter();
   const [sdkReady, setSdkReady] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
+  const [disconnectBusy, setDisconnectBusy] = useState(false);
   const [message, setMessage] = useState(initialMessage);
   const codeRef = useRef<string | null>(null);
   const assetRef = useRef<SignupAsset | null>(null);
@@ -170,6 +174,33 @@ export function WhatsAppSetup({
     }
   }
 
+  async function disconnect(connectionId: string) {
+    if (!canManage || disconnectBusy) return;
+    setDisconnectBusy(true);
+    setMessage('Disconnecting this number from Business OS…');
+    try {
+      const response = await fetch('/api/whatsapp/connections', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId }),
+      });
+      const result = (await response.json()) as { message?: string };
+      if (!response.ok)
+        throw new Error(result.message ?? 'Could not disconnect WhatsApp.');
+      setDisconnectingId(null);
+      setMessage(
+        'Disconnected from Business OS. Message history is retained. Remove Propulse from Meta Business Settings to revoke Meta-side access too.',
+      );
+      router.refresh();
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : 'Could not disconnect WhatsApp.',
+      );
+    } finally {
+      setDisconnectBusy(false);
+    }
+  }
+
   function connect() {
     if (!window.FB || !sdkReady || !canManage || busy) return;
     codeRef.current = null;
@@ -256,34 +287,89 @@ export function WhatsAppSetup({
         {connections.map((connection) => (
           <article
             key={connection.id}
-            className="flex flex-wrap items-center justify-between gap-4 rounded-xl border p-4"
+            className="space-y-3 rounded-xl border p-4"
           >
-            <div>
-              <h3 className="font-semibold">
-                {connection.businessName ||
-                  connection.verifiedName ||
-                  'WhatsApp Business Account'}
-              </h3>
-              <p className="text-sm text-neutral-600">
-                {connection.displayPhoneNumber || connection.phoneNumberId} ·{' '}
-                {connection.status}
-              </p>
-              <p className="text-xs text-neutral-500">
-                WABA {connection.wabaId}
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h3 className="font-semibold">
+                  {connection.businessName ||
+                    connection.verifiedName ||
+                    'WhatsApp Business Account'}
+                </h3>
+                <p className="text-sm text-neutral-600">
+                  {connection.displayPhoneNumber || connection.phoneNumberId} ·{' '}
+                  {connection.status}
+                </p>
+                <p className="text-xs text-neutral-500">
+                  WABA {connection.wabaId}
+                </p>
+                <p className="mt-2 text-xs text-neutral-500">
+                  Connected{' '}
+                  {new Date(connection.lastConnectedAt).toLocaleDateString()}
+                </p>
+              </div>
+              {canManage && connection.status === 'connected' && (
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    className="rounded-lg border border-neutral-300 px-3 py-2 text-sm font-semibold text-neutral-800 hover:bg-neutral-50"
+                    href="https://business.facebook.com/latest/billing_hub/accounts"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Billing &amp; payments in Meta ↗
+                  </a>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-rose-200 px-3 py-2 text-sm font-semibold text-rose-800 hover:bg-rose-50"
+                    onClick={() => setDisconnectingId(connection.id)}
+                    disabled={disconnectBusy}
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              )}
             </div>
-            <p className="text-xs text-neutral-500">
-              Connected{' '}
-              {new Date(connection.lastConnectedAt).toLocaleDateString()}
-            </p>
+            {disconnectingId === connection.id && (
+              <div
+                role="group"
+                aria-label={`Confirm disconnect for ${connection.displayPhoneNumber || connection.phoneNumberId}`}
+                className="space-y-3 rounded-lg border border-rose-200 bg-rose-50 p-3"
+              >
+                <p className="text-sm text-rose-950">
+                  This stops Business OS from using the saved Meta connection.
+                  Existing WhatsApp messages and contacts stay in this
+                  workspace. To revoke Propulse’s access from Meta completely,
+                  remove the integration in Meta Business Settings.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-semibold"
+                    onClick={() => setDisconnectingId(null)}
+                    disabled={disconnectBusy}
+                  >
+                    Keep connected
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-lg bg-rose-700 px-3 py-2 text-sm font-semibold text-white disabled:opacity-50"
+                    onClick={() => void disconnect(connection.id)}
+                    disabled={disconnectBusy}
+                  >
+                    {disconnectBusy ? 'Disconnecting…' : 'Confirm disconnect'}
+                  </button>
+                </div>
+              </div>
+            )}
           </article>
         ))}
       </div>
 
       <p className="text-xs leading-5 text-neutral-500">
         Meta handles authentication and asset selection. Propulse never asks for
-        a Facebook password or verification code. You can disconnect the account
-        from Meta Business Settings.
+        a Facebook password or verification code. The billing link opens Meta so
+        you can add or manage the payment method or funding options available to
+        your account.
       </p>
     </section>
   );
