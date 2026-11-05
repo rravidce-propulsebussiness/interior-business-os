@@ -237,15 +237,16 @@ export function SignedAgreementUploadForm({projectId,contractId,media,recorded=f
  </form>;
 }
 export function SiteReportForm({id}:{id:string}){
+ const indiaToday=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
  return <ProjectForm projectId={id} operation="report_add" label="Save daily work update">
   <div className="pv2-two">
-   <label>Date<input type="date" name="report_date" required defaultValue={new Date().toISOString().slice(0,10)}/></label>
+   <label>Work date<input type="date" name="report_date" required defaultValue={indiaToday}/></label>
    <label>Workers on site<input name="worker_count" type="number" min="0" max="10000" defaultValue="0" required/></label>
   </div>
   <label>Today's completed work<textarea name="completed_work" rows={3} required minLength={5}
    placeholder="Example: Column reinforcement, 12 columns completed"/></label>
-  <label>Tomorrow's work plan<textarea name="tomorrow_plan" rows={3} required minLength={5}
-   placeholder="Example: Begin shuttering and vertical-alignment check"/></label>
+  <label>Next work plan<textarea name="tomorrow_plan" rows={3} required minLength={5}
+   placeholder="What should happen next? Example: Begin shuttering and vertical-alignment check"/></label>
   <div className="pv2-two">
    <label>Workers needed tomorrow<input name="tomorrow_workers" type="number" min="0" max="10000"/></label>
    <label>Blockers / delays<input name="blockers" maxLength={2000} placeholder="Optional"/></label>
