@@ -29,6 +29,8 @@ export function WhatsAppWorkspace({
   const [optedIn, setOptedIn] = useState(false);
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
+  const [templatesCheckedAt, setTemplatesCheckedAt] = useState<Date | null>(null);
   const [newName, setNewName] = useState('');
   const [newBody, setNewBody] = useState('');
   const [newCategory, setNewCategory] = useState('UTILITY');
@@ -36,21 +38,30 @@ export function WhatsAppWorkspace({
   const loadTemplates = useCallback(
     async (id = connectionId) => {
       if (!id) return;
-      const response = await fetch(
-        `/api/whatsapp/templates?connectionId=${encodeURIComponent(id)}`,
-      );
-      const data = (await response.json()) as {
-        templates?: Template[];
-        message?: string;
-      };
-      if (!response.ok)
-        throw new Error(data.message ?? 'Could not load templates.');
-      const list = data.templates ?? [];
-      setTemplates(list);
-      const firstApproved = list.find((item) => item.status === 'APPROVED');
-      if (firstApproved) {
-        setTemplateName(firstApproved.name);
-        setLanguage(firstApproved.language);
+      setTemplatesLoading(true);
+      try {
+        const response = await fetch(
+          `/api/whatsapp/templates?connectionId=${encodeURIComponent(id)}`,
+          { cache: 'no-store' },
+        );
+        const data = (await response.json()) as {
+          templates?: Template[];
+          message?: string;
+        };
+        if (!response.ok)
+          throw new Error(data.message ?? 'Could not load templates.');
+        const list = data.templates ?? [];
+        setTemplates(list);
+        setTemplatesCheckedAt(new Date());
+        const firstApproved = list.find(
+          (item) => ['APPROVED', 'ACTIVE'].includes(item.status.toUpperCase()),
+        );
+        if (firstApproved) {
+          setTemplateName(firstApproved.name);
+          setLanguage(firstApproved.language);
+        }
+      } finally {
+        setTemplatesLoading(false);
       }
     },
     [connectionId],
@@ -128,9 +139,15 @@ export function WhatsAppWorkspace({
       setNewName('');
       setNewBody('');
       setNotice(
-        'Template submitted to Meta. It can be sent after Meta approves it.',
+        'Template submitted to Meta. Check the review status below; sending unlocks after approval.',
       );
-      await loadTemplates();
+      try {
+        await loadTemplates();
+      } catch {
+        setNotice(
+          'Template was submitted to Meta, but its latest status could not be refreshed. Use Refresh status to try again.',
+        );
+      }
     } catch (error) {
       setNotice(
         error instanceof Error
@@ -312,6 +329,113 @@ export function WhatsAppWorkspace({
           {notice}
         </p>
       )}
+      <section
+        aria-labelledby="whatsapp-template-status"
+        className="space-y-4 rounded-xl border border-neutral-200 p-4"
+      >
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 id="whatsapp-template-status" className="font-semibold">
+              Template approval status
+            </h3>
+            <p className="mt-1 text-sm text-neutral-600">
+              Live status for this connected number, refreshed from Meta.
+            </p>
+          </div>
+          <button
+            type="button"
+            className="rounded-lg border border-neutral-300 px-3 py-2 text-sm font-semibold disabled:opacity-50"
+            disabled={templatesLoading || busy}
+            onClick={() =>
+              void loadTemplates().catch((error: unknown) =>
+                setNotice(
+                  error instanceof Error
+                    ? error.message
+                    : 'Could not refresh template status.',
+                ),
+              )
+            }
+          >
+            {templatesLoading ? 'Refreshing…' : 'Refresh status'}
+          </button>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          {(
+            [
+              ['PENDING', 'IN_REVIEW'],
+              ['APPROVED', 'ACTIVE'],
+              ['REJECTED'],
+            ] as string[][]
+          ).map((statuses, index) => {
+            const labels = ['Pending', 'Approved', 'Rejected'];
+            const count = templates.filter((item) =>
+              statuses.includes(item.status.toUpperCase()),
+            ).length;
+            return (
+              <span
+                key={labels[index]}
+                className="rounded-full bg-neutral-100 px-3 py-1.5 font-medium text-neutral-700"
+              >
+                {labels[index]} · {count}
+              </span>
+            );
+          })}
+          <span className="text-neutral-500">
+            {templates.length} template{templates.length === 1 ? '' : 's'} from Meta
+            {templatesCheckedAt
+              ? ` · Updated ${templatesCheckedAt.toLocaleTimeString()}`
+              : ''}
+          </span>
+        </div>
+        {templates.length ? (
+          <ul className="divide-y divide-neutral-100 rounded-lg border border-neutral-100">
+            {[...templates]
+              .sort((left, right) => left.name.localeCompare(right.name))
+              .map((item) => {
+                const status = item.status.toUpperCase();
+                const label =
+                  status === 'APPROVED' || status === 'ACTIVE'
+                    ? 'Approved'
+                    : status === 'PENDING' || status === 'IN_REVIEW'
+                      ? 'Pending'
+                      : status.replaceAll('_', ' ').toLowerCase();
+                const badgeClass =
+                  status === 'APPROVED' || status === 'ACTIVE'
+                    ? 'bg-emerald-50 text-emerald-800'
+                    : status === 'PENDING' || status === 'IN_REVIEW'
+                      ? 'bg-amber-50 text-amber-900'
+                      : status === 'REJECTED' || status === 'DISABLED'
+                        ? 'bg-rose-50 text-rose-800'
+                        : 'bg-neutral-100 text-neutral-700';
+                return (
+                  <li
+                    key={item.id}
+                    className="flex flex-wrap items-center justify-between gap-2 px-3 py-3"
+                  >
+                    <div className="min-w-0">
+                      <p className="break-all text-sm font-medium text-neutral-900">
+                        {item.name}
+                      </p>
+                      <p className="mt-0.5 text-xs text-neutral-500">
+                        {item.category ?? 'Template'} · {item.language}
+                      </p>
+                    </div>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-semibold ${badgeClass}`}
+                    >
+                      {label}
+                    </span>
+                  </li>
+                );
+              })}
+          </ul>
+        ) : (
+          <p className="rounded-lg bg-neutral-50 p-3 text-sm text-neutral-600">
+            No templates were returned by Meta yet. After submission, select
+            Refresh status to check again.
+          </p>
+        )}
+      </section>
       <div className="rounded-xl bg-amber-50 p-4 text-sm text-amber-950">
         <strong>Compliance:</strong> Send only to people who consented to
         WhatsApp messages. Meta-approved templates are required for this
