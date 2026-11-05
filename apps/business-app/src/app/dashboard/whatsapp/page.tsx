@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { automationServices } from '../automations/service';
 import { WhatsAppSetup } from './setup';
 import { WhatsAppHub } from './hub';
@@ -32,27 +31,8 @@ export default async function WhatsAppPage() {
     // The developer test sender is platform-admin-only.
   }
 
-  return (
-    <main
-      id="main-content"
-      tabIndex={-1}
-      className="mx-auto w-full max-w-[1400px] min-w-0 space-y-6 overflow-x-hidden p-4 sm:p-6"
-    >
-      <Link className="underline" href="/dashboard">
-        Dashboard
-      </Link>
-      <header className="space-y-2">
-        <p className="text-sm font-semibold uppercase tracking-wide text-orange-800">
-          Channels
-        </p>
-        <h1 className="text-3xl font-semibold">WhatsApp Business</h1>
-        <p className="max-w-3xl text-sm text-neutral-600">
-          Connect a company-owned WhatsApp Business account through Meta’s
-          secure signup. Your team will manage the connection inside this
-          workspace.
-        </p>
-      </header>
-
+  const settingsPanel = (
+    <div className="space-y-5">
       <WhatsAppSetup
         configured={configured}
         appId={process.env.META_APP_ID ?? ''}
@@ -75,21 +55,6 @@ export default async function WhatsAppPage() {
           lastConnectedAt: connection.last_connected_at,
         }))}
       />
-
-      <WhatsAppHub
-        canManage={services.context.grants.some(
-          (grant) => grant.permission === 'automation.manage',
-        )}
-        connections={connections.map((connection) => ({
-          id: connection.id,
-          name:
-            connection.business_name ||
-            connection.verified_name ||
-            'WhatsApp Business',
-          phone: connection.display_phone_number || connection.phone_number_id,
-          status: connection.status,
-        }))}
-      />
       {canUseMetaTestSender && (
         <WhatsAppTestSender
           configured={Boolean(
@@ -100,6 +65,26 @@ export default async function WhatsAppPage() {
           )}
         />
       )}
+    </div>
+  );
+
+  return (
+    <main id="main-content" tabIndex={-1} className="wa-page-main">
+      <WhatsAppHub
+        canManage={services.context.grants.some(
+          (grant) => grant.permission === 'automation.manage',
+        )}
+        settingsPanel={settingsPanel}
+        connections={connections.map((connection) => ({
+          id: connection.id,
+          name:
+            connection.business_name ||
+            connection.verified_name ||
+            'WhatsApp Business',
+          phone: connection.display_phone_number || connection.phone_number_id,
+          status: connection.status,
+        }))}
+      />
     </main>
   );
 }

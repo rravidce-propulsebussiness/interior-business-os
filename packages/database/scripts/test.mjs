@@ -1,5 +1,6 @@
 import { psql, file } from './postgres.mjs';
 console.log(psql(['-f', file('tests/isolation.sql')]));
+console.log(psql(['-f', file('tests/whatsapp-read-permissions.sql')]));
 console.log(psql(['-f', file('tests/company-applications.sql')]));
 console.log(psql(['-f', file('tests/self-service-companies.sql')]));
 console.log(psql(['-f', file('tests/propulse-company-sync.sql')]));

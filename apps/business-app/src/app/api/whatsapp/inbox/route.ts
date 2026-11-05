@@ -29,7 +29,10 @@ export async function GET(request: Request) {
       p_search: search,
       p_page: page,
     });
-    if (result.error) throw new DomainError('FORBIDDEN');
+    if (result.error) {
+      if (result.error.code === '42501') throw new DomainError('FORBIDDEN');
+      throw new Error('WHATSAPP_WORKSPACE_READ_FAILED');
+    }
     return Response.json(result.data ?? {}, { headers: privateHeaders });
   } catch (error) {
     const failure = safeFailure(error);
@@ -38,8 +41,12 @@ export async function GET(request: Request) {
         error instanceof DomainError
           ? error.code === 'UNAUTHENTICATED'
             ? 401
-            : 403
-          : 400,
+            : error.code === 'VALIDATION_FAILED'
+              ? 400
+              : 403
+          : error instanceof z.ZodError
+            ? 400
+            : 500,
       headers: privateHeaders,
     });
   }
@@ -110,7 +117,9 @@ export async function POST(request: Request) {
           ? error.code === 'UNAUTHENTICATED'
             ? 401
             : 403
-          : 400,
+          : error instanceof z.ZodError
+            ? 400
+            : 500,
       headers: privateHeaders,
     });
   }

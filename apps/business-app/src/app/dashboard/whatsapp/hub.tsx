@@ -1,6 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import './whatsapp-inbox.css';
 
 type Connection = { id: string; name: string; phone: string; status: string };
 type Template = {
@@ -44,7 +46,15 @@ type Rule = {
   reply_text: string;
   status: 'active' | 'paused';
 };
-type Tab = 'inbox' | 'contacts' | 'automations' | 'templates';
+type Tab =
+  | 'overview'
+  | 'inbox'
+  | 'contacts'
+  | 'broadcasts'
+  | 'templates'
+  | 'automations'
+  | 'analytics'
+  | 'settings';
 
 const field =
   'w-full rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm text-stone-900 outline-none transition focus:border-[#BD5C3F] focus:ring-4 focus:ring-[#BD5C3F]/10';
@@ -118,14 +128,24 @@ function friendlyError(value: unknown, fallback: string) {
 export function WhatsAppHub({
   connections,
   canManage,
+  settingsPanel,
 }: {
   connections: Connection[];
   canManage: boolean;
+  settingsPanel?: ReactNode;
 }) {
   const [tab, setTab] = useState<Tab>('inbox');
   const [connectionId, setConnectionId] = useState(connections[0]?.id ?? '');
   const [templates, setTemplates] = useState<Template[]>([]);
   const [notice, setNotice] = useState('');
+  const [contactModal, setContactModal] = useState<{
+    name: string;
+    phone: string;
+    consentSource: string;
+    confirmOptIn: boolean;
+  } | null>(null);
+  const [contactSaving, setContactSaving] = useState(false);
+  const [contactRefresh, setContactRefresh] = useState(0);
 
   const loadTemplates = useCallback(async () => {
     if (!connectionId) return;
@@ -149,103 +169,472 @@ export function WhatsAppHub({
     );
   }, [connectionId, loadTemplates]);
 
-  const tabs: Array<{ id: Tab; label: string; detail: string }> = [
-    { id: 'inbox', label: 'Inbox', detail: 'Messages and replies' },
-    { id: 'contacts', label: 'Contacts', detail: 'Saved recipients and consent' },
-    { id: 'automations', label: 'Automations', detail: 'Automatic replies' },
-    {
-      id: 'templates',
-      label: 'Templates',
-      detail: 'Approved and starter templates',
-    },
+  const tabs: Array<{ id: Tab; label: string; icon: string }> = [
+    { id: 'inbox', label: 'Inbox', icon: 'message' },
+    { id: 'contacts', label: 'Contacts', icon: 'people' },
+    { id: 'broadcasts', label: 'Broadcasts', icon: 'broadcast' },
+    { id: 'templates', label: 'Templates', icon: 'template' },
+    { id: 'automations', label: 'Automations', icon: 'automation' },
+    { id: 'analytics', label: 'Analytics', icon: 'analytics' },
+    { id: 'settings', label: 'Settings', icon: 'settings' },
   ];
 
   if (!connections.length) return null;
 
+  async function saveContact(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!contactModal || !connectionId) return;
+    setContactSaving(true);
+    setNotice('Saving contact and opt-in record…');
+    try {
+      const response = await fetch('/api/whatsapp/inbox', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'add_contact',
+          connectionId,
+          waId: contactModal.phone.replace(/\D/g, ''),
+          name: contactModal.name,
+          consentSource: contactModal.consentSource,
+          confirmOptIn: contactModal.confirmOptIn,
+        }),
+      });
+      const result = (await response.json()) as { message?: string };
+      if (!response.ok)
+        throw new Error(result.message ?? 'Could not save this contact.');
+      setContactRefresh((value) => value + 1);
+      setContactModal(null);
+      setNotice('Contact saved with its opt-in record.');
+      setTab('contacts');
+    } catch (error) {
+      setNotice(friendlyError(error, 'Could not save this contact.'));
+    } finally {
+      setContactSaving(false);
+    }
+  }
+
   return (
-    <section className="overflow-hidden rounded-[28px] border border-stone-200 bg-white shadow-[0_18px_55px_-36px_rgba(67,37,31,.45)]">
-      <div className="border-b border-stone-200 bg-gradient-to-r from-[#fffaf7] via-white to-[#fff5ef] px-5 py-6 sm:px-7">
-        <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[.18em] text-[#BD5C3F]">
-              ProPulse messaging
-            </p>
-            <h2 className="mt-2 text-2xl font-bold tracking-tight text-[#44231f]">
-              WhatsApp workspace
-            </h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-stone-600">
-              Keep customer conversations, contacts, approved templates and
-              automatic replies together.
-            </p>
-          </div>
-          <label className="block w-full space-y-1 text-xs font-semibold text-stone-600 xl:max-w-sm">
-            Connected business number
-            <select
-              className={field}
-              value={connectionId}
-              onChange={(event) => setConnectionId(event.target.value)}
+    <section className="wa-shell">
+      <aside className="wa-sidebar" aria-label="ProPulse messaging navigation">
+        <div className="wa-brand">
+          <span className="wa-brand-mark">P</span>
+          <span>
+            <strong>ProPulse</strong>
+            <small>Business OS</small>
+          </span>
+        </div>
+        <div className="wa-nav-label">WORKSPACE</div>
+        <nav className="wa-nav">
+          <button
+            className={`wa-nav-item ${tab === 'overview' ? 'wa-nav-item-active' : ''}`}
+            type="button"
+            aria-current={tab === 'overview' ? 'page' : undefined}
+            onClick={() => setTab('overview')}
+          >
+            <NavIcon kind="overview" /> Overview
+          </button>
+          {tabs.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                setTab(item.id);
+                setNotice('');
+              }}
+              aria-current={tab === item.id ? 'page' : undefined}
+              className={`wa-nav-item ${tab === item.id ? 'wa-nav-item-active' : ''}`}
             >
-              {connections.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name} · {item.phone} · {item.status}
-                </option>
-              ))}
-            </select>
-          </label>
+              <NavIcon kind={item.icon} /> {item.label}
+              {item.id === 'inbox' && (
+                <span className="wa-nav-count">{/* filled from inbox */}•</span>
+              )}
+            </button>
+          ))}
+        </nav>
+        <div className="wa-sidebar-promo">
+          <span className="wa-promo-icon">
+            <NavIcon kind="automation" />
+          </span>
+          <strong>Grow with automations</strong>
+          <p>Save time and respond automatically.</p>
+          <button type="button" onClick={() => setTab('automations')}>
+            Go to Automations <span>→</span>
+          </button>
+        </div>
+        <div className="wa-account-health">
+          <span className="wa-online-dot" />
+          <span>
+            <strong>WhatsApp account</strong>
+            <small>Connected</small>
+          </span>
+          <span className="wa-account-ellipsis">•••</span>
+        </div>
+      </aside>
+
+      <div className="wa-main">
+        <header className="wa-topbar">
+          <div className="wa-topbar-title">
+            <span className="wa-whatsapp-mark">◉</span>
+            <div>
+              <h1>WhatsApp Inbox</h1>
+              <p>Team conversations and customer care</p>
+            </div>
+          </div>
+          <div className="wa-topbar-actions">
+            <label className="wa-connection-select">
+              <span aria-hidden="true">▦</span>
+              <select
+                value={connectionId}
+                onChange={(event) => setConnectionId(event.target.value)}
+                aria-label="Connected business number"
+              >
+                {connections.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name} · {item.phone}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <span className="wa-connected-badge">
+              <i /> Connected
+            </span>
+            <div className="wa-topbar-avatars" aria-label="Workspace team">
+              <span title="ProPulse workspace">PP</span>
+            </div>
+            <button
+              className="wa-icon-button"
+              type="button"
+              aria-label="Search"
+              onClick={() => setTab('contacts')}
+            >
+              <NavIcon kind="search" />
+            </button>
+            <button
+              className="wa-icon-button wa-notification"
+              type="button"
+              aria-label="Notifications"
+            >
+              <NavIcon kind="bell" />
+            </button>
+            <button
+              className="wa-new-message"
+              type="button"
+              onClick={() => setTab('templates')}
+            >
+              <NavIcon kind="compose" /> New message
+            </button>
+          </div>
+        </header>
+
+        <div className="wa-content">
+          <div className="wa-section-heading">
+            <div>
+              <span className="wa-eyebrow">PROPULSE MESSAGING</span>
+              <h2>
+                {tab === 'overview'
+                  ? 'Overview'
+                  : tab === 'inbox'
+                    ? 'Inbox'
+                    : tabs.find((item) => item.id === tab)?.label}
+              </h2>
+            </div>
+            <button
+              type="button"
+              className="wa-add-contact"
+              onClick={() =>
+                setContactModal({
+                  name: '',
+                  phone: '',
+                  consentSource: '',
+                  confirmOptIn: false,
+                })
+              }
+            >
+              <NavIcon kind="people" /> Add contact
+            </button>
+          </div>
+          {notice && (
+            <p className="wa-global-notice" role="status">
+              {notice}
+            </p>
+          )}
+          {tab === 'overview' && (
+            <OverviewPanel
+              connectionId={connectionId}
+              refreshKey={contactRefresh}
+              onNavigate={setTab}
+            />
+          )}
+          {tab === 'inbox' && (
+            <InboxPanel
+              connectionId={connectionId}
+              canManage={canManage}
+              refreshKey={contactRefresh}
+              onEditContact={(contact) =>
+                setContactModal({
+                  name: contact.name,
+                  phone: `+${contact.wa_id}`,
+                  consentSource: '',
+                  confirmOptIn: false,
+                })
+              }
+              onNavigate={setTab}
+            />
+          )}
+          {tab === 'contacts' && (
+            <ContactsPanel
+              connectionId={connectionId}
+              refreshKey={contactRefresh}
+              onAddContact={() =>
+                setContactModal({
+                  name: '',
+                  phone: '',
+                  consentSource: '',
+                  confirmOptIn: false,
+                })
+              }
+            />
+          )}
+          {tab === 'automations' && (
+            <AutomationsPanel
+              connectionId={connectionId}
+              canManage={canManage}
+            />
+          )}
+          {tab === 'templates' && (
+            <TemplatesPanel
+              connectionId={connectionId}
+              canManage={canManage}
+              templates={templates}
+              loadTemplates={loadTemplates}
+              notice={notice}
+              setNotice={setNotice}
+            />
+          )}
+          {tab === 'broadcasts' && (
+            <BroadcastsPanel templates={templates} onNavigate={setTab} />
+          )}
+          {tab === 'analytics' && (
+            <AnalyticsPanel
+              connectionId={connectionId}
+              refreshKey={contactRefresh}
+            />
+          )}
+          {tab === 'settings' && (
+            <SettingsPanel
+              connections={connections}
+              settingsPanel={settingsPanel}
+            />
+          )}
         </div>
       </div>
 
-      <nav
-        className="flex gap-1 overflow-x-auto border-b border-stone-200 px-4 py-2 sm:px-6"
-        aria-label="WhatsApp workspace"
-      >
-        {tabs.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => {
-              setTab(item.id);
-              setNotice('');
-            }}
-            aria-current={tab === item.id ? 'page' : undefined}
-            className={`whitespace-nowrap rounded-xl px-4 py-2.5 text-left transition ${tab === item.id ? 'bg-[#88352B] text-white shadow-sm' : 'text-stone-600 hover:bg-stone-100'}`}
+      {contactModal && (
+        <div
+          className="wa-modal-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setContactModal(null);
+          }}
+        >
+          <form
+            className="wa-contact-modal"
+            onSubmit={saveContact}
+            aria-labelledby="wa-contact-modal-title"
           >
-            <span className="block text-sm font-semibold">{item.label}</span>
-            <span
-              className={`hidden text-[11px] sm:block ${tab === item.id ? 'text-white/75' : 'text-stone-400'}`}
-            >
-              {item.detail}
-            </span>
-          </button>
-        ))}
-      </nav>
-
-      <div className="p-4 sm:p-6">
-        {tab === 'inbox' && (
-          <InboxPanel connectionId={connectionId} canManage={canManage} />
-        )}
-        {tab === 'contacts' && (
-          <ContactsPanel connectionId={connectionId} canManage={canManage} />
-        )}
-        {tab === 'automations' && (
-          <AutomationsPanel connectionId={connectionId} canManage={canManage} />
-        )}
-        {tab === 'templates' && (
-          <TemplatesPanel
-            connectionId={connectionId}
-            canManage={canManage}
-            templates={templates}
-            loadTemplates={loadTemplates}
-            notice={notice}
-            setNotice={setNotice}
-          />
-        )}
-      </div>
+            <div className="wa-modal-heading">
+              <div>
+                <span className="wa-eyebrow">CONTACT BOOK</span>
+                <h2 id="wa-contact-modal-title">
+                  {contactModal.name
+                    ? 'Edit contact details'
+                    : 'Add a WhatsApp contact'}
+                </h2>
+              </div>
+              <button
+                type="button"
+                className="wa-modal-close"
+                aria-label="Close"
+                onClick={() => setContactModal(null)}
+              >
+                ×
+              </button>
+            </div>
+            <p className="wa-modal-copy">
+              Record the source of the customer’s WhatsApp opt-in before saving
+              this contact for business-initiated messages.
+            </p>
+            <label>
+              Name
+              <input
+                required
+                maxLength={120}
+                value={contactModal.name}
+                onChange={(event) =>
+                  setContactModal({ ...contactModal, name: event.target.value })
+                }
+                placeholder="Customer name"
+              />
+            </label>
+            <label>
+              WhatsApp number
+              <input
+                required
+                value={contactModal.phone}
+                onChange={(event) =>
+                  setContactModal({
+                    ...contactModal,
+                    phone: event.target.value,
+                  })
+                }
+                placeholder="+919876543210"
+                pattern="\+[1-9]\d{7,14}"
+              />
+            </label>
+            <label>
+              Where did they opt in?
+              <input
+                required
+                minLength={3}
+                maxLength={200}
+                value={contactModal.consentSource}
+                onChange={(event) =>
+                  setContactModal({
+                    ...contactModal,
+                    consentSource: event.target.value,
+                  })
+                }
+                placeholder="Website enquiry form, signed form, or WhatsApp START"
+              />
+            </label>
+            <label className="wa-consent-note">
+              <input
+                type="checkbox"
+                required
+                checked={contactModal.confirmOptIn}
+                onChange={(event) =>
+                  setContactModal({
+                    ...contactModal,
+                    confirmOptIn: event.target.checked,
+                  })
+                }
+              />
+              I confirm this person expressly agreed to receive WhatsApp
+              messages from this business.
+            </label>
+            <div className="wa-modal-actions">
+              <button
+                type="button"
+                className="wa-modal-cancel"
+                onClick={() => setContactModal(null)}
+              >
+                Cancel
+              </button>
+              <button
+                className="wa-new-message"
+                disabled={contactSaving || !contactModal.confirmOptIn}
+              >
+                {contactSaving ? 'Saving…' : 'Save contact'}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </section>
   );
 }
 
-function useWorkspaceRows(section: 'inbox' | 'contacts', connectionId: string) {
+function NavIcon({ kind }: { kind: string }) {
+  const paths: Record<string, ReactNode> = {
+    overview: (
+      <>
+        <path d="m3 10 9-7 9 7" />
+        <path d="M5 9v11h14V9M9 20v-6h6v6" />
+      </>
+    ),
+    message: (
+      <>
+        <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 4a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z" />
+      </>
+    ),
+    people: (
+      <>
+        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+        <circle cx="10" cy="7" r="4" />
+        <path d="M20 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8" />
+      </>
+    ),
+    broadcast: (
+      <>
+        <path d="m3 11 18-5-5 18-4-8-9-5z" />
+        <path d="m12 16 4-5" />
+      </>
+    ),
+    template: (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2" />
+        <path d="M7 8h10M7 12h10M7 16h5" />
+      </>
+    ),
+    automation: (
+      <>
+        <path d="m13 2-3 8h7l-6 12 2-9H6l7-11z" />
+      </>
+    ),
+    analytics: (
+      <>
+        <path d="M3 3v18h18" />
+        <path d="m19 9-5 5-4-4-5 5" />
+      </>
+    ),
+    settings: (
+      <>
+        <circle cx="12" cy="12" r="3" />
+        <path
+          d="m19.4 15 .1.1 1.4 1.1-1.4 2.4-1.7-.7a8 8 0 0 1-1.6.9l-.3 1.8h-2.8l-.3-1.8a8 8 0 0 1-1.6-.9l-1.7.7-1.4-2.4 1.4-1.1a8 8 0 0 1 0-1.9l-1.4-1.1 1.4-2.4 1.7.7a8 8 0 0 1 1.6-.9l.3-1.8h2.8l.3 1.8a8 8 0 0 1 1.6.9l1.7-.7 1.4 2.4-1.4 1.1a8 8 0 0 1-.1 1.8z"
+          transform="translate(-2 -2)"
+        />
+      </>
+    ),
+    search: (
+      <>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-4-4" />
+      </>
+    ),
+    bell: (
+      <>
+        <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+        <path d="M10 21h4" />
+      </>
+    ),
+    compose: (
+      <>
+        <path d="M12 20h9" />
+        <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
+      </>
+    ),
+  };
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      {paths[kind] ?? paths.message}
+    </svg>
+  );
+}
+
+function useWorkspaceRows(
+  section: 'inbox' | 'contacts',
+  connectionId: string,
+  refreshKey = 0,
+) {
   const [rows, setRows] = useState<Contact[]>([]);
   const [total, setTotal] = useState(0);
   const [unread, setUnread] = useState(0);
@@ -280,22 +669,31 @@ function useWorkspaceRows(section: 'inbox' | 'contacts', connectionId: string) {
   }, [connectionId, search, section]);
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, refreshKey]);
   return { rows, total, unread, search, setSearch, busy, error, reload: load };
 }
 
 function InboxPanel({
   connectionId,
   canManage,
+  refreshKey,
+  onEditContact,
+  onNavigate,
 }: {
   connectionId: string;
   canManage: boolean;
+  refreshKey: number;
+  onEditContact: (contact: Contact) => void;
+  onNavigate: (tab: Tab) => void;
 }) {
-  const state = useWorkspaceRows('inbox', connectionId);
+  const state = useWorkspaceRows('inbox', connectionId, refreshKey);
   const [selected, setSelected] = useState('');
   const [thread, setThread] = useState<Message[]>([]);
   const [contact, setContact] = useState<Contact | null>(null);
   const [body, setBody] = useState('');
+  const [conversationFilter, setConversationFilter] = useState<
+    'all' | 'unread'
+  >('all');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
 
@@ -334,7 +732,7 @@ function InboxPanel({
       void loadThread(selected).catch((error: unknown) =>
         setNotice(friendlyError(error, 'Could not open conversation.')),
       );
-  }, [loadThread, selected]);
+  }, [loadThread, selected, state.rows]);
 
   async function markRead(waId: string) {
     await fetch('/api/whatsapp/inbox', {
@@ -402,10 +800,15 @@ function InboxPanel({
     }
   }
 
+  const visibleRows =
+    conversationFilter === 'unread'
+      ? state.rows.filter((row) => row.unread)
+      : state.rows;
+
   return (
-    <div className="grid min-h-[560px] overflow-hidden rounded-2xl border border-stone-200 lg:grid-cols-[330px_minmax(0,1fr)]">
-      <aside className="flex min-h-[360px] flex-col border-b border-stone-200 bg-stone-50/70 lg:border-b-0 lg:border-r">
-        <div className="border-b border-stone-200 p-4">
+    <div className="wa-inbox-grid">
+      <aside className="wa-conversation-panel">
+        <div className="wa-conversation-toolbar">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-bold text-stone-900">Conversations</h3>
@@ -422,6 +825,35 @@ function InboxPanel({
               Refresh
             </button>
           </div>
+          <div
+            className="wa-list-filters"
+            role="tablist"
+            aria-label="Conversation filters"
+          >
+            <button
+              type="button"
+              className={conversationFilter === 'all' ? 'wa-filter-active' : ''}
+              onClick={() => setConversationFilter('all')}
+            >
+              All <span>({state.total})</span>
+            </button>
+            <button
+              type="button"
+              className={
+                conversationFilter === 'unread' ? 'wa-filter-active' : ''
+              }
+              onClick={() => setConversationFilter('unread')}
+            >
+              Unread <span>({state.unread})</span>
+            </button>
+            <button
+              type="button"
+              disabled
+              title="Conversation assignments are not configured yet"
+            >
+              Assigned to me <span>(0)</span>
+            </button>
+          </div>
           <input
             className={`${field} mt-3`}
             value={state.search}
@@ -432,7 +864,7 @@ function InboxPanel({
             aria-label="Search conversations"
           />
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="wa-conversation-list">
           {state.busy && (
             <p className="p-5 text-sm text-stone-500">Loading conversations…</p>
           )}
@@ -447,7 +879,7 @@ function InboxPanel({
               </p>
             </div>
           )}
-          {state.rows.map((row) => (
+          {visibleRows.map((row) => (
             <button
               key={row.id}
               type="button"
@@ -479,12 +911,13 @@ function InboxPanel({
                     Opted out
                   </span>
                 )}
+                <span className="wa-contact-label">WhatsApp</span>
               </div>
             </button>
           ))}
         </div>
       </aside>
-      <div className="flex min-h-[520px] min-w-0 flex-col bg-[#fbfaf8]">
+      <div className="wa-thread-column">
         {!selected || !contact ? (
           <div className="m-auto max-w-sm px-6 text-center">
             <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[#f8e9e3] text-2xl">
@@ -499,22 +932,36 @@ function InboxPanel({
           </div>
         ) : (
           <>
-            <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 bg-white px-5 py-4">
-              <div>
-                <h3 className="font-bold text-stone-900">
-                  {contact.name || `+${contact.wa_id}`}
-                </h3>
-                <p className="mt-0.5 text-xs text-stone-500">
-                  +{contact.wa_id} · last activity{' '}
-                  {readableDate(contact.last_message_at)}
-                </p>
+            <header className="wa-thread-header">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="wa-contact-avatar">
+                  {(contact.name || contact.wa_id).slice(0, 1).toUpperCase()}
+                </span>
+                <div className="min-w-0">
+                  <h3 className="truncate font-bold text-stone-900">
+                    {contact.name || `+${contact.wa_id}`}
+                  </h3>
+                  <p className="mt-0.5 text-xs text-stone-500">
+                    Last activity {readableDate(contact.last_message_at)}
+                  </p>
+                </div>
               </div>
               <div className="flex items-center gap-2">
-                <span
-                  className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${contact.opted_out ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}
+                <button
+                  type="button"
+                  className="wa-icon-button"
+                  aria-label="Edit contact details"
+                  onClick={() => onEditContact(contact)}
                 >
-                  {contact.opted_out ? 'Opted out' : 'Service replies enabled'}
-                </span>
+                  <NavIcon kind="people" />
+                </button>
+                <button
+                  type="button"
+                  className="wa-icon-button"
+                  aria-label="More contact actions"
+                >
+                  •••
+                </button>
                 {canManage && !contact.opted_out && (
                   <button
                     className={softButton}
@@ -527,7 +974,7 @@ function InboxPanel({
                 )}
               </div>
             </header>
-            <div className="flex-1 space-y-3 overflow-y-auto p-4 sm:p-6">
+            <div className="wa-message-history">
               {thread.length === 0 && (
                 <p className="rounded-xl bg-white p-4 text-sm text-stone-500">
                   No messages in this conversation yet.
@@ -539,7 +986,7 @@ function InboxPanel({
                   className={`flex ${item.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
                 >
                   <article
-                    className={`max-w-[min(78%,560px)] rounded-2xl px-4 py-3 shadow-sm ${item.direction === 'outbound' ? 'rounded-br-md bg-[#88352B] text-white' : 'rounded-bl-md border border-stone-200 bg-white text-stone-800'}`}
+                    className={`wa-message-bubble ${item.direction === 'outbound' ? 'wa-message-out' : 'wa-message-in'}`}
                   >
                     <p className="whitespace-pre-wrap break-words text-sm leading-6">
                       {item.body}
@@ -556,10 +1003,7 @@ function InboxPanel({
                 </div>
               ))}
             </div>
-            <form
-              onSubmit={sendReply}
-              className="border-t border-stone-200 bg-white p-4"
-            >
+            <form onSubmit={sendReply} className="wa-composer">
               {!canManage ? (
                 <p className="rounded-xl bg-stone-50 p-3 text-sm text-stone-600">
                   You have view access. Ask an administrator with WhatsApp
@@ -572,29 +1016,58 @@ function InboxPanel({
                 </p>
               ) : (
                 <>
-                  <label className="sr-only" htmlFor="whatsapp-reply">
-                    Write a WhatsApp reply
-                  </label>
-                  <textarea
-                    id="whatsapp-reply"
-                    className={field}
-                    rows={3}
-                    maxLength={4096}
-                    value={body}
-                    onChange={(event) => setBody(event.target.value)}
-                    placeholder="Write a reply…"
-                  />
+                  <div className="wa-composer-row">
+                    <button
+                      type="button"
+                      className="wa-composer-attachment"
+                      aria-label="Attachments unavailable"
+                      title="Attachment messaging is not supported yet"
+                      disabled
+                    >
+                      ＋
+                    </button>
+                    <button
+                      type="button"
+                      className="wa-composer-template"
+                      onClick={() => onNavigate('templates')}
+                    >
+                      ▤ Template⌄
+                    </button>
+                    <label className="wa-composer-input">
+                      <span className="sr-only">Write a WhatsApp reply</span>
+                      <textarea
+                        id="whatsapp-reply"
+                        rows={1}
+                        maxLength={4096}
+                        value={body}
+                        onChange={(event) => setBody(event.target.value)}
+                        placeholder="Type a message…"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className="wa-composer-emoji"
+                      aria-label="Insert smile emoji"
+                      onClick={() => setBody((value) => `${value}🙂`)}
+                    >
+                      ☺
+                    </button>
+                    <button
+                      className="wa-send-button"
+                      disabled={busy || !body.trim()}
+                      aria-label="Send message"
+                    >
+                      {busy ? '…' : '➤'}
+                    </button>
+                  </div>
                   <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                     <p className="text-xs text-stone-500">
                       Free-form replies work within 24 hours of the customer’s
                       latest message.
                     </p>
-                    <button
-                      className={primaryButton}
-                      disabled={busy || !body.trim()}
-                    >
-                      {busy ? 'Sending…' : 'Send reply'}
-                    </button>
+                    <span className="text-xs text-stone-400">
+                      Press send to reply
+                    </span>
                   </div>
                 </>
               )}
@@ -610,6 +1083,12 @@ function InboxPanel({
           </p>
         )}
       </div>
+      <ContactProfile
+        contact={contact}
+        onEdit={onEditContact}
+        onOptOut={() => void changeOptOut()}
+        onNavigate={onNavigate}
+      />
     </div>
   );
 }
@@ -618,67 +1097,425 @@ function setStateSearch(set: (value: string) => void, value: string) {
   set(value);
 }
 
-function ContactsPanel({
-  connectionId,
-  canManage,
+function ContactProfile({
+  contact,
+  onEdit,
+  onOptOut,
+  onNavigate,
 }: {
-  connectionId: string;
-  canManage: boolean;
+  contact: Contact | null;
+  onEdit: (contact: Contact) => void;
+  onOptOut: () => void;
+  onNavigate: (tab: Tab) => void;
 }) {
-  const state = useWorkspaceRows('contacts', connectionId);
-  const [showAdd, setShowAdd] = useState(false);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [consentSource, setConsentSource] = useState('');
-  const [confirmOptIn, setConfirmOptIn] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState('');
-
-  async function addContact(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setSaving(true);
-    setNotice('Saving contact and consent record…');
-    try {
-      const response = await fetch('/api/whatsapp/inbox', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'add_contact',
-          connectionId,
-          waId: phone.replace(/\D/g, ''),
-          name,
-          consentSource,
-          confirmOptIn,
-        }),
-      });
-      const result = (await response.json()) as { message?: string };
-      if (!response.ok)
-        throw new Error(result.message ?? 'Could not save this contact.');
-      setNotice('Contact saved with its opt-in record.');
-      setName('');
-      setPhone('');
-      setConsentSource('');
-      setConfirmOptIn(false);
-      setShowAdd(false);
-      await state.reload();
-    } catch (error) {
-      setNotice(friendlyError(error, 'Could not save this contact.'));
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <div className="space-y-5">
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
-        <div>
-          <h3 className="text-lg font-bold text-stone-900">WhatsApp contacts</h3>
-          <p className="mt-1 text-sm text-stone-500">
-            Add recipients only when you have their WhatsApp opt-in. New inbound
-            messages also create contacts automatically.
+  if (!contact) {
+    return (
+      <aside className="wa-contact-profile">
+        <div className="wa-profile-empty">
+          <span className="wa-profile-empty-mark">
+            <NavIcon kind="people" />
+          </span>
+          <strong>Contact details</strong>
+          <p>
+            Select a conversation to view customer details, reply eligibility,
+            and quick actions.
           </p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <div className="wa-quick-actions">
+          <h3>Quick actions</h3>
+          <div className="wa-quick-action-grid">
+            <button type="button" onClick={() => onNavigate('automations')}>
+              <NavIcon kind="automation" />
+              Automations
+            </button>
+            <button type="button" onClick={() => onNavigate('templates')}>
+              <NavIcon kind="template" />
+              Templates
+            </button>
+            <button type="button" onClick={() => onNavigate('broadcasts')}>
+              <NavIcon kind="broadcast" />
+              Campaigns
+            </button>
+          </div>
+        </div>
+      </aside>
+    );
+  }
+  return (
+    <aside className="wa-contact-profile">
+      <div className="wa-profile-person">
+        <span className="wa-profile-avatar">
+          {(contact.name || contact.wa_id).slice(0, 1).toUpperCase()}
+        </span>
+        <h3>{contact.name || 'WhatsApp contact'}</h3>
+        <p>+{contact.wa_id}</p>
+        <span className="wa-profile-number-copy">WhatsApp</span>
+      </div>
+      <div className="wa-profile-section">
+        <div className="wa-profile-section-heading">
+          <h4>Tags</h4>
+          <span className="wa-profile-muted">Channel</span>
+        </div>
+        <div className="wa-tag-list">
+          <span className="wa-tag">WhatsApp</span>
+          {contact.opted_out && (
+            <span className="wa-tag wa-tag-danger">Opted out</span>
+          )}
+        </div>
+      </div>
+      <div className="wa-profile-meta">
+        <div>
+          <span>Assigned to</span>
+          <strong>Unassigned</strong>
+        </div>
+        <div>
+          <span>Source</span>
+          <strong>WhatsApp</strong>
+        </div>
+        <div>
+          <span>Consent</span>
+          <strong
+            className={
+              contact.opted_out
+                ? 'wa-consent-bad'
+                : contact.template_opted_in_at
+                  ? 'wa-consent-good'
+                  : 'wa-consent-unknown'
+            }
+          >
+            {contact.opted_out
+              ? 'Opted out'
+              : contact.template_opted_in_at
+                ? 'Opt-in recorded'
+                : 'Not recorded'}
+          </strong>
+        </div>
+        <div>
+          <span>Last contact</span>
+          <strong>{readableDate(contact.last_message_at)}</strong>
+        </div>
+      </div>
+      <div className="wa-profile-buttons">
+        <button
+          className="wa-profile-primary"
+          type="button"
+          onClick={() => onEdit(contact)}
+        >
+          <NavIcon kind="people" /> Edit contact
+        </button>
+        {!contact.opted_out && (
+          <button
+            className="wa-profile-secondary"
+            type="button"
+            onClick={onOptOut}
+          >
+            ⊘ Mark opted out
+          </button>
+        )}
+      </div>
+      <div className="wa-quick-actions">
+        <h3>Quick actions</h3>
+        <div className="wa-quick-action-grid">
+          <button type="button" onClick={() => onNavigate('automations')}>
+            <NavIcon kind="automation" />
+            Automations
+          </button>
+          <button type="button" onClick={() => onNavigate('templates')}>
+            <NavIcon kind="template" />
+            Templates
+          </button>
+          <button type="button" onClick={() => onNavigate('broadcasts')}>
+            <NavIcon kind="broadcast" />
+            Campaigns
+          </button>
+        </div>
+        <button
+          className="wa-view-contacts"
+          type="button"
+          onClick={() => onNavigate('contacts')}
+        >
+          <NavIcon kind="people" /> View in Contacts <span>→</span>
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function OverviewPanel({
+  connectionId,
+  refreshKey,
+  onNavigate,
+}: {
+  connectionId: string;
+  refreshKey: number;
+  onNavigate: (tab: Tab) => void;
+}) {
+  const state = useWorkspaceRows('inbox', connectionId, refreshKey);
+  return (
+    <section className="wa-feature-page">
+      <div className="wa-feature-hero">
+        <span className="wa-feature-icon">
+          <NavIcon kind="overview" />
+        </span>
+        <div>
+          <span className="wa-eyebrow">WORKSPACE OVERVIEW</span>
+          <h3>Keep every WhatsApp conversation moving</h3>
+          <p>
+            Review new conversations, manage your contacts, and prepare approved
+            template messages.
+          </p>
+        </div>
+      </div>
+      {state.error && (
+        <p role="status" className="wa-global-notice">
+          {state.error}
+        </p>
+      )}
+      <div className="wa-feature-cards">
+        <article>
+          <span>Contacts</span>
+          <strong>{state.total}</strong>
+          <small>For this business number</small>
+        </article>
+        <article>
+          <span>Unread</span>
+          <strong>{state.unread}</strong>
+          <small>Waiting for your team</small>
+        </article>
+        <article>
+          <span>Account</span>
+          <strong>{state.busy ? 'Loading' : 'Connected'}</strong>
+          <small>WhatsApp Cloud API</small>
+        </article>
+      </div>
+      <div className="wa-overview-actions">
+        <button type="button" onClick={() => onNavigate('inbox')}>
+          <NavIcon kind="message" />
+          <span>
+            <strong>Open inbox</strong>
+            <small>Read and reply to conversations</small>
+          </span>
+          <b>→</b>
+        </button>
+        <button type="button" onClick={() => onNavigate('contacts')}>
+          <NavIcon kind="people" />
+          <span>
+            <strong>Manage contacts</strong>
+            <small>Search or add a WhatsApp contact</small>
+          </span>
+          <b>→</b>
+        </button>
+        <button type="button" onClick={() => onNavigate('automations')}>
+          <NavIcon kind="automation" />
+          <span>
+            <strong>Set up automations</strong>
+            <small>Create a paused reply rule</small>
+          </span>
+          <b>→</b>
+        </button>
+        <button type="button" onClick={() => onNavigate('templates')}>
+          <NavIcon kind="template" />
+          <span>
+            <strong>Review templates</strong>
+            <small>Check Meta approval status</small>
+          </span>
+          <b>→</b>
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function BroadcastsPanel({
+  templates,
+  onNavigate,
+}: {
+  templates: Template[];
+  onNavigate: (tab: Tab) => void;
+}) {
+  const approvedCount = templates.filter(
+    (template) => template.status === 'APPROVED',
+  ).length;
+  return (
+    <section className="wa-feature-page">
+      <div className="wa-feature-hero">
+        <span className="wa-feature-icon">
+          <NavIcon kind="broadcast" />
+        </span>
+        <div>
+          <span className="wa-eyebrow">CAMPAIGNS</span>
+          <h3>WhatsApp broadcasts</h3>
+          <p>
+            Send approved template updates to contacts who have explicitly opted
+            in.
+          </p>
+        </div>
+      </div>
+      <div className="wa-feature-cards">
+        <article>
+          <span>Approved templates</span>
+          <strong>{approvedCount}</strong>
+          <small>Available from Meta</small>
+        </article>
+        <article>
+          <span>Audience source</span>
+          <strong>Contacts</strong>
+          <small>Consent must be confirmed</small>
+        </article>
+        <article>
+          <span>Delivery updates</span>
+          <strong>WhatsApp</strong>
+          <small>Status events are captured</small>
+        </article>
+      </div>
+      <div className="wa-feature-empty">
+        <span className="wa-feature-icon">
+          <NavIcon kind="template" />
+        </span>
+        <h4>
+          {approvedCount
+            ? 'Create a campaign from an approved template'
+            : 'No approved templates yet'}
+        </h4>
+        <p>
+          {approvedCount
+            ? 'Choose an approved template and review your opted-in audience before any campaign is sent.'
+            : 'Submit a utility or marketing template to Meta. Once approved, it can be selected for eligible contacts.'}
+        </p>
+        <button
+          type="button"
+          className="wa-add-contact"
+          onClick={() => onNavigate('templates')}
+        >
+          Open templates <span>→</span>
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function AnalyticsPanel({
+  connectionId,
+  refreshKey,
+}: {
+  connectionId: string;
+  refreshKey: number;
+}) {
+  const state = useWorkspaceRows('inbox', connectionId, refreshKey);
+  return (
+    <section className="wa-feature-page">
+      <div className="wa-feature-hero">
+        <span className="wa-feature-icon">
+          <NavIcon kind="analytics" />
+        </span>
+        <div>
+          <span className="wa-eyebrow">PERFORMANCE</span>
+          <h3>WhatsApp analytics</h3>
+          <p>Current conversation totals for the selected business number.</p>
+        </div>
+      </div>
+      {state.error && (
+        <p role="status" className="wa-global-notice">
+          {state.error}
+        </p>
+      )}
+      <div className="wa-feature-cards">
+        <article>
+          <span>Total contacts</span>
+          <strong>{state.total}</strong>
+          <small>Saved to this number</small>
+        </article>
+        <article>
+          <span>Unread conversations</span>
+          <strong>{state.unread}</strong>
+          <small>Awaiting team review</small>
+        </article>
+        <article>
+          <span>Inbox state</span>
+          <strong>{state.busy ? 'Loading' : 'Connected'}</strong>
+          <small>Latest read from workspace</small>
+        </article>
+      </div>
+      <div className="wa-analytics-note">
+        <span className="wa-online-dot" />
+        <p>
+          Message delivery and reply-time metrics will appear as WhatsApp events
+          are received.
+        </p>
+        <button
+          type="button"
+          className="wa-add-contact"
+          onClick={() => void state.reload()}
+        >
+          Refresh data
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function SettingsPanel({
+  connections,
+  settingsPanel,
+}: {
+  connections: Connection[];
+  settingsPanel?: ReactNode;
+}) {
+  return (
+    <section className="wa-feature-page wa-settings-page">
+      <div className="wa-feature-hero">
+        <span className="wa-feature-icon">
+          <NavIcon kind="settings" />
+        </span>
+        <div>
+          <span className="wa-eyebrow">ACCOUNT</span>
+          <h3>WhatsApp settings</h3>
+          <p>Manage connected business numbers and messaging access.</p>
+        </div>
+      </div>
+      <div className="wa-feature-cards">
+        {connections.map((connection) => (
+          <article key={connection.id}>
+            <span>{connection.name}</span>
+            <strong>{connection.phone}</strong>
+            <small>{connection.status}</small>
+          </article>
+        ))}
+      </div>
+      {settingsPanel ? (
+        <div className="wa-setup-card">{settingsPanel}</div>
+      ) : (
+        <p className="wa-analytics-note">
+          Connection setup is not available for your current role.
+        </p>
+      )}
+    </section>
+  );
+}
+
+function ContactsPanel({
+  connectionId,
+  refreshKey,
+  onAddContact,
+}: {
+  connectionId: string;
+  refreshKey: number;
+  onAddContact: () => void;
+}) {
+  const state = useWorkspaceRows('contacts', connectionId, refreshKey);
+  return (
+    <div>
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+        <div>
+          <h3 className="text-lg font-bold text-stone-900">
+            WhatsApp contacts
+          </h3>
+          <p className="mt-1 text-sm text-stone-500">
+            Contacts are added when a person messages the connected business
+            number.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2 sm:justify-end">
           <input
             className={`${field} sm:max-w-xs`}
             value={state.search}
@@ -688,103 +1525,34 @@ function ContactsPanel({
             placeholder="Search contacts"
             aria-label="Search contacts"
           />
-          {canManage && (
-            <button
-              type="button"
-              className={primaryButton}
-              onClick={() => {
-                setShowAdd((current) => !current);
-                setNotice('');
-              }}
-            >
-              {showAdd ? 'Cancel' : 'Add contact'}
-            </button>
-          )}
+          <button
+            className="wa-add-contact"
+            type="button"
+            onClick={onAddContact}
+          >
+            <NavIcon kind="people" /> Add contact
+          </button>
         </div>
       </div>
-      {showAdd && canManage && (
-        <form
-          onSubmit={addContact}
-          className="grid gap-3 rounded-2xl border border-[#BD5C3F]/20 bg-[#fffaf7] p-4 md:grid-cols-2"
-        >
-          <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
-            Contact name <span className="font-normal">(optional)</span>
-            <input
-              className={field}
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              maxLength={120}
-              placeholder="Customer name"
-            />
-          </label>
-          <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
-            WhatsApp number
-            <input
-              className={field}
-              type="tel"
-              value={phone}
-              onChange={(event) => setPhone(event.target.value)}
-              placeholder="+919876543210"
-              pattern="\+?[1-9]\d{7,14}"
-              required
-            />
-          </label>
-          <label className="block space-y-1.5 text-xs font-semibold text-stone-600 md:col-span-2">
-            Where did they opt in?
-            <input
-              className={field}
-              value={consentSource}
-              onChange={(event) => setConsentSource(event.target.value)}
-              minLength={3}
-              maxLength={200}
-              placeholder="Website enquiry form, signed form, or WhatsApp START"
-              required
-            />
-          </label>
-          <label className="flex items-start gap-2 text-sm text-stone-700 md:col-span-2">
-            <input
-              type="checkbox"
-              checked={confirmOptIn}
-              onChange={(event) => setConfirmOptIn(event.target.checked)}
-              required
-            />
-            <span>
-              I confirm this person expressly agreed to receive WhatsApp
-              messages from this business.
-            </span>
-          </label>
-          <button className={primaryButton} disabled={saving || !confirmOptIn}>
-            {saving ? 'Saving…' : 'Save contact'}
-          </button>
-        </form>
-      )}
-      {notice && (
-        <p
-          role="status"
-          className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900"
-        >
-          {notice}
-        </p>
-      )}
       {state.error && (
         <p
           role="status"
-          className="rounded-xl bg-red-50 p-3 text-sm text-red-800"
+          className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800"
         >
           {state.error}
         </p>
       )}
-      <div className="overflow-hidden rounded-2xl border border-stone-200">
-        <div className="grid grid-cols-[minmax(150px,1.2fr)_minmax(120px,.8fr)_minmax(160px,1.4fr)_120px] gap-3 bg-stone-50 px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-stone-500">
+      <div className="mt-5 overflow-hidden rounded-2xl border border-stone-200">
+        <div className="grid grid-cols-[minmax(150px,1.2fr)_minmax(120px,.8fr)_minmax(160px,1.4fr)_110px] gap-3 bg-stone-50 px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-stone-500">
           <span>Name</span>
           <span>WhatsApp number</span>
           <span>Latest message</span>
-          <span>Message consent</span>
+          <span>Consent</span>
         </div>
         {state.rows.map((row) => (
           <div
             key={row.id}
-            className="grid grid-cols-[minmax(150px,1.2fr)_minmax(120px,.8fr)_minmax(160px,1.4fr)_120px] items-center gap-3 border-t border-stone-100 px-4 py-3 text-sm"
+            className="grid grid-cols-[minmax(150px,1.2fr)_minmax(120px,.8fr)_minmax(160px,1.4fr)_110px] items-center gap-3 border-t border-stone-100 px-4 py-3 text-sm"
           >
             <div className="truncate font-semibold text-stone-900">
               {row.name || 'Unknown contact'}
@@ -795,19 +1563,12 @@ function ContactsPanel({
             </div>
             <div>
               <span
-                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                  row.opted_out
-                    ? 'bg-red-50 text-red-700'
-                    : row.template_opted_in_at
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : 'bg-amber-50 text-amber-800'
-                }`}
-                title={row.template_opt_in_source || undefined}
+                className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${row.opted_out ? 'bg-red-50 text-red-700' : 'bg-emerald-50 text-emerald-700'}`}
               >
                 {row.opted_out
                   ? 'Opted out'
                   : row.template_opted_in_at
-                    ? 'Opted in'
+                    ? 'Opt-in recorded'
                     : 'No opt-in'}
               </span>
             </div>
@@ -815,8 +1576,7 @@ function ContactsPanel({
         ))}
         {!state.busy && state.rows.length === 0 && (
           <p className="p-8 text-center text-sm text-stone-500">
-            No contacts yet. Add a recipient with recorded opt-in or wait for
-            someone to message this business number.
+            Contacts will appear after the first inbound WhatsApp message.
           </p>
         )}
       </div>
