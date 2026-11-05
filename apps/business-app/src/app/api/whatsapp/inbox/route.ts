@@ -1,5 +1,5 @@
 import { automationServices } from '@/app/dashboard/automations/service';
-import { privateHeaders } from '@/lib/whatsapp-cloud';
+import { privateHeaders, validSameOrigin } from '@/lib/whatsapp-cloud';
 import { DomainError, safeFailure } from '@business-os/shared';
 import { z } from 'zod';
 
@@ -52,18 +52,48 @@ const actionSchema = z
     waId: z.string().regex(/^\d{5,32}$/),
   })
   .strict();
+const addContactSchema = z
+  .object({
+    action: z.literal('add_contact'),
+    connectionId: z.string().uuid(),
+    waId: z.string().regex(/^[1-9]\d{7,14}$/),
+    name: z.string().trim().max(120).default(''),
+    consentSource: z.string().trim().min(3).max(200),
+    confirmOptIn: z.literal(true),
+  })
+  .strict();
 
 export async function POST(request: Request) {
   try {
-    const input = actionSchema.safeParse(
-      await request.json().catch(() => null),
-    );
+    if (!validSameOrigin(request))
+      return Response.json(
+        { message: 'Request origin was not accepted.' },
+        { status: 403, headers: privateHeaders },
+      );
+    const raw = await request.json().catch(() => null);
+    const addContact = addContactSchema.safeParse(raw);
+    const services = await automationServices('automation.manage');
+    if (addContact.success) {
+      const result = await services.client.rpc('whatsapp_contact_create', {
+        p_organization_id: services.context.organizationId,
+        p_connection_id: addContact.data.connectionId,
+        p_wa_id: addContact.data.waId,
+        p_display_name: addContact.data.name,
+        p_consent_source: addContact.data.consentSource,
+      });
+      if (result.error || !result.data)
+        throw new DomainError('VALIDATION_FAILED');
+      return Response.json(
+        { saved: true, contactId: result.data },
+        { status: 201, headers: privateHeaders },
+      );
+    }
+    const input = actionSchema.safeParse(raw);
     if (!input.success)
       return Response.json(
         { message: 'Choose a valid contact action.' },
         { status: 400, headers: privateHeaders },
       );
-    const services = await automationServices('automation.manage');
     const result = await services.client.rpc('whatsapp_contact_state', {
       p_organization_id: services.context.organizationId,
       p_connection_id: input.data.connectionId,
