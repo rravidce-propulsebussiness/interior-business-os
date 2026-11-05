@@ -320,7 +320,8 @@ function InboxPanel({
   );
 
   useEffect(() => {
-    if (!selected && state.rows.length) setSelected(state.rows[0].wa_id);
+    const first = state.rows.at(0);
+    if (!selected && first) setSelected(first.wa_id);
     if (selected && !state.rows.some((row) => row.wa_id === selected))
       setSelected('');
   }, [selected, state.rows]);
@@ -615,7 +616,6 @@ function setStateSearch(set: (value: string) => void, value: string) {
 
 function ContactsPanel({ connectionId }: { connectionId: string }) {
   const state = useWorkspaceRows('contacts', connectionId);
-  const [notice, setNotice] = useState('');
   return (
     <div>
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
@@ -644,14 +644,6 @@ function ContactsPanel({ connectionId }: { connectionId: string }) {
           className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-800"
         >
           {state.error}
-        </p>
-      )}
-      {notice && (
-        <p
-          role="status"
-          className="mt-4 rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800"
-        >
-          {notice}
         </p>
       )}
       <div className="mt-5 overflow-hidden rounded-2xl border border-stone-200">
