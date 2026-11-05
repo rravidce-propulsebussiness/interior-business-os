@@ -10808,6 +10808,24 @@ export interface Database {
         };
         Returns: Json;
       };
+      whatsapp_contact_create: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+          p_display_name: string;
+          p_consent_source: string;
+        };
+        Returns: string;
+      };
+      whatsapp_contact_template_opted_in: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+        };
+        Returns: boolean;
+      };
       whatsapp_message_ingest: {
         Args: {
           p_organization_id: string;
