@@ -30,7 +30,10 @@ export async function getConnection(organizationId: string, id?: string) {
     .eq('organization_id', organizationId)
     .eq('status', 'connected');
   if (id) query = query.eq('id', id);
-  const { data, error } = await query.order('created_at', { ascending: false }).limit(1).maybeSingle();
+  const { data, error } = await query
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
   if (error || !data) throw new DomainError('NOT_FOUND');
 
   const keyHex = process.env.WHATSAPP_TOKEN_ENCRYPTION_KEY ?? '';
@@ -56,16 +59,19 @@ export async function graphRequest<T>(
 ): Promise<T> {
   const version = process.env.META_GRAPH_API_VERSION ?? '';
   if (!/^v\d+\.0$/.test(version)) throw new Error('META_API_UNAVAILABLE');
-  const response = await fetch(`https://graph.facebook.com/${version}/${path}`, {
-    ...init,
-    cache: 'no-store',
-    signal: AbortSignal.timeout(15000),
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-      ...(init?.headers ?? {}),
+  const response = await fetch(
+    `https://graph.facebook.com/${version}/${path}`,
+    {
+      ...init,
+      cache: 'no-store',
+      signal: AbortSignal.timeout(15000),
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        ...(init?.headers ?? {}),
+      },
     },
-  });
+  );
   const result = (await response.json().catch(() => null)) as T | null;
   if (!response.ok || !result) throw new Error('META_API_FAILED');
   return result;

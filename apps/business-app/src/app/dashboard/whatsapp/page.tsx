@@ -69,7 +69,10 @@ export default async function WhatsAppPage() {
       <WhatsAppWorkspace
         connections={connections.map((connection) => ({
           id: connection.id,
-          name: connection.business_name || connection.verified_name || 'WhatsApp Business',
+          name:
+            connection.business_name ||
+            connection.verified_name ||
+            'WhatsApp Business',
           phone: connection.display_phone_number || connection.phone_number_id,
           status: connection.status,
         }))}

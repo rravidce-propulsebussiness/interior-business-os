@@ -24,13 +24,27 @@ const sendSchema = z
 export async function POST(request: Request) {
   try {
     if (!validSameOrigin(request))
-      return Response.json({ message: 'Request origin was not accepted.' }, { status: 403, headers: privateHeaders });
+      return Response.json(
+        { message: 'Request origin was not accepted.' },
+        { status: 403, headers: privateHeaders },
+      );
     const length = Number(request.headers.get('content-length') ?? 0);
-    if (length > 12000) return Response.json({ message: 'Request is too large.' }, { status: 413, headers: privateHeaders });
+    if (length > 12000)
+      return Response.json(
+        { message: 'Request is too large.' },
+        { status: 413, headers: privateHeaders },
+      );
     const parsed = sendSchema.safeParse(await request.json().catch(() => null));
-    if (!parsed.success) return Response.json({ message: 'Enter a valid recipient and approved template.' }, { status: 400, headers: privateHeaders });
+    if (!parsed.success)
+      return Response.json(
+        { message: 'Enter a valid recipient and approved template.' },
+        { status: 400, headers: privateHeaders },
+      );
     const { organizationId } = await whatsappContext();
-    const connection = await getConnection(organizationId, parsed.data.connectionId);
+    const connection = await getConnection(
+      organizationId,
+      parsed.data.connectionId,
+    );
     const templates = await graphRequest<{
       data?: Array<{ name: string; language: string; status: string }>;
     }>(
@@ -44,43 +58,59 @@ export async function POST(request: Request) {
         template.status === 'APPROVED',
     );
     if (!approved)
-      return Response.json({ message: 'Only Meta-approved templates can be sent.' }, { status: 400, headers: privateHeaders });
+      return Response.json(
+        { message: 'Only Meta-approved templates can be sent.' },
+        { status: 400, headers: privateHeaders },
+      );
     const result = await graphRequest<{
       messages?: Array<{ id?: string; message_status?: string }>;
-    }>(
-      `${connection.phone_number_id}/messages`,
-      connection.accessToken,
-      {
-        method: 'POST',
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          recipient_type: 'individual',
-          to: parsed.data.to.replace(/^\+/, ''),
-          type: 'template',
-          template: {
-            name: parsed.data.templateName,
-            language: { code: parsed.data.language },
-            ...(parsed.data.parameters.length
-              ? {
-                  components: [
-                    {
-                      type: 'body',
-                      parameters: parsed.data.parameters.map((text) => ({ type: 'text', text })),
-                    },
-                  ],
-                }
-              : {}),
-          },
-        }),
-      },
-    );
+    }>(`${connection.phone_number_id}/messages`, connection.accessToken, {
+      method: 'POST',
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: parsed.data.to.replace(/^\+/, ''),
+        type: 'template',
+        template: {
+          name: parsed.data.templateName,
+          language: { code: parsed.data.language },
+          ...(parsed.data.parameters.length
+            ? {
+                components: [
+                  {
+                    type: 'body',
+                    parameters: parsed.data.parameters.map((text) => ({
+                      type: 'text',
+                      text,
+                    })),
+                  },
+                ],
+              }
+            : {}),
+        },
+      }),
+    });
     const messageId = result.messages?.[0]?.id;
     if (!messageId) throw new Error('META_MESSAGE_ID_MISSING');
-    return Response.json({ sent: true, messageId, status: result.messages?.[0]?.message_status ?? 'accepted' }, { status: 202, headers: privateHeaders });
+    return Response.json(
+      {
+        sent: true,
+        messageId,
+        status: result.messages?.[0]?.message_status ?? 'accepted',
+      },
+      { status: 202, headers: privateHeaders },
+    );
   } catch (error) {
     const failure = safeFailure(error);
     return Response.json(failure, {
-      status: error instanceof DomainError ? (error.code === 'UNAUTHENTICATED' ? 401 : error.code === 'NOT_FOUND' ? 404 : 403) : 502,
+      status:
+        error instanceof DomainError
+          ? error.code === 'UNAUTHENTICATED'
+            ? 401
+            : error.code === 'NOT_FOUND'
+              ? 404
+              : 403
+          : 502,
       headers: privateHeaders,
     });
   }

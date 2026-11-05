@@ -23,7 +23,8 @@ const createTemplateSchema = z
 export async function GET(request: Request) {
   try {
     const { organizationId } = await whatsappContext();
-    const connectionId = new URL(request.url).searchParams.get('connectionId') ?? undefined;
+    const connectionId =
+      new URL(request.url).searchParams.get('connectionId') ?? undefined;
     const connection = await getConnection(organizationId, connectionId);
     const result = await graphRequest<{
       data?: Array<{
@@ -45,7 +46,14 @@ export async function GET(request: Request) {
   } catch (error) {
     const failure = safeFailure(error);
     return Response.json(failure, {
-      status: error instanceof DomainError ? (error.code === 'UNAUTHENTICATED' ? 401 : error.code === 'NOT_FOUND' ? 404 : 403) : 502,
+      status:
+        error instanceof DomainError
+          ? error.code === 'UNAUTHENTICATED'
+            ? 401
+            : error.code === 'NOT_FOUND'
+              ? 404
+              : 403
+          : 502,
       headers: privateHeaders,
     });
   }
@@ -54,13 +62,29 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     if (!validSameOrigin(request))
-      return Response.json({ message: 'Request origin was not accepted.' }, { status: 403, headers: privateHeaders });
+      return Response.json(
+        { message: 'Request origin was not accepted.' },
+        { status: 403, headers: privateHeaders },
+      );
     const length = Number(request.headers.get('content-length') ?? 0);
-    if (length > 12000) return Response.json({ message: 'Request is too large.' }, { status: 413, headers: privateHeaders });
-    const body = createTemplateSchema.safeParse(await request.json().catch(() => null));
-    if (!body.success) return Response.json({ message: 'Enter a valid WhatsApp template.' }, { status: 400, headers: privateHeaders });
+    if (length > 12000)
+      return Response.json(
+        { message: 'Request is too large.' },
+        { status: 413, headers: privateHeaders },
+      );
+    const body = createTemplateSchema.safeParse(
+      await request.json().catch(() => null),
+    );
+    if (!body.success)
+      return Response.json(
+        { message: 'Enter a valid WhatsApp template.' },
+        { status: 400, headers: privateHeaders },
+      );
     const { organizationId } = await whatsappContext();
-    const connection = await getConnection(organizationId, body.data.connectionId);
+    const connection = await getConnection(
+      organizationId,
+      body.data.connectionId,
+    );
     const result = await graphRequest<{ id?: string; success?: boolean }>(
       `${connection.waba_id}/message_templates`,
       connection.accessToken,
@@ -74,11 +98,21 @@ export async function POST(request: Request) {
         }),
       },
     );
-    return Response.json({ created: true, id: result.id ?? null }, { status: 201, headers: privateHeaders });
+    return Response.json(
+      { created: true, id: result.id ?? null },
+      { status: 201, headers: privateHeaders },
+    );
   } catch (error) {
     const failure = safeFailure(error);
     return Response.json(failure, {
-      status: error instanceof DomainError ? (error.code === 'UNAUTHENTICATED' ? 401 : error.code === 'NOT_FOUND' ? 404 : 403) : 502,
+      status:
+        error instanceof DomainError
+          ? error.code === 'UNAUTHENTICATED'
+            ? 401
+            : error.code === 'NOT_FOUND'
+              ? 404
+              : 403
+          : 502,
       headers: privateHeaders,
     });
   }
