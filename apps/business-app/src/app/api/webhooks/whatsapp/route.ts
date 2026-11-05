@@ -1,6 +1,7 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import type { Json } from '@business-os/database';
+import { getConnection, graphRequest } from '@/lib/whatsapp-cloud';
 
 export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'no-store' };
@@ -58,7 +59,7 @@ export async function POST(request: Request) {
         continue;
       const { data: connection, error } = await database
         .from('whatsapp_business_connections')
-        .select('organization_id')
+        .select('id,organization_id')
         .eq('waba_id', wabaId)
         .maybeSingle();
       if (error || !connection) continue;
@@ -78,6 +79,116 @@ export async function POST(request: Request) {
           { onConflict: 'idempotency_key', ignoreDuplicates: true },
         );
         if (saved.error) throw new Error('WEBHOOK_QUEUE_FAILED');
+
+        const ingested = await database.rpc('whatsapp_message_ingest', {
+          p_organization_id: connection.organization_id,
+          p_connection_id: connection.id,
+          p_change: change as Json,
+        });
+        if (ingested.error) throw new Error('WHATSAPP_MESSAGE_INGEST_FAILED');
+
+        const value = (change as { value?: Record<string, unknown> })?.value;
+        const messages = Array.isArray(value?.messages)
+          ? (value.messages as Array<Record<string, unknown>>)
+          : [];
+        for (const message of messages) {
+          const waId = String(message.from ?? '');
+          const messageId = String(message.id ?? '');
+          const messageText = String(
+            (message.text as Record<string, unknown> | undefined)?.body ?? '',
+          );
+          if (!/^\d{5,32}$/.test(waId) || !messageId) continue;
+          const normalized = messageText.trim().toUpperCase();
+          if (
+            [
+              'STOP',
+              'STOPALL',
+              'UNSUBSCRIBE',
+              'CANCEL',
+              'END',
+              'QUIT',
+            ].includes(normalized)
+          ) {
+            await database.rpc('whatsapp_contact_state', {
+              p_organization_id: connection.organization_id,
+              p_connection_id: connection.id,
+              p_wa_id: waId,
+              p_action: 'opt_out',
+            });
+            continue;
+          }
+          if (normalized === 'START') {
+            await database.rpc('whatsapp_contact_state', {
+              p_organization_id: connection.organization_id,
+              p_connection_id: connection.id,
+              p_wa_id: waId,
+              p_action: 'opt_in',
+            });
+            continue;
+          }
+          if (String(message.type ?? '') !== 'text' || !messageText.trim())
+            continue;
+          const match = await database.rpc('whatsapp_automation_match', {
+            p_organization_id: connection.organization_id,
+            p_connection_id: connection.id,
+            p_message_id: messageId,
+            p_wa_id: waId,
+            p_text: messageText.slice(0, 4000),
+          });
+          if (match.error || !match.data) continue;
+          const rule = match.data as {
+            run_id?: string;
+            reply_text?: string;
+            to?: string;
+            name?: string;
+          };
+          if (!rule.run_id || !rule.reply_text || !rule.to) continue;
+          const replyText = rule.reply_text.replace(
+            /\{\{name\}\}/gi,
+            rule.name?.trim() || rule.to,
+          );
+          try {
+            const connected = await getConnection(
+              connection.organization_id,
+              connection.id,
+            );
+            const result = await graphRequest<{
+              messages?: Array<{ id?: string }>;
+            }>(`${connected.phone_number_id}/messages`, connected.accessToken, {
+              method: 'POST',
+              body: JSON.stringify({
+                messaging_product: 'whatsapp',
+                recipient_type: 'individual',
+                to: rule.to,
+                type: 'text',
+                text: { preview_url: false, body: replyText },
+              }),
+            });
+            const providerId = result.messages?.[0]?.id ?? '';
+            if (!providerId) throw new Error('META_MESSAGE_ID_MISSING');
+            await database.rpc('whatsapp_message_log_outbound', {
+              p_organization_id: connection.organization_id,
+              p_connection_id: connection.id,
+              p_to: rule.to,
+              p_provider_id: providerId,
+              p_body: replyText,
+              p_type: 'text',
+            });
+            await database.rpc('whatsapp_automation_finish', {
+              p_organization_id: connection.organization_id,
+              p_run_id: rule.run_id,
+              p_status: 'sent',
+              p_provider_id: providerId,
+            });
+          } catch {
+            await database.rpc('whatsapp_automation_finish', {
+              p_organization_id: connection.organization_id,
+              p_run_id: rule.run_id,
+              p_status: 'failed',
+              p_error: 'META_SEND_FAILED',
+            });
+          }
+        }
       }
     }
     return Response.json({ received: true }, { status: 200, headers });

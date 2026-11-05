@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { automationServices } from '../automations/service';
 import { WhatsAppSetup } from './setup';
-import { WhatsAppWorkspace } from './workspace';
+import { WhatsAppHub } from './hub';
 import { WhatsAppTestSender } from './test-sender';
 import { serverServices } from '@business-os/auth/server';
 
@@ -36,7 +36,7 @@ export default async function WhatsAppPage() {
     <main
       id="main-content"
       tabIndex={-1}
-      className="mx-auto max-w-6xl space-y-6 p-6"
+      className="mx-auto w-full max-w-[1400px] min-w-0 space-y-6 overflow-x-hidden p-4 sm:p-6"
     >
       <Link className="underline" href="/dashboard">
         Dashboard
@@ -76,7 +76,10 @@ export default async function WhatsAppPage() {
         }))}
       />
 
-      <WhatsAppWorkspace
+      <WhatsAppHub
+        canManage={services.context.grants.some(
+          (grant) => grant.permission === 'automation.manage',
+        )}
         connections={connections.map((connection) => ({
           id: connection.id,
           name:
@@ -87,12 +90,16 @@ export default async function WhatsAppPage() {
           status: connection.status,
         }))}
       />
-      {canUseMetaTestSender && <WhatsAppTestSender configured={Boolean(
-        process.env.WHATSAPP_TEST_PHONE_NUMBER_ID &&
-        process.env.WHATSAPP_TEST_ACCESS_TOKEN &&
-        process.env.WHATSAPP_TEST_RECIPIENTS &&
-        process.env.META_GRAPH_API_VERSION,
-      )} />}
+      {canUseMetaTestSender && (
+        <WhatsAppTestSender
+          configured={Boolean(
+            process.env.WHATSAPP_TEST_PHONE_NUMBER_ID &&
+            process.env.WHATSAPP_TEST_ACCESS_TOKEN &&
+            process.env.WHATSAPP_TEST_RECIPIENTS &&
+            process.env.META_GRAPH_API_VERSION,
+          )}
+        />
+      )}
     </main>
   );
 }

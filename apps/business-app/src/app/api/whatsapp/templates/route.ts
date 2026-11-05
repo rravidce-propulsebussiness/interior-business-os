@@ -14,7 +14,7 @@ const createTemplateSchema = z
   .object({
     connectionId: z.string().uuid().optional(),
     name: z.string().regex(/^[a-z0-9_]{3,512}$/),
-    category: z.enum(['UTILITY', 'MARKETING', 'AUTHENTICATION']),
+    category: z.enum(['UTILITY', 'MARKETING']),
     language: z.string().regex(/^[a-z]{2}_[A-Z]{2}$/),
     body: z.string().min(1).max(1024),
   })
@@ -22,7 +22,7 @@ const createTemplateSchema = z
 
 export async function GET(request: Request) {
   try {
-    const { organizationId } = await whatsappContext();
+    const { organizationId } = await whatsappContext('automation.view');
     const connectionId =
       new URL(request.url).searchParams.get('connectionId') ?? undefined;
     const connection = await getConnection(organizationId, connectionId);
@@ -85,6 +85,27 @@ export async function POST(request: Request) {
       organizationId,
       body.data.connectionId,
     );
+    const placeholders = [...body.data.body.matchAll(/\{\{(\d+)\}\}/g)]
+      .map((match) => Number(match[1]))
+      .filter((value) => Number.isInteger(value) && value > 0);
+    const parameterCount = placeholders.length ? Math.max(...placeholders) : 0;
+    if (
+      Array.from({ length: parameterCount }, (_, index) => index + 1).some(
+        (number) => !placeholders.includes(number),
+      )
+    ) {
+      return Response.json(
+        {
+          message:
+            'Template variables must be numbered in order, starting with {{1}}.',
+        },
+        { status: 400, headers: privateHeaders },
+      );
+    }
+    const exampleValues = Array.from(
+      { length: parameterCount },
+      (_, index) => `Example ${index + 1}`,
+    );
     const result = await graphRequest<{ id?: string; success?: boolean }>(
       `${connection.waba_id}/message_templates`,
       connection.accessToken,
@@ -94,7 +115,15 @@ export async function POST(request: Request) {
           name: body.data.name,
           category: body.data.category,
           language: body.data.language,
-          components: [{ type: 'BODY', text: body.data.body }],
+          components: [
+            {
+              type: 'BODY',
+              text: body.data.body,
+              ...(parameterCount
+                ? { example: { body_text: [exampleValues] } }
+                : {}),
+            },
+          ],
         }),
       },
     );
