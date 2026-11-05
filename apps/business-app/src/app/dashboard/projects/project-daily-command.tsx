@@ -2,7 +2,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 import { OwnerIcon } from '../owner-shell';
-import { SiteMediaForm, SiteReportForm } from './project-v2-forms';
+import { MaterialRequestForm, SiteMediaForm, SiteReportForm } from './project-v2-forms';
+import { StageChecklistItem } from './project-stage-checklist-item';
+import { suggestedStageMaterials } from './stage-material-options';
 import { projectTimelineStages } from './project-visible-stages';
 import { pretty, stringValue, type Stage, type WorkspaceData } from './project-v2-data';
 
@@ -40,6 +42,10 @@ function StageDayCard({ d, stage, expanded }: { d: WorkspaceData; stage: Stage; 
     stageMediaIds.has(row.id) && stringValue(row.mime).startsWith('image/'));
   const progress = stage.activities.length ? Math.round(100 * finished / stage.activities.length) : 0;
   const execution = d.stageExecution.find(item => item.stageId === stage.id);
+  const canEditWork = d.site?.stage === 'execution' && execution?.status === 'in_progress' &&
+    (d.site.canManage || ['manager', 'project_manager', 'site_engineer', 'supervisor'].includes(d.site.role));
+  const photoOptions = (d.site?.media ?? []).filter(row => stringValue(row.mime).startsWith('image/'))
+    .map(row => ({ id: row.id, filename: stringValue(row.filename) }));
   return <details className="daily-stage" open={expanded}>
     <summary className="daily-stage-title">
       <span className="daily-stage-icon"><OwnerIcon name="projects" size={18}/></span>
@@ -48,16 +54,15 @@ function StageDayCard({ d, stage, expanded }: { d: WorkspaceData; stage: Stage; 
       <span className="daily-chevron" aria-hidden>⌄</span>
     </summary>
     <div className="daily-stage-body">
-      {stage.activities.length ? <ul className="daily-task-list">
+      {stage.activities.length ? <div className="daily-task-list">
         {stage.activities.map((title, i) => {
           const row = work.find(x => Number(x.index) === i);
-          const done = complete(stringValue(row?.status));
-          return <li key={i}>
-            <span aria-label={done ? 'Completed' : 'Pending'} className={'daily-task-tick ' + (done ? 'done' : '')}>{done ? '✓' : ''}</span>
-            <span>{title}</span>
-          </li>;
+          return <StageChecklistItem key={i} projectId={d.project.id} stageId={stage.id}
+            kind="work" index={i} title={title} status={stringValue(row?.status) || 'pending'}
+            notes={stringValue(row?.notes)} photoId={stringValue(row?.photo_id)} photos={photoOptions}
+            canEdit={canEditWork}/>;
         })}
-      </ul> : <p className="daily-help">Open all stages to review prerequisites and next actions.</p>}
+      </div> : <p className="daily-help">Open all stages to review prerequisites and next actions.</p>}
       {photos.length > 0 && <div className="daily-thumbs" aria-label="Recent project photos">
         {photos.slice(0, 3).map(photo => <Link key={photo.id} href={'/dashboard/projects/' + d.project.id + '/site/media/' + photo.id} target="_blank" aria-label="View project photo">
           <Image unoptimized src={'/dashboard/projects/' + d.project.id + '/site/media/' + photo.id} width={74} height={66} alt={stringValue(photo.caption) || 'Project site photo'}/>
@@ -65,7 +70,7 @@ function StageDayCard({ d, stage, expanded }: { d: WorkspaceData; stage: Stage; 
         {photos.length > 3 && <span>+{photos.length - 3}</span>}
       </div>}
       <div className="daily-stage-foot">
-        <span>{execution?.status === 'ready_for_qc' ? 'Field work submitted · QC pending' : 'Stage tasks remain independently editable below'}</span>
+        <span>{execution?.status === 'ready_for_qc' ? 'Field work submitted · QC pending' : canEditWork ? 'Expand a work item to update progress or add evidence' : 'Work item updates are limited to authorized project roles'}</span>
         <span className="daily-progress-track"><span style={{ width: progress + '%' }}/></span>
       </div>
     </div>
@@ -124,6 +129,10 @@ export function ProjectDailyCommand({ d, stageDetails, financialDetails }: {
     (d.site.canManage || ['manager', 'project_manager', 'site_engineer', 'supervisor'].includes(d.site.role));
   const canUpload = d.site?.stage === 'execution' &&
     (d.site.canManage || ['manager', 'project_manager', 'site_engineer', 'supervisor'].includes(d.site.role));
+  const canRequestMaterials = d.site?.stage === 'execution' &&
+    (d.site.canManage || ['manager', 'project_manager', 'procurement', 'site_engineer'].includes(d.site.role));
+  const materialStage = active.find(stage =>
+    d.stageExecution.some(row => row.stageId === stage.id && row.status === 'in_progress')) ?? nextReadyStage;
   const needsCount = qcPending.length + qcFailures.length + materialPending.length + clientRequests.length +
     (nextReadyStage ? 1 : 0) +
     (d.site?.stage !== 'execution' && !d.agreement?.authorized ? 1 : 0);
@@ -140,6 +149,8 @@ export function ProjectDailyCommand({ d, stageDetails, financialDetails }: {
         <span className="daily-chevron" aria-hidden>⌄</span>
       </summary>
       <div className="daily-section-body">
+        {d.site?.canManage && <p className="daily-role-note"><strong>Full project access:</strong> one owner or manager can handle daily progress, material requests and approvals. Add project roles when your team grows.</p>}
+        {!d.site?.canManage && d.site?.role && <p className="daily-role-note">Your <strong>{pretty(d.site.role)}</strong> access shows the actions assigned to your role. Material approvals and orders stay with authorized managers or procurement staff.</p>}
         {active.length ? active.map((stage, i) =>
           <StageDayCard d={d} stage={stage} key={stage.id} expanded={i === 0}/>) :
           <div className="daily-empty">
@@ -164,6 +175,15 @@ export function ProjectDailyCommand({ d, stageDetails, financialDetails }: {
           {canUpload && <details className="daily-action-drawer daily-action-photo">
             <summary><OwnerIcon name="projects" size={17}/> Upload Photos</summary>
             <div className="daily-action-form"><SiteMediaForm id={d.project.id}/></div>
+          </details>}
+          {canRequestMaterials && <details className="daily-action-drawer daily-action-material">
+            <summary><OwnerIcon name="purchases" size={17}/> Request Materials</summary>
+            <div className="daily-action-form">
+              <p className="daily-help">Add what the next work needs. Requests remain linked to the active stage when available; approval is required before an order is placed.</p>
+              <MaterialRequestForm id={d.project.id} {...(materialStage ? { stageId: materialStage.id } : {})}
+                suggestions={materialStage ? suggestedStageMaterials(materialStage.template_code) : []}/>
+              <Link className="daily-material-register-link" href={'/dashboard/projects/' + d.project.id + '/procurement'}>Review requests, approve and arrange orders →</Link>
+            </div>
           </details>}
           {!canUpdate && <span className="daily-help">Project updates are available to authorized site staff.</span>}
         </div>
