@@ -119,6 +119,22 @@ export async function POST(request: Request) {
         },
         { status: 400, headers: privateHeaders },
       );
+    const templateOptIn = await client.rpc(
+      'whatsapp_contact_template_opted_in',
+      {
+        p_organization_id: organizationId,
+        p_connection_id: connection.id,
+        p_wa_id: templateRequest.to.replace(/^\+/, ''),
+      },
+    );
+    if (templateOptIn.error || !templateOptIn.data)
+      return Response.json(
+        {
+          message:
+            'Add this contact and record their WhatsApp opt-in before sending a template.',
+        },
+        { status: 400, headers: privateHeaders },
+      );
     const templates = await graphRequest<{
       data?: Array<{
         name: string;
