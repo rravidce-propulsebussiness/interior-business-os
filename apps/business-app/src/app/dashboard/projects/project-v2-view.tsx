@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 20081)
-Total output lines: 1138
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName, OwnerShell } from '../owner-shell';
@@ -586,7 +583,10 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
 
         {startingPayments.length>0&&<div className="pv2-stage-payment-start">
           <strong>Payment milestone at stage start</strong>
-          {startingPayments.map((p,i)=><p key={i}>{p.name} ·…81 tokens truncated…)}>
+          {startingPayments.map((p,i)=><p key={i}>{p.name} · {p.percent}% of accepted quotation</p>)}
+          <p className="pv2-hint">Review this agreed payment before starting work. Invoices,
+           payment requests and verified receipts stay in Finance. An invoice alone is not proof of payment.</p>
+          {d.permissions.finance&&<Link href={cur(d.project.id,'payments')}>
            Check invoice and verified payment status
           </Link>}
          </div>}
