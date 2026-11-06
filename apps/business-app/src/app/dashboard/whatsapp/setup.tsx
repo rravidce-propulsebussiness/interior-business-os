@@ -63,6 +63,9 @@ export function WhatsAppSetup({
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
   const [disconnectBusy, setDisconnectBusy] = useState(false);
   const [message, setMessage] = useState(initialMessage);
+  const [registrationPins, setRegistrationPins] = useState<Record<string, string>>({});
+  const [registrationMessages, setRegistrationMessages] = useState<Record<string, string>>({});
+  const [registrationBusyId, setRegistrationBusyId] = useState<string | null>(null);
   const codeRef = useRef<string | null>(null);
   const assetRef = useRef<SignupAsset | null>(null);
   const submittedRef = useRef(false);
@@ -171,6 +174,52 @@ export function WhatsAppSetup({
           ? error.message
           : 'Could not connect this WhatsApp account.',
       );
+    }
+  }
+
+  async function registerPhone(connectionId: string) {
+    if (!canManage || registrationBusyId) return;
+    const pin = registrationPins[connectionId] ?? '';
+    if (!/^\d{6}$/.test(pin)) {
+      setRegistrationMessages((current) => ({
+        ...current,
+        [connectionId]: 'Enter the six-digit WhatsApp two-step verification PIN.',
+      }));
+      return;
+    }
+
+    setRegistrationBusyId(connectionId);
+    setRegistrationMessages((current) => ({
+      ...current,
+      [connectionId]: 'Registering the phone number with Meta…',
+    }));
+    try {
+      const response = await fetch('/api/whatsapp/connections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId, pin }),
+      });
+      const result = (await response.json()) as {
+        registered?: boolean;
+        message?: string;
+      };
+      if (!response.ok || !result.registered)
+        throw new Error(result.message ?? 'Meta could not register this phone number.');
+      setRegistrationPins((current) => ({ ...current, [connectionId]: '' }));
+      setRegistrationMessages((current) => ({
+        ...current,
+        [connectionId]: 'Meta accepted the registration. Refresh WhatsApp Manager to confirm the number status.',
+      }));
+    } catch (error) {
+      setRegistrationMessages((current) => ({
+        ...current,
+        [connectionId]:
+          error instanceof Error
+            ? error.message
+            : 'Meta could not register this phone number.',
+      }));
+    } finally {
+      setRegistrationBusyId(null);
     }
   }
 
@@ -329,6 +378,58 @@ export function WhatsAppSetup({
                 </div>
               )}
             </div>
+            {canManage && connection.status === 'connected' && (
+              <div className="space-y-3 rounded-lg border border-neutral-200 bg-neutral-50 p-3">
+                <label
+                  htmlFor={`whatsapp-register-pin-${connection.id}`}
+                  className="block text-sm font-semibold text-neutral-800"
+                >
+                  WhatsApp two-step verification PIN
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  <input
+                    id={`whatsapp-register-pin-${connection.id}`}
+                    type="password"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    maxLength={6}
+                    pattern="[0-9]{6}"
+                    value={registrationPins[connection.id] ?? ''}
+                    onChange={(event) =>
+                      setRegistrationPins((current) => ({
+                        ...current,
+                        [connection.id]: event.target.value.replace(/\D/g, '').slice(0, 6),
+                      }))
+                    }
+                    className={inputClass}
+                    placeholder="6-digit PIN"
+                    aria-describedby={`whatsapp-register-help-${connection.id}`}
+                    disabled={registrationBusyId === connection.id}
+                  />
+                  <button
+                    type="button"
+                    className="rounded-lg bg-[#88352B] px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                    onClick={() => void registerPhone(connection.id)}
+                    disabled={!canManage || registrationBusyId !== null}
+                  >
+                    {registrationBusyId === connection.id
+                      ? 'Registering…'
+                      : 'Register phone with Meta'}
+                  </button>
+                </div>
+                <p
+                  id={`whatsapp-register-help-${connection.id}`}
+                  className="text-xs leading-5 text-neutral-600"
+                >
+                  Meta requires a six-digit two-step verification PIN to register a phone for Cloud API messaging. The PIN is sent to Meta for this request and is not saved by Business OS. If the display name is In Review in Meta, wait for approval before registering.
+                </p>
+                {registrationMessages[connection.id] && (
+                  <p role="status" className="text-sm text-neutral-700">
+                    {registrationMessages[connection.id]}
+                  </p>
+                )}
+              </div>
+            )}
             {disconnectingId === connection.id && (
               <div
                 role="group"
@@ -366,8 +467,9 @@ export function WhatsAppSetup({
       </div>
 
       <p className="text-xs leading-5 text-neutral-500">
-        Meta handles authentication and asset selection. Propulse never asks for
-        a Facebook password or verification code. The billing link opens Meta so
+        Meta handles authentication and asset selection. Business OS never asks
+        for a Facebook password or SMS verification code. The registration PIN is
+        sent to Meta for the phone activation request and is not stored. The billing link opens Meta so
         you can add or manage the payment method or funding options available to
         your account.
       </p>
