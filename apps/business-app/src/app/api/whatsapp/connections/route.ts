@@ -15,7 +15,7 @@ const disconnectSchema = z
   .object({ connectionId: z.string().uuid() })
   .strict();
 const registerSchema = z
-  .object({ connectionId: z.string().uuid(), pin: z.string().regex(/^\\d{6}$/) })
+  .object({ connectionId: z.string().uuid(), pin: z.string().regex(/^\d{6}$/) })
   .strict();
 
 export async function DELETE(request: Request) {
