@@ -2,6 +2,8 @@ import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import type { Json } from '@business-os/database';
 import { getConnection, graphRequest } from '@/lib/whatsapp-cloud';
+import { metaErrorLabel } from '@/lib/whatsapp-meta-error';
+import { routeWebhookChange } from '@/lib/whatsapp-webhook-routing';
 
 export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'no-store' };
@@ -57,14 +59,36 @@ export async function POST(request: Request) {
       const wabaId = entry.id ?? '';
       if (!/^[0-9]{5,32}$/.test(wabaId) || !Array.isArray(entry.changes))
         continue;
-      const { data: connection, error } = await database
+      // Disconnected rows are excluded. A database failure returns 503 so Meta retries.
+      const { data: connections, error } = await database
         .from('whatsapp_business_connections')
-        .select('id,organization_id')
+        .select('id,organization_id,phone_number_id')
         .eq('waba_id', wabaId)
-        .maybeSingle();
-      if (error || !connection) continue;
+        .eq('status', 'connected');
+      if (error) throw new Error('WEBHOOK_CONNECTION_LOOKUP_FAILED');
 
       for (const change of entry.changes) {
+        const route = routeWebhookChange(connections ?? [], change);
+        if (route.kind === 'ignore') continue;
+        if (route.kind === 'account') {
+          for (const organizationId of route.organizationIds) {
+            const accountPayload = { waba_id: wabaId, change };
+            const stored = await database.from('whatsapp_webhook_events').upsert(
+              {
+                organization_id: organizationId,
+                waba_id: wabaId,
+                idempotency_key: createHash('sha256')
+                  .update(JSON.stringify({ ...accountPayload, organizationId }))
+                  .digest('hex'),
+                payload: accountPayload as Json,
+              },
+              { onConflict: 'idempotency_key', ignoreDuplicates: true },
+            );
+            if (stored.error) throw new Error('WEBHOOK_QUEUE_FAILED');
+          }
+          continue;
+        }
+        const { connection } = route;
         const payload = { waba_id: wabaId, change };
         const idempotencyKey = createHash('sha256')
           .update(JSON.stringify(payload))
@@ -180,12 +204,12 @@ export async function POST(request: Request) {
               p_status: 'sent',
               p_provider_id: providerId,
             });
-          } catch {
+          } catch (sendError) {
             await database.rpc('whatsapp_automation_finish', {
               p_organization_id: connection.organization_id,
               p_run_id: rule.run_id,
               p_status: 'failed',
-              p_error: 'META_SEND_FAILED',
+              p_error: metaErrorLabel(sendError),
             });
           }
         }

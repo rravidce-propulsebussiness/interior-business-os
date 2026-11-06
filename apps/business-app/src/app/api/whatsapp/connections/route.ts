@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
-import { DomainError, safeFailure } from '@business-os/shared';
 import {
   privateHeaders,
   validSameOrigin,
@@ -8,6 +7,7 @@ import {
   getConnection,
   graphRequest,
 } from '@/lib/whatsapp-cloud';
+import { whatsappFailure } from '@/lib/whatsapp-meta-error';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,16 +71,9 @@ export async function DELETE(request: Request) {
       { status: 200, headers: privateHeaders },
     );
   } catch (error) {
-    const failure = safeFailure(error);
-    return Response.json(failure, {
-      status:
-        error instanceof DomainError
-          ? error.code === 'UNAUTHENTICATED'
-            ? 401
-            : error.code === 'NOT_FOUND'
-              ? 404
-              : 403
-          : 502,
+    const failure = whatsappFailure(error);
+    return Response.json(failure.body, {
+      status: failure.status,
       headers: privateHeaders,
     });
   }
@@ -134,16 +127,9 @@ export async function POST(request: Request) {
       { status: 200, headers: privateHeaders },
     );
   } catch (error) {
-    const failure = safeFailure(error);
-    return Response.json(failure, {
-      status:
-        error instanceof DomainError
-          ? error.code === 'UNAUTHENTICATED'
-            ? 401
-            : error.code === 'NOT_FOUND'
-              ? 404
-              : 403
-          : 502,
+    const failure = whatsappFailure(error);
+    return Response.json(failure.body, {
+      status: failure.status,
       headers: privateHeaders,
     });
   }

@@ -3,6 +3,13 @@ import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
 import { isAllowedWebsiteUploadOrigin } from '@/app/dashboard/website/upload-origin';
+import { graphRequest } from '@/lib/whatsapp-cloud';
+import {
+  logMetaError,
+  metaApiErrorFrom,
+  MetaApiError,
+  metaErrorMessage,
+} from '@/lib/whatsapp-meta-error';
 
 export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'private, no-store' };
@@ -35,29 +42,6 @@ function graphVersion() {
   const version = process.env.META_GRAPH_API_VERSION ?? '';
   if (!/^v\d+\.0$/.test(version)) throw new Error('META_API_UNAVAILABLE');
   return version;
-}
-
-async function graph<T>(
-  path: string,
-  token: string,
-  init?: RequestInit,
-): Promise<T> {
-  const response = await fetch(
-    `https://graph.facebook.com/${graphVersion()}/${path}`,
-    {
-      ...init,
-      cache: 'no-store',
-      signal: AbortSignal.timeout(12000),
-      headers: {
-        Authorization: `Bearer ${token}`,
-        ...(init?.headers ?? {}),
-      },
-    },
-  );
-  const data = (await response.json().catch(() => null)) as
-    T | { error?: unknown } | null;
-  if (!response.ok || !data) throw new Error('META_API_FAILED');
-  return data as T;
 }
 
 export async function POST(request: Request) {
@@ -135,23 +119,27 @@ export async function POST(request: Request) {
     const tokenBody = (await tokenResponse.json().catch(() => null)) as {
       access_token?: string;
     } | null;
-    if (!tokenResponse.ok || !tokenBody?.access_token)
+    if (!tokenResponse.ok || !tokenBody?.access_token) {
+      const metaError = metaApiErrorFrom(tokenResponse.status, tokenBody);
+      logMetaError(metaError);
       return Response.json(
         {
           message:
             'Meta could not exchange the signup code. Check app review, app roles, and the embedded signup configuration.',
+          ...(metaError.code === null ? {} : { metaCode: metaError.code }),
         },
         { status: 502, headers },
       );
+    }
 
     const token = tokenBody.access_token;
-    const waba = await graph<{ id: string; name?: string }>(
+    const waba = await graphRequest<{ id: string; name?: string }>(
       `${parsed.data.wabaId}?fields=id,name`,
       token,
     );
     if (waba.id !== parsed.data.wabaId) throw new Error('META_ASSET_MISMATCH');
 
-    const numbers = await graph<{
+    const numbers = await graphRequest<{
       data?: Array<{
         id: string;
         display_phone_number?: string;
@@ -166,10 +154,13 @@ export async function POST(request: Request) {
     );
     if (!phone) throw new Error('META_PHONE_NOT_IN_WABA');
 
-    await graph<{ success?: boolean }>(
+    await graphRequest<{ success?: boolean }>(
       `${parsed.data.wabaId}/subscribed_apps`,
       token,
-      { method: 'POST' },
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      },
     );
     const encrypted = encryptToken(token);
     const saved = await client.rpc('whatsapp_connection_save', {
@@ -183,6 +174,14 @@ export async function POST(request: Request) {
       p_token_iv: encrypted.iv,
       p_token_tag: encrypted.tag,
     });
+    if (saved.error?.code === '23505')
+      return Response.json(
+        {
+          message:
+            'This WhatsApp number is connected to another company workspace. Disconnect it there first.',
+        },
+        { status: 409, headers },
+      );
     if (saved.error || !saved.data) throw new Error('CONNECTION_SAVE_FAILED');
     return Response.json({ connected: true }, { status: 200, headers });
   } catch (error) {
@@ -199,7 +198,17 @@ export async function POST(request: Request) {
         },
         { status: 403, headers },
       );
-    // Graph errors may contain account and request details. Do not return or log them.
+    if (error instanceof MetaApiError) {
+      logMetaError(error);
+      return Response.json(
+        {
+          message: metaErrorMessage(error.code),
+          ...(error.code === null ? {} : { metaCode: error.code }),
+        },
+        { status: 502, headers },
+      );
+    }
+    // Other failures may contain internal details. Do not return or log them.
     return Response.json(
       {
         message:

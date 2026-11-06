@@ -31,6 +31,7 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/quotations/pdf-renderer.test.ts',
       'apps/business-app/src/app/dashboard/pricing/construction/floor-rate-rules.test.ts',
       'apps/business-app/src/workspace-paths.test.ts',
+      'apps/business-app/src/lib/whatsapp-fixes.test.ts',
       'apps/business-app/src/erp-routing-regression.test.ts',
       'apps/business-app/src/app/dashboard/owner-navigation.test.ts',
       'apps/business-app/src/app/dashboard/dashboard-shared-theme.test.ts',

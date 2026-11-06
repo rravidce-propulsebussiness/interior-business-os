@@ -25,4 +25,15 @@ The signup route exchanges the one-time Meta code on the server, verifies the WA
 
 ## Current product boundary
 
-The connected account and signed webhook intake are the foundation for the next WhatsApp product work. The existing generic automation builder does not yet send WhatsApp messages or expose WhatsApp triggers. Add those explicitly after the event queue consumer, template checks, opt-in controls, message delivery tracking, and organization-level permissions are implemented.
+The WhatsApp workspace handles the inbox, templates, and WhatsApp automation replies. The generic automation builder remains separate and does not send WhatsApp messages.
+
+## Connections and numbers
+
+- Each connected phone number has its own row and encrypted token, so one WhatsApp Business Account can hold several numbers.
+- A number can be connected to only one company at a time. Disconnect it there before connecting it to another company. Disconnected rows stay so message history keeps its connection.
+- Webhook changes go to the number named in `metadata.phone_number_id`. Numbers with no live connection are ignored. Changes with no number are stored as account-level events and never enter an inbox.
+- Apply migration `20261107000000_whatsapp_multi_number_connections.sql` before or with this code.
+
+## Troubleshooting Meta errors
+
+Routes return a plain message and `metaCode` when Meta supplies one. Server logs record `whatsapp_meta_error` with the HTTP status, code, subcode, and `fbtrace_id` only. Meta's own error text and tokens are never logged or returned, because that text can contain account details.

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { isMetaOrigin, parseSignupEvent } from '@/lib/whatsapp-signup-event';
 
 type MetaLoginResponse = {
   authResponse?: { code?: string };
@@ -36,6 +37,8 @@ type Connection = {
   lastConnectedAt: string;
 };
 type SignupAsset = { wabaId: string; phoneNumberId: string };
+
+const SIGNUP_DETAILS_TIMEOUT_MS = 30_000;
 
 const inputClass =
   'rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm font-semibold text-neutral-900 shadow-sm disabled:cursor-not-allowed disabled:opacity-50';
@@ -100,46 +103,34 @@ export function WhatsAppSetup({
 
   useEffect(() => {
     const receive = (event: MessageEvent) => {
-      let host = '';
-      try {
-        host = new URL(event.origin).hostname;
-      } catch {
-        return;
-      }
-      if (host !== 'facebook.com' && !host.endsWith('.facebook.com')) return;
-      let data: {
-        type?: string;
-        event?: string;
-        data?: { waba_id?: string; phone_number_id?: string };
-      };
-      try {
-        data =
-          typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
-      } catch {
-        return;
-      }
-      if (data?.type !== 'WA_EMBEDDED_SIGNUP') return;
-      if (data.event === 'CANCEL') {
+      if (!isMetaOrigin(event.origin)) return;
+      const signup = parseSignupEvent(event.data);
+      if (!signup) return;
+      if (signup.kind === 'cancel') {
+        codeRef.current = null;
         setBusy(false);
         setMessage('WhatsApp setup was cancelled before completion.');
         return;
       }
-      if (
-        data.event === 'FINISH' ||
-        data.event === 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING'
-      ) {
-        const wabaId = data.data?.waba_id;
-        const phoneNumberId = data.data?.phone_number_id;
-        if (!wabaId || !phoneNumberId) {
-          setBusy(false);
-          setMessage(
-            'Meta did not return a WhatsApp account and phone number. Try the connection again.',
-          );
-          return;
-        }
-        assetRef.current = { wabaId, phoneNumberId };
-        void completeIfReady();
+      if (signup.kind === 'error') {
+        codeRef.current = null;
+        setBusy(false);
+        setMessage(signup.message);
+        return;
       }
+      if (signup.kind === 'missing-assets') {
+        codeRef.current = null;
+        setBusy(false);
+        setMessage(
+          'Meta did not return a WhatsApp account and phone number. Try the connection again.',
+        );
+        return;
+      }
+      assetRef.current = {
+        wabaId: signup.wabaId,
+        phoneNumberId: signup.phoneNumberId,
+      };
+      void completeIfReady();
     };
     window.addEventListener('message', receive);
     return () => window.removeEventListener('message', receive);
@@ -271,6 +262,14 @@ export function WhatsAppSetup({
         }
         codeRef.current = code;
         void completeIfReady();
+        // Meta sends the account details separately. Do not wait forever for them.
+        window.setTimeout(() => {
+          if (codeRef.current !== code || assetRef.current) return;
+          setBusy(false);
+          setMessage(
+            'Meta finished signup but did not send the WhatsApp account details. Try the connection again.',
+          );
+        }, SIGNUP_DETAILS_TIMEOUT_MS);
       },
       {
         config_id: configurationId,

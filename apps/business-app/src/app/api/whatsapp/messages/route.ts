@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { DomainError, safeFailure } from '@business-os/shared';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import {
   getConnection,
@@ -8,6 +7,7 @@ import {
   validSameOrigin,
   whatsappContext,
 } from '@/lib/whatsapp-cloud';
+import { whatsappFailure } from '@/lib/whatsapp-meta-error';
 
 export const dynamic = 'force-dynamic';
 
@@ -232,16 +232,9 @@ export async function POST(request: Request) {
       { status: 202, headers: privateHeaders },
     );
   } catch (error) {
-    const failure = safeFailure(error);
-    return Response.json(failure, {
-      status:
-        error instanceof DomainError
-          ? error.code === 'UNAUTHENTICATED'
-            ? 401
-            : error.code === 'NOT_FOUND'
-              ? 404
-              : 403
-          : 502,
+    const failure = whatsappFailure(error);
+    return Response.json(failure.body, {
+      status: failure.status,
       headers: privateHeaders,
     });
   }

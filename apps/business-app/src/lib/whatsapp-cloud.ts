@@ -4,6 +4,7 @@ import { createDecipheriv } from 'node:crypto';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import { DomainError } from '@business-os/shared';
+import { metaApiErrorFrom } from './whatsapp-meta-error';
 
 export const privateHeaders = {
   'Cache-Control': 'private, no-store',
@@ -70,7 +71,7 @@ export async function graphRequest<T>(
     },
   );
   const result = (await response.json().catch(() => null)) as T | null;
-  if (!response.ok || !result) throw new Error('META_API_FAILED');
+  if (!response.ok || !result) throw metaApiErrorFrom(response.status, result);
   return result;
 }
 
