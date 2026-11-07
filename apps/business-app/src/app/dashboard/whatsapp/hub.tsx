@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import './whatsapp-inbox.css';
+import { readApiResponse } from '@/lib/whatsapp-response';
 
 type Connection = { id: string; name: string; phone: string; status: string };
 type Template = {
@@ -153,7 +154,7 @@ export function WhatsAppHub({
       `/api/whatsapp/templates?connectionId=${encodeURIComponent(connectionId)}`,
       { cache: 'no-store' },
     );
-    const result = (await response.json()) as {
+    const result = (await readApiResponse(response)) as {
       templates?: Template[];
       message?: string;
     };
@@ -199,7 +200,7 @@ export function WhatsAppHub({
           confirmOptIn: contactModal.confirmOptIn,
         }),
       });
-      const result = (await response.json()) as { message?: string };
+      const result = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(result.message ?? 'Could not save this contact.');
       setContactRefresh((value) => value + 1);
@@ -649,7 +650,7 @@ function useWorkspaceRows(
       const response = await fetch(`/api/whatsapp/inbox?${params}`, {
         cache: 'no-store',
       });
-      const data = (await response.json()) as {
+      const data = (await readApiResponse(response)) as {
         rows?: Contact[];
         total?: number;
         unread?: number;
@@ -708,7 +709,7 @@ function InboxPanel({
       const response = await fetch(`/api/whatsapp/inbox?${params}`, {
         cache: 'no-store',
       });
-      const data = (await response.json()) as {
+      const data = (await readApiResponse(response)) as {
         rows?: Message[];
         contact?: Contact;
         message?: string;
@@ -759,7 +760,7 @@ function InboxPanel({
           body: body.trim(),
         }),
       });
-      const result = (await response.json()) as { message?: string };
+      const result = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(result.message ?? 'Reply could not be sent.');
       setBody('');
@@ -1612,7 +1613,7 @@ function AutomationsPanel({
     const response = await fetch(`/api/whatsapp/inbox?${params}`, {
       cache: 'no-store',
     });
-    const result = (await response.json()) as {
+    const result = (await readApiResponse(response)) as {
       rows?: Rule[];
       message?: string;
     };
@@ -1643,7 +1644,7 @@ function AutomationsPanel({
           status: 'paused',
         }),
       });
-      const result = (await response.json()) as { message?: string };
+      const result = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(result.message ?? 'Could not save automation.');
       setNotice(
@@ -1677,7 +1678,7 @@ function AutomationsPanel({
           status: rule.status === 'active' ? 'paused' : 'active',
         }),
       });
-      const result = (await response.json()) as { message?: string };
+      const result = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(result.message ?? 'Could not update automation.');
       setNotice(
@@ -1910,7 +1911,7 @@ function TemplatesPanel({
           body: newBody,
         }),
       });
-      const data = (await response.json()) as { message?: string };
+      const data = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(data.message ?? 'Template could not be submitted.');
       setNotice(
@@ -1966,7 +1967,7 @@ function TemplatesPanel({
           recipientHasOptedIn: optedIn,
         }),
       });
-      const data = (await response.json()) as {
+      const data = (await readApiResponse(response)) as {
         message?: string;
         messageId?: string;
       };

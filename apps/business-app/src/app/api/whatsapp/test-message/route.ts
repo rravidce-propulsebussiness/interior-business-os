@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DomainError, safeFailure } from '@business-os/shared';
 import { serverServices } from '@business-os/auth/server';
-import { logMetaError, metaApiErrorFrom, metaErrorMessage } from '@/lib/whatsapp-meta-error';
+import { INTERNAL_FAILURE_STATUS, logMetaError, META_FAILURE_STATUS, metaApiErrorFrom, metaErrorMessage } from '@/lib/whatsapp-meta-error';
 
 export const dynamic = 'force-dynamic';
 const privateHeaders = { 'Cache-Control': 'private, no-store' };
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
             : metaErrorMessage(metaError.code),
           ...(metaError.code === null ? {} : { metaCode: metaError.code }),
         },
-        { status: 502, headers: privateHeaders },
+        { status: META_FAILURE_STATUS, headers: privateHeaders },
       );
     }
     return Response.json({ sent: true, messageId, template: 'hello_world', environment: 'meta_test' }, { status: 202, headers: privateHeaders });
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     return Response.json(failure, {
       status: error instanceof DomainError
         ? error.code === 'UNAUTHENTICATED' ? 401 : 403
-        : 502,
+        : INTERNAL_FAILURE_STATUS,
       headers: privateHeaders,
     });
   }

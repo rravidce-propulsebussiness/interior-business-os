@@ -6,6 +6,7 @@ import {
   metaErrorMessage,
   whatsappFailure,
 } from './whatsapp-meta-error';
+import { readApiResponse } from './whatsapp-response';
 import { isMetaOrigin, parseSignupEvent } from './whatsapp-signup-event';
 import { routeWebhookChange } from './whatsapp-webhook-routing';
 
@@ -42,7 +43,7 @@ describe('Meta errors', () => {
   it('returns a safe route failure and logs numbers only', () => {
     const log = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     const failure = whatsappFailure(new MetaApiError(401, 190, 463, 'trace'));
-    expect(failure.status).toBe(502);
+    expect(failure.status).toBe(424);
     expect(failure.body.metaCode).toBe(190);
     expect(failure.body.message).toContain('expired');
     expect(log).toHaveBeenCalledWith('whatsapp_meta_error', {
@@ -56,7 +57,7 @@ describe('Meta errors', () => {
 
   it('keeps the generic failure for other errors', () => {
     const failure = whatsappFailure(new Error('database password'));
-    expect(failure.status).toBe(502);
+    expect(failure.status).toBe(500);
     expect(JSON.stringify(failure.body)).not.toContain('database password');
   });
 });
@@ -134,5 +135,32 @@ describe('webhook routing', () => {
       organizationIds: ['org1', 'org2'],
     });
     expect(routeWebhookChange([a], null)).toEqual({ kind: 'account', organizationIds: ['org1'] });
+  });
+});
+
+describe('browser reply reading', () => {
+  it('returns JSON replies unchanged', async () => {
+    const reply = new Response('{"message":"PIN is wrong","metaCode":133005}', { status: 424 });
+    expect(await readApiResponse(reply)).toEqual({ message: 'PIN is wrong', metaCode: 133005 });
+  });
+
+  it('turns a Cloudflare HTML page into a plain message', async () => {
+    const reply = new Response('<!DOCTYPE html><title>502: Bad gateway</title>', { status: 502 });
+    const result = (await readApiResponse(reply)) as { message: string };
+    expect(result.message).toContain('Try again');
+    expect(result.message).not.toContain('<');
+  });
+
+  it('handles an empty reply', async () => {
+    const result = (await readApiResponse(new Response(''))) as { message: string };
+    expect(result.message).toContain('Try again');
+  });
+});
+
+describe('statuses', () => {
+  it('never uses a status Cloudflare replaces', async () => {
+    const { META_FAILURE_STATUS, INTERNAL_FAILURE_STATUS } = await import('./whatsapp-meta-error');
+    for (const status of [META_FAILURE_STATUS, INTERNAL_FAILURE_STATUS])
+      expect([502, 504]).not.toContain(status);
   });
 });

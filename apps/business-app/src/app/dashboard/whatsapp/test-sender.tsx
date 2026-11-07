@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { readApiResponse } from '@/lib/whatsapp-response';
 
 export function WhatsAppTestSender({ configured }: { configured: boolean }) {
   const [recipient, setRecipient] = useState('');
@@ -18,7 +19,7 @@ export function WhatsAppTestSender({ configured }: { configured: boolean }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ to: recipient, confirmTestRecipient: confirmed }),
       });
-      const result = await response.json() as { message?: string; messageId?: string };
+      const result = await readApiResponse(response) as { message?: string; messageId?: string };
       if (!response.ok) throw new Error(result.message ?? 'Meta test message failed.');
       setMessage(`Meta accepted hello_world. Message ID: ${result.messageId ?? 'accepted'}`);
     } catch (error) {

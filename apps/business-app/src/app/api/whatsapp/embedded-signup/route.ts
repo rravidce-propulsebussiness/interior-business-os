@@ -5,7 +5,9 @@ import { DomainError } from '@business-os/shared';
 import { isAllowedWebsiteUploadOrigin } from '@/app/dashboard/website/upload-origin';
 import { graphRequest } from '@/lib/whatsapp-cloud';
 import {
+  INTERNAL_FAILURE_STATUS,
   logMetaError,
+  META_FAILURE_STATUS,
   metaApiErrorFrom,
   MetaApiError,
   metaErrorMessage,
@@ -128,7 +130,7 @@ export async function POST(request: Request) {
             'Meta could not exchange the signup code. Check app review, app roles, and the embedded signup configuration.',
           ...(metaError.code === null ? {} : { metaCode: metaError.code }),
         },
-        { status: 502, headers },
+        { status: META_FAILURE_STATUS, headers },
       );
     }
 
@@ -205,7 +207,7 @@ export async function POST(request: Request) {
           message: metaErrorMessage(error.code),
           ...(error.code === null ? {} : { metaCode: error.code }),
         },
-        { status: 502, headers },
+        { status: META_FAILURE_STATUS, headers },
       );
     }
     // Other failures may contain internal details. Do not return or log them.
@@ -214,7 +216,7 @@ export async function POST(request: Request) {
         message:
           'WhatsApp could not be connected. Verify the Meta app configuration and try again.',
       },
-      { status: 502, headers },
+      { status: INTERNAL_FAILURE_STATUS, headers },
     );
   }
 }

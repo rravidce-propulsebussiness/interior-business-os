@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { readApiResponse } from '@/lib/whatsapp-response';
 
 type Connection = { id: string; name: string; phone: string; status: string };
 type Template = {
@@ -44,7 +45,7 @@ export function WhatsAppWorkspace({
           `/api/whatsapp/templates?connectionId=${encodeURIComponent(id)}`,
           { cache: 'no-store' },
         );
-        const data = (await response.json()) as {
+        const data = (await readApiResponse(response)) as {
           templates?: Template[];
           message?: string;
         };
@@ -98,7 +99,7 @@ export function WhatsAppWorkspace({
           recipientHasOptedIn: optedIn,
         }),
       });
-      const data = (await response.json()) as {
+      const data = (await readApiResponse(response)) as {
         sent?: boolean;
         messageId?: string;
         message?: string;
@@ -133,7 +134,7 @@ export function WhatsAppWorkspace({
           body: newBody,
         }),
       });
-      const data = (await response.json()) as { message?: string };
+      const data = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(data.message ?? 'Template could not be submitted.');
       setNewName('');

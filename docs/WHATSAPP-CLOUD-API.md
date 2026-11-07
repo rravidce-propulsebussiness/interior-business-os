@@ -36,4 +36,4 @@ The WhatsApp workspace handles the inbox, templates, and WhatsApp automation rep
 
 ## Troubleshooting Meta errors
 
-Routes return a plain message and `metaCode` when Meta supplies one. Server logs record `whatsapp_meta_error` with the HTTP status, code, subcode, and `fbtrace_id` only. Meta's own error text and tokens are never logged or returned, because that text can contain account details.
+Routes return a plain message and `metaCode` when Meta supplies one, with status 424 for Meta failures and 500 for internal failures. Do not use 502 or 504 here: Cloudflare replaces those with its own HTML page and hides the message. Server logs record `whatsapp_meta_error` with the HTTP status, code, subcode, and `fbtrace_id` only. Meta's own error text and tokens are never logged or returned, because that text can contain account details.

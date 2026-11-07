@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { isMetaOrigin, parseSignupEvent } from '@/lib/whatsapp-signup-event';
+import { readApiResponse } from '@/lib/whatsapp-response';
 
 type MetaLoginResponse = {
   authResponse?: { code?: string };
@@ -151,7 +152,7 @@ export function WhatsAppSetup({
           phoneNumberId: assetRef.current.phoneNumberId,
         }),
       });
-      const result = (await response.json()) as { message?: string };
+      const result = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(
           result.message ?? 'Could not connect this WhatsApp account.',
@@ -190,7 +191,7 @@ export function WhatsAppSetup({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ connectionId, pin }),
       });
-      const result = (await response.json()) as {
+      const result = (await readApiResponse(response)) as {
         registered?: boolean;
         message?: string;
       };
@@ -224,7 +225,7 @@ export function WhatsAppSetup({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ connectionId }),
       });
-      const result = (await response.json()) as { message?: string };
+      const result = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(result.message ?? 'Could not disconnect WhatsApp.');
       setDisconnectingId(null);

@@ -78,6 +78,13 @@ export function logMetaError(error: MetaApiError) {
   });
 }
 
+/**
+ * Cloudflare replaces an origin 502 or 504 with its own HTML page, which hides
+ * the reply. Use these instead so the browser receives the message.
+ */
+export const META_FAILURE_STATUS = 424;
+export const INTERNAL_FAILURE_STATUS = 500;
+
 /** Status and browser-safe body for a failed WhatsApp API route. */
 export function whatsappFailure(error: unknown): {
   status: number;
@@ -86,7 +93,7 @@ export function whatsappFailure(error: unknown): {
   if (error instanceof MetaApiError) {
     logMetaError(error);
     return {
-      status: 502,
+      status: META_FAILURE_STATUS,
       body: {
         message: metaErrorMessage(error.code),
         ...(error.code === null ? {} : { metaCode: error.code }),
@@ -101,7 +108,7 @@ export function whatsappFailure(error: unknown): {
           : error.code === 'NOT_FOUND'
             ? 404
             : 403
-        : 502,
+        : INTERNAL_FAILURE_STATUS,
     body: safeFailure(error),
   };
 }
