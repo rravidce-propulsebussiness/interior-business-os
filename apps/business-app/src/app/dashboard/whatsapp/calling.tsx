@@ -131,7 +131,7 @@ export function WhatsAppCalling({
     } catch (error) { setPermissionError(errorText(error)); setPermission(null); }
   }, [connectionId, canManage, selectedWaId, get]);
 
-  useEffect(() => { if (active) void refreshSettings(); }, [active, refreshSettings]);
+  useEffect(() => { void refreshSettings(); }, [refreshSettings]);
   useEffect(() => {
     setPermission(null);
     if (active && selectedWaId) void refreshPermission();
@@ -195,11 +195,11 @@ export function WhatsAppCalling({
   }, [connectionId, canManage, closeMedia, get]);
 
   useEffect(() => {
-    if (!connectionId || !canManage) return;
+    if (!connectionId || !canManage || settings?.status?.toUpperCase() !== 'ENABLED') return;
     void poll();
     const handle = window.setInterval(() => void poll(), 2500);
     return () => window.clearInterval(handle);
-  }, [connectionId, canManage, poll]);
+  }, [connectionId, canManage, poll, settings?.status]);
 
   useEffect(() => {
     if (!audioRef.current || !remoteStreamRef.current) return;
