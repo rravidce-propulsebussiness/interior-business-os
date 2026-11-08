@@ -11,6 +11,7 @@ import {
 } from '@/lib/whatsapp-cloud';
 import { whatsappFailure } from '@/lib/whatsapp-meta-error';
 import { whatsappIceConfig } from '@/lib/whatsapp-turn';
+import { metaCallingUpdatePayload } from '@/lib/whatsapp-calling-status';
 import { eventForConnection } from '@/lib/whatsapp-calling-events';
 import {
   canStartWhatsAppCall,
@@ -232,13 +233,15 @@ export async function POST(request: Request) {
         connection.accessToken,
         {
           method: 'POST',
-          body: JSON.stringify({
-            calling: {
-              status: 'ENABLED',
-              call_icon_visibility:
-                data.action === 'publish' ? 'DEFAULT' : 'DISABLE_ALL',
-            },
-          }),
+          body: JSON.stringify(
+            metaCallingUpdatePayload(
+              data.action === 'publish'
+                ? 'publish'
+                : data.action === 'hide'
+                  ? 'hide'
+                  : 'enable',
+            ),
+          ),
         },
       );
       return Response.json(
