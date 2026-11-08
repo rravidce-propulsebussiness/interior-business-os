@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { readApiResponse } from '@/lib/whatsapp-response';
-import { canRequestWhatsAppCallingEnable, isWhatsAppCallingEnabled } from '@/lib/whatsapp-calling-status';
+import {
+  canRequestWhatsAppCallingEnable,
+  isWhatsAppCallingEnabled,
+} from '@/lib/whatsapp-calling-status';
 import {
   canStartWhatsAppCall,
   metaCallActionAllowed,
@@ -336,7 +339,11 @@ export function WhatsAppCalling({
   }, [connectionId, canManage, closeMedia, get]);
 
   useEffect(() => {
-    if (!connectionId || !canManage || !isWhatsAppCallingEnabled(settings?.status))
+    if (
+      !connectionId ||
+      !canManage ||
+      !isWhatsAppCallingEnabled(settings?.status)
+    )
       return;
     const first = window.setTimeout(() => void poll(), 0);
     const handle = window.setInterval(() => void poll(), 2500);
@@ -664,10 +671,10 @@ export function WhatsAppCalling({
               className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
             >
               Meta Calling is not yet active on this number. Select
-              &quot;Activate with Meta (private)&quot; to request activation, then
-              verify it in WhatsApp Manager. Meta currently requires a messaging
-              limit of at least 2,000 business-initiated conversations per 24
-              hours. If Meta rejects the request, that eligibility or app
+              &quot;Activate with Meta (private)&quot; to request activation,
+              then verify it in WhatsApp Manager. Meta currently requires a
+              messaging limit of at least 2,000 business-initiated conversations
+              per 24 hours. If Meta rejects the request, that eligibility or app
               permissions may be the blocker.
             </p>
           )}

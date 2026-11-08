@@ -3,7 +3,10 @@
  */
 export function normalizeWhatsAppCallingStatus(status: unknown) {
   return typeof status === 'string'
-    ? status.trim().toUpperCase().replace(/[\s-]+/g, '_')
+    ? status
+        .trim()
+        .toUpperCase()
+        .replace(/[\s-]+/g, '_')
     : '';
 }
 
@@ -17,11 +20,12 @@ export function canRequestWhatsAppCallingEnable(status: unknown) {
   );
 }
 
-
 /** Enable privately first; exposing the customer call button is a separate
  * explicitly confirmed action after relay/webhook/agent readiness.
  */
-export function metaCallingUpdatePayload(action: 'enable' | 'publish' | 'hide') {
+export function metaCallingUpdatePayload(
+  action: 'enable' | 'publish' | 'hide',
+) {
   return {
     calling: {
       status: 'ENABLED',
