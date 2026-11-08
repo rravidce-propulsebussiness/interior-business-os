@@ -118,7 +118,11 @@ export function WhatsAppCalling({
         void fetch('/api/whatsapp/calling', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'terminate', connectionId, callId: id }),
+          body: JSON.stringify({
+            action: 'terminate',
+            connectionId,
+            callId: id,
+          }),
           keepalive: true,
           credentials: 'same-origin',
         }).catch(() => undefined);
@@ -451,7 +455,9 @@ export function WhatsAppCalling({
     } catch (error) {
       // Keep the End Call control visible. The session may still be connected
       // and billable at Meta until termination succeeds.
-      setNotice(`Could not end the call with Meta: ${errorText(error)}. Retry End call or ask the customer to hang up.`);
+      setNotice(
+        `Could not end the call with Meta: ${errorText(error)}. Retry End call or ask the customer to hang up.`,
+      );
     } finally {
       setBusy(false);
     }
