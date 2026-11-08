@@ -33,7 +33,7 @@ type CallEvent = {
   direction: string;
   from: string;
   to: string;
-  session?: { sdp_type?: string; sdp?: string };
+  session?: { sdp_type?: string; sdp?: string } | undefined;
   timestamp: number;
 };
 
