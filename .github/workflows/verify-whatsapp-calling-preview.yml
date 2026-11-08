@@ -30,7 +30,6 @@ jobs:
           pnpm exec eslint
           apps/business-app/src/app/api/whatsapp/calling/route.ts
           apps/business-app/src/app/dashboard/whatsapp/calling.tsx
-          apps/business-app/src/app/dashboard/whatsapp/hub.tsx
           apps/business-app/src/lib/whatsapp-meta-error.ts
           --max-warnings=0
       - run: >-
