@@ -10,7 +10,10 @@ import {
   whatsappContext,
 } from '@/lib/whatsapp-cloud';
 import { whatsappFailure } from '@/lib/whatsapp-meta-error';
-import { whatsappIceConfig } from '@/lib/whatsapp-turn';
+import {
+  whatsappIceConfigFromEnvironment,
+  whatsappRelayConfigured,
+} from '@/lib/whatsapp-turn';
 import { metaCallingUpdatePayload } from '@/lib/whatsapp-calling-status';
 import { eventForConnection } from '@/lib/whatsapp-calling-events';
 import {
@@ -102,10 +105,8 @@ export async function GET(request: Request) {
     const connection = await getConnection(organizationId, parsed.data);
     const action = url.searchParams.get('action') ?? 'settings';
     if (action === 'ice') {
-      const config = whatsappIceConfig(
-        process.env.WHATSAPP_TURN_URLS,
-        process.env.WHATSAPP_TURN_SHARED_SECRET,
-      );
+      // Cloudflare TURN (preferred), coturn shared secret, or STUN only.
+      const config = await whatsappIceConfigFromEnvironment(process.env);
       return Response.json(config, { headers: privateHeaders });
     }
     if (action === 'events') {
@@ -214,11 +215,7 @@ export async function POST(request: Request) {
       // Initial activation is private: do not advertise a customer call button
       // until WebRTC relay and the live webhook/agent workflow are ready.
       if (data.action === 'publish') {
-        const relay = whatsappIceConfig(
-          process.env.WHATSAPP_TURN_URLS,
-          process.env.WHATSAPP_TURN_SHARED_SECRET,
-        );
-        if (!relay.relayConfigured) {
+        if (!whatsappRelayConfigured(process.env)) {
           return Response.json(
             {
               message:

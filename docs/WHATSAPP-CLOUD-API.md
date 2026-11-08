@@ -56,7 +56,26 @@ To run a controlled calling test:
 
 The Calls workspace first asks its authenticated server endpoint for ICE servers. By
 default it uses STUN only, which is **not reliable on restrictive mobile and
-office networks**. To enable a TURN relay, provision an external coturn server
+office networks**.
+
+**Recommended: Cloudflare Realtime TURN.** Shared hosting cannot run a TURN
+server (it needs open UDP ports), so use Cloudflare's managed relay:
+
+1. Cloudflare dashboard → **Realtime** → **TURN Server** → **Create** a TURN key.
+2. Copy the **Turn Token ID** (32 hex characters) and the **API Token** shown once.
+3. Set these **server-side** variables on Hostinger, then redeploy:
+
+```dotenv
+WHATSAPP_TURN_CLOUDFLARE_KEY_ID=<32-hex Turn Token ID>
+WHATSAPP_TURN_CLOUDFLARE_API_TOKEN=<API token for that key>
+```
+
+For every call the server asks Cloudflare for credentials that expire after
+60 minutes; the API token never reaches the browser. Port-53 TURN URLs are
+dropped because browsers block them. If Cloudflare is unreachable the call
+falls back to STUN (and coturn, if configured) instead of failing outright.
+
+**Alternative: self-hosted coturn.** Provision an external coturn server
 (or a compatible managed TURN service using the coturn REST shared-secret
 credential scheme). Configure **server-side** environment variables:
 
