@@ -11,6 +11,16 @@ import { whatsappFailure } from '@/lib/whatsapp-meta-error';
 
 export const dynamic = 'force-dynamic';
 
+const mediaSchema = z
+  .object({
+    connectionId: z.string().uuid().optional(),
+    messageType: z.literal('media'),
+    to: z.string().regex(/^\\+[1-9]\\d{7,14}$/),
+    mediaId: z.string().regex(/^[A-Za-z0-9._-]{1,200}$/),
+    mediaType: z.enum(['image', 'video', 'audio', 'document']),
+    caption: z.string().trim().max(1000).default(''),
+  })
+  .strict();
 const templateSchema = z
   .object({
     connectionId: z.string().uuid().optional(),
@@ -49,7 +59,11 @@ export async function POST(request: Request) {
       unknown
     > | null;
     const parsed = (
-      raw?.messageType === 'text' ? textSchema : templateSchema
+      raw?.messageType === 'text'
+        ? textSchema
+        : raw?.messageType === 'media'
+          ? mediaSchema
+          : templateSchema
     ).safeParse({ ...raw, messageType: raw?.messageType ?? 'template' });
     if (!parsed.success)
       return Response.json(
@@ -98,6 +112,58 @@ export async function POST(request: Request) {
           p_provider_id: messageId,
           p_body: parsed.data.body,
           p_type: 'text',
+        },
+      );
+      return Response.json(
+        { sent: true, messageId, logged: !logged.error },
+        { status: 202, headers: privateHeaders },
+      );
+    }
+    if (parsed.data.messageType === 'media') {
+      const mediaRequest = parsed.data as z.infer<typeof mediaSchema>;
+      const allowed = await client.rpc('whatsapp_window_open', {
+        p_organization_id: organizationId,
+        p_connection_id: connection.id,
+        p_wa_id: mediaRequest.to.replace(/^\\+/, ''),
+      });
+      if (allowed.error || !allowed.data)
+        return Response.json(
+          {
+            message:
+              'Attachments can be sent only within 24 hours of the contact’s latest message.',
+          },
+          { status: 400, headers: privateHeaders },
+        );
+      const attachment = {
+        id: mediaRequest.mediaId,
+        ...(mediaRequest.caption ? { caption: mediaRequest.caption } : {}),
+        ...(mediaRequest.mediaType === 'document'
+          ? { filename: 'attachment' }
+          : {}),
+      };
+      const result = await graphRequest<{
+        messages?: Array<{ id?: string; message_status?: string }>;
+      }>(`${connection.phone_number_id}/messages`, connection.accessToken, {
+        method: 'POST',
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: mediaRequest.to.replace(/^\\+/, ''),
+          type: mediaRequest.mediaType,
+          [mediaRequest.mediaType]: attachment,
+        }),
+      });
+      const messageId = result.messages?.[0]?.id;
+      if (!messageId) throw new Error('META_MESSAGE_ID_MISSING');
+      const logged = await createOwnerProvisioningDatabase().rpc(
+        'whatsapp_message_log_outbound',
+        {
+          p_organization_id: organizationId,
+          p_connection_id: connection.id,
+          p_to: mediaRequest.to.replace(/^\\+/, ''),
+          p_provider_id: messageId,
+          p_body: `[[WA_MEDIA:${mediaRequest.mediaId}:${mediaRequest.mediaType}]]${mediaRequest.caption ? `\\n${mediaRequest.caption}` : ''}`,
+          p_type: mediaRequest.mediaType,
         },
       );
       return Response.json(
