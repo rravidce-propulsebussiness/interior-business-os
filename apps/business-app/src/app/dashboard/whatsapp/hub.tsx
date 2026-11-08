@@ -141,6 +141,7 @@ export function WhatsAppHub({
   const [tab, setTab] = useState<Tab>('inbox');
   const [connectionId, setConnectionId] = useState(connections[0]?.id ?? '');
   const [callTarget, setCallTarget] = useState('');
+  const [callInProgress, setCallInProgress] = useState(false);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [notice, setNotice] = useState('');
   const [contactModal, setContactModal] = useState<{
@@ -291,6 +292,8 @@ export function WhatsAppHub({
               <span aria-hidden="true">▦</span>
               <select
                 value={connectionId}
+                disabled={callInProgress}
+                title={callInProgress ? 'End the WhatsApp call before switching business numbers.' : undefined}
                 onChange={(event) => {
                   setConnectionId(event.target.value);
                   setCallTarget('');
@@ -337,11 +340,13 @@ export function WhatsAppHub({
 
         <div className="wa-content">
           <WhatsAppCalling
+            key={connectionId}
             connectionId={connectionId}
             selectedWaId={callTarget}
             active={tab === 'calling'}
             canManage={canManage}
             onOpen={() => setTab('calling')}
+            onCallActivityChange={setCallInProgress}
           />
           <div className="wa-section-heading">
             <div>
