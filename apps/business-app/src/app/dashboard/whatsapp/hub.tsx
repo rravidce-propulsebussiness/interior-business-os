@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import './whatsapp-inbox.css';
+import { WhatsAppCalling } from './calling';
 import { readApiResponse } from '@/lib/whatsapp-response';
 import { createBrowserDatabase } from '@business-os/database/browser';
 
@@ -51,6 +52,7 @@ type Rule = {
 type Tab =
   | 'overview'
   | 'inbox'
+  | 'calling'
   | 'contacts'
   | 'broadcasts'
   | 'templates'
@@ -138,6 +140,7 @@ export function WhatsAppHub({
 }) {
   const [tab, setTab] = useState<Tab>('inbox');
   const [connectionId, setConnectionId] = useState(connections[0]?.id ?? '');
+  const [callTarget, setCallTarget] = useState('');
   const [templates, setTemplates] = useState<Template[]>([]);
   const [notice, setNotice] = useState('');
   const [contactModal, setContactModal] = useState<{
@@ -173,6 +176,7 @@ export function WhatsAppHub({
 
   const tabs: Array<{ id: Tab; label: string; icon: string }> = [
     { id: 'inbox', label: 'Inbox', icon: 'message' },
+    { id: 'calling', label: 'Calls', icon: 'bell' },
     { id: 'contacts', label: 'Contacts', icon: 'people' },
     { id: 'broadcasts', label: 'Broadcasts', icon: 'broadcast' },
     { id: 'templates', label: 'Templates', icon: 'template' },
@@ -287,7 +291,7 @@ export function WhatsAppHub({
               <span aria-hidden="true">▦</span>
               <select
                 value={connectionId}
-                onChange={(event) => setConnectionId(event.target.value)}
+                onChange={(event) => { setConnectionId(event.target.value); setCallTarget(''); }}
                 aria-label="Connected business number"
               >
                 {connections.map((item) => (
@@ -329,6 +333,13 @@ export function WhatsAppHub({
         </header>
 
         <div className="wa-content">
+          <WhatsAppCalling
+            connectionId={connectionId}
+            selectedWaId={callTarget}
+            active={tab === 'calling'}
+            canManage={canManage}
+            onOpen={() => setTab('calling')}
+          />
           <div className="wa-section-heading">
             <div>
               <span className="wa-eyebrow">PROPULSE MESSAGING</span>
@@ -381,6 +392,7 @@ export function WhatsAppHub({
                 })
               }
               onNavigate={setTab}
+              onCallContact={(waId) => { setCallTarget(waId); setTab('calling'); }}
             />
           )}
           {tab === 'contacts' && (
@@ -681,12 +693,14 @@ function InboxPanel({
   refreshKey,
   onEditContact,
   onNavigate,
+  onCallContact,
 }: {
   connectionId: string;
   canManage: boolean;
   refreshKey: number;
   onEditContact: (contact: Contact) => void;
   onNavigate: (tab: Tab) => void;
+  onCallContact: (waId: string) => void;
 }) {
   const state = useWorkspaceRows('inbox', connectionId, refreshKey);
   const [selected, setSelected] = useState('');
@@ -1024,6 +1038,7 @@ function InboxPanel({
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {canManage && <button type="button" className="rounded-lg bg-[#88352B] px-3 py-2 text-xs font-semibold text-white" onClick={() => onCallContact(contact.wa_id)} aria-label="Call this WhatsApp contact">Call</button>}
                 <button
                   type="button"
                   className="wa-icon-button"
