@@ -3,6 +3,7 @@ import {
   canRequestWhatsAppCallingEnable,
   isWhatsAppCallingEnabled,
   normalizeWhatsAppCallingStatus,
+  metaCallingUpdatePayload,
 } from './whatsapp-calling-status';
 
 describe('Meta WhatsApp Calling number-level status', () => {
@@ -23,5 +24,25 @@ describe('Meta WhatsApp Calling number-level status', () => {
     expect(canRequestWhatsAppCallingEnable(null)).toBe(false);
     expect(canRequestWhatsAppCallingEnable('UNKNOWN')).toBe(false);
     expect(normalizeWhatsAppCallingStatus({ status: 'NOT SET' })).toBe('');
+  });
+});
+
+describe('safe Meta Calling activation payloads', () => {
+  it('activates privately, not exposing an untested incoming call button', () => {
+    expect(metaCallingUpdatePayload('enable')).toEqual({
+      calling: { status: 'ENABLED', call_icon_visibility: 'DISABLE_ALL' },
+    });
+  });
+
+  it('reveals customer calling only as an explicit second action', () => {
+    expect(metaCallingUpdatePayload('publish')).toEqual({
+      calling: { status: 'ENABLED', call_icon_visibility: 'DEFAULT' },
+    });
+  });
+
+  it('hides the customer call button without disconnecting existing calls', () => {
+    expect(metaCallingUpdatePayload('hide')).toEqual({
+      calling: { status: 'ENABLED', call_icon_visibility: 'DISABLE_ALL' },
+    });
   });
 });
