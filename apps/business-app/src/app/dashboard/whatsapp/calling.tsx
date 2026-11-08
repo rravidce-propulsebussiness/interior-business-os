@@ -3,6 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { readApiResponse } from '@/lib/whatsapp-response';
 import {
+  canRequestWhatsAppCallingEnable,
+  isWhatsAppCallingEnabled,
+} from '@/lib/whatsapp-calling-status';
+import {
   canStartWhatsAppCall,
   metaCallActionAllowed,
   type MetaCallPermission,
@@ -179,14 +183,15 @@ export function WhatsAppCalling({
   );
 
   const refreshSettings = useCallback(async () => {
-    if (!connectionId || !canManage) return;
+    if (!connectionId || !canManage) return null;
+    let next: Calling | null = null;
     try {
       const result = await get('settings');
-      setSettings(
-        (result.calling as Calling | null) ?? { status: 'NOT_CONFIGURED' },
-      );
+      next = (result.calling as Calling | null) ?? { status: 'NOT_CONFIGURED' };
+      setSettings(next);
       setSettingsError('');
     } catch (error) {
+      setSettings(null);
       setSettingsError(errorText(error));
     }
     try {
@@ -195,6 +200,7 @@ export function WhatsAppCalling({
     } catch {
       setRelayConfigured(false);
     }
+    return next;
   }, [connectionId, canManage, get]);
 
   const refreshPermission = useCallback(async () => {
@@ -219,10 +225,12 @@ export function WhatsAppCalling({
     const handle = window.requestAnimationFrame(() => {
       setPermission(null);
       setPermissionFor('');
-      if (active && selectedWaId) void refreshPermission();
+      setPermissionError('');
+      if (active && selectedWaId && isWhatsAppCallingEnabled(settings?.status))
+        void refreshPermission();
     });
     return () => window.cancelAnimationFrame(handle);
-  }, [active, selectedWaId, refreshPermission]);
+  }, [active, selectedWaId, refreshPermission, settings?.status]);
 
   const beginAudio = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia)
@@ -334,7 +342,7 @@ export function WhatsAppCalling({
     if (
       !connectionId ||
       !canManage ||
-      settings?.status?.toUpperCase() !== 'ENABLED'
+      !isWhatsAppCallingEnabled(settings?.status)
     )
       return;
     const first = window.setTimeout(() => void poll(), 0);
@@ -370,17 +378,46 @@ export function WhatsAppCalling({
   async function enable() {
     if (
       !window.confirm(
-        'Enable the customer call button for this WhatsApp number? An agent must be available to answer incoming calls.',
+        'Request WhatsApp Calling activation for this business number? The customer call button will remain HIDDEN until your relay, calls webhook and answering agents are ready. Meta may reject the request if the account is not eligible.',
       )
     )
       return;
     setBusy(true);
     try {
       await post({ action: 'enable' });
+      const current = await refreshSettings();
       setNotice(
-        'Meta accepted the calling setting. Test incoming calls before relying on it.',
+        isWhatsAppCallingEnabled(current?.status)
+          ? 'Meta Calling is enabled. The public call button remains hidden until you explicitly publish it.'
+          : 'Meta accepted the setup request, but its enabled status is not yet confirmed. Check WhatsApp Manager and refresh the status.',
       );
-      await refreshSettings();
+    } catch (error) {
+      setNotice(errorText(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function changePublicCallButton(show: boolean) {
+    if (
+      !window.confirm(
+        show
+          ? 'Show the WhatsApp call button to customers? Confirm the calls webhook is subscribed and an agent is online to answer. Incoming calls may arrive immediately.'
+          : 'Hide the WhatsApp call button from customers? Existing active calls will not be disconnected.',
+      )
+    )
+      return;
+    setBusy(true);
+    try {
+      await post({ action: show ? 'publish' : 'hide' });
+      const current = await refreshSettings();
+      setNotice(
+        current?.call_icon_visibility === (show ? 'DEFAULT' : 'DISABLE_ALL')
+          ? show
+            ? 'Customer call button is visible in Meta.'
+            : 'Customer call button is hidden in Meta.'
+          : 'Meta accepted the request; refresh status in a moment to verify the call button setting.',
+      );
     } catch (error) {
       setNotice(errorText(error));
     } finally {
@@ -590,27 +627,55 @@ export function WhatsAppCalling({
             >
               Refresh Meta status
             </button>
-            {settings?.status?.toUpperCase() === 'DISABLED' && (
+            {canRequestWhatsAppCallingEnable(settings?.status) && (
               <button
                 className={primary}
                 disabled={busy}
                 onClick={() => void enable()}
               >
-                Enable with Meta
+                Activate with Meta (private)
               </button>
             )}
+            {isWhatsAppCallingEnabled(settings?.status) &&
+              settings?.call_icon_visibility !== 'DEFAULT' && (
+                <button
+                  className={primary}
+                  disabled={busy || relayConfigured !== true}
+                  onClick={() => void changePublicCallButton(true)}
+                  title={
+                    relayConfigured
+                      ? 'Requires a subscribed calls webhook and available answering agents.'
+                      : 'Configure a TURN relay before displaying the customer call button.'
+                  }
+                >
+                  Show customer call button
+                </button>
+              )}
+            {isWhatsAppCallingEnabled(settings?.status) &&
+              settings?.call_icon_visibility === 'DEFAULT' && (
+                <button
+                  className={button}
+                  disabled={busy}
+                  onClick={() => void changePublicCallButton(false)}
+                >
+                  Hide customer call button
+                </button>
+              )}
           </div>
           {settingsError && (
             <p className="text-xs text-red-700">{settingsError}</p>
           )}
-          {settings?.status === 'NOT_CONFIGURED' && (
+          {canRequestWhatsAppCallingEnable(settings?.status) && (
             <p
               role="status"
               className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
             >
-              Meta has not returned a calling configuration for this number.
-              Check Calling API eligibility and the phone-number calling
-              settings in WhatsApp Manager.
+              Meta Calling is not yet active on this number. Select
+              &quot;Activate with Meta (private)&quot; to request activation,
+              then verify it in WhatsApp Manager. Meta currently requires a
+              messaging limit of at least 2,000 business-initiated conversations
+              per 24 hours. If Meta rejects the request, that eligibility or app
+              permissions may be the blocker.
             </p>
           )}
           {relayConfigured === false && (
@@ -643,7 +708,7 @@ export function WhatsAppCalling({
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   className={button}
-                  disabled={busy}
+                  disabled={busy || !isWhatsAppCallingEnabled(settings?.status)}
                   onClick={() => void refreshPermission()}
                 >
                   Check permission
@@ -652,6 +717,7 @@ export function WhatsAppCalling({
                   className={button}
                   disabled={
                     busy ||
+                    !isWhatsAppCallingEnabled(settings?.status) ||
                     permissionFor !== selectedWaId ||
                     !metaCallActionAllowed(
                       permission,
@@ -667,7 +733,7 @@ export function WhatsAppCalling({
                   disabled={
                     busy ||
                     phase !== 'idle' ||
-                    settings?.status?.toUpperCase() !== 'ENABLED' ||
+                    !isWhatsAppCallingEnabled(settings?.status) ||
                     permissionFor !== selectedWaId ||
                     !canStartWhatsAppCall(permission)
                   }

@@ -11,6 +11,7 @@ import {
 } from '@/lib/whatsapp-cloud';
 import { whatsappFailure } from '@/lib/whatsapp-meta-error';
 import { whatsappIceConfig } from '@/lib/whatsapp-turn';
+import { metaCallingUpdatePayload } from '@/lib/whatsapp-calling-status';
 import { eventForConnection } from '@/lib/whatsapp-calling-events';
 import {
   canStartWhatsAppCall,
@@ -31,6 +32,8 @@ const sdpSchema = z.string().min(40).max(150000);
 
 const postSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('enable'), connectionId: uuid }),
+  z.object({ action: z.literal('publish'), connectionId: uuid }),
+  z.object({ action: z.literal('hide'), connectionId: uuid }),
   z.object({
     action: z.literal('request_permission'),
     connectionId: uuid,
@@ -190,6 +193,8 @@ export async function POST(request: Request) {
     const data = parsed.data as {
       action:
         | 'enable'
+        | 'publish'
+        | 'hide'
         | 'request_permission'
         | 'connect'
         | 'pre_accept'
@@ -204,19 +209,45 @@ export async function POST(request: Request) {
     const { organizationId, client } = await whatsappContext();
     const connection = await getConnection(organizationId, data.connectionId);
 
-    if (data.action === 'enable') {
-      // Explicit administrator operation: never enable the public call button silently.
+    if (['enable', 'publish', 'hide'].includes(data.action)) {
+      // Only explicit authenticated management actions can mutate calling.
+      // Initial activation is private: do not advertise a customer call button
+      // until WebRTC relay and the live webhook/agent workflow are ready.
+      if (data.action === 'publish') {
+        const relay = whatsappIceConfig(
+          process.env.WHATSAPP_TURN_URLS,
+          process.env.WHATSAPP_TURN_SHARED_SECRET,
+        );
+        if (!relay.relayConfigured) {
+          return Response.json(
+            {
+              message:
+                'Configure a TURN relay before showing the WhatsApp call button to customers.',
+            },
+            { status: 409, headers: privateHeaders },
+          );
+        }
+      }
       await graphRequest(
         `${connection.phone_number_id}/settings`,
         connection.accessToken,
         {
           method: 'POST',
-          body: JSON.stringify({
-            calling: { status: 'ENABLED', call_icon_visibility: 'DEFAULT' },
-          }),
+          body: JSON.stringify(
+            metaCallingUpdatePayload(
+              data.action === 'publish'
+                ? 'publish'
+                : data.action === 'hide'
+                  ? 'hide'
+                  : 'enable',
+            ),
+          ),
         },
       );
-      return Response.json({ success: true }, { headers: privateHeaders });
+      return Response.json(
+        { success: true, requested: data.action },
+        { headers: privateHeaders },
+      );
     }
 
     if (data.action === 'request_permission' || data.action === 'connect') {

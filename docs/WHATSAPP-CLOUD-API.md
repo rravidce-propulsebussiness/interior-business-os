@@ -46,7 +46,7 @@ To run a controlled calling test:
 
 1. In Meta WhatsApp Manager select the target phone number under **Account tools > Phone numbers > Calls**. Verify that the number is eligible (Meta requires the 2,000-conversation messaging tier for production calling) and that the app has the required advanced permissions.
 2. In Meta for Developers subscribe the app's **WhatsApp Business Account** webhook to the **calls** field. Keep the existing `https://sghomesinterior.in/api/webhooks/whatsapp` endpoint and signature verification. Do not create an unverified second webhook.
-3. Open Business OS > WhatsApp > Calls, choose the exact number, and refresh Meta status. A workspace user with `automation.manage` permission may explicitly enable calling; this exposes an inbound call button to WhatsApp users, so have an agent in the Calls tab ready to answer.
+3. Open Business OS > WhatsApp > Calls, choose the exact number, and refresh Meta status. When Meta reports `NOT SET`, `NOT_SET`, `NOT_CONFIGURED` or `DISABLED`, a workspace user with `automation.manage` permission can click **Activate with Meta (private)**. This requests `calling.status=ENABLED` with `call_icon_visibility=DISABLE_ALL`, so it does **not** advertise an untested public call button. If the action is rejected, check the business phone number's Meta eligibility tier and app access. After approval, configure a TURN relay and subscribe the `calls` webhook field, keep an agent online, then explicitly use **Show customer call button**. Use **Hide customer call button** when the team is offline.
 4. Open a recent customer chat, select **Call**, and refresh call permission. If Meta allows it and the customer wrote within the last 24 hours, send the interactive permission request, await approval, refresh, then dial. Direct outbound calls without Meta-approved permission are blocked in both the browser and server.
 5. Test incoming Answer/Decline, outbound connect, mute, termination and audio in Chrome on HTTPS with microphone access. Incoming signals are polled from the signed, service-role-only webhook queue; the browser never receives Meta tokens. SDP is limited to recent call events and is returned only to callers holding `automation.manage`.
 
@@ -82,3 +82,9 @@ TURN, then place a real inbound and outbound call and confirm audio in both
 directions. The UI alone cannot establish that Meta has activated calling.
 Incoming calls now send `pre_accept` before `accept` with the same complete
 (non-trickle) SDP answer.
+
+### Calling shows NOT SET
+
+Meta does not automatically enable Calling API on a new business phone number. A number with a status of `NOT SET` is not yet ready for customer calling; customer permission checks and call attempts will fail until the business number is activated. The Calls tab now displays a deliberate private activation action for this state. Meta currently requires at least the 2,000 business-initiated conversation limit (the _messaging tier_, not that many actual daily messages) for production Calling API access. If Meta refuses activation, check the phone's Calls tab in WhatsApp Manager, its messaging limit, and the app's advanced `whatsapp_business_management` permission. Never bypass these checks or claim eligibility based on a connected messaging number alone.
+
+The public call icon is deliberately **not** turned on by the first activation request. Publishing it requires a configured TURN relay and separate human confirmation that call webhooks and agents are ready. The server cannot establish from a missing call event alone whether Meta's `calls` field is subscribed, and the business number must be tested end-to-end before a production launch.
