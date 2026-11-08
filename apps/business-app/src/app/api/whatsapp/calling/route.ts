@@ -115,7 +115,6 @@ export async function GET(request: Request) {
         status: calling.status ?? 'UNKNOWN',
         call_icon_visibility: calling.call_icon_visibility ?? 'UNKNOWN',
         callback_permission_status: calling.callback_permission_status ?? 'UNKNOWN',
-        sip: calling.sip ?? null,
       } : null,
     }, { headers: privateHeaders });
   } catch (error) {
