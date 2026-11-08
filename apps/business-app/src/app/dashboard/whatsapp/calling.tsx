@@ -59,12 +59,14 @@ export function WhatsAppCalling({
   active,
   canManage,
   onOpen,
+  onCallActivityChange,
 }: {
   connectionId: string;
   selectedWaId: string;
   active: boolean;
   canManage: boolean;
   onOpen: () => void;
+  onCallActivityChange: (active: boolean) => void;
 }) {
   const [settings, setSettings] = useState<Calling | null>(null);
   const [settingsError, setSettingsError] = useState('');
@@ -95,7 +97,8 @@ export function WhatsAppCalling({
     appliedAnswerRef.current = '';
     setPhase('idle');
     setMuted(false);
-  }, []);
+    onCallActivityChange(false);
+  }, [onCallActivityChange]);
 
   useEffect(() => {
     // A connection change remounts the panel; release browser media on unmount.
@@ -350,6 +353,7 @@ export function WhatsAppCalling({
         sdp: peer.localDescription?.sdp,
       });
       activeCallRef.current = String(result.callId ?? '');
+      onCallActivityChange(true);
       setPhase('dialing');
       setNotice('Calling customer. Waiting for their answer…');
     } catch (error) {
@@ -378,6 +382,7 @@ export function WhatsAppCalling({
         sdp: peer.localDescription?.sdp,
       });
       activeCallRef.current = incoming.id;
+      onCallActivityChange(true);
       dismissedCallsRef.current.add(incoming.id);
       setIncoming(null);
       setPhase('connected');
