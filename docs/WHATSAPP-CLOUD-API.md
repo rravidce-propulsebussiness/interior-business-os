@@ -51,3 +51,35 @@ To run a controlled calling test:
 5. Test incoming Answer/Decline, outbound connect, mute, termination and audio in Chrome on HTTPS with microphone access. Incoming signals are polled from the signed, service-role-only webhook queue; the browser never receives Meta tokens. SDP is limited to recent call events and is returned only to callers holding `automation.manage`.
 
 **Limitations before production launch:** This preview uses browser WebRTC and a public STUN server; restrictive networks can require an authenticated TURN relay with short-lived credentials. Agents must have the Business OS open to receive calls. Call history, multi-agent arbitration, push notifications, centralized media servers, QoS checks, automated end-to-end audio tests, and SIP trunk routing are not yet provided. Do not advertise 24/7 calling until the agent workflow, TURN connectivity and production Meta eligibility have been validated. Do not turn on the call button for an unstaffed number.
+
+
+### WebRTC relay configuration
+
+The Calls workspace first asks its authenticated server endpoint for ICE servers. By
+default it uses STUN only, which is **not reliable on restrictive mobile and
+office networks**. To enable a TURN relay, provision an external coturn server
+(or a compatible managed TURN service using the coturn REST shared-secret
+credential scheme). Configure **server-side** environment variables:
+
+```dotenv
+WHATSAPP_TURN_URLS=turn:relay.example.com:3478?transport=udp,turns:relay.example.com:5349?transport=tcp
+WHATSAPP_TURN_SHARED_SECRET=<long-secret-matching-the-turn-server>
+```
+
+The TURN server must use its REST/shared-secret authentication mechanism
+(`use-auth-secret` and `static-auth-secret` in coturn). HTTPS/TLS certificate
+management and UDP/TCP firewall access remain the relay operator's
+responsibility. Credentials issued to browsers expire after 60 minutes. The
+shared secret **must not** have a `NEXT_PUBLIC_` prefix or be exposed in
+client bundles. Restart the Business OS server after setting these variables.
+
+If a managed provider only supports permanent usernames/passwords or its own
+token API, use its supported short-lived credential integration rather than
+pasting static TURN credentials into the browser or these variables.
+
+**Operational readiness:** enable the Meta `calls` webhook field, verify the
+number's Calling API status, ensure agents are online to answer, configure
+TURN, then place a real inbound and outbound call and confirm audio in both
+directions. The UI alone cannot establish that Meta has activated calling.
+Incoming calls now send `pre_accept` before `accept` with the same complete
+(non-trickle) SDP answer.
