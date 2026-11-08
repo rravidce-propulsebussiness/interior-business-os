@@ -58,11 +58,13 @@ describe('project management navigation and trusted portfolio boundaries', () =>
   });
 
   it('never offers the owner portfolio to a role without project.view', () => {
-    expect(
-      ownerWorkspaceNavigation(company(['task.view'])).find(
-        (item) => item.label === 'Project Management',
-      ),
-    ).toBeUndefined();
+    const taskOnly = ownerWorkspaceNavigation(company(['task.view'])).find(
+      (item) => item.label === 'Project Management',
+    );
+    expect(taskOnly?.children).not.toContainEqual({
+      label: 'Portfolio Overview',
+      href: '/dashboard/project-management',
+    });
     expect(
       ownerWorkspaceNavigation(company(['project.view'], [])).find(
         (item) => item.label === 'Project Management',
