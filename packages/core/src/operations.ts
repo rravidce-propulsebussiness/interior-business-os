@@ -108,7 +108,7 @@ export const operationsEntitySchema = z.enum([
   'project_execution_events',
 ]);
 export type OperationsEntity = z.infer<typeof operationsEntitySchema>;
-export const operationsFilterSchema = z.record(
+export const operationsFilterSchema = z.partialRecord(
   z.enum([
     'id',
     'project_id',
