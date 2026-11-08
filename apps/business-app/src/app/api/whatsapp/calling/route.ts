@@ -190,7 +190,7 @@ export async function GET(request: Request) {
         { status: 400, headers: privateHeaders },
       );
     const result = await graphRequest<{ calling?: Record<string, unknown> }>(
-      `${connection.phone_number_id}/settings`,
+      `${connection.phone_number_id}/settings?fields=calling`,
       connection.accessToken,
     );
     const calling = result.calling ?? null;
