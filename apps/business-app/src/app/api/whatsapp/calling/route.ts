@@ -391,7 +391,27 @@ export async function POST(request: Request) {
           },
           { onConflict: 'idempotency_key', ignoreDuplicates: true },
         );
-      if (saved.error) throw new Error('WHATSAPP_CALL_TRACKING_FAILED');
+      if (saved.error) {
+        // A call was already placed at Meta. Compensate immediately if we
+        // cannot associate it with this tenant for secure future hang-up.
+        try {
+          await graphRequest(
+            `${connection.phone_number_id}/calls`,
+            connection.accessToken,
+            {
+              method: 'POST',
+              body: JSON.stringify({
+                messaging_product: 'whatsapp',
+                action: 'terminate',
+                call_id: callId,
+              }),
+            },
+          );
+        } catch {
+          // The next call webhook still permits recovery once received.
+        }
+        throw new Error('WHATSAPP_CALL_TRACKING_FAILED');
+      }
       return Response.json(
         { success: true, callId },
         { headers: privateHeaders },
