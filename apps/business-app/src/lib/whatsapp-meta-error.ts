@@ -29,7 +29,9 @@ export function metaApiErrorFrom(httpStatus: number, body: unknown) {
     httpStatus,
     finiteNumber(error?.code),
     finiteNumber(error?.error_subcode),
-    typeof error?.fbtrace_id === 'string' ? error.fbtrace_id.slice(0, 64) : null,
+    typeof error?.fbtrace_id === 'string'
+      ? error.fbtrace_id.slice(0, 64)
+      : null,
   );
 }
 
@@ -38,19 +40,34 @@ const messages: Record<number, string> = {
   10: 'The Meta app does not have permission for this action. Check App Review, advanced access, and the app roles.',
   190: 'The Meta access token has expired or was revoked. Disconnect this number and connect it again.',
   200: 'The Meta app does not have permission for this action. Check App Review, advanced access, and the app roles.',
-  80007: 'This WhatsApp account has reached a Meta rate limit. Wait and try again.',
+  80007:
+    'This WhatsApp account has reached a Meta rate limit. Wait and try again.',
   130429: 'This number is sending faster than Meta allows. Wait and try again.',
-  131026: 'Meta could not deliver to this recipient. Check that the number uses WhatsApp.',
-  131030: 'This recipient is not on the Meta test recipient list for this number.',
-  131031: 'Meta has locked this WhatsApp Business Account. Check WhatsApp Manager.',
-  131042: 'Meta reported a billing problem. Check the payment method in WhatsApp Manager.',
-  131047: 'More than 24 hours have passed since this contact last wrote. Send an approved template instead.',
-  131056: 'Too many messages were sent to this contact too quickly. Wait and try again.',
+  131026:
+    'Meta could not deliver to this recipient. Check that the number uses WhatsApp.',
+  131030:
+    'This recipient is not on the Meta test recipient list for this number.',
+  131031:
+    'Meta has locked this WhatsApp Business Account. Check WhatsApp Manager.',
+  131042:
+    'Meta reported a billing problem. Check the payment method in WhatsApp Manager.',
+  131047:
+    'More than 24 hours have passed since this contact last wrote. Send an approved template instead.',
+  131056:
+    'Too many messages were sent to this contact too quickly. Wait and try again.',
   132001: 'Meta could not find this template in the selected language.',
   133004: 'WhatsApp is temporarily unavailable. Try again shortly.',
   133005: 'The six-digit WhatsApp two-step verification PIN is not correct.',
   133006: 'This phone number must be verified again before registration.',
-  133010: 'This phone number is not registered with WhatsApp Cloud API. Register it with its six-digit PIN first.',
+  133010:
+    'This phone number is not registered with WhatsApp Cloud API. Register it with its six-digit PIN first.',
+  138000:
+    'WhatsApp Calling is not enabled for this business number. Enable calling in WhatsApp Manager and verify eligibility.',
+  138001: 'The WhatsApp recipient cannot receive a voice call at present.',
+  138006:
+    'This customer has not granted WhatsApp call permission. Send a permission request and wait for approval.',
+  138012:
+    'Meta has limited calls for this WhatsApp number. Check calling limits and retry later.',
 };
 
 export function metaErrorMessage(code: number | null) {

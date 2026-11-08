@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import './whatsapp-inbox.css';
+import { WhatsAppCalling } from './calling';
 import { readApiResponse } from '@/lib/whatsapp-response';
 import { createBrowserDatabase } from '@business-os/database/browser';
 
@@ -51,6 +52,7 @@ type Rule = {
 type Tab =
   | 'overview'
   | 'inbox'
+  | 'calling'
   | 'contacts'
   | 'broadcasts'
   | 'templates'
@@ -138,6 +140,8 @@ export function WhatsAppHub({
 }) {
   const [tab, setTab] = useState<Tab>('inbox');
   const [connectionId, setConnectionId] = useState(connections[0]?.id ?? '');
+  const [callTarget, setCallTarget] = useState('');
+  const [callInProgress, setCallInProgress] = useState(false);
   const [templates, setTemplates] = useState<Template[]>([]);
   const [notice, setNotice] = useState('');
   const [contactModal, setContactModal] = useState<{
@@ -173,6 +177,7 @@ export function WhatsAppHub({
 
   const tabs: Array<{ id: Tab; label: string; icon: string }> = [
     { id: 'inbox', label: 'Inbox', icon: 'message' },
+    { id: 'calling', label: 'Calls', icon: 'bell' },
     { id: 'contacts', label: 'Contacts', icon: 'people' },
     { id: 'broadcasts', label: 'Broadcasts', icon: 'broadcast' },
     { id: 'templates', label: 'Templates', icon: 'template' },
@@ -287,7 +292,16 @@ export function WhatsAppHub({
               <span aria-hidden="true">▦</span>
               <select
                 value={connectionId}
-                onChange={(event) => setConnectionId(event.target.value)}
+                disabled={callInProgress}
+                title={
+                  callInProgress
+                    ? 'End the WhatsApp call before switching business numbers.'
+                    : undefined
+                }
+                onChange={(event) => {
+                  setConnectionId(event.target.value);
+                  setCallTarget('');
+                }}
                 aria-label="Connected business number"
               >
                 {connections.map((item) => (
@@ -329,6 +343,15 @@ export function WhatsAppHub({
         </header>
 
         <div className="wa-content">
+          <WhatsAppCalling
+            key={connectionId}
+            connectionId={connectionId}
+            selectedWaId={callTarget}
+            active={tab === 'calling'}
+            canManage={canManage}
+            onOpen={() => setTab('calling')}
+            onCallActivityChange={setCallInProgress}
+          />
           <div className="wa-section-heading">
             <div>
               <span className="wa-eyebrow">PROPULSE MESSAGING</span>
@@ -381,6 +404,10 @@ export function WhatsAppHub({
                 })
               }
               onNavigate={setTab}
+              onCallContact={(waId) => {
+                setCallTarget(waId);
+                setTab('calling');
+              }}
             />
           )}
           {tab === 'contacts' && (
@@ -643,32 +670,35 @@ function useWorkspaceRows(
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const load = useCallback(async (quiet = false) => {
-    if (!connectionId) return;
-    if (!quiet) setBusy(true);
-    try {
-      const params = new URLSearchParams({ section, connectionId, search });
-      const response = await fetch(`/api/whatsapp/inbox?${params}`, {
-        cache: 'no-store',
-      });
-      const data = (await readApiResponse(response)) as {
-        rows?: Contact[];
-        total?: number;
-        unread?: number;
-        message?: string;
-      };
-      if (!response.ok)
-        throw new Error(data.message ?? 'Could not load contacts.');
-      setRows(data.rows ?? []);
-      setTotal(data.total ?? 0);
-      setUnread(data.unread ?? 0);
-      setError('');
-    } catch (cause) {
-      setError(friendlyError(cause, 'Could not load WhatsApp data.'));
-    } finally {
-      if (!quiet) setBusy(false);
-    }
-  }, [connectionId, search, section]);
+  const load = useCallback(
+    async (quiet = false) => {
+      if (!connectionId) return;
+      if (!quiet) setBusy(true);
+      try {
+        const params = new URLSearchParams({ section, connectionId, search });
+        const response = await fetch(`/api/whatsapp/inbox?${params}`, {
+          cache: 'no-store',
+        });
+        const data = (await readApiResponse(response)) as {
+          rows?: Contact[];
+          total?: number;
+          unread?: number;
+          message?: string;
+        };
+        if (!response.ok)
+          throw new Error(data.message ?? 'Could not load contacts.');
+        setRows(data.rows ?? []);
+        setTotal(data.total ?? 0);
+        setUnread(data.unread ?? 0);
+        setError('');
+      } catch (cause) {
+        setError(friendlyError(cause, 'Could not load WhatsApp data.'));
+      } finally {
+        if (!quiet) setBusy(false);
+      }
+    },
+    [connectionId, search, section],
+  );
   useEffect(() => {
     void load();
   }, [load, refreshKey]);
@@ -681,12 +711,14 @@ function InboxPanel({
   refreshKey,
   onEditContact,
   onNavigate,
+  onCallContact,
 }: {
   connectionId: string;
   canManage: boolean;
   refreshKey: number;
   onEditContact: (contact: Contact) => void;
   onNavigate: (tab: Tab) => void;
+  onCallContact: (waId: string) => void;
 }) {
   const state = useWorkspaceRows('inbox', connectionId, refreshKey);
   const [selected, setSelected] = useState('');
@@ -796,7 +828,9 @@ function InboxPanel({
     event.preventDefault();
     if (!contact || (!body.trim() && !attachment)) return;
     setBusy(true);
-    setNotice(attachment ? 'Uploading and sending attachment…' : 'Sending reply…');
+    setNotice(
+      attachment ? 'Uploading and sending attachment…' : 'Sending reply…',
+    );
     try {
       let payload: Record<string, unknown> = {
         messageType: 'text',
@@ -1024,6 +1058,16 @@ function InboxPanel({
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                {canManage && (
+                  <button
+                    type="button"
+                    className="rounded-lg bg-[#88352B] px-3 py-2 text-xs font-semibold text-white"
+                    onClick={() => onCallContact(contact.wa_id)}
+                    aria-label="Call this WhatsApp contact"
+                  >
+                    Call
+                  </button>
+                )}
                 <button
                   type="button"
                   className="wa-icon-button"
@@ -1149,7 +1193,9 @@ function InboxPanel({
                   />
                   {attachment && (
                     <div className="mt-2 flex items-center justify-between gap-3 rounded-xl bg-stone-50 px-3 py-2 text-xs text-stone-700">
-                      <span className="min-w-0 truncate">{attachment.name}</span>
+                      <span className="min-w-0 truncate">
+                        {attachment.name}
+                      </span>
                       <button
                         type="button"
                         className="font-semibold text-[#88352B]"
@@ -1203,7 +1249,10 @@ function MessageBody({
   message: Message;
   connectionId: string;
 }) {
-  const match = /^\[\[WA_MEDIA:([A-Za-z0-9._-]{1,200}):(image|video|audio|document)\]\](?:\r?\n([\s\S]*))?$/.exec(message.body);
+  const match =
+    /^\[\[WA_MEDIA:([A-Za-z0-9._-]{1,200}):(image|video|audio|document)\]\](?:\r?\n([\s\S]*))?$/.exec(
+      message.body,
+    );
   if (!match) {
     return (
       <p className="whitespace-pre-wrap break-words text-sm leading-6">
@@ -1218,17 +1267,41 @@ function MessageBody({
   return (
     <div className="space-y-2">
       {kind === 'image' ? (
-        <img className="max-h-80 max-w-full rounded-lg object-contain" src={source} alt={caption || 'WhatsApp image'} loading="lazy" />
+        <img
+          className="max-h-80 max-w-full rounded-lg object-contain"
+          src={source}
+          alt={caption || 'WhatsApp image'}
+          loading="lazy"
+        />
       ) : kind === 'video' ? (
-        <video className="max-h-80 max-w-full rounded-lg" src={source} controls preload="metadata" />
+        <video
+          className="max-h-80 max-w-full rounded-lg"
+          src={source}
+          controls
+          preload="metadata"
+        />
       ) : kind === 'audio' ? (
-        <audio className="max-w-full" src={source} controls preload="metadata" />
+        <audio
+          className="max-w-full"
+          src={source}
+          controls
+          preload="metadata"
+        />
       ) : (
-        <a className="inline-flex rounded-lg bg-white/70 px-3 py-2 text-sm font-semibold underline" href={source} target="_blank" rel="noreferrer">
+        <a
+          className="inline-flex rounded-lg bg-white/70 px-3 py-2 text-sm font-semibold underline"
+          href={source}
+          target="_blank"
+          rel="noreferrer"
+        >
           Open attachment
         </a>
       )}
-      {caption && <p className="whitespace-pre-wrap break-words text-sm leading-6">{caption}</p>}
+      {caption && (
+        <p className="whitespace-pre-wrap break-words text-sm leading-6">
+          {caption}
+        </p>
+      )}
     </div>
   );
 }
