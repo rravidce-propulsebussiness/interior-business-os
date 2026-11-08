@@ -13107,6 +13107,10 @@ export interface Database {
         };
         Returns: string;
       };
+      whatsapp_realtime_allowed: {
+        Args: { p_organization_id: string };
+        Returns: boolean;
+      };
       whatsapp_window_open: {
         Args: {
           p_organization_id: string;
