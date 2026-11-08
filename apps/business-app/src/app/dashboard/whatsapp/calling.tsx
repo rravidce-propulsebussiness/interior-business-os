@@ -105,14 +105,35 @@ export function WhatsAppCalling({
   }, [onCallActivityChange]);
 
   useEffect(() => {
-    // A connection change remounts the panel; release browser media on unmount.
+    // When leaving WhatsApp, request termination before releasing local audio.
+    // keepalive is best-effort during tab closure; customers can also hang up.
     const peer = peerRef;
     const stream = streamRef;
+    const callId = activeCallRef;
+    const terminateOnExit = () => {
+      const id = callId.current;
+      if (!id) return;
+      callId.current = '';
+      try {
+        void fetch('/api/whatsapp/calling', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'terminate', connectionId, callId: id }),
+          keepalive: true,
+          credentials: 'same-origin',
+        }).catch(() => undefined);
+      } catch {
+        // The peer is closed even if the network is no longer available.
+      }
+    };
+    window.addEventListener('pagehide', terminateOnExit);
     return () => {
+      window.removeEventListener('pagehide', terminateOnExit);
+      terminateOnExit();
       peer.current?.close();
       stream.current?.getTracks().forEach((track) => track.stop());
     };
-  }, []);
+  }, [connectionId]);
 
   const get = useCallback(
     async (action: string, waId?: string) => {
