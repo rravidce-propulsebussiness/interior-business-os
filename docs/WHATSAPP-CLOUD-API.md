@@ -52,7 +52,6 @@ To run a controlled calling test:
 
 **Limitations before production launch:** This preview uses browser WebRTC and a public STUN server; restrictive networks can require an authenticated TURN relay with short-lived credentials. Agents must have the Business OS open to receive calls. Call history, multi-agent arbitration, push notifications, centralized media servers, QoS checks, automated end-to-end audio tests, and SIP trunk routing are not yet provided. Do not advertise 24/7 calling until the agent workflow, TURN connectivity and production Meta eligibility have been validated. Do not turn on the call button for an unstaffed number.
 
-
 ### WebRTC relay configuration
 
 The Calls workspace first asks its authenticated server endpoint for ICE servers. By

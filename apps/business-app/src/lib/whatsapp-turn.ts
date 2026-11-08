@@ -22,13 +22,13 @@ export function whatsappIceConfig(
   sharedSecret: string | undefined,
   nowSeconds = Math.floor(Date.now() / 1000),
 ): WhatsAppIceConfig {
-  const iceServers: WhatsAppIceConfig['iceServers'] = [
-    { urls: DEFAULT_STUN },
-  ];
+  const iceServers: WhatsAppIceConfig['iceServers'] = [{ urls: DEFAULT_STUN }];
   const urls = (turnUrls ?? '')
     .split(',')
     .map((url) => url.trim())
-    .filter((url) => /^turns?:[^\s/@?#]+(?::\d{1,5})?(?:\?transport=(?:tcp|udp))?$/i.test(url))
+    .filter((url) =>
+      /^turns?:[^\s/@?#]+(?::\d{1,5})?(?:\?transport=(?:tcp|udp))?$/i.test(url),
+    )
     .slice(0, 8);
 
   if (!urls.length || !sharedSecret || sharedSecret.length < 24) {

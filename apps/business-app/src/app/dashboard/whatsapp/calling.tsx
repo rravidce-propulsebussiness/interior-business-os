@@ -596,8 +596,12 @@ export function WhatsAppCalling({
             <p className="text-xs text-red-700">{settingsError}</p>
           )}
           {relayConfigured === false && (
-            <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
-              TURN relay is not configured. Calls may connect without audio on restrictive networks. Add a TURN server before production rollout.
+            <p
+              role="status"
+              className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
+            >
+              TURN relay is not configured. Calls may connect without audio on
+              restrictive networks. Add a TURN server before production rollout.
             </p>
           )}
           <p className="text-xs leading-5 text-stone-500">
