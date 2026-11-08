@@ -25,25 +25,27 @@ create policy whatsapp_messages_realtime_select
   for select to authenticated
   using (public.whatsapp_realtime_allowed(organization_id));
 
-do $$
+do $
 begin
-  if not exists (
-    select 1 from pg_publication_tables
-    where pubname = 'supabase_realtime'
-      and schemaname = 'public'
-      and tablename = 'whatsapp_contacts'
-  ) then
-    execute 'alter publication supabase_realtime add table public.whatsapp_contacts';
+  if exists (select 1 from pg_publication where pubname = 'supabase_realtime') then
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'whatsapp_contacts'
+    ) then
+      execute 'alter publication supabase_realtime add table public.whatsapp_contacts';
+    end if;
+    if not exists (
+      select 1 from pg_publication_tables
+      where pubname = 'supabase_realtime'
+        and schemaname = 'public'
+        and tablename = 'whatsapp_messages'
+    ) then
+      execute 'alter publication supabase_realtime add table public.whatsapp_messages';
+    end if;
   end if;
-  if not exists (
-    select 1 from pg_publication_tables
-    where pubname = 'supabase_realtime'
-      and schemaname = 'public'
-      and tablename = 'whatsapp_messages'
-  ) then
-    execute 'alter publication supabase_realtime add table public.whatsapp_messages';
-  end if;
-end $$;
+end $;
 
 create or replace function public.whatsapp_message_ingest(
   p_organization_id uuid, p_connection_id uuid, p_change jsonb
