@@ -425,11 +425,13 @@ export function WhatsAppCalling({
     setBusy(true);
     try {
       await post({ action: 'terminate', callId: id });
+      closeMedia();
       setNotice('Call ended.');
     } catch (error) {
-      setNotice(errorText(error));
+      // Keep the End Call control visible. The session may still be connected
+      // and billable at Meta until termination succeeds.
+      setNotice(`Could not end the call with Meta: ${errorText(error)}. Retry End call or ask the customer to hang up.`);
     } finally {
-      closeMedia();
       setBusy(false);
     }
   }
