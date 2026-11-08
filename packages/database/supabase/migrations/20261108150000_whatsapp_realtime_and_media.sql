@@ -102,7 +102,7 @@ begin
       body := '[[WA_MEDIA:' || media_id || ':' || msg_type || ']]'
         || case
           when coalesce(m->msg_type->>'caption','') <> ''
-            then E'\\n' || m->msg_type->>'caption'
+            then chr(10) || m->msg_type->>'caption'
           else ''
         end;
     else
