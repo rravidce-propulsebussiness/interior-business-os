@@ -69,7 +69,7 @@ export async function POST(request: Request) {
     const { organizationId } = await whatsappContext('automation.manage');
     const connection = await getConnection(organizationId, connectionId);
     const version = process.env.META_GRAPH_API_VERSION ?? '';
-    if (!/^v\\d+\\.0$/.test(version))
+    if (!/^v\d+\.0$/.test(version))
       throw new Error('META_API_UNAVAILABLE');
 
     const upload = new FormData();
