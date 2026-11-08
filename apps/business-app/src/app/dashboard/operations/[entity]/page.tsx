@@ -3,10 +3,7 @@ import { notFound } from 'next/navigation';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
 import { canUseOperations } from '../access';
 import { createOperationsRepository } from '@business-os/database/operations';
-import {
-  operationsEntitySchema,
-  operationsPermissions,
-} from '@business-os/core/operations';
+import { operationsEntitySchema } from '@business-os/core/operations';
 import { text } from '../../execution/presentation';
 import { SiteForm } from '../site-form';
 import { operationDefinitions } from '@business-os/core/operations-command';
