@@ -38,4 +38,4 @@ jobs:
           apps/business-app/src/lib/whatsapp-fixes.test.ts
           apps/business-app/src/lib/whatsapp-origin.test.ts
       - run: pnpm --filter ./apps/business-app build
-      - run: pnpm security:secrets
+      - run: pnpm build && pnpm security:secrets
