@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { readApiResponse } from '@/lib/whatsapp-response';
+import { canStartWhatsAppCall, metaCallActionAllowed, type MetaCallPermission } from '@/lib/whatsapp-calling-permission';
 
 type Calling = {
   status?: string;
@@ -9,12 +10,7 @@ type Calling = {
   callback_permission_status?: string;
   sip?: unknown;
 };
-type Permission = {
-  permission?: {
-    status?: string;
-    actions?: Array<{ action_name?: string; can_perform_action?: boolean }>;
-  };
-};
+type Permission = MetaCallPermission;
 type CallEvent = {
   id: string;
   event: string;
@@ -33,13 +29,6 @@ function errorText(error: unknown) {
   return error instanceof Error
     ? error.message
     : 'WhatsApp calling could not complete the action.';
-}
-function mayPerform(permission: Permission | null, action: string) {
-  return (
-    permission?.permission?.actions?.some(
-      (item) => item.action_name === action && item.can_perform_action === true,
-    ) ?? false
-  );
 }
 async function waitForIce(peer: RTCPeerConnection) {
   if (peer.iceGatheringState === 'complete') return;
@@ -80,6 +69,7 @@ export function WhatsAppCalling({
   const [settings, setSettings] = useState<Calling | null>(null);
   const [settingsError, setSettingsError] = useState('');
   const [permission, setPermission] = useState<Permission | null>(null);
+  const [permissionFor, setPermissionFor] = useState('');
   const [permissionError, setPermissionError] = useState('');
   const [busy, setBusy] = useState(false);
   const [phase, setPhase] = useState('idle');
@@ -171,10 +161,12 @@ export function WhatsAppCalling({
     try {
       const result = await get('permissions', selectedWaId);
       setPermission((result.permission as Permission | null) ?? null);
+      setPermissionFor(selectedWaId);
       setPermissionError('');
     } catch (error) {
       setPermissionError(errorText(error));
       setPermission(null);
+      setPermissionFor('');
     }
   }, [connectionId, canManage, selectedWaId, get]);
 
@@ -185,6 +177,7 @@ export function WhatsAppCalling({
   useEffect(() => {
     const handle = window.requestAnimationFrame(() => {
       setPermission(null);
+      setPermissionFor('');
       if (active && selectedWaId) void refreshPermission();
     });
     return () => window.cancelAnimationFrame(handle);
@@ -344,7 +337,7 @@ export function WhatsAppCalling({
   }
 
   async function call() {
-    if (!selectedWaId || !mayPerform(permission, 'start_call')) return;
+    if (!selectedWaId || permissionFor !== selectedWaId || !canStartWhatsAppCall(permission)) return;
     setBusy(true);
     try {
       const peer = await beginAudio();
@@ -576,7 +569,7 @@ export function WhatsAppCalling({
                   className={button}
                   disabled={
                     busy ||
-                    !mayPerform(permission, 'send_call_permission_request')
+                    permissionFor !== selectedWaId || !metaCallActionAllowed(permission, 'send_call_permission_request')
                   }
                   onClick={() => void requestPermission()}
                 >
@@ -588,7 +581,7 @@ export function WhatsAppCalling({
                     busy ||
                     phase !== 'idle' ||
                     settings?.status?.toUpperCase() !== 'ENABLED' ||
-                    !mayPerform(permission, 'start_call')
+                    permissionFor !== selectedWaId || !canStartWhatsAppCall(permission)
                   }
                   onClick={() => void call()}
                 >
