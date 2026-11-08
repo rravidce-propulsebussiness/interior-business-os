@@ -1211,7 +1211,9 @@ function MessageBody({
       </p>
     );
   }
-  const [, mediaId, kind, caption = ''] = match;
+  const mediaId = match[1]!;
+  const kind = match[2]!;
+  const caption = match[3] ?? '';
   const source = `/api/whatsapp/media?connectionId=${encodeURIComponent(connectionId)}&mediaId=${encodeURIComponent(mediaId)}`;
   return (
     <div className="space-y-2">
