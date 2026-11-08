@@ -306,9 +306,7 @@ export async function POST(request: Request) {
         `${connection.phone_number_id}/call_permissions?user_wa_id=${encodeURIComponent(data.waId!)}`,
         connection.accessToken,
       );
-      if (
-        !metaCallActionAllowed(permission, 'send_call_permission_request')
-      ) {
+      if (!metaCallActionAllowed(permission, 'send_call_permission_request')) {
         return Response.json(
           {
             message:

@@ -293,7 +293,11 @@ export function WhatsAppHub({
               <select
                 value={connectionId}
                 disabled={callInProgress}
-                title={callInProgress ? 'End the WhatsApp call before switching business numbers.' : undefined}
+                title={
+                  callInProgress
+                    ? 'End the WhatsApp call before switching business numbers.'
+                    : undefined
+                }
                 onChange={(event) => {
                   setConnectionId(event.target.value);
                   setCallTarget('');

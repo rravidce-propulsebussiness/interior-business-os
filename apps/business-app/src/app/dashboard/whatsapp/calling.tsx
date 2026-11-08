@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { readApiResponse } from '@/lib/whatsapp-response';
-import { canStartWhatsAppCall, metaCallActionAllowed, type MetaCallPermission } from '@/lib/whatsapp-calling-permission';
+import {
+  canStartWhatsAppCall,
+  metaCallActionAllowed,
+  type MetaCallPermission,
+} from '@/lib/whatsapp-calling-permission';
 
 type Calling = {
   status?: string;
@@ -340,7 +344,12 @@ export function WhatsAppCalling({
   }
 
   async function call() {
-    if (!selectedWaId || permissionFor !== selectedWaId || !canStartWhatsAppCall(permission)) return;
+    if (
+      !selectedWaId ||
+      permissionFor !== selectedWaId ||
+      !canStartWhatsAppCall(permission)
+    )
+      return;
     setBusy(true);
     try {
       const peer = await beginAudio();
@@ -574,7 +583,11 @@ export function WhatsAppCalling({
                   className={button}
                   disabled={
                     busy ||
-                    permissionFor !== selectedWaId || !metaCallActionAllowed(permission, 'send_call_permission_request')
+                    permissionFor !== selectedWaId ||
+                    !metaCallActionAllowed(
+                      permission,
+                      'send_call_permission_request',
+                    )
                   }
                   onClick={() => void requestPermission()}
                 >
@@ -586,7 +599,8 @@ export function WhatsAppCalling({
                     busy ||
                     phase !== 'idle' ||
                     settings?.status?.toUpperCase() !== 'ENABLED' ||
-                    permissionFor !== selectedWaId || !canStartWhatsAppCall(permission)
+                    permissionFor !== selectedWaId ||
+                    !canStartWhatsAppCall(permission)
                   }
                   onClick={() => void call()}
                 >
