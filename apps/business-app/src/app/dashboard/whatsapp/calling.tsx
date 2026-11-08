@@ -74,6 +74,7 @@ export function WhatsAppCalling({
 }) {
   const [settings, setSettings] = useState<Calling | null>(null);
   const [settingsError, setSettingsError] = useState('');
+  const [relayConfigured, setRelayConfigured] = useState<boolean | null>(null);
   const [permission, setPermission] = useState<Permission | null>(null);
   const [permissionFor, setPermissionFor] = useState('');
   const [permissionError, setPermissionError] = useState('');
@@ -235,9 +236,7 @@ export function WhatsAppCalling({
       stream.getTracks().forEach((track) => track.stop());
       throw error;
     }
-    if (!ice.relayConfigured) {
-      setNotice('TURN relay is not configured. Calls can fail or have no audio on restrictive networks.');
-    }
+    setRelayConfigured(ice.relayConfigured === true);
     stream.getAudioTracks().forEach((track) => peer.addTrack(track, stream));
     peer.ontrack = (event) => {
       if (audioRef.current) {
@@ -595,6 +594,11 @@ export function WhatsAppCalling({
           </div>
           {settingsError && (
             <p className="text-xs text-red-700">{settingsError}</p>
+          )}
+          {relayConfigured === false && (
+            <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+              TURN relay is not configured. Calls may connect without audio on restrictive networks. Add a TURN server before production rollout.
+            </p>
           )}
           <p className="text-xs leading-5 text-stone-500">
             Calling requires Meta approval, the calls webhook subscription, and
