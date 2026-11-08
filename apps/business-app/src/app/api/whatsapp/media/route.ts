@@ -75,7 +75,13 @@ export async function POST(request: Request) {
     const upload = new FormData();
     upload.append('messaging_product', 'whatsapp');
     upload.append('type', file.type);
-    const fileName = file.name.replace(/[\\\\/\\r\\n"]/g, '_').slice(0, 120) || 'attachment';
+    const fileName = file.name
+      .replaceAll(String.fromCharCode(92), '_')
+      .replaceAll('/', '_')
+      .replaceAll(String.fromCharCode(13), '_')
+      .replaceAll(String.fromCharCode(10), '_')
+      .replaceAll('"', '_')
+      .slice(0, 120) || 'attachment';
     upload.append('file', file, fileName);
     const response = await fetch(
       `https://graph.facebook.com/${version}/${connection.phone_number_id}/media`,
