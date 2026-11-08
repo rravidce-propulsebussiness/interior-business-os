@@ -19,6 +19,7 @@ const mediaSchema = z
     mediaId: z.string().regex(/^[A-Za-z0-9._-]{1,200}$/),
     mediaType: z.enum(['image', 'video', 'audio', 'document']),
     caption: z.string().trim().max(1000).default(''),
+    filename: z.string().trim().min(1).max(120).optional(),
   })
   .strict();
 const templateSchema = z
@@ -134,11 +135,16 @@ export async function POST(request: Request) {
           },
           { status: 400, headers: privateHeaders },
         );
+      if (mediaRequest.mediaType === 'audio' && mediaRequest.caption)
+        return Response.json(
+          { message: 'Send audio without a caption, or send the text separately.' },
+          { status: 400, headers: privateHeaders },
+        );
       const attachment = {
         id: mediaRequest.mediaId,
         ...(mediaRequest.caption ? { caption: mediaRequest.caption } : {}),
         ...(mediaRequest.mediaType === 'document'
-          ? { filename: 'attachment' }
+          ? { filename: mediaRequest.filename ?? 'attachment' }
           : {}),
       };
       const result = await graphRequest<{
