@@ -25,7 +25,7 @@ function company(
 
 function erp(context: Context | null) {
   return ownerWorkspaceNavigation(context).find(
-    (item) => item.label === 'Construction ERP',
+    (item) => item.label === 'Project Management',
   );
 }
 
@@ -36,7 +36,7 @@ describe('ERP uses the existing owner workspace and access policy', () => {
     ]);
   });
 
-  it('shows authorized ERP destinations under the current owner menu', () => {
+  it('shows authorized ERP destinations inside Project Management', () => {
     expect(
       erp(
         company([
@@ -51,31 +51,37 @@ describe('ERP uses the existing owner workspace and access policy', () => {
         ]),
       ),
     ).toEqual({
-      label: 'Construction ERP',
+      label: 'Project Management',
       href: '/dashboard/operations',
-      icon: 'building',
+      icon: 'projects',
       children: [
-        { label: 'Site Execution', href: '/dashboard/operations' },
+        { label: 'ERP: Site Execution', href: '/dashboard/operations' },
         {
-          label: 'BOQ & Estimate Revisions',
+          label: 'ERP: BOQ & Estimate Revisions',
           href: '/dashboard/execution/execution_estimate_revisions',
         },
-        { label: 'Execution Planner', href: '/dashboard/execution' },
-        { label: 'Materials', href: '/dashboard/execution/materials' },
+        { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
+        { label: 'ERP: Materials', href: '/dashboard/execution/materials' },
         {
-          label: 'Rate Recipes',
+          label: 'ERP: Rate Recipes',
           href: '/dashboard/execution/estimation_recipes',
         },
         {
-          label: 'Procurement',
+          label: 'ERP: Procurement',
           href: '/dashboard/execution/purchase_orders',
         },
-        { label: 'Inventory & Stock', href: '/dashboard/operations/stock' },
         {
-          label: 'Quality Inspections',
+          label: 'ERP: Inventory & Stock',
+          href: '/dashboard/operations/stock',
+        },
+        {
+          label: 'ERP: Quality Inspections',
           href: '/dashboard/operations/project_inspections',
         },
-        { label: 'Handover', href: '/dashboard/operations/handover_records' },
+        {
+          label: 'ERP: Handover',
+          href: '/dashboard/operations/handover_records',
+        },
       ],
     });
   });
@@ -88,7 +94,7 @@ describe('ERP uses the existing owner workspace and access policy', () => {
       ),
     );
     expect(items?.children).toEqual([
-      { label: 'Site Execution', href: '/dashboard/operations' },
+      { label: 'ERP: Site Execution', href: '/dashboard/operations' },
     ]);
   });
 
@@ -105,7 +111,7 @@ describe('ERP uses the existing owner workspace and access policy', () => {
   it('shows only the operator-authorized section', () => {
     expect(erp(company(['inspection.view']))?.children).toEqual([
       {
-        label: 'Quality Inspections',
+        label: 'ERP: Quality Inspections',
         href: '/dashboard/operations/project_inspections',
       },
     ]);
