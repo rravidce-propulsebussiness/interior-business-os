@@ -66,44 +66,25 @@ export function ownerWorkspaceNavigation(
           : []),
       ],
     });
-  if (has('estimate.view', 'projects'))
-    items.push({
-      label: 'BOQ & Estimating',
-      href: '/dashboard/execution/execution_estimate_revisions',
-      icon: 'quotations',
-      children: [
-        {
-          label: 'Estimate Revisions',
-          href: '/dashboard/execution/execution_estimate_revisions',
-        },
-        { label: 'Execution Planner', href: '/dashboard/execution' },
-        ...(has('material.view', 'projects')
-          ? [{ label: 'Materials', href: '/dashboard/execution/materials' }]
-          : []),
-        ...(has('estimate.manage_recipes', 'projects')
-          ? [
-              {
-                label: 'Rate Recipes',
-                href: '/dashboard/execution/estimation_recipes',
-              },
-            ]
-          : []),
-      ],
-    });
   if (has('project.view', 'projects'))
     items.push({
-      label: 'Project Management',
+      label: 'Projects & Portfolio',
       href: '/dashboard/project-management',
       icon: 'projects',
       children: [
         { label: 'Portfolio Overview', href: '/dashboard/project-management' },
-        { label: 'Projects', href: '/dashboard/projects' },
+        { label: 'Project Directory', href: '/dashboard/projects' },
         ...(has('task.view', 'projects')
           ? [
-              {
-                label: 'Task Register',
-                href: '/dashboard/operations/project_tasks',
-              },
+              has('execution.view', 'projects')
+                ? {
+                    label: 'Task Board',
+                    href: '/dashboard/project-management/tasks',
+                  }
+                : {
+                    label: 'Task Register',
+                    href: '/dashboard/operations/project_tasks',
+                  },
             ]
           : []),
         ...(has('milestone.view', 'projects')
@@ -128,13 +109,26 @@ export function ownerWorkspaceNavigation(
   const erpChildren: NonNullable<OwnerNavItem['children']> = [];
   if (has('execution.view', 'projects'))
     erpChildren.push({
-      label: 'Site Operations',
+      label: 'Site Execution',
       href: '/dashboard/operations',
     });
   if (has('estimate.view', 'projects'))
+    erpChildren.push(
+      {
+        label: 'BOQ & Estimate Revisions',
+        href: '/dashboard/execution/execution_estimate_revisions',
+      },
+      { label: 'Execution Planner', href: '/dashboard/execution' },
+    );
+  if (has('material.view', 'projects'))
     erpChildren.push({
-      label: 'Estimates & Materials',
-      href: '/dashboard/execution',
+      label: 'Materials',
+      href: '/dashboard/execution/materials',
+    });
+  if (has('estimate.manage_recipes', 'projects'))
+    erpChildren.push({
+      label: 'Rate Recipes',
+      href: '/dashboard/execution/estimation_recipes',
     });
   if (
     has('purchase_order.view', 'projects') &&
@@ -164,9 +158,9 @@ export function ownerWorkspaceNavigation(
     });
   if (erpChildren.length)
     items.push({
-      label: 'ERP Operations',
+      label: 'Construction ERP',
       href: erpChildren[0]!.href,
-      icon: 'projects',
+      icon: 'building',
       children: erpChildren,
     });
   if (has('purchase.view')) {

@@ -14,6 +14,8 @@ const iconPaths = {
     'M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 20v-2a4 4 0 0 0-3-3.87M16 2.13a4 4 0 0 1 0 7.75',
   quotations: 'M6 2h9l5 5v15H6zM15 2v6h5M9 12h8M9 16h8',
   projects: 'M3 7h8l2 3h8v10H3zM3 7V4h8l2 3',
+  building:
+    'M3 21h18M5 21V7l8-4v18M13 9h6v12M8 9v.01M8 12v.01M8 15v.01M16 12v.01M16 15v.01',
   clients:
     'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8',
   marketplace: 'M4 9h16l-1-5H5L4 9Zm0 0v11h16V9M9 20v-7h6v7',

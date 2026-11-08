@@ -29,12 +29,13 @@ describe('one authorized company navigation on every dashboard page', () => {
       'Dashboard',
       'Leads',
       'Quotations',
-      'Project Management',
-      'Projects',
+      'Projects & Portfolio',
+      'Project Directory',
       'Automations',
       'Brochures',
       'My Work',
-      'ERP Operations',
+      'Construction ERP',
+      'BOQ & Estimate Revisions',
       'Marketplace',
       'Purchases',
       'Finance',
@@ -59,6 +60,8 @@ describe('one authorized company navigation on every dashboard page', () => {
   it('matches ERP link permission and entitlement checks at destination', () => {
     expect(canonical).toContain("has('execution.view', 'projects')");
     expect(canonical).toContain("has('estimate.view', 'projects')");
+    expect(canonical).toContain("has('material.view', 'projects')");
+    expect(canonical).toContain("has('estimate.manage_recipes', 'projects')");
     expect(canonical).toContain("has('purchase_order.view', 'projects')");
     expect(canonical).toContain("has('inventory.view', 'projects')");
     expect(canonical).toContain("has('inspection.view', 'projects')");
@@ -66,7 +69,10 @@ describe('one authorized company navigation on every dashboard page', () => {
     expect(canonical).toContain("context.entitlements.includes('purchasing')");
     for (const href of [
       '/dashboard/operations',
+      '/dashboard/execution/execution_estimate_revisions',
       '/dashboard/execution',
+      '/dashboard/execution/materials',
+      '/dashboard/execution/estimation_recipes',
       '/dashboard/execution/purchase_orders',
       '/dashboard/operations/stock',
       '/dashboard/operations/project_inspections',
@@ -75,6 +81,7 @@ describe('one authorized company navigation on every dashboard page', () => {
       expect(canonical).toContain(`href: '${href}'`);
     }
     expect(canonical).toContain('if (erpChildren.length)');
+    expect(canonical).not.toContain("label: 'BOQ & Estimating'");
     expect(canonical).toContain("has('project.view', 'projects')");
     expect(canonical).toContain("has('task.view', 'projects')");
     expect(canonical).toContain("has('milestone.view', 'projects')");
