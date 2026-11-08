@@ -1141,7 +1141,7 @@ function InboxPanel({
                     ref={fileInput}
                     type="file"
                     hidden
-                    accept="image/jpeg,image/png,image/webp,video/mp4,video/3gpp,audio/aac,audio/mp4,audio/mpeg,audio/amr,audio/ogg,application/pdf,text/plain"
+                    accept="image/jpeg,image/png,image/webp,video/mp4,video/3gpp,audio/aac,audio/mp4,audio/mpeg,audio/amr,audio/ogg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/csv"
                     onChange={(event) => {
                       setAttachment(event.currentTarget.files?.[0] ?? null);
                       event.currentTarget.value = '';
@@ -1203,7 +1203,7 @@ function MessageBody({
   message: Message;
   connectionId: string;
 }) {
-  const match = /^\\[\\[WA_MEDIA:([A-Za-z0-9._-]{1,200}):(image|video|audio|document)\\]\\](?:\\r?\\n([\\s\\S]*))?$/.exec(message.body);
+  const match = /^\[\[WA_MEDIA:([A-Za-z0-9._-]{1,200}):(image|video|audio|document)\]\](?:\r?\n([\s\S]*))?$/.exec(message.body);
   if (!match) {
     return (
       <p className="whitespace-pre-wrap break-words text-sm leading-6">
