@@ -10,6 +10,8 @@ import {
   whatsappContext,
 } from '@/lib/whatsapp-cloud';
 import { whatsappFailure } from '@/lib/whatsapp-meta-error';
+import { whatsappIceConfig } from '@/lib/whatsapp-turn';
+import { eventForConnection } from '@/lib/whatsapp-calling-events';
 import {
   canStartWhatsAppCall,
   metaCallActionAllowed,
@@ -41,6 +43,12 @@ const postSchema = z.discriminatedUnion('action', [
     sdp: sdpSchema,
   }),
   z.object({
+    action: z.literal('pre_accept'),
+    connectionId: uuid,
+    callId: callIdSchema,
+    sdp: sdpSchema,
+  }),
+  z.object({
     action: z.literal('accept'),
     connectionId: uuid,
     callId: callIdSchema,
@@ -57,68 +65,6 @@ const postSchema = z.discriminatedUnion('action', [
     callId: callIdSchema,
   }),
 ]);
-
-type CallEvent = {
-  id: string;
-  event: string;
-  direction: string;
-  from: string;
-  to: string;
-  session?: { sdp_type?: string; sdp?: string } | undefined;
-  timestamp: number;
-};
-
-function eventForConnection(
-  payload: unknown,
-  phoneNumberId: string,
-  connectionId: string,
-): CallEvent[] {
-  if (!payload || typeof payload !== 'object') return [];
-  const data = payload as Record<string, unknown>;
-  if (data.kind === 'outbound_call') {
-    if (data.connection_id !== connectionId) return [];
-    const id = String(data.call_id ?? '');
-    return id
-      ? [
-          {
-            id,
-            event: 'dialing',
-            direction: 'BUSINESS_INITIATED',
-            from: '',
-            to: String(data.to ?? ''),
-            timestamp: Number(data.timestamp ?? 0),
-          },
-        ]
-      : [];
-  }
-  const change = data.change as Record<string, unknown> | undefined;
-  const value = change?.value as Record<string, unknown> | undefined;
-  const metadata = value?.metadata as Record<string, unknown> | undefined;
-  if (String(metadata?.phone_number_id ?? '') !== phoneNumberId) return [];
-  if (!Array.isArray(value?.calls)) return [];
-  return value.calls.flatMap((item: unknown) => {
-    if (!item || typeof item !== 'object') return [];
-    const call = item as Record<string, unknown>;
-    const id = String(call.id ?? '');
-    if (!id || id.length > 256) return [];
-    const event = String(call.event ?? call.status ?? '').toLowerCase();
-    const session = call.session as Record<string, unknown> | undefined;
-    return [
-      {
-        id,
-        event,
-        direction: String(call.direction ?? ''),
-        from: String(call.from ?? ''),
-        to: String(call.to ?? ''),
-        session:
-          typeof session?.sdp === 'string' && session.sdp.length <= 150000
-            ? { sdp_type: String(session.sdp_type ?? ''), sdp: session.sdp }
-            : undefined,
-        timestamp: Number(call.timestamp ?? 0),
-      },
-    ];
-  });
-}
 
 async function recentCallEvents(
   organizationId: string,
@@ -152,6 +98,13 @@ export async function GET(request: Request) {
     const { organizationId } = await whatsappContext();
     const connection = await getConnection(organizationId, parsed.data);
     const action = url.searchParams.get('action') ?? 'settings';
+    if (action === 'ice') {
+      const config = whatsappIceConfig(
+        process.env.WHATSAPP_TURN_URLS,
+        process.env.WHATSAPP_TURN_SHARED_SECRET,
+      );
+      return Response.json(config, { headers: privateHeaders });
+    }
     if (action === 'events') {
       // Only a recent window is returned; ICE/SDP must never be cached in a browser/CDN.
       const events = await recentCallEvents(organizationId, connection, 3);
@@ -239,6 +192,7 @@ export async function POST(request: Request) {
         | 'enable'
         | 'request_permission'
         | 'connect'
+        | 'pre_accept'
         | 'accept'
         | 'reject'
         | 'terminate';
@@ -419,23 +373,35 @@ export async function POST(request: Request) {
     }
 
     const events = await recentCallEvents(organizationId, connection, 120);
-    const matching = events.find((event) => event.id === data.callId);
-    if (!matching)
+    const callEvents = events.filter((event) => event.id === data.callId);
+    if (callEvents.length === 0)
       return Response.json(
-        {
-          message:
-            'This call is not associated with the selected business number.',
-        },
+        { message: 'This call does not belong to this business number.' },
         { status: 404, headers: privateHeaders },
       );
+    if (callEvents.some((event) => event.event === 'terminate')) {
+      return Response.json(
+        { message: 'This WhatsApp call has already ended.' },
+        { status: 409, headers: privateHeaders },
+      );
+    }
+    const inboundConnect = callEvents.find(
+      (event) =>
+        event.direction === 'USER_INITIATED' &&
+        event.event === 'connect' &&
+        event.session?.sdp_type === 'offer',
+    );
     if (
-      (data.action === 'accept' || data.action === 'reject') &&
-      (matching.direction !== 'USER_INITIATED' ||
-        matching.event !== 'connect' ||
-        Date.now() - matching.timestamp * 1000 > 90_000)
+      (data.action === 'pre_accept' ||
+        data.action === 'accept' ||
+        data.action === 'reject') &&
+      (!inboundConnect ||
+        !Number.isFinite(inboundConnect.timestamp) ||
+        Date.now() - inboundConnect.timestamp * 1000 > 90_000 ||
+        inboundConnect.timestamp * 1000 - Date.now() > 10_000)
     ) {
       return Response.json(
-        { message: 'This incoming call can no longer be answered.' },
+        { message: 'This incoming call is no longer answerable.' },
         { status: 409, headers: privateHeaders },
       );
     }
@@ -448,7 +414,7 @@ export async function POST(request: Request) {
           messaging_product: 'whatsapp',
           action: data.action,
           call_id: data.callId,
-          ...(data.action === 'accept'
+          ...(['pre_accept', 'accept'].includes(data.action)
             ? { session: { sdp_type: 'answer', sdp: data.sdp } }
             : {}),
         }),

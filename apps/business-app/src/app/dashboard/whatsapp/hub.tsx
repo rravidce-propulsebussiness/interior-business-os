@@ -177,7 +177,7 @@ export function WhatsAppHub({
 
   const tabs: Array<{ id: Tab; label: string; icon: string }> = [
     { id: 'inbox', label: 'Inbox', icon: 'message' },
-    { id: 'calling', label: 'Calls', icon: 'bell' },
+    { id: 'calling', label: 'Calls', icon: 'phone' },
     { id: 'contacts', label: 'Contacts', icon: 'people' },
     { id: 'broadcasts', label: 'Broadcasts', icon: 'broadcast' },
     { id: 'templates', label: 'Templates', icon: 'template' },
@@ -629,6 +629,11 @@ function NavIcon({ kind }: { kind: string }) {
       <>
         <circle cx="11" cy="11" r="7" />
         <path d="m20 20-4-4" />
+      </>
+    ),
+    phone: (
+      <>
+        <path d="M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7l.5 3.2a2 2 0 0 1-.6 1.7L7.1 10.5a16 16 0 0 0 6.4 6.4l1.9-1.9a2 2 0 0 1 1.7-.6l3.2.5a2 2 0 0 1 1.7 2z" />
       </>
     ),
     bell: (

@@ -74,6 +74,7 @@ export function WhatsAppCalling({
 }) {
   const [settings, setSettings] = useState<Calling | null>(null);
   const [settingsError, setSettingsError] = useState('');
+  const [relayConfigured, setRelayConfigured] = useState<boolean | null>(null);
   const [permission, setPermission] = useState<Permission | null>(null);
   const [permissionFor, setPermissionFor] = useState('');
   const [permissionError, setPermissionError] = useState('');
@@ -181,10 +182,18 @@ export function WhatsAppCalling({
     if (!connectionId || !canManage) return;
     try {
       const result = await get('settings');
-      setSettings((result.calling as Calling | null) ?? null);
+      setSettings(
+        (result.calling as Calling | null) ?? { status: 'NOT_CONFIGURED' },
+      );
       setSettingsError('');
     } catch (error) {
       setSettingsError(errorText(error));
+    }
+    try {
+      const ice = await get('ice');
+      setRelayConfigured(ice.relayConfigured === true);
+    } catch {
+      setRelayConfigured(false);
     }
   }, [connectionId, canManage, get]);
 
@@ -218,13 +227,24 @@ export function WhatsAppCalling({
   const beginAudio = useCallback(async () => {
     if (!navigator.mediaDevices?.getUserMedia)
       throw new Error('A secure browser and microphone access are required.');
+    const ice = (await get('ice')) as {
+      iceServers?: RTCIceServer[];
+      relayConfigured?: boolean;
+    };
+    if (!Array.isArray(ice.iceServers) || ice.iceServers.length === 0)
+      throw new Error('WebRTC network configuration is not available.');
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true },
       video: false,
     });
-    const peer = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    });
+    let peer: RTCPeerConnection;
+    try {
+      peer = new RTCPeerConnection({ iceServers: ice.iceServers });
+    } catch (error) {
+      stream.getTracks().forEach((track) => track.stop());
+      throw error;
+    }
+    setRelayConfigured(ice.relayConfigured === true);
     stream.getAudioTracks().forEach((track) => peer.addTrack(track, stream));
     peer.ontrack = (event) => {
       if (audioRef.current) {
@@ -247,7 +267,7 @@ export function WhatsAppCalling({
     streamRef.current = stream;
     peerRef.current = peer;
     return peer;
-  }, []);
+  }, [get]);
 
   const poll = useCallback(async () => {
     if (!connectionId || !canManage) return;
@@ -410,11 +430,12 @@ export function WhatsAppCalling({
       const answerSdp = await peer.createAnswer();
       await peer.setLocalDescription(answerSdp);
       await waitForIce(peer);
-      await post({
-        action: 'accept',
-        callId: incoming.id,
-        sdp: peer.localDescription?.sdp,
-      });
+      // Meta Calling API negotiates inbound media with pre_accept followed
+      // by accept; the SDP answer includes all non-trickle ICE candidates.
+      const sdp = peer.localDescription?.sdp;
+      if (!sdp) throw new Error('WebRTC did not create an SDP answer.');
+      await post({ action: 'pre_accept', callId: incoming.id, sdp });
+      await post({ action: 'accept', callId: incoming.id, sdp });
       activeCallRef.current = incoming.id;
       onCallActivityChange(true);
       dismissedCallsRef.current.add(incoming.id);
@@ -581,6 +602,25 @@ export function WhatsAppCalling({
           </div>
           {settingsError && (
             <p className="text-xs text-red-700">{settingsError}</p>
+          )}
+          {settings?.status === 'NOT_CONFIGURED' && (
+            <p
+              role="status"
+              className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
+            >
+              Meta has not returned a calling configuration for this number.
+              Check Calling API eligibility and the phone-number calling
+              settings in WhatsApp Manager.
+            </p>
+          )}
+          {relayConfigured === false && (
+            <p
+              role="status"
+              className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900"
+            >
+              TURN relay is not configured. Calls may connect without audio on
+              restrictive networks. Add a TURN server before production rollout.
+            </p>
           )}
           <p className="text-xs leading-5 text-stone-500">
             Calling requires Meta approval, the calls webhook subscription, and
