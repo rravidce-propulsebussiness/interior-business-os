@@ -149,6 +149,20 @@ export async function POST(request: Request) {
       return Response.json({ success: true }, { headers: privateHeaders });
     }
 
+    if (data.action === 'request_permission' || data.action === 'connect') {
+      const { data: contact, error: contactError } = await createOwnerProvisioningDatabase()
+        .from('whatsapp_contacts')
+        .select('opted_out_at')
+        .eq('organization_id', organizationId)
+        .eq('connection_id', connection.id)
+        .eq('wa_id', data.waId!)
+        .maybeSingle();
+      if (contactError) throw new Error('WHATSAPP_CONTACT_PERMISSION_CHECK_FAILED');
+      if (contact?.opted_out_at) {
+        return Response.json({ message: 'This contact opted out. Do not request calls or start new calls until the customer opts back in.' }, { status: 409, headers: privateHeaders });
+      }
+    }
+
     if (data.action === 'request_permission') {
       const allowed = await client.rpc('whatsapp_window_open', {
         p_organization_id: organizationId,
