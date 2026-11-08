@@ -34,3 +34,4 @@ jobs:
             git commit -m "Format WhatsApp calling integration"
             git push origin HEAD:feature/whatsapp-voice-calling
           fi
+# Round 2: format call lifecycle fixes before verification.
