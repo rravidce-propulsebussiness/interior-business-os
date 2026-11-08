@@ -66,38 +66,33 @@ export function ownerWorkspaceNavigation(
           : []),
       ],
     });
+  const projectChildren: NonNullable<OwnerNavItem['children']> = [];
   if (has('project.view', 'projects'))
-    items.push({
-      label: 'Projects & Portfolio',
-      href: '/dashboard/project-management',
-      icon: 'projects',
-      children: [
-        { label: 'Portfolio Overview', href: '/dashboard/project-management' },
-        { label: 'Project Directory', href: '/dashboard/projects' },
-        ...(has('task.view', 'projects')
-          ? [
-              has('execution.view', 'projects')
-                ? {
-                    label: 'Task Board',
-                    href: '/dashboard/project-management/tasks',
-                  }
-                : {
-                    label: 'Task Register',
-                    href: '/dashboard/operations/project_tasks',
-                  },
-            ]
-          : []),
-        ...(has('milestone.view', 'projects')
-          ? [
-              {
-                label: 'Milestones',
-                href: '/dashboard/operations/project_milestones',
-              },
-            ]
-          : []),
-      ],
+    projectChildren.push(
+      { label: 'Portfolio Overview', href: '/dashboard/project-management' },
+      { label: 'Project Directory', href: '/dashboard/projects' },
+    );
+  if (has('task.view', 'projects'))
+    projectChildren.push(
+      has('execution.view', 'projects')
+        ? {
+            label: 'Task Board',
+            href: '/dashboard/project-management/tasks',
+          }
+        : {
+            label: 'Task Register',
+            href: '/dashboard/operations/project_tasks',
+          },
+    );
+  if (has('milestone.view', 'projects'))
+    projectChildren.push({
+      label: 'Milestones',
+      href: '/dashboard/operations/project_milestones',
     });
-  else if (context.entitlements.includes('projects'))
+  if (
+    !has('project.view', 'projects') &&
+    context.entitlements.includes('projects')
+  )
     items.push({
       label: 'My Sites',
       href: '/dashboard/site-projects',
@@ -109,25 +104,25 @@ export function ownerWorkspaceNavigation(
   const erpChildren: NonNullable<OwnerNavItem['children']> = [];
   if (has('execution.view', 'projects'))
     erpChildren.push({
-      label: 'Site Execution',
+      label: 'ERP: Site Execution',
       href: '/dashboard/operations',
     });
   if (has('estimate.view', 'projects'))
     erpChildren.push(
       {
-        label: 'BOQ & Estimate Revisions',
+        label: 'ERP: BOQ & Estimate Revisions',
         href: '/dashboard/execution/execution_estimate_revisions',
       },
-      { label: 'Execution Planner', href: '/dashboard/execution' },
+      { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
     );
   if (has('material.view', 'projects'))
     erpChildren.push({
-      label: 'Materials',
+      label: 'ERP: Materials',
       href: '/dashboard/execution/materials',
     });
   if (has('estimate.manage_recipes', 'projects'))
     erpChildren.push({
-      label: 'Rate Recipes',
+      label: 'ERP: Rate Recipes',
       href: '/dashboard/execution/estimation_recipes',
     });
   if (
@@ -135,7 +130,7 @@ export function ownerWorkspaceNavigation(
     context.entitlements.includes('purchasing')
   )
     erpChildren.push({
-      label: 'Procurement',
+      label: 'ERP: Procurement',
       href: '/dashboard/execution/purchase_orders',
     });
   if (
@@ -143,25 +138,28 @@ export function ownerWorkspaceNavigation(
     context.entitlements.includes('purchasing')
   )
     erpChildren.push({
-      label: 'Inventory & Stock',
+      label: 'ERP: Inventory & Stock',
       href: '/dashboard/operations/stock',
     });
   if (has('inspection.view', 'projects'))
     erpChildren.push({
-      label: 'Quality Inspections',
+      label: 'ERP: Quality Inspections',
       href: '/dashboard/operations/project_inspections',
     });
   if (has('handover.view', 'projects'))
     erpChildren.push({
-      label: 'Handover',
+      label: 'ERP: Handover',
       href: '/dashboard/operations/handover_records',
     });
-  if (erpChildren.length)
+  projectChildren.push(...erpChildren);
+  if (projectChildren.length)
     items.push({
-      label: 'Construction ERP',
-      href: erpChildren[0]!.href,
-      icon: 'building',
-      children: erpChildren,
+      label: 'Project Management',
+      href: has('project.view', 'projects')
+        ? '/dashboard/project-management'
+        : projectChildren[0]!.href,
+      icon: 'projects',
+      children: projectChildren,
     });
   if (has('purchase.view')) {
     items.push({

@@ -39,7 +39,7 @@ describe('permission-aware BOQ presentation', () => {
     expect(workspace).not.toContain('service_role');
   });
   it('hides BOQ menu without grant, active project entitlement and company context', () => {
-    const name = 'Construction ERP';
+    const name = 'Project Management';
     expect(
       ownerWorkspaceNavigation(null).some((item) => item.label === name),
     ).toBe(false);
@@ -57,10 +57,10 @@ describe('permission-aware BOQ presentation', () => {
       )?.children,
     ).toEqual([
       {
-        label: 'BOQ & Estimate Revisions',
+        label: 'ERP: BOQ & Estimate Revisions',
         href: '/dashboard/execution/execution_estimate_revisions',
       },
-      { label: 'Execution Planner', href: '/dashboard/execution' },
+      { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
     ]);
   });
   it('uses shared navigation and scoped styles for execution routes', () => {

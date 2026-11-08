@@ -24,18 +24,19 @@ describe('one authorized company navigation on every dashboard page', () => {
     expect(shell).toContain('displayedNavigation.map');
   });
 
-  it('keeps existing destinations and introduces ERP as an optional group', () => {
+  it('keeps project management and ERP destinations under one menu', () => {
     for (const name of [
       'Dashboard',
       'Leads',
       'Quotations',
-      'Projects & Portfolio',
+      'Project Management',
       'Project Directory',
       'Automations',
       'Brochures',
       'My Work',
-      'Construction ERP',
-      'BOQ & Estimate Revisions',
+      'ERP: Site Execution',
+      'ERP: Execution Planner',
+      'ERP: BOQ & Estimate Revisions',
       'Marketplace',
       'Purchases',
       'Finance',
@@ -80,8 +81,9 @@ describe('one authorized company navigation on every dashboard page', () => {
     ]) {
       expect(canonical).toContain(`href: '${href}'`);
     }
-    expect(canonical).toContain('if (erpChildren.length)');
-    expect(canonical).not.toContain("label: 'BOQ & Estimating'");
+    expect(canonical).toContain('projectChildren.push(...erpChildren)');
+    expect(canonical).toContain('if (projectChildren.length)');
+    expect(canonical).not.toContain("label: 'Construction ERP'");
     expect(canonical).toContain("has('project.view', 'projects')");
     expect(canonical).toContain("has('task.view', 'projects')");
     expect(canonical).toContain("has('milestone.view', 'projects')");
