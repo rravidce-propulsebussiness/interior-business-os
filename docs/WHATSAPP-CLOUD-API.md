@@ -37,3 +37,17 @@ The WhatsApp workspace handles the inbox, templates, and WhatsApp automation rep
 ## Troubleshooting Meta errors
 
 Routes return a plain message and `metaCode` when Meta supplies one, with status 424 for Meta failures and 500 for internal failures. Do not use 502 or 504 here: Cloudflare replaces those with its own HTML page and hides the message. Server logs record `whatsapp_meta_error` with the HTTP status, code, subcode, and `fbtrace_id` only. Meta's own error text and tokens are never logged or returned, because that text can contain account details.
+
+## WhatsApp voice calling (preview)
+
+A dedicated `Calls` tab and the contact-header Call action now use the official Meta call-settings, call-permissions and call-signaling endpoints. Calls are not automatically activated on any connected business number.
+
+To run a controlled calling test:
+
+1. In Meta WhatsApp Manager select the target phone number under **Account tools > Phone numbers > Calls**. Verify that the number is eligible (Meta requires the 2,000-conversation messaging tier for production calling) and that the app has the required advanced permissions.
+2. In Meta for Developers subscribe the app's **WhatsApp Business Account** webhook to the **calls** field. Keep the existing `https://sghomesinterior.in/api/webhooks/whatsapp` endpoint and signature verification. Do not create an unverified second webhook.
+3. Open Business OS > WhatsApp > Calls, choose the exact number, and refresh Meta status. A workspace user with `automation.manage` permission may explicitly enable calling; this exposes an inbound call button to WhatsApp users, so have an agent in the Calls tab ready to answer.
+4. Open a recent customer chat, select **Call**, and refresh call permission. If Meta allows it and the customer wrote within the last 24 hours, send the interactive permission request, await approval, refresh, then dial. Direct outbound calls without Meta-approved permission are blocked in both the browser and server.
+5. Test incoming Answer/Decline, outbound connect, mute, termination and audio in Chrome on HTTPS with microphone access. Incoming signals are polled from the signed, service-role-only webhook queue; the browser never receives Meta tokens. SDP is limited to recent call events and is returned only to callers holding `automation.manage`.
+
+**Limitations before production launch:** This preview uses browser WebRTC and a public STUN server; restrictive networks can require an authenticated TURN relay with short-lived credentials. Agents must have the Business OS open to receive calls. Call history, multi-agent arbitration, push notifications, centralized media servers, QoS checks, automated end-to-end audio tests, and SIP trunk routing are not yet provided. Do not advertise 24/7 calling until the agent workflow, TURN connectivity and production Meta eligibility have been validated. Do not turn on the call button for an unstaffed number.
