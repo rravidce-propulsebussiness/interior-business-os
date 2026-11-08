@@ -10,6 +10,11 @@ import {
   whatsappContext,
 } from '@/lib/whatsapp-cloud';
 import { whatsappFailure } from '@/lib/whatsapp-meta-error';
+import {
+  canStartWhatsAppCall,
+  metaCallActionAllowed,
+  type MetaCallPermission,
+} from '@/lib/whatsapp-calling-permission';
 
 export const dynamic = 'force-dynamic';
 
@@ -162,11 +167,22 @@ export async function GET(request: Request) {
           { message: 'Select a valid WhatsApp contact.' },
           { status: 400, headers: privateHeaders },
         );
-      const result = await graphRequest<Record<string, unknown>>(
+      const result = await graphRequest<MetaCallPermission>(
         `${connection.phone_number_id}/call_permissions?user_wa_id=${encodeURIComponent(user.data)}`,
         connection.accessToken,
       );
-      return Response.json({ permission: result }, { headers: privateHeaders });
+      return Response.json(
+        {
+          permission: {
+            permission: result.permission ?? null,
+            actions: (result.actions ?? []).map((action) => ({
+              action_name: action.action_name,
+              can_perform_action: action.can_perform_action === true,
+            })),
+          },
+        },
+        { headers: privateHeaders },
+      );
     }
     if (action !== 'settings')
       return Response.json(
@@ -286,23 +302,12 @@ export async function POST(request: Request) {
           { status: 409, headers: privateHeaders },
         );
       }
-      const permission = await graphRequest<{
-        permission?: {
-          actions?: Array<{
-            action_name?: string;
-            can_perform_action?: boolean;
-          }>;
-        };
-      }>(
+      const permission = await graphRequest<MetaCallPermission>(
         `${connection.phone_number_id}/call_permissions?user_wa_id=${encodeURIComponent(data.waId!)}`,
         connection.accessToken,
       );
       if (
-        !permission.permission?.actions?.some(
-          (action) =>
-            action.action_name === 'send_call_permission_request' &&
-            action.can_perform_action === true,
-        )
+        !metaCallActionAllowed(permission, 'send_call_permission_request')
       ) {
         return Response.json(
           {
@@ -339,28 +344,13 @@ export async function POST(request: Request) {
     }
 
     if (data.action === 'connect') {
-      const permission = await graphRequest<{
-        permission?: {
-          status?: string;
-          actions?: Array<{
-            action_name?: string;
-            can_perform_action?: boolean;
-          }>;
-        };
-      }>(
+      const permission = await graphRequest<MetaCallPermission>(
         `${connection.phone_number_id}/call_permissions?user_wa_id=${encodeURIComponent(data.waId!)}`,
         connection.accessToken,
       );
-      // Meta's permission.actions array includes per-action rate limits and approval.
-      const permissionStatus = String(
-        permission.permission?.status ?? '',
-      ).toLowerCase();
-      const canStart = permission.permission?.actions?.some(
-        (action) =>
-          action.action_name === 'start_call' &&
-          action.can_perform_action === true,
-      );
-      if (permissionStatus !== 'granted' || !canStart) {
+      // Permission is "temporary" or "permanent"; Meta's action limits
+      // are top-level, not nested under permission.
+      if (!canStartWhatsAppCall(permission)) {
         return Response.json(
           {
             message: 'Customer call permission has not been confirmed by Meta.',
