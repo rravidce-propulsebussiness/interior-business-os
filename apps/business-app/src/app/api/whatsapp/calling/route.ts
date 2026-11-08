@@ -179,18 +179,16 @@ export async function POST(request: Request) {
     }
 
     if (data.action === 'connect') {
-      const permission = await graphRequest<{ permission_status?: string; permissions?: Array<{ status?: string }>; available_actions?: unknown }>(
+      const permission = await graphRequest<{ permission?: { status?: string; actions?: Array<{ action_name?: string; can_perform_action?: boolean }> } }>(
         `${connection.phone_number_id}/call_permissions?user_wa_id=${encodeURIComponent(data.waId!)}`,
         connection.accessToken,
       );
-      // Never dial with unknown, denied, expired or pending consent.
-      const permissionStatus = String(permission.permission_status ?? permission.permissions?.[0]?.status ?? '').toLowerCase();
-      const actions = permission.available_actions;
-      const hasStartAction = Array.isArray(actions) && actions.some((a) => {
-        if (typeof a === 'string') return a.toLowerCase() === 'start_call';
-        return a && typeof a === 'object' && String((a as { action?: string; name?: string }).action ?? (a as { name?: string }).name ?? '').toLowerCase() === 'start_call';
-      });
-      if (permissionStatus !== 'granted' && !hasStartAction) {
+      // Meta's permission.actions array includes per-action rate limits and approval.
+      const permissionStatus = String(permission.permission?.status ?? '').toLowerCase();
+      const canStart = permission.permission?.actions?.some(
+        (action) => action.action_name === 'start_call' && action.can_perform_action === true,
+      );
+      if (permissionStatus !== 'granted' || !canStart) {
         return Response.json({ message: 'Customer call permission has not been confirmed by Meta.' }, { status: 409, headers: privateHeaders });
       }
       const result = await graphRequest<{ calls?: Array<{ id?: string }> }>(
