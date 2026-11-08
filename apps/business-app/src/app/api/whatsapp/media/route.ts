@@ -23,7 +23,14 @@ const MIME_TYPES: Record<string, 'image' | 'video' | 'audio' | 'document'> = {
   'audio/amr': 'audio',
   'audio/ogg': 'audio',
   'application/pdf': 'document',
+  'application/msword': 'document',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'document',
+  'application/vnd.ms-excel': 'document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'document',
+  'application/vnd.ms-powerpoint': 'document',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'document',
   'text/plain': 'document',
+  'text/csv': 'document',
 };
 
 export async function POST(request: Request) {
@@ -68,7 +75,8 @@ export async function POST(request: Request) {
     const upload = new FormData();
     upload.append('messaging_product', 'whatsapp');
     upload.append('type', file.type);
-    upload.append('file', file, file.name.slice(0, 180));
+    const fileName = file.name.replace(/[\\\\/\\r\\n"]/g, '_').slice(0, 120) || 'attachment';
+    upload.append('file', file, fileName);
     const response = await fetch(
       `https://graph.facebook.com/${version}/${connection.phone_number_id}/media`,
       {
@@ -90,7 +98,7 @@ export async function POST(request: Request) {
       });
     }
     return Response.json(
-      { mediaId: data.id, mediaType },
+      { mediaId: data.id, mediaType, fileName },
       { headers: privateHeaders },
     );
   } catch (error) {
