@@ -108,12 +108,14 @@ export function WhatsAppCalling({
   }, []);
 
   useEffect(() => {
-    closeMedia();
-    dismissedCallsRef.current.clear();
-    setIncoming(null);
-    setSettings(null);
-    setPermission(null);
-  }, [connectionId, closeMedia]);
+    // A connection change remounts the panel; release browser media on unmount.
+    const peer = peerRef;
+    const stream = streamRef;
+    return () => {
+      peer.current?.close();
+      stream.current?.getTracks().forEach((track) => track.stop());
+    };
+  }, []);
 
   const get = useCallback(
     async (action: string, waId?: string) => {
@@ -177,11 +179,15 @@ export function WhatsAppCalling({
   }, [connectionId, canManage, selectedWaId, get]);
 
   useEffect(() => {
-    void refreshSettings();
+    const handle = window.requestAnimationFrame(() => void refreshSettings());
+    return () => window.cancelAnimationFrame(handle);
   }, [refreshSettings]);
   useEffect(() => {
-    setPermission(null);
-    if (active && selectedWaId) void refreshPermission();
+    const handle = window.requestAnimationFrame(() => {
+      setPermission(null);
+      if (active && selectedWaId) void refreshPermission();
+    });
+    return () => window.cancelAnimationFrame(handle);
   }, [active, selectedWaId, refreshPermission]);
 
   const beginAudio = useCallback(async () => {
@@ -286,9 +292,12 @@ export function WhatsAppCalling({
       settings?.status?.toUpperCase() !== 'ENABLED'
     )
       return;
-    void poll();
+    const first = window.setTimeout(() => void poll(), 0);
     const handle = window.setInterval(() => void poll(), 2500);
-    return () => window.clearInterval(handle);
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(handle);
+    };
   }, [connectionId, canManage, poll, settings?.status]);
 
   useEffect(() => {
@@ -589,7 +598,7 @@ export function WhatsAppCalling({
             </div>
           ) : (
             <p className="text-xs text-stone-500">
-              Open a conversation and select Call to check that contact's
+              Open a conversation and select Call to check that contact&apos;s
               permissions.
             </p>
           )}
