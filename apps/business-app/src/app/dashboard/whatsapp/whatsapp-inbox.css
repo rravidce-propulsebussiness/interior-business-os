@@ -1324,6 +1324,27 @@
   .wa-sidebar {
     padding: 10px 8px;
   }
+  /* Keep every WhatsApp workspace destination visible on phones. The
+     horizontally scrolling strip used at tablet widths hid the later tabs
+     with no clear indication that more navigation was available. */
+  .wa-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+    overflow: visible;
+    padding: 0;
+  }
+  .wa-nav-item {
+    min-width: 0;
+    min-height: 40px;
+    justify-content: flex-start;
+    padding-inline: 9px;
+    white-space: nowrap;
+  }
+  .wa-nav-item span:not(.wa-nav-count) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .wa-topbar {
     align-items: flex-start;
     flex-direction: column;
