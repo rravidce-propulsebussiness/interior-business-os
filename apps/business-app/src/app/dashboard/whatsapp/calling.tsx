@@ -67,6 +67,7 @@ export function WhatsAppCalling({
   const audioRef = useRef<HTMLAudioElement>(null);
   const peerRef = useRef<RTCPeerConnection | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const remoteStreamRef = useRef<MediaStream | null>(null);
   const activeCallRef = useRef('');
   const appliedAnswerRef = useRef('');
   const dismissedCallsRef = useRef(new Set<string>());
@@ -76,6 +77,7 @@ export function WhatsAppCalling({
     peerRef.current = null;
     streamRef.current?.getTracks().forEach((track) => track.stop());
     streamRef.current = null;
+    remoteStreamRef.current = null;
     if (audioRef.current) audioRef.current.srcObject = null;
     activeCallRef.current = '';
     appliedAnswerRef.current = '';
@@ -142,7 +144,8 @@ export function WhatsAppCalling({
     stream.getAudioTracks().forEach((track) => peer.addTrack(track, stream));
     peer.ontrack = (event) => {
       if (audioRef.current) {
-        audioRef.current.srcObject = event.streams[0] ?? new MediaStream([event.track]);
+        remoteStreamRef.current = event.streams[0] ?? new MediaStream([event.track]);
+        audioRef.current.srcObject = remoteStreamRef.current;
         void audioRef.current.play().catch(() => setNotice('Tap the audio player to allow call playback.'));
       }
     };
@@ -198,6 +201,12 @@ export function WhatsAppCalling({
     return () => window.clearInterval(handle);
   }, [connectionId, canManage, poll]);
 
+  useEffect(() => {
+    if (!audioRef.current || !remoteStreamRef.current) return;
+    audioRef.current.srcObject = remoteStreamRef.current;
+    void audioRef.current.play().catch(() => undefined);
+  }, [active, phase, incoming]);
+
   async function requestPermission() {
     if (!selectedWaId) return;
     setBusy(true);
@@ -222,7 +231,6 @@ export function WhatsAppCalling({
     setBusy(true);
     try {
       const peer = await beginAudio();
-      peer.addTransceiver('audio', { direction: 'sendrecv' });
       const offer = await peer.createOffer();
       await peer.setLocalDescription(offer);
       await waitForIce(peer);
