@@ -1,0 +1,50 @@
+name: Verify WhatsApp calling reliability (one time)
+on:
+  push:
+    branches:
+      - fix/whatsapp-calling-reliability-nov08
+    paths:
+      - .github/workflows/verify-whatsapp-reliability-once.yml
+permissions:
+  contents: read
+jobs:
+  targeted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: >-
+          pnpm exec prettier --check
+          apps/business-app/src/lib/whatsapp-turn.ts
+          apps/business-app/src/lib/whatsapp-turn.test.ts
+          apps/business-app/src/lib/whatsapp-calling-events.ts
+          apps/business-app/src/lib/whatsapp-calling-events.test.ts
+          apps/business-app/src/app/api/whatsapp/calling/route.ts
+          apps/business-app/src/app/dashboard/whatsapp/calling.tsx
+          tests/chromium/live.spec.ts
+          docs/WHATSAPP-CLOUD-API.md
+      - run: >-
+          pnpm exec eslint
+          apps/business-app/src/lib/whatsapp-turn.ts
+          apps/business-app/src/lib/whatsapp-turn.test.ts
+          apps/business-app/src/lib/whatsapp-calling-events.ts
+          apps/business-app/src/lib/whatsapp-calling-events.test.ts
+          apps/business-app/src/app/api/whatsapp/calling/route.ts
+          apps/business-app/src/app/dashboard/whatsapp/calling.tsx
+          tests/chromium/live.spec.ts
+          --max-warnings=0
+      - run: >-
+          pnpm exec vitest run
+          apps/business-app/src/lib/whatsapp-turn.test.ts
+          apps/business-app/src/lib/whatsapp-calling-events.test.ts
+          apps/business-app/src/lib/whatsapp-calling-permission.test.ts
+          apps/business-app/src/lib/whatsapp-fixes.test.ts
+          apps/business-app/src/lib/whatsapp-origin.test.ts
+      - run: pnpm --filter ./apps/business-app build
+      - run: pnpm build && pnpm security:secrets
