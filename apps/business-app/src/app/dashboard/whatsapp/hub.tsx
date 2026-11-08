@@ -691,6 +691,7 @@ function InboxPanel({
   const state = useWorkspaceRows('inbox', connectionId, refreshKey);
   const [selected, setSelected] = useState('');
   const [thread, setThread] = useState<Message[]>([]);
+  const messageEndRef = useRef<HTMLDivElement | null>(null);
   const [contact, setContact] = useState<Contact | null>(null);
   const [body, setBody] = useState('');
   const [attachment, setAttachment] = useState<File | null>(null);
@@ -737,6 +738,10 @@ function InboxPanel({
         setNotice(friendlyError(error, 'Could not open conversation.')),
       );
   }, [loadThread, selected, state.rows]);
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+  }, [thread]);
+
   useEffect(() => {
     if (!connectionId) return;
     const database = createBrowserDatabase();
@@ -810,6 +815,7 @@ function InboxPanel({
         const uploaded = (await readApiResponse(uploadResponse)) as {
           mediaId?: string;
           mediaType?: string;
+          fileName?: string;
           message?: string;
         };
         if (!uploadResponse.ok || !uploaded.mediaId || !uploaded.mediaType)
@@ -820,6 +826,7 @@ function InboxPanel({
           to: `+${contact.wa_id}`,
           mediaId: uploaded.mediaId,
           mediaType: uploaded.mediaType,
+          filename: uploaded.fileName,
           caption: body.trim(),
         };
       }
@@ -1070,6 +1077,7 @@ function InboxPanel({
                   </article>
                 </div>
               ))}
+              <div ref={messageEndRef} />
             </div>
             <form onSubmit={sendReply} className="wa-composer">
               {!canManage ? (
