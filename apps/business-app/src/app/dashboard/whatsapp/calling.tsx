@@ -182,10 +182,16 @@ export function WhatsAppCalling({
     if (!connectionId || !canManage) return;
     try {
       const result = await get('settings');
-      setSettings((result.calling as Calling | null) ?? null);
+      setSettings((result.calling as Calling | null) ?? { status: 'NOT_CONFIGURED' });
       setSettingsError('');
     } catch (error) {
       setSettingsError(errorText(error));
+    }
+    try {
+      const ice = await get('ice');
+      setRelayConfigured(ice.relayConfigured === true);
+    } catch {
+      setRelayConfigured(false);
     }
   }, [connectionId, canManage, get]);
 
@@ -594,6 +600,11 @@ export function WhatsAppCalling({
           </div>
           {settingsError && (
             <p className="text-xs text-red-700">{settingsError}</p>
+          )}
+          {settings?.status === 'NOT_CONFIGURED' && (
+            <p role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+              Meta has not returned a calling configuration for this number. Check Calling API eligibility and the phone-number calling settings in WhatsApp Manager.
+            </p>
           )}
           {relayConfigured === false && (
             <p
