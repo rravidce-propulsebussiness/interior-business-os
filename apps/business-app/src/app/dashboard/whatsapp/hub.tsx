@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import './whatsapp-inbox.css';
 import { readApiResponse } from '@/lib/whatsapp-response';
+import { createBrowserDatabase } from '@business-os/database/browser';
 
 type Connection = { id: string; name: string; phone: string; status: string };
 type Template = {
@@ -671,20 +672,6 @@ function useWorkspaceRows(
   useEffect(() => {
     void load();
   }, [load, refreshKey]);
-  useEffect(() => {
-    if (section !== 'inbox') return;
-    let timer: ReturnType<typeof setTimeout>;
-    let active = true;
-    const refresh = async () => {
-      if (document.visibilityState === 'visible') await load(true);
-      if (active) timer = setTimeout(() => void refresh(), 4000);
-    };
-    timer = setTimeout(() => void refresh(), 4000);
-    return () => {
-      active = false;
-      clearTimeout(timer);
-    };
-  }, [load, section]);
   return { rows, total, unread, search, setSearch, busy, error, reload: load };
 }
 
@@ -706,6 +693,8 @@ function InboxPanel({
   const [thread, setThread] = useState<Message[]>([]);
   const [contact, setContact] = useState<Contact | null>(null);
   const [body, setBody] = useState('');
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
   const [conversationFilter, setConversationFilter] = useState<
     'all' | 'unread'
   >('all');
@@ -749,25 +738,45 @@ function InboxPanel({
       );
   }, [loadThread, selected, state.rows]);
   useEffect(() => {
-    if (!selected) return;
-    let timer: ReturnType<typeof setTimeout>;
-    let active = true;
-    const refresh = async () => {
-      if (document.visibilityState === 'visible') {
-        try {
-          await loadThread(selected);
-        } catch {
-          // Keep the existing conversation visible through temporary network errors.
-        }
-      }
-      if (active) timer = setTimeout(() => void refresh(), 4000);
+    if (!connectionId) return;
+    const database = createBrowserDatabase();
+    let refreshTimer: ReturnType<typeof setTimeout> | undefined;
+    const refreshInbox = () => {
+      if (document.visibilityState !== 'visible') return;
+      if (refreshTimer) clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(() => {
+        void state.reload(true);
+        if (selected) void loadThread(selected).catch(() => undefined);
+      }, 80);
     };
-    timer = setTimeout(() => void refresh(), 4000);
+    const channel = database
+      .channel(`whatsapp-inbox-${connectionId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'whatsapp_messages',
+          filter: `connection_id=eq.${connectionId}`,
+        },
+        refreshInbox,
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'whatsapp_contacts',
+          filter: `connection_id=eq.${connectionId}`,
+        },
+        refreshInbox,
+      )
+      .subscribe();
     return () => {
-      active = false;
-      clearTimeout(timer);
+      if (refreshTimer) clearTimeout(refreshTimer);
+      void database.removeChannel(channel);
     };
-  }, [loadThread, selected]);
+  }, [connectionId, loadThread, selected, state.reload]);
 
   async function markRead(waId: string) {
     await fetch('/api/whatsapp/inbox', {
@@ -780,24 +789,50 @@ function InboxPanel({
 
   async function sendReply(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!contact || !body.trim()) return;
+    if (!contact || (!body.trim() && !attachment)) return;
     setBusy(true);
-    setNotice('Sending reply…');
+    setNotice(attachment ? 'Uploading and sending attachment…' : 'Sending reply…');
     try {
+      let payload: Record<string, unknown> = {
+        messageType: 'text',
+        connectionId,
+        to: `+${contact.wa_id}`,
+        body: body.trim(),
+      };
+      if (attachment) {
+        const form = new FormData();
+        form.append('connectionId', connectionId);
+        form.append('file', attachment);
+        const uploadResponse = await fetch('/api/whatsapp/media', {
+          method: 'POST',
+          body: form,
+        });
+        const uploaded = (await readApiResponse(uploadResponse)) as {
+          mediaId?: string;
+          mediaType?: string;
+          message?: string;
+        };
+        if (!uploadResponse.ok || !uploaded.mediaId || !uploaded.mediaType)
+          throw new Error(uploaded.message ?? 'Attachment upload failed.');
+        payload = {
+          messageType: 'media',
+          connectionId,
+          to: `+${contact.wa_id}`,
+          mediaId: uploaded.mediaId,
+          mediaType: uploaded.mediaType,
+          caption: body.trim(),
+        };
+      }
       const response = await fetch('/api/whatsapp/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messageType: 'text',
-          connectionId,
-          to: `+${contact.wa_id}`,
-          body: body.trim(),
-        }),
+        body: JSON.stringify(payload),
       });
       const result = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(result.message ?? 'Reply could not be sent.');
       setBody('');
+      setAttachment(null);
       setNotice('Reply sent.');
       await loadThread(contact.wa_id);
       await state.reload();
@@ -1023,9 +1058,7 @@ function InboxPanel({
                   <article
                     className={`wa-message-bubble ${item.direction === 'outbound' ? 'wa-message-out' : 'wa-message-in'}`}
                   >
-                    <p className="whitespace-pre-wrap break-words text-sm leading-6">
-                      {item.body}
-                    </p>
+                    <MessageBody message={item} connectionId={connectionId} />
                     <p
                       className={`mt-2 text-[10px] ${item.direction === 'outbound' ? 'text-white/65' : 'text-stone-400'}`}
                     >
@@ -1055,9 +1088,10 @@ function InboxPanel({
                     <button
                       type="button"
                       className="wa-composer-attachment"
-                      aria-label="Attachments unavailable"
-                      title="Attachment messaging is not supported yet"
-                      disabled
+                      aria-label="Attach image, video, audio or document"
+                      title="Attach a file"
+                      disabled={busy}
+                      onClick={() => fileInput.current?.click()}
                     >
                       ＋
                     </button>
@@ -1089,12 +1123,34 @@ function InboxPanel({
                     </button>
                     <button
                       className="wa-send-button"
-                      disabled={busy || !body.trim()}
+                      disabled={busy || (!body.trim() && !attachment)}
                       aria-label="Send message"
                     >
                       {busy ? '…' : '➤'}
                     </button>
                   </div>
+                  <input
+                    ref={fileInput}
+                    type="file"
+                    hidden
+                    accept="image/jpeg,image/png,image/webp,video/mp4,video/3gpp,audio/aac,audio/mp4,audio/mpeg,audio/amr,audio/ogg,application/pdf,text/plain"
+                    onChange={(event) => {
+                      setAttachment(event.currentTarget.files?.[0] ?? null);
+                      event.currentTarget.value = '';
+                    }}
+                  />
+                  {attachment && (
+                    <div className="mt-2 flex items-center justify-between gap-3 rounded-xl bg-stone-50 px-3 py-2 text-xs text-stone-700">
+                      <span className="min-w-0 truncate">{attachment.name}</span>
+                      <button
+                        type="button"
+                        className="font-semibold text-[#88352B]"
+                        onClick={() => setAttachment(null)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  )}
                   <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                     <p className="text-xs text-stone-500">
                       Free-form replies work within 24 hours of the customer’s
@@ -1130,6 +1186,41 @@ function InboxPanel({
 
 function setStateSearch(set: (value: string) => void, value: string) {
   set(value);
+}
+
+function MessageBody({
+  message,
+  connectionId,
+}: {
+  message: Message;
+  connectionId: string;
+}) {
+  const match = /^\\[\\[WA_MEDIA:([A-Za-z0-9._-]{1,200}):(image|video|audio|document)\\]\\](?:\\r?\\n([\\s\\S]*))?$/.exec(message.body);
+  if (!match) {
+    return (
+      <p className="whitespace-pre-wrap break-words text-sm leading-6">
+        {message.body}
+      </p>
+    );
+  }
+  const [, mediaId, kind, caption = ''] = match;
+  const source = `/api/whatsapp/media?connectionId=${encodeURIComponent(connectionId)}&mediaId=${encodeURIComponent(mediaId)}`;
+  return (
+    <div className="space-y-2">
+      {kind === 'image' ? (
+        <img className="max-h-80 max-w-full rounded-lg object-contain" src={source} alt={caption || 'WhatsApp image'} loading="lazy" />
+      ) : kind === 'video' ? (
+        <video className="max-h-80 max-w-full rounded-lg" src={source} controls preload="metadata" />
+      ) : kind === 'audio' ? (
+        <audio className="max-w-full" src={source} controls preload="metadata" />
+      ) : (
+        <a className="inline-flex rounded-lg bg-white/70 px-3 py-2 text-sm font-semibold underline" href={source} target="_blank" rel="noreferrer">
+          Open attachment
+        </a>
+      )}
+      {caption && <p className="whitespace-pre-wrap break-words text-sm leading-6">{caption}</p>}
+    </div>
+  );
 }
 
 function ContactProfile({
