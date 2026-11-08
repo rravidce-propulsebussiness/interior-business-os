@@ -25,7 +25,7 @@ const postSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('accept'), connectionId: uuid, callId: callIdSchema, sdp: sdpSchema }),
   z.object({ action: z.literal('reject'), connectionId: uuid, callId: callIdSchema }),
   z.object({ action: z.literal('terminate'), connectionId: uuid, callId: callIdSchema }),
-]).pipe(z.object({ action: z.string() }).passthrough());
+]);
 
 type CallEvent = {
   id: string;
@@ -158,6 +158,15 @@ export async function POST(request: Request) {
       });
       if (allowed.error || !allowed.data) {
         return Response.json({ message: 'A customer message within the last 24 hours is required to send a call permission request.' }, { status: 409, headers: privateHeaders });
+      }
+      const permission = await graphRequest<{ permission?: { actions?: Array<{ action_name?: string; can_perform_action?: boolean }> } }>(
+        `${connection.phone_number_id}/call_permissions?user_wa_id=${encodeURIComponent(data.waId!)}`,
+        connection.accessToken,
+      );
+      if (!permission.permission?.actions?.some((action) =>
+        action.action_name === 'send_call_permission_request' && action.can_perform_action === true,
+      )) {
+        return Response.json({ message: 'Meta does not currently permit another call permission request for this customer.' }, { status: 409, headers: privateHeaders });
       }
       const result = await graphRequest<{ messages?: Array<{ id?: string }> }>(
         `${connection.phone_number_id}/messages`, connection.accessToken, {
