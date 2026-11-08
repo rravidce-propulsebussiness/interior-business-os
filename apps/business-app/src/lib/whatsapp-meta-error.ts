@@ -51,6 +51,10 @@ const messages: Record<number, string> = {
   133005: 'The six-digit WhatsApp two-step verification PIN is not correct.',
   133006: 'This phone number must be verified again before registration.',
   133010: 'This phone number is not registered with WhatsApp Cloud API. Register it with its six-digit PIN first.',
+  138000: 'WhatsApp Calling is not enabled for this business number. Enable calling in WhatsApp Manager and verify eligibility.',
+  138001: 'The WhatsApp recipient cannot receive a voice call at present.',
+  138006: 'This customer has not granted WhatsApp call permission. Send a permission request and wait for approval.',
+  138012: 'Meta has limited calls for this WhatsApp number. Check calling limits and retry later.',
 };
 
 export function metaErrorMessage(code: number | null) {
