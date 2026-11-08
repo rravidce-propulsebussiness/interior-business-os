@@ -15,7 +15,7 @@ const mediaSchema = z
   .object({
     connectionId: z.string().uuid().optional(),
     messageType: z.literal('media'),
-    to: z.string().regex(/^\\+[1-9]\\d{7,14}$/),
+    to: z.string().regex(/^\+[1-9]\d{7,14}$/),
     mediaId: z.string().regex(/^[A-Za-z0-9._-]{1,200}$/),
     mediaType: z.enum(['image', 'video', 'audio', 'document']),
     caption: z.string().trim().max(1000).default(''),
@@ -125,7 +125,7 @@ export async function POST(request: Request) {
       const allowed = await client.rpc('whatsapp_window_open', {
         p_organization_id: organizationId,
         p_connection_id: connection.id,
-        p_wa_id: mediaRequest.to.replace(/^\\+/, ''),
+        p_wa_id: mediaRequest.to.replace(/^\+/, ''),
       });
       if (allowed.error || !allowed.data)
         return Response.json(
@@ -168,7 +168,7 @@ export async function POST(request: Request) {
           p_connection_id: connection.id,
           p_to: mediaRequest.to.replace(/^\\+/, ''),
           p_provider_id: messageId,
-          p_body: `[[WA_MEDIA:${mediaRequest.mediaId}:${mediaRequest.mediaType}]]${mediaRequest.caption ? `\\n${mediaRequest.caption}` : ''}`,
+          p_body: `[[WA_MEDIA:${mediaRequest.mediaId}:${mediaRequest.mediaType}]]${mediaRequest.caption ? `\n${mediaRequest.caption}` : ''}`,
           p_type: mediaRequest.mediaType,
         },
       );
