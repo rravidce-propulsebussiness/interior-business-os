@@ -25,7 +25,7 @@ function company(
 
 function erp(context: Context | null) {
   return ownerWorkspaceNavigation(context).find(
-    (item) => item.label === 'ERP Operations',
+    (item) => item.label === 'Construction ERP',
   );
 }
 
@@ -42,6 +42,8 @@ describe('ERP uses the existing owner workspace and access policy', () => {
         company([
           'execution.view',
           'estimate.view',
+          'material.view',
+          'estimate.manage_recipes',
           'purchase_order.view',
           'inventory.view',
           'inspection.view',
@@ -49,12 +51,21 @@ describe('ERP uses the existing owner workspace and access policy', () => {
         ]),
       ),
     ).toEqual({
-      label: 'ERP Operations',
+      label: 'Construction ERP',
       href: '/dashboard/operations',
-      icon: 'projects',
+      icon: 'building',
       children: [
-        { label: 'Site Operations', href: '/dashboard/operations' },
-        { label: 'Estimates & Materials', href: '/dashboard/execution' },
+        { label: 'Site Execution', href: '/dashboard/operations' },
+        {
+          label: 'BOQ & Estimate Revisions',
+          href: '/dashboard/execution/execution_estimate_revisions',
+        },
+        { label: 'Execution Planner', href: '/dashboard/execution' },
+        { label: 'Materials', href: '/dashboard/execution/materials' },
+        {
+          label: 'Rate Recipes',
+          href: '/dashboard/execution/estimation_recipes',
+        },
         {
           label: 'Procurement',
           href: '/dashboard/execution/purchase_orders',
@@ -77,7 +88,7 @@ describe('ERP uses the existing owner workspace and access policy', () => {
       ),
     );
     expect(items?.children).toEqual([
-      { label: 'Site Operations', href: '/dashboard/operations' },
+      { label: 'Site Execution', href: '/dashboard/operations' },
     ]);
   });
 

@@ -25,9 +25,6 @@ export default async function ProjectManagementPage() {
 
   const canTasks = has('task.view', 'projects');
   const canExecution = has('execution.view', 'projects');
-  const canEstimates = has('estimate.view', 'projects');
-  const canQuality = has('inspection.view', 'projects');
-  const canFinance = has('invoice.view', 'billing');
   const canMilestones = has('milestone.view', 'projects');
   const canCreateProject = has('project.create', 'projects');
   const timeZone = org.default_timezone || 'UTC';
@@ -88,20 +85,13 @@ export default async function ProjectManagementPage() {
   const overview = portfolioSnapshot(list, tasks, today);
   const accountEmail = user.email ?? '';
   const actions = [
-    ...(canExecution
-      ? [
-          {
-            label: 'Site operations',
-            href: '/dashboard/operations',
-            icon: 'projects' as const,
-          },
-        ]
-      : []),
     ...(canTasks
       ? [
           {
-            label: 'Task register',
-            href: '/dashboard/operations/project_tasks',
+            label: canExecution ? 'Task Board' : 'Task Register',
+            href: canExecution
+              ? '/dashboard/project-management/tasks'
+              : '/dashboard/operations/project_tasks',
             icon: 'calendar' as const,
           },
         ]
@@ -112,33 +102,6 @@ export default async function ProjectManagementPage() {
             label: 'Milestones',
             href: '/dashboard/operations/project_milestones',
             icon: 'calendar' as const,
-          },
-        ]
-      : []),
-    ...(canEstimates
-      ? [
-          {
-            label: 'Estimates',
-            href: '/dashboard/execution',
-            icon: 'quotations' as const,
-          },
-        ]
-      : []),
-    ...(canQuality
-      ? [
-          {
-            label: 'Inspections',
-            href: '/dashboard/operations/project_inspections',
-            icon: 'check' as const,
-          },
-        ]
-      : []),
-    ...(canFinance
-      ? [
-          {
-            label: 'Finance',
-            href: '/dashboard/finance',
-            icon: 'billing' as const,
           },
         ]
       : []),
@@ -161,15 +124,16 @@ export default async function ProjectManagementPage() {
         <div className="pm-breadcrumb">
           <Link href="/dashboard">Business OS</Link>
           <span>/</span>
-          <strong>Project Management</strong>
+          <strong>Projects &amp; Portfolio</strong>
         </div>
         <header className="pm-hero">
           <div>
             <span className="pm-hero-kicker">CONSTRUCTION & DELIVERY</span>
-            <h1>Project Management</h1>
+            <h1>Projects &amp; Portfolio</h1>
             <p>
-              One workspace for real project progress, schedules, site work and
-              delivery.
+              Manage project records, portfolio status, progress, tasks and
+              milestones. Run site execution and operational workflows in
+              Construction ERP.
             </p>
           </div>
           <div className="pm-hero-buttons">
@@ -249,9 +213,13 @@ export default async function ProjectManagementPage() {
               {canTasks && (
                 <Link
                   className="pm-text-link"
-                  href="/dashboard/operations/project_tasks"
+                  href={
+                    canExecution
+                      ? '/dashboard/project-management/tasks'
+                      : '/dashboard/operations/project_tasks'
+                  }
                 >
-                  Task register →
+                  {canExecution ? 'Task Board' : 'Task register'} →
                 </Link>
               )}
             </div>
@@ -320,12 +288,9 @@ export default async function ProjectManagementPage() {
           <div className="pm-panel pm-shortcuts">
             <div className="pm-panel-heading">
               <div>
-                <span className="pm-eyebrow">YOUR WORKSPACE</span>
-                <h2>Management tools</h2>
-                <p>
-                  Existing authorized modules, linked to the same company
-                  records.
-                </p>
+                <span className="pm-eyebrow">PROJECT PLANNING</span>
+                <h2>Tasks &amp; milestones</h2>
+                <p>Plan and track work against your project records.</p>
               </div>
             </div>
             <div className="pm-shortcut-grid">

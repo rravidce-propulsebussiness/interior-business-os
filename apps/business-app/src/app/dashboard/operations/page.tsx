@@ -321,8 +321,11 @@ export default async function OperationsPage({
               <OwnerIcon name="projects" size={27} />
             </span>
             <div>
-              <h1>Project Execution</h1>
-              <p>Plan, track and complete every site activity.</p>
+              <h1>Site Execution</h1>
+              <p>
+                Run day-to-day site work, materials, inspections and handover
+                for your projects.
+              </p>
             </div>
           </div>
           <div className="ops-hero-actions">

@@ -27,29 +27,46 @@ function company(
 describe('project management navigation and trusted portfolio boundaries', () => {
   it('opens one portfolio and canonical projects under an authorized group', () => {
     const items = ownerWorkspaceNavigation(
+      company(['project.view', 'task.view', 'execution.view']),
+    );
+    expect(items.find((item) => item.label === 'Projects & Portfolio')).toEqual(
+      {
+        label: 'Projects & Portfolio',
+        href: '/dashboard/project-management',
+        icon: 'projects',
+        children: [
+          {
+            label: 'Portfolio Overview',
+            href: '/dashboard/project-management',
+          },
+          { label: 'Project Directory', href: '/dashboard/projects' },
+          { label: 'Task Board', href: '/dashboard/project-management/tasks' },
+        ],
+      },
+    );
+  });
+
+  it('falls back to the existing task register without execution permission', () => {
+    const projects = ownerWorkspaceNavigation(
       company(['project.view', 'task.view']),
     );
-    expect(items.find((item) => item.label === 'Project Management')).toEqual({
-      label: 'Project Management',
-      href: '/dashboard/project-management',
-      icon: 'projects',
-      children: [
-        { label: 'Portfolio Overview', href: '/dashboard/project-management' },
-        { label: 'Projects', href: '/dashboard/projects' },
-        { label: 'Task Register', href: '/dashboard/operations/project_tasks' },
-      ],
+    expect(
+      projects.find((item) => item.label === 'Projects & Portfolio')?.children,
+    ).toContainEqual({
+      label: 'Task Register',
+      href: '/dashboard/operations/project_tasks',
     });
   });
 
   it('never offers the owner portfolio to a role without project.view', () => {
     expect(
       ownerWorkspaceNavigation(company(['task.view'])).find(
-        (item) => item.label === 'Project Management',
+        (item) => item.label === 'Projects & Portfolio',
       ),
     ).toBeUndefined();
     expect(
       ownerWorkspaceNavigation(company(['project.view'], [])).find(
-        (item) => item.label === 'Project Management',
+        (item) => item.label === 'Projects & Portfolio',
       ),
     ).toBeUndefined();
   });
@@ -70,7 +87,7 @@ describe('project management navigation and trusted portfolio boundaries', () =>
       ),
     );
     const projectNav = navigation.find(
-      (item) => item.label === 'Project Management',
+      (item) => item.label === 'Projects & Portfolio',
     );
     expect(projectNav?.children).toHaveLength(2);
     expect(navigation.some((item) => item.label === 'Brochures')).toBe(true);
