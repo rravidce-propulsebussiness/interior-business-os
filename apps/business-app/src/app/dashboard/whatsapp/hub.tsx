@@ -642,9 +642,9 @@ function useWorkspaceRows(
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const load = useCallback(async () => {
+  const load = useCallback(async (quiet = false) => {
     if (!connectionId) return;
-    setBusy(true);
+    if (!quiet) setBusy(true);
     try {
       const params = new URLSearchParams({ section, connectionId, search });
       const response = await fetch(`/api/whatsapp/inbox?${params}`, {
@@ -665,12 +665,26 @@ function useWorkspaceRows(
     } catch (cause) {
       setError(friendlyError(cause, 'Could not load WhatsApp data.'));
     } finally {
-      setBusy(false);
+      if (!quiet) setBusy(false);
     }
   }, [connectionId, search, section]);
   useEffect(() => {
     void load();
   }, [load, refreshKey]);
+  useEffect(() => {
+    if (section !== 'inbox') return;
+    let timer: ReturnType<typeof setTimeout>;
+    let active = true;
+    const refresh = async () => {
+      if (document.visibilityState === 'visible') await load(true);
+      if (active) timer = setTimeout(() => void refresh(), 4000);
+    };
+    timer = setTimeout(() => void refresh(), 4000);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [load, section]);
   return { rows, total, unread, search, setSearch, busy, error, reload: load };
 }
 
@@ -734,6 +748,26 @@ function InboxPanel({
         setNotice(friendlyError(error, 'Could not open conversation.')),
       );
   }, [loadThread, selected, state.rows]);
+  useEffect(() => {
+    if (!selected) return;
+    let timer: ReturnType<typeof setTimeout>;
+    let active = true;
+    const refresh = async () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          await loadThread(selected);
+        } catch {
+          // Keep the existing conversation visible through temporary network errors.
+        }
+      }
+      if (active) timer = setTimeout(() => void refresh(), 4000);
+    };
+    timer = setTimeout(() => void refresh(), 4000);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [loadThread, selected]);
 
   async function markRead(waId: string) {
     await fetch('/api/whatsapp/inbox', {
