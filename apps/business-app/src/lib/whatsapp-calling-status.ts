@@ -16,3 +16,16 @@ export function canRequestWhatsAppCallingEnable(status: unknown) {
     normalizeWhatsAppCallingStatus(status),
   );
 }
+
+
+/** Enable privately first; exposing the customer call button is a separate
+ * explicitly confirmed action after relay/webhook/agent readiness.
+ */
+export function metaCallingUpdatePayload(action: 'enable' | 'publish' | 'hide') {
+  return {
+    calling: {
+      status: 'ENABLED',
+      call_icon_visibility: action === 'publish' ? 'DEFAULT' : 'DISABLE_ALL',
+    },
+  };
+}
