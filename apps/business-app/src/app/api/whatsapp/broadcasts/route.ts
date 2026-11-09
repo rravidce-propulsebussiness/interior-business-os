@@ -31,6 +31,9 @@ const createSchema = z
 const cancelSchema = z
   .object({ action: z.literal('cancel'), broadcastId: z.string().uuid() })
   .strict();
+const resumeSchema = z
+  .object({ action: z.literal('resume'), broadcastId: z.string().uuid() })
+  .strict();
 
 type Audience = {
   matched: number;
@@ -242,7 +245,7 @@ export async function POST(request: Request) {
         .update({ status: 'cancelled', completed_at: new Date().toISOString() })
         .eq('organization_id', organizationId)
         .eq('id', input.broadcastId)
-        .eq('status', 'sending');
+        .in('status', ['verifying', 'sending', 'paused_billing', 'paused_error']);
       await database
         .from('whatsapp_broadcast_recipients')
         .update({ status: 'cancelled' })
@@ -250,6 +253,28 @@ export async function POST(request: Request) {
         .eq('broadcast_id', input.broadcastId)
         .eq('status', 'queued');
       return Response.json({ cancelled: true }, { headers: privateHeaders });
+    }
+
+    if (raw?.action === 'resume') {
+      const input = resumeSchema.safeParse(raw);
+      if (!input.success)
+        return Response.json(
+          { message: 'Choose a valid broadcast to resume.' },
+          { status: 400, headers: privateHeaders },
+        );
+      const resumed = await database.rpc('whatsapp_broadcast_resume', {
+        p_organization_id: organizationId,
+        p_broadcast_id: input.data.broadcastId,
+      });
+      if (resumed.error)
+        return Response.json(
+          { message: 'This broadcast cannot be retried. Refresh its status first.' },
+          { status: 409, headers: privateHeaders },
+        );
+      return Response.json(
+        { resumed: true, retried: resumed.data ?? 0 },
+        { headers: privateHeaders },
+      );
     }
 
     const parsed = createSchema.safeParse(raw);
@@ -334,6 +359,7 @@ export async function POST(request: Request) {
         label_ids: input.labelIds,
         total: people.eligible.length,
         skipped: people.matched - people.eligible.length,
+        status: 'verifying',
       })
       .select('id')
       .single();
