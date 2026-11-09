@@ -20,7 +20,11 @@ const relationships = JSON.parse(
     `select coalesce(json_agg(x),'[]') from (select cl.relname as table_name,c.conname as "foreignKeyName",(select json_agg(a.attname order by k.ord) from unnest(c.conkey) with ordinality k(num,ord) join pg_attribute a on a.attrelid=c.conrelid and a.attnum=k.num) as columns,exists(select 1 from pg_constraint u where u.conrelid=c.conrelid and u.contype in ('p','u') and u.conkey @> c.conkey and c.conkey @> u.conkey) as "isOneToOne",r.relname as "referencedRelation",(select json_agg(a.attname order by k.ord) from unnest(c.confkey) with ordinality k(num,ord) join pg_attribute a on a.attrelid=c.confrelid and a.attnum=k.num) as "referencedColumns" from pg_constraint c join pg_class cl on cl.oid=c.conrelid join pg_namespace n on n.oid=cl.relnamespace join pg_class r on r.oid=c.confrelid join pg_namespace rn on rn.oid=r.relnamespace where c.contype='f' and n.nspname='public' and rn.nspname='public' order by cl.relname,c.conname) x`,
   ]),
 );
-function type(sql) {
+function type(sql, udtName) {
+  // information_schema represents PostgreSQL array columns as data_type
+  // 'ARRAY'; use udt_name (_uuid, _text, _int4, ...) for the element type.
+  if (sql === 'ARRAY' && udtName?.startsWith('_'))
+    return `${type(udtName.slice(1))}[]`;
   if (sql.endsWith('[]')) return `${type(sql.slice(0, -2))}[]`;
   return /json/.test(sql)
     ? 'Json'
@@ -40,7 +44,7 @@ for (const table of [...new Set(rows.map((r) => r.table_name))]) {
   for (const shape of ['Row', 'Insert', 'Update']) {
     out += `${shape}: {\n`;
     for (const c of columns)
-      out += `${JSON.stringify(c.column_name)}${shape === 'Update' || (shape === 'Insert' && (c.column_default !== null || c.is_nullable === 'YES')) ? '?' : ''}: ${type(c.data_type)}${c.is_nullable === 'YES' ? ' | null' : ''};\n`;
+      out += `${JSON.stringify(c.column_name)}${shape === 'Update' || (shape === 'Insert' && (c.column_default !== null || c.is_nullable === 'YES')) ? '?' : ''}: ${type(c.data_type, c.udt_name)}${c.is_nullable === 'YES' ? ' | null' : ''};\n`;
     out += '};\n';
   }
   out += `Relationships: ${JSON.stringify(
