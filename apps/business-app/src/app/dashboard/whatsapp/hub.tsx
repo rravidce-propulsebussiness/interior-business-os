@@ -18,6 +18,11 @@ import {
 } from '@/lib/whatsapp-message-label';
 import { createBrowserDatabase } from '@business-os/database/browser';
 import { parseContactSheet } from '@/lib/whatsapp-contact-sheet';
+import {
+  metaBillingUrl,
+  whatsappErrorHelp,
+  whatsappManagerUrl,
+} from '@/lib/whatsapp-error-help';
 
 type Connection = { id: string; name: string; phone: string; status: string };
 type Template = {
@@ -113,6 +118,7 @@ type BroadcastRow = {
     failed: number;
     cancelled: number;
   };
+  errors?: Record<string, number>;
 };
 const LABEL_COLORS = [
   '#88352B',
@@ -1682,7 +1688,30 @@ function InboxPanel({
                         {item.status === 'failed' && (
                           <p className="wa-message-error">
                             Not sent
-                            {item.error_code ? ` · ${item.error_code}` : ''}
+                            {(() => {
+                              const help = item.local
+                                ? null
+                                : whatsappErrorHelp(item.error_code);
+                              if (!help)
+                                return item.error_code
+                                  ? ` · ${item.error_code}`
+                                  : '';
+                              return (
+                                <>
+                                  {` · ${help.reason}. `}
+                                  {help.link && (
+                                    <a
+                                      className="underline"
+                                      href={help.link.href}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                    >
+                                      {help.link.label} ↗
+                                    </a>
+                                  )}
+                                </>
+                              );
+                            })()}
                             {item.local && (
                               <button
                                 type="button"
@@ -2266,6 +2295,7 @@ function BroadcastsPanel({
   );
   const labelState = useLabels(connectionId);
   const [rows, setRows] = useState<BroadcastRow[]>([]);
+  const [wabaId, setWabaId] = useState('');
   const [name, setName] = useState('');
   const [templateKey, setTemplateKey] = useState('');
   const [values, setValues] = useState<string[]>([]);
@@ -2307,8 +2337,12 @@ function BroadcastsPanel({
     );
     const data = (await readApiResponse(response)) as {
       rows?: BroadcastRow[];
+      wabaId?: string;
     };
-    if (response.ok) setRows(data.rows ?? []);
+    if (response.ok) {
+      setRows(data.rows ?? []);
+      setWabaId(data.wabaId ?? '');
+    }
   }, [connectionId]);
   useEffect(() => {
     void load().catch(() => undefined);
@@ -2431,6 +2465,38 @@ function BroadcastsPanel({
           </p>
         </div>
       </div>
+
+      {rows.some((row) => (row.errors?.['131042'] ?? 0) > 0) && (
+        <div className="wa-payment-alert" role="alert">
+          <div>
+            <strong>Meta could not charge for your WhatsApp messages</strong>
+            <p>
+              Broadcasts and other business-started messages are paid. Add money
+              or a valid payment method (card/UPI) for this WhatsApp account in
+              Meta, wait a few minutes, then send again. New cards can take up
+              to an hour to activate.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a
+              className={primaryButton}
+              href={metaBillingUrl(wabaId)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Add money / payment in Meta ↗
+            </a>
+            <a
+              className={softButton}
+              href={whatsappManagerUrl(wabaId)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open WhatsApp Manager ↗
+            </a>
+          </div>
+        </div>
+      )}
 
       {canManage && (
         <form
@@ -2728,6 +2794,18 @@ function BroadcastsPanel({
                 I confirm these contacts agreed to receive WhatsApp messages
                 from us. Meta charges per delivered template message.
               </label>
+              <p className="text-[11px] text-stone-500">
+                Meta bills these messages to the WhatsApp account&apos;s payment
+                method.{' '}
+                <a
+                  className="font-semibold text-[#88352B] underline"
+                  href={metaBillingUrl(wabaId)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Check balance / add money in Meta ↗
+                </a>
+              </p>
               <button
                 className={primaryButton}
                 disabled={
@@ -2854,6 +2932,26 @@ function BroadcastsPanel({
                   <span>Waiting {row.stats.queued}</span>
                 )}
               </p>
+              {Object.entries(row.errors ?? {}).map(([code, count]) => {
+                const help = whatsappErrorHelp(code, wabaId);
+                if (!help) return null;
+                return (
+                  <p key={code} className="wa-failure-reason">
+                    <strong>
+                      {count} failed: {help.reason}.
+                    </strong>{' '}
+                    {help.action}
+                    {help.link && (
+                      <>
+                        {' '}
+                        <a href={help.link.href} target="_blank" rel="noreferrer">
+                          {help.link.label} ↗
+                        </a>
+                      </>
+                    )}
+                  </p>
+                );
+              })}
             </article>
           );
         })}

@@ -153,7 +153,7 @@ export async function GET(request: Request) {
     for (const broadcast of broadcasts.data ?? []) {
       const recipients = await database
         .from('whatsapp_broadcast_recipients')
-        .select('status,provider_message_id')
+        .select('status,provider_message_id,error_code')
         .eq('organization_id', organizationId)
         .eq('broadcast_id', broadcast.id)
         .limit(MAX_RECIPIENTS);
@@ -167,10 +167,19 @@ export async function GET(request: Request) {
         cancelled: 0,
       };
       const providerIds: string[] = [];
+      // Why messages failed, e.g. {"131042": 3} for payment problems.
+      const errors: Record<string, number> = {};
+      const addError = (code: string) => {
+        const key = (/\d{3,6}/.exec(code)?.[0] ?? code).trim() || 'unknown';
+        errors[key] = (errors[key] ?? 0) + 1;
+      };
       for (const item of list) {
         if (item.status === 'queued' || item.status === 'sending')
           stats.queued += 1;
-        else if (item.status === 'failed') stats.failed += 1;
+        else if (item.status === 'failed') {
+          stats.failed += 1;
+          addError(item.error_code);
+        }
         else if (item.status === 'cancelled') stats.cancelled += 1;
         else if (item.provider_message_id)
           providerIds.push(item.provider_message_id);
@@ -179,20 +188,31 @@ export async function GET(request: Request) {
       for (let i = 0; i < providerIds.length; i += 500) {
         const statuses = await database
           .from('whatsapp_messages')
-          .select('status')
+          .select('status,error_code')
           .eq('organization_id', organizationId)
           .eq('connection_id', connectionId)
           .in('provider_message_id', providerIds.slice(i, i + 500));
         for (const message of statuses.data ?? []) {
           if (message.status === 'read') stats.read += 1;
           else if (message.status === 'delivered') stats.delivered += 1;
-          else if (message.status === 'failed') stats.failed += 1;
-          else stats.sent += 1;
+          else if (message.status === 'failed') {
+            stats.failed += 1;
+            addError(message.error_code);
+          } else stats.sent += 1;
         }
       }
-      rows.push({ ...broadcast, stats });
+      rows.push({ ...broadcast, stats, errors });
     }
-    return Response.json({ rows }, { headers: privateHeaders });
+    const account = await database
+      .from('whatsapp_business_connections')
+      .select('waba_id')
+      .eq('organization_id', organizationId)
+      .eq('id', connectionId)
+      .maybeSingle();
+    return Response.json(
+      { rows, wabaId: account.data?.waba_id ?? '' },
+      { headers: privateHeaders },
+    );
   } catch (error) {
     const failure = whatsappFailure(error);
     return Response.json(failure.body, {

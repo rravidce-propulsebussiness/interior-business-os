@@ -1644,3 +1644,34 @@
   font-size: 10px;
   font-weight: 800;
 }
+.wa-payment-alert {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 16px;
+  background: #fef2f2;
+  color: #7f1d1d;
+}
+.wa-payment-alert p {
+  margin-top: 4px;
+  max-width: 640px;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.wa-failure-reason {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #7f1d1d;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.wa-failure-reason a {
+  font-weight: 700;
+  text-decoration: underline;
+}
