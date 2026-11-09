@@ -95,7 +95,10 @@ export async function POST(request: Request) {
       if (pending === 0 && status === 'sending') {
         const closed = await database
           .from('whatsapp_broadcasts')
-          .update({ status: 'completed', completed_at: new Date().toISOString() })
+          .update({
+            status: 'completed',
+            completed_at: new Date().toISOString(),
+          })
           .eq('organization_id', organizationId)
           .eq('id', broadcast.data.id)
           .eq('status', 'sending');
