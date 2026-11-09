@@ -276,6 +276,21 @@ export async function POST(request: Request) {
         p_type: 'template',
       });
       if (log.error) throw new Error('BROADCAST_OUTBOUND_LOG_FAILED');
+
+      if (current.data?.status === 'verifying') {
+        // Meta can deliver a webhook before we persist its Send API ID.
+        // Replaying the already authenticated, stored receipt prevents the
+        // verification gate from hanging without attempting a duplicate send.
+        const replay = await database.rpc(
+          'whatsapp_broadcast_probe_reconcile',
+          {
+            p_organization_id: organizationId,
+            p_connection_id: connection.id,
+            p_provider_message_id: messageId,
+          },
+        );
+        if (replay.error) throw new Error('BROADCAST_PROBE_RECONCILE_FAILED');
+      }
       sent += 1;
     }
 
