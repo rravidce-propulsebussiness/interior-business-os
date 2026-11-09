@@ -10526,6 +10526,133 @@ export interface Database {
           },
         ];
       };
+      whatsapp_broadcast_recipients: {
+        Row: {
+          id: string;
+          organization_id: string;
+          broadcast_id: string;
+          contact_id: string;
+          wa_id: string;
+          display_name: string;
+          status: string;
+          provider_message_id: string | null;
+          error_code: string;
+          sent_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          broadcast_id: string;
+          contact_id: string;
+          wa_id: string;
+          display_name?: string;
+          status?: string;
+          provider_message_id?: string | null;
+          error_code?: string;
+          sent_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          broadcast_id?: string;
+          contact_id?: string;
+          wa_id?: string;
+          display_name?: string;
+          status?: string;
+          provider_message_id?: string | null;
+          error_code?: string;
+          sent_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_broadcast_recipients_organization_id_broadcast_id_fkey';
+            columns: ['organization_id', 'broadcast_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_broadcasts';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_broadcast_recipients_organization_id_contact_id_fkey';
+            columns: ['organization_id', 'contact_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_contacts';
+            referencedColumns: ['organization_id', 'id'];
+          },
+        ];
+      };
+      whatsapp_broadcasts: {
+        Row: {
+          id: string;
+          organization_id: string;
+          connection_id: string;
+          name: string;
+          template_name: string;
+          language: string;
+          parameters: Json;
+          label_ids: string[];
+          status: string;
+          total: number;
+          skipped: number;
+          created_by: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          connection_id: string;
+          name: string;
+          template_name: string;
+          language: string;
+          parameters?: Json;
+          label_ids?: string[];
+          status?: string;
+          total?: number;
+          skipped?: number;
+          created_by?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          connection_id?: string;
+          name?: string;
+          template_name?: string;
+          language?: string;
+          parameters?: Json;
+          label_ids?: string[];
+          status?: string;
+          total?: number;
+          skipped?: number;
+          created_by?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_broadcasts_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_broadcasts_organization_id_connection_id_fkey';
+            columns: ['organization_id', 'connection_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_business_connections';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_broadcasts_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       whatsapp_business_connections: {
         Row: {
           id: string;
@@ -10582,6 +10709,42 @@ export interface Database {
             isOneToOne: false;
             referencedRelation: 'organizations';
             referencedColumns: ['id'];
+          },
+        ];
+      };
+      whatsapp_contact_labels: {
+        Row: {
+          organization_id: string;
+          contact_id: string;
+          label_id: string;
+          created_at: string;
+        };
+        Insert: {
+          organization_id: string;
+          contact_id: string;
+          label_id: string;
+          created_at?: string;
+        };
+        Update: {
+          organization_id?: string;
+          contact_id?: string;
+          label_id?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_contact_labels_organization_id_contact_id_fkey';
+            columns: ['organization_id', 'contact_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_contacts';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_contact_labels_organization_id_label_id_fkey';
+            columns: ['organization_id', 'label_id'];
+            isOneToOne: false;
+            referencedRelation: 'whatsapp_labels';
+            referencedColumns: ['organization_id', 'id'];
           },
         ];
       };
@@ -10651,6 +10814,38 @@ export interface Database {
             columns: ['template_opt_in_recorded_by'];
             isOneToOne: false;
             referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      whatsapp_labels: {
+        Row: {
+          id: string;
+          organization_id: string;
+          name: string;
+          color: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          name: string;
+          color?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          name?: string;
+          color?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_labels_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
             referencedColumns: ['id'];
           },
         ];
@@ -13092,6 +13287,25 @@ export interface Database {
           p_input: Json;
         };
         Returns: Json;
+      };
+      whatsapp_broadcast_claim: {
+        Args: {
+          p_organization_id: string;
+          p_broadcast_id: string;
+          p_limit: number;
+        };
+        Returns: {
+          id: string;
+          organization_id: string;
+          broadcast_id: string;
+          contact_id: string;
+          wa_id: string;
+          display_name: string;
+          status: string;
+          provider_message_id: string | null;
+          error_code: string;
+          sent_at: string | null;
+        }[];
       };
       whatsapp_connection_save: {
         Args: {

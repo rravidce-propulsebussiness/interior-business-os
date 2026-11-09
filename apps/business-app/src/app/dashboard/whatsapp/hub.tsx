@@ -87,6 +87,120 @@ type Schedule = {
   end: string;
 };
 type QuickReply = { id: string; shortcut: string; body: string };
+type Label = { id: string; name: string; color: string };
+type BroadcastRow = {
+  id: string;
+  name: string;
+  template_name: string;
+  language: string;
+  status: 'sending' | 'completed' | 'cancelled';
+  total: number;
+  skipped: number;
+  created_at: string;
+  stats: {
+    queued: number;
+    sent: number;
+    delivered: number;
+    read: number;
+    failed: number;
+    cancelled: number;
+  };
+};
+const LABEL_COLORS = [
+  '#88352B',
+  '#0F766E',
+  '#1D4ED8',
+  '#B45309',
+  '#7C3AED',
+  '#BE185D',
+  '#15803D',
+  '#475569',
+];
+
+function useLabels(connectionId: string) {
+  const [labels, setLabels] = useState<Label[]>([]);
+  const [assignments, setAssignments] = useState<Record<string, string[]>>(
+    {},
+  );
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const reload = useCallback(async () => {
+    const params = new URLSearchParams(
+      connectionId ? { connectionId } : undefined,
+    );
+    const response = await fetch(`/api/whatsapp/labels?${params}`, {
+      cache: 'no-store',
+    });
+    const data = (await readApiResponse(response)) as {
+      labels?: Label[];
+      assignments?: Record<string, string[]>;
+      counts?: Record<string, number>;
+    };
+    if (!response.ok) return;
+    setLabels(data.labels ?? []);
+    setAssignments(data.assignments ?? {});
+    setCounts(data.counts ?? {});
+  }, [connectionId]);
+  useEffect(() => {
+    void reload().catch(() => undefined);
+  }, [reload]);
+  async function createLabel(name: string, color: string) {
+    const response = await fetch('/api/whatsapp/labels', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', name, color }),
+    });
+    const data = (await readApiResponse(response)) as {
+      id?: string;
+      message?: string;
+    };
+    if (!response.ok) throw new Error(data.message ?? 'Could not add label.');
+    await reload();
+    return data.id ?? '';
+  }
+  async function toggleLabel(contactId: string, labelId: string, on: boolean) {
+    setAssignments((value) => ({
+      ...value,
+      [contactId]: on
+        ? [...(value[contactId] ?? []), labelId]
+        : (value[contactId] ?? []).filter((id) => id !== labelId),
+    }));
+    await fetch('/api/whatsapp/labels', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'assign', contactId, labelId, on }),
+    });
+    await reload();
+  }
+  async function deleteLabel(id: string) {
+    await fetch('/api/whatsapp/labels', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id }),
+    });
+    await reload();
+  }
+  return {
+    labels,
+    assignments,
+    counts,
+    reload,
+    createLabel,
+    toggleLabel,
+    deleteLabel,
+  };
+}
+
+function LabelChip({ label }: { label: Label }) {
+  return (
+    <span
+      className="wa-label-chip"
+      style={{ background: `${label.color}1a`, color: label.color }}
+    >
+      <i style={{ background: label.color }} />
+      {label.name}
+    </span>
+  );
+}
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const DEFAULT_SCHEDULE: Schedule = {
   timezone: 'Asia/Kolkata',
@@ -589,7 +703,12 @@ export function WhatsAppHub({
             />
           )}
           {tab === 'broadcasts' && (
-            <BroadcastsPanel templates={templates} onNavigate={setTab} />
+            <BroadcastsPanel
+              templates={templates}
+              onNavigate={setTab}
+              connectionId={connectionId}
+              canManage={canManage}
+            />
           )}
           {tab === 'analytics' && (
             <AnalyticsPanel
@@ -888,6 +1007,10 @@ function InboxPanel({
   const [notice, setNotice] = useState('');
   const [pending, setPending] = useState<Message[]>([]);
   const { replies: quickReplies } = useQuickReplies();
+  const labelState = useLabels(connectionId);
+  const [labelFilter, setLabelFilter] = useState('');
+  const [labelMenuOpen, setLabelMenuOpen] = useState(false);
+  const [newLabel, setNewLabel] = useState('');
   const selectedRef = useRef('');
   const lastReceiptRef = useRef('');
   const lastTypingRef = useRef(0);
@@ -1182,10 +1305,16 @@ function InboxPanel({
     }
   }
 
-  const visibleRows =
+  const visibleRows = (
     conversationFilter === 'unread'
       ? state.rows.filter((row) => row.unread)
-      : state.rows;
+      : state.rows
+  ).filter(
+    (row) =>
+      !labelFilter ||
+      (labelState.assignments[row.id] ?? []).includes(labelFilter),
+  );
+  const labelById = new Map(labelState.labels.map((label) => [label.id, label]));
 
   return (
     <div className="wa-inbox-grid">
@@ -1261,6 +1390,21 @@ function InboxPanel({
             placeholder="Search name or number"
             aria-label="Search conversations"
           />
+          {labelState.labels.length > 0 && (
+            <select
+              className={`${field} mt-2`}
+              value={labelFilter}
+              onChange={(event) => setLabelFilter(event.target.value)}
+              aria-label="Filter by label"
+            >
+              <option value="">All labels</option>
+              {labelState.labels.map((label) => (
+                <option key={label.id} value={label.id}>
+                  {label.name} ({labelState.counts[label.id] ?? 0})
+                </option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="wa-conversation-list">
           {state.busy && (
@@ -1309,7 +1453,16 @@ function InboxPanel({
                     Opted out
                   </span>
                 )}
-                <span className="wa-contact-label">WhatsApp</span>
+                {(labelState.assignments[row.id] ?? [])
+                  .map((id) => labelById.get(id))
+                  .filter((label): label is Label => !!label)
+                  .slice(0, 2)
+                  .map((label) => (
+                    <LabelChip key={label.id} label={label} />
+                  ))}
+                {!(labelState.assignments[row.id] ?? []).length && (
+                  <span className="wa-contact-label">WhatsApp</span>
+                )}
               </div>
             </button>
           ))}
@@ -1339,6 +1492,16 @@ function InboxPanel({
                   <h3 className="truncate font-bold text-stone-900">
                     {contact.name || `+${contact.wa_id}`}
                   </h3>
+                  {(labelState.assignments[contact.id] ?? []).length > 0 && (
+                    <div className="mt-1 flex flex-wrap gap-1">
+                      {(labelState.assignments[contact.id] ?? [])
+                        .map((id) => labelById.get(id))
+                        .filter((label): label is Label => !!label)
+                        .map((label) => (
+                          <LabelChip key={label.id} label={label} />
+                        ))}
+                    </div>
+                  )}
                   <p className="mt-0.5 text-xs text-stone-500">
                     Last activity {readableDate(contact.last_message_at)}
                   </p>
@@ -1363,13 +1526,86 @@ function InboxPanel({
                 >
                   <NavIcon kind="people" />
                 </button>
-                <button
-                  type="button"
-                  className="wa-icon-button"
-                  aria-label="More contact actions"
-                >
-                  •••
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    className="wa-icon-button"
+                    aria-label="Labels for this chat"
+                    aria-expanded={labelMenuOpen}
+                    title="Labels"
+                    onClick={() => setLabelMenuOpen((open) => !open)}
+                  >
+                    🏷
+                  </button>
+                  {labelMenuOpen && (
+                    <div className="wa-label-menu" role="menu">
+                      <p className="px-3 pt-2 text-[11px] font-semibold uppercase tracking-wide text-stone-400">
+                        Label this chat
+                      </p>
+                      {labelState.labels.map((label) => {
+                        const on = (
+                          labelState.assignments[contact.id] ?? []
+                        ).includes(label.id);
+                        return (
+                          <label key={label.id} className="wa-label-option">
+                            <input
+                              type="checkbox"
+                              checked={on}
+                              disabled={!canManage}
+                              onChange={() =>
+                                void labelState.toggleLabel(
+                                  contact.id,
+                                  label.id,
+                                  !on,
+                                )
+                              }
+                            />
+                            <LabelChip label={label} />
+                          </label>
+                        );
+                      })}
+                      {canManage && (
+                        <form
+                          className="flex gap-1 border-t border-stone-100 p-2"
+                          onSubmit={(event) => {
+                            event.preventDefault();
+                            const name = newLabel.trim();
+                            if (!name) return;
+                            const color =
+                              LABEL_COLORS[
+                                labelState.labels.length % LABEL_COLORS.length
+                              ]!;
+                            void labelState
+                              .createLabel(name, color)
+                              .then((id) => {
+                                setNewLabel('');
+                                if (id)
+                                  return labelState.toggleLabel(
+                                    contact.id,
+                                    id,
+                                    true,
+                                  );
+                              })
+                              .catch((error: unknown) =>
+                                setNotice(
+                                  friendlyError(error, 'Could not add label.'),
+                                ),
+                              );
+                          }}
+                        >
+                          <input
+                            className={field}
+                            maxLength={40}
+                            placeholder="New label, e.g. Hot lead"
+                            value={newLabel}
+                            onChange={(event) => setNewLabel(event.target.value)}
+                          />
+                          <button className={softButton}>Add</button>
+                        </form>
+                      )}
+                    </div>
+                  )}
+                </div>
                 {canManage && !contact.opted_out && (
                   <button
                     className={softButton}
@@ -1915,13 +2151,159 @@ function OverviewPanel({
 function BroadcastsPanel({
   templates,
   onNavigate,
+  connectionId,
+  canManage,
 }: {
   templates: Template[];
   onNavigate: (tab: Tab) => void;
+  connectionId: string;
+  canManage: boolean;
 }) {
-  const approvedCount = templates.filter(
+  const approved = templates.filter(
     (template) => template.status === 'APPROVED',
-  ).length;
+  );
+  const labelState = useLabels(connectionId);
+  const [rows, setRows] = useState<BroadcastRow[]>([]);
+  const [name, setName] = useState('');
+  const [templateKey, setTemplateKey] = useState('');
+  const [values, setValues] = useState<string[]>([]);
+  const [labelIds, setLabelIds] = useState<string[]>([]);
+  const [confirm, setConfirm] = useState(false);
+  const [preview, setPreview] = useState<{
+    matched: number;
+    eligible: number;
+    optedOut: number;
+    noOptIn: number;
+  } | null>(null);
+  const [notice, setNotice] = useState('');
+  const [sendingId, setSendingId] = useState('');
+  const cancelRef = useRef(false);
+
+  const template = approved.find(
+    (item) => `${item.name}|${item.language}` === templateKey,
+  );
+  const bodyText =
+    template?.components?.find((component) => component.type === 'BODY')
+      ?.text ?? '';
+  const needed = Math.max(
+    0,
+    ...[...bodyText.matchAll(/\{\{(\d+)\}\}/g)].map((match) =>
+      Number(match[1]),
+    ),
+  );
+
+  const load = useCallback(async () => {
+    if (!connectionId) return;
+    const response = await fetch(
+      `/api/whatsapp/broadcasts?${new URLSearchParams({ connectionId })}`,
+      { cache: 'no-store' },
+    );
+    const data = (await readApiResponse(response)) as {
+      rows?: BroadcastRow[];
+    };
+    if (response.ok) setRows(data.rows ?? []);
+  }, [connectionId]);
+  useEffect(() => {
+    void load().catch(() => undefined);
+  }, [load]);
+
+  useEffect(() => {
+    if (!connectionId) return;
+    const params = new URLSearchParams({
+      connectionId,
+      preview: '1',
+      labelIds: labelIds.join(','),
+    });
+    let cancelled = false;
+    void fetch(`/api/whatsapp/broadcasts?${params}`, { cache: 'no-store' })
+      .then((response) => readApiResponse(response))
+      .then((data) => {
+        if (!cancelled) setPreview(data as typeof preview);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [connectionId, labelIds]);
+
+  async function runSending(id: string) {
+    setSendingId(id);
+    cancelRef.current = false;
+    try {
+      for (let round = 0; round < 1000 && !cancelRef.current; round += 1) {
+        const response = await fetch('/api/whatsapp/broadcasts/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ broadcastId: id }),
+        });
+        const result = (await readApiResponse(response)) as {
+          remaining?: number;
+          message?: string;
+        };
+        if (!response.ok)
+          throw new Error(result.message ?? 'Broadcast sending stopped.');
+        await load();
+        if (!result.remaining) break;
+      }
+      setNotice(
+        cancelRef.current
+          ? 'Sending paused. You can resume it below.'
+          : 'Broadcast sent. Delivery and read ticks update as WhatsApp reports them.',
+      );
+    } catch (error) {
+      setNotice(friendlyError(error, 'Broadcast sending stopped.'));
+    } finally {
+      setSendingId('');
+      void load();
+    }
+  }
+
+  async function createBroadcast(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!template) return;
+    setNotice('Creating broadcast…');
+    try {
+      const response = await fetch('/api/whatsapp/broadcasts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          connectionId,
+          name,
+          templateName: template.name,
+          language: template.language,
+          parameters: values.slice(0, needed),
+          labelIds,
+          confirmOptIn: true,
+        }),
+      });
+      const result = (await readApiResponse(response)) as {
+        id?: string;
+        total?: number;
+        message?: string;
+      };
+      if (!response.ok || !result.id)
+        throw new Error(result.message ?? 'Could not create broadcast.');
+      setNotice(`Sending to ${result.total} contacts…`);
+      setName('');
+      setConfirm(false);
+      await load();
+      await runSending(result.id);
+    } catch (error) {
+      setNotice(friendlyError(error, 'Could not create broadcast.'));
+    }
+  }
+
+  async function cancelBroadcast(id: string) {
+    cancelRef.current = true;
+    await fetch('/api/whatsapp/broadcasts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'cancel', broadcastId: id }),
+    });
+    await load();
+  }
+
   return (
     <section className="wa-feature-page">
       <div className="wa-feature-hero">
@@ -1932,50 +2314,316 @@ function BroadcastsPanel({
           <span className="wa-eyebrow">CAMPAIGNS</span>
           <h3>WhatsApp broadcasts</h3>
           <p>
-            Send approved template updates to contacts who have explicitly opted
-            in.
+            Send an approved template to labelled contacts who opted in, and
+            see who received and read it.
           </p>
         </div>
       </div>
-      <div className="wa-feature-cards">
-        <article>
-          <span>Approved templates</span>
-          <strong>{approvedCount}</strong>
-          <small>Available from Meta</small>
-        </article>
-        <article>
-          <span>Audience source</span>
-          <strong>Contacts</strong>
-          <small>Consent must be confirmed</small>
-        </article>
-        <article>
-          <span>Delivery updates</span>
-          <strong>WhatsApp</strong>
-          <small>Status events are captured</small>
-        </article>
-      </div>
-      <div className="wa-feature-empty">
-        <span className="wa-feature-icon">
-          <NavIcon kind="template" />
-        </span>
-        <h4>
-          {approvedCount
-            ? 'Create a campaign from an approved template'
-            : 'No approved templates yet'}
-        </h4>
-        <p>
-          {approvedCount
-            ? 'Choose an approved template and review your opted-in audience before any campaign is sent.'
-            : 'Submit a utility or marketing template to Meta. Once approved, it can be selected for eligible contacts.'}
-        </p>
-        <button
-          type="button"
-          className="wa-add-contact"
-          onClick={() => onNavigate('templates')}
+
+      {canManage && (
+        <form
+          onSubmit={createBroadcast}
+          className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffdfa] p-5"
         >
-          Open templates <span>→</span>
-        </button>
+          <h4 className="text-base font-bold text-stone-900">New broadcast</h4>
+          {!approved.length ? (
+            <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
+              No approved templates yet. Broadcasts must use a Meta-approved
+              template.{' '}
+              <button
+                type="button"
+                className="font-semibold underline"
+                onClick={() => onNavigate('templates')}
+              >
+                Open templates
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
+                  Broadcast name
+                  <input
+                    className={field}
+                    required
+                    maxLength={120}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Diwali offer – 2BHK leads"
+                  />
+                </label>
+                <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
+                  Approved template
+                  <select
+                    className={field}
+                    required
+                    value={templateKey}
+                    onChange={(e) => {
+                      setTemplateKey(e.target.value);
+                      setValues([]);
+                    }}
+                  >
+                    <option value="">Choose a template</option>
+                    {approved.map((item) => (
+                      <option
+                        key={`${item.name}|${item.language}`}
+                        value={`${item.name}|${item.language}`}
+                      >
+                        {item.name} · {item.language} ·{' '}
+                        {(item.category ?? '').toLowerCase()}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              {template && (
+                <div className="rounded-xl bg-stone-50 p-3 text-sm text-stone-700">
+                  <p className="whitespace-pre-wrap">{bodyText}</p>
+                  {needed > 0 && (
+                    <div className="mt-3 grid gap-2 md:grid-cols-2">
+                      {Array.from({ length: needed }, (_, index) => (
+                        <label
+                          key={index}
+                          className="block space-y-1 text-xs font-semibold text-stone-600"
+                        >
+                          {`{{${index + 1}}}`}
+                          <input
+                            className={field}
+                            required
+                            maxLength={1024}
+                            value={values[index] ?? ''}
+                            onChange={(e) =>
+                              setValues((list) => {
+                                const next = [...list];
+                                next[index] = e.target.value;
+                                return next;
+                              })
+                            }
+                            placeholder={
+                              index === 0 ? '{{name}}' : 'Value for everyone'
+                            }
+                          />
+                        </label>
+                      ))}
+                      <p className="text-[11px] text-stone-500 md:col-span-2">
+                        Type <code>{'{{name}}'}</code> to insert each
+                        contact&apos;s name.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+              <div>
+                <p className="text-xs font-semibold text-stone-600">
+                  Audience
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {labelState.labels.map((label) => {
+                    const on = labelIds.includes(label.id);
+                    return (
+                      <button
+                        key={label.id}
+                        type="button"
+                        aria-pressed={on}
+                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${on ? 'border-transparent text-white' : 'border-stone-200 bg-white text-stone-700'}`}
+                        style={on ? { background: label.color } : undefined}
+                        onClick={() =>
+                          setLabelIds((list) =>
+                            on
+                              ? list.filter((id) => id !== label.id)
+                              : [...list, label.id],
+                          )
+                        }
+                      >
+                        {label.name} · {labelState.counts[label.id] ?? 0}
+                      </button>
+                    );
+                  })}
+                  {!labelState.labels.length && (
+                    <p className="text-xs text-stone-500">
+                      No labels yet. Add labels from a chat (🏷) to target
+                      groups such as “2BHK leads”.
+                    </p>
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-stone-500">
+                  {labelIds.length
+                    ? 'Contacts with any of the selected labels.'
+                    : 'No label selected: all contacts on this number.'}{' '}
+                  {preview && (
+                    <strong className="text-stone-800">
+                      {preview.eligible} will receive it
+                    </strong>
+                  )}
+                  {preview && preview.optedOut + preview.noOptIn > 0 && (
+                    <>
+                      {' '}
+                      · {preview.noOptIn} skipped without recorded opt-in ·{' '}
+                      {preview.optedOut} opted out
+                    </>
+                  )}
+                </p>
+              </div>
+              <label className="flex items-start gap-2 text-xs text-stone-700">
+                <input
+                  type="checkbox"
+                  className="mt-0.5"
+                  checked={confirm}
+                  onChange={(e) => setConfirm(e.target.checked)}
+                />
+                I confirm these contacts agreed to receive WhatsApp messages
+                from us. Meta charges per delivered template message.
+              </label>
+              <button
+                className={primaryButton}
+                disabled={
+                  !confirm ||
+                  !template ||
+                  !!sendingId ||
+                  !preview?.eligible ||
+                  values.slice(0, needed).filter((v) => v?.trim()).length <
+                    needed
+                }
+              >
+                {sendingId
+                  ? 'Sending…'
+                  : `Send to ${preview?.eligible ?? 0} contacts`}
+              </button>
+            </>
+          )}
+          {notice && (
+            <p role="status" className="text-sm text-stone-700">
+              {notice}
+            </p>
+          )}
+        </form>
+      )}
+
+      <div className="space-y-3">
+        <h4 className="text-base font-bold text-stone-900">
+          Recent broadcasts
+        </h4>
+        {!rows.length && (
+          <p className="rounded-xl border border-dashed border-stone-300 p-6 text-center text-sm text-stone-500">
+            No broadcasts yet.
+          </p>
+        )}
+        {rows.map((row) => {
+          const done =
+            row.stats.sent +
+            row.stats.delivered +
+            row.stats.read +
+            row.stats.failed;
+          const percent = row.total ? Math.round((done / row.total) * 100) : 0;
+          return (
+            <article
+              key={row.id}
+              className="rounded-xl border border-stone-200 bg-white p-4"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <h5 className="font-semibold text-stone-900">{row.name}</h5>
+                  <p className="mt-0.5 text-xs text-stone-500">
+                    {row.template_name} · {readableDate(row.created_at)} ·{' '}
+                    {row.total} recipients
+                    {row.skipped ? ` · ${row.skipped} skipped` : ''}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${row.status === 'completed' ? 'bg-emerald-50 text-emerald-700' : row.status === 'cancelled' ? 'bg-stone-100 text-stone-600' : 'bg-amber-50 text-amber-800'}`}
+                  >
+                    {row.status === 'sending'
+                      ? sendingId === row.id
+                        ? `Sending ${percent}%`
+                        : 'Paused'
+                      : row.status === 'completed'
+                        ? 'Sent'
+                        : 'Cancelled'}
+                  </span>
+                  {canManage && row.status === 'sending' && (
+                    <>
+                      {sendingId !== row.id && (
+                        <button
+                          type="button"
+                          className={softButton}
+                          disabled={!!sendingId}
+                          onClick={() => void runSending(row.id)}
+                        >
+                          Resume
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        className={softButton}
+                        onClick={() => void cancelBroadcast(row.id)}
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+              <div className="wa-broadcast-bar" aria-hidden="true">
+                <span
+                  style={{
+                    width: `${row.total ? (row.stats.read / row.total) * 100 : 0}%`,
+                    background: '#53bdeb',
+                  }}
+                />
+                <span
+                  style={{
+                    width: `${row.total ? (row.stats.delivered / row.total) * 100 : 0}%`,
+                    background: '#10b981',
+                  }}
+                />
+                <span
+                  style={{
+                    width: `${row.total ? (row.stats.sent / row.total) * 100 : 0}%`,
+                    background: '#a8a29e',
+                  }}
+                />
+                <span
+                  style={{
+                    width: `${row.total ? (row.stats.failed / row.total) * 100 : 0}%`,
+                    background: '#dc2626',
+                  }}
+                />
+              </div>
+              <p className="mt-2 flex flex-wrap gap-3 text-xs text-stone-600">
+                <span>✓ Sent {row.stats.sent}</span>
+                <span>✓✓ Delivered {row.stats.delivered}</span>
+                <span className="text-sky-600">✓✓ Read {row.stats.read}</span>
+                <span className="text-red-700">Failed {row.stats.failed}</span>
+                {row.stats.queued > 0 && (
+                  <span>Waiting {row.stats.queued}</span>
+                )}
+              </p>
+            </article>
+          );
+        })}
       </div>
+
+      {canManage && labelState.labels.length > 0 && (
+        <div className="rounded-2xl border border-stone-200 p-4">
+          <h4 className="text-sm font-bold text-stone-900">Labels</h4>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {labelState.labels.map((label) => (
+              <span key={label.id} className="flex items-center gap-1">
+                <LabelChip label={label} />
+                <button
+                  type="button"
+                  className="text-xs text-stone-400 hover:text-red-700"
+                  aria-label={`Delete label ${label.name}`}
+                  onClick={() => void labelState.deleteLabel(label.id)}
+                >
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
