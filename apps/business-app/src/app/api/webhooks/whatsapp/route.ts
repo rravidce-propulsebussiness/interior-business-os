@@ -113,6 +113,35 @@ export async function POST(request: Request) {
         if (ingested.error) throw new Error('WHATSAPP_MESSAGE_INGEST_FAILED');
 
         const value = (change as { value?: Record<string, unknown> })?.value;
+        // A Graph Send response is only acceptance. A later status webhook
+        // may report 131042; stop the matching campaign/WABA at that point.
+        const statuses = Array.isArray(value?.statuses)
+          ? (value.statuses as Array<Record<string, unknown>>)
+          : [];
+        for (const receipt of statuses) {
+          const messageId = typeof receipt.id === 'string' ? receipt.id : '';
+          const delivery = typeof receipt.status === 'string' ? receipt.status : '';
+          const errors = Array.isArray(receipt.errors)
+            ? (receipt.errors as Array<Record<string, unknown>>)
+            : [];
+          const rawCode = errors[0]?.code;
+          const errorCode =
+            typeof rawCode === 'number' && Number.isInteger(rawCode)
+              ? String(rawCode)
+              : '';
+          if (!messageId || !['sent', 'delivered', 'read', 'failed'].includes(delivery))
+            continue;
+          const storedReceipt = await database.rpc('whatsapp_broadcast_receipt', {
+            p_organization_id: connection.organization_id,
+            p_connection_id: connection.id,
+            p_provider_message_id: messageId,
+            p_delivery_status: delivery,
+            p_error_code: errorCode,
+          });
+          if (storedReceipt.error)
+            throw new Error('WHATSAPP_BROADCAST_RECEIPT_FAILED');
+        }
+
         const messages = Array.isArray(value?.messages)
           ? (value.messages as Array<Record<string, unknown>>)
           : [];
