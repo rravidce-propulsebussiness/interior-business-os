@@ -106,7 +106,7 @@ type BroadcastRow = {
   name: string;
   template_name: string;
   language: string;
-  status: 'sending' | 'completed' | 'cancelled';
+  status: 'verifying' | 'sending' | 'paused_billing' | 'paused_error' | 'completed' | 'cancelled';
   total: number;
   skipped: number;
   created_at: string;
@@ -2342,7 +2342,9 @@ function BroadcastsPanel({
     if (response.ok) {
       setRows(data.rows ?? []);
       setWabaId(data.wabaId ?? '');
+      return data.rows ?? [];
     }
+    throw new Error('Could not refresh broadcast status.');
   }, [connectionId]);
   useEffect(() => {
     void load().catch(() => undefined);
@@ -2371,6 +2373,7 @@ function BroadcastsPanel({
   }, [connectionId, labelIds, audienceMode, pickedIds]);
 
   async function runSending(id: string) {
+    if (sendingId) return;
     setSendingId(id);
     cancelRef.current = false;
     try {
@@ -2382,23 +2385,96 @@ function BroadcastsPanel({
         });
         const result = (await readApiResponse(response)) as {
           remaining?: number;
+          sent?: number;
+          failed?: number;
+          status?: BroadcastRow['status'];
+          noProgress?: boolean;
           message?: string;
         };
         if (!response.ok)
           throw new Error(result.message ?? 'Broadcast sending stopped.');
-        await load();
-        if (!result.remaining) break;
+
+        if (result.status === 'paused_billing') {
+          setNotice('Billing issue 131042: remaining contacts are safely queued. Add funds or fix the payment method in Meta, then click Resend & Continue.');
+          break;
+        }
+        if (result.status === 'paused_error') {
+          setNotice('Verification failed or sending is uncertain. Review failed messages before retrying; accepted messages are never automatically resent.');
+          break;
+        }
+        if (result.status === 'verifying') {
+          setNotice('Test message submitted. Waiting for Meta to confirm delivery before sending the rest.');
+          let nextStatus: BroadcastRow['status'] = 'verifying';
+          // This is cheap status-only polling in the open browser. It stops
+          // after 90s; billing holds never trigger repeated send attempts.
+          for (let check = 0; check < 30 && !cancelRef.current; check += 1) {
+            await new Promise<void>((resolve) => setTimeout(resolve, 3000));
+            const poll = await fetch(
+              `/api/whatsapp/broadcasts?${new URLSearchParams({ connectionId, stateOnly: id })}`,
+              { cache: 'no-store' },
+            );
+            const state = (await readApiResponse(poll)) as {
+              row?: { status?: BroadcastRow['status'] };
+              message?: string;
+            };
+            if (!poll.ok) throw new Error(state.message ?? 'Could not check broadcast verification.');
+            nextStatus = state.row?.status ?? 'verifying';
+            if (nextStatus !== 'verifying') break;
+          }
+          await load();
+          if (nextStatus === 'sending' && !cancelRef.current) continue;
+          if (nextStatus === 'paused_billing') {
+            setNotice('Meta billing error 131042. Queue paused; use Add Money / Fix Payment and then Resend & Continue.');
+          } else if (nextStatus === 'paused_error') {
+            setNotice('The test message failed. Review the cause, then use Resend & Continue.');
+          } else if (!cancelRef.current) {
+            setNotice('Waiting for Meta to deliver the first test message. No more messages were attempted. Refresh this page later and use Continue when it is verified.');
+          }
+          break;
+        }
+        if (result.status === 'completed') {
+          const latest = await load();
+          const campaign = latest.find((item) => item.id === id);
+          setNotice(campaign?.stats.failed
+            ? `Broadcast finished with ${campaign.stats.failed} failed recipient(s). Use Resend Failed to retry only confirmed failures.`
+            : 'All messages submitted. Delivery and read ticks update from Meta.');
+          break;
+        }
+        if (result.noProgress) {
+          setNotice('No safely claimable recipients. An earlier message may still be in flight; do not resend until its status is confirmed.');
+          break;
+        }
+        // Avoid a heavy all-campaign read after every small batch.
+        if (round % 5 === 0) await load();
       }
-      setNotice(
-        cancelRef.current
-          ? 'Sending paused. You can resume it below.'
-          : 'Broadcast sent. Delivery and read ticks update as WhatsApp reports them.',
-      );
+      if (cancelRef.current) setNotice('Broadcast cancelled. Unsent contacts were preserved in history.');
     } catch (error) {
       setNotice(friendlyError(error, 'Broadcast sending stopped.'));
     } finally {
       setSendingId('');
-      void load();
+      void load().catch(() => undefined);
+    }
+  }
+
+  async function resendBroadcast(id: string) {
+    if (sendingId) return;
+    setNotice('Preparing confirmed failed recipients for resend…');
+    try {
+      const response = await fetch('/api/whatsapp/broadcasts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'resume', broadcastId: id }),
+      });
+      const data = (await readApiResponse(response)) as {
+        retried?: number;
+        message?: string;
+      };
+      if (!response.ok) throw new Error(data.message ?? 'Cannot resume broadcast.');
+      await load();
+      setNotice(`Retrying ${data.retried ?? 0} confirmed failed message(s), without resending accepted messages.`);
+      await runSending(id);
+    } catch (error) {
+      setNotice(friendlyError(error, 'Cannot resume broadcast.'));
     }
   }
 
@@ -2466,15 +2542,15 @@ function BroadcastsPanel({
         </div>
       </div>
 
-      {rows.some((row) => (row.errors?.['131042'] ?? 0) > 0) && (
+      {rows.some((row) => row.status === 'paused_billing') && (
         <div className="wa-payment-alert" role="alert">
           <div>
             <strong>Meta could not charge for your WhatsApp messages</strong>
             <p>
-              Broadcasts and other business-started messages are paid. Add money
-              or a valid payment method (card/UPI) for this WhatsApp account in
-              Meta, wait a few minutes, then send again. New cards can take up
-              to an hour to activate.
+              Meta returned billing error 131042. The affected campaigns are
+              paused, and remaining contacts are safely queued. Fix the
+              WhatsApp account's payment method, outstanding dues or prepaid
+              funds in Meta, then click Resend & Continue on the campaign.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -2864,35 +2940,41 @@ function BroadcastsPanel({
                 </div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${row.status === 'completed' ? 'bg-emerald-50 text-emerald-700' : row.status === 'cancelled' ? 'bg-stone-100 text-stone-600' : 'bg-amber-50 text-amber-800'}`}
+                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${row.status === 'completed' ? 'bg-emerald-50 text-emerald-700' : row.status === 'cancelled' ? 'bg-stone-100 text-stone-600' : row.status === 'paused_billing' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800'}`}
                   >
-                    {row.status === 'sending'
-                      ? sendingId === row.id
-                        ? `Sending ${percent}%`
-                        : 'Paused'
-                      : row.status === 'completed'
-                        ? 'Sent'
-                        : 'Cancelled'}
+                    {row.status === 'verifying' ? 'Verifying first delivery'
+                      : row.status === 'sending' ? sendingId === row.id ? `Sending ${percent}%` : 'Ready to continue'
+                      : row.status === 'paused_billing' ? 'Billing paused · 131042'
+                      : row.status === 'paused_error' ? 'Needs review'
+                      : row.status === 'completed' ? row.stats.failed ? 'Completed with failures' : 'Submitted'
+                      : 'Cancelled'}
                   </span>
-                  {canManage && row.status === 'sending' && (
+                  {canManage && (
                     <>
-                      {sendingId !== row.id && (
-                        <button
-                          type="button"
-                          className={softButton}
+                      {row.status === 'sending' && sendingId !== row.id && (
+                        <button type="button" className={softButton}
                           disabled={!!sendingId}
-                          onClick={() => void runSending(row.id)}
-                        >
-                          Resume
+                          onClick={() => void runSending(row.id)}>
+                          Continue
                         </button>
                       )}
-                      <button
-                        type="button"
-                        className={softButton}
-                        onClick={() => void cancelBroadcast(row.id)}
-                      >
-                        Cancel
-                      </button>
+                      {(row.status === 'paused_billing' || row.status === 'paused_error' ||
+                        (row.status === 'completed' && row.stats.failed > 0)) && (
+                        <button type="button" className={primaryButton}
+                          disabled={!!sendingId}
+                          onClick={() => void resendBroadcast(row.id)}>
+                          {row.status === 'completed' ? 'Resend failed' : 'Resend & Continue'}
+                        </button>
+                      )}
+                      {row.status === 'verifying' && (
+                        <span className="text-xs text-stone-500">Waiting for Meta receipt</span>
+                      )}
+                      {['verifying', 'sending', 'paused_billing', 'paused_error'].includes(row.status) && (
+                        <button type="button" className={softButton}
+                          onClick={() => void cancelBroadcast(row.id)}>
+                          Cancel
+                        </button>
+                      )}
                     </>
                   )}
                 </div>
