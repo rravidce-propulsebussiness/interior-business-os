@@ -221,7 +221,7 @@ function triggerLabel(rule: Rule) {
     const days = sched.days.map((d) => WEEKDAYS[d]).join(', ');
     return `Away · outside ${days} ${sched.start}–${sched.end} (India time)`;
   }
-  return 'Every inbound message';
+  return 'Any message · once per customer every 24 hours';
 }
 type Tab =
   | 'overview'
@@ -3061,7 +3061,7 @@ function AutomationsPanel({
                 Away message (outside business hours)
               </option>
               <option value="keyword">Message contains a keyword</option>
-              <option value="any_message">Every inbound message</option>
+              <option value="any_message">Any message (once per customer per 24 h)</option>
             </select>
           </label>
           {triggerType === 'menu' && (
