@@ -483,7 +483,7 @@ export function WhatsAppHub({
           waId: contactModal.phone.replace(/\D/g, ''),
           name: contactModal.name,
           consentSource: contactModal.consentSource,
-          confirmOptIn: contactModal.confirmOptIn,
+          confirmOptIn: true,
         }),
       });
       const result = (await readApiResponse(response)) as { message?: string };
@@ -650,8 +650,8 @@ export function WhatsAppHub({
                 setContactModal({
                   name: '',
                   phone: '',
-                  consentSource: '',
-                  confirmOptIn: false,
+                  consentSource: 'Customer enquiry form',
+                  confirmOptIn: true,
                 })
               }
             >
@@ -679,8 +679,9 @@ export function WhatsAppHub({
                 setContactModal({
                   name: contact.name,
                   phone: `+${contact.wa_id}`,
-                  consentSource: '',
-                  confirmOptIn: false,
+                  consentSource:
+                    contact.template_opt_in_source || 'Customer enquiry form',
+                  confirmOptIn: true,
                 })
               }
               onNavigate={setTab}
@@ -694,12 +695,23 @@ export function WhatsAppHub({
             <ContactsPanel
               connectionId={connectionId}
               refreshKey={contactRefresh}
+              canManage={canManage}
               onAddContact={() =>
                 setContactModal({
                   name: '',
                   phone: '',
-                  consentSource: '',
-                  confirmOptIn: false,
+                  consentSource: 'Customer enquiry form',
+                  confirmOptIn: true,
+                })
+              }
+              onEditContact={(contact, resume) =>
+                setContactModal({
+                  name: contact.name,
+                  phone: `+${contact.wa_id}`,
+                  consentSource: resume
+                    ? 'Customer asked to receive messages again'
+                    : contact.template_opt_in_source || 'Customer enquiry form',
+                  confirmOptIn: true,
                 })
               }
             />
@@ -775,8 +787,9 @@ export function WhatsAppHub({
               </button>
             </div>
             <p className="wa-modal-copy">
-              Record the source of the customer’s WhatsApp opt-in before saving
-              this contact for business-initiated messages.
+              Saving records that this customer agreed to WhatsApp messages
+              from you, for example by filling your enquiry form. If they ask
+              to stop, use Opt out on the contact.
             </p>
             <label>
               Name
@@ -806,7 +819,7 @@ export function WhatsAppHub({
               />
             </label>
             <label>
-              Where did they opt in?
+              Where did they agree?
               <input
                 required
                 minLength={3}
@@ -821,21 +834,6 @@ export function WhatsAppHub({
                 placeholder="Website enquiry form, signed form, or WhatsApp START"
               />
             </label>
-            <label className="wa-consent-note">
-              <input
-                type="checkbox"
-                required
-                checked={contactModal.confirmOptIn}
-                onChange={(event) =>
-                  setContactModal({
-                    ...contactModal,
-                    confirmOptIn: event.target.checked,
-                  })
-                }
-              />
-              I confirm this person expressly agreed to receive WhatsApp
-              messages from this business.
-            </label>
             <div className="wa-modal-actions">
               <button
                 type="button"
@@ -846,7 +844,7 @@ export function WhatsAppHub({
               </button>
               <button
                 className="wa-new-message"
-                disabled={contactSaving || !contactModal.confirmOptIn}
+                disabled={contactSaving}
               >
                 {contactSaving ? 'Saving…' : 'Save contact'}
               </button>
@@ -2312,7 +2310,6 @@ function BroadcastsPanel({
   );
   const [pickedIds, setPickedIds] = useState<string[]>([]);
   const contactRows = useWorkspaceRows('contacts', connectionId);
-  const [confirm, setConfirm] = useState(false);
   const [preview, setPreview] = useState<{
     matched: number;
     eligible: number;
@@ -2540,7 +2537,6 @@ function BroadcastsPanel({
         throw new Error(result.message ?? 'Could not create broadcast.');
       setNotice(`Sending to ${result.total} contacts…`);
       setName('');
-      setConfirm(false);
       await load();
       await runSending(result.id);
     } catch (error) {
@@ -2895,16 +2891,10 @@ function BroadcastsPanel({
                   )}
                 </p>
               </div>
-              <label className="flex items-start gap-2 text-xs text-stone-700">
-                <input
-                  type="checkbox"
-                  className="mt-0.5 h-4 w-4 shrink-0"
-                  checked={confirm}
-                  onChange={(e) => setConfirm(e.target.checked)}
-                />
-                I confirm these contacts agreed to receive WhatsApp messages
-                from us. Meta charges per delivered template message.
-              </label>
+              <p className="text-xs text-stone-600">
+                Only contacts marked “Opted in” receive this. Meta charges per
+                delivered template message.
+              </p>
               <p className="text-[11px] text-stone-500">
                 Meta bills these messages to the WhatsApp account&apos;s payment
                 method.{' '}
@@ -2920,7 +2910,6 @@ function BroadcastsPanel({
               <button
                 className={primaryButton}
                 disabled={
-                  !confirm ||
                   !template ||
                   (audienceMode === 'contacts' && !pickedIds.length) ||
                   !!sendingId ||
@@ -3416,13 +3405,35 @@ function SettingsPanel({
 function ContactsPanel({
   connectionId,
   refreshKey,
+  canManage,
   onAddContact,
+  onEditContact,
 }: {
   connectionId: string;
   refreshKey: number;
+  canManage: boolean;
   onAddContact: () => void;
+  onEditContact: (contact: Contact, resume?: boolean) => void;
 }) {
   const state = useWorkspaceRows('contacts', connectionId, refreshKey);
+  const [busyId, setBusyId] = useState('');
+  async function optOut(contact: Contact) {
+    setBusyId(contact.id);
+    try {
+      await fetch('/api/whatsapp/inbox', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'opt_out',
+          connectionId,
+          waId: contact.wa_id,
+        }),
+      });
+      await state.reload(true);
+    } finally {
+      setBusyId('');
+    }
+  }
   return (
     <div>
       <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
@@ -3431,8 +3442,9 @@ function ContactsPanel({
             WhatsApp contacts
           </h3>
           <p className="mt-1 text-sm text-stone-500">
-            Contacts are added when a person messages the connected business
-            number.
+            Customers who message you appear here automatically. Contacts with
+            “Opted in” can receive broadcasts; use Opt out if someone asks to
+            stop.
           </p>
         </div>
         <div className="flex flex-wrap gap-2 sm:justify-end">
@@ -3463,16 +3475,17 @@ function ContactsPanel({
         </p>
       )}
       <div className="mt-5 overflow-hidden rounded-2xl border border-stone-200">
-        <div className="grid grid-cols-[minmax(150px,1.2fr)_minmax(120px,.8fr)_minmax(160px,1.4fr)_110px] gap-3 bg-stone-50 px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-stone-500">
+        <div className="grid grid-cols-[minmax(140px,1.1fr)_minmax(120px,.8fr)_minmax(150px,1.3fr)_100px_150px] gap-3 bg-stone-50 px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-stone-500">
           <span>Name</span>
           <span>WhatsApp number</span>
           <span>Latest message</span>
           <span>Consent</span>
+          <span>Actions</span>
         </div>
         {state.rows.map((row) => (
           <div
             key={row.id}
-            className="grid grid-cols-[minmax(150px,1.2fr)_minmax(120px,.8fr)_minmax(160px,1.4fr)_110px] items-center gap-3 border-t border-stone-100 px-4 py-3 text-sm"
+            className="grid grid-cols-[minmax(140px,1.1fr)_minmax(120px,.8fr)_minmax(150px,1.3fr)_100px_150px] items-center gap-3 border-t border-stone-100 px-4 py-3 text-sm"
           >
             <div className="truncate font-semibold text-stone-900">
               {row.name || 'Unknown contact'}
@@ -3488,9 +3501,49 @@ function ContactsPanel({
                 {row.opted_out
                   ? 'Opted out'
                   : row.template_opted_in_at
-                    ? 'Opt-in recorded'
-                    : 'No opt-in'}
+                    ? 'Opted in'
+                    : 'Not opted in'}
               </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5">
+              {canManage && (
+                <>
+                  <button
+                    type="button"
+                    className="wa-row-action"
+                    onClick={() => onEditContact(row)}
+                  >
+                    Edit
+                  </button>
+                  {row.opted_out ? (
+                    <button
+                      type="button"
+                      className="wa-row-action"
+                      title="Only if the customer asked to receive messages again"
+                      onClick={() => onEditContact(row, true)}
+                    >
+                      Resume
+                    </button>
+                  ) : row.template_opted_in_at ? (
+                    <button
+                      type="button"
+                      className="wa-row-action wa-row-action-danger"
+                      disabled={busyId === row.id}
+                      onClick={() => void optOut(row)}
+                    >
+                      {busyId === row.id ? '…' : 'Opt out'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="wa-row-action"
+                      onClick={() => onEditContact(row)}
+                    >
+                      Opt in
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
         ))}
