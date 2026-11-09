@@ -304,6 +304,40 @@ const starterTemplates = [
   },
 ];
 
+const AVATAR_COLORS = [
+  '#00a884',
+  '#53bdeb',
+  '#ff7f50',
+  '#a78bfa',
+  '#f59e0b',
+  '#ef4444',
+  '#10b981',
+  '#6366f1',
+];
+function avatarColor(seed: string) {
+  let hash = 0;
+  for (const char of seed) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return AVATAR_COLORS[hash % AVATAR_COLORS.length]!;
+}
+
+/** WhatsApp list time: clock today, "Yesterday", weekday this week, else date. */
+function chatListTime(value?: string) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.valueOf())) return '';
+  const label = dayLabel(value);
+  if (label === 'Today') return clockTime(value);
+  if (label === 'Yesterday') return 'Yesterday';
+  const days = (Date.now() - date.valueOf()) / 86400000;
+  if (days < 7)
+    return new Intl.DateTimeFormat('en-IN', { weekday: 'long' }).format(date);
+  return new Intl.DateTimeFormat('en-IN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: '2-digit',
+  }).format(date);
+}
+
 function clockTime(value?: string) {
   if (!value) return '';
   const date = new Date(value);
@@ -501,7 +535,7 @@ export function WhatsAppHub({
   }
 
   return (
-    <section className="wa-shell">
+    <section className={`wa-shell wa-skin${tab === 'inbox' ? ' wa-skin-inbox' : ''}`}>
       <aside className="wa-sidebar" aria-label="ProPulse messaging navigation">
         <div className="wa-brand">
           <span className="wa-brand-mark">P</span>
@@ -516,9 +550,11 @@ export function WhatsAppHub({
             className={`wa-nav-item ${tab === 'overview' ? 'wa-nav-item-active' : ''}`}
             type="button"
             aria-current={tab === 'overview' ? 'page' : undefined}
+            title="Overview"
             onClick={() => setTab('overview')}
           >
-            <NavIcon kind="overview" /> Overview
+            <NavIcon kind="overview" />{' '}
+            <span className="wa-nav-text">Overview</span>
           </button>
           {tabs.map((item) => (
             <button
@@ -529,9 +565,11 @@ export function WhatsAppHub({
                 setNotice('');
               }}
               aria-current={tab === item.id ? 'page' : undefined}
+              title={item.label}
               className={`wa-nav-item ${tab === item.id ? 'wa-nav-item-active' : ''}`}
             >
-              <NavIcon kind={item.icon} /> {item.label}
+              <NavIcon kind={item.icon} />{' '}
+              <span className="wa-nav-text">{item.label}</span>
               {item.id === 'inbox' && (
                 <span className="wa-nav-count">{/* filled from inbox */}•</span>
               )}
@@ -632,7 +670,9 @@ export function WhatsAppHub({
             onOpen={() => setTab('calling')}
             onCallActivityChange={setCallInProgress}
           />
-          <div className="wa-section-heading">
+          <div
+            className={`wa-section-heading${tab === 'inbox' ? ' wa-hidden-on-inbox' : ''}`}
+          >
             <div>
               <span className="wa-eyebrow">PROPULSE MESSAGING</span>
               <h2>
@@ -858,6 +898,35 @@ export function WhatsAppHub({
 
 function NavIcon({ kind }: { kind: string }) {
   const paths: Record<string, ReactNode> = {
+    refresh: (
+      <>
+        <path d="M21 12a9 9 0 1 1-2.6-6.4" />
+        <path d="M21 3v6h-6" />
+      </>
+    ),
+    tag: (
+      <>
+        <path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z" />
+        <circle cx="7.5" cy="7.5" r="1.5" />
+      </>
+    ),
+    more: (
+      <>
+        <circle cx="12" cy="5" r="1.4" />
+        <circle cx="12" cy="12" r="1.4" />
+        <circle cx="12" cy="19" r="1.4" />
+      </>
+    ),
+    close: <path d="M18 6 6 18M6 6l12 12" />,
+    plus: <path d="M12 5v14M5 12h14" />,
+    smile: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+        <path d="M9 9.5h.01M15 9.5h.01" />
+      </>
+    ),
+    send: <path d="M4 12 20 4l-4 16-4-6-8-2z" />,
     overview: (
       <>
         <path d="m3 10 9-7 9 7" />
@@ -1038,6 +1107,7 @@ function InboxPanel({
   const labelState = useLabels(connectionId);
   const [labelFilter, setLabelFilter] = useState('');
   const [labelMenuOpen, setLabelMenuOpen] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [newLabel, setNewLabel] = useState('');
   const selectedRef = useRef('');
   const lastReceiptRef = useRef('');
@@ -1349,94 +1419,89 @@ function InboxPanel({
   );
 
   return (
-    <div className="wa-inbox-grid">
+    <div className={`wa-inbox-grid${showProfile ? ' wa-inbox-with-profile' : ''}`}>
       <aside className="wa-conversation-panel">
         <div className="wa-conversation-toolbar">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-bold text-stone-900">Conversations</h3>
-              <p className="mt-1 text-xs text-stone-500">
-                {state.total} contacts · {state.unread} unread
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
+          <div className="wa-chats-head">
+            <h3>Chats</h3>
+            <div className="flex items-center gap-1">
               {typeof Notification !== 'undefined' && !alertsEnabled && (
                 <button
                   type="button"
-                  className={softButton}
-                  title="Show desktop alerts for new WhatsApp messages"
+                  className="wa-round-icon"
+                  title="Turn on desktop alerts for new messages"
+                  aria-label="Turn on desktop alerts"
                   onClick={() =>
                     void Notification.requestPermission().then((result) =>
                       setAlertsEnabled(result === 'granted'),
                     )
                   }
                 >
-                  🔔 Alerts
+                  <NavIcon kind="bell" />
                 </button>
               )}
               <button
                 type="button"
-                className={softButton}
+                className="wa-round-icon"
+                title="Refresh"
+                aria-label="Refresh chats"
                 onClick={() => void state.reload()}
                 disabled={state.busy}
               >
-                Refresh
+                <NavIcon kind="refresh" />
               </button>
             </div>
           </div>
+          <label className="wa-search">
+            <NavIcon kind="search" />
+            <input
+              value={state.search}
+              onChange={(event) =>
+                setStateSearch(state.setSearch, event.target.value)
+              }
+              placeholder="Search or start a new chat"
+              aria-label="Search conversations"
+            />
+          </label>
           <div
-            className="wa-list-filters"
+            className="wa-chips"
             role="tablist"
             aria-label="Conversation filters"
           >
             <button
               type="button"
-              className={conversationFilter === 'all' ? 'wa-filter-active' : ''}
-              onClick={() => setConversationFilter('all')}
+              className={
+                conversationFilter === 'all' && !labelFilter
+                  ? 'wa-chip-active'
+                  : ''
+              }
+              onClick={() => {
+                setConversationFilter('all');
+                setLabelFilter('');
+              }}
             >
-              All <span>({state.total})</span>
+              All
             </button>
             <button
               type="button"
-              className={
-                conversationFilter === 'unread' ? 'wa-filter-active' : ''
-              }
+              className={conversationFilter === 'unread' ? 'wa-chip-active' : ''}
               onClick={() => setConversationFilter('unread')}
             >
-              Unread <span>({state.unread})</span>
+              Unread{state.unread ? ` ${state.unread}` : ''}
             </button>
-            <button
-              type="button"
-              disabled
-              title="Conversation assignments are not configured yet"
-            >
-              Assigned to me <span>(0)</span>
-            </button>
+            {labelState.labels.map((label) => (
+              <button
+                key={label.id}
+                type="button"
+                className={labelFilter === label.id ? 'wa-chip-active' : ''}
+                onClick={() =>
+                  setLabelFilter((value) => (value === label.id ? '' : label.id))
+                }
+              >
+                {label.name}
+              </button>
+            ))}
           </div>
-          <input
-            className={`${field} mt-3`}
-            value={state.search}
-            onChange={(event) =>
-              setStateSearch(state.setSearch, event.target.value)
-            }
-            placeholder="Search name or number"
-            aria-label="Search conversations"
-          />
-          {labelState.labels.length > 0 && (
-            <select
-              className={`${field} mt-2`}
-              value={labelFilter}
-              onChange={(event) => setLabelFilter(event.target.value)}
-              aria-label="Filter by label"
-            >
-              <option value="">All labels</option>
-              {labelState.labels.map((label) => (
-                <option key={label.id} value={label.id}>
-                  {label.name} ({labelState.counts[label.id] ?? 0})
-                </option>
-              ))}
-            </select>
-          )}
         </div>
         <div className="wa-conversation-list">
           {state.busy && (
@@ -1453,51 +1518,54 @@ function InboxPanel({
               </p>
             </div>
           )}
-          {visibleRows.map((row) => (
-            <button
-              key={row.id}
-              type="button"
-              onClick={() => {
-                setSelected(row.wa_id);
-                if (canManage) void markRead(row.wa_id);
-              }}
-              className={`block w-full border-b border-stone-100 px-4 py-3 text-left transition ${selected === row.wa_id ? 'bg-white shadow-[inset_3px_0_0_#88352B]' : 'hover:bg-white'}`}
-            >
-              <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-sm font-semibold text-stone-900">
-                  {row.name || `+${row.wa_id}`}
+          {visibleRows.map((row) => {
+            const rowLabels = (labelState.assignments[row.id] ?? [])
+              .map((id) => labelById.get(id))
+              .filter((label): label is Label => !!label);
+            return (
+              <button
+                key={row.id}
+                type="button"
+                onClick={() => {
+                  setSelected(row.wa_id);
+                  if (canManage) void markRead(row.wa_id);
+                }}
+                className={`wa-chat-row${selected === row.wa_id ? ' wa-chat-row-active' : ''}`}
+              >
+                <span
+                  className="wa-avatar"
+                  style={{ background: avatarColor(row.wa_id) }}
+                >
+                  {(row.name || row.wa_id).slice(0, 1).toUpperCase()}
                 </span>
-                <span className="shrink-0 text-[10px] text-stone-400">
-                  {readableDate(row.last_message_at)}
-                </span>
-              </div>
-              <p className="mt-1 truncate text-xs text-stone-500">
-                {row.last_direction === 'outbound' ? 'You: ' : ''}
-                {whatsappMessagePreview(row.last_message) || 'No message text'}
-              </p>
-              <div className="mt-2 flex items-center gap-2">
-                {row.unread && (
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                )}
-                <span className="text-[10px] text-stone-400">+{row.wa_id}</span>
-                {row.opted_out && (
-                  <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-semibold text-red-700">
-                    Opted out
+                <span className="wa-chat-body">
+                  <span className="wa-chat-top">
+                    <strong>{row.name || `+${row.wa_id}`}</strong>
+                    <time className={row.unread ? 'wa-time-unread' : ''}>
+                      {chatListTime(row.last_message_at)}
+                    </time>
                   </span>
-                )}
-                {(labelState.assignments[row.id] ?? [])
-                  .map((id) => labelById.get(id))
-                  .filter((label): label is Label => !!label)
-                  .slice(0, 2)
-                  .map((label) => (
-                    <LabelChip key={label.id} label={label} />
-                  ))}
-                {!(labelState.assignments[row.id] ?? []).length && (
-                  <span className="wa-contact-label">WhatsApp</span>
-                )}
-              </div>
-            </button>
-          ))}
+                  <span className="wa-chat-bottom">
+                    <span className="wa-chat-preview">
+                      {row.last_direction === 'outbound' && (
+                        <StatusTicks status={row.last_status || 'sent'} />
+                      )}{' '}
+                      {whatsappMessagePreview(row.last_message) || 'No messages yet'}
+                    </span>
+                    {row.opted_out && (
+                      <span className="wa-mini-tag wa-mini-tag-red">
+                        Opted out
+                      </span>
+                    )}
+                    {rowLabels.slice(0, 1).map((label) => (
+                      <LabelChip key={label.id} label={label} />
+                    ))}
+                    {row.unread && <span className="wa-unread-badge">1</span>}
+                  </span>
+                </span>
+              </button>
+            );
+          })}
         </div>
       </aside>
       <div className="wa-thread-column">
@@ -1516,58 +1584,53 @@ function InboxPanel({
         ) : (
           <>
             <header className="wa-thread-header">
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="wa-contact-avatar">
+              <button
+                type="button"
+                className="wa-thread-who"
+                onClick={() => setShowProfile((open) => !open)}
+                title="Contact info"
+              >
+                <span
+                  className="wa-avatar"
+                  style={{ background: avatarColor(contact.wa_id) }}
+                >
                   {(contact.name || contact.wa_id).slice(0, 1).toUpperCase()}
                 </span>
-                <div className="min-w-0">
-                  <h3 className="truncate font-bold text-stone-900">
+                <span className="min-w-0 text-left">
+                  <strong className="block truncate">
                     {contact.name || `+${contact.wa_id}`}
-                  </h3>
-                  {(labelState.assignments[contact.id] ?? []).length > 0 && (
-                    <div className="mt-1 flex flex-wrap gap-1">
-                      {(labelState.assignments[contact.id] ?? [])
-                        .map((id) => labelById.get(id))
-                        .filter((label): label is Label => !!label)
-                        .map((label) => (
-                          <LabelChip key={label.id} label={label} />
-                        ))}
-                    </div>
-                  )}
-                  <p className="mt-0.5 text-xs text-stone-500">
-                    Last activity {readableDate(contact.last_message_at)}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
+                  </strong>
+                  <small className="block truncate">
+                    {(labelState.assignments[contact.id] ?? [])
+                      .map((id) => labelById.get(id)?.name)
+                      .filter(Boolean)
+                      .join(' · ') ||
+                      `+${contact.wa_id} · click for contact info`}
+                  </small>
+                </span>
+              </button>
+              <div className="flex items-center gap-1">
                 {canManage && (
                   <button
                     type="button"
-                    className="rounded-lg bg-[#88352B] px-3 py-2 text-xs font-semibold text-white"
+                    className="wa-round-icon"
                     onClick={() => onCallContact(contact.wa_id)}
                     aria-label="Call this WhatsApp contact"
+                    title="Voice call"
                   >
-                    Call
+                    <NavIcon kind="phone" />
                   </button>
                 )}
-                <button
-                  type="button"
-                  className="wa-icon-button"
-                  aria-label="Edit contact details"
-                  onClick={() => onEditContact(contact)}
-                >
-                  <NavIcon kind="people" />
-                </button>
                 <div className="relative">
                   <button
                     type="button"
-                    className="wa-icon-button"
+                    className="wa-round-icon"
                     aria-label="Labels for this chat"
                     aria-expanded={labelMenuOpen}
                     title="Labels"
                     onClick={() => setLabelMenuOpen((open) => !open)}
                   >
-                    🏷
+                    <NavIcon kind="tag" />
                   </button>
                   {labelMenuOpen && (
                     <div className="wa-label-menu" role="menu">
@@ -1640,16 +1703,15 @@ function InboxPanel({
                     </div>
                   )}
                 </div>
-                {canManage && !contact.opted_out && (
-                  <button
-                    className={softButton}
-                    type="button"
-                    disabled={busy}
-                    onClick={() => void changeOptOut()}
-                  >
-                    Opt out
-                  </button>
-                )}
+                <button
+                  type="button"
+                  className="wa-round-icon"
+                  aria-label="Contact info"
+                  title="Contact info"
+                  onClick={() => setShowProfile((open) => !open)}
+                >
+                  <NavIcon kind="more" />
+                </button>
               </div>
             </header>
             <div className="wa-message-history" ref={historyRef}>
@@ -1799,7 +1861,7 @@ function InboxPanel({
                         disabled={busy}
                         onClick={() => setAttachMenu((open) => !open)}
                       >
-                        ＋
+                        <NavIcon kind="plus" />
                       </button>
                       {attachMenu && (
                         <div className="wa-attach-menu" role="menu">
@@ -1837,7 +1899,7 @@ function InboxPanel({
                       className="wa-composer-template"
                       onClick={() => onNavigate('templates')}
                     >
-                      ▤ Template⌄
+                      Templates
                     </button>
                     <label className="wa-composer-input">
                       <span className="sr-only">Write a WhatsApp reply</span>
@@ -1868,14 +1930,14 @@ function InboxPanel({
                       aria-label="Insert smile emoji"
                       onClick={() => setBody((value) => `${value}🙂`)}
                     >
-                      ☺
+                      <NavIcon kind="smile" />
                     </button>
                     <button
                       className="wa-send-button"
                       disabled={!body.trim() && !attachment}
                       aria-label="Send message"
                     >
-                      ➤
+                      <NavIcon kind="send" />
                     </button>
                   </div>
                   <input
@@ -1961,12 +2023,27 @@ function InboxPanel({
           </p>
         )}
       </div>
-      <ContactProfile
-        contact={contact}
-        onEdit={onEditContact}
-        onOptOut={() => void changeOptOut()}
-        onNavigate={onNavigate}
-      />
+      {showProfile && (
+        <div className="wa-profile-drawer">
+          <div className="wa-profile-drawer-head">
+            <button
+              type="button"
+              className="wa-round-icon"
+              aria-label="Close contact info"
+              onClick={() => setShowProfile(false)}
+            >
+              <NavIcon kind="close" />
+            </button>
+            <strong>Contact info</strong>
+          </div>
+          <ContactProfile
+            contact={contact}
+            onEdit={onEditContact}
+            onOptOut={() => void changeOptOut()}
+            onNavigate={onNavigate}
+          />
+        </div>
+      )}
     </div>
   );
 }
