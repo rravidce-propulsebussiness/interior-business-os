@@ -48,7 +48,7 @@ language sql security definer set search_path = '' as $$
           )
         )
       )
-    order by x.id
+    order by x.retry_count desc, x.id
     limit case
       when (select b.status = 'verifying' from public.whatsapp_broadcasts b
             where b.organization_id = p_organization_id and b.id = p_broadcast_id)
