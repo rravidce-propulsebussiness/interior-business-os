@@ -168,7 +168,13 @@ export async function POST(request: Request) {
           p_connection_id: connection.id,
           p_to: mediaRequest.to.replace(/^\\+/, ''),
           p_provider_id: messageId,
-          p_body: `[[WA_MEDIA:${mediaRequest.mediaId}:${mediaRequest.mediaType}]]${mediaRequest.caption ? `\n${mediaRequest.caption}` : ''}`,
+          // Documents keep their file name so the chat shows a proper card.
+          p_body: `[[WA_MEDIA:${mediaRequest.mediaId}:${mediaRequest.mediaType}]]${
+            mediaRequest.caption ||
+            (mediaRequest.mediaType === 'document' && mediaRequest.filename)
+              ? `\n${mediaRequest.caption || mediaRequest.filename}`
+              : ''
+          }`,
           p_type: mediaRequest.mediaType,
         },
       );

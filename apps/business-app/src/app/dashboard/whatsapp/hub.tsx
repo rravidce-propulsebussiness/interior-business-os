@@ -1,6 +1,13 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { ReactNode } from 'react';
 import './whatsapp-inbox.css';
 import { WhatsAppCalling } from './calling';
@@ -10,6 +17,7 @@ import {
   whatsappPlaceholderLabel,
 } from '@/lib/whatsapp-message-label';
 import { createBrowserDatabase } from '@business-os/database/browser';
+import { parseContactSheet } from '@/lib/whatsapp-contact-sheet';
 
 type Connection = { id: string; name: string; phone: string; status: string };
 type Template = {
@@ -995,10 +1003,22 @@ function InboxPanel({
   const state = useWorkspaceRows('inbox', connectionId, refreshKey);
   const [selected, setSelected] = useState('');
   const [thread, setThread] = useState<Message[]>([]);
-  const messageEndRef = useRef<HTMLDivElement | null>(null);
+  const historyRef = useRef<HTMLDivElement | null>(null);
+  const photoInput = useRef<HTMLInputElement>(null);
+  const [attachMenu, setAttachMenu] = useState(false);
   const [contact, setContact] = useState<Contact | null>(null);
   const [body, setBody] = useState('');
   const [attachment, setAttachment] = useState<File | null>(null);
+  const attachmentUrl = useMemo(
+    () => (attachment ? URL.createObjectURL(attachment) : ''),
+    [attachment],
+  );
+  useEffect(
+    () => () => {
+      if (attachmentUrl) URL.revokeObjectURL(attachmentUrl);
+    },
+    [attachmentUrl],
+  );
   const fileInput = useRef<HTMLInputElement>(null);
   const [conversationFilter, setConversationFilter] = useState<
     'all' | 'unread'
@@ -1088,7 +1108,9 @@ function InboxPanel({
       );
   }, [loadThread, selected, state.rows]);
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    // Scroll only the chat box, never the whole page (WhatsApp behaviour).
+    const box = historyRef.current;
+    if (box) box.scrollTo({ top: box.scrollHeight, behavior: 'smooth' });
   }, [thread, pending]);
 
   useEffect(() => {
@@ -1618,7 +1640,7 @@ function InboxPanel({
                 )}
               </div>
             </header>
-            <div className="wa-message-history">
+            <div className="wa-message-history" ref={historyRef}>
               {thread.length === 0 &&
                 !pending.some((item) => item.waId === contact.wa_id) && (
                   <p className="rounded-xl bg-white p-4 text-sm text-stone-500">
@@ -1681,7 +1703,6 @@ function InboxPanel({
                   </Fragment>
                 );
               })}
-              <div ref={messageEndRef} />
             </div>
             <form onSubmit={sendReply} className="wa-composer">
               {!canManage ? (
@@ -1735,16 +1756,49 @@ function InboxPanel({
                     );
                   })()}
                   <div className="wa-composer-row">
-                    <button
-                      type="button"
-                      className="wa-composer-attachment"
-                      aria-label="Attach image, video, audio or document"
-                      title="Attach a file"
-                      disabled={busy}
-                      onClick={() => fileInput.current?.click()}
-                    >
-                      ＋
-                    </button>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        className="wa-composer-attachment"
+                        aria-label="Attach a photo, video or document"
+                        aria-expanded={attachMenu}
+                        title="Attach"
+                        disabled={busy}
+                        onClick={() => setAttachMenu((open) => !open)}
+                      >
+                        ＋
+                      </button>
+                      {attachMenu && (
+                        <div className="wa-attach-menu" role="menu">
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setAttachMenu(false);
+                              photoInput.current?.click();
+                            }}
+                          >
+                            <span className="wa-attach-icon wa-attach-photo">
+                              🖼
+                            </span>
+                            Photos &amp; videos
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setAttachMenu(false);
+                              fileInput.current?.click();
+                            }}
+                          >
+                            <span className="wa-attach-icon wa-attach-doc">
+                              📄
+                            </span>
+                            Document
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     <button
                       type="button"
                       className="wa-composer-template"
@@ -1795,24 +1849,60 @@ function InboxPanel({
                     ref={fileInput}
                     type="file"
                     hidden
-                    accept="image/jpeg,image/png,image/webp,video/mp4,video/3gpp,audio/aac,audio/mp4,audio/mpeg,audio/amr,audio/ogg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/csv"
+                    accept="audio/aac,audio/mp4,audio/mpeg,audio/amr,audio/ogg,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation,text/plain,text/csv"
+                    onChange={(event) => {
+                      setAttachment(event.currentTarget.files?.[0] ?? null);
+                      event.currentTarget.value = '';
+                    }}
+                  />
+                  <input
+                    ref={photoInput}
+                    type="file"
+                    hidden
+                    accept="image/jpeg,image/png,image/webp,video/mp4,video/3gpp"
                     onChange={(event) => {
                       setAttachment(event.currentTarget.files?.[0] ?? null);
                       event.currentTarget.value = '';
                     }}
                   />
                   {attachment && (
-                    <div className="mt-2 flex items-center justify-between gap-3 rounded-xl bg-stone-50 px-3 py-2 text-xs text-stone-700">
-                      <span className="min-w-0 truncate">
-                        {attachment.name}
-                      </span>
-                      <button
-                        type="button"
-                        className="font-semibold text-[#88352B]"
-                        onClick={() => setAttachment(null)}
-                      >
-                        Remove
-                      </button>
+                    <div className="wa-attach-preview">
+                      {attachment.type.startsWith('image/') ? (
+                        <img src={attachmentUrl} alt={attachment.name} />
+                      ) : attachment.type.startsWith('video/') ? (
+                        <video src={attachmentUrl} controls muted />
+                      ) : attachment.type.startsWith('audio/') ? (
+                        <audio src={attachmentUrl} controls />
+                      ) : (
+                        <div className="wa-doc-card">
+                          <span className="wa-doc-icon">
+                            {(attachment.name.split('.').pop() ?? 'file')
+                              .slice(0, 4)
+                              .toUpperCase()}
+                          </span>
+                          <span className="min-w-0">
+                            <strong className="block truncate">
+                              {attachment.name}
+                            </strong>
+                            <small>
+                              {Math.max(1, Math.round(attachment.size / 1024))}{' '}
+                              KB
+                            </small>
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="min-w-0 truncate text-xs text-stone-500">
+                          {attachment.name} · add a caption below, then send
+                        </span>
+                        <button
+                          type="button"
+                          className="text-xs font-semibold text-[#88352B]"
+                          onClick={() => setAttachment(null)}
+                        >
+                          ✕ Remove
+                        </button>
+                      </div>
                     </div>
                   )}
                   <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
@@ -1880,12 +1970,14 @@ function MessageBody({
   return (
     <div className="space-y-2">
       {kind === 'image' ? (
-        <img
-          className="max-h-80 max-w-full rounded-lg object-contain"
-          src={source}
-          alt={caption || 'WhatsApp image'}
-          loading="lazy"
-        />
+        <a href={source} target="_blank" rel="noreferrer">
+          <img
+            className="max-h-80 max-w-full rounded-lg object-contain"
+            src={source}
+            alt={caption || 'WhatsApp image'}
+            loading="lazy"
+          />
+        </a>
       ) : kind === 'video' ? (
         <video
           className="max-h-80 max-w-full rounded-lg"
@@ -1902,15 +1994,25 @@ function MessageBody({
         />
       ) : (
         <a
-          className="inline-flex rounded-lg bg-white/70 px-3 py-2 text-sm font-semibold underline"
+          className="wa-doc-card"
           href={source}
           target="_blank"
           rel="noreferrer"
         >
-          Open attachment
+          <span className="wa-doc-icon">
+            {(/\.([a-z0-9]{1,4})$/i.exec(caption.split('\n')[0] ?? '')?.[1] ??
+              'DOC'
+            ).toUpperCase()}
+          </span>
+          <span className="min-w-0">
+            <strong className="block truncate">
+              {caption.split('\n')[0] || 'Document'}
+            </strong>
+            <small>Tap to open</small>
+          </span>
         </a>
       )}
-      {caption && (
+      {caption && kind !== 'document' && (
         <p className="whitespace-pre-wrap break-words text-sm leading-6">
           {caption}
         </p>
@@ -2326,6 +2428,17 @@ function BroadcastsPanel({
           className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffdfa] p-5"
         >
           <h4 className="text-base font-bold text-stone-900">New broadcast</h4>
+          {templates.some((item) => item.status !== 'APPROVED') && (
+            <p className="rounded-xl bg-stone-50 p-3 text-xs text-stone-600">
+              Templates waiting for Meta:{' '}
+              {templates
+                .filter((item) => item.status !== 'APPROVED')
+                .map((item) => `${item.name} (${item.status.toLowerCase()})`)
+                .join(', ')}
+              . They can be broadcast once Meta approves them, usually within
+              minutes to 24 hours.
+            </p>
+          )}
           {!approved.length ? (
             <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
               No approved templates yet. Broadcasts must use a Meta-approved
@@ -2364,13 +2477,17 @@ function BroadcastsPanel({
                     }}
                   >
                     <option value="">Choose a template</option>
-                    {approved.map((item) => (
+                    {templates.map((item) => (
                       <option
                         key={`${item.name}|${item.language}`}
                         value={`${item.name}|${item.language}`}
+                        disabled={item.status !== 'APPROVED'}
                       >
                         {item.name} · {item.language} ·{' '}
                         {(item.category ?? '').toLowerCase()}
+                        {item.status !== 'APPROVED'
+                          ? ` · ${item.status.toLowerCase()} (not usable yet)`
+                          : ''}
                       </option>
                     ))}
                   </select>
@@ -2413,6 +2530,13 @@ function BroadcastsPanel({
                   )}
                 </div>
               )}
+              <SheetImport
+                connectionId={connectionId}
+                onImported={(labelId) => {
+                  void labelState.reload();
+                  setLabelIds([labelId]);
+                }}
+              />
               <div>
                 <p className="text-xs font-semibold text-stone-600">
                   Audience
@@ -2625,6 +2749,172 @@ function BroadcastsPanel({
         </div>
       )}
     </section>
+  );
+}
+
+function SheetImport({
+  connectionId,
+  onImported,
+}: {
+  connectionId: string;
+  onImported: (labelId: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [rows, setRows] = useState<Array<{ phone: string; name: string }>>([]);
+  const [invalid, setInvalid] = useState(0);
+  const [labelName, setLabelName] = useState(
+    () =>
+      `Upload ${new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short' }).format(new Date())}`,
+  );
+  const [source, setSource] = useState('');
+  const [agree, setAgree] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [notice, setNotice] = useState('');
+
+  async function readFile(file: File) {
+    if (!/\.(csv|txt)$/i.test(file.name)) {
+      setNotice(
+        'Save the sheet as CSV first: Excel → File → Save As → CSV, or Google Sheets → File → Download → CSV.',
+      );
+      return;
+    }
+    const parsed = parseContactSheet(await file.text());
+    setRows(parsed.contacts.slice(0, 2000));
+    setInvalid(parsed.invalid.length);
+    setNotice(
+      `${parsed.contacts.length} numbers found${parsed.invalid.length ? `, ${parsed.invalid.length} rows skipped (no valid number)` : ''}.`,
+    );
+  }
+
+  async function upload() {
+    setBusy(true);
+    try {
+      const response = await fetch('/api/whatsapp/broadcasts/import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          connectionId,
+          consentSource: source,
+          labelName,
+          rows,
+        }),
+      });
+      const result = (await readApiResponse(response)) as {
+        imported?: number;
+        skippedOptedOut?: number;
+        failed?: number;
+        labelId?: string;
+        message?: string;
+      };
+      if (!response.ok || !result.labelId)
+        throw new Error(result.message ?? 'Upload failed.');
+      setNotice(
+        `${result.imported} contacts added with label “${labelName}” and selected as the audience.${result.skippedOptedOut ? ` ${result.skippedOptedOut} skipped because they opted out.` : ''}${result.failed ? ` ${result.failed} could not be saved.` : ''}`,
+      );
+      setRows([]);
+      setAgree(false);
+      onImported(result.labelId);
+    } catch (error) {
+      setNotice(friendlyError(error, 'Upload failed.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (!open)
+    return (
+      <button
+        type="button"
+        className={softButton}
+        onClick={() => setOpen(true)}
+      >
+        ⬆ Upload contacts from a sheet (CSV)
+      </button>
+    );
+  return (
+    <div className="space-y-3 rounded-xl border border-dashed border-stone-300 p-3">
+      <div className="flex items-start justify-between gap-2">
+        <p className="text-xs leading-5 text-stone-600">
+          Columns: <strong>phone</strong> (required) and <strong>name</strong>.
+          10-digit Indian mobiles get +91 automatically. Up to 2000 rows.
+        </p>
+        <button
+          type="button"
+          className="text-xs text-stone-500"
+          onClick={() => setOpen(false)}
+        >
+          Close
+        </button>
+      </div>
+      <input
+        type="file"
+        accept=".csv,text/csv,.txt"
+        className="text-xs"
+        onChange={(event) => {
+          const file = event.currentTarget.files?.[0];
+          if (file) void readFile(file);
+          event.currentTarget.value = '';
+        }}
+      />
+      {rows.length > 0 && (
+        <>
+          <div className="max-h-32 overflow-auto rounded-lg bg-white p-2 text-xs text-stone-600">
+            {rows.slice(0, 8).map((row) => (
+              <p key={row.phone}>
+                +{row.phone} {row.name && `· ${row.name}`}
+              </p>
+            ))}
+            {rows.length > 8 && <p>… and {rows.length - 8} more</p>}
+          </div>
+          <div className="grid gap-2 md:grid-cols-2">
+            <label className="block space-y-1 text-xs font-semibold text-stone-600">
+              Label for these contacts
+              <input
+                className={field}
+                maxLength={40}
+                value={labelName}
+                onChange={(e) => setLabelName(e.target.value)}
+              />
+            </label>
+            <label className="block space-y-1 text-xs font-semibold text-stone-600">
+              Where did they agree to WhatsApp messages?
+              <input
+                className={field}
+                maxLength={200}
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+                placeholder="Website enquiry form / site visit form"
+              />
+            </label>
+          </div>
+          <label className="flex items-start gap-2 text-xs text-stone-700">
+            <input
+              type="checkbox"
+              className="mt-0.5"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+            />
+            Everyone on this sheet agreed to receive WhatsApp messages from us.
+            People who previously replied STOP are skipped automatically.
+          </label>
+          <button
+            type="button"
+            className={primaryButton}
+            disabled={
+              busy || !agree || source.trim().length < 3 || !labelName.trim()
+            }
+            onClick={() => void upload()}
+          >
+            {busy ? 'Adding contacts…' : `Add ${rows.length} contacts`}
+          </button>
+        </>
+      )}
+      {(notice || invalid > 0) && (
+        <p role="status" className="text-xs text-stone-700">
+          {notice}
+        </p>
+      )}
+    </div>
   );
 }
 
