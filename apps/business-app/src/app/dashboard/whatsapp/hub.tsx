@@ -633,7 +633,11 @@ export function WhatsAppHub({
           <div className="wa-topbar-title">
             <span className="wa-whatsapp-mark">◉</span>
             <div>
-              <h1>WhatsApp Inbox</h1>
+              <h1>
+                {tab === 'inbox'
+                  ? 'WhatsApp Inbox'
+                  : `WhatsApp · ${tab === 'overview' ? 'Overview' : (tabs.find((item) => item.id === tab)?.label ?? '')}`}
+              </h1>
               <p>Team conversations and customer care</p>
             </div>
           </div>
