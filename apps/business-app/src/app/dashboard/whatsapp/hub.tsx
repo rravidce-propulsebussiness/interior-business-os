@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import './whatsapp-inbox.css';
 import { WhatsAppCalling } from './calling';
@@ -42,6 +42,9 @@ type Message = {
   status: string;
   error_code: string;
   occurred_at: string;
+  /** Optimistic outbound message shown before Meta accepts it. */
+  local?: boolean;
+  waId?: string;
 };
 type Rule = {
   id: string;
@@ -115,6 +118,88 @@ const starterTemplates = [
     note: 'A neutral follow-up; use only when the recipient expects it.',
   },
 ];
+
+function clockTime(value?: string) {
+  if (!value) return '';
+  const date = new Date(value);
+  return Number.isNaN(date.valueOf())
+    ? ''
+    : new Intl.DateTimeFormat('en-IN', {
+        hour: 'numeric',
+        minute: '2-digit',
+      }).format(date);
+}
+
+function dayLabel(value?: string) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.valueOf())) return '';
+  const start = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate()).valueOf();
+  const days = Math.round((start(new Date()) - start(date)) / 86400000);
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  return new Intl.DateTimeFormat('en-IN', {
+    day: 'numeric',
+    month: 'long',
+    year: days > 300 ? 'numeric' : undefined,
+  }).format(date);
+}
+
+/** WhatsApp-style delivery ticks for outbound messages. */
+function StatusTicks({ status }: { status: string }) {
+  if (status === 'sending')
+    return (
+      <span aria-label="Sending" title="Sending">
+        🕓
+      </span>
+    );
+  if (status === 'failed')
+    return (
+      <span aria-label="Not sent" title="Not sent">
+        ⚠
+      </span>
+    );
+  const label =
+    status === 'read' ? 'Read' : status === 'delivered' ? 'Delivered' : 'Sent';
+  return (
+    <span
+      aria-label={label}
+      title={label}
+      className={`wa-ticks${status === 'read' ? ' wa-ticks-read' : ''}`}
+    >
+      {status === 'read' || status === 'delivered' ? '✓✓' : '✓'}
+    </span>
+  );
+}
+
+let incomingAudio: AudioContext | null = null;
+/** Short two-note chime; no audio file needed. */
+function playIncomingTone() {
+  try {
+    const AudioCtor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!AudioCtor) return;
+    incomingAudio ??= new AudioCtor();
+    const ctx = incomingAudio;
+    [880, 1320].forEach((frequency, index) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const at = ctx.currentTime + index * 0.12;
+      osc.frequency.value = frequency;
+      gain.gain.setValueAtTime(0.0001, at);
+      gain.gain.exponentialRampToValueAtTime(0.18, at + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, at + 0.18);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(at);
+      osc.stop(at + 0.2);
+    });
+  } catch {
+    // Audio can be blocked until the user interacts with the page.
+  }
+}
 
 function readableDate(value?: string) {
   if (!value) return '—';
@@ -748,6 +833,31 @@ function InboxPanel({
   >('all');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
+  const [pending, setPending] = useState<Message[]>([]);
+  const selectedRef = useRef('');
+  const lastReceiptRef = useRef('');
+  const lastTypingRef = useRef(0);
+  const newestInboundRef = useRef<string | null>(null);
+  const [alertsEnabled, setAlertsEnabled] = useState(
+    () =>
+      typeof Notification !== 'undefined' &&
+      Notification.permission === 'granted',
+  );
+  useEffect(() => {
+    selectedRef.current = selected;
+  }, [selected]);
+
+  const sendReceipt = useCallback(
+    (waId: string, typing = false) => {
+      if (!canManage || !waId) return;
+      void fetch('/api/whatsapp/receipts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ connectionId, waId, typing }),
+      }).catch(() => undefined);
+    },
+    [canManage, connectionId],
+  );
 
   const loadThread = useCallback(
     async (waId: string) => {
@@ -767,10 +877,25 @@ function InboxPanel({
       };
       if (!response.ok)
         throw new Error(data.message ?? 'Could not open conversation.');
-      setThread(data.rows ?? []);
+      // Ignore a late response for a chat the user has already left.
+      if (selectedRef.current && selectedRef.current !== waId) return;
+      const rows = data.rows ?? [];
+      setThread(rows);
       setContact(data.contact ?? null);
+      // Blue ticks for the customer once their newest message is on screen.
+      const newestInbound = [...rows]
+        .reverse()
+        .find((row) => row.direction === 'inbound');
+      if (
+        newestInbound &&
+        document.visibilityState === 'visible' &&
+        lastReceiptRef.current !== newestInbound.provider_id
+      ) {
+        lastReceiptRef.current = newestInbound.provider_id;
+        sendReceipt(waId);
+      }
     },
-    [connectionId],
+    [connectionId, sendReceipt],
   );
 
   useEffect(() => {
@@ -787,7 +912,7 @@ function InboxPanel({
   }, [loadThread, selected, state.rows]);
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  }, [thread]);
+  }, [thread, pending]);
 
   useEffect(() => {
     if (!connectionId) return;
@@ -830,6 +955,52 @@ function InboxPanel({
     };
   }, [connectionId, loadThread, selected, state.reload]);
 
+  // Safety net if a realtime event is missed (network change, sleep, proxy).
+  useEffect(() => {
+    if (!connectionId) return;
+    const timer = setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      void state.reload(true);
+      if (selectedRef.current)
+        void loadThread(selectedRef.current).catch(() => undefined);
+    }, 15000);
+    return () => clearInterval(timer);
+  }, [connectionId, loadThread, state.reload]);
+
+  // New-message alert: sound, tab title and optional desktop notification.
+  useEffect(() => {
+    const newest = state.rows
+      .filter((row) => row.last_direction === 'inbound')
+      .map((row) => row.last_message_at)
+      .sort()
+      .at(-1);
+    if (!newest) return;
+    const previous = newestInboundRef.current;
+    newestInboundRef.current = newest;
+    if (!previous || newest <= previous) return;
+    const row = state.rows.find((item) => item.last_message_at === newest);
+    playIncomingTone();
+    if (
+      document.visibilityState !== 'visible' &&
+      typeof Notification !== 'undefined' &&
+      Notification.permission === 'granted' &&
+      row
+    ) {
+      new Notification(row.name || `+${row.wa_id}`, {
+        body:
+          whatsappMessagePreview(row.last_message) || 'New WhatsApp message',
+        tag: `wa-${row.wa_id}`,
+      });
+    }
+  }, [state.rows]);
+  useEffect(() => {
+    const base = document.title.replace(/^\(\d+\) /, '');
+    document.title = state.unread ? `(${state.unread}) ${base}` : base;
+    return () => {
+      document.title = document.title.replace(/^\(\d+\) /, '');
+    };
+  }, [state.unread]);
+
   async function markRead(waId: string) {
     await fetch('/api/whatsapp/inbox', {
       method: 'POST',
@@ -839,24 +1010,52 @@ function InboxPanel({
     await state.reload();
   }
 
+  function onComposerChange(value: string) {
+    setBody(value);
+    if (!contact || !value.trim()) return;
+    if (Date.now() - lastTypingRef.current < 20000) return;
+    lastTypingRef.current = Date.now();
+    sendReceipt(contact.wa_id, true);
+  }
+
   async function sendReply(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!contact || (!body.trim() && !attachment)) return;
-    setBusy(true);
-    setNotice(
-      attachment ? 'Uploading and sending attachment…' : 'Sending reply…',
-    );
+    // Show the message at once, like WhatsApp, and send in the background.
+    const text = body.trim();
+    const file = attachment;
+    const waId = contact.wa_id;
+    const tempId = `local-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setPending((list) => [
+      ...list,
+      {
+        id: tempId,
+        provider_id: '',
+        direction: 'outbound',
+        type: file ? 'document' : 'text',
+        body: file ? `📎 ${file.name}${text ? `\n${text}` : ''}` : text,
+        status: 'sending',
+        error_code: '',
+        occurred_at: new Date().toISOString(),
+        local: true,
+        waId,
+      },
+    ]);
+    setBody('');
+    setAttachment(null);
+    setNotice('');
+    lastTypingRef.current = 0;
     try {
       let payload: Record<string, unknown> = {
         messageType: 'text',
         connectionId,
-        to: `+${contact.wa_id}`,
-        body: body.trim(),
+        to: `+${waId}`,
+        body: text,
       };
-      if (attachment) {
+      if (file) {
         const form = new FormData();
         form.append('connectionId', connectionId);
-        form.append('file', attachment);
+        form.append('file', file);
         const uploadResponse = await fetch('/api/whatsapp/media', {
           method: 'POST',
           body: form,
@@ -872,11 +1071,11 @@ function InboxPanel({
         payload = {
           messageType: 'media',
           connectionId,
-          to: `+${contact.wa_id}`,
+          to: `+${waId}`,
           mediaId: uploaded.mediaId,
           mediaType: uploaded.mediaType,
           filename: uploaded.fileName,
-          caption: body.trim(),
+          caption: text,
         };
       }
       const response = await fetch('/api/whatsapp/messages', {
@@ -887,15 +1086,18 @@ function InboxPanel({
       const result = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(result.message ?? 'Reply could not be sent.');
-      setBody('');
-      setAttachment(null);
-      setNotice('Reply sent.');
-      await loadThread(contact.wa_id);
-      await state.reload();
+      await loadThread(waId).catch(() => undefined);
+      setPending((list) => list.filter((item) => item.id !== tempId));
+      void state.reload(true);
     } catch (error) {
-      setNotice(friendlyError(error, 'Reply could not be sent.'));
-    } finally {
-      setBusy(false);
+      const reason = friendlyError(error, 'Reply could not be sent.');
+      setPending((list) =>
+        list.map((item) =>
+          item.id === tempId
+            ? { ...item, status: 'failed', error_code: reason }
+            : item,
+        ),
+      );
     }
   }
 
@@ -942,14 +1144,30 @@ function InboxPanel({
                 {state.total} contacts · {state.unread} unread
               </p>
             </div>
-            <button
-              type="button"
-              className={softButton}
-              onClick={() => void state.reload()}
-              disabled={state.busy}
-            >
-              Refresh
-            </button>
+            <div className="flex items-center gap-2">
+              {typeof Notification !== 'undefined' && !alertsEnabled && (
+                <button
+                  type="button"
+                  className={softButton}
+                  title="Show desktop alerts for new WhatsApp messages"
+                  onClick={() =>
+                    void Notification.requestPermission().then((result) =>
+                      setAlertsEnabled(result === 'granted'),
+                    )
+                  }
+                >
+                  🔔 Alerts
+                </button>
+              )}
+              <button
+                type="button"
+                className={softButton}
+                onClick={() => void state.reload()}
+                disabled={state.busy}
+              >
+                Refresh
+              </button>
+            </div>
           </div>
           <div
             className="wa-list-filters"
@@ -1111,31 +1329,68 @@ function InboxPanel({
               </div>
             </header>
             <div className="wa-message-history">
-              {thread.length === 0 && (
-                <p className="rounded-xl bg-white p-4 text-sm text-stone-500">
-                  No messages in this conversation yet.
-                </p>
-              )}
-              {thread.map((item) => (
-                <div
-                  key={item.id}
-                  className={`flex ${item.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <article
-                    className={`wa-message-bubble ${item.direction === 'outbound' ? 'wa-message-out' : 'wa-message-in'}`}
-                  >
-                    <MessageBody message={item} connectionId={connectionId} />
-                    <p
-                      className={`mt-2 text-[10px] ${item.direction === 'outbound' ? 'text-white/65' : 'text-stone-400'}`}
+              {thread.length === 0 &&
+                !pending.some((item) => item.waId === contact.wa_id) && (
+                  <p className="rounded-xl bg-white p-4 text-sm text-stone-500">
+                    No messages in this conversation yet.
+                  </p>
+                )}
+              {[
+                ...thread,
+                ...pending.filter((item) => item.waId === contact.wa_id),
+              ].map((item, index, all) => {
+                const day = dayLabel(item.occurred_at);
+                const showDay =
+                  index === 0 || dayLabel(all[index - 1]!.occurred_at) !== day;
+                return (
+                  <Fragment key={item.id}>
+                    {showDay && (
+                      <div className="wa-day-separator">
+                        <span>{day}</span>
+                      </div>
+                    )}
+                    <div
+                      className={`flex ${item.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
                     >
-                      {item.direction === 'outbound'
-                        ? `${item.status}${item.error_code ? ` · ${item.error_code}` : ''}`
-                        : item.type}{' '}
-                      · {readableDate(item.occurred_at)}
-                    </p>
-                  </article>
-                </div>
-              ))}
+                      <article
+                        className={`wa-message-bubble ${item.direction === 'outbound' ? 'wa-message-out' : 'wa-message-in'}${item.status === 'failed' ? ' wa-message-failed' : ''}`}
+                      >
+                        <MessageBody
+                          message={item}
+                          connectionId={connectionId}
+                        />
+                        <p
+                          className="wa-message-meta"
+                        >
+                          <span>{clockTime(item.occurred_at)}</span>
+                          {item.direction === 'outbound' && (
+                            <StatusTicks status={item.status} />
+                          )}
+                        </p>
+                        {item.status === 'failed' && (
+                          <p className="wa-message-error">
+                            Not sent
+                            {item.error_code ? ` · ${item.error_code}` : ''}
+                            {item.local && (
+                              <button
+                                type="button"
+                                className="ml-2 underline"
+                                onClick={() =>
+                                  setPending((list) =>
+                                    list.filter((row) => row.id !== item.id),
+                                  )
+                                }
+                              >
+                                Dismiss
+                              </button>
+                            )}
+                          </p>
+                        )}
+                      </article>
+                    </div>
+                  </Fragment>
+                );
+              })}
               <div ref={messageEndRef} />
             </div>
             <form onSubmit={sendReply} className="wa-composer">
@@ -1176,7 +1431,19 @@ function InboxPanel({
                         rows={1}
                         maxLength={4096}
                         value={body}
-                        onChange={(event) => setBody(event.target.value)}
+                        onChange={(event) =>
+                          onComposerChange(event.target.value)
+                        }
+                        onKeyDown={(event) => {
+                          if (
+                            event.key === 'Enter' &&
+                            !event.shiftKey &&
+                            !event.nativeEvent.isComposing
+                          ) {
+                            event.preventDefault();
+                            event.currentTarget.form?.requestSubmit();
+                          }
+                        }}
                         placeholder="Type a message…"
                       />
                     </label>
@@ -1190,10 +1457,10 @@ function InboxPanel({
                     </button>
                     <button
                       className="wa-send-button"
-                      disabled={busy || (!body.trim() && !attachment)}
+                      disabled={!body.trim() && !attachment}
                       aria-label="Send message"
                     >
-                      {busy ? '…' : '➤'}
+                      ➤
                     </button>
                   </div>
                   <input
@@ -1226,7 +1493,7 @@ function InboxPanel({
                       latest message.
                     </p>
                     <span className="text-xs text-stone-400">
-                      Press send to reply
+                      Enter to send · Shift+Enter for a new line
                     </span>
                   </div>
                 </>
