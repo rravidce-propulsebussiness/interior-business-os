@@ -332,7 +332,8 @@ export async function POST(request: Request) {
       .eq('waba_id', connection.waba_id);
     if (allAccounts.error) throw new Error('BROADCAST_ACCOUNT_READ_FAILED');
     const wabaConnectionIds = (allAccounts.data ?? []).map((row) => row.id);
-    if (!wabaConnectionIds.length) throw new Error('BROADCAST_ACCOUNT_READ_FAILED');
+    if (!wabaConnectionIds.length)
+      throw new Error('BROADCAST_ACCOUNT_READ_FAILED');
     const billingHold = await database
       .from('whatsapp_broadcasts')
       .select('id')
