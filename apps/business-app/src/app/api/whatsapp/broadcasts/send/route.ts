@@ -84,6 +84,7 @@ export async function POST(request: Request) {
     let sent = 0;
     let failed = 0;
     let halt = false;
+    let releaseFrom = recipients.length;
 
     for (let index = 0; index < recipients.length; index += 1) {
       const recipient = recipients[index];
@@ -94,6 +95,7 @@ export async function POST(request: Request) {
         .eq('id', broadcast.data.id).single();
       if (current.error || !['verifying', 'sending'].includes(current.data?.status ?? '')) {
         halt = true;
+        releaseFrom = index;
         break;
       }
 
@@ -149,6 +151,7 @@ export async function POST(request: Request) {
             p_billing: false,
           });
           halt = true;
+          releaseFrom = index + 1;
           break;
         }
         const labelled = await database.from('whatsapp_broadcast_recipients')
@@ -166,6 +169,7 @@ export async function POST(request: Request) {
           });
           if (paused.error) throw new Error('BROADCAST_BILLING_PAUSE_FAILED');
           halt = true;
+          releaseFrom = index + 1;
           break;
         }
         continue;
@@ -179,6 +183,7 @@ export async function POST(request: Request) {
           p_billing: false,
         });
         halt = true;
+        releaseFrom = index + 1;
         break;
       }
 
@@ -217,20 +222,17 @@ export async function POST(request: Request) {
       sent += 1;
     }
 
-    // If the WABA was blocked while a batch was in progress, release only
-    // unattempted claimed rows. Never reset a row with an uncertain send.
-    if (halt) {
-      const unattempted = recipients.filter((r) => r.status === 'sending')
-        .map((r) => r.id);
-      // Previously attempted rows were updated in DB. Only 'sending' rows
-      // without a provider ID are candidates, except the current ambiguous
-      // row, which remains locked for reconciliation.
-      const untouched = unattempted.slice(sent + failed + 1);
-      if (untouched.length)
-        await database.from('whatsapp_broadcast_recipients')
-          .update({ status: 'queued' })
-          .eq('organization_id', organizationId)
-          .in('id', untouched).eq('status', 'sending');
+    // Only untouched claims return to the queue. An ambiguous network or
+    // storage failure stays 'sending' for manual reconciliation, never auto-resend.
+    if (halt && releaseFrom < recipients.length) {
+      const untouched = recipients.slice(releaseFrom).map((r) => r.id);
+      const released = await database.from('whatsapp_broadcast_recipients')
+        .update({ status: 'queued' })
+        .eq('organization_id', organizationId)
+        .eq('broadcast_id', broadcast.data.id)
+        .in('id', untouched)
+        .eq('status', 'sending');
+      if (released.error) throw new Error('BROADCAST_UNTOUCHED_RELEASE_FAILED');
     }
 
     const remaining = await database
