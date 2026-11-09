@@ -16,7 +16,7 @@ import { personaliseParameters } from '@/lib/whatsapp-template-params';
 
 export const dynamic = 'force-dynamic';
 
-const BATCH = 10;
+const BATCH = 5;
 const inputSchema = z.object({ broadcastId: z.string().uuid() }).strict();
 
 /**
@@ -58,6 +58,13 @@ export async function POST(request: Request) {
         { sent: 0, failed: 0, remaining: 0, status: broadcast.data.status },
         { headers: privateHeaders },
       );
+
+    // Validate the connection before claiming recipients. A revoked token must
+    // not strand a claimed batch in the database.
+    const connection = await getConnection(
+      organizationId,
+      broadcast.data.connection_id,
+    );
 
     // Claim is atomic and limits 'verifying' campaigns to exactly one probe.
     // It will not claim another probe while the first is in flight/awaiting receipt.
@@ -107,10 +114,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const connection = await getConnection(
-      organizationId,
-      broadcast.data.connection_id,
-    );
     const values = Array.isArray(broadcast.data.parameters)
       ? (broadcast.data.parameters as string[])
       : [];
