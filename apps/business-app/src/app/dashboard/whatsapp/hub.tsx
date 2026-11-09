@@ -5,6 +5,10 @@ import type { ReactNode } from 'react';
 import './whatsapp-inbox.css';
 import { WhatsAppCalling } from './calling';
 import { readApiResponse } from '@/lib/whatsapp-response';
+import {
+  whatsappMessagePreview,
+  whatsappPlaceholderLabel,
+} from '@/lib/whatsapp-message-label';
 import { createBrowserDatabase } from '@business-os/database/browser';
 
 type Connection = { id: string; name: string; phone: string; status: string };
@@ -130,7 +134,7 @@ function friendlyError(value: unknown, fallback: string) {
 }
 
 export function WhatsAppHub({
-  connections,
+  connections: allConnections,
   canManage,
   settingsPanel,
 }: {
@@ -138,6 +142,12 @@ export function WhatsAppHub({
   canManage: boolean;
   settingsPanel?: ReactNode;
 }) {
+  // Disconnected rows are kept for message history but are not offered as
+  // live numbers; fall back to them only when nothing is connected.
+  const liveConnections = allConnections.filter(
+    (item) => item.status === 'connected',
+  );
+  const connections = liveConnections.length ? liveConnections : allConnections;
   const [tab, setTab] = useState<Tab>('inbox');
   const [connectionId, setConnectionId] = useState(connections[0]?.id ?? '');
   const [callTarget, setCallTarget] = useState('');
@@ -1015,7 +1025,7 @@ function InboxPanel({
               </div>
               <p className="mt-1 truncate text-xs text-stone-500">
                 {row.last_direction === 'outbound' ? 'You: ' : ''}
-                {row.last_message || 'No message text'}
+                {whatsappMessagePreview(row.last_message) || 'No message text'}
               </p>
               <div className="mt-2 flex items-center gap-2">
                 {row.unread && (
@@ -1259,9 +1269,12 @@ function MessageBody({
       message.body,
     );
   if (!match) {
+    const placeholder = whatsappPlaceholderLabel(message.body);
     return (
-      <p className="whitespace-pre-wrap break-words text-sm leading-6">
-        {message.body}
+      <p
+        className={`whitespace-pre-wrap break-words text-sm leading-6${placeholder ? ' italic opacity-75' : ''}`}
+      >
+        {placeholder ?? message.body}
       </p>
     );
   }
@@ -1692,7 +1705,9 @@ function SettingsPanel({
           <article key={connection.id}>
             <span>{connection.name}</span>
             <strong>{connection.phone}</strong>
-            <small>{connection.status}</small>
+            <small>
+              {connection.status === 'connected' ? 'Connected' : connection.status}
+            </small>
           </article>
         ))}
       </div>
@@ -1773,7 +1788,7 @@ function ContactsPanel({
             </div>
             <div className="text-stone-600">+{row.wa_id}</div>
             <div className="truncate text-stone-500">
-              {row.last_message || '—'}
+              {whatsappMessagePreview(row.last_message) || '—'}
             </div>
             <div>
               <span
