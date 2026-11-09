@@ -2241,3 +2241,197 @@
 .wa-skin .wa-chat-row:last-child .wa-chat-body {
   border-bottom: 0;
 }
+
+/* ===================================================================== */
+/* Full-screen WhatsApp workspace                                        */
+/* ===================================================================== */
+.wa-skin.wa-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  border: 0;
+  border-radius: 0 !important;
+  box-shadow: none;
+}
+.wa-fullscreen .wa-main {
+  display: flex;
+  min-height: 0;
+  height: 100dvh;
+  flex-direction: column;
+  overflow: hidden;
+}
+.wa-fullscreen .wa-content {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+.wa-fullscreen.wa-skin-inbox .wa-content {
+  overflow: hidden;
+}
+@media (min-width: 1051px) {
+  .wa-fullscreen.wa-skin-inbox .wa-inbox-grid {
+    height: 100%;
+  }
+}
+.wa-back-link {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  color: var(--wa-icon);
+  text-decoration: none;
+}
+.wa-back-link:hover {
+  background: #e3e6e8;
+  color: var(--wa-text);
+}
+.wa-back-link svg {
+  width: 22px;
+  height: 22px;
+}
+.wa-skin .wa-icon-button {
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: var(--wa-icon);
+}
+
+/* ===================================================================== */
+/* WhatsApp look for every page (Overview, Calls, Contacts, Broadcasts,  */
+/* Templates, Automations, Analytics, Settings)                          */
+/* ===================================================================== */
+.wa-skin .wa-content {
+  background: #fff;
+}
+.wa-skin .wa-section-heading {
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--wa-line);
+}
+.wa-skin .wa-eyebrow {
+  color: var(--wa-green-dark);
+  letter-spacing: 0.06em;
+}
+.wa-skin .wa-section-heading h2,
+.wa-skin .wa-feature-hero h3 {
+  color: var(--wa-text);
+}
+.wa-skin .wa-feature-hero {
+  border: 1px solid var(--wa-line);
+  border-radius: 12px;
+  background: #fff;
+}
+.wa-skin .wa-feature-hero p,
+.wa-skin .wa-feature-cards span,
+.wa-skin .wa-feature-cards small,
+.wa-skin .wa-analytics-note p {
+  color: var(--wa-muted);
+}
+.wa-skin .wa-feature-icon {
+  border-radius: 999px;
+  background: #e7fce3;
+  color: var(--wa-green-dark);
+}
+.wa-skin .wa-feature-cards article {
+  border: 1px solid var(--wa-line);
+  border-radius: 12px;
+  background: #fff;
+}
+.wa-skin .wa-feature-cards strong {
+  color: var(--wa-text);
+}
+.wa-skin .wa-feature-empty {
+  border: 1px dashed #d1d7db;
+  border-radius: 12px;
+  background: #f7f8fa;
+}
+.wa-skin .wa-analytics-note {
+  border: 1px solid var(--wa-line);
+  border-radius: 12px;
+}
+.wa-skin .wa-global-notice {
+  border-color: #c8e6c9;
+  background: #e7fce3;
+  color: #1b5e20;
+}
+.wa-skin .wa-list-filters button {
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: var(--wa-panel);
+  color: var(--wa-icon);
+}
+.wa-skin .wa-list-filters .wa-filter-active {
+  background: #d9fdd3;
+  color: var(--wa-green-dark);
+  font-weight: 600;
+}
+.wa-skin .wa-label-option:hover,
+.wa-skin .wa-attach-menu button:hover {
+  background: var(--wa-panel);
+}
+
+/* Replace the maroon accents used across the pages with WhatsApp green */
+.wa-skin .bg-\[\#88352B\],
+.wa-skin .bg-\[\#6f2b23\] {
+  background-color: var(--wa-green) !important;
+  border-color: var(--wa-green) !important;
+  color: #fff;
+}
+.wa-skin .text-\[\#88352B\] {
+  color: var(--wa-green-dark) !important;
+}
+.wa-skin .border-\[\#BD5C3F\] {
+  border-color: var(--wa-green) !important;
+}
+.wa-skin .ring-\[\#BD5C3F\] {
+  --tw-ring-color: var(--wa-green) !important;
+}
+.wa-skin .bg-\[\#f9eee9\],
+.wa-skin .bg-\[\#f8e9e3\] {
+  background-color: #e7fce3 !important;
+}
+.wa-skin .bg-\[\#fffdfa\] {
+  background-color: #f7f8fa !important;
+}
+.wa-skin .rounded-2xl.border.border-stone-200,
+.wa-skin .rounded-xl.border.border-stone-200 {
+  border-color: var(--wa-line);
+}
+.wa-skin .text-stone-900 {
+  color: var(--wa-text);
+}
+.wa-skin .text-stone-500 {
+  color: var(--wa-muted);
+}
+.wa-skin input:focus,
+.wa-skin select:focus,
+.wa-skin textarea:focus {
+  border-color: var(--wa-green) !important;
+  box-shadow: 0 0 0 2px rgba(0, 168, 132, 0.15);
+}
+.wa-skin input[type="checkbox"] {
+  accent-color: var(--wa-green);
+}
+/* Contacts table */
+.wa-skin .wa-row-action {
+  border-color: var(--wa-line) !important;
+  border-radius: 999px !important;
+}
+.wa-skin .wa-row-action:hover {
+  background: var(--wa-panel);
+}
+/* Contact modal */
+.wa-skin .wa-modal-close,
+.wa-skin .wa-modal-cancel {
+  border-radius: 999px !important;
+}
+.wa-skin .wa-eyebrow,
+.wa-skin [class*="wa-modal"] .wa-eyebrow {
+  color: var(--wa-green-dark);
+}

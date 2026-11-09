@@ -453,6 +453,27 @@ export function WhatsAppHub({
   );
   const connections = liveConnections.length ? liveConnections : allConnections;
   const [tab, setTab] = useState<Tab>('inbox');
+  // Full-screen WhatsApp workspace (remembered per browser), like WhatsApp Web.
+  const [fullscreen, setFullscreen] = useState(() => {
+    try {
+      return window.localStorage.getItem('wa-fullscreen') !== 'off';
+    } catch {
+      return true;
+    }
+  });
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('wa-fullscreen', fullscreen ? 'on' : 'off');
+    } catch {
+      // Storage can be unavailable (private mode); the toggle still works.
+    }
+    if (!fullscreen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [fullscreen]);
   const [connectionId, setConnectionId] = useState(connections[0]?.id ?? '');
   const [callTarget, setCallTarget] = useState('');
   const [callInProgress, setCallInProgress] = useState(false);
@@ -535,8 +556,19 @@ export function WhatsAppHub({
   }
 
   return (
-    <section className={`wa-shell wa-skin${tab === 'inbox' ? ' wa-skin-inbox' : ''}`}>
+    <section
+      className={`wa-shell wa-skin${tab === 'inbox' ? ' wa-skin-inbox' : ''}${fullscreen ? ' wa-fullscreen' : ''}`}
+    >
       <aside className="wa-sidebar" aria-label="ProPulse messaging navigation">
+        <a
+          className="wa-back-link"
+          href="/dashboard"
+          title="Back to Business OS"
+          aria-label="Back to Business OS"
+        >
+          <NavIcon kind="back" />
+          <span className="wa-nav-text">Business OS</span>
+        </a>
         <div className="wa-brand">
           <span className="wa-brand-mark">P</span>
           <span>
@@ -635,6 +667,15 @@ export function WhatsAppHub({
             <div className="wa-topbar-avatars" aria-label="Workspace team">
               <span title="ProPulse workspace">PP</span>
             </div>
+            <button
+              className="wa-icon-button"
+              type="button"
+              aria-label={fullscreen ? 'Exit full screen' : 'Full screen'}
+              title={fullscreen ? 'Exit full screen' : 'Full screen'}
+              onClick={() => setFullscreen((value) => !value)}
+            >
+              <NavIcon kind={fullscreen ? 'collapse' : 'expand'} />
+            </button>
             <button
               className="wa-icon-button"
               type="button"
@@ -898,6 +939,17 @@ export function WhatsAppHub({
 
 function NavIcon({ kind }: { kind: string }) {
   const paths: Record<string, ReactNode> = {
+    back: <path d="M15 18 9 12l6-6" />,
+    expand: (
+      <>
+        <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+      </>
+    ),
+    collapse: (
+      <>
+        <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+      </>
+    ),
     refresh: (
       <>
         <path d="M21 12a9 9 0 1 1-2.6-6.4" />
