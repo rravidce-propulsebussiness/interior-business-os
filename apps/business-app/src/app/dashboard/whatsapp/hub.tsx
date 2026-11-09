@@ -2909,9 +2909,22 @@ function BroadcastsPanel({
       )}
 
       <div className="space-y-3">
-        <h4 className="text-base font-bold text-stone-900">
-          Recent broadcasts
-        </h4>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h4 className="text-base font-bold text-stone-900">
+            Recent broadcasts
+          </h4>
+          <button
+            type="button"
+            className={softButton}
+            onClick={() =>
+              void load().catch(() =>
+                setNotice('Could not refresh broadcast status. Try again.'),
+              )
+            }
+          >
+            Refresh status
+          </button>
+        </div>
         {!rows.length && (
           <p className="rounded-xl border border-dashed border-stone-300 p-6 text-center text-sm text-stone-500">
             No broadcasts yet.
