@@ -23,6 +23,7 @@ const createSchema = z
     language: z.string().regex(/^[a-z]{2}(_[A-Z]{2})?$/),
     parameters: z.array(z.string().max(1024)).max(20).default([]),
     labelIds: z.array(z.string().uuid()).max(20).default([]),
+    contactIds: z.array(z.string().uuid()).max(5000).default([]),
     confirmOptIn: z.literal(true),
   })
   .strict();
@@ -42,10 +43,13 @@ async function audience(
   organizationId: string,
   connectionId: string,
   labelIds: string[],
+  pickedContactIds: string[] = [],
 ): Promise<Audience> {
   const database = createOwnerProvisioningDatabase();
-  let contactIds: string[] | null = null;
-  if (labelIds.length) {
+  let contactIds: string[] | null = pickedContactIds.length
+    ? [...new Set(pickedContactIds)]
+    : null;
+  if (!contactIds && labelIds.length) {
     const tagged = await database
       .from('whatsapp_contact_labels')
       .select('contact_id')
@@ -104,10 +108,16 @@ export async function GET(request: Request) {
       .parse(url.searchParams.get('connectionId'));
     const { organizationId } = await whatsappContext('automation.view');
     if (url.searchParams.get('preview') === '1') {
-      const labelIds = (url.searchParams.get('labelIds') ?? '')
-        .split(',')
-        .filter((id) => z.string().uuid().safeParse(id).success);
-      const result = await audience(organizationId, connectionId, labelIds);
+      const ids = (name: string) =>
+        (url.searchParams.get(name) ?? '')
+          .split(',')
+          .filter((id) => z.string().uuid().safeParse(id).success);
+      const result = await audience(
+        organizationId,
+        connectionId,
+        ids('labelIds'),
+        ids('contactIds'),
+      );
       return Response.json(
         {
           matched: result.matched,
@@ -260,6 +270,7 @@ export async function POST(request: Request) {
       organizationId,
       connection.id,
       input.labelIds,
+      input.contactIds,
     );
     if (!people.eligible.length)
       return Response.json(

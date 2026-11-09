@@ -2270,6 +2270,11 @@ function BroadcastsPanel({
   const [templateKey, setTemplateKey] = useState('');
   const [values, setValues] = useState<string[]>([]);
   const [labelIds, setLabelIds] = useState<string[]>([]);
+  const [audienceMode, setAudienceMode] = useState<'labels' | 'contacts'>(
+    'labels',
+  );
+  const [pickedIds, setPickedIds] = useState<string[]>([]);
+  const contactRows = useWorkspaceRows('contacts', connectionId);
   const [confirm, setConfirm] = useState(false);
   const [preview, setPreview] = useState<{
     matched: number;
@@ -2314,7 +2319,9 @@ function BroadcastsPanel({
     const params = new URLSearchParams({
       connectionId,
       preview: '1',
-      labelIds: labelIds.join(','),
+      ...(audienceMode === 'contacts'
+        ? { contactIds: pickedIds.join(',') || 'none' }
+        : { labelIds: labelIds.join(',') }),
     });
     let cancelled = false;
     void fetch(`/api/whatsapp/broadcasts?${params}`, { cache: 'no-store' })
@@ -2326,7 +2333,7 @@ function BroadcastsPanel({
     return () => {
       cancelled = true;
     };
-  }, [connectionId, labelIds]);
+  }, [connectionId, labelIds, audienceMode, pickedIds]);
 
   async function runSending(id: string) {
     setSendingId(id);
@@ -2375,7 +2382,8 @@ function BroadcastsPanel({
           templateName: template.name,
           language: template.language,
           parameters: values.slice(0, needed),
-          labelIds,
+          labelIds: audienceMode === 'labels' ? labelIds : [],
+          contactIds: audienceMode === 'contacts' ? pickedIds : [],
           confirmOptIn: true,
         }),
       });
@@ -2534,14 +2542,132 @@ function BroadcastsPanel({
                 connectionId={connectionId}
                 onImported={(labelId) => {
                   void labelState.reload();
+                  void contactRows.reload(true);
+                  setAudienceMode('labels');
                   setLabelIds([labelId]);
                 }}
               />
               <div>
-                <p className="text-xs font-semibold text-stone-600">
-                  Audience
-                </p>
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-semibold text-stone-600">
+                    Audience
+                  </p>
+                  <div className="wa-list-filters" role="tablist">
+                    <button
+                      type="button"
+                      className={audienceMode === 'labels' ? 'wa-filter-active' : ''}
+                      onClick={() => setAudienceMode('labels')}
+                    >
+                      By label
+                    </button>
+                    <button
+                      type="button"
+                      className={
+                        audienceMode === 'contacts' ? 'wa-filter-active' : ''
+                      }
+                      onClick={() => setAudienceMode('contacts')}
+                    >
+                      Pick contacts{pickedIds.length ? ` (${pickedIds.length})` : ''}
+                    </button>
+                  </div>
+                </div>
+                {audienceMode === 'contacts' && (
+                  <div className="mt-2 rounded-xl border border-stone-200 bg-white">
+                    <div className="flex items-center gap-2 border-b border-stone-100 p-2">
+                      <input
+                        className={field}
+                        placeholder="Search name or number"
+                        value={contactRows.search}
+                        onChange={(e) => contactRows.setSearch(e.target.value)}
+                        aria-label="Search contacts"
+                      />
+                      <button
+                        type="button"
+                        className={softButton}
+                        onClick={() =>
+                          setPickedIds((list) => [
+                            ...new Set([
+                              ...list,
+                              ...contactRows.rows
+                                .filter(
+                                  (row) =>
+                                    !row.opted_out && row.template_opted_in_at,
+                                )
+                                .map((row) => row.id),
+                            ]),
+                          ])
+                        }
+                      >
+                        Select all eligible
+                      </button>
+                      {pickedIds.length > 0 && (
+                        <button
+                          type="button"
+                          className="text-xs font-semibold text-stone-500"
+                          onClick={() => setPickedIds([])}
+                        >
+                          Clear
+                        </button>
+                      )}
+                    </div>
+                    <div className="max-h-64 overflow-y-auto">
+                      {contactRows.rows.map((row) => {
+                        const reason = row.opted_out
+                          ? 'Opted out'
+                          : !row.template_opted_in_at
+                            ? 'No opt-in recorded'
+                            : '';
+                        const on = pickedIds.includes(row.id);
+                        return (
+                          <label
+                            key={row.id}
+                            className={`flex items-center gap-3 border-b border-stone-50 px-3 py-2 text-sm ${reason ? 'opacity-60' : 'cursor-pointer hover:bg-stone-50'}`}
+                          >
+                            <input
+                              type="checkbox"
+                              className="h-4 w-4 shrink-0"
+                              disabled={!!reason}
+                              checked={on}
+                              onChange={() =>
+                                setPickedIds((list) =>
+                                  on
+                                    ? list.filter((id) => id !== row.id)
+                                    : [...list, row.id],
+                                )
+                              }
+                            />
+                            <span className="min-w-0 flex-1">
+                              <strong className="block truncate text-stone-800">
+                                {row.name || `+${row.wa_id}`}
+                              </strong>
+                              <small className="text-stone-500">
+                                +{row.wa_id}
+                              </small>
+                            </span>
+                            {reason && (
+                              <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600">
+                                {reason}
+                              </span>
+                            )}
+                          </label>
+                        );
+                      })}
+                      {!contactRows.rows.length && (
+                        <p className="p-4 text-sm text-stone-500">
+                          No contacts on this number yet.
+                        </p>
+                      )}
+                    </div>
+                    <p className="border-t border-stone-100 p-2 text-[11px] text-stone-500">
+                      Only contacts with a recorded WhatsApp opt-in can receive
+                      broadcasts. Record it under Contacts (edit contact) or
+                      upload a sheet.
+                    </p>
+                  </div>
+                )}
+                <div
+                  className={`mt-2 flex flex-wrap gap-2 ${audienceMode === 'contacts' ? 'hidden' : ''}`}
+                >
                   {labelState.labels.map((label) => {
                     const on = labelIds.includes(label.id);
                     return (
@@ -2571,9 +2697,11 @@ function BroadcastsPanel({
                   )}
                 </div>
                 <p className="mt-2 text-xs text-stone-500">
-                  {labelIds.length
-                    ? 'Contacts with any of the selected labels.'
-                    : 'No label selected: all contacts on this number.'}{' '}
+                  {audienceMode === 'contacts'
+                    ? `${pickedIds.length} contacts picked.`
+                    : labelIds.length
+                      ? 'Contacts with any of the selected labels.'
+                      : 'No label selected: all contacts on this number.'}{' '}
                   {preview && (
                     <strong className="text-stone-800">
                       {preview.eligible} will receive it
@@ -2591,7 +2719,7 @@ function BroadcastsPanel({
               <label className="flex items-start gap-2 text-xs text-stone-700">
                 <input
                   type="checkbox"
-                  className="mt-0.5"
+                  className="mt-0.5 h-4 w-4 shrink-0"
                   checked={confirm}
                   onChange={(e) => setConfirm(e.target.checked)}
                 />
