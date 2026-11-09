@@ -1,0 +1,41 @@
+name: WhatsApp broadcast regression checks
+on:
+  pull_request:
+    paths:
+      - 'apps/business-app/src/app/api/whatsapp/broadcasts/**'
+      - 'apps/business-app/src/app/api/webhooks/whatsapp/**'
+      - 'apps/business-app/src/app/dashboard/whatsapp/**'
+      - 'apps/business-app/src/lib/whatsapp-broadcast-*.ts'
+      - 'packages/database/supabase/migrations/*whatsapp_broadcast*.sql'
+  push:
+    branches:
+      - feature/whatsapp-broadcast-billing-pause-resend
+permissions:
+  contents: read
+jobs:
+  targeted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Check changed file formatting
+        run: >-
+          pnpm exec prettier --check
+          apps/business-app/src/app/api/whatsapp/broadcasts/route.ts
+          apps/business-app/src/app/api/whatsapp/broadcasts/send/route.ts
+          apps/business-app/src/app/api/webhooks/whatsapp/route.ts
+          apps/business-app/src/app/dashboard/whatsapp/hub.tsx
+          apps/business-app/src/lib/whatsapp-broadcast-policy.ts
+          apps/business-app/src/lib/whatsapp-broadcast-policy.test.ts
+          packages/database/scripts/generate-types.mjs
+          packages/database/src/generated/database.types.ts
+      - name: Test billing circuit breaker and retry policy
+        run: pnpm exec vitest run apps/business-app/src/lib/whatsapp-broadcast-policy.test.ts
+      - name: Typecheck Business OS
+        run: pnpm --filter @business-os/business-app typecheck

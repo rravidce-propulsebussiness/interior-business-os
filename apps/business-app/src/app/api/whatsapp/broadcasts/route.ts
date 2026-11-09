@@ -31,6 +31,9 @@ const createSchema = z
 const cancelSchema = z
   .object({ action: z.literal('cancel'), broadcastId: z.string().uuid() })
   .strict();
+const resumeSchema = z
+  .object({ action: z.literal('resume'), broadcastId: z.string().uuid() })
+  .strict();
 
 type Audience = {
   matched: number;
@@ -108,6 +111,28 @@ export async function GET(request: Request) {
       .uuid()
       .parse(url.searchParams.get('connectionId'));
     const { organizationId } = await whatsappContext('automation.view');
+    // Cheap status polling for the single initial delivery probe. Avoid
+    // loading all broadcast recipients every few seconds.
+    const stateOnly = url.searchParams.get('stateOnly');
+    if (stateOnly) {
+      if (!z.string().uuid().safeParse(stateOnly).success)
+        return Response.json(
+          { message: 'Invalid broadcast.' },
+          { status: 400, headers: privateHeaders },
+        );
+      const state = await createOwnerProvisioningDatabase()
+        .from('whatsapp_broadcasts')
+        .select('id,status')
+        .eq('organization_id', organizationId)
+        .eq('connection_id', connectionId)
+        .eq('id', stateOnly)
+        .maybeSingle();
+      if (state.error) throw new Error('BROADCAST_STATUS_READ_FAILED');
+      return Response.json(
+        { row: state.data ?? null },
+        { headers: privateHeaders },
+      );
+    }
     if (url.searchParams.get('preview') === '1') {
       const ids = (name: string) =>
         (url.searchParams.get(name) ?? '')
@@ -179,8 +204,7 @@ export async function GET(request: Request) {
         else if (item.status === 'failed') {
           stats.failed += 1;
           addError(item.error_code);
-        }
-        else if (item.status === 'cancelled') stats.cancelled += 1;
+        } else if (item.status === 'cancelled') stats.cancelled += 1;
         else if (item.provider_message_id)
           providerIds.push(item.provider_message_id);
       }
@@ -242,7 +266,12 @@ export async function POST(request: Request) {
         .update({ status: 'cancelled', completed_at: new Date().toISOString() })
         .eq('organization_id', organizationId)
         .eq('id', input.broadcastId)
-        .eq('status', 'sending');
+        .in('status', [
+          'verifying',
+          'sending',
+          'paused_billing',
+          'paused_error',
+        ]);
       await database
         .from('whatsapp_broadcast_recipients')
         .update({ status: 'cancelled' })
@@ -250,6 +279,31 @@ export async function POST(request: Request) {
         .eq('broadcast_id', input.broadcastId)
         .eq('status', 'queued');
       return Response.json({ cancelled: true }, { headers: privateHeaders });
+    }
+
+    if (raw?.action === 'resume') {
+      const input = resumeSchema.safeParse(raw);
+      if (!input.success)
+        return Response.json(
+          { message: 'Choose a valid broadcast to resume.' },
+          { status: 400, headers: privateHeaders },
+        );
+      const resumed = await database.rpc('whatsapp_broadcast_resume', {
+        p_organization_id: organizationId,
+        p_broadcast_id: input.data.broadcastId,
+      });
+      if (resumed.error)
+        return Response.json(
+          {
+            message:
+              'This broadcast cannot be retried. Refresh its status first.',
+          },
+          { status: 409, headers: privateHeaders },
+        );
+      return Response.json(
+        { resumed: true, retried: resumed.data ?? 0 },
+        { headers: privateHeaders },
+      );
     }
 
     const parsed = createSchema.safeParse(raw);
@@ -268,6 +322,30 @@ export async function POST(request: Request) {
         { status: 400, headers: privateHeaders },
       );
     const connection = await getConnection(organizationId, input.connectionId);
+    // A billing failure stops all campaigns on this WABA, not just the
+    // current phone number. New campaigns remain safely queued until the
+    // operator repairs billing and explicitly resumes them.
+    const allAccounts = await database
+      .from('whatsapp_business_connections')
+      .select('id')
+      .eq('organization_id', organizationId)
+      .eq('waba_id', connection.waba_id);
+    if (allAccounts.error) throw new Error('BROADCAST_ACCOUNT_READ_FAILED');
+    const wabaConnectionIds = (allAccounts.data ?? []).map((row) => row.id);
+    if (!wabaConnectionIds.length)
+      throw new Error('BROADCAST_ACCOUNT_READ_FAILED');
+    const billingHold = await database
+      .from('whatsapp_broadcasts')
+      .select('id')
+      .eq('organization_id', organizationId)
+      .in('connection_id', wabaConnectionIds)
+      .eq('status', 'paused_billing')
+      .limit(1);
+    if (billingHold.error)
+      throw new Error('BROADCAST_BILLING_HOLD_READ_FAILED');
+    const initialBroadcastStatus = billingHold.data?.length
+      ? 'paused_billing'
+      : 'verifying';
     const templates = await graphRequest<{
       data?: Array<{
         name: string;
@@ -291,8 +369,7 @@ export async function POST(request: Request) {
         { status: 400, headers: privateHeaders },
       );
     const needed = templatePlaceholderCount(
-      template.components?.find((component) => component.type === 'BODY')
-        ?.text,
+      template.components?.find((component) => component.type === 'BODY')?.text,
     );
     if (input.parameters.length !== needed)
       return Response.json(
@@ -334,10 +411,12 @@ export async function POST(request: Request) {
         label_ids: input.labelIds,
         total: people.eligible.length,
         skipped: people.matched - people.eligible.length,
+        status: initialBroadcastStatus,
       })
       .select('id')
       .single();
-    if (created.error || !created.data) throw new Error('BROADCAST_CREATE_FAILED');
+    if (created.error || !created.data)
+      throw new Error('BROADCAST_CREATE_FAILED');
     for (let i = 0; i < people.eligible.length; i += 500) {
       const batch = people.eligible.slice(i, i + 500).map((contact) => ({
         organization_id: organizationId,

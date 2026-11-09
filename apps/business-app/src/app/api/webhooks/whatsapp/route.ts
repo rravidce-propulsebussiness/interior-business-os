@@ -74,17 +74,21 @@ export async function POST(request: Request) {
         if (route.kind === 'account') {
           for (const organizationId of route.organizationIds) {
             const accountPayload = { waba_id: wabaId, change };
-            const stored = await database.from('whatsapp_webhook_events').upsert(
-              {
-                organization_id: organizationId,
-                waba_id: wabaId,
-                idempotency_key: createHash('sha256')
-                  .update(JSON.stringify({ ...accountPayload, organizationId }))
-                  .digest('hex'),
-                payload: accountPayload as Json,
-              },
-              { onConflict: 'idempotency_key', ignoreDuplicates: true },
-            );
+            const stored = await database
+              .from('whatsapp_webhook_events')
+              .upsert(
+                {
+                  organization_id: organizationId,
+                  waba_id: wabaId,
+                  idempotency_key: createHash('sha256')
+                    .update(
+                      JSON.stringify({ ...accountPayload, organizationId }),
+                    )
+                    .digest('hex'),
+                  payload: accountPayload as Json,
+                },
+                { onConflict: 'idempotency_key', ignoreDuplicates: true },
+              );
             if (stored.error) throw new Error('WEBHOOK_QUEUE_FAILED');
           }
           continue;
@@ -113,6 +117,42 @@ export async function POST(request: Request) {
         if (ingested.error) throw new Error('WHATSAPP_MESSAGE_INGEST_FAILED');
 
         const value = (change as { value?: Record<string, unknown> })?.value;
+        // A Graph Send response is only acceptance. A later status webhook
+        // may report 131042; stop the matching campaign/WABA at that point.
+        const statuses = Array.isArray(value?.statuses)
+          ? (value.statuses as Array<Record<string, unknown>>)
+          : [];
+        for (const receipt of statuses) {
+          const messageId = typeof receipt.id === 'string' ? receipt.id : '';
+          const delivery =
+            typeof receipt.status === 'string' ? receipt.status : '';
+          const errors = Array.isArray(receipt.errors)
+            ? (receipt.errors as Array<Record<string, unknown>>)
+            : [];
+          const rawCode = errors[0]?.code;
+          const errorCode =
+            typeof rawCode === 'number' && Number.isInteger(rawCode)
+              ? String(rawCode)
+              : '';
+          if (
+            !messageId ||
+            !['sent', 'delivered', 'read', 'failed'].includes(delivery)
+          )
+            continue;
+          const storedReceipt = await database.rpc(
+            'whatsapp_broadcast_receipt',
+            {
+              p_organization_id: connection.organization_id,
+              p_connection_id: connection.id,
+              p_provider_message_id: messageId,
+              p_delivery_status: delivery,
+              p_error_code: errorCode,
+            },
+          );
+          if (storedReceipt.error)
+            throw new Error('WHATSAPP_BROADCAST_RECEIPT_FAILED');
+        }
+
         const messages = Array.isArray(value?.messages)
           ? (value.messages as Array<Record<string, unknown>>)
           : [];
@@ -120,8 +160,7 @@ export async function POST(request: Request) {
           const waId = String(message.from ?? '');
           const messageId = String(message.id ?? '');
           const interactive = message.interactive as
-            | Record<string, Record<string, unknown> | undefined>
-            | undefined;
+            Record<string, Record<string, unknown> | undefined> | undefined;
           // Menu choices arrive as text ("2") or as a tapped list/button id.
           const messageText = String(
             (message.text as Record<string, unknown> | undefined)?.body ??

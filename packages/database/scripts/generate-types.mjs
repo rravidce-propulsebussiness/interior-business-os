@@ -20,7 +20,24 @@ const relationships = JSON.parse(
     `select coalesce(json_agg(x),'[]') from (select cl.relname as table_name,c.conname as "foreignKeyName",(select json_agg(a.attname order by k.ord) from unnest(c.conkey) with ordinality k(num,ord) join pg_attribute a on a.attrelid=c.conrelid and a.attnum=k.num) as columns,exists(select 1 from pg_constraint u where u.conrelid=c.conrelid and u.contype in ('p','u') and u.conkey @> c.conkey and c.conkey @> u.conkey) as "isOneToOne",r.relname as "referencedRelation",(select json_agg(a.attname order by k.ord) from unnest(c.confkey) with ordinality k(num,ord) join pg_attribute a on a.attrelid=c.confrelid and a.attnum=k.num) as "referencedColumns" from pg_constraint c join pg_class cl on cl.oid=c.conrelid join pg_namespace n on n.oid=cl.relnamespace join pg_class r on r.oid=c.confrelid join pg_namespace rn on rn.oid=r.relnamespace where c.contype='f' and n.nspname='public' and rn.nspname='public' order by cl.relname,c.conname) x`,
   ]),
 );
-function type(sql) {
+function type(sql, udtName) {
+  // A RETURNS SETOF table function exposes the table's full row type.
+  // Without this, generated RPC types drift to an incorrect string return.
+  const setof = /^SETOF (?:public\.)?([a-zA-Z0-9_]+)$/.exec(sql);
+  if (setof) {
+    const columns = rows.filter((column) => column.table_name === setof[1]);
+    if (columns.length)
+      return `{ ${columns
+        .map(
+          (column) =>
+            `${JSON.stringify(column.column_name)}: ${type(column.data_type, column.udt_name)}${column.is_nullable === 'YES' ? ' | null' : ''};`,
+        )
+        .join(' ')} }[]`;
+  }
+  // information_schema represents PostgreSQL array columns as data_type
+  // 'ARRAY'; use udt_name (_uuid, _text, _int4, ...) for the element type.
+  if (sql === 'ARRAY' && udtName?.startsWith('_'))
+    return `${type(udtName.slice(1))}[]`;
   if (sql.endsWith('[]')) return `${type(sql.slice(0, -2))}[]`;
   return /json/.test(sql)
     ? 'Json'
@@ -40,7 +57,7 @@ for (const table of [...new Set(rows.map((r) => r.table_name))]) {
   for (const shape of ['Row', 'Insert', 'Update']) {
     out += `${shape}: {\n`;
     for (const c of columns)
-      out += `${JSON.stringify(c.column_name)}${shape === 'Update' || (shape === 'Insert' && (c.column_default !== null || c.is_nullable === 'YES')) ? '?' : ''}: ${type(c.data_type)}${c.is_nullable === 'YES' ? ' | null' : ''};\n`;
+      out += `${JSON.stringify(c.column_name)}${shape === 'Update' || (shape === 'Insert' && (c.column_default !== null || c.is_nullable === 'YES')) ? '?' : ''}: ${type(c.data_type, c.udt_name)}${c.is_nullable === 'YES' ? ' | null' : ''};\n`;
     out += '};\n';
   }
   out += `Relationships: ${JSON.stringify(
@@ -66,13 +83,15 @@ const target = file('src/generated/database.types.ts');
 if (process.argv.includes('--check')) {
   const saved = readFileSync(target, 'utf8');
   if (saved !== out) {
-    const index = Array.from({length:Math.min(saved.length,out.length)}).findIndex(
-      (_,i)=>saved[i]!==out[i],
+    const index = Array.from({
+      length: Math.min(saved.length, out.length),
+    }).findIndex((_, i) => saved[i] !== out[i]);
+    const at = index < 0 ? Math.min(saved.length, out.length) : index;
+    console.error(
+      'Generated types first differ at character ' + at,
+      'saved=' + JSON.stringify(saved.slice(Math.max(0, at - 80), at + 200)),
+      'expected=' + JSON.stringify(out.slice(Math.max(0, at - 80), at + 200)),
     );
-    const at=index<0?Math.min(saved.length,out.length):index;
-    console.error('Generated types first differ at character '+at,
-      'saved='+JSON.stringify(saved.slice(Math.max(0,at-80),at+200)),
-      'expected='+JSON.stringify(out.slice(Math.max(0,at-80),at+200)));
     throw new Error('Generated database types have drifted. Run db:types.');
   }
   console.log('Generated database types match the applied schema.');
