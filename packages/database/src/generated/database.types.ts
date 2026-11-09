@@ -10538,6 +10538,7 @@ export interface Database {
           provider_message_id: string | null;
           error_code: string;
           sent_at: string | null;
+          retry_count: number;
         };
         Insert: {
           id?: string;
@@ -10550,6 +10551,7 @@ export interface Database {
           provider_message_id?: string | null;
           error_code?: string;
           sent_at?: string | null;
+          retry_count?: number;
         };
         Update: {
           id?: string;
@@ -10562,6 +10564,7 @@ export interface Database {
           provider_message_id?: string | null;
           error_code?: string;
           sent_at?: string | null;
+          retry_count?: number;
         };
         Relationships: [
           {
@@ -10596,6 +10599,7 @@ export interface Database {
           created_by: string | null;
           created_at: string;
           completed_at: string | null;
+          probe_message_id: string | null;
         };
         Insert: {
           id?: string;
@@ -10612,6 +10616,7 @@ export interface Database {
           created_by?: string | null;
           created_at?: string;
           completed_at?: string | null;
+          probe_message_id?: string | null;
         };
         Update: {
           id?: string;
@@ -10628,6 +10633,7 @@ export interface Database {
           created_by?: string | null;
           created_at?: string;
           completed_at?: string | null;
+          probe_message_id?: string | null;
         };
         Relationships: [
           {
@@ -13305,7 +13311,33 @@ export interface Database {
           provider_message_id: string | null;
           error_code: string;
           sent_at: string | null;
+          retry_count: number;
         }[];
+      };
+      whatsapp_broadcast_pause: {
+        Args: {
+          p_organization_id: string;
+          p_broadcast_id: string;
+          p_billing: boolean;
+        };
+        Returns: undefined;
+      };
+      whatsapp_broadcast_receipt: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_provider_message_id: string;
+          p_delivery_status: string;
+          p_error_code: string;
+        };
+        Returns: undefined;
+      };
+      whatsapp_broadcast_resume: {
+        Args: {
+          p_organization_id: string;
+          p_broadcast_id: string;
+        };
+        Returns: number;
       };
       whatsapp_connection_save: {
         Args: {
