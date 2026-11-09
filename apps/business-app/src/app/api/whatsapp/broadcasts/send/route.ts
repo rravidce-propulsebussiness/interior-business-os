@@ -88,7 +88,7 @@ export async function POST(request: Request) {
     let releaseFrom = recipients.length;
 
     for (let index = 0; index < recipients.length; index += 1) {
-      const recipient = recipients[index];
+      const recipient = recipients[index]!;
       // A delivery-status webhook may have blocked the whole WABA between
       // claims; never continue after that.
       const current = await database.from('whatsapp_broadcasts')
