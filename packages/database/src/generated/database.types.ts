@@ -13322,6 +13322,14 @@ export interface Database {
         };
         Returns: undefined;
       };
+      whatsapp_broadcast_probe_reconcile: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_provider_message_id: string;
+        };
+        Returns: number;
+      };
       whatsapp_broadcast_receipt: {
         Args: {
           p_organization_id: string;
