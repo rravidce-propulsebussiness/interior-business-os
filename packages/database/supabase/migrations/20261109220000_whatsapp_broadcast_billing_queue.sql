@@ -148,7 +148,7 @@ begin
       and status = 'verifying' and probe_message_id = p_provider_message_id;
   end if;
 end;
-$;
+$$;
 revoke all on function public.whatsapp_broadcast_receipt(uuid,uuid,text,text,text)
   from public,anon,authenticated;
 grant execute on function public.whatsapp_broadcast_receipt(uuid,uuid,text,text,text)
