@@ -2769,3 +2769,12 @@
 .wa-attach-menu button:disabled {
   opacity: 0.5;
 }
+
+.wa-skin .wa-attach-menu button {
+  border: 0 !important;
+  border-radius: 10px !important;
+}
+.wa-skin .wa-chips button,
+.wa-skin .wa-row-action {
+  transform: none;
+}
