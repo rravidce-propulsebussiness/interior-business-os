@@ -34,7 +34,7 @@ create table if not exists public.whatsapp_broadcasts (
   organization_id uuid not null references public.organizations(id) on delete cascade,
   connection_id uuid not null,
   name text not null check (length(trim(name)) between 1 and 120),
-  template_name text not null check (template_name ~ '^[a-z0-9_]{1,512}$'),
+  template_name text not null check (template_name ~ '^[a-z0-9_]+$' and length(template_name) between 1 and 512),
   language text not null check (language ~ '^[a-z]{2}(_[A-Z]{2})?$'),
   parameters jsonb not null default '[]'::jsonb check (jsonb_typeof(parameters) = 'array'),
   label_ids uuid[] not null default '{}',
