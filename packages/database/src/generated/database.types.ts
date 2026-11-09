@@ -10389,6 +10389,7 @@ export interface Database {
           created_at: string;
           updated_at: string;
           schedule: Json;
+          menu: Json;
         };
         Insert: {
           id?: string;
@@ -10405,6 +10406,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           schedule?: Json;
+          menu?: Json;
         };
         Update: {
           id?: string;
@@ -10421,6 +10423,7 @@ export interface Database {
           created_at?: string;
           updated_at?: string;
           schedule?: Json;
+          menu?: Json;
         };
         Relationships: [
           {
@@ -10467,6 +10470,7 @@ export interface Database {
           error_code: string;
           created_at: string;
           completed_at: string | null;
+          kind: string;
         };
         Insert: {
           id?: string;
@@ -10481,6 +10485,7 @@ export interface Database {
           error_code?: string;
           created_at?: string;
           completed_at?: string | null;
+          kind?: string;
         };
         Update: {
           id?: string;
@@ -10495,6 +10500,7 @@ export interface Database {
           error_code?: string;
           created_at?: string;
           completed_at?: string | null;
+          kind?: string;
         };
         Relationships: [
           {

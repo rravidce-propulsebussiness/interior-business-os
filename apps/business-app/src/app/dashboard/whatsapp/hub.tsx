@@ -56,8 +56,30 @@ type Rule = {
   reply_text: string;
   status: 'active' | 'paused';
   schedule?: Partial<Schedule>;
+  menu?: MenuOption[];
 };
-type TriggerType = 'any_message' | 'keyword' | 'greeting' | 'away';
+type TriggerType = 'any_message' | 'keyword' | 'greeting' | 'away' | 'menu';
+type MenuOption = { key: string; title: string; reply: string };
+const DEFAULT_MENU: MenuOption[] = [
+  {
+    key: '1',
+    title: 'Accounts',
+    reply:
+      'Our accounts team will help with payments and invoices. Please share your project name or invoice number.',
+  },
+  {
+    key: '2',
+    title: 'New project / quote',
+    reply:
+      'Great! Please share your city, property type (2BHK/3BHK/villa) and budget. Our designer will call you.',
+  },
+  {
+    key: '3',
+    title: 'Ongoing project support',
+    reply:
+      'Please share your project name and the issue. Your project coordinator will get back to you today.',
+  },
+];
 type Schedule = {
   timezone: string;
   days: number[];
@@ -78,6 +100,8 @@ function triggerLabel(rule: Rule) {
     return `Keyword contains “${rule.keyword}”`;
   if (rule.trigger_type === 'greeting')
     return 'Greeting · first message, or after 14 days without messages';
+  if (rule.trigger_type === 'menu')
+    return `Menu · ${(rule.menu ?? []).length} options · first message, or when the customer types MENU or 0`;
   if (rule.trigger_type === 'away') {
     const sched = { ...DEFAULT_SCHEDULE, ...(rule.schedule ?? {}) };
     const days = sched.days.map((d) => WEEKDAYS[d]).join(', ');
@@ -2161,6 +2185,7 @@ function AutomationsPanel({
   const [name, setName] = useState('Welcome reply');
   const [triggerType, setTriggerType] = useState<TriggerType>('greeting');
   const [schedule, setSchedule] = useState<Schedule>(DEFAULT_SCHEDULE);
+  const [menu, setMenu] = useState<MenuOption[]>(DEFAULT_MENU);
   const [keyword, setKeyword] = useState('');
   const [replyText, setReplyText] = useState(
     'Hi {{name}}, thanks for messaging us. Our team will reply shortly.',
@@ -2205,6 +2230,7 @@ function AutomationsPanel({
           replyText,
           status: 'paused',
           ...(triggerType === 'away' ? { schedule } : {}),
+          ...(triggerType === 'menu' ? { menu } : {}),
         }),
       });
       const result = (await readApiResponse(response)) as { message?: string };
@@ -2242,6 +2268,7 @@ function AutomationsPanel({
           ...(rule.trigger_type === 'away'
             ? { schedule: { ...DEFAULT_SCHEDULE, ...(rule.schedule ?? {}) } }
             : {}),
+          ...(rule.trigger_type === 'menu' ? { menu: rule.menu ?? [] } : {}),
         }),
       });
       const result = (await readApiResponse(response)) as { message?: string };
@@ -2305,6 +2332,18 @@ function AutomationsPanel({
               <p className="mt-3 rounded-lg bg-white p-3 text-sm leading-6 text-stone-700">
                 {rule.reply_text}
               </p>
+              {rule.trigger_type === 'menu' && (
+                <ol className="mt-2 space-y-1 text-xs text-stone-600">
+                  {(rule.menu ?? []).map((option) => (
+                    <li key={option.key}>
+                      <strong>
+                        {option.key}. {option.title}
+                      </strong>{' '}
+                      → {option.reply}
+                    </li>
+                  ))}
+                </ol>
+              )}
             </article>
           ))}
           {!rules.length && (
@@ -2364,6 +2403,9 @@ function AutomationsPanel({
                 setTriggerType(e.target.value as typeof triggerType)
               }
             >
+              <option value="menu">
+                Auto-reply menu (1 for Accounts, 2 for Sales…)
+              </option>
               <option value="greeting">
                 Greeting message (first message or after 14 days)
               </option>
@@ -2374,6 +2416,103 @@ function AutomationsPanel({
               <option value="any_message">Every inbound message</option>
             </select>
           </label>
+          {triggerType === 'menu' && (
+            <fieldset className="space-y-2 rounded-xl border border-stone-200 p-3">
+              <legend className="px-1 text-xs font-semibold text-stone-600">
+                Menu options (customer replies with the number)
+              </legend>
+              {menu.map((option, index) => (
+                <div
+                  key={index}
+                  className="grid grid-cols-[44px_1fr_auto] items-start gap-2"
+                >
+                  <input
+                    className={field}
+                    aria-label="Option number"
+                    maxLength={2}
+                    pattern="[0-9]{1,2}"
+                    required
+                    value={option.key}
+                    onChange={(e) =>
+                      setMenu((list) =>
+                        list.map((item, i) =>
+                          i === index
+                            ? { ...item, key: e.target.value.replace(/\D/g, '') }
+                            : item,
+                        ),
+                      )
+                    }
+                  />
+                  <div className="space-y-1">
+                    <input
+                      className={field}
+                      aria-label="Option title"
+                      maxLength={24}
+                      required
+                      placeholder="Accounts"
+                      value={option.title}
+                      onChange={(e) =>
+                        setMenu((list) =>
+                          list.map((item, i) =>
+                            i === index
+                              ? { ...item, title: e.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                    <textarea
+                      className={field}
+                      aria-label="Reply for this option"
+                      rows={2}
+                      maxLength={1000}
+                      required
+                      placeholder="Reply sent when the customer chooses this"
+                      value={option.reply}
+                      onChange={(e) =>
+                        setMenu((list) =>
+                          list.map((item, i) =>
+                            i === index
+                              ? { ...item, reply: e.target.value }
+                              : item,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="pt-2 text-xs font-semibold text-stone-500 hover:text-red-700"
+                    disabled={menu.length <= 1}
+                    onClick={() =>
+                      setMenu((list) => list.filter((_, i) => i !== index))
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              {menu.length < 10 && (
+                <button
+                  type="button"
+                  className={softButton}
+                  onClick={() =>
+                    setMenu((list) => [
+                      ...list,
+                      { key: String(list.length + 1), title: '', reply: '' },
+                    ])
+                  }
+                >
+                  + Add option
+                </button>
+              )}
+              <p className="text-[11px] text-stone-500">
+                Customers get your message with these numbered options and a
+                tappable list. Typing the number (or tapping) within 24 hours
+                sends that option&apos;s reply. MENU or 0 shows it again.
+              </p>
+            </fieldset>
+          )}
           {triggerType === 'away' && (
             <fieldset className="space-y-2 rounded-xl border border-stone-200 p-3">
               <legend className="px-1 text-xs font-semibold text-stone-600">
@@ -2465,7 +2604,10 @@ function AutomationsPanel({
           <button
             className={primaryButton}
             disabled={
-              busy || (triggerType === 'away' && schedule.days.length === 0)
+              busy ||
+              (triggerType === 'away' && schedule.days.length === 0) ||
+              (triggerType === 'menu' &&
+                new Set(menu.map((option) => option.key)).size !== menu.length)
             }
           >
             {busy ? 'Saving…' : 'Save paused rule'}

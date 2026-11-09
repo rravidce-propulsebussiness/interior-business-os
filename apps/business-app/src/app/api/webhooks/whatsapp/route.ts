@@ -1,4 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
+import { whatsappMenuMessage } from '@/lib/whatsapp-menu';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import type { Json } from '@business-os/database';
 import { getConnection, graphRequest } from '@/lib/whatsapp-cloud';
@@ -118,8 +119,17 @@ export async function POST(request: Request) {
         for (const message of messages) {
           const waId = String(message.from ?? '');
           const messageId = String(message.id ?? '');
+          const interactive = message.interactive as
+            | Record<string, Record<string, unknown> | undefined>
+            | undefined;
+          // Menu choices arrive as text ("2") or as a tapped list/button id.
           const messageText = String(
-            (message.text as Record<string, unknown> | undefined)?.body ?? '',
+            (message.text as Record<string, unknown> | undefined)?.body ??
+              interactive?.list_reply?.id ??
+              interactive?.button_reply?.id ??
+              (message.button as Record<string, unknown> | undefined)
+                ?.payload ??
+              '',
           );
           if (!/^\d{5,32}$/.test(waId) || !messageId) continue;
           const normalized = messageText.trim().toUpperCase();
@@ -168,15 +178,21 @@ export async function POST(request: Request) {
           if (match.error || !match.data) continue;
           const rule = match.data as {
             run_id?: string;
+            rule_id?: string;
             reply_text?: string;
             to?: string;
             name?: string;
+            kind?: string;
+            menu?: unknown;
           };
           if (!rule.run_id || !rule.reply_text || !rule.to) continue;
-          const replyText = rule.reply_text.replace(
+          const intro = rule.reply_text.replace(
             /\{\{name\}\}/gi,
             rule.name?.trim() || rule.to,
           );
+          const menu =
+            rule.kind === 'menu' ? whatsappMenuMessage(intro, rule) : null;
+          const replyText = menu ? menu.text : intro;
           try {
             const connected = await getConnection(
               connection.organization_id,
@@ -190,8 +206,12 @@ export async function POST(request: Request) {
                 messaging_product: 'whatsapp',
                 recipient_type: 'individual',
                 to: rule.to,
-                type: 'text',
-                text: { preview_url: false, body: replyText },
+                ...(menu
+                  ? { type: 'interactive', interactive: menu.interactive }
+                  : {
+                      type: 'text',
+                      text: { preview_url: false, body: replyText },
+                    }),
               }),
             });
             const providerId = result.messages?.[0]?.id ?? '';

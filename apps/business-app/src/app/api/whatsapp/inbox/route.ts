@@ -43,15 +43,16 @@ export async function GET(request: Request) {
       if (ids.length) {
         const schedules = await createOwnerProvisioningDatabase()
           .from('whatsapp_automation_rules')
-          .select('id,schedule')
+          .select('id,schedule,menu')
           .eq('organization_id', services.context.organizationId)
           .in('id', ids);
         const byId = new Map(
-          (schedules.data ?? []).map((row) => [row.id, row.schedule]),
+          (schedules.data ?? []).map((row) => [row.id, row]),
         );
         data.rows = (data.rows ?? []).map((row) => ({
           ...row,
-          schedule: byId.get(String(row.id)) ?? {},
+          schedule: byId.get(String(row.id))?.schedule ?? {},
+          menu: byId.get(String(row.id))?.menu ?? [],
         }));
       }
       return Response.json(data, { headers: privateHeaders });

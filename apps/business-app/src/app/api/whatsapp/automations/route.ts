@@ -11,7 +11,7 @@ const ruleSchema = z
     version: z.number().int().min(0).default(0),
     connectionId: z.string().uuid(),
     name: z.string().trim().min(1).max(120),
-    triggerType: z.enum(['any_message', 'keyword', 'greeting', 'away']),
+    triggerType: z.enum(['any_message', 'keyword', 'greeting', 'away', 'menu']),
     keyword: z.string().trim().max(80).default(''),
     replyText: z.string().trim().min(1).max(1000),
     status: z.enum(['active', 'paused']).default('paused'),
@@ -23,6 +23,19 @@ const ruleSchema = z
         end: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
       })
       .strict()
+      .optional(),
+    menu: z
+      .array(
+        z
+          .object({
+            key: z.string().regex(/^[0-9]{1,2}$/),
+            title: z.string().trim().min(1).max(24),
+            reply: z.string().trim().min(1).max(1000),
+          })
+          .strict(),
+      )
+      .min(1)
+      .max(10)
       .optional(),
   })
   .strict()
@@ -39,6 +52,15 @@ const ruleSchema = z
         path: ['schedule'],
         message: 'Set business hours for the away message.',
       });
+    if (rule.triggerType === 'menu') {
+      const keys = (rule.menu ?? []).map((option) => option.key);
+      if (!keys.length || new Set(keys).size !== keys.length)
+        context.addIssue({
+          code: 'custom',
+          path: ['menu'],
+          message: 'Add menu options with different numbers.',
+        });
+    }
   });
 
 export async function POST(request: Request) {
@@ -63,6 +85,7 @@ export async function POST(request: Request) {
         status: input.data.status,
         schedule:
           input.data.triggerType === 'away' ? (input.data.schedule ?? {}) : {},
+        menu: input.data.triggerType === 'menu' ? (input.data.menu ?? []) : [],
       },
     });
     if (result.error) throw new DomainError('VALIDATION_FAILED');
