@@ -13333,10 +13333,7 @@ export interface Database {
         Returns: undefined;
       };
       whatsapp_broadcast_resume: {
-        Args: {
-          p_organization_id: string;
-          p_broadcast_id: string;
-        };
+        Args: { p_organization_id: string; p_broadcast_id: string };
         Returns: number;
       };
       whatsapp_connection_save: {
