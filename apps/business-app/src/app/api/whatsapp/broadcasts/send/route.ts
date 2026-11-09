@@ -84,7 +84,7 @@ export async function POST(request: Request) {
       if (latest.error || waiting.error)
         throw new Error('BROADCAST_PROGRESS_READ_FAILED');
       const pending = waiting.count ?? 0;
-      let status = latest.data.status;
+      let status = latest.data?.status ?? broadcast.data.status;
       if (pending === 0 && status === 'sending') {
         const closed = await database
           .from('whatsapp_broadcasts')
