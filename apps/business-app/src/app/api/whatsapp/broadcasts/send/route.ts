@@ -75,13 +75,33 @@ export async function POST(request: Request) {
         .eq('organization_id', organizationId)
         .eq('id', broadcast.data.id)
         .single();
+      const waiting = await database
+        .from('whatsapp_broadcast_recipients')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', organizationId)
+        .eq('broadcast_id', broadcast.data.id)
+        .in('status', ['queued', 'sending']);
+      if (latest.error || waiting.error)
+        throw new Error('BROADCAST_PROGRESS_READ_FAILED');
+      const pending = waiting.count ?? 0;
+      let status = latest.data.status;
+      if (pending === 0 && status === 'sending') {
+        const closed = await database
+          .from('whatsapp_broadcasts')
+          .update({ status: 'completed', completed_at: new Date().toISOString() })
+          .eq('organization_id', organizationId)
+          .eq('id', broadcast.data.id)
+          .eq('status', 'sending');
+        if (closed.error) throw new Error('BROADCAST_COMPLETION_FAILED');
+        status = 'completed';
+      }
       return Response.json(
         {
           sent: 0,
           failed: 0,
-          remaining: 0,
-          status: latest.data?.status ?? broadcast.data.status,
-          noProgress: true,
+          remaining: pending,
+          status,
+          noProgress: pending > 0 && status !== 'verifying',
         },
         { headers: privateHeaders },
       );
