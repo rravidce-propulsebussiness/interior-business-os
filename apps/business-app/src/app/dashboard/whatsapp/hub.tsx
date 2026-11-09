@@ -106,7 +106,13 @@ type BroadcastRow = {
   name: string;
   template_name: string;
   language: string;
-  status: 'verifying' | 'sending' | 'paused_billing' | 'paused_error' | 'completed' | 'cancelled';
+  status:
+    | 'verifying'
+    | 'sending'
+    | 'paused_billing'
+    | 'paused_error'
+    | 'completed'
+    | 'cancelled';
   total: number;
   skipped: number;
   created_at: string;
@@ -133,9 +139,7 @@ const LABEL_COLORS = [
 
 function useLabels(connectionId: string) {
   const [labels, setLabels] = useState<Label[]>([]);
-  const [assignments, setAssignments] = useState<Record<string, string[]>>(
-    {},
-  );
+  const [assignments, setAssignments] = useState<Record<string, string[]>>({});
   const [counts, setCounts] = useState<Record<string, number>>({});
   const reload = useCallback(async () => {
     const params = new URLSearchParams(
@@ -1342,7 +1346,9 @@ function InboxPanel({
       !labelFilter ||
       (labelState.assignments[row.id] ?? []).includes(labelFilter),
   );
-  const labelById = new Map(labelState.labels.map((label) => [label.id, label]));
+  const labelById = new Map(
+    labelState.labels.map((label) => [label.id, label]),
+  );
 
   return (
     <div className="wa-inbox-grid">
@@ -1626,7 +1632,9 @@ function InboxPanel({
                             maxLength={40}
                             placeholder="New label, e.g. Hot lead"
                             value={newLabel}
-                            onChange={(event) => setNewLabel(event.target.value)}
+                            onChange={(event) =>
+                              setNewLabel(event.target.value)
+                            }
                           />
                           <button className={softButton}>Add</button>
                         </form>
@@ -1677,9 +1685,7 @@ function InboxPanel({
                           message={item}
                           connectionId={connectionId}
                         />
-                        <p
-                          className="wa-message-meta"
-                        >
+                        <p className="wa-message-meta">
                           <span>{clockTime(item.occurred_at)}</span>
                           {item.direction === 'outbound' && (
                             <StatusTicks status={item.status} />
@@ -2029,7 +2035,8 @@ function MessageBody({
           rel="noreferrer"
         >
           <span className="wa-doc-icon">
-            {(/\.([a-z0-9]{1,4})$/i.exec(caption.split('\n')[0] ?? '')?.[1] ??
+            {(
+              /\.([a-z0-9]{1,4})$/i.exec(caption.split('\n')[0] ?? '')?.[1] ??
               'DOC'
             ).toUpperCase()}
           </span>
@@ -2395,15 +2402,21 @@ function BroadcastsPanel({
           throw new Error(result.message ?? 'Broadcast sending stopped.');
 
         if (result.status === 'paused_billing') {
-          setNotice('Billing issue 131042: remaining contacts are safely queued. Add funds or fix the payment method in Meta, then click Resend & Continue.');
+          setNotice(
+            'Billing issue 131042: remaining contacts are safely queued. Add funds or fix the payment method in Meta, then click Resend & Continue.',
+          );
           break;
         }
         if (result.status === 'paused_error') {
-          setNotice('Verification failed or sending is uncertain. Review failed messages before retrying; accepted messages are never automatically resent.');
+          setNotice(
+            'Verification failed or sending is uncertain. Review failed messages before retrying; accepted messages are never automatically resent.',
+          );
           break;
         }
         if (result.status === 'verifying') {
-          setNotice('Test message submitted. Waiting for Meta to confirm delivery before sending the rest.');
+          setNotice(
+            'Test message submitted. Waiting for Meta to confirm delivery before sending the rest.',
+          );
           let nextStatus: BroadcastRow['status'] = 'verifying';
           // This is cheap status-only polling in the open browser. It stops
           // after 90s; billing holds never trigger repeated send attempts.
@@ -2417,37 +2430,53 @@ function BroadcastsPanel({
               row?: { status?: BroadcastRow['status'] };
               message?: string;
             };
-            if (!poll.ok) throw new Error(state.message ?? 'Could not check broadcast verification.');
+            if (!poll.ok)
+              throw new Error(
+                state.message ?? 'Could not check broadcast verification.',
+              );
             nextStatus = state.row?.status ?? 'verifying';
             if (nextStatus !== 'verifying') break;
           }
           await load();
           if (nextStatus === 'sending' && !cancelRef.current) continue;
           if (nextStatus === 'paused_billing') {
-            setNotice('Meta billing error 131042. Queue paused; use Add Money / Fix Payment and then Resend & Continue.');
+            setNotice(
+              'Meta billing error 131042. Queue paused; use Add Money / Fix Payment and then Resend & Continue.',
+            );
           } else if (nextStatus === 'paused_error') {
-            setNotice('The test message failed. Review the cause, then use Resend & Continue.');
+            setNotice(
+              'The test message failed. Review the cause, then use Resend & Continue.',
+            );
           } else if (!cancelRef.current) {
-            setNotice('Waiting for Meta to deliver the first test message. No more messages were attempted. Refresh this page later and use Continue when it is verified.');
+            setNotice(
+              'Waiting for Meta to deliver the first test message. No more messages were attempted. Refresh this page later and use Continue when it is verified.',
+            );
           }
           break;
         }
         if (result.status === 'completed') {
           const latest = await load();
           const campaign = latest?.find((item) => item.id === id);
-          setNotice(campaign?.stats.failed
-            ? `Broadcast finished with ${campaign.stats.failed} failed recipient(s). Use Resend Failed to retry only confirmed failures.`
-            : 'All messages submitted. Delivery and read ticks update from Meta.');
+          setNotice(
+            campaign?.stats.failed
+              ? `Broadcast finished with ${campaign.stats.failed} failed recipient(s). Use Resend Failed to retry only confirmed failures.`
+              : 'All messages submitted. Delivery and read ticks update from Meta.',
+          );
           break;
         }
         if (result.noProgress) {
-          setNotice('No safely claimable recipients. An earlier message may still be in flight; do not resend until its status is confirmed.');
+          setNotice(
+            'No safely claimable recipients. An earlier message may still be in flight; do not resend until its status is confirmed.',
+          );
           break;
         }
         // Avoid a heavy all-campaign read after every small batch.
         if (round % 5 === 0) await load();
       }
-      if (cancelRef.current) setNotice('Broadcast cancelled. Unsent contacts were preserved in history.');
+      if (cancelRef.current)
+        setNotice(
+          'Broadcast cancelled. Unsent contacts were preserved in history.',
+        );
     } catch (error) {
       setNotice(friendlyError(error, 'Broadcast sending stopped.'));
     } finally {
@@ -2469,9 +2498,12 @@ function BroadcastsPanel({
         retried?: number;
         message?: string;
       };
-      if (!response.ok) throw new Error(data.message ?? 'Cannot resume broadcast.');
+      if (!response.ok)
+        throw new Error(data.message ?? 'Cannot resume broadcast.');
       await load();
-      setNotice(`Retrying ${data.retried ?? 0} confirmed failed message(s), without resending accepted messages.`);
+      setNotice(
+        `Retrying ${data.retried ?? 0} confirmed failed message(s), without resending accepted messages.`,
+      );
       await runSending(id);
     } catch (error) {
       setNotice(friendlyError(error, 'Cannot resume broadcast.'));
@@ -2536,8 +2568,8 @@ function BroadcastsPanel({
           <span className="wa-eyebrow">CAMPAIGNS</span>
           <h3>WhatsApp broadcasts</h3>
           <p>
-            Send an approved template to labelled contacts who opted in, and
-            see who received and read it.
+            Send an approved template to labelled contacts who opted in, and see
+            who received and read it.
           </p>
         </div>
       </div>
@@ -2548,9 +2580,9 @@ function BroadcastsPanel({
             <strong>Meta could not charge for your WhatsApp messages</strong>
             <p>
               Meta returned billing error 131042. The affected campaigns are
-              paused, and remaining contacts are safely queued. Fix the
-              WhatsApp account's payment method, outstanding dues or prepaid
-              funds in Meta, then click Resend & Continue on the campaign.
+              paused, and remaining contacts are safely queued. Fix the WhatsApp
+              account's payment method, outstanding dues or prepaid funds in
+              Meta, then click Resend & Continue on the campaign.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -2699,7 +2731,9 @@ function BroadcastsPanel({
                   <div className="wa-list-filters" role="tablist">
                     <button
                       type="button"
-                      className={audienceMode === 'labels' ? 'wa-filter-active' : ''}
+                      className={
+                        audienceMode === 'labels' ? 'wa-filter-active' : ''
+                      }
                       onClick={() => setAudienceMode('labels')}
                     >
                       By label
@@ -2711,7 +2745,8 @@ function BroadcastsPanel({
                       }
                       onClick={() => setAudienceMode('contacts')}
                     >
-                      Pick contacts{pickedIds.length ? ` (${pickedIds.length})` : ''}
+                      Pick contacts
+                      {pickedIds.length ? ` (${pickedIds.length})` : ''}
                     </button>
                   </div>
                 </div>
@@ -2835,8 +2870,8 @@ function BroadcastsPanel({
                   })}
                   {!labelState.labels.length && (
                     <p className="text-xs text-stone-500">
-                      No labels yet. Add labels from a chat (🏷) to target
-                      groups such as “2BHK leads”.
+                      No labels yet. Add labels from a chat (🏷) to target groups
+                      such as “2BHK leads”.
                     </p>
                   )}
                 </div>
@@ -2955,36 +2990,65 @@ function BroadcastsPanel({
                   <span
                     className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${row.status === 'completed' ? 'bg-emerald-50 text-emerald-700' : row.status === 'cancelled' ? 'bg-stone-100 text-stone-600' : row.status === 'paused_billing' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800'}`}
                   >
-                    {row.status === 'verifying' ? 'Verifying first delivery'
-                      : row.status === 'sending' ? sendingId === row.id ? `Sending ${percent}%` : 'Ready to continue'
-                      : row.status === 'paused_billing' ? 'Billing paused · 131042'
-                      : row.status === 'paused_error' ? 'Needs review'
-                      : row.status === 'completed' ? row.stats.failed ? 'Completed with failures' : 'Submitted'
-                      : 'Cancelled'}
+                    {row.status === 'verifying'
+                      ? 'Verifying first delivery'
+                      : row.status === 'sending'
+                        ? sendingId === row.id
+                          ? `Sending ${percent}%`
+                          : 'Ready to continue'
+                        : row.status === 'paused_billing'
+                          ? 'Billing paused · 131042'
+                          : row.status === 'paused_error'
+                            ? 'Needs review'
+                            : row.status === 'completed'
+                              ? row.stats.failed
+                                ? 'Completed with failures'
+                                : 'Submitted'
+                              : 'Cancelled'}
                   </span>
                   {canManage && (
                     <>
                       {row.status === 'sending' && sendingId !== row.id && (
-                        <button type="button" className={softButton}
+                        <button
+                          type="button"
+                          className={softButton}
                           disabled={!!sendingId}
-                          onClick={() => void runSending(row.id)}>
+                          onClick={() => void runSending(row.id)}
+                        >
                           Continue
                         </button>
                       )}
-                      {(row.status === 'paused_billing' || row.status === 'paused_error' ||
-                        (row.status === 'completed' && row.stats.failed > 0)) && (
-                        <button type="button" className={primaryButton}
+                      {(row.status === 'paused_billing' ||
+                        row.status === 'paused_error' ||
+                        (row.status === 'completed' &&
+                          row.stats.failed > 0)) && (
+                        <button
+                          type="button"
+                          className={primaryButton}
                           disabled={!!sendingId}
-                          onClick={() => void resendBroadcast(row.id)}>
-                          {row.status === 'completed' ? 'Resend failed' : 'Resend & Continue'}
+                          onClick={() => void resendBroadcast(row.id)}
+                        >
+                          {row.status === 'completed'
+                            ? 'Resend failed'
+                            : 'Resend & Continue'}
                         </button>
                       )}
                       {row.status === 'verifying' && (
-                        <span className="text-xs text-stone-500">Waiting for Meta receipt</span>
+                        <span className="text-xs text-stone-500">
+                          Waiting for Meta receipt
+                        </span>
                       )}
-                      {['verifying', 'sending', 'paused_billing', 'paused_error'].includes(row.status) && (
-                        <button type="button" className={softButton}
-                          onClick={() => void cancelBroadcast(row.id)}>
+                      {[
+                        'verifying',
+                        'sending',
+                        'paused_billing',
+                        'paused_error',
+                      ].includes(row.status) && (
+                        <button
+                          type="button"
+                          className={softButton}
+                          onClick={() => void cancelBroadcast(row.id)}
+                        >
                           Cancel
                         </button>
                       )}
@@ -3039,7 +3103,11 @@ function BroadcastsPanel({
                     {help.link && (
                       <>
                         {' '}
-                        <a href={help.link.href} target="_blank" rel="noreferrer">
+                        <a
+                          href={help.link.href}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           {help.link.label} ↗
                         </a>
                       </>
@@ -3327,7 +3395,9 @@ function SettingsPanel({
             <span>{connection.name}</span>
             <strong>{connection.phone}</strong>
             <small>
-              {connection.status === 'connected' ? 'Connected' : connection.status}
+              {connection.status === 'connected'
+                ? 'Connected'
+                : connection.status}
             </small>
           </article>
         ))}
@@ -3675,7 +3745,9 @@ function AutomationsPanel({
                 Away message (outside business hours)
               </option>
               <option value="keyword">Message contains a keyword</option>
-              <option value="any_message">Any message (once per customer per 24 h)</option>
+              <option value="any_message">
+                Any message (once per customer per 24 h)
+              </option>
             </select>
           </label>
           {triggerType === 'menu' && (
@@ -3699,7 +3771,10 @@ function AutomationsPanel({
                       setMenu((list) =>
                         list.map((item, i) =>
                           i === index
-                            ? { ...item, key: e.target.value.replace(/\D/g, '') }
+                            ? {
+                                ...item,
+                                key: e.target.value.replace(/\D/g, ''),
+                              }
                             : item,
                         ),
                       )
@@ -3827,7 +3902,10 @@ function AutomationsPanel({
                     required
                     value={schedule.end}
                     onChange={(e) =>
-                      setSchedule((value) => ({ ...value, end: e.target.value }))
+                      setSchedule((value) => ({
+                        ...value,
+                        end: e.target.value,
+                      }))
                     }
                   />
                 </label>
@@ -3959,9 +4037,9 @@ function QuickRepliesManager({ canManage }: { canManage: boolean }) {
         <div>
           <h3 className="text-lg font-bold text-stone-900">Quick replies</h3>
           <p className="mt-1 text-sm text-stone-500">
-            Saved answers for common questions. In any chat, type{' '}
-            <code>/</code> and the shortcut to insert one. Use{' '}
-            <code>{'{{name}}'}</code> for the customer&apos;s name.
+            Saved answers for common questions. In any chat, type <code>/</code>{' '}
+            and the shortcut to insert one. Use <code>{'{{name}}'}</code> for
+            the customer&apos;s name.
           </p>
         </div>
         <span className="rounded-full bg-[#f9eee9] px-3 py-1 text-xs font-semibold text-[#88352B]">

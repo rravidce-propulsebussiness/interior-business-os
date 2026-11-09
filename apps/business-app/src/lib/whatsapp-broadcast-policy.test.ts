@@ -8,22 +8,27 @@ import {
 
 describe('WhatsApp billing-aware broadcast policy', () => {
   it('stops immediately on payment eligibility error 131042', () => {
-    expect(broadcastSendErrorKind(new MetaApiError(400, 131042, null, null)))
-      .toBe('billing');
+    expect(
+      broadcastSendErrorKind(new MetaApiError(400, 131042, null, null)),
+    ).toBe('billing');
   });
 
   it('does not classify known template errors as billing errors', () => {
-    expect(broadcastSendErrorKind(new MetaApiError(400, 132001, null, null)))
-      .toBe('rejected');
+    expect(
+      broadcastSendErrorKind(new MetaApiError(400, 132001, null, null)),
+    ).toBe('rejected');
   });
 
   it('does not retry ambiguous failures that Meta could have accepted', () => {
-    expect(broadcastSendErrorKind(new Error('network timeout')))
-      .toBe('uncertain');
-    expect(broadcastSendErrorKind(new MetaApiError(503, 131042, null, null)))
-      .toBe('uncertain');
-    expect(broadcastSendErrorKind(new MetaApiError(400, null, null, null)))
-      .toBe('uncertain');
+    expect(broadcastSendErrorKind(new Error('network timeout'))).toBe(
+      'uncertain',
+    );
+    expect(
+      broadcastSendErrorKind(new MetaApiError(503, 131042, null, null)),
+    ).toBe('uncertain');
+    expect(
+      broadcastSendErrorKind(new MetaApiError(400, null, null, null)),
+    ).toBe('uncertain');
   });
 
   it('disables sending for both billing-paused and cancelled campaigns', () => {
@@ -36,15 +41,20 @@ describe('WhatsApp billing-aware broadcast policy', () => {
   });
 
   it('retries only confirmed failed recipients within the retry budget', () => {
-    expect(canRetryBroadcastRecipient({ status: 'failed', retry_count: 0 }))
-      .toBe(true);
-    expect(canRetryBroadcastRecipient({ status: 'failed', retry_count: 2 }))
-      .toBe(true);
-    expect(canRetryBroadcastRecipient({ status: 'failed', retry_count: 3 }))
-      .toBe(false);
-    expect(canRetryBroadcastRecipient({ status: 'sent', retry_count: 0 }))
-      .toBe(false);
-    expect(canRetryBroadcastRecipient({ status: 'sending', retry_count: 0 }))
-      .toBe(false);
+    expect(
+      canRetryBroadcastRecipient({ status: 'failed', retry_count: 0 }),
+    ).toBe(true);
+    expect(
+      canRetryBroadcastRecipient({ status: 'failed', retry_count: 2 }),
+    ).toBe(true);
+    expect(
+      canRetryBroadcastRecipient({ status: 'failed', retry_count: 3 }),
+    ).toBe(false);
+    expect(canRetryBroadcastRecipient({ status: 'sent', retry_count: 0 })).toBe(
+      false,
+    );
+    expect(
+      canRetryBroadcastRecipient({ status: 'sending', retry_count: 0 }),
+    ).toBe(false);
   });
 });

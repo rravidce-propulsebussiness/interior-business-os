@@ -8,7 +8,10 @@ import {
   whatsappContext,
 } from '@/lib/whatsapp-cloud';
 import { metaErrorLabel, whatsappFailure } from '@/lib/whatsapp-meta-error';
-import { broadcastSendErrorKind, isActiveBroadcast } from '@/lib/whatsapp-broadcast-policy';
+import {
+  broadcastSendErrorKind,
+  isActiveBroadcast,
+} from '@/lib/whatsapp-broadcast-policy';
 import { personaliseParameters } from '@/lib/whatsapp-template-params';
 
 export const dynamic = 'force-dynamic';
@@ -39,7 +42,9 @@ export async function POST(request: Request) {
     const database = createOwnerProvisioningDatabase();
     const broadcast = await database
       .from('whatsapp_broadcasts')
-      .select('id,connection_id,template_name,language,parameters,status,probe_message_id')
+      .select(
+        'id,connection_id,template_name,language,parameters,status,probe_message_id',
+      )
       .eq('organization_id', organizationId)
       .eq('id', input.data.broadcastId)
       .maybeSingle();
@@ -64,13 +69,20 @@ export async function POST(request: Request) {
     if (claimed.error) throw new Error('BROADCAST_CLAIM_FAILED');
     const recipients = claimed.data ?? [];
     if (recipients.length === 0) {
-      const latest = await database.from('whatsapp_broadcasts')
-        .select('status').eq('organization_id', organizationId)
-        .eq('id', broadcast.data.id).single();
+      const latest = await database
+        .from('whatsapp_broadcasts')
+        .select('status')
+        .eq('organization_id', organizationId)
+        .eq('id', broadcast.data.id)
+        .single();
       return Response.json(
-        { sent: 0, failed: 0, remaining: 0,
+        {
+          sent: 0,
+          failed: 0,
+          remaining: 0,
           status: latest.data?.status ?? broadcast.data.status,
-          noProgress: true },
+          noProgress: true,
+        },
         { headers: privateHeaders },
       );
     }
@@ -91,9 +103,12 @@ export async function POST(request: Request) {
       const recipient = recipients[index]!;
       // A delivery-status webhook may have blocked the whole WABA between
       // claims; never continue after that.
-      const current = await database.from('whatsapp_broadcasts')
-        .select('status').eq('organization_id', organizationId)
-        .eq('id', broadcast.data.id).single();
+      const current = await database
+        .from('whatsapp_broadcasts')
+        .select('status')
+        .eq('organization_id', organizationId)
+        .eq('id', broadcast.data.id)
+        .single();
       if (current.error || !isActiveBroadcast(current.data?.status ?? '')) {
         halt = true;
         releaseFrom = index;
@@ -108,9 +123,11 @@ export async function POST(request: Request) {
         .maybeSingle();
       if (contact.error) throw new Error('BROADCAST_CONTACT_READ_FAILED');
       if (!contact.data || contact.data.opted_out_at) {
-        await database.from('whatsapp_broadcast_recipients')
+        await database
+          .from('whatsapp_broadcast_recipients')
           .update({ status: 'cancelled', error_code: 'opted_out' })
-          .eq('organization_id', organizationId).eq('id', recipient.id)
+          .eq('organization_id', organizationId)
+          .eq('id', recipient.id)
           .eq('status', 'sending');
         continue;
       }
@@ -132,10 +149,15 @@ export async function POST(request: Request) {
               language: { code: broadcast.data.language },
               ...(parameters.length
                 ? {
-                    components: [{
-                      type: 'body',
-                      parameters: parameters.map((text) => ({ type: 'text', text })),
-                    }],
+                    components: [
+                      {
+                        type: 'body',
+                        parameters: parameters.map((text) => ({
+                          type: 'text',
+                          text,
+                        })),
+                      },
+                    ],
                   }
                 : {}),
             },
@@ -156,9 +178,11 @@ export async function POST(request: Request) {
           releaseFrom = index + 1;
           break;
         }
-        const labelled = await database.from('whatsapp_broadcast_recipients')
+        const labelled = await database
+          .from('whatsapp_broadcast_recipients')
           .update({ status: 'failed', error_code: metaErrorLabel(error) })
-          .eq('organization_id', organizationId).eq('id', recipient.id)
+          .eq('organization_id', organizationId)
+          .eq('id', recipient.id)
           .eq('status', 'sending');
         if (labelled.error) throw new Error('BROADCAST_FAILURE_SAVE_FAILED');
         failed += 1;
@@ -191,22 +215,27 @@ export async function POST(request: Request) {
 
       // Record acceptance BEFORE any optional inbox logging: if downstream
       // storage fails, the recipient must not be marked 'failed' and resent.
-      const stored = await database.from('whatsapp_broadcast_recipients')
+      const stored = await database
+        .from('whatsapp_broadcast_recipients')
         .update({
           status: 'sent',
           provider_message_id: messageId,
           sent_at: new Date().toISOString(),
         })
-        .eq('organization_id', organizationId).eq('id', recipient.id)
+        .eq('organization_id', organizationId)
+        .eq('id', recipient.id)
         .eq('status', 'sending')
-        .select('id').maybeSingle();
+        .select('id')
+        .maybeSingle();
       if (stored.error || !stored.data)
         throw new Error('BROADCAST_ACCEPTED_MESSAGE_SAVE_FAILED');
 
       if (current.data?.status === 'verifying') {
-        const updated = await database.from('whatsapp_broadcasts')
+        const updated = await database
+          .from('whatsapp_broadcasts')
           .update({ probe_message_id: messageId })
-          .eq('organization_id', organizationId).eq('id', broadcast.data.id)
+          .eq('organization_id', organizationId)
+          .eq('id', broadcast.data.id)
           .eq('status', 'verifying')
           .is('probe_message_id', null);
         if (updated.error) throw new Error('BROADCAST_PROBE_SAVE_FAILED');
@@ -228,7 +257,8 @@ export async function POST(request: Request) {
     // storage failure stays 'sending' for manual reconciliation, never auto-resend.
     if (halt && releaseFrom < recipients.length) {
       const untouched = recipients.slice(releaseFrom).map((r) => r.id);
-      const released = await database.from('whatsapp_broadcast_recipients')
+      const released = await database
+        .from('whatsapp_broadcast_recipients')
         .update({ status: 'queued' })
         .eq('organization_id', organizationId)
         .eq('broadcast_id', broadcast.data.id)
@@ -247,14 +277,19 @@ export async function POST(request: Request) {
     const left = remaining.count ?? 0;
 
     if (left === 0)
-      await database.from('whatsapp_broadcasts')
+      await database
+        .from('whatsapp_broadcasts')
         .update({ status: 'completed', completed_at: new Date().toISOString() })
-        .eq('organization_id', organizationId).eq('id', broadcast.data.id)
+        .eq('organization_id', organizationId)
+        .eq('id', broadcast.data.id)
         .eq('status', 'sending');
 
-    const latest = await database.from('whatsapp_broadcasts')
-      .select('status').eq('organization_id', organizationId)
-      .eq('id', broadcast.data.id).single();
+    const latest = await database
+      .from('whatsapp_broadcasts')
+      .select('status')
+      .eq('organization_id', organizationId)
+      .eq('id', broadcast.data.id)
+      .single();
     if (latest.error) throw new Error('BROADCAST_PROGRESS_READ_FAILED');
     return Response.json(
       { sent, failed, remaining: left, status: latest.data.status },

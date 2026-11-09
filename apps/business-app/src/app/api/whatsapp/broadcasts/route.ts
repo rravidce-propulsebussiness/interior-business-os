@@ -128,7 +128,10 @@ export async function GET(request: Request) {
         .eq('id', stateOnly)
         .maybeSingle();
       if (state.error) throw new Error('BROADCAST_STATUS_READ_FAILED');
-      return Response.json({ row: state.data ?? null }, { headers: privateHeaders });
+      return Response.json(
+        { row: state.data ?? null },
+        { headers: privateHeaders },
+      );
     }
     if (url.searchParams.get('preview') === '1') {
       const ids = (name: string) =>
@@ -201,8 +204,7 @@ export async function GET(request: Request) {
         else if (item.status === 'failed') {
           stats.failed += 1;
           addError(item.error_code);
-        }
-        else if (item.status === 'cancelled') stats.cancelled += 1;
+        } else if (item.status === 'cancelled') stats.cancelled += 1;
         else if (item.provider_message_id)
           providerIds.push(item.provider_message_id);
       }
@@ -264,7 +266,12 @@ export async function POST(request: Request) {
         .update({ status: 'cancelled', completed_at: new Date().toISOString() })
         .eq('organization_id', organizationId)
         .eq('id', input.broadcastId)
-        .in('status', ['verifying', 'sending', 'paused_billing', 'paused_error']);
+        .in('status', [
+          'verifying',
+          'sending',
+          'paused_billing',
+          'paused_error',
+        ]);
       await database
         .from('whatsapp_broadcast_recipients')
         .update({ status: 'cancelled' })
@@ -287,7 +294,10 @@ export async function POST(request: Request) {
       });
       if (resumed.error)
         return Response.json(
-          { message: 'This broadcast cannot be retried. Refresh its status first.' },
+          {
+            message:
+              'This broadcast cannot be retried. Refresh its status first.',
+          },
           { status: 409, headers: privateHeaders },
         );
       return Response.json(
@@ -335,8 +345,7 @@ export async function POST(request: Request) {
         { status: 400, headers: privateHeaders },
       );
     const needed = templatePlaceholderCount(
-      template.components?.find((component) => component.type === 'BODY')
-        ?.text,
+      template.components?.find((component) => component.type === 'BODY')?.text,
     );
     if (input.parameters.length !== needed)
       return Response.json(
@@ -382,7 +391,8 @@ export async function POST(request: Request) {
       })
       .select('id')
       .single();
-    if (created.error || !created.data) throw new Error('BROADCAST_CREATE_FAILED');
+    if (created.error || !created.data)
+      throw new Error('BROADCAST_CREATE_FAILED');
     for (let i = 0; i < people.eligible.length; i += 500) {
       const batch = people.eligible.slice(i, i + 500).map((contact) => ({
         organization_id: organizationId,
