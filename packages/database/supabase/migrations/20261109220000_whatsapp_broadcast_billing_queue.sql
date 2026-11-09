@@ -8,6 +8,9 @@ alter table public.whatsapp_broadcasts
   add constraint whatsapp_broadcasts_status_check
   check (status in ('verifying','sending','paused_billing','paused_error','completed','cancelled'));
 
+alter table public.whatsapp_broadcasts
+  add column if not exists probe_message_id text;
+
 alter table public.whatsapp_broadcast_recipients
   add column if not exists retry_count integer not null default 0;
 alter table public.whatsapp_broadcast_recipients
@@ -35,11 +38,14 @@ language sql security definer set search_path = '' as $$
       and b.status in ('verifying','sending')
       and (
         b.status = 'sending'
-        or not exists (
-          select 1 from public.whatsapp_broadcast_recipients pending
-          where pending.organization_id = x.organization_id
-            and pending.broadcast_id = x.broadcast_id
-            and pending.status in ('sending','sent')
+        or (
+          b.probe_message_id is null
+          and not exists (
+            select 1 from public.whatsapp_broadcast_recipients pending
+            where pending.organization_id = x.organization_id
+              and pending.broadcast_id = x.broadcast_id
+              and pending.status = 'sending'
+          )
         )
       )
     order by x.id
@@ -139,10 +145,10 @@ begin
   elsif p_delivery_status in ('delivered','read') then
     update public.whatsapp_broadcasts set status = 'sending'
     where organization_id = p_organization_id and id = target_broadcast
-      and status = 'verifying';
+      and status = 'verifying' and probe_message_id = p_provider_message_id;
   end if;
 end;
-$$;
+$;
 revoke all on function public.whatsapp_broadcast_receipt(uuid,uuid,text,text,text)
   from public,anon,authenticated;
 grant execute on function public.whatsapp_broadcast_receipt(uuid,uuid,text,text,text)
@@ -182,7 +188,7 @@ begin
 
   if pending > 0 then
     update public.whatsapp_broadcasts
-    set status = 'verifying', completed_at = null
+    set status = 'verifying', probe_message_id = null, completed_at = null
     where organization_id = p_organization_id and id = p_broadcast_id;
   end if;
   return retried;
