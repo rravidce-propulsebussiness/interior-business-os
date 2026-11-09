@@ -55,7 +55,7 @@ language sql security definer set search_path = '' as $$
       then 1
       else least(greatest(p_limit, 1), 20)
     end
-    for update of x skip locked
+    for update of x, b skip locked
   )
   returning r.*;
 $$;
@@ -109,13 +109,13 @@ create or replace function public.whatsapp_broadcast_receipt(
 )
 returns void
 language plpgsql security definer set search_path = '' as $$
-declare target_broadcast uuid;
+declare target_broadcast uuid; recipient_state text;
 begin
   if p_provider_message_id is null or p_provider_message_id = ''
     or p_delivery_status not in ('sent','delivered','read','failed')
   then return; end if;
 
-  select r.broadcast_id into target_broadcast
+  select r.broadcast_id, r.status into target_broadcast, recipient_state
   from public.whatsapp_broadcast_recipients r
   join public.whatsapp_broadcasts b
     on b.id = r.broadcast_id and b.organization_id = r.organization_id
@@ -137,12 +137,15 @@ begin
       and r.broadcast_id = target_broadcast
       and r.provider_message_id = p_provider_message_id
       and r.status = 'sent';
-    if p_error_code = '131042' then
-      perform public.whatsapp_broadcast_pause(p_organization_id, target_broadcast, true);
-    else
-      perform public.whatsapp_broadcast_pause(p_organization_id, target_broadcast, false);
+    -- Repeated/stale status webhooks must not re-open a settled circuit.
+    if recipient_state = 'sent' then
+      if p_error_code = '131042' then
+        perform public.whatsapp_broadcast_pause(p_organization_id, target_broadcast, true);
+      else
+        perform public.whatsapp_broadcast_pause(p_organization_id, target_broadcast, false);
+      end if;
     end if;
-  elsif p_delivery_status in ('delivered','read') then
+  elsif p_delivery_status in ('delivered','read') and recipient_state = 'sent' then
     update public.whatsapp_broadcasts set status = 'sending'
     where organization_id = p_organization_id and id = target_broadcast
       and status = 'verifying' and probe_message_id = p_provider_message_id;
@@ -171,6 +174,16 @@ begin
   if previous_status is null
     or previous_status not in ('paused_billing','paused_error','completed')
   then raise exception 'Broadcast is not paused or retryable' using errcode='22023';
+  end if;
+  -- A timeout or lost Graph response might have been accepted. Never
+  -- reactivate the queue until those in-flight attempts are reconciled.
+  if exists (
+    select 1 from public.whatsapp_broadcast_recipients r
+    where r.organization_id = p_organization_id
+      and r.broadcast_id = p_broadcast_id and r.status = 'sending'
+  ) then
+    raise exception 'Uncertain in-flight WhatsApp send; reconciliation required'
+      using errcode='22023';
   end if;
 
   update public.whatsapp_broadcast_recipients r
