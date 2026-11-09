@@ -2188,3 +2188,56 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Override the app-wide !important button/input styles inside the WhatsApp skin */
+.wa-skin button:hover:not(:disabled) {
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+.wa-skin .wa-chat-row {
+  border: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 0 0 12px;
+  margin: 0;
+}
+.wa-skin .wa-round-icon,
+.wa-skin .wa-nav-item,
+.wa-skin .wa-composer-attachment,
+.wa-skin .wa-composer-emoji,
+.wa-skin .wa-send-button,
+.wa-skin .wa-chips button {
+  border: 0 !important;
+  border-radius: 999px !important;
+}
+.wa-skin .wa-search input {
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent;
+  box-shadow: none;
+}
+.wa-skin .wa-composer-input textarea {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  min-height: 22px;
+  resize: none;
+}
+.wa-skin .wa-composer-template {
+  border: 0 !important;
+  border-radius: 999px !important;
+}
+.wa-skin .wa-thread-who {
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: transparent;
+  padding: 0;
+}
+.wa-skin .wa-chat-row:last-child .wa-chat-body {
+  border-bottom: 0;
+}
