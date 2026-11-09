@@ -7,7 +7,8 @@ import {
   validSameOrigin,
   whatsappContext,
 } from '@/lib/whatsapp-cloud';
-import { MetaApiError, metaErrorLabel, whatsappFailure } from '@/lib/whatsapp-meta-error';
+import { metaErrorLabel, whatsappFailure } from '@/lib/whatsapp-meta-error';
+import { broadcastSendErrorKind, isActiveBroadcast } from '@/lib/whatsapp-broadcast-policy';
 import { personaliseParameters } from '@/lib/whatsapp-template-params';
 
 export const dynamic = 'force-dynamic';
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
         { message: 'Broadcast not found.' },
         { status: 404, headers: privateHeaders },
       );
-    if (!['verifying', 'sending'].includes(broadcast.data.status))
+    if (!isActiveBroadcast(broadcast.data.status))
       return Response.json(
         { sent: 0, failed: 0, remaining: 0, status: broadcast.data.status },
         { headers: privateHeaders },
@@ -93,7 +94,7 @@ export async function POST(request: Request) {
       const current = await database.from('whatsapp_broadcasts')
         .select('status').eq('organization_id', organizationId)
         .eq('id', broadcast.data.id).single();
-      if (current.error || !['verifying', 'sending'].includes(current.data?.status ?? '')) {
+      if (current.error || !isActiveBroadcast(current.data?.status ?? '')) {
         halt = true;
         releaseFrom = index;
         break;
@@ -144,7 +145,8 @@ export async function POST(request: Request) {
       } catch (error) {
         // A timeout/network failure is ambiguous: Meta might have accepted
         // the message. Never auto-resend that recipient without reconciliation.
-        if (!(error instanceof MetaApiError) || error.httpStatus >= 500 || error.code === null) {
+        const kind = broadcastSendErrorKind(error);
+        if (kind === 'uncertain') {
           await database.rpc('whatsapp_broadcast_pause', {
             p_organization_id: organizationId,
             p_broadcast_id: broadcast.data.id,
@@ -161,11 +163,11 @@ export async function POST(request: Request) {
         if (labelled.error) throw new Error('BROADCAST_FAILURE_SAVE_FAILED');
         failed += 1;
 
-        if (error.code === 131042 || current.data?.status === 'verifying') {
+        if (kind === 'billing' || current.data?.status === 'verifying') {
           const paused = await database.rpc('whatsapp_broadcast_pause', {
             p_organization_id: organizationId,
             p_broadcast_id: broadcast.data.id,
-            p_billing: error.code === 131042,
+            p_billing: kind === 'billing',
           });
           if (paused.error) throw new Error('BROADCAST_BILLING_PAUSE_FAILED');
           halt = true;
