@@ -2319,8 +2319,9 @@ function BroadcastsPanel({
     const params = new URLSearchParams({
       connectionId,
       preview: '1',
+      mode: audienceMode,
       ...(audienceMode === 'contacts'
-        ? { contactIds: pickedIds.join(',') || 'none' }
+        ? { contactIds: pickedIds.join(',') }
         : { labelIds: labelIds.join(',') }),
     });
     let cancelled = false;
@@ -2384,6 +2385,7 @@ function BroadcastsPanel({
           parameters: values.slice(0, needed),
           labelIds: audienceMode === 'labels' ? labelIds : [],
           contactIds: audienceMode === 'contacts' ? pickedIds : [],
+          audienceMode,
           confirmOptIn: true,
         }),
       });
@@ -2731,6 +2733,7 @@ function BroadcastsPanel({
                 disabled={
                   !confirm ||
                   !template ||
+                  (audienceMode === 'contacts' && !pickedIds.length) ||
                   !!sendingId ||
                   !preview?.eligible ||
                   values.slice(0, needed).filter((v) => v?.trim()).length <

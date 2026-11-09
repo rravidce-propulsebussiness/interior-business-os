@@ -24,6 +24,7 @@ const createSchema = z
     parameters: z.array(z.string().max(1024)).max(20).default([]),
     labelIds: z.array(z.string().uuid()).max(20).default([]),
     contactIds: z.array(z.string().uuid()).max(5000).default([]),
+    audienceMode: z.enum(['labels', 'contacts']).default('labels'),
     confirmOptIn: z.literal(true),
   })
   .strict();
@@ -112,6 +113,15 @@ export async function GET(request: Request) {
         (url.searchParams.get(name) ?? '')
           .split(',')
           .filter((id) => z.string().uuid().safeParse(id).success);
+      // Picking contacts with none ticked means nobody, never "everyone".
+      if (
+        url.searchParams.get('mode') === 'contacts' &&
+        !ids('contactIds').length
+      )
+        return Response.json(
+          { matched: 0, eligible: 0, optedOut: 0, noOptIn: 0 },
+          { headers: privateHeaders },
+        );
       const result = await audience(
         organizationId,
         connectionId,
@@ -232,6 +242,11 @@ export async function POST(request: Request) {
         { status: 400, headers: privateHeaders },
       );
     const input = parsed.data;
+    if (input.audienceMode === 'contacts' && !input.contactIds.length)
+      return Response.json(
+        { message: 'Pick at least one contact.' },
+        { status: 400, headers: privateHeaders },
+      );
     const connection = await getConnection(organizationId, input.connectionId);
     const templates = await graphRequest<{
       data?: Array<{
