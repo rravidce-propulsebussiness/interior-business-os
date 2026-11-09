@@ -1,4 +1,5 @@
 import { automationServices } from '@/app/dashboard/automations/service';
+import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import { privateHeaders, validSameOrigin } from '@/lib/whatsapp-cloud';
 import { DomainError, safeFailure } from '@business-os/shared';
 import { z } from 'zod';
@@ -32,6 +33,28 @@ export async function GET(request: Request) {
     if (result.error) {
       if (result.error.code === '42501') throw new DomainError('FORBIDDEN');
       throw new Error('WHATSAPP_WORKSPACE_READ_FAILED');
+    }
+    if (section === 'automations') {
+      // Business hours for away messages live beside the rule row.
+      const data = (result.data ?? {}) as {
+        rows?: Array<Record<string, unknown>>;
+      };
+      const ids = (data.rows ?? []).map((row) => String(row.id));
+      if (ids.length) {
+        const schedules = await createOwnerProvisioningDatabase()
+          .from('whatsapp_automation_rules')
+          .select('id,schedule')
+          .eq('organization_id', services.context.organizationId)
+          .in('id', ids);
+        const byId = new Map(
+          (schedules.data ?? []).map((row) => [row.id, row.schedule]),
+        );
+        data.rows = (data.rows ?? []).map((row) => ({
+          ...row,
+          schedule: byId.get(String(row.id)) ?? {},
+        }));
+      }
+      return Response.json(data, { headers: privateHeaders });
     }
     return Response.json(result.data ?? {}, { headers: privateHeaders });
   } catch (error) {

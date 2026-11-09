@@ -51,11 +51,40 @@ type Rule = {
   version: number;
   connection_id: string;
   name: string;
-  trigger_type: 'any_message' | 'keyword';
+  trigger_type: TriggerType;
   keyword: string;
   reply_text: string;
   status: 'active' | 'paused';
+  schedule?: Partial<Schedule>;
 };
+type TriggerType = 'any_message' | 'keyword' | 'greeting' | 'away';
+type Schedule = {
+  timezone: string;
+  days: number[];
+  start: string;
+  end: string;
+};
+type QuickReply = { id: string; shortcut: string; body: string };
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const DEFAULT_SCHEDULE: Schedule = {
+  timezone: 'Asia/Kolkata',
+  days: [1, 2, 3, 4, 5, 6],
+  start: '09:00',
+  end: '19:00',
+};
+
+function triggerLabel(rule: Rule) {
+  if (rule.trigger_type === 'keyword')
+    return `Keyword contains “${rule.keyword}”`;
+  if (rule.trigger_type === 'greeting')
+    return 'Greeting · first message, or after 14 days without messages';
+  if (rule.trigger_type === 'away') {
+    const sched = { ...DEFAULT_SCHEDULE, ...(rule.schedule ?? {}) };
+    const days = sched.days.map((d) => WEEKDAYS[d]).join(', ');
+    return `Away · outside ${days} ${sched.start}–${sched.end} (India time)`;
+  }
+  return 'Every inbound message';
+}
 type Tab =
   | 'overview'
   | 'inbox'
@@ -834,6 +863,7 @@ function InboxPanel({
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [pending, setPending] = useState<Message[]>([]);
+  const { replies: quickReplies } = useQuickReplies();
   const selectedRef = useRef('');
   const lastReceiptRef = useRef('');
   const lastTypingRef = useRef(0);
@@ -1406,6 +1436,44 @@ function InboxPanel({
                 </p>
               ) : (
                 <>
+                  {(() => {
+                    const match = /^\/([a-z0-9_-]*)$/i.exec(body);
+                    if (!match) return null;
+                    const query = match[1]!.toLowerCase();
+                    const options = quickReplies
+                      .filter((reply) => reply.shortcut.startsWith(query))
+                      .slice(0, 6);
+                    return (
+                      <div className="wa-quick-replies" role="listbox">
+                        {options.length === 0 ? (
+                          <p className="px-3 py-2 text-xs text-stone-500">
+                            No quick reply starts with /{query}. Add them under
+                            Automations.
+                          </p>
+                        ) : (
+                          options.map((reply) => (
+                            <button
+                              key={reply.id}
+                              type="button"
+                              role="option"
+                              aria-selected={false}
+                              onClick={() =>
+                                setBody(
+                                  reply.body.replace(
+                                    /\{\{name\}\}/gi,
+                                    contact.name || 'there',
+                                  ),
+                                )
+                              }
+                            >
+                              <strong>/{reply.shortcut}</strong>
+                              <span>{reply.body}</span>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    );
+                  })()}
                   <div className="wa-composer-row">
                     <button
                       type="button"
@@ -2091,9 +2159,8 @@ function AutomationsPanel({
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
   const [name, setName] = useState('Welcome reply');
-  const [triggerType, setTriggerType] = useState<'any_message' | 'keyword'>(
-    'any_message',
-  );
+  const [triggerType, setTriggerType] = useState<TriggerType>('greeting');
+  const [schedule, setSchedule] = useState<Schedule>(DEFAULT_SCHEDULE);
   const [keyword, setKeyword] = useState('');
   const [replyText, setReplyText] = useState(
     'Hi {{name}}, thanks for messaging us. Our team will reply shortly.',
@@ -2134,9 +2201,10 @@ function AutomationsPanel({
           connectionId,
           name,
           triggerType,
-          keyword,
+          keyword: triggerType === 'keyword' ? keyword : '',
           replyText,
           status: 'paused',
+          ...(triggerType === 'away' ? { schedule } : {}),
         }),
       });
       const result = (await readApiResponse(response)) as { message?: string };
@@ -2171,6 +2239,9 @@ function AutomationsPanel({
           keyword: rule.keyword,
           replyText: rule.reply_text,
           status: rule.status === 'active' ? 'paused' : 'active',
+          ...(rule.trigger_type === 'away'
+            ? { schedule: { ...DEFAULT_SCHEDULE, ...(rule.schedule ?? {}) } }
+            : {}),
         }),
       });
       const result = (await readApiResponse(response)) as { message?: string };
@@ -2196,8 +2267,9 @@ function AutomationsPanel({
               Reply automations
             </h3>
             <p className="mt-1 text-sm leading-6 text-stone-500">
-              Send one automatic text reply when a customer starts a
-              conversation or sends a matching keyword.
+              Like WhatsApp Business: a greeting for new customers, an away
+              message outside business hours, and keyword replies. One automatic
+              reply is sent per customer message.
             </p>
           </div>
           <span className="rounded-full bg-[#f9eee9] px-3 py-1 text-xs font-semibold text-[#88352B]">
@@ -2214,9 +2286,7 @@ function AutomationsPanel({
                 <div>
                   <h4 className="font-semibold text-stone-900">{rule.name}</h4>
                   <p className="mt-1 text-xs text-stone-500">
-                    {rule.trigger_type === 'any_message'
-                      ? 'Every inbound text'
-                      : `Keyword contains “${rule.keyword}”`}
+                    {triggerLabel(rule)}
                   </p>
                 </div>
                 {canManage && (
@@ -2294,10 +2364,79 @@ function AutomationsPanel({
                 setTriggerType(e.target.value as typeof triggerType)
               }
             >
-              <option value="any_message">Any inbound text message</option>
+              <option value="greeting">
+                Greeting message (first message or after 14 days)
+              </option>
+              <option value="away">
+                Away message (outside business hours)
+              </option>
               <option value="keyword">Message contains a keyword</option>
+              <option value="any_message">Every inbound message</option>
             </select>
           </label>
+          {triggerType === 'away' && (
+            <fieldset className="space-y-2 rounded-xl border border-stone-200 p-3">
+              <legend className="px-1 text-xs font-semibold text-stone-600">
+                Business hours (India time)
+              </legend>
+              <div className="flex flex-wrap gap-1.5">
+                {WEEKDAYS.map((day, index) => {
+                  const on = schedule.days.includes(index);
+                  return (
+                    <button
+                      key={day}
+                      type="button"
+                      aria-pressed={on}
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${on ? 'bg-[#88352B] text-white' : 'bg-stone-100 text-stone-600'}`}
+                      onClick={() =>
+                        setSchedule((value) => ({
+                          ...value,
+                          days: on
+                            ? value.days.filter((d) => d !== index)
+                            : [...value.days, index].sort(),
+                        }))
+                      }
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <label className="block space-y-1 text-xs font-semibold text-stone-600">
+                  Opens
+                  <input
+                    type="time"
+                    className={field}
+                    required
+                    value={schedule.start}
+                    onChange={(e) =>
+                      setSchedule((value) => ({
+                        ...value,
+                        start: e.target.value,
+                      }))
+                    }
+                  />
+                </label>
+                <label className="block space-y-1 text-xs font-semibold text-stone-600">
+                  Closes
+                  <input
+                    type="time"
+                    className={field}
+                    required
+                    value={schedule.end}
+                    onChange={(e) =>
+                      setSchedule((value) => ({ ...value, end: e.target.value }))
+                    }
+                  />
+                </label>
+              </div>
+              <p className="text-[11px] text-stone-500">
+                The away message is sent once per customer every 12 hours when
+                they write outside these hours.
+              </p>
+            </fieldset>
+          )}
           {triggerType === 'keyword' && (
             <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
               Keyword
@@ -2323,7 +2462,12 @@ function AutomationsPanel({
               placeholder="Write the reply customers will receive"
             />
           </label>
-          <button className={primaryButton} disabled={busy}>
+          <button
+            className={primaryButton}
+            disabled={
+              busy || (triggerType === 'away' && schedule.days.length === 0)
+            }
+          >
             {busy ? 'Saving…' : 'Save paused rule'}
           </button>
           <div className="rounded-xl bg-blue-50 p-3 text-xs leading-5 text-blue-900">
@@ -2339,7 +2483,149 @@ function AutomationsPanel({
           create or activate reply rules.
         </div>
       )}
+      <QuickRepliesManager canManage={canManage} />
     </div>
+  );
+}
+
+function useQuickReplies() {
+  const [replies, setReplies] = useState<QuickReply[]>([]);
+  const reload = useCallback(async () => {
+    const response = await fetch('/api/whatsapp/quick-replies', {
+      cache: 'no-store',
+    });
+    const data = (await readApiResponse(response)) as {
+      rows?: QuickReply[];
+    };
+    if (response.ok) setReplies(data.rows ?? []);
+  }, []);
+  useEffect(() => {
+    void reload().catch(() => undefined);
+  }, [reload]);
+  return { replies, reload };
+}
+
+function QuickRepliesManager({ canManage }: { canManage: boolean }) {
+  const { replies, reload } = useQuickReplies();
+  const [shortcut, setShortcut] = useState('');
+  const [text, setText] = useState('');
+  const [notice, setNotice] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  async function save(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      const response = await fetch('/api/whatsapp/quick-replies', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shortcut, body: text }),
+      });
+      const result = (await readApiResponse(response)) as { message?: string };
+      if (!response.ok)
+        throw new Error(result.message ?? 'Could not save quick reply.');
+      setShortcut('');
+      setText('');
+      setNotice('Quick reply saved. Type / in a chat to use it.');
+      await reload();
+    } catch (error) {
+      setNotice(friendlyError(error, 'Could not save quick reply.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function remove(id: string) {
+    setBusy(true);
+    try {
+      await fetch('/api/whatsapp/quick-replies', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      await reload();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <section className="rounded-2xl border border-stone-200 p-5 xl:col-span-2">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-bold text-stone-900">Quick replies</h3>
+          <p className="mt-1 text-sm text-stone-500">
+            Saved answers for common questions. In any chat, type{' '}
+            <code>/</code> and the shortcut to insert one. Use{' '}
+            <code>{'{{name}}'}</code> for the customer&apos;s name.
+          </p>
+        </div>
+        <span className="rounded-full bg-[#f9eee9] px-3 py-1 text-xs font-semibold text-[#88352B]">
+          {replies.length} saved
+        </span>
+      </div>
+      <div className="mt-4 grid gap-2 md:grid-cols-2">
+        {replies.map((reply) => (
+          <article
+            key={reply.id}
+            className="flex items-start justify-between gap-3 rounded-xl border border-stone-200 bg-stone-50/70 p-3"
+          >
+            <div className="min-w-0">
+              <p className="font-mono text-xs font-semibold text-[#88352B]">
+                /{reply.shortcut}
+              </p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-stone-700">
+                {reply.body}
+              </p>
+            </div>
+            {canManage && (
+              <button
+                type="button"
+                className="text-xs font-semibold text-stone-500 hover:text-red-700"
+                disabled={busy}
+                onClick={() => void remove(reply.id)}
+              >
+                Delete
+              </button>
+            )}
+          </article>
+        ))}
+      </div>
+      {canManage && (
+        <form
+          onSubmit={save}
+          className="mt-4 grid gap-2 md:grid-cols-[180px_1fr_auto]"
+        >
+          <input
+            className={field}
+            required
+            maxLength={30}
+            pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{0,29}"
+            value={shortcut}
+            onChange={(e) => setShortcut(e.target.value.replace(/^\//, ''))}
+            placeholder="shortcut e.g. price"
+            aria-label="Quick reply shortcut"
+          />
+          <input
+            className={field}
+            required
+            maxLength={1000}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="Hi {{name}}, our 2BHK interiors start from ₹4.5 lakh…"
+            aria-label="Quick reply text"
+          />
+          <button className={primaryButton} disabled={busy}>
+            Save
+          </button>
+        </form>
+      )}
+      {notice && (
+        <p role="status" className="mt-3 text-sm text-stone-600">
+          {notice}
+        </p>
+      )}
+    </section>
   );
 }
 

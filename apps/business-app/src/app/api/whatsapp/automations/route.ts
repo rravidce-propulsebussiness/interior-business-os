@@ -11,10 +11,19 @@ const ruleSchema = z
     version: z.number().int().min(0).default(0),
     connectionId: z.string().uuid(),
     name: z.string().trim().min(1).max(120),
-    triggerType: z.enum(['any_message', 'keyword']),
+    triggerType: z.enum(['any_message', 'keyword', 'greeting', 'away']),
     keyword: z.string().trim().max(80).default(''),
     replyText: z.string().trim().min(1).max(1000),
     status: z.enum(['active', 'paused']).default('paused'),
+    schedule: z
+      .object({
+        timezone: z.string().max(60).default('Asia/Kolkata'),
+        days: z.array(z.number().int().min(0).max(6)).min(1).max(7),
+        start: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+        end: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .superRefine((rule, context) => {
@@ -23,6 +32,12 @@ const ruleSchema = z
         code: 'custom',
         path: ['keyword'],
         message: 'Enter a keyword for this trigger.',
+      });
+    if (rule.triggerType === 'away' && !rule.schedule)
+      context.addIssue({
+        code: 'custom',
+        path: ['schedule'],
+        message: 'Set business hours for the away message.',
       });
   });
 
@@ -46,6 +61,8 @@ export async function POST(request: Request) {
         keyword: input.data.keyword,
         reply_text: input.data.replyText,
         status: input.data.status,
+        schedule:
+          input.data.triggerType === 'away' ? (input.data.schedule ?? {}) : {},
       },
     });
     if (result.error) throw new DomainError('VALIDATION_FAILED');

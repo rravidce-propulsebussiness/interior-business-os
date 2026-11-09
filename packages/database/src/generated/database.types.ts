@@ -10388,6 +10388,7 @@ export interface Database {
           updated_by: string;
           created_at: string;
           updated_at: string;
+          schedule: Json;
         };
         Insert: {
           id?: string;
@@ -10403,6 +10404,7 @@ export interface Database {
           updated_by: string;
           created_at?: string;
           updated_at?: string;
+          schedule?: Json;
         };
         Update: {
           id?: string;
@@ -10418,6 +10420,7 @@ export interface Database {
           updated_by?: string;
           created_at?: string;
           updated_at?: string;
+          schedule?: Json;
         };
         Relationships: [
           {
@@ -10706,6 +10709,51 @@ export interface Database {
           },
           {
             foreignKeyName: 'whatsapp_messages_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      whatsapp_quick_replies: {
+        Row: {
+          id: string;
+          organization_id: string;
+          shortcut: string;
+          body: string;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          shortcut: string;
+          body: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          shortcut?: string;
+          body?: string;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'whatsapp_quick_replies_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'whatsapp_quick_replies_organization_id_fkey';
             columns: ['organization_id'];
             isOneToOne: false;
             referencedRelation: 'organizations';

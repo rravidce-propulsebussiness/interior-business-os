@@ -150,7 +150,13 @@ export async function POST(request: Request) {
             });
             continue;
           }
-          if (String(message.type ?? '') !== 'text' || !messageText.trim())
+          // Reactions and system notices never get an automatic reply; other
+          // message types can trigger greeting, away or any-message rules.
+          if (
+            ['reaction', 'system', 'unsupported', 'request_welcome'].includes(
+              String(message.type ?? ''),
+            )
+          )
             continue;
           const match = await database.rpc('whatsapp_automation_match', {
             p_organization_id: connection.organization_id,

@@ -1451,3 +1451,35 @@
   font-size: 11px;
   font-weight: 600;
 }
+.wa-quick-replies {
+  margin-bottom: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 8px 24px -16px rgb(42 31 26 / 40%);
+}
+.wa-quick-replies button {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 13px;
+}
+.wa-quick-replies button:hover {
+  background: #f9eee9;
+}
+.wa-quick-replies strong {
+  flex: none;
+  color: #88352b;
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+}
+.wa-quick-replies span {
+  overflow: hidden;
+  color: #57534e;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
