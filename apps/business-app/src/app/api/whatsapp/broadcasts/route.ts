@@ -322,6 +322,28 @@ export async function POST(request: Request) {
         { status: 400, headers: privateHeaders },
       );
     const connection = await getConnection(organizationId, input.connectionId);
+    // A billing failure stops all campaigns on this WABA, not just the
+    // current phone number. New campaigns remain safely queued until the
+    // operator repairs billing and explicitly resumes them.
+    const allAccounts = await database
+      .from('whatsapp_business_connections')
+      .select('id')
+      .eq('organization_id', organizationId)
+      .eq('waba_id', connection.waba_id);
+    if (allAccounts.error) throw new Error('BROADCAST_ACCOUNT_READ_FAILED');
+    const wabaConnectionIds = (allAccounts.data ?? []).map((row) => row.id);
+    if (!wabaConnectionIds.length) throw new Error('BROADCAST_ACCOUNT_READ_FAILED');
+    const billingHold = await database
+      .from('whatsapp_broadcasts')
+      .select('id')
+      .eq('organization_id', organizationId)
+      .in('connection_id', wabaConnectionIds)
+      .eq('status', 'paused_billing')
+      .limit(1);
+    if (billingHold.error) throw new Error('BROADCAST_BILLING_HOLD_READ_FAILED');
+    const initialBroadcastStatus = billingHold.data?.length
+      ? 'paused_billing'
+      : 'verifying';
     const templates = await graphRequest<{
       data?: Array<{
         name: string;
@@ -387,7 +409,7 @@ export async function POST(request: Request) {
         label_ids: input.labelIds,
         total: people.eligible.length,
         skipped: people.matched - people.eligible.length,
-        status: 'verifying',
+        status: initialBroadcastStatus,
       })
       .select('id')
       .single();
