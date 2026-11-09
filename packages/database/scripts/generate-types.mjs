@@ -21,6 +21,19 @@ const relationships = JSON.parse(
   ]),
 );
 function type(sql, udtName) {
+  // A RETURNS SETOF table function exposes the table's full row type.
+  // Without this, generated RPC types drift to an incorrect string return.
+  const setof = /^SETOF (?:public\.)?([a-zA-Z0-9_]+)$/.exec(sql);
+  if (setof) {
+    const columns = rows.filter((column) => column.table_name === setof[1]);
+    if (columns.length)
+      return `{ ${columns
+        .map(
+          (column) =>
+            `${JSON.stringify(column.column_name)}: ${type(column.data_type, column.udt_name)}${column.is_nullable === 'YES' ? ' | null' : ''};`,
+        )
+        .join(' ')} }[]`;
+  }
   // information_schema represents PostgreSQL array columns as data_type
   // 'ARRAY'; use udt_name (_uuid, _text, _int4, ...) for the element type.
   if (sql === 'ARRAY' && udtName?.startsWith('_'))
