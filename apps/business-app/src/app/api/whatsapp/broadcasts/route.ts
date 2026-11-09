@@ -341,7 +341,8 @@ export async function POST(request: Request) {
       .in('connection_id', wabaConnectionIds)
       .eq('status', 'paused_billing')
       .limit(1);
-    if (billingHold.error) throw new Error('BROADCAST_BILLING_HOLD_READ_FAILED');
+    if (billingHold.error)
+      throw new Error('BROADCAST_BILLING_HOLD_READ_FAILED');
     const initialBroadcastStatus = billingHold.data?.length
       ? 'paused_billing'
       : 'verifying';
