@@ -2434,7 +2434,7 @@ function BroadcastsPanel({
         }
         if (result.status === 'completed') {
           const latest = await load();
-          const campaign = latest.find((item) => item.id === id);
+          const campaign = latest?.find((item) => item.id === id);
           setNotice(campaign?.stats.failed
             ? `Broadcast finished with ${campaign.stats.failed} failed recipient(s). Use Resend Failed to retry only confirmed failures.`
             : 'All messages submitted. Delivery and read ticks update from Meta.');
