@@ -111,6 +111,25 @@ export async function GET(request: Request) {
       .uuid()
       .parse(url.searchParams.get('connectionId'));
     const { organizationId } = await whatsappContext('automation.view');
+    // Cheap status polling for the single initial delivery probe. Avoid
+    // loading all broadcast recipients every few seconds.
+    const stateOnly = url.searchParams.get('stateOnly');
+    if (stateOnly) {
+      if (!z.string().uuid().safeParse(stateOnly).success)
+        return Response.json(
+          { message: 'Invalid broadcast.' },
+          { status: 400, headers: privateHeaders },
+        );
+      const state = await createOwnerProvisioningDatabase()
+        .from('whatsapp_broadcasts')
+        .select('id,status')
+        .eq('organization_id', organizationId)
+        .eq('connection_id', connectionId)
+        .eq('id', stateOnly)
+        .maybeSingle();
+      if (state.error) throw new Error('BROADCAST_STATUS_READ_FAILED');
+      return Response.json({ row: state.data ?? null }, { headers: privateHeaders });
+    }
     if (url.searchParams.get('preview') === '1') {
       const ids = (name: string) =>
         (url.searchParams.get(name) ?? '')
