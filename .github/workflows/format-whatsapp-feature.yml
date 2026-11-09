@@ -1,0 +1,41 @@
+name: Temporary formatting for WhatsApp broadcast feature
+on:
+  push:
+    branches:
+      - feature/whatsapp-broadcast-billing-pause-resend
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format feature changes
+        run: >-
+          pnpm exec prettier --write
+          apps/business-app/src/app/api/whatsapp/broadcasts/route.ts
+          apps/business-app/src/app/api/whatsapp/broadcasts/send/route.ts
+          apps/business-app/src/app/api/webhooks/whatsapp/route.ts
+          apps/business-app/src/app/dashboard/whatsapp/hub.tsx
+          apps/business-app/src/lib/whatsapp-broadcast-policy.ts
+          apps/business-app/src/lib/whatsapp-broadcast-policy.test.ts
+          packages/database/src/generated/database.types.ts
+          packages/database/scripts/generate-types.mjs
+      - name: Commit formatter results on feature branch only
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- apps/business-app/src/app/api/whatsapp/broadcasts/route.ts apps/business-app/src/app/api/whatsapp/broadcasts/send/route.ts apps/business-app/src/app/api/webhooks/whatsapp/route.ts apps/business-app/src/app/dashboard/whatsapp/hub.tsx apps/business-app/src/lib/whatsapp-broadcast-policy.ts apps/business-app/src/lib/whatsapp-broadcast-policy.test.ts packages/database/src/generated/database.types.ts packages/database/scripts/generate-types.mjs
+          if ! git diff --cached --quiet; then
+            git commit -m "style: format payment-aware WhatsApp broadcast queue"
+            git push origin HEAD:feature/whatsapp-broadcast-billing-pause-resend
+          fi
