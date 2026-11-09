@@ -21,7 +21,6 @@ import { parseContactSheet } from '@/lib/whatsapp-contact-sheet';
 import {
   metaBillingUrl,
   whatsappErrorHelp,
-  whatsappManagerUrl,
 } from '@/lib/whatsapp-error-help';
 
 type Connection = { id: string; name: string; phone: string; status: string };
@@ -454,14 +453,19 @@ export function WhatsAppHub({
   const connections = liveConnections.length ? liveConnections : allConnections;
   const [tab, setTab] = useState<Tab>('inbox');
   // Full-screen WhatsApp workspace (remembered per browser), like WhatsApp Web.
-  const [fullscreen, setFullscreen] = useState(() => {
-    try {
-      return window.localStorage.getItem('wa-fullscreen') !== 'off';
-    } catch {
-      return true;
-    }
-  });
+  const [fullscreen, setFullscreen] = useState(true);
+  const [fullscreenLoaded, setFullscreenLoaded] = useState(false);
   useEffect(() => {
+    try {
+      if (window.localStorage.getItem('wa-fullscreen') === 'off')
+        setFullscreen(false);
+    } catch {
+      // Storage unavailable: keep full screen.
+    }
+    setFullscreenLoaded(true);
+  }, []);
+  useEffect(() => {
+    if (!fullscreenLoaded) return;
     try {
       window.localStorage.setItem('wa-fullscreen', fullscreen ? 'on' : 'off');
     } catch {
@@ -473,7 +477,7 @@ export function WhatsAppHub({
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [fullscreen]);
+  }, [fullscreen, fullscreenLoaded]);
   const [connectionId, setConnectionId] = useState(connections[0]?.id ?? '');
   const [callTarget, setCallTarget] = useState('');
   const [callInProgress, setCallInProgress] = useState(false);
@@ -1139,6 +1143,14 @@ function InboxPanel({
   const historyRef = useRef<HTMLDivElement | null>(null);
   const photoInput = useRef<HTMLInputElement>(null);
   const [attachMenu, setAttachMenu] = useState(false);
+  const cameraInput = useRef<HTMLInputElement>(null);
+  const [richForm, setRichForm] = useState<
+    | null
+    | { kind: 'location'; name: string; address: string; lat: string; lng: string }
+    | { kind: 'contacts'; name: string; phone: string }
+    | { kind: 'buttons'; question: string; options: string[] }
+  >(null);
+  const [locating, setLocating] = useState(false);
   const [contact, setContact] = useState<Contact | null>(null);
   const [body, setBody] = useState('');
   const [attachment, setAttachment] = useState<File | null>(null);
@@ -1169,11 +1181,13 @@ function InboxPanel({
   const lastReceiptRef = useRef('');
   const lastTypingRef = useRef(0);
   const newestInboundRef = useRef<string | null>(null);
-  const [alertsEnabled, setAlertsEnabled] = useState(
-    () =>
-      typeof Notification !== 'undefined' &&
-      Notification.permission === 'granted',
-  );
+  const [alertsEnabled, setAlertsEnabled] = useState(true);
+  useEffect(() => {
+    setAlertsEnabled(
+      typeof Notification === 'undefined' ||
+        Notification.permission === 'granted',
+    );
+  }, []);
   useEffect(() => {
     selectedRef.current = selected;
   }, [selected]);
@@ -1296,7 +1310,7 @@ function InboxPanel({
       void state.reload(true);
       if (selectedRef.current)
         void loadThread(selectedRef.current).catch(() => undefined);
-    }, 15000);
+    }, 4000);
     return () => clearInterval(timer);
   }, [connectionId, loadThread, state.reload]);
 
@@ -1434,6 +1448,99 @@ function InboxPanel({
     }
   }
 
+  async function sendRich() {
+    if (!contact || !richForm) return;
+    const waId = contact.wa_id;
+    let payload: Record<string, unknown>;
+    let preview: string;
+    if (richForm.kind === 'location') {
+      const latitude = Number(richForm.lat);
+      const longitude = Number(richForm.lng);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+        setNotice('Press “Use my location” or type the latitude and longitude.');
+        return;
+      }
+      payload = {
+        messageType: 'location',
+        latitude,
+        longitude,
+        name: richForm.name,
+        address: richForm.address,
+      };
+      preview = `📍 ${richForm.name || 'Location'}`;
+    } else if (richForm.kind === 'contacts') {
+      const digits = richForm.phone.replace(/\D/g, '');
+      const phone = /^[6-9]\d{9}$/.test(digits) ? `91${digits}` : digits;
+      payload = { messageType: 'contacts', name: richForm.name, phone };
+      preview = `👤 Contact: ${richForm.name}`;
+    } else {
+      const options = richForm.options.map((o) => o.trim()).filter(Boolean);
+      payload = { messageType: 'buttons', question: richForm.question, options };
+      preview = `📊 ${richForm.question}\n${options.map((o, i) => `${i + 1}. ${o}`).join('\n')}`;
+    }
+    const tempId = `local-${Date.now()}`;
+    setPending((list) => [
+      ...list,
+      {
+        id: tempId,
+        provider_id: '',
+        direction: 'outbound',
+        type: richForm.kind,
+        body: preview,
+        status: 'sending',
+        error_code: '',
+        occurred_at: new Date().toISOString(),
+        local: true,
+        waId,
+      },
+    ]);
+    setRichForm(null);
+    try {
+      const response = await fetch('/api/whatsapp/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...payload, connectionId, to: `+${waId}` }),
+      });
+      const result = (await readApiResponse(response)) as { message?: string };
+      if (!response.ok) throw new Error(result.message ?? 'Not sent.');
+      await loadThread(waId).catch(() => undefined);
+      setPending((list) => list.filter((item) => item.id !== tempId));
+    } catch (error) {
+      const reason = friendlyError(error, 'Not sent.');
+      setPending((list) =>
+        list.map((item) =>
+          item.id === tempId
+            ? { ...item, status: 'failed', error_code: reason }
+            : item,
+        ),
+      );
+    }
+  }
+
+  function locateMe() {
+    if (!navigator.geolocation || richForm?.kind !== 'location') return;
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocating(false);
+        setRichForm((form) =>
+          form && form.kind === 'location'
+            ? {
+                ...form,
+                lat: position.coords.latitude.toFixed(6),
+                lng: position.coords.longitude.toFixed(6),
+              }
+            : form,
+        );
+      },
+      () => {
+        setLocating(false);
+        setNotice('Location permission was not given. Type the place instead.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }
+
   async function changeOptOut() {
     if (!contact) return;
     setBusy(true);
@@ -1481,7 +1588,7 @@ function InboxPanel({
           <div className="wa-chats-head">
             <h3>Chats</h3>
             <div className="flex items-center gap-1">
-              {typeof Notification !== 'undefined' && !alertsEnabled && (
+              {!alertsEnabled && (
                 <button
                   type="button"
                   className="wa-round-icon"
@@ -1939,6 +2046,19 @@ function InboxPanel({
                             role="menuitem"
                             onClick={() => {
                               setAttachMenu(false);
+                              cameraInput.current?.click();
+                            }}
+                          >
+                            <span className="wa-attach-icon wa-attach-camera">
+                              📷
+                            </span>
+                            Camera
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setAttachMenu(false);
                               fileInput.current?.click();
                             }}
                           >
@@ -1946,6 +2066,66 @@ function InboxPanel({
                               📄
                             </span>
                             Document
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setAttachMenu(false);
+                              setRichForm({
+                                kind: 'location',
+                                name: '',
+                                address: '',
+                                lat: '',
+                                lng: '',
+                              });
+                            }}
+                          >
+                            <span className="wa-attach-icon wa-attach-location">
+                              📍
+                            </span>
+                            Location
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setAttachMenu(false);
+                              setRichForm({ kind: 'contacts', name: '', phone: '' });
+                            }}
+                          >
+                            <span className="wa-attach-icon wa-attach-contact">
+                              👤
+                            </span>
+                            Contact
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            onClick={() => {
+                              setAttachMenu(false);
+                              setRichForm({
+                                kind: 'buttons',
+                                question: '',
+                                options: ['', ''],
+                              });
+                            }}
+                          >
+                            <span className="wa-attach-icon wa-attach-poll">
+                              📊
+                            </span>
+                            Quick question (poll)
+                          </button>
+                          <button
+                            type="button"
+                            role="menuitem"
+                            disabled
+                            title="Needs a product catalog connected in Meta Commerce Manager"
+                          >
+                            <span className="wa-attach-icon wa-attach-catalog">
+                              🛍
+                            </span>
+                            Catalog (needs Meta catalog)
                           </button>
                         </div>
                       )}
@@ -2006,6 +2186,164 @@ function InboxPanel({
                       event.currentTarget.value = '';
                     }}
                   />
+                  <input
+                    ref={cameraInput}
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    capture="environment"
+                    onChange={(event) => {
+                      setAttachment(event.currentTarget.files?.[0] ?? null);
+                      event.currentTarget.value = '';
+                    }}
+                  />
+                  {richForm && (
+                    <div className="wa-rich-form">
+                      <div className="flex items-center justify-between">
+                        <strong>
+                          {richForm.kind === 'location'
+                            ? '📍 Send a location'
+                            : richForm.kind === 'contacts'
+                              ? '👤 Send a contact'
+                              : '📊 Ask a quick question'}
+                        </strong>
+                        <button
+                          type="button"
+                          className="wa-round-icon"
+                          aria-label="Close"
+                          onClick={() => setRichForm(null)}
+                        >
+                          <NavIcon kind="close" />
+                        </button>
+                      </div>
+                      {richForm.kind === 'location' && (
+                        <>
+                          <button
+                            type="button"
+                            className="wa-row-action"
+                            onClick={locateMe}
+                            disabled={locating}
+                          >
+                            {locating ? 'Finding…' : '📍 Use my location'}
+                          </button>
+                          <input
+                            placeholder="Place name (e.g. SG Homes office)"
+                            value={richForm.name}
+                            onChange={(e) =>
+                              setRichForm({ ...richForm, name: e.target.value })
+                            }
+                          />
+                          <input
+                            placeholder="Address"
+                            value={richForm.address}
+                            onChange={(e) =>
+                              setRichForm({ ...richForm, address: e.target.value })
+                            }
+                          />
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              placeholder="Latitude"
+                              inputMode="decimal"
+                              value={richForm.lat}
+                              onChange={(e) =>
+                                setRichForm({ ...richForm, lat: e.target.value })
+                              }
+                            />
+                            <input
+                              placeholder="Longitude"
+                              inputMode="decimal"
+                              value={richForm.lng}
+                              onChange={(e) =>
+                                setRichForm({ ...richForm, lng: e.target.value })
+                              }
+                            />
+                          </div>
+                        </>
+                      )}
+                      {richForm.kind === 'contacts' && (
+                        <>
+                          <input
+                            placeholder="Name"
+                            value={richForm.name}
+                            onChange={(e) =>
+                              setRichForm({ ...richForm, name: e.target.value })
+                            }
+                          />
+                          <input
+                            placeholder="Phone number"
+                            inputMode="tel"
+                            value={richForm.phone}
+                            onChange={(e) =>
+                              setRichForm({ ...richForm, phone: e.target.value })
+                            }
+                          />
+                        </>
+                      )}
+                      {richForm.kind === 'buttons' && (
+                        <>
+                          <input
+                            placeholder="Question (e.g. When can we visit?)"
+                            maxLength={1024}
+                            value={richForm.question}
+                            onChange={(e) =>
+                              setRichForm({ ...richForm, question: e.target.value })
+                            }
+                          />
+                          {richForm.options.map((option, index) => (
+                            <input
+                              key={index}
+                              placeholder={`Answer ${index + 1} (short)`}
+                              maxLength={20}
+                              value={option}
+                              onChange={(e) =>
+                                setRichForm({
+                                  ...richForm,
+                                  options: richForm.options.map((o, i) =>
+                                    i === index ? e.target.value : o,
+                                  ),
+                                })
+                              }
+                            />
+                          ))}
+                          {richForm.options.length < 3 && (
+                            <button
+                              type="button"
+                              className="wa-row-action"
+                              onClick={() =>
+                                setRichForm({
+                                  ...richForm,
+                                  options: [...richForm.options, ''],
+                                })
+                              }
+                            >
+                              + Add answer
+                            </button>
+                          )}
+                          <small className="text-xs text-stone-500">
+                            The customer taps one answer. Up to 3 answers.
+                          </small>
+                        </>
+                      )}
+                      <button
+                        type="button"
+                        className="wa-bc-send"
+                        disabled={
+                          (richForm.kind === 'contacts' &&
+                            (!richForm.name.trim() ||
+                              richForm.phone.replace(/\D/g, '').length < 10)) ||
+                          (richForm.kind === 'buttons' &&
+                            (!richForm.question.trim() ||
+                              richForm.options.filter((o) => o.trim()).length <
+                                2)) ||
+                          (richForm.kind === 'location' &&
+                            (!richForm.lat || !richForm.lng))
+                        }
+                        onClick={() => void sendRich()}
+                      >
+                        Send
+                      </button>
+                    </div>
+                  )}
                   <input
                     ref={photoInput}
                     type="file"
@@ -2651,7 +2989,9 @@ function BroadcastsPanel({
         body: JSON.stringify({
           action: 'create',
           connectionId,
-          name,
+          name:
+            name.trim() ||
+            `${template.name.replaceAll('_', ' ')} · ${new Date().toLocaleDateString('en-IN')}`,
           templateName: template.name,
           language: template.language,
           parameters: values.slice(0, needed),
@@ -2687,31 +3027,38 @@ function BroadcastsPanel({
     await load();
   }
 
-  return (
-    <section className="wa-feature-page">
-      <div className="wa-feature-hero">
-        <span className="wa-feature-icon">
-          <NavIcon kind="broadcast" />
-        </span>
-        <div>
-          <span className="wa-eyebrow">CAMPAIGNS</span>
-          <h3>WhatsApp broadcasts</h3>
-          <p>
-            Send an approved template to labelled contacts who opted in, and see
-            who received and read it.
-          </p>
-        </div>
-      </div>
+  const who: 'everyone' | 'labels' | 'people' =
+    audienceMode === 'contacts'
+      ? 'people'
+      : labelIds.length
+        ? 'labels'
+        : 'everyone';
+  const filledPreview = bodyText.replace(/\{\{(\d+)\}\}/g, (_, n: string) => {
+    const value = values[Number(n) - 1]?.trim();
+    if (!value) return `[blank ${n}]`;
+    return value.replace(/\{\{\s*name\s*\}\}/gi, 'Ravi');
+  });
+  const missingValues =
+    values.slice(0, needed).filter((value) => value?.trim()).length < needed;
+  const statusText: Record<string, string> = {
+    verifying: 'Checking first message…',
+    sending: 'Sending',
+    paused_billing: 'Stopped: add money in Meta',
+    paused_error: 'Stopped: please check',
+    completed: 'Sent',
+    cancelled: 'Cancelled',
+  };
 
+  return (
+    <section className="wa-feature-page wa-bc">
       {rows.some((row) => row.status === 'paused_billing') && (
         <div className="wa-payment-alert" role="alert">
           <div>
-            <strong>Meta could not charge for your WhatsApp messages</strong>
+            <strong>WhatsApp needs money to send your messages</strong>
             <p>
-              Meta returned billing error 131042. The affected campaigns are
-              paused, and remaining contacts are safely queued. Fix the WhatsApp
-              account's payment method, outstanding dues or prepaid funds in
-              Meta, then click Resend & Continue on the campaign.
+              Meta could not charge your card, so sending stopped. Nobody got a
+              message twice. Add money or fix your card in Meta, then press
+              “Send the rest”.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -2721,128 +3068,159 @@ function BroadcastsPanel({
               target="_blank"
               rel="noreferrer"
             >
-              Add money / payment in Meta ↗
-            </a>
-            <a
-              className={softButton}
-              href={whatsappManagerUrl(wabaId)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Open WhatsApp Manager ↗
+              Add money in Meta ↗
             </a>
           </div>
         </div>
       )}
 
       {canManage && (
-        <form
-          onSubmit={createBroadcast}
-          className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffdfa] p-5"
-        >
-          <h4 className="text-base font-bold text-stone-900">New broadcast</h4>
-          {templates.some((item) => item.status !== 'APPROVED') && (
-            <p className="rounded-xl bg-stone-50 p-3 text-xs text-stone-600">
-              Templates waiting for Meta:{' '}
-              {templates
-                .filter((item) => item.status !== 'APPROVED')
-                .map((item) => `${item.name} (${item.status.toLowerCase()})`)
-                .join(', ')}
-              . They can be broadcast once Meta approves them, usually within
-              minutes to 24 hours.
-            </p>
-          )}
-          {!approved.length ? (
-            <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900">
-              No approved templates yet. Broadcasts must use a Meta-approved
-              template.{' '}
-              <button
-                type="button"
-                className="font-semibold underline"
-                onClick={() => onNavigate('templates')}
-              >
-                Open templates
-              </button>
-            </div>
-          ) : (
-            <>
-              <div className="grid gap-3 md:grid-cols-2">
-                <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
-                  Broadcast name
-                  <input
-                    className={field}
-                    required
-                    maxLength={120}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Diwali offer – 2BHK leads"
-                  />
-                </label>
-                <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
-                  Approved template
-                  <select
-                    className={field}
-                    required
-                    value={templateKey}
-                    onChange={(e) => {
-                      setTemplateKey(e.target.value);
-                      setValues([]);
-                    }}
-                  >
-                    <option value="">Choose a template</option>
-                    {templates.map((item) => (
-                      <option
-                        key={`${item.name}|${item.language}`}
-                        value={`${item.name}|${item.language}`}
-                        disabled={item.status !== 'APPROVED'}
-                      >
-                        {item.name} · {item.language} ·{' '}
-                        {(item.category ?? '').toLowerCase()}
-                        {item.status !== 'APPROVED'
-                          ? ` · ${item.status.toLowerCase()} (not usable yet)`
-                          : ''}
-                      </option>
-                    ))}
-                  </select>
-                </label>
+        <form onSubmit={createBroadcast} className="wa-bc-card">
+          <h3 className="wa-bc-title">New broadcast</h3>
+          <p className="wa-bc-sub">
+            Send one message to many customers at once. Each person gets it
+            privately, like a normal chat.
+          </p>
+
+          <div className="wa-bc-step">
+            <span className="wa-bc-num">1</span>
+            <div className="min-w-0 flex-1">
+              <h4>Who should get it?</h4>
+              <div className="wa-bc-options">
+                <button
+                  type="button"
+                  className={who === 'everyone' ? 'wa-bc-option-on' : ''}
+                  onClick={() => {
+                    setAudienceMode('labels');
+                    setLabelIds([]);
+                  }}
+                >
+                  <strong>Everyone</strong>
+                  <small>All customers who said yes to messages</small>
+                </button>
+                <button
+                  type="button"
+                  className={who === 'labels' ? 'wa-bc-option-on' : ''}
+                  onClick={() => {
+                    setAudienceMode('labels');
+                    if (!labelIds.length && labelState.labels[0])
+                      setLabelIds([labelState.labels[0].id]);
+                  }}
+                  disabled={!labelState.labels.length}
+                  title={
+                    labelState.labels.length
+                      ? undefined
+                      : 'Add a label to a chat first (🏷 in the chat)'
+                  }
+                >
+                  <strong>A group (label)</strong>
+                  <small>
+                    {labelState.labels.length
+                      ? 'For example “Hot leads”'
+                      : 'No labels yet'}
+                  </small>
+                </button>
+                <button
+                  type="button"
+                  className={who === 'people' ? 'wa-bc-option-on' : ''}
+                  onClick={() => setAudienceMode('contacts')}
+                >
+                  <strong>Choose people</strong>
+                  <small>Tick names one by one</small>
+                </button>
               </div>
-              {template && (
-                <div className="rounded-xl bg-stone-50 p-3 text-sm text-stone-700">
-                  <p className="whitespace-pre-wrap">{bodyText}</p>
-                  {needed > 0 && (
-                    <div className="mt-3 grid gap-2 md:grid-cols-2">
-                      {Array.from({ length: needed }, (_, index) => (
-                        <label
-                          key={index}
-                          className="block space-y-1 text-xs font-semibold text-stone-600"
-                        >
-                          {`{{${index + 1}}}`}
-                          <input
-                            className={field}
-                            required
-                            maxLength={1024}
-                            value={values[index] ?? ''}
-                            onChange={(e) =>
-                              setValues((list) => {
-                                const next = [...list];
-                                next[index] = e.target.value;
-                                return next;
-                              })
-                            }
-                            placeholder={
-                              index === 0 ? '{{name}}' : 'Value for everyone'
-                            }
-                          />
-                        </label>
-                      ))}
-                      <p className="text-[11px] text-stone-500 md:col-span-2">
-                        Type <code>{'{{name}}'}</code> to insert each
-                        contact&apos;s name.
-                      </p>
-                    </div>
-                  )}
+
+              {who === 'labels' && (
+                <div className="wa-chips mt-2">
+                  {labelState.labels.map((label) => {
+                    const on = labelIds.includes(label.id);
+                    return (
+                      <button
+                        key={label.id}
+                        type="button"
+                        className={on ? 'wa-chip-active' : ''}
+                        onClick={() =>
+                          setLabelIds((list) =>
+                            on
+                              ? list.filter((id) => id !== label.id)
+                              : [...list, label.id],
+                          )
+                        }
+                      >
+                        {label.name} ({labelState.counts[label.id] ?? 0})
+                      </button>
+                    );
+                  })}
                 </div>
               )}
+
+              {who === 'people' && (
+                <div className="wa-bc-people">
+                  <label className="wa-search">
+                    <NavIcon kind="search" />
+                    <input
+                      placeholder="Search name or number"
+                      value={contactRows.search}
+                      onChange={(e) => contactRows.setSearch(e.target.value)}
+                      aria-label="Search contacts"
+                    />
+                  </label>
+                  <div className="wa-bc-people-list">
+                    {contactRows.rows.map((row) => {
+                      const blocked = row.opted_out || !row.template_opted_in_at;
+                      const on = pickedIds.includes(row.id);
+                      return (
+                        <label
+                          key={row.id}
+                          className={`wa-bc-person${blocked ? ' wa-bc-person-off' : ''}`}
+                        >
+                          <input
+                            type="checkbox"
+                            disabled={blocked}
+                            checked={on}
+                            onChange={() =>
+                              setPickedIds((list) =>
+                                on
+                                  ? list.filter((id) => id !== row.id)
+                                  : [...list, row.id],
+                              )
+                            }
+                          />
+                          <span
+                            className="wa-avatar"
+                            style={{ background: avatarColor(row.wa_id) }}
+                          >
+                            {(row.name || row.wa_id).slice(0, 1).toUpperCase()}
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <strong>{row.name || `+${row.wa_id}`}</strong>
+                            <small>
+                              {row.opted_out
+                                ? 'Said stop'
+                                : !row.template_opted_in_at
+                                  ? 'Has not said yes yet'
+                                  : `+${row.wa_id}`}
+                            </small>
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              <p className="wa-bc-count">
+                {preview ? (
+                  <>
+                    <strong>{preview.eligible}</strong>{' '}
+                    {preview.eligible === 1 ? 'person' : 'people'} will get it
+                    {preview.noOptIn + preview.optedOut > 0 &&
+                      ` · ${preview.noOptIn + preview.optedOut} left out (not said yes, or said stop)`}
+                  </>
+                ) : (
+                  'Counting…'
+                )}
+              </p>
               <SheetImport
                 connectionId={connectionId}
                 onImported={(labelId) => {
@@ -2852,213 +3230,133 @@ function BroadcastsPanel({
                   setLabelIds([labelId]);
                 }}
               />
-              <div>
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xs font-semibold text-stone-600">
-                    Audience
-                  </p>
-                  <div className="wa-list-filters" role="tablist">
-                    <button
-                      type="button"
-                      className={
-                        audienceMode === 'labels' ? 'wa-filter-active' : ''
-                      }
-                      onClick={() => setAudienceMode('labels')}
-                    >
-                      By label
-                    </button>
-                    <button
-                      type="button"
-                      className={
-                        audienceMode === 'contacts' ? 'wa-filter-active' : ''
-                      }
-                      onClick={() => setAudienceMode('contacts')}
-                    >
-                      Pick contacts
-                      {pickedIds.length ? ` (${pickedIds.length})` : ''}
-                    </button>
-                  </div>
-                </div>
-                {audienceMode === 'contacts' && (
-                  <div className="mt-2 rounded-xl border border-stone-200 bg-white">
-                    <div className="flex items-center gap-2 border-b border-stone-100 p-2">
-                      <input
-                        className={field}
-                        placeholder="Search name or number"
-                        value={contactRows.search}
-                        onChange={(e) => contactRows.setSearch(e.target.value)}
-                        aria-label="Search contacts"
-                      />
-                      <button
-                        type="button"
-                        className={softButton}
-                        onClick={() =>
-                          setPickedIds((list) => [
-                            ...new Set([
-                              ...list,
-                              ...contactRows.rows
-                                .filter(
-                                  (row) =>
-                                    !row.opted_out && row.template_opted_in_at,
-                                )
-                                .map((row) => row.id),
-                            ]),
-                          ])
-                        }
-                      >
-                        Select all eligible
-                      </button>
-                      {pickedIds.length > 0 && (
-                        <button
-                          type="button"
-                          className="text-xs font-semibold text-stone-500"
-                          onClick={() => setPickedIds([])}
-                        >
-                          Clear
-                        </button>
-                      )}
-                    </div>
-                    <div className="max-h-64 overflow-y-auto">
-                      {contactRows.rows.map((row) => {
-                        const reason = row.opted_out
-                          ? 'Opted out'
-                          : !row.template_opted_in_at
-                            ? 'No opt-in recorded'
-                            : '';
-                        const on = pickedIds.includes(row.id);
-                        return (
-                          <label
-                            key={row.id}
-                            className={`flex items-center gap-3 border-b border-stone-50 px-3 py-2 text-sm ${reason ? 'opacity-60' : 'cursor-pointer hover:bg-stone-50'}`}
-                          >
-                            <input
-                              type="checkbox"
-                              className="h-4 w-4 shrink-0"
-                              disabled={!!reason}
-                              checked={on}
-                              onChange={() =>
-                                setPickedIds((list) =>
-                                  on
-                                    ? list.filter((id) => id !== row.id)
-                                    : [...list, row.id],
-                                )
-                              }
-                            />
-                            <span className="min-w-0 flex-1">
-                              <strong className="block truncate text-stone-800">
-                                {row.name || `+${row.wa_id}`}
-                              </strong>
-                              <small className="text-stone-500">
-                                +{row.wa_id}
-                              </small>
-                            </span>
-                            {reason && (
-                              <span className="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600">
-                                {reason}
-                              </span>
-                            )}
-                          </label>
-                        );
-                      })}
-                      {!contactRows.rows.length && (
-                        <p className="p-4 text-sm text-stone-500">
-                          No contacts on this number yet.
-                        </p>
-                      )}
-                    </div>
-                    <p className="border-t border-stone-100 p-2 text-[11px] text-stone-500">
-                      Only contacts with a recorded WhatsApp opt-in can receive
-                      broadcasts. Record it under Contacts (edit contact) or
-                      upload a sheet.
-                    </p>
-                  </div>
-                )}
-                <div
-                  className={`mt-2 flex flex-wrap gap-2 ${audienceMode === 'contacts' ? 'hidden' : ''}`}
-                >
-                  {labelState.labels.map((label) => {
-                    const on = labelIds.includes(label.id);
+            </div>
+          </div>
+
+          <div className="wa-bc-step">
+            <span className="wa-bc-num">2</span>
+            <div className="min-w-0 flex-1">
+              <h4>Which message?</h4>
+              <p className="wa-bc-sub">
+                Broadcasts use ready messages that WhatsApp has approved.
+              </p>
+              {!approved.length ? (
+                <p className="wa-bc-empty">
+                  No approved message yet.{' '}
+                  <button
+                    type="button"
+                    className="font-semibold underline"
+                    onClick={() => onNavigate('templates')}
+                  >
+                    Make one in Templates
+                  </button>
+                </p>
+              ) : (
+                <div className="wa-bc-templates">
+                  {approved.map((item) => {
+                    const key = `${item.name}|${item.language}`;
+                    const text =
+                      item.components?.find((c) => c.type === 'BODY')?.text ??
+                      '';
                     return (
                       <button
-                        key={label.id}
+                        key={key}
                         type="button"
-                        aria-pressed={on}
-                        className={`rounded-full border px-3 py-1 text-xs font-semibold ${on ? 'border-transparent text-white' : 'border-stone-200 bg-white text-stone-700'}`}
-                        style={on ? { background: label.color } : undefined}
-                        onClick={() =>
-                          setLabelIds((list) =>
-                            on
-                              ? list.filter((id) => id !== label.id)
-                              : [...list, label.id],
-                          )
+                        className={
+                          templateKey === key ? 'wa-bc-option-on' : ''
                         }
+                        onClick={() => {
+                          setTemplateKey(key);
+                          setValues(['{{name}}']);
+                        }}
                       >
-                        {label.name} · {labelState.counts[label.id] ?? 0}
+                        <strong>{item.name.replaceAll('_', ' ')}</strong>
+                        <small>{text}</small>
                       </button>
                     );
                   })}
-                  {!labelState.labels.length && (
-                    <p className="text-xs text-stone-500">
-                      No labels yet. Add labels from a chat (🏷) to target groups
-                      such as “2BHK leads”.
-                    </p>
+                </div>
+              )}
+              {template && needed > 1 && (
+                <div className="wa-bc-blanks">
+                  <p className="wa-bc-sub">
+                    Fill the blanks. Blank 1 is the customer’s name, added
+                    automatically.
+                  </p>
+                  {Array.from({ length: needed - 1 }, (_, i) => i + 1).map(
+                    (index) => (
+                      <label key={index}>
+                        Blank {index + 1}
+                        <input
+                          required
+                          maxLength={1024}
+                          value={values[index] ?? ''}
+                          onChange={(e) =>
+                            setValues((list) => {
+                              const next = [...list];
+                              next[0] = next[0] || '{{name}}';
+                              next[index] = e.target.value;
+                              return next;
+                            })
+                          }
+                          placeholder={index === 1 ? '2BHK interior' : 'Type here'}
+                        />
+                      </label>
+                    ),
                   )}
                 </div>
-                <p className="mt-2 text-xs text-stone-500">
-                  {audienceMode === 'contacts'
-                    ? `${pickedIds.length} contacts picked.`
-                    : labelIds.length
-                      ? 'Contacts with any of the selected labels.'
-                      : 'No label selected: all contacts on this number.'}{' '}
-                  {preview && (
-                    <strong className="text-stone-800">
-                      {preview.eligible} will receive it
-                    </strong>
-                  )}
-                  {preview && preview.optedOut + preview.noOptIn > 0 && (
-                    <>
-                      {' '}
-                      · {preview.noOptIn} skipped without recorded opt-in ·{' '}
-                      {preview.optedOut} opted out
-                    </>
-                  )}
-                </p>
-              </div>
-              <p className="text-xs text-stone-600">
-                Only contacts marked “Opted in” receive this. Meta charges per
-                delivered template message.
-              </p>
-              <p className="text-[11px] text-stone-500">
-                Meta bills these messages to the WhatsApp account&apos;s payment
-                method.{' '}
-                <a
-                  className="font-semibold text-[#88352B] underline"
-                  href={metaBillingUrl(wabaId)}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  Check balance / add money in Meta ↗
-                </a>
-              </p>
+              )}
+              {template && (
+                <div className="wa-bc-preview">
+                  <span>How it will look</span>
+                  <div className="wa-bc-bubble">{filledPreview}</div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="wa-bc-step">
+            <span className="wa-bc-num">3</span>
+            <div className="min-w-0 flex-1">
+              <h4>Send</h4>
+              <label className="wa-bc-name">
+                Name (only you see this)
+                <input
+                  maxLength={120}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Diwali offer"
+                />
+              </label>
               <button
-                className={primaryButton}
+                className="wa-bc-send"
                 disabled={
                   !template ||
-                  (audienceMode === 'contacts' && !pickedIds.length) ||
                   !!sendingId ||
                   !preview?.eligible ||
-                  values.slice(0, needed).filter((v) => v?.trim()).length <
-                    needed
+                  missingValues ||
+                  (audienceMode === 'contacts' && !pickedIds.length)
                 }
               >
                 {sendingId
                   ? 'Sending…'
-                  : `Send to ${preview?.eligible ?? 0} contacts`}
+                  : `Send to ${preview?.eligible ?? 0} ${preview?.eligible === 1 ? 'person' : 'people'}`}
               </button>
-            </>
-          )}
+              <p className="wa-bc-sub">
+                WhatsApp charges a small fee for each message.{' '}
+                <a
+                  className="font-semibold underline"
+                  href={metaBillingUrl(wabaId)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Check money in Meta ↗
+                </a>
+              </p>
+            </div>
+          </div>
           {notice && (
-            <p role="status" className="text-sm text-stone-700">
+            <p role="status" className="wa-bc-notice">
               {notice}
             </p>
           )}
@@ -3066,170 +3364,51 @@ function BroadcastsPanel({
       )}
 
       <div className="space-y-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h4 className="text-base font-bold text-stone-900">
-            Recent broadcasts
-          </h4>
-          <button
-            type="button"
-            className={softButton}
-            onClick={() =>
-              void load().catch(() =>
-                setNotice('Could not refresh broadcast status. Try again.'),
-              )
-            }
-          >
-            Refresh status
-          </button>
-        </div>
+        <h3 className="wa-bc-title">Sent broadcasts</h3>
         {!rows.length && (
-          <p className="rounded-xl border border-dashed border-stone-300 p-6 text-center text-sm text-stone-500">
-            No broadcasts yet.
-          </p>
+          <p className="wa-bc-empty">Nothing sent yet.</p>
         )}
         {rows.map((row) => {
           const done =
-            row.stats.sent +
-            row.stats.delivered +
-            row.stats.read +
-            row.stats.failed;
-          const percent = row.total ? Math.round((done / row.total) * 100) : 0;
+            row.stats.sent + row.stats.delivered + row.stats.read;
           return (
-            <article
-              key={row.id}
-              className="rounded-xl border border-stone-200 bg-white p-4"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h5 className="font-semibold text-stone-900">{row.name}</h5>
-                  <p className="mt-0.5 text-xs text-stone-500">
-                    {row.template_name} · {readableDate(row.created_at)} ·{' '}
-                    {row.total} recipients
-                    {row.skipped ? ` · ${row.skipped} skipped` : ''}
-                  </p>
+            <article key={row.id} className="wa-bc-row">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <strong className="block truncate">{row.name}</strong>
+                  <small>
+                    {readableDate(row.created_at)} · {row.total}{' '}
+                    {row.total === 1 ? 'person' : 'people'}
+                  </small>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${row.status === 'completed' ? 'bg-emerald-50 text-emerald-700' : row.status === 'cancelled' ? 'bg-stone-100 text-stone-600' : row.status === 'paused_billing' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800'}`}
-                  >
-                    {row.status === 'verifying'
-                      ? 'Verifying first delivery'
-                      : row.status === 'sending'
-                        ? sendingId === row.id
-                          ? `Sending ${percent}%`
-                          : 'Ready to continue'
-                        : row.status === 'paused_billing'
-                          ? 'Billing paused · 131042'
-                          : row.status === 'paused_error'
-                            ? 'Needs review'
-                            : row.status === 'completed'
-                              ? row.stats.failed
-                                ? 'Completed with failures'
-                                : 'Submitted'
-                              : 'Cancelled'}
-                  </span>
-                  {canManage && (
-                    <>
-                      {row.status === 'sending' && sendingId !== row.id && (
-                        <button
-                          type="button"
-                          className={softButton}
-                          disabled={!!sendingId}
-                          onClick={() => void runSending(row.id)}
-                        >
-                          Continue
-                        </button>
-                      )}
-                      {(row.status === 'paused_billing' ||
-                        row.status === 'paused_error' ||
-                        (row.status === 'completed' &&
-                          row.stats.failed > 0)) && (
-                        <button
-                          type="button"
-                          className={primaryButton}
-                          disabled={!!sendingId}
-                          onClick={() => void resendBroadcast(row.id)}
-                        >
-                          {row.status === 'completed'
-                            ? 'Resend failed'
-                            : 'Resend & Continue'}
-                        </button>
-                      )}
-                      {row.status === 'verifying' && (
-                        <span className="text-xs text-stone-500">
-                          Waiting for Meta receipt
-                        </span>
-                      )}
-                      {[
-                        'verifying',
-                        'sending',
-                        'paused_billing',
-                        'paused_error',
-                      ].includes(row.status) && (
-                        <button
-                          type="button"
-                          className={softButton}
-                          onClick={() => void cancelBroadcast(row.id)}
-                        >
-                          Cancel
-                        </button>
-                      )}
-                    </>
-                  )}
-                </div>
+                <span className={`wa-bc-status wa-bc-status-${row.status}`}>
+                  {sendingId === row.id
+                    ? 'Sending now…'
+                    : (statusText[row.status] ?? row.status)}
+                </span>
               </div>
-              <div className="wa-broadcast-bar" aria-hidden="true">
-                <span
-                  style={{
-                    width: `${row.total ? (row.stats.read / row.total) * 100 : 0}%`,
-                    background: '#53bdeb',
-                  }}
-                />
-                <span
-                  style={{
-                    width: `${row.total ? (row.stats.delivered / row.total) * 100 : 0}%`,
-                    background: '#10b981',
-                  }}
-                />
-                <span
-                  style={{
-                    width: `${row.total ? (row.stats.sent / row.total) * 100 : 0}%`,
-                    background: '#a8a29e',
-                  }}
-                />
-                <span
-                  style={{
-                    width: `${row.total ? (row.stats.failed / row.total) * 100 : 0}%`,
-                    background: '#dc2626',
-                  }}
-                />
-              </div>
-              <p className="mt-2 flex flex-wrap gap-3 text-xs text-stone-600">
-                <span>✓ Sent {row.stats.sent}</span>
-                <span>✓✓ Delivered {row.stats.delivered}</span>
+              <div className="wa-bc-stats">
+                <span>✓ Sent {done}</span>
+                <span>✓✓ Got it {row.stats.delivered + row.stats.read}</span>
                 <span className="text-sky-600">✓✓ Read {row.stats.read}</span>
-                <span className="text-red-700">Failed {row.stats.failed}</span>
-                {row.stats.queued > 0 && (
-                  <span>Waiting {row.stats.queued}</span>
+                {row.stats.failed > 0 && (
+                  <span className="text-red-700">✕ Failed {row.stats.failed}</span>
                 )}
-              </p>
+                {row.stats.queued > 0 && <span>⏳ Waiting {row.stats.queued}</span>}
+              </div>
               {Object.entries(row.errors ?? {}).map(([code, count]) => {
                 const help = whatsappErrorHelp(code, wabaId);
                 if (!help) return null;
                 return (
                   <p key={code} className="wa-failure-reason">
                     <strong>
-                      {count} failed: {help.reason}.
+                      {count} not sent: {help.reason}.
                     </strong>{' '}
                     {help.action}
                     {help.link && (
                       <>
                         {' '}
-                        <a
-                          href={help.link.href}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
+                        <a href={help.link.href} target="_blank" rel="noreferrer">
                           {help.link.label} ↗
                         </a>
                       </>
@@ -3237,31 +3416,52 @@ function BroadcastsPanel({
                   </p>
                 );
               })}
+              {canManage && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {row.status === 'sending' && sendingId !== row.id && (
+                    <button
+                      type="button"
+                      className="wa-row-action"
+                      disabled={!!sendingId}
+                      onClick={() => void runSending(row.id)}
+                    >
+                      Continue sending
+                    </button>
+                  )}
+                  {(row.status === 'paused_billing' ||
+                    row.status === 'paused_error' ||
+                    (row.status === 'completed' && row.stats.failed > 0)) && (
+                    <button
+                      type="button"
+                      className="wa-row-action"
+                      disabled={!!sendingId}
+                      onClick={() => void resendBroadcast(row.id)}
+                    >
+                      {row.status === 'completed'
+                        ? 'Try failed ones again'
+                        : 'Send the rest'}
+                    </button>
+                  )}
+                  {[
+                    'sending',
+                    'verifying',
+                    'paused_billing',
+                    'paused_error',
+                  ].includes(row.status) && (
+                    <button
+                      type="button"
+                      className="wa-row-action wa-row-action-danger"
+                      onClick={() => void cancelBroadcast(row.id)}
+                    >
+                      Stop
+                    </button>
+                  )}
+                </div>
+              )}
             </article>
           );
         })}
       </div>
-
-      {canManage && labelState.labels.length > 0 && (
-        <div className="rounded-2xl border border-stone-200 p-4">
-          <h4 className="text-sm font-bold text-stone-900">Labels</h4>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {labelState.labels.map((label) => (
-              <span key={label.id} className="flex items-center gap-1">
-                <LabelChip label={label} />
-                <button
-                  type="button"
-                  className="text-xs text-stone-400 hover:text-red-700"
-                  aria-label={`Delete label ${label.name}`}
-                  onClick={() => void labelState.deleteLabel(label.id)}
-                >
-                  ×
-                </button>
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
     </section>
   );
 }
@@ -4312,119 +4512,88 @@ function TemplatesPanel({
   notice: string;
   setNotice: (value: string) => void;
 }) {
-  const [recipient, setRecipient] = useState('');
-  const [templateName, setTemplateName] = useState('');
-  const [language, setLanguage] = useState('en_US');
-  const [parameters, setParameters] = useState('');
-  const [optedIn, setOptedIn] = useState(false);
+  const [view, setView] = useState<'mine' | 'new'>('mine');
+  const [sendKey, setSendKey] = useState('');
+  const [sendTo, setSendTo] = useState('');
+  const [sendValues, setSendValues] = useState<string[]>([]);
   const [newName, setNewName] = useState('');
   const [newBody, setNewBody] = useState('');
   const [newCategory, setNewCategory] = useState('UTILITY');
   const [busy, setBusy] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const approved = templates.filter((item) =>
-    ['APPROVED', 'ACTIVE'].includes(item.status.toUpperCase()),
-  );
-  const pending = templates.filter((item) =>
-    ['PENDING', 'IN_REVIEW'].includes(item.status.toUpperCase()),
-  );
-  const rejected = templates.filter((item) =>
-    ['REJECTED'].includes(item.status.toUpperCase()),
+  const contactRows = useWorkspaceRows('contacts', connectionId);
+  const optedIn = contactRows.rows.filter(
+    (row) => !row.opted_out && row.template_opted_in_at,
   );
 
-  function useStarter(item: (typeof starterTemplates)[number]) {
-    setNewName(item.name);
-    setNewBody(item.body);
-    setNewCategory(item.category);
-    setNotice(
-      `Loaded “${item.title}”. Review it, then submit it to Meta for approval.`,
+  const statusOf = (item: Template) => {
+    const status = item.status.toUpperCase();
+    if (['APPROVED', 'ACTIVE'].includes(status))
+      return { text: '✅ Ready to use', className: 'wa-tpl-ok', ready: true };
+    if (['PENDING', 'IN_REVIEW'].includes(status))
+      return {
+        text: '⏳ Waiting for WhatsApp',
+        className: 'wa-tpl-wait',
+        ready: false,
+      };
+    if (status === 'REJECTED')
+      return { text: '❌ Not approved', className: 'wa-tpl-no', ready: false };
+    return {
+      text: status.replaceAll('_', ' ').toLowerCase(),
+      className: 'wa-tpl-wait',
+      ready: false,
+    };
+  };
+  const bodyOf = (item: Template) =>
+    item.components?.find((component) => component.type === 'BODY')?.text ??
+    '';
+  const blanksOf = (text: string) =>
+    Math.max(
+      0,
+      ...[...text.matchAll(/\{\{(\d+)\}\}/g)].map((match) => Number(match[1])),
     );
-    document
-      .getElementById('whatsapp-template-composer')
-      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
 
-  async function submitTemplate(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setBusy(true);
-    setNotice('Submitting template to Meta for review…');
-    try {
-      const response = await fetch('/api/whatsapp/templates', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          connectionId,
-          name: newName,
-          category: newCategory,
-          language: 'en_US',
-          body: newBody,
-        }),
-      });
-      const data = (await readApiResponse(response)) as { message?: string };
-      if (!response.ok)
-        throw new Error(data.message ?? 'Template could not be submitted.');
-      setNotice(
-        'Template submitted to Meta. Its current review status is shown below.',
-      );
-      setNewName('');
-      setNewBody('');
-      try {
-        await loadTemplates();
-      } catch {
-        setNotice(
-          'Template submitted to Meta, but its status could not be refreshed. Use Refresh status below.',
-        );
-      }
-    } catch (error) {
-      setNotice(friendlyError(error, 'Template could not be submitted.'));
-    } finally {
-      setBusy(false);
-    }
-  }
   async function refreshStatus() {
     setRefreshing(true);
     try {
       await loadTemplates();
-      setNotice('Template status refreshed from Meta.');
+      setNotice('Status updated.');
     } catch (error) {
-      setNotice(
-        friendlyError(error, 'Could not refresh template status from Meta.'),
-      );
+      setNotice(friendlyError(error, 'Could not check status right now.'));
     } finally {
       setRefreshing(false);
     }
   }
 
-  async function sendTemplate(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function sendOne(item: Template) {
+    const person = optedIn.find((row) => row.id === sendTo);
+    if (!person) return;
     setBusy(true);
-    setNotice('Sending approved template…');
     try {
+      const blanks = blanksOf(bodyOf(item));
+      const values = Array.from({ length: blanks }, (_, i) =>
+        (sendValues[i] ?? '')
+          .replace(/\{\{\s*name\s*\}\}/gi, person.name || 'there')
+          .trim(),
+      );
       const response = await fetch('/api/whatsapp/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messageType: 'template',
           connectionId,
-          to: recipient,
-          templateName,
-          language,
-          parameters: parameters
-            .split('\n')
-            .map((v) => v.trim())
-            .filter(Boolean),
-          recipientHasOptedIn: optedIn,
+          to: `+${person.wa_id}`,
+          templateName: item.name,
+          language: item.language,
+          parameters: values,
+          recipientHasOptedIn: true,
         }),
       });
-      const data = (await readApiResponse(response)) as {
-        message?: string;
-        messageId?: string;
-      };
+      const data = (await readApiResponse(response)) as { message?: string };
       if (!response.ok)
         throw new Error(data.message ?? 'Message could not be sent.');
-      setNotice(
-        `Meta accepted the message (${data.messageId ?? 'message recorded'}).`,
-      );
+      setNotice(`Sent to ${person.name || `+${person.wa_id}`}.`);
+      setSendKey('');
     } catch (error) {
       setNotice(friendlyError(error, 'Message could not be sent.'));
     } finally {
@@ -4432,297 +4601,272 @@ function TemplatesPanel({
     }
   }
 
+  async function submitTemplate(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setBusy(true);
+    try {
+      const response = await fetch('/api/whatsapp/templates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          connectionId,
+          name: newName
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '_')
+            .replace(/^_|_$/g, ''),
+          category: newCategory,
+          language: 'en_US',
+          body: newBody,
+        }),
+      });
+      const data = (await readApiResponse(response)) as { message?: string };
+      if (!response.ok)
+        throw new Error(data.message ?? 'Could not send for approval.');
+      setNotice(
+        'Sent to WhatsApp for approval. It usually takes a few minutes to a day.',
+      );
+      setNewName('');
+      setNewBody('');
+      setView('mine');
+      await loadTemplates().catch(() => undefined);
+    } catch (error) {
+      setNotice(friendlyError(error, 'Could not send for approval.'));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <div className="space-y-7">
-      <section>
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-bold text-stone-900">
-              Starter templates
-            </h3>
-            <p className="mt-1 text-sm text-stone-500">
-              Load a ready-to-edit draft. Meta must approve every template
-              before business-initiated sending.
-            </p>
-          </div>
-          <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-            {approved.length} approved
-          </span>
-        </div>
-        <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {starterTemplates.map((item) => (
-            <article
-              key={item.name}
-              className="flex flex-col rounded-2xl border border-stone-200 bg-white p-4 transition hover:-translate-y-0.5 hover:border-[#BD5C3F]/50 hover:shadow-md"
-            >
-              <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h4 className="font-semibold text-stone-900">{item.title}</h4>
-                  <p className="mt-1 text-xs text-stone-500">{item.note}</p>
-                </div>
-                <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold text-blue-700">
-                  Utility
-                </span>
-              </div>
-              <p className="mt-3 flex-1 rounded-xl bg-stone-50 p-3 text-xs leading-5 text-stone-600">
-                {item.body}
-              </p>
-              {canManage && (
-                <button
-                  type="button"
-                  className={`${softButton} mt-3 w-full`}
-                  onClick={() => useStarter(item)}
-                >
-                  Use this template
-                </button>
-              )}
-            </article>
-          ))}
-        </div>
-      </section>
-      {canManage ? (
-        <div className="grid gap-5 xl:grid-cols-2">
-          <form
-            onSubmit={sendTemplate}
-            className="space-y-4 rounded-2xl border border-stone-200 p-5"
-          >
-            <div>
-              <h3 className="text-lg font-bold text-stone-900">
-                Send an approved template
-              </h3>
-              <p className="mt-1 text-sm text-stone-500">
-                The recipient must have opted in. Use only templates approved by
-                Meta.
-              </p>
-            </div>
-            <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
-              Recipient number
-              <input
-                className={field}
-                value={recipient}
-                onChange={(e) => setRecipient(e.target.value)}
-                placeholder="+919876543210"
-                pattern="\+[1-9]\d{7,14}"
-                required
-              />
-            </label>
-            <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
-              Approved template
-              <select
-                className={field}
-                value={`${templateName}|${language}`}
-                onChange={(e) => {
-                  const [name, locale] = e.target.value.split('|');
-                  setTemplateName(name ?? '');
-                  setLanguage(locale ?? 'en_US');
-                }}
-                required
-              >
-                <option value="|">Select an approved template</option>
-                {approved.map((item) => (
-                  <option key={item.id} value={`${item.name}|${item.language}`}>
-                    {item.name} · {item.language}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {templateName && (
-              <p className="rounded-xl bg-stone-50 p-3 text-xs text-stone-600">
-                {templates
-                  .find(
-                    (item) =>
-                      item.name === templateName && item.language === language,
-                  )
-                  ?.components?.find((item) => item.type === 'BODY')?.text ??
-                  'Template body available in Meta WhatsApp Manager.'}
-              </p>
-            )}
-            <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
-              Template values, one per line
-              <textarea
-                className={field}
-                rows={3}
-                value={parameters}
-                onChange={(e) => setParameters(e.target.value)}
-                placeholder="Only when the template uses {{1}}, {{2}}, …"
-              />
-            </label>
-            <label className="flex items-start gap-2 text-sm text-stone-600">
-              <input
-                type="checkbox"
-                checked={optedIn}
-                onChange={(e) => setOptedIn(e.target.checked)}
-                required
-              />
-              I confirm this recipient opted in to receive messages from this
-              business.
-            </label>
-            <button
-              className={primaryButton}
-              disabled={busy || !templateName || !optedIn}
-            >
-              {busy ? 'Working…' : 'Send template'}
-            </button>
-          </form>
-          <form
-            id="whatsapp-template-composer"
-            onSubmit={submitTemplate}
-            className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffdfa] p-5"
-          >
-            <div>
-              <h3 className="text-lg font-bold text-stone-900">
-                Create a template draft
-              </h3>
-              <p className="mt-1 text-sm text-stone-500">
-                Templates submitted here go to Meta review; they are not
-                immediately sendable.
-              </p>
-            </div>
-            <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
-              Template name
-              <input
-                className={field}
-                value={newName}
-                onChange={(e) =>
-                  setNewName(
-                    e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '_'),
-                  )
-                }
-                placeholder="appointment_reminder"
-                pattern="[a-z0-9_]{3,512}"
-                required
-              />
-            </label>
-            <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
-              Category
-              <select
-                className={field}
-                value={newCategory}
-                onChange={(e) => setNewCategory(e.target.value)}
-              >
-                <option value="UTILITY">Utility</option>
-                <option value="MARKETING">Marketing</option>
-              </select>
-            </label>
-            <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
-              Message text
-              <textarea
-                className={field}
-                rows={5}
-                value={newBody}
-                onChange={(e) => setNewBody(e.target.value)}
-                placeholder="Hello {{1}}, your appointment is on {{2}}."
-                maxLength={1024}
-                required
-              />
-            </label>
-            <button className={primaryButton} disabled={busy}>
-              {busy ? 'Submitting…' : 'Submit draft to Meta'}
-            </button>
-          </form>
-        </div>
-      ) : (
-        <p className="rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-600">
-          Your account has view access. Ask a workspace administrator to send
-          messages or manage template submissions.
+    <div className="wa-tpl">
+      <div className="wa-tpl-intro">
+        <p>
+          A <strong>template</strong> is a ready message that WhatsApp checks
+          and approves. You need one to message a customer who has not written
+          to you in the last 24 hours, and for broadcasts.
         </p>
-      )}
-      <section className="space-y-4 rounded-2xl border border-stone-200 p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h3 className="text-lg font-bold text-stone-900">
-              Template approval status
-            </h3>
-            <p className="mt-1 text-sm text-stone-500">
-              Status is read from Meta for the selected WhatsApp number.
-            </p>
-          </div>
+      </div>
+
+      <div className="wa-chips" role="tablist">
+        <button
+          type="button"
+          className={view === 'mine' ? 'wa-chip-active' : ''}
+          onClick={() => setView('mine')}
+        >
+          My templates ({templates.length})
+        </button>
+        {canManage && (
           <button
             type="button"
-            className={softButton}
-            onClick={() => void refreshStatus()}
-            disabled={refreshing || busy}
+            className={view === 'new' ? 'wa-chip-active' : ''}
+            onClick={() => setView('new')}
           >
-            {refreshing ? 'Refreshing…' : 'Refresh status'}
+            + Make a new one
           </button>
-        </div>
-        <div className="flex flex-wrap gap-2 text-xs font-semibold">
-          <span className="rounded-full bg-amber-50 px-3 py-1.5 text-amber-900">
-            Pending · {pending.length}
-          </span>
-          <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-800">
-            Approved · {approved.length}
-          </span>
-          <span className="rounded-full bg-rose-50 px-3 py-1.5 text-rose-800">
-            Rejected · {rejected.length}
-          </span>
-          <span className="rounded-full bg-stone-100 px-3 py-1.5 text-stone-600">
-            {templates.length} total
-          </span>
-        </div>
-        {templates.length ? (
-          <ul className="divide-y divide-stone-100 rounded-xl border border-stone-200">
-            {[...templates]
-              .sort((left, right) => left.name.localeCompare(right.name))
-              .map((item) => {
-                const status = item.status.toUpperCase();
-                const isPending = ['PENDING', 'IN_REVIEW'].includes(status);
-                const isApproved = ['APPROVED', 'ACTIVE'].includes(status);
-                const isRejected = status === 'REJECTED';
-                const label = isPending
-                  ? 'Pending'
-                  : isApproved
-                    ? 'Approved'
-                    : status.replaceAll('_', ' ').toLowerCase();
-                const badge = isPending
-                  ? 'bg-amber-50 text-amber-900'
-                  : isApproved
-                    ? 'bg-emerald-50 text-emerald-800'
-                    : isRejected
-                      ? 'bg-rose-50 text-rose-800'
-                      : 'bg-stone-100 text-stone-700';
-                return (
-                  <li
-                    key={item.id}
-                    className="flex flex-wrap items-center justify-between gap-3 px-3 py-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="break-all text-sm font-semibold text-stone-900">
-                        {item.name}
-                      </p>
-                      <p className="mt-0.5 text-xs text-stone-500">
-                        {item.category ?? 'Template'} · {item.language}
-                      </p>
-                    </div>
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-xs font-bold ${badge}`}
-                    >
-                      {label}
-                    </span>
-                  </li>
-                );
-              })}
-          </ul>
-        ) : (
-          <p className="rounded-xl bg-stone-50 p-4 text-sm text-stone-600">
-            Meta has not returned any templates for this number yet. After
-            submitting, use Refresh status to check again.
-          </p>
         )}
-      </section>
+      </div>
+
       {notice && (
-        <p
-          role="status"
-          className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900"
-        >
+        <p role="status" className="wa-bc-notice">
           {notice}
         </p>
       )}
-      <p className="rounded-xl bg-stone-50 p-4 text-xs leading-5 text-stone-600">
-        <strong>Messaging rules:</strong> free-form replies are limited to the
-        customer service window. Use approved templates outside that window,
-        honor STOP requests, and send templates only to opted-in recipients.
-      </p>
+
+      {view === 'mine' && (
+        <div className="space-y-3">
+          <div className="flex justify-end">
+            <button
+              type="button"
+              className="wa-row-action"
+              onClick={() => void refreshStatus()}
+              disabled={refreshing}
+            >
+              {refreshing ? 'Checking…' : '↻ Check status'}
+            </button>
+          </div>
+          {!templates.length && (
+            <p className="wa-bc-empty">
+              No templates yet. Press “+ Make a new one”.
+            </p>
+          )}
+          {[...templates]
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .map((item) => {
+              const status = statusOf(item);
+              const key = `${item.name}|${item.language}`;
+              const text = bodyOf(item);
+              const blanks = blanksOf(text);
+              const open = sendKey === key;
+              return (
+                <article key={item.id} className="wa-tpl-card">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <strong className="block">
+                        {item.name.replaceAll('_', ' ')}
+                      </strong>
+                      <small>
+                        {(item.category ?? '').toUpperCase() === 'MARKETING'
+                          ? 'Offers & promotions'
+                          : 'Updates & reminders'}
+                      </small>
+                    </div>
+                    <span className={`wa-tpl-status ${status.className}`}>
+                      {status.text}
+                    </span>
+                  </div>
+                  <div className="wa-bc-bubble mt-2">{text || '—'}</div>
+                  {status.ready && canManage && !open && (
+                    <button
+                      type="button"
+                      className="wa-bc-send mt-3"
+                      onClick={() => {
+                        setSendKey(key);
+                        setSendTo('');
+                        setSendValues(['{{name}}']);
+                      }}
+                    >
+                      Send to one person
+                    </button>
+                  )}
+                  {open && (
+                    <div className="wa-tpl-send">
+                      <label>
+                        Send to
+                        <select
+                          value={sendTo}
+                          onChange={(e) => setSendTo(e.target.value)}
+                        >
+                          <option value="">Choose a customer</option>
+                          {optedIn.map((row) => (
+                            <option key={row.id} value={row.id}>
+                              {row.name || `+${row.wa_id}`} · +{row.wa_id}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      {Array.from({ length: Math.max(0, blanks - 1) }, (_, i) => i + 1).map(
+                        (index) => (
+                          <label key={index}>
+                            Blank {index + 1}
+                            <input
+                              value={sendValues[index] ?? ''}
+                              onChange={(e) =>
+                                setSendValues((list) => {
+                                  const next = [...list];
+                                  next[index] = e.target.value;
+                                  return next;
+                                })
+                              }
+                              placeholder="Type here"
+                            />
+                          </label>
+                        ),
+                      )}
+                      {blanks > 0 && (
+                        <p className="wa-bc-sub">
+                          Blank 1 is filled with the customer’s name.
+                        </p>
+                      )}
+                      {!optedIn.length && (
+                        <p className="wa-bc-sub">
+                          No customer has said yes to messages yet. Open
+                          Contacts and press “Opt in”.
+                        </p>
+                      )}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          className="wa-bc-send"
+                          disabled={
+                            busy ||
+                            !sendTo ||
+                            Array.from({ length: Math.max(0, blanks - 1) }, (_, i) => i + 1).some(
+                              (i) => !(sendValues[i] ?? '').trim(),
+                            )
+                          }
+                          onClick={() => void sendOne(item)}
+                        >
+                          {busy ? 'Sending…' : 'Send'}
+                        </button>
+                        <button
+                          type="button"
+                          className="wa-row-action"
+                          onClick={() => setSendKey('')}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </article>
+              );
+            })}
+        </div>
+      )}
+
+      {view === 'new' && canManage && (
+        <div className="space-y-4">
+          <div>
+            <h4 className="wa-bc-title">Start from an example</h4>
+            <div className="wa-tpl-starters">
+              {starterTemplates.map((item) => (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => {
+                    setNewName(item.title);
+                    setNewBody(item.body);
+                    setNewCategory(item.category);
+                  }}
+                >
+                  <strong>{item.title}</strong>
+                  <small>{item.body}</small>
+                </button>
+              ))}
+            </div>
+          </div>
+          <form onSubmit={submitTemplate} className="wa-bc-card">
+            <label className="wa-bc-name">
+              Name
+              <input
+                required
+                maxLength={60}
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Site visit reminder"
+              />
+            </label>
+            <label className="wa-bc-name">
+              Type
+              <select
+                value={newCategory}
+                onChange={(e) => setNewCategory(e.target.value)}
+              >
+                <option value="UTILITY">Updates &amp; reminders</option>
+                <option value="MARKETING">Offers &amp; promotions</option>
+              </select>
+            </label>
+            <label className="wa-bc-name">
+              Message
+              <textarea
+                required
+                rows={4}
+                maxLength={1024}
+                value={newBody}
+                onChange={(e) => setNewBody(e.target.value)}
+                placeholder="Hi {{1}}, your site visit is on {{2}}."
+              />
+            </label>
+            <p className="wa-bc-sub">
+              Write <code>{'{{1}}'}</code> where the customer’s name goes, and{' '}
+              <code>{'{{2}}'}</code>, <code>{'{{3}}'}</code> for other blanks.
+            </p>
+            <button className="wa-bc-send" disabled={busy}>
+              {busy ? 'Sending…' : 'Send to WhatsApp for approval'}
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

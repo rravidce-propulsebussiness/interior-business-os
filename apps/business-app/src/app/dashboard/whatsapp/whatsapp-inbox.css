@@ -2466,3 +2466,306 @@
 .wa-skin .wa-quick-actions svg {
   color: var(--wa-green-dark);
 }
+
+/* ===================================================================== */
+/* Simple Broadcasts, Templates and attachment forms                     */
+/* ===================================================================== */
+.wa-bc,
+.wa-tpl {
+  display: grid;
+  gap: 18px;
+  max-width: 920px;
+}
+.wa-bc-card {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #e9edef;
+  border-radius: 14px;
+  background: #fff;
+}
+.wa-bc-title {
+  color: #111b21;
+  font-size: 19px;
+  font-weight: 700;
+}
+.wa-bc-sub {
+  color: #667781;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.wa-bc-step {
+  display: flex;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #f0f2f5;
+}
+.wa-bc-step h4 {
+  margin-bottom: 8px;
+  color: #111b21;
+  font-size: 16px;
+  font-weight: 700;
+}
+.wa-bc-num {
+  display: grid;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 999px;
+  background: #00a884;
+  color: #fff;
+  font-weight: 700;
+}
+.wa-bc-options,
+.wa-bc-templates,
+.wa-tpl-starters {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+.wa-skin .wa-bc-options button,
+.wa-skin .wa-bc-templates button,
+.wa-skin .wa-tpl-starters button {
+  display: grid;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 2px solid #e9edef !important;
+  border-radius: 12px !important;
+  background: #fff;
+  text-align: left;
+}
+.wa-bc-options strong,
+.wa-bc-templates strong,
+.wa-tpl-starters strong {
+  color: #111b21;
+  font-size: 14.5px;
+  text-transform: capitalize;
+}
+.wa-bc-options small,
+.wa-bc-templates small,
+.wa-tpl-starters small {
+  color: #667781;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.wa-skin .wa-bc-options button.wa-bc-option-on,
+.wa-skin .wa-bc-templates button.wa-bc-option-on {
+  border-color: #00a884 !important;
+  background: #f0fdf4;
+}
+.wa-bc-options button:disabled {
+  opacity: 0.5;
+}
+.wa-bc-people {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+.wa-bc-people-list {
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid #e9edef;
+  border-radius: 12px;
+}
+.wa-bc-person {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f0f2f5;
+  cursor: pointer;
+}
+.wa-bc-person .wa-avatar {
+  width: 34px;
+  height: 34px;
+  font-size: 14px;
+}
+.wa-bc-person strong {
+  display: block;
+  color: #111b21;
+  font-size: 14px;
+}
+.wa-bc-person small {
+  color: #667781;
+  font-size: 12px;
+}
+.wa-bc-person-off {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.wa-skin .wa-bc-person input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+.wa-bc-count {
+  margin: 10px 0;
+  color: #3b4a54;
+  font-size: 14px;
+}
+.wa-bc-count strong {
+  color: #008069;
+  font-size: 18px;
+}
+.wa-bc-blanks,
+.wa-tpl-send {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+.wa-bc-blanks label,
+.wa-tpl-send label,
+.wa-bc-name {
+  display: grid;
+  gap: 4px;
+  color: #3b4a54;
+  font-size: 13px;
+  font-weight: 600;
+}
+.wa-bc-preview {
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #efeae2;
+}
+.wa-bc-preview > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #54656f;
+  font-size: 12px;
+  font-weight: 600;
+}
+.wa-bc-bubble {
+  max-width: 420px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border-top-left-radius: 0;
+  background: #fff;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  color: #111b21;
+  font-size: 14px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+.wa-skin .wa-bc-send {
+  justify-self: start;
+  min-height: 44px;
+  padding: 0 22px;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #00a884;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+.wa-skin .wa-bc-send:disabled {
+  background: #c7d0d5;
+  color: #fff;
+}
+.wa-bc-notice {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #e7fce3;
+  color: #1b5e20;
+  font-size: 13.5px;
+}
+.wa-bc-empty {
+  padding: 18px;
+  border: 1px dashed #d1d7db;
+  border-radius: 12px;
+  color: #667781;
+  font-size: 14px;
+  text-align: center;
+}
+.wa-bc-row,
+.wa-tpl-card {
+  padding: 14px 16px;
+  border: 1px solid #e9edef;
+  border-radius: 12px;
+  background: #fff;
+}
+.wa-bc-row strong,
+.wa-tpl-card strong {
+  color: #111b21;
+  font-size: 15px;
+  text-transform: capitalize;
+}
+.wa-bc-row small,
+.wa-tpl-card small {
+  color: #667781;
+  font-size: 12.5px;
+}
+.wa-bc-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+  color: #3b4a54;
+  font-size: 13px;
+}
+.wa-bc-status,
+.wa-tpl-status {
+  flex: none;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fff7e0;
+  color: #8a5a00;
+  font-size: 12px;
+  font-weight: 700;
+}
+.wa-bc-status-completed,
+.wa-tpl-ok {
+  background: #e7fce3;
+  color: #1b5e20;
+}
+.wa-bc-status-cancelled {
+  background: #f0f2f5;
+  color: #54656f;
+}
+.wa-bc-status-paused_billing,
+.wa-bc-status-paused_error,
+.wa-tpl-no {
+  background: #fde8e8;
+  color: #b91c1c;
+}
+.wa-tpl-intro {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f0f2f5;
+  color: #3b4a54;
+  font-size: 14px;
+  line-height: 1.5;
+}
+/* Attachment forms */
+.wa-rich-form {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 12px;
+  border: 1px solid #e9edef;
+  border-radius: 12px;
+  background: #fff;
+}
+.wa-rich-form strong {
+  color: #111b21;
+  font-size: 14px;
+}
+.wa-attach-camera {
+  background: #ff2e74;
+}
+.wa-attach-location {
+  background: #1fa855;
+}
+.wa-attach-contact {
+  background: #009de2;
+}
+.wa-attach-poll {
+  background: #ffbc38;
+}
+.wa-attach-catalog {
+  background: #8e99a3;
+}
+.wa-attach-menu button:disabled {
+  opacity: 0.5;
+}

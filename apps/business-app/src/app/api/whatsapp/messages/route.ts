@@ -8,6 +8,13 @@ import {
   whatsappContext,
 } from '@/lib/whatsapp-cloud';
 import { whatsappFailure } from '@/lib/whatsapp-meta-error';
+import {
+  buttonsSchema,
+  contactCardSchema,
+  digitsOnly,
+  locationSchema,
+  richMessagePayload,
+} from '@/lib/whatsapp-rich-messages';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,6 +66,66 @@ export async function POST(request: Request) {
       string,
       unknown
     > | null;
+    if (
+      raw &&
+      ['location', 'contacts', 'buttons'].includes(String(raw.messageType))
+    ) {
+      // Location pin, contact card or quick question with tap buttons.
+      const rich = (
+        raw.messageType === 'location'
+          ? locationSchema
+          : raw.messageType === 'contacts'
+            ? contactCardSchema
+            : buttonsSchema
+      ).safeParse(raw);
+      if (!rich.success)
+        return Response.json(
+          { message: 'Check the details and try again.' },
+          { status: 400, headers: privateHeaders },
+        );
+      const { organizationId, client } = await whatsappContext();
+      const connection = await getConnection(
+        organizationId,
+        rich.data.connectionId,
+      );
+      const allowed = await client.rpc('whatsapp_window_open', {
+        p_organization_id: organizationId,
+        p_connection_id: connection.id,
+        p_wa_id: digitsOnly(rich.data.to),
+      });
+      if (allowed.error || !allowed.data)
+        return Response.json(
+          {
+            message:
+              'You can send this only within 24 hours of the customer’s last message.',
+          },
+          { status: 400, headers: privateHeaders },
+        );
+      const built = richMessagePayload(rich.data);
+      const result = await graphRequest<{
+        messages?: Array<{ id?: string }>;
+      }>(`${connection.phone_number_id}/messages`, connection.accessToken, {
+        method: 'POST',
+        body: JSON.stringify(built.payload),
+      });
+      const messageId = result.messages?.[0]?.id;
+      if (!messageId) throw new Error('META_MESSAGE_ID_MISSING');
+      const logged = await createOwnerProvisioningDatabase().rpc(
+        'whatsapp_message_log_outbound',
+        {
+          p_organization_id: organizationId,
+          p_connection_id: connection.id,
+          p_to: digitsOnly(rich.data.to),
+          p_provider_id: messageId,
+          p_body: built.logBody,
+          p_type: built.logType,
+        },
+      );
+      return Response.json(
+        { sent: true, messageId, logged: !logged.error },
+        { status: 202, headers: privateHeaders },
+      );
+    }
     const parsed = (
       raw?.messageType === 'text'
         ? textSchema
@@ -154,7 +221,7 @@ export async function POST(request: Request) {
         body: JSON.stringify({
           messaging_product: 'whatsapp',
           recipient_type: 'individual',
-          to: mediaRequest.to.replace(/^\\+/, ''),
+          to: mediaRequest.to.replace(/^\+/, ''),
           type: mediaRequest.mediaType,
           [mediaRequest.mediaType]: attachment,
         }),
@@ -166,7 +233,7 @@ export async function POST(request: Request) {
         {
           p_organization_id: organizationId,
           p_connection_id: connection.id,
-          p_to: mediaRequest.to.replace(/^\\+/, ''),
+          p_to: mediaRequest.to.replace(/^\+/, ''),
           p_provider_id: messageId,
           // Documents keep their file name so the chat shows a proper card.
           p_body: `[[WA_MEDIA:${mediaRequest.mediaId}:${mediaRequest.mediaType}]]${
