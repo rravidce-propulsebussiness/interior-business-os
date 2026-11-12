@@ -67,6 +67,7 @@ export function ownerWorkspaceNavigation(
       ],
     });
   const projectChildren: NonNullable<OwnerNavItem['children']> = [];
+  const boqChildren: NonNullable<OwnerNavItem['children']> = [];
   if (has('project.view', 'projects'))
     projectChildren.push(
       { label: 'Portfolio Overview', href: '/dashboard/project-management' },
@@ -107,22 +108,24 @@ export function ownerWorkspaceNavigation(
       label: 'ERP: Site Execution',
       href: '/dashboard/operations',
     });
-  if (has('estimate.view', 'projects'))
-    erpChildren.push(
-      {
-        label: 'ERP: BOQ & Estimate Revisions',
-        href: '/dashboard/execution/execution_estimate_revisions',
-      },
-      { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
-    );
+  if (has('estimate.view', 'projects')) {
+    boqChildren.push({
+      label: 'BOQ & Estimate Revisions',
+      href: '/dashboard/execution/execution_estimate_revisions',
+    });
+    erpChildren.push({
+      label: 'ERP: Execution Planner',
+      href: '/dashboard/execution',
+    });
+  }
   if (has('material.view', 'projects'))
     erpChildren.push({
       label: 'ERP: Materials',
       href: '/dashboard/execution/materials',
     });
   if (has('estimate.manage_recipes', 'projects'))
-    erpChildren.push({
-      label: 'ERP: Rate Recipes',
+    boqChildren.push({
+      label: 'Rate Recipes',
       href: '/dashboard/execution/estimation_recipes',
     });
   if (
@@ -150,6 +153,15 @@ export function ownerWorkspaceNavigation(
     erpChildren.push({
       label: 'ERP: Handover',
       href: '/dashboard/operations/handover_records',
+    });
+  if (boqChildren.length)
+    items.push({
+      label: 'BOQ & Estimating',
+      href: has('estimate.view', 'projects')
+        ? '/dashboard/execution/execution_estimate_revisions'
+        : '/dashboard/execution/estimation_recipes',
+      icon: 'quotations',
+      children: boqChildren,
     });
   projectChildren.push(...erpChildren);
   if (projectChildren.length)
