@@ -10,6 +10,7 @@ import {
   measurementPrompts,
   nextAction,
   projectWorkItems,
+  shouldShowAdvancePayment,
   stageLabel,
   type FlowBuckets,
   type FlowRole,
@@ -815,7 +816,7 @@ function OwnerOverview({
           hint="Requests are not receipts. Finance records actual money."
         >
           <ul className="pf-plain">
-            {d.advance && (
+            {shouldShowAdvancePayment(d.advance) && d.advance && (
               <li>
                 <span>
                   <b>Advance</b>
