@@ -62,6 +62,11 @@ begin
    result=public.project_site_command(org,project,'design_submit',jsonb_build_object('kind',kind,'reference','Approved reference drawing '||kind));
    design_id=(result->>'id')::uuid;
    perform public.project_site_command(org,project,'design_decide',jsonb_build_object('id',design_id,'decision','approved','note','Reviewed'));
+   -- Structural and 3D work starts only after the homeowner approves the floor plan.
+   if kind='architectural_plan' then
+     perform public.project_design_client_decision(org,project,design_id,'approved',
+       'Homeowner approved the floor plan at the site meeting');
+   end if;
  end loop;
  begin
    perform public.project_site_command(org,project,'client_approve',jsonb_build_object('evidence',''));

@@ -96,6 +96,7 @@ if (!initializeOnly) {
   assertionFile('deployment');
   assertionFile('whatsapp-read-permissions');
   assertionFile('meta-lead-ads');
+  assertionFile('single-project-flow');
 } else {
   console.log(
     'Fresh schema/seed initialization only; no regression PASS is claimed.',
