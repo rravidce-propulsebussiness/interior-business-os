@@ -210,6 +210,11 @@ describe('lead-driven quotation creation', () => {
     expect(form).toContain('maxLength={200} placeholder={industry ===');
     expect(action).toContain('plotSize: z.string().trim().max(200)');
   });
+
+  it('uses the entered site location when an existing customer has no billing city', () => {
+    expect(action).toContain("typeof address.city === 'string' && address.city.trim().length > 0");
+    expect(action).toContain('? address.city : values.location');
+  });
 });
 
 describe('single premium package library and working Custom Quote entry', () => {
