@@ -843,25 +843,35 @@ function OwnerOverview({
                   const s = d.stages.find((x) => x.instance_code === code);
                   return s && certified.has(s.id);
                 });
+                // Inferred groups that no single stage completes are not
+                // requested automatically; say so instead of implying it.
+                const manual = p.autoRequest === false;
                 return (
                   <li key={p.name}>
                     <span>
                       <b>{p.name}</b>
                       <small>
                         {p.percent}% ·{' '}
-                        {done
-                          ? 'stages certified'
-                          : 'on certification of ' +
-                            p.stageCodes.length +
-                            ' stage(s)'}
+                        {manual
+                          ? 'covers parallel stages — link it to the stage that completes it in Milestones'
+                          : done
+                            ? 'stages certified'
+                            : 'on certification of ' +
+                              p.stageCodes.length +
+                              ' stage(s)'}
                       </small>
                     </span>
                     <span
                       className={
-                        'pf-pill pf-pill-' + (done ? 'completed' : 'pending')
+                        'pf-pill pf-pill-' +
+                        (manual ? 'missed' : done ? 'completed' : 'pending')
                       }
                     >
-                      {done ? 'Eligible' : 'Not due'}
+                      {manual
+                        ? 'Needs manual link'
+                        : done
+                          ? 'Eligible'
+                          : 'Not due'}
                     </span>
                   </li>
                 );

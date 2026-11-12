@@ -17,6 +17,7 @@ import { BulkStageChecks } from './project-stage-bulk-checks';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { projectTimelineFeed } from './project-timeline-feed';
 import { ProjectFlow } from './project-flow-view';
+import { QuotePlanView } from './project-quote-plan';
 import { flowRole } from './project-flow';
 import { StageActivationControl } from './project-stage-activation';
 import { ProjectClientAccess } from './project-client-access';
@@ -896,6 +897,8 @@ function Timeline({d}:{d:WorkspaceData}){
     <p>Agreement, advance, site survey and design approval steps are in Milestones. Site work appears here once execution is released.</p></div>
    <Link className="pv2-button pv2-primary" href={cur(d.project.id,'milestones')}>Open Milestones</Link>
   </section>}
+  {d.quotePlan&&role!=='watchman'&&<QuotePlanView plan={d.quotePlan} projectId={d.project.id}
+   canPrepare={d.permissions.manage&&d.permissions.finance&&!d.agreement}/>}
   <ProjectFlow d={d}/>
  </>;
 }
@@ -903,6 +906,7 @@ function Timeline({d}:{d:WorkspaceData}){
  * its schedule, checks, certification and linked payment milestone. */
 function Milestones({d}:{d:WorkspaceData}){
  return <>
+  {d.quotePlan&&<div className="pf-flow"><QuotePlanView plan={d.quotePlan} projectId={d.project.id} canPrepare={false}/></div>}
   <ProjectWorkHub d={d} showHistory/>
   <ProjectTimelineFeed d={d}/>
  </>;
