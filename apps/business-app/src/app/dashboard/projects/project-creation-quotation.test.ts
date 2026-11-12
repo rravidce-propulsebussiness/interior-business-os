@@ -25,7 +25,8 @@ describe('delivery project creation starts from a customer quotation', () => {
     expect(quoteStart).toContain('industryKey: industry');
     expect(quoteAction).toContain('customerId: z.uuid().optional()');
     expect(quoteAction).toContain(".eq('id', values.customerId)");
-    expect(quoteAction).toContain('customerId: existingCustomer?.id');
+    expect(quoteAction).toContain('let customerId = existingCustomer?.id ||');
+    expect(quoteAction).toContain('p_customer_id: customerId');
     expect(quoteAction).toContain("p_new_customer: createdCustomer");
   });
 
