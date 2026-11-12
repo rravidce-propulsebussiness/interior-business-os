@@ -2679,3 +2679,136 @@ body:has(.crm-leads-root) .crm-shared-navigation {
   background:#ff5b0b;color:white;font-weight:800;
   text-decoration:none;
 }
+
+/* Facebook & Instagram lead forms: connected forms and their WhatsApp follow-up. */
+.crm-meta-panel .crm-integrations-details {
+  align-items: stretch;
+}
+.crm-meta-panel h3 {
+  font-size: 14px;
+  font-weight: 800;
+  color: #15223e;
+}
+.crm-meta-form,
+.crm-meta-add {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--crm-border);
+  border-radius: 12px;
+}
+.crm-meta-form header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.crm-meta-form header p {
+  font-size: 12px;
+}
+.crm-meta-panel .crm-meta-error {
+  color: #b42318;
+}
+.crm-meta-followup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px 14px 14px;
+  border: 1px dashed var(--crm-border);
+  border-radius: 10px;
+}
+.crm-meta-followup legend {
+  padding: 0 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #425879;
+}
+.crm-meta-followup label,
+.crm-meta-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 570px;
+  width: 100%;
+  font-size: 12px;
+  font-weight: 700;
+  color: #425879;
+}
+.crm-meta-followup label.crm-meta-check {
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  color: #15223e;
+}
+.crm-meta-followup label.crm-meta-code {
+  max-width: 260px;
+}
+.crm-leads-root .crm-meta-panel select,
+.crm-leads-root .crm-meta-panel textarea,
+.crm-leads-root .crm-meta-panel input:not([type='checkbox']) {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  font: inherit;
+  font-weight: 500;
+}
+.crm-meta-followup small {
+  font-weight: 500;
+  line-height: 1.6;
+  color: #506582;
+}
+.crm-meta-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.crm-meta-row label {
+  flex: 1 1 260px;
+}
+.crm-meta-panel .crm-meta-preview {
+  max-width: 620px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: #f1f8f2;
+  color: #1f4a2c;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+.crm-meta-starter {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.crm-meta-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #235eaa;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.crm-meta-panel .crm-integrations-top > div {
+  flex: 1 1 320px;
+  min-width: 0;
+}
+.crm-leads-root .crm-meta-followup .crm-meta-check input[type='checkbox'] {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  min-height: 0;
+  margin: 2px 0 0;
+  padding: 0;
+}
+.crm-meta-followup .crm-meta-check span {
+  flex: 1;
+}
+.crm-meta-followup > button {
+  align-self: flex-start;
+}

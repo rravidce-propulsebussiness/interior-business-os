@@ -38,6 +38,7 @@ export default defineConfig({
       'apps/business-app/src/lib/whatsapp-calling-events.test.ts',
       'apps/business-app/src/lib/whatsapp-calling-status.test.ts',
       'apps/business-app/src/lib/whatsapp-turn.test.ts',
+      'apps/business-app/src/lib/meta-lead-fields.test.ts',
       'apps/business-app/src/erp-routing-regression.test.ts',
       'apps/business-app/src/app/dashboard/owner-navigation.test.ts',
       'apps/business-app/src/app/dashboard/dashboard-shared-theme.test.ts',

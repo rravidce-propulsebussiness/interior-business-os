@@ -2,6 +2,7 @@ import { canAccess } from '@business-os/auth';
 import { redirect } from 'next/navigation';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import type { ProPulseConnectionView } from './propulse-connect-panel';
+import { loadMetaLeadView } from './meta-lead-view';
 import { crmServices, resultSchema } from '../service';
 import { lookups, pageNumber, type Params } from '../lookups';
 import { OwnerShell, type OwnerNavItem } from '../../owner-shell';
@@ -454,6 +455,13 @@ export default async function Leads({
     // Do not stop the CRM if an optional integration has not been deployed.
   }
 
+  const metaLeads = await loadMetaLeadView({
+    organizationId: s.org,
+    canManage: propulseConnection.canManage,
+    canAutomate: s.allowed('automation.manage'),
+    ...(typeof p.meta === 'string' ? { notice: p.meta } : {}),
+  });
+
   const stats = [
     {
       label: 'Total Leads',
@@ -504,8 +512,11 @@ export default async function Leads({
           canManageFollowups={s.allowed('crm.followup.manage')}
           canManageVisits={s.allowed('crm.site_visit.manage')}/> : null}
         propulseConnection={propulseConnection}
+        metaLeads={metaLeads}
         initialTool={
-          p.panel === 'add' || p.panel === 'propulse' ? p.panel : 'none'
+          p.panel === 'add' || p.panel === 'propulse' || p.panel === 'meta'
+            ? p.panel
+            : 'none'
         }
         stats={stats}
         tabs={tabs}
