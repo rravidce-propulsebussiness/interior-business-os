@@ -93,7 +93,7 @@ describe('project management navigation and trusted portfolio boundaries', () =>
     expect(projectNav?.children).toHaveLength(2);
     expect(navigation.some((item) => item.label === 'Brochures')).toBe(true);
     expect(navigation.some((item) => item.label === 'Automations')).toBe(true);
-    expect(navigation.some((item) => item.label === 'My Work')).toBe(true);
+    expect(navigation.some((item) => item.label === 'My Work')).toBe(false);
     expect(
       navigation.find((item) => item.label === 'Quotations')?.children,
     ).toContainEqual({
