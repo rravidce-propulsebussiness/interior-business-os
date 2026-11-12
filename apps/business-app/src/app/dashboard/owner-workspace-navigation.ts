@@ -65,7 +65,7 @@ export function ownerWorkspaceNavigation(
   if (has('project.view', 'projects'))
     projectChildren.push(
       { label: 'Portfolio Overview', href: '/dashboard/project-management' },
-      { label: 'Project Directory', href: '/dashboard/projects' },
+      { label: 'All Projects', href: '/dashboard/projects' },
     );
   if (has('task.view', 'projects'))
     projectChildren.push(
