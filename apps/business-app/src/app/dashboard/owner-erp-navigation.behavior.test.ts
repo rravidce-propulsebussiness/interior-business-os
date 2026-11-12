@@ -84,8 +84,25 @@ describe('ERP uses the existing owner workspace and access policy', () => {
     });
   });
 
+  it('shows BOQ revisions and rate recipes in their own menu', () => {
+    const context = company(['estimate.view', 'estimate.manage_recipes']);
+    expect(boq(context)).toEqual({
+      label: 'BOQ & Estimating',
+      href: '/dashboard/execution/execution_estimate_revisions',
+      icon: 'quotations',
+      children: [
+        {
+          label: 'BOQ & Estimate Revisions',
+          href: '/dashboard/execution/execution_estimate_revisions',
+        },
+        { label: 'Rate Recipes', href: '/dashboard/execution/estimation_recipes' },
+      ],
+    });
+    expect(projectManagement(context)).toBeUndefined();
+  });
+
   it('hides procurement and stock when purchasing is not entitled', () => {
-    const items = erp(
+    const items = projectManagement(
       company(
         ['execution.view', 'purchase_order.view', 'inventory.view'],
         ['projects'],
@@ -97,7 +114,7 @@ describe('ERP uses the existing owner workspace and access policy', () => {
   });
 
   it('requires the project entitlement and active membership', () => {
-    expect(erp(company(['execution.view'], ['purchasing']))).toBeUndefined();
+    expect(projectManagement(company(['execution.view'], ['purchasing']))).toBeUndefined();
     const inactive = company(['execution.view'], ['projects'], 'inactive');
     expect(projectManagement(inactive)).toBeUndefined();
   });
