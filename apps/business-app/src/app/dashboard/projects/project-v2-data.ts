@@ -6,6 +6,7 @@ import { activeOrganization,pageServices } from '@business-os/auth/server';
 import { workCompletionByProject } from './work-progress';
 import { createMarketplaceRepository, type MarketplaceProduct } from '@business-os/database/marketplace';
 import type { ProjectEntry } from './project-v2-types';
+import { parseCuring,parseEvents,parseOptional,type CuringState,type OptionalItem,type WorkEvent } from './project-flow';
 import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
 import { savedMilestoneFlow,projectStageFlowFromMilestones } from '@business-os/core/quotation-milestone-flow';
 import { savedStageRequirements,defaultStageRequirements } from '@business-os/core/quotation-stage-requirements';
@@ -116,7 +117,31 @@ export type WorkspaceData = {
  agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean;revisionId:string|null;clearanceType:string|null;version:number|null}|null;
  preflight:{inspectionDone:boolean;measurementsDone:boolean;inspectionDetails:string;measurementDetails:string;signedReady:boolean}|null;
  advance:{invoiceId:string|null;invoiceNumber:string|null;invoiceStatus:string|null;invoiceTotal:number;percent:number|null;received:number;scheduleActive:boolean}|null;
+ flow:ProjectFlowData;
 };
+export type BoqItem={id:string;name:string;quantity:string;unit:string};
+export type DesignRevision={id:string;kind:string;revision:number;reference:string;status:string;reviewNote:string;
+ createdAt:string;clientApprovedAt:string|null;clientSource:string};
+export type DesignFlow={stage:string;floorPlanKind:string;advanceBeforeDesign:boolean;agreementAuthorized:boolean;
+ designs:DesignRevision[];decisions:{designId:string;kind:string;decision:string;note:string;source:string;createdAt:string}[]};
+export type ProjectFlowData={userId:string;optional:OptionalItem[];events:WorkEvent[];curing:CuringState|null;boq:BoqItem[];design:DesignFlow|null};
+function designFlow(raw:unknown):DesignFlow|null{
+ const r=obj(raw);if(!Array.isArray(r.designs))return null;
+ return {stage:stringValue(r.stage),floorPlanKind:stringValue(r.floor_plan_kind)||'architectural_plan',
+  advanceBeforeDesign:r.advance_before_design===true,agreementAuthorized:r.agreement_authorized===true,
+  designs:r.designs.map(x=>{const d=obj(x);return {id:stringValue(d.id),kind:stringValue(d.kind),revision:Number(d.revision)||0,
+   reference:stringValue(d.reference),status:stringValue(d.status),reviewNote:stringValue(d.review_note),createdAt:stringValue(d.created_at),
+   clientApprovedAt:stringValue(d.client_approved_at)||null,clientSource:stringValue(d.client_approval_source)};}),
+  decisions:Array.isArray(r.decisions)?r.decisions.map(x=>{const d=obj(x);return {designId:stringValue(d.design_id),kind:stringValue(d.kind),
+   decision:stringValue(d.decision),note:stringValue(d.note),source:stringValue(d.source),createdAt:stringValue(d.created_at)};}):[]};
+}
+function flowData(userId:string,checklist:unknown,curing:unknown,boq:unknown,design:unknown):ProjectFlowData{
+ const c=obj(checklist);
+ return {userId,optional:parseOptional(c.optional),events:parseEvents(c.events),curing:parseCuring(curing),
+  boq:Array.isArray(boq)?boq.flatMap(raw=>{const b=obj(raw);return stringValue(b.id)&&stringValue(b.name)?
+   [{id:stringValue(b.id),name:stringValue(b.name),quantity:stringValue(b.quantity),unit:stringValue(b.unit)}]:[];}):[],
+  design:designFlow(design)};
+}
 export function stringValue(v:unknown):string{return typeof v==='string'||typeof v==='number'?String(v):'';}
 export function formatMoney(value:number|null){return value===null?'—':new Intl.NumberFormat('en-IN',{
  style:'currency',currency:'INR',maximumFractionDigits:0,
@@ -201,7 +226,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   payments:has('payment.view'),purchases:has('purchase.view'),purchaseManage:has('purchase.manage'),
   team:has('team.manage')||has('team.view'),quotation:has('quotation.view','quotation'),
  };
- const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,stageGuidanceResult,stageProgressResult,qcItemResult,qualityResult,stageExecutionResult,materialAccessResult,receipts,orders,contract,agreementResult,preflightResult,advanceResult,scheduleResult]=await Promise.all([
+ const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,stageGuidanceResult,stageProgressResult,qcItemResult,qualityResult,stageExecutionResult,materialAccessResult,receipts,orders,contract,agreementResult,preflightResult,advanceResult,scheduleResult,curingResult,boqResult,designResult]=await Promise.all([
   s.repository.organization(s.org),s.authorization.requireAuthenticatedUser(),
   s.repository.industries(),
   project.customer_id?s.client.from('customers').select('id,display_name').eq('organization_id',s.org)
@@ -233,6 +258,9 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   permissions.finance?s.client.rpc('project_advance_read',{p_org:s.org,p_project:id}):
     Promise.resolve({data:null,error:null}),
   s.client.rpc('project_stage_item_schedule_read' as never,{p_org:s.org,p_project:id} as never),
+  s.client.rpc('project_curing_read' as never,{p_org:s.org,p_project:id} as never),
+  s.client.rpc('project_boq_items_read' as never,{p_org:s.org,p_project:id} as never),
+  s.client.rpc('project_design_flow_read' as never,{p_org:s.org,p_project:id} as never),
  ]);
  if(!org)notFound();
  const rawSite=siteResult.error?null:obj(siteResult.data);
@@ -442,6 +470,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
      (obj(qualityResult.data).stages as StageItemRecord[]):[]},stageQc:stageQcReview(qcItemResult.error?null:qcItemResult.data),milestones,quotations,quotePaymentTriggers,stageRequests,
   preflight,advance,requests,
+  flow:flowData(user.id,stageProgressResult.error?null:stageProgressResult.data,curingResult.error?null:curingResult.data,boqResult.error?null:boqResult.data,designResult.error?null:designResult.data),
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
   contractValue,projectRaw:permissions.manage?project:null,
@@ -495,7 +524,7 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  if(read.error||!read.data)notFound();
  const raw=obj(read.data),p=obj(raw.project);
  if(stringValue(p.id)!==id)notFound();
- const [org,stagesResult,tasksResult,stageProgressResult,qcItemResult,qualityResult,stageExecutionResult,materialAccessResult,stageLinkResult,stageGuidanceResult,scheduleResult]=await Promise.all([
+ const [org,stagesResult,tasksResult,stageProgressResult,qcItemResult,qualityResult,stageExecutionResult,materialAccessResult,stageLinkResult,stageGuidanceResult,scheduleResult,curingResult,boqResult,designResult]=await Promise.all([
   repository.organization(context.organizationId),
   client.rpc('construction_project_read',{p_organization_id:context.organizationId,p_project_id:id}),
   client.from('project_tasks').select('id,project_id,title,status,planned_start,completion_percentage,weight')
@@ -508,6 +537,9 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
   client.rpc('construction_stage_record_read',{p_organization_id:context.organizationId,p_project_id:id}),
   client.rpc('project_stage_guidance_read' as never,{p_org:context.organizationId,p_project:id} as never),
   client.rpc('project_stage_item_schedule_read' as never,{p_org:context.organizationId,p_project:id} as never),
+  client.rpc('project_curing_read' as never,{p_org:context.organizationId,p_project:id} as never),
+  client.rpc('project_boq_items_read' as never,{p_org:context.organizationId,p_project:id} as never),
+  client.rpc('project_design_flow_read' as never,{p_org:context.organizationId,p_project:id} as never),
  ]);
  if(!org)notFound();
  const stagesRaw=obj(stagesResult.error?null:stagesResult.data);
@@ -554,5 +586,6 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
   })),
   contractValue:null,expenditure:null,requests:null,agreement:null,projectRaw:null,
   preflight:null,advance:null,
+  flow:flowData(user.id,stageProgressResult.error?null:stageProgressResult.data,curingResult.error?null:curingResult.data,boqResult.error?null:boqResult.data,designResult.error?null:designResult.data),
  };
 }

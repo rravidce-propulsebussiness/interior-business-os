@@ -10,6 +10,7 @@ export default defineConfig({
     fileParallelism: !process.env.TEST_DATABASE_URL,
     include: [
       'packages/*/src/**/*.test.ts',
+      'apps/business-app/src/app/dashboard/projects/project-flow.test.ts',
       'apps/business-app/src/app/dashboard/website/cloudflare-domains.test.ts',
       'apps/business-app/src/app/dashboard/website/editor-entry.test.ts',
       'apps/business-app/src/app/dashboard/website/github-static-import-paths.test.ts',

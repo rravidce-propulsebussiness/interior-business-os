@@ -17,6 +17,8 @@ import { BulkStageChecks } from './project-stage-bulk-checks';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectDailyCommand } from './project-daily-command';
 import { projectTimelineFeed } from './project-timeline-feed';
+import { ProjectFlow } from './project-flow-view';
+import { flowRole } from './project-flow';
 import { StageActivationControl } from './project-stage-activation';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
@@ -81,6 +83,8 @@ function PhotoStrip({projectId,rows}:{projectId:string;rows:SiteRow[]}){
 function FieldDate({value}:{value:unknown}){return <time>{shortDate(value)}</time>;}
 function LinkTabs({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
  const id=data.project.id;
+ // Watchmen work only on their curing and security screen.
+ if(viewerRole(data)==='watchman')return null;
  const tabs=[
   {slug:'overview' as ProjectPageSlug,title:'Today',icon:'dashboard' as OwnerIconName,href:cur(id,'overview')},
   {slug:'timeline' as ProjectPageSlug,title:'Timeline',icon:'projects' as OwnerIconName,href:cur(id,'timeline')},
@@ -892,10 +896,22 @@ function timeline(d:WorkspaceData):Activity[]{
   description:stringValue(row.description)});
  return all.sort((a,b)=>b.date.localeCompare(a.date));
 }
-function Timeline({d}:{d:WorkspaceData}){return <>
- <ProjectDailyCommand d={d} stageDetails={<ProjectTimelineFeed d={d}/>} financialDetails={<ProjectFinancialSummary d={d}/>}/>
- <ProjectWorkHub d={d} showHistory/>
-</>;}
+const viewerRole=(d:WorkspaceData)=>flowRole({canManage:d.site?.canManage===true,siteRole:d.site?.role??'',
+ qcReviewer:d.stageQc.canReview&&!d.site?.canManage});
+/** The primary project screen: one role-first flow on top of the same records.
+ * Stage-level planning, agreement steps and records stay one tap below. */
+function Timeline({d}:{d:WorkspaceData}){
+ const role=viewerRole(d);
+ if(role==='watchman')return <ProjectFlow d={d}/>;
+ return <>
+  <ProjectFlow d={d}/>
+  <details className="pv2-flow-details" open={d.site?.stage!=='execution'&&role==='owner'}>
+   <summary>{role==='owner'?'Stages, schedules, agreement & records':'All stages, schedules & records'}</summary>
+   <ProjectDailyCommand d={d} stageDetails={<ProjectTimelineFeed d={d}/>} financialDetails={<ProjectFinancialSummary d={d}/>}/>
+   <ProjectWorkHub d={d} showHistory/>
+  </details>
+ </>;
+}
 function Documents({d}:{d:WorkspaceData}){
  const canSeeCommercial=d.permissions.quotation||d.permissions.finance;
  const photos=d.site?.media??[],agreement=photos.filter(r=>stringValue(r.category)==='agreement');

@@ -11736,6 +11736,10 @@ export interface Database {
         Args: { p_organization_id: string; p_customer_id: string };
         Returns: Json;
       };
+      client_portal_advance_request: {
+        Args: { p_project_id: string };
+        Returns: Json;
+      };
       client_portal_dashboard: {
         Args: { p_project_id: string };
         Returns: Json;
@@ -11748,6 +11752,10 @@ export interface Database {
           p_note?: string;
         };
         Returns: undefined;
+      };
+      client_portal_design_status: {
+        Args: { p_project_id: string };
+        Returns: Json;
       };
       client_portal_grantable_projects: {
         Args: { p_organization_id: string; p_customer_id: string };
@@ -12866,6 +12874,10 @@ export interface Database {
         Args: { p_user_id: string; p_status: string };
         Returns: undefined;
       };
+      project_advance_policy_set: {
+        Args: { p_org: string; p_project: string; p_before_design: boolean };
+        Returns: Json;
+      };
       project_advance_proforma_prepare: {
         Args: { p_org: string; p_project: string; p_percent: number };
         Returns: string;
@@ -12886,6 +12898,10 @@ export interface Database {
       };
       project_agreement_read: {
         Args: { p_organization_id: string; p_project_id: string };
+        Returns: Json;
+      };
+      project_boq_items_read: {
+        Args: { p_org: string; p_project: string };
         Returns: Json;
       };
       project_client_request_create: {
@@ -12910,6 +12926,38 @@ export interface Database {
           p_response: string;
         };
         Returns: undefined;
+      };
+      project_curing_command: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: Json;
+      };
+      project_curing_read: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_from?: string;
+          p_to?: string;
+        };
+        Returns: Json;
+      };
+      project_design_client_decision: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_design: string;
+          p_decision: string;
+          p_evidence: string;
+        };
+        Returns: Json;
+      };
+      project_design_flow_read: {
+        Args: { p_org: string; p_project: string };
+        Returns: Json;
       };
       project_material_access_read: {
         Args: { p_org: string; p_project: string };
@@ -13135,6 +13183,27 @@ export interface Database {
       };
       project_stage_owner_read: {
         Args: { p_org: string; p_project: string };
+        Returns: Json;
+      };
+      project_work_item_command: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_stage: string;
+          p_index: number;
+          p_action: string;
+          p_input?: Json;
+        };
+        Returns: Json;
+      };
+      project_work_item_material_request: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_stage: string;
+          p_index: number;
+          p_items: Json;
+        };
         Returns: Json;
       };
       propulse_company_import: {
