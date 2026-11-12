@@ -7,6 +7,7 @@ import { useCompanyNavigation } from './company-navigation-provider';
 import './owner-dashboard.css';
 import './command-centre.css';
 import './owner-shell-global.css';
+import './glass-theme.css';
 
 const iconPaths = {
   dashboard: 'M3 10.5 12 3l9 7.5M5 9v12h14V9M9 21v-8h6v8',
@@ -168,7 +169,7 @@ export function OwnerShell({
       .join('') || 'BO';
 
   return (
-    <div className="owner-layout owner-layout-unified">
+    <div className="owner-layout owner-layout-unified owner-theme-glass">
       {menuOpen && (
         <button
           className="owner-scrim"

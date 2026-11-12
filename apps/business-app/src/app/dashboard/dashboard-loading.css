@@ -1,0 +1,115 @@
+/* Branded workspace splash in the existing ProPulse burgundy palette. */
+.dash-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #fff;
+  background:
+    radial-gradient(
+      ellipse at 80% 110%,
+      rgba(255, 120, 32, 0.32),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse at 10% -10%,
+      rgba(189, 92, 63, 0.45),
+      transparent 50%
+    ),
+    linear-gradient(160deg, #2e1619 0%, #451d22 45%, #6a2929 100%);
+}
+.dash-splash-card {
+  width: min(340px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 30px 28px 26px;
+  border-radius: 24px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 30px 60px rgba(20, 6, 9, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+}
+.dash-splash-mark {
+  width: 64px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  border-radius: 20px;
+  color: #fff;
+  background: linear-gradient(145deg, #c77c61, #88352b);
+  box-shadow:
+    0 0 0 8px rgba(189, 92, 63, 0.16),
+    0 12px 34px rgba(189, 92, 63, 0.55);
+}
+.dash-splash-skyline {
+  width: 190px;
+  height: 64px;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  border-bottom: 1px solid rgba(255, 217, 194, 0.35);
+}
+.dash-splash-skyline > span {
+  flex: 1;
+  border-radius: 3px 3px 0 0;
+  background: linear-gradient(0deg, #bd5c3f, #ffb283);
+  opacity: 0.85;
+  transform-origin: bottom;
+}
+.dash-splash-title {
+  font-size: 17px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+.dash-splash-text {
+  font-size: 12px;
+  color: #ffe1d4;
+}
+.dash-splash-progress {
+  width: 100%;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+}
+.dash-splash-progress > span {
+  display: block;
+  width: 40%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffa02c, #fa4d1b);
+  box-shadow: 0 0 12px rgba(250, 77, 27, 0.6);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes dash-splash-rise {
+    from {
+      transform: scaleY(0.15);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+  @keyframes dash-splash-slide {
+    from {
+      transform: translateX(-110%);
+    }
+    to {
+      transform: translateX(260%);
+    }
+  }
+  .dash-splash-skyline > span {
+    animation: dash-splash-rise 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .dash-splash-progress > span {
+    animation: dash-splash-slide 1.3s ease-in-out infinite;
+  }
+}
