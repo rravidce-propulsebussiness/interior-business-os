@@ -23,10 +23,16 @@ function company(
   } as unknown as Context;
 }
 
-function erp(context: Context | null) {
-  return ownerWorkspaceNavigation(context).find(
-    (item) => item.label === 'Project Management',
-  );
+function module(context: Context | null, label: string) {
+  return ownerWorkspaceNavigation(context).find((item) => item.label === label);
+}
+
+function projectManagement(context: Context | null) {
+  return module(context, 'Project Management');
+}
+
+function boq(context: Context | null) {
+  return module(context, 'BOQ & Estimating');
 }
 
 describe('ERP uses the existing owner workspace and access policy', () => {
@@ -36,9 +42,9 @@ describe('ERP uses the existing owner workspace and access policy', () => {
     ]);
   });
 
-  it('shows authorized ERP destinations inside Project Management', () => {
+  it('keeps project execution destinations inside Project Management', () => {
     expect(
-      erp(
+      projectManagement(
         company([
           'execution.view',
           'estimate.view',
@@ -56,16 +62,8 @@ describe('ERP uses the existing owner workspace and access policy', () => {
       icon: 'projects',
       children: [
         { label: 'ERP: Site Execution', href: '/dashboard/operations' },
-        {
-          label: 'ERP: BOQ & Estimate Revisions',
-          href: '/dashboard/execution/execution_estimate_revisions',
-        },
         { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
         { label: 'ERP: Materials', href: '/dashboard/execution/materials' },
-        {
-          label: 'ERP: Rate Recipes',
-          href: '/dashboard/execution/estimation_recipes',
-        },
         {
           label: 'ERP: Procurement',
           href: '/dashboard/execution/purchase_orders',
@@ -86,8 +84,32 @@ describe('ERP uses the existing owner workspace and access policy', () => {
     });
   });
 
+  it('shows BOQ revisions and rate recipes in their own menu', () => {
+    const context = company(['estimate.view', 'estimate.manage_recipes']);
+    expect(boq(context)).toEqual({
+      label: 'BOQ & Estimating',
+      href: '/dashboard/execution/execution_estimate_revisions',
+      icon: 'quotations',
+      children: [
+        {
+          label: 'BOQ & Estimate Revisions',
+          href: '/dashboard/execution/execution_estimate_revisions',
+        },
+        { label: 'Rate Recipes', href: '/dashboard/execution/estimation_recipes' },
+      ],
+    });
+    expect(projectManagement(context)).toEqual({
+      label: 'Project Management',
+      href: '/dashboard/execution',
+      icon: 'projects',
+      children: [
+        { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
+      ],
+    });
+  });
+
   it('hides procurement and stock when purchasing is not entitled', () => {
-    const items = erp(
+    const items = projectManagement(
       company(
         ['execution.view', 'purchase_order.view', 'inventory.view'],
         ['projects'],
@@ -99,17 +121,17 @@ describe('ERP uses the existing owner workspace and access policy', () => {
   });
 
   it('requires the project entitlement and active membership', () => {
-    expect(erp(company(['execution.view'], ['purchasing']))).toBeUndefined();
+    expect(projectManagement(company(['execution.view'], ['purchasing']))).toBeUndefined();
     const inactive = company(['execution.view'], ['projects'], 'inactive');
-    expect(erp(inactive)).toBeUndefined();
+    expect(projectManagement(inactive)).toBeUndefined();
   });
 
   it('never grants access merely because a module entitlement exists', () => {
-    expect(erp(company([], ['projects', 'purchasing']))).toBeUndefined();
+    expect(projectManagement(company([], ['projects', 'purchasing']))).toBeUndefined();
   });
 
   it('shows only the operator-authorized section', () => {
-    expect(erp(company(['inspection.view']))?.children).toEqual([
+    expect(projectManagement(company(['inspection.view']))?.children).toEqual([
       {
         label: 'ERP: Quality Inspections',
         href: '/dashboard/operations/project_inspections',
