@@ -44,6 +44,7 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
   const payments = d.quoteMilestoneTimeline ?? [];
   if (!payments.length) return null;
   const stageByCode = new Map(d.stages.map((stage) => [stage.instance_code, stage]));
+  const quotedStageByCode = new Map((d.quotePlan?.stages ?? []).map((stage) => [stage.code, stage]));
   const certified = new Set(d.stageExecution.filter((stage) =>
     stage.status === 'certified').map((stage) => stage.stageId));
   const canSeePercent = d.permissions.finance || d.permissions.quotation;
@@ -112,7 +113,7 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
                         return <li key={code}>
                           {stage ? <Link href={'/dashboard/projects/' + d.project.id + '/milestones#project-stage-' + stage.id}>
                             {stage.title}
-                          </Link> : <span>{pretty(code.replaceAll('/', ' · '))}</span>}
+                          </Link> : <span>{quotedStageByCode.get(code)?.title ?? pretty(code.replaceAll('/', ' · '))}</span>}
                           <small>{stage ? pretty(stage.status || 'not_started') : 'Planned from quote'}</small>
                         </li>;
                       })}
