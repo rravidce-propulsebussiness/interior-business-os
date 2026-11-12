@@ -11,9 +11,9 @@ export const dynamic = 'force-dynamic';
 export default async function NewQuotation({
   searchParams,
 }: {
-  searchParams: Promise<{ lead?: string; package?: string; industry?: string; mode?: string }>;
+  searchParams: Promise<{ lead?: string; customer?: string; package?: string; industry?: string; mode?: string }>;
 }) {
-  const { lead, package: initialPackageId, industry: initialPackageIndustry, mode } = await searchParams;
+  const { lead, customer: customerId, package: initialPackageId, industry: initialPackageIndustry, mode } = await searchParams;
   const s = await commercialServices('quotation.create', 'quotation', true);
   const [organization, user, industries] = await Promise.all([
     s.repository.organization(s.org),
@@ -55,6 +55,20 @@ export default async function NewQuotation({
         .eq('id', lead)
         .maybeSingle()).data
     : null;
+  const selectedCustomer = customerId && idSchema.safeParse(customerId).success &&
+    (s.allowed('customer.view', 'crm') || s.allowed('customer.view', 'quotation'))
+    ? (await s.client.from('customers')
+        .select('id,display_name,phone,email,billing_address,status,is_sales_prospect')
+        .eq('organization_id', s.org)
+        .eq('id', customerId)
+        .eq('status', 'active')
+        .eq('is_sales_prospect', false)
+        .maybeSingle()).data
+    : null;
+  const customerAddress = selectedCustomer?.billing_address &&
+    typeof selectedCustomer.billing_address === 'object' &&
+    !Array.isArray(selectedCustomer.billing_address)
+    ? selectedCustomer.billing_address as Record<string, unknown> : {};
   const leadChoices = [
     ...(selectedLead ? [selectedLead] : []),
     ...(rawLeads ?? []).filter((item) => item.id !== selectedLead?.id),
@@ -98,6 +112,13 @@ export default async function NewQuotation({
           initialPackageId={initialPackageId ?? ''}
           initialPackageIndustry={initialPackageIndustry ?? ''}
           initialCustomizedQuote={mode === 'custom'}
+          existingCustomer={selectedCustomer ? {
+            id: selectedCustomer.id,
+            name: selectedCustomer.display_name,
+            phone: selectedCustomer.phone,
+            email: selectedCustomer.email || '',
+            location: typeof customerAddress.city === 'string' ? customerAddress.city : '',
+          } : null}
         />
       </div>
     </QuotationStudioFrame>

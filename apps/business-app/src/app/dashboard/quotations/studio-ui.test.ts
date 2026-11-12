@@ -169,13 +169,14 @@ describe('lead-driven quotation creation', () => {
     expect(form).not.toContain('chooseStyle');
     expect(css).not.toContain('.qs-create-type');
     expect(form).toContain('onChange={(event) => chooseLead(event.target.value)}');
-    expect(form).toContain('const industry = selectedLead?.industryKey');
+    expect(form).toContain('selectedLead?.industryKey &&');
+    expect(form).toContain('existingCustomer ? industryKey');
     expect(form).toContain('Auto-detected from lead');
-    expect(form).toContain('disabled={pending || !leadId || !industry');
+    expect(form).toContain('disabled={pending || (!existingCustomer && !leadId) || !industry}');
     expect(form).toContain("industry === 'construction' && !initialCustomizedQuote ? 'sft' : 'custom'");
   });
 
-  it('does not require a project name before the lead is Won', () => {
+  it('requires a quotation before project conversion and no longer opens blank projects', () => {
     const inlineProject = file('../crm/leads/lead-project-action.tsx');
     const linkAction = file('../crm/leads/lead-project-actions.ts');
     const convert = file('../crm/leads/[id]/convert/page.tsx');
@@ -186,7 +187,8 @@ describe('lead-driven quotation creation', () => {
     expect(action).toContain('leadQuotationProjectIds');
     expect(action).toContain("'is_sales_prospect', true");
     expect(action).toContain("p_name: prospectName");
-    expect(inlineProject).toContain('Project name');
+    expect(inlineProject).toContain('Create a quotation to start the project');
+    expect(inlineProject).not.toContain('projectName');
     expect(inlineProject).toContain('quotationProjectId');
     expect(linkAction).toContain("customer_id: null, project_id: null");
     expect(convert).toContain("redirect('/dashboard/crm/leads/'");
@@ -194,9 +196,10 @@ describe('lead-driven quotation creation', () => {
 
   it('derives category from the tenant lead and rejects unknown classifications', () => {
     expect(page).toContain('resolveLeadCategory(entry, enabledIndustries)');
-    expect(action).toContain('leadId: z.uuid()');
-    expect(action).not.toContain('industryKey: z.string()');
-    expect(action).toContain('entry.id === lead.industry_id');
+    expect(action).toContain('leadId: z.uuid().optional()');
+    expect(action).toContain('customerId: z.uuid().optional()');
+    expect(action).toContain('industryKey: z.string().trim().min(2).max(80).optional()');
+    expect(action).toContain('entry.id === lead?.industry_id');
     expect(action).toContain('resolveLeadCategory(lead, industries)');
     expect(action).toContain('Classify this lead in CRM');
   });
@@ -296,12 +299,12 @@ describe('automatic CRN reuse from selected lead', () => {
   });
 
   it('resolves existing CRN securely on the server, never by a browser-selected id', () => {
-    expect(form).toContain('...data, leadId, currency: defaultCurrency');
-    expect(action).not.toContain('customerId: z.uuid()');
+    expect(form).toContain('...(existingCustomer ? { customerId: existingCustomer.id, industryKey: industry } : { leadId })');
+    expect(action).toContain('customerId: z.uuid().optional()');
     expect(action).toContain("await s.client.rpc('lead_quotation_list'");
-    expect(action).toContain('contactMatches(candidate, values)');
-    expect(action).toContain('phone: lead.phone');
-    expect(action).toContain('let customerId = leadCustomerId || matches[0]?.id ||');
+    expect(action).toContain('contactMatches(candidate, quoteClient)');
+    expect(action).toContain('phone: lead?.phone');
+    expect(action).toContain('let customerId = existingCustomer?.id || leadCustomerId || matches[0]?.id ||');
     expect(action).toContain('if (!customerId) {');
   });
 });

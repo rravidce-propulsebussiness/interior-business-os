@@ -3,7 +3,7 @@ create function pg_temp.crm_assert(ok boolean,label text) returns void language 
 create function pg_temp.crm_denied(statement text,label text) returns void language plpgsql as $$begin begin execute statement;exception when insufficient_privilege or check_violation or invalid_parameter_value or foreign_key_violation or serialization_failure or unique_violation then raise notice 'PASS: %',label;return;end;raise exception 'FAIL: %',label;end$$;
 set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
 set local role authenticated;
-do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';lead uuid;followup uuid;visit uuid;version integer;converted jsonb;again jsonb;t text;begin
+do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';lead uuid;followup uuid;visit uuid;version integer;t text;begin
  perform pg_temp.crm_assert((public.crm_search(org,'lead_sources')->>'total')::integer>=13,'configurable sources');
  lead=public.crm_save(org,'leads',jsonb_build_object('name','CRM verification','phone','+44 (20) 7946 0958','email','crm@example.test','source_id',(select id from public.lead_sources where organization_id=org and key='referral'),'stage_id',(select id from public.crm_pipeline_stages where organization_id=org and key='new'),'assigned_to',auth.uid()));
  perform pg_temp.crm_assert((select phone_normalized='+442079460958' and lead_number like 'L-%' from public.leads where id=lead),'lead numbering and international phone');
@@ -29,12 +29,10 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';lead uuid;followup 
  select l.version into version from public.leads l where id=lead;
  perform pg_temp.crm_denied(format('select public.crm_convert(%L,%L::jsonb)',org,jsonb_build_object('id',lead,'version',version,'project_id','99999999-9999-4999-8999-999999999999')),'conversion rolls back unavailable project');
  perform pg_temp.crm_assert(not exists(select 1 from public.customers where organization_id=org and email='crm@example.test'),'failed conversion creates no customer');
- converted=public.crm_convert(org,jsonb_build_object('id',lead,'version',version,'project_name','CRM project'));
- again=public.crm_convert(org,jsonb_build_object('id',lead,'version',version));
- perform pg_temp.crm_assert(converted=again,'conversion retry returns original mapping');
- perform pg_temp.crm_assert((select project_id=(converted->>'project_id')::uuid from public.site_visits where id=visit),'site visit history survives conversion');
- perform pg_temp.crm_assert((select count(*)=1 from public.lead_activities where lead_id=lead and activity_type='conversion'),'single conversion event');
- perform pg_temp.crm_assert((select count(*)=1 from public.customers where organization_id=org and email='crm@example.test'),'one converted customer');
+ perform pg_temp.crm_denied(format('select public.crm_convert(%L,%L::jsonb)',org,jsonb_build_object('id',lead,'version',version,'project_name','CRM project')),'Won lead without a quotation cannot create a project');
+ perform pg_temp.crm_assert(not exists(select 1 from public.customers where organization_id=org and email='crm@example.test'),'quotation guard creates no customer');
+ perform pg_temp.crm_assert((select project_id is null from public.site_visits where id=visit),'blocked conversion preserves unlinked site visit');
+ perform pg_temp.crm_assert((select count(*)=0 from public.lead_activities where lead_id=lead and activity_type='conversion'),'blocked conversion emits no conversion event');
  perform pg_temp.crm_assert((select count(*)>0 from public.lead_activities where lead_id=lead),'timeline retained');
  foreach t in array array['lead_sources','crm_pipeline_stages','crm_lost_reasons','crm_requirement_fields','leads','lead_activities','lead_followups','site_visits','quotation_share_links','quotation_customer_responses'] loop
   perform pg_temp.crm_denied(format('delete from public.%I where organization_id=%L',t,org),'direct DML denied: '||t);
@@ -55,12 +53,10 @@ do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';source uuid;stage u
  select id into customer from public.customers where organization_id=org order by created_at,id limit 1;
  perform pg_temp.crm_denied(format('select public.crm_convert(%L,%L::jsonb)',org,jsonb_build_object('id',lead,'version',1,'customer_id',customer)),'open lead cannot convert to client');
   perform public.crm_command(org,'stage',jsonb_build_object('id',lead,'version',1,'stage_id',(select id from public.crm_pipeline_stages where organization_id=org and key='won'),'note','Client accepted proposal'));
-  mapping=public.crm_convert(org,jsonb_build_object('id',lead,'version',2,'customer_id',customer));
- perform pg_temp.crm_assert((mapping->>'customer_id')::uuid=customer,'conversion links existing customer');
- perform pg_temp.crm_assert((select customer_id=customer from public.projects where id=(mapping->>'project_id')::uuid),'converted project links selected customer');
+  perform pg_temp.crm_denied(format('select public.crm_convert(%L,%L::jsonb)',org,jsonb_build_object('id',lead,'version',2,'customer_id',customer)),'existing customer conversion also requires a quotation');
  lead2=public.crm_save(org,'leads',jsonb_build_object('name','Existing project conversion','phone','+61255550124','source_id',source,'stage_id',stage));
  perform public.crm_command(org,'stage',jsonb_build_object('id',lead2,'version',1,'stage_id',(select id from public.crm_pipeline_stages where organization_id=org and key='won'),'note','Customer confirmed project'));
-  perform pg_temp.crm_denied(format('select public.crm_convert(%L,%L::jsonb)',org,jsonb_build_object('id',lead2,'version',2,'customer_id',customer,'project_id',mapping->>'project_id')),'project cannot acquire second originating lead');
+  perform pg_temp.crm_denied(format('select public.crm_convert(%L,%L::jsonb)',org,jsonb_build_object('id',lead2,'version',2,'customer_id',customer,'project_id',customer)),'conversion cannot bypass quotation requirement with supplied project');
  perform public.crm_command(org,'stage',jsonb_build_object('id',lead2,'version',2,'stage_id',(select id from public.crm_pipeline_stages where organization_id=org and key='lost'),'lost_reason_id',(select id from public.crm_lost_reasons where organization_id=org and key='budget_mismatch'),'note','Outside budget'));
  perform pg_temp.crm_assert((select lifecycle='lost' and lost_at is not null and lost_by=auth.uid() from public.leads where id=lead2),'Lost records reason and actor');
  perform public.crm_save(org,'lead_sources',jsonb_build_object('id',source,'version',2,'active',false));

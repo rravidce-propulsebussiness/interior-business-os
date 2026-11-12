@@ -1,21 +1,19 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { openOrCreateWonLeadProject } from './lead-project-actions';
 
 export function LeadProjectAction({
-  leadId, version, leadName, lifecycle, convertedProjectId,
+  leadId, version, lifecycle, convertedProjectId,
   quotationProjectId, canConvert, canViewProject,
 }: {
-  leadId: string; version: number; leadName: string; lifecycle: string;
+  leadId: string; version: number; lifecycle: string;
   convertedProjectId: string | null; quotationProjectId: string | null;
   canConvert: boolean; canViewProject: boolean;
 }) {
   const router = useRouter();
-  const [creating,setCreating] = useState(false);
-  const [projectName,setProjectName] = useState(leadName + ' project');
   const [pending,setPending] = useState(false);
   const [error,setError] = useState('');
 
@@ -29,14 +27,12 @@ export function LeadProjectAction({
   if (lifecycle !== 'won' || !canConvert) return null;
 
   const existingQuoteProject = Boolean(quotationProjectId);
-  const save = async (event?: FormEvent<HTMLFormElement>) => {
-    event?.preventDefault();
-    if (pending || (!existingQuoteProject && !projectName.trim())) return;
+  const save = async () => {
+    if (pending || !existingQuoteProject) return;
     setPending(true);setError('');
     try {
       const result = await openOrCreateWonLeadProject({
         leadId, version,
-        ...(!existingQuoteProject ? { projectName: projectName.trim() } : {}),
       });
       if (!result.ok || !result.projectId) {
         setError(result.message || 'Could not create project.');
@@ -60,24 +56,9 @@ export function LeadProjectAction({
   </div>;
 
   return <div className="crm-project-inline">
-    {!creating ? (
-      <button className="crm-project-create" type="button"
-        onClick={()=>setCreating(true)}>+ Create Project</button>
-    ) : (
-      <form className="crm-project-quick-form" onSubmit={save}>
-        <label htmlFor={'lead-project-'+leadId}>Project name</label>
-        <input id={'lead-project-'+leadId} autoFocus required maxLength={200}
-          value={projectName} onChange={e=>setProjectName(e.target.value)}
-          placeholder="Enter project name"/>
-        <div className="crm-project-quick-actions">
-          <button className="crm-project-create" disabled={pending || !projectName.trim()}
-            type="submit">{pending ? 'Creating…' : 'Create Project'}</button>
-          <button type="button" disabled={pending} onClick={()=>setCreating(false)}>
-            Cancel
-          </button>
-        </div>
-      </form>
-    )}
+    <Link className="crm-project-create" href={'/dashboard/quotations/new?lead='+encodeURIComponent(leadId)}>
+      Create a quotation to start the project
+    </Link>
     {error && <small role="alert" className="crm-project-error">{error}</small>}
   </div>;
 }

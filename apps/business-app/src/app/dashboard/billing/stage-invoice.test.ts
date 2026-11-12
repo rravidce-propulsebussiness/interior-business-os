@@ -96,7 +96,7 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(leadStage).toContain("<LeadProjectAction");
     expect(leadStage).toContain("canConvert={canConvert}");
     expect(inlineProject).toContain("Open Project ↗");
-    expect(inlineProject).toContain("+ Create Project");
+    expect(inlineProject).toContain('Create a quotation to start the project');
     expect(inlineProject).toContain("convertedProjectId");
     expect(inlineProject).toContain("quotationProjectId");
     expect(projectAction).toContain("crmServices('lead.convert')");
@@ -126,12 +126,12 @@ describe('lead-linked GST milestone invoicing',()=>{
     expect(screen).toContain('Won lead');
     expect(screen).toContain('name="wonLeadId"');
     expect(screen).toContain('row.leadId === selectedClient?.wonLeadId');
-    expect(screen).toContain('Create Project');
-    expect(screen).toContain('createWonLeadInvoiceProject');
+    expect(screen).toContain('Create quotation to start project');
+    expect(screen).toContain('/dashboard/quotations/new?lead=');
     expect(screen).not.toContain('Create project from this lead');
     expect(screen).not.toContain("'/dashboard/crm/leads/'+selectedClient.wonLeadId");
-    expect(screen).toContain("type=\"button\" className=\"psi-project-create\"");
-    expect(screen).toContain("setProjectDialog(true)");
+    expect(screen).toContain('className="psi-project-create"');
+    expect(screen).not.toContain('createWonLeadInvoiceProject');
     expect(page).toContain('existingWonLeadId={existingWonLeadId}');
     expect(issueMigration).toContain('public.gst_won_lead_invoice_save(p_org,p_input,p_won_lead)');
     expect(wonLeadMigration).toContain("l.lifecycle='won'");
