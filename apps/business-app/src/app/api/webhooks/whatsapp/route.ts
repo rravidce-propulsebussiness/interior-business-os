@@ -3,6 +3,7 @@ import { whatsappMenuMessage } from '@/lib/whatsapp-menu';
 import { createOwnerProvisioningDatabase } from '@business-os/database/server';
 import type { Json } from '@business-os/database';
 import { getConnection, graphRequest } from '@/lib/whatsapp-cloud';
+import { handleMetaLeadReply } from '@/lib/meta-leads';
 import { metaErrorLabel } from '@/lib/whatsapp-meta-error';
 import { routeWebhookChange } from '@/lib/whatsapp-webhook-routing';
 
@@ -205,6 +206,12 @@ export async function POST(request: Request) {
             ['reaction', 'system', 'unsupported', 'request_welcome'].includes(
               String(message.type ?? ''),
             )
+          )
+            continue;
+          // A lead-form contact confirming their details gets the quotation
+          // message instead of the ordinary auto-reply rules.
+          if (
+            await handleMetaLeadReply(database, connection, waId, messageText)
           )
             continue;
           const match = await database.rpc('whatsapp_automation_match', {

@@ -5026,6 +5026,224 @@ export interface Database {
           },
         ];
       };
+      meta_lead_events: {
+        Row: {
+          leadgen_id: string;
+          organization_id: string;
+          form_row_id: string;
+          lead_id: string | null;
+          status: string;
+          error: string | null;
+          attempts: number;
+          whatsapp_connection_id: string | null;
+          wa_id: string | null;
+          whatsapp_status: string;
+          whatsapp_error: string | null;
+          confirmation_sent_at: string | null;
+          confirmed_at: string | null;
+          created_at: string;
+          processed_at: string | null;
+        };
+        Insert: {
+          leadgen_id: string;
+          organization_id: string;
+          form_row_id: string;
+          lead_id?: string | null;
+          status?: string;
+          error?: string | null;
+          attempts?: number;
+          whatsapp_connection_id?: string | null;
+          wa_id?: string | null;
+          whatsapp_status?: string;
+          whatsapp_error?: string | null;
+          confirmation_sent_at?: string | null;
+          confirmed_at?: string | null;
+          created_at?: string;
+          processed_at?: string | null;
+        };
+        Update: {
+          leadgen_id?: string;
+          organization_id?: string;
+          form_row_id?: string;
+          lead_id?: string | null;
+          status?: string;
+          error?: string | null;
+          attempts?: number;
+          whatsapp_connection_id?: string | null;
+          wa_id?: string | null;
+          whatsapp_status?: string;
+          whatsapp_error?: string | null;
+          confirmation_sent_at?: string | null;
+          confirmed_at?: string | null;
+          created_at?: string;
+          processed_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'meta_lead_events_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'meta_lead_events_organization_id_form_row_id_fkey';
+            columns: ['organization_id', 'form_row_id'];
+            isOneToOne: false;
+            referencedRelation: 'meta_lead_forms';
+            referencedColumns: ['organization_id', 'id'];
+          },
+        ];
+      };
+      meta_lead_forms: {
+        Row: {
+          id: string;
+          organization_id: string;
+          page_row_id: string;
+          page_id: string;
+          form_id: string;
+          form_name: string;
+          status: string;
+          whatsapp_connection_id: string | null;
+          confirm_enabled: boolean;
+          template_name: string;
+          template_language: string;
+          template_parameters: number;
+          quote_enabled: boolean;
+          quote_message: string;
+          default_country_code: string;
+          leads_received: number;
+          leads_created: number;
+          leads_duplicate: number;
+          leads_failed: number;
+          last_lead_at: string | null;
+          last_error: string | null;
+          last_error_at: string | null;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          page_row_id: string;
+          page_id: string;
+          form_id: string;
+          form_name?: string;
+          status?: string;
+          whatsapp_connection_id?: string | null;
+          confirm_enabled?: boolean;
+          template_name?: string;
+          template_language?: string;
+          template_parameters?: number;
+          quote_enabled?: boolean;
+          quote_message?: string;
+          default_country_code?: string;
+          leads_received?: number;
+          leads_created?: number;
+          leads_duplicate?: number;
+          leads_failed?: number;
+          last_lead_at?: string | null;
+          last_error?: string | null;
+          last_error_at?: string | null;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          page_row_id?: string;
+          page_id?: string;
+          form_id?: string;
+          form_name?: string;
+          status?: string;
+          whatsapp_connection_id?: string | null;
+          confirm_enabled?: boolean;
+          template_name?: string;
+          template_language?: string;
+          template_parameters?: number;
+          quote_enabled?: boolean;
+          quote_message?: string;
+          default_country_code?: string;
+          leads_received?: number;
+          leads_created?: number;
+          leads_duplicate?: number;
+          leads_failed?: number;
+          last_lead_at?: string | null;
+          last_error?: string | null;
+          last_error_at?: string | null;
+          created_by?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'meta_lead_forms_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'meta_lead_forms_organization_id_page_row_id_fkey';
+            columns: ['organization_id', 'page_row_id'];
+            isOneToOne: false;
+            referencedRelation: 'meta_lead_pages';
+            referencedColumns: ['organization_id', 'id'];
+          },
+        ];
+      };
+      meta_lead_pages: {
+        Row: {
+          id: string;
+          organization_id: string;
+          page_id: string;
+          page_name: string;
+          token_ciphertext: string;
+          token_iv: string;
+          token_tag: string;
+          connected_by: string;
+          authorized_at: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          page_id: string;
+          page_name?: string;
+          token_ciphertext: string;
+          token_iv: string;
+          token_tag: string;
+          connected_by: string;
+          authorized_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          page_id?: string;
+          page_name?: string;
+          token_ciphertext?: string;
+          token_iv?: string;
+          token_tag?: string;
+          connected_by?: string;
+          authorized_at?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'meta_lead_pages_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       modules: {
         Row: {
           id: string;
@@ -12302,6 +12520,44 @@ export interface Database {
       };
       marketplace_sellers_review: {
         Args: { p_status?: string };
+        Returns: Json;
+      };
+      meta_lead_confirmation_logged: {
+        Args: {
+          p_organization_id: string;
+          p_leadgen_id: string;
+          p_connection_id: string;
+          p_sent: boolean;
+          p_error?: string;
+        };
+        Returns: undefined;
+      };
+      meta_lead_ingest: {
+        Args: {
+          p_organization_id: string;
+          p_form_row_id: string;
+          p_leadgen_id: string;
+          p_input: Json;
+        };
+        Returns: Json;
+      };
+      meta_lead_quote_logged: {
+        Args: {
+          p_organization_id: string;
+          p_leadgen_id: string;
+          p_sent: boolean;
+          p_body?: string;
+          p_error?: string;
+        };
+        Returns: undefined;
+      };
+      meta_lead_reply: {
+        Args: {
+          p_organization_id: string;
+          p_connection_id: string;
+          p_wa_id: string;
+          p_text: string;
+        };
         Returns: Json;
       };
       notification_preferences_save: {

@@ -18,10 +18,7 @@ import {
 } from '@/lib/whatsapp-message-label';
 import { createBrowserDatabase } from '@business-os/database/browser';
 import { parseContactSheet } from '@/lib/whatsapp-contact-sheet';
-import {
-  metaBillingUrl,
-  whatsappErrorHelp,
-} from '@/lib/whatsapp-error-help';
+import { metaBillingUrl, whatsappErrorHelp } from '@/lib/whatsapp-error-help';
 
 type Connection = { id: string; name: string; phone: string; status: string };
 type Template = {
@@ -876,9 +873,9 @@ export function WhatsAppHub({
               </button>
             </div>
             <p className="wa-modal-copy">
-              Saving records that this customer agreed to WhatsApp messages
-              from you, for example by filling your enquiry form. If they ask
-              to stop, use Opt out on the contact.
+              Saving records that this customer agreed to WhatsApp messages from
+              you, for example by filling your enquiry form. If they ask to
+              stop, use Opt out on the contact.
             </p>
             <label>
               Name
@@ -931,10 +928,7 @@ export function WhatsAppHub({
               >
                 Cancel
               </button>
-              <button
-                className="wa-new-message"
-                disabled={contactSaving}
-              >
+              <button className="wa-new-message" disabled={contactSaving}>
                 {contactSaving ? 'Saving…' : 'Save contact'}
               </button>
             </div>
@@ -1146,7 +1140,13 @@ function InboxPanel({
   const cameraInput = useRef<HTMLInputElement>(null);
   const [richForm, setRichForm] = useState<
     | null
-    | { kind: 'location'; name: string; address: string; lat: string; lng: string }
+    | {
+        kind: 'location';
+        name: string;
+        address: string;
+        lat: string;
+        lng: string;
+      }
     | { kind: 'contacts'; name: string; phone: string }
     | { kind: 'buttons'; question: string; options: string[] }
   >(null);
@@ -1457,7 +1457,9 @@ function InboxPanel({
       const latitude = Number(richForm.lat);
       const longitude = Number(richForm.lng);
       if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-        setNotice('Press “Use my location” or type the latitude and longitude.');
+        setNotice(
+          'Press “Use my location” or type the latitude and longitude.',
+        );
         return;
       }
       payload = {
@@ -1475,7 +1477,11 @@ function InboxPanel({
       preview = `👤 Contact: ${richForm.name}`;
     } else {
       const options = richForm.options.map((o) => o.trim()).filter(Boolean);
-      payload = { messageType: 'buttons', question: richForm.question, options };
+      payload = {
+        messageType: 'buttons',
+        question: richForm.question,
+        options,
+      };
       preview = `📊 ${richForm.question}\n${options.map((o, i) => `${i + 1}. ${o}`).join('\n')}`;
     }
     const tempId = `local-${Date.now()}`;
@@ -1582,7 +1588,9 @@ function InboxPanel({
   );
 
   return (
-    <div className={`wa-inbox-grid${showProfile ? ' wa-inbox-with-profile' : ''}`}>
+    <div
+      className={`wa-inbox-grid${showProfile ? ' wa-inbox-with-profile' : ''}`}
+    >
       <aside className="wa-conversation-panel">
         <div className="wa-conversation-toolbar">
           <div className="wa-chats-head">
@@ -1647,7 +1655,9 @@ function InboxPanel({
             </button>
             <button
               type="button"
-              className={conversationFilter === 'unread' ? 'wa-chip-active' : ''}
+              className={
+                conversationFilter === 'unread' ? 'wa-chip-active' : ''
+              }
               onClick={() => setConversationFilter('unread')}
             >
               Unread{state.unread ? ` ${state.unread}` : ''}
@@ -1658,7 +1668,9 @@ function InboxPanel({
                 type="button"
                 className={labelFilter === label.id ? 'wa-chip-active' : ''}
                 onClick={() =>
-                  setLabelFilter((value) => (value === label.id ? '' : label.id))
+                  setLabelFilter((value) =>
+                    value === label.id ? '' : label.id,
+                  )
                 }
               >
                 {label.name}
@@ -1713,7 +1725,8 @@ function InboxPanel({
                       {row.last_direction === 'outbound' && (
                         <StatusTicks status={row.last_status || 'sent'} />
                       )}{' '}
-                      {whatsappMessagePreview(row.last_message) || 'No messages yet'}
+                      {whatsappMessagePreview(row.last_message) ||
+                        'No messages yet'}
                     </span>
                     {row.opted_out && (
                       <span className="wa-mini-tag wa-mini-tag-red">
@@ -2091,7 +2104,11 @@ function InboxPanel({
                             role="menuitem"
                             onClick={() => {
                               setAttachMenu(false);
-                              setRichForm({ kind: 'contacts', name: '', phone: '' });
+                              setRichForm({
+                                kind: 'contacts',
+                                name: '',
+                                phone: '',
+                              });
                             }}
                           >
                             <span className="wa-attach-icon wa-attach-contact">
@@ -2237,7 +2254,10 @@ function InboxPanel({
                             placeholder="Address"
                             value={richForm.address}
                             onChange={(e) =>
-                              setRichForm({ ...richForm, address: e.target.value })
+                              setRichForm({
+                                ...richForm,
+                                address: e.target.value,
+                              })
                             }
                           />
                           <div className="grid grid-cols-2 gap-2">
@@ -2246,7 +2266,10 @@ function InboxPanel({
                               inputMode="decimal"
                               value={richForm.lat}
                               onChange={(e) =>
-                                setRichForm({ ...richForm, lat: e.target.value })
+                                setRichForm({
+                                  ...richForm,
+                                  lat: e.target.value,
+                                })
                               }
                             />
                             <input
@@ -2254,7 +2277,10 @@ function InboxPanel({
                               inputMode="decimal"
                               value={richForm.lng}
                               onChange={(e) =>
-                                setRichForm({ ...richForm, lng: e.target.value })
+                                setRichForm({
+                                  ...richForm,
+                                  lng: e.target.value,
+                                })
                               }
                             />
                           </div>
@@ -2274,7 +2300,10 @@ function InboxPanel({
                             inputMode="tel"
                             value={richForm.phone}
                             onChange={(e) =>
-                              setRichForm({ ...richForm, phone: e.target.value })
+                              setRichForm({
+                                ...richForm,
+                                phone: e.target.value,
+                              })
                             }
                           />
                         </>
@@ -2286,7 +2315,10 @@ function InboxPanel({
                             maxLength={1024}
                             value={richForm.question}
                             onChange={(e) =>
-                              setRichForm({ ...richForm, question: e.target.value })
+                              setRichForm({
+                                ...richForm,
+                                question: e.target.value,
+                              })
                             }
                           />
                           {richForm.options.map((option, index) => (
@@ -3167,7 +3199,8 @@ function BroadcastsPanel({
                   </label>
                   <div className="wa-bc-people-list">
                     {contactRows.rows.map((row) => {
-                      const blocked = row.opted_out || !row.template_opted_in_at;
+                      const blocked =
+                        row.opted_out || !row.template_opted_in_at;
                       const on = pickedIds.includes(row.id);
                       return (
                         <label
@@ -3262,9 +3295,7 @@ function BroadcastsPanel({
                       <button
                         key={key}
                         type="button"
-                        className={
-                          templateKey === key ? 'wa-bc-option-on' : ''
-                        }
+                        className={templateKey === key ? 'wa-bc-option-on' : ''}
                         onClick={() => {
                           setTemplateKey(key);
                           setValues(['{{name}}']);
@@ -3299,7 +3330,9 @@ function BroadcastsPanel({
                               return next;
                             })
                           }
-                          placeholder={index === 1 ? '2BHK interior' : 'Type here'}
+                          placeholder={
+                            index === 1 ? '2BHK interior' : 'Type here'
+                          }
                         />
                       </label>
                     ),
@@ -3365,12 +3398,9 @@ function BroadcastsPanel({
 
       <div className="space-y-3">
         <h3 className="wa-bc-title">Sent broadcasts</h3>
-        {!rows.length && (
-          <p className="wa-bc-empty">Nothing sent yet.</p>
-        )}
+        {!rows.length && <p className="wa-bc-empty">Nothing sent yet.</p>}
         {rows.map((row) => {
-          const done =
-            row.stats.sent + row.stats.delivered + row.stats.read;
+          const done = row.stats.sent + row.stats.delivered + row.stats.read;
           return (
             <article key={row.id} className="wa-bc-row">
               <div className="flex flex-wrap items-start justify-between gap-2">
@@ -3392,9 +3422,13 @@ function BroadcastsPanel({
                 <span>✓✓ Got it {row.stats.delivered + row.stats.read}</span>
                 <span className="text-sky-600">✓✓ Read {row.stats.read}</span>
                 {row.stats.failed > 0 && (
-                  <span className="text-red-700">✕ Failed {row.stats.failed}</span>
+                  <span className="text-red-700">
+                    ✕ Failed {row.stats.failed}
+                  </span>
                 )}
-                {row.stats.queued > 0 && <span>⏳ Waiting {row.stats.queued}</span>}
+                {row.stats.queued > 0 && (
+                  <span>⏳ Waiting {row.stats.queued}</span>
+                )}
               </div>
               {Object.entries(row.errors ?? {}).map(([code, count]) => {
                 const help = whatsappErrorHelp(code, wabaId);
@@ -3408,7 +3442,11 @@ function BroadcastsPanel({
                     {help.link && (
                       <>
                         {' '}
-                        <a href={help.link.href} target="_blank" rel="noreferrer">
+                        <a
+                          href={help.link.href}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           {help.link.label} ↗
                         </a>
                       </>
@@ -4545,8 +4583,7 @@ function TemplatesPanel({
     };
   };
   const bodyOf = (item: Template) =>
-    item.components?.find((component) => component.type === 'BODY')?.text ??
-    '';
+    item.components?.find((component) => component.type === 'BODY')?.text ?? '';
   const blanksOf = (text: string) =>
     Math.max(
       0,
@@ -4744,24 +4781,25 @@ function TemplatesPanel({
                           ))}
                         </select>
                       </label>
-                      {Array.from({ length: Math.max(0, blanks - 1) }, (_, i) => i + 1).map(
-                        (index) => (
-                          <label key={index}>
-                            Blank {index + 1}
-                            <input
-                              value={sendValues[index] ?? ''}
-                              onChange={(e) =>
-                                setSendValues((list) => {
-                                  const next = [...list];
-                                  next[index] = e.target.value;
-                                  return next;
-                                })
-                              }
-                              placeholder="Type here"
-                            />
-                          </label>
-                        ),
-                      )}
+                      {Array.from(
+                        { length: Math.max(0, blanks - 1) },
+                        (_, i) => i + 1,
+                      ).map((index) => (
+                        <label key={index}>
+                          Blank {index + 1}
+                          <input
+                            value={sendValues[index] ?? ''}
+                            onChange={(e) =>
+                              setSendValues((list) => {
+                                const next = [...list];
+                                next[index] = e.target.value;
+                                return next;
+                              })
+                            }
+                            placeholder="Type here"
+                          />
+                        </label>
+                      ))}
                       {blanks > 0 && (
                         <p className="wa-bc-sub">
                           Blank 1 is filled with the customer’s name.
@@ -4780,9 +4818,10 @@ function TemplatesPanel({
                           disabled={
                             busy ||
                             !sendTo ||
-                            Array.from({ length: Math.max(0, blanks - 1) }, (_, i) => i + 1).some(
-                              (i) => !(sendValues[i] ?? '').trim(),
-                            )
+                            Array.from(
+                              { length: Math.max(0, blanks - 1) },
+                              (_, i) => i + 1,
+                            ).some((i) => !(sendValues[i] ?? '').trim())
                           }
                           onClick={() => void sendOne(item)}
                         >

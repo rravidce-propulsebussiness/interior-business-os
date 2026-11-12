@@ -22,6 +22,8 @@ import {
   type ProPulseConnectionView,
 } from './propulse-connect-panel';
 import { syncPropulseLeads } from './propulse-actions';
+import { MetaLeadPanel } from './meta-lead-panel';
+import type { MetaLeadView } from './meta-lead-view';
 
 export type LeadOption = { value: string; label: string };
 export type LeadStage = { id: string; name: string; outcome: string };
@@ -233,6 +235,7 @@ export function LeadsWorkspace({
   organizationName,
   timeZone,
   propulseConnection,
+  metaLeads,
   activityPanel,
   initialTool,
 }: {
@@ -273,12 +276,13 @@ export function LeadsWorkspace({
   timeZone: string;
   asOf: string;
   propulseConnection: ProPulseConnectionView;
+  metaLeads: MetaLeadView;
   activityPanel: ReactNode;
-  initialTool: 'none' | 'add' | 'propulse';
+  initialTool: 'none' | 'add' | 'propulse' | 'meta';
 }) {
   const [openedId, setOpenedId] = useState<string | null>(null);
   const [expandedMobileId, setExpandedMobileId] = useState<string | null>(null);
-  const [leadTool, setLeadTool] = useState<'none' | 'add' | 'propulse'>(
+  const [leadTool, setLeadTool] = useState<'none' | 'add' | 'propulse' | 'meta'>(
     initialTool,
   );
   const viewMode = params.view === 'board' ? 'board' : 'list';
@@ -297,7 +301,7 @@ export function LeadsWorkspace({
   const viewLink = (nextView: 'list' | 'board') => {
     const query = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
-      if (value && !['panel', 'view', 'converted', 'assigned_to', 'unassigned'].includes(key)) query.set(key, value);
+      if (value && !['panel', 'meta', 'view', 'converted', 'assigned_to', 'unassigned'].includes(key)) query.set(key, value);
     }
     if (nextView === 'board') query.set('view', 'board');
     const string = query.toString();
@@ -386,6 +390,9 @@ export function LeadsWorkspace({
               <button type="button" onClick={() => setLeadTool(leadTool === 'propulse' ? 'none' : 'propulse')}>
                 {propulseConnection.connected ? 'ProPulse connection' : 'Connect ProPulse'}
               </button>
+              <button type="button" onClick={() => setLeadTool(leadTool === 'meta' ? 'none' : 'meta')}>
+                Facebook &amp; Instagram lead forms
+              </button>
               <a href={viewLink(viewMode === 'list' ? 'board' : 'list')}>
                 {viewMode === 'list' ? 'Board view' : 'List view'}
               </a>
@@ -412,6 +419,9 @@ export function LeadsWorkspace({
               .map((stage) => ({ value: stage.id, label: stage.name }))}
             onClose={() => setLeadTool('none')}
           />
+        )}
+        {leadTool === 'meta' && (
+          <MetaLeadPanel view={metaLeads} onClose={() => setLeadTool('none')} />
         )}
         {leadTool === 'propulse' && (
           <ProPulseConnectPanel
