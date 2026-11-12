@@ -10,7 +10,7 @@ describe('delivery project creation starts from a customer quotation', () => {
   const quoteStart = file('../quotations/studio-start.tsx');
   const quotePage = file('../quotations/new/page.tsx');
   const quoteAction = file('../quotations/studio-actions.ts');
-  const migration = file('../../../../../../packages/database/supabase/migrations/20261112130000_projects_require_quotation.sql');
+  const migration = file('../../../../../../packages/database/supabase/migrations/20261112190531_projects_require_quotation_20261112.sql');
 
   it('continues an existing customer quote or starts a quote for that customer', () => {
     expect(projectStart).toContain('Continue {quote.number}');
