@@ -5,5 +5,5 @@ export const dynamic='force-dynamic';
 export default async function ProjectOverview({params}:{params:Promise<{id:string}>}){
  const {id}=await params;
  if(!z.uuid().safeParse(id).success)notFound();
- return <ProjectV2Page id={id} view="overview"/>;
+ return <ProjectV2Page id={id} view="timeline"/>;
 }

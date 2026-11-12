@@ -13,7 +13,7 @@ import { stageFlowStepSchema,type StageFlowStep } from '@business-os/core/quotat
 export type { ProjectEntry } from './project-v2-types';
 
 export type SiteRow = Record<string,unknown> & {id:string};
-export type Stage = {id:string;title:string;status:string;phase:string;floor_code:string|null;
+export type Stage = {id:string;sequence:number;title:string;status:string;phase:string;floor_code:string|null;
  explanation:string;activities:string[];task_count:number;
  instance_code:string;template_code:string;dependencies:string[];inspectionTopics:string[]};
 export type StageLink = {stage_id:string;kind:string;record_id:string};
@@ -253,7 +253,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
  const industriesById=new Map(industries.map(x=>[x.id,x.name]));
  const stageList:Array<Stage>=Array.isArray(rawStages.stages)?rawStages.stages.map(x=>{
   const a=obj(x);
-  return {id:stringValue(a.id),title:stringValue(a.title),status:stringValue(a.status),phase:stringValue(a.phase),
+  return {id:stringValue(a.id),sequence:Number(a.sequence)||0,title:stringValue(a.title),status:stringValue(a.status),phase:stringValue(a.phase),
    floor_code:stringValue(a.floor_code)||null,explanation:stringValue(a.explanation),
     instance_code:stringValue(a.instance_code),template_code:stringValue(a.template_code),
     dependencies:Array.isArray(a.dependencies)?a.dependencies.map(stringValue).filter(Boolean):[],
@@ -512,7 +512,7 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  if(!org)notFound();
  const stagesRaw=obj(stagesResult.error?null:stagesResult.data);
  const stages:Stage[]=Array.isArray(stagesRaw.stages)?stagesRaw.stages.map(x=>{
-  const a=obj(x);return {id:stringValue(a.id),title:stringValue(a.title),
+  const a=obj(x);return {id:stringValue(a.id),sequence:Number(a.sequence)||0,title:stringValue(a.title),
    status:stringValue(a.status),phase:stringValue(a.phase),floor_code:stringValue(a.floor_code)||null,
    instance_code:stringValue(a.instance_code),template_code:stringValue(a.template_code),
    dependencies:Array.isArray(a.dependencies)?a.dependencies.map(stringValue).filter(Boolean):[],

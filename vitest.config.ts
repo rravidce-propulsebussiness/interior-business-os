@@ -45,6 +45,7 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/owner-erp-navigation.behavior.test.ts',
       'apps/business-app/src/app/dashboard/project-management/portfolio.test.ts',
       'apps/business-app/src/app/dashboard/project-management/project-management.test.ts',
+      'apps/business-app/src/app/dashboard/projects/project-timeline-feed.test.ts',
       'apps/business-app/src/app/dashboard/execution/revision-cost.test.ts',
       'apps/business-app/src/app/dashboard/execution/revision-ui.test.ts',
       'apps/business-app/src/app/dashboard/project-management/tasks/tasks-board.test.ts',

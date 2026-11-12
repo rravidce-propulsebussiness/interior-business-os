@@ -16,6 +16,7 @@ import {forecastWork} from './project-work-forecast';
 import { BulkStageChecks } from './project-stage-bulk-checks';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectDailyCommand } from './project-daily-command';
+import { projectTimelineFeed } from './project-timeline-feed';
 import { StageActivationControl } from './project-stage-activation';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
@@ -36,7 +37,7 @@ import './project-v2.css';
 import './project-daily-command.css';
 
 export const projectPages=[
- {slug:'overview',title:'Overview',icon:'dashboard' as OwnerIconName},
+ {slug:'overview',title:'Today',icon:'dashboard' as OwnerIconName},
  {slug:'timeline',title:'Timeline',icon:'calendar' as OwnerIconName},
  {slug:'documents',title:'Quote & Agreement',icon:'quotations' as OwnerIconName},
  {slug:'payments',title:'Payments',icon:'billing' as OwnerIconName},
@@ -81,8 +82,8 @@ function FieldDate({value}:{value:unknown}){return <time>{shortDate(value)}</tim
 function LinkTabs({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
  const id=data.project.id;
  const tabs=[
-  {slug:'overview' as ProjectPageSlug,title:'Overview',icon:'dashboard' as OwnerIconName,href:cur(id,'overview')},
-  {slug:'timeline' as ProjectPageSlug,title:'Stages',icon:'projects' as OwnerIconName,href:cur(id,'timeline')},
+  {slug:'overview' as ProjectPageSlug,title:'Today',icon:'dashboard' as OwnerIconName,href:cur(id,'overview')},
+  {slug:'timeline' as ProjectPageSlug,title:'Timeline',icon:'projects' as OwnerIconName,href:cur(id,'timeline')},
   {slug:'execution' as ProjectPageSlug,title:'Photos',icon:'globe' as OwnerIconName,href:cur(id,'execution')+'#site-photos'},
   {slug:'execution' as ProjectPageSlug,title:'Reports',icon:'reports' as OwnerIconName,href:cur(id,'execution')},
   {slug:'team' as ProjectPageSlug,title:'Team',icon:'team' as OwnerIconName,href:cur(id,'team')},
@@ -554,7 +555,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
        ...(site?.checks??[]).map(x=>({kind:'check' as const,id:x.id,title:stringValue(x.title)})),
        ...(site?.media??[]).filter(x=>x.category!=='agreement').map(x=>({kind:'media' as const,id:x.id,title:stringValue(x.filename)})),
       ];
-      return <details className={'pv2-command-stage '+(complete?'is-complete':'')+
+      return <details id={'project-stage-'+stage.id} className={'pv2-command-stage '+(complete?'is-complete':'')+
        (index===current?' is-current':'')} key={stage.id} open={index===current}>
        <summary className="pv2-command-stage-summary">
         <span className="pv2-stage-number">{complete?'✓':index+1}</span>
@@ -841,6 +842,35 @@ function ProjectWorkHub({d,showHistory=false}:{d:WorkspaceData;showHistory?:bool
   </div>
  </div>;
 }
+function ProjectTimelineFeed({d}:{d:WorkspaceData}){
+ const items=projectTimelineFeed({stages:projectTimelineStages(d.stages),plans:d.itemPlans,
+  work:d.stageProgress.work,checks:d.stageProgress.checks,execution:d.stageExecution});
+ const grouped=new Map<string,typeof items>();
+ for(const item of items){
+  const date=item.plan.plannedStart;
+  grouped.set(date,[...(grouped.get(date)??[]),item]);
+ }
+ return <section className="pv2-panel pv2-date-feed" aria-labelledby="pv2-date-feed-title">
+  <div className="pv2-command-head"><div><h2 id="pv2-date-feed-title">Chronological work plan</h2>
+   <p>One feed across floors and activities. Overlapping work stays visible; structural blockers remain enforced.</p></div>
+   <span className="pv2-timeline-counter">{items.length} scheduled activities</span></div>
+  {items.length?Array.from(grouped,([date,rows])=><section className="pv2-date-group" key={date}>
+   <h3><time dateTime={date}>{shortDate(date)}</time><small>{rows.length} planned item{rows.length===1?'':'s'}</small></h3>
+   <ol>{rows.map(item=>{
+    const title=item.plan.kind==='work'?item.stage.activities[item.plan.index]:
+     item.plan.kind==='material'?item.plan.title:item.stage.inspectionTopics[item.plan.index]??item.plan.title;
+    return <li key={item.stage.id+'-'+item.plan.kind+'-'+item.plan.index}>
+     <span className="pv2-date-feed-time">{item.plan.plannedStart===item.plan.plannedFinish?'':shortDate(item.plan.plannedStart)+' – '}{shortDate(item.plan.plannedFinish)}</span>
+     <div><strong>{title}</strong><p>{item.stage.floor_code?pretty(item.stage.floor_code)+' · ':''}{item.stage.title} · {pretty(item.plan.kind)}</p>
+      {item.blockers.length>0&&<small className="pv2-date-feed-blocked">Blocked: {item.blockers.join(' · ')}</small>}
+      <Status value={item.status}/>
+     </div><Link href={cur(d.project.id,'timeline')+'#project-stage-'+item.stage.id}
+      aria-label={'Open '+item.stage.title+' stage details'}>Open activity →</Link>
+    </li>;
+   })}</ol>
+  </section>):<Blank title="No dated work yet" detail="Plan activity dates in the project timeline. Dates help organize work; they do not activate work or bypass dependencies."/>}
+ </section>;
+}
 function Overview({d}:{d:WorkspaceData}){
  return <ProjectDailyCommand d={d}
   stageDetails={<ProjectStageBoard d={d}/>}
@@ -862,7 +892,10 @@ function timeline(d:WorkspaceData):Activity[]{
   description:stringValue(row.description)});
  return all.sort((a,b)=>b.date.localeCompare(a.date));
 }
-function Timeline({d}:{d:WorkspaceData}){return <ProjectWorkHub d={d} showHistory/>;}
+function Timeline({d}:{d:WorkspaceData}){return <>
+ <ProjectDailyCommand d={d} stageDetails={<ProjectTimelineFeed d={d}/>} financialDetails={<ProjectFinancialSummary d={d}/>}/>
+ <ProjectWorkHub d={d} showHistory/>
+</>;}
 function Documents({d}:{d:WorkspaceData}){
  const canSeeCommercial=d.permissions.quotation||d.permissions.finance;
  const photos=d.site?.media??[],agreement=photos.filter(r=>stringValue(r.category)==='agreement');
@@ -1091,7 +1124,7 @@ function Designs({d}:{d:WorkspaceData}){
   {designFiles.length>0&&<div className="pv2-file-list">{designFiles.map(f=><a key={f.id}
    href={'/dashboard/projects/'+d.project.id+'/site/media/'+f.id} className="pv2-file">
    <OwnerIcon name="quotations" size={20}/><strong>{stringValue(f.filename)}</strong><span>Download</span></a>)}</div>}
-  <p className="pv2-muted">Drawing uploads and approvals are handled in the project's design timeline stage.</p>
+  <p className="pv2-muted">Drawing uploads and approvals are handled in the project&apos;s design timeline stage.</p>
  </section></div>;
 }
 function Team({d}:{d:WorkspaceData}){

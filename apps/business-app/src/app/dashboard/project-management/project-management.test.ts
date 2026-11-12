@@ -38,7 +38,7 @@ describe('project management navigation and trusted portfolio boundaries', () =>
           label: 'Portfolio Overview',
           href: '/dashboard/project-management',
         },
-        { label: 'Project Directory', href: '/dashboard/projects' },
+        { label: 'All Projects', href: '/dashboard/projects' },
         { label: 'Task Board', href: '/dashboard/project-management/tasks' },
         { label: 'ERP: Site Execution', href: '/dashboard/operations' },
       ],

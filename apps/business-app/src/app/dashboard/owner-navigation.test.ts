@@ -33,7 +33,7 @@ describe('one authorized company navigation on every dashboard page', () => {
       'BOQ & Estimating',
       'BOQ & Estimate Revisions',
       'Rate Recipes',
-      'Project Directory',
+      'All Projects',
       'Automations',
       'Brochures',
       'ERP: Site Execution',

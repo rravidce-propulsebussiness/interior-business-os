@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
+import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
 
 type Result = { saved: boolean; message: string };
 const id = z.uuid();
@@ -177,13 +178,36 @@ export async function saveSignedAgreement(
       ? 'Signed agreement confirmation requires authorized project and finance access.'
       : error.message.slice(0, 220));
 
+    // The signed contract revision is the authoritative source for the
+    // advance percentage. Use the existing idempotent Finance RPC; the PDF
+    // upload and signature event never count as money received.
+    const contract = await services.client.from('contracts')
+      .select('revision_id').eq('organization_id', org).eq('project_id', projectId)
+      .eq('id', contractId).maybeSingle();
+    let advanceMessage = 'No advance request was created because the signed quotation has no valid advance/booking milestone.';
+    if (!contract.error && contract.data?.revision_id) {
+      const revision = await services.client.from('quotation_revisions')
+        .select('terms').eq('organization_id', org).eq('id', contract.data.revision_id).maybeSingle();
+      const plan = !revision.error && typeof revision.data?.terms === 'string'
+        ? savedStagePaymentPlan(revision.data.terms) : null;
+      const advance = plan?.find(item => /advance|booking/i.test(item.name));
+      if (advance) {
+        const issued = await services.client.rpc('project_advance_proforma_prepare', {
+          p_org: org, p_project: projectId, p_percent: advance.percent,
+        });
+        advanceMessage = issued.error
+          ? 'Agreement recorded. The agreed advance request could not be issued automatically; an authorized Finance user must review it in Finance.'
+          : 'Agreement recorded and the agreed advance request was issued. Payment is still pending until Finance verifies a receipt.';
+      }
+    }
+
     for (const path of [
       '/dashboard/projects/' + projectId,
       '/dashboard/projects/' + projectId + '/documents',
       '/dashboard/projects/' + projectId + '/site',
       '/dashboard/projects/' + projectId + '/timeline',
     ]) revalidatePath(path);
-    return { saved: true, message: 'Signed agreement uploaded and recorded successfully.' };
+    return { saved: true, message: 'Signed agreement uploaded and recorded successfully. ' + advanceMessage };
   } catch (error) {
     if (uploaded) {
       revalidatePath('/dashboard/projects/' + projectId + '/documents');
