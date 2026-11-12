@@ -114,12 +114,14 @@ export async function createStudioQuotation(input: unknown): Promise<{
         typeof existingCustomer.billing_address === 'object' &&
         !Array.isArray(existingCustomer.billing_address)
         ? existingCustomer.billing_address as Record<string, unknown> : {};
+      const customerCity = typeof address.city === 'string' && address.city.trim().length > 0
+        ? address.city : values.location;
       quoteClient = {
         ...values,
         clientName: existingCustomer.display_name,
         phone: existingCustomer.phone,
         email: existingCustomer.email || '',
-        location: typeof address.city === 'string' ? address.city : values.location,
+        location: customerCity,
       };
       if (quoteClient.phone.trim().length < 3)
         return { ok: false, message: 'Add a valid phone number to this customer record before quoting.' };
