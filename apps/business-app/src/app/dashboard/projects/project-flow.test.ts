@@ -9,6 +9,7 @@ import {
   parseEvents,
   parseOptional,
   projectWorkItems,
+  shouldShowAdvancePayment,
   floorName,
 } from './project-flow';
 import type { Stage, StageExecution, StageItemPlan } from './project-v2-data';
@@ -74,6 +75,13 @@ const execution = [
 ];
 
 describe('single project flow model', () => {
+  it('does not show an advance milestone without a schedule or Finance invoice', () => {
+    expect(shouldShowAdvancePayment(null)).toBe(false);
+    expect(shouldShowAdvancePayment({ invoiceId: null, scheduleActive: false })).toBe(false);
+    expect(shouldShowAdvancePayment({ invoiceId: null, scheduleActive: true })).toBe(true);
+    expect(shouldShowAdvancePayment({ invoiceId: 'invoice-1', scheduleActive: false })).toBe(true);
+  });
+
   it('resolves exactly one role per person from canonical site permissions', () => {
     expect(
       flowRole({ canManage: true, siteRole: 'watchman', qcReviewer: false }),

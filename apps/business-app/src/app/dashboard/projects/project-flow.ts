@@ -103,6 +103,11 @@ const workStatus = (v: unknown): WorkStatus =>
   ) ?? 'pending';
 
 export const isDone = (s: WorkStatus) => s === 'completed' || s === 'skipped';
+export function shouldShowAdvancePayment(
+  advance: { invoiceId: string | null; scheduleActive: boolean } | null | undefined,
+): boolean {
+  return Boolean(advance && (advance.scheduleActive || advance.invoiceId));
+}
 export const isPhysicalStage = (stage: Stage) =>
   !PLANNING.has(stage.template_code);
 
