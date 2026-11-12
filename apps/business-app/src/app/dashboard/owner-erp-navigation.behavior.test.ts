@@ -95,7 +95,10 @@ describe('ERP uses the existing owner workspace and access policy', () => {
           label: 'BOQ & Estimate Revisions',
           href: '/dashboard/execution/execution_estimate_revisions',
         },
-        { label: 'Rate Recipes', href: '/dashboard/execution/estimation_recipes' },
+        {
+          label: 'Rate Recipes',
+          href: '/dashboard/execution/estimation_recipes',
+        },
       ],
     });
     expect(projectManagement(context)).toEqual({
@@ -121,13 +124,17 @@ describe('ERP uses the existing owner workspace and access policy', () => {
   });
 
   it('requires the project entitlement and active membership', () => {
-    expect(projectManagement(company(['execution.view'], ['purchasing']))).toBeUndefined();
+    expect(
+      projectManagement(company(['execution.view'], ['purchasing'])),
+    ).toBeUndefined();
     const inactive = company(['execution.view'], ['projects'], 'inactive');
     expect(projectManagement(inactive)).toBeUndefined();
   });
 
   it('never grants access merely because a module entitlement exists', () => {
-    expect(projectManagement(company([], ['projects', 'purchasing']))).toBeUndefined();
+    expect(
+      projectManagement(company([], ['projects', 'purchasing'])),
+    ).toBeUndefined();
   });
 
   it('shows only the operator-authorized section', () => {
