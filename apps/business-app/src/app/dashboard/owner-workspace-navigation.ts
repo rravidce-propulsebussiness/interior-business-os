@@ -21,12 +21,6 @@ export function ownerWorkspaceNavigation(
       permission,
       ...(moduleKey ? { moduleKey } : {}),
     });
-  if (has('notification.view'))
-    items.push({
-      label: 'My Work',
-      href: '/dashboard/work',
-      icon: 'calendar',
-    });
   if (has('lead.view', 'crm'))
     items.push({
       label: 'Leads',
