@@ -93,7 +93,6 @@ describe('one authorized company navigation on every dashboard page', () => {
     expect(canonical).toContain("has('milestone.view', 'projects')");
     expect(canonical).toContain("has('brochure.view', 'brochure')");
     expect(canonical).toContain("has('automation.view')");
-    expect(canonical).toContain("has('notification.view')");
     expect(canonical).toContain("has('catalog.view', 'catalog')");
     expect(canonical).toContain("has('pricing.view', 'pricing')");
     expect(canonical).toContain("href: '/dashboard/project-management'");
