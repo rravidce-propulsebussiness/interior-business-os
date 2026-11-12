@@ -19,7 +19,7 @@ const createInput = z
     email: z.union([z.literal(''), z.email().max(254)]),
     location: z.string().trim().max(200),
     projectType: z.string().trim().min(2).max(100),
-    plotSize: z.string().trim().max(40),
+    plotSize: z.string().trim().max(200),
     notes: z.string().trim().max(1000).optional().default(''),
     currency: z
       .string()

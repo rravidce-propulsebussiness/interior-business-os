@@ -203,6 +203,13 @@ describe('lead-driven quotation creation', () => {
     expect(action).toContain('resolveLeadCategory(lead, industries)');
     expect(action).toContain('Classify this lead in CRM');
   });
+
+  it('accepts realistic plot and floor configuration in the quote form and server action', () => {
+    const configuration = '200 sq yards · G+2 (Ground, First, Second)';
+    expect(configuration.length).toBeGreaterThan(40);
+    expect(form).toContain('maxLength={200} placeholder={industry ===');
+    expect(action).toContain('plotSize: z.string().trim().max(200)');
+  });
 });
 
 describe('single premium package library and working Custom Quote entry', () => {
