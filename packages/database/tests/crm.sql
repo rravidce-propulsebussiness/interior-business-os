@@ -70,6 +70,9 @@ reset role;
 -- submitted twice and the two requests overlap.
 do $$
 begin
+  insert into public.customers(organization_id,display_name,phone,email)
+  values ('dddddddd-dddd-4ddd-8ddd-dddddddddddd',
+    'CRM verification','+44 (20) 7946 0958','');
   begin
     insert into public.customers(organization_id,display_name,phone,email)
     values ('dddddddd-dddd-4ddd-8ddd-dddddddddddd',
