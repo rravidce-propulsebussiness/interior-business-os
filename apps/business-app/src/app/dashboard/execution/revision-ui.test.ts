@@ -56,11 +56,27 @@ describe('permission-aware BOQ presentation', () => {
         (item) => item.label === name,
       )?.children,
     ).toEqual([
+      { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
+    ]);
+    // BOQ now has its own menu, separate from Project Management.
+    const boq = 'BOQ & Estimating';
+    expect(
+      ownerWorkspaceNavigation(company([])).some((item) => item.label === boq),
+    ).toBe(false);
+    expect(
+      ownerWorkspaceNavigation(company(['estimate.view'], [])).some(
+        (item) => item.label === boq,
+      ),
+    ).toBe(false);
+    expect(
+      ownerWorkspaceNavigation(company(['estimate.view'])).find(
+        (item) => item.label === boq,
+      )?.children,
+    ).toEqual([
       {
-        label: 'ERP: BOQ & Estimate Revisions',
+        label: 'BOQ & Estimate Revisions',
         href: '/dashboard/execution/execution_estimate_revisions',
       },
-      { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
     ]);
   });
   it('uses shared navigation and scoped styles for execution routes', () => {
