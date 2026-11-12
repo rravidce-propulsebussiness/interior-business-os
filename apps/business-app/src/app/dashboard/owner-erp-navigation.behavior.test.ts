@@ -98,7 +98,14 @@ describe('ERP uses the existing owner workspace and access policy', () => {
         { label: 'Rate Recipes', href: '/dashboard/execution/estimation_recipes' },
       ],
     });
-    expect(projectManagement(context)).toBeUndefined();
+    expect(projectManagement(context)).toEqual({
+      label: 'Project Management',
+      href: '/dashboard/execution',
+      icon: 'projects',
+      children: [
+        { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
+      ],
+    });
   });
 
   it('hides procurement and stock when purchasing is not entitled', () => {
