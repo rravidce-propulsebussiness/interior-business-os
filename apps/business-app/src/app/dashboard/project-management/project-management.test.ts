@@ -25,32 +25,36 @@ function company(
 }
 
 describe('project management navigation and trusted portfolio boundaries', () => {
-  it('opens one portfolio and canonical projects under an authorized group', () => {
+  it('keeps one project path: All Projects, then the project timeline', () => {
     const items = ownerWorkspaceNavigation(
-      company(['project.view', 'task.view', 'execution.view']),
+      company([
+        'project.view',
+        'task.view',
+        'execution.view',
+        'milestone.view',
+        'inspection.view',
+      ]),
     );
     expect(items.find((item) => item.label === 'Project Management')).toEqual({
       label: 'Project Management',
-      href: '/dashboard/project-management',
+      href: '/dashboard/projects',
       icon: 'projects',
-      children: [
-        {
-          label: 'Portfolio Overview',
-          href: '/dashboard/project-management',
-        },
-        { label: 'All Projects', href: '/dashboard/projects' },
-        { label: 'Task Board', href: '/dashboard/project-management/tasks' },
-        { label: 'ERP: Site Execution', href: '/dashboard/operations' },
-      ],
+      children: [{ label: 'All Projects', href: '/dashboard/projects' }],
     });
+    const labels = JSON.stringify(items);
+    for (const removed of [
+      'Task Board',
+      'Milestones',
+      'ERP: ',
+      'Portfolio Overview',
+    ])
+      expect(labels).not.toContain(removed);
   });
 
-  it('falls back to the existing task register without execution permission', () => {
-    const projects = ownerWorkspaceNavigation(
-      company(['project.view', 'task.view']),
-    );
+  it('keeps the task register for staff who cannot open projects', () => {
+    const taskOnly = ownerWorkspaceNavigation(company(['task.view']));
     expect(
-      projects.find((item) => item.label === 'Project Management')?.children,
+      taskOnly.find((item) => item.label === 'Project Management')?.children,
     ).toContainEqual({
       label: 'Task Register',
       href: '/dashboard/operations/project_tasks',
@@ -90,7 +94,7 @@ describe('project management navigation and trusted portfolio boundaries', () =>
     const projectNav = navigation.find(
       (item) => item.label === 'Project Management',
     );
-    expect(projectNav?.children).toHaveLength(2);
+    expect(projectNav?.children).toHaveLength(1);
     expect(navigation.some((item) => item.label === 'Brochures')).toBe(true);
     expect(navigation.some((item) => item.label === 'Automations')).toBe(true);
     expect(navigation.some((item) => item.label === 'My Work')).toBe(false);

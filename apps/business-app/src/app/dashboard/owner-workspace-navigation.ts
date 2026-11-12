@@ -157,12 +157,21 @@ export function ownerWorkspaceNavigation(
       icon: 'quotations',
       children: boqChildren,
     });
-  projectChildren.push(...erpChildren);
+  // One project path: All Projects → project → Timeline. Task boards,
+  // milestones and ERP registers are reached from inside each project's
+  // timeline and tabs, so they are not repeated in the menu for anyone who
+  // can open projects. Staff without project access keep their own entry.
+  if (has('project.view', 'projects'))
+    projectChildren.splice(0, projectChildren.length, {
+      label: 'All Projects',
+      href: '/dashboard/projects',
+    });
+  else projectChildren.push(...erpChildren);
   if (projectChildren.length)
     items.push({
       label: 'Project Management',
       href: has('project.view', 'projects')
-        ? '/dashboard/project-management'
+        ? '/dashboard/projects'
         : projectChildren[0]!.href,
       icon: 'projects',
       children: projectChildren,

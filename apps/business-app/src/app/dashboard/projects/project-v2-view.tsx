@@ -15,7 +15,6 @@ import { ProjectItemSchedule } from './project-item-schedule';
 import {forecastWork} from './project-work-forecast';
 import { BulkStageChecks } from './project-stage-bulk-checks';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
-import { ProjectDailyCommand } from './project-daily-command';
 import { projectTimelineFeed } from './project-timeline-feed';
 import { ProjectFlow } from './project-flow-view';
 import { flowRole } from './project-flow';
@@ -38,20 +37,24 @@ import '../owner-dashboard.css';
 import './project-v2.css';
 import './project-daily-command.css';
 
+/** Project tabs. Timeline is first and holds only site work; every other tab
+ * is a record area. `overview` and `checks` remain valid addresses for old
+ * links but are not shown as tabs (their content lives in the timeline). */
 export const projectPages=[
- {slug:'overview',title:'Today',icon:'dashboard' as OwnerIconName},
- {slug:'timeline',title:'Timeline',icon:'calendar' as OwnerIconName},
- {slug:'documents',title:'Quote & Agreement',icon:'quotations' as OwnerIconName},
- {slug:'payments',title:'Payments',icon:'billing' as OwnerIconName},
- {slug:'procurement',title:'Procurement',icon:'purchases' as OwnerIconName},
- {slug:'labour',title:'Labour',icon:'team' as OwnerIconName},
- {slug:'execution',title:'Execution',icon:'projects' as OwnerIconName},
- {slug:'checks',title:'Checks',icon:'check' as OwnerIconName},
- {slug:'designs',title:'Designs & Plans',icon:'quotations' as OwnerIconName},
- {slug:'team',title:'Team & Access',icon:'team' as OwnerIconName},
+ {slug:'timeline',title:'Timeline',icon:'calendar' as OwnerIconName,tab:true},
+ {slug:'milestones',title:'Milestones',icon:'check' as OwnerIconName,tab:true},
+ {slug:'procurement',title:'Materials',icon:'purchases' as OwnerIconName,tab:true},
+ {slug:'designs',title:'Designs',icon:'quotations' as OwnerIconName,tab:true},
+ {slug:'documents',title:'Agreement',icon:'quotations' as OwnerIconName,tab:true},
+ {slug:'payments',title:'Payments & Expenses',icon:'billing' as OwnerIconName,tab:true},
+ {slug:'labour',title:'Labour',icon:'team' as OwnerIconName,tab:true},
+ {slug:'execution',title:'Site reports',icon:'reports' as OwnerIconName,tab:true},
+ {slug:'team',title:'Team',icon:'team' as OwnerIconName,tab:true},
+ {slug:'overview',title:'Timeline',icon:'calendar' as OwnerIconName,tab:false},
+ {slug:'checks',title:'Checks',icon:'check' as OwnerIconName,tab:false},
 ] as const;
 export type ProjectPageSlug=(typeof projectPages)[number]['slug'];
-const cur=(id:string,view:string)=>'/dashboard/projects/'+id+(view==='overview'?'':'/'+view);
+const cur=(id:string,view:string)=>'/dashboard/projects/'+id+(view==='overview'||view==='timeline'?'':'/'+view);
 function Status({value}:{value:string}) {
  return <span className={'pv2-status '+(['active','ongoing','paid','passed','approved','received','completed','signed'].includes(value)
   ?'good':['pending','in_progress','requested','submitted','ordered'].includes(value)?'warn':'neutral')}>
@@ -85,24 +88,13 @@ function LinkTabs({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
  const id=data.project.id;
  // Watchmen work only on their curing and security screen.
  if(viewerRole(data)==='watchman')return null;
- const tabs=[
-  {slug:'overview' as ProjectPageSlug,title:'Today',icon:'dashboard' as OwnerIconName,href:cur(id,'overview')},
-  {slug:'timeline' as ProjectPageSlug,title:'Timeline',icon:'projects' as OwnerIconName,href:cur(id,'timeline')},
-  {slug:'execution' as ProjectPageSlug,title:'Photos',icon:'globe' as OwnerIconName,href:cur(id,'execution')+'#site-photos'},
-  {slug:'execution' as ProjectPageSlug,title:'Reports',icon:'reports' as OwnerIconName,href:cur(id,'execution')},
-  {slug:'team' as ProjectPageSlug,title:'Team',icon:'team' as OwnerIconName,href:cur(id,'team')},
- ];
- const extra=projectPages.filter(item=>!['overview','timeline','execution','team'].includes(item.slug)
-  &&(item.slug!=='payments'||data.permissions.payments));
- return <nav className="pv2-project-tabs pv2-premium-tabs" aria-label="Project sections">
-  {tabs.map(tab=><Link key={tab.title} href={tab.href}
-   aria-current={active===tab.slug&&(tab.title!=='Photos'||active==='execution')?'page':undefined}
-   className={active===tab.slug&&(tab.title!=='Photos'||active==='execution')?'selected':''}>
+ const current=active==='overview'?'timeline':active==='checks'?'milestones':active;
+ const tabs=projectPages.filter(item=>item.tab&&(item.slug!=='payments'||data.permissions.payments));
+ return <nav className="pv2-project-tabs pv2-premium-tabs pv2-flow-tabs" aria-label="Project sections">
+  {tabs.map(tab=><Link key={tab.slug} href={cur(id,tab.slug)}
+   aria-current={current===tab.slug?'page':undefined}
+   className={(current===tab.slug?'selected ':'')+(tab.slug==='timeline'?'pv2-tab-main':'')}>
    <OwnerIcon name={tab.icon} size={16}/>{tab.title}</Link>)}
-  <details className="pv2-project-more"><summary><OwnerIcon name="settings" size={16}/> More</summary>
-   <div>{extra.map(item=><Link key={item.slug} href={cur(id,item.slug)}>
-    <OwnerIcon name={item.icon} size={16}/>{item.title}</Link>)}</div>
-  </details>
  </nav>;
 }
 function ProjectHeader({data,active}:{data:WorkspaceData;active:ProjectPageSlug}){
@@ -875,11 +867,6 @@ function ProjectTimelineFeed({d}:{d:WorkspaceData}){
   </section>):<Blank title="No dated work yet" detail="Plan activity dates in the project timeline. Dates help organize work; they do not activate work or bypass dependencies."/>}
  </section>;
 }
-function Overview({d}:{d:WorkspaceData}){
- return <ProjectDailyCommand d={d}
-  stageDetails={<ProjectStageBoard d={d}/>}
-  financialDetails={<ProjectFinancialSummary d={d}/>}/>;
-}
 
 type Activity={id:string;date:string;title:string;kind:string;description:string;media?:SiteRow};
 function timeline(d:WorkspaceData):Activity[]{
@@ -902,14 +889,22 @@ const viewerRole=(d:WorkspaceData)=>flowRole({canManage:d.site?.canManage===true
  * Stage-level planning, agreement steps and records stay one tap below. */
 function Timeline({d}:{d:WorkspaceData}){
  const role=viewerRole(d);
- if(role==='watchman')return <ProjectFlow d={d}/>;
+ const preSite=d.site?.stage!=='execution';
  return <>
+  {preSite&&role==='owner'&&<section className="pv2-flow-presite" aria-label="Before site work">
+   <div><strong>Before site work starts</strong>
+    <p>Agreement, advance, site survey and design approval steps are in Milestones. Site work appears here once execution is released.</p></div>
+   <Link className="pv2-button pv2-primary" href={cur(d.project.id,'milestones')}>Open Milestones</Link>
+  </section>}
   <ProjectFlow d={d}/>
-  <details className="pv2-flow-details" open={d.site?.stage!=='execution'&&role==='owner'}>
-   <summary>{role==='owner'?'Stages, schedules, agreement & records':'All stages, schedules & records'}</summary>
-   <ProjectDailyCommand d={d} stageDetails={<ProjectTimelineFeed d={d}/>} financialDetails={<ProjectFinancialSummary d={d}/>}/>
-   <ProjectWorkHub d={d} showHistory/>
-  </details>
+ </>;
+}
+/** Stage-by-stage milestones: agreement and design gates, each floor's stage,
+ * its schedule, checks, certification and linked payment milestone. */
+function Milestones({d}:{d:WorkspaceData}){
+ return <>
+  <ProjectWorkHub d={d} showHistory/>
+  <ProjectTimelineFeed d={d}/>
  </>;
 }
 function Documents({d}:{d:WorkspaceData}){
@@ -1161,7 +1156,7 @@ function Team({d}:{d:WorkspaceData}){
  <p className="pv2-muted">Use “Share with client” in the project header to invite or revoke access for this exact project.</p></div>;
 }
 const pages:{[key in ProjectPageSlug]:(p:{d:WorkspaceData})=>React.ReactNode}={
- overview:Overview,timeline:Timeline,documents:Documents,payments:Payments,
+ overview:Timeline,timeline:Timeline,milestones:Milestones,documents:Documents,payments:Payments,
  procurement:Procurement,labour:Labour,execution:Execution,checks:Checks,designs:Designs,team:Team,
 };
 export async function ProjectV2Page({id,view}:{id:string;view:ProjectPageSlug}){

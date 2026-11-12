@@ -986,3 +986,11 @@
 .pv2-flow-details[open] {
   padding-bottom: 14px;
 }
+.pv2-flow-tabs{overflow-x:auto;scrollbar-width:none;flex-wrap:nowrap!important}
+.pv2-flow-tabs::-webkit-scrollbar{display:none}
+.pv2-flow-tabs>a{white-space:nowrap;flex:0 0 auto}
+.pv2-flow-tabs>a.pv2-tab-main{font-weight:900}
+.pv2-flow-presite{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+  background:#fff7f1;border:1px solid #ffd8c0;border-radius:20px;padding:16px 18px;margin-bottom:14px}
+.pv2-flow-presite strong{font-size:15px;color:#18243c}
+.pv2-flow-presite p{margin:4px 0 0;font-size:13px;color:#6f7b8e;max-width:620px}
