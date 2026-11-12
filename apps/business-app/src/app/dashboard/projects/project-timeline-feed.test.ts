@@ -13,10 +13,15 @@ it('routes All Projects selections into the single timeline-first project worksp
   const projectEntry = read('./[id]/page.tsx');
   const screen = read('./project-v2-view.tsx');
   const navigation = read('../owner-workspace-navigation.ts');
+  const agreementAction = read('./[id]/site/agreement-actions.ts');
   expect(projectEntry).toContain('view="timeline"');
   expect(screen).toContain('function ProjectTimelineFeed');
   expect(screen).toContain('<ProjectDailyCommand d=');
   expect(navigation).toContain("label: 'All Projects'");
+  expect(agreementAction).toContain('savedStagePaymentPlan(revision.data.terms)');
+  expect(agreementAction).toContain("/advance|booking/i.test(item.name)");
+  expect(agreementAction).toContain("rpc('project_advance_proforma_prepare'");
+  expect(agreementAction).toContain('Finance verifies a receipt');
 });
 const plan = (stageId: string, index: number, plannedStart: string, kind: 'work' | 'check' = 'work') => ({
   stageId, index, kind, title: kind === 'work' ? `Work ${index}` : `Check ${index}`,
