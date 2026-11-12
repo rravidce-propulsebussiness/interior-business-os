@@ -36,7 +36,6 @@ describe('one authorized company navigation on every dashboard page', () => {
       'Project Directory',
       'Automations',
       'Brochures',
-      'My Work',
       'ERP: Site Execution',
       'ERP: Execution Planner',
       'Marketplace',
@@ -88,6 +87,7 @@ describe('one authorized company navigation on every dashboard page', () => {
     expect(canonical).toContain("label: 'BOQ & Estimating'");
     expect(canonical).toContain('if (projectChildren.length)');
     expect(canonical).not.toContain("label: 'Construction ERP'");
+    expect(canonical).not.toContain("label: 'My Work'");
     expect(canonical).toContain("has('project.view', 'projects')");
     expect(canonical).toContain("has('task.view', 'projects')");
     expect(canonical).toContain("has('milestone.view', 'projects')");
