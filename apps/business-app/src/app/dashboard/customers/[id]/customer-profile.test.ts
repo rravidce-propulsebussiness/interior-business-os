@@ -18,10 +18,12 @@ describe('Clients workspace retired without removing customer data or client app
   expect(profile).toContain("redirect('/dashboard/projects?customer='+encodeURIComponent(id))");
   expect(activity).toContain("redirect('/dashboard/projects?customer='+encodeURIComponent(id))");
  });
- it('keeps one New Project form and existing customer selection inside Projects',()=>{
-  expect(projects).toContain('<NewProjectForCustomer customers={customers} initialCustomerId={clientId}/>');
-  expect(form).toContain('Select an existing customer from your company.');
-  expect(form).toContain('createExistingClientProject(selected,form)');
+ it('starts project setup from a quote for an existing customer',()=>{
+  expect(projects).toContain('<NewProjectForCustomer customers={customers} quotesByCustomer={quotesByCustomer}');
+  expect(form).toContain('Select an existing customer');
+  expect(form).toContain('Create quotation');
+  expect(form).toContain('Continue {quote.number}');
+  expect(form).not.toContain('createExistingClientProject');
   expect(projects).not.toContain('/dashboard/customers/');
  });
  it('keeps client app sharing inside the same project Team workspace',()=>{

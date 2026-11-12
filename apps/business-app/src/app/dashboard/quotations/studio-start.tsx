@@ -11,6 +11,7 @@ type QuoteLead = {
   location: string; project_size: string; service_type: string; industryKey: string;
   floorCount: number | null;
 };
+type ExistingCustomer = { id: string; name: string; phone: string; email: string; location: string };
 
 export function QuotationStudioStart({
   leads, industries, defaultCurrency,
@@ -18,6 +19,7 @@ export function QuotationStudioStart({
   initialPackageId = '',
   initialPackageIndustry = '',
   initialCustomizedQuote = false,
+  existingCustomer,
 }: {
   leads: QuoteLead[];
   industries: Industry[];
@@ -26,23 +28,25 @@ export function QuotationStudioStart({
   initialPackageId?: string;
   initialPackageIndustry?: string;
   initialCustomizedQuote?: boolean;
+  existingCustomer?: ExistingCustomer | null;
 }) {
   const router = useRouter();
   const initialLead = leads.find((entry) => entry.id === initialLeadId);
   const [leadId, setLeadId] = useState(initialLead?.id ?? '');
+  const [industryKey, setIndustryKey] = useState('');
   const selectedLead = leads.find((entry) => entry.id === leadId);
   // Quote industry is sourced only from the CRM lead, never chosen a second time.
-  const industry = selectedLead?.industryKey &&
+  const industry = existingCustomer ? industryKey : selectedLead?.industryKey &&
     industries.some((entry) => entry.key === selectedLead.industryKey)
       ? selectedLead.industryKey : '';
   const industryName = industries.find((entry) => entry.key === industry)?.name ?? '';
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState('');
   const [data, setData] = useState({
-    clientName: initialLead?.name ?? '',
-    phone: initialLead?.phone ?? '',
-    email: initialLead?.email ?? '',
-    location: initialLead?.location ?? '',
+    clientName: existingCustomer?.name ?? initialLead?.name ?? '',
+    phone: existingCustomer?.phone ?? initialLead?.phone ?? '',
+    email: existingCustomer?.email ?? initialLead?.email ?? '',
+    location: existingCustomer?.location ?? initialLead?.location ?? '',
     plotSize: initialLead?.project_size ?? '',
     projectType: 'Residential',
     notes: '',
@@ -68,17 +72,23 @@ export function QuotationStudioStart({
   return <div className="qs-create-start">
     <form className="qs-create-form" onSubmit={(event) => {
       event.preventDefault();
-      if (!leadId || !industry) { setFeedback('Select a classified lead before continuing.'); return; }
+      if ((!existingCustomer && !leadId) || !industry) {
+        setFeedback(existingCustomer ? 'Choose a service before continuing.' : 'Select a classified lead before continuing.');
+        return;
+      }
       setFeedback('');
       start(async () => {
         const result = await createStudioQuotation({
-          ...data, leadId, currency: defaultCurrency,
+          ...data,
+          ...(existingCustomer ? { customerId: existingCustomer.id, industryKey: industry } : { leadId }),
+          currency: defaultCurrency,
         });
         if (!result.ok || !result.revisionId) {
           setFeedback(result.message);
           return;
         }
-        // Industry always comes from the saved CRM lead, not the requested card.
+         // A lead supplies its saved industry; existing-customer quotes require
+         // an explicit service selection before opening the editor.
         const allowedPackage = !initialCustomizedQuote &&
           initialPackageIndustry === industry &&
           /^[0-9a-f]{8}-[0-9a-f-]{27,36}$/i.test(initialPackageId);
@@ -100,7 +110,20 @@ export function QuotationStudioStart({
       </div>
 
       <div className="qs-source-lead">
-        {leads.length > 0 ? (
+        {existingCustomer ? (
+          <>
+            <p className="qs-source-service" role="status">
+              <span className="qs-source-indicator" aria-hidden="true"/> Existing customer · {existingCustomer.name}
+            </p>
+            <label className="qs-clean-field qs-source-picker">
+              <span className="qs-field-label">Service <span className="qs-field-required" aria-hidden="true">*</span></span>
+              <select required value={industryKey} onChange={(event) => setIndustryKey(event.target.value)}>
+                <option value="">Choose a service</option>
+                {industries.map((entry) => <option key={entry.key} value={entry.key}>{entry.name}</option>)}
+              </select>
+            </label>
+          </>
+        ) : leads.length > 0 ? (
           <label className="qs-clean-field qs-source-picker">
             <span className="qs-field-label">Select lead <span className="qs-field-required" aria-hidden="true">*</span></span>
             <select required value={leadId} onChange={(event) => chooseLead(event.target.value)}>
@@ -125,16 +148,16 @@ export function QuotationStudioStart({
               {' '}{industryName}. The quotation will use this lead’s industry instead.
             </p>
           )}
-        {selectedLead && industry ? (
+        {!existingCustomer && selectedLead && industry ? (
           <p className="qs-source-service" role="status">
             <span className="qs-source-indicator" aria-hidden="true"/> {industryName} · Auto-detected from lead
           </p>
-        ) : selectedLead ? (
+        ) : !existingCustomer && selectedLead ? (
           <p className="qs-source-warning" role="alert">
             This lead needs an industry classification.
             {' '}<Link href={'/dashboard/crm/leads/' + selectedLead.id}>Classify the lead</Link> to prepare its quote.
           </p>
-        ) : leads.length > 0 ? (
+        ) : !existingCustomer && leads.length > 0 ? (
           <p className="qs-source-guidance">Client and quotation details fill automatically from the selected lead.</p>
         ) : null}
       </div>
@@ -143,16 +166,19 @@ export function QuotationStudioStart({
         <label className="qs-clean-field qs-field-full"><span className="qs-field-label">Client Name <span className="qs-field-required" aria-hidden="true">*</span></span>
           <input required maxLength={200} placeholder="Enter client name"
             autoComplete="name"
+            readOnly={Boolean(existingCustomer)}
             value={data.clientName} onChange={(event) => update('clientName', event.target.value)}/>
         </label>
         <label className="qs-clean-field"><span className="qs-field-label">Phone Number <span className="qs-field-required" aria-hidden="true">*</span></span>
           <input type="tel" required minLength={3} maxLength={40} autoComplete="tel"
             placeholder="Enter phone number"
+            readOnly={Boolean(existingCustomer)}
             value={data.phone} onChange={(event) => update('phone', event.target.value)}/>
         </label>
         <label className="qs-clean-field"><span className="qs-field-label">Email Address</span>
           <input type="email" maxLength={254} autoComplete="email"
             placeholder="Enter email address"
+            readOnly={Boolean(existingCustomer)}
             value={data.email} onChange={(event) => update('email', event.target.value)}/>
         </label>
         <label className="qs-clean-field qs-field-full"><span className="qs-field-label">Project Location</span>
@@ -178,7 +204,7 @@ export function QuotationStudioStart({
       {feedback && <p role="alert" className="qs-clean-feedback">{feedback}</p>}
       <div className="qs-clean-form-actions">
         <button className="qs-clean-next" type="submit"
-          disabled={pending || !leadId || !industry}>
+          disabled={pending || (!existingCustomer && !leadId) || !industry}>
           {pending ? 'Creating quotation…' : 'Next →'}
         </button>
       </div>

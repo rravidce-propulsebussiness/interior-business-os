@@ -12,7 +12,9 @@ import { resolveLeadCategory } from '../crm/leads/lead-category';
 const createInput = z
   .object({
     clientName: z.string().trim().min(2).max(200),
-    leadId: z.uuid(),
+    leadId: z.uuid().optional(),
+    customerId: z.uuid().optional(),
+    industryKey: z.string().trim().min(2).max(80).optional(),
     phone: z.string().trim().min(3).max(40),
     email: z.union([z.literal(''), z.email().max(254)]),
     location: z.string().trim().max(200),
@@ -24,14 +26,20 @@ const createInput = z
       .regex(/^[A-Z]{3}$/)
       .default('INR'),
   })
-  .strict();
+  .strict()
+  .refine((values) => Boolean(values.leadId) !== Boolean(values.customerId), {
+    message: 'Choose either a lead or an existing customer.',
+  })
+  .refine((values) => !values.customerId || Boolean(values.industryKey), {
+    message: 'Choose the service for this customer quotation.',
+  });
 
 /**
  * Real quote creation from client and quotation details.
  *
- * Saves a pre-sale customer and a signed versioned quotation draft.
- * Until the CRM conversion, the database's mandatory project FK is only an
- * internal sales-prospect reference, not a visible execution project.
+ * Saves a versioned quotation under a lead or an explicitly selected existing
+ * customer. Until an accepted agreement activates it, the required project FK
+ * remains a hidden sales-prospect reference, not an execution project.
  * Never use elevated credentials to bypass the actor's permissions.
  */
 export async function createStudioQuotation(input: unknown): Promise<{
@@ -44,41 +52,80 @@ export async function createStudioQuotation(input: unknown): Promise<{
     const s = await commercialServices('quotation.create', 'quotation');
     // A salesperson may prepare a quotation without project.create permission.
     // Projects are execution workspaces and have a separate conversion gate.
-    if (!(s.allowed('customer.create', 'crm') ||
+    if (!values.customerId &&
+        !(s.allowed('customer.create', 'crm') ||
           s.allowed('customer.create', 'quotation')))
       throw new DomainError('FORBIDDEN');
 
-    // The stored CRM lead is the sole source of quotation industry.
-    // Never trust a browser-supplied industry or choose construction by default.
-    if (!s.allowed('lead.view', 'crm'))
-      return { ok: false, message: 'Lead access is required to quote an enquiry.' };
-    const { data: lead, error: leadError } = await s.client
-      .from('leads')
-      .select('id,lead_number,phone,email,industry_id,service_type,requirements')
-      .eq('organization_id', s.org)
-      .eq('id', values.leadId)
-      .maybeSingle();
-    if (leadError || !lead)
-      return { ok: false, message: 'The selected lead is not available.' };
-    const samePhone = Boolean(lead.phone && values.phone &&
-      normalizedCustomerPhone(lead.phone) === normalizedCustomerPhone(values.phone));
-    const sameEmail = Boolean(lead.email && values.email &&
-      lead.email.toLowerCase() === values.email.toLowerCase());
-    if (!samePhone && !sameEmail)
-      return { ok: false, message: 'Customer contact details must match the selected lead.' };
-
     const industries = await s.repository.industries();
-    const assignedIndustry = industries.find((entry) =>
-      entry.id === lead.industry_id && entry.status === 'active');
-    // Older leads without industry_id may still have an explicit service saved.
-    // Ambiguous or conflicting legacy labels must be corrected in CRM.
-    const legacyCategory = !lead.industry_id
-      ? resolveLeadCategory(lead, industries)
-      : null;
-    const activeIndustry = assignedIndustry ?? industries.find((entry) =>
-      entry.status === 'active' && entry.key === legacyCategory);
+    let lead: {
+      id: string; lead_number: string; phone: string; email: string;
+      industry_id: string | null; service_type: string; requirements: unknown;
+    } | null = null;
+    let existingCustomer: {
+      id: string; display_name: string; phone: string; email: string;
+      billing_address: unknown;
+    } | null = null;
+    let activeIndustry: (typeof industries)[number] | undefined;
+    let quoteClient = values;
+    if (values.leadId) {
+      // The stored CRM lead remains the source of category for lead quotes.
+      if (!s.allowed('lead.view', 'crm'))
+        return { ok: false, message: 'Lead access is required to quote an enquiry.' };
+      const { data, error } = await s.client
+        .from('leads')
+        .select('id,lead_number,phone,email,industry_id,service_type,requirements')
+        .eq('organization_id', s.org)
+        .eq('id', values.leadId)
+        .maybeSingle();
+      if (error || !data)
+        return { ok: false, message: 'The selected lead is not available.' };
+      lead = data;
+      const samePhone = Boolean(lead.phone && values.phone &&
+        normalizedCustomerPhone(lead.phone) === normalizedCustomerPhone(values.phone));
+      const sameEmail = Boolean(lead.email && values.email &&
+        lead.email.toLowerCase() === values.email.toLowerCase());
+      if (!samePhone && !sameEmail)
+        return { ok: false, message: 'Customer contact details must match the selected lead.' };
+      const assignedIndustry = industries.find((entry) =>
+        entry.id === lead?.industry_id && entry.status === 'active');
+      const legacyCategory = !lead.industry_id
+        ? resolveLeadCategory(lead, industries)
+        : null;
+      activeIndustry = assignedIndustry ?? industries.find((entry) =>
+        entry.status === 'active' && entry.key === legacyCategory);
+      if (!activeIndustry)
+        return { ok: false, message: 'Classify this lead in CRM before creating its quotation.' };
+    } else if (values.customerId) {
+      if (!s.allowed('customer.view', 'crm') && !s.allowed('customer.view', 'quotation'))
+        return { ok: false, message: 'Customer access is required to create a linked quotation.' };
+      const { data, error } = await s.client.from('customers')
+        .select('id,display_name,phone,email,billing_address,status,is_sales_prospect')
+        .eq('organization_id', s.org).eq('id', values.customerId)
+        .eq('status', 'active').eq('is_sales_prospect', false).maybeSingle();
+      if (error || !data)
+        return { ok: false, message: 'Select an active existing customer in this company.' };
+      existingCustomer = data;
+      activeIndustry = industries.find((entry) =>
+        entry.key === values.industryKey && entry.status === 'active');
+      if (!activeIndustry)
+        return { ok: false, message: 'Choose an active service before creating the quotation.' };
+      const address = existingCustomer.billing_address &&
+        typeof existingCustomer.billing_address === 'object' &&
+        !Array.isArray(existingCustomer.billing_address)
+        ? existingCustomer.billing_address as Record<string, unknown> : {};
+      quoteClient = {
+        ...values,
+        clientName: existingCustomer.display_name,
+        phone: existingCustomer.phone,
+        email: existingCustomer.email || '',
+        location: typeof address.city === 'string' ? address.city : values.location,
+      };
+      if (quoteClient.phone.trim().length < 3)
+        return { ok: false, message: 'Add a valid phone number to this customer record before quoting.' };
+    }
     if (!activeIndustry)
-      return { ok: false, message: 'Classify this lead in CRM before creating its quotation.' };
+      return { ok: false, message: 'Choose a valid quotation source.' };
 
     const {
       data: { user },
@@ -132,7 +179,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
     const baseAddress = {
       line1: '',
       line2: '',
-      city: values.location,
+      city: quoteClient.location,
       region: '',
       postal_code: '',
       country_code: 'IN',
@@ -141,15 +188,19 @@ export async function createStudioQuotation(input: unknown): Promise<{
     // A lead owns the identity of the customer being quoted. Resolve the CRN
     // automatically on the server, regardless of which browser was used.
     // Names alone cannot prove identity; confirmed phone/email must match.
-    const escapedName = values.clientName
+    let matches: {
+      id: string; display_name: string; phone: string; email: string; created_at: string;
+    }[] = [];
+    if (!existingCustomer) {
+    const escapedName = quoteClient.clientName
       .replaceAll('\\', '\\\\')
       .replaceAll('%', '\\%')
       .replaceAll('_', '\\_');
-    const escapedEmail = values.email
+    const escapedEmail = quoteClient.email
       .replaceAll('\\', '\\\\')
       .replaceAll('%', '\\%')
       .replaceAll('_', '\\_');
-    const phoneKey = normalizedCustomerPhone(values.phone);
+    const phoneKey = normalizedCustomerPhone(quoteClient.phone);
     const lookups = [
       s.client.from('customers')
         .select('id,display_name,phone,email,created_at')
@@ -167,7 +218,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
           .ilike('phone', '%' + phoneKey.slice(-4))
           .limit(300)]
         : []),
-      ...(values.email
+      ...(quoteClient.email
         ? [s.client.from('customers')
           .select('id,display_name,phone,email,created_at')
           .eq('organization_id', s.org)
@@ -180,17 +231,18 @@ export async function createStudioQuotation(input: unknown): Promise<{
     if (results.some((result) => result.error))
       return { ok: false, message: 'Could not verify the client identity. Please retry.' };
 
-    const matches = [...new Map(
+    matches = [...new Map(
       results.flatMap((result) => result.data ?? [])
         .filter((candidate) =>
-          contactMatches(candidate, values) &&
+          contactMatches(candidate, quoteClient) &&
           contactMatches(candidate, {
-            phone: lead.phone ?? '',
-            email: lead.email ?? '',
+            phone: lead?.phone ?? '',
+            email: lead?.email ?? '',
           }))
         .map((candidate) => [candidate.id, candidate]),
     ).values()].sort((a, b) =>
       a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
+    }
 
     // Prefer the CRN already attached to a previous quote from this exact lead.
     // For older duplicate CRNs without a linked quote, consistently reuse the
@@ -198,31 +250,33 @@ export async function createStudioQuotation(input: unknown): Promise<{
     // audited merge that preserves their linked quotations and projects.
     let leadCustomerId = '';
     const leadQuotationProjectIds: string[] = [];
-    const linked = await s.client.rpc('lead_quotation_list', {
-      p_organization_id: s.org,
-      p_lead_id: values.leadId,
-    });
-    if (!linked.error && Array.isArray(linked.data)) {
-      leadQuotationProjectIds.push(...linked.data.flatMap((item: unknown) =>
-        item !== null && typeof item === 'object' && !Array.isArray(item) &&
-        'project_id' in item && typeof item.project_id === 'string'
-          ? [item.project_id]
-          : []));
-      const firstProjectId = leadQuotationProjectIds[0];
-      if (firstProjectId) {
-        const { data: previousProject } = await s.client.from('projects')
-          .select('customer_id')
-          .eq('organization_id', s.org)
-          .eq('id', firstProjectId)
-          .maybeSingle();
-        const previousCustomer = matches.find((item) =>
-          item.id === previousProject?.customer_id);
-        if (previousCustomer) leadCustomerId = previousCustomer.id;
+    if (lead) {
+      const linked = await s.client.rpc('lead_quotation_list', {
+        p_organization_id: s.org,
+        p_lead_id: lead.id,
+      });
+      if (!linked.error && Array.isArray(linked.data)) {
+        leadQuotationProjectIds.push(...linked.data.flatMap((item: unknown) =>
+          item !== null && typeof item === 'object' && !Array.isArray(item) &&
+          'project_id' in item && typeof item.project_id === 'string'
+            ? [item.project_id]
+            : []));
+        const firstProjectId = leadQuotationProjectIds[0];
+        if (firstProjectId) {
+          const { data: previousProject } = await s.client.from('projects')
+            .select('customer_id')
+            .eq('organization_id', s.org)
+            .eq('id', firstProjectId)
+            .maybeSingle();
+          const previousCustomer = matches.find((item) =>
+            item.id === previousProject?.customer_id);
+          if (previousCustomer) leadCustomerId = previousCustomer.id;
+        }
       }
     }
 
     let createdCustomer = false;
-    let customerId = leadCustomerId || matches[0]?.id || '';
+    let customerId = existingCustomer?.id || leadCustomerId || matches[0]?.id || '';
     if (!customerId) {
       customerId = randomUUID();
       await s.commercial.saveEntity(s.org, 'customers', {
@@ -230,11 +284,11 @@ export async function createStudioQuotation(input: unknown): Promise<{
         organization_id: s.org,
         version: 1,
         customer_type: 'individual',
-        display_name: values.clientName,
+        display_name: quoteClient.clientName,
         legal_name: '',
-        phone: values.phone,
+        phone: quoteClient.phone,
         secondary_phone: '',
-        email: values.email,
+        email: quoteClient.email,
         tax_identifier: '',
         billing_address: baseAddress,
         notes: '',
@@ -248,7 +302,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
     // The customer supplies no project name at quotation time. Use a stable,
     // lead-based internal reference to satisfy the existing quotation FK.
     const prospectName = ['Quotation', activeIndustry.name,
-      lead.lead_number || lead.id.slice(0, 8)].join(' · ').slice(0, 200);
+      lead?.lead_number || customerId.slice(0, 8)].join(' · ').slice(0, 200);
     // Quote alternatives for the same lead share one hidden pre-sale reference.
     // Never pick an unrelated customer project or a confirmed execution job.
     if (leadQuotationProjectIds.length) {
@@ -281,9 +335,9 @@ export async function createStudioQuotation(input: unknown): Promise<{
           p_industry_id: activeIndustry.id,
           p_name: prospectName,
           p_project_type: values.projectType,
-          p_site_city: values.location,
+          p_site_city: quoteClient.location,
           p_notes: [
-            values.plotSize ? 'Plot / project size: ' + values.plotSize : '',
+            quoteClient.plotSize ? 'Plot / project size: ' + quoteClient.plotSize : '',
             values.notes,
           ].filter(Boolean).join('\\n'),
           p_new_customer: createdCustomer,
