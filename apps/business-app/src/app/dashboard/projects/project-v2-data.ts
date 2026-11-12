@@ -7,7 +7,9 @@ import { workCompletionByProject } from './work-progress';
 import { createMarketplaceRepository, type MarketplaceProduct } from '@business-os/database/marketplace';
 import type { ProjectEntry } from './project-v2-types';
 import { parseCuring,parseEvents,parseOptional,type CuringState,type OptionalItem,type WorkEvent } from './project-flow';
-import { savedStagePaymentPlan,savedStagePaymentLinks } from '@business-os/core/quotation-payment-plan';
+import { projectTimelineFromQuote } from '@business-os/core/quote-project-timeline';
+import { syncQuotedConstructionTimeline } from '../finance/quote-construction-handoff';
+import { savedStagePaymentPlan,savedStagePaymentLinks,inferStagePaymentLinks,representativePaymentStage } from '@business-os/core/quotation-payment-plan';
 import { savedMilestoneFlow,projectStageFlowFromMilestones } from '@business-os/core/quotation-milestone-flow';
 import { savedStageRequirements,defaultStageRequirements } from '@business-os/core/quotation-stage-requirements';
 import { stageFlowStepSchema,type StageFlowStep } from '@business-os/core/quotation-stage-requirements';
@@ -107,7 +109,7 @@ export type WorkspaceData = {
  checks:SiteRow[];media:SiteRow[];designs:SiteRow[];team:SiteRow[];gate:SiteRow[];
  memberOptions:{id:string;label:string}[]};
  stages:Stage[];links:StageLink[];itemPlans:StageItemPlan[];stageGuidance:StageGuidance[];stageExecution:StageExecution[];stageProgress:StageProgress;stageQc:StageQcReview;milestones:PaymentMilestone[];quotations:ProjectQuotation[];
- quotePaymentTriggers:{name:string;percent:number;stageCodes:string[]}[];
+ quotePaymentTriggers:{name:string;percent:number;stageCodes:string[];autoRequest?:boolean}[];
  transactions: {id:string;number:string;date:string;amount:number;status:string}[]|null;
  stageRequests?: {id:string;number:string;amount:number;status:string;date:string}[];
  purchaseOrders:{id:string;number:string;status:string;date:string}[]|null;
@@ -118,7 +120,13 @@ export type WorkspaceData = {
  preflight:{inspectionDone:boolean;measurementsDone:boolean;inspectionDetails:string;measurementDetails:string;signedReady:boolean}|null;
  advance:{invoiceId:string|null;invoiceNumber:string|null;invoiceStatus:string|null;invoiceTotal:number;percent:number|null;received:number;scheduleActive:boolean}|null;
  flow:ProjectFlowData;
+ quotePlan?:QuotePlan|null;
 };
+/** The project's construction plan generated from its quotation before the
+ * agreement freezes it into real stages. Read-only; nothing is stored. */
+export type QuotePlan={quoteNumber:string;frozen:boolean;floors:{code:string;name:string}[];
+ stages:{code:string;title:string;floor:string|null;phase:string;activities:string[];checks:string[];payments:{name:string;percent:number}[]}[];
+ otherPayments:{name:string;percent:number}[]};
 export type BoqItem={id:string;name:string;quantity:string;unit:string};
 export type DesignRevision={id:string;kind:string;revision:number;reference:string;status:string;reviewNote:string;
  createdAt:string;clientApprovedAt:string|null;clientSource:string};
@@ -209,7 +217,7 @@ export async function projectIndex(){
  }));
  return {s,list,org, user};
 }
-export async function projectWorkspace(id:string):Promise<WorkspaceData>{
+export async function projectWorkspace(id:string,autoSynced=false):Promise<WorkspaceData>{
  const s=await commercialServices('project.view','projects',true).catch(()=>null);
  if(!s)return assignedProjectWorkspace(id);
  const {data:project,error}=await s.client.from('projects')
@@ -263,6 +271,18 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   s.client.rpc('project_design_flow_read' as never,{p_org:s.org,p_project:id} as never),
  ]);
  if(!org)notFound();
+ // A project with an agreement always gets its stages from the frozen quote.
+ // If they were never imported (older projects, a failed first attempt), do it
+ // now, once, through the same idempotent canonical handoff as agreement
+ // creation. The database rechecks manager rights and the quote fingerprint.
+ const existingStages=Array.isArray(obj(stageResult.error?null:stageResult.data).stages)
+  ?(obj(stageResult.data).stages as unknown[]).filter(x=>!stringValue(obj(x).template_code).startsWith('QUOTED_SCOPE')).length:0;
+ const latestContract=permissions.finance&&!contract.error?contract.data?.[0]:null;
+ if(!autoSynced&&existingStages===0&&permissions.manage&&latestContract&&
+   ['pending','active'].includes(latestContract.status)){
+  const synced=await syncQuotedConstructionTimeline(latestContract.id).catch(()=>null);
+  if(synced?.created)return projectWorkspace(id,true);
+ }
  const rawSite=siteResult.error?null:obj(siteResult.data);
  const rawStages=stageResult.error?{}:obj(stageResult.data);
  const rawLinks=stageLinkResult.error?{}:obj(stageLinkResult.data);
@@ -454,9 +474,70 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   return {stageId:stage.id,materials:imported?.materials??base.materials,
    reports:imported?.reports??base.reports,flow:ordered};
  }).filter((item):item is StageGuidance=>item!==null);
-  const quotePaymentTriggers=(proposal??[]).map((row,index)=>({
-  name:row.name,percent:row.percent,stageCodes:bindings?.[index]??[],
+  // Explicit links saved on the quote win; otherwise payment stages are matched
+ // to the quoted construction stages by name (never guessed beyond that).
+ const liveCodes=stageList.filter(x=>!x.template_code.startsWith('QUOTED_SCOPE')).map(x=>x.instance_code);
+ const inferredLinks=!bindings&&proposal&&liveCodes.length?inferStagePaymentLinks(proposal.map(x=>x.name),liveCodes):null;
+ const quotePaymentTriggers=(proposal??[]).map((row,index)=>({
+  name:row.name,percent:row.percent,stageCodes:bindings?.[index]??inferredLinks?.[index]??[],
+  // Explicit quote links are requested on certification of all their stages;
+  // inferred groups only when one stage's certification covers the group.
+  autoRequest:bindings?Boolean(bindings[index]?.length):Boolean(inferredLinks?.[index]?.length&&
+   representativePaymentStage(inferredLinks[index]!,stageList.map(x=>({code:x.instance_code,dependsOn:x.dependencies,sequence:x.sequence})))),
  }));
+ // Live project whose signed quote carries no explicit links: attach each
+ // payment schedule item once to the stage whose certification completes its
+ // group. Requests still only follow independent certification; no payment
+ // is ever recorded. Runs once, only for managers who can see the schedule.
+ const contractForLinks=permissions.finance&&!contract.error?contract.data?.[0]:null;
+ if(!autoSynced&&inferredLinks&&contractForLinks?.status==='active'&&permissions.manage&&
+   !linkList.some(l=>l.kind==='payment')){
+  const items=await s.client.from('payment_schedule_items').select('id,label,sort_order,schedule_id')
+   .eq('organization_id',s.org).eq('contract_id',contractForLinks.id).order('sort_order');
+  const graph=stageList.map(x=>({code:x.instance_code,dependsOn:x.dependencies,sequence:x.sequence}));
+  let linked=0;
+  if(!items.error&&items.data&&items.data.length===proposal?.length){
+   for(const item of items.data){
+    const group=inferredLinks[item.sort_order]??[];
+    if(!group.length||item.label!==proposal[item.sort_order]?.name)continue;
+    const code=representativePaymentStage(group,graph);
+    const stageId=stageList.find(x=>x.instance_code===code)?.id;
+    if(!stageId)continue;
+    const r=await s.client.rpc('construction_stage_record_command',{p_organization_id:s.org,p_project_id:id,
+     p_action:'link',p_input:{stage_id:stageId,kind:'payment',record_id:item.id,contract_id:contractForLinks.id}});
+    if(!r.error)linked+=1;
+   }
+  }
+  if(linked)return projectWorkspace(id,true);
+ }
+ // Until the agreement creates real stages, show the plan the quote implies.
+ let quotePlan:QuotePlan|null=null;
+ const industryKey=project.industry_id?stringValue(obj(industries.find(x=>x.id===project.industry_id)).key):'';
+ if(!stageList.some(x=>!x.template_code.startsWith('QUOTED_SCOPE'))&&paymentRevision&&industryKey){
+  const lines=await s.client.from('quotation_items').select('id,snapshot,description,optional')
+   .eq('organization_id',s.org).eq('revision_id',paymentRevision).order('id').limit(250);
+  if(!lines.error&&lines.data?.length){
+   try{
+    const plan=projectTimelineFromQuote(industryKey,lines.data.filter(x=>!x.optional).map(x=>({
+     id:x.id,name:stringValue(obj(x.snapshot).name),description:x.description??''})),
+     industryKey==='construction'&&typeof savedTerms==='string'?savedStageRequirements(savedTerms):{});
+    if(plan){
+     const planCodes=plan.stages.filter(x=>x.templateCode!=='QUOTED_SCOPE').map(x=>x.instanceCode);
+     const planLinks=bindings??(proposal?inferStagePaymentLinks(proposal.map(x=>x.name),planCodes):null);
+     const triggers=(proposal??[]).map((row,index)=>({name:row.name,percent:row.percent,stageCodes:planLinks?.[index]??[]}));
+     const linked=new Set(triggers.flatMap(p=>p.stageCodes));
+     quotePlan={quoteNumber:quotations[0]?.number??'Quotation',frozen:Boolean(contractedRevision),
+      floors:plan.zones,
+      stages:plan.stages.filter(x=>x.templateCode!=='QUOTED_SCOPE').map(x=>({code:x.instanceCode,title:x.title,
+       floor:x.floorCode,phase:x.phase,activities:x.activities,checks:x.inspectionTopics,
+       payments:triggers.filter(p=>p.stageCodes.includes(x.instanceCode))
+        .map(p=>({name:p.name,percent:p.percent}))})),
+      otherPayments:triggers.filter(p=>!p.stageCodes.some(code=>linked.has(code)&&
+       plan.stages.some(x=>x.instanceCode===code))).map(p=>({name:p.name,percent:p.percent}))};
+    }
+   }catch{quotePlan=null;}
+  }
+ }
  return {
   org:s.org,company:org.name,email:user.email??'',permissions,
   project:{
@@ -469,7 +550,7 @@ export async function projectWorkspace(id:string):Promise<WorkspaceData>{
   site,stages:stageList,links:linkList,itemPlans:parseStageItemPlans(scheduleResult.error?null:scheduleResult.data),stageGuidance,stageExecution:executionRows(stageExecutionResult.data),marketplaceOffers,materialAccess:materialAccess(materialAccessResult.data),stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
      (obj(qualityResult.data).stages as StageItemRecord[]):[]},stageQc:stageQcReview(qcItemResult.error?null:qcItemResult.data),milestones,quotations,quotePaymentTriggers,stageRequests,
-  preflight,advance,requests,
+  preflight,advance,requests,quotePlan,
   flow:flowData(user.id,stageProgressResult.error?null:stageProgressResult.data,curingResult.error?null:curingResult.data,boqResult.error?null:boqResult.data,designResult.error?null:designResult.data),
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
