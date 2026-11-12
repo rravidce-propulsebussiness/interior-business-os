@@ -8,6 +8,7 @@ import { createMarketplaceRepository, type MarketplaceProduct } from '@business-
 import type { ProjectEntry } from './project-v2-types';
 import { parseCuring,parseEvents,parseOptional,type CuringState,type OptionalItem,type WorkEvent } from './project-flow';
 import { projectTimelineFromQuote } from '@business-os/core/quote-project-timeline';
+import { quoteMilestoneProjection, type QuotedTimelineMilestone } from './project-quote-milestone-projection';
 import { syncQuotedConstructionTimeline } from '../finance/quote-construction-handoff';
 import { savedStagePaymentPlan,savedStagePaymentLinks,inferStagePaymentLinks,representativePaymentStage } from '@business-os/core/quotation-payment-plan';
 import { savedMilestoneFlow,projectStageFlowFromMilestones } from '@business-os/core/quotation-milestone-flow';
@@ -110,6 +111,7 @@ export type WorkspaceData = {
  memberOptions:{id:string;label:string}[]};
  stages:Stage[];links:StageLink[];itemPlans:StageItemPlan[];stageGuidance:StageGuidance[];stageExecution:StageExecution[];stageProgress:StageProgress;stageQc:StageQcReview;milestones:PaymentMilestone[];quotations:ProjectQuotation[];
  quotePaymentTriggers:{name:string;percent:number;stageCodes:string[];autoRequest?:boolean}[];
+ quoteMilestoneTimeline?:QuotedTimelineMilestone[];
  transactions: {id:string;number:string;date:string;amount:number;status:string}[]|null;
  stageRequests?: {id:string;number:string;amount:number;status:string;date:string}[];
  purchaseOrders:{id:string;number:string;status:string;date:string}[]|null;
@@ -512,6 +514,7 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
  }
  // Until the agreement creates real stages, show the plan the quote implies.
  let quotePlan:QuotePlan|null=null;
+ let previewPaymentLinks:string[][]|null=null;
  const industryKey=project.industry_id?stringValue(obj(industries.find(x=>x.id===project.industry_id)).key):'';
  if(!stageList.some(x=>!x.template_code.startsWith('QUOTED_SCOPE'))&&paymentRevision&&industryKey){
   const lines=await s.client.from('quotation_items').select('id,snapshot,description,optional')
@@ -524,6 +527,7 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
     if(plan){
      const planCodes=plan.stages.filter(x=>x.templateCode!=='QUOTED_SCOPE').map(x=>x.instanceCode);
      const planLinks=bindings??(proposal?inferStagePaymentLinks(proposal.map(x=>x.name),planCodes):null);
+     previewPaymentLinks=planLinks;
      const triggers=(proposal??[]).map((row,index)=>({name:row.name,percent:row.percent,stageCodes:planLinks?.[index]??[]}));
      const linked=new Set(triggers.flatMap(p=>p.stageCodes));
      quotePlan={quoteNumber:quotations[0]?.number??'Quotation',frozen:Boolean(contractedRevision),
@@ -551,6 +555,9 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
      (obj(qualityResult.data).stages as StageItemRecord[]):[]},stageQc:stageQcReview(qcItemResult.error?null:qcItemResult.data),milestones,quotations,quotePaymentTriggers,stageRequests,
   preflight,advance,requests,quotePlan,
+  quoteMilestoneTimeline:quoteMilestoneProjection(typeof savedTerms==='string'?savedTerms:'',
+   quotePaymentTriggers.map((row,index)=>({...row,
+    stageCodes:row.stageCodes.length?row.stageCodes:previewPaymentLinks?.[index]??[]}))),
   flow:flowData(user.id,stageProgressResult.error?null:stageProgressResult.data,curingResult.error?null:curingResult.data,boqResult.error?null:boqResult.data,designResult.error?null:designResult.data),
   transactions:trans,purchaseOrders:po,
   tasks:tasks.map(t=>({id:t.id,title:t.title,planned_start:t.planned_start,status:t.status})),
