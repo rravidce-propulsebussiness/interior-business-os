@@ -897,7 +897,8 @@ function Timeline({d}:{d:WorkspaceData}){
     <p>Agreement, advance, site survey and design approval steps are in Milestones. Site work appears here once execution is released.</p></div>
    <Link className="pv2-button pv2-primary" href={cur(d.project.id,'milestones')}>Open Milestones</Link>
   </section>}
-  {d.quotePlan&&role!=='watchman'&&<QuotePlanView plan={d.quotePlan} projectId={d.project.id}
+  {d.quotePlan&&role!=='watchman'&&!d.quoteMilestoneTimeline?.some(row=>row.steps.length>0)&&
+    <QuotePlanView plan={d.quotePlan} projectId={d.project.id}
    canPrepare={d.permissions.manage&&d.permissions.finance&&!d.agreement}/>}
   <ProjectFlow d={d}/>
  </>;
