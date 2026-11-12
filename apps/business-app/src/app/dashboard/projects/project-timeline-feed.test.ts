@@ -31,7 +31,12 @@ it('routes All Projects selections into the single timeline-first project worksp
   const agreementAction = read('./[id]/site/agreement-actions.ts');
   expect(projectEntry).toContain('view="timeline"');
   expect(screen).toContain('function ProjectTimelineFeed');
-  expect(screen).toContain('<ProjectDailyCommand d=');
+  expect(screen).toContain('<ProjectFlow d={d}/>');
+  expect(screen).toContain("{slug:'timeline',title:'Timeline'");
+  expect(screen).toContain("{slug:'milestones',title:'Milestones'");
+  expect(screen).toContain(
+    'overview:Timeline,timeline:Timeline,milestones:Milestones',
+  );
   expect(navigation).toContain("label: 'All Projects'");
   expect(agreementAction).toContain(
     'savedStagePaymentPlan(revision.data.terms)',
