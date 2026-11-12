@@ -186,7 +186,7 @@ export function QuotationStudioStart({
             value={data.location} onChange={(event) => update('location', event.target.value)}/>
         </label>
         <label className="qs-clean-field"><span className="qs-field-label">Plot Area / Property Configuration</span>
-          <input maxLength={40} placeholder={industry === 'interior' ? '3BHK' : 'e.g. 200 sq yards'}
+          <input maxLength={200} placeholder={industry === 'interior' ? '3BHK' : 'e.g. 200 sq yards'}
             value={data.plotSize} onChange={(event) => update('plotSize', event.target.value)}/>
         </label>
         <label className="qs-clean-field"><span className="qs-field-label">Project Type</span>
