@@ -1140,3 +1140,45 @@
     padding-left: 14px;
   }
 }
+
+
+/* Quotation-linked execution view. Payment group boundaries come only from the
+   frozen quote; work status is read from existing project/Finance records. */
+.pf-flow .pq-payment-flow {padding:18px}
+.pq-payment-flow .pf-section-head {margin-bottom:16px}
+.pq-payment-list {list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.pq-payment-group {min-width:0;background:#fff;border:1px solid #e8e5e2;border-radius:15px;overflow:hidden}
+.pq-payment-group:has(details[open]) {border-color:#e6b99c;box-shadow:0 6px 20px #3c241309}
+.pq-payment-group summary {display:flex;gap:12px;align-items:center;cursor:pointer;min-height:64px;padding:13px 15px;list-style:none}
+.pq-payment-group summary::-webkit-details-marker {display:none}
+.pq-payment-group summary:after {content:"⌄";color:#8b5b4b;font-size:19px;font-weight:800;margin-left:auto}
+.pq-payment-group details[open]>summary:after {transform:rotate(180deg)}
+.pq-payment-index {display:grid;place-items:center;width:37px;height:37px;flex:0 0 37px;border-radius:11px;background:#fcece5;color:#8a372c;font-size:12px;font-weight:900}
+.pq-payment-title {display:grid;gap:4px;min-width:0}
+.pq-payment-title strong {font-size:13px;line-height:1.45;overflow-wrap:anywhere}
+.pq-payment-title small {font-size:11px;color:#6f7b8e}
+.pq-payment-share {font-weight:900;color:#88352b;background:#faf1ed;padding:7px 9px;border-radius:8px;white-space:nowrap;font-size:12px}
+.pq-payment-content {padding:0 15px 15px;border-top:1px solid #f1ece9}
+.pq-steps {list-style:none;padding:10px 0 0;margin:0;display:grid;gap:5px}
+.pq-steps li {display:flex;gap:11px;align-items:center;min-width:0;border-bottom:1px solid #f4f0ed;padding:10px 2px}
+.pq-step-number {flex:0 0 26px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#f3f5f7;color:#64748b;font-size:11px;font-weight:800}
+.pq-steps li>div {display:grid;gap:2px;min-width:0;flex:1}
+.pq-steps li>div>small {font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#8c6b5c;font-weight:800}
+.pq-steps li strong {font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+.pq-steps li p {font-size:11px;color:#64748b}
+.pq-steps li>a,.pq-stage-links a,.pq-payment-footer a {color:#88352b;font-weight:800;font-size:11px;text-decoration:none}
+.pq-steps li>a {padding:8px;min-height:36px;display:flex;align-items:center}
+.pq-stage-links {list-style:none;display:grid;gap:9px;margin:12px 0;padding:0}
+.pq-stage-links li {display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px}
+.pq-stage-links small {color:#6f7b8e}
+.pq-note {font-size:12px;color:#6f7b8e;margin:12px 0!important}
+.pq-payment-footer {display:flex;justify-content:space-between;flex-wrap:wrap;align-items:center;gap:8px;padding-top:12px;font-size:11px;color:#6f7b8e}
+@media(max-width:560px) {
+  .pf-flow .pq-payment-flow {padding:12px}
+  .pq-payment-group summary {padding:11px 9px;gap:8px}
+  .pq-payment-title strong {font-size:12px}
+  .pq-payment-index {width:30px;height:30px;flex-basis:30px}
+  .pq-payment-content {padding:0 9px 12px}
+  .pq-steps li {align-items:flex-start;gap:7px}
+  .pq-payment-share {font-size:11px}
+}
