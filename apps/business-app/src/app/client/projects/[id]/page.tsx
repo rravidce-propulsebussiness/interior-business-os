@@ -1,7 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { z } from 'zod';
 import { createServerDatabase } from '@business-os/database/server';
-import { ClientDashboard } from '../../client-dashboard';
+import { ClientDashboard, type ClientAdvanceRequest, type ClientDesignStatus } from '../../client-dashboard';
 
 export const dynamic = 'force-dynamic';
 
@@ -147,7 +147,7 @@ export default async function ClientProjectPage({
     name: string,
     args: Record<string, string>,
   ) => Promise<{ data: unknown; error: { message: string } | null }>;
-  const [projectResult, timelineResult, dashboardResult, requestsResult, invoicesResult, stageRequestsResult, paymentProofsResult, siteMaterialsResult] = await Promise.all([
+  const [projectResult, timelineResult, dashboardResult, requestsResult, invoicesResult, stageRequestsResult, paymentProofsResult, siteMaterialsResult, advanceResult, designStatusResult] = await Promise.all([
     rpc('client_portal_project', { p_project_id: id }),
     rpc('client_portal_timeline', { p_project_id: id }),
     rpc('client_portal_dashboard', { p_project_id: id }),
@@ -156,6 +156,8 @@ export default async function ClientProjectPage({
     rpc('client_portal_stage_payment_requests', { p_project_id: id }),
     rpc('client_payment_proof_list', { p_project: id }),
     rpc('client_portal_site_materials', { p_project_id:id }),
+    rpc('client_portal_advance_request', { p_project_id: id }),
+    rpc('client_portal_design_status', { p_project_id: id }),
   ]);
   const project = projectSchema.safeParse(projectResult.data);
   if (projectResult.error || !project.success) notFound();
@@ -204,6 +206,21 @@ export default async function ClientProjectPage({
       paymentRequests={stageRequests.success&&!stageRequestsResult.error?stageRequests.data:[]}
       paymentProofs={paymentProofs.success&&!paymentProofsResult.error?paymentProofs.data:[]}
       clientEmail={auth.user.email ?? ''}
+      advance={advanceResult.error?null:parseAdvance(advanceResult.data)}
+      designStatus={designStatusResult.error?null:parseDesignStatus(designStatusResult.data)}
     />
   );
+}
+
+const advanceSchema=z.object({id:z.string(),number:z.string().nullable(),total:z.string(),received:z.string(),
+ percent:z.coerce.number().nullable(),status:z.enum(['payment_requested','partially_received','received'])});
+function parseAdvance(raw:unknown):ClientAdvanceRequest|null{
+ const r=advanceSchema.safeParse(raw);return r.success?r.data:null;
+}
+const designStatusSchema=z.object({floor_plan_kind:z.string(),drawings:z.array(z.object({kind:z.string(),
+ revision:z.number(),reference:z.string(),status:z.string(),client_approved_at:z.string().nullable(),review_note:z.string()}))});
+function parseDesignStatus(raw:unknown):ClientDesignStatus|null{
+ const r=designStatusSchema.safeParse(raw);if(!r.success)return null;
+ return {floorPlanKind:r.data.floor_plan_kind,drawings:r.data.drawings.map(d=>({kind:d.kind,revision:d.revision,
+  reference:d.reference,status:d.status,clientApprovedAt:d.client_approved_at,reviewNote:d.review_note}))};
 }

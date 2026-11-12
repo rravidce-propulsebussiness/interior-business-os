@@ -283,6 +283,14 @@ select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decid
   jsonb_build_object('id',current_setting('test.fp2'),'decision','approved','note','Kitchen revision checked'));
 select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
 select public.client_portal_design_decide(pg_temp.project(),'approved','architectural_plan','Looks good');
+do $portal_design$
+declare r jsonb=public.client_portal_design_status(pg_temp.project());
+begin
+ if not exists(select 1 from jsonb_array_elements(r->'drawings') x where x->>'kind'='architectural_plan'
+     and (x->>'revision')::int=2 and x->>'client_approved_at' is not null)
+    or jsonb_array_length(r->'decisions')<>2 then
+   raise exception 'FAIL: homeowner cannot see drawing decisions: %',r;end if;
+end$portal_design$;
 reset role;
 do $design_history$
 declare project uuid=current_setting('test.flow_project')::uuid;
@@ -300,6 +308,14 @@ set local role authenticated;
 ------------------------------------------------------------------------------
 -- 4. Structural and 3D in parallel, approvals, execution release.
 ------------------------------------------------------------------------------
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+do $design_read$
+declare r jsonb=public.project_design_flow_read(pg_temp.org(),pg_temp.project());
+begin
+ if (r->>'advance_before_design')<>'true' or jsonb_array_length(r->'designs')<>2 or jsonb_array_length(r->'decisions')<>2
+    or not exists(select 1 from jsonb_array_elements(r->'designs') d where d->>'client_approved_at' is not null)
+ then raise exception 'FAIL: design journey read incomplete: %',r;end if;
+end$design_read$;
 select pg_temp.as_user('66666666-6666-4666-8666-666666666666');
 select set_config('test.st',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
   '{"kind":"structural_design","reference":"ST-01 structural drawings and bar bending schedule"}')->>'id'),true);

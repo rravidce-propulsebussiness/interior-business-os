@@ -109,7 +109,14 @@ export type ClientDashboardData = {
   paymentRequests: ClientStagePaymentRequest[];
   paymentProofs: ClientPaymentProof[];
   clientEmail: string;
+  advance?: ClientAdvanceRequest | null;
+  designStatus?: ClientDesignStatus | null;
 };
+export type ClientAdvanceRequest = { id: string; number: string | null; total: string; received: string;
+  percent: number | null; status: 'payment_requested' | 'partially_received' | 'received' };
+export type ClientDesignStatus = { floorPlanKind: string;
+  drawings: { kind: string; revision: number; reference: string; status: string; clientApprovedAt: string | null; reviewNote: string }[] };
+const inr = (v: string) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(v) || 0);
 
 function Icon({ name, size = 20 }: { name: string; size?: number }) {
   const attrs = {
@@ -327,6 +334,8 @@ export function ClientDashboard({
   paymentRequests,
   paymentProofs,
   clientEmail,
+  advance = null,
+  designStatus = null,
 }: ClientDashboardData) {
   const [search, setSearch] = useState('');
   const needle = search.toLocaleLowerCase().trim();
@@ -1024,6 +1033,12 @@ export function ClientDashboard({
                 <h2>Invoices &amp; payment requests</h2>
                 <p>Issued bills from your builder. A bill is not a payment receipt.</p>
               </div></div>
+              {advance&&<article className="pc-file-link" aria-label="Advance payment request"
+                style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:12,justifyContent:'space-between'}}>
+                <span><strong>Advance{advance.percent?' ('+advance.percent+'%)':''} · {advance.number??'Request'}</strong>
+                  <small style={{display:'block'}}>{inr(advance.total)} requested · {inr(advance.received)} verified by your builder&apos;s finance team</small></span>
+                <span className="pc-status">{advance.status==='received'?'Received':advance.status==='partially_received'?'Partly received':'Payment requested'}</span>
+              </article>}
               {paymentRequests.length>0&&<div className="pc-record-list">
                {paymentRequests.map(request=><article key={request.id}
                  className="pc-file-link" style={{display:'flex',flexWrap:'wrap',
@@ -1121,6 +1136,7 @@ export function ClientDashboard({
                 <ClientDesignReview
                   projectId={project.id}
                   drawings={drawings}
+                  status={designStatus}
                 />
               ) : (
                 <p className="pc-empty">

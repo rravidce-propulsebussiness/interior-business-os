@@ -3,6 +3,12 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition, type FormEvent } from 'react';
 import { clientDesignDecision } from './actions';
+import type { ClientDesignStatus } from './client-dashboard';
+
+const names: Record<string, string> = {
+  architectural_plan: 'Floor plan', interior_layout: 'Interior layout', structural_design: 'Structural design',
+  '3d_design': '3D visualisation', electrical_plan: 'Electrical plan', plumbing_plan: 'Plumbing plan',
+};
 
 type Drawing = {
   kind: string;
@@ -14,9 +20,11 @@ type Drawing = {
 export function ClientDesignReview({
   projectId,
   drawings,
+  status = null,
 }: {
   projectId: string;
   drawings: Drawing[];
+  status?: ClientDesignStatus | null;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -44,6 +52,40 @@ export function ClientDesignReview({
         Check the latest drawings, approve them, or request a revision. Required
         drawings must pass technical review before final client approval.
       </p>
+      {status && status.drawings.length > 0 && (
+        <ol className="space-y-2" aria-label="Your drawings">
+          {[...status.drawings].sort((a, b) => (a.kind === status.floorPlanKind ? -1 : b.kind === status.floorPlanKind ? 1 : 0))
+            .map((drawing) => {
+              const waiting = drawing.status === 'approved' && !drawing.clientApprovedAt;
+              const label = drawing.clientApprovedAt ? 'Approved by you'
+                : drawing.status === 'approved' ? 'Waiting for your decision'
+                : drawing.status === 'changes_requested' ? 'Being revised' : 'Being checked by the team';
+              return (
+                <li key={drawing.kind} className="rounded-xl border border-slate-200 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <strong>{names[drawing.kind] ?? drawing.kind.replaceAll('_', ' ')} · Revision {drawing.revision}</strong>
+                    <span className={'rounded-full px-3 py-1 text-xs font-bold ' + (drawing.clientApprovedAt ? 'bg-emerald-50 text-emerald-800' : waiting ? 'bg-orange-50 text-orange-800' : 'bg-slate-100 text-slate-700')}>{label}</span>
+                  </div>
+                  {drawing.status === 'changes_requested' && drawing.reviewNote && <p className="mt-1 text-sm text-slate-600">Your request: {drawing.reviewNote}</p>}
+                  {waiting && (
+                    <form onSubmit={submit} className="mt-2 flex flex-wrap items-center gap-2">
+                      <input type="hidden" name="project" value={projectId} />
+                      <input type="hidden" name="decision" value="approved" />
+                      <input type="hidden" name="kind" value={drawing.kind} />
+                      <input type="hidden" name="note" value={'Approved ' + (names[drawing.kind] ?? drawing.kind) + ' revision ' + drawing.revision} />
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name="acknowledged" required /> I reviewed this drawing
+                      </label>
+                      <button disabled={pending} type="submit" className="min-h-11 rounded-xl bg-orange-700 px-4 font-semibold text-white disabled:opacity-50">
+                        Approve {names[drawing.kind] ?? 'drawing'}
+                      </button>
+                    </form>
+                  )}
+                </li>
+              );
+            })}
+        </ol>
+      )}
       <form onSubmit={submit} className="space-y-3">
         <input type="hidden" name="project" value={projectId} />
         <input type="hidden" name="decision" value="approved" />

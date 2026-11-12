@@ -888,6 +888,34 @@ drop trigger if exists site_design_advance_guard on private.site_designs;
 create trigger site_design_advance_guard before insert on private.site_designs
   for each row execute function private.site_design_advance_guard();
 
+
+-- Design journey read: every drawing revision with technical and homeowner
+-- decisions, the floor-plan kind that gates structural/3D, and the policy.
+create or replace function public.project_design_flow_read(p_org uuid, p_project uuid)
+returns jsonb language plpgsql stable security definer set search_path = '' as $f$
+begin
+  if not private.site_allowed(p_org, p_project, array['manager','architect','structural_designer','site_engineer','quality_inspector']) then
+    raise exception 'Design records unavailable' using errcode = '42501'; end if;
+  return jsonb_build_object(
+    'stage', (select stage from private.site_state where organization_id = p_org and project_id = p_project),
+    'floor_plan_kind', private.project_floor_plan_kind(p_org, p_project),
+    'advance_before_design', coalesce((select bool_or(before_design) from private.project_advance_requirements
+       where organization_id = p_org and project_id = p_project), false),
+    'agreement_authorized', private.project_agreement_authorized(p_org, p_project),
+    'designs', coalesce((select jsonb_agg(jsonb_build_object('id', d.id, 'kind', d.kind, 'revision', d.revision,
+        'reference', d.reference, 'status', d.status, 'review_note', d.review_note, 'created_at', d.created_at,
+        'client_approved_at', d.client_approved_at, 'client_approval_source', d.client_approval_source,
+        'submitted_by', d.submitted_by) order by d.kind, d.revision desc)
+      from private.site_designs d where d.organization_id = p_org and d.project_id = p_project), '[]'::jsonb),
+    'decisions', coalesce((select jsonb_agg(jsonb_build_object('design_id', x.design_id, 'kind', x.design_kind,
+        'decision', x.decision, 'note', x.note, 'source', x.source, 'created_at', x.created_at) order by x.created_at desc)
+      from private.client_design_decisions x where x.organization_id = p_org and x.project_id = p_project), '[]'::jsonb)
+  );
+end
+$f$;
+revoke all on function public.project_design_flow_read(uuid, uuid) from public, anon;
+grant execute on function public.project_design_flow_read(uuid, uuid) to authenticated;
+
 -- Staff-recorded homeowner decision on one drawing (meeting, email, call).
 create or replace function public.project_design_client_decision(
   p_org uuid, p_project uuid, p_design uuid, p_decision text, p_evidence text
@@ -1230,6 +1258,33 @@ BEGIN
 END;
 $function$;
 revoke all on function private.certified_stage_payment_requests(uuid,uuid) from public,anon,authenticated;
+
+
+-- Homeowner: current drawing per kind and its decision state, plus history.
+create or replace function public.client_portal_design_status(p_project_id uuid)
+returns jsonb language plpgsql stable security definer set search_path = '' as $f$
+declare v_org uuid;
+begin
+  if not private.client_portal_accessible(p_project_id) then
+    raise exception 'Project invitation required' using errcode = '42501'; end if;
+  select organization_id into v_org from public.projects where id = p_project_id;
+  return jsonb_build_object(
+    'stage', (select stage from private.site_state where organization_id = v_org and project_id = p_project_id),
+    'floor_plan_kind', private.project_floor_plan_kind(v_org, p_project_id),
+    'drawings', coalesce((select jsonb_agg(jsonb_build_object('kind', d.kind, 'revision', d.revision,
+        'reference', d.reference, 'status', d.status, 'client_approved_at', d.client_approved_at,
+        'review_note', case when d.status = 'changes_requested' then d.review_note else '' end) order by d.kind)
+      from (select distinct on (x.kind) x.* from private.site_designs x
+            where x.organization_id = v_org and x.project_id = p_project_id
+            order by x.kind, x.revision desc) d), '[]'::jsonb),
+    'decisions', coalesce((select jsonb_agg(jsonb_build_object('kind', c.design_kind, 'decision', c.decision,
+        'note', c.note, 'created_at', c.created_at) order by c.created_at desc)
+      from private.client_design_decisions c where c.organization_id = v_org and c.project_id = p_project_id), '[]'::jsonb)
+  );
+end
+$f$;
+revoke all on function public.client_portal_design_status(uuid) from public, anon;
+grant execute on function public.client_portal_design_status(uuid) to authenticated;
 
 -- Staff "client_approve" of the whole package stamps the drawings it covered.
 create or replace function private.site_state_package_approval_stamp()

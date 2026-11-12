@@ -11753,6 +11753,10 @@ export interface Database {
         };
         Returns: undefined;
       };
+      client_portal_design_status: {
+        Args: { p_project_id: string };
+        Returns: Json;
+      };
       client_portal_grantable_projects: {
         Args: { p_organization_id: string; p_customer_id: string };
         Returns: Json;
@@ -12949,6 +12953,10 @@ export interface Database {
           p_decision: string;
           p_evidence: string;
         };
+        Returns: Json;
+      };
+      project_design_flow_read: {
+        Args: { p_org: string; p_project: string };
         Returns: Json;
       };
       project_material_access_read: {
