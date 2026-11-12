@@ -6,16 +6,16 @@
 
 ## Existing canonical paths to reuse
 
-| Workflow | Existing source of truth |
-| --- | --- |
-| Accepted scope and design revisions | Frozen quotation stage snapshot; `project_agreement_command`; `project_design_command` |
-| Advance and payment receipts | `project_advance_proforma_prepare`, Finance invoice/payment records, `project_advance_read` |
-| Parallel stage start and structural blockers | `construction_stage_execution_command` and `construction_stage_start_blockers` |
-| Work items, evidence, measurements, checks | `project_stage_checklist_command`, `project_stage_checklist_read`, site media, stage snapshot |
-| Work-item materials | `project_stage_activity_material_batch` and the existing procurement/receipt workflow |
-| Independent QC and certification | `construction_stage_qc_item_command`, stage QC review records, certified-stage payment request workflow |
-| Curing/security observations | `private.site_gate` records and project media with watchman-scoped photo access |
-| Staff membership and permissions | Project site team, organization roles, existing RLS and security-definer RPC checks |
+| Workflow                                     | Existing source of truth                                                                                |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Accepted scope and design revisions          | Frozen quotation stage snapshot; `project_agreement_command`; `project_design_command`                  |
+| Advance and payment receipts                 | `project_advance_proforma_prepare`, Finance invoice/payment records, `project_advance_read`             |
+| Parallel stage start and structural blockers | `construction_stage_execution_command` and `construction_stage_start_blockers`                          |
+| Work items, evidence, measurements, checks   | `project_stage_checklist_command`, `project_stage_checklist_read`, site media, stage snapshot           |
+| Work-item materials                          | `project_stage_activity_material_batch` and the existing procurement/receipt workflow                   |
+| Independent QC and certification             | `construction_stage_qc_item_command`, stage QC review records, certified-stage payment request workflow |
+| Curing/security observations                 | `private.site_gate` records and project media with watchman-scoped photo access                         |
+| Staff membership and permissions             | Project site team, organization roles, existing RLS and security-definer RPC checks                     |
 
 ## File-level implementation plan
 
