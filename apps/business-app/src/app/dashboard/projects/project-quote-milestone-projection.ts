@@ -1,5 +1,8 @@
 import { savedMilestoneFlow } from '@business-os/core/quotation-milestone-flow';
-import { defaultStageRequirements, savedStageRequirements } from '@business-os/core/quotation-stage-requirements';
+import {
+  defaultStageRequirements,
+  savedStageRequirements,
+} from '@business-os/core/quotation-stage-requirements';
 
 /** The quote owns the payment rows and their ordered work references.
  * This is a read-only projection for the project timeline, never a new
@@ -39,12 +42,14 @@ export function quoteMilestoneProjection(
     steps: (flow[String(paymentIndex)] ?? []).flatMap((step) => {
       // Only work explicitly saved inside THIS payment is rendered.
       if (!payment.stageCodes.includes(step.code)) return [];
-      const stage = requirements[step.code] ?? defaultStageRequirements(step.code);
-      const field = step.kind === 'work'
-        ? stage.work
-        : step.kind === 'material'
-          ? stage.materials
-          : stage.checks;
+      const stage =
+        requirements[step.code] ?? defaultStageRequirements(step.code);
+      const field =
+        step.kind === 'work'
+          ? stage.work
+          : step.kind === 'material'
+            ? stage.materials
+            : stage.checks;
       const title = field[step.index];
       return title ? [{ ...step, title }] : [];
     }),
