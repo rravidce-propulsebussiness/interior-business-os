@@ -34,6 +34,19 @@ describe('delivery project creation starts from a customer quotation', () => {
     expect(quoteAction).toContain("p_new_customer: createdCustomer");
   });
 
+  it('syncs planned stages from the current Final quote when a delivery project is created', () => {
+    const leadProjectAction = file('../crm/leads/lead-project-actions.ts');
+    const handoff = file('../../../../../../packages/database/supabase/migrations/20261113200000_auto_sync_final_quote_project_timeline.sql');
+    expect(leadProjectAction).toContain("rpc('quotation_final_choices'");
+    expect(leadProjectAction).toContain("rpc('contract_create_for_project_quote'");
+    expect(leadProjectAction).toContain('syncQuotedConstructionTimeline(contractId.data)');
+    expect(leadProjectAction).toContain('No customer acceptance, signed agreement, or payment was recorded.');
+    expect(handoff).toContain("rev.status not in ('draft','issued')");
+    expect(handoff).toContain('q.current_revision_id=rev.id');
+    expect(handoff).toContain('quotation_final_choices');
+    expect(handoff).toContain('planned stages');
+  });
+
   it('closes the legacy blank project RPC and directs stale callers to quotation flow', () => {
     expect(projectStart).not.toContain('customer_project_create');
     expect(migration).toContain("using errcode='23514'");
