@@ -587,9 +587,9 @@ begin
     jsonb_build_object('item','Binding wire','quantity','25','unit','kg','required_date',tomorrow)));
  -- The owner may record a homeowner's direct supplier cash settlement on the
  -- existing ordered material. This must remain separate from company Finance.
- select id into binding from private.site_material_needs
-  where organization_id=pg_temp.org() and project_id=pg_temp.project() and item='Binding wire'
-  order by created_at desc limit 1;
+ select (x->>'id')::uuid into binding
+  from jsonb_array_elements(public.project_site_read(pg_temp.org(),pg_temp.project())->'materials') x
+  where x->>'item'='Binding wire' order by x->>'id' limit 1;
  if binding is null then raise exception 'FAIL: test material request missing';end if;
  perform set_config('test.direct_cash_material',binding::text,true);
  perform pg_temp.as_user('11111111-1111-4111-8111-111111111111');
