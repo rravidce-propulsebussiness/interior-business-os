@@ -62,6 +62,13 @@
 .command-reel .command-hero-head p svg {
   color: #bd5c3f;
 }
+.owner-layout .command-reel .command-hero-head p a {
+  color: #a24b3c;
+  font-weight: 700;
+}
+.command-reel .command-hero-head p {
+  flex-wrap: wrap;
+}
 .command-reel .command-hero-actions {
   display: flex;
   flex-wrap: wrap;

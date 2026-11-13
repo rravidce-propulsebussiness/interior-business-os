@@ -289,7 +289,10 @@ export function CommandCentre({
         icon: 'purchases',
       },
     );
-  if (team)
+  // The team count only becomes a tile when it completes a row; otherwise it
+  // is shown in the greeting line so the tile grid never leaves an orphan.
+  const teamTile = team !== null && tiles.length % 4 !== 0;
+  if (team && teamTile)
     tiles.push({
       key: 'team',
       label: 'Active Members',
@@ -298,7 +301,12 @@ export function CommandCentre({
       href: '/dashboard/company/team',
       icon: 'team',
     });
-  const [primaryAction, ...otherActions] = actions;
+  // Creating something is the main call to action; fall back to the first.
+  const primaryAction =
+    actions.find((action) => action.href.includes('kind=sales_invoice')) ??
+    actions.find((action) => action.href.includes('/new')) ??
+    actions[0];
+  const otherActions = actions.filter((action) => action !== primaryAction);
   const hasDonut =
     metrics.filter((item) => typeof item.count === 'number').length >= 2;
 
@@ -324,6 +332,15 @@ export function CommandCentre({
                 <time>{dateLabel}</time>
                 <span aria-hidden="true">·</span>
                 Your business at a glance
+                {team && !teamTile && team.active !== null && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <a href="/dashboard/company/team">
+                      {team.active} active team{' '}
+                      {team.active === 1 ? 'member' : 'members'}
+                    </a>
+                  </>
+                )}
               </p>
             </div>
             {actions.length > 0 && (
