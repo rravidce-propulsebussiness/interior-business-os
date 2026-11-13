@@ -343,7 +343,7 @@ select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decid
 select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
   jsonb_build_object('id',current_setting('test.plumbing'),'decision','approved','note','Plumbing plan technically reviewed'));
 -- Physical work cannot start before the homeowner approves the complete design set.
-select pg_temp.expect_fail(format($select public.project_site_command(%L,%L,'execution_start','{}')$,
+select pg_temp.expect_fail(format('select public.project_site_command(%L,%L,''execution_start'',''{}'')',
   pg_temp.org(),pg_temp.project()),'42501','execution blocked before design approval');
 select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
 select public.client_portal_design_decide(pg_temp.project(),'approved',null,'All required construction drawings approved');
