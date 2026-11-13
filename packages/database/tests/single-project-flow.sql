@@ -631,7 +631,12 @@ do $material_check$
 declare project uuid=current_setting('test.flow_project')::uuid;
 begin
  if (select count(*) from private.site_material_needs where project_id=project and required_date is not null
-      and status='requested' and requested_by='22222222-2222-4222-8222-222222222222' and activity_index=3)<>3
+      and requested_by='22222222-2222-4222-8222-222222222222' and activity_index=3)<>3
+  or (select count(*) from private.site_material_needs where project_id=project and required_date is not null
+      and status='requested' and requested_by='22222222-2222-4222-8222-222222222222' and activity_index=3)<>2
+  or (select count(*) from private.site_material_needs where project_id=project
+      and homeowner_paid_method='cash' and homeowner_paid_amount=2500
+      and homeowner_paid_by='11111111-1111-4111-8111-111111111111')<>1
   or (select count(*) from private.site_material_needs where project_id=project and boq_item_id is not null)<>1
  then raise exception 'FAIL: material requests not captured with activity, date and requester';end if;
  if exists(select 1 from public.purchase_orders where project_id=project)
