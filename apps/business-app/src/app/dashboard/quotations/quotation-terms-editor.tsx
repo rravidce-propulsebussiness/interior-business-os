@@ -28,6 +28,9 @@ export function QuotationTermsEditor({
   const [exclusions, setExclusions] = useState(fields.exclusions);
   const [warranty, setWarranty] = useState(fields.warranty);
   const [additional, setAdditional] = useState(fields.additional);
+  const [workProgramme, setWorkProgramme] = useState(fields.workProgramme);
+  const [termination, setTermination] = useState(fields.termination);
+  const [disputeResolution, setDisputeResolution] = useState(fields.disputeResolution);
   const [customerNotes, setCustomerNotes] = useState(initial.customer_notes);
   const [internalNotes, setInternalNotes] = useState(initial.internal_notes);
   const savedDiscount: Discount = (() => {
@@ -58,7 +61,8 @@ export function QuotationTermsEditor({
     }
     try {
       joinQuotationTerms({
-        inclusions, exclusions, warranty, additional, paymentPlan:fields.paymentPlan,
+        inclusions, exclusions, warranty, additional, workProgramme, termination,
+        disputeResolution, paymentPlan:fields.paymentPlan,
       });
     } catch (error) {
       setMessage(error instanceof Error?error.message:'Please review the terms.');
@@ -72,6 +76,7 @@ export function QuotationTermsEditor({
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify({
             kind:'terms',validUntil,inclusions,exclusions,warranty,additional,
+            workProgramme,termination,disputeResolution,
             customerNotes,internalNotes,
             discount:canDiscount?discount:savedDiscount,
           }),
@@ -149,6 +154,22 @@ export function QuotationTermsEditor({
         </div>
       </div>
 
+      <details className="qs-terms-advanced qs-agreement-clauses">
+        <summary>Agreement clauses <span aria-hidden="true">⌄</span></summary>
+        <div className="qs-terms-advanced-content">
+          <p className="qs-terms-help">Optional clauses are saved with this quote and appear only in its linked Agreement PDF. The payment schedule remains the same grouped schedule saved in the Payment Schedule tab.</p>
+          {textField('work-programme','Work programme & completion',
+            'Agreed start conditions, duration and completion milestones',
+            workProgramme,setWorkProgramme,'◷',4)}
+          {textField('termination','Termination & indemnification',
+            'Agreed notice, settlement, liability and indemnity conditions',
+            termination,setTermination,'§',5)}
+          {textField('dispute-resolution','Dispute resolution',
+            'Agreed escalation, mediation or jurisdiction terms',
+            disputeResolution,setDisputeResolution,'◇',4)}
+        </div>
+      </details>
+
       <details className="qs-terms-advanced">
         <summary>More quotation options <span aria-hidden="true">⌄</span></summary>
         <div className="qs-terms-advanced-content">
@@ -177,8 +198,8 @@ export function QuotationTermsEditor({
       </details>
 
       <div className="qs-terms-footer">
-        <p><strong>Payment stages are separate.</strong> Edit percentages in the Payment
-          Schedule tab. Saving these terms retains the saved stage-wise payment schedule.</p>
+        <p><strong>Payment stages stay in one schedule.</strong> Edit groups in the Payment
+          Schedule tab. Saving terms keeps that schedule unchanged. Quote PDFs show pricing and scope; Agreement PDFs include payment terms and any saved agreement clauses.</p>
         {editable && <button type="button" data-studio-save="files"
           onClick={save} disabled={pending} className="qs-terms-save">
           {pending ? 'Saving conditions…' : 'Save Terms & Inclusions →'}
