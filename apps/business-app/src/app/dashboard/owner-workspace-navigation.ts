@@ -50,7 +50,7 @@ export function ownerWorkspaceNavigation(
           : []),
         { label: 'My Quotes', href: '/dashboard/quotations' },
         ...(context.entitlements.includes('projects') &&
-          (has('contract.view', 'billing') || has('contract.create', 'billing'))
+        (has('contract.view', 'billing') || has('contract.create', 'billing'))
           ? [{ label: 'Agreements', href: '/dashboard/finance/contracts' }]
           : []),
         { label: 'Packages', href: '/dashboard/quotations/packages' },
