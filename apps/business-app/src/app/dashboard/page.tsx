@@ -434,6 +434,7 @@ export default async function Dashboard({
       href: '/dashboard/crm/leads',
       icon: 'leads',
       tone: 'orange',
+      count: leads?.total,
     });
   if (canQuotes)
     metrics.push({
@@ -443,6 +444,7 @@ export default async function Dashboard({
       href: '/dashboard/quotations',
       icon: 'quotations',
       tone: 'blue',
+      count: quotes?.total,
     });
   if (canProjects)
     metrics.push({
@@ -452,6 +454,7 @@ export default async function Dashboard({
       href: '/dashboard/projects',
       icon: 'projects',
       tone: 'green',
+      count: projects?.total,
     });
   if (canBilling)
     metrics.push({
@@ -567,13 +570,28 @@ export default async function Dashboard({
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 4)
     .map(mapDocument);
+  const companyTimeZone = organization.default_timezone || 'Asia/Kolkata';
   const dateLabel = new Intl.DateTimeFormat('en-IN', {
     weekday: 'short',
     day: '2-digit',
     month: 'short',
     year: 'numeric',
-    timeZone: organization.default_timezone || 'Asia/Kolkata',
+    timeZone: companyTimeZone,
   }).format(new Date());
+  // Rendered on the server only, in the company's time zone.
+  const companyHour = Number(
+    new Intl.DateTimeFormat('en-GB', {
+      hour: '2-digit',
+      hourCycle: 'h23',
+      timeZone: companyTimeZone,
+    }).format(new Date()),
+  );
+  const greeting =
+    companyHour < 5 || companyHour >= 17
+      ? 'Good evening'
+      : companyHour < 12
+        ? 'Good morning'
+        : 'Good afternoon';
   const mobileNav = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' as const },
     ...(canProjects
@@ -626,6 +644,7 @@ export default async function Dashboard({
       dashboardBrand
     >
       <CommandCentre
+        greeting={greeting}
         accountLabel={accountLabel}
         dateLabel={dateLabel}
         metrics={metrics}

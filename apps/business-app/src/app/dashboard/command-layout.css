@@ -1,0 +1,376 @@
+/*
+ * Command-centre layout: greeting card with chart beside a pipeline donut,
+ * then a grid of KPI tiles, then detail panels. Uses the existing ProPulse
+ * palette (#88352b burgundy, #bd5c3f terracotta, orange accents).
+ * Scoped to .command-reel so no other page is affected.
+ */
+.owner-layout .command-reel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.command-reel > * {
+  margin-bottom: 0;
+}
+
+/* ---------- Greeting + donut row ---------- */
+.command-reel .command-hero-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.9fr) minmax(260px, 1fr);
+  gap: 16px;
+}
+.command-reel .command-hero-row-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+.command-reel .command-hero {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 22px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 14px 34px rgba(68, 30, 29, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+}
+.command-reel .command-hero-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.command-reel .command-hero h1 {
+  color: #2c1a1d;
+  font-size: clamp(21px, 2vw, 27px);
+  font-weight: 850;
+  letter-spacing: -0.04em;
+  line-height: 1.15;
+}
+.command-reel .command-hero-head p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  color: #7a6a6c;
+  font-size: 12px;
+}
+.command-reel .command-hero-head p svg {
+  color: #bd5c3f;
+}
+.command-reel .command-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.owner-layout .command-reel .command-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid #ecdcd8;
+  background: rgba(255, 255, 255, 0.85);
+  color: #4a2f33;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+.owner-layout .command-reel .command-chip:hover {
+  border-color: #d29a8c;
+  transform: translateY(-1px);
+}
+.owner-layout .command-reel .command-chip-primary {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(106deg, #a2473a, #bd5c3f);
+  box-shadow: 0 6px 16px rgba(136, 53, 43, 0.28);
+}
+.owner-layout .command-reel .command-chip-primary:hover {
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(136, 53, 43, 0.38);
+}
+.command-reel .command-hero-note {
+  color: #7a6a6c;
+  font-size: 12px;
+}
+
+.command-reel .command-hero-chart {
+  border-radius: 16px;
+  border: 1px solid rgba(136, 53, 43, 0.08);
+  background: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+}
+.command-reel .command-hero-chart-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 12px 16px 0;
+}
+.command-reel .command-hero-chart-head strong {
+  color: #2c1a1d;
+  font-size: 13px;
+}
+.command-reel .command-hero-chart-head small {
+  color: #8a7a7c;
+  font-size: 10px;
+}
+.owner-layout .command-reel .command-hero-chart-head a {
+  margin-left: auto;
+  color: #a24b3c;
+  font-size: 11px;
+  font-weight: 750;
+}
+.command-reel .command-hero-chart .command-chart {
+  height: 170px;
+  border-bottom: 0;
+}
+.command-reel .command-hero-chart .command-chart-bar-wrap {
+  height: 125px;
+  width: 54%;
+}
+.command-reel .command-chart-bar {
+  background: linear-gradient(0deg, #e9c6bb, #f3ddd5);
+}
+.command-reel .command-chart-bar-current {
+  background: linear-gradient(0deg, #88352b, #bd5c3f);
+  box-shadow: 0 6px 16px rgba(136, 53, 43, 0.3);
+}
+
+/* ---------- Pipeline donut ---------- */
+.command-reel .command-mix {
+  display: flex;
+  flex-direction: column;
+}
+.command-reel .command-mix-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 18px;
+}
+.command-reel .command-donut {
+  position: relative;
+  width: 150px;
+  height: 150px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  box-shadow: 0 12px 28px rgba(136, 53, 43, 0.18);
+}
+.command-reel .command-donut-centre {
+  position: absolute;
+  inset: 22px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: inset 0 2px 8px rgba(68, 30, 29, 0.06);
+}
+.command-reel .command-donut-centre strong {
+  color: #2c1a1d;
+  font-size: 24px;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+}
+.command-reel .command-donut-centre small {
+  color: #8a7a7c;
+  font-size: 10px;
+}
+.command-reel .command-mix-legend {
+  width: 100%;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.command-reel .command-mix-legend li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+}
+.owner-layout .command-reel .command-mix-legend a {
+  color: #4a3a3d;
+}
+.command-reel .command-mix-legend strong {
+  margin-left: auto;
+  color: #2c1a1d;
+}
+.command-reel .command-mix-dot {
+  width: 10px;
+  height: 10px;
+  flex: 0 0 10px;
+  border-radius: 3px;
+}
+
+/* ---------- KPI tiles ---------- */
+.command-reel .command-tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+}
+.owner-layout .command-reel .command-tile {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 15px 16px 16px;
+  border-radius: 18px;
+  color: #2c1a1d;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 12px 28px rgba(68, 30, 29, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+.owner-layout .command-reel .command-tile:hover {
+  border-color: #ffc9a8;
+  box-shadow: 0 18px 36px rgba(68, 30, 29, 0.12);
+  transform: translateY(-2px);
+}
+.command-reel .command-tile-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.command-reel .command-tile-icon {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  color: #bd5c3f;
+  background: linear-gradient(145deg, #fff4ef, #fbe1d8);
+}
+.command-reel .command-tile-pill {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 3px 9px;
+  border-radius: 999px;
+  color: #8a4a3e;
+  background: #fbeee9;
+  font-size: 10px;
+  font-weight: 700;
+}
+.command-reel .command-tile strong {
+  font-size: clamp(20px, 1.9vw, 26px);
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.command-reel .command-tile-label {
+  color: #7a6a6c;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1250px) {
+  .command-reel .command-hero-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .command-reel .command-mix-body {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+  .command-reel .command-mix-legend {
+    width: auto;
+    flex: 1;
+  }
+}
+@media (max-width: 900px) {
+  .command-reel .command-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 740px) {
+  .owner-layout .command-reel {
+    gap: 12px;
+  }
+  .command-reel .command-hero {
+    padding: 15px 14px 12px;
+    border-radius: 16px;
+  }
+  .command-reel .command-hero-actions {
+    width: 100%;
+  }
+  .command-reel .command-hero-chart .command-chart {
+    height: 140px;
+    padding: 12px 10px 6px;
+  }
+  .command-reel .command-hero-chart .command-chart-bar-wrap {
+    height: 98px;
+    width: 70%;
+  }
+  .command-reel .command-mix-body {
+    flex-direction: column;
+  }
+  .command-reel .command-mix-legend {
+    width: 100%;
+  }
+  .command-reel .command-tiles {
+    gap: 10px;
+  }
+  .owner-layout .command-reel .command-tile {
+    padding: 12px;
+    border-radius: 14px;
+  }
+  .command-reel .command-tile-pill {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes command-reel-rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .command-reel > :is(.command-hero-row, .command-tiles, .command-two-cols) {
+    animation: command-reel-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .command-reel > .command-tiles {
+    animation-delay: 0.07s;
+  }
+  .command-reel > .command-two-cols {
+    animation-delay: 0.14s;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .owner-layout .command-reel .command-tile,
+  .owner-layout .command-reel .command-chip {
+    transition: none;
+  }
+}
