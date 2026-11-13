@@ -22,12 +22,14 @@ begin
    'Private signed paper copy test');
  perform public.project_site_command(org,project,'assign',
   '{"user_id":"33333333-3333-4333-8333-333333333333","role":"site_engineer","active":true}');
- foreach kind in array array['architectural_plan','3d_design','structural_design'] loop
+ foreach kind in array array[
+  'architectural_plan','structural_design','3d_design','electrical_plan','plumbing_plan'
+ ] loop
   record=public.project_site_command(org,project,'design_submit',jsonb_build_object('kind',kind,'reference','2026 revision for '||kind));
   perform public.project_site_command(org,project,'design_decide',jsonb_build_object('id',record->>'id','decision','approved','note','Validated'));
-  if kind='architectural_plan' then
+  if kind in ('architectural_plan','structural_design','3d_design') then
    perform public.project_design_client_decision(org,project,(record->>'id')::uuid,'approved',
-     'Homeowner approved the floor plan by email reference C-107');
+     'Homeowner approved '||kind||' by email reference C-107');
   end if;
  end loop;
  perform public.project_site_command(org,project,'client_approve',
