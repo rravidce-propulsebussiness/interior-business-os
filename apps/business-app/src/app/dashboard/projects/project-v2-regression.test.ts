@@ -17,7 +17,17 @@ describe('Projects v2 one screen per route',()=>{
   expect(ui).not.toContain('pcc-module-grid');
   expect(ui).not.toContain('pcc-section-columns');
  });
- it('explains the missing agreement instead of allowing an invalid stage import',()=>{
+ it('prepares an agreement from the selected saved Final quotation without sharing it',()=>{
+  const actions=read('./project-agreement-actions.ts');
+  const migration=read('../../../../../packages/database/supabase/migrations/20261113170000_project_contract_uses_final_quote.sql');
+  expect(ui).toContain("quote&&d.permissions.manage&&d.permissions.finance&&!d.agreement");
+  expect(loader).toContain("'quotation_final_choices'");
+  expect(actions).toContain("contract_create_for_project_quote");
+  expect(migration).toContain("public.quotation_final_choices");
+  expect(migration).toContain("r.status not in ('draft','issued')");
+  expect(migration).toContain("v_final_quote is distinct from q.id::text");
+});
+it('explains the missing agreement instead of allowing an invalid stage import',()=>{
   expect(ui).toContain("Prepare the agreement from the issued Final quotation");
   expect(ui).toContain("d.agreement&&<SyncStages");
   expect(ui).toContain('Agreement & advance');
