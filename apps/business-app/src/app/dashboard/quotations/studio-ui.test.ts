@@ -521,6 +521,13 @@ describe('PDF attachment sharing and reliable file operations', () => {
     expect(css).not.toContain('.qs-work-preview-grid');
   });
 
+  it('keeps editable draft quotations save/edit only without a share action', () => {
+    const page = file('./[id]/studio/page.tsx');
+    expect(page).toContain("canSharePdf={revision.status !== 'draft' && s.allowed('quotation.share', 'quotation')}");
+    expect(controls).toContain('{canShare && <button');
+    expect(controls).toContain('{canShare && <p className="qs-work-preview-note">');
+  });
+
   it('opens the same premium HTML preview in Leads and the quotations list, keeping PDF output separate', () => {
     const list = file('./page.tsx');
     const studio = file('./studio-editor.tsx');
