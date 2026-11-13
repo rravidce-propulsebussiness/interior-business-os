@@ -49,6 +49,12 @@ const iconPaths = {
   calendar: 'M3 5h18v16H3zM7 2v6M17 2v6M3 10h18',
   message:
     'M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5Z',
+  calculator:
+    'M6 2h12a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1ZM8 6h8v4H8zM8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01',
+  zap: 'M13 2 4 14h7l-1 8 9-12h-7l1-8Z',
+  idcard:
+    'M3 5h18v14H3zM9 13a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM5.5 17a3.5 3.5 0 0 1 7 0M15 10h3M15 14h3',
+  chevron: 'm9 6 6 6-6 6',
 } as const;
 
 const noopSubscribe = () => () => {};
@@ -393,7 +399,7 @@ export function OwnerShell({
                         }
                         aria-hidden="true"
                       >
-                        ⌄
+                        <OwnerIcon name="chevron" size={16} />
                       </span>
                     </button>
                     {isExpanded && (

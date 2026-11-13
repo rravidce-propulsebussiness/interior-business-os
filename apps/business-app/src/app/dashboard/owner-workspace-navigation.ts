@@ -33,12 +33,6 @@ export function ownerWorkspaceNavigation(
       href: '/dashboard/website',
       icon: 'globe',
     });
-  if (has('brochure.view', 'brochure'))
-    items.push({
-      label: 'Brochures',
-      href: '/dashboard/brochures',
-      icon: 'quotations',
-    });
   if (has('quotation.view', 'quotation'))
     items.push({
       label: 'Quotations',
@@ -158,7 +152,7 @@ export function ownerWorkspaceNavigation(
       href: has('estimate.view', 'projects')
         ? '/dashboard/execution/execution_estimate_revisions'
         : '/dashboard/execution/estimation_recipes',
-      icon: 'quotations',
+      icon: 'calculator',
       children: boqChildren,
     });
   // One project path: All Projects → project → Timeline. Task boards,
@@ -203,7 +197,7 @@ export function ownerWorkspaceNavigation(
     items.push({
       label: 'Billing & Plans',
       href: '/dashboard/billing',
-      icon: 'billing',
+      icon: 'crown',
     });
   if (
     has('report.view') ||
@@ -224,14 +218,14 @@ export function ownerWorkspaceNavigation(
     items.push({
       label: 'Automations',
       href: '/dashboard/automations',
-      icon: 'settings',
+      icon: 'zap',
     });
   }
   if (has('team.manage'))
     items.push({
       label: 'Employees',
       href: '/dashboard/employees',
-      icon: 'team',
+      icon: 'idcard',
     });
   if (has('team.view') || has('role.view'))
     items.push({

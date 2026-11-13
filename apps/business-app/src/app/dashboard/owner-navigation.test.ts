@@ -35,7 +35,6 @@ describe('one authorized company navigation on every dashboard page', () => {
       'Rate Recipes',
       'All Projects',
       'Automations',
-      'Brochures',
       'ERP: Site Execution',
       'ERP: Execution Planner',
       'Marketplace',
@@ -91,7 +90,8 @@ describe('one authorized company navigation on every dashboard page', () => {
     expect(canonical).toContain("has('project.view', 'projects')");
     expect(canonical).toContain("has('task.view', 'projects')");
     expect(canonical).toContain("has('milestone.view', 'projects')");
-    expect(canonical).toContain("has('brochure.view', 'brochure')");
+    // Brochures is retired from the workspace menu.
+    expect(canonical).not.toContain("label: 'Brochures'");
     expect(canonical).toContain("has('automation.view')");
     expect(canonical).toContain("has('catalog.view', 'catalog')");
     expect(canonical).toContain("has('pricing.view', 'pricing')");

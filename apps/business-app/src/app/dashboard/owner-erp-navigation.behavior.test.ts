@@ -89,7 +89,7 @@ describe('ERP uses the existing owner workspace and access policy', () => {
     expect(boq(context)).toEqual({
       label: 'BOQ & Estimating',
       href: '/dashboard/execution/execution_estimate_revisions',
-      icon: 'quotations',
+      icon: 'calculator',
       children: [
         {
           label: 'BOQ & Estimate Revisions',

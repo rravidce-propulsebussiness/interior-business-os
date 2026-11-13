@@ -92,6 +92,42 @@ describe('ProPulse premium glass layer', () => {
     expect(globals).toMatch(/:is\(input, select\) \{\s+border: 0 !important;/);
   });
 
+  it('keeps sidebar rows consistent and the menu fully visible', () => {
+    const style = file('./glass-theme.css');
+    expect(style).toMatch(/\.owner-studio-promo \{\s+display: none;/);
+    expect(style).toMatch(
+      /:is\(\.owner-nav-item, \.owner-nav-group-toggle\) \{\s+min-height: 42px;\s+border-radius: 0\.8rem;\s+white-space: nowrap;/,
+    );
+    expect(style).toMatch(
+      /\.owner-nav-chevron-open \{\s+transform: rotate\(90deg\);/,
+    );
+    const shell = file('./owner-shell.tsx');
+    expect(shell).toContain('<OwnerIcon name="chevron" size={16} />');
+    expect(shell).not.toMatch(/>\s*⌄\s*<\/span>\s*<\/button>/);
+  });
+
+  it('retires the Brochures module from the workspace', () => {
+    const navigation = file('./owner-workspace-navigation.ts');
+    expect(navigation).not.toContain("label: 'Brochures'");
+    for (const [label, icon] of [
+      ['BOQ & Estimating', 'calculator'],
+      ['Billing & Plans', 'crown'],
+      ['Automations', 'zap'],
+      ['Employees', 'idcard'],
+    ]) {
+      expect(navigation).toMatch(
+        new RegExp(
+          `label: '${label}',[\\s\\S]{0,300}?icon: '${icon}'`.replace(
+            '&',
+            '\\&',
+          ),
+        ),
+      );
+    }
+    const layout = file('./brochures/layout.tsx');
+    expect(layout).toContain("redirect('/dashboard')");
+  });
+
   it('renders a static, accessible loading splash', () => {
     const loading = file('./loading.tsx');
     expect(loading).toContain('role="status"');
