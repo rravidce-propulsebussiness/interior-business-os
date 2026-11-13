@@ -45,17 +45,10 @@ begin
  raise notice 'PASS: signed-copy evidence, real advance and revocation keep their guards';
 end$$;
 
--- Test the explicit owner choice as a fresh quote-backed clearance. The
--- exception event, not a signed PDF, must activate the original quote groups.
+-- Test the explicit owner choice after revoking signed-copy clearance.
+-- Reuse the same contract and immutable quote schedule; the exception event
+-- must restore execution readiness without changing payment history or groups.
 reset role;
-delete from public.payment_schedule_items where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
- and contract_id=(select id from public.contracts where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
-   and project_id=(select id from public.projects where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
-     and code='demo-3bhk'));
-delete from public.payment_schedules where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
- and contract_id=(select id from public.contracts where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
-   and project_id=(select id from public.projects where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
-     and code='demo-3bhk'));
 set local role authenticated;
 do $$
 declare
