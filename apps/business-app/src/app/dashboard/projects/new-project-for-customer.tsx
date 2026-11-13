@@ -52,9 +52,10 @@ export function NewProjectForCustomer({
         >
           <h2>Start with a quotation</h2>
           <p className="pv2-muted">
-            Select an existing customer and continue an open quotation, or create
-            one first. A delivery project is created from the accepted quotation
-            and agreement; a project cannot be saved without its quotation.
+            Select an existing customer and continue a quotation, or create one
+            first. The customer’s latest quotation is Final by default. When the
+            delivery project is created, its planned milestones sync from that
+            quote without recording homeowner acceptance, a signed agreement, or payment.
           </p>
           <label>
             Customer

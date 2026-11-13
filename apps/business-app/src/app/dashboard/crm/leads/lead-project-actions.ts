@@ -3,6 +3,7 @@
 import { z } from 'zod';
 import { convertLead } from '../actions';
 import { crmServices } from '../service';
+import { syncQuotedConstructionTimeline } from '../../finance/quote-construction-handoff';
 
 const projectRequest = z.object({
   leadId: z.uuid(),
@@ -75,7 +76,62 @@ export async function openOrCreateWonLeadProject(input: unknown):
     });
     if (!converted.id) return { ok: false,
       message: converted.message || 'Could not link this project.' };
-    return { ok: true, projectId: converted.id, message: 'Project linked to lead.' };
+
+    // A delivery project gets its planned milestones from the customer's
+    // current Final quote. Preparing a pending contract does not record
+    // customer acceptance, a signed agreement, or a payment.
+    let message = 'Project linked to lead.';
+    if (s.allowed('contract.create','finance') &&
+        s.allowed('project.manage','projects') &&
+        s.allowed('quotation.view','quotation')) {
+      try {
+        const project = await s.client.from('projects').select('customer_id')
+          .eq('organization_id',s.org).eq('id',converted.id).maybeSingle();
+        if (project.data?.customer_id) {
+          const rpc = s.client.rpc.bind(s.client) as unknown as
+            (name:string,args:Record<string,unknown>) =>
+              Promise<{data:unknown;error:{code?:string;message?:string}|null}>;
+          const choices = await rpc('quotation_final_choices',{
+            p_org:s.org,p_customer_ids:[project.data.customer_id],
+          });
+          const choiceObject = choices.data && typeof choices.data==='object'
+            && !Array.isArray(choices.data) ? choices.data as Record<string,unknown> : {};
+          const quotationId = typeof choiceObject[project.data.customer_id]==='string'
+            ? choiceObject[project.data.customer_id] as string : '';
+          if (!choices.error && quotationId) {
+            const quote = await s.client.from('quotations')
+              .select('current_revision_id').eq('organization_id',s.org)
+              .eq('customer_id',project.data.customer_id).eq('id',quotationId).maybeSingle();
+            const revisionId = quote.data?.current_revision_id;
+            if (!quote.error && typeof revisionId==='string') {
+              const prepared = await rpc('contract_create_for_project_quote',{
+                p_org:s.org,p_project:converted.id,p_revision:revisionId,
+              });
+              const contractId = z.uuid().safeParse(prepared.data);
+              if (!prepared.error && contractId.success) {
+                const timeline = await syncQuotedConstructionTimeline(contractId.data);
+                if (timeline.created || timeline.reason==='exists') {
+                  message = 'Project linked. Planned milestones from its current Final quotation and payment groups are synced. No customer acceptance, signed agreement, or payment was recorded.';
+                } else {
+                  message = 'Project linked. Planned milestones are ready to sync after the remaining project setup checks.';
+                }
+              } else if (prepared.error?.code==='42501') {
+                message = 'Project linked. An authorized owner must prepare the Final quotation before its milestones can sync.';
+              } else {
+                message = 'Project linked, but its milestones could not sync yet. Open the project Timeline to retry.';
+              }
+            }
+          }
+        }
+      } catch {
+        // The project conversion has already succeeded. The project page
+        // retries the same idempotent timeline sync when an eligible contract exists.
+        message = 'Project linked. Its planned milestones will retry syncing when the project opens.';
+      }
+    } else {
+      message = 'Project linked. An authorized owner can prepare its Final quotation and sync the planned milestones.';
+    }
+    return { ok: true, projectId: converted.id, message };
   } catch {
     return { ok: false, message: 'Could not link the project. Retry.' };
   }
