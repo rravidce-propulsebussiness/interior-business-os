@@ -13,7 +13,7 @@ export type CommandMetric = {
   icon: OwnerIconName;
   tone: 'orange' | 'green' | 'blue' | 'purple';
   /** Raw count for the pipeline donut; omitted when the value is not a count. */
-  count?: number;
+  count?: number | undefined;
 };
 export type CommandAction = {
   title: string;
@@ -62,6 +62,8 @@ type Tile = {
 };
 
 const donutColours = ['#88352b', '#bd5c3f', '#ff7820', '#ffb283'];
+const donutColour = (index: number) =>
+  donutColours[index % donutColours.length] ?? '#bd5c3f';
 
 const formatDate = (value: string) => {
   if (!value) return '';
@@ -171,7 +173,7 @@ function PipelineDonut({ metrics }: { metrics: CommandMetric[] }) {
   let start = 0;
   const stops = parts.map((item, index) => {
     const end = total ? start + (item.count / total) * 100 : start;
-    const stop = `${donutColours[index % donutColours.length]} ${start}% ${end}%`;
+    const stop = `${donutColour(index)} ${start}% ${end}%`;
     start = end;
     return stop;
   });
@@ -201,7 +203,7 @@ function PipelineDonut({ metrics }: { metrics: CommandMetric[] }) {
               <span
                 className="command-mix-dot"
                 style={{
-                  background: donutColours[index % donutColours.length],
+                  background: donutColour(index),
                 }}
                 aria-hidden="true"
               />

@@ -101,7 +101,7 @@ function navSectionLabels(items: { href: string }[]) {
   let current: string | null = null;
   for (const item of items) {
     const path = item.href.split('?')[0] ?? item.href;
-    const section =
+    const section: string | null =
       navSections.find(([, pattern]) => pattern.test(path))?.[0] ?? current;
     if (section && section !== current && !shown.has(section)) {
       labels.set(item.href, section);
