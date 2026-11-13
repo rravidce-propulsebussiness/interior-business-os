@@ -196,7 +196,9 @@ export default async function QuotationStudio({
               initialMode={mode === 'custom' ? 'custom' : 'sft'}
               initialPackageId={query.package ?? ''}
               initialFloorCount={query.floors && /^[1-8]$/.test(query.floors) ? Number(query.floors) : null}
-              canSharePdf={s.allowed('quotation.share', 'quotation')}
+              // Draft quotations are save/edit only. Sharing is available
+              // once the quote leaves the editable draft state.
+              canSharePdf={revision.status !== 'draft' && s.allowed('quotation.share', 'quotation')}
               quoteNumber={root.quotation_number}
             />
           ) : (

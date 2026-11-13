@@ -506,7 +506,9 @@ export function PremiumSftBuilder({
       <div className="qs-work-heading">
         <div className="qs-work-heading-icon">▤</div>
         <div><h3>Quotation PDF</h3>
-          <p>View, download or send the saved PDF directly through WhatsApp.</p></div>
+          <p>{canSharePdf
+            ? 'View, download or send the saved PDF directly through WhatsApp.'
+            : 'View or download the saved quotation PDF.'}</p></div>
       </div>
       <QuotationPdfControls
         revisionId={revisionId} version={version}

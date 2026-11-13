@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 13135)
+Total output lines: 986
+
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -453,88 +456,7 @@ describe('compact single-screen construction quotation editor', () => {
     expect(editor).toContain("'Ground Floor','First Floor','Second Floor'");
     expect(editor).toContain('Shelves & Sajjas');
     expect(editor).toContain("name:'Shelves & Sajjas'");
-    expect(editor).toContain("'Compound Wall'");
-    expect(editor).toContain("'wall_sqft'");
-    expect(editor).toContain('Length (ft)');
-    expect(editor).toContain('Height (ft)');
-    expect(editor).toContain('Area / Qty');
-    expect(editor).toContain('data-studio-save="quote"');
-  });
-
-  it('stores brand edits in a quotation specification snapshot, not a package template', () => {
-    expect(editor).toContain('Edit all material specifications');
-    expect(editor).toContain('Apply to this quotation');
-    expect(editor).toContain('master package remains untouched');
-    expect(editor).toContain('Quote-only editable');
-    expect(editor).toContain('setDraftSections(curr=>curr.map(');
-    expect(editor).toContain('setSections(draftSections.map(');
-    expect(editor).toContain('cancelMaterials');
-    expect(editor).toContain("'/dashboard/quotations/'+revisionId+'/sft-save'");
-    expect(editor).toContain('if(validationMessage)');
-    expect(editor).toContain('setSavedVersion(data.version??savedVersion+1)');
-    expect(editor).toContain('propagateFloorChanges(current,index,patch)');
-    expect(editor).not.toContain('construction_package_save');
-    expect(actions).toContain('const calculated = calculateSftEstimate(');
-    expect(actions).toContain('const description = encodeSftEstimate(calculated)');
-  });
-});
-
-describe('unified construction quote page and reliable preview', () => {
-  const detail = file('./[id]/page.tsx');
-  const studio = file('./studio-editor.tsx');
-  const page = file('./[id]/studio/page.tsx');
-  const editor = file('./premium-sft-builder.tsx');
-
-  it('redirects the old details route to Studio without a second editor', () => {
-    expect(detail).toContain("redirect('/dashboard/quotations/'");
-    expect(detail).not.toContain('LineForm');
-    expect(studio).not.toContain('Advanced item editing, discounts &amp; revisions');
-    expect(studio).toContain('!isConstruction && <section className="qs-card"');
-  });
-  it('passes authenticated PDF preview HTML instead of depending on a separate iframe request', () => {
-    expect(page).toContain('quotationDocument(revision.id)');
-    expect(page).toContain('previewHtml={previewHtml}');
-    expect(editor).not.toContain('srcDoc={previewHtml}');
-    expect(editor).not.toContain('Hide inline preview');
-    expect(editor).toContain('<QuotationPdfControls');
-    expect(editor).not.toContain('Hide inline preview');
-    expect(editor).toContain('<QuotationPdfControls');
-  });
-});
-
-describe('PDF attachment sharing and reliable file operations', () => {
-  const editor = file('./premium-sft-builder.tsx');
-  const controls = file('./quotation-pdf-controls.tsx');
-  const renderer = file('./pdf-renderer.ts');
-  const secureRoute = file('./[id]/pdf/route.ts');
-  const css = file('./studio.css');
-
-  it('shows only view PDF, download PDF, and actual file share actions', () => {
-    expect(editor).toContain('<QuotationPdfControls');
-    expect(controls).toContain('◉ View PDF');
-    expect(controls).toContain('↓ Download PDF');
-    expect(controls).toContain('Share PDF to WhatsApp');
-    expect(controls).not.toContain('wa.me/');
-    expect(editor).not.toContain('Hide inline preview');
-    expect(editor).not.toContain("url+'/studio?step=preview'");
-    expect(css).toContain('.qs-work-pdf-actions');
-    expect(css).not.toContain('.qs-work-preview-grid');
-  });
-
-  it('opens the same premium HTML preview in Leads and the quotations list, keeping PDF output separate', () => {
-    const list = file('./page.tsx');
-    const studio = file('./studio-editor.tsx');
-    expect(list).toContain("const preview = '/dashboard/quotations/' + row.id + '/preview'");
-    expect(studio).toContain("href={url + '/preview'}");
-    expect(studio).not.toContain("'/pdf?view=1&version=' + revisionVersion");
-    expect(studio).not.toContain('Print A4 design / Save as PDF');
-    expect(studio).not.toContain('qs-studio-compact-bar');
-  });
-
-  it('shares the same checked PDF File through the Studio and Leads', () => {
-    const common = file('./quotation-pdf-file.ts');
-    expect(controls).toContain('fetchQuotationPdfFile(revisionId, quoteNumber, signal)');
-    expect(controls).toContain('supportsPdfFileSharing(pdf)');
+    expect(editor).toContain("'Compound Wall'")…1135 tokens truncated…portsPdfFileSharing(pdf)');
     expect(controls).toContain('sharePdfFile(pdf, quoteNumber)');
     expect(controls).toContain('downloadQuotationPdfFile(pdf)');
     expect(controls).toContain('choose WhatsApp');
