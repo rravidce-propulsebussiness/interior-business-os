@@ -203,7 +203,7 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
   ?{title:'Record agreement choice',detail:'Upload the offline signed copy or have the owner record that the final quotation will be used without a separate agreement upload.',
     href:cur(d.project.id,'timeline'),action:'Choose agreement option'}
   :d.agreement.status!=='active'
-  ?{title:'Activate the project contract',detail:signed?'Signed agreement recorded. Activate its existing contract.':'Owner decision recorded. Activate the quote-based project contract.',
+  ?{title:'Activate the project contract',detail:signed?'Signed agreement recorded. Activate its existing contract.':'Owner-recorded offline homeowner approval saved. Activate the quote-based project contract.',
     href:contractHref,action:signed?'Activate signed contract':'Activate quote-based project'}
   :!d.advance?.scheduleActive
   ?d.quotePaymentTriggers.length>0
@@ -229,7 +229,7 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
     {(!quote||quote.status!=='issued')&&<p className="pv2-muted">Issue the final quotation before preparing the agreement.</p>}
    </>:<>
     <div className="pv2-stage-workflow-status"><strong>{d.agreement.contractNumber}</strong>
-     <Status value={signed?'signed':d.agreement.clearanceType==='owner_exception'?'owner chose quote':d.agreement.status||'pending'}/></div>
+     <Status value={signed?'signed':d.agreement.clearanceType==='owner_exception'?'owner-recorded offline approval':d.agreement.status||'pending'}/></div>
     {d.permissions.finance&&<NextLink href={contractHref} label="View agreement record"/>}
     {agreementCleared&&d.agreement.status==='pending'&&d.permissions.contractManage&&typeof d.agreement.version==='number'&&
      <ProjectContractActivation contractId={d.agreement.contractId} version={d.agreement.version} offlineAgreement={!signed}/>}
@@ -244,7 +244,7 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
      <details className="pv2-edit-drawer"><summary>Use Final quotation without agreement upload</summary>
       <SkipAgreementUpload projectId={d.project.id} contractId={d.agreement.contractId}/>
      </details>}
-    {d.agreement.clearanceType==='owner_exception'&&<p className="pv2-hint">Owner decision recorded: the final quotation is being used without a signed agreement upload. This is not recorded as a customer signature.</p>}
+    {d.agreement.clearanceType==='owner_exception'&&<p className="pv2-hint">Owner-recorded offline homeowner approval: the Final quotation is the agreed scope. No separate signed upload or digital signature was used.</p>}
     {signed&&<p className="pv2-form-feedback good">Signed agreement recorded. No repeat approval or upload is required.</p>}
     {agreementCleared&&invoice!==null&&<div className="pv2-stage-workflow-payment">
      {d.quotePaymentTriggers.some(x=>/advance|booking/i.test(x.name))?<>
@@ -282,7 +282,7 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
    <h3>Construction start readiness</h3>
    <div className="pv2-execution-readiness-grid">
     <span>Active contract <strong>{d.agreement?.status==='active'?'Ready':d.agreement?'Pending activation':'Not available'}</strong></span>
-    <span>Agreement choice <strong>{signed?'Signed copy recorded':d.agreement?.clearanceType==='owner_exception'?'Owner uses final quotation':'Not recorded'}</strong></span>
+    <span>Agreement choice <strong>{signed?'Signed copy recorded':d.agreement?.clearanceType==='owner_exception'?'Owner confirmed offline homeowner approval':'Not recorded'}</strong></span>
     <span>Payment schedule <strong>{d.advance===null?'Unavailable':d.advance.scheduleActive?'Active':'Not active'}</strong></span>
     <span>Verified advance <strong>{d.advance===null?'Unavailable':formatMoney(d.advance.received)}</strong></span>
    </div>
@@ -968,7 +968,7 @@ function Milestones({d}:{d:WorkspaceData}){
   {!hasLiveStages&&d.quotePlan&&<div className="pf-flow">
    {!d.agreement&&<section className="pf-section pf-milestone-start" aria-labelledby="pf-milestone-start-title">
     <div><h2 id="pf-milestone-start-title">Make this project plan actionable</h2>
-     <p>The quotation preview becomes progressable after the project contract is prepared. The owner can upload an offline agreement or record the final quotation as the agreed scope—no customer signature is implied.</p>
+     <p>The quotation preview becomes progressable after the project contract is prepared. The owner can upload an offline agreement or record the homeowner's offline approval of the Final quotation; no digital signature is required.</p>
     </div>
     {canPrepare?<PrepareAgreement projectId={d.project.id} revisionId={quote!.revisionId}/>
      :<p className="pv2-hint">Project manager and Finance permissions are required to prepare the project contract.</p>}
@@ -1034,12 +1034,12 @@ function Documents({d}:{d:WorkspaceData}){
      <Title title="Agreement" detail="Recorded contract and signed-document history"/>
      {d.agreement?<div>
       <div className="pv2-between"><strong>{d.agreement.contractNumber}</strong>
-       <Status value={signedRecorded?'signed':ownerQuoteChoice?'owner chose quote':d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
+       <Status value={signedRecorded?'signed':ownerQuoteChoice?'owner-recorded offline approval':d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
       {!signedRecorded&&d.quotations[0]&&d.agreement.revisionId&&d.quotations[0].revisionId!==d.agreement.revisionId?
        <p role="alert" className="pv2-form-feedback bad">The unsigned agreement references a different quotation. Confirm the agreed version before signing.</p>:
        <p className="pv2-muted">The project scope and payment groups come from this saved quotation. The owner can record its offline signed copy or choose to proceed without a separate upload.</p>}
       {signedRecorded&&<p className="pv2-muted">The signed agreement fixes the agreed quotation for this project. New alternatives stay in quotation history; changed signed scope requires a formal change order.</p>}
-      {ownerQuoteChoice&&<p className="pv2-muted">The owner chose the Final quotation as this project’s scope without uploading a separate agreement. This record is not a customer signature.</p>}
+      {ownerQuoteChoice&&<p className="pv2-muted">The owner recorded that the homeowner approved the Final quotation offline. A separate signed agreement upload or digital signature is not required.</p>}
       {signedRecorded&&d.agreement.status==='pending'&&d.permissions.contractManage&&typeof d.agreement.version==='number'&&
        <ProjectContractActivation contractId={d.agreement.contractId} version={d.agreement.version}/>}
 
