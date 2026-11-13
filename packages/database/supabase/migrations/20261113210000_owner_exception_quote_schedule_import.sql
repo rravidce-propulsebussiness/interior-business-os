@@ -20,10 +20,38 @@ begin
   if definition is null then
     raise exception 'Unexpected quotation schedule agreement guard';
   elsif position(old_guard in definition)>0 then
-    execute replace(definition,old_guard,new_guard);
+    definition := replace(definition,old_guard,new_guard);
   elsif position(new_guard in definition)=0 then
     raise exception 'Unexpected quotation schedule agreement guard';
   end if;
+
+  -- The importer is SECURITY DEFINER. Do not call the permission-checked
+  -- customer-facing quotation lookup from a migration/backfill context.
+  -- Read the private selection directly and preserve its newest-quote fallback.
+  old_guard := $before$AND (public.quotation_final_choices(p_org,ARRAY[q.customer_id])->>q.customer_id::text)=q.id::text$before$;
+  new_guard := $after$AND q.id=coalesce(
+          (select pinned.id
+             from private.quotation_final_selections selection
+             join public.quotations pinned
+               on pinned.organization_id=selection.organization_id
+              and pinned.id=selection.quotation_id
+              and pinned.customer_id=selection.customer_id
+              and pinned.status in ('draft','issued')
+            where selection.organization_id=p_org
+              and selection.customer_id=q.customer_id),
+          (select newest.id
+             from public.quotations newest
+            where newest.organization_id=p_org
+              and newest.customer_id=q.customer_id
+              and newest.status in ('draft','issued')
+            order by newest.created_at desc,newest.id desc
+            limit 1))$after$;
+  if position(old_guard in definition)>0 then
+    definition := replace(definition,old_guard,new_guard);
+  elsif position(new_guard in definition)=0 then
+    raise exception 'Unexpected quotation Final selection guard';
+  end if;
+  execute definition;
 end
 $patch$;
 
