@@ -55,6 +55,43 @@ describe('ProPulse premium glass layer', () => {
     }
   });
 
+  it('fixes the phone top bar and lets page content fit the screen', () => {
+    const style = file('./glass-theme.css');
+    const phone = style.slice(style.indexOf('@media (max-width: 740px)'));
+    expect(phone).toMatch(/\.owner-topbar\s+\.owner-search,/);
+    expect(phone).toContain('.owner-menu-button {\n    order: -1;');
+    expect(style).toMatch(
+      /\.owner-theme-glass \.owner-workspace > main \{\s+width: 100%;\s+min-width: 0;/,
+    );
+  });
+
+  it('keeps Leads on the shared shell instead of restyling it', () => {
+    const leads = file('./crm/leads/leads-premium.css');
+    expect(leads).not.toMatch(/:has\(\.crm-leads-root\)\s*\.owner-/);
+    expect(file('./crm/leads/leads.css')).toContain(
+      '.crm-kpi-card:last-child:nth-child(odd)',
+    );
+  });
+
+  it('undoes the global input border inside styled field wrappers', () => {
+    const all = file('../globals.css');
+    const start = all.indexOf('/* Field wrappers');
+    expect(start).toBeGreaterThan(-1);
+    const globals = all.slice(start, all.indexOf('}', start) + 1);
+    for (const wrapper of [
+      '.pp-login-input-wrap',
+      '.crm-search-field',
+      '.pv2-search',
+      '.team-search',
+      '.emp-search',
+      '.ush-search',
+      '.rp-select-wrap',
+    ]) {
+      expect(globals).toContain(wrapper);
+    }
+    expect(globals).toMatch(/:is\(input, select\) \{\s+border: 0 !important;/);
+  });
+
   it('renders a static, accessible loading splash', () => {
     const loading = file('./loading.tsx');
     expect(loading).toContain('role="status"');

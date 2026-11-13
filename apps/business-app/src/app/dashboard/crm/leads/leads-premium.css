@@ -1,49 +1,7 @@
 /* Leads-only orange premium surface; retains the original working CRM forms,
-   dialogs and controls without rendering a second workspace. */
-.owner-layout:has(.crm-leads-root) {
-  --owner-blue: #ff590a;
-  --owner-text: #162039;
-  background: #fff9f5;
-}
-.owner-layout:has(.crm-leads-root) .owner-workspace {
-  background: radial-gradient(ellipse at 70% 0%, #fff0e7, transparent 560px), #fffaf7;
-}
-.owner-layout:has(.crm-leads-root) .owner-sidebar {
-  background: #fff;
-  color: #14203c;
-  border-right: 1px solid #f3e5df;
-}
-.owner-layout:has(.crm-leads-root) .owner-brand { color: #15203a !important; }
-.owner-layout:has(.crm-leads-root) .owner-brand-icon,
-.owner-layout:has(.crm-leads-root) .owner-command-mobile-mark {
-  color: #fff; background: linear-gradient(135deg,#ff831c,#ff4900);
-}
-.owner-layout:has(.crm-leads-root) .owner-brand small,
-.owner-layout:has(.crm-leads-root) .owner-sidebar-company { color: #7b8493; }
-.owner-layout:has(.crm-leads-root) .owner-nav-item { color: #34425b !important; font-weight: 650; }
-.owner-layout:has(.crm-leads-root) .owner-nav-item:hover {
-  color: #f65a11 !important; background: #fff1e9;
-}
-.owner-layout:has(.crm-leads-root) .owner-nav-item.owner-nav-active {
-  color: #fff !important;
-  background: linear-gradient(120deg,#ff7518,#ff4700);
-  box-shadow: 0 7px 19px #ff590d20;
-}
-.owner-layout:has(.crm-leads-root) .owner-subnav { border-left-color: #ffdcca; }
-.owner-layout:has(.crm-leads-root) .owner-subnav-link { color: #65718a !important; }
-.owner-layout:has(.crm-leads-root) .owner-subnav-active { color: #f45c11 !important; background: #fff2ea; }
-.owner-layout:has(.crm-leads-root) .owner-sidebar-bottom { display: none; }
-.owner-layout:has(.crm-leads-root) .owner-topbar {
-  border-color: #f2e9e4;
-  background: #fff;
-}
-.owner-layout:has(.crm-leads-root) .owner-search {
-  background: #fcf9f7;
-  border: 1px solid #f4eae5;
-}
-.owner-layout:has(.crm-leads-root) .owner-mobile-heading,
-.owner-layout:has(.crm-leads-root) .owner-mobile-heading button { color: #18263d; }
-.owner-layout:has(.crm-leads-root) .owner-command-mobile-brand { display: none; }
+   dialogs and controls without rendering a second workspace. The shared
+   OwnerShell (top bar, sidebar, brand, search) is styled globally and is
+   intentionally not overridden here, so Leads matches every other page. */
 
 .crm-leads-root {
   --crm-blue: #ff590a;
@@ -371,20 +329,6 @@
   .crm-kpi-card:last-child { grid-column:auto; }
 }
 @media(max-width:720px){
-  .owner-layout:has(.crm-leads-root) .owner-topbar { padding:8px 11px; min-height:62px; }
-  .owner-layout:has(.crm-leads-root) .owner-command-mobile-brand {
-    display:flex; align-items:center; gap:9px; flex:1; min-width:0;
-    color:#14243c; font-size:13px;
-  }
-  .owner-layout:has(.crm-leads-root) .owner-command-mobile-brand strong {
-    overflow:hidden; white-space:nowrap; text-overflow:ellipsis;
-  }
-  .owner-layout:has(.crm-leads-root) .owner-search { display:none; }
-  .owner-layout:has(.crm-leads-root) .owner-command-mobile-mark {
-    width:34px; height:34px; border-radius:9px;
-    display:grid; place-items:center; flex:0 0 34px;
-    font-size:16px; font-weight:800;
-  }
   .crm-leads-root { padding:16px 11px 36px; }
   .crm-leads-heading { align-items:center; flex-wrap:wrap; }
   .crm-premium-heading-icon { width:42px; height:42px; flex-basis:42px; border-radius:11px; }
