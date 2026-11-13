@@ -6,6 +6,9 @@ export type QuotationTermsSections = {
   exclusions: string;
   warranty: string;
   additional: string;
+  workProgramme: string;
+  termination: string;
+  disputeResolution: string;
   paymentPlan: string;
 };
 const HEADINGS = [
@@ -13,16 +16,20 @@ const HEADINGS = [
   ['Exclusions', 'exclusions'],
   ['Warranty', 'warranty'],
   ['Additional terms', 'additional'],
+  ['Work programme & completion', 'workProgramme'],
+  ['Termination & indemnification', 'termination'],
+  ['Dispute resolution', 'disputeResolution'],
 ] as const;
 const STAGE = /\[(STAGE_PAYMENT_PLAN|STAGE_PAYMENT_LINKS|STAGE_CUSTOM_REQUIREMENTS|QUOTATION_MILESTONE_FLOW)\][\s\S]*?\[\/\1\]/g;
-const HEADER = /^(Inclusions|Exclusions|Warranty|Additional terms):[ \t]*$/gim;
+const HEADER = /^(Inclusions|Exclusions|Warranty|Additional terms|Work programme & completion|Termination & indemnification|Dispute resolution):[ \t]*$/gim;
 
 export function splitQuotationTerms(terms: string): QuotationTermsSections {
   const savedPlans = terms.match(STAGE) ?? [];
   const paymentPlan = savedPlans.join('\n\n');
   const plain = terms.replace(STAGE, '').trim();
   const sections: QuotationTermsSections = {
-    inclusions: '', exclusions: '', warranty: '', additional: '', paymentPlan,
+    inclusions: '', exclusions: '', warranty: '', additional: '',
+    workProgramme: '', termination: '', disputeResolution: '', paymentPlan,
   };
   const headings = [...plain.matchAll(HEADER)];
   if (!headings.length) {
@@ -49,10 +56,11 @@ export function splitQuotationTerms(terms: string): QuotationTermsSections {
 }
 
 export function joinQuotationTerms(
-  parts: Pick<QuotationTermsSections, 'inclusions'|'exclusions'|'warranty'|'additional'|'paymentPlan'>,
+  parts: Pick<QuotationTermsSections, 'inclusions'|'exclusions'|'warranty'|'additional'|'paymentPlan'> &
+    Partial<Pick<QuotationTermsSections, 'workProgramme'|'termination'|'disputeResolution'>>,
 ): string {
   const result = HEADINGS.flatMap(([title, key]) =>
-    parts[key].trim() ? [title + ':\n' + parts[key].trim()] : []);
+    (parts[key] ?? '').trim() ? [title + ':\n' + (parts[key] ?? '').trim()] : []);
   if (parts.paymentPlan.trim()) result.push(parts.paymentPlan.trim());
   const text = result.join('\n\n');
   if (text.length > 10000) throw new Error('Terms exceed the 10,000-character limit.');

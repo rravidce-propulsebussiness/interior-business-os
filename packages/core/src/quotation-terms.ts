@@ -3,9 +3,13 @@
  * by savedStagePaymentPlan; no mutable package/settings lookup is required.
  */
 export type CustomerTermSection = { title: string; text: string };
-const sections = ['Inclusions', 'Exclusions', 'Warranty', 'Additional terms'] as const;
+const sections = [
+  'Inclusions', 'Exclusions', 'Warranty', 'Additional terms',
+  'Work programme & completion', 'Termination & indemnification',
+  'Dispute resolution',
+] as const;
 const stageBlock = /\[(STAGE_PAYMENT_PLAN|STAGE_PAYMENT_LINKS|STAGE_CUSTOM_REQUIREMENTS|QUOTATION_MILESTONE_FLOW)\][\s\S]*?\[\/\1\]/g;
-const headings = /^(Inclusions|Exclusions|Warranty|Additional terms):[ \t]*$/gim;
+const headings = /^(Inclusions|Exclusions|Warranty|Additional terms|Work programme & completion|Termination & indemnification|Dispute resolution):[ \t]*$/gim;
 
 export function customerTermSections(source: string): CustomerTermSection[] {
   const plain = source.replace(stageBlock, '').trim();

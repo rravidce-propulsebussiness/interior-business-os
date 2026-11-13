@@ -22,7 +22,8 @@ const payload = z.discriminatedUnion('kind',[
     kind: z.literal('terms'),
     validUntil: z.iso.date(),
     inclusions: text, exclusions: text, warranty: text,
-    additional: text, customerNotes: z.string().max(10000),
+    additional: text, workProgramme: text, termination: text,
+    disputeResolution: text, customerNotes: z.string().max(10000),
     internalNotes: z.string().max(10000),
     discount,
   }).strict(),
@@ -162,6 +163,9 @@ export async function POST(request:Request, {params}:{
         exclusions:incoming.exclusions,
         warranty:incoming.warranty,
         additional:incoming.additional,
+        workProgramme:incoming.workProgramme,
+        termination:incoming.termination,
+        disputeResolution:incoming.disputeResolution,
         paymentPlan:saved.paymentPlan,
       });
     }
@@ -181,7 +185,7 @@ export async function POST(request:Request, {params}:{
       version:current.version+1,
       message:incoming.kind==='payments'
         ?'Payment schedule saved. The customer PDF uses these stages.'
-        :'Terms & Inclusions saved. The customer PDF uses these conditions.',
+        :'Terms & Inclusions saved. Agreement clauses appear in the linked Agreement PDF.',
     },200);
   } catch(error){
     const failure=safeFailure(error);

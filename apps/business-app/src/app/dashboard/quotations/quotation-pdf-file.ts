@@ -4,17 +4,19 @@
  * attach a PDF. Only Web Share Level 2 with a File shares the actual bytes. */
 const MAX_PDF_BYTES = 60 * 1024 * 1024;
 
-export function quotationPdfFilename(quoteNumber: string): string {
-  return (quoteNumber.replace(/[^a-z0-9_-]/gi, '_').slice(0, 80) || 'Quotation') + '.pdf';
+export function quotationPdfFilename(quoteNumber: string, kind: 'quotation'|'agreement' = 'quotation'): string {
+  const base=quoteNumber.replace(/[^a-z0-9_-]/gi, '_').slice(0, 80) || 'Quotation';
+  return base + (kind==='agreement' ? '-Agreement-Draft' : '') + '.pdf';
 }
 
 export async function fetchQuotationPdfFile(
   revisionId: string,
   quoteNumber: string,
   signal?: AbortSignal,
+  kind: 'quotation'|'agreement' = 'quotation',
 ): Promise<File> {
   const path = '/dashboard/quotations/' + encodeURIComponent(revisionId) +
-    '/pdf?view=1&_pdf=' + Date.now();
+    '/pdf?view=1' + (kind==='agreement' ? '&document=agreement' : '') + '&_pdf=' + Date.now();
   const response = await fetch(path, {
     credentials: 'same-origin',
     cache: 'no-store',
@@ -40,7 +42,7 @@ export async function fetchQuotationPdfFile(
     await blob.slice(0, 5).text() !== '%PDF-') {
     throw new Error('The PDF service did not return a valid quotation PDF.');
   }
-  return new File([blob], quotationPdfFilename(quoteNumber), {
+  return new File([blob], quotationPdfFilename(quoteNumber,kind), {
     type: 'application/pdf',
   });
 }
@@ -52,12 +54,12 @@ export function supportsPdfFileSharing(file: File): boolean {
     navigator.canShare({ files: [file] });
 }
 
-export function sharePdfFile(file: File, number: string): Promise<void> {
+export function sharePdfFile(file: File, number: string, kind: 'quotation'|'agreement' = 'quotation'): Promise<void> {
   // Invoke synchronously inside a real click handler. If fetch or a server
   // action is awaited first, Android may reject it (lost user activation).
   return navigator.share({
     files: [file],
-    title: 'Quotation ' + number,
+    title: (kind==='agreement' ? 'Agreement draft ' : 'Quotation ') + number,
   });
 }
 

@@ -16,9 +16,13 @@ export async function GET(
   let stage = 'document';
   try {
     const { id } = await params;
-    const { html, document } = await quotationDocument(id);
+    const query = new URL(request.url).searchParams;
+    const agreement = query.get('document') === 'agreement';
+    const { html, document } = await quotationDocument(
+      id, agreement ? 'agreement' : 'quotation',
+    );
     stage = 'render';
-    const base = await renderQuotationPdf(html, document);
+    const base = await renderQuotationPdf(html, document, agreement ? 'agreement' : 'quotation');
     stage = 'annexures';
 
     // Basic PDF generation must not depend on optional privileged storage
@@ -55,7 +59,7 @@ export async function GET(
       headers: {
         'Content-Type': 'application/pdf',
         'X-Quotation-PDF-Template': 'premium-html-v1',
-        'Content-Disposition': `${new URL(request.url).searchParams.get('view') === '1' ? 'inline' : 'attachment'}; filename="${document.number.replaceAll(/[^A-Za-z0-9-]/g, '_')}-R${document.revision}.pdf"`,
+        'Content-Disposition': `${query.get('view') === '1' ? 'inline' : 'attachment'}; filename="${document.number.replaceAll(/[^A-Za-z0-9-]/g, '_')}-R${document.revision}${agreement ? '-Agreement-Draft' : ''}.pdf"`,
         'Cache-Control': 'private, no-store',
         'X-Content-Type-Options': 'nosniff',
       },

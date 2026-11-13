@@ -27,11 +27,17 @@ describe('premium quotation terms sections', () => {
     const saved = joinQuotationTerms({
       inclusions:'Tiles and fittings',exclusions:'Borewell',
       warranty:'Structural only',additional:'Client to provide access',paymentPlan:'',
+      workProgramme:'Start after site handover; complete in 12 months',
+      termination:'30 days written notice; settle completed work',
+      disputeResolution:'Mediation in Hyderabad before jurisdiction',
     });
     const parsed = splitQuotationTerms(saved);
     expect(parsed).toEqual({
       inclusions:'Tiles and fittings',exclusions:'Borewell',
-      warranty:'Structural only',additional:'Client to provide access',paymentPlan:'',
+      warranty:'Structural only',additional:'Client to provide access',
+      workProgramme:'Start after site handover; complete in 12 months',
+      termination:'30 days written notice; settle completed work',
+      disputeResolution:'Mediation in Hyderabad before jurisdiction',paymentPlan:'',
     });
     expect(joinQuotationTerms(parsed)).toBe(saved);
   });

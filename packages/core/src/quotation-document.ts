@@ -65,6 +65,7 @@ export const customerDocumentSchema = z.object({
   }),
 });
 export type CustomerDocument = z.infer<typeof customerDocumentSchema>;
+export type QuotationDocumentKind = 'quotation' | 'agreement';
 const escape = (s: string) =>
   s
     .replaceAll('&', '&amp;')
@@ -75,9 +76,14 @@ const escape = (s: string) =>
 const address = (a: z.infer<typeof addressSchema>) =>
   Object.values(a).filter(Boolean).map(escape).join(', ');
 /** Parses to an allowlist before rendering. No generic row/object serialization. */
-export function renderQuotationDocument(input: unknown): string {
+export function renderQuotationDocument(
+  input: unknown,
+  options: { kind?: QuotationDocumentKind } = {},
+): string {
   const d = customerDocumentSchema.parse(input),
     h = d.header,
+    documentKind = options.kind ?? 'quotation',
+    agreementMode = documentKind === 'agreement',
     money = (value: string) => {
       const parsed = Number(value);
       return Number.isFinite(parsed) && Number.isSafeInteger(Math.round(parsed * 100))
@@ -116,8 +122,8 @@ export function renderQuotationDocument(input: unknown): string {
   const fullCents = Math.round(Number(d.totals.final_amount) * 100);
   let paidCents = 0;
   const paymentSection = paymentValid && Number.isSafeInteger(fullCents)
-    ? '<section class="terms payment-plan"><h2>Proposed stage-wise payment schedule</h2>' +
-      '<p class="muted">To be agreed in the contract. No invoice or payment has been raised.</p>' +
+    ? '<section class="terms payment-plan"><h2>Stage-wise payment schedule</h2>' +
+      '<p class="muted">Payment groups are copied from the linked quotation without changes. No invoice, payment request or receipt is created by this document.</p>' +
       '<table><thead><tr><th>Milestone</th><th>Share</th><th class="amount">Payment amount</th></tr></thead><tbody>' +
       paymentRows.map((row, index) => {
         const cents = index === paymentRows.length - 1
@@ -363,24 +369,23 @@ export function renderQuotationDocument(input: unknown): string {
     additionalSpecs + sftSpecifications + customBrandSpecifications + '</div>' +
     brochure.pageFooter('Material specifications') + '</section>'
     : '';
-  const schedulePage =
+  const schedulePage = agreementMode ?
     '<section class="pb-page pb-payment-page">' +
-    brochure.pageHeader('Payments / terms') +
-    '<div class="pb-section-title"><h2>Payment schedule &amp; conditions</h2></div>' +
+    brochure.pageHeader('Agreement terms') +
+    '<div class="pb-section-title"><h2>Agreement terms &amp; payment schedule</h2></div>' +
     (paymentSection ||
-      '<div class="pb-terms-panel"><h2>Stage-wise payments not specified</h2>' +
-      '<p class="text">No confirmed payment milestones are included in this quotation revision. ' +
-      'Payment terms must be agreed and documented before they are treated as part of the contract.</p></div>') +
+      '<div class="pb-terms-panel"><h2>No payment milestones saved</h2>' +
+      '<p class="text">Add the agreed grouped payment schedule in this quotation before preparing a final agreement. This draft does not invent payment terms.</p></div>') +
     (d.notes ? '<section class="pb-terms-panel"><h2>Project notes</h2>' +
       '<p class="text">' + escape(d.notes) + '</p></section>' : '') +
     '<section class="pb-terms-panel pb-quote-conditions">' +
-      '<h2>Terms &amp; Inclusions</h2>' +
+      '<h2>Agreement conditions</h2>' +
       (savedTerms.length ? savedTerms.map(section => '<div class="pb-term-section"><h3>' +
         escape(section.title) + '</h3><p class="text">' +
         escape(section.text) + '</p></div>').join('') :
         '<p class="text muted">No additional quotation-specific conditions have been saved.</p>') +
       '</section>' +
-    brochure.pageFooter('Payments / terms') + '</section>';
+    brochure.pageFooter('Agreement terms') + '</section>' : '';
   // Only saved quote-stage associations produce this proposed QA annexure.
   // Never infer test completion, certification or material quantities.
   const qualityCodes=[...new Set((paymentStageLinks??[]).flat())].filter(stageCode=>{
@@ -422,13 +427,24 @@ export function renderQuotationDocument(input: unknown): string {
     (isFloorQuote ? renderSftSchedule + itemTable : itemTable) + customPricingTables +
     adjustmentMarkup + total +
     '<p class="pb-pricing-caption">Only the included quoted amounts are part of the total. ' +
-    'Payment terms, detailed specifications and any exclusions are shown in the following sections.</p>' +
+    (agreementMode ? 'This agreement draft is based on the linked quotation; signing and contract activation are recorded separately.' :
+      'This quotation contains pricing and scope details only. Agreement terms and payment milestones are available in the linked Agreement document when needed.') + '</p>' +
     brochure.pageFooter('Work-wise estimate') + '</section>';
+  const cover = agreementMode
+    ? brochure.cover
+      .replace('Quotation proposal', 'Agreement draft')
+      .replace('Project proposal', 'Draft agreement')
+    : brochure.cover;
+  const agreementNotice = agreementMode
+    ? '<section class="pb-terms-panel pb-agreement-draft-notice"><h1>DRAFT AGREEMENT</h1>' +
+      '<p class="text">Linked quotation ' + escape(d.number) + ' · Revision ' + d.revision +
+      '. This is an unsigned draft. It does not record customer acceptance, a signed agreement, an invoice or a payment receipt.</p></section>'
+    : '';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>${escape(d.number)} R${d.revision}</title>
+    <title>${agreementMode ? 'Agreement draft ' : 'Quotation '}${escape(d.number)} R${d.revision}</title>
     ${premiumCss.replaceAll('__ACCENT__', packageAccent)}</head><body><main>
-    ${brochure.cover}${pricingPage}${specificationPage}${schedulePage}${qualityPage}${brochure.close}
+    ${cover}${agreementNotice}${pricingPage}${specificationPage}${schedulePage}${qualityPage}${brochure.close}
     </main></body></html>`;
 
 }

@@ -40,7 +40,7 @@ describe('lead quotation preview and secure WhatsApp PDF sharing', () => {
     expect(share).toContain('hasSavedStagePaymentPlan(revision.terms)');
     expect(share).toContain("s.allowed('quotation.issue', 'quotation')");
     expect(share).not.toContain("p_action: 'create'");
-    expect(file).toContain("new File([blob], quotationPdfFilename(quoteNumber)");
+    expect(file).toContain('new File([blob], quotationPdfFilename(quoteNumber,kind)');
     expect(file).toContain("await blob.slice(0, 5).text() !== '%PDF-'");
     expect(file).toContain('navigator.share({');
     expect(file).toContain('files: [file]');
@@ -73,8 +73,8 @@ describe('consistent premium quotation document across previews and PDF routes',
     expect(quoteList).toContain("const preview = '/dashboard/quotations/' + row.id + '/preview'");
     expect(quoteStudio).toContain('srcDoc={previewHtml}');
     expect(privatePreview).toContain('quotationDocument(id)');
-    expect(privatePdf).toContain('quotationDocument(id)');
-    expect(privatePdf).toContain('renderQuotationPdf(html, document)');
+    expect(privatePdf).toContain('quotationDocument(');
+    expect(privatePdf).toContain('renderQuotationPdf(html, document,');
     expect(publicPdf).toContain('renderQuotationDocument(q.document)');
     expect(publicPdf).toContain('renderQuotationPdf(');
   });
@@ -540,7 +540,7 @@ describe('PDF attachment sharing and reliable file operations', () => {
     const page = file('./[id]/studio/page.tsx');
     expect(page).toContain("canSharePdf={revision.status !== 'draft' && s.allowed('quotation.share', 'quotation')}");
     expect(controls).toContain('{canShare && <button');
-    expect(controls).toContain('{canShare && <p className="qs-work-preview-note">');
+    expect(controls).toContain('<p className="qs-work-preview-note">');
   });
 
   it('opens the same premium HTML preview in Leads and the quotations list, keeping PDF output separate', () => {
@@ -555,13 +555,13 @@ describe('PDF attachment sharing and reliable file operations', () => {
 
   it('shares the same checked PDF File through the Studio and Leads', () => {
     const common = file('./quotation-pdf-file.ts');
-    expect(controls).toContain('fetchQuotationPdfFile(revisionId, quoteNumber, signal)');
+    expect(controls).toContain('fetchQuotationPdfFile(revisionId, quoteNumber, signal, kind)');
     expect(controls).toContain('supportsPdfFileSharing(pdf)');
-    expect(controls).toContain('sharePdfFile(pdf, quoteNumber)');
+    expect(controls).toContain('sharePdfFile(pdf, quoteNumber, kind)');
     expect(controls).toContain('downloadQuotationPdfFile(pdf)');
     expect(controls).toContain('choose WhatsApp');
     expect(controls).toContain('if (dirty)');
-    expect(common).toContain("new File([blob], quotationPdfFilename(quoteNumber)");
+    expect(common).toContain('new File([blob], quotationPdfFilename(quoteNumber,kind)');
     expect(common).toContain("await blob.slice(0, 5).text() !== '%PDF-'");
     expect(common).toContain('navigator.share({');
     expect(common).toContain('files: [file]');
@@ -570,13 +570,13 @@ describe('PDF attachment sharing and reliable file operations', () => {
 
   it('uses one premium HTML PDF printer without switching to a second template', () => {
     const common = file('./quotation-pdf-file.ts');
-    expect(common).toContain('/pdf?view=1&_pdf=');
+    expect(common).toContain("'/pdf?view=1' + (kind==='agreement' ? '&document=agreement' : '')");
     expect(controls).toContain("'?view=1&version=' + version");
     expect(controls).toContain('downloadRoute');
     expect(renderer).not.toContain('renderQuotationFallbackPdf');
     expect(renderer).toContain('return renderPdf(safeQuotationPrintHtml(html)');
     expect(renderer).toContain('customerDocumentSchema.parse(document)');
-    expect(secureRoute).toContain('renderQuotationPdf(html, document)');
+    expect(secureRoute).toContain('renderQuotationPdf(html, document, agreement ?');
   });
 });
 
@@ -608,7 +608,7 @@ describe('split-floor construction area editing and resilient PDF routes', () =>
 
   it('serves base PDF when optional annexure credentials are not set', () => {
     expect(pdf).toContain('privilegedStorageConfigured');
-    expect(pdf).toContain('const base = await renderQuotationPdf(html, document)');
+    expect(pdf).toContain('const base = await renderQuotationPdf(html, document, agreement ?');
     expect(pdf).toContain('const bytes = await appendQuotationAnnexures(base, additional)');
   });
 });
