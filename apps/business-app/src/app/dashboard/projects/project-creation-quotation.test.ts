@@ -2,7 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const file = (path: string) => readFileSync(fileURLToPath(new URL(path, import.meta.url)), 'utf8');
+const file = (path: string) =>
+  readFileSync(fileURLToPath(new URL(path, import.meta.url)), 'utf8');
 
 describe('delivery project creation starts from a customer quotation', () => {
   const projectStart = file('./new-project-for-customer.tsx');
@@ -10,7 +11,9 @@ describe('delivery project creation starts from a customer quotation', () => {
   const quoteStart = file('../quotations/studio-start.tsx');
   const quotePage = file('../quotations/new/page.tsx');
   const quoteAction = file('../quotations/studio-actions.ts');
-  const migration = file('../../../../../../packages/database/supabase/migrations/20261112190531_projects_require_quotation_20261112.sql');
+  const migration = file(
+    '../../../../../../packages/database/supabase/migrations/20261112190531_projects_require_quotation_20261112.sql',
+  );
   const projectView = file('./project-v2-view.tsx');
   const linkAction = file('./project-quotation-link-action.ts');
   const linker = file('./project-quotation-linker.tsx');
@@ -31,7 +34,7 @@ describe('delivery project creation starts from a customer quotation', () => {
     expect(quoteAction).toContain(".eq('id', values.customerId)");
     expect(quoteAction).toContain('let customerId = existingCustomer?.id ||');
     expect(quoteAction).toContain('p_customer_id: customerId');
-    expect(quoteAction).toContain("p_new_customer: createdCustomer");
+    expect(quoteAction).toContain('p_new_customer: createdCustomer');
   });
 
   it('closes the legacy blank project RPC and directs stale callers to quotation flow', () => {
@@ -39,8 +42,10 @@ describe('delivery project creation starts from a customer quotation', () => {
     expect(migration).toContain("using errcode='23514'");
     expect(migration).toContain('from public,anon,authenticated');
     expect(migration).toContain('accepted quotation and agreement');
-    expect(migration).toContain("public.crm_convert(uuid,jsonb)");
-    expect(migration).toContain('A quotation is required before creating a project');
+    expect(migration).toContain('public.crm_convert(uuid,jsonb)');
+    expect(migration).toContain(
+      'A quotation is required before creating a project',
+    );
   });
 
   it('lets an owner attach an existing quote to its converted lead without cloning it', () => {
