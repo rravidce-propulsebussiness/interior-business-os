@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 20972)
-Total output lines: 1190
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName, OwnerShell } from '../owner-shell';
@@ -586,7 +583,60 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         {startingPayments.length>0&&<div className="pv2-stage-payment-start">
           <strong>Payment milestone at stage start</strong>
           {startingPayments.map((p,i)=><p key={i}>{p.name} · {p.percent}% of accepted quotation</p>)}
-          <p className="pv2-hint">Rev…972 tokens truncated…tivities.length&&passed===checks.length&&
+          <p className="pv2-hint">Review this agreed payment before starting work. Invoices,
+           payment requests and verified receipts stay in Finance. An invoice alone is not proof of payment.</p>
+          {d.permissions.finance&&<Link href={cur(d.project.id,'payments')}>
+           Check invoice and verified payment status
+          </Link>}
+         </div>}
+         {physicalStage&&site?.stage==='execution'&&<StageActivationControl
+         projectId={d.project.id} stageId={stage.id} state={stageExecution}
+         canManage={allowWork} workCompleted={finishedActivities} workTotal={stage.activities.length}
+         checksPassed={passed} checksTotal={checks.length}/>}
+        {orderedFlow.length===0&&plannedMaterials.length>0&&
+         <details className="pv2-stage-secondary pv2-legacy-material-planning">
+          <summary>Plan material delivery dates ({plannedMaterials.length})</summary>
+          <p className="pv2-hint">Plan when each material is needed. Procurement, delivery updates
+           and marketplace/outside supplier orders remain attached to the work items below.</p>
+          <div className="pv2-stage-task-entries">
+           {plannedMaterials.map((material,i)=><div key={stage.id+'-material-'+i}
+             className="pv2-flow-step">
+             <strong>{material}</strong>
+             <ProjectItemSchedule projectId={d.project.id} stageId={stage.id}
+              kind="material" index={i} title={material}
+              item={planFor(stage.id,'material',i)} canPlan={canPlan&&!complete}
+              planningMode={planningMode} today={todayInIndia}/>
+            </div>)}
+          </div>
+         </details>}
+        {orderedFlow.length===0&&remainingQc.length>0&&<details className="pv2-stage-secondary">
+         <summary>Plan company QC visits ({remainingQc.length})</summary>
+         {remainingQc.map(item=><ProjectItemSchedule key={item.i} projectId={d.project.id}
+          stageId={stage.id} kind="qc" index={item.i} title={item.name}
+          item={planFor(stage.id,'qc',item.i)} canPlan={canPlan&&!complete} planningMode={planningMode} today={todayInIndia}/>)}
+        </details>}
+        {!!checks.length&&(orderedFlow.length===0||stageExecution?.status==='ready_for_qc'||formalReviews.length>0)&&<details className="pv2-stage-quality-hub" id={'pv2-stage-checks-'+stage.id}>
+         <summary><span>{orderedFlow.length?'Final stage quality approval & history':'Site checks & company QC'}</span><strong>{passed}/{checks.length} checks passed</strong></summary>
+         <div className="pv2-stage-quality-inner">
+        {!!checks.length&&orderedFlow.length===0&&<div className="pv2-stage-task-group">
+         {orderedFlow.length===0&&<BulkStageChecks projectId={d.project.id} stageId={stage.id} photos={photos}
+          canEdit={checksAllowed&&!complete} workCompleted={finishedActivities}
+          workTotal={stage.activities.length} stageStatus={stageExecution?.status??'not_started'}
+          checks={checks.map((title,index)=>{
+           const record=stageChecks.find(x=>stringValue(x.title).toLowerCase()===title.toLowerCase())??
+            (site?.checks??[]).find(x=>stringValue(x.title).toLowerCase()===title.toLowerCase());
+           return {index,title,status:stringValue(record?.status)||'pending',
+            photoId:stringValue(record?.photo_id),notes:stringValue(record?.notes)};
+          })}/>}
+         <h4>Site checks & tests <small>{passed}/{checks.length} passed</small></h4>
+         {stageExecution?.status==='ready_for_qc'&&
+          <p className="pv2-stage-ready-note">
+           All required site checks are passed and field work has been submitted.
+           On-site company QC review and final stage certification remain pending; the checks do not need
+           to be repeated unless corrections are requested.
+          </p>}
+         {stageExecution?.status==='in_progress'&&
+          finishedActivities===stage.activities.length&&passed===checks.length&&
           <p className="pv2-stage-ready-note">
            Work and checks are complete. Use “Finish field work · Request QC”
            above to unlock the next eligible stage.
