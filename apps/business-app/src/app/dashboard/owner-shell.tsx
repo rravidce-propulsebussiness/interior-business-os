@@ -1,7 +1,14 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Intentional full-document navigation avoids incomplete RSC Flight streams on Hostinger. */
 'use client';
 
-import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
 import { signOut } from '@business-os/auth/actions';
 import { useCompanyNavigation } from './company-navigation-provider';
 import './owner-dashboard.css';
@@ -43,6 +50,8 @@ const iconPaths = {
   message:
     'M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5Z',
 } as const;
+
+const noopSubscribe = () => () => {};
 
 export type OwnerIconName = keyof typeof iconPaths;
 
@@ -145,6 +154,15 @@ export function OwnerShell({
   const displayedNavigation = sharedNavigation ?? navigation;
   const sectionLabels = navSectionLabels(displayedNavigation);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Cloudflare Email Obfuscation rewrites email addresses in server HTML,
+  // which breaks hydration (React #418). Render the email only after mount
+  // so it never appears in the server-rendered markup.
+  const hydrated = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+  const visibleEmail = hydrated ? accountEmail : '';
   const toggleRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
@@ -287,7 +305,7 @@ export function OwnerShell({
             </summary>
             <div className="owner-profile-menu">
               <strong>{companyName}</strong>
-              <small>{accountEmail}</small>
+              <small>{visibleEmail}</small>
               <form action={signOut}>
                 <button type="submit">
                   <OwnerIcon name="logout" size={17} /> Sign out
