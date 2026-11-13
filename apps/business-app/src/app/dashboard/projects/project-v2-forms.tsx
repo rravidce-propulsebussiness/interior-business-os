@@ -72,8 +72,8 @@ export function ProjectContractActivation({contractId,version,offlineAgreement=f
  </div>;
 }
 
-/** Owner-only audited choice for businesses whose agreement is offline or
- * intentionally omitted. This records an exception, never a fake signature. */
+/** Owner-only record that the homeowner approved the final quote/agreement offline.
+ * This records the owner's confirmation without claiming a digital signature. */
 export function SkipAgreementUpload({projectId,contractId}:{projectId:string;contractId:string}){
  const router=useRouter();
  const [pending,start]=useTransition();
@@ -81,22 +81,22 @@ export function SkipAgreementUpload({projectId,contractId}:{projectId:string;con
  const [saved,setSaved]=useState(false);
  const [confirmed,setConfirmed]=useState(false);
  return <div className="pv2-offline-agreement">
-  <p className="pv2-hint">If the agreement is handled offline or you are proceeding from the final quotation alone, the owner can record that choice. This does not mark a customer signature or approval.</p>
+  <p className="pv2-hint">If the homeowner approved the final quotation or agreement offline, the company owner can record that approval here. No separate signed upload or digital signature is required.</p>
   <label className="pv2-offline-agreement-ack">
    <input type="checkbox" checked={confirmed} onChange={event=>setConfirmed(event.currentTarget.checked)} disabled={pending||saved}/>
-   I am the company owner and authorize this project to proceed using its final quotation without a signed agreement upload.
+   I am the company owner and confirm the homeowner approved this final quotation or agreement offline.
   </label>
   <button type="button" className="pv2-button" disabled={pending||saved||!confirmed}
    onClick={()=>{
     start(async()=>{
      const form=new FormData();
-     form.set('reason','Owner confirms the final quotation is the agreed project scope. The separate agreement was handled offline or is intentionally skipped; this does not represent a customer signature.');
-     form.set('reference','Owner authorized offline agreement option');
+     form.set('reason','Company owner confirms the homeowner approved the final quotation offline; no separate signed agreement upload or digital signature was used.');
+     form.set('reference','Owner-recorded offline homeowner approval');
      const result=await createAgreementException(projectId,contractId,form);
      setMessage(result.message);
      if(result.saved){setSaved(true);router.refresh();}
     });
-   }}>{pending?'Recording owner decision…':saved?'Owner decision recorded':'Use final quotation without upload'}</button>
+   }}>{pending?'Recording owner decision…':saved?'Offline approval recorded':'Record offline homeowner approval'}</button>
   {message&&<p role="status" className={'pv2-form-feedback '+(saved?'good':'bad')}>{message}</p>}
  </div>;
 }

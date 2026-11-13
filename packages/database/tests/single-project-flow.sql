@@ -526,7 +526,7 @@ begin
  perform set_config('test.curing_plan',(public.project_curing_command(pg_temp.org(),pg_temp.project(),'plan_create',jsonb_build_object(
    'stage_id',pg_temp.stage('FOUNDATION'),'activity_index',3,'title','Footing curing',
    'spec_reference','Structural drawing ST-01 note 7: keep footings wet',
-   'starts_on',today-1,'ends_on',today+6,'grace_minutes',90,
+   'starts_on',today-2,'ends_on',today+6,'grace_minutes',90,
    'round_times',jsonb_build_array(
      to_char((now_m-interval '1 hour') at time zone zone,'HH24:MI'),
      to_char((now_m-interval '3 hours') at time zone zone,'HH24:MI'),

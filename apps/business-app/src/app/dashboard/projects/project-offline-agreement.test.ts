@@ -32,12 +32,15 @@ describe('optional offline agreement with final quotation', () => {
     );
   });
 
-  it('records an owner exception instead of claiming a customer signature', () => {
+  it('records the owner-confirmed offline homeowner approval without claiming a digital signature', () => {
     expect(action).toContain("call(projectId, contractId, 'owner_exception'");
     expect(forms).toContain(
-      'This does not mark a customer signature or approval.',
+      'confirm the homeowner approved this final quotation or agreement offline.',
     );
-    expect(ui).toContain('This is not recorded as a customer signature.');
+    expect(forms).toContain('Record offline homeowner approval');
+    expect(ui).toContain(
+      'Owner-recorded offline homeowner approval: the Final quotation is the agreed scope.',
+    );
     expect(data).toContain(
       "['signed_copy_recorded','owner_exception'].includes(stringValue(agreement.clearance_type))",
     );
