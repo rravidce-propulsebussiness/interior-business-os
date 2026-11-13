@@ -1,12 +1,20 @@
 /* eslint-disable @next/next/no-html-link-for-pages -- Intentional full-document navigation avoids incomplete RSC Flight streams on Hostinger. */
 'use client';
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react';
 import { signOut } from '@business-os/auth/actions';
 import { useCompanyNavigation } from './company-navigation-provider';
 import './owner-dashboard.css';
 import './command-centre.css';
 import './owner-shell-global.css';
+import './glass-theme.css';
 
 const iconPaths = {
   dashboard: 'M3 10.5 12 3l9 7.5M5 9v12h14V9M9 21v-8h6v8',
@@ -43,6 +51,8 @@ const iconPaths = {
     'M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 21l2.1-5.4A8.5 8.5 0 1 1 21 11.5Z',
 } as const;
 
+const noopSubscribe = () => () => {};
+
 export type OwnerIconName = keyof typeof iconPaths;
 
 export function OwnerIcon({
@@ -76,6 +86,41 @@ export type OwnerNavItem = {
   children?: { label: string; href: string }[];
 };
 
+// Visual section labels for the sidebar. Purely presentational: the items,
+// their order and their permissions still come from the navigation provider.
+const navSections: [label: string, pattern: RegExp][] = [
+  ['Overview', /^\/dashboard\/?$/],
+  [
+    'Sales',
+    /^\/dashboard\/(crm|website|brochures|quotations|customers|catalog)(\/|$)/,
+  ],
+  [
+    'Projects',
+    /^\/dashboard\/(projects?|project-management|site-projects|operations|execution|pricing)(\/|$)/,
+  ],
+  ['Finance', /^\/dashboard\/(marketplace|finance|billing|reports)(\/|$)/],
+  ['Automation', /^\/dashboard\/(whatsapp|automations)(\/|$)/],
+  ['Company', /^\/dashboard\/(employees|company|settings)(\/|$)/],
+];
+
+/** Maps the first item of each section to its label; each label shows once. */
+function navSectionLabels(items: { href: string }[]) {
+  const labels = new Map<string, string>();
+  const shown = new Set<string>();
+  let current: string | null = null;
+  for (const item of items) {
+    const path = item.href.split('?')[0] ?? item.href;
+    const section: string | null =
+      navSections.find(([, pattern]) => pattern.test(path))?.[0] ?? current;
+    if (section && section !== current && !shown.has(section)) {
+      labels.set(item.href, section);
+      shown.add(section);
+    }
+    current = section;
+  }
+  return labels;
+}
+
 export function OwnerShell({
   children,
   companyName,
@@ -107,7 +152,17 @@ export function OwnerShell({
   // When the shared dashboard layout is present, ignore short page-specific
   // menus: permissions and menu order must remain stable across every route.
   const displayedNavigation = sharedNavigation ?? navigation;
+  const sectionLabels = navSectionLabels(displayedNavigation);
   const [menuOpen, setMenuOpen] = useState(false);
+  // Cloudflare Email Obfuscation rewrites email addresses in server HTML,
+  // which breaks hydration (React #418). Render the email only after mount
+  // so it never appears in the server-rendered markup.
+  const hydrated = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  );
+  const visibleEmail = hydrated ? accountEmail : '';
   const toggleRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const sidebarRef = useRef<HTMLElement>(null);
@@ -168,7 +223,7 @@ export function OwnerShell({
       .join('') || 'BO';
 
   return (
-    <div className="owner-layout owner-layout-unified">
+    <div className="owner-layout owner-layout-unified owner-theme-glass">
       {menuOpen && (
         <button
           className="owner-scrim"
@@ -250,7 +305,7 @@ export function OwnerShell({
             </summary>
             <div className="owner-profile-menu">
               <strong>{companyName}</strong>
-              <small>{accountEmail}</small>
+              <small>{visibleEmail}</small>
               <form action={signOut}>
                 <button type="submit">
                   <OwnerIcon name="logout" size={17} /> Sign out
@@ -295,6 +350,10 @@ export function OwnerShell({
         </div>
         <nav className="owner-nav" aria-label="Your company's modules">
           {displayedNavigation.map((item) => {
+            const sectionLabel = sectionLabels.get(item.href);
+            const sectionHeading = sectionLabel ? (
+              <p className="owner-nav-section">{sectionLabel}</p>
+            ) : null;
             const selected = currentHref
               ? item.href === currentHref
               : item.href === '/dashboard';
@@ -305,83 +364,89 @@ export function OwnerShell({
               const isExpanded =
                 expanded[item.href] ?? (selected || childActive);
               return (
-                <div className="owner-nav-group" key={item.href}>
-                  <button
-                    type="button"
-                    className={
-                      'owner-nav-item owner-nav-group-toggle' +
-                      (selected || childActive ? ' owner-nav-active' : '')
-                    }
-                    aria-expanded={isExpanded}
-                    aria-controls={
-                      'owner-subnav-' + item.href.replace(/[^a-z0-9]/gi, '-')
-                    }
-                    onClick={() =>
-                      setExpanded((previous) => ({
-                        ...previous,
-                        [item.href]: !isExpanded,
-                      }))
-                    }
-                  >
-                    <OwnerIcon name={item.icon} size={20} />
-                    <span>{item.label}</span>
-                    <span
+                <Fragment key={item.href}>
+                  {sectionHeading}
+                  <div className="owner-nav-group">
+                    <button
+                      type="button"
                       className={
-                        'owner-nav-chevron' +
-                        (isExpanded ? ' owner-nav-chevron-open' : '')
+                        'owner-nav-item owner-nav-group-toggle' +
+                        (selected || childActive ? ' owner-nav-active' : '')
                       }
-                      aria-hidden="true"
-                    >
-                      ⌄
-                    </span>
-                  </button>
-                  {isExpanded && (
-                    <div
-                      className="owner-subnav"
-                      id={
+                      aria-expanded={isExpanded}
+                      aria-controls={
                         'owner-subnav-' + item.href.replace(/[^a-z0-9]/gi, '-')
                       }
+                      onClick={() =>
+                        setExpanded((previous) => ({
+                          ...previous,
+                          [item.href]: !isExpanded,
+                        }))
+                      }
                     >
-                      {item.children.map((child) => (
-                        <a
-                          key={child.href}
-                          href={child.href}
-                          className={
-                            'owner-subnav-link' +
-                            (child.href === currentHref
-                              ? ' owner-subnav-active'
-                              : '')
-                          }
-                          aria-current={
-                            child.href === currentHref ? 'page' : undefined
-                          }
-                          onClick={() => setMenuOpen(false)}
-                        >
-                          <span
-                            className="owner-subnav-dot"
-                            aria-hidden="true"
-                          />
-                          {child.label}
-                        </a>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                      <OwnerIcon name={item.icon} size={20} />
+                      <span>{item.label}</span>
+                      <span
+                        className={
+                          'owner-nav-chevron' +
+                          (isExpanded ? ' owner-nav-chevron-open' : '')
+                        }
+                        aria-hidden="true"
+                      >
+                        ⌄
+                      </span>
+                    </button>
+                    {isExpanded && (
+                      <div
+                        className="owner-subnav"
+                        id={
+                          'owner-subnav-' +
+                          item.href.replace(/[^a-z0-9]/gi, '-')
+                        }
+                      >
+                        {item.children.map((child) => (
+                          <a
+                            key={child.href}
+                            href={child.href}
+                            className={
+                              'owner-subnav-link' +
+                              (child.href === currentHref
+                                ? ' owner-subnav-active'
+                                : '')
+                            }
+                            aria-current={
+                              child.href === currentHref ? 'page' : undefined
+                            }
+                            onClick={() => setMenuOpen(false)}
+                          >
+                            <span
+                              className="owner-subnav-dot"
+                              aria-hidden="true"
+                            />
+                            {child.label}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Fragment>
               );
             }
             return (
-              <a
-                key={item.href}
-                href={item.href}
-                className={
-                  'owner-nav-item' + (selected ? ' owner-nav-active' : '')
-                }
-                aria-current={selected ? 'page' : undefined}
-                onClick={() => setMenuOpen(false)}
-              >
-                <OwnerIcon name={item.icon} size={20} />
-                <span>{item.label}</span>
-              </a>
+              <Fragment key={item.href}>
+                {sectionHeading}
+                <a
+                  href={item.href}
+                  className={
+                    'owner-nav-item' + (selected ? ' owner-nav-active' : '')
+                  }
+                  aria-current={selected ? 'page' : undefined}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <OwnerIcon name={item.icon} size={20} />
+                  <span>{item.label}</span>
+                </a>
+              </Fragment>
             );
           })}
         </nav>

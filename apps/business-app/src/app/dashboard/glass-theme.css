@@ -1,0 +1,119 @@
+/*
+ * ProPulse premium "glass" layer for the owner workspace.
+ *
+ * Keeps the existing burgundy / terracotta / orange brand colours and adds
+ * depth only: frosted panels, sidebar section labels, soft glow.
+ * Loaded LAST by OwnerShell and scoped to .owner-theme-glass, so it layers
+ * over the existing styles without editing them. Public websites, admin
+ * shells and legacy <main> pages never receive this class.
+ */
+.owner-layout.owner-layout-unified.owner-theme-glass {
+  --glass-fill: rgba(255, 255, 255, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.9);
+  --glass-hairline: rgba(136, 53, 43, 0.08);
+  --glass-shadow:
+    0 14px 34px rgba(68, 30, 29, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --glass-blur: blur(20px) saturate(150%);
+}
+
+/* ---------- Shell depth (colours unchanged) ---------- */
+.owner-layout.owner-layout-unified.owner-theme-glass .owner-topbar {
+  backdrop-filter: blur(16px) saturate(140%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.owner-layout.owner-layout-unified.owner-theme-glass .owner-nav-item {
+  border-radius: 12px;
+}
+.owner-layout.owner-layout-unified.owner-theme-glass
+  .owner-nav-item.owner-nav-active {
+  box-shadow:
+    0 8px 22px rgba(33, 10, 17, 0.35),
+    0 0 18px rgba(189, 92, 63, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+/* Section labels between sidebar groups. */
+.owner-layout.owner-layout-unified.owner-theme-glass .owner-nav-section {
+  margin: 12px 13px 2px;
+  color: rgba(255, 228, 219, 0.55);
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.owner-layout.owner-layout-unified.owner-theme-glass
+  .owner-nav
+  > .owner-nav-section:first-child {
+  margin-top: 0;
+}
+.owner-layout.owner-layout-unified.owner-theme-glass .owner-profile-menu {
+  border-radius: 14px;
+  border-color: var(--glass-edge);
+  box-shadow: 0 18px 40px rgba(68, 30, 29, 0.16);
+}
+
+/* Soft warm light behind the frosted panels, built from the brand tones. */
+.owner-layout.owner-layout-unified.owner-theme-glass .owner-workspace {
+  background:
+    radial-gradient(
+      ellipse 820px 520px at 100% -4%,
+      rgba(189, 92, 63, 0.16),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 760px 480px at 0% 8%,
+      rgba(255, 120, 32, 0.09),
+      transparent 70%
+    ),
+    radial-gradient(
+      ellipse 900px 560px at 55% 112%,
+      rgba(136, 53, 43, 0.08),
+      transparent 70%
+    ),
+    #faf6f5;
+  background-attachment: fixed;
+}
+.owner-layout.owner-layout-unified.owner-theme-glass .owner-global-footer {
+  background: rgba(255, 255, 255, 0.55);
+  border-top-color: var(--glass-edge);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* ---------- Dashboard panels ---------- */
+.owner-layout.owner-theme-glass .command-panel {
+  border-radius: 20px;
+  background: var(--glass-fill);
+  border: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+.owner-layout.owner-theme-glass .command-heading-icon {
+  box-shadow: 0 6px 16px rgba(255, 88, 10, 0.28);
+}
+.owner-layout.owner-theme-glass .command-panel-heading,
+.owner-layout.owner-theme-glass .command-attention-row,
+.owner-layout.owner-theme-glass .command-project-row,
+.owner-layout.owner-theme-glass .command-document-row {
+  border-bottom-color: var(--glass-hairline);
+}
+.owner-layout.owner-theme-glass .command-status {
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+.owner-layout.owner-theme-glass .command-progress > span {
+  background: linear-gradient(90deg, #bd5c3f, #88352b);
+  box-shadow: 0 0 10px rgba(189, 92, 63, 0.4);
+}
+
+@media (max-width: 740px) {
+  .owner-layout.owner-theme-glass .command-mobile-nav {
+    background: rgba(255, 255, 255, 0.85);
+    border-top-color: var(--glass-edge);
+    backdrop-filter: var(--glass-blur);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .owner-layout.owner-theme-glass .command-panel {
+    transition: none;
+  }
+}

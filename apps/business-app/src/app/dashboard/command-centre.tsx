@@ -3,6 +3,7 @@
    authenticated, tenant-scoped server page. No demonstration data. */
 import { OwnerIcon, type OwnerIconName } from './owner-shell';
 import { OwnerMobileNav } from './owner-mobile-nav';
+import './command-layout.css';
 
 export type CommandMetric = {
   title: string;
@@ -11,6 +12,8 @@ export type CommandMetric = {
   href: string;
   icon: OwnerIconName;
   tone: 'orange' | 'green' | 'blue' | 'purple';
+  /** Raw count for the pipeline donut; omitted when the value is not a count. */
+  count?: number | undefined;
 };
 export type CommandAction = {
   title: string;
@@ -49,58 +52,173 @@ export type CommandFinance = {
   graph: { name: string; total: number }[];
 };
 
+type Tile = {
+  key: string;
+  label: string;
+  value: string;
+  note: string;
+  href: string;
+  icon: OwnerIconName;
+};
+
+const donutColours = ['#88352b', '#bd5c3f', '#ff7820', '#ffb283'];
+const donutColour = (index: number) =>
+  donutColours[index % donutColours.length] ?? '#bd5c3f';
+
 const formatDate = (value: string) => {
   if (!value) return '';
   const parsed = new Date(value);
-  return Number.isNaN(parsed.getTime()) ? value : new Intl.DateTimeFormat('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
-  }).format(parsed);
+  return Number.isNaN(parsed.getTime())
+    ? value
+    : new Intl.DateTimeFormat('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC',
+      }).format(parsed);
 };
-const prettify = (value: string) => value.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+const prettify = (value: string) =>
+  value.replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
 
-function PanelHeading({ title, href, action = 'View all', icon }: {
-  title: string; href?: string; action?: string; icon: OwnerIconName;
+function PanelHeading({
+  title,
+  href,
+  action = 'View all',
+  icon,
+}: {
+  title: string;
+  href?: string;
+  action?: string;
+  icon: OwnerIconName;
 }) {
-  return <div className="command-panel-heading">
-    <h2><span className="command-heading-icon"><OwnerIcon name={icon} size={17}/></span>{title}</h2>
-    {href && <a href={href}>{action}<span aria-hidden="true"> →</span></a>}
-  </div>;
+  return (
+    <div className="command-panel-heading">
+      <h2>
+        <span className="command-heading-icon">
+          <OwnerIcon name={icon} size={17} />
+        </span>
+        {title}
+      </h2>
+      {href && (
+        <a href={href}>
+          {action}
+          <span aria-hidden="true"> →</span>
+        </a>
+      )}
+    </div>
+  );
 }
 
-function Metric({ item }: { item: CommandMetric }) {
-  return <a className={'command-metric command-tone-' + item.tone} href={item.href}>
-    <span className="command-metric-icon"><OwnerIcon name={item.icon} size={24}/></span>
-    <span className="command-metric-body">
-      <span className="command-metric-label">{item.title}</span>
-      <strong>{item.value}</strong>
-      <small>{item.detail}</small>
-    </span>
-  </a>;
+function DocumentList({
+  rows,
+  empty,
+  href,
+  kind,
+}: {
+  rows: CommandDocument[];
+  empty: string;
+  href: string;
+  kind: 'invoice' | 'expense';
+}) {
+  const icon = kind === 'invoice' ? 'billing' : 'expenses';
+  return (
+    <section className="command-panel command-documents">
+      <PanelHeading
+        title={kind === 'invoice' ? 'Recent Invoices' : 'Recent Expenses'}
+        href={href}
+        icon={icon}
+      />
+      {rows.length ? (
+        <div className="command-document-rows">
+          {rows.map((item) => (
+            <a key={item.id} href={href} className="command-document-row">
+              <span className="command-row-icon">
+                <OwnerIcon name={icon} size={17} />
+              </span>
+              <span className="command-row-content">
+                <strong>{item.party}</strong>
+                <small>
+                  {item.number ? item.number + ' · ' : ''}
+                  {formatDate(item.date)}
+                </small>
+              </span>
+              <strong className="command-document-amount">{item.total}</strong>
+              <span
+                className={
+                  'command-status command-status-' +
+                  (item.status === 'issued' || item.status === 'recorded'
+                    ? 'success'
+                    : 'pending')
+                }
+              >
+                {prettify(item.status)}
+              </span>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <p className="command-empty">{empty}</p>
+      )}
+    </section>
+  );
 }
 
-function DocumentList({ rows, empty, href, kind }: {
-  rows: CommandDocument[]; empty: string; href: string; kind: 'invoice' | 'expense';
-}) {
-  return <section className="command-panel command-documents">
-    <PanelHeading title={kind === 'invoice' ? 'Recent Invoices' : 'Recent Expenses'}
-      href={href} icon={kind === 'invoice' ? 'billing' : 'expenses'} />
-    {rows.length ? <div className="command-document-rows">
-      {rows.map((item) => <a key={item.id} href={href} className="command-document-row">
-        <span className="command-row-icon"><OwnerIcon name={kind === 'invoice' ? 'billing' : 'expenses'} size={17}/></span>
-        <span className="command-row-content">
-          <strong>{item.party}</strong>
-          <small>{item.number ? item.number + ' · ' : ''}{formatDate(item.date)}</small>
-        </span>
-        <strong className="command-document-amount">{item.total}</strong>
-        <span className={'command-status command-status-' + (item.status === 'issued' || item.status === 'recorded' ? 'success' : 'pending')}>
-          {prettify(item.status)}
-        </span>
-      </a>)}
-    </div> : <p className="command-empty">{empty}</p>}
-  </section>;
+function PipelineDonut({ metrics }: { metrics: CommandMetric[] }) {
+  const parts = metrics.filter(
+    (item): item is CommandMetric & { count: number } =>
+      typeof item.count === 'number' && Number.isFinite(item.count),
+  );
+  if (parts.length < 2) return null;
+  const total = parts.reduce((sum, item) => sum + item.count, 0);
+  let start = 0;
+  const stops = parts.map((item, index) => {
+    const end = total ? start + (item.count / total) * 100 : start;
+    const stop = `${donutColour(index)} ${start}% ${end}%`;
+    start = end;
+    return stop;
+  });
+  const ring = total
+    ? `conic-gradient(${stops.join(', ')})`
+    : 'conic-gradient(#efe6e4 0% 100%)';
+  return (
+    <section className="command-panel command-mix">
+      <PanelHeading title="Pipeline Mix" icon="reports" />
+      <div className="command-mix-body">
+        <div
+          className="command-donut"
+          style={{ background: ring }}
+          role="img"
+          aria-label={parts
+            .map((item) => item.title + ': ' + item.value)
+            .join(', ')}
+        >
+          <span className="command-donut-centre">
+            <strong>{total.toLocaleString('en-IN')}</strong>
+            <small>Total records</small>
+          </span>
+        </div>
+        <ul className="command-mix-legend">
+          {parts.map((item, index) => (
+            <li key={item.title}>
+              <span
+                className="command-mix-dot"
+                style={{
+                  background: donutColour(index),
+                }}
+                aria-hidden="true"
+              />
+              <a href={item.href}>{item.title}</a>
+              <strong>{item.value}</strong>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
 }
 
 export function CommandCentre({
+  greeting = 'Good to see you',
   accountLabel,
   dateLabel,
   metrics,
@@ -113,6 +231,7 @@ export function CommandCentre({
   expenses,
   navigation,
 }: {
+  greeting?: string;
   accountLabel: string;
   dateLabel: string;
   metrics: CommandMetric[];
@@ -125,107 +244,304 @@ export function CommandCentre({
   expenses: CommandDocument[];
   navigation: { label: string; href: string; icon: OwnerIconName }[];
 }) {
-  const max = Math.max(1, ...(finance?.graph.map((month) => month.total) ?? []));
-  return <main id="main-content" tabIndex={-1} className="owner-dashboard command-dashboard">
-    <header className="command-welcome">
-      <div className="command-welcome-text">
-        <span className="command-sun" aria-hidden="true">☀</span>
-        <div><h1>Good to see you, {accountLabel}</h1><p>Your business at a glance.</p></div>
-      </div>
-      <time className="command-date"><OwnerIcon name="calendar" size={16}/>{dateLabel}</time>
-    </header>
+  const max = Math.max(
+    1,
+    ...(finance?.graph.map((month) => month.total) ?? []),
+  );
+  const tiles: Tile[] = metrics.map((item) => ({
+    key: item.title,
+    label: item.title,
+    value: item.value,
+    note: item.detail,
+    href: item.href,
+    icon: item.icon,
+  }));
+  if (finance)
+    tiles.push(
+      {
+        key: 'invoiced',
+        label: 'Invoiced',
+        value: finance.invoiced,
+        note: 'This month',
+        href: '/dashboard/finance?tab=invoices',
+        icon: 'billing',
+      },
+      {
+        key: 'expenses',
+        label: 'Recorded Expenses',
+        value: finance.expenses,
+        note: 'This month',
+        href: '/dashboard/finance?tab=expenses',
+        icon: 'expenses',
+      },
+      {
+        key: 'issued',
+        label: 'Invoices Issued',
+        value: finance.issuedCount,
+        note: 'This month',
+        href: '/dashboard/billing?kind=sales_invoice',
+        icon: 'quotations',
+      },
+      {
+        key: 'bills',
+        label: 'Bills Recorded',
+        value: finance.recordedCount,
+        note: 'This month',
+        href: '/dashboard/billing?kind=purchase_bill',
+        icon: 'purchases',
+      },
+    );
+  // The team count only becomes a tile when it completes a row; otherwise it
+  // is shown in the greeting line so the tile grid never leaves an orphan.
+  const teamTile = team !== null && tiles.length % 4 !== 0;
+  if (team && teamTile)
+    tiles.push({
+      key: 'team',
+      label: 'Active Members',
+      value: team.active === null ? '—' : String(team.active),
+      note: team.total === null ? 'Team' : 'of ' + team.total + ' total',
+      href: '/dashboard/company/team',
+      icon: 'team',
+    });
+  // Creating something is the main call to action; fall back to the first.
+  const primaryAction =
+    actions.find((action) => action.href.includes('kind=sales_invoice')) ??
+    actions.find((action) => action.href.includes('/new')) ??
+    actions[0];
+  const otherActions = actions.filter((action) => action !== primaryAction);
+  const hasDonut =
+    metrics.filter((item) => typeof item.count === 'number').length >= 2;
 
-    {metrics.length > 0 && <section className="command-metrics" aria-label="Business overview">
-      {metrics.map((item) => <Metric item={item} key={item.title}/>)}
-    </section>}
-
-    {actions.length > 0 && <section className="command-actions-panel">
-      <div className="command-actions-heading">
-        <h2><span className="command-heading-icon"><OwnerIcon name="dashboard" size={18}/></span>Quick Actions</h2>
+  return (
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="owner-dashboard command-dashboard command-reel"
+    >
+      <div
+        className={
+          'command-hero-row' + (hasDonut ? '' : ' command-hero-row-single')
+        }
+      >
+        <section className="command-hero" aria-labelledby="command-greeting">
+          <header className="command-hero-head">
+            <div>
+              <h1 id="command-greeting">
+                {greeting}, {accountLabel}
+              </h1>
+              <p>
+                <OwnerIcon name="calendar" size={14} />
+                <time>{dateLabel}</time>
+                <span aria-hidden="true">·</span>
+                Your business at a glance
+                {team && !teamTile && team.active !== null && (
+                  <>
+                    <span aria-hidden="true">·</span>
+                    <a href="/dashboard/company/team">
+                      {team.active} active team{' '}
+                      {team.active === 1 ? 'member' : 'members'}
+                    </a>
+                  </>
+                )}
+              </p>
+            </div>
+            {actions.length > 0 && (
+              <div className="command-hero-actions">
+                {otherActions.map((action) => (
+                  <a
+                    key={action.href}
+                    href={action.href}
+                    className="command-chip"
+                    title={action.detail}
+                  >
+                    <OwnerIcon name={action.icon} size={15} />
+                    {action.title}
+                  </a>
+                ))}
+                {primaryAction && (
+                  <a
+                    href={primaryAction.href}
+                    className="command-chip command-chip-primary"
+                    title={primaryAction.detail}
+                  >
+                    <OwnerIcon name="plus" size={15} />
+                    {primaryAction.title}
+                  </a>
+                )}
+              </div>
+            )}
+          </header>
+          {finance ? (
+            <div className="command-hero-chart">
+              <div className="command-hero-chart-head">
+                <strong>Invoice value</strong>
+                <small>Issued invoices, last 7 months</small>
+                <a href="/dashboard/billing">
+                  Finance<span aria-hidden="true"> →</span>
+                </a>
+              </div>
+              <div
+                className="command-chart"
+                role="img"
+                aria-label="Issued invoice value over the last seven calendar months"
+              >
+                {finance.graph.map((item, index) => (
+                  <div className="command-chart-column" key={item.name}>
+                    <span className="command-chart-bar-wrap">
+                      <span
+                        className={
+                          'command-chart-bar' +
+                          (index === finance.graph.length - 1
+                            ? ' command-chart-bar-current'
+                            : '')
+                        }
+                        style={{
+                          height:
+                            (item.total > 0
+                              ? Math.max(3, (item.total / max) * 100)
+                              : 0) + '%',
+                        }}
+                        title={item.name}
+                      />
+                    </span>
+                    <span>{item.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="command-hero-note">
+              Your modules are summarised below.
+            </p>
+          )}
+        </section>
+        <PipelineDonut metrics={metrics} />
       </div>
-      <div className="command-actions-grid">
-        {actions.map((action) => <a key={action.href} className="command-action" href={action.href}>
-          <span className="command-action-icon"><OwnerIcon name={action.icon} size={23}/></span>
-          <span><strong>{action.title}</strong><small>{action.detail}</small></span>
-        </a>)}
-      </div>
-    </section>}
 
-    <div className="command-two-cols">
-      <section className="command-panel">
-        <PanelHeading title="Needs Attention" icon="bell" />
-        {attention.length ? <div className="command-attention-list">
-          {attention.map((item, i) => <a key={item.href + ':' + i} href={item.href} className="command-attention-row">
-            <span className="command-row-icon"><OwnerIcon name={item.icon} size={18}/></span>
-            <span className="command-row-content"><strong>{item.title}</strong><small>{item.detail}</small></span>
-            <span className={'command-status command-status-' + item.tone}>{item.status}</span>
-            <span className="command-arrow" aria-hidden="true">›</span>
-          </a>)}
-        </div> : <p className="command-empty">Nothing needs your attention right now.</p>}
-      </section>
-      <section className="command-panel">
-        <PanelHeading title="Project Progress" icon="projects" href="/dashboard/projects" />
-        {projects.length ? <div className="command-project-list">
-          {projects.map((project) => <a key={project.id} href={'/dashboard/projects/' + project.id} className="command-project-row">
-            <span className="command-project-symbol"><OwnerIcon name="projects" size={25}/></span>
-            <span className="command-project-content">
-              <span className="command-project-top">
-                <strong>{project.name}</strong>
-                <small>{project.step === null ? 'Not tracked' : project.step + '% done'}</small>
+      {tiles.length > 0 && (
+        <section className="command-tiles" aria-label="Business overview">
+          {tiles.map((tile) => (
+            <a key={tile.key} className="command-tile" href={tile.href}>
+              <span className="command-tile-top">
+                <span className="command-tile-icon">
+                  <OwnerIcon name={tile.icon} size={18} />
+                </span>
+                <span className="command-tile-pill">{tile.note}</span>
               </span>
-              <span className="command-progress"
-                role={project.step === null ? undefined : 'progressbar'}
-                aria-label="Recorded work completed"
-                aria-valuenow={project.step ?? undefined}
-                aria-valuemin={project.step === null ? undefined : 0}
-                aria-valuemax={project.step === null ? undefined : 100}>
-                {project.step !== null && <span style={{ width: project.step + '%' }}/>}
-              </span>
-              <small className="command-stage-note">Overall work completion</small>
-            </span><span className="command-arrow" aria-hidden="true">›</span>
-          </a>)}
-        </div> : <p className="command-empty">No active projects to display.</p>}
-      </section>
-    </div>
+              <strong>{tile.value}</strong>
+              <span className="command-tile-label">{tile.label}</span>
+            </a>
+          ))}
+        </section>
+      )}
 
-    <div className="command-two-cols command-secondary-row">
-      {finance && <section className="command-panel">
-        <PanelHeading title="Finance Overview" icon="expenses" href="/dashboard/billing"/>
-        <div className="command-chart" role="img" aria-label="Issued invoice value over the last seven calendar months">
-          {finance.graph.map((item) => <div className="command-chart-column" key={item.name}>
-            <span className="command-chart-bar-wrap">
-              <span className="command-chart-bar" style={{ height: (item.total > 0 ? Math.max(3, item.total / max * 100) : 0) + '%' }} title={item.name}/>
-            </span>
-            <span>{item.name}</span>
-          </div>)}
-        </div>
-        <div className="command-finance-totals">
-          <div><strong>{finance.invoiced}</strong><span>Invoiced this month</span></div>
-          <div><strong>{finance.expenses}</strong><span>Recorded expenses</span></div>
-          <div><strong>{finance.issuedCount}</strong><span>Invoices issued</span></div>
-          <div><strong>{finance.recordedCount}</strong><span>Bills recorded</span></div>
-        </div>
-      </section>}
-      {team && <section className="command-panel">
-        <PanelHeading title="Team Overview" icon="team" href="/dashboard/company/team" action="Manage Team"/>
-        <div className="command-team-content">
-          <div className="command-team-count"><OwnerIcon name="team" size={34}/>
-            <strong>{team.active === null ? '—' : team.active}</strong><span>Active members</span>
-          </div>
-          <div className="command-team-details">
-            <span><OwnerIcon name="check" size={17}/> Active <strong>{team.active ?? '—'}</strong></span>
-            <span><OwnerIcon name="leads" size={17}/> Total members <strong>{team.total ?? '—'}</strong></span>
-            <a href="/dashboard/company/team">Manage assignments and access →</a>
-          </div>
-        </div>
-      </section>}
-    </div>
+      <div className="command-two-cols">
+        <section className="command-panel">
+          <PanelHeading title="Needs Attention" icon="bell" />
+          {attention.length ? (
+            <div className="command-attention-list">
+              {attention.map((item, i) => (
+                <a
+                  key={item.href + ':' + i}
+                  href={item.href}
+                  className="command-attention-row"
+                >
+                  <span className="command-row-icon">
+                    <OwnerIcon name={item.icon} size={18} />
+                  </span>
+                  <span className="command-row-content">
+                    <strong>{item.title}</strong>
+                    <small>{item.detail}</small>
+                  </span>
+                  <span
+                    className={'command-status command-status-' + item.tone}
+                  >
+                    {item.status}
+                  </span>
+                  <span className="command-arrow" aria-hidden="true">
+                    ›
+                  </span>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="command-empty">
+              Nothing needs your attention right now.
+            </p>
+          )}
+        </section>
+        <section className="command-panel">
+          <PanelHeading
+            title="Project Progress"
+            icon="projects"
+            href="/dashboard/projects"
+          />
+          {projects.length ? (
+            <div className="command-project-list">
+              {projects.map((project) => (
+                <a
+                  key={project.id}
+                  href={'/dashboard/projects/' + project.id}
+                  className="command-project-row"
+                >
+                  <span className="command-project-symbol">
+                    <OwnerIcon name="projects" size={25} />
+                  </span>
+                  <span className="command-project-content">
+                    <span className="command-project-top">
+                      <strong>{project.name}</strong>
+                      <small>
+                        {project.step === null
+                          ? 'Not tracked'
+                          : project.step + '% done'}
+                      </small>
+                    </span>
+                    <span
+                      className="command-progress"
+                      role={project.step === null ? undefined : 'progressbar'}
+                      aria-label="Recorded work completed"
+                      aria-valuenow={project.step ?? undefined}
+                      aria-valuemin={project.step === null ? undefined : 0}
+                      aria-valuemax={project.step === null ? undefined : 100}
+                    >
+                      {project.step !== null && (
+                        <span style={{ width: project.step + '%' }} />
+                      )}
+                    </span>
+                    <small className="command-stage-note">
+                      Overall work completion
+                    </small>
+                  </span>
+                  <span className="command-arrow" aria-hidden="true">
+                    ›
+                  </span>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <p className="command-empty">No active projects to display.</p>
+          )}
+        </section>
+      </div>
 
-    {finance && <div className="command-two-cols command-bottom-row">
-      <DocumentList kind="invoice" rows={invoices} href="/dashboard/billing?kind=sales_invoice" empty="No invoices recorded yet."/>
-      <DocumentList kind="expense" rows={expenses} href="/dashboard/billing?kind=purchase_bill" empty="No expenses recorded yet."/>
-    </div>}
+      {finance && (
+        <div className="command-two-cols command-bottom-row">
+          <DocumentList
+            kind="invoice"
+            rows={invoices}
+            href="/dashboard/billing?kind=sales_invoice"
+            empty="No invoices recorded yet."
+          />
+          <DocumentList
+            kind="expense"
+            rows={expenses}
+            href="/dashboard/billing?kind=purchase_bill"
+            empty="No expenses recorded yet."
+          />
+        </div>
+      )}
 
-    <OwnerMobileNav navigation={navigation} currentHref="/dashboard" />
-  </main>;
+      <OwnerMobileNav navigation={navigation} currentHref="/dashboard" />
+    </main>
+  );
 }
