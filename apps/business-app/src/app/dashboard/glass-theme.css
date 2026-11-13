@@ -21,9 +21,6 @@
   backdrop-filter: blur(16px) saturate(140%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
-.owner-layout.owner-layout-unified.owner-theme-glass .owner-nav-item {
-  border-radius: 12px;
-}
 .owner-layout.owner-layout-unified.owner-theme-glass
   .owner-nav-item.owner-nav-active {
   box-shadow:
@@ -31,6 +28,41 @@
     0 0 18px rgba(189, 92, 63, 0.3),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
+/* One shape for every menu row: plain links and collapsible group buttons.
+   Group buttons get the forced global button radius (0.8rem), so links
+   use the same value; long labels stay on one line. */
+.owner-layout.owner-layout-unified.owner-theme-glass
+  .owner-nav
+  :is(.owner-nav-item, .owner-nav-group-toggle) {
+  min-height: 42px;
+  border-radius: 0.8rem;
+  white-space: nowrap;
+}
+.owner-layout.owner-layout-unified.owner-theme-glass
+  .owner-nav
+  :is(.owner-nav-item, .owner-nav-group-toggle)
+  > span:not(.owner-nav-chevron) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* Group arrow: right when closed, down when open. */
+.owner-layout.owner-layout-unified.owner-theme-glass .owner-nav-chevron {
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  transform: none;
+  opacity: 0.75;
+}
+.owner-layout.owner-layout-unified.owner-theme-glass .owner-nav-chevron-open {
+  transform: rotate(90deg);
+}
+/* The Website Studio promo card took a third of the sidebar height and left
+   room for only four menu rows; Website Studio is already in the menu. */
+.owner-layout.owner-layout-unified.owner-theme-glass .owner-studio-promo {
+  display: none;
+}
+
 /* Section labels between sidebar groups. */
 .owner-layout.owner-layout-unified.owner-theme-glass .owner-nav-section {
   margin: 12px 13px 2px;
