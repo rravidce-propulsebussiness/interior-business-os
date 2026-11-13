@@ -34,6 +34,9 @@ describe('quotation payment steps projected into one project timeline', () => {
       ['Ground slab', 35],
       ['Final handover', 25],
     ]);
+    expect(result.map(row => row.durationHint)).toEqual([
+      '15–20 days', '15–20 days', '15–20 days',
+    ]);
     const requirements = defaultStageRequirements('FOUNDATION');
     expect(result[0]?.steps).toEqual([
       {
@@ -66,10 +69,12 @@ describe('quotation payment steps projected into one project timeline', () => {
     expect(result).toHaveLength(2);
     expect(result[0]?.steps).toEqual([]);
     expect(result[1]?.steps).toEqual([]);
+    expect(result[1]?.durationHint).toBe('15–20 days');
     expect(Object.keys(result[0] ?? {})).toEqual([
       'name',
       'percent',
       'stageCodes',
+      'durationHint',
       'steps',
     ]);
   });

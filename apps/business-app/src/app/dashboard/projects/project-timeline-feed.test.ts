@@ -37,7 +37,7 @@ it('routes All Projects selections into the single timeline-first project worksp
   expect(screen).toContain(
     'overview:Timeline,timeline:Timeline,milestones:Milestones',
   );
-  expect(navigation).toContain("label: 'All Projects'");
+  expect(navigation).toContain("label: 'Projects'");
   expect(agreementAction).toContain(
     'savedStagePaymentPlan(revision.data.terms)',
   );

@@ -130,7 +130,9 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
                   <span className="pq-payment-title">
                     <strong>{payment.name}</strong>
                     <small>
-                      {state} ·{' '}
+                      {state}
+                      {payment.durationHint ? ' · Reference: ' + payment.durationHint : ''}
+                      {' · '}
                       {payment.steps.length
                         ? payment.steps.length + ' saved work/check steps'
                         : payment.stageCodes.length
@@ -225,6 +227,9 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
                       schedule.
                     </p>
                   )}
+                  <p className="pq-note">
+                    Reference durations are planning guides based on the uploaded agreement schedule. Actual dates and progress come from site updates; the quoted payment group is unchanged.
+                  </p>
                   <div className="pq-payment-footer">
                     <small>
                       Work certification is separate from an invoice, payment

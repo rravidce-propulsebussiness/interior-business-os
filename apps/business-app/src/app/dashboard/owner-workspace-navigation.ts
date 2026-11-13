@@ -60,12 +60,7 @@ export function ownerWorkspaceNavigation(
     });
   const projectChildren: NonNullable<OwnerNavItem['children']> = [];
   const boqChildren: NonNullable<OwnerNavItem['children']> = [];
-  if (has('project.view', 'projects'))
-    projectChildren.push(
-      { label: 'Portfolio Overview', href: '/dashboard/project-management' },
-      { label: 'All Projects', href: '/dashboard/projects' },
-    );
-  if (has('task.view', 'projects'))
+  if (!has('project.view', 'projects') && has('task.view', 'projects'))
     projectChildren.push(
       has('execution.view', 'projects')
         ? {
@@ -77,7 +72,7 @@ export function ownerWorkspaceNavigation(
             href: '/dashboard/operations/project_tasks',
           },
     );
-  if (has('milestone.view', 'projects'))
+  if (!has('project.view', 'projects') && has('milestone.view', 'projects'))
     projectChildren.push({
       label: 'Milestones',
       href: '/dashboard/operations/project_milestones',
@@ -155,22 +150,21 @@ export function ownerWorkspaceNavigation(
       icon: 'calculator',
       children: boqChildren,
     });
-  // One project path: All Projects → project → Timeline. Task boards,
-  // milestones and ERP registers are reached from inside each project's
-  // timeline and tabs, so they are not repeated in the menu for anyone who
-  // can open projects. Staff without project access keep their own entry.
-  if (has('project.view', 'projects'))
-    projectChildren.splice(0, projectChildren.length, {
-      label: 'All Projects',
+  // Projects is the single entry for the single project flow. Specialist
+  // execution destinations stay available only to staff who lack project view.
+  if (has('project.view', 'projects')) {
+    items.push({
+      label: 'Projects',
       href: '/dashboard/projects',
+      icon: 'projects',
     });
-  else projectChildren.push(...erpChildren);
-  if (projectChildren.length)
+  } else {
+    projectChildren.push(...erpChildren);
+  }
+  if (!has('project.view', 'projects') && projectChildren.length)
     items.push({
       label: 'Project Management',
-      href: has('project.view', 'projects')
-        ? '/dashboard/projects'
-        : projectChildren[0]!.href,
+      href: projectChildren[0]!.href,
       icon: 'projects',
       children: projectChildren,
     });

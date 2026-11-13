@@ -27,6 +27,36 @@ describe('construction workflow blueprint', () => {
     );
   });
 
+  it('orders design, foundation and plinth work as the owner requested', () => {
+    const stages = defaultConstructionWorkflow.stages;
+    const design = stages.find((stage) => stage.code === 'DESIGN')!;
+    const foundation = stages.find((stage) => stage.code === 'FOUNDATION')!;
+    const plinth = stages.find((stage) => stage.code === 'PLINTH')!;
+    const at = (items: string[], pattern: RegExp) =>
+      items.findIndex((item) => pattern.test(item));
+
+    expect(at(design.activities, /floor plan/i)).toBeLessThan(
+      at(design.activities, /structural analysis/i),
+    );
+    expect(at(design.activities, /structural analysis/i)).toBeLessThan(
+      at(design.activities, /3D elevation/i),
+    );
+    expect(at(design.activities, /3D elevation/i)).toBeLessThan(
+      at(design.activities, /electrical and plumbing.*MEP/i),
+    );
+    expect(at(foundation.activities, /PCC below footings/i)).toBeLessThan(
+      at(foundation.activities, /Column reinforcement/i),
+    );
+    expect(at(plinth.activities, /Backfill/i)).toBeLessThan(
+      at(plinth.activities, /Plinth beam reinforcement/i),
+    );
+    expect(at(plinth.activities, /Anti-termite/i)).toBeGreaterThan(
+      at(plinth.activities, /Final soil leveling/i),
+    );
+    expect(stages.find((stage) => stage.code === 'SITE_PREP')?.explanation)
+      .toContain('15–20 days');
+  });
+
   it('expands an arbitrary floor list and respects cross-floor structural gates', () => {
     const stages = expandConstructionStages(
       defaultConstructionWorkflow,
