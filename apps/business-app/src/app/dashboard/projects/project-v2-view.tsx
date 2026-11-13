@@ -918,7 +918,10 @@ function Timeline({d}:{d:WorkspaceData}){
 function Milestones({d}:{d:WorkspaceData}){
  const hasLiveStages=d.stages.length>0;
  const quote=d.quotations[0];
- const canPrepare=Boolean(quote?.status==='issued'&&d.permissions.manage&&d.permissions.finance&&!d.agreement);
+ // The loader resolves the project's customer-level Final quotation, including a
+ // saved quotation deliberately marked Final. Issuing or sharing it is not a
+ // prerequisite for preparing the owner-reviewed project contract.
+ const canPrepare=Boolean(quote&&d.permissions.manage&&d.permissions.finance&&!d.agreement);
  return <>
   {!hasLiveStages&&d.quotePlan&&<div className="pf-flow">
    {!d.agreement&&<section className="pf-section pf-milestone-start" aria-labelledby="pf-milestone-start-title">
@@ -926,7 +929,6 @@ function Milestones({d}:{d:WorkspaceData}){
      <p>The quotation preview becomes progressable after the project contract is prepared. The owner can upload an offline agreement or record the final quotation as the agreed scope—no customer signature is implied.</p>
     </div>
     {canPrepare?<PrepareAgreement projectId={d.project.id} revisionId={quote!.revisionId}/>
-     :quote?.status!=='issued'?<p className="pv2-hint">Issue the Final quotation before preparing the project contract.</p>
      :<p className="pv2-hint">Project manager and Finance permissions are required to prepare the project contract.</p>}
    </section>}
    {d.agreement&&<section className="pf-section pf-milestone-start" aria-labelledby="pf-milestone-start-title">
