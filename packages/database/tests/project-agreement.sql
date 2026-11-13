@@ -1,12 +1,6 @@
 \set ON_ERROR_STOP on
 begin;
 \ir site-agreement-quotation-fixture.sql
--- Preserve the saved quote payment groups exactly; the agreement helper will
--- import these same three rows rather than making a replacement schedule.
-update public.quotation_revisions r set terms=E'[STAGE_PAYMENT_PLAN]\nTEST ONLY — Foundation and plinth|20\nTEST ONLY — Structural frame and slabs|50\nTEST ONLY — Masonry, services and handover|30\n[/STAGE_PAYMENT_PLAN]'
- where r.quotation_id=(select id from public.quotations
-   where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
-     and quotation_number='SITE-AGREEMENT-TEST');
 set local role authenticated;
 \ir site-agreement-helper.sql
 
