@@ -17,7 +17,7 @@ it('escapes customer text and excludes all unlisted/internal payload fields', ()
       minimum_rate: 'MINIMUM_SECRET',
       calculation: { modifiers: 'MODIFIER_SECRET' },
     })),
-  });
+  }, { kind: 'agreement' });
   expect(html).toContain('&lt;script&gt;');
   expect(html).not.toContain('<script>');
   for (const secret of [
@@ -191,18 +191,19 @@ it('renders company theme and saved package brand, grade, allowance safely', () 
 });
 
 
-it('shows editable proposed payment milestones in the customer PDF without leaking metadata', () => {
+it('prints the unchanged grouped payment milestones in the linked agreement PDF without leaking metadata', () => {
   const d = quotationDocumentFixture();
   d.totals.final_amount = '100000.00';
   d.terms = 'Workmanship warranty applies.\n\n[STAGE_PAYMENT_PLAN]\nAgreement & advance|10.00\nRCC frame|60.00\nHandover|30.00\n[/STAGE_PAYMENT_PLAN]';
-  const html = renderQuotationDocument(d);
-  expect(html).toContain('Proposed stage-wise payment schedule');
+  const html = renderQuotationDocument(d, { kind: 'agreement' });
+  expect(html).toContain('Stage-wise payment schedule');
   expect(html).toContain('Agreement &amp; advance');
   expect(html).toContain('RCC frame');
   expect(html).toContain('10,000');
   expect(html).toContain('60,000');
   expect(html).toContain('30,000');
   expect(html).toContain('Workmanship warranty applies.');
+  expect(html).toContain('DRAFT AGREEMENT');
   expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
   expect(html).not.toContain('[/STAGE_PAYMENT_PLAN]');
 });
@@ -245,7 +246,7 @@ it('prints a 33-stage construction payment plan without amount or percentage dri
     'Stage ' + (i + 1) + '|' + (i === 32 ? '4.00' : '3.00'),
   );
   d.terms = '[STAGE_PAYMENT_PLAN]\n' + amounts.join('\n') + '\n[/STAGE_PAYMENT_PLAN]';
-  const html = renderQuotationDocument(d);
+  const html = renderQuotationDocument(d, { kind: 'agreement' });
   expect(html).toContain('Stage 33');
   expect(html).toContain('<td>100%</td>');
   expect(html).toContain('2,40,35,000');
@@ -258,7 +259,7 @@ it('shows distinct quotation page surfaces and factual saved specification cards
   expect(html).toContain('pb-cover');
   expect(html).toContain('pb-page pb-pricing');
   expect(html).toContain('pb-page pb-specs-page');
-  expect(html).toContain('pb-page pb-payment-page');
+  expect(html).not.toContain('pb-page pb-payment-page');
   expect(html).toContain('pb-end');
   expect(html).toContain('Detailed quotation');
   expect(html).toContain('Selected package inclusions');
@@ -350,19 +351,22 @@ it('does not invent stage payments when the quotation has none saved', () => {
   const document = quotationDocumentFixture();
   document.terms = 'Materials as specified.';
   const html = renderQuotationDocument(document);
-  expect(html).toContain('Payment schedule &amp; conditions');
-  expect(html).toContain('Stage-wise payments not specified');
+  expect(html).not.toContain('Payment schedule &amp; conditions');
+  expect(html).not.toContain('Stage-wise payments not specified');
   expect(html).not.toContain('Agreement &amp; advance');
   expect(html).not.toContain('10.00%');
-  expect(html).toContain('Materials as specified.');
+  expect(html).not.toContain('Materials as specified.');
 });
 
 it('keeps the saved payment table and exact final amount in the PDF', () => {
   const document = quotationDocumentFixture();
   document.totals.final_amount = '5550000.00';
   document.terms = '[STAGE_PAYMENT_PLAN]\nAdvance|10.00\nRCC & steel|40.00\nHandover|50.00\n[/STAGE_PAYMENT_PLAN]';
-  const html = renderQuotationDocument(document);
-  expect(html).toContain('Proposed stage-wise payment schedule');
+  const quoteHtml=renderQuotationDocument(document);
+  expect(quoteHtml).not.toContain('Stage-wise payment schedule');
+  expect(quoteHtml).not.toContain('RCC &amp; steel');
+  const html = renderQuotationDocument(document, { kind: 'agreement' });
+  expect(html).toContain('Stage-wise payment schedule');
   expect(html).toContain('RCC &amp; steel');
   expect(html).toContain('5,55,000');
   expect(html).toContain('22,20,000');
@@ -370,6 +374,27 @@ it('keeps the saved payment table and exact final amount in the PDF', () => {
   expect(html).toContain('55,50,000');
   expect(html).not.toContain('Stage-wise payments not specified');
   expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
+});
+
+it('renders saved agreement clauses only in the linked unsigned Agreement PDF', () => {
+  const document = quotationDocumentFixture();
+  document.terms = [
+    'Work programme & completion:', 'Start after site handover; finish in 12 months', '',
+    'Termination & indemnification:', 'Either party may terminate on 30 days written notice', '',
+    'Dispute resolution:', 'First seek mediation in Hyderabad', '',
+    '[STAGE_PAYMENT_PLAN]', 'Agreement & advance|10.00', 'Foundation|40.00',
+    'Handover|50.00', '[/STAGE_PAYMENT_PLAN]',
+  ].join('\n');
+  const quote = renderQuotationDocument(document);
+  expect(quote).not.toContain('Start after site handover');
+  expect(quote).not.toContain('Agreement &amp; advance');
+  const agreement = renderQuotationDocument(document, { kind: 'agreement' });
+  expect(agreement).toContain('Start after site handover; finish in 12 months');
+  expect(agreement).toContain('Either party may terminate on 30 days written notice');
+  expect(agreement).toContain('First seek mediation in Hyderabad');
+  expect(agreement).toContain('Agreement &amp; advance');
+  expect(agreement).toContain('DRAFT AGREEMENT');
+  expect(agreement).toContain('does not record customer acceptance');
 });
 
 
@@ -384,15 +409,15 @@ it('prints saved Terms & Inclusions with distinct warranty and exclusions plus s
     '[STAGE_PAYMENT_PLAN]', 'Advance|10.00', 'RCC & brickwork|60.00',
     'Handover|30.00', '[/STAGE_PAYMENT_PLAN]',
   ].join('\n');
-  const html=renderQuotationDocument(document);
-  expect(html).toContain('Terms &amp; Inclusions');
+  const html=renderQuotationDocument(document, { kind: 'agreement' });
+  expect(html).toContain('Agreement conditions');
   expect(html).toContain('<h3>Inclusions</h3>');
   expect(html).toContain('Steel and cement as quoted');
   expect(html).toContain('<h3>Exclusions</h3>');
   expect(html).toContain('<h3>Warranty</h3>');
   expect(html).toContain('Structural coverage for ten years');
   expect(html).toContain('<h3>Additional terms</h3>');
-  expect(html).toContain('Proposed stage-wise payment schedule');
+  expect(html).toContain('Stage-wise payment schedule');
   expect(html).toContain('RCC &amp; brickwork');
   expect(html).toContain('5,55,000');
   expect(html).toContain('33,30,000');
@@ -403,12 +428,12 @@ it('prints saved Terms & Inclusions with distinct warranty and exclusions plus s
 it('safely prints legacy free-text terms without inventing milestone payments', () => {
   const document=quotationDocumentFixture();
   document.terms='Owner will arrange water and power; <script>unsafe()</script>';
-  const html=renderQuotationDocument(document);
-  expect(html).toContain('Terms &amp; Inclusions');
+  const html=renderQuotationDocument(document, { kind: 'agreement' });
+  expect(html).toContain('Agreement conditions');
   expect(html).toContain('Additional terms');
   expect(html).toContain('&lt;script&gt;');
   expect(html).not.toContain('<script>unsafe()</script>');
-  expect(html).toContain('Stage-wise payments not specified');
+  expect(html).toContain('No payment milestones saved');
   expect(html).not.toContain('Advance|10.00');
 });
 
@@ -420,11 +445,11 @@ it('shows both structured saved warranty and stage payment schedule after legacy
     'Site access subject to confirmation.','','Warranty:','Structural warranty ten years','',
     '[STAGE_PAYMENT_PLAN]','Advance|10.00','RCC|60.00','Handover|30.00','[/STAGE_PAYMENT_PLAN]',
   ].join('\n');
-  const html=renderQuotationDocument(d);
+  const html=renderQuotationDocument(d, { kind: 'agreement' });
   expect(html).toContain('<h3>Warranty</h3>');
   expect(html).toContain('Structural warranty ten years');
   expect(html).toContain('Site access subject to confirmation.');
-  expect(html).toContain('Proposed stage-wise payment schedule');
+  expect(html).toContain('Stage-wise payment schedule');
   expect(html).toContain('33,30,000');
 });
 
@@ -465,7 +490,7 @@ it('shows customer-approved custom stage work, materials, tests and reports by a
  });
  d.terms='[STAGE_PAYMENT_PLAN]\nGround slab|100.00\n[/STAGE_PAYMENT_PLAN]\n'
    +encodeStagePaymentLinks([[code]])+'\n'+encodeStageRequirements(overrides);
- const html=renderQuotationDocument(d);
+ const html=renderQuotationDocument(d, { kind: 'agreement' });
  for(const label of ['Custom site shuttering work','Customer agreed steel brand',
    'Custom pre-pour engineer inspection','Extra RCC pour evidence photos']){
   expect(html).toContain(label);
@@ -491,7 +516,7 @@ it('prints priced execution steps once under the matching payment stage without 
    {kind:'check',code:'DESIGN',index:0},
    {kind:'qc',code:'DESIGN',index:0},
   ]});
- const html=renderQuotationDocument(d);
+ const html=renderQuotationDocument(d, { kind: 'agreement' });
  expect(html).toContain('Design Fee');
  expect(html).toContain('Work, material &amp; inspection order');
  expect(html).toContain('Architectural floor plan');
