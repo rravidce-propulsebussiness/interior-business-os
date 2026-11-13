@@ -16,6 +16,7 @@ import {forecastWork} from './project-work-forecast';
 import { BulkStageChecks } from './project-stage-bulk-checks';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { projectTimelineFeed } from './project-timeline-feed';
+import { ProjectQuotationLinker } from './project-quotation-linker';
 import { ProjectFlow } from './project-flow-view';
 import { QuotePlanView } from './project-quote-plan';
 import { flowRole } from './project-flow';
@@ -947,6 +948,8 @@ function Documents({d}:{d:WorkspaceData}){
       <Blank title="No saved final quotation found"
        detail="No active quotation was found for this project or its converted Won lead."
        action={d.permissions.quotation?<NextLink href="/dashboard/quotations" label="Open Quotations"/>:undefined}/>}
+     {d.permissions.linkQuotation&&d.linkableQuotations.length>0&&
+      <ProjectQuotationLinker projectId={d.project.id} quotes={d.linkableQuotations}/>}
      {d.permissions.quotation&&<details className="pv2-secondary-more"><summary>Quotation history / change Final</summary>
       <NextLink href="/dashboard/quotations" label="Manage quotation history"/>
      </details>}
