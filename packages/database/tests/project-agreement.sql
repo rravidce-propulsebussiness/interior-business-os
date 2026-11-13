@@ -1,13 +1,19 @@
 \set ON_ERROR_STOP on
 begin;
 \ir site-agreement-quotation-fixture.sql
+-- Preserve the saved quote payment groups exactly; the agreement helper will
+-- import these same three rows rather than making a replacement schedule.
+update public.quotation_revisions r set terms=E'[STAGE_PAYMENT_PLAN]\nTEST ONLY — Foundation and plinth|20\nTEST ONLY — Structural frame and slabs|50\nTEST ONLY — Masonry, services and handover|30\n[/STAGE_PAYMENT_PLAN]'
+ where r.quotation_id=(select id from public.quotations
+   where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
+     and quotation_number='SITE-AGREEMENT-TEST');
 set local role authenticated;
 \ir site-agreement-helper.sql
 
 do $$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
- project uuid;contract uuid;latest uuid;new_latest uuid;
+ project uuid;contract uuid;latest uuid;
 begin
  select id into project from public.projects where organization_id=org and code='demo-3bhk';
  perform public.project_site_command(org,project,'initialize','{}'::jsonb);
@@ -42,16 +48,55 @@ begin
     '{"media_id":"11111111-1111-4111-8111-111111111111","note":"This is not uploaded evidence"}');
   raise exception 'FAIL: forged document accepted';
  exception when insufficient_privilege then null;end;
- -- Owner-only reasoned exception restores physical readiness without inventing a signature.
+ raise notice 'PASS: signed-copy evidence, real advance and revocation keep their guards';
+end$$;
+
+-- Test the explicit owner choice as a fresh quote-backed clearance. The
+-- exception event, not a signed PDF, must activate the original quote groups.
+reset role;
+delete from public.payment_schedule_items where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
+ and contract_id=(select id from public.contracts where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
+   and project_id=(select id from public.projects where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
+     and code='demo-3bhk'));
+delete from public.payment_schedules where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
+ and contract_id=(select id from public.contracts where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
+   and project_id=(select id from public.projects where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
+     and code='demo-3bhk'));
+set local role authenticated;
+do $$
+declare
+ org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ project uuid;contract uuid;new_latest uuid;readiness jsonb;
+begin
+ select id into project from public.projects where organization_id=org and code='demo-3bhk';
+ select id into contract from public.contracts where organization_id=org and project_id=project
+  order by accepted_at desc,id desc limit 1;
  new_latest=public.project_agreement_command(org,project,contract,'owner_exception',
-   '{"reason":"Emergency site safety intervention authorized by company owner; contractual paper remains pending","reference":"Owner decision file EXCEPT-2026-1"}'::jsonb);
- if new_latest is null
-   or (public.project_agreement_read(org,project)->>'execution_authorized')<>'true'
-   or (public.project_agreement_read(org,project)->>'clearance_type')<>'owner_exception'
+   '{"reason":"Owner confirms the final quotation is the scope; the separate agreement is handled offline or skipped","reference":"Owner authorized offline agreement option"}'::jsonb);
+ readiness=public.project_agreement_read(org,project);
+ if new_latest is null or readiness->>'execution_authorized'<>'true'
+   or readiness->>'clearance_type'<>'owner_exception'
  then raise exception 'FAIL: recorded owner exception not applied';end if;
  if (select count(*) from public.payments where contract_id=contract)<>1
- then raise exception 'FAIL: clearance added an artificial receipt';end if;
- raise notice 'PASS: signed-copy evidence, real advance, revoke, owner exception, no invented payment';
+ then raise exception 'FAIL: agreement exception created an artificial receipt';end if;
+ if (select count(*) from public.payment_schedules where organization_id=org and contract_id=contract and status='active')<>1
+ then raise exception 'FAIL: offline agreement choice did not create one canonical active quotation schedule';end if;
+ if (select array_agg(label order by sort_order) from public.payment_schedule_items
+      where organization_id=org and contract_id=contract)<>array[
+       'TEST ONLY — Foundation and plinth',
+       'TEST ONLY — Structural frame and slabs',
+       'TEST ONLY — Masonry, services and handover']::text[]
+   or (select array_agg(value::numeric order by sort_order) from public.payment_schedule_items
+      where organization_id=org and contract_id=contract)<>array[20,50,30]::numeric[]
+ then raise exception 'FAIL: offline agreement choice changed the quote payment groups';end if;
+ perform public.project_preflight_save(org,project,'inspection',
+   'TEST ONLY site inspection fixture confirms synthetic observations for regression coverage');
+ perform public.project_preflight_save(org,project,'measurements',
+   'TEST ONLY site measurement fixture confirms synthetic measurements for regression coverage');
+ readiness=public.project_preflight_read(org,project);
+ if readiness->>'inspection_done'<>'true' or readiness->>'measurements_done'<>'true'
+ then raise exception 'FAIL: owner agreement choice did not unlock site preflight';end if;
+ raise notice 'PASS: owner can use final quote without a signature, with unchanged milestones and no fake receipt';
 end$$;
 
 select set_config('request.jwt.claim.sub','22222222-2222-4222-8222-222222222222',true);

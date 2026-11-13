@@ -16,9 +16,13 @@ begin
    jsonb_build_object('media_id',media,'note',
     'Received paper agreement copy, signatures unverified by digital provider'));
  perform public.contract_transition(org,contract,1,'active');
- schedule=public.payment_schedule_save(org,contract,
-   '{"label":"Contractual sample","items":[{"label":"Final stage","calculation_type":"remaining","value":"0"}]}'::jsonb);
- perform public.payment_schedule_activate(org,schedule,1);
+ select id into schedule from public.payment_schedules
+   where organization_id=org and contract_id=contract and status='active' limit 1;
+ if schedule is null then
+  schedule=public.payment_schedule_save(org,contract,
+    '{"label":"Contractual sample","items":[{"label":"Final stage","calculation_type":"remaining","value":"0"}]}'::jsonb);
+  perform public.payment_schedule_activate(org,schedule,1);
+ end if;
  return contract;
 end$$;
 

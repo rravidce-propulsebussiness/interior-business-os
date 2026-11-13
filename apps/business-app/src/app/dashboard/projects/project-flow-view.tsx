@@ -70,7 +70,7 @@ const kindName: Record<string, string> = {
   architectural_plan: 'Floor plan',
   interior_layout: 'Interior layout',
   structural_design: 'Structural design',
-  '3d_design': '3D visualisation',
+  '3d_design': '3D elevation',
   electrical_plan: 'Electrical plan',
   plumbing_plan: 'Plumbing plan',
 };
@@ -637,15 +637,12 @@ function DesignJourney({ d, role }: { d: WorkspaceData; role: FlowRole }) {
     flow.designs
       .filter((x) => x.kind === kind)
       .sort((a, b) => b.revision - a.revision)[0];
-  const plan = latest(flow.floorPlanKind);
-  const planApproved =
-    plan?.status === 'approved' && Boolean(plan.clientApprovedAt);
   const kinds = [
     flow.floorPlanKind,
     ...(flow.floorPlanKind === 'architectural_plan'
-      ? ['structural_design']
+      ? ['structural_design', '3d_design', 'electrical_plan', 'plumbing_plan']
       : []),
-    '3d_design',
+    ...(flow.floorPlanKind === 'interior_layout' ? ['3d_design'] : []),
   ];
   const team = (d.site?.team ?? []).filter((t) => t.active === true);
   const who = (role: string) =>
@@ -654,10 +651,12 @@ function DesignJourney({ d, role }: { d: WorkspaceData; role: FlowRole }) {
       : 'Not assigned';
   const stepState = (kind: string) => {
     const x = latest(kind);
-    if (!x)
-      return kind !== flow.floorPlanKind && !planApproved
-        ? 'Waits for floor plan approval'
-        : 'To prepare';
+    const position = kinds.indexOf(kind);
+    const prior = position > 0 ? latest(kinds[position - 1]!) : undefined;
+    const priorApproved = position === 0 ||
+      (prior?.status === 'approved' && Boolean(prior.clientApprovedAt));
+    if (!priorApproved) return 'Waits for previous design approval';
+    if (!x) return 'To prepare';
     if (x.status === 'submitted') return 'Technical review';
     if (x.status === 'changes_requested') return 'Changes requested';
     return x.clientApprovedAt ? 'Homeowner approved' : 'With homeowner';

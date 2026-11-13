@@ -120,7 +120,7 @@ export type WorkspaceData = {
  tasks:{id:string;title:string;planned_start:string|null;status:string}[];
  contractValue:number|null;expenditure:number|null;requests:ClientRequestRow[]|null;
  projectRaw:Record<string,unknown>|null;
- agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean;revisionId:string|null;clearanceType:string|null;version:number|null}|null;
+ agreement:{contractId:string;contractNumber:string;status:string;authorized:boolean;canAuthorizeException:boolean;revisionId:string|null;clearanceType:string|null;version:number|null}|null;
  preflight:{inspectionDone:boolean;measurementsDone:boolean;inspectionDetails:string;measurementDetails:string;signedReady:boolean}|null;
  advance:{invoiceId:string|null;invoiceNumber:string|null;invoiceStatus:string|null;invoiceTotal:number;percent:number|null;received:number;scheduleActive:boolean}|null;
  flow:ProjectFlowData;
@@ -430,21 +430,20 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
  const choiceObject=choice&&!choice.error?obj(choice.data):{};
  const finalQuoteId=typeof choiceObject[project.customer_id]==='string'
    ?choiceObject[project.customer_id] as string:null;
- // The recorded signed agreement binds the project to its quoted scope.
- // A newer unsent or alternative quote cannot reopen completed project work.
+ // A signed copy or explicit owner choice binds the project to its final
+ // quotation scope. A later alternative cannot silently rewrite live work.
  const contractedRevision=permissions.finance&&!contract.error?contract.data?.[0]?.revision_id:null;
- const signedContractSource=agreement.clearance_type==='signed_copy_recorded'
+ const contractedScopeSource=['signed_copy_recorded','owner_exception'].includes(stringValue(agreement.clearance_type))
    &&agreement.current_scope===true&&typeof contractedRevision==='string';
- // A signed contract freezes one specific quotation revision. Even after
- // another quotation becomes Final or the same quote gets a new revision,
- // the project document must not silently replace the legally agreed version.
- const signedRevision=signedContractSource&&contractedRevision
+ // The contract freezes one specific quotation revision. Even after another
+ // quotation becomes Final, the project document cannot silently replace it.
+ const signedRevision=contractedScopeSource&&contractedRevision
    ?await s.client.from('quotation_revisions')
     .select('id,quotation_id,status').eq('organization_id',s.org)
     .eq('id',contractedRevision).maybeSingle():null;
  const signedQuoteId=!signedRevision?.error?signedRevision?.data?.quotation_id:null;
  const signedRoot=quoteRoots.find(q=>q.id===signedQuoteId);
- const contractedQuote=(signedContractSource&&signedRoot&&contractedRevision&&signedRevision?.data)
+ const contractedQuote=(contractedScopeSource&&signedRoot&&contractedRevision&&signedRevision?.data)
    ?{id:signedRoot.id,number:signedRoot.quotation_number??'Quotation',
       revisionId:contractedRevision,status:signedRevision.data.status,
       createdAt:signedRoot.created_at}:null;
@@ -457,8 +456,8 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
       status:revisionsById.get(finalRoot.current_revision_id)??'',
       createdAt:finalRoot.created_at}:null;
  const quotations:ProjectQuotation[]=contractedQuote?[contractedQuote]:
-   // If signed scope is not resolvable, do not substitute a new Final quote.
-   signedContractSource?[]:currentQuote?[currentQuote]:[];
+   // If the contracted scope is not resolvable, do not substitute a new Final quote.
+   contractedScopeSource?[]:currentQuote?[currentQuote]:[];
  // Read only a saved planning proposal before the agreement exists.
  // This never activates milestones or invents payment receipts.
  const paymentRevision=contractedRevision??quotations[0]?.revisionId??null;
@@ -596,6 +595,7 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
   agreement:typeof agreement.contract_id==='string'?{
    contractId:agreement.contract_id,contractNumber:stringValue(agreement.contract_number),
    status:stringValue(agreement.contract_status),authorized:agreement.execution_authorized===true,
+   canAuthorizeException:agreement.can_authorize_exception===true,
    clearanceType:stringValue(agreement.clearance_type)||null,
    revisionId:contract.data?.find(c=>c.id===agreement.contract_id)?.revision_id??null,
    version:contract.data?.find(c=>c.id===agreement.contract_id)?.version??null,

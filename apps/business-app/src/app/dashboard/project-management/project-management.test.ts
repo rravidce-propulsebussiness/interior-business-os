@@ -25,7 +25,7 @@ function company(
 }
 
 describe('project management navigation and trusted portfolio boundaries', () => {
-  it('keeps one project path: All Projects, then the project timeline', () => {
+  it('opens the Projects list directly before the project timeline', () => {
     const items = ownerWorkspaceNavigation(
       company([
         'project.view',
@@ -35,12 +35,12 @@ describe('project management navigation and trusted portfolio boundaries', () =>
         'inspection.view',
       ]),
     );
-    expect(items.find((item) => item.label === 'Project Management')).toEqual({
-      label: 'Project Management',
+    expect(items.find((item) => item.label === 'Projects')).toEqual({
+      label: 'Projects',
       href: '/dashboard/projects',
       icon: 'projects',
-      children: [{ label: 'All Projects', href: '/dashboard/projects' }],
     });
+    expect(items.find((item) => item.label === 'Project Management')).toBeUndefined();
     const labels = JSON.stringify(items);
     for (const removed of [
       'Task Board',
@@ -91,10 +91,11 @@ describe('project management navigation and trusted portfolio boundaries', () =>
         ['projects', 'quotation', 'catalog', 'pricing', 'brochure'],
       ),
     );
-    const projectNav = navigation.find(
-      (item) => item.label === 'Project Management',
-    );
-    expect(projectNav?.children).toHaveLength(1);
+    expect(navigation.find((item) => item.label === 'Projects')).toEqual({
+      label: 'Projects',
+      href: '/dashboard/projects',
+      icon: 'projects',
+    });
     expect(navigation.some((item) => item.label === 'Brochures')).toBe(false);
     expect(navigation.some((item) => item.label === 'Automations')).toBe(true);
     expect(navigation.some((item) => item.label === 'My Work')).toBe(false);

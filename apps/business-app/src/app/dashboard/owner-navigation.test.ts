@@ -29,11 +29,10 @@ describe('one authorized company navigation on every dashboard page', () => {
       'Dashboard',
       'Leads',
       'Quotations',
-      'Project Management',
+      'Projects',
       'BOQ & Estimating',
       'BOQ & Estimate Revisions',
       'Rate Recipes',
-      'All Projects',
       'Automations',
       'ERP: Site Execution',
       'ERP: Execution Planner',
@@ -48,6 +47,9 @@ describe('one authorized company navigation on every dashboard page', () => {
     ]) {
       expect(canonical).toContain(`label: '${name}'`);
     }
+    expect(canonical).not.toContain("label: 'All Projects'");
+    expect(canonical).toContain("if (has('project.view', 'projects'))");
+    expect(canonical).toContain("label: 'Projects'");
     expect(canonical).toMatch(
       /label: 'Billing & Plans',\s*href: '\/dashboard\/billing'/,
     );
@@ -84,18 +86,18 @@ describe('one authorized company navigation on every dashboard page', () => {
     expect(canonical).toContain('projectChildren.push(...erpChildren)');
     expect(canonical).toContain('boqChildren.push');
     expect(canonical).toContain("label: 'BOQ & Estimating'");
-    expect(canonical).toContain('if (projectChildren.length)');
+    expect(canonical).toContain("if (!has('project.view', 'projects') && projectChildren.length)");
     expect(canonical).not.toContain("label: 'Construction ERP'");
     expect(canonical).not.toContain("label: 'My Work'");
     expect(canonical).toContain("has('project.view', 'projects')");
     expect(canonical).toContain("has('task.view', 'projects')");
     expect(canonical).toContain("has('milestone.view', 'projects')");
-    // Brochures is retired from the workspace menu.
     expect(canonical).not.toContain("label: 'Brochures'");
     expect(canonical).toContain("has('automation.view')");
     expect(canonical).toContain("has('catalog.view', 'catalog')");
     expect(canonical).toContain("has('pricing.view', 'pricing')");
-    expect(canonical).toContain("href: '/dashboard/project-management'");
+    expect(canonical).toContain("label: 'Projects'");
+    expect(canonical).toContain("href: '/dashboard/projects'");
     expect(operations).toContain('currentHref="/dashboard/operations"');
     expect(canonical).not.toContain('window.location');
   });

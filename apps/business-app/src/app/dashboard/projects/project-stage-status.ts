@@ -5,7 +5,7 @@ export type ProjectStageEvidence = {
  approvedQuotation:boolean;
  quotedScopeImported:boolean;
  agreementPrepared:boolean;
- agreementSigned:boolean;
+ agreementCleared:boolean;
  inspectionDone:boolean;
  measurementsDone:boolean;
  designRevisionStarted:boolean;
@@ -21,7 +21,7 @@ export function effectiveProjectStageStatus(
  // Honor explicit blocked/hold states and final recorded stage states.
  if(stage.template_code==='PRECONSTRUCTION'&&
    ['not_started','in_progress'].includes(stored)&&
-   evidence.agreementSigned&&evidence.inspectionDone&&evidence.measurementsDone&&
+   evidence.agreementCleared&&evidence.inspectionDone&&evidence.measurementsDone&&
    (evidence.designRevisionStarted||evidence.designClientApproved))return 'completed';
  // Explicit execution statuses always win over other derived presentation.
  if(stored!=='not_started')return stored;

@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 21508)
+Total output lines: 1201
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName, OwnerShell } from '../owner-shell';
@@ -33,7 +36,7 @@ import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
 import {
  SiteReportForm,SiteMediaForm,MaterialRequestForm,MaterialUpdateForm,
  QualityForm,ReviewCheck,GateForm,AssignRole,SyncStages,
- ProjectLifecycle,PrepareAgreement,SignedAgreementUploadForm,ProjectContractActivation,
+ ProjectLifecycle,PrepareAgreement,SignedAgreementUploadForm,ProjectContractActivation,SkipAgreementUpload,
 } from './project-v2-forms';
 import '../owner-dashboard.css';
 import './project-v2.css';
@@ -177,6 +180,7 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
  const designStep=code==='DESIGN'||code==='DESIGN_APPROVAL';
  if(!agreementStep&&!surveyStep&&!designStep)return null;
  const signed=d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true;
+ const agreementCleared=signed||d.agreement?.clearanceType==='owner_exception';
  const quote=d.quotations[0];
  // The signed contract is the agreed scope; later quote alternatives are history.
  const sameRevision=signed||!d.agreement?.revisionId||!quote||d.agreement.revisionId===quote.revisionId;
@@ -195,42 +199,42 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
   ?{title:'Prepare the contract',detail:'A contract is required before work can start.',
     href:cur(d.project.id,'documents'),action:'Review quotation & agreement'}
   :!sameRevision
-  ?{title:'Confirm unsigned agreement scope',detail:'The draft agreement refers to a different quotation. Confirm the agreed version before signing.',
+  ?{title:'Confirm quotation scope',detail:'The project contract refers to a different quotation revision. Review the linked Final quotation before choosing agreement handling.',
     href:contractHref,action:'Open project agreement'}
-  :!signed
-  ?{title:'Confirm signed agreement',detail:'Record the currently signed agreement before starting construction.',
-    href:cur(d.project.id,'timeline'),action:'Review signing'}
+  :!agreementCleared
+  ?{title:'Record agreement choice',detail:'Upload the offline signed copy or have the owner record that the final quotation will be used without a separate agreement upload.',
+    href:cur(d.project.id,'timeline'),action:'Choose agreement option'}
   :d.agreement.status!=='active'
-  ?{title:'Activate the contract',detail:'Signed agreement recorded. Activate its existing contract before physical construction.',
-    href:contractHref,action:'Activate signed contract'}
+  ?{title:'Activate the project contract',detail:signed?'Signed agreement recorded. Activate its existing contract.':'Owner decision recorded. Activate the quote-based project contract.',
+    href:contractHref,action:signed?'Activate signed contract':'Activate quote-based project'}
   :!d.advance?.scheduleActive
   ?d.quotePaymentTriggers.length>0
-    ?{title:'Sync agreed payment milestones',detail:'The stage-wise payment plan is already saved in the signed quotation. It is imported automatically; refresh the project to confirm its activation.',
+    ?{title:'Sync agreed payment milestones',detail:'The stage-wise payment plan is already saved in the Final quotation. It is imported automatically; refresh the project to confirm its activation.',
       href:cur(d.project.id,'payments'),action:'View agreed payment milestones'}
-    :{title:'Confirm contract payment terms',detail:'No valid stage-wise payment plan was found in the signed quotation. Confirm the agreed terms before physical work.',
+    :{title:'Confirm contract payment terms',detail:'No valid stage-wise payment plan was found in the Final quotation. Confirm the agreed terms before physical work.',
       href:contractHref,action:'View agreement terms'}
-  :!d.advance?.received
+  :d.quotePaymentTriggers.some(x=>/advance|booking/i.test(x.name))&&!d.advance?.received
   ?{title:'Record advance actually received',detail:'The advance invoice is issued, but no payment has been verified. Record a receipt only after receiving funds.',
     href:'/dashboard/finance?tab=payments&contract_id='+d.agreement.contractId,
     action:'Open Finance payments'}
   :!d.agreement.authorized
-  ?{title:'Confirm site-start clearance',detail:'Verify current signed evidence and required payment records before physical construction.',
+  ?{title:'Confirm site-start clearance',detail:'Verify the current agreement choice and required payment records before physical construction.',
     href:contractHref,action:'View project agreement'}
   :null;
  return <div className="pv2-stage-workflow">
   {agreementStep&&<>
-   <h3>Agreement & advance</h3>
+   <h3>Final quotation & agreement</h3>
    {!d.agreement?<>
-    <p className="pv2-muted">The project exists from its approved quotation. Prepare its agreement here; do not create another project.</p>
+    <p className="pv2-muted">The final quotation defines this project’s scope and payment groups. Prepare the project contract once; the owner can upload an offline signed agreement or record that no separate upload will be used.</p>
     {quote?.status==='issued'&&d.permissions.manage&&d.permissions.finance&&
      <PrepareAgreement projectId={d.project.id} revisionId={quote.revisionId}/>}
     {(!quote||quote.status!=='issued')&&<p className="pv2-muted">Issue the final quotation before preparing the agreement.</p>}
    </>:<>
     <div className="pv2-stage-workflow-status"><strong>{d.agreement.contractNumber}</strong>
-     <Status value={signed?'signed':d.agreement.status||'pending'}/></div>
+     <Status value={signed?'signed':d.agreement.clearanceType==='owner_exception'?'owner chose quote':d.agreement.status||'pending'}/></div>
     {d.permissions.finance&&<NextLink href={contractHref} label="View agreement record"/>}
-    {signed&&d.agreement.status==='pending'&&d.permissions.contractManage&&typeof d.agreement.version==='number'&&
-     <ProjectContractActivation contractId={d.agreement.contractId} version={d.agreement.version}/>}
+    {agreementCleared&&d.agreement.status==='pending'&&d.permissions.contractManage&&typeof d.agreement.version==='number'&&
+     <ProjectContractActivation contractId={d.agreement.contractId} version={d.agreement.version} offlineAgreement={!signed}/>}
 
     {!sameRevision&&<p role="alert" className="pv2-form-feedback bad">This agreement belongs to an earlier Final quotation. Check the linked revision before proceeding.</p>}
     {!signed&&sameRevision&&d.site?.canManage&&d.permissions.finance&&
@@ -238,9 +242,15 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
       <SignedAgreementUploadForm projectId={d.project.id} contractId={d.agreement.contractId}
        media={pdfs.map(x=>({id:x.id,name:stringValue(x.filename)}))}/>
      </details>}
+    {!signed&&sameRevision&&d.agreement.canAuthorizeException&&d.agreement.clearanceType!=='owner_exception'&&
+     <details className="pv2-edit-drawer"><summary>Use Final quotation without agreement upload</summary>
+      <SkipAgreementUpload projectId={d.project.id} contractId={d.agreement.contractId}/>
+     </details>}
+    {d.agreement.clearanceType==='owner_exception'&&<p className="pv2-hint">Owner decision recorded: the final quotation is being used without a signed agreement upload. This is not recorded as a customer signature.</p>}
     {signed&&<p className="pv2-form-feedback good">Signed agreement recorded. No repeat approval or upload is required.</p>}
-    {signed&&invoice!==null&&<div className="pv2-stage-workflow-payment">
-     <strong>Advance payment — required before site execution</strong>
+    {agreementCleared&&invoice!==null&&<div className="pv2-stage-workflow-payment">
+     {d.quotePaymentTriggers.some(x=>/advance|booking/i.test(x.name))?<>
+     <strong>Quoted advance — required before site execution</strong>
      <p>{invoice.invoiceId?formatMoney(invoice.received)+' received · '+formatMoney(due)+' pending':'Advance invoice not yet requested'}</p>
      <Status value={paid?'paid':invoice.invoiceStatus||'pending'}/>
      {!invoice.invoiceId&&d.permissions.finance&&d.permissions.manage&&
@@ -248,15 +258,16 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
        <ProjectAdvanceAction projectId={d.project.id} defaultPercent={defaultPercent}/>
       </details>}
      {invoice.invoiceId&&d.permissions.finance&&<NextLink href={'/dashboard/finance?tab=invoices'+(invoice.invoiceNumber?'&q='+encodeURIComponent(invoice.invoiceNumber):'')} label="View advance in Finance"/>}
-     {!invoice.scheduleActive&&<p className="pv2-hint">Payment stages come from the signed quotation; no second payment schedule should be entered. A verified advance is required before physical construction.</p>}
+     {!invoice.scheduleActive&&<p className="pv2-hint">Payment stages come from the Final quotation; no second payment schedule should be entered. A verified advance is required before physical construction.</p>}
      {invoice.scheduleActive&&<p className="pv2-hint">Agreed quotation milestones are active. Payments remain unpaid until actual receipts are recorded.</p>}
+     </>:<p className="pv2-hint">No separate advance is defined in the Final quotation. Its grouped payment milestones remain unchanged and are managed in Finance.</p>}
     </div>}
    </>}
-   {d.site?.stage==='not_started'&&signed&&sameRevision&&d.site.canManage&&
+   {d.site?.stage==='not_started'&&d.agreement?.authorized===true&&agreementCleared&&sameRevision&&d.site.canManage&&
     <ProjectLifecycle id={d.project.id} stage="not_started" canManage
-     agreementSigned={signed} industry={d.project.industry} designs={[]}/>}
+     agreementCleared={agreementCleared} industry={d.project.industry} designs={[]}/>}
   </>}
-  {surveyStep&&signed&&<div className="pv2-stage-workflow-survey">
+  {surveyStep&&agreementCleared&&<div className="pv2-stage-workflow-survey">
    <h3>Site inspection & measurements</h3>
    <div className="pv2-checklist-inline">
     <span className={inspection?'done':'waiting'}>{inspection?'✓':'○'} Site inspection</span>
@@ -273,7 +284,7 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
    <h3>Construction start readiness</h3>
    <div className="pv2-execution-readiness-grid">
     <span>Active contract <strong>{d.agreement?.status==='active'?'Ready':d.agreement?'Pending activation':'Not available'}</strong></span>
-    <span>Signed agreement <strong>{signed?'Recorded':'Not confirmed'}</strong></span>
+    <span>Agreement choice <strong>{signed?'Signed copy recorded':d.agreement?.clearanceType==='owner_exception'?'Owner uses final quotation':'Not recorded'}</strong></span>
     <span>Payment schedule <strong>{d.advance===null?'Unavailable':d.advance.scheduleActive?'Active':'Not active'}</strong></span>
     <span>Verified advance <strong>{d.advance===null?'Unavailable':formatMoney(d.advance.received)}</strong></span>
    </div>
@@ -282,9 +293,9 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
     <div className="pv2-readiness-next" role="status">
      <strong>Next action: {readinessStep?.title??'Confirm execution clearance'}</strong>
      <p>{readinessStep?.detail??'Confirm the project financial records before physical site work.'}</p>
-     {readinessStep?.title==='Activate the contract'&&d.agreement&&signed&&
+     {readinessStep?.title==='Activate the project contract'&&d.agreement&&agreementCleared&&
        d.permissions.contractManage&&typeof d.agreement.version==='number'?
-      <ProjectContractActivation contractId={d.agreement.contractId} version={d.agreement.version}/>:
+      <ProjectContractActivation contractId={d.agreement.contractId} version={d.agreement.version} offlineAgreement={!signed}/>:
       readinessStep&&d.permissions.finance?
       <NextLink href={readinessStep.href} label={readinessStep.action}/>:
       <p className="pv2-hint">Ask a company owner or finance manager to complete this step.</p>}
@@ -292,7 +303,7 @@ function ProjectStageWorkflow({d,code}:{d:WorkspaceData;code:string}){
   </div>}
   {designStep&&d.site&&['design','client_approved'].includes(d.site.stage)&&
    <ProjectLifecycle id={d.project.id} stage={d.site.stage} canManage={d.site.canManage}
-    agreementSigned={signed} industry={d.project.industry}
+    agreementCleared={agreementCleared} industry={d.project.industry}
     executionReady={d.agreement?.authorized===true}
     designs={d.site.designs.map(x=>({id:x.id,kind:stringValue(x.kind),status:stringValue(x.status)}))}/>}
  </div>;
@@ -362,7 +373,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
    Boolean(d.agreement?.revisionId),
   quotedScopeImported:d.stages.some(stage=>stage.template_code==='QUOTED_SCOPE'),
   agreementPrepared:Boolean(d.agreement),
-  agreementSigned:d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true,
+  agreementCleared:d.agreement?.clearanceType==='signed_copy_recorded'||d.agreement?.clearanceType==='owner_exception'||d.preflight?.signedReady===true,
   inspectionDone:d.preflight?.inspectionDone===true,
   measurementsDone:d.preflight?.measurementsDone===true,
   designRevisionStarted:Boolean(d.site?.designs.length),
@@ -558,92 +569,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
        <summary className="pv2-command-stage-summary">
         <span className="pv2-stage-number">{complete?'✓':index+1}</span>
         <span className="pv2-stage-title-block"><strong>{stage.title}</strong>
-         <small>{stage.floor_code?pretty(stage.floor_code)+' · ':''}{stage.phase?pretty(stage.phase)+' · ':''}{stage.activities.length} work items</small>
-         <span className={'pv2-stage-schedule-summary '+(stagePlan.count?'is-planned':'')}>
-          <span aria-hidden="true">▦</span>
-          {stagePlan.count
-           ?<span>{stagePlan.count} item{stagePlan.count===1?'':'s'} planned · {shortDate(stagePlan.start)} – {shortDate(stagePlan.finish)}
-            {stagePlan.hasWorkToday&&<b> · Scheduled today</b>}
-            {stagePlan.overlapsAnotherStage&&<em> · Overlaps another stage</em>}</span>
-           :<span>Work dates not planned</span>}
-         </span></span>
-        <Status value={displayStatus}/>
-        <span className="pv2-stage-meta">{payment.length} payment milestone{payment.length===1?'':'s'}</span>
-        <OwnerIcon name="arrow" size={15}/>
-       </summary>
-       <div className="pv2-command-stage-inner">
-        {stage.explanation&&<p className="pv2-muted">{stage.explanation}</p>}
-        {stage.dependencies.some(dep=>!dep.startsWith('QUOTED_SCOPE'))&&
-         <p className="pv2-stage-hint">Dependent on: {
-          stage.dependencies.filter(dep=>!dep.startsWith('QUOTED_SCOPE')).join(' · ')
-         }</p>}
-        {(!complete||(['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code)&&site?.stage==='client_approved'))&&
-         <ProjectStageWorkflow d={d} code={stage.template_code}/>}
-
-        {startingPayments.length>0&&<div className="pv2-stage-payment-start">
-          <strong>Payment milestone at stage start</strong>
-          {startingPayments.map((p,i)=><p key={i}>{p.name} · {p.percent}% of accepted quotation</p>)}
-          <p className="pv2-hint">Review this agreed payment before starting work. Invoices,
-           payment requests and verified receipts stay in Finance. An invoice alone is not proof of payment.</p>
-          {d.permissions.finance&&<Link href={cur(d.project.id,'payments')}>
-           Check invoice and verified payment status
-          </Link>}
-         </div>}
-         {physicalStage&&site?.stage==='execution'&&<StageActivationControl
-         projectId={d.project.id} stageId={stage.id} state={stageExecution}
-         canManage={allowWork} workCompleted={finishedActivities} workTotal={stage.activities.length}
-         checksPassed={passed} checksTotal={checks.length}/>}
-        {orderedFlow.length===0&&plannedMaterials.length>0&&
-         <details className="pv2-stage-secondary pv2-legacy-material-planning">
-          <summary>Plan material delivery dates ({plannedMaterials.length})</summary>
-          <p className="pv2-hint">Plan when each material is needed. Procurement, delivery updates
-           and marketplace/outside supplier orders remain attached to the work items below.</p>
-          <div className="pv2-stage-task-entries">
-           {plannedMaterials.map((material,i)=><div key={stage.id+'-material-'+i}
-             className="pv2-flow-step">
-             <strong>{material}</strong>
-             <ProjectItemSchedule projectId={d.project.id} stageId={stage.id}
-              kind="material" index={i} title={material}
-              item={planFor(stage.id,'material',i)} canPlan={canPlan&&!complete}
-              planningMode={planningMode} today={todayInIndia}/>
-            </div>)}
-          </div>
-         </details>}
-        {orderedFlow.length===0&&remainingQc.length>0&&<details className="pv2-stage-secondary">
-         <summary>Plan company QC visits ({remainingQc.length})</summary>
-         {remainingQc.map(item=><ProjectItemSchedule key={item.i} projectId={d.project.id}
-          stageId={stage.id} kind="qc" index={item.i} title={item.name}
-          item={planFor(stage.id,'qc',item.i)} canPlan={canPlan&&!complete} planningMode={planningMode} today={todayInIndia}/>)}
-        </details>}
-        {!!checks.length&&(orderedFlow.length===0||stageExecution?.status==='ready_for_qc'||formalReviews.length>0)&&<details className="pv2-stage-quality-hub" id={'pv2-stage-checks-'+stage.id}>
-         <summary><span>{orderedFlow.length?'Final stage quality approval & history':'Site checks & company QC'}</span><strong>{passed}/{checks.length} checks passed</strong></summary>
-         <div className="pv2-stage-quality-inner">
-        {!!checks.length&&orderedFlow.length===0&&<div className="pv2-stage-task-group">
-         {orderedFlow.length===0&&<BulkStageChecks projectId={d.project.id} stageId={stage.id} photos={photos}
-          canEdit={checksAllowed&&!complete} workCompleted={finishedActivities}
-          workTotal={stage.activities.length} stageStatus={stageExecution?.status??'not_started'}
-          checks={checks.map((title,index)=>{
-           const record=stageChecks.find(x=>stringValue(x.title).toLowerCase()===title.toLowerCase())??
-            (site?.checks??[]).find(x=>stringValue(x.title).toLowerCase()===title.toLowerCase());
-           return {index,title,status:stringValue(record?.status)||'pending',
-            photoId:stringValue(record?.photo_id),notes:stringValue(record?.notes)};
-          })}/>}
-         <h4>Site checks & tests <small>{passed}/{checks.length} passed</small></h4>
-         {stageExecution?.status==='ready_for_qc'&&
-          <p className="pv2-stage-ready-note">
-           All required site checks are passed and field work has been submitted.
-           On-site company QC review and final stage certification remain pending; the checks do not need
-           to be repeated unless corrections are requested.
-          </p>}
-         {stageExecution?.status==='in_progress'&&
-          finishedActivities===stage.activities.length&&passed===checks.length&&
-          <p className="pv2-stage-ready-note">
-           Work and checks are complete. Use “Finish field work · Request QC”
-           above to unlock the next eligible stage.
-          </p>}
-         <p className="pv2-hint">Complete checks one by one, with photo evidence. A passed site check must still be reviewed by the assigned company QC inspector when the stage is submitted.</p>
-         {orderedFlow.length===0&&<details className="pv2-single-checks">
-          <summary>Review / edit individual checks</summary>
+         <small>{stage.floor_code?pretty(stage.floor_code)+' · ':''}{stage.phase?pretty(stage.pha…1508 tokens truncated…  <summary>Review / edit individual checks</summary>
          <div className="pv2-stage-task-entries">
           {checks.map((name,i)=>{
            const existing=stageChecks.find(x=>stringValue(x.title).toLowerCase()===name.toLowerCase())??
@@ -777,8 +703,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
 }
 function ProjectCommandSidebar({d,showHistory=false}:{d:WorkspaceData;showHistory?:boolean}){
  const recent=timeline(d).slice(0,5);
- const signed=d.agreement?.clearanceType==='signed_copy_recorded'||d.preflight?.signedReady===true;
- const needsAdvance=signed&&d.advance!==null&&(!d.advance?.invoiceId||
+ const needsQuotedAdvance=d.quotePaymentTriggers.some(x=>/advance|booking/i.test(x.name));
+ const agreementCleared=d.agreement?.clearanceType==='signed_copy_recorded'||d.agreement?.clearanceType==='owner_exception'||d.preflight?.signedReady===true;
+ const needsAdvance=agreementCleared&&needsQuotedAdvance&&d.advance!==null&&(!d.advance?.invoiceId||
     (d.advance.invoiceTotal>0&&d.advance.received<d.advance.invoiceTotal));
  const incompleteChecks=d.site?.checks.filter(r=>!['passed','approved'].includes(stringValue(r.status)))??[];
  const openRequests=(d.requests??[]).filter(request=>!['resolved','declined'].includes(request.status));
@@ -917,6 +844,7 @@ function Documents({d}:{d:WorkspaceData}){
  const canSeeCommercial=d.permissions.quotation||d.permissions.finance;
  const photos=d.site?.media??[],agreement=photos.filter(r=>stringValue(r.category)==='agreement');
  const signedRecorded=d.agreement?.clearanceType==='signed_copy_recorded';
+ const ownerQuoteChoice=d.agreement?.clearanceType==='owner_exception';
  const plans=photos.filter(r=>['plan','design'].includes(stringValue(r.category)));
  const other=photos.filter(r=>!['agreement','plan','design'].includes(stringValue(r.category)));
  const group=(title:string,list:SiteRow[])=> <section className="pv2-panel" key={title}>
@@ -958,11 +886,12 @@ function Documents({d}:{d:WorkspaceData}){
      <Title title="Agreement" detail="Recorded contract and signed-document history"/>
      {d.agreement?<div>
       <div className="pv2-between"><strong>{d.agreement.contractNumber}</strong>
-       <Status value={signedRecorded?'signed':d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
+       <Status value={signedRecorded?'signed':ownerQuoteChoice?'owner chose quote':d.agreement.authorized?'approved':d.agreement.status||'pending'}/></div>
       {!signedRecorded&&d.quotations[0]&&d.agreement.revisionId&&d.quotations[0].revisionId!==d.agreement.revisionId?
        <p role="alert" className="pv2-form-feedback bad">The unsigned agreement references a different quotation. Confirm the agreed version before signing.</p>:
-       <p className="pv2-muted">The agreement is tied to its saved quotation version. Payment schedule, signed evidence and advance remain required for execution.</p>}
+       <p className="pv2-muted">The project scope and payment groups come from this saved quotation. The owner can record its offline signed copy or choose to proceed without a separate upload.</p>}
       {signedRecorded&&<p className="pv2-muted">The signed agreement fixes the agreed quotation for this project. New alternatives stay in quotation history; changed signed scope requires a formal change order.</p>}
+      {ownerQuoteChoice&&<p className="pv2-muted">The owner chose the Final quotation as this project’s scope without uploading a separate agreement. This record is not a customer signature.</p>}
       {signedRecorded&&d.agreement.status==='pending'&&d.permissions.contractManage&&typeof d.agreement.version==='number'&&
        <ProjectContractActivation contractId={d.agreement.contractId} version={d.agreement.version}/>}
 

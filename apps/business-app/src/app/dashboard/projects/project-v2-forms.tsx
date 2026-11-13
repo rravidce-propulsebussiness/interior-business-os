@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { saveProjectSite, uploadProjectSiteMedia } from './[id]/site/actions';
 import { saveProjectMaterials } from './[id]/site/stage-checklist-actions';
 import { syncConstructionFromProjectAgreement, assignConstructionRole } from './[id]/site/construction-actions';
-import { saveSignedAgreement } from './[id]/site/agreement-actions';
+import { createAgreementException, saveSignedAgreement } from './[id]/site/agreement-actions';
 import { prepareAgreementFromProjectQuote } from './project-agreement-actions';
 import { financeCommand } from '../finance/actions';
 import { submitProjectDrawing } from './project-design-actions';
@@ -27,7 +27,8 @@ export function ProjectForm({projectId,operation,label,children,media=false}:{
   {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
  </form>;
 }
-/** Does not claim digital customer acceptance. Signed agreement is uploaded next. */
+/** Creates the existing Finance contract from the immutable Final quotation.
+ * It does not claim customer acceptance or generate an agreement PDF. */
 export function PrepareAgreement({projectId,revisionId}:{projectId:string;revisionId:string}){
  const router=useRouter();
  const [pending,start]=useTransition();
@@ -41,7 +42,7 @@ export function PrepareAgreement({projectId,revisionId}:{projectId:string;revisi
     setMessage(result.message);
     if(result.saved){setPrepared(true);router.refresh();}
    })}>
-   {pending?'Preparing…':prepared?'Agreement prepared':'Prepare agreement'}
+   {pending?'Preparing…':prepared?'Project prepared':'Prepare project from Final quotation'}
   </button>
   {message&&<p role="status" className={'pv2-form-feedback '+(prepared?'good':'')}>{message}</p>}
  </div>;
@@ -50,7 +51,7 @@ export function PrepareAgreement({projectId,revisionId}:{projectId:string;revisi
 
 /** The existing Finance contract is activated here, never by creating a second
  * agreement or navigating to a parallel contract-detail workspace. */
-export function ProjectContractActivation({contractId,version}:{contractId:string;version:number}){
+export function ProjectContractActivation({contractId,version,offlineAgreement=false}:{contractId:string;version:number;offlineAgreement?:boolean}){
  const router=useRouter();
  const [pending,start]=useTransition();
  const [message,setMessage]=useState('');
@@ -60,12 +61,43 @@ export function ProjectContractActivation({contractId,version}:{contractId:strin
    onClick={()=>start(async()=>{
     const result=await financeCommand({
      action:'contract_status',id:contractId,version,status:'active',
-     reason:'Signed agreement evidence has been recorded for this project.',
+     reason:offlineAgreement
+      ?'Owner confirmed that the final quotation is the agreed scope and the separate agreement is handled offline or skipped.'
+      :'Signed agreement evidence has been recorded for this project.',
     });
     setMessage(result.message);
     if(result.id){setActivated(true);router.refresh();}
-   })}>{pending?'Activating…':activated?'Contract activated':'Activate signed contract'}</button>
+   })}>{pending?'Activating…':activated?'Contract activated':offlineAgreement?'Activate quote-based project':'Activate signed contract'}</button>
   {message&&<p role="status" className={'pv2-form-feedback '+(activated?'good':'bad')}>{message}</p>}
+ </div>;
+}
+
+/** Owner-only audited choice for businesses whose agreement is offline or
+ * intentionally omitted. This records an exception, never a fake signature. */
+export function SkipAgreementUpload({projectId,contractId}:{projectId:string;contractId:string}){
+ const router=useRouter();
+ const [pending,start]=useTransition();
+ const [message,setMessage]=useState('');
+ const [saved,setSaved]=useState(false);
+ const [confirmed,setConfirmed]=useState(false);
+ return <div className="pv2-offline-agreement">
+  <p className="pv2-hint">If the agreement is handled offline or you are proceeding from the final quotation alone, the owner can record that choice. This does not mark a customer signature or approval.</p>
+  <label className="pv2-offline-agreement-ack">
+   <input type="checkbox" checked={confirmed} onChange={event=>setConfirmed(event.currentTarget.checked)} disabled={pending||saved}/>
+   I am the company owner and authorize this project to proceed using its final quotation without a signed agreement upload.
+  </label>
+  <button type="button" className="pv2-button" disabled={pending||saved||!confirmed}
+   onClick={()=>{
+    start(async()=>{
+     const form=new FormData();
+     form.set('reason','Owner confirms the final quotation is the agreed project scope. The separate agreement was handled offline or is intentionally skipped; this does not represent a customer signature.');
+     form.set('reference','Owner authorized offline agreement option');
+     const result=await createAgreementException(projectId,contractId,form);
+     setMessage(result.message);
+     if(result.saved){setSaved(true);router.refresh();}
+    });
+   }}>{pending?'Recording owner decision…':saved?'Owner decision recorded':'Use final quotation without upload'}</button>
+  {message&&<p role="status" className={'pv2-form-feedback '+(saved?'good':'bad')}>{message}</p>}
  </div>;
 }
 
@@ -76,7 +108,7 @@ export function SyncStages({id}:{id:string}){
  return <div className="pv2-sync"><button className="pv2-button pv2-primary" disabled={pending} onClick={()=>{
   start(async()=>{const result=await syncConstructionFromProjectAgreement(id);
    setMessage(result.message);if(result.saved)router.refresh();});
- }}> {pending?'Checking quotation…':'Import stages from signed agreement'}</button>
+ }}> {pending?'Checking quotation…':'Import stages from Final quotation'}</button>
  {message&&<p role="status">{message}</p>}</div>;
 }
 export function AssignRole({projectId,users}:{projectId:string;users:{id:string;label:string}[]}){
@@ -101,7 +133,7 @@ export function AssignRole({projectId,users}:{projectId:string;users:{id:string;
   {state.message&&<p role="status" className="pv2-form-feedback">{state.message}</p>}
  </form>;
 }
-/** Primary next action after recording signed agreement: a floor plan,
+/** Primary next action after recording the agreement choice: a floor plan,
  * followed by technical review, structural/3D drawings and final client
  * design confirmation. Not a physical construction authorization. */
 export function ProjectDrawingForm({id,kind,label}:{id:string;kind?:string;label:string}){
@@ -120,21 +152,21 @@ export function ProjectDrawingForm({id,kind,label}:{id:string;kind?:string;label
   <label>Upload drawing (PDF or image, up to 8 MB)
    <input name="file" type="file" accept="application/pdf,image/png,image/jpeg,image/webp"/>
   </label>
-  <label>Drawing number or existing file reference
-   <input name="reference" maxLength={1500} placeholder="Optional when uploading a new PDF"/>
+  <label>Drawing number or existing WhatsApp / offline share reference
+   <input name="reference" maxLength={1500} placeholder="Upload the drawing or record its existing share/reference"/>
   </label>
   <label>Revision notes
    <textarea name="notes" rows={2} maxLength={3000} placeholder="Floor, requested layout and revision details"/>
   </label>
-  <p className="pv2-hint">Upload a new drawing or enter its existing reference. The same submission appears in the project drawing history.</p>
+  <p className="pv2-hint">If the plan was already shared in WhatsApp or offline, record the date/message/file reference here instead of uploading it again. This records submission for technical review; it does not record homeowner approval.</p>
   <button className="pv2-button pv2-primary" type="submit" disabled={pending}>
    {pending?'Saving drawing…':label}
   </button>
   {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
  </form>;
 }
-export function ProjectLifecycle({id,stage,canManage,designs,agreementSigned,industry,executionReady=false}:{
- id:string;stage:string;canManage:boolean;agreementSigned:boolean;industry:string;executionReady?:boolean;
+export function ProjectLifecycle({id,stage,canManage,designs,agreementCleared,industry,executionReady=false}:{
+ id:string;stage:string;canManage:boolean;agreementCleared:boolean;industry:string;executionReady?:boolean;
  designs:{id:string;kind:string;status:string}[];
 }){
  if(!canManage)return null;
@@ -146,7 +178,8 @@ export function ProjectLifecycle({id,stage,canManage,designs,agreementSigned,ind
  if(stage==='design'){
   const interior=/interior/i.test(industry);
   const initialKind=interior?'interior_layout':'architectural_plan';
-  const required=interior?['interior_layout','3d_design']:['architectural_plan','3d_design','structural_design'];
+  const required=interior?['interior_layout','structural_design','3d_design']:
+   ['architectural_plan','structural_design','3d_design','electrical_plan','plumbing_plan'];
   const latest=(kind:string)=>designs.find(x=>x.kind===kind);
   const first=latest(initialKind);
   const nextKind=required.find(kind=>kind!==initialKind&&latest(kind)?.status!=='approved');
@@ -156,11 +189,11 @@ export function ProjectLifecycle({id,stage,canManage,designs,agreementSigned,ind
   return <section className="pv2-panel pv2-lifecycle pv2-design-workflow">
    <div className="pv2-design-step-head">
     <span className="pv2-design-step-index">01</span>
-    <div><h2>{canSubmitPrimary?'Floor Plan Preparation':first?.status==='submitted'?'Floor Plan Under Review':'Floor Plan & Design Revisions'}</h2>
-     <p>Prepare the floor plan, review the drawing, and capture the client’s design changes before progressing to structural and 3D plans.</p></div>
+   <div><h2>{canSubmitPrimary?'Floor Plan Preparation':first?.status==='submitted'?'Floor Plan Under Review':'Floor Plan & Design Revisions'}</h2>
+     <p>Progress in order: floor plan and homeowner changes → structural design → 3D elevation → electrical and plumbing / MEP plans → final homeowner confirmation.</p></div>
    </div>
-   {!agreementSigned?<p className="pv2-stage-setup-notice">
-    A recorded signed agreement is required before submitting drawings. Open Quote &amp; Agreement to confirm signing.</p>:
+   {!agreementCleared?<p className="pv2-stage-setup-notice">
+    Record the agreement choice before submitting drawings: upload the offline signed copy or use the owner-authorized Final quotation option.</p>:
     <>
      {canSubmitPrimary?<ProjectDrawingForm id={id} kind={initialKind} label="Submit floor plan for review"/>:
       <p className="pv2-design-step-state">Floor plan: <strong>{first?.status==='approved'?'Technically approved':'Submitted for technical review'}</strong></p>}
@@ -186,7 +219,7 @@ export function ProjectLifecycle({id,stage,canManage,designs,agreementSigned,ind
        <p className="pv2-hint">A manager-recorded approval is not an authenticated digital signature.</p>
       </ProjectForm>
      </details>:
-      <p className="pv2-hint">Client design confirmation becomes available after all required floor plan, structural and 3D revisions pass technical review. Design work may be prepared while financial execution checks remain pending.</p>}
+      <p className="pv2-hint">Final homeowner confirmation becomes available after required plans pass technical review. Record a reference for plans already shared externally; design stages must still be reviewed before site execution.</p>}
     </>}
   </section>;
  }

@@ -37,7 +37,13 @@ async function call(
       p_input: input,
     });
     if (error) throw new Error(error.message);
-    revalidatePath('/dashboard/projects/' + projectId + '/site');
+    for (const path of [
+      '/dashboard/projects/' + projectId,
+      '/dashboard/projects/' + projectId + '/documents',
+      '/dashboard/projects/' + projectId + '/site',
+      '/dashboard/projects/' + projectId + '/timeline',
+      '/dashboard/projects/' + projectId + '/milestones',
+    ]) revalidatePath(path);
     return {
       saved: true,
       message: 'Agreement record saved. The contract history is preserved.',

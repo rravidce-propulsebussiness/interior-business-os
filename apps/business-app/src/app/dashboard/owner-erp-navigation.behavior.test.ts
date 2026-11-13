@@ -31,6 +31,10 @@ function projectManagement(context: Context | null) {
   return module(context, 'Project Management');
 }
 
+function projects(context: Context | null) {
+  return module(context, 'Projects');
+}
+
 function boq(context: Context | null) {
   return module(context, 'BOQ & Estimating');
 }
@@ -82,6 +86,15 @@ describe('ERP uses the existing owner workspace and access policy', () => {
         },
       ],
     });
+  });
+
+  it('opens Projects directly without a one-item dropdown for project owners', () => {
+    expect(projects(company(['project.view']))).toEqual({
+      label: 'Projects',
+      href: '/dashboard/projects',
+      icon: 'projects',
+    });
+    expect(projectManagement(company(['project.view']))).toBeUndefined();
   });
 
   it('shows BOQ revisions and rate recipes in their own menu', () => {

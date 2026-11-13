@@ -3,9 +3,9 @@ import { OwnerIcon } from '../owner-shell';
 import { floorName } from './project-flow';
 import type { QuotePlan } from './project-v2-data';
 
-/** The construction plan generated automatically from the project's quotation.
- * It is a read-only preview until the agreement freezes it into live stages;
- * no stage, payment or progress record is created by viewing it. */
+/** The construction plan generated automatically from the project's final
+ * quotation. It is a read-only preview until the owner prepares its project
+ * contract and records an agreement choice; viewing creates no records. */
 export function QuotePlanView({
   plan,
   projectId,
@@ -48,8 +48,8 @@ export function QuotePlanView({
           </h2>
           <p>
             {plan.frozen
-              ? 'Generated from the signed quotation. Live stages are being prepared from it.'
-              : 'Generated automatically from the quotation and its payment stages. It becomes the live timeline as soon as the agreement is prepared — nothing to enter by hand.'}
+              ? 'Generated from the Final quotation. Live stages keep its saved scope and payment groups.'
+              : 'Generated automatically from the Final quotation and its payment groups. Prepare the project contract once; the owner may upload the offline agreement or record the quotation as the agreed scope.'}
           </p>
         </div>
       </header>

@@ -17,8 +17,26 @@ export type QuotedTimelineMilestone = {
   name: string;
   percent: number;
   stageCodes: string[];
+  durationHint: string;
   steps: QuotedTimelineStep[];
 };
+
+/** Reference ranges transcribed from the uploaded SG Homes agreement's
+ * schedule. They guide planning only; the project's quotation remains the
+ * source of its actual payment terms and the site log records actual dates. */
+function referenceDuration(name: string, stageCodes: readonly string[]): string {
+  const text = name.toLowerCase();
+  if (/material dump|material deliver|material.*brick|material.*tile/.test(text)) return '2–4 days';
+  if (/brickwork|door frame|conduiting/.test(text)) return '40–70 days';
+  if (/plaster|sajja|shelves/.test(text)) return '20–30 days';
+  if (/site inspection|design|clearing|excavat/.test(text)) return '15–20 days';
+  if (/pcc|footing|column|plinth|sump|morram|slab/.test(text)) return '15–20 days';
+  if (/tile|granite|paint|door|window|railing|grill|finish|handover|putty|wiring/.test(text)) return '15–20 days';
+  if (stageCodes.some(code => /^(SITE_PREP|FOUNDATION|PLINTH|RCC)(\/|$)/.test(code))) return '15–20 days';
+  if (stageCodes.some(code => /^(MASONRY)(\/|$)/.test(code))) return '40–70 days';
+  if (stageCodes.some(code => /^(INTERNAL_PLASTER|EXTERNAL_PLASTER)(\/|$)/.test(code))) return '20–30 days';
+  return '';
+}
 
 export function quoteMilestoneProjection(
   savedTerms: string,
@@ -39,6 +57,7 @@ export function quoteMilestoneProjection(
     name: payment.name,
     percent: payment.percent,
     stageCodes: [...payment.stageCodes],
+    durationHint: referenceDuration(payment.name, payment.stageCodes),
     steps: (flow[String(paymentIndex)] ?? []).flatMap((step) => {
       // Only work explicitly saved inside THIS payment is rendered.
       if (!payment.stageCodes.includes(step.code)) return [];
