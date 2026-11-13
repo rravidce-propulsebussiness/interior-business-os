@@ -1,5 +1,6 @@
 import { renderPdf } from '@business-os/shared/pdf';
 import { customerDocumentSchema, type CustomerDocument } from '@business-os/core/quotation-document';
+import type { QuotationDocumentKind } from '@business-os/core/quotation-document';
 
 /**
  * Two published concept photographs are decorative and externally hosted.
@@ -28,6 +29,7 @@ export function safeQuotationPrintHtml(html: string): string {
 export async function renderQuotationPdf(
   html: string,
   document?: CustomerDocument,
+  kind: QuotationDocumentKind = 'quotation',
 ): Promise<Buffer> {
   if (document) {
     customerDocumentSchema.parse(document);
@@ -35,7 +37,7 @@ export async function renderQuotationPdf(
   return renderPdf(safeQuotationPrintHtml(html), {
     brochure: true,
     ...(document ? {
-      title: 'Quotation ' + document.number + ' R' + document.revision,
+      title: (kind === 'agreement' ? 'Agreement draft ' : 'Quotation ') + document.number + ' R' + document.revision,
       author: document.header.branding.name,
     } : {}),
   });
