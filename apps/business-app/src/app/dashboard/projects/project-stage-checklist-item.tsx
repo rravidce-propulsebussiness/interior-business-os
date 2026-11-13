@@ -1,16 +1,17 @@
 'use client';
 
-import { useActionState, useState, type ReactNode } from 'react';
+import { useActionState, useState, useTransition, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveProjectStageItem } from './[id]/site/stage-checklist-actions';
+import { updateWorkItem } from './[id]/site/work-item-actions';
 import {ProjectItemSchedule,type ProjectItemScheduleRow} from './project-item-schedule';
 
 type Result={saved:boolean;message:string};
 type Photo={id:string;filename:string};
-export function StageChecklistItem({projectId,stageId,kind,index,title,status,notes,photos,
-  canEdit=false,photoId='',materialPanel,checksHref,schedule,canPlan=false,scheduleKind,planningMode,today}:{
+export function StageChecklistItem({projectId,stageId,kind,index,title,status,notes,skipReason='',photos,
+  canEdit=false,canSkip=false,scheduledToday=false,photoId='',materialPanel,checksHref,schedule,canPlan=false,scheduleKind,planningMode,today}:{
   projectId:string;stageId:string;kind:'work'|'check';index:number;title:string;
-  status:string;notes?:string;photos:Photo[];canEdit?:boolean;photoId?:string;
+  status:string;notes?:string;skipReason?:string;photos:Photo[];canEdit?:boolean;canSkip?:boolean;scheduledToday?:boolean;photoId?:string;
   materialPanel?:ReactNode;checksHref?:string;
   schedule?:ProjectItemScheduleRow|undefined;canPlan?:boolean;
   scheduleKind?:'work'|'check'|'test';planningMode?:'full'|'site';today?:string;
@@ -19,6 +20,11 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
  const [selectedPhotoId,setSelectedPhotoId]=useState(photoId);
  const [evidenceEdited,setEvidenceEdited]=useState(false);
  const [materialsOpen,setMaterialsOpen]=useState(false);
+ const [skipOpen,setSkipOpen]=useState(false);
+ const [skipReasonValue,setSkipReasonValue]=useState('');
+ const [skipMessage,setSkipMessage]=useState('');
+ const [skipSaved,setSkipSaved]=useState(false);
+ const [skipPending,startSkip]=useTransition();
  const showSiteChecks=()=>{
    if(!checksHref)return;
    const target=document.getElementById(checksHref.replace(/^#/,'')) as HTMLDetailsElement|null;
@@ -39,14 +45,28 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
   if(result.saved)router.refresh();
   return result;
  },{saved:false,message:''});
- const finished=status==='completed'||status==='passed';
+ const finished=status==='completed'||status==='passed'||status==='skipped';
+ const skipped=status==='skipped';
  const selectedPhoto=photos.find(p=>p.id===selectedPhotoId);
  const previewPhotoId=selectedPhoto?.id || (selectedPhotoId===photoId?photoId:'');
- return <details className={'pv2-item-checklist '+(finished?'is-done':'')}>
+ const runWorkCommand=async(action:'skip'|'reopen',reason='')=>{
+  const form=new FormData();form.set('action',action);if(reason)form.set('reason',reason);
+  const result=await updateWorkItem({projectId,stageId,index,title},form);
+  setSkipMessage(result.message);setSkipSaved(result.saved);
+  if(result.saved){setSkipOpen(false);if(action==='skip')setSkipReasonValue('');router.refresh();}
+ };
+ const skipWork=()=>{
+  const reason=skipReasonValue.trim();
+  if(reason.length<10){setSkipMessage('Explain why this work does not apply (at least 10 characters).');return;}
+  setSkipMessage('');setSkipSaved(false);startSkip(async()=>{await runWorkCommand('skip',reason);});
+ };
+ const reopenSkipped=()=>{setSkipMessage('');setSkipSaved(false);startSkip(async()=>{await runWorkCommand('reopen');});};
+ return <details className={'pv2-item-checklist '+(finished?'is-done ':'')+(skipped?'is-skipped':'')}>
   <summary className="pv2-item-checklist-summary">
-   <span aria-hidden="true" className="pv2-item-checklist-icon">{finished?'✓':status==='failed'?'!':'○'}</span>
+   <span aria-hidden="true" className="pv2-item-checklist-icon">{skipped?'–':finished?'✓':status==='failed'?'!':'○'}</span>
    <span className="pv2-item-checklist-copy"><strong>{title}</strong>
-    <small>{finished?'Completed':status==='failed'?'Failed — recheck needed':status==='recheck'?'Recheck required':'Pending'}</small></span>
+    {scheduledToday&&<span className="pv2-item-today">Today</span>}
+    <small>{skipped?'Not applicable':finished?'Completed':status==='failed'?'Failed — recheck needed':status==='recheck'?'Recheck required':'Pending'}</small></span>
    <span aria-hidden="true" className="pv2-item-checklist-chevron">⌄</span>
   </summary>
   <div className="pv2-item-checklist-inner">
@@ -65,8 +85,9 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
    </section>}
    {photoId&&<a href={'/dashboard/projects/'+projectId+'/site/media/'+photoId}
      target="_blank" rel="noopener noreferrer" className="pv2-check-photo-link">View recorded photo</a>}
-   {notes&&<p className="pv2-hint">{notes}</p>}
-   {canEdit?<form action={submit} className="pv2-form">
+   {skipped&&skipReason&&<p className="pv2-item-skip-reason">Skipped with reason: {skipReason}</p>}
+   {notes&&!skipped&&<p className="pv2-hint">{notes}</p>}
+   {canEdit&&!skipped?<form action={submit} className="pv2-form">
     <label>Result
      <select name="decision" defaultValue={finished?'reopen':'done'}>
       {!finished&&<option value="done">{kind==='work'?'Complete this work':'Pass this check'}</option>}
@@ -96,7 +117,24 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
     <button type="submit" className="pv2-button pv2-primary" disabled={pending}>
      {pending?'Saving…':'Save this item'}</button>
     {!evidenceEdited&&state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
-   </form>:<p className="pv2-hint">Only authorized site engineers or project managers can update this item.</p>}
+   </form>:!canEdit&&!skipped?<p className="pv2-hint">Only authorized site engineers or project managers can update this item.</p>:null}
+   {canSkip&&kind==='work'&&status==='pending'&&<div className="pv2-item-skip">
+    {!skipOpen?<button type="button" className="pv2-button pv2-outline" onClick={()=>setSkipOpen(true)}>Mark not applicable</button>:
+     <div className="pv2-item-skip-form">
+      <label>Reason this work does not apply<textarea rows={2} maxLength={1000} minLength={10}
+       value={skipReasonValue} onChange={event=>setSkipReasonValue(event.target.value)}
+       placeholder="Explain the approved scope change or site condition"/></label>
+      <p className="pv2-hint">Contracted work can only be skipped with an approved change order. This decision is audited.</p>
+      <div><button type="button" className="pv2-button pv2-primary" disabled={skipPending||skipReasonValue.trim().length<10}
+       onClick={skipWork}>{skipPending?'Saving…':'Save skip reason'}</button>
+       <button type="button" className="pv2-button pv2-outline" onClick={()=>setSkipOpen(false)}>Cancel</button></div>
+     </div>}
+    {skipMessage&&<p role="status" className={'pv2-form-feedback '+(skipSaved?'good':'bad')}>{skipMessage}</p>}
+   </div>}
+   {canEdit&&skipped&&<div className="pv2-item-skip">
+    <button type="button" className="pv2-button pv2-outline" disabled={skipPending} onClick={reopenSkipped}>{skipPending?'Reopening…':'Reopen work item'}</button>
+    {skipMessage&&<p role="status" className={'pv2-form-feedback '+(skipSaved?'good':'bad')}>{skipMessage}</p>}
+   </div>}
 
   </div>
  </details>;

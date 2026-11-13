@@ -19,7 +19,8 @@ import { projectTimelineFeed } from './project-timeline-feed';
 import { ProjectQuotationLinker } from './project-quotation-linker';
 import { ProjectFlow } from './project-flow-view';
 import { QuotePlanView } from './project-quote-plan';
-import { flowRole } from './project-flow';
+import { flowRole, measurementPrompts, projectWorkItems, stageLabel } from './project-flow';
+import { WorkItemCard, type WorkItemView } from './project-work-item-card';
 import { StageActivationControl } from './project-stage-activation';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey,ProjectAdvanceAction } from './project-next-forms';
@@ -378,6 +379,14 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
  };
  // QUOTED_SCOPE is contract metadata, not an executable construction stage.
  const timelineStages=projectTimelineStages(d.stages);
+ const projectedWork=projectWorkItems({stages:timelineStages,work:d.stageProgress.work,
+  optional:d.flow.optional,plans:d.itemPlans,execution:d.stageExecution});
+ const projectedWorkByKey=new Map(projectedWork.map(item=>[item.key,item]));
+ const people=new Map((site?.memberOptions??[]).map(person=>[person.id,person.label]));
+ const engineers=(site?.team??[]).filter(person=>person.active===true&&
+  ['site_engineer','manager'].includes(stringValue(person.role))).map(person=>({
+   id:stringValue(person.user_id),label:people.get(stringValue(person.user_id))??pretty(person.role),
+  }));
  const executionById=new Map(d.stageExecution.map(item=>[item.stageId,item]));
  const visualStatuses=timelineStages.map(stage=>{
   const effective=effectiveProjectStageStatus(stage,evidence);
@@ -407,6 +416,9 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
  const todayInIndia=new Intl.DateTimeFormat('en-CA',{
   timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit',
  }).format(new Date());
+ const tomorrowInIndia=new Intl.DateTimeFormat('en-CA',{
+  timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit',
+ }).format(new Date(Date.now()+86400000));
  const upcoming=[...d.itemPlans].sort((a,b)=>a.plannedStart.localeCompare(b.plannedStart))
   .filter(x=>x.plannedFinish>=todayInIndia).slice(0,12);
  const progressForecast=forecastWork(timelineStages,d.itemPlans,d.stageProgress.work,todayInIndia);
@@ -485,6 +497,16 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
       const unassignedStageMaterials=stageMaterials.filter(m=>stringValue(m.activity_index)==='');
       const finishedActivities=stage.activities.filter((_,i)=>stageWork.some(x=>
        Number(x.index)===i&&stringValue(x.status)==='completed')).length;
+      const skippedActivities=stage.activities.filter((_,i)=>stageWork.some(x=>
+       Number(x.index)===i&&stringValue(x.status)==='skipped')).length;
+      const workProgressPct=stage.activities.length?Math.round(finishedActivities/stage.activities.length*100):0;
+      const latestQcByIndex=new Map<number,typeof d.stageQc.records[number]>();
+      for(const review of [...d.stageQc.records].filter(x=>stringValue(x.stage_id)===stage.id)
+       .sort((a,b)=>stringValue(b.reviewed_at).localeCompare(stringValue(a.reviewed_at)))){
+       if(!latestQcByIndex.has(Number(review.index)))latestQcByIndex.set(Number(review.index),review);
+      }
+      const qcPassed=[...latestQcByIndex.values()].filter(x=>stringValue(x.decision)==='passed').length;
+      const qcFailed=[...latestQcByIndex.values()].filter(x=>stringValue(x.decision)==='failed').length;
       const formalQc=d.stageProgress.qualityStages.find(x=>stringValue(x.stage_id)===stage.id);
       const formalInspections=Array.isArray(formalQc?.inspections)?formalQc.inspections as Record<string,unknown>[]:[];
       const formalReviews=Array.isArray(formalQc?.reviews)?formalQc.reviews as Record<string,unknown>[]:[];
@@ -519,8 +541,8 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         scheduleKind={kind}/>;
       };
       const renderWorkItem=(work:string,i:number)=>{
-
-           const record=stageWork.find(x=>Number(x.index)===i);
+           const workSchedule=planFor(stage.id,'work',i);
+           const scheduledToday=Boolean(workSchedule&&workSchedule.plannedStart<=todayInIndia&&workSchedule.plannedFinish>=todayInIndia);
            const workMaterials=stageMaterials.filter(m=>stringValue(m.activity_index)===String(i));
            const hasExplicitMaterials=orderedFlow.some(step=>step.kind==='material');
            const namedMaterials=new Set(orderedFlow.filter(step=>step.kind==='material')
@@ -547,12 +569,25 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
               </details>}
               {!workMaterials.length&&!allowMaterials&&<p className="pv2-hint">No material requests yet.</p>}
              </div>:undefined;
-           return <StageChecklistItem key={i} projectId={d.project.id} stageId={stage.id}
-             kind="work" index={i} title={work} status={stringValue(record?.status)||'pending'}
-             notes={stringValue(record?.notes)} photoId={stringValue(record?.photo_id)}
-             photos={photos} canEdit={workAllowed&&!complete}
-             schedule={planFor(stage.id,'work',i)} canPlan={canPlan&&!complete} planningMode={planningMode} today={todayInIndia}
-             checksHref={orderedFlow.length?'':'#pv2-stage-checks-'+stage.id} materialPanel={materialPanel}/>;
+           const projected=projectedWorkByKey.get(stage.id+':'+i);
+           if(!projected)return null;
+           const workView:WorkItemView={key:projected.key,stageId:stage.id,index:i,title:projected.title,
+            stageLabel:stageLabel(projected.stage),status:projected.status,stageStatus:projected.stageStatus,
+            blockers:projected.blockers,optional:projected.optional,assigneeId:projected.assigneeId,
+            assigneeLabel:projected.assigneeId?(projected.assigneeId===d.flow.userId?'You':people.get(projected.assigneeId)??'Assigned'):'',
+            crew:projected.crew,skipReason:projected.skipReason,measurements:projected.measurements,
+            prompts:measurementPrompts(projected.title),planned:projected.plannedStart?shortDate(projected.plannedStart):'',
+            hasPhoto:Boolean(projected.photoId),openMaterials:workMaterials.filter(material=>
+             ['requested','approved','ordered'].includes(stringValue(material.status))).length};
+           return <div key={i} className="pv2-work-item-entry">
+            <WorkItemCard projectId={d.project.id} item={workView} canWork={workAllowed&&!complete}
+             canOwn={site?.canManage===true} canRequest={allowMaterials} engineers={engineers}
+             boq={d.flow.boq} tomorrow={tomorrowInIndia} scheduledToday={scheduledToday}/>
+            <ProjectItemSchedule projectId={d.project.id} stageId={stage.id} kind="work" index={i}
+             title={work} item={workSchedule} canPlan={canPlan&&!complete}
+             planningMode={planningMode} today={todayInIndia}/>
+            {materialPanel}
+           </div>;
           
       };
       const availableRecords:StageLinkOption[]=[
@@ -567,6 +602,12 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         <span className="pv2-stage-number">{complete?'✓':index+1}</span>
         <span className="pv2-stage-title-block"><strong>{stage.title}</strong>
          <small>{stage.floor_code?pretty(stage.floor_code)+' · ':''}{stage.phase?pretty(stage.phase)+' · ':''}{stage.activities.length} work items</small>
+         {!!stage.activities.length&&<span className="pv2-stage-progress" aria-label={`${finishedActivities} of ${stage.activities.length} work items complete`}>
+          <span className="pv2-stage-progress-track" role="progressbar" aria-label={stage.title+' work progress'}
+           aria-valuemin={0} aria-valuemax={100} aria-valuenow={workProgressPct}><span style={{width:workProgressPct+'%'}}/></span>
+          <small>{finishedActivities}/{stage.activities.length} work complete{skippedActivities>0?' · '+skippedActivities+' not applicable':''}
+           {' · Checks '+passed+'/'+checks.length}{' · QC '+qcPassed+'/'+stage.inspectionTopics.length}{qcFailed>0?' · '+qcFailed+' failed':''}</small>
+         </span>}
          <span className={'pv2-stage-schedule-summary '+(stagePlan.count?'is-planned':'')}>
           <span aria-hidden="true">▦</span>
           {stagePlan.count
@@ -666,8 +707,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
         </div>}
 
         {physicalStage&&
-          (stageExecution?.status==='ready_for_qc'||
-           d.stageQc.records.some(review=>review.stage_id===stage.id))&&
+          (remainingQc.length>0||d.stageQc.records.some(review=>review.stage_id===stage.id))&&
           <StageOnsiteQcReview projectId={d.project.id} stageId={stage.id}
            stageName={stage.title} topics={remainingQc.map(item=>item.name)}
            topicIndices={remainingQc.map(item=>item.i)}
@@ -690,7 +730,7 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
          <h4>{orderedFlow.length?'Work & inspections in execution order':'Work checklist'} <small>{finishedActivities}/{stage.activities.length} work completed</small></h4>
          <p className="pv2-hint">{orderedFlow.length?'Follow the quoted order. Site checks and tests use actual photo evidence; company QC is a separate on-site pass/fail, not an automatic tick.':'Open any work item to record progress/photos, request materials, or view existing orders.'}</p>
          <div className="pv2-stage-task-entries">
-          {orderedFlow.length>0?orderedFlow.map((step,position)=>{
+          <>{orderedFlow.length>0?orderedFlow.map((step,position)=>{
            if(step.kind==='payment'){
             const milestone=d.quotePaymentTriggers[step.index];
             if(!milestone)return null;
@@ -748,6 +788,8 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
             {renderCheckItem(title,step.index,step.kind==='test'?'test':'check')}
            </div>;
           }):stage.activities.map((work,i)=>renderWorkItem(work,i))}
+          {projectedWork.filter(item=>item.stage.id===stage.id&&item.optional)
+           .map(item=>renderWorkItem(item.title,item.index))}</>
          </div>
         </div>}
         {unpositionedPayments.length>0&&startingPayments.length===0&&d.permissions.finance&&orderedFlow.length===0&&<div className="pv2-command-payments">
