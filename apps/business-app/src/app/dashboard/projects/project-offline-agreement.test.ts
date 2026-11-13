@@ -24,12 +24,16 @@ describe('optional offline agreement with final quotation', () => {
     expect(ui).toContain('Use Final quotation without agreement upload');
     expect(forms).toContain('I am the company owner');
     expect(forms).toContain('disabled={pending||saved||!confirmed}');
-    expect(forms).toContain('createAgreementException(projectId,contractId,form)');
+    expect(forms).toContain(
+      'createAgreementException(projectId,contractId,form)',
+    );
   });
 
   it('records an owner exception instead of claiming a customer signature', () => {
     expect(action).toContain("call(projectId, contractId, 'owner_exception'");
-    expect(forms).toContain('This does not mark a customer signature or approval.');
+    expect(forms).toContain(
+      'This does not mark a customer signature or approval.',
+    );
     expect(ui).toContain('This is not recorded as a customer signature.');
     expect(data).toContain(
       "['signed_copy_recorded','owner_exception'].includes(stringValue(agreement.clearance_type))",
@@ -40,15 +44,23 @@ describe('optional offline agreement with final quotation', () => {
     expect(migration).toContain("'signed_copy_recorded','owner_exception'");
     expect(migration).toContain('private.sync_signed_quotation_schedule');
     expect(migration).toContain('public.project_advance_proforma_prepare');
-    expect(databaseTest).toContain('offline agreement choice changed the quote payment groups');
-    expect(databaseTest).toContain("count(*) from public.payments where contract_id=contract)<>1");
+    expect(databaseTest).toContain(
+      'offline agreement choice changed the quote payment groups',
+    );
+    expect(databaseTest).toContain(
+      'count(*) from public.payments where contract_id=contract)<>1',
+    );
   });
 
   it('allows the saved customer Final quote to seed the project while keeping digital acceptance strict', () => {
     expect(quoteSetupGuard).toContain("r.status not in ('draft','issued')");
     expect(quoteSetupGuard).toContain("q.status not in ('draft','issued')");
     expect(quoteSetupGuard).toContain('public.quotation_final_choices');
-    expect(quoteSetupGuard).toContain("if r.status<>'issued' or q.status<>'issued'");
-    expect(quoteSetupGuard).toContain('Digitally accepted contract source mismatch');
+    expect(quoteSetupGuard).toContain(
+      "if r.status<>'issued' or q.status<>'issued'",
+    );
+    expect(quoteSetupGuard).toContain(
+      'Digitally accepted contract source mismatch',
+    );
   });
 });
