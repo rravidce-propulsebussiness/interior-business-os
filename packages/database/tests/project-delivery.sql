@@ -58,14 +58,15 @@ begin
  then raise exception 'FAIL: advance invoice not issued';end if;
  if (public.project_agreement_read(org,project)->>'execution_authorized')<>'false'
  then raise exception 'FAIL: signed agreement bypassed recorded advance';end if;
- foreach kind in array array['architectural_plan','3d_design','structural_design'] loop
+ foreach kind in array array['architectural_plan','structural_design','3d_design'] loop
    result=public.project_site_command(org,project,'design_submit',jsonb_build_object('kind',kind,'reference','Approved reference drawing '||kind));
    design_id=(result->>'id')::uuid;
    perform public.project_site_command(org,project,'design_decide',jsonb_build_object('id',design_id,'decision','approved','note','Reviewed'));
-   -- Structural and 3D work starts only after the homeowner approves the floor plan.
-   if kind='architectural_plan' then
+   -- Approve the floor plan before structural design, and the reviewed
+   -- structural design before 3D work begins.
+   if kind in ('architectural_plan','structural_design') then
      perform public.project_design_client_decision(org,project,design_id,'approved',
-       'Homeowner approved the floor plan at the site meeting');
+       'Homeowner approved the '||kind||' at the site meeting');
    end if;
  end loop;
  begin
