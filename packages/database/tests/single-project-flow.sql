@@ -306,7 +306,7 @@ end$design_history$;
 set local role authenticated;
 
 ------------------------------------------------------------------------------
--- 4. Structural and 3D in parallel, approvals, execution release.
+-- 4. Structural, 3D and MEP in sequence, approvals, execution release.
 ------------------------------------------------------------------------------
 select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
 do $design_read$
@@ -319,19 +319,34 @@ end$design_read$;
 select pg_temp.as_user('66666666-6666-4666-8666-666666666666');
 select set_config('test.st',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
   '{"kind":"structural_design","reference":"ST-01 structural drawings and bar bending schedule"}')->>'id'),true);
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
+  jsonb_build_object('id',current_setting('test.st'),'decision','approved','note','Structural clearance verified'));
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'approved','structural_design','Structure approved');
 select pg_temp.as_user('33333333-3333-4333-8333-333333333333');
 select set_config('test.vis',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
   '{"kind":"3d_design","reference":"3D-01 exterior and interior views"}')->>'id'),true);
 select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
 select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
-  jsonb_build_object('id',current_setting('test.st'),'decision','approved','note','Structural clearance verified'));
-select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
   jsonb_build_object('id',current_setting('test.vis'),'decision','approved','note','Visualization checked'));
--- Physical work cannot start before the homeowner approves the design set.
-select pg_temp.expect_fail(format($$select public.project_site_command(%L,%L,'execution_start','{}')$$,
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'approved','3d_design','3D design approved');
+select pg_temp.as_user('33333333-3333-4333-8333-333333333333');
+select set_config('test.electrical',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
+  '{"kind":"electrical_plan","reference":"MEP-E-01 electrical conduit and load plan"}')->>'id'),true);
+select set_config('test.plumbing',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
+  '{"kind":"plumbing_plan","reference":"MEP-P-01 water and drainage plan"}')->>'id'),true);
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
+  jsonb_build_object('id',current_setting('test.electrical'),'decision','approved','note','Electrical plan technically reviewed'));
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
+  jsonb_build_object('id',current_setting('test.plumbing'),'decision','approved','note','Plumbing plan technically reviewed'));
+-- Physical work cannot start before the homeowner approves the complete design set.
+select pg_temp.expect_fail(format('select public.project_site_command(%L,%L,''execution_start'',''{}'')',
   pg_temp.org(),pg_temp.project()),'42501','execution blocked before design approval');
 select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
-select public.client_portal_design_decide(pg_temp.project(),'approved',null,'All drawings approved');
+select public.client_portal_design_decide(pg_temp.project(),'approved',null,'All required construction drawings approved');
 select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
 select public.project_site_command(pg_temp.org(),pg_temp.project(),'execution_start','{}');
 do $plan$

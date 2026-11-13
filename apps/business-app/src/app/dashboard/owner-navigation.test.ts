@@ -86,7 +86,9 @@ describe('one authorized company navigation on every dashboard page', () => {
     expect(canonical).toContain('projectChildren.push(...erpChildren)');
     expect(canonical).toContain('boqChildren.push');
     expect(canonical).toContain("label: 'BOQ & Estimating'");
-    expect(canonical).toContain("if (!has('project.view', 'projects') && projectChildren.length)");
+    expect(canonical).toContain(
+      "if (!has('project.view', 'projects') && projectChildren.length)",
+    );
     expect(canonical).not.toContain("label: 'Construction ERP'");
     expect(canonical).not.toContain("label: 'My Work'");
     expect(canonical).toContain("has('project.view', 'projects')");

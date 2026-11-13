@@ -40,7 +40,9 @@ describe('project management navigation and trusted portfolio boundaries', () =>
       href: '/dashboard/projects',
       icon: 'projects',
     });
-    expect(items.find((item) => item.label === 'Project Management')).toBeUndefined();
+    expect(
+      items.find((item) => item.label === 'Project Management'),
+    ).toBeUndefined();
     const labels = JSON.stringify(items);
     for (const removed of [
       'Task Board',

@@ -34,8 +34,9 @@ begin
  values(root,org,customer,project,'SITE-AGREEMENT-TEST');
  insert into public.quotation_revisions(
    id,organization_id,quotation_id,project_id,revision_number,currency,
-   valid_until,document_snapshot)
+   valid_until,terms,document_snapshot)
  select revision,org,root,project,1,'INR',current_date+30,
+ E'[STAGE_PAYMENT_PLAN]\nTEST ONLY — Foundation and plinth|20\nTEST ONLY — Structural frame and slabs|50\nTEST ONLY — Masonry, services and handover|30\n[/STAGE_PAYMENT_PLAN]',
  jsonb_build_object('branding',branding,
    'customer',jsonb_build_object('name','Site Fixture Customer','billing_address','{}'::jsonb),
    'project',jsonb_build_object('name','Site Fixture Project','site_address','{}'::jsonb),

@@ -1029,6 +1029,28 @@
   border-color: #ffd8c0;
   background: linear-gradient(180deg, #fffaf6, #fff 140px);
 }
+.pf-milestone-start {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-color: #ffd8c0;
+  background: #fffaf6;
+}
+.pf-milestone-start h2 {
+  margin: 0;
+  color: #18243c;
+  font-size: 17px;
+}
+.pf-milestone-start p {
+  max-width: 760px;
+  margin: 5px 0 0;
+  color: #6f7b8e;
+  font-size: 13px;
+}
+.pf-milestone-start .pv2-hint {
+  margin: 0;
+}
 .pf-quote-pay-strip {
   list-style: none;
   margin: 0 0 4px;
@@ -1136,6 +1158,10 @@
   text-decoration: none;
 }
 @media (max-width: 640px) {
+  .pf-milestone-start {
+    align-items: stretch;
+    flex-direction: column;
+  }
   .pf-quote-detail {
     padding-left: 14px;
   }

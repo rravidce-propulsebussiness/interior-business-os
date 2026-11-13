@@ -1,12 +1,6 @@
 \set ON_ERROR_STOP on
 begin;
 \ir site-agreement-quotation-fixture.sql
--- Preserve the saved quote payment groups exactly; the agreement helper will
--- import these same three rows rather than making a replacement schedule.
-update public.quotation_revisions r set terms=E'[STAGE_PAYMENT_PLAN]\nTEST ONLY — Foundation and plinth|20\nTEST ONLY — Structural frame and slabs|50\nTEST ONLY — Masonry, services and handover|30\n[/STAGE_PAYMENT_PLAN]'
- where r.quotation_id=(select id from public.quotations
-   where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
-     and quotation_number='SITE-AGREEMENT-TEST');
 set local role authenticated;
 \ir site-agreement-helper.sql
 
@@ -51,17 +45,10 @@ begin
  raise notice 'PASS: signed-copy evidence, real advance and revocation keep their guards';
 end$$;
 
--- Test the explicit owner choice as a fresh quote-backed clearance. The
--- exception event, not a signed PDF, must activate the original quote groups.
+-- Test the explicit owner choice after revoking signed-copy clearance.
+-- Reuse the same contract and immutable quote schedule; the exception event
+-- must restore execution readiness without changing payment history or groups.
 reset role;
-delete from public.payment_schedule_items where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
- and contract_id=(select id from public.contracts where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
-   and project_id=(select id from public.projects where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
-     and code='demo-3bhk'));
-delete from public.payment_schedules where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
- and contract_id=(select id from public.contracts where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
-   and project_id=(select id from public.projects where organization_id='dddddddd-dddd-4ddd-8ddd-dddddddddddd'::uuid
-     and code='demo-3bhk'));
 set local role authenticated;
 do $$
 declare
