@@ -14,6 +14,9 @@ describe('optional offline agreement with final quotation', () => {
   const quoteSetupGuard = read(
     '../../../../../../packages/database/supabase/migrations/20261113161437_allow_final_quote_project_agreement.sql',
   );
+  const stageGuidanceGuard = read(
+    '../../../../../../packages/database/supabase/migrations/20261113163106_allow_saved_final_quote_stage_guidance.sql',
+  );
   const databaseTest = read(
     '../../../../../../packages/database/tests/project-agreement.sql',
   );
@@ -61,6 +64,18 @@ describe('optional offline agreement with final quotation', () => {
     );
     expect(quoteSetupGuard).toContain(
       'Digitally accepted contract source mismatch',
+    );
+  });
+
+  it('syncs frozen quote guidance only from the pending project current Final quote', () => {
+    expect(stageGuidanceGuard).toContain(
+      "rev.status='draft' and c.status='pending'",
+    );
+    expect(stageGuidanceGuard).toContain('c.acceptance_id is null');
+    expect(stageGuidanceGuard).toContain('q.current_revision_id=rev.id');
+    expect(stageGuidanceGuard).toContain('public.quotation_final_choices');
+    expect(stageGuidanceGuard).toContain(
+      'execute replace(definition,old_gate,new_gate)',
     );
   });
 });
