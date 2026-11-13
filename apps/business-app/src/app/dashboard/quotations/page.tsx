@@ -292,7 +292,7 @@ export default async function Quotations({
         {finalStatusAvailable && revision?.quotation_id===finalByCustomer.get(customerId) &&
           <span className="qs-final-label">{manualByCustomer[customerId]===revision?.quotation_id?
           '★ Final':'Latest'}</span>}
-        {shared ? <span className="qs-quotes-state qs-state-shared">Shared</span> : !sharingAvailable ? <span className="qs-quotes-state">Sharing unavailable</span> : row.status === 'draft' ? <span className="qs-quotes-state">Saved</span> : null}
+        {shared ? <span className="qs-quotes-state qs-state-shared">Shared</span> : row.status === 'draft' ? <span className="qs-quotes-state">Saved</span> : !sharingAvailable ? <span className="qs-quotes-state">Sharing unavailable</span> : null}
       </div>
       <div className="qs-quotes-mobile-meta">
         <span className="qs-quotes-service">{industry}</span>
@@ -369,8 +369,9 @@ export default async function Quotations({
       row.currency || organization.default_currency || 'INR', row.amount)}</td>
     <td>{shared
       ? <span className="qs-quotes-state qs-state-shared">Shared</span>
-      : !sharingAvailable ? <span className="qs-quotes-unshared">Sharing unavailable</span>
-       : <span className="qs-quotes-unshared">{row.status === 'draft' ? 'Saved' : 'Not shared'}</span>}</td>
+      : row.status === 'draft' ? <span className="qs-quotes-unshared">Saved</span>
+       : !sharingAvailable ? <span className="qs-quotes-unshared">Sharing unavailable</span>
+        : <span className="qs-quotes-unshared">Not shared</span>}</td>
     <td className="qs-quotes-created">{niceDate(createdAt)}</td>
     <td>
       <div className="qs-quotes-actions">

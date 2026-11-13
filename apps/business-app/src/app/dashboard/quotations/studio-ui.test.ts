@@ -336,6 +336,21 @@ describe('customer-grouped quotation list without Draft presentation', () => {
     expect(list).toContain('Shared');
   });
 
+  it('labels saved editable quotations Saved even when sharing metadata is unavailable', () => {
+    const mobileStatus = list.slice(
+      list.indexOf('qs-quotes-mobile-top'),
+      list.indexOf('qs-quotes-mobile-meta'),
+    );
+    const tableStatus = list.slice(
+      list.indexOf('renderTableRow'),
+      list.indexOf('const pageCount'),
+    );
+    expect(mobileStatus.indexOf("row.status === 'draft' ? <span className=\"qs-quotes-state\">Saved"))
+      .toBeLessThan(mobileStatus.indexOf('!sharingAvailable'));
+    expect(tableStatus.indexOf("row.status === 'draft' ? <span className=\"qs-quotes-unshared\">Saved"))
+      .toBeLessThan(tableStatus.indexOf('!sharingAvailable'));
+  });
+
   it('shows one mobile customer card containing all quote options for their customer ID', () => {
     expect(list).toContain(".select('id,industry_id,customer_id')");
     expect(list).toContain('const customerGroups = new Map<string');
