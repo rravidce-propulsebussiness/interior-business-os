@@ -14,30 +14,42 @@ BEGIN
   ) INTO definition;
   old_guard := $before$and event.event_kind='signed_copy_recorded'$before$;
   new_guard := $after$and event.event_kind in ('signed_copy_recorded','owner_exception')$after$;
-  IF definition IS NULL OR position(old_guard IN definition)=0 THEN
+  IF definition IS NULL THEN
     RAISE EXCEPTION 'Unexpected project_site_command agreement guard';
   END IF;
-  EXECUTE replace(definition,old_guard,new_guard);
+  IF position(old_guard IN definition)>0 THEN
+    EXECUTE replace(definition,old_guard,new_guard);
+  ELSIF position(new_guard IN definition)=0 THEN
+    RAISE EXCEPTION 'Unexpected project_site_command agreement guard';
+  END IF;
 
   SELECT pg_get_functiondef(
     'public.project_preflight_save(uuid,uuid,text,text)'::regprocedure
   ) INTO definition;
   old_guard := $before$and ev.event_kind='signed_copy_recorded'$before$;
   new_guard := $after$and ev.event_kind in ('signed_copy_recorded','owner_exception')$after$;
-  IF definition IS NULL OR position(old_guard IN definition)=0 THEN
+  IF definition IS NULL THEN
     RAISE EXCEPTION 'Unexpected project_preflight_save agreement guard';
   END IF;
-  EXECUTE replace(definition,old_guard,new_guard);
+  IF position(old_guard IN definition)>0 THEN
+    EXECUTE replace(definition,old_guard,new_guard);
+  ELSIF position(new_guard IN definition)=0 THEN
+    RAISE EXCEPTION 'Unexpected project_preflight_save agreement guard';
+  END IF;
 
   SELECT pg_get_functiondef(
     'public.project_advance_proforma_prepare(uuid,uuid,numeric)'::regprocedure
   ) INTO definition;
   old_guard := $before$and ev.event_kind='signed_copy_recorded'$before$;
   new_guard := $after$and ev.event_kind in ('signed_copy_recorded','owner_exception')$after$;
-  IF definition IS NULL OR position(old_guard IN definition)=0 THEN
+  IF definition IS NULL THEN
     RAISE EXCEPTION 'Unexpected project_advance_proforma_prepare agreement guard';
   END IF;
-  EXECUTE replace(definition,old_guard,new_guard);
+  IF position(old_guard IN definition)>0 THEN
+    EXECUTE replace(definition,old_guard,new_guard);
+  ELSIF position(new_guard IN definition)=0 THEN
+    RAISE EXCEPTION 'Unexpected project_advance_proforma_prepare agreement guard';
+  END IF;
 
   -- Allow the owner-prepared current Final draft only when it is still the
   -- customer's selected Final quote for this exact contract. Issued quotes
@@ -74,10 +86,14 @@ $before$;
     ))
   ) THEN RETURN NULL; END IF;
 $after$;
-  IF definition IS NULL OR position(old_guard IN definition)=0 THEN
+  IF definition IS NULL THEN
     RAISE EXCEPTION 'Unexpected quotation schedule source guard';
   END IF;
-  definition := replace(definition,old_guard,new_guard);
+  IF position(old_guard IN definition)>0 THEN
+    definition := replace(definition,old_guard,new_guard);
+  ELSIF position(new_guard IN definition)=0 THEN
+    RAISE EXCEPTION 'Unexpected quotation schedule source guard';
+  END IF;
   definition := replace(definition,
     'payment_schedule.activated_from_signed_quotation',
     'payment_schedule.activated_from_quotation');
@@ -88,10 +104,14 @@ $after$;
   ) INTO definition;
   old_guard := $before$IF new.event_kind='signed_copy_recorded' THEN$before$;
   new_guard := $after$IF new.event_kind IN ('signed_copy_recorded','owner_exception') THEN$after$;
-  IF definition IS NULL OR position(old_guard IN definition)=0 THEN
+  IF definition IS NULL THEN
     RAISE EXCEPTION 'Unexpected quotation schedule event trigger';
   END IF;
-  EXECUTE replace(definition,old_guard,new_guard);
+  IF position(old_guard IN definition)>0 THEN
+    EXECUTE replace(definition,old_guard,new_guard);
+  ELSIF position(new_guard IN definition)=0 THEN
+    RAISE EXCEPTION 'Unexpected quotation schedule event trigger';
+  END IF;
 END
 $patch$;
 
