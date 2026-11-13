@@ -63,6 +63,35 @@ export async function saveProjectMaterials(projectId:string,form:FormData,stageI
     return {saved:false,message:error instanceof Error?error.message:'Unable to request materials'};
   }
 }
+
+/** Records a homeowner-to-supplier cash settlement on the existing project material request.
+ * It does not create a company receipt, invoice, or cash expense. */
+export async function recordHomeownerDirectSupplierCashPayment(
+ projectId:string,form:FormData,
+):Promise<Result>{
+ try{
+  const parsedProject=uuid.parse(projectId);
+  const input={
+   materialId:uuid.parse(form.get('material_id')),
+   amount:z.coerce.number().finite().positive().max(100000000).refine(value=>Math.round(value*100)===value*100).parse(form.get('amount')),
+   paidDate:z.iso.date().parse(form.get('paid_date')),
+   supplier:z.string().trim().min(2).max(200).parse(form.get('supplier')),
+   reference:z.string().max(200).default('').parse(form.get('reference')??''),
+   note:z.string().trim().min(3).max(1500).parse(form.get('note')),
+  };
+  const {client,org}=await context(parsedProject);
+  const response=await client.rpc('project_material_homeowner_cash_paid' as never,{
+   p_org:org,p_project:parsedProject,p_material:input.materialId,
+   p_amount:input.amount,p_paid_date:input.paidDate,p_supplier:input.supplier,
+   p_reference:input.reference,p_note:input.note,
+  } as never);
+  if(response.error)throw new Error(response.error.message);
+  refresh(parsedProject);
+  return {saved:true,message:'Homeowner direct cash payment recorded for this supplier. No company receipt or expense was created.'};
+ }catch(error){
+  return {saved:false,message:error instanceof Error?error.message:'Unable to record supplier cash payment'};
+ }
+}
 export async function saveProjectStageItem(
   input:{projectId:string;stageId:string;kind:'work'|'check';index:number;title:string},
   form:FormData,

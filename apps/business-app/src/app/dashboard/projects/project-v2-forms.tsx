@@ -2,7 +2,7 @@
 import { useActionState, useTransition, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { saveProjectSite, uploadProjectSiteMedia } from './[id]/site/actions';
-import { saveProjectMaterials } from './[id]/site/stage-checklist-actions';
+import { recordHomeownerDirectSupplierCashPayment, saveProjectMaterials } from './[id]/site/stage-checklist-actions';
 import { syncConstructionFromProjectAgreement, assignConstructionRole } from './[id]/site/construction-actions';
 import { createAgreementException, saveSignedAgreement } from './[id]/site/agreement-actions';
 import { prepareAgreementFromProjectQuote } from './project-agreement-actions';
@@ -383,6 +383,31 @@ export function MaterialUpdateForm({id,material}:{id:string;material:{
    </label>
    <p className="pv2-hint">Approval permits an authorized employee to place an order. No order or client delivery estimate is created yet.</p>
   </ProjectForm>
+ </details>;
+}
+/** Records the direct homeowner-to-supplier cash payment on the existing material request. */
+export function DirectSupplierCashPaymentForm({id,materialId}:{id:string;materialId:string}){
+ const router=useRouter();
+ const [state,submit,pending]=useActionState(async(_prev:Result,form:FormData)=>{
+  const result=await recordHomeownerDirectSupplierCashPayment(id,form);
+  if(result.saved)router.refresh();
+  return result;
+ },initial);
+ return <details className="pv2-subaction pv2-direct-supplier-payment">
+  <summary>Record homeowner cash paid directly to supplier</summary>
+  <form action={submit} className="pv2-form">
+   <input type="hidden" name="material_id" value={materialId}/>
+   <p className="pv2-hint">Cash settlement only. This records the homeowner paying the supplier directly; it does not add a company receipt, invoice, or company cash expense.</p>
+   <label>Supplier name<input name="supplier" required minLength={2} maxLength={200}/></label>
+   <div className="pv2-two">
+    <label>Amount paid (₹)<input name="amount" type="number" min="0.01" step="0.01" max="100000000" required/></label>
+    <label>Date paid<input name="paid_date" type="date" required/></label>
+   </div>
+   <label>Supplier receipt / cash reference (optional)<input name="reference" maxLength={200}/></label>
+   <label>Owner note<textarea name="note" rows={2} minLength={3} maxLength={1500} required placeholder="TEST ONLY — owner records homeowner's direct cash payment to supplier"/></label>
+   <button className="pv2-button pv2-primary" type="submit" disabled={pending}>{pending?'Saving…':'Mark supplier as paid in cash'}</button>
+   {state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
+  </form>
  </details>;
 }
 export function QualityForm({id}:{id:string}){

@@ -32,7 +32,7 @@ import { activeOrganization } from '@business-os/auth/server';
 import { projectWorkspace,formatMoney,pretty,shortDate,stringValue,
  type WorkspaceData,type SiteRow } from './project-v2-data';
 import {
- SiteReportForm,SiteMediaForm,MaterialRequestForm,MaterialUpdateForm,
+ SiteReportForm,SiteMediaForm,MaterialRequestForm,MaterialUpdateForm,DirectSupplierCashPaymentForm,
  QualityForm,ReviewCheck,GateForm,AssignRole,SyncStages,
  ProjectLifecycle,PrepareAgreement,SignedAgreementUploadForm,ProjectContractActivation,SkipAgreementUpload,
 } from './project-v2-forms';
@@ -320,6 +320,13 @@ function StageMaterialRows({d,rows}:{d:WorkspaceData;rows:SiteRow[]}){
              <div><b>{stringValue(m.item)}</b>
               <small>{stringValue(m.quantity)} {stringValue(m.unit)}</small></div>
              <Status value={status}/>
+             {stringValue(m.homeowner_paid_amount)&&<p className="pv2-hint pv2-material-homeowner-paid">
+              Homeowner paid supplier directly · cash · {formatMoney(Number(m.homeowner_paid_amount))}
+              {stringValue(m.homeowner_paid_to)?' · '+stringValue(m.homeowner_paid_to):''}
+              {stringValue(m.homeowner_paid_date)?' · '+shortDate(m.homeowner_paid_date):''}
+             </p>}
+             {['ordered','received'].includes(status)&&!stringValue(m.homeowner_paid_amount)&&d.materialAccess.canOrder&&
+              <DirectSupplierCashPaymentForm id={d.project.id} materialId={m.id}/>}
              {(site?.canManage||['manager','procurement'].includes(site?.role??''))&&
                (!((source==='marketplace') &&
                    stringValue(m.vendor_reference).startsWith('Marketplace request ') &&
