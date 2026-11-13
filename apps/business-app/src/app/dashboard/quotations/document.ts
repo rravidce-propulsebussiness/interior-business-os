@@ -2,12 +2,16 @@ import 'server-only';
 import {
   customerDocumentSchema,
   renderQuotationDocument,
+  type QuotationDocumentKind,
 } from '@business-os/core/quotation-document';
 import { lineSnapshotSchema } from '@business-os/quotation-engine';
 import { DomainError, idSchema } from '@business-os/shared';
 import { commercialServices } from '../commercial/service';
 import { inlinePremiumConceptImages } from './inline-premium-concepts';
-export async function quotationDocument(id: string) {
+export async function quotationDocument(
+  id: string,
+  kind: QuotationDocumentKind = 'quotation',
+) {
   const s = await commercialServices('quotation.view', 'quotation');
   idSchema.parse(id);
   const { data: r, error } = await s.client
@@ -74,6 +78,6 @@ export async function quotationDocument(id: string) {
       };
     }),
   });
-  const html = await inlinePremiumConceptImages(renderQuotationDocument(document));
+  const html = await inlinePremiumConceptImages(renderQuotationDocument(document, { kind }));
   return { document, html };
 }
