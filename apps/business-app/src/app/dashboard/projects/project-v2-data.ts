@@ -98,19 +98,21 @@ export type StageMarketplaceProduct=Pick<MarketplaceProduct,'id'|'name'|'unit'|'
 export type PaymentMilestone={id:string;label:string;amount:string;currency:string;contract_number:string;
  contract_id:string};
 export type ProjectQuotation={id:string;number:string;revisionId:string;status:string;createdAt:string};
+export type LinkableQuotation={id:string;number:string;status:string;createdAt:string;sourceProjectName:string};
 export type ClientRequestRow={
  id:string;kind:string;details:string;status:string;
  requested_date:string|null;response:string;created_at:string;responded_at:string|null;
 };
 export type WorkspaceData = {
  project:ProjectEntry;org:string;company:string;email:string;
- permissions:{manage:boolean;finance:boolean;contractManage:boolean;payments:boolean;purchases:boolean;purchaseManage:boolean;team:boolean;quotation:boolean};
+ permissions:{manage:boolean;finance:boolean;contractManage:boolean;payments:boolean;purchases:boolean;purchaseManage:boolean;team:boolean;quotation:boolean;linkQuotation:boolean};
  marketplaceOffers:StageMarketplaceProduct[];materialAccess:MaterialAccess;
  site:null|{stage:string;role:string;canManage:boolean;reports:SiteRow[];materials:SiteRow[];
  checks:SiteRow[];media:SiteRow[];designs:SiteRow[];team:SiteRow[];gate:SiteRow[];
  memberOptions:{id:string;label:string}[]};
  stages:Stage[];links:StageLink[];itemPlans:StageItemPlan[];stageGuidance:StageGuidance[];stageExecution:StageExecution[];stageProgress:StageProgress;stageQc:StageQcReview;milestones:PaymentMilestone[];quotations:ProjectQuotation[];
  quotePaymentTriggers:{name:string;percent:number;stageCodes:string[];autoRequest?:boolean}[];
+ linkableQuotations:LinkableQuotation[];
  quoteMilestoneTimeline?:QuotedTimelineMilestone[];
  transactions: {id:string;number:string;date:string;amount:number;status:string}[]|null;
  stageRequests?: {id:string;number:string;amount:number;status:string;date:string}[];
@@ -235,6 +237,8 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
    contractManage:has('contract.manage','billing'),
   payments:has('payment.view'),purchases:has('purchase.view'),purchaseManage:has('purchase.manage'),
   team:has('team.manage')||has('team.view'),quotation:has('quotation.view','quotation'),
+  linkQuotation:has('project.manage','projects')&&has('quotation.create','quotation')&&
+    has('quotation.view','quotation')&&has('lead.view','crm'),
  };
  const [org,user,industries,customer,taskResult,siteResult,stageResult,stageLinkResult,stageGuidanceResult,stageProgressResult,qcItemResult,qualityResult,stageExecutionResult,materialAccessResult,receipts,orders,contract,agreementResult,preflightResult,advanceResult,scheduleResult,curingResult,boqResult,designResult]=await Promise.all([
   s.repository.organization(s.org),s.authorization.requireAuthenticatedUser(),
@@ -358,10 +362,12 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
    .eq('organization_id',s.org).eq('project_id',id).neq('status','cancelled')
    .order('created_at',{ascending:false}).limit(25):null;
  let leadQuoteIds:string[]=[];
+ let convertedLeadId:string|null=null;
  if(permissions.quotation&&has('lead.view')){
    const leadRows=await s.client.from('leads').select('id')
      .eq('organization_id',s.org).eq('converted_project_id',id).limit(4);
    if(!leadRows.error&&leadRows.data?.length===1){
+     convertedLeadId=leadRows.data[0]!.id;
      const linked=await s.client.rpc('lead_quotation_list',{
        p_organization_id:s.org,p_lead_id:leadRows.data[0]!.id,
      });
@@ -370,6 +376,31 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
          .filter(Boolean))].slice(0,100);
      }
    }
+ }
+ let linkableQuotations:LinkableQuotation[]=[];
+ if(permissions.linkQuotation&&convertedLeadId&&!leadQuoteIds.length&&
+    !(directQuotes?.data?.length)&&
+    !(contract.data??[]).some(row=>['pending','active','on_hold'].includes(row.status))){
+  const candidates=await s.client.from('quotations')
+   .select('id,quotation_number,status,created_at,project_id,customer_id')
+   .eq('organization_id',s.org).eq('customer_id',project.customer_id)
+   .in('status',['draft','issued']).neq('project_id',id)
+   .order('created_at',{ascending:false}).limit(50);
+  const candidateRows=candidates.error?[]:candidates.data??[];
+  const sourceIds=[...new Set(candidateRows.map(row=>row.project_id).filter(Boolean))];
+  const sources=sourceIds.length?await s.client.from('projects')
+   .select('id,name,customer_id,industry_id,status,is_sales_prospect,removed_from_workspace')
+   .eq('organization_id',s.org).in('id',sourceIds):{data:[],error:null};
+  const sourcesById=new Map((sources.error?[]:sources.data??[])
+   .filter(source=>source.customer_id===project.customer_id&&
+     source.industry_id===project.industry_id&&source.is_sales_prospect&&
+     source.status==='active'&&!source.removed_from_workspace)
+   .map(source=>[source.id,source]));
+  linkableQuotations=candidateRows.flatMap(row=>{
+   const source=sourcesById.get(row.project_id);
+   return source?[{id:row.id,number:row.quotation_number||'Quotation',status:row.status,
+    createdAt:row.created_at,sourceProjectName:source.name||'Quotation prospect'}]:[];
+  });
  }
  const historical=leadQuoteIds.length?await s.client.from('quotations')
    .select('id,quotation_number,current_revision_id,status,created_at,project_id,customer_id')
@@ -553,7 +584,7 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
   },
   site,stages:stageList,links:linkList,itemPlans:parseStageItemPlans(scheduleResult.error?null:scheduleResult.data),stageGuidance,stageExecution:executionRows(stageExecutionResult.data),marketplaceOffers,materialAccess:materialAccess(materialAccessResult.data),stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
-     (obj(qualityResult.data).stages as StageItemRecord[]):[]},stageQc:stageQcReview(qcItemResult.error?null:qcItemResult.data),milestones,quotations,quotePaymentTriggers,stageRequests,
+     (obj(qualityResult.data).stages as StageItemRecord[]):[]},stageQc:stageQcReview(qcItemResult.error?null:qcItemResult.data),milestones,quotations,quotePaymentTriggers,linkableQuotations,stageRequests,
   preflight,advance,requests,quotePlan,
   quoteMilestoneTimeline:quoteMilestoneProjection(typeof savedTerms==='string'?savedTerms:'',
    quotePaymentTriggers.map((row,index)=>({...row,
@@ -659,7 +690,7 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
  };
  return {
   org:context.organizationId,company:org.name,email:user.email??'',
-  permissions:{manage:site.canManage,finance:false,contractManage:false,payments:false,purchases:canPurchase,purchaseManage:canPurchase,team:site.canManage,quotation:false},
+  permissions:{manage:site.canManage,finance:false,contractManage:false,payments:false,purchases:canPurchase,purchaseManage:canPurchase,team:site.canManage,quotation:false,linkQuotation:false},
   project:{id,name:stringValue(p.name),code:stringValue(p.code),status:stringValue(p.status)||'active',
    projectType:'',address:'Project site',createdAt:'',client:'Project team',customerId:null,
    industry:'Site Delivery',
@@ -669,7 +700,7 @@ async function assignedProjectWorkspace(id:string):Promise<WorkspaceData>{
     stage_id:stringValue(x.stage_id),kind:stringValue(x.kind),record_id:stringValue(x.record_id),
    })):[],itemPlans:parseStageItemPlans(scheduleResult.error?null:scheduleResult.data),stageGuidance:stageGuidanceRows(stageGuidanceResult.data),stageExecution:executionRows(stageExecutionResult.data),marketplaceOffers:offers,materialAccess:materialAccess(materialAccessResult.data),stageProgress:{...stageProgress(stageProgressResult.error?null:stageProgressResult.data),
     qualityStages:Array.isArray(obj(qualityResult.error?null:qualityResult.data).stages)?
-     (obj(qualityResult.data).stages as StageItemRecord[]):[]},stageQc:stageQcReview(qcItemResult.error?null:qcItemResult.data),milestones:[],quotations:[],quotePaymentTriggers:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
+     (obj(qualityResult.data).stages as StageItemRecord[]):[]},stageQc:stageQcReview(qcItemResult.error?null:qcItemResult.data),milestones:[],quotations:[],quotePaymentTriggers:[],linkableQuotations:[],transactions:null,purchaseOrders:null,tasks:(tasks??[]).map(t=>({
    id:t.id,title:t.title,planned_start:t.planned_start,status:t.status,
   })),
   contractValue:null,expenditure:null,requests:null,agreement:null,projectRaw:null,

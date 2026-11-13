@@ -11,6 +11,10 @@ describe('delivery project creation starts from a customer quotation', () => {
   const quotePage = file('../quotations/new/page.tsx');
   const quoteAction = file('../quotations/studio-actions.ts');
   const migration = file('../../../../../../packages/database/supabase/migrations/20261112190531_projects_require_quotation_20261112.sql');
+  const projectView = file('./project-v2-view.tsx');
+  const linkAction = file('./project-quotation-link-action.ts');
+  const linker = file('./project-quotation-linker.tsx');
+  const workspace = file('./project-v2-data.ts');
 
   it('continues an existing customer quote or starts a quote for that customer', () => {
     expect(projectStart).toContain('Continue {quote.number}');
@@ -37,5 +41,20 @@ describe('delivery project creation starts from a customer quotation', () => {
     expect(migration).toContain('accepted quotation and agreement');
     expect(migration).toContain("public.crm_convert(uuid,jsonb)");
     expect(migration).toContain('A quotation is required before creating a project');
+  });
+
+  it('lets an owner attach an existing quote to its converted lead without cloning it', () => {
+    expect(projectView).toContain(
+      '<ProjectQuotationLinker projectId={d.project.id} quotes={d.linkableQuotations}/>',
+    );
+    expect(workspace).toContain('linkableQuotations');
+    expect(linkAction).toContain("rpc('lead_quotation_link'");
+    expect(linkAction).toContain('quote.customer_id !== project.customer_id');
+    expect(linkAction).toContain('source.industry_id !== project.industry_id');
+    expect(linkAction).toContain("['pending', 'active', 'on_hold']");
+    expect(linkAction).not.toContain("from('quotations').update");
+    expect(linkAction).not.toContain("from('quotation_revisions').update");
+    expect(linker).toContain('does not issue');
+    expect(linker).toContain('record customer approval or payment.');
   });
 });
