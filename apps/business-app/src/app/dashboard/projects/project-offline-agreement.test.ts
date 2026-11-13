@@ -11,6 +11,9 @@ describe('optional offline agreement with final quotation', () => {
   const migration = read(
     '../../../../../../packages/database/supabase/migrations/20261113110415_project_offline_agreement_skip.sql',
   );
+  const quoteSetupGuard = read(
+    '../../../../../../packages/database/supabase/migrations/20261113161437_allow_final_quote_project_agreement.sql',
+  );
   const databaseTest = read(
     '../../../../../../packages/database/tests/project-agreement.sql',
   );
@@ -39,5 +42,13 @@ describe('optional offline agreement with final quotation', () => {
     expect(migration).toContain('public.project_advance_proforma_prepare');
     expect(databaseTest).toContain('offline agreement choice changed the quote payment groups');
     expect(databaseTest).toContain("count(*) from public.payments where contract_id=contract)<>1");
+  });
+
+  it('allows the saved customer Final quote to seed the project while keeping digital acceptance strict', () => {
+    expect(quoteSetupGuard).toContain("r.status not in ('draft','issued')");
+    expect(quoteSetupGuard).toContain("q.status not in ('draft','issued')");
+    expect(quoteSetupGuard).toContain('public.quotation_final_choices');
+    expect(quoteSetupGuard).toContain("if r.status<>'issued' or q.status<>'issued'");
+    expect(quoteSetupGuard).toContain('Digitally accepted contract source mismatch');
   });
 });
