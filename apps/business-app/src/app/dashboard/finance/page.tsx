@@ -233,7 +233,7 @@ export default async function Finance({
         <div className="fw-register">
           <div className="fw-toolbar"><form action="/dashboard/finance" className="fw-search">
             <input type="hidden" name="tab" value={tab}/><input type="hidden" name="period" value={period}/>
-            <OwnerIcon name="dashboard" size={16}/><input type="search" name="q" defaultValue={params.q ?? ''} placeholder="Search invoices or clients…" aria-label="Search invoices"/><button>Search</button>
+            <OwnerIcon name="search" size={16}/><input type="search" name="q" defaultValue={params.q ?? ''} placeholder="Search invoices or clients…" aria-label="Search invoices"/><button>Search</button>
           </form><form action="/dashboard/finance" className="fw-period"><input name="tab" type="hidden" value={tab}/>
             <select name="period" defaultValue={period} aria-label="Invoice date range">
               <option value="all">All dates</option><option value="month">This month</option><option value="quarter">Last 3 months</option><option value="year">Last 12 months</option>

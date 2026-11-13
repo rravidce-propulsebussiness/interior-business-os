@@ -78,6 +78,14 @@
   backdrop-filter: var(--glass-blur);
 }
 
+/* Page <main> elements centre themselves with margin: 0 auto, which in the
+   workspace flex column stops them stretching; they then grow to their
+   widest content (Website Studio was ~1140px wide on phones). */
+.owner-layout.owner-layout-unified.owner-theme-glass .owner-workspace > main {
+  width: 100%;
+  min-width: 0;
+}
+
 /* ---------- Dashboard panels ---------- */
 .owner-layout.owner-theme-glass .command-panel {
   border-radius: 20px;
@@ -106,6 +114,38 @@
 }
 
 @media (max-width: 740px) {
+  /* Phone top bar: menu, one brand, then actions. The desktop search rule
+     (.owner-topbar .owner-search) out-ranks the shell's own mobile "hide",
+     so it is hidden here with matching specificity. */
+  .owner-layout.owner-layout-unified.owner-theme-glass
+    .owner-topbar
+    .owner-search,
+  .owner-layout.owner-layout-unified.owner-theme-glass
+    .owner-topbar
+    .owner-command-mobile-brand {
+    display: none;
+  }
+  .owner-layout.owner-layout-unified.owner-theme-glass .owner-menu-button {
+    order: -1;
+  }
+  .owner-layout.owner-layout-unified.owner-theme-glass .owner-global-brand {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .owner-layout.owner-layout-unified.owner-theme-glass
+    .owner-global-brand
+    > span:last-child {
+    min-width: 0;
+  }
+  .owner-layout.owner-layout-unified.owner-theme-glass
+    .owner-global-brand
+    small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .owner-layout.owner-theme-glass .command-mobile-nav {
     background: rgba(255, 255, 255, 0.85);
     border-top-color: var(--glass-edge);

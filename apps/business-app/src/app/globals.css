@@ -113,6 +113,27 @@ body {
     background 160ms ease;
 }
 
+/* Field wrappers (an icon plus an input or select inside one styled box:
+   search boxes, the login fields, report filters) draw the box themselves.
+   The rule above forces a border with !important, which drew a second box
+   inside them, so it is undone here. */
+:where(body:not(:has(.public-website-root)))
+  :is(
+    .pp-login-input-wrap,
+    .crm-search-field,
+    .pv2-search,
+    .team-search,
+    .emp-search,
+    .ush-search,
+    .rp-select-wrap
+  )
+  :is(input, select) {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent;
+  box-shadow: none;
+}
+
 :where(body:not(:has(.public-website-root))) input::placeholder,
 :where(body:not(:has(.public-website-root))) textarea::placeholder {
   color: #9299a6;

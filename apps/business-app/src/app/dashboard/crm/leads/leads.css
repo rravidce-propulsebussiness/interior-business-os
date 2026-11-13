@@ -1135,7 +1135,9 @@ body:has(.crm-leads-root) .crm-shared-navigation {
     min-height: 85px;
     padding: 11px;
   }
-  .crm-kpi-card:last-child {
+  /* Only an odd last card fills the row; with an even count it would leave
+     a gap beside the card before it. */
+  .crm-kpi-card:last-child:nth-child(odd) {
     grid-column: span 2;
   }
   .crm-leads-heading h1 {
