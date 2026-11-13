@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 21508)
-Total output lines: 1201
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName, OwnerShell } from '../owner-shell';
@@ -569,7 +566,92 @@ function ProjectStageBoard({d}:{d:WorkspaceData}){
        <summary className="pv2-command-stage-summary">
         <span className="pv2-stage-number">{complete?'✓':index+1}</span>
         <span className="pv2-stage-title-block"><strong>{stage.title}</strong>
-         <small>{stage.floor_code?pretty(stage.floor_code)+' · ':''}{stage.phase?pretty(stage.pha…1508 tokens truncated…  <summary>Review / edit individual checks</summary>
+         <small>{stage.floor_code?pretty(stage.floor_code)+' · ':''}{stage.phase?pretty(stage.phase)+' · ':''}{stage.activities.length} work items</small>
+         <span className={'pv2-stage-schedule-summary '+(stagePlan.count?'is-planned':'')}>
+          <span aria-hidden="true">▦</span>
+          {stagePlan.count
+           ?<span>{stagePlan.count} item{stagePlan.count===1?'':'s'} planned · {shortDate(stagePlan.start)} – {shortDate(stagePlan.finish)}
+            {stagePlan.hasWorkToday&&<b> · Scheduled today</b>}
+            {stagePlan.overlapsAnotherStage&&<em> · Overlaps another stage</em>}</span>
+           :<span>Work dates not planned</span>}
+         </span></span>
+        <Status value={displayStatus}/>
+        <span className="pv2-stage-meta">{payment.length} payment milestone{payment.length===1?'':'s'}</span>
+        <OwnerIcon name="arrow" size={15}/>
+       </summary>
+       <div className="pv2-command-stage-inner">
+        {stage.explanation&&<p className="pv2-muted">{stage.explanation}</p>}
+        {stage.dependencies.some(dep=>!dep.startsWith('QUOTED_SCOPE'))&&
+         <p className="pv2-stage-hint">Dependent on: {
+          stage.dependencies.filter(dep=>!dep.startsWith('QUOTED_SCOPE')).join(' · ')
+         }</p>}
+        {(!complete||(['DESIGN','DESIGN_APPROVAL'].includes(stage.template_code)&&site?.stage==='client_approved'))&&
+         <ProjectStageWorkflow d={d} code={stage.template_code}/>}
+
+        {startingPayments.length>0&&<div className="pv2-stage-payment-start">
+          <strong>Payment milestone at stage start</strong>
+          {startingPayments.map((p,i)=><p key={i}>{p.name} · {p.percent}% of accepted quotation</p>)}
+          <p className="pv2-hint">Review this agreed payment before starting work. Invoices,
+           payment requests and verified receipts stay in Finance. An invoice alone is not proof of payment.</p>
+          {d.permissions.finance&&<Link href={cur(d.project.id,'payments')}>
+           Check invoice and verified payment status
+          </Link>}
+         </div>}
+         {physicalStage&&site?.stage==='execution'&&<StageActivationControl
+         projectId={d.project.id} stageId={stage.id} state={stageExecution}
+         canManage={allowWork} workCompleted={finishedActivities} workTotal={stage.activities.length}
+         checksPassed={passed} checksTotal={checks.length}/>}
+        {orderedFlow.length===0&&plannedMaterials.length>0&&
+         <details className="pv2-stage-secondary pv2-legacy-material-planning">
+          <summary>Plan material delivery dates ({plannedMaterials.length})</summary>
+          <p className="pv2-hint">Plan when each material is needed. Procurement, delivery updates
+           and marketplace/outside supplier orders remain attached to the work items below.</p>
+          <div className="pv2-stage-task-entries">
+           {plannedMaterials.map((material,i)=><div key={stage.id+'-material-'+i}
+             className="pv2-flow-step">
+             <strong>{material}</strong>
+             <ProjectItemSchedule projectId={d.project.id} stageId={stage.id}
+              kind="material" index={i} title={material}
+              item={planFor(stage.id,'material',i)} canPlan={canPlan&&!complete}
+              planningMode={planningMode} today={todayInIndia}/>
+            </div>)}
+          </div>
+         </details>}
+        {orderedFlow.length===0&&remainingQc.length>0&&<details className="pv2-stage-secondary">
+         <summary>Plan company QC visits ({remainingQc.length})</summary>
+         {remainingQc.map(item=><ProjectItemSchedule key={item.i} projectId={d.project.id}
+          stageId={stage.id} kind="qc" index={item.i} title={item.name}
+          item={planFor(stage.id,'qc',item.i)} canPlan={canPlan&&!complete} planningMode={planningMode} today={todayInIndia}/>)}
+        </details>}
+        {!!checks.length&&(orderedFlow.length===0||stageExecution?.status==='ready_for_qc'||formalReviews.length>0)&&<details className="pv2-stage-quality-hub" id={'pv2-stage-checks-'+stage.id}>
+         <summary><span>{orderedFlow.length?'Final stage quality approval & history':'Site checks & company QC'}</span><strong>{passed}/{checks.length} checks passed</strong></summary>
+         <div className="pv2-stage-quality-inner">
+        {!!checks.length&&orderedFlow.length===0&&<div className="pv2-stage-task-group">
+         {orderedFlow.length===0&&<BulkStageChecks projectId={d.project.id} stageId={stage.id} photos={photos}
+          canEdit={checksAllowed&&!complete} workCompleted={finishedActivities}
+          workTotal={stage.activities.length} stageStatus={stageExecution?.status??'not_started'}
+          checks={checks.map((title,index)=>{
+           const record=stageChecks.find(x=>stringValue(x.title).toLowerCase()===title.toLowerCase())??
+            (site?.checks??[]).find(x=>stringValue(x.title).toLowerCase()===title.toLowerCase());
+           return {index,title,status:stringValue(record?.status)||'pending',
+            photoId:stringValue(record?.photo_id),notes:stringValue(record?.notes)};
+          })}/>}
+         <h4>Site checks & tests <small>{passed}/{checks.length} passed</small></h4>
+         {stageExecution?.status==='ready_for_qc'&&
+          <p className="pv2-stage-ready-note">
+           All required site checks are passed and field work has been submitted.
+           On-site company QC review and final stage certification remain pending; the checks do not need
+           to be repeated unless corrections are requested.
+          </p>}
+         {stageExecution?.status==='in_progress'&&
+          finishedActivities===stage.activities.length&&passed===checks.length&&
+          <p className="pv2-stage-ready-note">
+           Work and checks are complete. Use “Finish field work · Request QC”
+           above to unlock the next eligible stage.
+          </p>}
+         <p className="pv2-hint">Complete checks one by one, with photo evidence. A passed site check must still be reviewed by the assigned company QC inspector when the stage is submitted.</p>
+         {orderedFlow.length===0&&<details className="pv2-single-checks">
+          <summary>Review / edit individual checks</summary>
          <div className="pv2-stage-task-entries">
           {checks.map((name,i)=>{
            const existing=stageChecks.find(x=>stringValue(x.title).toLowerCase()===name.toLowerCase())??
@@ -834,10 +916,32 @@ function Timeline({d}:{d:WorkspaceData}){
 /** Stage-by-stage milestones: agreement and design gates, each floor's stage,
  * its schedule, checks, certification and linked payment milestone. */
 function Milestones({d}:{d:WorkspaceData}){
+ const hasLiveStages=d.stages.length>0;
+ const quote=d.quotations[0];
+ const canPrepare=Boolean(quote?.status==='issued'&&d.permissions.manage&&d.permissions.finance&&!d.agreement);
  return <>
-  {d.quotePlan&&<div className="pf-flow"><QuotePlanView plan={d.quotePlan} projectId={d.project.id} canPrepare={false}/></div>}
-  <ProjectWorkHub d={d} showHistory/>
-  <ProjectTimelineFeed d={d}/>
+  {!hasLiveStages&&d.quotePlan&&<div className="pf-flow">
+   {!d.agreement&&<section className="pf-section pf-milestone-start" aria-labelledby="pf-milestone-start-title">
+    <div><h2 id="pf-milestone-start-title">Make this project plan actionable</h2>
+     <p>The quotation preview becomes progressable after the project contract is prepared. The owner can upload an offline agreement or record the final quotation as the agreed scope—no customer signature is implied.</p>
+    </div>
+    {canPrepare?<PrepareAgreement projectId={d.project.id} revisionId={quote!.revisionId}/>
+     :quote?.status!=='issued'?<p className="pv2-hint">Issue the Final quotation before preparing the project contract.</p>
+     :<p className="pv2-hint">Project manager and Finance permissions are required to prepare the project contract.</p>}
+   </section>}
+   {d.agreement&&<section className="pf-section pf-milestone-start" aria-labelledby="pf-milestone-start-title">
+    <div><h2 id="pf-milestone-start-title">Continue project setup</h2>
+     <p>Use the Timeline to complete agreement and Finance gates. Live work items appear here after the agreed project stages are active.</p>
+    </div>
+    <Link className="pf-btn pf-btn-primary" href={cur(d.project.id,'timeline')}>Continue in Timeline</Link>
+   </section>}
+   <QuotePlanView plan={d.quotePlan} projectId={d.project.id} canPrepare={false}/>
+  </div>}
+  {hasLiveStages&&<>
+   <ProjectWorkHub d={d} showHistory/>
+   <ProjectTimelineFeed d={d}/>
+  </>}
+  {!d.quotePlan&&!hasLiveStages&&<ProjectWorkHub d={d} showHistory/>}
  </>;
 }
 function Documents({d}:{d:WorkspaceData}){
