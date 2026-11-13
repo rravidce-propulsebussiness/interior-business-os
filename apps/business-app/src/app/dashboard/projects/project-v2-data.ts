@@ -435,15 +435,21 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
  const contractedRevision=permissions.finance&&!contract.error?contract.data?.[0]?.revision_id:null;
  const contractedScopeSource=['signed_copy_recorded','owner_exception'].includes(stringValue(agreement.clearance_type))
    &&agreement.current_scope===true&&typeof contractedRevision==='string';
- // The contract freezes one specific quotation revision. Even after another
- // quotation becomes Final, the project document cannot silently replace it.
- const signedRevision=contractedScopeSource&&contractedRevision
+ const currentContract=contract.data?.[0];
+ const pendingContractSource=Boolean(currentContract&&
+   ['pending','active','on_hold'].includes(currentContract.status)&&
+   typeof contractedRevision==='string');
+ const contractQuoteSource=contractedScopeSource||pendingContractSource;
+ // Pin the quote revision as soon as the project contract is prepared. A
+ // later customer-level Final choice belongs to quotation history, not this
+ // project's already planned milestones.
+ const signedRevision=contractQuoteSource&&contractedRevision
    ?await s.client.from('quotation_revisions')
     .select('id,quotation_id,status').eq('organization_id',s.org)
     .eq('id',contractedRevision).maybeSingle():null;
  const signedQuoteId=!signedRevision?.error?signedRevision?.data?.quotation_id:null;
  const signedRoot=quoteRoots.find(q=>q.id===signedQuoteId);
- const contractedQuote=(contractedScopeSource&&signedRoot&&contractedRevision&&signedRevision?.data)
+ const contractedQuote=(contractQuoteSource&&signedRoot&&contractedRevision&&signedRevision?.data)
    ?{id:signedRoot.id,number:signedRoot.quotation_number??'Quotation',
       revisionId:contractedRevision,status:signedRevision.data.status,
       createdAt:signedRoot.created_at}:null;
@@ -457,7 +463,7 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
       createdAt:finalRoot.created_at}:null;
  const quotations:ProjectQuotation[]=contractedQuote?[contractedQuote]:
    // If the contracted scope is not resolvable, do not substitute a new Final quote.
-   contractedScopeSource?[]:currentQuote?[currentQuote]:[];
+   contractQuoteSource?[]:currentQuote?[currentQuote]:[];
  // Read only a saved planning proposal before the agreement exists.
  // This never activates milestones or invents payment receipts.
  const paymentRevision=contractedRevision??quotations[0]?.revisionId??null;
