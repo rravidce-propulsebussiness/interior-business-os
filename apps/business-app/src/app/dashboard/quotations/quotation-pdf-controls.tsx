@@ -103,10 +103,10 @@ export function QuotationPdfControls({
           {loading ? 'Preparing PDF…' : '➤ Share PDF to WhatsApp'}
         </button>}
       </div>
-      <p className="qs-work-preview-note">
+      {canShare && <p className="qs-work-preview-note">
         Share sends the actual PDF file. Choose WhatsApp from your phone’s share sheet,
         then select the customer and tap Send.
-      </p>
+      </p>}
       {message && <p className="qs-work-pdf-message" role="status">{message}</p>}
     </>
   );
