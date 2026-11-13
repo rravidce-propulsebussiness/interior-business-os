@@ -598,6 +598,10 @@
 .pv2-stage-title-block{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
 .pv2-stage-title-block strong{color:#18213a;font-size:12px;line-height:1.35;overflow-wrap:anywhere}
 .pv2-stage-title-block small{color:#8c97a7;font-size:10px;line-height:1.4}
+.pv2-stage-progress{display:grid;gap:4px;max-width:290px;min-width:0;margin-top:1px}
+.pv2-stage-progress-track{height:5px;display:block;overflow:hidden;border-radius:999px;background:#f0e8e2}
+.pv2-stage-progress-track>span{height:100%;display:block;border-radius:inherit;background:linear-gradient(90deg,#bd5c3f,#88352b);transition:width .2s ease}
+.pv2-stage-progress>small{font-size:9px!important;color:#6d788a!important;line-height:1.35}
 .pv2-stage-meta{font-size:10px;color:#68758b;background:#fff5ee;border-radius:7px;
  padding:7px 8px;white-space:nowrap}
 .pv2-command-stage-inner{display:grid;gap:12px;padding:12px 12px 14px 21px;
@@ -690,6 +694,8 @@
  .pv2-stage-number{width:29px;height:29px;flex-basis:29px;margin-left:-26px;margin-right:2px}
  .pv2-stage-title-block strong{font-size:11px}
  .pv2-stage-title-block small{font-size:9px}
+ .pv2-stage-progress{max-width:100%;width:100%}
+ .pv2-stage-progress>small{font-size:8px!important;overflow-wrap:anywhere}
  .pv2-stage-meta{display:none}
  .pv2-command-stage-inner{padding:11px 8px 13px 13px}
  .pv2-command-stage-summary .pv2-status{font-size:9px;padding:6px}
@@ -779,6 +785,8 @@
 .pv2-page .pv2-item-checklist.is-done .pv2-item-checklist-icon{
  background:#e7f8ed;color:#148759;border-color:#bcdfca;
 }
+.pv2-page .pv2-item-checklist.is-skipped{border-style:dashed;background:#fffaf5}
+.pv2-page .pv2-item-checklist.is-skipped .pv2-item-checklist-icon{background:#f2edf2;color:#76677b;border-color:#ded4e1}
 .pv2-page .pv2-item-checklist-copy{display:grid;gap:3px;min-width:0;flex:1}
 .pv2-page .pv2-item-checklist-copy strong{
  color:#26364a;font-size:12px;font-weight:750;line-height:1.45;
@@ -787,6 +795,13 @@
 .pv2-page .pv2-item-checklist-copy small{
  font-size:10px;color:#7a899b;
 }
+.pv2-page .pv2-item-today{justify-self:start;padding:2px 7px;border-radius:999px;background:#fff0df;color:#a54c1b;font-size:9px;font-weight:850;letter-spacing:.03em;text-transform:uppercase}
+.pv2-page .pv2-item-skip{display:grid;gap:7px;margin-top:9px;padding-top:9px;border-top:1px solid #f1e7df}
+.pv2-page .pv2-item-skip-form{display:grid;gap:8px;padding:10px;border:1px solid #f2ddcc;border-radius:9px;background:#fff9f4}
+.pv2-page .pv2-item-skip-form label{display:grid;gap:5px;color:#40536e;font-size:11px;font-weight:750}
+.pv2-page .pv2-item-skip-form textarea{width:100%;min-height:68px;resize:vertical;padding:9px;border:1px solid #e1e6eb;border-radius:8px;color:#23364d;background:#fff;font:inherit}
+.pv2-page .pv2-item-skip-form>div{display:flex;gap:7px;flex-wrap:wrap}
+.pv2-page .pv2-item-skip-reason{margin:0 0 9px;padding:9px 10px;border-left:3px solid #ba8a5f;background:#fff8f1;color:#684a32;font-size:11px;line-height:1.5}
 .pv2-page .pv2-item-checklist-chevron{color:#e05b19;font-size:19px}
 .pv2-page .pv2-item-checklist-inner{
  padding:12px;border-top:1px solid #f4e6dd;background:#fffdfb;

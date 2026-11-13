@@ -43,6 +43,7 @@ export function WorkItemCard({
   engineers,
   boq,
   tomorrow,
+  scheduledToday = false,
 }: {
   projectId: string;
   item: WorkItemView;
@@ -52,6 +53,7 @@ export function WorkItemCard({
   engineers: { id: string; label: string }[];
   boq: BoqItem[];
   tomorrow: string;
+  scheduledToday?: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -153,6 +155,7 @@ export function WorkItemCard({
           <strong>
             {item.title}
             {item.optional && <span className="pf-tag">Optional</span>}
+            {scheduledToday && <span className="pf-tag">Today</span>}
           </strong>
           <small>
             {item.stageLabel}
