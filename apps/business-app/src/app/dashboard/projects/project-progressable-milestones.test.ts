@@ -18,7 +18,9 @@ describe('progressable quotation-linked milestones', () => {
     );
     expect(milestones).toContain('Make this project plan actionable');
     expect(milestones).toContain('const quote=d.quotations[0]');
-    expect(milestones).toContain('quote&&d.permissions.manage&&d.permissions.finance&&!d.agreement');
+    expect(milestones).toContain(
+      'quote&&d.permissions.manage&&d.permissions.finance&&!d.agreement',
+    );
     expect(milestones).toContain('<PrepareAgreement');
     expect(milestones).toContain('upload an offline');
   });
@@ -44,7 +46,9 @@ describe('progressable quotation-linked milestones', () => {
     expect(view).toContain('workSchedule.plannedFinish>=todayInIndia');
     expect(view).toContain('<WorkItemCard');
     expect(view).toContain('measurementPrompts(projected.title)');
-    expect(view).toContain('projectedWork.filter(item=>item.stage.id===stage.id&&item.optional)');
+    expect(view).toContain(
+      'projectedWork.filter(item=>item.stage.id===stage.id&&item.optional)',
+    );
     expect(view).toContain('scheduledToday={scheduledToday}');
     expect(view).toContain('<StageOnsiteQcReview');
     expect(view).toContain('remainingQc.length>0');
@@ -54,7 +58,9 @@ describe('progressable quotation-linked milestones', () => {
     expect(checklist).toContain('Skipped with reason:');
     expect(workItem).toContain('Complete with photo');
     expect(workItem).toContain('Measurements and checks');
-    expect(workItem).toContain('QC checks and structural certification are never skipped.');
+    expect(workItem).toContain(
+      'QC checks and structural certification are never skipped.',
+    );
     expect(workItem).toContain('Today</span>');
     expect(flow).toContain("{ label: 'Depth', unit: 'mm' }");
     expect(flow).toContain("{ label: 'Width', unit: 'mm' }");
