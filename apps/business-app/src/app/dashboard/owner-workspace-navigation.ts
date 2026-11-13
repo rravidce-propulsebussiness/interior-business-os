@@ -49,6 +49,10 @@ export function ownerWorkspaceNavigation(
           ? [{ label: 'Create Quote', href: '/dashboard/quotations/new' }]
           : []),
         { label: 'My Quotes', href: '/dashboard/quotations' },
+        ...(context.entitlements.includes('projects') &&
+          (has('contract.view', 'billing') || has('contract.create', 'billing'))
+          ? [{ label: 'Agreements', href: '/dashboard/finance/contracts' }]
+          : []),
         { label: 'Packages', href: '/dashboard/quotations/packages' },
         ...(has('catalog.view', 'catalog') && has('pricing.view', 'pricing')
           ? [
