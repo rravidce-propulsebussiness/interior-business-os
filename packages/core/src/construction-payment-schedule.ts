@@ -70,7 +70,7 @@ export function proposedConstructionPayments(floorNames: readonly string[]): Pro
     { name: 'Inside plastering payment — concealed services & two coats',
       percent: '7.00', stageCodes: floors.map(f => 'INTERNAL_PLASTER/' + f.code) },
     { name: 'Outer plastering & elevation payment',
-      percent: '5.00', stageCodes: ['EXTERNAL_PLASTER'] },
+      percent: '5.00', stageCodes: floors.map(floor => 'EXTERNAL_PLASTER/' + floor.code) },
     { name: 'Plumbing & painting payment',
       percent: '8.00', stageCodes: floors.map(f => 'PLUMBING_PAINT/' + f.code) },
     { name: 'Tiles payment',
