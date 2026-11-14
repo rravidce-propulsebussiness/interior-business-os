@@ -55,10 +55,9 @@ function QcItem({projectId,stageId,index,title,records,photos,fieldPhotoId,
       <option value="failed">Fail — corrective work required</option>
      </select>
     </label>
-    <label>Inspection remarks {decision==='failed'||isOwner?'(required)':'(optional)'}
-     <textarea name="notes" rows={2} minLength={isOwner?12:decision==='failed'?10:undefined}
-      required={isOwner||decision==='failed'} maxLength={2000}
-      placeholder={decision==='failed'?'Describe the defect, measurement and correction needed':isOwner?'Describe what you personally verified on site':'Measurements, verification and observations'}/>
+    <label>Inspection remarks (optional)
+     <textarea name="notes" rows={2} maxLength={2000}
+      placeholder={decision==='failed'?'Add correction details if useful':isOwner?'Add what you verified if useful':'Add measurements or observations if useful'}/>
     </label>
     <label>Site inspection photograph
      <input type="file" name="file" accept="image/jpeg,image/png,image/webp"/>

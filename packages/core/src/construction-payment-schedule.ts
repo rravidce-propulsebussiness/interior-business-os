@@ -70,7 +70,7 @@ export function proposedConstructionPayments(floorNames: readonly string[]): Pro
     { name: 'Inside plastering payment — concealed services & two coats',
       percent: '7.00', stageCodes: floors.map(f => 'INTERNAL_PLASTER/' + f.code) },
     { name: 'Outer plastering & elevation payment',
-      percent: '5.00', stageCodes: ['EXTERNAL_PLASTER'] },
+      percent: '5.00', stageCodes: floors.map(floor => 'EXTERNAL_PLASTER/' + floor.code) },
     { name: 'Plumbing & painting payment',
       percent: '8.00', stageCodes: floors.map(f => 'PLUMBING_PAINT/' + f.code) },
     { name: 'Tiles payment',
@@ -245,18 +245,21 @@ export function milestoneConstructionStages(): ConstructionStageTemplate[] {
     extraStage('EXTERNAL_PLASTER','External plaster & elevation',['MASONRY'],[
       'External plastering, elevation features and weatherproof detailing',
       'Curing and facade quality inspection',
-    ],false),
-    extraStage('PLUMBING_PAINT','Plumbing, electrical & painting',['INTERNAL_PLASTER'],[
-      'Final plumbing fixture/service pressure and drainage checks',
-      'Electrical safety verification by qualified personnel',
-      'Putty, primer and approved painting coats',
     ],true),
-    extraStage('TILES','Floor and wall tiles',['INTERNAL_PLASTER'],[
-      'Wet-area waterproofing check and base/slope readiness',
-      'Floor/wall tiling, grout and line/level checks',
+    extraStage('PLUMBING_PAINT','Plumbing, final wiring & finishing',['INTERNAL_PLASTER'],[
+      'Final plumbing fixtures, pressure and drainage checks',
+      'Final electrical connections and safety verification by qualified personnel',
+      'Final finishing, snag correction and completion checks',
     ],true),
-    extraStage('DOORS','Door shutters & hardware',['MASONRY','TILES'],[
-      'Fix door shutters, locks, hinges, handles and hardware',
+    extraStage('TILES','Tiles selection & installation',['INTERNAL_PLASTER'],[
+      'Tile selection and homeowner confirmation',
+      'Tile marking, room layout, levels and wet-area slopes',
+      'Floor/wall tiling, grouting and line/level checks',
+    ],true),
+    extraStage('DOORS','Doors, painting & electrical wiring',['MASONRY','TILES'],[
+      'Install door frames, shutters, locks, hinges and hardware',
+      'Painting, approved colour and finish coats',
+      'Electrical wiring, fittings and function checks',
       'Door operation, alignment and finish inspection',
     ],true),
   );

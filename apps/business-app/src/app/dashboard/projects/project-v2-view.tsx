@@ -28,7 +28,6 @@ import { ProjectStageReviewActions } from './project-stage-review-actions';
 import { RccDailyPlan, RccSubstageGroups } from './project-rcc-substage-groups';
 import { ProjectQuotationLinker } from './project-quotation-linker';
 import { ProjectFlow } from './project-flow-view';
-import { QuotePlanView } from './project-quote-plan';
 import {
   flowRole,
   measurementPrompts,
@@ -2858,85 +2857,7 @@ const viewerRole = (d: WorkspaceData) =>
 /** The primary project screen: one role-first flow on top of the same records.
  * Stage-level planning, agreement steps and records stay one tap below. */
 function Milestones({ d }: { d: WorkspaceData }) {
-  return (
-    <>
-      <ProjectFlow d={d} milestoneMode />
-      {viewerRole(d) !== 'watchman' && <ProjectMilestoneSection d={d} />}
-    </>
-  );
-}
-/** Stage-by-stage milestones: agreement and design gates, each floor's stage,
- * its schedule, checks, certification and linked payment milestone. */
-function ProjectMilestoneSection({ d }: { d: WorkspaceData }) {
-  const hasLiveStages = d.stages.length > 0;
-  const quote = d.quotations[0];
-  // The loader resolves the project's customer-level Final quotation, including a
-  // saved quotation deliberately marked Final. Issuing or sharing it is not a
-  // prerequisite for preparing the owner-reviewed project contract.
-  const canPrepare = Boolean(
-    quote && d.permissions.manage && d.permissions.finance && !d.agreement,
-  );
-  return (
-    <>
-      {!hasLiveStages && d.quotePlan && (
-        <div className="pf-flow">
-          {!d.agreement && (
-            <section
-              className="pf-section pf-milestone-start"
-              aria-labelledby="pf-milestone-start-title"
-            >
-              <div>
-                <h2 id="pf-milestone-start-title">
-                  Make this project plan actionable
-                </h2>
-                <p>
-                  The quotation preview becomes progressable after the project
-                  contract is prepared. The owner can upload an offline
-                  agreement or record the homeowner’s offline approval of the
-                  Final quotation; no digital signature is required.
-                </p>
-              </div>
-              {canPrepare ? (
-                <PrepareAgreement
-                  projectId={d.project.id}
-                  revisionId={quote!.revisionId}
-                />
-              ) : (
-                <p className="pv2-hint">
-                  Project manager and Finance permissions are required to
-                  prepare the project contract.
-                </p>
-              )}
-            </section>
-          )}
-          {d.agreement && (
-            <section
-              className="pf-section pf-milestone-start"
-              aria-labelledby="pf-milestone-start-title"
-            >
-              <div>
-                <h2 id="pf-milestone-start-title">Continue project setup</h2>
-                <p>
-                  Continue the agreement and Finance steps below. Live work,
-                  stage progress and QC stay in these milestones.
-                </p>
-              </div>
-              <Link className="pf-btn pf-btn-primary" href="#project-timeline">
-                View milestones
-              </Link>
-            </section>
-          )}
-          <QuotePlanView
-            plan={d.quotePlan}
-            projectId={d.project.id}
-            canPrepare={false}
-          />
-        </div>
-      )}
-      {hasLiveStages && <ProjectWorkHub d={d} showHistory />}
-      {!d.quotePlan && !hasLiveStages && <ProjectWorkHub d={d} showHistory />}
-    </>
-  );
+  return <ProjectFlow d={d} milestoneMode />;
 }
 function Documents({ d }: { d: WorkspaceData }) {
   const canSeeCommercial = d.permissions.quotation || d.permissions.finance;
