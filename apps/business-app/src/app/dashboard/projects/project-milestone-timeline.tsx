@@ -8,7 +8,11 @@ import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectItemSchedule } from './project-item-schedule';
 import { StageButton } from './project-flow-controls';
 import { RccSubstageGroups } from './project-rcc-substage-groups';
-import { ProjectMilestoneAutoScroll } from './project-milestone-stage-list';
+import { ProjectMilestoneStageCarousel } from './project-milestone-stage-carousel';
+import {
+  ProjectDesignPaymentAndAgreement,
+  ProjectDesignPlansWorkflow,
+} from './project-design-stage-workflow';
 import { PrepareAgreement } from './project-v2-forms';
 import { CuringRounds, CuringPlanForm, type CuringRoundView } from './project-curing-card';
 import './project-milestone-timeline.css';
@@ -35,6 +39,12 @@ const durationByCode: Record<string, number> = {
 };
 const isComplete = (status: string) => ['completed', 'passed', 'certified', 'skipped'].includes(status);
 const itemPlanKey = (stageId: string, kind: string, index: number) => stageId + ':' + kind + ':' + index;
+const DESIGN_STAGE_CODES = ['PRECONSTRUCTION', 'DESIGN', 'SITE_PREP'];
+const DESIGN_SUBSTAGE_TITLES: Record<string, string> = {
+  PRECONSTRUCTION: 'Design payment & agreement',
+  DESIGN: 'Plans',
+  SITE_PREP: 'Site marking, excavation & soil test',
+};
 function milestoneNumber(stage: Stage, floorCodes: string[]) {
   const code = stage.template_code.split('/')[0] ?? '';
   if (['QUOTED_SCOPE','PRECONSTRUCTION','DESIGN','SITE_PREP','SITE_SURVEY','DESIGN_APPROVAL'].includes(code)) return 1;
@@ -69,6 +79,19 @@ function milestoneFamily(stage: Stage) {
 
 export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   const stages = projectTimelineStages(d.stages);
+  const designStages = DESIGN_STAGE_CODES.flatMap((code) => {
+    const stage = stages.find((row) => row.template_code.split('/')[0] === code);
+    return stage ? [stage] : [];
+  });
+  const designStageIds = new Set(designStages.map((stage) => stage.id));
+  const timelineCards = [
+    ...(designStages.length
+      ? [{ id: 'design-stage', title: 'Design stage', stages: designStages }]
+      : []),
+    ...stages
+      .filter((stage) => !designStageIds.has(stage.id))
+      .map((stage) => ({ id: stage.id, title: stageLabel(stage), stages: [stage] })),
+  ];
   const site = d.site;
   const role = flowRole({
     canManage: site?.canManage === true,
@@ -217,20 +240,18 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         planningMode={role === 'engineer' ? 'site' : 'full'} today={today}/>
     </div>;
   };
-  const workIsScheduledOn = (item: WorkItem, date: string) => {
+  const todayItems = items.filter((item) => {
     const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
-    const start = plan?.plannedStart || estimatedItemDate(item);
-    const finish = plan?.plannedFinish || start;
-    return start <= date && finish >= date;
-  };
-  const todayItems = items.filter((item) =>
-    workIsScheduledOn(item, today) && !isComplete(item.status));
-  const todayStageIndex = stages.findIndex((stage) =>
-    items.some((item) => item.stage.id === stage.id && workIsScheduledOn(item, today)));
-  const tomorrowStageIndex = stages.findIndex((stage) =>
-    items.some((item) => item.stage.id === stage.id && workIsScheduledOn(item, tomorrow) && !isComplete(item.status)));
-  const tomorrowItems = items.filter((item) =>
-    workIsScheduledOn(item, tomorrow) && !isComplete(item.status));
+    const when = plan?.plannedStart ?? estimatedItemDate(item);
+    return when === today && !isComplete(item.status);
+  });
+  const todayStageIndex = timelineCards.findIndex((card) =>
+    card.stages.some((stage) => todayItems.some((item) => item.stage.id === stage.id)));
+  const tomorrowItems = items.filter((item) => {
+    const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
+    const when = plan?.plannedStart ?? estimatedItemDate(item);
+    return when === tomorrow && !isComplete(item.status);
+  });
   const workDone = items.filter((item) => isComplete(item.status)).length;
   const delayedItems = items.filter((item) =>
     !isComplete(item.status) && dayDistance(today, estimatedItemDate(item)) > 0);
@@ -239,16 +260,13 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     const status = d.stageExecution.find((row) => row.stageId === stage.id)?.status ?? stage.status;
     return !isComplete(status);
   });
-  const currentIndex = current ? stages.indexOf(current) : -1;
-  const activeStageIndex = stages.findIndex((stage) =>
-    (d.stageExecution.find((row) => row.stageId === stage.id)?.status ?? stage.status) === 'in_progress');
-  const delayedStageIndex = delayedItems.length ? stages.indexOf(delayedItems[0].stage) : -1;
-  const focusStageIndex = todayStageIndex >= 0 ? todayStageIndex
-    : activeStageIndex >= 0 ? activeStageIndex
-      : tomorrowStageIndex >= 0 ? tomorrowStageIndex
-        : delayedStageIndex >= 0 ? delayedStageIndex
-          : currentIndex >= 0 ? currentIndex : 0;
-  const nextStage = currentIndex >= 0 ? stages[currentIndex + 1] : undefined;
+  const currentIndex = current
+    ? timelineCards.findIndex((card) => card.stages.some((stage) => stage.id === current.id))
+    : -1;
+  const firstStageIndex = todayStageIndex >= 0
+    ? todayStageIndex
+    : currentIndex >= 0 ? currentIndex : 0;
+  const nextStage = currentIndex >= 0 ? timelineCards[currentIndex + 1]?.stages[0] : undefined;
   if (!stages.length) {
     const quote = d.quotations[0];
     const canPrepare = Boolean(quote && d.permissions.manage && d.permissions.finance && !d.agreement);
@@ -305,6 +323,188 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   const roundSlots = ['Morning', 'Afternoon', 'Evening'];
   const checkStatus = (stageId: string, title: string) => d.stageProgress.checks.find((row) =>
     stringValue(row.stage_id) === stageId && stringValue(row.title).toLowerCase() === title.toLowerCase());
+  const stageExecution = (stage: Stage) => d.stageExecution.find((row) => row.stageId === stage.id);
+  const stageItemsFor = (stage: Stage) => grouped.get(stage.id) ?? [];
+  const siteChecksFor = (stage: Stage) => {
+    const code = stage.template_code.split('/')[0];
+    if (code === 'PRECONSTRUCTION' || code === 'DESIGN') return [];
+    return stage.inspectionTopics.map((title, index) => {
+      const record = checkStatus(stage.id, title);
+      return {
+        title,
+        index,
+        status: stringValue(record?.status) || 'pending',
+        notes: stringValue(record?.notes),
+        photoId: stringValue(record?.photo_id),
+      };
+    });
+  };
+  const stageStatusFor = (stage: Stage) =>
+    stageExecution(stage)?.status ?? stage.status ?? 'not_started';
+  const stageStatusLabel = (stage: Stage) => {
+    const status = stageStatusFor(stage);
+    return pretty(status);
+  };
+  const renderStageContent = (stage: Stage) => {
+    const code = stage.template_code.split('/')[0] ?? '';
+    const stageItems = stageItemsFor(stage);
+    const completed = stageItems.filter((item) => isComplete(item.status)).length;
+    const stageStatus = stageStatusFor(stage);
+    const siteChecks = siteChecksFor(stage);
+    const actualQc = d.stageQc.records.filter((record) => record.stage_id === stage.id);
+    const stagePhotos = photos;
+
+    return <div className="pmt-stage-body">
+      {stage.explanation && <p className="pmt-explanation">{stage.explanation}</p>}
+      {code === 'PRECONSTRUCTION' && <ProjectDesignPaymentAndAgreement data={d}/>}
+      {code === 'DESIGN' && <ProjectDesignPlansWorkflow data={d}/>}
+      {code === 'DESIGN' ? null : stageItems.length ? code === 'RCC' ? <RccSubstageGroups
+        stageId={stage.id}
+        title={stage.floor_code ? pretty(stage.floor_code) + ' structural work areas' : 'Structural work areas'}
+        activities={stageItems.map((item) => {
+          const plan = plansByKey.get(itemPlanKey(stage.id, 'work', item.index));
+          const baseline = estimatedItemDate(item);
+          return { index: item.index, title: item.title, status: item.status,
+            plannedStart: plan?.plannedStart ?? baseline, plannedFinish: plan?.plannedFinish ?? baseline };
+        })}
+        completed={completed}
+        renderActivity={(workIndex) => {
+          const workItem = stageItems.find((item) => item.index === workIndex);
+          return workItem ? card(workItem) : null;
+        }}/>
+        : <div className="pmt-work-list">{stageItems.map(card)}</div>
+        : <p className="pmt-empty">No work items are available for this sub-stage.</p>}
+      {!!siteChecks.length && <section className="pmt-subsection">
+        <h3>Site checks <small>Owner or site engineer · photo evidence required</small></h3>
+        {siteChecks.map((check) => {
+          const plan = plansByKey.get(itemPlanKey(stage.id, 'check', check.index));
+          return <div className="pmt-check" key={check.index}>
+            <StageChecklistItem projectId={d.project.id} stageId={stage.id} kind="check"
+              index={check.index} title={check.title} status={check.status}
+              notes={check.notes} photoId={check.photoId} photos={stagePhotos}
+              canEdit={canWork} schedule={plan} canPlan={canPlan} scheduleKind="check"
+              baselineStart={checkBaselineDate(stage, check.index, siteChecks.length)}
+              baselineFinish={checkBaselineDate(stage, check.index, siteChecks.length)}
+              planningMode={role === 'engineer' ? 'site' : 'full'} today={today}/>
+          </div>;
+        })}
+      </section>}
+      {stage.inspectionTopics.length > 0 && !DESIGN_STAGE_CODES.includes(code) && <section className="pmt-subsection">
+        <StageOnsiteQcReview projectId={d.project.id} stageId={stage.id}
+          stageName={stageLabel(stage)} topics={stage.inspectionTopics}
+          topicIndices={stage.inspectionTopics.map((_, index) => index)}
+          stageStatus={stageStatus} canReview={d.stageQc.canReview || d.stageQc.isOwner}
+          canManage={site?.canManage === true} inspectorAssigned={d.stageQc.inspectorAssigned}
+          isOwner={d.stageQc.isOwner} records={actualQc} photos={stagePhotos}
+          existingChecks={siteChecks.map((check) => ({ title: check.title, photoId: check.photoId, status: check.status }))}/>
+      </section>}
+      {canWork && stageStatus === 'not_started' && (stageExecution(stage)?.blockers.length ?? 0) === 0 &&
+        !['QUOTED_SCOPE','PRECONSTRUCTION','DESIGN','DESIGN_APPROVAL','SITE_SURVEY'].includes(code) &&
+        <StageButton projectId={d.project.id} stageId={stage.id} action="start" label="Start this sub-stage"/>}
+      {canWork && stageStatus === 'in_progress' && code === 'SITE_PREP' &&
+        <StageButton projectId={d.project.id} stageId={stage.id} action="mark_complete" label="Mark site preparation complete"/>}
+      {canWork && stageStatus === 'in_progress' && code !== 'SITE_PREP' && !DESIGN_STAGE_CODES.includes(code) &&
+        <StageButton projectId={d.project.id} stageId={stage.id} action="submit_for_qc" label="Submit stage for QC"/>}
+    </div>;
+  };
+  const renderDesignStageCard = (cardIndex: number) => {
+    const children = designStages;
+    const ranges = children.map(windowFor);
+    const baselineRange = {
+      start: ranges.map((range) => range.start).sort()[0] ?? startDate,
+      finish: ranges.map((range) => range.finish).sort().at(-1) ?? startDate,
+    };
+    const totalActivities = children.reduce((total, stage) => total + stage.activities.length, 0);
+    const totalChecks = children.reduce((total, stage) => total + siteChecksFor(stage).length, 0);
+    const totalItems = children.reduce((total, stage) => total + stageItemsFor(stage).length, 0);
+    const completedItems = children.reduce((total, stage) => total + stageItemsFor(stage).filter((item) => isComplete(item.status)).length, 0);
+    const statuses = children.map(stageStatusFor);
+    const displayStatus = statuses.every((status) => isComplete(status) || status === 'completed')
+      ? 'completed'
+      : statuses.some((status) => ['in_progress', 'ready_for_qc'].includes(status))
+        ? 'in_progress'
+        : 'not_started';
+    const todaySubstageIndex = children.findIndex((stage) => todayItems.some((item) => item.stage.id === stage.id));
+    const currentSubstageIndex = current ? children.findIndex((stage) => stage.id === current.id) : -1;
+    const pendingSubstageIndex = children.findIndex((stage) => !isComplete(stageStatusFor(stage)));
+    const openSubstageIndex = todaySubstageIndex >= 0 ? todaySubstageIndex
+      : currentSubstageIndex >= 0 ? currentSubstageIndex
+        : pendingSubstageIndex >= 0 ? pendingSubstageIndex : 0;
+    const daysOverBaseline = dayDistance(today, baselineRange.finish);
+    const variance = displayStatus === 'completed'
+      ? 'On track'
+      : daysOverBaseline > 0 ? 'Delayed ' + daysOverBaseline + 'd' : 'On track';
+
+    return <details className={'pmt-stage pmt-design-stage ' + (cardIndex === firstStageIndex ? 'is-current' : '')}
+      data-stage-index={cardIndex} key="design-stage" open={cardIndex === firstStageIndex}>
+      <summary>
+        <span className="pmt-number">01</span>
+        <span className="pmt-stage-name"><strong>Design stage</strong>
+          <small>3 sub-stages · {totalActivities} works · {totalChecks} site checks · {completedItems}/{totalItems} complete</small></span>
+        <span className="pmt-dates">{displayDay(baselineRange.start)} – {displayDay(baselineRange.finish)}<small>Auto baseline</small>
+          <small className={'pmt-stage-variance ' + (/late|Delayed/i.test(variance) ? 'late' : '')}>{variance}</small></span>
+        <span className={'pmt-status ' + (displayStatus === 'in_progress' ? 'active' : displayStatus === 'completed' ? 'done' : '')}>{pretty(displayStatus)}</span>
+        <span className="pmt-chevron">⌄</span>
+      </summary>
+      <div className="pmt-design-substages">
+        {children.map((stage, index) => {
+          const code = stage.template_code.split('/')[0] ?? '';
+          const stageItems = stageItemsFor(stage);
+          const checks = siteChecksFor(stage);
+          const completed = stageItems.filter((item) => isComplete(item.status)).length;
+          const stageStatus = stageStatusFor(stage);
+          const range = windowFor(stage);
+          return <details className="pmt-stage pmt-design-substage" key={stage.id} open={index === openSubstageIndex}>
+            <summary><span className="pmt-number">{String(index + 1).padStart(2, '0')}</span>
+              <span className="pmt-stage-name"><strong>{DESIGN_SUBSTAGE_TITLES[code] ?? stage.title}</strong>
+                <small>{stageItems.length ? stage.activities.length + ' works' : 'Plan workflow'} · {checks.length} checks · {completed}/{stageItems.length} complete</small></span>
+              <span className="pmt-dates">{displayDay(range.start)} – {displayDay(range.finish)}<small>Auto baseline</small></span>
+              <span className={'pmt-status ' + (stageStatus === 'in_progress' ? 'active' : isComplete(stageStatus) ? 'done' : '')}>{stageStatusLabel(stage)}</span>
+              <span className="pmt-chevron">⌄</span>
+            </summary>
+            {renderStageContent(stage)}
+          </details>;
+        })}
+      </div>
+    </details>;
+  };
+  const renderStageCard = (stage: Stage, cardIndex: number) => {
+    const range = windowFor(stage);
+    const stageItems = stageItemsFor(stage);
+    const completed = stageItems.filter((item) => isComplete(item.status)).length;
+    const checks = siteChecksFor(stage);
+    const execution = stageExecution(stage);
+    const stageStatus = stageStatusFor(stage);
+    const baselineRange = estimated.get(stage.id) ?? range;
+    const savedRange = d.itemPlans.some((plan) =>
+      plan.stageId === stage.id && plan.plannedStart && plan.plannedFinish);
+    const actualFinish = execution?.fieldFinishedAt;
+    const completedDelta = actualFinish
+      ? dayDistance(dayKey(new Date(actualFinish)), baselineRange.finish)
+      : null;
+    const daysOverBaseline = dayDistance(today, baselineRange.finish);
+    const stageVariance = isComplete(stageStatus) && completedDelta !== null
+      ? completedDelta < 0 ? Math.abs(completedDelta) + 'd early'
+        : completedDelta > 0 ? completedDelta + 'd late' : 'On baseline'
+      : daysOverBaseline > 0 && !isComplete(stageStatus)
+        ? 'Delayed ' + daysOverBaseline + 'd'
+        : 'On track';
+    const visibleStatus = stageStatusLabel(stage);
+
+    return <details className={'pmt-stage ' + (cardIndex === firstStageIndex ? 'is-current' : '')}
+      data-stage-index={cardIndex} key={stage.id} open={cardIndex === firstStageIndex}>
+      <summary><span className="pmt-number">{String(milestoneNumber(stage, floorCodes)).padStart(2, '0')}</span>
+        <span className="pmt-stage-name"><strong>{stage.floor_code ? pretty(stage.floor_code) + ' · ' : ''}{stage.title}</strong>
+          <small>{milestoneFamily(stage)} · {stage.activities.length} works · {checks.length} checks · {completed}/{stageItems.length} complete</small></span>
+        <span className="pmt-dates">{displayDay(baselineRange.start)} – {displayDay(baselineRange.finish)}<small>Auto baseline</small>
+          {savedRange && <small className="pmt-current-date">Current plan: {displayDay(range.start)} – {displayDay(range.finish)}</small>}
+          <small className={'pmt-stage-variance ' + (/late|Delayed/i.test(stageVariance) ? 'late' : /early/i.test(stageVariance) ? 'early' : '')}>{stageVariance}</small></span>
+        <span className={'pmt-status ' + (stageStatus === 'in_progress' ? 'active' : isComplete(stageStatus) ? 'done' : '')}>{visibleStatus}</span>
+        <span className="pmt-chevron">⌄</span>
+      </summary>
+      {renderStageContent(stage)}
+    </details>;
+  };
   return <div className="pmt">
     <header className="pmt-hero">
       <div><span className="pmt-kicker">One project · one live timeline</span>
@@ -356,104 +556,16 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
 
     <section className="pmt-timeline" id="project-timeline">
       <div className="pmt-timeline-head"><div><h2>All stages</h2><p>Baseline dates are fixed from the project creation date. You can adjust the current plan without changing the baseline; early and late work is labelled against it.</p></div>
-        <div className="pmt-board-controls"><span>{stages.length} stages</span></div></div>
-      <ProjectMilestoneAutoScroll focusIndex={focusStageIndex}/>
-      <div className="pmt-stage-list">
-      {stages.map((stage, index) => {
-        const range = windowFor(stage);
-        const stageItems = grouped.get(stage.id) ?? [];
-        const completed = stageItems.filter((item) => isComplete(item.status)).length;
-        const isRccStage = stage.template_code.split('/')[0] === 'RCC';
-        const rccActivities = stageItems.map((item) => {
-          const plan = plansByKey.get(itemPlanKey(stage.id, 'work', item.index));
-          const baseline = estimatedItemDate(item);
-          return {
-            index: item.index,
-            title: item.title,
-            status: item.status,
-            plannedStart: plan?.plannedStart ?? baseline,
-            plannedFinish: plan?.plannedFinish ?? baseline,
-          };
-        });
-        const execution = d.stageExecution.find((row) => row.stageId === stage.id);
-        const stageStatus = execution?.status ?? stage.status ?? 'not_started';
-        const siteChecks = stage.inspectionTopics.map((title, i) => {
-          const record = checkStatus(stage.id, title);
-          return { title, index: i, status: stringValue(record?.status) || 'pending',
-            notes: stringValue(record?.notes), photoId: stringValue(record?.photo_id) };
-        });
-        const stagePhotos = photos;
-        const actualQc = d.stageQc.records.filter((record) => record.stage_id === stage.id);
-        const baselineRange = estimated.get(stage.id) ?? range;
-        const savedRange = d.itemPlans.some((plan) => plan.stageId === stage.id && plan.plannedStart && plan.plannedFinish);
-        const actualFinish = execution?.fieldFinishedAt;
-        const completedDelta = actualFinish
-          ? dayDistance(dayKey(new Date(actualFinish)), baselineRange.finish)
-          : null;
-        const daysOverBaseline = dayDistance(today, baselineRange.finish);
-        const stageVariance = isComplete(stageStatus) && completedDelta !== null
-          ? completedDelta < 0 ? Math.abs(completedDelta) + 'd early'
-            : completedDelta > 0 ? completedDelta + 'd late' : 'On baseline'
-          : daysOverBaseline > 0 && !isComplete(stageStatus)
-            ? 'Delayed ' + daysOverBaseline + 'd'
-            : 'On track';
-        return <details className={'pmt-stage ' + (index === focusStageIndex ? 'is-current' : '')}
-          id={'project-stage-' + index} data-stage-index={index} key={stage.id} open={index === focusStageIndex}>
-          <summary><span className="pmt-number">{String(milestoneNumber(stage, floorCodes)).padStart(2,'0')}</span>
-            <span className="pmt-stage-name"><strong>{stage.floor_code ? pretty(stage.floor_code) + ' · ' : ''}{stage.title}</strong>
-              <small>{milestoneFamily(stage)} · {stage.activities.length} works · {siteChecks.length} checks · {completed}/{stageItems.length} complete{index === todayStageIndex ? ' · Today’s stage' : ''}</small></span>
-            <span className="pmt-dates">{displayDay(baselineRange.start)} – {displayDay(baselineRange.finish)}<small>Auto baseline</small>
-              {savedRange && <small className="pmt-current-date">Current plan: {displayDay(range.start)} – {displayDay(range.finish)}</small>}
-              <small className={'pmt-stage-variance ' + (/late|Delayed/i.test(stageVariance) ? 'late' : /early/i.test(stageVariance) ? 'early' : '')}>{stageVariance}</small></span>
-            <span className={'pmt-status ' + (stageStatus === 'in_progress' ? 'active' : isComplete(stageStatus) ? 'done' : '')}>{pretty(stageStatus)}</span>
-            <span className="pmt-chevron">⌄</span>
-          </summary>
-          <div className="pmt-stage-body">
-            {stage.explanation && <p className="pmt-explanation">{stage.explanation}</p>}
-            {stageItems.length ? isRccStage ? <RccSubstageGroups
-              stageId={stage.id}
-              title={stage.floor_code ? pretty(stage.floor_code) + ' structural work areas' : 'Structural work areas'}
-              activities={rccActivities}
-              completed={completed}
-              renderActivity={(workIndex) => {
-                const workItem = stageItems.find((item) => item.index === workIndex);
-                return workItem ? card(workItem) : null;
-              }}/>
-              : <div className="pmt-work-list">{stageItems.map(card)}</div> :
-              <p className="pmt-empty">No work items are available for this stage.</p>}
-            {!!siteChecks.length && <section className="pmt-subsection">
-              <h3>Site checks <small>Photo evidence required · notes optional</small></h3>
-              {siteChecks.map((check) => {
-                const plan = plansByKey.get(itemPlanKey(stage.id, 'check', check.index));
-                return <div className="pmt-check" key={check.index}>
-                  <StageChecklistItem projectId={d.project.id} stageId={stage.id} kind="check"
-                    index={check.index} title={check.title} status={check.status}
-                    notes={check.notes} photoId={check.photoId} photos={stagePhotos}
-                    canEdit={canWork} schedule={plan} canPlan={canPlan} scheduleKind="check"
-                    baselineStart={checkBaselineDate(stage, check.index, siteChecks.length)}
-                    baselineFinish={checkBaselineDate(stage, check.index, siteChecks.length)}
-                    planningMode={role === 'engineer' ? 'site' : 'full'} today={today}/>
-                </div>;
-              })}
-            </section>}
-            {!!stage.inspectionTopics.length && <section className="pmt-subsection">
-              <StageOnsiteQcReview projectId={d.project.id} stageId={stage.id}
-                stageName={stageLabel(stage)} topics={stage.inspectionTopics}
-                topicIndices={stage.inspectionTopics.map((_, i) => i)}
-                stageStatus={stageStatus} canReview={d.stageQc.canReview || d.stageQc.isOwner}
-                canManage={site?.canManage === true} inspectorAssigned={d.stageQc.inspectorAssigned}
-                isOwner={d.stageQc.isOwner} records={actualQc} photos={stagePhotos}
-                existingChecks={siteChecks.map((check) => ({ title: check.title, photoId: check.photoId, status: check.status }))}/>
-            </section>}
-            {canWork && stageStatus === 'not_started' && (execution?.blockers.length ?? 0) === 0 &&
-              !['QUOTED_SCOPE','PRECONSTRUCTION','DESIGN','DESIGN_APPROVAL','SITE_SURVEY'].includes(stage.template_code) &&
-              <StageButton projectId={d.project.id} stageId={stage.id} action="start" label="Start this stage"/>}
-            {canWork && ['in_progress','ready_for_qc'].includes(stageStatus) && stageStatus === 'in_progress' &&
-              <StageButton projectId={d.project.id} stageId={stage.id} action="submit_for_qc" label="Submit stage for QC"/>}
-          </div>
-        </details>;
-      })}
-      </div>
+        <div className="pmt-board-controls"><span>{timelineCards.length} stages</span></div></div>
+      <ProjectMilestoneStageCarousel
+        currentIndex={firstStageIndex}
+        todayIndex={todayStageIndex}
+        stageTitles={timelineCards.map((card) => card.title)}
+      >
+      {timelineCards.map((card, index) => card.id === 'design-stage'
+        ? renderDesignStageCard(index)
+        : renderStageCard(card.stages[0]!, index))}
+      </ProjectMilestoneStageCarousel>
     </section>
   </div>;
 }

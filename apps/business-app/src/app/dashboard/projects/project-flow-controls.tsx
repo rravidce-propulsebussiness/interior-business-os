@@ -39,7 +39,7 @@ export function StageButton({
 }: {
   projectId: string;
   stageId: string;
-  action: 'start' | 'submit_for_qc';
+  action: 'start' | 'submit_for_qc' | 'mark_complete';
   label: string;
 }) {
   const { pending, message, run } = useAction();

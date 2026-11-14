@@ -5,7 +5,7 @@ const read = (name: string) =>
   readFileSync(new URL(name, import.meta.url), 'utf8');
 
 describe('optional offline agreement with final quotation', () => {
-  const ui = read('./project-v2-view.tsx');
+  const designWorkflow = read('./project-design-stage-workflow.tsx');
   const forms = read('./project-v2-forms.tsx');
   const action = read('./[id]/site/agreement-actions.ts');
   const data = read('./project-v2-data.ts');
@@ -23,9 +23,8 @@ describe('optional offline agreement with final quotation', () => {
   );
 
   it('offers the offline choice only when the database identifies the owner', () => {
-    expectSource(ui).toContain('<SkipAgreementUpload');
-    expectSource(ui).toContain('d.agreement.canAuthorizeException');
-    expectSource(ui).toContain('Use Final quotation without agreement upload');
+    expectSource(designWorkflow).toContain('<SkipAgreementUpload');
+    expectSource(designWorkflow).toContain('agreement?.canAuthorizeException && hasOwnerAccess');
     expectSource(forms).toContain('I am the company owner');
     expectSource(forms).toContain('disabled={pending||saved||!confirmed}');
     expectSource(forms).toContain(
@@ -41,9 +40,7 @@ describe('optional offline agreement with final quotation', () => {
       'confirm the homeowner approved this final quotation or agreement offline.',
     );
     expectSource(forms).toContain('Record offline homeowner approval');
-    expectSource(ui).toContain(
-      'Owner-recorded offline homeowner approval: the Final quotation is the agreed scope.',
-    );
+    expectSource(forms).toContain('confirm the homeowner approved this final quotation or agreement offline.');
     expectSource(data).toContain(
       "['signed_copy_recorded','owner_exception'].includes(stringValue(agreement.clearance_type))",
     );

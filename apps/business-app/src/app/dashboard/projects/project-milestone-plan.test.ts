@@ -15,7 +15,7 @@ describe('single project milestones and drawing progress', () => {
 
   it('records externally shared plans as references and keeps approvals separate', () => {
     const forms = read('./project-v2-forms.tsx');
-    const journey = read('./project-flow-view.tsx');
+    const journey = read('./project-design-stage-workflow.tsx');
     expectSource(forms).toContain(
       'existing WhatsApp / offline share reference',
     );
@@ -24,9 +24,11 @@ describe('single project milestones and drawing progress', () => {
       "['architectural_plan','3d_design','structural_design','interior_layout','electrical_plan','plumbing_plan']",
     );
     expectSource(journey).toContain(
-      "['structural_design', '3d_design', 'electrical_plan', 'plumbing_plan']",
+      "'structural_design',\n    'electrical_plan',\n    'plumbing_plan'",
     );
-    expectSource(journey).toContain('Waits for previous design approval');
+    expectSource(journey).toContain('Each current revision needs technical review');
+    const drawingAction = read('./project-design-actions.ts');
+    expectSource(drawingAction).not.toContain("'project_preflight_read'");
   });
 
   it('retains existing payment groups and shows only agreement-based duration guidance', () => {
@@ -42,20 +44,21 @@ describe('single project milestones and drawing progress', () => {
     );
   });
 
-  it('gates structural, elevation and MEP submissions on the preceding approved design', () => {
+  it('gates structural and MEP submissions on the preceding owner-approved plan', () => {
     const migration = read(
-      '../../../../../../packages/database/supabase/migrations/20261113115420_project_design_sequence_and_mep_gate.sql',
+      '../../../../../../packages/database/supabase/migrations/20261114190000_design_stage_floorplan_structural_mep_order.sql',
     );
     expectSource(migration).toContain(
-      "when '3d_design' then 'structural_design'",
+      "WHEN 'structural_design' THEN private.project_floor_plan_kind",
     );
     expectSource(migration).toContain(
-      "when 'electrical_plan' then '3d_design'",
+      "WHEN 'electrical_plan' THEN 'structural_design'",
     );
-    expectSource(migration).toContain("when 'plumbing_plan' then '3d_design'");
+    expectSource(migration).toContain("WHEN 'plumbing_plan' THEN 'electrical_plan'");
     expectSource(migration).toContain(
       "'electrical_plan','plumbing_plan']::text[]",
     );
+    expectSource(migration).toContain('owner_approved_at IS NULL');
   });
 
   it('shows one slideable stage at a time and selects today’s stage first', () => {
@@ -63,7 +66,7 @@ describe('single project milestones and drawing progress', () => {
     const carousel = read('./project-milestone-stage-carousel.tsx');
     const styles = read('./project-milestone-timeline.css');
     expectSource(timeline).toContain(
-      'const todayStageIndex = stages.findIndex',
+      'const todayStageIndex = timelineCards.findIndex',
     );
     expectSource(timeline).toContain(
       'todayItems.some((item) => item.stage.id === stage.id)',
@@ -72,7 +75,9 @@ describe('single project milestones and drawing progress', () => {
       'const firstStageIndex = todayStageIndex >= 0',
     );
     expectSource(timeline).toContain('<ProjectMilestoneStageCarousel');
-    expectSource(timeline).toContain('open={index === firstStageIndex}');
+    expectSource(timeline).toContain(
+      'open={cardIndex === firstStageIndex}',
+    );
     expectSource(styles).toContain('grid-auto-flow:column');
     expectSource(styles).toContain('scroll-snap-type:x mandatory');
     expectSource(carousel).toContain(
@@ -93,5 +98,40 @@ describe('single project milestones and drawing progress', () => {
     expectSource(groups).toContain(
       'No work items are assigned to this area yet.',
     );
+  });
+
+  it('groups agreement, plans, and site preparation under one Design stage with no QC card', () => {
+    const timeline = read('./project-milestone-timeline.tsx');
+    const workflow = read('./project-design-stage-workflow.tsx');
+    expectSource(timeline).toContain(
+      "const DESIGN_STAGE_CODES = ['PRECONSTRUCTION', 'DESIGN', 'SITE_PREP']",
+    );
+    expectSource(timeline).toContain("title: 'Design stage'");
+    expectSource(timeline).toContain(
+      "PRECONSTRUCTION: 'Design payment & agreement'",
+    );
+    expectSource(timeline).toContain("DESIGN: 'Plans'");
+    expectSource(timeline).toContain(
+      "SITE_PREP: 'Site marking, excavation & soil test'",
+    );
+    expectSource(timeline).toContain(
+      '<ProjectDesignPaymentAndAgreement data={d}/>',
+    );
+    expectSource(timeline).toContain('<ProjectDesignPlansWorkflow data={d}/>');
+    expectSource(timeline).toContain('!DESIGN_STAGE_CODES.includes(code)');
+    expectSource(workflow).toContain("'structural_design'");
+    expectSource(workflow).toContain("'electrical_plan'");
+    expectSource(workflow).toContain("'plumbing_plan'");
+    expectSource(workflow).toContain('<DesignDecisionForm');
+    expectSource(workflow).toContain('Release approved plans for site marking');
+    expectSource(workflow).toContain('enter the meeting, call, or message reference');
+    expectSource(timeline).toContain('action="mark_complete"');
+    expectSource(timeline).toContain('!DESIGN_STAGE_CODES.includes(code)');
+    const completion = read(
+      '../../../../../../packages/database/supabase/migrations/20261114193000_site_prep_completion_without_qc.sql',
+    );
+    expectSource(completion).toContain("status IN ('in_progress', 'on_hold', 'ready_for_qc', 'completed')");
+    expectSource(completion).toContain("v_stage.template_code <> 'SITE_PREP'");
+    expectSource(completion).toContain('site_preparation_completed');
   });
 });
