@@ -98,13 +98,27 @@ export function CuringRounds({
   canRecord: boolean;
 }) {
   const [open, setOpen] = useState(rounds.find((r) => r.recordable)?.key ?? '');
+  const [showAll, setShowAll] = useState(false);
+  const todayRounds = rounds.filter((round) => round.day === 'Today');
+  const visibleRounds = showAll ? rounds : todayRounds;
+  const hasOtherDays = rounds.some((round) => round.day !== 'Today');
   if (!rounds.length)
     return (
       <p className="pf-empty">No curing rounds scheduled for these days.</p>
     );
   return (
-    <ol className="pf-rounds">
-      {rounds.map((round) => (
+    <div className="pf-round-list">
+      {hasOtherDays && <div className="pf-rounds-toolbar">
+        <span>{showAll ? 'All available curing days' : 'Today’s curing log'}</span>
+        <button type="button" aria-expanded={showAll}
+          onClick={() => setShowAll((value) => !value)}>
+          {showAll ? 'Show today only' : 'Show all days'}
+        </button>
+      </div>}
+      {!visibleRounds.length
+        ? <p className="pf-empty pf-rounds-empty">No curing rounds scheduled for today.</p>
+        : <ol className="pf-rounds">
+      {visibleRounds.map((round) => (
         <li key={round.key} className={'pf-round pf-round-' + round.status}>
           <button
             type="button"
@@ -136,7 +150,8 @@ export function CuringRounds({
           )}
         </li>
       ))}
-    </ol>
+    </ol>}
+    </div>
   );
 }
 
