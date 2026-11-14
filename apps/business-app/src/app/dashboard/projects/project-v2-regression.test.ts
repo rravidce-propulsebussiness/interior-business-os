@@ -123,8 +123,7 @@ it('keeps project edit and sharing inline and shows one evidence-backed next act
  expect(finance).toContain("'project_preflight_save'");
  expect(finance).toContain("'project_advance_proforma_prepare'");
  expect(nextForms).toContain('Issue advance proforma');
- expect(drawing).toContain("readiness.inspection_done!==true||readiness.measurements_done!==true");
- expect(loader).toContain("'project_preflight_read'");
+ expect(drawing).not.toContain("'project_preflight_read'");
  expect(loader).toContain("'project_advance_read'");
 });
 
