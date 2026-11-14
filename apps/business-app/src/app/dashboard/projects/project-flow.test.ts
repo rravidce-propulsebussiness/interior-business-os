@@ -319,8 +319,8 @@ describe('single project flow model', () => {
     expect(migration).toContain("homeowner_paid_method = 'cash'");
     expect(migration).toContain('homeowner_paid_request_hash');
     expect(migration).toContain("'already_recorded', true");
-    expect(actions).toContain(
-      "client.rpc('project_material_homeowner_cash_paid'",
+    expect(actions).toMatch(
+      /client\.rpc\(\s*['"]project_material_homeowner_cash_paid['"]/,
     );
     expect(forms).toContain('Cash settlement only.');
     expect(view).toContain('Homeowner paid supplier directly · cash');
