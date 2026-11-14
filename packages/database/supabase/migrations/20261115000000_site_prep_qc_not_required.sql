@@ -11,7 +11,7 @@ SECURITY DEFINER
 SET search_path = ''
 AS $function$
   SELECT coalesce(
-    s.template_code = 'SITE_PREP' OR (
+    s.template_code IN ('SITE_PREP', 'SITE_PREPARATION') OR (
       (
         jsonb_array_length(s.inspection_topics) = 0
         AND s.hold_point IS DISTINCT FROM 'structural'
