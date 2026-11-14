@@ -12963,6 +12963,19 @@ export interface Database {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };
+      project_material_homeowner_cash_paid: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_material: string;
+          p_amount: number;
+          p_paid_date: string;
+          p_supplier: string;
+          p_reference?: string;
+          p_note?: string;
+        };
+        Returns: Json;
+      };
       project_material_delivery_command: {
         Args: {
           p_org: string;
