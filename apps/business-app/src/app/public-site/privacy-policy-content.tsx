@@ -1,26 +1,22 @@
-import { notFound } from 'next/navigation';
-import type { Metadata } from 'next';
-import { currentWebsite } from '../../website';
-
 const PROPULSE_HOST = 'propulsetechnologies.online';
 
-export async function generateMetadata(): Promise<Metadata> {
-  const site = await currentWebsite();
-  if (site?.host !== PROPULSE_HOST) {
-    return { robots: { index: false, follow: false } };
-  }
+export function isPropulsePrivacyPage(host: string | undefined, path: string) {
+  return host === PROPULSE_HOST && path === '/privacy-policy';
+}
+
+export function privacyPolicyMetadata() {
   return {
     title: 'Privacy Policy | ProPulse',
     description:
       'How ProPulse collects, uses and shares Meta lead information for lead capture and business marketplace access.',
-    alternates: { canonical: 'https://propulsetechnologies.online/privacy-policy' },
+    alternates: {
+      canonical: 'https://propulsetechnologies.online/privacy-policy',
+    },
+    robots: { index: true, follow: true },
   };
 }
 
-export default async function PrivacyPolicyPage() {
-  const site = await currentWebsite();
-  if (site?.host !== PROPULSE_HOST) notFound();
-
+export function PrivacyPolicyContent() {
   return (
     <main className="privacy-page">
       <style>{`
@@ -107,9 +103,9 @@ export default async function PrivacyPolicyPage() {
         We retain connection and lead records for as long as needed to operate
         the lead service, provide marketplace access, maintain transaction and
         support records, and meet applicable obligations. A person may ask
-        ProPulse to access, correct, or delete information by emailing
+        ProPulse to access, correct, or delete information by emailing{' '}
         <a href="mailto:info@propulsetechnologies.online">
-          {' '}info@propulsetechnologies.online
+          info@propulsetechnologies.online
         </a>
         . We will review and respond to requests as applicable. Deletion may
         not remove information a business has already received or records we
