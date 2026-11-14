@@ -29,6 +29,37 @@ const durationByCode: Record<string, number> = {
 };
 const isComplete = (status: string) => ['completed', 'passed', 'certified', 'skipped'].includes(status);
 const itemPlanKey = (stageId: string, kind: string, index: number) => stageId + ':' + kind + ':' + index;
+function milestoneNumber(stage: Stage, floorCodes: string[]) {
+  const code = stage.template_code.split('/')[0] ?? '';
+  if (['QUOTED_SCOPE','PRECONSTRUCTION','DESIGN','SITE_PREP','SITE_SURVEY','DESIGN_APPROVAL'].includes(code)) return 1;
+  if (['FOUNDATION','PLINTH'].includes(code)) return 2;
+  const floorIndex = Math.max(0, floorCodes.indexOf(stage.floor_code ?? ''));
+  const count = Math.max(floorCodes.length, 1);
+  const groupIndex: Record<string, number> = {
+    RCC: 0, MASONRY: 1, INTERNAL_PLASTER: 2, EXTERNAL_PLASTER: 3,
+    TILES: 4, DOORS: 5, PLUMBING_PAINT: 6, HANDOVER: 7,
+  };
+  return 3 + (groupIndex[code] ?? 0) * count + floorIndex;
+}
+function milestoneFamily(stage: Stage) {
+  const code = stage.template_code.split('/')[0] ?? '';
+  const names: Record<string, string> = {
+    PRECONSTRUCTION: 'Advance & project confirmation',
+    DESIGN: 'Advance & project confirmation',
+    SITE_PREP: 'Advance & project confirmation',
+    FOUNDATION: 'Foundation & plinth',
+    PLINTH: 'Foundation & plinth',
+    RCC: 'Floor slab structure',
+    MASONRY: 'Room marking & brickwork',
+    INTERNAL_PLASTER: 'Plastering & concealed services',
+    EXTERNAL_PLASTER: 'Outer plaster & elevation',
+    TILES: 'Tiles selection & installation',
+    DOORS: 'Doors, painting & electrical wiring',
+    PLUMBING_PAINT: 'Plumbing, final wiring & finishing',
+    HANDOVER: 'Handover',
+  };
+  return names[code] ?? stage.title;
+}
 
 export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   const stages = projectTimelineStages(d.stages);
@@ -61,6 +92,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     plans: d.itemPlans, execution: d.stageExecution,
   });
   const startDate = dayKey(new Date(d.project.createdAt));
+  const floorCodes = [...new Set(stages.map((stage) => stage.floor_code).filter((code): code is string => Boolean(code)))];
   let offset = 0;
   const estimated = new Map<string, { start: string; finish: string }>();
   for (const stage of stages) {
@@ -193,9 +225,9 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         const stagePhotos = photos;
         const actualQc = d.stageQc.records.filter((record) => record.stage_id === stage.id);
         return <details className="pmt-stage" key={stage.id} open={index === 0 || stage.id === current?.id}>
-          <summary><span className="pmt-number">{String(index + 1).padStart(2,'0')}</span>
+          <summary><span className="pmt-number">{String(milestoneNumber(stage, floorCodes)).padStart(2,'0')}</span>
             <span className="pmt-stage-name"><strong>{stage.floor_code ? pretty(stage.floor_code) + ' · ' : ''}{stage.title}</strong>
-              <small>{stage.activities.length} works · {siteChecks.length} checks · {completed}/{stageItems.length} complete</small></span>
+              <small>{milestoneFamily(stage)} · {stage.activities.length} works · {siteChecks.length} checks · {completed}/{stageItems.length} complete</small></span>
             <span className="pmt-dates">{displayDay(range.start)} – {displayDay(range.finish)}<small>{d.itemPlans.some((plan) => plan.stageId === stage.id) ? 'Saved schedule' : 'Estimated dates'}</small></span>
             <span className={'pmt-status ' + (stageStatus === 'in_progress' ? 'active' : isComplete(stageStatus) ? 'done' : '')}>{pretty(stageStatus)}</span>
             <span className="pmt-chevron">⌄</span>
