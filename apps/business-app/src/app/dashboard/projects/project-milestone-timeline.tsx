@@ -367,9 +367,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
                   <StageChecklistItem projectId={d.project.id} stageId={stage.id} kind="check"
                     index={check.index} title={check.title} status={check.status}
                     notes={check.notes} photoId={check.photoId} photos={stagePhotos}
-                    canEdit={canWork}/>
-                  <ProjectItemSchedule projectId={d.project.id} stageId={stage.id} kind="check"
-                    index={check.index} title={check.title} item={plan} canPlan={canPlan}
+                    canEdit={canWork} schedule={plan} canPlan={canPlan} scheduleKind="check"
                     baselineStart={checkBaselineDate(stage, check.index, siteChecks.length)}
                     baselineFinish={checkBaselineDate(stage, check.index, siteChecks.length)}
                     planningMode={role === 'engineer' ? 'site' : 'full'} today={today}/>
