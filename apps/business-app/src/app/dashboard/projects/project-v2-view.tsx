@@ -428,65 +428,6 @@ function MaterialSupplierCashSettlement({
     </>
   );
 }
-type Activity = {
-  id: string;
-  date: string;
-  title: string;
-  kind: string;
-  description: string;
-  media?: SiteRow;
-};
-function timeline(d: WorkspaceData): Activity[] {
-  const site = d.site,
-    all: Activity[] = [];
-  for (const row of site?.reports ?? [])
-    all.push({
-      id: row.id,
-      title: 'Daily work update',
-      kind: 'execution',
-      date: stringValue(row.report_date),
-      description: stringValue(row.completed_work),
-    });
-  for (const row of site?.materials ?? [])
-    all.push({
-      id: row.id,
-      title: 'Material: ' + stringValue(row.item),
-      kind: 'material',
-      date: stringValue(row.created_at),
-      description:
-        stringValue(row.quantity) +
-        ' ' +
-        stringValue(row.unit) +
-        ' · ' +
-        pretty(row.status),
-    });
-  for (const row of site?.checks ?? [])
-    all.push({
-      id: row.id,
-      title: 'Quality check: ' + stringValue(row.title),
-      kind: 'check',
-      date: stringValue(row.created_at),
-      description: pretty(row.status),
-    });
-  for (const row of site?.media ?? [])
-    all.push({
-      id: row.id,
-      title: 'Site file: ' + stringValue(row.filename),
-      kind: 'media',
-      date: stringValue(row.created_at),
-      description: stringValue(row.caption),
-      media: row,
-    });
-  for (const row of site?.gate ?? [])
-    all.push({
-      id: row.id,
-      title: pretty(row.kind),
-      kind: 'gate',
-      date: stringValue(row.created_at),
-      description: stringValue(row.description),
-    });
-  return all.sort((a, b) => b.date.localeCompare(a.date));
-}
 const viewerRole = (d: WorkspaceData) =>
   flowRole({
     canManage: d.site?.canManage === true,
