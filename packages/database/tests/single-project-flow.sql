@@ -460,12 +460,17 @@ begin
  if pg_temp.exec_status('SITE_PREP')<>'ready_for_qc' then raise exception 'FAIL: site prep not submitted';end if;
  raise notice 'PASS 5: marking and excavation recorded with depth/width/level measurements';
 end$excavation$;
-select pg_temp.certify('SITE_PREP',false);
 
 ------------------------------------------------------------------------------
 -- 6. PCC, reinforcement, independent pre-pour QC with corrective work.
 ------------------------------------------------------------------------------
 select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
+do $site_prep_release$
+begin
+ if pg_temp.blockers('FOUNDATION')<>'[]' then
+   raise exception 'FAIL: completed site checks without QC block Foundation: %',pg_temp.blockers('FOUNDATION');
+ end if;
+end$site_prep_release$;
 select public.construction_stage_execution_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),'start','');
 select set_config('test.footing_photo',pg_temp.photo('site','Footing reinforcement and cover blocks')::text,true);
 select pg_temp.work('FOUNDATION',0,'start');
@@ -663,6 +668,7 @@ select pg_temp.expect_fail(format($q$select public.project_material_homeowner_ca
 ------------------------------------------------------------------------------
 -- 9. Certification, stage payments and concurrent floors.
 ------------------------------------------------------------------------------
+select pg_temp.certify('SITE_PREP',false);
 select pg_temp.certify('FOUNDATION',true);
 -- Add a second required topic in this disposable fixture so partial QC can be
 -- distinguished from the all-passed case by the release regression below.
