@@ -7,10 +7,12 @@ import { StageChecklistItem } from './project-stage-checklist-item';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectItemSchedule } from './project-item-schedule';
 import { StageButton } from './project-flow-controls';
-import { ProjectTimelineExpandControl } from './project-timeline-expand-control';
+import { RccSubstageGroups } from './project-rcc-substage-groups';
+import { ProjectMilestoneStageCarousel } from './project-milestone-stage-carousel';
 import { PrepareAgreement } from './project-v2-forms';
 import { CuringRounds, CuringPlanForm, type CuringRoundView } from './project-curing-card';
 import './project-milestone-timeline.css';
+import './project-rcc-substage-groups.css';
 
 const zone = 'Asia/Kolkata';
 const dayKey = (date: Date) => new Intl.DateTimeFormat('en-CA', {
@@ -220,6 +222,8 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     const when = plan?.plannedStart ?? estimatedItemDate(item);
     return when === today && !isComplete(item.status);
   });
+  const todayStageIndex = stages.findIndex((stage) =>
+    todayItems.some((item) => item.stage.id === stage.id));
   const tomorrowItems = items.filter((item) => {
     const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
     const when = plan?.plannedStart ?? estimatedItemDate(item);
@@ -234,6 +238,9 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     return !isComplete(status);
   });
   const currentIndex = current ? stages.indexOf(current) : -1;
+  const firstStageIndex = todayStageIndex >= 0
+    ? todayStageIndex
+    : currentIndex >= 0 ? currentIndex : 0;
   const nextStage = currentIndex >= 0 ? stages[currentIndex + 1] : undefined;
   if (!stages.length) {
     const quote = d.quotations[0];
@@ -342,11 +349,28 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
 
     <section className="pmt-timeline" id="project-timeline">
       <div className="pmt-timeline-head"><div><h2>All stages</h2><p>Baseline dates are fixed from the project creation date. You can adjust the current plan without changing the baseline; early and late work is labelled against it.</p></div>
-        <div className="pmt-board-controls"><span>{stages.length} stages</span><ProjectTimelineExpandControl/></div></div>
+        <div className="pmt-board-controls"><span>{stages.length} stages</span></div></div>
+      <ProjectMilestoneStageCarousel
+        currentIndex={firstStageIndex}
+        todayIndex={todayStageIndex}
+        stageTitles={stages.map((stage) => stageLabel(stage))}
+      >
       {stages.map((stage, index) => {
         const range = windowFor(stage);
         const stageItems = grouped.get(stage.id) ?? [];
         const completed = stageItems.filter((item) => isComplete(item.status)).length;
+        const isRccStage = stage.template_code.split('/')[0] === 'RCC';
+        const rccActivities = stageItems.map((item) => {
+          const plan = plansByKey.get(itemPlanKey(stage.id, 'work', item.index));
+          const baseline = estimatedItemDate(item);
+          return {
+            index: item.index,
+            title: item.title,
+            status: item.status,
+            plannedStart: plan?.plannedStart ?? baseline,
+            plannedFinish: plan?.plannedFinish ?? baseline,
+          };
+        });
         const execution = d.stageExecution.find((row) => row.stageId === stage.id);
         const stageStatus = execution?.status ?? stage.status ?? 'not_started';
         const siteChecks = stage.inspectionTopics.map((title, i) => {
@@ -369,7 +393,8 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
           : daysOverBaseline > 0 && !isComplete(stageStatus)
             ? 'Delayed ' + daysOverBaseline + 'd'
             : 'On track';
-        return <details className="pmt-stage" key={stage.id} open={index === 0 || stage.id === current?.id}>
+        return <details className={'pmt-stage ' + (index === firstStageIndex ? 'is-current' : '')}
+          data-stage-index={index} key={stage.id} open={index === firstStageIndex}>
           <summary><span className="pmt-number">{String(milestoneNumber(stage, floorCodes)).padStart(2,'0')}</span>
             <span className="pmt-stage-name"><strong>{stage.floor_code ? pretty(stage.floor_code) + ' · ' : ''}{stage.title}</strong>
               <small>{milestoneFamily(stage)} · {stage.activities.length} works · {siteChecks.length} checks · {completed}/{stageItems.length} complete</small></span>
@@ -381,7 +406,16 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
           </summary>
           <div className="pmt-stage-body">
             {stage.explanation && <p className="pmt-explanation">{stage.explanation}</p>}
-            {stageItems.length ? <div className="pmt-work-list">{stageItems.map(card)}</div> :
+            {stageItems.length ? isRccStage ? <RccSubstageGroups
+              stageId={stage.id}
+              title={stage.floor_code ? pretty(stage.floor_code) + ' structural work areas' : 'Structural work areas'}
+              activities={rccActivities}
+              completed={completed}
+              renderActivity={(workIndex) => {
+                const workItem = stageItems.find((item) => item.index === workIndex);
+                return workItem ? card(workItem) : null;
+              }}/>
+              : <div className="pmt-work-list">{stageItems.map(card)}</div> :
               <p className="pmt-empty">No work items are available for this stage.</p>}
             {!!siteChecks.length && <section className="pmt-subsection">
               <h3>Site checks <small>Photo evidence required · notes optional</small></h3>
@@ -415,6 +449,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
           </div>
         </details>;
       })}
+      </ProjectMilestoneStageCarousel>
     </section>
   </div>;
 }

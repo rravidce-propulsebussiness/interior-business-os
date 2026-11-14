@@ -57,4 +57,41 @@ describe('single project milestones and drawing progress', () => {
       "'electrical_plan','plumbing_plan']::text[]",
     );
   });
+
+  it('shows one slideable stage at a time and selects today’s stage first', () => {
+    const timeline = read('./project-milestone-timeline.tsx');
+    const carousel = read('./project-milestone-stage-carousel.tsx');
+    const styles = read('./project-milestone-timeline.css');
+    expectSource(timeline).toContain(
+      'const todayStageIndex = stages.findIndex',
+    );
+    expectSource(timeline).toContain(
+      'todayItems.some((item) => item.stage.id === stage.id)',
+    );
+    expectSource(timeline).toContain(
+      'const firstStageIndex = todayStageIndex >= 0',
+    );
+    expectSource(timeline).toContain('<ProjectMilestoneStageCarousel');
+    expectSource(timeline).toContain('open={index === firstStageIndex}');
+    expectSource(styles).toContain('grid-auto-flow:column');
+    expectSource(styles).toContain('scroll-snap-type:x mandatory');
+    expectSource(carousel).toContain(
+      'aria-label="Swipe through project stages"',
+    );
+    expectSource(carousel).toContain('aria-label="Previous stage"');
+    expectSource(carousel).toContain('aria-label="Next stage"');
+  });
+
+  it('keeps the three expandable structural work areas inside the RCC stage', () => {
+    const timeline = read('./project-milestone-timeline.tsx');
+    const groups = read('./project-rcc-substage-groups.tsx');
+    expectSource(timeline).toContain('<RccSubstageGroups');
+    expectSource(groups).toContain("title: 'Columns'");
+    expectSource(groups).toContain("title: 'Staircase'");
+    expectSource(groups).toContain("title: 'Slab & beams'");
+    expectSource(groups).toContain('<details');
+    expectSource(groups).toContain(
+      'No work items are assigned to this area yet.',
+    );
+  });
 });
