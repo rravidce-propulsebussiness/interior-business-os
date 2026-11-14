@@ -712,8 +712,8 @@ end$parallel$;
 select pg_temp.execute_stage('F3_SLAB');
 do $structural_hold$
 begin
- if pg_temp.blockers('F3_MASONRY') not like '%Structural sign-off required%' then
-   raise exception 'FAIL: uncertified slab released dependent work: %',pg_temp.blockers('F3_MASONRY');end if;
+ if pg_temp.blockers('F3_MASONRY') not like '%On-site QC items pending%' then
+   raise exception 'FAIL: slab with pending QC items released dependent work: %',pg_temp.blockers('F3_MASONRY');end if;
 end$structural_hold$;
 select pg_temp.certify('F3_SLAB',true);
 select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
