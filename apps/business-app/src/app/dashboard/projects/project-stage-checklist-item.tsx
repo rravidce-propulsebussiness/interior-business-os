@@ -9,12 +9,13 @@ import {ProjectItemSchedule,type ProjectItemScheduleRow} from './project-item-sc
 type Result={saved:boolean;message:string};
 type Photo={id:string;filename:string};
 export function StageChecklistItem({projectId,stageId,kind,index,title,status,notes,skipReason='',photos,
-  canEdit=false,canSkip=false,scheduledToday=false,photoId='',materialPanel,checksHref,schedule,canPlan=false,scheduleKind,planningMode,today}:{
+  canEdit=false,canSkip=false,scheduledToday=false,photoId='',materialPanel,checksHref,schedule,canPlan=false,scheduleKind,planningMode,today,baselineStart,baselineFinish}:{
   projectId:string;stageId:string;kind:'work'|'check';index:number;title:string;
   status:string;notes?:string;skipReason?:string;photos:Photo[];canEdit?:boolean;canSkip?:boolean;scheduledToday?:boolean;photoId?:string;
   materialPanel?:ReactNode;checksHref?:string;
   schedule?:ProjectItemScheduleRow|undefined;canPlan?:boolean;
   scheduleKind?:'work'|'check'|'test';planningMode?:'full'|'site';today?:string;
+  baselineStart?:string;baselineFinish?:string;
 }) {
  const router=useRouter();
  const [selectedPhotoId,setSelectedPhotoId]=useState(photoId);
@@ -71,7 +72,8 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
   </summary>
   <div className="pv2-item-checklist-inner">
    <ProjectItemSchedule projectId={projectId} stageId={stageId} kind={scheduleKind??kind}
-    index={index} title={title} item={schedule} canPlan={canPlan} planningMode={planningMode} today={today}/>
+    index={index} title={title} item={schedule} canPlan={canPlan} planningMode={planningMode} today={today}
+    baselineStart={baselineStart} baselineFinish={baselineFinish}/>
    {kind==='work'&&(materialPanel||checksHref)&&<div className="pv2-item-inline-quick" role="group" aria-label="Work item actions">
     {materialPanel&&<button type="button" aria-controls={'activity-materials-'+stageId+'-'+index}
       aria-expanded={materialsOpen} className={materialsOpen?'is-active':''}
@@ -115,7 +117,7 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
     <label>Update notes (optional)<textarea name="note" rows={2} maxLength={2000}
       placeholder="Measurements, result, location or pending issue" defaultValue={notes??''}/></label>
     <button type="submit" className="pv2-button pv2-primary" disabled={pending}>
-     {pending?'Saving…':'Save this item'}</button>
+     {pending?'Saving…':kind==='check'?'Save check result':'Mark work complete'}</button>
     {!evidenceEdited&&state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
    </form>:!canEdit&&!skipped?<p className="pv2-hint">Only authorized site engineers or project managers can update this item.</p>:null}
    {canSkip&&kind==='work'&&status==='pending'&&<div className="pv2-item-skip">
