@@ -110,7 +110,9 @@ describe('structured website publishing', () => {
     expect(preview).toContain('website.preview-restored');
     expect(preview).toContain('event.source!==parent');
     expect(preview).toContain('Number.isFinite(x)&&Number.isFinite(y)');
-    expect(preview).toContain('window.scrollTo(Math.min(x,100000),Math.min(y,100000))');
+    expect(preview).toContain(
+      'window.scrollTo(Math.min(x,100000),Math.min(y,100000))',
+    );
     expect(published).not.toContain('website.preview-scroll');
     expect(published).not.toContain('website.preview-restored');
   });
@@ -172,6 +174,14 @@ describe('structured website publishing', () => {
   ])('rejects executable or unapproved custom HTML', (html) =>
     expect(() => sanitizeHtml(html)).toThrow(),
   );
+  it('accepts child selectors while keeping style-breakout markup blocked', () => {
+    expect(
+      validateCss('.website-grid > .website-card { color: red }'),
+    ).toContain('>');
+    expect(() =>
+      validateCss('p{color:red}</style><script>bad</script>'),
+    ).toThrow();
+  });
   it.each([
     '@import "https://evil.example";',
     'p{background:url(https://evil.example)}',

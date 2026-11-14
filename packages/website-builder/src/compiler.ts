@@ -20,7 +20,7 @@ export function escapeHtml(value: unknown): string {
 export function validateCss(css: string): string {
   if (
     css.length > 50000 ||
-    /[<>\\]|\b(?:url|expression)\s*\(|@(?:import|font-face|namespace)|-moz-binding|behavior\s*:/i.test(
+    /[<\\]|\b(?:url|expression)\s*\(|@(?:import|font-face|namespace)|-moz-binding|behavior\s*:/i.test(
       css,
     )
   )

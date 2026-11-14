@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { expectSource } from './source-test-assertions';
+import { describe, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 
 const read = (path: string) =>
@@ -16,13 +17,13 @@ describe('progressable quotation-linked milestones', () => {
       view.indexOf('function Milestones('),
       view.indexOf('function Documents('),
     );
-    expect(milestones).toContain('Make this project plan actionable');
-    expect(milestones).toContain('const quote=d.quotations[0]');
-    expect(milestones).toContain(
+    expectSource(milestones).toContain('Make this project plan actionable');
+    expectSource(milestones).toContain('const quote=d.quotations[0]');
+    expectSource(milestones).toContain(
       'quote&&d.permissions.manage&&d.permissions.finance&&!d.agreement',
     );
-    expect(milestones).toContain('<PrepareAgreement');
-    expect(milestones).toContain('upload an offline');
+    expectSource(milestones).toContain('<PrepareAgreement');
+    expectSource(milestones).toContain('upload an offline');
   });
 
   it('replaces the read-only quote preview with existing live work controls', () => {
@@ -30,39 +31,41 @@ describe('progressable quotation-linked milestones', () => {
       view.indexOf('function Milestones('),
       view.indexOf('function Documents('),
     );
-    expect(milestones).toContain('const hasLiveStages=d.stages.length>0');
-    expect(milestones).toContain('{hasLiveStages&&<>');
-    expect(milestones).toContain('<ProjectWorkHub d={d} showHistory/>');
-    expect(milestones).toContain('<ProjectTimelineFeed d={d}/>');
-    expect(milestones).toContain('Continue in Timeline');
-    expect(workItem).toContain("send('start')");
-    expect(workItem).toContain("submitForm('complete')");
-    expect(workItem).toContain('router.refresh()');
-    expect(actions).toContain("action === 'complete'");
+    expectSource(milestones).toContain('const hasLiveStages=d.stages.length>0');
+    expectSource(milestones).toContain('{hasLiveStages&&(');
+    expectSource(milestones).toContain('<ProjectWorkHub d={d} showHistory/>');
+    expectSource(milestones).toContain('<ProjectTimelineFeed d={d}/>');
+    expectSource(milestones).toContain('Continue in Timeline');
+    expectSource(workItem).toContain("send('start')");
+    expectSource(workItem).toContain("submitForm('complete')");
+    expectSource(workItem).toContain('router.refresh()');
+    expectSource(actions).toContain("action === 'complete'");
   });
 
   it('shows milestone progress, today work, evidence, owner skip and separate QC', () => {
-    expect(view).toContain('pv2-stage-progress');
-    expect(view).toContain('workSchedule.plannedFinish>=todayInIndia');
-    expect(view).toContain('<WorkItemCard');
-    expect(view).toContain('measurementPrompts(projected.title)');
-    expect(view).toContain(
+    expectSource(view).toContain('pv2-stage-progress');
+    expectSource(view).toContain('workSchedule.plannedFinish>=todayInIndia');
+    expectSource(view).toContain('<WorkItemCard');
+    expectSource(view).toContain('measurementPrompts(projected.title)');
+    expectSource(view).toContain(
       'projectedWork.filter(item=>item.stage.id===stage.id&&item.optional)',
     );
-    expect(view).toContain('scheduledToday={scheduledToday}');
-    expect(view).toContain('<StageOnsiteQcReview');
-    expect(view).toContain('remainingQc.length>0');
-    expect(checklist).toContain('accept="image/jpeg,image/png,image/webp"');
-    expect(checklist).toContain('Mark not applicable');
-    expect(checklist).toContain('updateWorkItem');
-    expect(checklist).toContain('Skipped with reason:');
-    expect(workItem).toContain('Complete with photo');
-    expect(workItem).toContain('Measurements and checks');
-    expect(workItem).toContain(
+    expectSource(view).toContain('scheduledToday={scheduledToday}');
+    expectSource(view).toContain('<StageOnsiteQcReview');
+    expectSource(view).toContain('remainingQc.length>0');
+    expectSource(checklist).toContain(
+      'accept="image/jpeg,image/png,image/webp"',
+    );
+    expectSource(checklist).toContain('Mark not applicable');
+    expectSource(checklist).toContain('updateWorkItem');
+    expectSource(checklist).toContain('Skipped with reason:');
+    expectSource(workItem).toContain('Complete with photo');
+    expectSource(workItem).toContain('Measurements and checks');
+    expectSource(workItem).toContain(
       'QC checks and structural certification are never skipped.',
     );
-    expect(workItem).toContain('Today</span>');
-    expect(flow).toContain("{ label: 'Depth', unit: 'mm' }");
-    expect(flow).toContain("{ label: 'Width', unit: 'mm' }");
+    expectSource(workItem).toContain('Today</span>');
+    expectSource(flow).toContain("{ label: 'Depth', unit: 'mm' }");
+    expectSource(flow).toContain("{ label: 'Width', unit: 'mm' }");
   });
 });
