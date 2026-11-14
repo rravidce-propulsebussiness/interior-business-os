@@ -1176,9 +1176,9 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
       ].includes(site.role));
   const canPlan = Boolean(
     site?.canManage ||
-      ['manager', 'project_manager', 'site_engineer', 'supervisor'].includes(
-        site?.role ?? '',
-      ),
+    ['manager', 'project_manager', 'site_engineer', 'supervisor'].includes(
+      site?.role ?? '',
+    ),
   );
   const planningMode: 'full' | 'site' = [
     'site_engineer',
@@ -1534,8 +1534,8 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
               const workSchedule = planFor(stage.id, 'work', i);
               const scheduledToday = Boolean(
                 workSchedule &&
-                  workSchedule.plannedStart <= todayInIndia &&
-                  workSchedule.plannedFinish >= todayInIndia,
+                workSchedule.plannedStart <= todayInIndia &&
+                workSchedule.plannedFinish >= todayInIndia,
               );
               const workMaterials = stageMaterials.filter(
                 (m) => stringValue(m.activity_index) === String(i),
