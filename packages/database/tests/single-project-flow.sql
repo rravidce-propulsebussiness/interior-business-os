@@ -511,9 +511,34 @@ select public.construction_stage_qc_item_command(pg_temp.org(),pg_temp.project()
 select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
 do $hold$
 begin
- if pg_temp.blockers('F1_SLAB') not like '%Structural sign-off required%' then
-   raise exception 'FAIL: structural hold point not blocking first floor slab: %',pg_temp.blockers('F1_SLAB');end if;
- raise notice 'PASS 6: PCC/reinforcement measured, independent pre-pour QC failed then passed, hold point enforced';
+ if pg_temp.blockers('F1_SLAB') not like '%On-site QC items pending%' then
+   raise exception 'FAIL: incomplete QC review released the dependent slab: %',pg_temp.blockers('F1_SLAB');end if;
+end$hold$;
+-- All required in-field QC items passing releases dependent work for the owner
+-- workflow. The separate formal stage certificate is still recorded later.
+select pg_temp.as_user('88888888-8888-4888-8888-888888888888');
+do $qc_complete$
+declare total integer; i integer;
+begin
+ select jsonb_array_length(inspection_topics) into total
+ from private.construction_project_stages
+ where id=pg_temp.stage('FOUNDATION');
+ for i in 1..total-1 loop
+   perform public.construction_stage_qc_item_command(
+     pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),i,'passed',
+     'All required field checks verified',current_setting('test.footing_photo')::uuid,true);
+ end loop;
+end$qc_complete$;
+select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
+do $hold$
+begin
+ if pg_temp.blockers('F1_SLAB')<>'[]' then
+   raise exception 'FAIL: all-passed on-site QC still blocks dependent slab: %',pg_temp.blockers('F1_SLAB');end if;
+ perform public.construction_stage_execution_command(
+   pg_temp.org(),pg_temp.project(),pg_temp.stage('F1_SLAB'),'start','Foundation QC passed');
+ if pg_temp.exec_status('F1_SLAB')<>'in_progress' then
+   raise exception 'FAIL: dependent slab did not start after all QC items passed';end if;
+ raise notice 'PASS 6: failed QC blocks dependent work; all required QC passes release it before formal certification';
 end$hold$;
 
 ------------------------------------------------------------------------------
