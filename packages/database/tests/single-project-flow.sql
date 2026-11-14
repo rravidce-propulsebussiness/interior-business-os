@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 15086)
-Total output lines: 764
-
 \set ON_ERROR_STOP on
 -- Single project flow acceptance scenario.
 -- Disposable database only: every write below is ROLLED BACK.
@@ -169,7 +166,456 @@ begin
  perform public.construction_quality_command(pg_temp.org(),pg_temp.project(),'review',jsonb_build_object(
    'stage_id',pg_temp.stage(code),'inspection_id',inspection,'review_kind','quality','decision','approved',
    'notes','Quality verified against the approved drawings for '||code));
- if structural th…9086 tokens truncated…emp.project(),binding),'23505','different duplicate direct payment rejected');
+ if structural then
+   perform pg_temp.as_user('66666666-6666-4666-8666-666666666666');
+   perform public.construction_quality_command(pg_temp.org(),pg_temp.project(),'review',jsonb_build_object(
+     'stage_id',pg_temp.stage(code),'inspection_id',inspection,'review_kind','structural','decision','approved',
+     'notes','Independent structural review of reinforcement and concrete for '||code));
+   perform pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+ end if;
+ perform public.construction_quality_command(pg_temp.org(),pg_temp.project(),'stage_clear',jsonb_build_object(
+   'stage_id',pg_temp.stage(code),'notes','Stage certified after independent reviews: '||code));
+end$$;
+
+------------------------------------------------------------------------------
+-- 1. Confirm project and signed agreement; advance request issued once.
+------------------------------------------------------------------------------
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+do $agreement$
+declare org uuid=pg_temp.org();project uuid=pg_temp.project();contract uuid;media uuid;advance uuid;
+ schedule_items integer;
+begin
+ perform public.project_site_command(org,project,'initialize','{}'::jsonb);
+ perform public.project_site_command(org,project,'assign','{"user_id":"33333333-3333-4333-8333-333333333333","role":"architect"}');
+ perform public.project_site_command(org,project,'assign','{"user_id":"66666666-6666-4666-8666-666666666666","role":"structural_designer"}');
+ perform public.project_site_command(org,project,'assign','{"user_id":"22222222-2222-4222-8222-222222222222","role":"site_engineer"}');
+ perform public.project_site_command(org,project,'assign','{"user_id":"77777777-7777-4777-8777-777777777777","role":"watchman"}');
+ perform public.project_site_command(org,project,'assign','{"user_id":"88888888-8888-4888-8888-888888888888","role":"quality_inspector"}');
+ contract=public.contract_create(org,current_setting('test.flow_revision')::uuid);
+ perform set_config('test.flow_contract',contract::text,true);
+ media=public.project_site_media_put(org,project,'agreement','signed.pdf','application/pdf',
+   encode(convert_to('%PDF-1.7'||chr(10)||'Signed agreement fixture','UTF8'),'base64'),'Signed paper agreement');
+ -- The signed copy alone never authorizes design or site work.
+ perform public.project_agreement_command(org,project,contract,'record_signed_pdf',
+   jsonb_build_object('media_id',media,'note','Signed paper agreement received at office'));
+ perform public.contract_transition(org,contract,1,'active');
+ select count(*) into schedule_items from public.payment_schedule_items i join public.payment_schedules s on s.id=i.schedule_id
+  where s.contract_id=contract and s.status='active';
+ if schedule_items<>4 then raise exception 'FAIL: agreed stage payment schedule not activated (% items)',schedule_items;end if;
+ -- The application issues the agreed advance (Booking advance|10) on signing.
+ -- Repeating the call (retry, double click, second staff member) is idempotent.
+ advance=public.project_advance_proforma_prepare(org,project,10);
+ if advance is distinct from public.project_advance_proforma_prepare(org,project,10) then
+   raise exception 'FAIL: advance request duplicated';end if;
+ if (select count(*) from public.invoices where organization_id=org and contract_id=contract and invoice_type='proforma')<>1 then
+   raise exception 'FAIL: expected exactly one advance request';end if;
+ perform set_config('test.flow_advance',advance::text,true);
+ if (public.project_advance_read(org,project)->>'received')::numeric<>0
+    or (public.project_agreement_read(org,project)->>'execution_authorized')<>'false' then
+   raise exception 'FAIL: signed agreement or invoice treated as money received';end if;
+ -- This project's policy: design waits for the verified advance.
+ perform public.project_advance_policy_set(org,project,true);
+ -- Share the project with the verified homeowner.
+ perform public.client_portal_manage(org,current_setting('test.flow_customer')::uuid,project,'homeowner@example.test',true);
+ raise notice 'PASS 1: signed agreement, agreed schedule, single advance request, nothing marked received';
+end$agreement$;
+
+-- Homeowner is notified through the approved portal channel: the advance
+-- request is visible, but no receipt exists.
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+do $notify$
+declare advance jsonb;
+begin
+ advance=public.client_portal_advance_request(pg_temp.project());
+ if advance->>'id'<>current_setting('test.flow_advance') or advance->>'status'<>'payment_requested'
+    or (advance->>'received')::numeric<>0 then
+   raise exception 'FAIL: homeowner cannot see an accurate advance request: %',advance;end if;
+ raise notice 'PASS 1b: homeowner sees the issued advance request in the portal';
+end$notify$;
+
+------------------------------------------------------------------------------
+-- 2. Design waits for verified advance; Finance verifies the payment.
+------------------------------------------------------------------------------
+select pg_temp.as_user('33333333-3333-4333-8333-333333333333');
+select pg_temp.expect_fail(format($$select public.project_site_command(%L,%L,'design_submit','{"kind":"architectural_plan","reference":"FP-01 ground floor plan"}')$$,
+  pg_temp.org(),pg_temp.project()),'23514','floor plan cannot start before verified advance');
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+do $payment$
+declare org uuid=pg_temp.org();contract uuid=current_setting('test.flow_contract')::uuid;method uuid;total numeric;
+begin
+ select id into method from public.payment_methods where organization_id=org and kind='bank_transfer' limit 1;
+ select i.total::numeric into total from public.invoices i where i.id=current_setting('test.flow_advance')::uuid;
+ perform public.payment_record(org,contract,jsonb_build_object('idempotency_key',gen_random_uuid(),
+   'payment_date',current_date,'amount',trim_scale(total)::text,'method_id',method));
+ if (public.project_advance_read(org,pg_temp.project())->>'received')::numeric<>total
+    or (public.project_agreement_read(org,pg_temp.project())->>'execution_authorized')<>'true' then
+   raise exception 'FAIL: verified advance did not clear the agreement gate';end if;
+ raise notice 'PASS 2: Finance-verified advance receipt clears the commercial gate';
+end$payment$;
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+do $notify_paid$
+begin
+ if public.client_portal_advance_request(pg_temp.project())->>'status'<>'received' then
+   raise exception 'FAIL: homeowner does not see the verified receipt';end if;
+end$notify_paid$;
+
+------------------------------------------------------------------------------
+-- 3. Floor plan → homeowner change request → revision → approval.
+------------------------------------------------------------------------------
+select pg_temp.as_user('33333333-3333-4333-8333-333333333333');
+select set_config('test.fp1',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
+  '{"kind":"architectural_plan","reference":"FP-01 ground floor plan revision 1"}')->>'id'),true);
+-- Structural design cannot start before the homeowner approves the floor plan.
+select pg_temp.as_user('66666666-6666-4666-8666-666666666666');
+select pg_temp.expect_fail(format($$select public.project_site_command(%L,%L,'design_submit','{"kind":"structural_design","reference":"ST-01 footing layout"}')$$,
+  pg_temp.org(),pg_temp.project()),'23514','structural design blocked before floor plan approval');
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
+  jsonb_build_object('id',current_setting('test.fp1'),'decision','approved','note','Technically checked'));
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'changes_requested','architectural_plan',
+  'Please enlarge the kitchen by two feet toward the utility');
+select pg_temp.as_user('33333333-3333-4333-8333-333333333333');
+select set_config('test.fp2',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
+  '{"kind":"architectural_plan","reference":"FP-01 ground floor plan revision 2 kitchen enlarged"}')->>'id'),true);
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
+  jsonb_build_object('id',current_setting('test.fp2'),'decision','approved','note','Kitchen revision checked'));
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'approved','architectural_plan','Looks good');
+do $portal_design$
+declare r jsonb=public.client_portal_design_status(pg_temp.project());
+begin
+ if not exists(select 1 from jsonb_array_elements(r->'drawings') x where x->>'kind'='architectural_plan'
+     and (x->>'revision')::int=2 and x->>'client_approved_at' is not null)
+    or jsonb_array_length(r->'decisions')<>2 then
+   raise exception 'FAIL: homeowner cannot see drawing decisions: %',r;end if;
+end$portal_design$;
+reset role;
+do $design_history$
+declare project uuid=current_setting('test.flow_project')::uuid;
+begin
+ if (select count(*) from private.site_designs where project_id=project and kind='architectural_plan')<>2
+  or (select status from private.site_designs where id=current_setting('test.fp1')::uuid)<>'changes_requested'
+  or (select client_approved_at is null from private.site_designs where id=current_setting('test.fp2')::uuid)
+ then raise exception 'FAIL: floor plan revisions or decision not preserved';end if;
+ if (select count(*) from private.client_design_decisions where project_id=project and design_id is not null)<>2
+ then raise exception 'FAIL: homeowner decisions not tied to drawing revisions';end if;
+ raise notice 'PASS 3: floor plan revision history and homeowner decisions preserved';
+end$design_history$;
+set local role authenticated;
+
+------------------------------------------------------------------------------
+-- 4. Structural, 3D and MEP in sequence, approvals, execution release.
+------------------------------------------------------------------------------
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+do $design_read$
+declare r jsonb=public.project_design_flow_read(pg_temp.org(),pg_temp.project());
+begin
+ if (r->>'advance_before_design')<>'true' or jsonb_array_length(r->'designs')<>2 or jsonb_array_length(r->'decisions')<>2
+    or not exists(select 1 from jsonb_array_elements(r->'designs') d where d->>'client_approved_at' is not null)
+ then raise exception 'FAIL: design journey read incomplete: %',r;end if;
+end$design_read$;
+select pg_temp.as_user('66666666-6666-4666-8666-666666666666');
+select set_config('test.st',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
+  '{"kind":"structural_design","reference":"ST-01 structural drawings and bar bending schedule"}')->>'id'),true);
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
+  jsonb_build_object('id',current_setting('test.st'),'decision','approved','note','Structural clearance verified'));
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'approved','structural_design','Structure approved');
+select pg_temp.as_user('33333333-3333-4333-8333-333333333333');
+select set_config('test.vis',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
+  '{"kind":"3d_design","reference":"3D-01 exterior and interior views"}')->>'id'),true);
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
+  jsonb_build_object('id',current_setting('test.vis'),'decision','approved','note','Visualization checked'));
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'approved','3d_design','3D design approved');
+select pg_temp.as_user('33333333-3333-4333-8333-333333333333');
+select set_config('test.electrical',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
+  '{"kind":"electrical_plan","reference":"MEP-E-01 electrical conduit and load plan"}')->>'id'),true);
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
+  jsonb_build_object('id',current_setting('test.electrical'),'decision','approved','note','Electrical plan technically reviewed'));
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'approved','electrical_plan','Electrical plan approved');
+select pg_temp.as_user('33333333-3333-4333-8333-333333333333');
+select set_config('test.plumbing',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
+  '{"kind":"plumbing_plan","reference":"MEP-P-01 water and drainage plan"}')->>'id'),true);
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
+  jsonb_build_object('id',current_setting('test.plumbing'),'decision','approved','note','Plumbing plan technically reviewed'));
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'approved','plumbing_plan','Plumbing plan approved');
+-- Physical work cannot start before the homeowner approves the complete design set.
+select pg_temp.expect_fail(format('select public.project_site_command(%L,%L,''execution_start'',''{}'')',
+  pg_temp.org(),pg_temp.project()),'42501','execution blocked before design approval');
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'approved',null,'All required construction drawings approved');
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'execution_start','{}');
+do $plan$
+declare org uuid=pg_temp.org();project uuid=pg_temp.project();contract uuid=current_setting('test.flow_contract')::uuid;
+ hash text;plan uuid;revision uuid;milestone uuid;code text;estimate uuid;scope uuid;v integer;
+begin
+ select md5(coalesce(string_agg(qi.id::text||chr(31)||coalesce(qi.snapshot->>'name','')||chr(31)||qi.description||chr(31)||
+   case when qi.optional then '1' else '0' end,chr(30) order by qi.id),''))
+ into hash from public.quotation_items qi where qi.organization_id=org and qi.revision_id=current_setting('test.flow_revision')::uuid;
+ perform public.project_quote_timeline_create(org,contract,jsonb_build_object(
+  'industry','construction','quote_hash',hash,
+  'template',jsonb_build_object('industry','construction','version','1.0.0'),
+  'zones',jsonb_build_array(jsonb_build_object('code','F1','name','First floor'),jsonb_build_object('code','F3','name','Third floor')),
+  'stages',jsonb_build_array(
+   jsonb_build_object('instanceCode','SITE_PREP','templateCode','SITE_PREPARATION','phase','site_preparation','floorCode',null,
+     'title','Site preparation and excavation','explanation','Setting out to founding level','holdPoint','quality','dependsOn','[]'::jsonb,
+     'activities',jsonb_build_array('Site clearing and marking','Excavation to founding level'),
+     'inspectionTopics',jsonb_build_array('Founding level inspection')),
+   jsonb_build_object('instanceCode','FOUNDATION','templateCode','FOUNDATION','phase','foundation','floorCode',null,
+     'title','Footings','explanation','PCC, reinforcement, concreting and curing','holdPoint','structural','dependsOn',jsonb_build_array('SITE_PREP'),
+     'activities',jsonb_build_array('PCC below footings','Footing reinforcement','Footing concreting','Footing curing'),
+     'inspectionTopics',jsonb_build_array('Pre-pour reinforcement check')),
+   jsonb_build_object('instanceCode','F1_SLAB','templateCode','SLAB','phase','superstructure','floorCode','F1',
+     'title','First floor columns and slab','explanation','Structural frame','holdPoint','structural','dependsOn',jsonb_build_array('FOUNDATION'),
+     'activities',jsonb_build_array('Columns up to first floor','First floor slab concreting'),
+     'inspectionTopics',jsonb_build_array('First floor slab pre-pour check')),
+   jsonb_build_object('instanceCode','F1_MASONRY','templateCode','MASONRY','phase','masonry','floorCode','F1',
+     'title','First floor brickwork','explanation','Walls on first floor','holdPoint','quality','dependsOn',jsonb_build_array('F1_SLAB'),
+     'activities',jsonb_build_array('First floor brickwork'),'inspectionTopics',jsonb_build_array('Wall alignment check')),
+   jsonb_build_object('instanceCode','F3_SLAB','templateCode','SLAB','phase','superstructure','floorCode','F3',
+     'title','Third floor slab','explanation','Structural frame','holdPoint','structural','dependsOn',jsonb_build_array('F1_SLAB'),
+     'activities',jsonb_build_array('Third floor slab reinforcement','Third floor slab concreting'),
+     'inspectionTopics',jsonb_build_array('Third floor slab pre-pour check')),
+   jsonb_build_object('instanceCode','F3_MASONRY','templateCode','MASONRY','phase','masonry','floorCode','F3',
+     'title','Third floor brickwork','explanation','Walls on third floor','holdPoint','quality','dependsOn',jsonb_build_array('F3_SLAB'),
+     'activities',jsonb_build_array('Third floor brickwork'),'inspectionTopics','[]'::jsonb),
+   jsonb_build_object('instanceCode','HANDOVER','templateCode','HANDOVER','phase','handover','floorCode',null,
+     'title','Finishes and handover','explanation','Close out','holdPoint','handover',
+     'dependsOn',jsonb_build_array('F1_MASONRY','F3_MASONRY'),
+     'activities',jsonb_build_array('Final cleaning and handover'),'inspectionTopics','[]'::jsonb))));
+ -- Independent reviewers for formal certification.
+ perform public.construction_project_command(org,project,'role_assign',
+   '{"user_id":"11111111-1111-4111-8111-111111111111","role":"quality_inspector"}');
+ perform public.construction_project_command(org,project,'role_assign',
+   '{"user_id":"88888888-8888-4888-8888-888888888888","role":"quality_inspector"}');
+ perform public.construction_project_command(org,project,'role_assign',
+   '{"user_id":"66666666-6666-4666-8666-666666666666","role":"structural_engineer"}');
+ -- Canonical Operations plan whose tasks back each stage certificate.
+ -- Operations planning needs an approved execution estimate for the contract.
+ estimate=public.execution_estimate_command(org,'create',jsonb_build_object('contract_id',contract));
+ for scope in select id from public.execution_estimate_scope_items where revision_id=estimate and coverage='unestimated' loop
+   select version into v from public.execution_estimate_revisions where id=estimate;
+   perform public.execution_estimate_command(org,'exclude_scope',jsonb_build_object('id',estimate,'version',v,
+     'scope_id',scope,'reason','Estimated in the site procurement package'));
+ end loop;
+ select version into v from public.execution_estimate_revisions where id=estimate;
+ perform public.execution_estimate_command(org,'submit',jsonb_build_object('id',estimate,'version',v));
+ perform public.execution_estimate_command(org,'approve',jsonb_build_object('id',estimate,'version',v+1));
+ plan=public.operations_plan(org,'create',jsonb_build_object('contract_id',contract));
+ milestone=public.operations_save(org,'project_milestones',jsonb_build_object('project_id',project,'plan_id',plan,'name','Structure'));
+ foreach code in array array['SITE_PREP','FOUNDATION','F1_SLAB','F3_SLAB'] loop
+   perform public.operations_save(org,'project_tasks',jsonb_build_object('project_id',project,'plan_id',plan,
+     'milestone_id',milestone,'title','Certify '||code));
+ end loop;
+ select id into revision from public.execution_plan_revisions where plan_id=plan and status='draft';
+ perform public.operations_plan(org,'approve',jsonb_build_object('id',revision,'version',1));
+ perform public.operations_plan(org,'status',jsonb_build_object('id',plan,'version',1,'status','in_progress'));
+ perform set_config('test.flow_template',public.operations_save(org,'inspection_templates',
+   '{"name":"Stage conformance","is_final":false,"mandatory":true,"checklist":[{"key":"conformance","label":"Work conforms to drawings","required":true}]}'::jsonb)::text,true);
+ if exists(select 1 from jsonb_array_elements(public.construction_stage_execution_read(org,project)) e
+   where e->>'status'<>'not_started') then raise exception 'FAIL: planning started work automatically';end if;
+ raise notice 'PASS 4: structural and 3D prepared concurrently, homeowner approval, execution released';
+end$plan$;
+
+------------------------------------------------------------------------------
+-- 5. Marking and excavation with engineer measurements.
+------------------------------------------------------------------------------
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select pg_temp.work('SITE_PREP',0,'assign','{"user_id":"22222222-2222-4222-8222-222222222222","crew":"Marking gang A"}');
+select pg_temp.expect_fail($$select pg_temp.work('SITE_PREP',0,'assign','{"user_id":"77777777-7777-4777-8777-777777777777"}')$$,
+  '22023','watchman cannot be assigned engineering work');
+select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
+select pg_temp.expect_fail($$select pg_temp.work('SITE_PREP',0,'start')$$,'23514','work item cannot start before its stage');
+select public.construction_stage_execution_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('SITE_PREP'),'start','');
+select pg_temp.work('SITE_PREP',0,'start');
+select pg_temp.expect_fail($$select pg_temp.work('SITE_PREP',0,'complete')$$,'23514','completion requires an actual photo');
+select set_config('test.marking_photo',pg_temp.photo('site','Footing marking with string lines')::text,true);
+select pg_temp.work('SITE_PREP',0,'complete',jsonb_build_object('photo_id',current_setting('test.marking_photo'),
+  'measurements','[{"label":"Grid diagonal check","value":"14.142","unit":"m"}]'::jsonb));
+select pg_temp.work('SITE_PREP',1,'start');
+select pg_temp.work('SITE_PREP',1,'pause','{"note":"Rain, dewatering required"}');
+select pg_temp.work('SITE_PREP',1,'resume');
+select pg_temp.work('SITE_PREP',1,'measure','{"measurements":[{"label":"Depth","value":"1500","unit":"mm"},{"label":"Width","value":"1800","unit":"mm"},{"label":"Founding level","value":"-1.500","unit":"m"}]}');
+select pg_temp.work('SITE_PREP',1,'complete',jsonb_build_object('photo_id',current_setting('test.marking_photo')));
+select public.project_stage_checklist_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('SITE_PREP'),'check',0,
+  'Founding level inspection','done','Hard strata reached at -1.5 m',current_setting('test.marking_photo')::uuid);
+select public.construction_stage_execution_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('SITE_PREP'),'submit_for_qc','Excavation complete');
+do $excavation$
+declare w jsonb;
+begin
+ select x into w from jsonb_array_elements(public.project_stage_checklist_read(pg_temp.org(),pg_temp.project())->'work') x
+  where (x->>'stage_id')::uuid=pg_temp.stage('SITE_PREP') and (x->>'index')::int=1;
+ if w->>'status'<>'completed' or jsonb_array_length(w->'measurements')<>3 or w->>'started_at' is null then
+   raise exception 'FAIL: excavation measurements not recorded: %',w;end if;
+ if pg_temp.exec_status('SITE_PREP')<>'ready_for_qc' then raise exception 'FAIL: site prep not submitted';end if;
+ raise notice 'PASS 5: marking and excavation recorded with depth/width/level measurements';
+end$excavation$;
+select pg_temp.certify('SITE_PREP',false);
+
+------------------------------------------------------------------------------
+-- 6. PCC, reinforcement, independent pre-pour QC with corrective work.
+------------------------------------------------------------------------------
+select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
+select public.construction_stage_execution_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),'start','');
+select set_config('test.footing_photo',pg_temp.photo('site','Footing reinforcement and cover blocks')::text,true);
+select pg_temp.work('FOUNDATION',0,'start');
+select pg_temp.work('FOUNDATION',0,'complete',jsonb_build_object('photo_id',current_setting('test.footing_photo'),
+ 'measurements','[{"label":"PCC thickness","value":"100","unit":"mm"}]'::jsonb));
+select pg_temp.work('FOUNDATION',1,'start');
+select pg_temp.work('FOUNDATION',1,'complete',jsonb_build_object('photo_id',current_setting('test.footing_photo'),
+ 'measurements','[{"label":"Bar spacing","value":"150","unit":"mm"},{"label":"Cover","value":"50","unit":"mm"}]'::jsonb));
+select pg_temp.work('FOUNDATION',2,'start');
+select pg_temp.work('FOUNDATION',2,'complete',jsonb_build_object('photo_id',current_setting('test.footing_photo')));
+select pg_temp.work('FOUNDATION',3,'start');
+select pg_temp.work('FOUNDATION',3,'complete',jsonb_build_object('photo_id',current_setting('test.footing_photo')));
+select public.project_stage_checklist_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),'check',0,
+  'Pre-pour reinforcement check','done','Engineer checked spacing and cover',current_setting('test.footing_photo')::uuid);
+select public.construction_stage_execution_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),'submit_for_qc','Ready for pre-pour QC');
+-- The engineer who performed the check cannot QC-approve it.
+select pg_temp.expect_fail(format('select public.construction_stage_qc_item_command(%L,%L,%L,0,''passed'',''Self check'',%L,true)',
+  pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),current_setting('test.footing_photo')),'42501','engineer cannot self-approve QC');
+-- Independent QC fails the item, corrective work follows, QC re-inspects.
+select pg_temp.as_user('88888888-8888-4888-8888-888888888888');
+select public.construction_stage_qc_item_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),0,'failed',
+  'Cover blocks missing at two footings, add before pour',current_setting('test.footing_photo')::uuid,true);
+-- The whole scenario runs in one transaction (one now()). Rework happens later
+-- in reality, so the failed review is moved one hour back to keep the review
+-- order deterministic; no decision or outcome is altered.
+reset role;
+update private.construction_stage_qc_item_reviews set reviewed_at=reviewed_at-interval '1 hour'
+ where project_id=current_setting('test.flow_project')::uuid and decision='failed';
+set local role authenticated;
+select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
+select pg_temp.expect_fail(format('select public.construction_stage_execution_command(%L,%L,%L,''start'','''')',
+  pg_temp.org(),pg_temp.project(),pg_temp.stage('F1_SLAB')),'23514','failed QC holds dependent structural work');
+do $rework$ begin
+ -- A failed QC item reopens the stage for corrective work automatically.
+ if pg_temp.exec_status('FOUNDATION')<>'in_progress' then raise exception 'FAIL: QC failure did not reopen the stage';end if;
+end$rework$;
+select public.project_stage_checklist_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),'check',0,
+  'Pre-pour reinforcement check','done','Cover blocks added at all footings',current_setting('test.footing_photo')::uuid);
+select public.construction_stage_execution_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),'submit_for_qc','Corrected');
+select pg_temp.as_user('88888888-8888-4888-8888-888888888888');
+select public.construction_stage_qc_item_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),0,'passed',
+  'Cover blocks verified on re-inspection',current_setting('test.footing_photo')::uuid,true);
+select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
+do $hold$
+begin
+ if pg_temp.blockers('F1_SLAB') not like '%Structural sign-off required%' then
+   raise exception 'FAIL: structural hold point not blocking first floor slab: %',pg_temp.blockers('F1_SLAB');end if;
+ raise notice 'PASS 6: PCC/reinforcement measured, independent pre-pour QC failed then passed, hold point enforced';
+end$hold$;
+
+------------------------------------------------------------------------------
+-- 7. Curing: one schedule from the approved spec, watchman and engineer rounds.
+------------------------------------------------------------------------------
+select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
+select pg_temp.expect_fail(format($$select public.project_curing_command(%L,%L,'plan_create','{}')$$,pg_temp.org(),pg_temp.project()),
+  '42501','engineer cannot approve a curing schedule');
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+do $curing_plan$
+declare zone text='Asia/Kolkata';now_m timestamptz=date_trunc('minute',now());today date=(now() at time zone 'Asia/Kolkata')::date;
+begin
+ perform set_config('test.r1',(now_m-interval '1 hour')::text,true);
+ perform set_config('test.r2',(now_m-interval '3 hours')::text,true);
+ perform set_config('test.r3',(now_m+interval '5 hours')::text,true);
+ perform set_config('test.curing_plan',(public.project_curing_command(pg_temp.org(),pg_temp.project(),'plan_create',jsonb_build_object(
+   'stage_id',pg_temp.stage('FOUNDATION'),'activity_index',3,'title','Footing curing',
+   'spec_reference','Structural drawing ST-01 note 7: keep footings wet',
+   'starts_on',today-2,'ends_on',today+6,'grace_minutes',90,
+   'round_times',jsonb_build_array(
+     to_char((now_m-interval '1 hour') at time zone zone,'HH24:MI'),
+     to_char((now_m-interval '3 hours') at time zone zone,'HH24:MI'),
+     to_char((now_m+interval '5 hours') at time zone zone,'HH24:MI'))))->>'id'),true);
+end$curing_plan$;
+select pg_temp.as_user('77777777-7777-4777-8777-777777777777');
+do $watchman$
+declare gate uuid;photo uuid;read jsonb;
+begin
+ -- Watchman sees only curing, not engineering records or work commands.
+ perform pg_temp.expect_fail(format('select public.project_stage_checklist_read(%L,%L)',pg_temp.org(),pg_temp.project()),'42501','watchman cannot read engineering checklist');
+ perform pg_temp.expect_fail($$select pg_temp.work('FOUNDATION',0,'reopen')$$,'42501','watchman cannot change work items');
+ perform pg_temp.expect_fail(format($$select public.project_curing_command(%L,%L,'round_record',%L)$$,pg_temp.org(),pg_temp.project(),
+   jsonb_build_object('plan_id',current_setting('test.curing_plan'),'round_at',current_setting('test.r3'),'remarks','Too early')),
+   '23514','future curing round cannot be pre-recorded');
+ perform pg_temp.expect_fail(format($$select public.project_curing_command(%L,%L,'round_record',%L)$$,pg_temp.org(),pg_temp.project(),
+   jsonb_build_object('plan_id',current_setting('test.curing_plan'),'round_at',(current_setting('test.r1')::timestamptz-interval '1 day'),'remarks','Old round')),
+   '23514','round older than 24 hours stays missed');
+ gate=(public.project_curing_command(pg_temp.org(),pg_temp.project(),'round_record',jsonb_build_object(
+   'plan_id',current_setting('test.curing_plan'),'round_at',current_setting('test.r1'),'remarks','Footings wetted, hessian kept damp'))->>'id')::uuid;
+ photo=pg_temp.photo('curing','Watchman curing photo');
+ perform public.project_curing_command(pg_temp.org(),pg_temp.project(),'round_photo',jsonb_build_object('gate_id',gate,'photo_id',photo));
+ perform pg_temp.expect_fail(format($$select public.project_curing_command(%L,%L,'round_record',%L)$$,pg_temp.org(),pg_temp.project(),
+   jsonb_build_object('plan_id',current_setting('test.curing_plan'),'round_at',current_setting('test.r1'),'remarks','Duplicate')),
+   '23505','one canonical record per curing round');
+ read=public.project_curing_read(pg_temp.org(),pg_temp.project());
+ if read->>'missed_total' is not null then raise exception 'FAIL: watchman received supervisor alerts';end if;
+end$watchman$;
+select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
+do $engineer_curing$
+declare r jsonb;read jsonb;
+begin
+ r=public.project_curing_command(pg_temp.org(),pg_temp.project(),'round_record',jsonb_build_object(
+   'plan_id',current_setting('test.curing_plan'),'round_at',current_setting('test.r2'),'remarks','Ponding checked by engineer'));
+ if (r->>'late')::boolean is distinct from true then raise exception 'FAIL: late round not flagged';end if;
+ read=public.project_curing_read(pg_temp.org(),pg_temp.project());
+ if (select count(*) from jsonb_array_elements(read->'rounds') x where x->>'status'='recorded')<>2
+  or (read->>'missed_total')::int<1
+  or not exists(select 1 from jsonb_array_elements(read->'rounds') x where x->>'status'='upcoming')
+ then raise exception 'FAIL: curing read model incorrect: %',left(read::text,600);end if;
+ raise notice 'PASS 7: curing recorded by watchman and engineer, missed rounds alerted, nothing assumed';
+end$engineer_curing$;
+
+------------------------------------------------------------------------------
+-- 8. Tomorrow's material: one from the BOQ, one manual; nothing ordered.
+------------------------------------------------------------------------------
+do $materials$
+declare boq jsonb;steel uuid;binding uuid;result jsonb;material_read jsonb;
+ payments_before bigint;tomorrow date=(now() at time zone 'Asia/Kolkata')::date+1;
+begin
+ boq=public.project_boq_items_read(pg_temp.org(),pg_temp.project());
+ if jsonb_array_length(boq)<>3 or boq::text ~* 'rate|amount' then raise exception 'FAIL: BOQ projection wrong or leaks prices: %',boq;end if;
+ select (x->>'id')::uuid into steel from jsonb_array_elements(boq) x where x->>'name' like 'Reinforcement%';
+ perform public.project_work_item_material_request(pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),3,
+   jsonb_build_array(
+    jsonb_build_object('boq_item_id',steel,'quantity','0.8','unit','tonnes','required_date',tomorrow),
+    jsonb_build_object('item','OPC 53 grade cement','quantity','40','unit','bags','required_date',tomorrow,'notes','For column starters'),
+    jsonb_build_object('item','Binding wire','quantity','25','unit','kg','required_date',tomorrow)));
+ -- The owner may record a homeowner's direct supplier cash settlement on the
+ -- existing ordered material. This must remain separate from company Finance.
+ select (x->>'id')::uuid into binding
+  from jsonb_array_elements(public.project_site_read(pg_temp.org(),pg_temp.project())->'materials') x
+  where x->>'item'='Binding wire' order by x->>'id' limit 1;
+ if binding is null then raise exception 'FAIL: test material request missing';end if;
+ perform set_config('test.direct_cash_material',binding::text,true);
+ perform pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+ perform public.project_site_command(pg_temp.org(),pg_temp.project(),'material_update',
+   jsonb_build_object('id',binding,'status','approved','source','outside','vendor_reference',''));
+ perform public.project_material_delivery_command(pg_temp.org(),pg_temp.project(),binding,
+   'place_outside_order','TEST ONLY — local DB supplier order',tomorrow,'anytime');
+ select count(*) into payments_before from public.payments
+  where organization_id=pg_temp.org() and project_id=pg_temp.project();
+ result=public.project_material_homeowner_cash_paid(pg_temp.org(),pg_temp.project(),binding,
+   2500.00,(now() at time zone 'Asia/Kolkata')::date,'TEST ONLY local supplier','TEST ONLY cash ref',
+   'TEST ONLY — synthetic homeowner direct cash settlement');
+ if result->>'method'<>'cash' or result->>'saved'<>'true' then
+   raise exception 'FAIL: owner could not record direct supplier cash: %',result;end if;
+ result=public.project_material_homeowner_cash_paid(pg_temp.org(),pg_temp.project(),binding,
+   2500.00,(now() at time zone 'Asia/Kolkata')::date,'TEST ONLY local supplier','TEST ONLY cash ref',
+   'TEST ONLY — synthetic homeowner direct cash settlement');
+ if result->>'already_recorded'<>'true' then raise exception 'FAIL: direct cash retry was not idempotent';end if;
+ perform pg_temp.expect_fail(format($q$select public.project_material_homeowner_cash_paid(%L,%L,%L,2501.00,(now() at time zone 'Asia/Kolkata')::date,'TEST ONLY local supplier','TEST ONLY cash ref','TEST ONLY changed duplicate')$q$,
+   pg_temp.org(),pg_temp.project(),binding),'23505','different duplicate direct payment rejected');
  material_read=public.project_material_access_read(pg_temp.org(),pg_temp.project());
  if not exists(select 1 from jsonb_array_elements(material_read->'delivery') x
    where x->>'id'=binding::text and x->>'homeowner_paid_method'='cash'
