@@ -162,7 +162,6 @@ export function RccSubstageGroups({
         const items = activities.filter(
           (item) => groupFor(item.title) === group.id,
         );
-        if (!items.length) return null;
         const done = items.filter((item) => item.status === 'completed').length;
         return (
           <details
@@ -177,11 +176,17 @@ export function RccSubstageGroups({
               </span>
             </summary>
             <div className="pv2-rcc-substage-items">
-              {items.map((item) => (
-                <div className="pv2-rcc-work-entry" key={item.index}>
-                  {renderActivity(item.index, item.title)}
-                </div>
-              ))}
+              {items.length ? (
+                items.map((item) => (
+                  <div className="pv2-rcc-work-entry" key={item.index}>
+                    {renderActivity(item.index, item.title)}
+                  </div>
+                ))
+              ) : (
+                <p className="pv2-rcc-empty">
+                  No work items are assigned to this area yet.
+                </p>
+              )}
             </div>
           </details>
         );
