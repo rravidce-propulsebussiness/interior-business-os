@@ -511,9 +511,13 @@ select public.construction_stage_qc_item_command(pg_temp.org(),pg_temp.project()
 select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
 do $hold$
 begin
- if pg_temp.blockers('F1_SLAB') not like '%Structural sign-off required%' then
-   raise exception 'FAIL: structural hold point not blocking first floor slab: %',pg_temp.blockers('F1_SLAB');end if;
- raise notice 'PASS 6: PCC/reinforcement measured, independent pre-pour QC failed then passed, hold point enforced';
+ if pg_temp.blockers('F1_SLAB')<>'[]' then
+   raise exception 'FAIL: all-passed foundation QC still blocks dependent slab: %',pg_temp.blockers('F1_SLAB');end if;
+ perform public.construction_stage_execution_command(
+   pg_temp.org(),pg_temp.project(),pg_temp.stage('F1_SLAB'),'start','Foundation QC passed');
+ if pg_temp.exec_status('F1_SLAB')<>'in_progress' then
+   raise exception 'FAIL: dependent slab did not start after all QC items passed';end if;
+ raise notice 'PASS 6: failed QC blocks dependent work; all-passed field QC releases it before formal certification';
 end$hold$;
 
 ------------------------------------------------------------------------------
@@ -660,7 +664,35 @@ select pg_temp.expect_fail(format($q$select public.project_material_homeowner_ca
 -- 9. Certification, stage payments and concurrent floors.
 ------------------------------------------------------------------------------
 select pg_temp.certify('FOUNDATION',true);
+-- Add a second required topic in this disposable fixture so partial QC can be
+-- distinguished from the all-passed case by the release regression below.
+reset role;
+update private.construction_project_stages
+set inspection_topics=inspection_topics||jsonb_build_array('Secondary slab QC fixture topic')
+where id=(select (stage->>'id')::uuid
+ from jsonb_array_elements(public.construction_project_read(pg_temp.org(),pg_temp.project())->'stages') stage
+ where stage->>'instance_code'='F1_SLAB');
+set local role authenticated;
 select pg_temp.execute_stage('F1_SLAB');
+-- One passing item must not release a dependent stage when this stage has
+-- multiple required QC items. A formal certificate still releases it after
+-- its independent reviews are approved.
+select pg_temp.as_user('88888888-8888-4888-8888-888888888888');
+do $partial_qc$
+declare total integer;
+begin
+ select jsonb_array_length(stage->'inspection_topics') into total
+ from jsonb_array_elements(
+   public.construction_project_read(pg_temp.org(),pg_temp.project())->'stages') stage
+ where stage->>'instance_code'='F1_SLAB';
+ if total<2 then raise exception 'FAIL: slab fixture must have multiple QC topics';end if;
+ perform public.construction_stage_qc_item_command(
+   pg_temp.org(),pg_temp.project(),pg_temp.stage('F1_SLAB'),0,'passed',
+   'First required slab check passed',current_setting('test.footing_photo')::uuid,true);
+end$partial_qc$;
+select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
+select pg_temp.expect_fail(format('select public.construction_stage_execution_command(%L,%L,%L,''start'','''')',
+  pg_temp.org(),pg_temp.project(),pg_temp.stage('F1_MASONRY')),'23514','partial QC blocks dependent masonry');
 select pg_temp.certify('F1_SLAB',true);
 select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
 select public.construction_stage_execution_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('F3_SLAB'),'start','Third floor slab shuttering');
@@ -680,8 +712,8 @@ end$parallel$;
 select pg_temp.execute_stage('F3_SLAB');
 do $structural_hold$
 begin
- if pg_temp.blockers('F3_MASONRY') not like '%Structural sign-off required%' then
-   raise exception 'FAIL: uncertified slab released dependent work: %',pg_temp.blockers('F3_MASONRY');end if;
+ if pg_temp.blockers('F3_MASONRY') not like '%On-site QC items pending%' then
+   raise exception 'FAIL: slab with pending QC items released dependent work: %',pg_temp.blockers('F3_MASONRY');end if;
 end$structural_hold$;
 select pg_temp.certify('F3_SLAB',true);
 select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
