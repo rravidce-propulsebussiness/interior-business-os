@@ -1,0 +1,69 @@
+.pv2-stage-review-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin: 0 0 14px;
+  padding: 12px;
+  border: 1px solid #eee4dc;
+  border-radius: 13px;
+  background: linear-gradient(120deg, #fffaf6, #fff);
+}
+
+.pv2-stage-review-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #e8d8ce;
+  border-radius: 9px;
+  background: #fff;
+  color: #803b30;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pv2-stage-review-actions button:hover,
+.pv2-stage-review-actions button:focus-visible {
+  border-color: #c97557;
+  background: #fff5ee;
+  outline: 2px solid #f0d2c3;
+  outline-offset: 1px;
+}
+
+.pv2-stage-review-actions button span {
+  flex: none;
+  padding: 4px 7px;
+  border-radius: 99px;
+  background: #f7eee8;
+  color: #68758a;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.pv2-command-stage-inner [id^='pv2-stage-check-'],
+.pv2-command-stage-inner [id^='pv2-stage-qc-'] {
+  scroll-margin-top: 22px;
+}
+
+@media (max-width: 520px) {
+  .pv2-stage-review-actions {
+    gap: 7px;
+    padding: 9px;
+  }
+
+  .pv2-stage-review-actions button {
+    min-height: 40px;
+    padding: 8px;
+    font-size: 10px;
+  }
+
+  .pv2-stage-review-actions button span {
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+}

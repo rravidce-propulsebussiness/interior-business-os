@@ -214,7 +214,7 @@ export function WorkItemCard({
               disabled={pending}
               onClick={() => setPanel(panel === 'complete' ? '' : 'complete')}
             >
-              ✓ Complete with photo
+              ✓ Mark work complete
             </button>
             {rows.length > 0 && (
               <button
@@ -297,7 +297,7 @@ export function WorkItemCard({
             <input name="note" maxLength={2000} placeholder="Optional" />
           </label>
           <button className="pf-btn pf-btn-primary pf-wide" disabled={pending}>
-            {pending ? 'Saving…' : 'Mark complete'}
+            {pending ? 'Saving…' : 'Mark complete with photo'}
           </button>
         </form>
       )}

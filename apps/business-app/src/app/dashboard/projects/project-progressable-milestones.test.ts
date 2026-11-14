@@ -11,6 +11,9 @@ describe('progressable quotation-linked milestones', () => {
   const flow = read('./project-flow.ts');
   const actions = read('./[id]/site/work-item-actions.ts');
   const checklist = read('./project-stage-checklist-item.tsx');
+  const reviewActions = read('./project-stage-review-actions.tsx');
+  const onsiteQc = read('./project-onsite-qc-review.tsx');
+  const onsiteQcAction = read('./[id]/site/onsite-qc-actions.ts');
 
   it('shows the final-quotation preparation action in project setup', () => {
     const milestones = view.slice(
@@ -63,7 +66,8 @@ describe('progressable quotation-linked milestones', () => {
     expectSource(checklist).toContain('Mark not applicable');
     expectSource(checklist).toContain('updateWorkItem');
     expectSource(checklist).toContain('Skipped with reason:');
-    expectSource(workItem).toContain('Complete with photo');
+    expectSource(workItem).toContain('Mark work complete');
+    expectSource(workItem).toContain('Mark complete with photo');
     expectSource(workItem).toContain('Measurements and checks');
     expectSource(workItem).toContain(
       'QC checks and structural certification are never skipped.',
@@ -74,5 +78,24 @@ describe('progressable quotation-linked milestones', () => {
     const styles = read('./project-v2.css');
     expectSource(styles).toContain('.pv2-stage-qc-card.is-complete');
     expectSource(styles).toContain('.pv2-stage-qc-card.has-fail');
+  });
+
+  it('opens the selected site check or QC item with evidence controls', () => {
+    expectSource(view).toContain('<ProjectStageReviewActions');
+    expectSource(view).toContain("'pv2-stage-check-' + stage.id + '-' + i");
+    expectSource(view).toContain(
+      "'pv2-stage-qc-' + stage.id + '-' + step.index",
+    );
+    expectSource(checklist).toContain('required to pass');
+    expectSource(reviewActions).toContain('target.scrollIntoView');
+    expectSource(reviewActions).toContain('details.pv2-item-checklist');
+    expectSource(reviewActions).toContain('details.pv2-on-site-qc');
+    expectSource(reviewActions).toContain('details.pv2-qc-item');
+    expectSource(reviewActions).toContain('Site checks');
+    expectSource(reviewActions).toContain('Company QC');
+    expectSource(onsiteQc).toContain('Site inspection photograph');
+    expectSource(onsiteQcAction).toContain(
+      'QC Pass and Fail both require project photo evidence.',
+    );
   });
 });
