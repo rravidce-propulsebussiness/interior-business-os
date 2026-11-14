@@ -8,7 +8,7 @@ import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectItemSchedule } from './project-item-schedule';
 import { StageButton } from './project-flow-controls';
 import { RccSubstageGroups } from './project-rcc-substage-groups';
-import { ProjectMilestoneStageList } from './project-milestone-stage-list';
+import { ProjectMilestoneAutoScroll } from './project-milestone-stage-list';
 import { PrepareAgreement } from './project-v2-forms';
 import { CuringRounds, CuringPlanForm, type CuringRoundView } from './project-curing-card';
 import './project-milestone-timeline.css';
@@ -357,7 +357,8 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     <section className="pmt-timeline" id="project-timeline">
       <div className="pmt-timeline-head"><div><h2>All stages</h2><p>Baseline dates are fixed from the project creation date. You can adjust the current plan without changing the baseline; early and late work is labelled against it.</p></div>
         <div className="pmt-board-controls"><span>{stages.length} stages</span></div></div>
-      <ProjectMilestoneStageList focusIndex={focusStageIndex}>
+      <ProjectMilestoneAutoScroll focusIndex={focusStageIndex}/>
+      <div className="pmt-stage-list">
       {stages.map((stage, index) => {
         const range = windowFor(stage);
         const stageItems = grouped.get(stage.id) ?? [];
@@ -397,7 +398,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
             ? 'Delayed ' + daysOverBaseline + 'd'
             : 'On track';
         return <details className={'pmt-stage ' + (index === focusStageIndex ? 'is-current' : '')}
-          data-stage-index={index} key={stage.id} open={index === focusStageIndex}>
+          id={'project-stage-' + index} data-stage-index={index} key={stage.id} open={index === focusStageIndex}>
           <summary><span className="pmt-number">{String(milestoneNumber(stage, floorCodes)).padStart(2,'0')}</span>
             <span className="pmt-stage-name"><strong>{stage.floor_code ? pretty(stage.floor_code) + ' · ' : ''}{stage.title}</strong>
               <small>{milestoneFamily(stage)} · {stage.activities.length} works · {siteChecks.length} checks · {completed}/{stageItems.length} complete{index === todayStageIndex ? ' · Today’s stage' : ''}</small></span>
@@ -452,7 +453,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
           </div>
         </details>;
       })}
-      </ProjectMilestoneStageList>
+      </div>
     </section>
   </div>;
 }
