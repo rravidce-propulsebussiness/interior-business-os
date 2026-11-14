@@ -125,16 +125,19 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     const status = d.stageExecution.find((row) => row.stageId === stage.id)?.status ?? stage.status;
     return !isComplete(status);
   });
-  const rounds: CuringRoundView[] = (d.flow.curing?.rounds ?? []).map((round) => ({
-    key: round.planId + round.roundAt, planId: round.planId, title: round.title,
-    roundAt: round.roundAt,
-    time: new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit' }).format(new Date(round.roundAt)),
-    day: dayKey(new Date(round.roundAt)) === today ? 'Today' :
-      dayKey(new Date(round.roundAt)) === tomorrow ? 'Tomorrow' : shortDate(round.roundAt),
-    status: round.status, late: round.late, remarks: round.remarks,
-    hasPhoto: round.hasPhoto,
-    recordable: round.status !== 'recorded',
-  }));
+  const rounds: CuringRoundView[] = (d.flow.curing?.rounds ?? []).map((round) => {
+    const age = Date.now() - new Date(round.roundAt).getTime();
+    return {
+      key: round.planId + round.roundAt, planId: round.planId, title: round.title,
+      roundAt: round.roundAt,
+      time: new Intl.DateTimeFormat('en-GB', { timeZone: zone, hour: '2-digit', minute: '2-digit' }).format(new Date(round.roundAt)),
+      day: dayKey(new Date(round.roundAt)) === today ? 'Today' :
+        dayKey(new Date(round.roundAt)) === tomorrow ? 'Tomorrow' : shortDate(round.roundAt),
+      status: round.status, late: round.late, remarks: round.remarks,
+      hasPhoto: round.hasPhoto,
+      recordable: round.status !== 'recorded' && age <= 86400000 && age >= -30 * 60000,
+    };
+  });
   const roundSlots = ['Morning', 'Afternoon', 'Evening'];
   const checkStatus = (stageId: string, title: string) => d.stageProgress.checks.find((row) =>
     stringValue(row.stage_id) === stageId && stringValue(row.title).toLowerCase() === title.toLowerCase());
