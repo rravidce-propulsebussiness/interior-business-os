@@ -233,6 +233,8 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     const status = d.stageExecution.find((row) => row.stageId === stage.id)?.status ?? stage.status;
     return !isComplete(status);
   });
+  const currentIndex = current ? stages.indexOf(current) : -1;
+  const nextStage = currentIndex >= 0 ? stages[currentIndex + 1] : undefined;
   if (!stages.length) {
     const quote = d.quotations[0];
     const canPrepare = Boolean(quote && d.permissions.manage && d.permissions.finance && !d.agreement);
@@ -296,6 +298,13 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         <p>Work, site checks, QC, curing and dates in one project flow.</p></div>
       <div className="pmt-progress"><strong>{progress}%</strong><span>{workDone} of {items.length} work items complete</span><i><b style={{ width: progress + '%' }}/></i></div>
     </header>
+
+    <section className="pmt-metrics" aria-label="Project progress summary">
+      <article><span>Work complete</span><strong>{progress}%</strong><small>{workDone} of {items.length} work items</small></article>
+      <article><span>Active milestone</span><strong className="pmt-metric-name">{current ? stageLabel(current) : 'All milestones complete'}</strong><small>{current ? 'Stage ' + milestoneNumber(current, floorCodes) : 'Ready for handover'}</small></article>
+      <article><span>Today</span><strong>{todayItems.length} works</strong><small>{displayDay(today)}</small></article>
+      <article className={delayedItems.length ? 'at-risk' : ''}><span>{delayedItems.length ? 'Behind baseline' : 'Next milestone'}</span><strong className="pmt-metric-name">{delayedItems.length ? delayedItems.length + ' delayed' : nextStage ? stageLabel(nextStage) : 'Project handover'}</strong><small>{delayedItems.length ? 'Original dates remain fixed' : nextStage ? 'Stage ' + milestoneNumber(nextStage, floorCodes) : 'Final review pending'}</small></article>
+    </section>
 
     <section className="pmt-days">
       <article><h2>Today <time>{displayDay(today)}</time></h2>
