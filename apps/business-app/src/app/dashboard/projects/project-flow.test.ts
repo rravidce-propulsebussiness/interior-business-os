@@ -260,6 +260,16 @@ describe('single project flow model', () => {
     expect(measurementPrompts('Footing reinforcement')[0]?.label).toBe(
       'Bar spacing',
     );
+    expect(
+      measurementPrompts('Footing shuttering, alignment and stability'),
+    ).toEqual([
+      { label: 'Alignment deviation', unit: 'mm' },
+      { label: 'Support spacing', unit: 'mm' },
+    ]);
+    expect(
+      measurementPrompts('Footing concrete placement, pour and test records')[0]
+        ?.label,
+    ).toBe('Slump');
     expect(measurementPrompts('First floor brickwork')[0]?.label).toBe(
       'Wall thickness',
     );
