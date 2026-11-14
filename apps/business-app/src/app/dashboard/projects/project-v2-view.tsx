@@ -28,7 +28,6 @@ import { ProjectStageReviewActions } from './project-stage-review-actions';
 import { RccDailyPlan, RccSubstageGroups } from './project-rcc-substage-groups';
 import { ProjectQuotationLinker } from './project-quotation-linker';
 import { ProjectFlow } from './project-flow-view';
-import { QuotePlanView } from './project-quote-plan';
 import {
   flowRole,
   measurementPrompts,
