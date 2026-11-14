@@ -11,6 +11,7 @@ type Props={
  projectId:string;stageId:string;kind:ProjectItemScheduleRow['kind'];
  index:number;title:string;item?:ProjectItemScheduleRow|undefined;canPlan:boolean;
  planningMode?:'full'|'site'|undefined;today?:string|undefined;
+ baselineStart?:string|undefined;baselineFinish?:string|undefined;
 };
 const readable=(date:string)=>{
  if(!date)return '';
@@ -18,21 +19,23 @@ const readable=(date:string)=>{
  return d&&m&&y?d+'/'+m+'/'+y:date;
 };
 /** One date editor per canonical stage item; no second progress checklist. */
-export function ProjectItemSchedule({projectId,stageId,kind,index,title,item,canPlan,planningMode='full',today=''}:Props){
+export function ProjectItemSchedule({projectId,stageId,kind,index,title,item,canPlan,planningMode='full',today='',baselineStart='',baselineFinish=''}:Props){
  const router=useRouter();
  const [open,setOpen]=useState(false);
  const [currentVersion,setCurrentVersion]=useState(item?.version??0);
- const [start,setStart]=useState(item?.plannedStart??'');
- const [finish,setFinish]=useState(item?.plannedFinish??'');
+ const [start,setStart]=useState(item?.plannedStart||baselineStart);
+ const [finish,setFinish]=useState(item?.plannedFinish||baselineFinish);
  const [note,setNote]=useState(item?.note??'');
+ const hasSavedRange=Boolean(item?.plannedStart&&item?.plannedFinish);
+ const hasBaseline=Boolean(baselineStart&&baselineFinish);
  // Refresh this editor when another user updates the stage schedule.
  useEffect(()=>{
   if(open)return;
   setCurrentVersion(item?.version??0);
-  setStart(item?.plannedStart??'');
-  setFinish(item?.plannedFinish??'');
+  setStart(item?.plannedStart||baselineStart);
+  setFinish(item?.plannedFinish||baselineFinish);
   setNote(item?.note??'');
- },[item?.version,item?.plannedStart,item?.plannedFinish,item?.note,open]);
+ },[item?.version,item?.plannedStart,item?.plannedFinish,item?.note,baselineStart,baselineFinish,open]);
  const [result,submit,pending]=useActionState(async(_previous:{saved:boolean;message:string},form:FormData)=>{
   const saved=await saveProjectItemSchedule({
    projectId,stageId,kind,index,title,version:currentVersion,
@@ -47,11 +50,13 @@ export function ProjectItemSchedule({projectId,stageId,kind,index,title,item,can
  return <div className="pv2-item-schedule">
   <div className="pv2-item-schedule-current">
    <span aria-hidden="true">▦</span>
-   {item||start&&finish?<span>Planned: {readable(start)} – {readable(finish)}</span>:
+   {hasSavedRange?<span><b>Current plan</b> {readable(item!.plannedStart)} – {readable(item!.plannedFinish)}
+     {hasBaseline&&<small className="pv2-item-schedule-baseline">Baseline {readable(baselineStart)} – {readable(baselineFinish)}</small>}</span>:
+    hasBaseline?<span><b>Auto baseline</b> {readable(baselineStart)} – {readable(baselineFinish)}</span>:
     <span>Dates not planned</span>}
    {canPlan&&<button type="button" onClick={()=>setOpen(value=>!value)}
     aria-expanded={open} className="pv2-item-schedule-toggle">
-    {open?'Close dates':item?'Edit dates':'Plan dates'}</button>}
+    {open?'Close dates':hasSavedRange?'Adjust dates':hasBaseline?'Adjust schedule':'Plan dates'}</button>}
   </div>
   {open&&canPlan&&<form action={submit} className="pv2-item-schedule-form">
    {today&&<div className="pv2-item-schedule-shortcuts" aria-label="Quick planned dates">
@@ -63,7 +68,7 @@ export function ProjectItemSchedule({projectId,stageId,kind,index,title,item,can
     <button type="button" onClick={()=>{setStart(today);setFinish(offsetPlanDate(today,6));}}>
      Next 7 days</button>
    </div>}
-   <p className="pv2-hint">{planningMode==='site'?'Site engineers may plan current and upcoming stage dates. Starting work still requires the project’s approvals and safety checks.':'Owners and project managers may plan current and future stages. Company defaults remain in Settings → Payment Settings.'}</p>
+   <p className="pv2-hint">{planningMode==='site'?'Site engineers may adjust current and upcoming work dates. Starting work still requires the project’s approvals and safety checks.':'Owners and project managers may adjust the current plan.'} The auto baseline stays tied to the project creation date.</p>
    <div className="pv2-item-schedule-dates">
     <label>Planned start<input type="date" name="planned_start" required
      value={start} onChange={event=>setStart(event.target.value)}/></label>
