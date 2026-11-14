@@ -72,9 +72,8 @@ describe('progressable quotation-linked milestones', () => {
     expectSource(workItem).toContain('Today</span>');
     expectSource(flow).toContain("{ label: 'Depth', unit: 'mm' }");
     expectSource(flow).toContain("{ label: 'Width', unit: 'mm' }");
-    const styles = readFileSync(
-      new URL('./project-v2.css', import.meta.url),
-      'utf8',
-    );
+    const styles = read('./project-v2.css');
     expectSource(styles).toContain('.pv2-stage-qc-card.is-complete');
-    expectSource(styles).toContain('.pv2-stage-qc-card.has-f
+    expectSource(styles).toContain('.pv2-stage-qc-card.has-fail');
+  });
+});
