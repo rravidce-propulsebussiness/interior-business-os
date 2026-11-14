@@ -217,26 +217,20 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         planningMode={role === 'engineer' ? 'site' : 'full'} today={today}/>
     </div>;
   };
-  const todayItems = items.filter((item) => {
+  const workIsScheduledOn = (item: WorkItem, date: string) => {
     const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
-    const when = plan?.plannedStart ?? estimatedItemDate(item);
-    return when === today && !isComplete(item.status);
-  });
+    const start = plan?.plannedStart || estimatedItemDate(item);
+    const finish = plan?.plannedFinish || start;
+    return start <= date && finish >= date;
+  };
+  const todayItems = items.filter((item) =>
+    workIsScheduledOn(item, today) && !isComplete(item.status));
   const todayStageIndex = stages.findIndex((stage) =>
-    items.some((item) => {
-      const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
-      return item.stage.id === stage.id && (plan?.plannedStart ?? estimatedItemDate(item)) === today;
-    }));
+    items.some((item) => item.stage.id === stage.id && workIsScheduledOn(item, today)));
   const tomorrowStageIndex = stages.findIndex((stage) =>
-    items.some((item) => {
-      const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
-      return item.stage.id === stage.id && (plan?.plannedStart ?? estimatedItemDate(item)) === tomorrow && !isComplete(item.status);
-    }));
-  const tomorrowItems = items.filter((item) => {
-    const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
-    const when = plan?.plannedStart ?? estimatedItemDate(item);
-    return when === tomorrow && !isComplete(item.status);
-  });
+    items.some((item) => item.stage.id === stage.id && workIsScheduledOn(item, tomorrow) && !isComplete(item.status)));
+  const tomorrowItems = items.filter((item) =>
+    workIsScheduledOn(item, tomorrow) && !isComplete(item.status));
   const workDone = items.filter((item) => isComplete(item.status)).length;
   const delayedItems = items.filter((item) =>
     !isComplete(item.status) && dayDistance(today, estimatedItemDate(item)) > 0);
