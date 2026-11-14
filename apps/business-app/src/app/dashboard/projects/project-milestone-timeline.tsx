@@ -23,6 +23,8 @@ const addDays = (value: string, days: number) => {
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 };
+const dayDistance = (later: string, earlier: string) =>
+  Math.round((Date.parse(later + 'T00:00:00Z') - Date.parse(earlier + 'T00:00:00Z')) / 86400000);
 const durationByCode: Record<string, number> = {
   PRECONSTRUCTION: 10, DESIGN: 8, SITE_PREP: 18, FOUNDATION: 10, PLINTH: 10,
   RCC: 18, MASONRY: 55, INTERNAL_PLASTER: 25, EXTERNAL_PLASTER: 25,
@@ -153,6 +155,32 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       finish: planned.map((plan) => plan.plannedFinish).sort().at(-1)!,
     };
   };
+  const checkBaselineDate = (stage: Stage, index: number, count: number) => {
+    const range = estimated.get(stage.id) ?? { start: startDate, finish: startDate };
+    const span = Math.max(0, dayDistance(range.finish, range.start));
+    return addDays(range.start, count > 1 ? Math.floor(index * span / (count - 1)) : span);
+  };
+  const workVariance = (item: WorkItem, baseline: string) => {
+    if (item.status === 'skipped') return { label: 'Not applicable', tone: 'neutral' };
+    const completion = d.flow.events
+      .filter((event) => event.stageId === item.stage.id && event.index === item.index && event.action === 'complete')
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+    if (item.status === 'completed') {
+      if (!completion?.createdAt) return { label: 'Completed', tone: 'done' };
+      const delta = dayDistance(dayKey(new Date(completion.createdAt)), baseline);
+      return delta < 0
+        ? { label: Math.abs(delta) + 'd early', tone: 'early' }
+        : delta > 0
+          ? { label: delta + 'd late', tone: 'late' }
+          : { label: 'On baseline', tone: 'done' };
+    }
+    const delta = dayDistance(today, baseline);
+    return delta > 0
+      ? { label: 'Delayed ' + delta + 'd', tone: 'late' }
+      : delta === 0
+        ? { label: 'Due today', tone: 'due' }
+        : { label: 'On track', tone: 'neutral' };
+  };
   const grouped = new Map<string, WorkItem[]>();
   for (const item of items) grouped.set(item.stage.id, [...(grouped.get(item.stage.id) ?? []), item]);
   const view = (item: WorkItem): WorkItemView => {
@@ -172,12 +200,17 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   };
   const card = (item: WorkItem) => {
     const p = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
+    const baseline = estimatedItemDate(item);
+    const variance = workVariance(item, baseline);
     return <div className="pmt-work" key={item.key}>
       <WorkItemCard projectId={d.project.id} item={view(item)} canWork={canWork}
         canOwn={role === 'owner'} canRequest={canRequest} engineers={engineers}
         boq={d.flow.boq} tomorrow={tomorrow}/>
+      <div className="pmt-work-timing"><span>Baseline · {displayDay(baseline)}</span>
+        <span className={'pmt-variance ' + variance.tone}>{variance.label}</span></div>
       <ProjectItemSchedule projectId={d.project.id} stageId={item.stage.id} kind="work"
         index={item.index} title={item.title} item={p} canPlan={canPlan}
+        baselineStart={baseline} baselineFinish={baseline}
         planningMode={role === 'engineer' ? 'site' : 'full'} today={today}/>
     </div>;
   };
@@ -304,11 +337,21 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         });
         const stagePhotos = photos;
         const actualQc = d.stageQc.records.filter((record) => record.stage_id === stage.id);
+        const baselineRange = estimated.get(stage.id) ?? range;
+        const savedRange = d.itemPlans.some((plan) => plan.stageId === stage.id && plan.plannedStart && plan.plannedFinish);
+        const stageVariance = isComplete(stageStatus) && execution?.fieldFinishedAt
+          ? (() => { const delta = dayDistance(dayKey(new Date(execution.fieldFinishedAt)), baselineRange.finish);
+              return delta < 0 ? Math.abs(delta) + 'd early' : delta > 0 ? delta + 'd late' : 'On baseline'; })()
+          : dayDistance(today, baselineRange.finish) > 0 && !isComplete(stageStatus)
+            ? 'Delayed ' + dayDistance(today, baselineRange.finish) + 'd'
+            : 'On track';
         return <details className="pmt-stage" key={stage.id} open={index === 0 || stage.id === current?.id}>
           <summary><span className="pmt-number">{String(milestoneNumber(stage, floorCodes)).padStart(2,'0')}</span>
             <span className="pmt-stage-name"><strong>{stage.floor_code ? pretty(stage.floor_code) + ' · ' : ''}{stage.title}</strong>
               <small>{milestoneFamily(stage)} · {stage.activities.length} works · {siteChecks.length} checks · {completed}/{stageItems.length} complete</small></span>
-            <span className="pmt-dates">{displayDay(range.start)} – {displayDay(range.finish)}<small>{d.itemPlans.some((plan) => plan.stageId === stage.id) ? 'Saved schedule' : 'Estimated dates'}</small></span>
+            <span className="pmt-dates">{displayDay(baselineRange.start)} – {displayDay(baselineRange.finish)}<small>Auto baseline</small>
+              {savedRange && <small className="pmt-current-date">Current plan: {displayDay(range.start)} – {displayDay(range.finish)}</small>}
+              <small className="pmt-stage-variance">{stageVariance}</small></span>
             <span className={'pmt-status ' + (stageStatus === 'in_progress' ? 'active' : isComplete(stageStatus) ? 'done' : '')}>{pretty(stageStatus)}</span>
             <span className="pmt-chevron">⌄</span>
           </summary>
@@ -327,6 +370,8 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
                     canEdit={canWork}/>
                   <ProjectItemSchedule projectId={d.project.id} stageId={stage.id} kind="check"
                     index={check.index} title={check.title} item={plan} canPlan={canPlan}
+                    baselineStart={checkBaselineDate(stage, check.index, siteChecks.length)}
+                    baselineFinish={checkBaselineDate(stage, check.index, siteChecks.length)}
                     planningMode={role === 'engineer' ? 'site' : 'full'} today={today}/>
                 </div>;
               })}
