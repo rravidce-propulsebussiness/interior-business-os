@@ -122,7 +122,7 @@ describe('quotation payment steps projected into one project timeline', () => {
       'quoteMilestoneProjection(',
     );
     expect(source('./project-flow-view.tsx')).toContain(
-      '<ProjectQuotePaymentFlow d={d} />',
+      '<ProjectMilestoneTimeline d={d} />',
     );
     expect(source('./project-quote-payment-flow.tsx')).toContain(
       'd.stageQc.records',
