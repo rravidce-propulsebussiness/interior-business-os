@@ -35,12 +35,14 @@ function dayStatus(item: RccWorkItem, today: string) {
 
 export function RccDailyPlan({
   stageId,
+  stageTitle,
   work,
   materials,
   today,
   tomorrow,
 }: {
   stageId: string;
+  stageTitle: string;
   work: RccWorkItem[];
   materials: RccMaterialItem[];
   today: string;
@@ -82,7 +84,7 @@ export function RccDailyPlan({
   return (
     <section
       className="pv2-rcc-daily-plan"
-      aria-label="Ground floor daily work"
+      aria-label={stageTitle + ' daily work'}
     >
       {[
         { label: 'Today', date: today },
@@ -109,7 +111,9 @@ export function RccDailyPlan({
                     >
                       {row.status}
                     </span>
-                    <OpenRccWorkButton targetId={row.id} />
+                    {row.kind === 'Work' && (
+                      <OpenRccWorkButton targetId={row.id} />
+                    )}
                   </li>
                 ))}
               </ul>

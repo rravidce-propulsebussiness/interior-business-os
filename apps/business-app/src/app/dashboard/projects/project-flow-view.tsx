@@ -113,7 +113,13 @@ function Section({
   );
 }
 
-export function ProjectFlow({ d }: { d: WorkspaceData }) {
+export function ProjectFlow({
+  d,
+  milestoneMode = false,
+}: {
+  d: WorkspaceData;
+  milestoneMode?: boolean;
+}) {
   const site = d.site;
   const role = flowRole({
     canManage: site?.canManage === true,
@@ -291,7 +297,11 @@ export function ProjectFlow({ d }: { d: WorkspaceData }) {
   ];
 
   return (
-    <div className={'pf-flow pf-role-' + role}>
+    <div
+      className={
+        'pf-flow pf-role-' + role + (milestoneMode ? ' pf-milestone-mode' : '')
+      }
+    >
       <section
         className={'pf-hero pf-tone-' + action.tone}
         aria-label="Your next action"
@@ -302,8 +312,12 @@ export function ProjectFlow({ d }: { d: WorkspaceData }) {
           <h1>{action.title}</h1>
           <p>{action.detail}</p>
         </div>
-        <a className="pf-hero-go" href={action.anchor}>
-          Go <OwnerIcon name="arrow" size={16} />
+        <a
+          className="pf-hero-go"
+          href={milestoneMode ? '#project-timeline' : action.anchor}
+        >
+          {milestoneMode ? 'View milestones' : 'Go'}{' '}
+          <OwnerIcon name="arrow" size={16} />
         </a>
         {role !== 'watchman' && (
           <ul className="pf-stats">
@@ -317,9 +331,11 @@ export function ProjectFlow({ d }: { d: WorkspaceData }) {
         )}
       </section>
 
-      {role !== 'watchman' && <ProjectQuotePaymentFlow d={d} />}
+      {!milestoneMode && role !== 'watchman' && (
+        <ProjectQuotePaymentFlow d={d} />
+      )}
 
-      {role === 'watchman' && (
+      {!milestoneMode && role === 'watchman' && (
         <>
           <Section
             id="flow-curing"
@@ -355,7 +371,7 @@ export function ProjectFlow({ d }: { d: WorkspaceData }) {
         </>
       )}
 
-      {(role === 'engineer' || role === 'owner') && (
+      {!milestoneMode && (role === 'engineer' || role === 'owner') && (
         <>
           {d.flow.design && d.flow.design.stage === 'design' && (
             <DesignJourney d={d} role={role} />
@@ -535,7 +551,8 @@ export function ProjectFlow({ d }: { d: WorkspaceData }) {
         </>
       )}
 
-      {(role === 'engineer' || role === 'owner') &&
+      {!milestoneMode &&
+        (role === 'engineer' || role === 'owner') &&
         curing &&
         (curing.plans.length > 0 || curing.canPlan) && (
           <Section
@@ -580,7 +597,7 @@ export function ProjectFlow({ d }: { d: WorkspaceData }) {
           </Section>
         )}
 
-      {(role === 'qc' || role === 'owner') && (
+      {!milestoneMode && (role === 'qc' || role === 'owner') && (
         <Section
           id={role === 'qc' ? 'flow-qc' : 'flow-qc-review'}
           icon="check"
@@ -628,9 +645,11 @@ export function ProjectFlow({ d }: { d: WorkspaceData }) {
         </Section>
       )}
 
-      {role === 'designer' && <DesignJourney d={d} role={role} />}
+      {!milestoneMode && role === 'designer' && (
+        <DesignJourney d={d} role={role} />
+      )}
 
-      {role === 'owner' && (
+      {!milestoneMode && role === 'owner' && (
         <OwnerOverview
           d={d}
           items={items}

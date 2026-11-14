@@ -65,7 +65,7 @@ describe('Existing project stage item dates, no second execution system',()=>{
   expect(migration).not.toContain('exclude using gist');
   expect(migration).not.toContain('p_finish<=p_start');
   expect(component).toContain("finish<start");
-  expect(view).toContain('upcoming=[...d.itemPlans]');
+  expect(view).not.toContain('pv2-planned-overview-grid');
  });
  it('reads dates for both owner and assigned staff from one source',()=>{
   expect(data.match(/project_stage_item_schedule_read/g)?.length).toBe(2);
@@ -86,7 +86,7 @@ describe('Automatic project work forecast and owner/engineer schedule boundaries
   expect(component).toContain("planningMode==='site'");
   expect(component).not.toContain('max={maximum}');
   expect(view).toContain('planningMode={planningMode} today={todayInIndia}');
-  expect(view).toContain("site engineers can plan upcoming stages as well.");
+  expect(view).toContain('Today, tomorrow and delayed items appear');
  });
  it('calculates actual physical work completion and detects late items without approving QC',()=>{
   const stages=[{id:'f',activities:['Mark','Excavate','PCC','Footing']}];
