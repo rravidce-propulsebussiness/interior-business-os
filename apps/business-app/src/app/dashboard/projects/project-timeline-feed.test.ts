@@ -33,7 +33,7 @@ it('routes All Projects selections into the single timeline-first project worksp
   expect(screen).toContain('function ProjectTimelineFeed');
   expect(screen).toMatch(/<ProjectFlow\s+d=\{d\}\s*\/>/);
   expect(screen).toMatch(/slug:\s*'timeline',\s*title:\s*'Timeline'/);
-  expect(screen).toMatch(/slug:\\s*'milestones',\\s*title:\\s*'Milestones'/);
+  expect(screen).toMatch(/slug:\s*'milestones',\s*title:\s*'Milestones'/);
   expect(screen).toContain(
     'overview:Timeline,timeline:Timeline,milestones:Milestones',
   );
