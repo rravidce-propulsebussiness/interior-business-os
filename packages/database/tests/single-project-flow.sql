@@ -460,7 +460,6 @@ begin
  if pg_temp.exec_status('SITE_PREP')<>'ready_for_qc' then raise exception 'FAIL: site prep not submitted';end if;
  raise notice 'PASS 5: marking and excavation recorded with depth/width/level measurements';
 end$excavation$;
-select pg_temp.certify('SITE_PREP',false);
 
 ------------------------------------------------------------------------------
 -- 6. PCC, reinforcement, independent pre-pour QC with corrective work.
@@ -663,6 +662,7 @@ select pg_temp.expect_fail(format($q$select public.project_material_homeowner_ca
 ------------------------------------------------------------------------------
 -- 9. Certification, stage payments and concurrent floors.
 ------------------------------------------------------------------------------
+select pg_temp.certify('SITE_PREP',false);
 select pg_temp.certify('FOUNDATION',true);
 -- Add a second required topic in this disposable fixture so partial QC can be
 -- distinguished from the all-passed case by the release regression below.
