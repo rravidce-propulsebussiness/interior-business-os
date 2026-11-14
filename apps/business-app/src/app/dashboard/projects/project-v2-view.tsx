@@ -2861,7 +2861,7 @@ function Milestones({ d }: { d: WorkspaceData }) {
   return (
     <>
       <ProjectFlow d={d} milestoneMode />
-      {viewerRole(d) !== 'watchman' && <ProjectMilestoneSection d={d} />}
+      {!d.stages.length && viewerRole(d) !== 'watchman' && <ProjectMilestoneSection d={d} />}
     </>
   );
 }
