@@ -15,6 +15,7 @@ describe('progressable quotation-linked milestones', () => {
   const onsiteQc = read('./project-onsite-qc-review.tsx');
   const onsiteQcAction = read('./[id]/site/onsite-qc-actions.ts');
   const rccGroups = read('./project-rcc-substage-groups.tsx');
+  const rccOpenButton = read('./project-rcc-open-work-button.tsx');
 
   it('shows the final-quotation preparation action in project setup', () => {
     const milestones = view.slice(
@@ -110,6 +111,9 @@ describe('progressable quotation-linked milestones', () => {
     expectSource(rccGroups).toContain("label: 'Today'");
     expectSource(rccGroups).toContain("label: 'Tomorrow'");
     expectSource(rccGroups).toContain("return 'Delayed'");
-    expectSource(rccGroups).toContain('openAndScroll(row.id)');
+    expectSource(rccGroups).not.toContain("'use client'");
+    expectSource(rccGroups).toContain('<OpenRccWorkButton targetId={row.id} />');
+    expectSource(rccOpenButton).toContain("'use client'");
+    expectSource(rccOpenButton).toContain('target.scrollIntoView');
   });
 });
