@@ -2772,23 +2772,6 @@ function ProjectCommandSidebar({
     </aside>
   );
 }
-function ProjectWorkHub({
-  d,
-  showHistory = false,
-}: {
-  d: WorkspaceData;
-  showHistory?: boolean;
-}) {
-  return (
-    <div className="pv2-content pv2-command-workspace">
-      <ProjectFinancialSummary d={d} />
-      <div className="pv2-command-layout">
-        <ProjectStageBoard d={d} />
-        <ProjectCommandSidebar d={d} showHistory={showHistory} />
-      </div>
-    </div>
-  );
-}
 type Activity = {
   id: string;
   date: string;
