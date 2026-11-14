@@ -35,7 +35,7 @@ it('routes All Projects selections into the single timeline-first project worksp
   expect(screen).toMatch(/slug:\s*'timeline',\s*title:\s*'Timeline'/);
   expect(screen).toMatch(/slug:\s*'milestones',\s*title:\s*'Milestones'/);
   expect(screen).toMatch(
-    /overview:\\s*Timeline,\\s*timeline:\\s*Timeline,\\s*milestones:\\s*Milestones/,
+    /overview:\s*Timeline,\s*timeline:\s*Timeline,\s*milestones:\s*Milestones/,
   );
   expect(navigation).toContain("label: 'Projects'");
   expect(agreementAction).toContain(
