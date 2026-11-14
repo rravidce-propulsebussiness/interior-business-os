@@ -1,7 +1,11 @@
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { isPropulsePrivacyPage, privacyPolicyMetadata, PrivacyPolicyContent } from '../privacy-policy-content';
 import {
-  currentWebsite, PublishedWebsite, websiteMetadata,
+  currentWebsite,
+  publicWebsiteHostname,
+  PublishedWebsite,
+  websiteMetadata,
 } from '../../../../../websites/src/website';
 
 export const dynamic = 'force-dynamic';
@@ -14,8 +18,9 @@ export async function generateMetadata({
   params: Promise<PublicSiteParams>;
 }) {
   const path = '/' + ((await params).path ?? []).join('/');
-  const site = await currentWebsite();
-  if (isPropulsePrivacyPage(site?.host, path)) return privacyPolicyMetadata();
+  const host = publicWebsiteHostname(await headers());
+  if (isPropulsePrivacyPage(host ?? undefined, path))
+    return privacyPolicyMetadata();
   return websiteMetadata(path);
 }
 
@@ -25,15 +30,17 @@ export default async function PublicSitePage({
   params: Promise<PublicSiteParams>;
 }) {
   const path = '/' + ((await params).path ?? []).join('/');
-  const site = await currentWebsite();
-  if (!site) notFound();
-  if (isPropulsePrivacyPage(site.host, path)) {
+  const host = publicWebsiteHostname(await headers());
+  if (isPropulsePrivacyPage(host ?? undefined, path)) {
     return (
       <div className="public-website-root">
         <PrivacyPolicyContent />
       </div>
     );
   }
+
+  const site = await currentWebsite();
+  if (!site) notFound();
   if (!site.build.document.pages.some((page) => page.path === path)) notFound();
   return (
     <div className="public-website-root">
