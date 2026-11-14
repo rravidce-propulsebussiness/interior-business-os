@@ -52,6 +52,7 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/project-management/project-management.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-timeline-feed.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-progressable-milestones.test.ts',
+      'apps/business-app/src/app/dashboard/projects/project-mobile-flow-navigation.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-quote-milestone-projection.test.ts',
       'apps/business-app/src/app/dashboard/execution/revision-cost.test.ts',
       'apps/business-app/src/app/dashboard/execution/revision-ui.test.ts',
