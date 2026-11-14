@@ -602,6 +602,25 @@
 .pv2-stage-progress-track{height:5px;display:block;overflow:hidden;border-radius:999px;background:#f0e8e2}
 .pv2-stage-progress-track>span{height:100%;display:block;border-radius:inherit;background:linear-gradient(90deg,#bd5c3f,#88352b);transition:width .2s ease}
 .pv2-stage-progress>small{font-size:9px!important;color:#6d788a!important;line-height:1.35}
+.pv2-stage-qc-card{display:grid;grid-template-columns:26px minmax(70px,1fr) auto;align-items:center;gap:8px;
+ max-width:320px;padding:8px 10px;border:1px solid #dedaf8;border-radius:10px;background:#faf9ff}
+.pv2-stage-qc-icon{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;
+ background:#eeeaff;color:#6554d8;font-size:13px;font-weight:900}
+.pv2-stage-qc-content{display:grid;gap:5px;min-width:0}
+.pv2-stage-qc-content>strong{font-size:10px;color:#3d376b;line-height:1.2}
+.pv2-stage-qc-track{height:5px;display:block;overflow:hidden;border-radius:999px;background:#e9e6f3}
+.pv2-stage-qc-track>span{height:100%;display:block;border-radius:inherit;background:#705ce5;transition:width .2s ease}
+.pv2-stage-qc-count{display:grid;justify-items:end;gap:2px;white-space:nowrap}
+.pv2-stage-qc-count>strong{font-size:11px;color:#473f88}
+.pv2-stage-qc-count>small{font-size:9px;color:#6f6a88}
+.pv2-stage-qc-card.is-complete{border-color:#c5e9d7;background:#f4fcf8}
+.pv2-stage-qc-card.is-complete .pv2-stage-qc-icon{background:#d8f4e6;color:#128356}
+.pv2-stage-qc-card.is-complete .pv2-stage-qc-content>strong,.pv2-stage-qc-card.is-complete .pv2-stage-qc-count>strong{color:#126c49}
+.pv2-stage-qc-card.is-complete .pv2-stage-qc-track>span{background:#16a36a}
+.pv2-stage-qc-card.has-fail{border-color:#f1c7c7;background:#fff7f7}
+.pv2-stage-qc-card.has-fail .pv2-stage-qc-icon{background:#ffe3e3;color:#bf3030}
+.pv2-stage-qc-card.has-fail .pv2-stage-qc-content>strong,.pv2-stage-qc-card.has-fail .pv2-stage-qc-count>strong{color:#a12d2d}
+.pv2-stage-qc-card.has-fail .pv2-stage-qc-track>span{background:#d64b4b}
 .pv2-stage-meta{font-size:10px;color:#68758b;background:#fff5ee;border-radius:7px;
  padding:7px 8px;white-space:nowrap}
 .pv2-command-stage-inner{display:grid;gap:12px;padding:12px 12px 14px 21px;

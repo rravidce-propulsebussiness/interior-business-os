@@ -44,6 +44,11 @@ describe('progressable quotation-linked milestones', () => {
 
   it('shows milestone progress, today work, evidence, owner skip and separate QC', () => {
     expectSource(view).toContain('pv2-stage-progress');
+    expectSource(view).toContain('pv2-stage-qc-card');
+    expectSource(view).toContain('Site QC milestone');
+    expectSource(view).toContain("aria-label={stage.title + ' QC progress'}");
+    expectSource(view).toContain('qcPending>0?`${qcPending} pending`');
+    expectSource(view).toContain('qcFailed>0?`${qcFailed} failed`');
     expectSource(view).toContain('workSchedule.plannedFinish>=todayInIndia');
     expectSource(view).toContain('<WorkItemCard');
     expectSource(view).toContain('measurementPrompts(projected.title)');
@@ -67,5 +72,9 @@ describe('progressable quotation-linked milestones', () => {
     expectSource(workItem).toContain('Today</span>');
     expectSource(flow).toContain("{ label: 'Depth', unit: 'mm' }");
     expectSource(flow).toContain("{ label: 'Width', unit: 'mm' }");
-  });
-});
+    const styles = readFileSync(
+      new URL('./project-v2.css', import.meta.url),
+      'utf8',
+    );
+    expectSource(styles).toContain('.pv2-stage-qc-card.is-complete');
+    expectSource(styles).toContain('.pv2-stage-qc-card.has-f

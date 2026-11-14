@@ -1456,6 +1456,14 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
             const qcFailed = [...latestQcByIndex.values()].filter(
               (x) => stringValue(x.decision) === 'failed',
             ).length;
+            const qcTotal = stage.inspectionTopics.length;
+            const qcPending = Math.max(0, qcTotal - qcPassed - qcFailed);
+            const qcMilestoneState =
+              qcFailed > 0
+                ? 'has-fail'
+                : qcPending === 0 && qcTotal > 0
+                  ? 'is-complete'
+                  : 'is-pending';
             const formalQc = d.stageProgress.qualityStages.find(
               (x) => stringValue(x.stage_id) === stage.id,
             );
@@ -1751,13 +1759,48 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                             ? ' · ' + skippedActivities + ' not applicable'
                             : ''}
                           {' · Checks ' + passed + '/' + checks.length}
-                          {' · QC ' +
-                            qcPassed +
-                            '/' +
-                            stage.inspectionTopics.length}
-                          {qcFailed > 0 ? ' · ' + qcFailed + ' failed' : ''}
                         </small>
                       </span>
+                    )}
+                    {physicalStage && qcTotal > 0 && (
+                      <div
+                        className={`pv2-stage-qc-card ${qcMilestoneState}`}
+                        role="group"
+                        aria-label={`${stage.title} QC milestone: ${qcPassed} of ${qcTotal} checks passed, ${qcPending} pending${qcFailed ? `, ${qcFailed} failed` : ''}`}
+                      >
+                        <span className="pv2-stage-qc-icon" aria-hidden="true">
+                          ✓
+                        </span>
+                        <span className="pv2-stage-qc-content">
+                          <strong>Site QC milestone</strong>
+                          <span
+                            className="pv2-stage-qc-track"
+                            role="progressbar"
+                            aria-label={stage.title + ' QC progress'}
+                            aria-valuemin={0}
+                            aria-valuemax={qcTotal}
+                            aria-valuenow={qcPassed}
+                          >
+                            <span
+                              style={{
+                                width: `${Math.round((qcPassed / qcTotal) * 100)}%`,
+                              }}
+                            />
+                          </span>
+                        </span>
+                        <span className="pv2-stage-qc-count">
+                          <strong>
+                            {qcPassed}/{qcTotal}
+                          </strong>
+                          <small>
+                            {qcFailed > 0
+                              ? `${qcFailed} failed`
+                              : qcPending > 0
+                                ? `${qcPending} pending`
+                                : 'Complete'}
+                          </small>
+                        </span>
+                      </div>
                     )}
                     <span
                       className={
