@@ -124,23 +124,8 @@
 .pmt .pf-rounds-toolbar button:hover{background:#fbefeb}
 .pmt .pf-rounds-empty{margin:10px 0;padding:12px;border:1px dashed #e9e7e3;border-radius:9px;text-align:center}
 
-.pmt-stage-carousel{display:grid;gap:8px;min-width:0;padding:10px}
-.pmt-stage-carousel-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;
- min-width:0;padding:10px 12px;border:1px solid #eadfd9;border-radius:11px;background:#fffaf7}
-.pmt-stage-carousel-current{display:grid;gap:3px;min-width:0}
-.pmt-stage-carousel-current small{font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#827a78}
-.pmt-stage-carousel-current strong{font-size:12px;line-height:1.4;color:#292a30;overflow-wrap:anywhere}
-.pmt-stage-carousel-current span{font-size:9px;font-weight:750;color:#777}
-.pmt-stage-carousel-current span.is-today{color:#9e4833}
-.pmt-stage-carousel-buttons{display:flex;gap:6px;flex:none}
-.pmt-stage-carousel-buttons button{display:grid;place-items:center;width:38px;height:36px;border:1px solid #e8d7cf;
- border-radius:9px;background:#fff;color:#88352b;font-size:17px;font-weight:800;cursor:pointer}
-.pmt-stage-carousel-buttons button:hover:not(:disabled){background:#fbefeb;border-color:#d7a99a}
-.pmt-stage-carousel-buttons button:disabled{opacity:.4;cursor:default}
-.pmt-stage-carousel-viewport{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:100%;gap:0;
- min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
- scroll-behavior:smooth;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#d8bbae transparent}
-.pmt-stage-carousel-viewport>.pmt-stage{width:100%;min-width:0;margin:0;scroll-snap-align:start;scroll-snap-stop:always}
+.pmt-stage-list{display:grid;gap:8px;min-width:0;padding:10px}
+.pmt-stage{scroll-margin-top:248px}
 .pmt-stage.is-current>summary{background:#fffaf7}
 .pmt-stage.is-current .pmt-number{background:#f3e4de}
 .pmt-design-substages{display:grid;gap:9px;padding:10px 12px 13px;background:#fcfaf8}
@@ -182,8 +167,6 @@
  .pmt-design-owner-decision .pf-decision{grid-template-columns:minmax(0,1fr)}
 }
 @media(max-width:700px){
- .pmt-stage-carousel{padding:8px}
- .pmt-stage-carousel-controls{padding:9px 10px}
- .pmt-stage-carousel-current strong{font-size:11px}
- .pmt-stage-carousel-viewport>.pmt-stage>summary{padding:11px 10px}
+ .pmt-stage-list{padding:8px}
+ .pmt-stage>summary{padding:11px 10px}
 }
