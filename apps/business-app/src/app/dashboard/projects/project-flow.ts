@@ -104,7 +104,8 @@ const workStatus = (v: unknown): WorkStatus =>
 
 export const isDone = (s: WorkStatus) => s === 'completed' || s === 'skipped';
 export function shouldShowAdvancePayment(
-  advance: { invoiceId: string | null; scheduleActive: boolean } | null | undefined,
+  advance:
+    { invoiceId: string | null; scheduleActive: boolean } | null | undefined,
 ): boolean {
   return Boolean(advance && (advance.scheduleActive || advance.invoiceId));
 }
@@ -314,6 +315,13 @@ export function measurementPrompts(title: string): MeasurementPrompt[] {
         { label: 'Bar spacing', unit: 'mm' },
         { label: 'Clear cover', unit: 'mm' },
         { label: 'Lap length', unit: 'mm' },
+      ],
+    ],
+    [
+      /shutter|formwork/,
+      [
+        { label: 'Alignment deviation', unit: 'mm' },
+        { label: 'Support spacing', unit: 'mm' },
       ],
     ],
     [

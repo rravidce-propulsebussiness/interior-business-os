@@ -942,6 +942,37 @@ function ProjectStageWorkflow({ d, code }: { d: WorkspaceData; code: string }) {
 /** The same canonical material controls are embedded in the work item that requested them.
  * Marketplace sourcing, owner approval, order and delivery remain unchanged.
  */
+function MaterialSupplierCashSettlement({
+  d,
+  material,
+}: {
+  d: WorkspaceData;
+  material: SiteRow;
+}) {
+  const m = material;
+  const status = stringValue(m.status);
+  return (
+    <>
+      {stringValue(m.homeowner_paid_amount) && (
+        <p className="pv2-hint pv2-material-homeowner-paid">
+          Homeowner paid supplier directly · cash ·{' '}
+          {formatMoney(Number(m.homeowner_paid_amount))}
+          {stringValue(m.homeowner_paid_to)
+            ? ' · ' + stringValue(m.homeowner_paid_to)
+            : ''}
+          {stringValue(m.homeowner_paid_date)
+            ? ' · ' + shortDate(m.homeowner_paid_date)
+            : ''}
+        </p>
+      )}
+      {['ordered', 'received'].includes(status) &&
+        !stringValue(m.homeowner_paid_amount) &&
+        d.materialAccess.canOrder && (
+          <DirectSupplierCashPaymentForm id={d.project.id} materialId={m.id} />
+        )}
+    </>
+  );
+}
 function StageMaterialRows({ d, rows }: { d: WorkspaceData; rows: SiteRow[] }) {
   const site = d.site;
   return (
@@ -961,26 +992,7 @@ function StageMaterialRows({ d, rows }: { d: WorkspaceData; rows: SiteRow[] }) {
                   </small>
                 </div>
                 <Status value={status} />
-                {stringValue(m.homeowner_paid_amount) && (
-                  <p className="pv2-hint pv2-material-homeowner-paid">
-                    Homeowner paid supplier directly · cash ·{' '}
-                    {formatMoney(Number(m.homeowner_paid_amount))}
-                    {stringValue(m.homeowner_paid_to)
-                      ? ' · ' + stringValue(m.homeowner_paid_to)
-                      : ''}
-                    {stringValue(m.homeowner_paid_date)
-                      ? ' · ' + shortDate(m.homeowner_paid_date)
-                      : ''}
-                  </p>
-                )}
-                {['ordered', 'received'].includes(status) &&
-                  !stringValue(m.homeowner_paid_amount) &&
-                  d.materialAccess.canOrder && (
-                    <DirectSupplierCashPaymentForm
-                      id={d.project.id}
-                      materialId={m.id}
-                    />
-                  )}
+                <MaterialSupplierCashSettlement d={d} material={m} />
                 {(site?.canManage ||
                   ['manager', 'procurement'].includes(site?.role ?? '')) &&
                   !(
@@ -3364,6 +3376,7 @@ function Procurement({ d }: { d: WorkspaceData }) {
                   )}
                 </div>
                 <Status value={stringValue(m.status)} />
+                <MaterialSupplierCashSettlement d={d} material={m} />
                 {['ordered', 'received'].includes(stringValue(m.status)) && (
                   <small>
                     {stringValue(m.status) === 'received'
