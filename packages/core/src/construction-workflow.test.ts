@@ -36,12 +36,9 @@ describe('construction workflow blueprint', () => {
       items.findIndex((item) => pattern.test(item));
 
     expect(at(design.activities, /floor plan/i)).toBeLessThan(
-      at(design.activities, /structural analysis/i),
+      at(design.activities, /structural drawings/i),
     );
-    expect(at(design.activities, /structural analysis/i)).toBeLessThan(
-      at(design.activities, /3D elevation/i),
-    );
-    expect(at(design.activities, /3D elevation/i)).toBeLessThan(
+    expect(at(design.activities, /structural drawings/i)).toBeLessThan(
       at(design.activities, /electrical and plumbing.*MEP/i),
     );
     expect(at(foundation.activities, /PCC below footings/i)).toBeLessThan(
@@ -53,9 +50,19 @@ describe('construction workflow blueprint', () => {
     expect(at(plinth.activities, /Anti-termite/i)).toBeGreaterThan(
       at(plinth.activities, /Final soil leveling/i),
     );
+    const sitePrep = stages.find((stage) => stage.code === 'SITE_PREP')!;
+    expect(sitePrep.explanation).toContain('15–20 days');
+    expect(sitePrep.holdPoint).toBeNull();
+    expect(sitePrep.inspectionTopics).toEqual([
+      'Column marking aligns with the approved structural design',
+      'Excavation depth matches the approved design',
+      'Excavation length matches the approved drawings',
+      'Excavation width matches the approved drawings',
+      'Soil sample sent to the testing laboratory',
+    ]);
     expect(
-      stages.find((stage) => stage.code === 'SITE_PREP')?.explanation,
-    ).toContain('15–20 days');
+      stages.find((stage) => stage.code === 'DESIGN')?.inspectionTopics,
+    ).toEqual([]);
   });
 
   it('sequences the floor RCC cycle through columns, staircase and slab work', () => {
