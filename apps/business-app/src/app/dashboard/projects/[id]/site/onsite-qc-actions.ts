@@ -18,8 +18,6 @@ export async function recordOnsiteStageQcItem(
   const checkIndex=z.number().int().min(0).max(999).parse(index);
   const decision=z.enum(['passed','failed']).parse(form.get('decision'));
   const notes=z.string().trim().max(2000).parse(String(form.get('notes')??''));
-  if(decision==='failed'&&notes.length<10)
-   throw new Error('Explain the QC failure and corrective work required (at least 10 characters).');
   if(form.get('onsite')!=='yes')
    throw new Error('Confirm that you visited the project site and inspected this item.');
   const file=form.get('file');
