@@ -14,6 +14,7 @@ import {
   ProjectDesignPlansWorkflow,
 } from './project-design-stage-workflow';
 import { designSubstageDisplayStatus } from './project-design-stage-status';
+import { displayStageQcStatus } from './project-stage-qc-status';
 import { PrepareAgreement } from './project-v2-forms';
 import { CuringRounds, CuringPlanForm, type CuringRoundView } from './project-curing-card';
 import './project-milestone-timeline.css';
@@ -356,10 +357,12 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       allChecksComplete: checks.length > 0 && checks.every((check) => isComplete(check.status)),
     });
   };
-  const stageStatusLabel = (stage: Stage) => {
-    const status = stageStatusFor(stage);
-    return pretty(status);
-  };
+  const stageDisplayStatusFor = (stage: Stage) => displayStageQcStatus(
+    stageStatusFor(stage),
+    stage.inspectionTopics,
+    d.stageQc.records.filter((record) => record.stage_id === stage.id),
+  );
+  const stageStatusLabel = (stage: Stage) => pretty(stageDisplayStatusFor(stage));
   const renderStageContent = (stage: Stage) => {
     const code = stage.template_code.split('/')[0] ?? '';
     const stageItems = stageItemsFor(stage);
@@ -490,6 +493,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     const checks = siteChecksFor(stage);
     const execution = stageExecution(stage);
     const stageStatus = stageStatusFor(stage);
+    const displayStatus = stageDisplayStatusFor(stage);
     const baselineRange = estimated.get(stage.id) ?? range;
     const savedRange = d.itemPlans.some((plan) =>
       plan.stageId === stage.id && plan.plannedStart && plan.plannedFinish);
@@ -514,7 +518,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         <span className="pmt-dates">{displayDay(baselineRange.start)} – {displayDay(baselineRange.finish)}<small>Auto baseline</small>
           {savedRange && <small className="pmt-current-date">Current plan: {displayDay(range.start)} – {displayDay(range.finish)}</small>}
           <small className={'pmt-stage-variance ' + (/late|Delayed/i.test(stageVariance) ? 'late' : /early/i.test(stageVariance) ? 'early' : '')}>{stageVariance}</small></span>
-        <span className={'pmt-status ' + (stageStatus === 'in_progress' ? 'active' : isComplete(stageStatus) ? 'done' : '')}>{visibleStatus}</span>
+        <span className={'pmt-status ' + (stageStatus === 'in_progress' ? 'active' : isComplete(stageStatus) || displayStatus === 'qc_passed' ? 'done' : '')}>{visibleStatus}</span>
         <span className="pmt-chevron">⌄</span>
       </summary>
       {renderStageContent(stage)}
