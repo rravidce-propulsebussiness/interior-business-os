@@ -1,3 +1,6 @@
+Warning: truncated output (original token count: 15566)
+Total output lines: 796
+
 \set ON_ERROR_STOP on
 -- Single project flow acceptance scenario.
 -- Disposable database only: every write below is ROLLED BACK.
@@ -393,33 +396,7 @@ begin
      'title','Finishes and handover','explanation','Close out','holdPoint','handover',
      'dependsOn',jsonb_build_array('F1_MASONRY','F3_MASONRY'),
      'activities',jsonb_build_array('Final cleaning and handover'),'inspectionTopics','[]'::jsonb))));
- -- Independent reviewers for formal certification.
- perform public.construction_project_command(org,project,'role_assign',
-   '{"user_id":"11111111-1111-4111-8111-111111111111","role":"quality_inspector"}');
- perform public.construction_project_command(org,project,'role_assign',
-   '{"user_id":"88888888-8888-4888-8888-888888888888","role":"quality_inspector"}');
- perform public.construction_project_command(org,project,'role_assign',
-   '{"user_id":"66666666-6666-4666-8666-666666666666","role":"structural_engineer"}');
- -- Canonical Operations plan whose tasks back each stage certificate.
- -- Operations planning needs an approved execution estimate for the contract.
- estimate=public.execution_estimate_command(org,'create',jsonb_build_object('contract_id',contract));
- for scope in select id from public.execution_estimate_scope_items where revision_id=estimate and coverage='unestimated' loop
-   select version into v from public.execution_estimate_revisions where id=estimate;
-   perform public.execution_estimate_command(org,'exclude_scope',jsonb_build_object('id',estimate,'version',v,
-     'scope_id',scope,'reason','Estimated in the site procurement package'));
- end loop;
- select version into v from public.execution_estimate_revisions where id=estimate;
- perform public.execution_estimate_command(org,'submit',jsonb_build_object('id',estimate,'version',v));
- perform public.execution_estimate_command(org,'approve',jsonb_build_object('id',estimate,'version',v+1));
- plan=public.operations_plan(org,'create',jsonb_build_object('contract_id',contract));
- milestone=public.operations_save(org,'project_milestones',jsonb_build_object('project_id',project,'plan_id',plan,'name','Structure'));
- foreach code in array array['SITE_PREP','FOUNDATION','F1_SLAB','F3_SLAB'] loop
-   perform public.operations_save(org,'project_tasks',jsonb_build_object('project_id',project,'plan_id',plan,
-     'milestone_id',milestone,'title','Certify '||code));
- end loop;
- select id into revision from public.execution_plan_revisions where plan_id=plan and status='draft';
- perform public.operations_plan(org,'approve',jsonb_build_object('id',revision,'version',1));
- perform public.operations_plan(org,'status',jsonb_build_object('id',plan,'version',1,'status','in_progress'));
+ …566 tokens truncated…ss'));
  perform set_config('test.flow_template',public.operations_save(org,'inspection_templates',
    '{"name":"Stage conformance","is_final":false,"mandatory":true,"checklist":[{"key":"conformance","label":"Work conforms to drawings","required":true}]}'::jsonb)::text,true);
  if exists(select 1 from jsonb_array_elements(public.construction_stage_execution_read(org,project)) e
