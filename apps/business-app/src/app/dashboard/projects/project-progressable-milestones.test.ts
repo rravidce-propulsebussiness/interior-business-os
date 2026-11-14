@@ -12,9 +12,9 @@ describe('progressable quotation-linked milestones', () => {
   const actions = read('./[id]/site/work-item-actions.ts');
   const checklist = read('./project-stage-checklist-item.tsx');
 
-  it('shows the final-quotation preparation action on the Milestones page', () => {
+  it('shows the final-quotation preparation action in project setup', () => {
     const milestones = view.slice(
-      view.indexOf('function Milestones('),
+      view.indexOf('function ProjectMilestoneSection('),
       view.indexOf('function Documents('),
     );
     expectSource(milestones).toContain('Make this project plan actionable');
@@ -28,14 +28,13 @@ describe('progressable quotation-linked milestones', () => {
 
   it('replaces the read-only quote preview with existing live work controls', () => {
     const milestones = view.slice(
-      view.indexOf('function Milestones('),
+      view.indexOf('function ProjectMilestoneSection('),
       view.indexOf('function Documents('),
     );
     expectSource(milestones).toContain('const hasLiveStages=d.stages.length>0');
     expectSource(milestones).toContain('{hasLiveStages&&(');
     expectSource(milestones).toContain('<ProjectWorkHub d={d} showHistory/>');
     expectSource(milestones).toContain('<ProjectTimelineFeed d={d}/>');
-    expectSource(milestones).toContain('Continue in Timeline');
     expectSource(workItem).toContain("send('start')");
     expectSource(workItem).toContain("submitForm('complete')");
     expectSource(workItem).toContain('router.refresh()');

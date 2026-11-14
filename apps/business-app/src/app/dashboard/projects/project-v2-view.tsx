@@ -73,9 +73,8 @@ import '../owner-dashboard.css';
 import './project-v2.css';
 import './project-daily-command.css';
 
-/** Project tabs. Timeline is first and holds only site work; every other tab
- * is a record area. `overview` and `checks` remain valid addresses for old
- * links but are not shown as tabs (their content lives in the timeline). */
+/** Project tabs. Timeline is the single project workflow; legacy overview,
+ * milestones and checks addresses remain valid but are not separate tabs. */
 export const projectPages = [
   {
     slug: 'timeline',
@@ -85,9 +84,9 @@ export const projectPages = [
   },
   {
     slug: 'milestones',
-    title: 'Milestones',
+    title: 'Timeline',
     icon: 'check' as OwnerIconName,
-    tab: true,
+    tab: false,
   },
   {
     slug: 'procurement',
@@ -283,11 +282,9 @@ function LinkTabs({
   // Watchmen work only on their curing and security screen.
   if (viewerRole(data) === 'watchman') return null;
   const current =
-    active === 'overview'
+    active === 'overview' || active === 'milestones' || active === 'checks'
       ? 'timeline'
-      : active === 'checks'
-        ? 'milestones'
-        : active;
+      : active;
   const tabs = projectPages.filter(
     (item) =>
       item.tab && (item.slug !== 'payments' || data.permissions.payments),
@@ -2816,45 +2813,16 @@ const viewerRole = (d: WorkspaceData) =>
 /** The primary project screen: one role-first flow on top of the same records.
  * Stage-level planning, agreement steps and records stay one tap below. */
 function Timeline({ d }: { d: WorkspaceData }) {
-  const role = viewerRole(d);
-  const preSite = d.site?.stage !== 'execution';
   return (
     <>
-      {preSite && role === 'owner' && (
-        <section className="pv2-flow-presite" aria-label="Before site work">
-          <div>
-            <strong>Before site work starts</strong>
-            <p>
-              Agreement, advance, site survey and design approval steps are in
-              Milestones. Site work appears here once execution is released.
-            </p>
-          </div>
-          <Link
-            className="pv2-button pv2-primary"
-            href={cur(d.project.id, 'milestones')}
-          >
-            Open Milestones
-          </Link>
-        </section>
-      )}
-      {d.quotePlan &&
-        role !== 'watchman' &&
-        !d.quoteMilestoneTimeline?.some((row) => row.steps.length > 0) && (
-          <QuotePlanView
-            plan={d.quotePlan}
-            projectId={d.project.id}
-            canPrepare={
-              d.permissions.manage && d.permissions.finance && !d.agreement
-            }
-          />
-        )}
       <ProjectFlow d={d} />
+      {viewerRole(d) !== 'watchman' && <ProjectMilestoneSection d={d} />}
     </>
   );
 }
 /** Stage-by-stage milestones: agreement and design gates, each floor's stage,
  * its schedule, checks, certification and linked payment milestone. */
-function Milestones({ d }: { d: WorkspaceData }) {
+function ProjectMilestoneSection({ d }: { d: WorkspaceData }) {
   const hasLiveStages = d.stages.length > 0;
   const quote = d.quotations[0];
   // The loader resolves the project's customer-level Final quotation, including a
@@ -2904,16 +2872,12 @@ function Milestones({ d }: { d: WorkspaceData }) {
               <div>
                 <h2 id="pf-milestone-start-title">Continue project setup</h2>
                 <p>
-                  Use the Timeline to complete agreement and Finance gates. Live
-                  work items appear here after the agreed project stages are
-                  active.
+                  Continue the agreement and Finance steps below. Live work,
+                  stage progress and QC stay in this same project timeline.
                 </p>
               </div>
-              <Link
-                className="pf-btn pf-btn-primary"
-                href={cur(d.project.id, 'timeline')}
-              >
-                Continue in Timeline
+              <Link className="pf-btn pf-btn-primary" href="#flow-today">
+                View project timeline
               </Link>
             </section>
           )}
@@ -3820,7 +3784,7 @@ const pages: {
 } = {
   overview: Timeline,
   timeline: Timeline,
-  milestones: Milestones,
+  milestones: Timeline,
   documents: Documents,
   payments: Payments,
   procurement: Procurement,
