@@ -8,7 +8,7 @@ import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectItemSchedule } from './project-item-schedule';
 import { StageButton } from './project-flow-controls';
 import { RccSubstageGroups } from './project-rcc-substage-groups';
-import { ProjectMilestoneStageCarousel } from './project-milestone-stage-carousel';
+import { ProjectMilestoneAutoScroll } from './project-milestone-stage-list';
 import {
   ProjectDesignPaymentAndAgreement,
   ProjectDesignPlansWorkflow,
@@ -266,7 +266,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   const firstStageIndex = todayStageIndex >= 0
     ? todayStageIndex
     : currentIndex >= 0 ? currentIndex : 0;
-  const nextStage = currentIndex >= 0 ? timelineCards[currentIndex + 1]?.stages[0] : undefined;
+  const nextStage = currentIndex >= 0 ? timelineCards[currentIndex + 1]?.stages.at(0) : undefined;
   if (!stages.length) {
     const quote = d.quotations[0];
     const canPrepare = Boolean(quote && d.permissions.manage && d.permissions.finance && !d.agreement);
@@ -435,7 +435,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       ? 'On track'
       : daysOverBaseline > 0 ? 'Delayed ' + daysOverBaseline + 'd' : 'On track';
 
-    return <details className={'pmt-stage pmt-design-stage ' + (cardIndex === firstStageIndex ? 'is-current' : '')}
+    return <details id={'project-stage-' + cardIndex} className={'pmt-stage pmt-design-stage ' + (cardIndex === firstStageIndex ? 'is-current' : '')}
       data-stage-index={cardIndex} key="design-stage" open={cardIndex === firstStageIndex}>
       <summary>
         <span className="pmt-number">01</span>
@@ -491,7 +491,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         : 'On track';
     const visibleStatus = stageStatusLabel(stage);
 
-    return <details className={'pmt-stage ' + (cardIndex === firstStageIndex ? 'is-current' : '')}
+    return <details id={'project-stage-' + cardIndex} className={'pmt-stage ' + (cardIndex === firstStageIndex ? 'is-current' : '')}
       data-stage-index={cardIndex} key={stage.id} open={cardIndex === firstStageIndex}>
       <summary><span className="pmt-number">{String(milestoneNumber(stage, floorCodes)).padStart(2, '0')}</span>
         <span className="pmt-stage-name"><strong>{stage.floor_code ? pretty(stage.floor_code) + ' · ' : ''}{stage.title}</strong>
@@ -557,15 +557,12 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     <section className="pmt-timeline" id="project-timeline">
       <div className="pmt-timeline-head"><div><h2>All stages</h2><p>Baseline dates are fixed from the project creation date. You can adjust the current plan without changing the baseline; early and late work is labelled against it.</p></div>
         <div className="pmt-board-controls"><span>{timelineCards.length} stages</span></div></div>
-      <ProjectMilestoneStageCarousel
-        currentIndex={firstStageIndex}
-        todayIndex={todayStageIndex}
-        stageTitles={timelineCards.map((card) => card.title)}
-      >
-      {timelineCards.map((card, index) => card.id === 'design-stage'
-        ? renderDesignStageCard(index)
-        : renderStageCard(card.stages[0]!, index))}
-      </ProjectMilestoneStageCarousel>
+      <ProjectMilestoneAutoScroll focusIndex={firstStageIndex}/>
+      <div className="pmt-stage-list">
+        {timelineCards.map((card, index) => card.id === 'design-stage'
+          ? renderDesignStageCard(index)
+          : renderStageCard(card.stages[0]!, index))}
+      </div>
     </section>
   </div>;
 }
