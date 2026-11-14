@@ -100,3 +100,14 @@
 .pmt .pf-round-head .pf-pill{margin-left:auto}
 .pmt .pf-round-form label{display:grid;gap:5px;color:#55565d;font-size:10px;font-weight:650}
 @media(max-width:700px){.pmt .pf-round-head{gap:7px;padding:8px}.pmt .pf-round-time{min-width:42px}.pmt .pf-round-head .pf-pill{font-size:8px}}
+
+.pmt-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 12px}
+.pmt-metrics article{display:grid;align-content:start;gap:5px;min-height:88px;padding:12px 14px;border:1px solid #e9e7e3;border-radius:11px;background:#fff}
+.pmt-metrics article>span{font-size:9px;color:#7b7d87}
+.pmt-metrics article>strong{font-size:17px;line-height:1.2;letter-spacing:-.35px;color:#292a30}
+.pmt-metrics article>small{font-size:9px;color:#7b7d87}
+.pmt-metrics article.at-risk{border-color:#f1c8c9;background:#fff8f7}
+.pmt-metrics article.at-risk>strong{color:#a42f35}
+.pmt-metrics article .pmt-metric-name{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:800px){.pmt-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.pmt-metrics{gap:7px}.pmt-metrics article{min-height:78px;padding:10px}.pmt-metrics article>strong{font-size:15px}}
