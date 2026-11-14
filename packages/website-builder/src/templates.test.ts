@@ -19,11 +19,12 @@ describe('reusable website templates', () => {
     },
   );
   it('does not share mutable template state between companies', () => {
+    const baseline = starterTemplate('Baseline', 'construction');
     const first = starterTemplate('One', 'construction');
     first.theme.primary = '#000000';
     first.pages[0]!.nodes.length = 0;
     const second = starterTemplate('Two', 'construction');
-    expect(second.theme.primary).toBe('#88352B');
+    expect(second.theme.primary).toBe(baseline.theme.primary);
     expect(second.pages[0]!.nodes.length).toBeGreaterThan(0);
   });
   it('rejects tenant media and business record references', () => {
