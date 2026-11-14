@@ -1,25 +1,17 @@
 'use client';
 
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect } from 'react';
 
-export function ProjectMilestoneStageList({
-  children,
-  focusIndex,
-}: {
-  children: ReactNode;
-  focusIndex: number;
-}) {
-  const listRef = useRef<HTMLDivElement>(null);
-
+/** Scroll the page to the stage scheduled for today when the project opens. */
+export function ProjectMilestoneAutoScroll({ focusIndex }: { focusIndex: number }) {
   useEffect(() => {
-    const stage = listRef.current?.children.item(focusIndex) as HTMLDetailsElement | null;
+    const stage = document.getElementById('project-stage-' + focusIndex);
     if (!stage) return;
-    stage.open = true;
     const frame = window.requestAnimationFrame(() => {
       stage.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
     return () => window.cancelAnimationFrame(frame);
   }, [focusIndex]);
 
-  return <div className="pmt-stage-list" ref={listRef}>{children}</div>;
+  return null;
 }
