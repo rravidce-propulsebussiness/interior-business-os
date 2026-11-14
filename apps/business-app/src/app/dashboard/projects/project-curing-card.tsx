@@ -154,6 +154,9 @@ export function CuringPlanForm({
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(
     null,
   );
+  const recurringUntil = new Date(today + 'T00:00:00.000Z');
+  recurringUntil.setUTCFullYear(recurringUntil.getUTCFullYear() + 10);
+  const recurringEnd = recurringUntil.toISOString().slice(0, 10);
   return (
     <form
       className="pf-panel pf-grid-form"
@@ -198,28 +201,16 @@ export function CuringPlanForm({
           placeholder="Drawing / BOQ clause that sets the curing period"
         />
       </label>
-      <label className="pf-field">
-        <span>From</span>
-        <input type="date" name="starts_on" required defaultValue={today} />
-      </label>
-      <label className="pf-field">
-        <span>To</span>
-        <input type="date" name="ends_on" required />
-      </label>
-      <label className="pf-field">
-        <span>Round times</span>
-        <input name="round_times" required placeholder="07:00, 12:00, 17:00" />
-      </label>
-      <label className="pf-field">
-        <span>Grace (minutes)</span>
-        <input name="grace_minutes" type="number" min={10} max={720} required />
-      </label>
+      <input type="hidden" name="starts_on" value={today} />
+      <input type="hidden" name="ends_on" value={recurringEnd} />
+      <input type="hidden" name="round_times" value="07:00,12:00,17:00" />
+      <input type="hidden" name="grace_minutes" value="60" />
       <p className="pf-help pf-span">
-        Enter the duration and frequency exactly as specified. The system never
-        assumes a curing period or marks rounds done.
+        This routine repeats every day with morning, afternoon and evening rounds.
+        Dates and times are set automatically; each round still needs a site record and photo.
       </p>
       <button className="pf-btn pf-btn-primary" disabled={pending}>
-        {pending ? 'Saving…' : 'Approve schedule'}
+        {pending ? 'Saving…' : 'Start daily curing routine'}
       </button>
       {message && (
         <p role="status" className={'pf-msg ' + (message.ok ? 'ok' : 'bad')}>
