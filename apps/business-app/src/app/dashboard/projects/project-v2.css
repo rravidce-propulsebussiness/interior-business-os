@@ -48,6 +48,7 @@
  white-space:nowrap;font-size:10px;font-weight:900;text-transform:capitalize;background:#f2f5f8;color:#6b7b91}
 .pv2-status.good{background:#dff9eb;color:#119456}
 .pv2-status.warn{background:#fff0dc;color:#db7e1b}
+.pv2-status.delayed{background:#ffebeb;color:#b42318;border:1px solid #ffc9c5}
 .pv2-card-progress{display:flex;align-items:center;gap:9px;font-size:10px;color:#667e96;width:100%}
 .pv2-card-progress strong{white-space:nowrap}
 .pv2-bar{background:#e4eaf1;width:100%;height:6px;border-radius:40px;overflow:hidden}

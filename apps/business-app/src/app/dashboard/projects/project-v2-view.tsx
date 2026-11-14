@@ -73,18 +73,18 @@ import '../owner-dashboard.css';
 import './project-v2.css';
 import './project-daily-command.css';
 
-/** Project tabs. Timeline is the single project workflow; legacy overview,
- * milestones and checks addresses remain valid but are not separate tabs. */
+/** Milestones is the single project workflow. Older timeline and overview
+ * addresses remain valid aliases, not separate project sections. */
 export const projectPages = [
   {
-    slug: 'timeline',
-    title: 'Timeline',
+    slug: 'milestones',
+    title: 'Milestones',
     icon: 'calendar' as OwnerIconName,
     tab: true,
   },
   {
-    slug: 'milestones',
-    title: 'Timeline',
+    slug: 'timeline',
+    title: 'Milestones',
     icon: 'check' as OwnerIconName,
     tab: false,
   },
@@ -122,7 +122,7 @@ export const projectPages = [
   { slug: 'team', title: 'Team', icon: 'team' as OwnerIconName, tab: true },
   {
     slug: 'overview',
-    title: 'Timeline',
+    title: 'Milestones',
     icon: 'calendar' as OwnerIconName,
     tab: false,
   },
@@ -137,35 +137,37 @@ export type ProjectPageSlug = (typeof projectPages)[number]['slug'];
 const cur = (id: string, view: string) =>
   '/dashboard/projects/' +
   id +
-  (view === 'overview' || view === 'timeline' ? '' : '/' + view);
+  (['overview', 'timeline', 'milestones'].includes(view) ? '' : '/' + view);
 function Status({ value }: { value: string }) {
   return (
     <span
       className={
         'pv2-status ' +
-        ([
-          'active',
-          'ongoing',
-          'paid',
-          'passed',
-          'approved',
-          'received',
-          'completed',
-          'signed',
-        ].includes(value)
-          ? 'good'
+        (value === 'delayed'
+          ? 'delayed'
           : [
-                'pending',
-                'in_progress',
-                'requested',
-                'submitted',
-                'ordered',
+                'active',
+                'ongoing',
+                'paid',
+                'passed',
+                'approved',
+                'received',
+                'completed',
+                'signed',
               ].includes(value)
-            ? 'warn'
-            : 'neutral')
+            ? 'good'
+            : [
+                  'pending',
+                  'in_progress',
+                  'requested',
+                  'submitted',
+                  'ordered',
+                ].includes(value)
+              ? 'warn'
+              : 'neutral')
       }
     >
-      {pretty(value) || 'Not recorded'}
+      {value === 'delayed' ? 'Delayed' : pretty(value) || 'Not recorded'}
     </span>
   );
 }
@@ -282,8 +284,8 @@ function LinkTabs({
   // Watchmen work only on their curing and security screen.
   if (viewerRole(data) === 'watchman') return null;
   const current =
-    active === 'overview' || active === 'milestones' || active === 'checks'
-      ? 'timeline'
+    active === 'overview' || active === 'timeline' || active === 'checks'
+      ? 'milestones'
       : active;
   const tabs = projectPages.filter(
     (item) =>
@@ -301,7 +303,7 @@ function LinkTabs({
           aria-current={current === tab.slug ? 'page' : undefined}
           className={
             (current === tab.slug ? 'selected ' : '') +
-            (tab.slug === 'timeline' ? 'pv2-tab-main' : '')
+            (tab.slug === 'milestones' ? 'pv2-tab-main' : '')
           }
         >
           <OwnerIcon name={tab.icon} size={16} />
@@ -1231,13 +1233,13 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
     completed: 'Recorded work completed',
     ahead: 'Ahead of plan',
     on_track: 'On schedule',
-    delayed: 'Delayed work',
+    delayed: 'Delayed',
   }[progressForecast.pace];
   return (
     <section className="pv2-panel pv2-command-stages" id="project-timeline">
       <div className="pv2-command-head">
         <div>
-          <h2>Project timeline</h2>
+          <h2>Project milestones</h2>
           <p>
             Manage stages, work, payments, materials, labour, photos and checks
             in one place.
@@ -1249,7 +1251,7 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
       </div>
       <div className="pv2-planned-overview">
         <div className="pv2-planned-overview-head">
-          <strong>Work progress & timeline</strong>
+          <strong>Schedule & progress</strong>
           <small>
             Recorded completion and approved plans only · dates never activate
             work
@@ -1375,6 +1377,21 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
             const checksAllowed =
               allowChecks && stageExecution?.status === 'in_progress';
             const complete = done(visualStatus);
+            const delayedWork =
+              !complete &&
+              d.itemPlans.some(
+                (plan) =>
+                  plan.stageId === stage.id &&
+                  plan.kind === 'work' &&
+                  plan.plannedFinish < todayInIndia &&
+                  !stageWork.some(
+                    (record) =>
+                      Number(record.index) === plan.index &&
+                      ['completed', 'skipped'].includes(
+                        stringValue(record.status),
+                      ),
+                  ),
+              );
             const guidance = guidanceForConstructionStage(stage.template_code);
             const customGuidance = d.stageGuidance.find(
               (x) => x.stageId === stage.id,
@@ -1808,8 +1825,8 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                       <span aria-hidden="true">▦</span>
                       {stagePlan.count ? (
                         <span>
-                          {stagePlan.count} item
-                          {stagePlan.count === 1 ? '' : 's'} planned ·{' '}
+                          Planned: {stagePlan.count} item
+                          {stagePlan.count === 1 ? '' : 's'} ·{' '}
                           {shortDate(stagePlan.start)} –{' '}
                           {shortDate(stagePlan.finish)}
                           {stagePlan.hasWorkToday && <b> · Scheduled today</b>}
@@ -1822,7 +1839,7 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                       )}
                     </span>
                   </span>
-                  <Status value={displayStatus} />
+                  <Status value={delayedWork ? 'delayed' : displayStatus} />
                   <span className="pv2-stage-meta">
                     {payment.length} payment milestone
                     {payment.length === 1 ? '' : 's'}
@@ -2660,9 +2677,9 @@ function ProjectTimelineFeed({ d }: { d: WorkspaceData }) {
     >
       <div className="pv2-command-head">
         <div>
-          <h2 id="pv2-date-feed-title">Chronological work plan</h2>
+          <h2 id="pv2-date-feed-title">Milestone schedule</h2>
           <p>
-            One feed across floors and activities. Overlapping work stays
+            Scheduled dates across floors and activities. Overlapping work stays
             visible; structural blockers remain enforced.
           </p>
         </div>
@@ -2738,7 +2755,7 @@ function ProjectTimelineFeed({ d }: { d: WorkspaceData }) {
       ) : (
         <Blank
           title="No dated work yet"
-          detail="Plan activity dates in the project timeline. Dates help organize work; they do not activate work or bypass dependencies."
+          detail="Plan activity dates in the milestone schedule. Dates help organize work; they do not activate work or bypass dependencies."
         />
       )}
     </section>
@@ -2812,7 +2829,7 @@ const viewerRole = (d: WorkspaceData) =>
   });
 /** The primary project screen: one role-first flow on top of the same records.
  * Stage-level planning, agreement steps and records stay one tap below. */
-function Timeline({ d }: { d: WorkspaceData }) {
+function Milestones({ d }: { d: WorkspaceData }) {
   return (
     <>
       <ProjectFlow d={d} />
@@ -2873,11 +2890,11 @@ function ProjectMilestoneSection({ d }: { d: WorkspaceData }) {
                 <h2 id="pf-milestone-start-title">Continue project setup</h2>
                 <p>
                   Continue the agreement and Finance steps below. Live work,
-                  stage progress and QC stay in this same project timeline.
+                  stage progress and QC stay in these milestones.
                 </p>
               </div>
               <Link className="pf-btn pf-btn-primary" href="#flow-today">
-                View project timeline
+                View milestones
               </Link>
             </section>
           )}
@@ -2949,7 +2966,7 @@ function Documents({ d }: { d: WorkspaceData }) {
       ) : (
         <Blank
           title="No files in this category"
-          detail="Evidence uploaded through the project timeline appears here."
+          detail="Evidence uploaded through project milestones appears here."
         />
       )}
     </section>
@@ -2962,7 +2979,7 @@ function Documents({ d }: { d: WorkspaceData }) {
             <h2>Quotation & Agreement</h2>
             <p>
               Approved quotation and signed-contract archive. Continue tasks in
-              the project timeline.
+              the project milestones.
             </p>
           </section>
           <section className="pv2-panel pv2-quote-links">
@@ -3715,7 +3732,7 @@ function Designs({ d }: { d: WorkspaceData }) {
         )}
         <p className="pv2-muted">
           Drawing uploads and approvals are handled in the project&apos;s design
-          timeline stage.
+          milestone.
         </p>
       </section>
     </div>
@@ -3782,9 +3799,9 @@ function Team({ d }: { d: WorkspaceData }) {
 const pages: {
   [key in ProjectPageSlug]: (p: { d: WorkspaceData }) => React.ReactNode;
 } = {
-  overview: Timeline,
-  timeline: Timeline,
-  milestones: Timeline,
+  overview: Milestones,
+  timeline: Milestones,
+  milestones: Milestones,
   documents: Documents,
   payments: Payments,
   procurement: Procurement,
