@@ -32,6 +32,7 @@ import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { GateForm } from './project-v2-forms';
 import { projectTimelineStages } from './project-visible-stages';
 import { ProjectQuotePaymentFlow } from './project-quote-payment-flow';
+import { ProjectMilestoneTimeline } from './project-milestone-timeline';
 import {
   formatMoney,
   pretty,
@@ -120,6 +121,7 @@ export function ProjectFlow({
   d: WorkspaceData;
   milestoneMode?: boolean;
 }) {
+  if (milestoneMode) return <ProjectMilestoneTimeline d={d} />;
   const site = d.site;
   const role = flowRole({
     canManage: site?.canManage === true,
