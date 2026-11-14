@@ -335,13 +335,19 @@ select public.client_portal_design_decide(pg_temp.project(),'approved','3d_desig
 select pg_temp.as_user('33333333-3333-4333-8333-333333333333');
 select set_config('test.electrical',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
   '{"kind":"electrical_plan","reference":"MEP-E-01 electrical conduit and load plan"}')->>'id'),true);
+select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
+  jsonb_build_object('id',current_setting('test.electrical'),'decision','approved','note','Electrical plan technically reviewed'));
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'approved','electrical_plan','Electrical plan approved');
+select pg_temp.as_user('33333333-3333-4333-8333-333333333333');
 select set_config('test.plumbing',(public.project_site_command(pg_temp.org(),pg_temp.project(),'design_submit',
   '{"kind":"plumbing_plan","reference":"MEP-P-01 water and drainage plan"}')->>'id'),true);
 select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
 select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
-  jsonb_build_object('id',current_setting('test.electrical'),'decision','approved','note','Electrical plan technically reviewed'));
-select public.project_site_command(pg_temp.org(),pg_temp.project(),'design_decide',
   jsonb_build_object('id',current_setting('test.plumbing'),'decision','approved','note','Plumbing plan technically reviewed'));
+select pg_temp.as_user('99999999-9999-4999-8999-999999999999');
+select public.client_portal_design_decide(pg_temp.project(),'approved','plumbing_plan','Plumbing plan approved');
 -- Physical work cannot start before the homeowner approves the complete design set.
 select pg_temp.expect_fail(format('select public.project_site_command(%L,%L,''execution_start'',''{}'')',
   pg_temp.org(),pg_temp.project()),'42501','execution blocked before design approval');

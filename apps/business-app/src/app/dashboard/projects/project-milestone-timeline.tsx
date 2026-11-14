@@ -13,6 +13,7 @@ import {
   ProjectDesignPaymentAndAgreement,
   ProjectDesignPlansWorkflow,
 } from './project-design-stage-workflow';
+import { designSubstageDisplayStatus } from './project-design-stage-status';
 import { PrepareAgreement } from './project-v2-forms';
 import { CuringRounds, CuringPlanForm, type CuringRoundView } from './project-curing-card';
 import './project-milestone-timeline.css';
@@ -339,8 +340,22 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       };
     });
   };
-  const stageStatusFor = (stage: Stage) =>
-    stageExecution(stage)?.status ?? stage.status ?? 'not_started';
+  const stageStatusFor = (stage: Stage) => {
+    const code = stage.template_code.split('/')[0] ?? '';
+    const storedStatus = stageExecution(stage)?.status ?? stage.status ?? 'not_started';
+    if (!DESIGN_STAGE_CODES.includes(code)) return storedStatus;
+
+    const workItems = stageItemsFor(stage);
+    const checks = siteChecksFor(stage);
+    return designSubstageDisplayStatus({
+      code,
+      storedStatus,
+      agreementAuthorized: d.agreement?.authorized === true,
+      design: d.flow.design,
+      allWorkComplete: workItems.length > 0 && workItems.every((item) => isComplete(item.status)),
+      allChecksComplete: checks.length > 0 && checks.every((check) => isComplete(check.status)),
+    });
+  };
   const stageStatusLabel = (stage: Stage) => {
     const status = stageStatusFor(stage);
     return pretty(status);
