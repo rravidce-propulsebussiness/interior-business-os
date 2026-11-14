@@ -111,3 +111,10 @@
 .pmt-metrics article .pmt-metric-name{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:800px){.pmt-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.pmt-metrics{gap:7px}.pmt-metrics article{min-height:78px;padding:10px}.pmt-metrics article>strong{font-size:15px}}
+
+.pmt .pf-chips{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0 0 0 29px}
+.pmt .pf-chips li{padding:4px 8px;border-radius:20px;background:#f6f5f3;color:#55565d;font-size:9px}
+.pmt .pf-note,.pmt .pf-wait{margin:0 0 0 29px;padding:7px 9px;border-radius:8px;background:#f7f6f3;color:#696a72;font-size:9px}
+.pmt .pf-wait{background:#fff4df;color:#8d601c}
+.pmt .pf-work-completed .pf-pill{background:#eaf5ef;color:#287a58}
+@media(max-width:700px){.pmt .pf-chips,.pmt .pf-note,.pmt .pf-wait{margin-left:0;padding-left:0}}
