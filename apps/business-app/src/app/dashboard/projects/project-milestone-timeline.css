@@ -118,3 +118,8 @@
 .pmt .pf-wait{background:#fff4df;color:#8d601c}
 .pmt .pf-work-completed .pf-pill{background:#eaf5ef;color:#287a58}
 @media(max-width:700px){.pmt .pf-chips,.pmt .pf-note,.pmt .pf-wait{margin-left:0;padding-left:0}}
+
+.pmt .pf-rounds-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 7px;color:#72737a;font-size:9px}
+.pmt .pf-rounds-toolbar button{border:1px solid #ead6cc;border-radius:8px;background:#fff;color:#88352b;padding:7px 10px;font-size:9px;font-weight:700}
+.pmt .pf-rounds-toolbar button:hover{background:#fbefeb}
+.pmt .pf-rounds-empty{margin:10px 0;padding:12px;border:1px dashed #e9e7e3;border-radius:9px;text-align:center}
