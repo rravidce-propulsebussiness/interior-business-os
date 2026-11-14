@@ -7,6 +7,7 @@ import { StageChecklistItem } from './project-stage-checklist-item';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectItemSchedule } from './project-item-schedule';
 import { StageButton } from './project-flow-controls';
+import { PrepareAgreement } from './project-v2-forms';
 import { CuringRounds, CuringPlanForm, type CuringRoundView } from './project-curing-card';
 import './project-milestone-timeline.css';
 
@@ -157,6 +158,46 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     const status = d.stageExecution.find((row) => row.stageId === stage.id)?.status ?? stage.status;
     return !isComplete(status);
   });
+  if (!stages.length) {
+    const quote = d.quotations[0];
+    const canPrepare = Boolean(quote && d.permissions.manage && d.permissions.finance && !d.agreement);
+    let quoteOffset = 0;
+    const quoteStages = (d.quotePlan?.stages ?? []).map((stage) => {
+      const code = stage.code.split('/')[0] ?? stage.code;
+      const days = durationByCode[code] ?? 10;
+      const start = addDays(startDate, quoteOffset);
+      const finish = addDays(start, Math.max(days - 1, 0));
+      quoteOffset += days;
+      return { ...stage, start, finish };
+    });
+    return <div className="pmt">
+      <header className="pmt-hero"><div><span className="pmt-kicker">Construction project · quotation plan</span>
+        <h1>Project milestones</h1>
+        <p>Estimated dates are calculated from project creation. Execution begins after the project agreement is confirmed.</p></div>
+        <div className="pmt-progress"><strong>{d.quotePlan?.floors.length ?? 0} floors</strong><span>{d.quotePlan?.quoteNumber ?? 'Accepted quotation'}</span></div>
+      </header>
+      {!d.agreement && <section className="pmt-curing">
+        <div className="pmt-section-title"><div><h2>Confirm the project to activate milestones</h2>
+          <p>The owner can upload the offline agreement or record the homeowner’s agreement to the final quotation.</p></div></div>
+        {canPrepare && quote ? <PrepareAgreement projectId={d.project.id} revisionId={quote.revisionId}/> :
+          <p className="pmt-empty">Project manager and Finance permissions are required to prepare the project agreement.</p>}
+      </section>}
+      <section className="pmt-timeline"><div className="pmt-timeline-head"><div><h2>Quotation-based timeline</h2>
+        <p>Scope and floors come from the accepted quotation. Dates are estimates until the project schedule is confirmed.</p></div>
+        <span>{quoteStages.length} milestones</span></div>
+        {quoteStages.map((stage,index) => <details className="pmt-stage" key={stage.code + ':' + index} open={index===0}>
+          <summary><span className="pmt-number">{String(milestoneNumber({template_code:stage.code,floor_code:stage.floor} as Stage, d.quotePlan?.floors.map((floor)=>floor.code) ?? [])).padStart(2,'0')}</span>
+            <span className="pmt-stage-name"><strong>{stage.floor ? pretty(stage.floor) + ' · ' : ''}{stage.title}</strong>
+              <small>{stage.activities.length} works · {stage.checks.length} checks · {stage.phase}</small></span>
+            <span className="pmt-dates">{displayDay(stage.start)} – {displayDay(stage.finish)}<small>Estimated dates</small></span>
+            <span className="pmt-status">Not started</span><span className="pmt-chevron">⌄</span></summary>
+          <div className="pmt-stage-body"><ul className="pmt-quote-items">{stage.activities.map((item,i)=><li key={i}>{item}</li>)}</ul>
+            {!!stage.checks.length && <p className="pmt-explanation">Checks: {stage.checks.join(' · ')}</p>}
+          </div>
+        </details>)}
+      </section>
+    </div>;
+  }
   const rounds: CuringRoundView[] = (d.flow.curing?.rounds ?? []).map((round) => {
     const age = Date.now() - new Date(round.roundAt).getTime();
     return {
