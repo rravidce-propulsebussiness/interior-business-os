@@ -3,10 +3,7 @@ import Image from 'next/image';
 import { OwnerIcon, type OwnerIconName, OwnerShell } from '../owner-shell';
 import { ownerWorkspaceNavigation } from '../owner-workspace-navigation';
 import { OwnerMobileNav } from '../owner-mobile-nav';
-import { OwnerProjectRequests } from '../../project-request-widgets';
 import { canAccess } from '@business-os/auth';
-import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
-import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
 import {
   MaterialOrderingAccess,
   MaterialDeliveryActions,
@@ -16,7 +13,6 @@ import { ProjectQuotationLinker } from './project-quotation-linker';
 import { ProjectFlow } from './project-flow-view';
 import { flowRole } from './project-flow';
 import { ProjectClientAccess } from './project-client-access';
-import { ProjectSiteSurvey, ProjectAdvanceAction } from './project-next-forms';
 import { projectTimelineStages } from './project-visible-stages';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
@@ -39,11 +35,7 @@ import {
   ReviewCheck,
   GateForm,
   AssignRole,
-  ProjectLifecycle,
-  PrepareAgreement,
-  SignedAgreementUploadForm,
   ProjectContractActivation,
-  SkipAgreementUpload,
 } from './project-v2-forms';
 import '../owner-dashboard.css';
 import './project-v2.css';
