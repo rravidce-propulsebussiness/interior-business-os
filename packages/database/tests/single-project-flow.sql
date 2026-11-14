@@ -672,9 +672,10 @@ select pg_temp.as_user('88888888-8888-4888-8888-888888888888');
 do $partial_qc$
 declare total integer;
 begin
- select jsonb_array_length(inspection_topics) into total
- from private.construction_project_stages
- where id=pg_temp.stage('F1_SLAB');
+ select jsonb_array_length(stage->'inspection_topics') into total
+ from jsonb_array_elements(
+   public.construction_project_read(pg_temp.org(),pg_temp.project())->'stages') stage
+ where stage->>'instance_code'='F1_SLAB';
  if total<2 then raise exception 'FAIL: slab fixture must have multiple QC topics';end if;
  perform public.construction_stage_qc_item_command(
    pg_temp.org(),pg_temp.project(),pg_temp.stage('F1_SLAB'),0,'passed',
