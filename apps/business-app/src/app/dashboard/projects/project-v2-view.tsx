@@ -25,6 +25,7 @@ import { forecastWork } from './project-work-forecast';
 import { BulkStageChecks } from './project-stage-bulk-checks';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectStageReviewActions } from './project-stage-review-actions';
+import { RccDailyPlan, RccSubstageGroups } from './project-rcc-substage-groups';
 import { projectTimelineFeed } from './project-timeline-feed';
 import { ProjectQuotationLinker } from './project-quotation-linker';
 import { ProjectFlow } from './project-flow-view';
@@ -74,6 +75,7 @@ import '../owner-dashboard.css';
 import './project-v2.css';
 import './project-daily-command.css';
 import './project-stage-review-actions.css';
+import './project-rcc-substage-groups.css';
 
 /** Milestones is the single project workflow. Older timeline and overview
  * addresses remain valid aliases, not separate project sections. */
@@ -1474,6 +1476,27 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
             ).length;
             const qcTotal = stage.inspectionTopics.length;
             const qcPending = Math.max(0, qcTotal - qcPassed - qcFailed);
+            const isRccStage = physicalStage && stage.template_code === 'RCC';
+            const rccWorkItems = stage.activities.map((title, i) => {
+              const record = stageWork.find((x) => Number(x.index) === i);
+              const schedule = planFor(stage.id, 'work', i);
+              return {
+                index: i,
+                title,
+                status: stringValue(record?.status),
+                plannedStart: schedule?.plannedStart ?? '',
+                plannedFinish: schedule?.plannedFinish ?? '',
+              };
+            });
+            const rccMaterials = plannedMaterials.map((title, i) => {
+              const schedule = planFor(stage.id, 'material', i);
+              return {
+                index: i,
+                title,
+                plannedStart: schedule?.plannedStart ?? '',
+                plannedFinish: schedule?.plannedFinish ?? '',
+              };
+            });
             const qcMilestoneState =
               qcFailed > 0
                 ? 'has-fail'
@@ -1701,7 +1724,11 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                 ).length,
               };
               return (
-                <div key={i} className="pv2-work-item-entry">
+                <div
+                  key={i}
+                  id={'pv2-work-' + stage.id + '-' + i}
+                  className="pv2-work-item-entry"
+                >
                   <WorkItemCard
                     projectId={d.project.id}
                     item={workView}
@@ -1898,6 +1925,15 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                       qcProgress={qcPassed + '/' + qcTotal}
                     />
                   )}
+                  {isRccStage && (
+                    <RccDailyPlan
+                      stageId={stage.id}
+                      work={rccWorkItems}
+                      materials={rccMaterials}
+                      today={todayInIndia}
+                      tomorrow={tomorrowInIndia}
+                    />
+                  )}
                   {stage.explanation && (
                     <p className="pv2-muted">{stage.explanation}</p>
                   )}
@@ -1966,6 +2002,7 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                           <div
                             key={stage.id + '-material-' + i}
                             className="pv2-flow-step"
+                            id={'pv2-material-' + stage.id + '-' + i}
                           >
                             <strong>{material}</strong>
                             <ProjectItemSchedule
@@ -2221,9 +2258,13 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                   {!!stage.activities.length && (
                     <div className="pv2-stage-task-group">
                       <h4>
-                        {orderedFlow.length
-                          ? 'Work & inspections in execution order'
-                          : 'Work checklist'}{' '}
+                        {isRccStage
+                          ? (stage.floor_code
+                              ? pretty(stage.floor_code)
+                              : 'Structural') + ' work areas'
+                          : orderedFlow.length
+                            ? 'Work & inspections in execution order'
+                            : 'Work checklist'}{' '}
                         <small>
                           {finishedActivities}/{stage.activities.length} work
                           completed
@@ -2235,6 +2276,21 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                           : 'Open any work item to record progress/photos, request materials, or view existing orders.'}
                       </p>
                       <div className="pv2-stage-task-entries">
+                        {isRccStage && (
+                          <RccSubstageGroups
+                            stageId={stage.id}
+                            title={
+                              stage.floor_code
+                                ? pretty(stage.floor_code) + ' slab work'
+                                : 'Structural slab work'
+                            }
+                            activities={rccWorkItems}
+                            completed={finishedActivities}
+                            renderActivity={(i, work) =>
+                              renderWorkItem(work, i)
+                            }
+                          />
+                        )}
                         <>
                           {orderedFlow.length > 0
                             ? orderedFlow.map((step, position) => {
@@ -2276,6 +2332,12 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                                     <div
                                       key={'flow-' + position}
                                       className="pv2-flow-step"
+                                      id={
+                                        'pv2-material-' +
+                                        stage.id +
+                                        '-' +
+                                        step.index
+                                      }
                                     >
                                       <span className="pv2-flow-step-number">
                                         {position + 1} · Material required
@@ -2336,6 +2398,7 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                                   );
                                 }
                                 if (step.kind === 'work') {
+                                  if (isRccStage) return null;
                                   const work = stage.activities[step.index];
                                   return work ? (
                                     <div
@@ -2430,9 +2493,11 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                                   </div>
                                 );
                               })
-                            : stage.activities.map((work, i) =>
-                                renderWorkItem(work, i),
-                              )}
+                            : isRccStage
+                              ? null
+                              : stage.activities.map((work, i) =>
+                                  renderWorkItem(work, i),
+                                )}
                           {projectedWork
                             .filter(
                               (item) =>

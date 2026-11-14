@@ -1,0 +1,213 @@
+.pv2-rcc-daily-plan {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.pv2-rcc-day {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #e8e0d9;
+  border-radius: 14px;
+  background: linear-gradient(145deg, #fffaf6, #fff);
+}
+
+.pv2-rcc-day h4,
+.pv2-rcc-substage-heading h4 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0;
+  color: #21304b;
+  font-size: 15px;
+}
+
+.pv2-rcc-day h4 time {
+  color: #758096;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.pv2-rcc-day > p,
+.pv2-rcc-substage-heading p {
+  margin: 8px 0 0;
+  color: #758096;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.pv2-rcc-day ul {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pv2-rcc-day li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f0ebe6;
+}
+
+.pv2-rcc-day li > span:first-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.pv2-rcc-day li small {
+  color: #8a7180;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.pv2-rcc-day li strong {
+  color: #36435a;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.pv2-rcc-task-status {
+  color: #777f8e;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.pv2-rcc-task-status.delayed {
+  color: #c54d31;
+}
+
+.pv2-rcc-task-status.completed {
+  color: #22845e;
+}
+
+.pv2-rcc-day li button {
+  min-height: 34px;
+  padding: 6px 9px;
+  border: 1px solid #ead9cf;
+  border-radius: 8px;
+  background: #fff;
+  color: #813e32;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.pv2-rcc-substages {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 14px;
+}
+
+.pv2-rcc-substage-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f7f3ef;
+}
+
+.pv2-rcc-substage-heading > span {
+  flex: none;
+  color: #69748a;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.pv2-rcc-substage {
+  overflow: hidden;
+  border: 1px solid #e8e0d9;
+  border-radius: 13px;
+  background: white;
+}
+
+.pv2-rcc-substage > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 12px 14px;
+  color: #24324a;
+  cursor: pointer;
+  list-style: none;
+}
+
+.pv2-rcc-substage > summary::-webkit-details-marker {
+  display: none;
+}
+
+.pv2-rcc-substage > summary::after {
+  content: '+';
+  margin-left: auto;
+  color: #bd5a39;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.pv2-rcc-substage[open] > summary::after {
+  content: '−';
+}
+
+.pv2-rcc-substage > summary strong {
+  font-size: 14px;
+}
+
+.pv2-rcc-substage > summary span {
+  color: #778196;
+  font-size: 10px;
+  font-weight: 750;
+}
+
+.pv2-rcc-substage-items {
+  display: grid;
+  gap: 10px;
+  padding: 0 12px 12px;
+}
+
+.pv2-rcc-work-entry {
+  scroll-margin-top: 24px;
+}
+
+@media (max-width: 640px) {
+  .pv2-rcc-daily-plan {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pv2-rcc-day {
+    padding: 12px;
+  }
+
+  .pv2-rcc-day li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .pv2-rcc-day li > span:first-child {
+    grid-row: 1 / span 2;
+  }
+
+  .pv2-rcc-day li .pv2-rcc-task-status {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+
+  .pv2-rcc-day li button {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .pv2-rcc-substage-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

@@ -53,8 +53,39 @@ describe('construction workflow blueprint', () => {
     expect(at(plinth.activities, /Anti-termite/i)).toBeGreaterThan(
       at(plinth.activities, /Final soil leveling/i),
     );
-    expect(stages.find((stage) => stage.code === 'SITE_PREP')?.explanation)
-      .toContain('15–20 days');
+    expect(
+      stages.find((stage) => stage.code === 'SITE_PREP')?.explanation,
+    ).toContain('15–20 days');
+  });
+
+  it('sequences the floor RCC cycle through columns, staircase and slab work', () => {
+    const rcc = defaultConstructionWorkflow.stages.find(
+      (stage) => stage.code === 'RCC',
+    )!;
+    const at = (pattern: RegExp) =>
+      rcc.activities.findIndex((item) => pattern.test(item));
+
+    expect(at(/column marking/i)).toBeLessThan(
+      at(/column steel.*procurement/i),
+    );
+    expect(at(/procurement/i)).toBeLessThan(at(/bar cutting, bending/i));
+    expect(at(/bar cutting, bending/i)).toBeLessThan(
+      at(/engineer site check of column/i),
+    );
+    expect(at(/column concreting/i)).toBeLessThan(at(/staircase shuttering/i));
+    expect(at(/staircase concreting/i)).toBeLessThan(
+      at(/staircase column rise/i),
+    );
+    expect(at(/staircase column rise/i)).toBeLessThan(
+      at(/beam and slab shuttering/i),
+    );
+    expect(at(/beam and slab shuttering/i)).toBeLessThan(
+      at(/slab and beam reinforcement/i),
+    );
+    expect(at(/pre-pour site check/i)).toBeLessThan(
+      at(/beam and slab concreting/i),
+    );
+    expect(rcc.inspectionTopics).toHaveLength(3);
   });
 
   it('expands an arbitrary floor list and respects cross-floor structural gates', () => {

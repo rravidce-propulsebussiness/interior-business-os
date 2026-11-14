@@ -1,23 +1,30 @@
 import { expect, it } from 'vitest';
 import { renderQuotationDocument } from './quotation-document';
 import { encodeStagePaymentLinks } from './quotation-payment-plan';
-import { defaultStageRequirements,encodeStageRequirements,mergeStageRequirementOverrides } from './quotation-stage-requirements';
+import {
+  defaultStageRequirements,
+  encodeStageRequirements,
+  mergeStageRequirementOverrides,
+} from './quotation-stage-requirements';
 import { encodeMilestoneFlow } from './quotation-milestone-flow';
 import { quotationDocumentFixture } from './quotation-document.fixture';
 import { calculateSftEstimate, encodeSftEstimate } from './sft-quotation';
 it('escapes customer text and excludes all unlisted/internal payload fields', () => {
   const d = quotationDocumentFixture();
   d.notes = '<script>alert("x")</script>';
-  const html = renderQuotationDocument({
-    ...d,
-    internal_notes: 'INTERNAL_SECRET',
-    estimatedCost: 'COST_SECRET',
-    lines: d.lines.map((line) => ({
-      ...line,
-      minimum_rate: 'MINIMUM_SECRET',
-      calculation: { modifiers: 'MODIFIER_SECRET' },
-    })),
-  }, { kind: 'agreement' });
+  const html = renderQuotationDocument(
+    {
+      ...d,
+      internal_notes: 'INTERNAL_SECRET',
+      estimatedCost: 'COST_SECRET',
+      lines: d.lines.map((line) => ({
+        ...line,
+        minimum_rate: 'MINIMUM_SECRET',
+        calculation: { modifiers: 'MODIFIER_SECRET' },
+      })),
+    },
+    { kind: 'agreement' },
+  );
   expect(html).toContain('&lt;script&gt;');
   expect(html).not.toContain('<script>');
   for (const secret of [
@@ -190,11 +197,11 @@ it('renders company theme and saved package brand, grade, allowance safely', () 
   expect(html).toContain('&lt;script&gt;unsafe&lt;/script&gt;');
 });
 
-
 it('prints the unchanged grouped payment milestones in the linked agreement PDF without leaking metadata', () => {
   const d = quotationDocumentFixture();
   d.totals.final_amount = '100000.00';
-  d.terms = 'Workmanship warranty applies.\n\n[STAGE_PAYMENT_PLAN]\nAgreement & advance|10.00\nRCC frame|60.00\nHandover|30.00\n[/STAGE_PAYMENT_PLAN]';
+  d.terms =
+    'Workmanship warranty applies.\n\n[STAGE_PAYMENT_PLAN]\nAgreement & advance|10.00\nRCC frame|60.00\nHandover|30.00\n[/STAGE_PAYMENT_PLAN]';
   const html = renderQuotationDocument(d, { kind: 'agreement' });
   expect(html).toContain('Stage-wise payment schedule');
   expect(html).toContain('Agreement &amp; advance');
@@ -207,7 +214,6 @@ it('prints the unchanged grouped payment milestones in the linked agreement PDF 
   expect(html).not.toContain('[STAGE_PAYMENT_PLAN]');
   expect(html).not.toContain('[/STAGE_PAYMENT_PLAN]');
 });
-
 
 it('renders a branded brochure cover, readable pricing and closing page', () => {
   const d = quotationDocumentFixture();
@@ -242,10 +248,12 @@ it('embeds only saved company-owned photo data, never remote images or other com
 it('prints a 33-stage construction payment plan without amount or percentage drift', () => {
   const d = quotationDocumentFixture();
   d.totals.final_amount = '24035000.00';
-  const amounts = Array.from({ length: 33 }, (_, i) =>
-    'Stage ' + (i + 1) + '|' + (i === 32 ? '4.00' : '3.00'),
+  const amounts = Array.from(
+    { length: 33 },
+    (_, i) => 'Stage ' + (i + 1) + '|' + (i === 32 ? '4.00' : '3.00'),
   );
-  d.terms = '[STAGE_PAYMENT_PLAN]\n' + amounts.join('\n') + '\n[/STAGE_PAYMENT_PLAN]';
+  d.terms =
+    '[STAGE_PAYMENT_PLAN]\n' + amounts.join('\n') + '\n[/STAGE_PAYMENT_PLAN]';
   const html = renderQuotationDocument(d, { kind: 'agreement' });
   expect(html).toContain('Stage 33');
   expect(html).toContain('<td>100%</td>');
@@ -260,6 +268,9 @@ it('shows distinct quotation page surfaces and factual saved specification cards
   expect(html).toContain('pb-page pb-pricing');
   expect(html).toContain('pb-page pb-specs-page');
   expect(html).not.toContain('pb-page pb-payment-page');
+  expect(renderQuotationDocument(d, { kind: 'agreement' })).toContain(
+    'pb-page pb-payment-page',
+  );
   expect(html).toContain('pb-end');
   expect(html).toContain('Detailed quotation');
   expect(html).toContain('Selected package inclusions');
@@ -276,19 +287,30 @@ it('only inserts company-uploaded material photo in the same revision', () => {
   const html = renderQuotationDocument(d);
   expect(html).toContain('Company-supplied materials photograph');
   expect(html).toContain('src="data:image/jpeg;base64,AA=="');
-  d.header.branding.materials_image_data_uri = 'https://untrusted.example/photo.jpg';
+  d.header.branding.materials_image_data_uri =
+    'https://untrusted.example/photo.jpg';
   expect(() => renderQuotationDocument(d)).toThrow();
 });
-
 
 it('uses the work-wise SFT estimate without printing the same package twice', () => {
   const d = quotationDocumentFixture();
   d.lines[0]!.name = 'Luxury — floor-wise construction';
   d.lines[0]!.description = encodeSftEstimate(
-    calculateSftEstimate({
-      rows: [{name:'Ground Floor',kind:'floor',lengthFeet:'50',widthFeet:'60',ratePerSqft:'1850'}],
-      materialIds: [],
-    }, []),
+    calculateSftEstimate(
+      {
+        rows: [
+          {
+            name: 'Ground Floor',
+            kind: 'floor',
+            lengthFeet: '50',
+            widthFeet: '60',
+            ratePerSqft: '1850',
+          },
+        ],
+        materialIds: [],
+      },
+      [],
+    ),
   );
   d.lines[0]!.amount = '5550000';
   d.totals.final_amount = '5550000';
@@ -308,15 +330,30 @@ it('uses the work-wise SFT estimate without printing the same package twice', ()
 it('shows other separately quoted work and discounts without erasing payable amounts', () => {
   const d = quotationDocumentFixture();
   d.lines[0]!.description = encodeSftEstimate(
-    calculateSftEstimate({
-      rows: [{name:'Ground Floor',kind:'floor',lengthFeet:'20',widthFeet:'30',ratePerSqft:'1950'}],
-      materialIds: [],
-    }, []),
+    calculateSftEstimate(
+      {
+        rows: [
+          {
+            name: 'Ground Floor',
+            kind: 'floor',
+            lengthFeet: '20',
+            widthFeet: '30',
+            ratePerSqft: '1950',
+          },
+        ],
+        materialIds: [],
+      },
+      [],
+    ),
   );
   d.lines.push({
     ...d.lines[0]!,
-    name:'Extra compound wall', description:'Independent additional item',
-    quantity:'1',unit:'unit',rate:'80000',amount:'80000',
+    name: 'Extra compound wall',
+    description: 'Independent additional item',
+    quantity: '1',
+    unit: 'unit',
+    rate: '80000',
+    amount: '80000',
   });
   d.totals.revision_discount = '5000';
   d.totals.final_amount = '1245000';
@@ -361,8 +398,9 @@ it('does not invent stage payments when the quotation has none saved', () => {
 it('keeps the saved payment table and exact final amount in the PDF', () => {
   const document = quotationDocumentFixture();
   document.totals.final_amount = '5550000.00';
-  document.terms = '[STAGE_PAYMENT_PLAN]\nAdvance|10.00\nRCC & steel|40.00\nHandover|50.00\n[/STAGE_PAYMENT_PLAN]';
-  const quoteHtml=renderQuotationDocument(document);
+  document.terms =
+    '[STAGE_PAYMENT_PLAN]\nAdvance|10.00\nRCC & steel|40.00\nHandover|50.00\n[/STAGE_PAYMENT_PLAN]';
+  const quoteHtml = renderQuotationDocument(document);
   expect(quoteHtml).not.toContain('Stage-wise payment schedule');
   expect(quoteHtml).not.toContain('RCC &amp; steel');
   const html = renderQuotationDocument(document, { kind: 'agreement' });
@@ -379,37 +417,58 @@ it('keeps the saved payment table and exact final amount in the PDF', () => {
 it('renders saved agreement clauses only in the linked unsigned Agreement PDF', () => {
   const document = quotationDocumentFixture();
   document.terms = [
-    'Work programme & completion:', 'Start after site handover; finish in 12 months', '',
-    'Termination & indemnification:', 'Either party may terminate on 30 days written notice', '',
-    'Dispute resolution:', 'First seek mediation in Hyderabad', '',
-    '[STAGE_PAYMENT_PLAN]', 'Agreement & advance|10.00', 'Foundation|40.00',
-    'Handover|50.00', '[/STAGE_PAYMENT_PLAN]',
+    'Work programme & completion:',
+    'Start after site handover; finish in 12 months',
+    '',
+    'Termination & indemnification:',
+    'Either party may terminate on 30 days written notice',
+    '',
+    'Dispute resolution:',
+    'First seek mediation in Hyderabad',
+    '',
+    '[STAGE_PAYMENT_PLAN]',
+    'Agreement & advance|10.00',
+    'Foundation|40.00',
+    'Handover|50.00',
+    '[/STAGE_PAYMENT_PLAN]',
   ].join('\n');
   const quote = renderQuotationDocument(document);
   expect(quote).not.toContain('Start after site handover');
   expect(quote).not.toContain('Agreement &amp; advance');
   const agreement = renderQuotationDocument(document, { kind: 'agreement' });
   expect(agreement).toContain('Start after site handover; finish in 12 months');
-  expect(agreement).toContain('Either party may terminate on 30 days written notice');
+  expect(agreement).toContain(
+    'Either party may terminate on 30 days written notice',
+  );
   expect(agreement).toContain('First seek mediation in Hyderabad');
   expect(agreement).toContain('Agreement &amp; advance');
   expect(agreement).toContain('DRAFT AGREEMENT');
   expect(agreement).toContain('does not record customer acceptance');
 });
 
-
 it('prints saved Terms & Inclusions with distinct warranty and exclusions plus stage payment amounts', () => {
-  const document=quotationDocumentFixture();
-  document.totals.final_amount='5550000';
-  document.terms=[
-    'Inclusions:', 'Steel and cement as quoted', '',
-    'Exclusions:', 'Borewell and owner-provided power', '',
-    'Warranty:', 'Structural coverage for ten years', '',
-    'Additional terms:', 'Subject to site accessibility', '',
-    '[STAGE_PAYMENT_PLAN]', 'Advance|10.00', 'RCC & brickwork|60.00',
-    'Handover|30.00', '[/STAGE_PAYMENT_PLAN]',
+  const document = quotationDocumentFixture();
+  document.totals.final_amount = '5550000';
+  document.terms = [
+    'Inclusions:',
+    'Steel and cement as quoted',
+    '',
+    'Exclusions:',
+    'Borewell and owner-provided power',
+    '',
+    'Warranty:',
+    'Structural coverage for ten years',
+    '',
+    'Additional terms:',
+    'Subject to site accessibility',
+    '',
+    '[STAGE_PAYMENT_PLAN]',
+    'Advance|10.00',
+    'RCC & brickwork|60.00',
+    'Handover|30.00',
+    '[/STAGE_PAYMENT_PLAN]',
   ].join('\n');
-  const html=renderQuotationDocument(document, { kind: 'agreement' });
+  const html = renderQuotationDocument(document, { kind: 'agreement' });
   expect(html).toContain('Agreement conditions');
   expect(html).toContain('<h3>Inclusions</h3>');
   expect(html).toContain('Steel and cement as quoted');
@@ -426,9 +485,10 @@ it('prints saved Terms & Inclusions with distinct warranty and exclusions plus s
 });
 
 it('safely prints legacy free-text terms without inventing milestone payments', () => {
-  const document=quotationDocumentFixture();
-  document.terms='Owner will arrange water and power; <script>unsafe()</script>';
-  const html=renderQuotationDocument(document, { kind: 'agreement' });
+  const document = quotationDocumentFixture();
+  document.terms =
+    'Owner will arrange water and power; <script>unsafe()</script>';
+  const html = renderQuotationDocument(document, { kind: 'agreement' });
   expect(html).toContain('Agreement conditions');
   expect(html).toContain('Additional terms');
   expect(html).toContain('&lt;script&gt;');
@@ -437,15 +497,22 @@ it('safely prints legacy free-text terms without inventing milestone payments', 
   expect(html).not.toContain('Advance|10.00');
 });
 
-
-it('shows both structured saved warranty and stage payment schedule after legacy preface',()=>{
-  const d=quotationDocumentFixture();
-  d.totals.final_amount='5550000.00';
-  d.terms=[
-    'Site access subject to confirmation.','','Warranty:','Structural warranty ten years','',
-    '[STAGE_PAYMENT_PLAN]','Advance|10.00','RCC|60.00','Handover|30.00','[/STAGE_PAYMENT_PLAN]',
+it('shows both structured saved warranty and stage payment schedule after legacy preface', () => {
+  const d = quotationDocumentFixture();
+  d.totals.final_amount = '5550000.00';
+  d.terms = [
+    'Site access subject to confirmation.',
+    '',
+    'Warranty:',
+    'Structural warranty ten years',
+    '',
+    '[STAGE_PAYMENT_PLAN]',
+    'Advance|10.00',
+    'RCC|60.00',
+    'Handover|30.00',
+    '[/STAGE_PAYMENT_PLAN]',
   ].join('\n');
-  const html=renderQuotationDocument(d, { kind: 'agreement' });
+  const html = renderQuotationDocument(d, { kind: 'agreement' });
   expect(html).toContain('<h3>Warranty</h3>');
   expect(html).toContain('Structural warranty ten years');
   expect(html).toContain('Site access subject to confirmation.');
@@ -453,75 +520,113 @@ it('shows both structured saved warranty and stage payment schedule after legacy
   expect(html).toContain('33,30,000');
 });
 
-
 it('prints quality and material requirements only for saved construction stage links', () => {
-  const d=quotationDocumentFixture();
-  d.lines[0]!.description=encodeSftEstimate(calculateSftEstimate({
-    rows:[{name:'Ground Floor',kind:'floor',lengthFeet:'20',widthFeet:'30',ratePerSqft:'1850'}],
-    materialIds:[],
-  },[]));
-  d.terms='[STAGE_PAYMENT_PLAN]\nGround slab|70.00\nGround masonry|30.00\n[/STAGE_PAYMENT_PLAN]\n'+
+  const d = quotationDocumentFixture();
+  d.lines[0]!.description = encodeSftEstimate(
+    calculateSftEstimate(
+      {
+        rows: [
+          {
+            name: 'Ground Floor',
+            kind: 'floor',
+            lengthFeet: '20',
+            widthFeet: '30',
+            ratePerSqft: '1850',
+          },
+        ],
+        materialIds: [],
+      },
+      [],
+    ),
+  );
+  d.terms =
+    '[STAGE_PAYMENT_PLAN]\nGround slab|70.00\nGround masonry|30.00\n[/STAGE_PAYMENT_PLAN]\n' +
     '[STAGE_PAYMENT_LINKS]\n[["RCC/GROUND_FLOOR"],["MASONRY/GROUND_FLOOR"]]\n[/STAGE_PAYMENT_LINKS]';
-  const html=renderQuotationDocument(d);
+  const html = renderQuotationDocument(d);
   expect(html).toContain('pb-quality-page');
   expect(html).toContain('Stage-wise quality &amp; material plan');
   expect(html).toContain('MASONRY');
   expect(html).toContain('RCC');
   expect(html).toContain('Slump/workability and concrete cube tests');
   expect(html).not.toContain('[STAGE_PAYMENT_LINKS]');
-  d.terms=d.terms.replace(/\[STAGE_PAYMENT_LINKS\][\s\S]*?\[\/STAGE_PAYMENT_LINKS\]/,'');
+  d.terms = d.terms.replace(
+    /\[STAGE_PAYMENT_LINKS\][\s\S]*?\[\/STAGE_PAYMENT_LINKS\]/,
+    '',
+  );
   expect(renderQuotationDocument(d)).not.toContain('pb-quality-page');
 });
 
-it('shows customer-approved custom stage work, materials, tests and reports by actual floor',()=>{
- const d=quotationDocumentFixture();
- d.lines[0]!.description=encodeSftEstimate(calculateSftEstimate({
-  rows:[{name:'Ground Floor',kind:'floor',lengthFeet:'20',widthFeet:'30',ratePerSqft:'1750'}],
-  materialIds:[],
- }));
- const code='RCC/GROUND_FLOOR';
- const req=defaultStageRequirements(code);
- const overrides=mergeStageRequirementOverrides({},code,{
-  ...req,
-  work:[...req.work,'Custom site shuttering work'],
-  materials:[...req.materials,'Customer agreed steel brand'],
-  checks:[...req.checks,'Custom pre-pour engineer inspection'],
-  reports:[...req.reports,'Extra RCC pour evidence photos'],
- });
- d.terms='[STAGE_PAYMENT_PLAN]\nGround slab|100.00\n[/STAGE_PAYMENT_PLAN]\n'
-   +encodeStagePaymentLinks([[code]])+'\n'+encodeStageRequirements(overrides);
- const html=renderQuotationDocument(d, { kind: 'agreement' });
- for(const label of ['Custom site shuttering work','Customer agreed steel brand',
-   'Custom pre-pour engineer inspection','Extra RCC pour evidence photos']){
-  expect(html).toContain(label);
- }
- expect(html).toContain('RCC · GROUND FLOOR');
- expect(html).not.toContain('[STAGE_CUSTOM_REQUIREMENTS]');
- expect(html).not.toContain('"stages":{"RCC/GROUND_FLOOR"');
+it('shows customer-approved custom stage work, materials, tests and reports by actual floor', () => {
+  const d = quotationDocumentFixture();
+  d.lines[0]!.description = encodeSftEstimate(
+    calculateSftEstimate({
+      rows: [
+        {
+          name: 'Ground Floor',
+          kind: 'floor',
+          lengthFeet: '20',
+          widthFeet: '30',
+          ratePerSqft: '1750',
+        },
+      ],
+      materialIds: [],
+    }),
+  );
+  const code = 'RCC/GROUND_FLOOR';
+  const req = defaultStageRequirements(code);
+  const overrides = mergeStageRequirementOverrides({}, code, {
+    ...req,
+    work: [...req.work, 'Custom site shuttering work'],
+    materials: [...req.materials, 'Customer agreed steel brand'],
+    checks: [...req.checks, 'Custom pre-pour engineer inspection'],
+    reports: [...req.reports, 'Extra RCC pour evidence photos'],
+  });
+  d.terms =
+    '[STAGE_PAYMENT_PLAN]\nGround slab|100.00\n[/STAGE_PAYMENT_PLAN]\n' +
+    encodeStagePaymentLinks([[code]]) +
+    '\n' +
+    encodeStageRequirements(overrides);
+  const html = renderQuotationDocument(d, { kind: 'agreement' });
+  for (const label of [
+    'Custom site shuttering work',
+    'Customer agreed steel brand',
+    'Custom pre-pour engineer inspection',
+    'Extra RCC pour evidence photos',
+  ]) {
+    expect(html).toContain(label);
+  }
+  expect(html).toContain('RCC · GROUND FLOOR');
+  expect(html).not.toContain('[STAGE_CUSTOM_REQUIREMENTS]');
+  expect(html).not.toContain('"stages":{"RCC/GROUND_FLOOR"');
 });
 
-
-it('prints priced execution steps once under the matching payment stage without leaking workflow JSON',()=>{
- const d=quotationDocumentFixture();
- const stage={...defaultStageRequirements('DESIGN'),
-  work:['Architectural floor plan','Structural drawing'],
-  materials:['Approved plan drawing sheets'],
-  checks:['Verify layout and dimensions']};
- d.terms='[STAGE_PAYMENT_PLAN]\nDesign Fee|100.00\n[/STAGE_PAYMENT_PLAN]\n'+
-  encodeStageRequirements({DESIGN:stage})+'\n'+
-  encodeMilestoneFlow({'0':[
-   {kind:'work',code:'DESIGN',index:0},
-   {kind:'work',code:'DESIGN',index:1},
-   {kind:'material',code:'DESIGN',index:0},
-   {kind:'check',code:'DESIGN',index:0},
-   {kind:'qc',code:'DESIGN',index:0},
-  ]});
- const html=renderQuotationDocument(d, { kind: 'agreement' });
- expect(html).toContain('Design Fee');
- expect(html).toContain('Work, material &amp; inspection order');
- expect(html).toContain('Architectural floor plan');
- expect(html).toContain('Approved plan drawing sheets');
- expect(html).toContain('Company QC');
- expect(html).not.toContain('[QUOTATION_MILESTONE_FLOW]');
- expect(html).not.toContain('"version":1');
+it('prints priced execution steps once under the matching payment stage without leaking workflow JSON', () => {
+  const d = quotationDocumentFixture();
+  const stage = {
+    ...defaultStageRequirements('DESIGN'),
+    work: ['Architectural floor plan', 'Structural drawing'],
+    materials: ['Approved plan drawing sheets'],
+    checks: ['Verify layout and dimensions'],
+  };
+  d.terms =
+    '[STAGE_PAYMENT_PLAN]\nDesign Fee|100.00\n[/STAGE_PAYMENT_PLAN]\n' +
+    encodeStageRequirements({ DESIGN: stage }) +
+    '\n' +
+    encodeMilestoneFlow({
+      '0': [
+        { kind: 'work', code: 'DESIGN', index: 0 },
+        { kind: 'work', code: 'DESIGN', index: 1 },
+        { kind: 'material', code: 'DESIGN', index: 0 },
+        { kind: 'check', code: 'DESIGN', index: 0 },
+        { kind: 'qc', code: 'DESIGN', index: 0 },
+      ],
+    });
+  const html = renderQuotationDocument(d, { kind: 'agreement' });
+  expect(html).toContain('Design Fee');
+  expect(html).toContain('Work, material &amp; inspection order');
+  expect(html).toContain('Architectural floor plan');
+  expect(html).toContain('Approved plan drawing sheets');
+  expect(html).toContain('Company QC');
+  expect(html).not.toContain('[QUOTATION_MILESTONE_FLOW]');
+  expect(html).not.toContain('"version":1');
 });
