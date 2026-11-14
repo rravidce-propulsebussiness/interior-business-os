@@ -63,3 +63,13 @@
 .pmt .pv2-item-schedule-shortcuts span{font-size:9px;color:#777}
 .pmt .pv2-item-schedule-shortcuts button{border:1px solid #e8dfd7;border-radius:7px;background:#fff;padding:6px 8px;font-size:9px}
 @media(max-width:700px){.pmt .pf-work{padding:9px}.pmt .pf-pill{font-size:8px}.pmt .pf-actions,.pmt .pf-panel,.pmt .pf-owner{padding-left:0}.pmt-work-timing{padding-left:0}.pmt .pv2-item-schedule-current{align-items:flex-start}.pmt .pv2-item-schedule-toggle{max-width:100px;white-space:normal}}
+
+.pmt-day-check{display:inline-grid;width:14px;height:14px;vertical-align:-2px;margin-right:3px;border:1px solid #d5d4d0;border-radius:4px;background:#fff}
+.pmt-delay-summary{display:flex;align-items:center;gap:10px;margin:-3px 0 12px;padding:10px 13px;border:1px solid #f1c8c9;border-radius:10px;background:#fff8f7;color:#8f282e}
+.pmt-delay-icon{display:grid;place-items:center;flex:none;width:22px;height:22px;border-radius:7px;background:#fbe3e3;font-size:12px;font-weight:800}
+.pmt-delay-summary>div{display:grid;gap:3px;flex:1}
+.pmt-delay-summary strong{font-size:10px}
+.pmt-delay-summary small{font-size:9px;color:#895b5d}
+.pmt-delay-count{padding:5px 8px;border-radius:20px;background:#fbe3e3;font-size:9px;font-weight:750;white-space:nowrap}
+.pmt-stage-variance{font-weight:700}
+@media(max-width:600px){.pmt-delay-summary{align-items:flex-start}.pmt-delay-count{align-self:center}.pmt .pf-work-head{align-items:flex-start}.pmt .pf-pill{white-space:normal;text-align:center}}
