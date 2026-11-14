@@ -365,7 +365,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
               <small>{milestoneFamily(stage)} · {stage.activities.length} works · {siteChecks.length} checks · {completed}/{stageItems.length} complete</small></span>
             <span className="pmt-dates">{displayDay(baselineRange.start)} – {displayDay(baselineRange.finish)}<small>Auto baseline</small>
               {savedRange && <small className="pmt-current-date">Current plan: {displayDay(range.start)} – {displayDay(range.finish)}</small>}
-              <small className="pmt-stage-variance">{stageVariance}</small></span>
+              <small className={'pmt-stage-variance ' + (/late|Delayed/i.test(stageVariance) ? 'late' : /early/i.test(stageVariance) ? 'early' : '')}>{stageVariance}</small></span>
             <span className={'pmt-status ' + (stageStatus === 'in_progress' ? 'active' : isComplete(stageStatus) ? 'done' : '')}>{pretty(stageStatus)}</span>
             <span className="pmt-chevron">⌄</span>
           </summary>
