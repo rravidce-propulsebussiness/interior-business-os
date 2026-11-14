@@ -13,6 +13,8 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/projects/project-flow.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-creation-quotation.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-stage-status.test.ts',
+      'apps/business-app/src/app/dashboard/projects/project-design-stage-status.test.ts',
+      'apps/business-app/src/app/dashboard/projects/project-stage-qc-status.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-offline-agreement.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-milestone-plan.test.ts',
       'apps/business-app/src/app/dashboard/website/cloudflare-domains.test.ts',
