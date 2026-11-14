@@ -664,6 +664,15 @@ select pg_temp.expect_fail(format($q$select public.project_material_homeowner_ca
 -- 9. Certification, stage payments and concurrent floors.
 ------------------------------------------------------------------------------
 select pg_temp.certify('FOUNDATION',true);
+-- Add a second required topic in this disposable fixture so partial QC can be
+-- distinguished from the all-passed case by the release regression below.
+reset role;
+update private.construction_project_stages
+set inspection_topics=inspection_topics||jsonb_build_array('Secondary slab QC fixture topic')
+where id=(select (stage->>'id')::uuid
+ from jsonb_array_elements(public.construction_project_read(pg_temp.org(),pg_temp.project())->'stages') stage
+ where stage->>'instance_code'='F1_SLAB');
+set local role authenticated;
 select pg_temp.execute_stage('F1_SLAB');
 -- One passing item must not release a dependent stage when this stage has
 -- multiple required QC items. A formal certificate still releases it after
