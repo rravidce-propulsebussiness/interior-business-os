@@ -1,6 +1,5 @@
-'use client';
-
 import type { ReactNode } from 'react';
+import { OpenRccWorkButton } from './project-rcc-open-work-button';
 
 export type RccWorkItem = {
   index: number;
@@ -25,22 +24,6 @@ const GROUPS = [
 
 function groupFor(title: string) {
   return GROUPS.find((group) => group.match.test(title))?.id ?? 'slab';
-}
-
-function openAndScroll(id: string) {
-  const target = document.getElementById(id);
-  if (!target) return;
-  let parent = target.parentElement;
-  while (parent) {
-    if (parent instanceof HTMLDetailsElement) parent.open = true;
-    parent = parent.parentElement;
-  }
-  target.scrollIntoView({
-    behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      ? 'auto'
-      : 'smooth',
-    block: 'start',
-  });
 }
 
 function dayStatus(item: RccWorkItem, today: string) {
@@ -126,9 +109,7 @@ export function RccDailyPlan({
                     >
                       {row.status}
                     </span>
-                    <button type="button" onClick={() => openAndScroll(row.id)}>
-                      Open
-                    </button>
+                    <OpenRccWorkButton targetId={row.id} />
                   </li>
                 ))}
               </ul>
