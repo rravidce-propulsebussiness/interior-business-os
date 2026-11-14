@@ -6,6 +6,7 @@ import {
   SkipAgreementUpload,
 } from './project-v2-forms';
 import { DesignDecisionForm } from './project-flow-controls';
+import { areRequiredDesignPlansApproved } from './project-design-stage-status';
 
 const PLAN_TITLES: Record<string, string> = {
   architectural_plan: 'Architectural floor plan',
@@ -117,7 +118,7 @@ export function ProjectDesignPlansWorkflow({ data }: { data: WorkspaceData }) {
   const canManage = data.site?.canManage === true;
   const role = data.site?.role ?? '';
   const canTechnicalReview = canManage || role === 'manager';
-  const allApproved = currentIndex < 0;
+  const allApproved = areRequiredDesignPlansApproved(design);
 
   return (
     <section
