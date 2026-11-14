@@ -27,10 +27,10 @@ begin
  ] loop
   record=public.project_site_command(org,project,'design_submit',jsonb_build_object('kind',kind,'reference','2026 revision for '||kind));
   perform public.project_site_command(org,project,'design_decide',jsonb_build_object('id',record->>'id','decision','approved','note','Validated'));
-  if kind in ('architectural_plan','structural_design','3d_design') then
-   perform public.project_design_client_decision(org,project,(record->>'id')::uuid,'approved',
-     'Homeowner approved '||kind||' by email reference C-107');
-  end if;
+  -- Record the owner decision for every drawing before starting its
+  -- dependent plan, including electrical before plumbing.
+  perform public.project_design_client_decision(org,project,(record->>'id')::uuid,'approved',
+    'Homeowner approved '||kind||' by email reference C-107');
  end loop;
  perform public.project_site_command(org,project,'client_approve',
   '{"evidence":"Client confirmed final drawings by project meeting; reference C-108"}');
