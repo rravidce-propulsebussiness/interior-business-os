@@ -8,7 +8,7 @@ import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectItemSchedule } from './project-item-schedule';
 import { StageButton } from './project-flow-controls';
 import { RccSubstageGroups } from './project-rcc-substage-groups';
-import { ProjectMilestoneStageCarousel } from './project-milestone-stage-carousel';
+import { ProjectMilestoneAutoScroll } from './project-milestone-stage-list';
 import { PrepareAgreement } from './project-v2-forms';
 import { CuringRounds, CuringPlanForm, type CuringRoundView } from './project-curing-card';
 import './project-milestone-timeline.css';
@@ -217,18 +217,20 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         planningMode={role === 'engineer' ? 'site' : 'full'} today={today}/>
     </div>;
   };
-  const todayItems = items.filter((item) => {
+  const workIsScheduledOn = (item: WorkItem, date: string) => {
     const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
-    const when = plan?.plannedStart ?? estimatedItemDate(item);
-    return when === today && !isComplete(item.status);
-  });
+    const start = plan?.plannedStart || estimatedItemDate(item);
+    const finish = plan?.plannedFinish || start;
+    return start <= date && finish >= date;
+  };
+  const todayItems = items.filter((item) =>
+    workIsScheduledOn(item, today) && !isComplete(item.status));
   const todayStageIndex = stages.findIndex((stage) =>
-    todayItems.some((item) => item.stage.id === stage.id));
-  const tomorrowItems = items.filter((item) => {
-    const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
-    const when = plan?.plannedStart ?? estimatedItemDate(item);
-    return when === tomorrow && !isComplete(item.status);
-  });
+    items.some((item) => item.stage.id === stage.id && workIsScheduledOn(item, today)));
+  const tomorrowStageIndex = stages.findIndex((stage) =>
+    items.some((item) => item.stage.id === stage.id && workIsScheduledOn(item, tomorrow) && !isComplete(item.status)));
+  const tomorrowItems = items.filter((item) =>
+    workIsScheduledOn(item, tomorrow) && !isComplete(item.status));
   const workDone = items.filter((item) => isComplete(item.status)).length;
   const delayedItems = items.filter((item) =>
     !isComplete(item.status) && dayDistance(today, estimatedItemDate(item)) > 0);
@@ -238,9 +240,14 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     return !isComplete(status);
   });
   const currentIndex = current ? stages.indexOf(current) : -1;
-  const firstStageIndex = todayStageIndex >= 0
-    ? todayStageIndex
-    : currentIndex >= 0 ? currentIndex : 0;
+  const activeStageIndex = stages.findIndex((stage) =>
+    (d.stageExecution.find((row) => row.stageId === stage.id)?.status ?? stage.status) === 'in_progress');
+  const delayedStageIndex = delayedItems.length ? stages.indexOf(delayedItems[0].stage) : -1;
+  const focusStageIndex = todayStageIndex >= 0 ? todayStageIndex
+    : activeStageIndex >= 0 ? activeStageIndex
+      : tomorrowStageIndex >= 0 ? tomorrowStageIndex
+        : delayedStageIndex >= 0 ? delayedStageIndex
+          : currentIndex >= 0 ? currentIndex : 0;
   const nextStage = currentIndex >= 0 ? stages[currentIndex + 1] : undefined;
   if (!stages.length) {
     const quote = d.quotations[0];
@@ -350,11 +357,8 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     <section className="pmt-timeline" id="project-timeline">
       <div className="pmt-timeline-head"><div><h2>All stages</h2><p>Baseline dates are fixed from the project creation date. You can adjust the current plan without changing the baseline; early and late work is labelled against it.</p></div>
         <div className="pmt-board-controls"><span>{stages.length} stages</span></div></div>
-      <ProjectMilestoneStageCarousel
-        currentIndex={firstStageIndex}
-        todayIndex={todayStageIndex}
-        stageTitles={stages.map((stage) => stageLabel(stage))}
-      >
+      <ProjectMilestoneAutoScroll focusIndex={focusStageIndex}/>
+      <div className="pmt-stage-list">
       {stages.map((stage, index) => {
         const range = windowFor(stage);
         const stageItems = grouped.get(stage.id) ?? [];
@@ -393,11 +397,11 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
           : daysOverBaseline > 0 && !isComplete(stageStatus)
             ? 'Delayed ' + daysOverBaseline + 'd'
             : 'On track';
-        return <details className={'pmt-stage ' + (index === firstStageIndex ? 'is-current' : '')}
-          data-stage-index={index} key={stage.id} open={index === firstStageIndex}>
+        return <details className={'pmt-stage ' + (index === focusStageIndex ? 'is-current' : '')}
+          id={'project-stage-' + index} data-stage-index={index} key={stage.id} open={index === focusStageIndex}>
           <summary><span className="pmt-number">{String(milestoneNumber(stage, floorCodes)).padStart(2,'0')}</span>
             <span className="pmt-stage-name"><strong>{stage.floor_code ? pretty(stage.floor_code) + ' · ' : ''}{stage.title}</strong>
-              <small>{milestoneFamily(stage)} · {stage.activities.length} works · {siteChecks.length} checks · {completed}/{stageItems.length} complete</small></span>
+              <small>{milestoneFamily(stage)} · {stage.activities.length} works · {siteChecks.length} checks · {completed}/{stageItems.length} complete{index === todayStageIndex ? ' · Today’s stage' : ''}</small></span>
             <span className="pmt-dates">{displayDay(baselineRange.start)} – {displayDay(baselineRange.finish)}<small>Auto baseline</small>
               {savedRange && <small className="pmt-current-date">Current plan: {displayDay(range.start)} – {displayDay(range.finish)}</small>}
               <small className={'pmt-stage-variance ' + (/late|Delayed/i.test(stageVariance) ? 'late' : /early/i.test(stageVariance) ? 'early' : '')}>{stageVariance}</small></span>
@@ -449,7 +453,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
           </div>
         </details>;
       })}
-      </ProjectMilestoneStageCarousel>
+      </div>
     </section>
   </div>;
 }
