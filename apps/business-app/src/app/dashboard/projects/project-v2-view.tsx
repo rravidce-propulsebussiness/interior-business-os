@@ -13,6 +13,7 @@ import { ProjectQuotationLinker } from './project-quotation-linker';
 import { ProjectFlow } from './project-flow-view';
 import { flowRole } from './project-flow';
 import { ProjectClientAccess } from './project-client-access';
+import { ProjectRemovalControl } from './project-removal-control';
 import { projectTimelineStages } from './project-visible-stages';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
@@ -359,6 +360,12 @@ function ProjectHeader({
         </div>
       )}
       <div className="pv2-project-header-actions">
+        {data.permissions.manage && data.projectRaw && (
+          <ProjectRemovalControl
+            projectId={p.id}
+            version={Number(data.projectRaw.version) || 1}
+          />
+        )}
         {data.permissions.manage && data.projectRaw && (
           <details className="pv2-header-drawer">
             <summary className="pv2-button pv2-outline">✎ Edit project</summary>
