@@ -322,7 +322,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     </section>
 
     <section className="pmt-timeline" id="project-timeline">
-      <div className="pmt-timeline-head"><div><h2>All stages</h2><p>Default dates are estimates from project creation. Saved item dates take precedence and remain editable.</p></div>
+      <div className="pmt-timeline-head"><div><h2>All stages</h2><p>Baseline dates are fixed from the project creation date. You can adjust the current plan without changing the baseline; early and late work is labelled against it.</p></div>
         <span>{stages.length} stages</span></div>
       {stages.map((stage, index) => {
         const range = windowFor(stage);
@@ -339,11 +339,16 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         const actualQc = d.stageQc.records.filter((record) => record.stage_id === stage.id);
         const baselineRange = estimated.get(stage.id) ?? range;
         const savedRange = d.itemPlans.some((plan) => plan.stageId === stage.id && plan.plannedStart && plan.plannedFinish);
-        const stageVariance = isComplete(stageStatus) && execution?.fieldFinishedAt
-          ? (() => { const delta = dayDistance(dayKey(new Date(execution.fieldFinishedAt)), baselineRange.finish);
-              return delta < 0 ? Math.abs(delta) + 'd early' : delta > 0 ? delta + 'd late' : 'On baseline'; })()
-          : dayDistance(today, baselineRange.finish) > 0 && !isComplete(stageStatus)
-            ? 'Delayed ' + dayDistance(today, baselineRange.finish) + 'd'
+        const actualFinish = execution?.fieldFinishedAt;
+        const completedDelta = actualFinish
+          ? dayDistance(dayKey(new Date(actualFinish)), baselineRange.finish)
+          : null;
+        const daysOverBaseline = dayDistance(today, baselineRange.finish);
+        const stageVariance = isComplete(stageStatus) && completedDelta !== null
+          ? completedDelta < 0 ? Math.abs(completedDelta) + 'd early'
+            : completedDelta > 0 ? completedDelta + 'd late' : 'On baseline'
+          : daysOverBaseline > 0 && !isComplete(stageStatus)
+            ? 'Delayed ' + daysOverBaseline + 'd'
             : 'On track';
         return <details className="pmt-stage" key={stage.id} open={index === 0 || stage.id === current?.id}>
           <summary><span className="pmt-number">{String(milestoneNumber(stage, floorCodes)).padStart(2,'0')}</span>
