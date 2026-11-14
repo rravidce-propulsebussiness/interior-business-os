@@ -112,7 +112,9 @@ describe('progressable quotation-linked milestones', () => {
     expectSource(rccGroups).toContain("label: 'Tomorrow'");
     expectSource(rccGroups).toContain("return 'Delayed'");
     expectSource(rccGroups).not.toContain("'use client'");
-    expectSource(rccGroups).toContain('<OpenRccWorkButton targetId={row.id} />');
+    expectSource(rccGroups).toContain(
+      '<OpenRccWorkButton targetId={row.id} />',
+    );
     expectSource(rccOpenButton).toContain("'use client'");
     expectSource(rccOpenButton).toContain('target.scrollIntoView');
   });
