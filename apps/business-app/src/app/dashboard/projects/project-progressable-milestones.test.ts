@@ -38,7 +38,9 @@ describe('progressable quotation-linked milestones', () => {
       view.indexOf('function Documents('),
     );
     expectSource(milestones).toContain('const hasLiveStages=d.stages.length>0');
-    expectSource(milestones).toContain('{hasLiveStages&&(');
+    expectSource(milestones).toContain(
+      'hasLiveStages&&<ProjectWorkHub d={d} showHistory/>',
+    );
     expectSource(milestones).toContain('<ProjectWorkHub d={d} showHistory/>');
     expectSource(milestones).not.toContain('<ProjectTimelineFeed');
     expectSource(flowView).toContain("!milestoneMode && role !== 'watchman'");
