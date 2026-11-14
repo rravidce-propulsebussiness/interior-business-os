@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { defaultStageRequirements } from '@business-os/core/quotation-stage-requirements';
-import { quoteMilestoneProjection } from './project-quote-milestone-projection';
+import {
+  quoteMilestoneProjection,
+  quotedStageStatus,
+} from './project-quote-milestone-projection';
 
 const savedFlow = (rows: Record<string, unknown>) =>
   '[QUOTATION_MILESTONE_FLOW]' +
@@ -15,6 +18,27 @@ const payment = (name: string, percent: number, stageCodes: string[]) => ({
 });
 
 describe('quotation payment steps projected into one project timeline', () => {
+  it('shows canonical execution progress even when the legacy stage snapshot is not started', () => {
+    const stage = { id: 'excavation', status: 'not_started' };
+    for (const status of [
+      'in_progress',
+      'ready_for_qc',
+      'certified',
+      'on_hold',
+    ]) {
+      expect(quotedStageStatus(stage, [{ stageId: stage.id, status }])).toBe(
+        status,
+      );
+    }
+    expect(
+      quotedStageStatus(stage, [
+        { stageId: 'another-stage', status: 'certified' },
+      ]),
+    ).toBe('not_started');
+    expect(quotedStageStatus({ ...stage, status: 'completed' }, [])).toBe(
+      'completed',
+    );
+  });
   it('retains the exact saved payment count, order and percentages without splitting', () => {
     const saved = savedFlow({
       '0': [
@@ -34,8 +58,10 @@ describe('quotation payment steps projected into one project timeline', () => {
       ['Ground slab', 35],
       ['Final handover', 25],
     ]);
-    expect(result.map(row => row.durationHint)).toEqual([
-      '15–20 days', '15–20 days', '15–20 days',
+    expect(result.map((row) => row.durationHint)).toEqual([
+      '15–20 days',
+      '15–20 days',
+      '15–20 days',
     ]);
     const requirements = defaultStageRequirements('FOUNDATION');
     expect(result[0]?.steps).toEqual([

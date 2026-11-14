@@ -6,6 +6,7 @@ import {
   type WorkspaceData,
 } from './project-v2-data';
 import type { QuotedTimelineStep } from './project-quote-milestone-projection';
+import { quotedStageStatus } from './project-quote-milestone-projection';
 
 /** One existing quotation payment = one group on the project timeline.
  * Work, checks and QC status are read from current project evidence.
@@ -110,9 +111,12 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
               d.stageExecution.some(
                 (row) =>
                   row.stageId === stage.id &&
-                  ['in_progress', 'field_completed', 'awaiting_qc'].includes(
-                    row.status,
-                  ),
+                  [
+                    'in_progress',
+                    'field_completed',
+                    'awaiting_qc',
+                    'ready_for_qc',
+                  ].includes(row.status),
               ),
           );
           const state = allCertified
@@ -131,7 +135,9 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
                     <strong>{payment.name}</strong>
                     <small>
                       {state}
-                      {payment.durationHint ? ' · Reference: ' + payment.durationHint : ''}
+                      {payment.durationHint
+                        ? ' · Reference: ' + payment.durationHint
+                        : ''}
                       {' · '}
                       {payment.steps.length
                         ? payment.steps.length + ' saved work/check steps'
@@ -213,7 +219,9 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
                             )}
                             <small>
                               {stage
-                                ? pretty(stage.status || 'not_started')
+                                ? pretty(
+                                    quotedStageStatus(stage, d.stageExecution),
+                                  )
                                 : 'Planned from quote'}
                             </small>
                           </li>
@@ -228,7 +236,9 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
                     </p>
                   )}
                   <p className="pq-note">
-                    Reference durations are planning guides based on the uploaded agreement schedule. Actual dates and progress come from site updates; the quoted payment group is unchanged.
+                    Reference durations are planning guides based on the
+                    uploaded agreement schedule. Actual dates and progress come
+                    from site updates; the quoted payment group is unchanged.
                   </p>
                   <div className="pq-payment-footer">
                     <small>
