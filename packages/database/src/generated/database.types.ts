@@ -13383,6 +13383,10 @@ export interface Database {
         };
         Returns: undefined;
       };
+      site_preparation_complete_command: {
+        Args: { p_org: string; p_project: string; p_stage: string };
+        Returns: Json;
+      };
       staff_payment_proof_decide: {
         Args: {
           p_org: string;
