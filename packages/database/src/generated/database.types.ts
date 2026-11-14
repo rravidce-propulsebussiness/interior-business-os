@@ -12963,6 +12963,18 @@ export interface Database {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };
+      project_material_delivery_command: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_material: string;
+          p_action: string;
+          p_reference?: string;
+          p_expected_date?: string;
+          p_window?: string;
+        };
+        Returns: Json;
+      };
       project_material_homeowner_cash_paid: {
         Args: {
           p_org: string;
@@ -12973,18 +12985,6 @@ export interface Database {
           p_supplier: string;
           p_reference?: string;
           p_note?: string;
-        };
-        Returns: Json;
-      };
-      project_material_delivery_command: {
-        Args: {
-          p_org: string;
-          p_project: string;
-          p_material: string;
-          p_action: string;
-          p_reference?: string;
-          p_expected_date?: string;
-          p_window?: string;
         };
         Returns: Json;
       };
