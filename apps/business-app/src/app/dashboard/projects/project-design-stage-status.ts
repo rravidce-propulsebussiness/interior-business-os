@@ -69,6 +69,8 @@ export function designSubstageDisplayStatus(input: {
 }
 
 export function allStatusesComplete(statuses: string[]): boolean {
-  return statuses.length > 0 &&
-    statuses.every((status) => COMPLETED_STATUSES.has(status));
+  return (
+    statuses.length > 0 &&
+    statuses.every((status) => COMPLETED_STATUSES.has(status))
+  );
 }
