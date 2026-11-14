@@ -225,6 +225,8 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     return when === tomorrow && !isComplete(item.status);
   });
   const workDone = items.filter((item) => isComplete(item.status)).length;
+  const delayedItems = items.filter((item) =>
+    !isComplete(item.status) && dayDistance(today, estimatedItemDate(item)) > 0);
   const progress = items.length ? Math.round(workDone * 100 / items.length) : 0;
   const current = stages.find((stage) => {
     const status = d.stageExecution.find((row) => row.stageId === stage.id)?.status ?? stage.status;
@@ -296,14 +298,21 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
 
     <section className="pmt-days">
       <article><h2>Today <time>{displayDay(today)}</time></h2>
-        {todayItems.length ? todayItems.slice(0, 5).map((item) => <p key={item.key}>◦ {item.title}<small>{stageLabel(item.stage)}</small></p>) :
+        {todayItems.length ? todayItems.slice(0, 5).map((item) => <p key={item.key}><span className="pmt-day-check" aria-hidden="true"/> {item.title}<small>{stageLabel(item.stage)}</small></p>) :
           <p className="pmt-empty">No work scheduled for today.</p>}
       </article>
       <article><h2>Tomorrow <time>{displayDay(tomorrow)}</time></h2>
-        {tomorrowItems.length ? tomorrowItems.slice(0, 5).map((item) => <p key={item.key}>◦ {item.title}<small>{stageLabel(item.stage)}</small></p>) :
+        {tomorrowItems.length ? tomorrowItems.slice(0, 5).map((item) => <p key={item.key}><span className="pmt-day-check" aria-hidden="true"/> {item.title}<small>{stageLabel(item.stage)}</small></p>) :
           <p className="pmt-empty">No work scheduled for tomorrow.</p>}
       </article>
     </section>
+
+    {delayedItems.length > 0 && <section className="pmt-delay-summary" aria-live="polite">
+      <span className="pmt-delay-icon">!</span>
+      <div><strong>{delayedItems.length} work {delayedItems.length === 1 ? 'item is' : 'items are'} behind the original baseline</strong>
+        <small>Baseline dates stay fixed from project creation, so rescheduling will not hide a delay.</small></div>
+      <span className="pmt-delay-count">{delayedItems.length} delayed</span>
+    </section>}
 
     <section className="pmt-curing">
       <div className="pmt-section-title"><div><h2>Daily curing</h2><p>Three regular rounds each day. Record the round and attach site evidence.</p></div><span>Morning · Afternoon · Evening</span></div>
