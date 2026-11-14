@@ -24,6 +24,7 @@ import { ProjectItemSchedule } from './project-item-schedule';
 import { forecastWork } from './project-work-forecast';
 import { BulkStageChecks } from './project-stage-bulk-checks';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
+import { ProjectStageReviewActions } from './project-stage-review-actions';
 import { projectTimelineFeed } from './project-timeline-feed';
 import { ProjectQuotationLinker } from './project-quotation-linker';
 import { ProjectFlow } from './project-flow-view';
@@ -72,6 +73,7 @@ import {
 import '../owner-dashboard.css';
 import './project-v2.css';
 import './project-daily-command.css';
+import './project-stage-review-actions.css';
 
 /** Milestones is the single project workflow. Older timeline and overview
  * addresses remain valid aliases, not separate project sections. */
@@ -1212,12 +1214,12 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
     month: '2-digit',
     day: '2-digit',
   }).format(new Date());
-  const tomorrowInIndia = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Kolkata',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(new Date(Date.now() + 86400000));
+  const [todayYear, todayMonth, todayDay] = todayInIndia.split('-').map(Number);
+  const tomorrowInIndia = new Date(
+    Date.UTC(todayYear!, todayMonth! - 1, todayDay! + 1),
+  )
+    .toISOString()
+    .slice(0, 10);
   const upcoming = [...d.itemPlans]
     .sort((a, b) => a.plannedStart.localeCompare(b.plannedStart))
     .filter((x) => x.plannedFinish >= todayInIndia)
@@ -1478,6 +1480,10 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                 : qcPending === 0 && qcTotal > 0
                   ? 'is-complete'
                   : 'is-pending';
+            const firstQcIndex = stage.inspectionTopics.findIndex(
+              (_, i) =>
+                stringValue(latestQcByIndex.get(i)?.decision) !== 'passed',
+            );
             const formalQc = d.stageProgress.qualityStages.find(
               (x) => stringValue(x.stage_id) === stage.id,
             );
@@ -1529,6 +1535,22 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
               photoId: stringValue(check.photo_id),
               status: stringValue(check.status),
             }));
+            const firstCheckIndex = checks.findIndex((title) => {
+              const record =
+                stageChecks.find(
+                  (x) =>
+                    stringValue(x.title).toLowerCase() === title.toLowerCase(),
+                ) ??
+                (site?.checks ?? []).find(
+                  (x) =>
+                    stringValue(x.title).toLowerCase() === title.toLowerCase(),
+                );
+              return stringValue(record?.status) !== 'passed';
+            });
+            const checkPanelVisible =
+              orderedFlow.length === 0 ||
+              stageExecution?.status === 'ready_for_qc' ||
+              formalReviews.length > 0;
             const renderCheckItem = (
               name: string,
               i: number,
@@ -1544,24 +1566,28 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                     stringValue(x.title).toLowerCase() === name.toLowerCase(),
                 );
               return (
-                <StageChecklistItem
+                <div
+                  id={'pv2-stage-check-' + stage.id + '-' + i}
                   key={'site-check-' + i}
-                  projectId={d.project.id}
-                  stageId={stage.id}
-                  kind="check"
-                  index={i}
-                  title={name}
-                  status={stringValue(existing?.status) || 'pending'}
-                  notes={stringValue(existing?.notes)}
-                  photoId={stringValue(existing?.photo_id)}
-                  photos={photos}
-                  canEdit={checksAllowed && !complete}
-                  schedule={planFor(stage.id, kind, i)}
-                  canPlan={canPlan && !complete}
-                  planningMode={planningMode}
-                  today={todayInIndia}
-                  scheduleKind={kind}
-                />
+                >
+                  <StageChecklistItem
+                    projectId={d.project.id}
+                    stageId={stage.id}
+                    kind="check"
+                    index={i}
+                    title={name}
+                    status={stringValue(existing?.status) || 'pending'}
+                    notes={stringValue(existing?.notes)}
+                    photoId={stringValue(existing?.photo_id)}
+                    photos={photos}
+                    canEdit={checksAllowed && !complete}
+                    schedule={planFor(stage.id, kind, i)}
+                    canPlan={canPlan && !complete}
+                    planningMode={planningMode}
+                    today={todayInIndia}
+                    scheduleKind={kind}
+                  />
+                </div>
               );
             };
             const renderWorkItem = (work: string, i: number) => {
@@ -1847,6 +1873,31 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                   <OwnerIcon name="arrow" size={15} />
                 </summary>
                 <div className="pv2-command-stage-inner">
+                  {physicalStage && (
+                    <ProjectStageReviewActions
+                      checkTargetId={
+                        firstCheckIndex >= 0 &&
+                        (orderedFlow.some(
+                          (step) =>
+                            (step.kind === 'check' || step.kind === 'test') &&
+                            step.index === firstCheckIndex,
+                        ) ||
+                          checkPanelVisible)
+                          ? 'pv2-stage-check-' +
+                            stage.id +
+                            '-' +
+                            firstCheckIndex
+                          : undefined
+                      }
+                      checkProgress={passed + '/' + checks.length}
+                      qcTargetId={
+                        firstQcIndex >= 0 && qcTotal > 0
+                          ? 'pv2-stage-qc-' + stage.id + '-' + firstQcIndex
+                          : undefined
+                      }
+                      qcProgress={qcPassed + '/' + qcTotal}
+                    />
+                  )}
                   {stage.explanation && (
                     <p className="pv2-muted">{stage.explanation}</p>
                   )}
@@ -2064,32 +2115,41 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                                             name.toLowerCase(),
                                         );
                                       return (
-                                        <StageChecklistItem
-                                          key={name}
-                                          projectId={d.project.id}
-                                          stageId={stage.id}
-                                          kind="check"
-                                          index={i}
-                                          title={name}
-                                          status={
-                                            stringValue(existing?.status) ||
-                                            'pending'
+                                        <div
+                                          id={
+                                            'pv2-stage-check-' +
+                                            stage.id +
+                                            '-' +
+                                            i
                                           }
-                                          notes={stringValue(existing?.notes)}
-                                          photoId={stringValue(
-                                            existing?.photo_id,
-                                          )}
-                                          photos={photos}
-                                          canEdit={checksAllowed && !complete}
-                                          schedule={planFor(
-                                            stage.id,
-                                            'check',
-                                            i,
-                                          )}
-                                          canPlan={canPlan && !complete}
-                                          planningMode={planningMode}
-                                          today={todayInIndia}
-                                        />
+                                          key={name}
+                                        >
+                                          <StageChecklistItem
+                                            projectId={d.project.id}
+                                            stageId={stage.id}
+                                            kind="check"
+                                            index={i}
+                                            title={name}
+                                            status={
+                                              stringValue(existing?.status) ||
+                                              'pending'
+                                            }
+                                            notes={stringValue(existing?.notes)}
+                                            photoId={stringValue(
+                                              existing?.photo_id,
+                                            )}
+                                            photos={photos}
+                                            canEdit={checksAllowed && !complete}
+                                            schedule={planFor(
+                                              stage.id,
+                                              'check',
+                                              i,
+                                            )}
+                                            canPlan={canPlan && !complete}
+                                            planningMode={planningMode}
+                                            today={todayInIndia}
+                                          />
+                                        </div>
                                       );
                                     })}
                                   </div>
@@ -2103,25 +2163,38 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                               d.stageQc.records.some(
                                 (review) => review.stage_id === stage.id,
                               )) && (
-                              <StageOnsiteQcReview
-                                projectId={d.project.id}
-                                stageId={stage.id}
-                                stageName={stage.title}
-                                topics={remainingQc.map((item) => item.name)}
-                                topicIndices={remainingQc.map((item) => item.i)}
-                                stageStatus={
-                                  stageExecution?.status ?? 'not_started'
+                              <div
+                                id={
+                                  'pv2-stage-qc-' +
+                                  stage.id +
+                                  '-' +
+                                  (remainingQc[0]?.i ?? 0)
                                 }
-                                canReview={d.stageQc.canReview}
-                                isOwner={d.stageQc.isOwner}
-                                canManage={site?.canManage === true}
-                                inspectorAssigned={d.stageQc.inspectorAssigned}
-                                records={d.stageQc.records.filter(
-                                  (review) => review.stage_id === stage.id,
-                                )}
-                                photos={photos}
-                                existingChecks={checkRecords}
-                              />
+                              >
+                                <StageOnsiteQcReview
+                                  projectId={d.project.id}
+                                  stageId={stage.id}
+                                  stageName={stage.title}
+                                  topics={remainingQc.map((item) => item.name)}
+                                  topicIndices={remainingQc.map(
+                                    (item) => item.i,
+                                  )}
+                                  stageStatus={
+                                    stageExecution?.status ?? 'not_started'
+                                  }
+                                  canReview={d.stageQc.canReview}
+                                  isOwner={d.stageQc.isOwner}
+                                  canManage={site?.canManage === true}
+                                  inspectorAssigned={
+                                    d.stageQc.inspectorAssigned
+                                  }
+                                  records={d.stageQc.records.filter(
+                                    (review) => review.stage_id === stage.id,
+                                  )}
+                                  photos={photos}
+                                  existingChecks={checkRecords}
+                                />
+                              </div>
                             )}
 
                           {!!plannedReports.length && (
@@ -2303,30 +2376,39 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                                         planningMode={planningMode}
                                         today={todayInIndia}
                                       />
-                                      <StageOnsiteQcReview
-                                        projectId={d.project.id}
-                                        stageId={stage.id}
-                                        stageName={title}
-                                        topics={[title]}
-                                        topicIndices={[step.index]}
-                                        earlyQc
-                                        stageStatus={
-                                          stageExecution?.status ??
-                                          'not_started'
+                                      <div
+                                        id={
+                                          'pv2-stage-qc-' +
+                                          stage.id +
+                                          '-' +
+                                          step.index
                                         }
-                                        canReview={d.stageQc.canReview}
-                                        isOwner={d.stageQc.isOwner}
-                                        canManage={site?.canManage === true}
-                                        inspectorAssigned={
-                                          d.stageQc.inspectorAssigned
-                                        }
-                                        records={d.stageQc.records.filter(
-                                          (review) =>
-                                            review.stage_id === stage.id,
-                                        )}
-                                        photos={photos}
-                                        existingChecks={checkRecords}
-                                      />
+                                      >
+                                        <StageOnsiteQcReview
+                                          projectId={d.project.id}
+                                          stageId={stage.id}
+                                          stageName={title}
+                                          topics={[title]}
+                                          topicIndices={[step.index]}
+                                          earlyQc
+                                          stageStatus={
+                                            stageExecution?.status ??
+                                            'not_started'
+                                          }
+                                          canReview={d.stageQc.canReview}
+                                          isOwner={d.stageQc.isOwner}
+                                          canManage={site?.canManage === true}
+                                          inspectorAssigned={
+                                            d.stageQc.inspectorAssigned
+                                          }
+                                          records={d.stageQc.records.filter(
+                                            (review) =>
+                                              review.stage_id === stage.id,
+                                          )}
+                                          photos={photos}
+                                          existingChecks={checkRecords}
+                                        />
+                                      </div>
                                     </div>
                                   );
                                 return (
@@ -2864,7 +2946,7 @@ function ProjectMilestoneSection({ d }: { d: WorkspaceData }) {
                 <p>
                   The quotation preview becomes progressable after the project
                   contract is prepared. The owner can upload an offline
-                  agreement or record the homeowner's offline approval of the
+                  agreement or record the homeowner’s offline approval of the
                   Final quotation; no digital signature is required.
                 </p>
               </div>
