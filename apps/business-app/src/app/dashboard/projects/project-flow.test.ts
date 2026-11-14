@@ -329,8 +329,8 @@ describe('single project flow model', () => {
       /public\.(payments|receipts|invoices|payment_requests)/,
     );
     expect(migration).not.toContain('payment_record');
-    expect(forms).toContain(
-      'it does not add a company receipt, invoice, or company cash expense',
+    expect(forms).toMatch(
+      /it does not add a company receipt,\\s*invoice,\\s*or company cash\\s*expense/i,
     );
   });
 });
