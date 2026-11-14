@@ -64,12 +64,10 @@ begin
    result=public.project_site_command(org,project,'design_submit',jsonb_build_object('kind',kind,'reference','Approved reference drawing '||kind));
    design_id=(result->>'id')::uuid;
    perform public.project_site_command(org,project,'design_decide',jsonb_build_object('id',design_id,'decision','approved','note','Reviewed'));
-   -- Approve each required drawing before its dependent plan can start:
-   -- floor plan -> structural -> electrical -> plumbing. 3D remains optional.
-   if kind in ('architectural_plan','structural_design','electrical_plan') then
-     perform public.project_design_client_decision(org,project,design_id,'approved',
-       'Homeowner approved the '||kind||' at the site meeting');
-   end if;
+   -- Record the owner's decision for every submitted drawing. The required
+   -- sequence is floor plan -> structural -> electrical -> plumbing.
+   perform public.project_design_client_decision(org,project,design_id,'approved',
+     'Homeowner approved the '||kind||' at the site meeting');
  end loop;
  begin
    perform public.project_site_command(org,project,'client_approve',jsonb_build_object('evidence',''));
