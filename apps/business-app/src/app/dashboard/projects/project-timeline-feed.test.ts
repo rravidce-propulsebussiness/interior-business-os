@@ -31,11 +31,11 @@ it('routes All Projects selections into the single timeline-first project worksp
   const agreementAction = read('./[id]/site/agreement-actions.ts');
   expect(projectEntry).toContain('view="timeline"');
   expect(screen).toContain('function ProjectTimelineFeed');
-  expect(screen).toContain('<ProjectFlow d={d}/>');
-  expect(screen).toContain("{slug:'timeline',title:'Timeline'");
-  expect(screen).toContain("{slug:'milestones',title:'Milestones'");
-  expect(screen).toContain(
-    'overview:Timeline,timeline:Timeline,milestones:Milestones',
+  expect(screen).toMatch(/<ProjectFlow\s+d=\{d\}\s*\/>/);
+  expect(screen).toMatch(/slug:\s*'timeline',\s*title:\s*'Timeline'/);
+  expect(screen).toMatch(/slug:\s*'milestones',\s*title:\s*'Milestones'/);
+  expect(screen).toMatch(
+    /overview:\s*Timeline,\s*timeline:\s*Timeline,\s*milestones:\s*Milestones/,
   );
   expect(navigation).toContain("label: 'Projects'");
   expect(agreementAction).toContain(

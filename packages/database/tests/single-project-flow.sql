@@ -574,7 +574,8 @@ end$engineer_curing$;
 -- 8. Tomorrow's material: one from the BOQ, one manual; nothing ordered.
 ------------------------------------------------------------------------------
 do $materials$
-declare boq jsonb;steel uuid;tomorrow date=(now() at time zone 'Asia/Kolkata')::date+1;
+declare boq jsonb;steel uuid;binding uuid;result jsonb;material_read jsonb;
+ payments_before bigint;tomorrow date=(now() at time zone 'Asia/Kolkata')::date+1;
 begin
  boq=public.project_boq_items_read(pg_temp.org(),pg_temp.project());
  if jsonb_array_length(boq)<>3 or boq::text ~* 'rate|amount' then raise exception 'FAIL: BOQ projection wrong or leaks prices: %',boq;end if;
@@ -584,6 +585,41 @@ begin
     jsonb_build_object('boq_item_id',steel,'quantity','0.8','unit','tonnes','required_date',tomorrow),
     jsonb_build_object('item','OPC 53 grade cement','quantity','40','unit','bags','required_date',tomorrow,'notes','For column starters'),
     jsonb_build_object('item','Binding wire','quantity','25','unit','kg','required_date',tomorrow)));
+ -- The owner may record a homeowner's direct supplier cash settlement on the
+ -- existing ordered material. This must remain separate from company Finance.
+ select (x->>'id')::uuid into binding
+  from jsonb_array_elements(public.project_site_read(pg_temp.org(),pg_temp.project())->'materials') x
+  where x->>'item'='Binding wire' order by x->>'id' limit 1;
+ if binding is null then raise exception 'FAIL: test material request missing';end if;
+ perform set_config('test.direct_cash_material',binding::text,true);
+ perform pg_temp.as_user('11111111-1111-4111-8111-111111111111');
+ perform public.project_site_command(pg_temp.org(),pg_temp.project(),'material_update',
+   jsonb_build_object('id',binding,'status','approved','source','outside','vendor_reference',''));
+ perform public.project_material_delivery_command(pg_temp.org(),pg_temp.project(),binding,
+   'place_outside_order','TEST ONLY — local DB supplier order',tomorrow,'anytime');
+ select count(*) into payments_before from public.payments
+  where organization_id=pg_temp.org() and project_id=pg_temp.project();
+ result=public.project_material_homeowner_cash_paid(pg_temp.org(),pg_temp.project(),binding,
+   2500.00,(now() at time zone 'Asia/Kolkata')::date,'TEST ONLY local supplier','TEST ONLY cash ref',
+   'TEST ONLY — synthetic homeowner direct cash settlement');
+ if result->>'method'<>'cash' or result->>'saved'<>'true' then
+   raise exception 'FAIL: owner could not record direct supplier cash: %',result;end if;
+ result=public.project_material_homeowner_cash_paid(pg_temp.org(),pg_temp.project(),binding,
+   2500.00,(now() at time zone 'Asia/Kolkata')::date,'TEST ONLY local supplier','TEST ONLY cash ref',
+   'TEST ONLY — synthetic homeowner direct cash settlement');
+ if result->>'already_recorded'<>'true' then raise exception 'FAIL: direct cash retry was not idempotent';end if;
+ perform pg_temp.expect_fail(format($q$select public.project_material_homeowner_cash_paid(%L,%L,%L,2501.00,(now() at time zone 'Asia/Kolkata')::date,'TEST ONLY local supplier','TEST ONLY cash ref','TEST ONLY changed duplicate')$q$,
+   pg_temp.org(),pg_temp.project(),binding),'23505','different duplicate direct payment rejected');
+ material_read=public.project_material_access_read(pg_temp.org(),pg_temp.project());
+ if not exists(select 1 from jsonb_array_elements(material_read->'delivery') x
+   where x->>'id'=binding::text and x->>'homeowner_paid_method'='cash'
+    and x->>'homeowner_paid_to'='TEST ONLY local supplier'
+    and (x->>'homeowner_paid_amount')::numeric=2500) then
+   raise exception 'FAIL: direct cash payment missing from persisted material read model: %',material_read;end if;
+ if (select count(*) from public.payments where organization_id=pg_temp.org()
+      and project_id=pg_temp.project())<>payments_before then
+   raise exception 'FAIL: direct supplier payment created a company Finance receipt';end if;
+ perform pg_temp.as_user('22222222-2222-4222-8222-222222222222');
  perform pg_temp.expect_fail(format('select public.project_work_item_material_request(%L,%L,%L,0,%L)',pg_temp.org(),pg_temp.project(),
    pg_temp.stage('FOUNDATION'),jsonb_build_array(jsonb_build_object('boq_item_id',gen_random_uuid(),'quantity','1','unit','nos','required_date',tomorrow))),
    '22023','foreign BOQ line rejected');
@@ -595,15 +631,24 @@ do $material_check$
 declare project uuid=current_setting('test.flow_project')::uuid;
 begin
  if (select count(*) from private.site_material_needs where project_id=project and required_date is not null
-      and status='requested' and requested_by='22222222-2222-4222-8222-222222222222' and activity_index=3)<>3
+      and requested_by='22222222-2222-4222-8222-222222222222' and activity_index=3)<>3
+  or (select count(*) from private.site_material_needs where project_id=project and required_date is not null
+      and status='requested' and requested_by='22222222-2222-4222-8222-222222222222' and activity_index=3)<>2
+  or (select count(*) from private.site_material_needs where project_id=project
+      and homeowner_paid_method='cash' and homeowner_paid_amount=2500
+      and homeowner_paid_by='11111111-1111-4111-8111-111111111111')<>1
   or (select count(*) from private.site_material_needs where project_id=project and boq_item_id is not null)<>1
  then raise exception 'FAIL: material requests not captured with activity, date and requester';end if;
  if exists(select 1 from public.purchase_orders where project_id=project)
   or exists(select 1 from public.purchase_requisitions where project_id=project)
  then raise exception 'FAIL: material request created procurement documents automatically';end if;
- raise notice 'PASS 8: BOQ and manual material requests captured; no PO, stock or payment created';
+ raise notice 'PASS 8: BOQ and manual material requests captured; direct supplier cash stayed outside company Finance';
 end$material_check$;
 set local role authenticated;
+select pg_temp.as_user('77777777-7777-4777-8777-777777777777');
+select pg_temp.expect_fail(format($q$select public.project_material_homeowner_cash_paid(%L,%L,%L,2500.00,(now() at time zone 'Asia/Kolkata')::date,'TEST ONLY local supplier','','TEST ONLY permission check')$q$,
+ pg_temp.org(),pg_temp.project(),current_setting('test.direct_cash_material',true)::uuid),
+ '42501','watchman cannot record procurement payment');
 
 ------------------------------------------------------------------------------
 -- 9. Certification, stage payments and concurrent floors.

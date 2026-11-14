@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
   chronologicalGroups,
   flowBuckets,
@@ -77,9 +78,18 @@ const execution = [
 describe('single project flow model', () => {
   it('does not show an advance milestone without a schedule or Finance invoice', () => {
     expect(shouldShowAdvancePayment(null)).toBe(false);
-    expect(shouldShowAdvancePayment({ invoiceId: null, scheduleActive: false })).toBe(false);
-    expect(shouldShowAdvancePayment({ invoiceId: null, scheduleActive: true })).toBe(true);
-    expect(shouldShowAdvancePayment({ invoiceId: 'invoice-1', scheduleActive: false })).toBe(true);
+    expect(
+      shouldShowAdvancePayment({ invoiceId: null, scheduleActive: false }),
+    ).toBe(false);
+    expect(
+      shouldShowAdvancePayment({ invoiceId: null, scheduleActive: true }),
+    ).toBe(true);
+    expect(
+      shouldShowAdvancePayment({
+        invoiceId: 'invoice-1',
+        scheduleActive: false,
+      }),
+    ).toBe(true);
   });
 
   it('resolves exactly one role per person from canonical site permissions', () => {
@@ -289,5 +299,38 @@ describe('single project flow model', () => {
     expect(parseCuring({})).toBeNull();
     expect(floorName('F3')).toBe('3rd floor');
     expect(floorName('GROUND')).toBe('Ground floor');
+  });
+
+  it('keeps homeowner supplier cash separate from company Finance', () => {
+    const read = (path: string) =>
+      readFileSync(new URL(path, import.meta.url), 'utf8');
+    const migration = read(
+      '../../../../../../packages/database/supabase/migrations/20261113230000_owner_homeowner_direct_cash_supplier_payment.sql',
+    );
+    const actions = read('./[id]/site/stage-checklist-actions.ts');
+    const forms = read('./project-v2-forms.tsx');
+    const view = read('./project-v2-view.tsx');
+    expect(migration).toContain(
+      'private.project_material_can_order(p_org, p_project)',
+    );
+    expect(migration).toContain(
+      "v_material.status NOT IN ('ordered', 'received')",
+    );
+    expect(migration).toContain("homeowner_paid_method = 'cash'");
+    expect(migration).toContain('homeowner_paid_request_hash');
+    expect(migration).toContain("'already_recorded', true");
+    expect(actions).toMatch(
+      /client\.rpc\(\s*['"]project_material_homeowner_cash_paid['"]/,
+    );
+    expect(forms).toContain('Cash settlement only.');
+    expect(view).toContain('Homeowner paid supplier directly · cash');
+    expect(view).toContain('d.materialAccess.canOrder');
+    expect(migration).not.toMatch(
+      /public\.(payments|receipts|invoices|payment_requests)/,
+    );
+    expect(migration).not.toContain('payment_record');
+    expect(forms).toMatch(
+      /it does not add a company receipt,\s*invoice,\s*or company cash\s*expense/i,
+    );
   });
 });
