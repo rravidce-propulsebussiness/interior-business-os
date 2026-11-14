@@ -97,8 +97,10 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   const estimated = new Map<string, { start: string; finish: string }>();
   const floorIndex = (stage: Stage) => Math.max(0, floorCodes.indexOf(stage.floor_code ?? ''));
   const prior = (code: string, stage: Stage) => {
-    const match = stages.find((row) => row.template_code.split('/')[0] === code &&
-      (!stage.floor_code || row.floor_code === stage.floor_code));
+    const matches = stages.filter((row) => row.template_code.split('/')[0] === code);
+    const match = stage.floor_code
+      ? matches.find((row) => row.floor_code === stage.floor_code) ?? matches.find((row) => !row.floor_code)
+      : matches.find((row) => !row.floor_code) ?? matches[0];
     return match ? estimated.get(match.id) : undefined;
   };
   for (const stage of stages) {
@@ -177,7 +179,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   });
   const tomorrowItems = items.filter((item) => {
     const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
-    const when = plan?.plannedStart ?? estimated.get(item.stage.id)?.start;
+    const when = plan?.plannedStart ?? estimatedItemDate(item);
     return when === tomorrow && !isComplete(item.status);
   });
   const workDone = items.filter((item) => isComplete(item.status)).length;
