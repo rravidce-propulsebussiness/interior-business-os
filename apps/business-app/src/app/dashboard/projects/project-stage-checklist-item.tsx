@@ -117,7 +117,7 @@ export function StageChecklistItem({projectId,stageId,kind,index,title,status,no
     <label>Update notes (optional)<textarea name="note" rows={2} maxLength={2000}
       placeholder="Measurements, result, location or pending issue" defaultValue={notes??''}/></label>
     <button type="submit" className="pv2-button pv2-primary" disabled={pending}>
-     {pending?'Saving…':'Save this item'}</button>
+     {pending?'Saving…':kind==='check'?'Save check result':'Mark work complete'}</button>
     {!evidenceEdited&&state.message&&<p role="status" className={'pv2-form-feedback '+(state.saved?'good':'bad')}>{state.message}</p>}
    </form>:!canEdit&&!skipped?<p className="pv2-hint">Only authorized site engineers or project managers can update this item.</p>:null}
    {canSkip&&kind==='work'&&status==='pending'&&<div className="pv2-item-skip">
