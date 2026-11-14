@@ -7,6 +7,7 @@ import { StageChecklistItem } from './project-stage-checklist-item';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectItemSchedule } from './project-item-schedule';
 import { StageButton } from './project-flow-controls';
+import { ProjectTimelineExpandControl } from './project-timeline-expand-control';
 import { PrepareAgreement } from './project-v2-forms';
 import { CuringRounds, CuringPlanForm, type CuringRoundView } from './project-curing-card';
 import './project-milestone-timeline.css';
@@ -332,7 +333,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
 
     <section className="pmt-timeline" id="project-timeline">
       <div className="pmt-timeline-head"><div><h2>All stages</h2><p>Baseline dates are fixed from the project creation date. You can adjust the current plan without changing the baseline; early and late work is labelled against it.</p></div>
-        <span>{stages.length} stages</span></div>
+        <div className="pmt-board-controls"><span>{stages.length} stages</span><ProjectTimelineExpandControl/></div></div>
       {stages.map((stage, index) => {
         const range = windowFor(stage);
         const stageItems = grouped.get(stage.id) ?? [];
