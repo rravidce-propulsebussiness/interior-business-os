@@ -94,17 +94,45 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   });
   const startDate = dayKey(new Date(d.project.createdAt));
   const floorCodes = [...new Set(stages.map((stage) => stage.floor_code).filter((code): code is string => Boolean(code)))];
-  let offset = 0;
   const estimated = new Map<string, { start: string; finish: string }>();
+  const floorIndex = (stage: Stage) => Math.max(0, floorCodes.indexOf(stage.floor_code ?? ''));
+  const prior = (code: string, stage: Stage) => {
+    const match = stages.find((row) => row.template_code.split('/')[0] === code &&
+      (!stage.floor_code || row.floor_code === stage.floor_code));
+    return match ? estimated.get(match.id) : undefined;
+  };
   for (const stage of stages) {
-    const days = durationByCode[stage.template_code.split('/')[0] ?? ''] ?? 10;
-    const start = addDays(startDate, offset);
+    const code = stage.template_code.split('/')[0] ?? '';
+    const days = durationByCode[code] ?? 10;
+    let start = startDate;
+    if (code === 'DESIGN') start = addDays(prior('PRECONSTRUCTION', stage)?.finish ?? startDate, 1);
+    else if (code === 'SITE_PREP') start = addDays(prior('DESIGN', stage)?.finish ?? startDate, 1);
+    else if (code === 'FOUNDATION') start = addDays(prior('SITE_PREP', stage)?.finish ?? startDate, 1);
+    else if (code === 'PLINTH') start = addDays(prior('FOUNDATION', stage)?.finish ?? startDate, 1);
+    else if (code === 'RCC') start = addDays(prior('PLINTH', stage)?.finish ?? startDate, 1 + floorIndex(stage) * 12);
+    else if (code === 'MASONRY') start = addDays(prior('RCC', stage)?.finish ?? startDate, 1);
+    else if (code === 'INTERNAL_PLASTER') start = addDays(prior('MASONRY', stage)?.start ?? startDate, 30);
+    else if (code === 'EXTERNAL_PLASTER') start = addDays(prior('INTERNAL_PLASTER', stage)?.start ?? startDate, 10);
+    else if (code === 'TILES') start = addDays(prior('INTERNAL_PLASTER', stage)?.finish ?? startDate, 1);
+    else if (code === 'DOORS') start = addDays(prior('TILES', stage)?.finish ?? startDate, 1);
+    else if (code === 'PLUMBING_PAINT') start = addDays(prior('DOORS', stage)?.finish ?? startDate, 1);
+    else if (code === 'HANDOVER') {
+      const finish = [...estimated.values()].map((row) => row.finish).sort().at(-1) ?? startDate;
+      start = addDays(finish, 1);
+    } else if (code !== 'PRECONSTRUCTION') start = addDays(startDate, Math.max(stage.sequence, 0) * 5);
     const finish = addDays(start, Math.max(days - 1, 0));
     estimated.set(stage.id, { start, finish });
-    offset += days;
   }
   const plansByKey = new Map(d.itemPlans.map((plan) =>
     [itemPlanKey(plan.stageId, plan.kind, plan.index), plan]));
+  const estimatedItemDate = (item: WorkItem) => {
+    const window = estimated.get(item.stage.id);
+    if (!window) return startDate;
+    const rows = grouped.get(item.stage.id) ?? [];
+    const days = durationByCode[item.stage.template_code.split('/')[0] ?? ''] ?? 10;
+    const slot = rows.length ? Math.floor(item.index * days / rows.length) : 0;
+    return addDays(window.start, Math.min(slot, Math.max(days - 1, 0)));
+  };
   const windowFor = (stage: Stage) => {
     const planned = d.itemPlans.filter((plan) => plan.stageId === stage.id &&
       plan.plannedStart && plan.plannedFinish);
@@ -124,7 +152,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       blockers: item.blockers, optional: item.optional, assigneeId: item.assigneeId,
       assigneeLabel: item.assigneeId ? (item.assigneeId === d.flow.userId ? 'You' : people.get(item.assigneeId) ?? 'Assigned') : '',
       crew: item.crew, skipReason: item.skipReason, measurements: item.measurements,
-      prompts: measurementPrompts(item.title), planned: p?.plannedStart ? shortDate(p.plannedStart) : displayDay(estimated.get(item.stage.id)?.start ?? ''),
+      prompts: measurementPrompts(item.title), planned: p?.plannedStart ? shortDate(p.plannedStart) : displayDay(estimatedItemDate(item)),
       hasPhoto: Boolean(item.photoId),
       openMaterials: materials.filter((material) => materialStage.get(material.id) === item.stage.id &&
         Number(material.activity_index) === item.index &&
@@ -144,7 +172,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   };
   const todayItems = items.filter((item) => {
     const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
-    const when = plan?.plannedStart ?? estimated.get(item.stage.id)?.start;
+    const when = plan?.plannedStart ?? estimatedItemDate(item);
     return when === today && !isComplete(item.status);
   });
   const tomorrowItems = items.filter((item) => {
