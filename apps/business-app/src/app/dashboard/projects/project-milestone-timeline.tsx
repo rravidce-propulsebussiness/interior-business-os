@@ -24,9 +24,9 @@ const addDays = (value: string, days: number) => {
   return d.toISOString().slice(0, 10);
 };
 const durationByCode: Record<string, number> = {
-  PRECONSTRUCTION: 10, DESIGN: 8, SITE_PREP: 7, FOUNDATION: 18, PLINTH: 12,
+  PRECONSTRUCTION: 10, DESIGN: 8, SITE_PREP: 18, FOUNDATION: 10, PLINTH: 10,
   RCC: 18, MASONRY: 55, INTERNAL_PLASTER: 25, EXTERNAL_PLASTER: 25,
-  TILES: 18, DOORS: 15, PLUMBING_PAINT: 18, HANDOVER: 7,
+  TILES: 18, DOORS: 18, PLUMBING_PAINT: 18, HANDOVER: 7,
 };
 const isComplete = (status: string) => ['completed', 'passed', 'certified', 'skipped'].includes(status);
 const itemPlanKey = (stageId: string, kind: string, index: number) => stageId + ':' + kind + ':' + index;
@@ -103,7 +103,16 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       : matches.find((row) => !row.floor_code) ?? matches[0];
     return match ? estimated.get(match.id) : undefined;
   };
-  for (const stage of stages) {
+  const estimateRank: Record<string, number> = {
+    PRECONSTRUCTION: 0, DESIGN: 1, SITE_PREP: 2, FOUNDATION: 3, PLINTH: 4,
+    RCC: 5, MASONRY: 6, INTERNAL_PLASTER: 7, EXTERNAL_PLASTER: 8,
+    TILES: 9, DOORS: 10, PLUMBING_PAINT: 11, HANDOVER: 12,
+  };
+  const estimateStages = [...stages].sort((a, b) =>
+    (estimateRank[a.template_code.split('/')[0] ?? ''] ?? 20) -
+    (estimateRank[b.template_code.split('/')[0] ?? ''] ?? 20) ||
+    floorIndex(a) - floorIndex(b) || a.sequence - b.sequence);
+  for (const stage of estimateStages) {
     const code = stage.template_code.split('/')[0] ?? '';
     const days = durationByCode[code] ?? 10;
     let start = startDate;
