@@ -73,3 +73,9 @@
 .pmt-delay-count{padding:5px 8px;border-radius:20px;background:#fbe3e3;font-size:9px;font-weight:750;white-space:nowrap}
 .pmt-stage-variance{font-weight:700}
 @media(max-width:600px){.pmt-delay-summary{align-items:flex-start}.pmt-delay-count{align-self:center}.pmt .pf-work-head{align-items:flex-start}.pmt .pf-pill{white-space:normal;text-align:center}}
+
+.pmt-board-controls{display:flex;align-items:center;gap:8px}
+.pmt-board-controls>span{font-size:9px;color:#88352b;background:#fbefeb;padding:6px 9px;border-radius:20px;white-space:nowrap}
+.pmt-expand-control{border:1px solid #e8ddd6;border-radius:8px;background:#fff;color:#88352b;padding:7px 10px;font-size:9px;font-weight:700;white-space:nowrap}
+.pmt-expand-control:hover{background:#fbefeb}
+@media(max-width:700px){.pmt-board-controls{margin-left:auto}.pmt-timeline-head{align-items:flex-start}.pmt-expand-control{padding:6px 8px}}
