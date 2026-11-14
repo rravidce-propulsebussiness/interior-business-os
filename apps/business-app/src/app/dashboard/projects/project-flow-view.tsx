@@ -447,7 +447,11 @@ export function ProjectFlow({ d }: { d: WorkspaceData }) {
               title="Submit for QC"
               tone="violet"
               count={b.readyForQc.length}
-              hint="An independent QC inspector decides pass or fail. Corrections reopen only the failed item."
+              hint={
+                role === 'owner'
+                  ? 'The company owner can record QC after inspecting the site. Owner self-review is recorded in the audit history.'
+                  : 'An independent QC inspector decides pass or fail. Corrections reopen only the failed item.'
+              }
             >
               <ul className="pf-plain">
                 {b.readyForQc.map((s) => (
@@ -470,7 +474,11 @@ export function ProjectFlow({ d }: { d: WorkspaceData }) {
                   <li key={s.id}>
                     <span>
                       <b>{stageLabel(s)}</b>
-                      <small>Waiting for QC inspector</small>
+                      <small>
+                        {role === 'owner'
+                          ? 'Waiting for owner or QC inspector review'
+                          : 'Waiting for QC inspector'}
+                      </small>
                     </span>
                     <span className="pf-pill pf-pill-on_hold">Awaiting QC</span>
                   </li>
@@ -579,7 +587,11 @@ export function ProjectFlow({ d }: { d: WorkspaceData }) {
           title="Inspections awaiting decision"
           tone="violet"
           count={b.awaitingQc.length}
-          hint="Inspect on site, record pass or fail with a photo. You cannot approve work you checked yourself."
+          hint={
+            role === 'owner'
+              ? 'Inspect on site and record pass or fail with a photo. The company owner can review their own checks; self-review is recorded in the audit history.'
+              : 'Inspect on site, record pass or fail with a photo. You cannot approve work you checked yourself.'
+          }
         >
           {b.awaitingQc.length ? (
             b.awaitingQc.map((s) =>
@@ -653,7 +665,8 @@ function DesignJourney({ d, role }: { d: WorkspaceData; role: FlowRole }) {
     const x = latest(kind);
     const position = kinds.indexOf(kind);
     const prior = position > 0 ? latest(kinds[position - 1]!) : undefined;
-    const priorApproved = position === 0 ||
+    const priorApproved =
+      position === 0 ||
       (prior?.status === 'approved' && Boolean(prior.clientApprovedAt));
     if (!priorApproved) return 'Waits for previous design approval';
     if (!x) return 'To prepare';
