@@ -21,7 +21,7 @@ describe('mobile project milestone navigation', () => {
     expectSource(tabs).toContain('tab: false');
     expectSource(view).toContain('timeline: Milestones');
     expectSource(view).toContain('milestones: Milestones');
-    expectSource(primaryFlow).toContain('<ProjectFlow d={d} />');
+    expectSource(primaryFlow).toContain('<ProjectFlow d={d} milestoneMode />');
     expectSource(primaryFlow).toContain('<ProjectMilestoneSection d={d} />');
     expectSource(view).toContain('<h2>Project milestones</h2>');
     expectSource(view).toContain('Planned: {stagePlan.count} item');

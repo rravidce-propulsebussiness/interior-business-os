@@ -30,8 +30,8 @@ it('routes All Projects selections into the single milestones-first project work
   const navigation = read('../owner-workspace-navigation.ts');
   const agreementAction = read('./[id]/site/agreement-actions.ts');
   expect(projectEntry).toContain('view="timeline"');
-  expect(screen).toContain('function ProjectTimelineFeed');
-  expect(screen).toMatch(/<ProjectFlow\s+d=\{d\}\s*\/>/);
+  expect(screen).not.toContain('function ProjectTimelineFeed');
+  expect(screen).toMatch(/<ProjectFlow\s+d=\{d\}\s+milestoneMode\s*\/>/);
   expect(screen).toMatch(/slug:\s*'milestones',\s*title:\s*'Milestones'/);
   expect(screen).toMatch(
     /slug:\s*'timeline',\s*title:\s*'Milestones',[\s\S]*?tab:\s*false/,

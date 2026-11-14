@@ -12,6 +12,7 @@ describe('progressable quotation-linked milestones', () => {
   const actions = read('./[id]/site/work-item-actions.ts');
   const checklist = read('./project-stage-checklist-item.tsx');
   const reviewActions = read('./project-stage-review-actions.tsx');
+  const flowView = read('./project-flow-view.tsx');
   const onsiteQc = read('./project-onsite-qc-review.tsx');
   const onsiteQcAction = read('./[id]/site/onsite-qc-actions.ts');
   const rccGroups = read('./project-rcc-substage-groups.tsx');
@@ -37,9 +38,12 @@ describe('progressable quotation-linked milestones', () => {
       view.indexOf('function Documents('),
     );
     expectSource(milestones).toContain('const hasLiveStages=d.stages.length>0');
-    expectSource(milestones).toContain('{hasLiveStages&&(');
+    expectSource(milestones).toContain(
+      'hasLiveStages&&<ProjectWorkHub d={d} showHistory/>',
+    );
     expectSource(milestones).toContain('<ProjectWorkHub d={d} showHistory/>');
-    expectSource(milestones).toContain('<ProjectTimelineFeed d={d}/>');
+    expectSource(milestones).not.toContain('<ProjectTimelineFeed');
+    expectSource(flowView).toContain("!milestoneMode && role !== 'watchman'");
     expectSource(workItem).toContain("send('start')");
     expectSource(workItem).toContain("submitForm('complete')");
     expectSource(workItem).toContain('router.refresh()');
@@ -111,11 +115,20 @@ describe('progressable quotation-linked milestones', () => {
     expectSource(rccGroups).toContain("label: 'Today'");
     expectSource(rccGroups).toContain("label: 'Tomorrow'");
     expectSource(rccGroups).toContain("return 'Delayed'");
+    expectSource(rccGroups).toContain(
+      "aria-label={stageTitle + ' daily work'}",
+    );
     expectSource(rccGroups).not.toContain("'use client'");
     expectSource(rccGroups).toContain(
       '<OpenRccWorkButton targetId={row.id} />',
     );
     expectSource(rccOpenButton).toContain("'use client'");
     expectSource(rccOpenButton).toContain('target.scrollIntoView');
+    expectSource(view).not.toContain('pv2-planned-overview-grid');
+    expectSource(view).toContain('One stage flow for dated work');
+    expectSource(view).toContain('Payment stage');
+    expectSource(view).toContain(
+      'd.quotePaymentTriggers.indexOf(milestone) + 1',
+    );
   });
 });

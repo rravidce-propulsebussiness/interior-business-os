@@ -26,7 +26,6 @@ import { BulkStageChecks } from './project-stage-bulk-checks';
 import { StageOnsiteQcReview } from './project-onsite-qc-review';
 import { ProjectStageReviewActions } from './project-stage-review-actions';
 import { RccDailyPlan, RccSubstageGroups } from './project-rcc-substage-groups';
-import { projectTimelineFeed } from './project-timeline-feed';
 import { ProjectQuotationLinker } from './project-quotation-linker';
 import { ProjectFlow } from './project-flow-view';
 import { QuotePlanView } from './project-quote-plan';
@@ -1222,10 +1221,6 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
   )
     .toISOString()
     .slice(0, 10);
-  const upcoming = [...d.itemPlans]
-    .sort((a, b) => a.plannedStart.localeCompare(b.plannedStart))
-    .filter((x) => x.plannedFinish >= todayInIndia)
-    .slice(0, 12);
   const progressForecast = forecastWork(
     timelineStages,
     d.itemPlans,
@@ -1245,8 +1240,8 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
         <div>
           <h2>Project milestones</h2>
           <p>
-            Manage stages, work, payments, materials, labour, photos and checks
-            in one place.
+            One stage flow for dated work, material needs, site checks, QC and
+            the agreed payment milestones.
           </p>
         </div>
         <span className="pv2-timeline-counter">
@@ -1293,32 +1288,10 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
             inspections, QC, invoices or payments as completed.
           </p>
         </div>
-        {upcoming.length > 0 ? (
-          <div className="pv2-planned-overview-grid">
-            {upcoming.map((x) => (
-              <div
-                key={x.stageId + '-' + x.kind + '-' + x.index}
-                className="pv2-planned-upcoming"
-              >
-                <span>
-                  {shortDate(x.plannedStart)} – {shortDate(x.plannedFinish)}
-                </span>
-                <strong>{x.title}</strong>
-                <small>
-                  {timelineStages.find((s) => s.id === x.stageId)?.title ??
-                    'Construction stage'}{' '}
-                  · {pretty(x.kind)}
-                </small>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="pv2-hint">
-            No upcoming dated items. Company stage sequencing is configured in
-            Settings → Payment Settings. Owners and project managers schedule
-            future dates here; site engineers can plan upcoming stages as well.
-          </p>
-        )}
+        <p className="pv2-hint">
+          Today, tomorrow and delayed items appear inside their stage. Open a
+          stage to plan dates, record work, collect evidence and review QC.
+        </p>
       </div>
       {d.agreement && (
         <p className="pv2-timeline-quote-note">
@@ -1893,9 +1866,14 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                     </span>
                   </span>
                   <Status value={delayedWork ? 'delayed' : displayStatus} />
-                  <span className="pv2-stage-meta">
-                    {payment.length} payment milestone
-                    {payment.length === 1 ? '' : 's'}
+                  <span className="pv2-stage-payment-tags">
+                    {payment.map((milestone) => (
+                      <span className="pv2-stage-meta" key={milestone.name}>
+                        Payment stage{' '}
+                        {d.quotePaymentTriggers.indexOf(milestone) + 1} ·{' '}
+                        {milestone.percent}%
+                      </span>
+                    ))}
                   </span>
                   <OwnerIcon name="arrow" size={15} />
                 </summary>
@@ -1928,6 +1906,11 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                   {isRccStage && (
                     <RccDailyPlan
                       stageId={stage.id}
+                      stageTitle={
+                        (stage.floor_code
+                          ? pretty(stage.floor_code)
+                          : stage.title) + ' structural work'
+                      }
                       work={rccWorkItems}
                       materials={rccMaterials}
                       today={todayInIndia}
@@ -1955,26 +1938,29 @@ function ProjectStageBoard({ d }: { d: WorkspaceData }) {
                     <ProjectStageWorkflow d={d} code={stage.template_code} />
                   )}
 
-                  {startingPayments.length > 0 && (
-                    <div className="pv2-stage-payment-start">
-                      <strong>Payment milestone at stage start</strong>
-                      {startingPayments.map((p, i) => (
-                        <p key={i}>
-                          {p.name} · {p.percent}% of accepted quotation
+                  {startingPayments.length > 0 &&
+                    !orderedFlow.some((step) => step.kind === 'payment') && (
+                      <div className="pv2-stage-payment-start">
+                        <strong>Agreed payment stage</strong>
+                        {startingPayments.map((p) => (
+                          <p key={p.name}>
+                            Payment stage{' '}
+                            {d.quotePaymentTriggers.indexOf(p) + 1} · {p.name} ·{' '}
+                            {p.percent}% of accepted quotation
+                          </p>
+                        ))}
+                        <p className="pv2-hint">
+                          Review this agreed payment before starting work.
+                          Invoices, payment requests and verified receipts stay
+                          in Finance. An invoice alone is not proof of payment.
                         </p>
-                      ))}
-                      <p className="pv2-hint">
-                        Review this agreed payment before starting work.
-                        Invoices, payment requests and verified receipts stay in
-                        Finance. An invoice alone is not proof of payment.
-                      </p>
-                      {d.permissions.finance && (
-                        <Link href={cur(d.project.id, 'payments')}>
-                          Check invoice and verified payment status
-                        </Link>
-                      )}
-                    </div>
-                  )}
+                        {d.permissions.finance && (
+                          <Link href={cur(d.project.id, 'payments')}>
+                            Check invoice and verified payment status
+                          </Link>
+                        )}
+                      </div>
+                    )}
                   {physicalStage && site?.stage === 'execution' && (
                     <StageActivationControl
                       projectId={d.project.id}
@@ -2804,111 +2790,6 @@ function ProjectWorkHub({
     </div>
   );
 }
-function ProjectTimelineFeed({ d }: { d: WorkspaceData }) {
-  const items = projectTimelineFeed({
-    stages: projectTimelineStages(d.stages),
-    plans: d.itemPlans,
-    work: d.stageProgress.work,
-    checks: d.stageProgress.checks,
-    execution: d.stageExecution,
-  });
-  const grouped = new Map<string, typeof items>();
-  for (const item of items) {
-    const date = item.plan.plannedStart;
-    grouped.set(date, [...(grouped.get(date) ?? []), item]);
-  }
-  return (
-    <section
-      className="pv2-panel pv2-date-feed"
-      aria-labelledby="pv2-date-feed-title"
-    >
-      <div className="pv2-command-head">
-        <div>
-          <h2 id="pv2-date-feed-title">Milestone schedule</h2>
-          <p>
-            Scheduled dates across floors and activities. Overlapping work stays
-            visible; structural blockers remain enforced.
-          </p>
-        </div>
-        <span className="pv2-timeline-counter">
-          {items.length} scheduled activities
-        </span>
-      </div>
-      {items.length ? (
-        Array.from(grouped, ([date, rows]) => (
-          <section className="pv2-date-group" key={date}>
-            <h3>
-              <time dateTime={date}>{shortDate(date)}</time>
-              <small>
-                {rows.length} planned item{rows.length === 1 ? '' : 's'}
-              </small>
-            </h3>
-            <ol>
-              {rows.map((item) => {
-                const title =
-                  item.plan.kind === 'work'
-                    ? item.stage.activities[item.plan.index]
-                    : item.plan.kind === 'material'
-                      ? item.plan.title
-                      : (item.stage.inspectionTopics[item.plan.index] ??
-                        item.plan.title);
-                return (
-                  <li
-                    key={
-                      item.stage.id +
-                      '-' +
-                      item.plan.kind +
-                      '-' +
-                      item.plan.index
-                    }
-                  >
-                    <span className="pv2-date-feed-time">
-                      {item.plan.plannedStart === item.plan.plannedFinish
-                        ? ''
-                        : shortDate(item.plan.plannedStart) + ' – '}
-                      {shortDate(item.plan.plannedFinish)}
-                    </span>
-                    <div>
-                      <strong>{title}</strong>
-                      <p>
-                        {item.stage.floor_code
-                          ? pretty(item.stage.floor_code) + ' · '
-                          : ''}
-                        {item.stage.title} · {pretty(item.plan.kind)}
-                      </p>
-                      {item.blockers.length > 0 && (
-                        <small className="pv2-date-feed-blocked">
-                          Blocked: {item.blockers.join(' · ')}
-                        </small>
-                      )}
-                      <Status value={item.status} />
-                    </div>
-                    <Link
-                      href={
-                        cur(d.project.id, 'timeline') +
-                        '#project-stage-' +
-                        item.stage.id
-                      }
-                      aria-label={'Open ' + item.stage.title + ' stage details'}
-                    >
-                      Open activity →
-                    </Link>
-                  </li>
-                );
-              })}
-            </ol>
-          </section>
-        ))
-      ) : (
-        <Blank
-          title="No dated work yet"
-          detail="Plan activity dates in the milestone schedule. Dates help organize work; they do not activate work or bypass dependencies."
-        />
-      )}
-    </section>
-  );
-}
-
 type Activity = {
   id: string;
   date: string;
@@ -2979,7 +2860,7 @@ const viewerRole = (d: WorkspaceData) =>
 function Milestones({ d }: { d: WorkspaceData }) {
   return (
     <>
-      <ProjectFlow d={d} />
+      <ProjectFlow d={d} milestoneMode />
       {viewerRole(d) !== 'watchman' && <ProjectMilestoneSection d={d} />}
     </>
   );
@@ -3040,7 +2921,7 @@ function ProjectMilestoneSection({ d }: { d: WorkspaceData }) {
                   stage progress and QC stay in these milestones.
                 </p>
               </div>
-              <Link className="pf-btn pf-btn-primary" href="#flow-today">
+              <Link className="pf-btn pf-btn-primary" href="#project-timeline">
                 View milestones
               </Link>
             </section>
@@ -3052,12 +2933,7 @@ function ProjectMilestoneSection({ d }: { d: WorkspaceData }) {
           />
         </div>
       )}
-      {hasLiveStages && (
-        <>
-          <ProjectWorkHub d={d} showHistory />
-          <ProjectTimelineFeed d={d} />
-        </>
-      )}
+      {hasLiveStages && <ProjectWorkHub d={d} showHistory />}
       {!d.quotePlan && !hasLiveStages && <ProjectWorkHub d={d} showHistory />}
     </>
   );
