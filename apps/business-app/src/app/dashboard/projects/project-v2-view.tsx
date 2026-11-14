@@ -6,41 +6,18 @@ import { OwnerMobileNav } from '../owner-mobile-nav';
 import { OwnerProjectRequests } from '../../project-request-widgets';
 import { canAccess } from '@business-os/auth';
 import { guidanceForConstructionStage } from '@business-os/core/construction-payment-schedule';
-import {
-  ProjectStageLinker,
-  type StageLinkOption,
-} from './project-stage-linker';
-import {
-  suggestedStageMaterials,
-  suggestedActivityMaterials,
-} from './stage-material-options';
 import { MaterialMarketplaceOrder } from './project-material-marketplace-order';
 import {
   MaterialOrderingAccess,
   MaterialDeliveryActions,
 } from './project-material-delivery';
-import { StageChecklistItem } from './project-stage-checklist-item';
-import { ProjectItemSchedule } from './project-item-schedule';
 import { forecastWork } from './project-work-forecast';
-import { BulkStageChecks } from './project-stage-bulk-checks';
-import { StageOnsiteQcReview } from './project-onsite-qc-review';
-import { ProjectStageReviewActions } from './project-stage-review-actions';
-import { RccDailyPlan, RccSubstageGroups } from './project-rcc-substage-groups';
 import { ProjectQuotationLinker } from './project-quotation-linker';
 import { ProjectFlow } from './project-flow-view';
-import {
-  flowRole,
-  measurementPrompts,
-  projectWorkItems,
-  stageLabel,
-} from './project-flow';
-import { WorkItemCard, type WorkItemView } from './project-work-item-card';
-import { StageActivationControl } from './project-stage-activation';
+import { flowRole } from './project-flow';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectSiteSurvey, ProjectAdvanceAction } from './project-next-forms';
-import { effectiveProjectStageStatus } from './project-stage-status';
 import { projectTimelineStages } from './project-visible-stages';
-import { stagePlanPreview } from './project-stage-schedule-preview';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
 import {
@@ -62,7 +39,6 @@ import {
   ReviewCheck,
   GateForm,
   AssignRole,
-  SyncStages,
   ProjectLifecycle,
   PrepareAgreement,
   SignedAgreementUploadForm,
