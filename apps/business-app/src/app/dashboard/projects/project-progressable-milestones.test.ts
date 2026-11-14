@@ -6,66 +6,46 @@ const read = (path: string) =>
   readFileSync(new URL(path, import.meta.url), 'utf8');
 
 describe('progressable quotation-linked milestones', () => {
-  const view = read('./project-v2-view.tsx');
+  const timeline = read('./project-milestone-timeline.tsx');
+  const designWorkflow = read('./project-design-stage-workflow.tsx');
   const workItem = read('./project-work-item-card.tsx');
   const flow = read('./project-flow.ts');
   const actions = read('./[id]/site/work-item-actions.ts');
   const checklist = read('./project-stage-checklist-item.tsx');
-  const reviewActions = read('./project-stage-review-actions.tsx');
   const flowView = read('./project-flow-view.tsx');
   const onsiteQc = read('./project-onsite-qc-review.tsx');
   const onsiteQcAction = read('./[id]/site/onsite-qc-actions.ts');
   const rccGroups = read('./project-rcc-substage-groups.tsx');
   const rccOpenButton = read('./project-rcc-open-work-button.tsx');
 
-  it('shows the final-quotation preparation action in project setup', () => {
-    const milestones = view.slice(
-      view.indexOf('function ProjectMilestoneSection('),
-      view.indexOf('function Documents('),
-    );
-    expectSource(milestones).toContain('Make this project plan actionable');
-    expectSource(milestones).toContain('const quote=d.quotations[0]');
-    expectSource(milestones).toContain(
-      'quote&&d.permissions.manage&&d.permissions.finance&&!d.agreement',
-    );
-    expectSource(milestones).toContain('<PrepareAgreement');
-    expectSource(milestones).toContain('upload an offline');
+  it('shows agreement preparation in the first Design sub-stage', () => {
+    expectSource(timeline).toContain("PRECONSTRUCTION: 'Design payment & agreement'");
+    expectSource(timeline).toContain('<ProjectDesignPaymentAndAgreement data={d}/>');
+    expectSource(designWorkflow).toContain('<PrepareAgreement');
+    expectSource(designWorkflow).toContain('<SkipAgreementUpload');
+    expectSource(designWorkflow).toContain('The project owner can prepare the agreement');
   });
 
-  it('replaces the read-only quote preview with existing live work controls', () => {
-    const milestones = view.slice(
-      view.indexOf('function ProjectMilestoneSection('),
-      view.indexOf('function Documents('),
-    );
-    expectSource(milestones).toContain('const hasLiveStages=d.stages.length>0');
-    expectSource(milestones).toContain(
-      'hasLiveStages&&<ProjectWorkHub d={d} showHistory/>',
-    );
-    expectSource(milestones).toContain('<ProjectWorkHub d={d} showHistory/>');
-    expectSource(milestones).not.toContain('<ProjectTimelineFeed');
-    expectSource(flowView).toContain("!milestoneMode && role !== 'watchman'");
+  it('shows current work actions inside the selected milestone', () => {
+    expectSource(timeline).toContain('<ProjectItemSchedule');
+    expectSource(timeline).toContain('<WorkItemCard');
+    expectSource(timeline).toContain('<StageButton');
+    expectSource(timeline).toContain('<ProjectMilestoneStageCarousel');
+    expectSource(flowView).toContain('<ProjectMilestoneTimeline d={d} />');
     expectSource(workItem).toContain("send('start')");
     expectSource(workItem).toContain("submitForm('complete')");
     expectSource(workItem).toContain('router.refresh()');
     expectSource(actions).toContain("action === 'complete'");
   });
 
-  it('shows milestone progress, today work, evidence, owner skip and separate QC', () => {
-    expectSource(view).toContain('pv2-stage-progress');
-    expectSource(view).toContain('pv2-stage-qc-card');
-    expectSource(view).toContain('Site QC milestone');
-    expectSource(view).toContain("aria-label={stage.title + ' QC progress'}");
-    expectSource(view).toContain('qcPending>0?`${qcPending} pending`');
-    expectSource(view).toContain('qcFailed>0?`${qcFailed} failed`');
-    expectSource(view).toContain('workSchedule.plannedFinish>=todayInIndia');
-    expectSource(view).toContain('<WorkItemCard');
-    expectSource(view).toContain('measurementPrompts(projected.title)');
-    expectSource(view).toContain(
-      'projectedWork.filter(item=>item.stage.id===stage.id&&item.optional)',
-    );
-    expectSource(view).toContain('scheduledToday={scheduledToday}');
-    expectSource(view).toContain('<StageOnsiteQcReview');
-    expectSource(view).toContain('remainingQc.length>0');
+  it('shows today work and evidence-backed site checks without QC in Stage 1', () => {
+    expectSource(timeline).toContain('pmt-progress');
+    expectSource(timeline).toContain('pmt-days');
+    expectSource(timeline).toContain('<WorkItemCard');
+    expectSource(timeline).toContain('<StageChecklistItem');
+    expectSource(timeline).toContain('<StageOnsiteQcReview');
+    expectSource(timeline).toContain('!DESIGN_STAGE_CODES.includes(code)');
+    expectSource(timeline).toContain("action=\"mark_complete\"");
     expectSource(checklist).toContain(
       'accept="image/jpeg,image/png,image/webp"',
     );
@@ -81,24 +61,15 @@ describe('progressable quotation-linked milestones', () => {
     expectSource(workItem).toContain('Today</span>');
     expectSource(flow).toContain("{ label: 'Depth', unit: 'mm' }");
     expectSource(flow).toContain("{ label: 'Width', unit: 'mm' }");
-    const styles = read('./project-v2.css');
-    expectSource(styles).toContain('.pv2-stage-qc-card.is-complete');
-    expectSource(styles).toContain('.pv2-stage-qc-card.has-fail');
+    const styles = read('./project-milestone-timeline.css');
+    expectSource(styles).toContain('.pmt-check');
+    expectSource(styles).toContain('.pmt-design-substage');
   });
 
   it('opens the selected site check or QC item with evidence controls', () => {
-    expectSource(view).toContain('<ProjectStageReviewActions');
-    expectSource(view).toContain("'pv2-stage-check-' + stage.id + '-' + i");
-    expectSource(view).toContain(
-      "'pv2-stage-qc-' + stage.id + '-' + step.index",
-    );
+    expectSource(timeline).toContain('<StageChecklistItem');
+    expectSource(timeline).toContain('<StageOnsiteQcReview');
     expectSource(checklist).toContain('required to pass');
-    expectSource(reviewActions).toContain('target.scrollIntoView');
-    expectSource(reviewActions).toContain('details.pv2-item-checklist');
-    expectSource(reviewActions).toContain('details.pv2-on-site-qc');
-    expectSource(reviewActions).toContain('details.pv2-qc-item');
-    expectSource(reviewActions).toContain('Site checks');
-    expectSource(reviewActions).toContain('Company QC');
     expectSource(onsiteQc).toContain('Site inspection photograph');
     expectSource(onsiteQcAction).toContain(
       'QC Pass and Fail both require project photo evidence.',
@@ -106,9 +77,9 @@ describe('progressable quotation-linked milestones', () => {
   });
 
   it('shows dated RCC work and three expandable work areas in milestones', () => {
-    expectSource(view).toContain('<RccDailyPlan');
-    expectSource(view).toContain('<RccSubstageGroups');
-    expectSource(view).toContain("stage.template_code === 'RCC'");
+    expectSource(timeline).toContain('<RccSubstageGroups');
+    expectSource(timeline).toContain("code === 'RCC'");
+    expectSource(timeline).toContain('<ProjectItemSchedule');
     expectSource(rccGroups).toContain("title: 'Columns'");
     expectSource(rccGroups).toContain("title: 'Staircase'");
     expectSource(rccGroups).toContain("title: 'Slab & beams'");
@@ -124,11 +95,7 @@ describe('progressable quotation-linked milestones', () => {
     );
     expectSource(rccOpenButton).toContain("'use client'");
     expectSource(rccOpenButton).toContain('target.scrollIntoView');
-    expectSource(view).not.toContain('pv2-planned-overview-grid');
-    expectSource(view).toContain('One stage flow for dated work');
-    expectSource(view).toContain('Payment stage');
-    expectSource(view).toContain(
-      'd.quotePaymentTriggers.indexOf(milestone) + 1',
-    );
+    expectSource(timeline).toContain('Today');
+    expectSource(timeline).toContain('Tomorrow');
   });
 });
