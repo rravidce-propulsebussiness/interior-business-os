@@ -177,10 +177,23 @@ describe('lead-driven quotation creation', () => {
     expect(css).not.toContain('.qs-create-type');
     expect(form).toContain('onChange={(event) => chooseLead(event.target.value)}');
     expect(form).toContain('selectedLead?.industryKey &&');
-    expect(form).toContain('existingCustomer ? industryKey');
+    expect(form).toContain('(existingCustomer || quoteWithoutLead) ? industryKey');
     expect(form).toContain('Auto-detected from lead');
-    expect(form).toContain('disabled={pending || (!existingCustomer && !leadId) || !industry}');
+    expect(form).toContain('disabled={pending || (!existingCustomer && !quoteWithoutLead && !leadId) || !industry}');
     expect(form).toContain("industry === 'construction' && !initialCustomizedQuote ? 'sft' : 'custom'");
+  });
+
+  it('offers quote preparation without creating a CRM lead when none are available', () => {
+    expect(form).toContain('No CRM leads yet? Prepare a quote now.');
+    expect(form).toContain('canPrepareWithoutLead');
+    expect(page).toContain("canPrepareWithoutLead={s.allowed('customer.create', 'crm') || s.allowed('customer.create', 'quotation')}");
+    expect(form).toContain('Quotation service');
+    expect(form).toContain('quoteWithoutLead ? { industryKey: industry } : { leadId }');
+    expect(form).toContain('Prepare quotation →');
+    expect(css).toContain('.qs-no-leads-callout');
+    expect(action).toContain('select a service for a quote without a lead.');
+    expect(action).toContain("Choose an active service before preparing a quote without a lead.");
+    expect(action).toContain("createProspect('quotation_prospect_project_create'");
   });
 
   it('requires a quotation before project conversion and no longer opens blank projects', () => {
@@ -318,11 +331,12 @@ describe('automatic CRN reuse from selected lead', () => {
   });
 
   it('resolves existing CRN securely on the server, never by a browser-selected id', () => {
-    expect(form).toContain('...(existingCustomer ? { customerId: existingCustomer.id, industryKey: industry } : { leadId })');
+    expect(form).toContain('quoteWithoutLead ? { industryKey: industry } : { leadId }');
     expect(action).toContain('customerId: z.uuid().optional()');
     expect(action).toContain("await s.client.rpc('lead_quotation_list'");
     expect(action).toContain('contactMatches(candidate, quoteClient)');
-    expect(action).toContain('phone: lead?.phone');
+    expect(action).toContain('phone: lead.phone');
+    expect(action).toContain('(!lead || contactMatches(candidate, {');
     expect(action).toContain('let customerId = existingCustomer?.id || leadCustomerId || matches[0]?.id ||');
     expect(action).toContain('if (!customerId) {');
   });

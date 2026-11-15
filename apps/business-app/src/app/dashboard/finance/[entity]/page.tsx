@@ -153,7 +153,7 @@ export default async function FinanceList({
     s.allowed('contract.view') ? s.finance.search('contracts', { q: query.lookup ?? '' }, lookupPage) : Promise.resolve({ rows: [] }),
     s.repository.organization(s.org),
   ]);
-  const choices: Record<string, { value: string; label: string }[]> = {
+  const choices = {
     customer_id: (customers.data ?? []).map((row) => ({ value: row.id, label: row.display_name })),
     project_id: (projects.data ?? []).map((row) => ({ value: row.id, label: row.name })),
     branch_id: (branches.data ?? []).map((row) => ({ value: row.id, label: row.name })),
@@ -175,6 +175,12 @@ export default async function FinanceList({
       page: String(targetPage),
     }).toString();
   const title = titles[entity] ?? entity;
+  const selected = {
+    customer_id: query.customer_id ?? '',
+    project_id: query.project_id ?? '',
+    branch_id: query.branch_id ?? '',
+    contract_id: query.contract_id ?? '',
+  };
   const activeFilters = Object.entries(filter).filter(([, value]) => Boolean(value)).length;
   const nav: OwnerNavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
@@ -190,7 +196,8 @@ export default async function FinanceList({
     { label: 'Team', href: '/dashboard/company/team', icon: 'team' },
     { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
   ];
-  const email = s.user.email ?? '';
+  const user = await s.authorization.requireAuthenticatedUser();
+  const email = user.email ?? '';
   const isContracts = entity === 'contracts';
 
   return (
@@ -241,8 +248,8 @@ export default async function FinanceList({
           <form action={`/dashboard/finance/${entity}`} method="get" className="fw-record-form">
             <div className="fw-filter-grid">
               <label className="fw-filter-search"><span>Reference search</span><span className="fw-input-wrap"><OwnerIcon name="search" size={17} /><input name="q" defaultValue={filter.q} placeholder={isContracts ? 'Contract number' : 'Reference'} /></span></label>
-              <label><span>Customer</span><select name="customer_id" defaultValue={query.customer_id ?? ''}><option value="">All customers</option>{query.customer_id && !choices.customer_id.some((choice) => choice.value === query.customer_id) && <option value={query.customer_id}>Current selection</option>}{choices.customer_id.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}</select></label>
-              <label><span>Project</span><select name="project_id" defaultValue={query.project_id ?? ''}><option value="">All projects</option>{query.project_id && !choices.project_id.some((choice) => choice.value === query.project_id) && <option value={query.project_id}>Current selection</option>}{choices.project_id.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}</select></label>
+              <label><span>Customer</span><select name="customer_id" defaultValue={selected.customer_id}><option value="">All customers</option>{selected.customer_id && !choices.customer_id.some((choice) => choice.value === selected.customer_id) && <option value={selected.customer_id}>Current selection</option>}{choices.customer_id.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}</select></label>
+              <label><span>Project</span><select name="project_id" defaultValue={selected.project_id}><option value="">All projects</option>{selected.project_id && !choices.project_id.some((choice) => choice.value === selected.project_id) && <option value={selected.project_id}>Current selection</option>}{choices.project_id.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}</select></label>
               {['contracts', 'invoices', 'payments', 'payment_schedules', 'payment_requests', 'receipts', 'change_orders'].includes(entity) && (
                 <label><span>Status</span><select name="status" defaultValue={filter.status ?? ''}><option value="">All statuses</option>{filter.status && !statusOptions.some(([value]) => value === filter.status) && <option value={filter.status}>{filter.status}</option>}{statusOptions.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
               )}
@@ -252,8 +259,8 @@ export default async function FinanceList({
               <div className="fw-advanced-grid">
                 <label><span>From date</span><input type="date" name="from" defaultValue={filter.from} /></label>
                 <label><span>Until date</span><input type="date" name="until" defaultValue={filter.until} /></label>
-                <label><span>Branch</span><select name="branch_id" defaultValue={query.branch_id ?? ''}><option value="">All branches</option>{query.branch_id && !choices.branch_id.some((choice) => choice.value === query.branch_id) && <option value={query.branch_id}>Current selection</option>}{choices.branch_id.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}</select></label>
-                {entity !== 'contracts' && <label><span>Contract</span><select name="contract_id" defaultValue={query.contract_id ?? ''}><option value="">All contracts</option>{query.contract_id && !choices.contract_id.some((choice) => choice.value === query.contract_id) && <option value={query.contract_id}>Current selection</option>}{choices.contract_id.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}</select></label>}
+                <label><span>Branch</span><select name="branch_id" defaultValue={selected.branch_id}><option value="">All branches</option>{selected.branch_id && !choices.branch_id.some((choice) => choice.value === selected.branch_id) && <option value={selected.branch_id}>Current selection</option>}{choices.branch_id.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}</select></label>
+                {entity !== 'contracts' && <label><span>Contract</span><select name="contract_id" defaultValue={selected.contract_id}><option value="">All contracts</option>{selected.contract_id && !choices.contract_id.some((choice) => choice.value === selected.contract_id) && <option value={selected.contract_id}>Current selection</option>}{choices.contract_id.map((choice) => <option key={choice.value} value={choice.value}>{choice.label}</option>)}</select></label>}
                 <label className="fw-filter-lookup"><span>Find filter choices</span><input name="lookup" defaultValue={query.lookup} placeholder="Name or contract number" /></label>
                 <label className="fw-choice-page"><span>Choices page</span><input type="number" min="1" name="lookup_page" defaultValue={lookupPage} /></label>
               </div>

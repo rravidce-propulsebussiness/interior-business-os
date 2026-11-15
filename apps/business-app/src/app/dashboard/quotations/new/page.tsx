@@ -112,6 +112,7 @@ export default async function NewQuotation({
           initialPackageId={initialPackageId ?? ''}
           initialPackageIndustry={initialPackageIndustry ?? ''}
           initialCustomizedQuote={mode === 'custom'}
+          canPrepareWithoutLead={s.allowed('customer.create', 'crm') || s.allowed('customer.create', 'quotation')}
           existingCustomer={selectedCustomer ? {
             id: selectedCustomer.id,
             name: selectedCustomer.display_name,
