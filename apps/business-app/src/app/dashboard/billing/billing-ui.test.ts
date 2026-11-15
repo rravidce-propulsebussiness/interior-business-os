@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'vitest';
+import { expectSource as expect } from '../source-test-expect';
 import { readFileSync } from 'node:fs';
 const path = (x: string) => new URL(x, import.meta.url);
 const finance = readFileSync(path('../finance/page.tsx'), 'utf8');

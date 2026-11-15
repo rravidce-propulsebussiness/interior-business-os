@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, it, vi } from 'vitest';
+import { expectSource as expect } from '../source-test-expect';
 vi.mock('server-only', () => ({}));
 import { readFileSync } from 'node:fs';
 import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
