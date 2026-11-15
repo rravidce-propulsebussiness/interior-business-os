@@ -10,6 +10,8 @@ const shell = file('./owner-shell.tsx');
 const studio = file('./quotations/studio-frame.tsx');
 const finance = file('./finance/page.tsx');
 const operations = file('./operations/page.tsx');
+const sharedShellStyles = file('./owner-shell-global.css');
+const routeSpecificStyles = file('./command-centre.css');
 
 describe('one authorized company navigation on every dashboard page', () => {
   it('uses the shared permission-filtered menu from dashboard layout', () => {
@@ -116,5 +118,26 @@ describe('one authorized company navigation on every dashboard page', () => {
     expect(canonical).not.toContain("label: 'GST'");
     expect(finance).toContain("tab === 'salaries'");
     expect(finance).toContain("tab === 'gst'");
+  });
+
+  it('keeps agreement navigation in the project and quotation workflow', () => {
+    expect(canonical).not.toContain("label: 'Agreements'");
+    expect(canonical).not.toContain("href: '/dashboard/finance/contracts'");
+    expect(canonical).toContain("label: 'Quotations'");
+  });
+
+  it('uses one sidebar skin on every company dashboard route', () => {
+    expect(sharedShellStyles).toContain(
+      '.owner-layout.owner-layout-unified .owner-sidebar {',
+    );
+    expect(routeSpecificStyles).not.toMatch(
+      /\.owner-layout:has\([^\n]*\) \.owner-sidebar/,
+    );
+    expect(routeSpecificStyles).not.toMatch(
+      /\.owner-layout:has\([^\n]*\) \.owner-nav-item/,
+    );
+    expect(routeSpecificStyles).not.toMatch(
+      /\.owner-layout:has\([^\n]*\) \.owner-subnav/,
+    );
   });
 });
