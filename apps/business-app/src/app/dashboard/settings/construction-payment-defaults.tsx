@@ -1,6 +1,6 @@
 'use client';
 
-import {useActionState,useState} from 'react';
+import {useActionState,useEffect,useState} from 'react';
 import {inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
@@ -14,6 +14,22 @@ const descriptions:Record<Kind,string>={
 const kinds:Kind[]=['work','material','check','test','qc'];
 const isCheck=(step:CompanyWorkStep)=>step.kind==='check'||step.kind==='test';
 const link=(step:CompanyWorkStep)=>step.area+'|'+step.name.toLowerCase();
+const validQcOrder=(steps:CompanyWorkStep[])=>!steps.some((item,index)=>item.kind==='qc'&&
+ !steps.slice(0,index).some(earlier=>isCheck(earlier)&&link(earlier)===link(item)));
+
+function OrderNumberField({index,total,label,onCommit}:{index:number;total:number;label:string;onCommit:(position:number)=>void}) {
+ const [value,setValue]=useState(String(index+1));
+ useEffect(()=>setValue(String(index+1)),[index]);
+ const commit=()=>{
+  const position=Number(value)-1;
+  if(Number.isInteger(position)&&position>=0&&position<total)onCommit(position);
+  setValue(String(index+1));
+ };
+ return <input className="us-order-number" type="number" inputMode="numeric" min="1" max={total}
+  step="1" value={value} aria-label={label}
+  onChange={event=>setValue(event.target.value)} onBlur={commit}
+  onKeyDown={event=>{if(event.key==='Enter'){event.preventDefault();event.currentTarget.blur();}}}/>;
+}
 
 function ItemIcon({kind}:{kind:Kind}) {
  const shape=kind==='work'?<><path d="M4 17h16M5 15a7 7 0 0 1 14 0M9 15V8M15 15V8M3 17v3h18v-3"/></>:
@@ -24,9 +40,7 @@ function ItemIcon({kind}:{kind:Kind}) {
  return <svg className="us-payment-kind-icon" xmlns="http://www.w3.org/2000/svg" width="19" height="19" viewBox="0 0 24 24"
   fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{shape}</svg>;
 }
-function ActionIcon({action}:{action:'up'|'down'|'edit'|'delete'}) {
- if(action==='up')return <span aria-hidden="true">↑</span>;
- if(action==='down')return <span aria-hidden="true">↓</span>;
+function ActionIcon({action}:{action:'edit'|'delete'}) {
  return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
   strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
   {action==='edit'?<><path d="m14 5 5 5M4 20l4.5-1 11-11a2 2 0 0 0-5-5l-11 11L4 20Z"/></>:
@@ -37,7 +51,7 @@ function ActionIcon({action}:{action:'up'|'down'|'edit'|'delete'}) {
 function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRemove,totalRows,onMove}:{
  row:CompanyConstructionPaymentRow;index:number;canEdit:boolean;expanded:boolean;totalRows:number;
  onToggle:()=>void;onChange:(next:CompanyConstructionPaymentRow)=>void;onRemove:()=>void;
- onMove:(direction:number)=>void;
+ onMove:(from:number,to:number)=>void;
 }) {
  const steps=row.steps??[];
  const areas=row.areas?.length?row.areas:[...new Set(steps.map(item=>item.area))];
@@ -46,6 +60,8 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const [checkRef,setCheckRef]=useState('');
  const [error,setError]=useState('');
  const [after,setAfter]=useState<number|null>(null);
+ const [sequence,setSequence]=useState('1');
+ const [draggedStep,setDraggedStep]=useState<number|null>(null);
  const [showAll,setShowAll]=useState(false);
  const [editing,setEditing]=useState<number|null>(null);
  const [editDraft,setEditDraft]=useState('');
@@ -69,7 +85,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  };
  const editRows=(next:CompanyWorkStep[])=>{onChange({...row,steps:next});setError('');};
  const add=(position:number)=>{
-  setAfter(position);setName('');setKind('work');setCheckRef('');setError('');
+  setAfter(position);setSequence(String(position+2));setName('');setKind('work');setCheckRef('');setError('');
  };
  const save=()=>{
   const title=kind==='qc'?current?.name:name.trim().replace(/\s+/g,' ');
@@ -82,7 +98,11 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   if(kind==='qc'&&!current){
    setError('First add a site check or test, then select it for company QC.');return;
   }
-  const chosen=kind==='qc'?current!.area:workAreaFor(title,after??steps.length-1);
+  const insertAt=Number(sequence)-1;
+  if(!Number.isInteger(insertAt)||insertAt<0||insertAt>steps.length){
+   setError('Enter a sequence number from 1 to '+(steps.length+1)+'.');return;
+  }
+  const chosen=kind==='qc'?current!.area:workAreaFor(title,insertAt-1);
   if(!chosen){
    setError('This work belongs to another construction stage. Add it under the corresponding payment milestone.');return;
   }
@@ -91,10 +111,13 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
    (item.kind===next.kind||(isCheck(item)&&isCheck(next))))){
    setError('This item already exists in the payment stage.');return;
   }
-  const updated=[...steps];updated.splice((after??steps.length-1)+1,0,next);
+  const updated=[...steps];updated.splice(insertAt,0,next);
+  if(!validQcOrder(updated)){
+   setError('Company QC must remain after its linked site check/test.');return;
+  }
   onChange({...row,steps:updated,areas:areas.includes(chosen)?row.areas:[...areas,chosen]});
   if(updated.length>limit)setShowAll(true);
-  setError('');setAfter(null);setName('');setCheckRef('');
+  setError('');setAfter(null);setSequence('1');setName('');setCheckRef('');
  };
  const startEdit=(position:number)=>{
   setEditing(position);setEditDraft(steps[position]?.name??'');setError('');
@@ -146,21 +169,26 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
    !(isCheck(item)&&other.kind==='qc'&&link(other)===link(item)));
   editRows(updated);setEditing(null);
  };
- const move=(position:number,direction:number)=>{
-  const destination=position+direction;
-  if(destination<0||destination>=steps.length)return;
-  const updated=[...steps];[updated[position],updated[destination]]=[updated[destination]!,updated[position]!];
-  if(updated.some((item,i)=>item.kind==='qc'&&!updated.slice(0,i).some(earlier=>
-   isCheck(earlier)&&link(earlier)===link(item)))){
+ const moveStep=(from:number,to:number)=>{
+  if(from<0||from>=steps.length||to<0||to>=steps.length||from===to)return;
+  const updated=[...steps];const [item]=updated.splice(from,1);
+  if(!item)return;
+  updated.splice(to,0,item);
+  if(!validQcOrder(updated)){
    setError('Company QC must remain after its linked site check/test.');return;
   }
-  editRows(updated);setEditing(null);
+  editRows(updated);setEditing(null);setDraggedStep(null);
  };
- return <li className={'us-payment-stage'+(expanded?' is-expanded':'')}>
+ return <li className={'us-payment-stage'+(expanded?' is-expanded':'')} draggable={canEdit}
+  onDragStart={event=>{event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','stage:'+index);}}
+  onDragOver={event=>event.preventDefault()}
+  onDrop={event=>{event.preventDefault();const value=event.dataTransfer.getData('text/plain');
+   if(value.startsWith('stage:'))onMove(Number(value.slice(6)),index);}}>
   <button className="us-payment-stage-toggle" type="button" onClick={()=>{
    if(expanded){setShowAll(false);setEditing(null);setAfter(null);}
    onToggle();
   }} aria-expanded={expanded} aria-controls={'company-payment-stage-'+index}>
+   {canEdit&&<span className="us-payment-stage-drag" aria-hidden="true">⠿</span>}
    <span className="us-payment-default-index">{index+1}</span>
    <span className="us-payment-heading-copy">
     <strong>{row.name||'Untitled payment milestone'}</strong>
@@ -191,16 +219,14 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
      </span>
     </label>
     {canEdit&&<div className="us-payment-stage-order">
-     <button type="button" aria-label={'Move stage '+(index+1)+' up'} disabled={index===0}
-      onClick={()=>onMove(-1)}>↑</button>
-     <button type="button" aria-label={'Move stage '+(index+1)+' down'} disabled={index===totalRows-1}
-      onClick={()=>onMove(1)}>↓</button>
+     <label>Stage number
+      <OrderNumberField index={index} total={totalRows} label="Stage number" onCommit={position=>onMove(index,position)}/>
+     </label>
      <button type="button" className="us-payment-remove" onClick={onRemove}>Remove stage</button>
     </div>}
    </div>
    <p className="us-payment-note">
-    These items define the scope of this payment stage. Edit the order here, or
-    customize a new quotation separately without changing your company defaults.
+    Drag items using the grip or enter a sequence number. Company QC must stay after its linked site check/test.
    </p>
    <div className="us-payment-items-heading">
     <strong>Items in this stage</strong>
@@ -212,8 +238,14 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
     </button>}
    </div>
    <div id={'company-payment-items-'+index} className="us-payment-step-list">
-    {visible.map((item,position)=><div key={position} className="us-payment-step">
-     <span className="us-payment-step-number">{position+1}</span>
+    {visible.map((item,position)=><div key={item.kind+'-'+item.area+'-'+item.name} className="us-payment-step"
+     draggable={canEdit}
+     onDragStart={event=>{event.stopPropagation();event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','step:'+position);setDraggedStep(position);}}
+     onDragOver={event=>event.preventDefault()}
+     onDrop={event=>{event.preventDefault();event.stopPropagation();const value=event.dataTransfer.getData('text/plain');
+      if(value.startsWith('step:'))moveStep(Number(value.slice(5)),position);}}>
+     {canEdit?<OrderNumberField index={position} total={steps.length} label={'Sequence number for '+item.name}
+      onCommit={target=>moveStep(position,target)}/>:<span className="us-payment-step-number">{position+1}</span>}
      <span className={'us-payment-step-kind is-'+item.kind}><ItemIcon kind={item.kind}/>
       <small>{labels[item.kind]}</small>
      </span>
@@ -234,10 +266,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
       </button>}
      </div>
      {canEdit&&<div className="us-payment-step-actions">
-      <button type="button" aria-label={'Move step '+(position+1)+' up'} title="Move up"
-       onClick={()=>move(position,-1)} disabled={position===0}><ActionIcon action="up"/></button>
-      <button type="button" aria-label={'Move step '+(position+1)+' down'} title="Move down"
-       onClick={()=>move(position,1)} disabled={position===steps.length-1}><ActionIcon action="down"/></button>
+      <span className="us-payment-step-drag" aria-hidden="true">⠿</span>
       <button type="button" aria-label={'Edit step '+(position+1)} title="Edit item"
        disabled={item.kind==='qc'} onClick={()=>startEdit(position)}><ActionIcon action="edit"/></button>
       <button type="button" aria-label={'Delete step '+(position+1)} title="Delete item"
@@ -283,6 +312,11 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
       <option value="qc">Company QC</option>
      </select>
     </label>
+    <label>Sequence number
+     <input type="number" inputMode="numeric" min="1" max={steps.length+1} step="1"
+      value={sequence} aria-label="New item sequence number"
+      onChange={event=>setSequence(event.target.value)}/>
+    </label>
     {kind==='qc'?<label>QC for which earlier site check/test?
      <select value={current?link(current):''} onChange={e=>setCheckRef(e.target.value)}
       aria-label="QC linked site check">
@@ -320,9 +354,8 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
   setRows(previous=>previous.filter((_,i)=>i!==index));
   setExpandedIndex(value=>value===null?null:value===index?null:value>index?value-1:value);
  };
- const moveStage=(from:number,direction:number)=>{
-  const to=from+direction;
-  if(to<0||to>=rows.length)return;
+ const moveStage=(from:number,to:number)=>{
+  if(from<0||from>=rows.length||to<0||to>=rows.length||from===to)return;
   setRows(previous=>{
    const next=[...previous];const [item]=next.splice(from,1);
    if(item)next.splice(to,0,item);return next;
@@ -340,7 +373,7 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
     {rows.map((row,index)=><DefaultPaymentStage key={row.name+'-'+index} row={row} index={index}
      expanded={expandedIndex===index} onToggle={()=>
       setExpandedIndex(value=>value===index?null:index)}
-     canEdit={canEdit} totalRows={rows.length} onMove={direction=>moveStage(index,direction)}
+     canEdit={canEdit} totalRows={rows.length} onMove={moveStage}
      onChange={next=>update(index,next)} onRemove={()=>remove(index)}/>)}
    </ol>
    {canEdit&&<button type="button" className="us-payment-add" disabled={rows.length>=40}
