@@ -17,7 +17,7 @@ describe('unified company settings',()=>{
    expect(page).toContain("label:'Branding'");
    expect(page).toContain("label:'Invoice & GST'");
    expect(page).toContain("label:'Documents'");
-   expect(page).toContain("label:'Payment Settings'");
+   expect(page).toContain("label:'Construction Workflow'");
    expect(page).toContain("label:'Team & Access'");
    expect(page).toContain("label:'Preferences'");
    expect(page).toContain('us-company-preview');
