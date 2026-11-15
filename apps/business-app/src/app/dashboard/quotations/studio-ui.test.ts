@@ -931,15 +931,19 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(section).not.toContain("Payment methods',href:");
   expect(section).not.toContain("Invoices & stage collections");
  });
- it('routes typed work and allows multi-stage assignment without repetitive area fields',()=>{
+ it('assigns one stage per item and lets the same item be added to other stages',()=>{
   expect(stageEditor).not.toContain('className="us-payment-work-areas"');
   expect(stageEditor).not.toContain('className="us-payment-area-tags"');
   expect(stageEditor).not.toContain('Type construction work area name');
   expect(stageEditor).not.toContain('<label>Work area');
   expect(stageEditor).not.toContain('Type default step work area');
   expect(stageEditor).toContain('workAreaFor(title,insertAt-1)');
-  expect(stageEditor).toContain('Use in construction stages');
-  expect(stageEditor).toContain('chosenAreas.map(area=>({kind,name:title,area}))');
+  expect(stageEditor).not.toContain('Use in construction stages');
+  expect(stageEditor).not.toContain('type="checkbox"');
+  expect(stageEditor).toContain('aria-label="Construction stage for new item"');
+  expect(stageEditor).toContain('To use this item in another stage, add it again and choose that stage.');
+  expect(stageEditor).toContain('const nextItems:CompanyWorkStep[]=[{kind,name:title,area:chosenArea}]');
+  expect(stageEditor).toContain('item.area===next.area');
   expect(stageEditor).toContain('const targets=inferred?allRows.flatMap');
   expect(stageEditor).toContain('companyWorkAreaLabel(row,inferred)');
   expect(stageEditor).toContain('Add to {target.name}');
