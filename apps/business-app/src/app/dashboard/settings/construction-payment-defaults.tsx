@@ -370,7 +370,7 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
        if(!target)return null;
        return <button key={targetIndex} type="button" onClick={()=>{
         if((target.steps??[]).some(item=>item.area===routeStep.area&&item.name.toLowerCase()===routeStep.name.toLowerCase()&&
-         (item.kind===routeStep.kind||(isCheck(item)&&isCheck(routeStep)))){
+         (item.kind===routeStep.kind||(isCheck(item)&&isCheck(routeStep))))){
          setError('This item is already included in that payment milestone.');setRouteStep(null);return;
         }
         onRouteStep(targetIndex,routeStep);setAfter(null);setName('');setCheckRef('');
