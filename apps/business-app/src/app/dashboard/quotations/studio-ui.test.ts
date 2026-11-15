@@ -116,6 +116,7 @@ describe('minimal quotation studio navigation', () => {
   });
 
   it('keeps the saved state visible until the quotation is edited again', () => {
+    expect(sft).toContain('useState(Boolean(initialSchedule))');
     expect(sft).toContain('disabled={pending||(saved&&!dirty)}');
     expect(sft).toContain("saved&&!dirty?'✓ Saved':'▣ Save quotation →'");
     expect(sft).toContain("className={'qs-work-summary-save'+(saved&&!dirty?' is-saved':'')}");
