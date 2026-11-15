@@ -5,7 +5,7 @@ import {defaultStageRequirements,type StageRequirementsMap} from './quotation-st
  * Stage codes preserve real construction/project ownership. No duplicate QC,
  * material order, or payment ledger is created by these display references. */
 export const quotationMilestoneStep=z.object({
- kind:z.enum(['work','material','check','test','qc']),
+ kind:z.enum(['payment','work','material','check','test','qc']),
  code:z.string().regex(/^[A-Z][A-Z0-9_]*(?:\/[A-Z][A-Z0-9_]*)?$/).max(120),
  index:z.number().int().min(0).max(49),
 }).strict();
@@ -36,11 +36,19 @@ export function validateMilestoneFlow(
    if(total>150)throw new Error('Too many execution steps; simplify the sequence');
    if(!row.stageCodes.includes(step.code))
     throw new Error('Choose a construction stage linked to this payment');
+   const key=step.code+':'+step.kind+':'+step.index;
+   if(step.kind==='payment'){
+    const linkedPayment=payments[step.index];
+    if(!linkedPayment||!linkedPayment.stageCodes.includes(step.code))
+     throw new Error('Choose an existing payment milestone linked to '+step.code);
+    if(used.has(key))throw new Error('Payment is already linked in this execution order');
+    used.add(key);
+    continue;
+   }
    const stage=stages[step.code]??defaultStageRequirements(step.code);
    const field=step.kind==='work'?'work':step.kind==='material'?'materials':'checks';
    if(!stage[field][step.index])
     throw new Error('Execution item no longer exists in '+step.code);
-   const key=step.code+':'+step.kind+':'+step.index;
    if(step.kind==='qc'){
     const checkKey=step.code+':check:'+step.index;
     if(!passedChecks.has(checkKey))
@@ -94,8 +102,13 @@ export function projectStageFlowFromMilestones(
 ):{kind:'work'|'check'|'test'|'qc'|'material';index:number}[] {
  const stage=stages[code]??defaultStageRequirements(code);
  const steps=Object.keys(plan).sort((a,b)=>Number(a)-Number(b))
-  .flatMap(key=>plan[key]??[]).filter(item=>item.code===code)
-  .map(({kind,index})=>({kind,index}));
+  .flatMap(key=>(plan[key]??[]).filter(
+   (item):item is Exclude<QuotationMilestoneStep,{kind:'payment'}> =>
+    item.code===code&&item.kind!=='payment',
+  )).map(({kind,index})=>({
+   kind:kind as Exclude<QuotationMilestoneStep['kind'],'payment'>,
+   index,
+  }));
  const known=new Set(steps.filter(item=>item.kind!=='qc').map(item=>
   (item.kind==='test'?'check':item.kind)+':'+item.index));
  for(let index=0;index<stage.work.length;index++){
