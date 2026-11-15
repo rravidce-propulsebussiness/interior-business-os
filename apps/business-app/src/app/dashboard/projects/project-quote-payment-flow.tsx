@@ -14,6 +14,13 @@ import { quotedStageStatus } from './project-quote-milestone-projection';
 function stepEvidence(d: WorkspaceData, step: QuotedTimelineStep) {
   const stage = d.stages.find((s) => s.instance_code === step.code);
   if (!stage) return { label: 'Planned in quote', stageId: '', date: '' };
+  if (step.kind === 'payment') {
+    return {
+      label: 'Existing payment milestone; check receipt in Finance',
+      stageId: stage.id,
+      date: '',
+    };
+  }
   const plan = d.itemPlans.find(
     (item) =>
       item.stageId === stage.id &&
@@ -54,6 +61,7 @@ function stepEvidence(d: WorkspaceData, step: QuotedTimelineStep) {
 }
 
 const kindLabel: Record<QuotedTimelineStep['kind'], string> = {
+  payment: 'Payment',
   work: 'Work',
   material: 'Material',
   check: 'Site check',
@@ -91,9 +99,9 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
             </span>
           </h2>
           <p>
-            Each existing quotation payment remains one stage. Its saved work
-            and checks appear in the same order; recorded site progress updates
-            their status. No payment schedule or quotation is changed here.
+            Each existing quotation payment remains one stage. Its payment marker,
+            work and checks appear in the saved order; recorded site progress updates
+            execution status. No extra payment or invoice is created here.
           </p>
         </div>
       </header>
