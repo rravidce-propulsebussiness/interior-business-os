@@ -48,6 +48,9 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const [showAll,setShowAll]=useState(false);
  const [editing,setEditing]=useState<number|null>(null);
  const [editDraft,setEditDraft]=useState('');
+ const [editingGuide,setEditingGuide]=useState<number|null>(null);
+ const [guideTextDraft,setGuideTextDraft]=useState('');
+ const [guideVideoDraft,setGuideVideoDraft]=useState('');
  const prior=steps.slice(0,after===null?steps.length:after+1).filter(isCheck);
  const current=checkRef?prior.find(x=>link(x)===checkRef):prior.at(-1);
  const counts=kinds.map(type=>({type,count:steps.filter(item=>item.kind===type).length}));
@@ -94,6 +97,23 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  };
  const startEdit=(position:number)=>{
   setEditing(position);setEditDraft(steps[position]?.name??'');setError('');
+ };
+ const startGuideEdit=(position:number)=>{
+  const item=steps[position];
+  if(!item)return;
+  setEditingGuide(position);setGuideTextDraft(item.guideText??'');
+  setGuideVideoDraft(item.guideVideoUrl??'');setError('');
+ };
+ const saveGuide=()=>{
+  if(editingGuide===null)return;
+  const text=guideTextDraft.trim(),video=guideVideoDraft.trim();
+  if(text.length>1800){setError('Keep the guide under 1,800 characters.');return;}
+  if(video&&!/^https:\/\//i.test(video)){
+   setError('Use a secure https video link.');return;
+  }
+  editRows(steps.map((item,position)=>position===editingGuide
+   ?{...item,guideText:text,guideVideoUrl:video}:item));
+  setEditingGuide(null);setError('');
  };
  const saveEdit=()=>{
   if(editing===null)return;
@@ -202,6 +222,10 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
         <button type="button" onClick={()=>{setEditing(null);setError('');}}>Cancel</button>
        </div>:
        <span>{item.name}</span>}
+      {canEdit&&<button type="button" className="us-payment-guide-action"
+       onClick={()=>startGuideEdit(position)}>
+       {item.guideText||item.guideVideoUrl?'Edit guide':'＋ Add guide'}
+      </button>}
      </div>
      {canEdit&&<div className="us-payment-step-actions">
       <button type="button" aria-label={'Move step '+(position+1)+' up'} title="Move up"
@@ -216,6 +240,30 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
     </div>)}
     {!steps.length&&<p className="us-payment-empty">No steps yet. Add the first work item below.</p>}
    </div>
+   {editingGuide!==null&&canEdit&&<section className="us-guide-editor" aria-label="Work and QC guidance">
+    <div><strong>{steps[editingGuide]?.kind==='work'?'Work instructions':
+      steps[editingGuide]?.kind==='material'?'Material handling guidance':'Inspection and QC guidance'}</strong>
+     <p>{steps[editingGuide]?.name} · copied into new quotations and project timelines</p>
+    </div>
+    <label>{steps[editingGuide]?.kind==='work'?'How to do this work':'How to check and accept this item'}
+     <textarea value={guideTextDraft} maxLength={1800} rows={5}
+      placeholder={steps[editingGuide]?.kind==='work'
+       ?'Write clear site instructions in the order the engineer should follow.'
+       :'Describe the inspection method, acceptance criteria and evidence to record.'}
+      onChange={event=>setGuideTextDraft(event.target.value)}/>
+     <small>{guideTextDraft.length}/1,800 characters</small>
+    </label>
+    <label>{steps[editingGuide]?.kind==='work'?'Work instruction video URL':'Check / QC video URL'}
+     <input type="url" value={guideVideoDraft} maxLength={1000}
+      placeholder="https://…" onChange={event=>setGuideVideoDraft(event.target.value)}/>
+    </label>
+    {guideVideoDraft.trim().startsWith('https://')&&<a href={guideVideoDraft.trim()}
+      target="_blank" rel="noopener noreferrer">Open current video ↗</a>}
+    <div className="us-guide-editor-actions">
+     <button type="button" className="us-save" onClick={saveGuide}>Save guide</button>
+     <button type="button" onClick={()=>{setEditingGuide(null);setError('');}}>Cancel</button>
+    </div>
+   </section>}
    {canEdit&&<button type="button" className="us-payment-add-work"
     onClick={()=>add(steps.length-1)}>＋ Add work, material or check</button>}
    {canEdit&&after!==null&&<div className="us-payment-step-form">
@@ -267,8 +315,8 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
   setExpandedIndex(value=>value===null?null:value===index?null:value>index?value-1:value);
  };
  return <div className="us-payment-defaults">
-  <p className="us-info">Each payment stage includes its work, materials, checks, tests and company QC.
-   These defaults are copied into new construction quotations and can be customized per project.</p>
+  <p className="us-info">Configure payment stages, work, materials, site checks and company QC once.
+   Add text and video guides to each work or QC item; saved defaults populate new quotations and their project timelines.</p>
   <form action={action}>
    <input type="hidden" name="rows" value={JSON.stringify(rows)}/>
    <ol className="us-payment-default-list">
