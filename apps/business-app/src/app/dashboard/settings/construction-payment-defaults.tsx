@@ -186,7 +186,6 @@ function DefaultPaymentStage({
     : [...new Set(steps.map((item) => item.area))];
   const [kind, setKind] = useState<Kind>('work');
   const [name, setName] = useState('');
-  const [selectedArea, setSelectedArea] = useState('');
   const [checkRef, setCheckRef] = useState('');
   const [error, setError] = useState('');
   const [after, setAfter] = useState<number | null>(null);
@@ -217,7 +216,6 @@ function DefaultPaymentStage({
   const workAreaFor = (title: string, position: number): string | null => {
     const inferred = inferCompanyWorkAreaCode(title);
     if (inferred && areas.includes(inferred)) return inferred;
-    if (inferred && areas.length) return null;
     return (
       steps[position]?.area ??
       steps[position + 1]?.area ??
@@ -236,7 +234,6 @@ function DefaultPaymentStage({
     setName('');
     setKind('work');
     setCheckRef('');
-    setSelectedArea('');
     setRouteStep(null);
     setRouteTargets([]);
     setError('');
@@ -276,16 +273,8 @@ function DefaultPaymentStage({
       return;
     }
     const chosenArea =
-      kind === 'qc'
-        ? current!.area
-        : kind === 'payment'
-          ? selectedArea
-          : selectedArea || workAreaFor(title, insertAt - 1);
+      kind === 'qc' ? current!.area : workAreaFor(title, insertAt - 1);
     if (!chosenArea) {
-      if (kind === 'payment') {
-        setError('Choose the stage where this payment becomes due.');
-        return;
-      }
       const inferred = kind === 'qc' ? null : inferCompanyWorkAreaCode(title);
       const targets = inferred
         ? allRows.flatMap((candidate, candidateIndex) => {
@@ -311,7 +300,7 @@ function DefaultPaymentStage({
       setError(
         inferred
           ? 'This item maps to another construction stage. Add or update a payment milestone for that stage first.'
-          : 'Choose at least one construction stage for this item.',
+          : 'Add a construction stage to this payment milestone first.',
       );
       return;
     }
@@ -353,7 +342,6 @@ function DefaultPaymentStage({
     setSequence('1');
     setName('');
     setCheckRef('');
-    setSelectedArea('');
   };
   const startEdit = (position: number) => {
     setEditing(position);
@@ -846,7 +834,6 @@ function DefaultPaymentStage({
                   onChange={(e) => {
                     setKind(e.target.value as Kind);
                     setCheckRef('');
-                    setSelectedArea('');
                   }}
                 >
                   <option value="payment">Payment milestone</option>
@@ -870,33 +857,7 @@ function DefaultPaymentStage({
                   onChange={(event) => setSequence(event.target.value)}
                 />
               </label>
-              {kind !== 'qc' &&
-                (areas.length ? (
-                  <label>
-                    Construction stage
-                    <select
-                      value={selectedArea}
-                      aria-label="Construction stage for new item"
-                      onChange={(event) => setSelectedArea(event.target.value)}
-                    >
-                      <option value="">
-                        Use stage inferred from item name
-                      </option>
-                      {areas.map((area) => (
-                        <option key={area} value={area}>
-                          {companyWorkAreaLabel(row, area)}
-                        </option>
-                      ))}
-                    </select>
-                    <small>
-                      {kind === 'payment'
-                        ? 'Choose the one stage where this payment becomes due.'
-                        : 'To use this item in another stage, add it again and choose that stage.'}
-                    </small>
-                  </label>
-                ) : (
-                  <small>Stage will be inferred from the item name.</small>
-                ))}
+
               {kind === 'qc' ? (
                 <label>
                   QC for which earlier site check/test?
