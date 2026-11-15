@@ -6,12 +6,12 @@ import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
 type Kind=CompanyWorkStep['kind'];
 const labels:Record<Kind,string>={
- work:'Work',material:'Material',check:'Site check',test:'Test',qc:'Company QC',
+ payment:'Payment',work:'Work',material:'Material',check:'Site check',test:'Test',qc:'Company QC',
 };
 const descriptions:Record<Kind,string>={
- work:'Work',material:'Materials',check:'Checks',test:'Tests',qc:'QC',
+ payment:'Payments',work:'Work',material:'Materials',check:'Checks',test:'Tests',qc:'QC',
 };
-const kinds:Kind[]=['work','material','check','test','qc'];
+const kinds:Kind[]=['payment','work','material','check','test','qc'];
 const isCheck=(step:CompanyWorkStep)=>step.kind==='check'||step.kind==='test';
 const link=(step:CompanyWorkStep)=>step.area+'|'+step.name.toLowerCase();
 const validQcOrder=(steps:CompanyWorkStep[])=>!steps.some((item,index)=>item.kind==='qc'&&
@@ -32,7 +32,8 @@ function OrderNumberField({index,total,label,onCommit}:{index:number;total:numbe
 }
 
 function ItemIcon({kind}:{kind:Kind}) {
- const shape=kind==='work'?<><path d="M4 17h16M5 15a7 7 0 0 1 14 0M9 15V8M15 15V8M3 17v3h18v-3"/></>:
+ const shape=kind==='payment'?<><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></>:
+  kind==='work'?<><path d="M4 17h16M5 15a7 7 0 0 1 14 0M9 15V8M15 15V8M3 17v3h18v-3"/></>:
   kind==='material'?<><path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/></>:
   kind==='check'?<><rect x="5" y="5" width="14" height="16" rx="2"/><path d="M9 5V3h6v2m-7 9 2 2 5-5"/></>:
   kind==='test'?<><path d="M9 3h6m-5 0v7L5 19a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2l-5-9V3M8 16h8"/></>:
@@ -90,9 +91,9 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
   setSelectedAreas([]);setRouteStep(null);setRouteTargets([]);setError('');
  };
  const save=()=>{
-  const title=kind==='qc'?current?.name:name.trim().replace(/\s+/g,' ');
+  const title=kind==='qc'?current?.name:kind==='payment'?row.name:name.trim().replace(/\s+/g,' ');
   if(!title||title.length<2||title.length>180){
-   setError('Enter a work, material or check name; for QC choose the earlier site check.');return;
+   setError(kind==='payment'?'Choose one construction stage for this payment.':'Enter an item name; for QC choose the earlier site check.');return;
   }
   if((kind==='check'||kind==='test')&&title.length<3){
    setError('Enter a descriptive site check or test name.');return;
@@ -105,6 +106,7 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
    setError('Enter a sequence number from 1 to '+(steps.length+1)+'.');return;
   }
   const chosenAreas=kind==='qc'?[current!.area]:
+   kind==='payment'?selectedAreas.slice(0,1):
    selectedAreas.length?selectedAreas:[workAreaFor(title,insertAt-1)].filter((value):value is string=>Boolean(value));
   if(!chosenAreas.length){
    const inferred=kind==='qc'?null:inferCompanyWorkAreaCode(title);
@@ -118,7 +120,7 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
     setRouteStep({kind,name:title,area:inferred});setRouteTargets(targets);
     setError('“'+title+'” maps to '+companyWorkAreaLabel(row,inferred)+'. Add it to a matching payment milestone:');return;
    }
-   setError(inferred?'This item maps to another construction stage. Add or update a payment milestone for that stage first.':'Choose at least one construction stage for this item.');return;
+   setError(kind==='payment'?'Choose one construction stage for this payment.':inferred?'This item maps to another construction stage. Add or update a payment milestone for that stage first.':'Choose at least one construction stage for this item.');return;
   }
   if(areas.length&&chosenAreas.some(area=>!areas.includes(area))){
    setError('Select construction stages linked to this payment milestone.');return;
@@ -162,7 +164,7 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
  const saveEdit=()=>{
   if(editing===null)return;
   const item=steps[editing];
-  if(!item||item.kind==='qc')return;
+  if(!item||item.kind==='qc'||item.kind==='payment')return;
   const name=editDraft.trim().replace(/\s+/g,' ');
   if(name.length<(isCheck(item)?3:2)||name.length>180){
    setError('Enter a descriptive item name, up to 180 characters.');return;
@@ -278,8 +280,8 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
         <button type="button" onClick={saveEdit}>Save</button>
         <button type="button" onClick={()=>{setEditing(null);setError('');}}>Cancel</button>
        </div>:
-       <span>{item.name}</span>}
-      {canEdit&&item.kind!=='material'&&<button type="button" className="us-payment-guide-action"
+       <span>{item.kind==='payment'?'Payment due · '+item.name+' · '+Number(row.percent||0).toLocaleString(undefined,{maximumFractionDigits:2})+'% of total':item.name}</span>}
+      {canEdit&&item.kind!=='material'&&item.kind!=='payment'&&<button type="button" className="us-payment-guide-action"
        onClick={()=>startGuideEdit(position)}>
        {item.guideText||item.guideVideoUrl?'Edit guide':'＋ Add guide'}
       </button>}
@@ -287,12 +289,12 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
      {canEdit&&<div className="us-payment-step-actions">
       <span className="us-payment-step-drag" aria-hidden="true">⠿</span>
       <button type="button" aria-label={'Edit step '+(position+1)} title="Edit item"
-       disabled={item.kind==='qc'} onClick={()=>startEdit(position)}><ActionIcon action="edit"/></button>
+       disabled={item.kind==='qc'||item.kind==='payment'} onClick={()=>startEdit(position)}><ActionIcon action="edit"/></button>
       <button type="button" aria-label={'Delete step '+(position+1)} title="Delete item"
        className="us-payment-step-delete" onClick={()=>removeStep(position)}><ActionIcon action="delete"/></button>
      </div>}
     </div>)}
-    {!steps.length&&<p className="us-payment-empty">No steps yet. Add the first work item below.</p>}
+    {!steps.length&&<p className="us-payment-empty">No items yet. Add a payment marker or work item below.</p>}
    </div>
    {editingGuide!==null&&canEdit&&<section className="us-guide-editor" aria-label="Work and QC guidance">
     <div><strong>{steps[editingGuide]?.kind==='work'?'Work instructions':
@@ -319,11 +321,12 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
     </div>
    </section>}
    {canEdit&&<button type="button" className="us-payment-add-work"
-    onClick={()=>add(steps.length-1)}>＋ Add work, material or check</button>}
+    onClick={()=>add(steps.length-1)}>＋ Add payment, work, material or check</button>}
    {canEdit&&after!==null&&<div className="us-payment-step-form">
     <label>Type of item
      <select aria-label="New default step type" value={kind}
       onChange={e=>{setKind(e.target.value as Kind);setCheckRef('');}}>
+      <option value="payment">Payment milestone</option>
       <option value="work">Work</option>
       <option value="material">Material required</option>
       <option value="check">Site check</option>
@@ -339,12 +342,16 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
     {kind!=='qc'&&<fieldset className="us-item-area-choices">
      <legend>Use in construction stages</legend>
      {areas.length?areas.map(area=><label key={area}>
-      <input type="checkbox" checked={selectedAreas.includes(area)}
-       onChange={event=>setSelectedAreas(current=>event.target.checked
-        ?[...new Set([...current,area])]:current.filter(value=>value!==area))}/>
+      <input type={kind==='payment'?'radio':'checkbox'}
+       name={kind==='payment'?'default-payment-stage-'+index:undefined}
+       checked={selectedAreas.includes(area)}
+       onChange={event=>setSelectedAreas(current=>{
+        if(kind==='payment')return event.target.checked?[area]:[];
+        return event.target.checked?[...new Set([...current,area])]:current.filter(value=>value!==area);
+       })}/>
       <span>{companyWorkAreaLabel(row,area)}</span>
      </label>):<small>Stage will be inferred from the item name.</small>}
-     <small>Select one or more stages linked to this payment milestone.</small>
+     <small>{kind==='payment'?'Choose one stage where this payment becomes due.':'Select one or more stages linked to this payment milestone.'}</small>
     </fieldset>}
     {kind==='qc'?<label>QC for which earlier site check/test?
      <select value={current?link(current):''} onChange={e=>setCheckRef(e.target.value)}
@@ -352,8 +359,10 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
       {prior.length===0&&<option value="">Add site check first</option>}
       {prior.map(item=><option key={link(item)} value={link(item)}>{item.name}</option>)}
      </select>
-    </label>:
-     <label>Item name
+    </label>:kind==='payment'?<p className="us-payment-item-hint">
+      This links the existing {Number(row.percent||0).toLocaleString(undefined,{maximumFractionDigits:2})}% {row.name} milestone.
+      It does not create another payment or invoice.
+     </p>:<label>Item name
       <input autoFocus value={name} maxLength={180} placeholder="e.g. Footing bar bending"
        aria-label="New default work item name" onChange={e=>setName(e.target.value)}/>
      </label>}
