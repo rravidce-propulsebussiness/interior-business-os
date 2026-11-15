@@ -170,3 +170,15 @@
  .pmt-stage-list{padding:8px}
  .pmt-stage>summary{padding:11px 10px}
 }
+
+
+/* Quotation-saved site instructions and QC guidance for field teams. */
+.pmt-item-guide{
+ margin:8px 0 10px;padding:11px 13px;border:1px solid #f0d8c8;
+ border-left:3px solid #bd5c3f;border-radius:10px;background:#fffaf6;
+ color:#334155
+}
+.pmt-item-guide strong{display:block;margin-bottom:4px;color:#793c2b;font-size:11px;font-weight:850}
+.pmt-item-guide p{margin:0;color:#4d5b6e;font-size:12px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.pmt-item-guide a{display:inline-flex;margin-top:7px;color:#b94d1d;font-size:11px;font-weight:800;text-decoration:none}
+.pmt-item-guide a:hover{text-decoration:underline}

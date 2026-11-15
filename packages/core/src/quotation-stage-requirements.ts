@@ -9,12 +9,25 @@ export const stageFlowStepSchema=z.object({
  index:z.number().int().min(0).max(49),
 }).strict();
 export type StageFlowStep=z.infer<typeof stageFlowStepSchema>;
+export const stageItemGuideSchema=z.object({
+ kind:z.enum(['work','material','check','test','qc']),
+ index:z.number().int().min(0).max(49),
+ text:z.string().max(1800),
+ videoUrl:z.string().trim().max(1000).optional().refine(value=>!value||(()=>{
+  try{return new URL(value).protocol==='https:';}catch{return false;}
+ })(),'Guide video links must be valid https URLs'),
+}).strict().superRefine((guide,ctx)=>{
+ if(guide.videoUrl&&guide.videoUrl.trim()&&!/^https:\/\//i.test(guide.videoUrl.trim()))
+  ctx.addIssue({code:'custom',message:'Guide video links must use https'});
+});
+export type StageItemGuide=z.infer<typeof stageItemGuideSchema>;
 const requirements = z.object({
   work: list.min(1),
   materials: list,
   checks: checkList,
   reports: list,
   flow:z.array(stageFlowStepSchema).max(150).optional(),
+  guides:z.array(stageItemGuideSchema).max(150).optional(),
 }).strict();
 // Legacy issued quotations may already contain two-character inspection labels.
 // Keep frozen revisions readable, but do not allow those labels in new writes.
@@ -76,6 +89,13 @@ function validateRequirements(value:unknown,legacyRead:boolean):StageRequirement
    if(works.size!==input.work.length||checks.size!==input.checks.length)
     throw new Error('Execution order must include every selected work and check once');
   }
+  for(const guide of input.guides??[]){
+   const length=guide.kind==='work'?input.work.length:
+    guide.kind==='material'?input.materials.length:input.checks.length;
+   if(guide.index>=length)throw new Error('Work or QC guide refers to a missing stage item in '+code);
+  }
+  if(input.guides&&new Set(input.guides.map(item=>item.kind+':'+item.index)).size!==input.guides.length)
+   throw new Error('Duplicate work or QC guide in '+code);
   // In structural stages, a quote may ADD special tests, but cannot remove
   // engineer-mandated hold-point inspections or rebar/concrete QC checks.
   const template=milestoneConstructionStages().find(s=>s.code===code.split('/')[0]);
@@ -99,14 +119,14 @@ export function validateStageRequirements(value:unknown):StageRequirementsMap {
 export function validateStageRequirementsDraft(value:unknown):StageRequirementsMap {
  const draft=validateRequirements(value,true);
  const body=JSON.stringify({version:1,stages:draft});
- if(body.length>7500)throw new Error('Too many project-specific requirements; reduce long descriptions');
+ if(body.length>250000)throw new Error('Too many project-specific requirements; reduce guide text or video links');
  return draft;
 }
 export function encodeStageRequirements(overrides:StageRequirementsMap):string {
  const cleaned=validateStageRequirements(overrides);
  if(!Object.keys(cleaned).length)return '';
  const body=JSON.stringify({version:1,stages:cleaned});
- if(body.length>7500)throw new Error('Too many project-specific requirements; reduce long descriptions');
+ if(body.length>250000)throw new Error('Too many project-specific requirements; reduce guide text or video links');
  return REQUIREMENTS_MARKER+body+'[/STAGE_CUSTOM_REQUIREMENTS]';
 }
 export function savedStageRequirements(terms:string):StageRequirementsMap {

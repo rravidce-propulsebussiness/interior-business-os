@@ -9,6 +9,10 @@ export const companyWorkStep=z.object({
  kind:z.enum(['work','material','check','test','qc']),
  name:z.string().trim().min(2).max(180),
  area:z.string().regex(/^[A-Z][A-Z_]*$/).max(45),
+ guideText:z.string().trim().max(1800).optional(),
+ guideVideoUrl:z.string().trim().max(1000).optional().refine(value=>!value||(()=>{
+  try{return new URL(value).protocol==='https:';}catch{return false;}
+ })(),'Guide video links must be valid https URLs'),
 }).strict().superRefine((item,ctx)=>{
  if(!validAreas.has(item.area))ctx.addIssue({code:'custom',message:'Unknown construction work area'});
 });
@@ -138,6 +142,13 @@ export function applyCompanyWorkDefaults(
     if(item.kind==='qc')continue;
     index=scope[field].length;
     scope[field].push(item.name);
+   }
+   if(item.guideText?.trim()||item.guideVideoUrl?.trim()){
+    const guides=scope.guides??[];
+    scope.guides=[...guides.filter(guide=>guide.kind!==item.kind||guide.index!==index),{
+     kind:item.kind,index,text:item.guideText?.trim()??'',
+     ...(item.guideVideoUrl?.trim()?{videoUrl:item.guideVideoUrl.trim()}:{})
+    }];
    }
    const value={kind:item.kind,code,index} as QuotationMilestoneStep;
    if(steps.some(x=>x.code===value.code&&x.index===value.index&&

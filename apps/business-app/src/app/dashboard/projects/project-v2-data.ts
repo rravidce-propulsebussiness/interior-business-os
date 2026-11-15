@@ -13,7 +13,7 @@ import { syncQuotedConstructionTimeline } from '../finance/quote-construction-ha
 import { savedStagePaymentPlan,savedStagePaymentLinks,inferStagePaymentLinks,representativePaymentStage } from '@business-os/core/quotation-payment-plan';
 import { savedMilestoneFlow,projectStageFlowFromMilestones } from '@business-os/core/quotation-milestone-flow';
 import { savedStageRequirements,defaultStageRequirements } from '@business-os/core/quotation-stage-requirements';
-import { stageFlowStepSchema,type StageFlowStep } from '@business-os/core/quotation-stage-requirements';
+import { stageFlowStepSchema,stageItemGuideSchema,type StageFlowStep,type StageItemGuide } from '@business-os/core/quotation-stage-requirements';
 export type { ProjectEntry } from './project-v2-types';
 
 export type SiteRow = Record<string,unknown> & {id:string};
@@ -37,7 +37,7 @@ function parseStageItemPlans(value:unknown):StageItemPlan[]{
    version:Number(v.version)||0}];
  }):[];
 }
-export type StageGuidance={stageId:string;materials:string[];reports:string[];flow:StageFlowStep[]};
+export type StageGuidance={stageId:string;materials:string[];reports:string[];flow:StageFlowStep[];guides:StageItemGuide[]};
 function stageGuidanceRows(raw:unknown):StageGuidance[]{
  if(!Array.isArray(raw))return [];
  return raw.map(row=>{
@@ -46,6 +46,10 @@ function stageGuidanceRows(raw:unknown):StageGuidance[]{
   return {stageId:stringValue(x.stage_id),materials:strings(x.materials),reports:strings(x.reports),
    flow:Array.isArray(x.flow)?x.flow.flatMap(item=>{
     const parsed=stageFlowStepSchema.safeParse(item);
+    return parsed.success?[parsed.data]:[];
+   }):[],
+   guides:Array.isArray(x.guides)?x.guides.flatMap(item=>{
+    const parsed=stageItemGuideSchema.safeParse(item);
     return parsed.success?[parsed.data]:[];
    }):[]};
  }).filter(row=>row.stageId);
@@ -510,7 +514,8 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
    return imported??null;
   const base=frozenStageRequirements[stage.instance_code]??defaultStageRequirements(stage.instance_code);
   return {stageId:stage.id,materials:imported?.materials??base.materials,
-   reports:imported?.reports??base.reports,flow:ordered};
+   reports:imported?.reports??base.reports,flow:ordered,
+   guides:imported?.guides?.length?imported.guides:base.guides??[]};
  }).filter((item):item is StageGuidance=>item!==null);
   // Explicit links saved on the quote win; otherwise payment stages are matched
  // to the quoted construction stages by name (never guessed beyond that).

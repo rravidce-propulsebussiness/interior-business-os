@@ -122,6 +122,22 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     stages, work: d.stageProgress.work, optional: d.flow.optional,
     plans: d.itemPlans, execution: d.stageExecution,
   });
+  const guideFor = (stageId: string, kind: 'work'|'material'|'check'|'test'|'qc', index: number) =>
+    d.stageGuidance.find((row) => row.stageId === stageId)?.guides.find((guide) =>
+      guide.kind === kind && guide.index === index);
+  const guideCard = (guide: ReturnType<typeof guideFor>) => {
+    if (!guide || (!guide.text && !guide.videoUrl)) return null;
+    const title = guide.kind === 'work' ? 'Work instructions'
+      : guide.kind === 'qc' ? 'QC method and acceptance'
+        : 'Check instructions';
+    return <aside className="pmt-item-guide">
+      <strong>{title}</strong>
+      {guide.text && <p>{guide.text}</p>}
+      {guide.videoUrl && <a href={guide.videoUrl} target="_blank" rel="noopener noreferrer">
+        Watch guide video ↗
+      </a>}
+    </aside>;
+  };
   const startDate = dayKey(new Date(d.project.createdAt));
   const floorCodes = [...new Set(stages.map((stage) => stage.floor_code).filter((code): code is string => Boolean(code)))];
   const estimated = new Map<string, { start: string; finish: string }>();
@@ -234,6 +250,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       <WorkItemCard projectId={d.project.id} item={view(item)} canWork={canWork}
         canOwn={role === 'owner'} canRequest={canRequest} engineers={engineers}
         boq={d.flow.boq} tomorrow={tomorrow}/>
+      {guideCard(guideFor(item.stage.id,'work',item.index))}
       <div className="pmt-work-timing"><span>Baseline · {displayDay(baseline)}</span>
         <span className={'pmt-variance ' + variance.tone}>{variance.label}</span></div>
       <ProjectItemSchedule projectId={d.project.id} stageId={item.stage.id} kind="work"
@@ -397,6 +414,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         {siteChecks.map((check) => {
           const plan = plansByKey.get(itemPlanKey(stage.id, 'check', check.index));
           return <div className="pmt-check" key={check.index}>
+            {guideCard(guideFor(stage.id,'check',check.index)??guideFor(stage.id,'test',check.index))}
             <StageChecklistItem projectId={d.project.id} stageId={stage.id} kind="check"
               index={check.index} title={check.title} status={check.status}
               notes={check.notes} photoId={check.photoId} photos={stagePhotos}
@@ -408,6 +426,8 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         })}
       </section>}
       {stage.inspectionTopics.length > 0 && !DESIGN_STAGE_CODES.includes(code) && <section className="pmt-subsection">
+        {stage.inspectionTopics.map((_,index)=>
+          <div key={'qc-guide-'+index}>{guideCard(guideFor(stage.id,'qc',index))}</div>)}
         <StageOnsiteQcReview projectId={d.project.id} stageId={stage.id}
           stageName={stageLabel(stage)} topics={stage.inspectionTopics}
           topicIndices={stage.inspectionTopics.map((_, index) => index)}

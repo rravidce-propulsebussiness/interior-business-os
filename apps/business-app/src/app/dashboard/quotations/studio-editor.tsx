@@ -38,7 +38,7 @@ type DocumentHeader = {
 const steps: { id: Tab; title: string }[] = [
   { id: 'quote', title: 'Scope' },
   { id: 'files', title: 'Terms & Inclusions' },
-  { id: 'payments', title: 'Payment Schedule' },
+  { id: 'payments', title: 'Payments & Work' },
 ];
 
 export function QuotationStudioEditor({
