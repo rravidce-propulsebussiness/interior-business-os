@@ -39,6 +39,15 @@
 .qs-source-service { display:flex; align-items:center; gap:7px; color:#217552; font-weight:800; }
 .qs-source-indicator { display:inline-block; width:8px; height:8px; border-radius:50%; background:#28a36f; }
 .qs-source-guidance { color:#667892; }
+.qs-no-leads-callout {
+  display:grid; gap:5px; padding:13px 15px;
+  border:1px solid #fed7aa; border-radius:12px;
+  background:linear-gradient(110deg,#fff8f1,#fffdf9);
+  color:#5c422f; font-size:12px; line-height:1.5;
+}
+.qs-no-leads-callout strong { color:#8b3e18; font-size:13px; }
+.qs-no-leads-callout span { color:#667892; }
+.qs-no-leads-callout a { justify-self:start; margin-top:2px; }
 .qs-source-warning { color:#9d5426; font-weight:700; }
 .qs-source-lead a { color:#d94d0c; text-decoration:underline; font-weight:800; }
 .qs-create-form {
