@@ -104,7 +104,8 @@ const navSections: [label: string, pattern: RegExp][] = [
     'Projects',
     /^\/dashboard\/(projects?|project-management|site-projects|operations|execution|pricing)(\/|$)/,
   ],
-  ['Finance', /^\/dashboard\/(marketplace|finance|billing|reports)(\/|$)/],
+  ['Finance', /^\/dashboard\/(finance|billing|reports)(\/|$)/],
+  ['Marketplace', /^\/dashboard\/marketplace(\/|$)/],
   ['Automation', /^\/dashboard\/(whatsapp|automations)(\/|$)/],
   ['Company', /^\/dashboard\/(employees|company|settings)(\/|$)/],
 ];
