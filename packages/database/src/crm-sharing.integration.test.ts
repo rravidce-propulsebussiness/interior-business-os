@@ -34,8 +34,12 @@ create function pg_temp.assert_value(ok boolean,label text) returns void languag
 create function pg_temp.denied(statement text,label text) returns void language plpgsql as $$begin begin execute statement;exception when insufficient_privilege or check_violation or invalid_parameter_value or serialization_failure then raise notice 'PASS: %',label;return;end;raise exception 'FAIL: %',label;end$$;
 create temp table share_test_state(payload jsonb);grant select,insert on share_test_state to authenticated,anon;
 set local role authenticated;
-do $$declare lead uuid;mapping jsonb;r uuid;n uuid;expired_revision uuid;link jsonb;rotated jsonb;hash text;oldhash text;payload jsonb;response jsonb;begin
+do $$declare lead uuid;mapping jsonb;r uuid;n uuid;expired_revision uuid;link jsonb;rotated jsonb;hash text;oldhash text;payload jsonb;response jsonb;project uuid;customer uuid;prospect_quote uuid=gen_random_uuid();begin
  lead=public.crm_save('${org}','leads',jsonb_build_object('name','Sharing lead','phone','+49 30 123456','source_id',(select id from public.lead_sources where organization_id='${org}' and key='referral'),'stage_id',(select id from public.crm_pipeline_stages where organization_id='${org}' and key='new')));
+ select id,customer_id into project,customer from public.projects where organization_id='${org}' order by id limit 1;
+ if project is null or customer is null then raise exception 'CRM sharing fixture requires a project customer';end if;
+ insert into public.quotations(id,organization_id,customer_id,project_id,quotation_number) values(prospect_quote,'${org}',customer,project,'SHARE-PROSPECT-'||prospect_quote::text);
+ perform public.lead_quotation_link('${org}',lead,prospect_quote,project);
  perform public.crm_command('${org}','stage',jsonb_build_object('id',lead,'version',1,'stage_id',(select id from public.crm_pipeline_stages where organization_id='${org}' and key='won'),'note','Signed approval received'));
  mapping=public.crm_convert('${org}',jsonb_build_object('id',lead,'version',2));
  r=pg_temp.commit_quote(jsonb_build_object('action','create','project_id',mapping->>'project_id','currency','INR'));
