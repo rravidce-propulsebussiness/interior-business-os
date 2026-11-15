@@ -229,7 +229,8 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
     <label>Milestone name
      <input value={row.name} maxLength={100} required disabled={!canEdit}
       aria-label={'Default milestone '+(index+1)}
-      onChange={e=>onChange({...row,name:e.target.value})}/>
+      onChange={e=>onChange({...row,name:e.target.value,steps:steps.map(step=>
+       step.kind==='payment'?{...step,name:e.target.value}:step)})}/>
     </label>
     <label>Percentage
      <span className="us-payment-default-percent">
@@ -280,7 +281,7 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
         <button type="button" onClick={saveEdit}>Save</button>
         <button type="button" onClick={()=>{setEditing(null);setError('');}}>Cancel</button>
        </div>:
-       <span>{item.kind==='payment'?'Payment due · '+item.name+' · '+Number(row.percent||0).toLocaleString(undefined,{maximumFractionDigits:2})+'% of total':item.name}</span>}
+       <span>{item.kind==='payment'?'Payment due · '+row.name+' · '+Number(row.percent||0).toLocaleString(undefined,{maximumFractionDigits:2})+'% of total':item.name}</span>}
       {canEdit&&item.kind!=='material'&&item.kind!=='payment'&&<button type="button" className="us-payment-guide-action"
        onClick={()=>startGuideEdit(position)}>
        {item.guideText||item.guideVideoUrl?'Edit guide':'＋ Add guide'}
