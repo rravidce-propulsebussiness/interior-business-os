@@ -44,7 +44,7 @@ it('routes All Projects selections into the single milestones-first project work
     'savedStagePaymentPlan(revision.data.terms)',
   );
   expect(agreementAction).toContain('/advance|booking/i.test(item.name)');
-  expect(agreementAction).toContain("rpc('project_advance_proforma_prepare'");
+  expect(agreementAction).toContain("'project_advance_proforma_prepare'");
   expect(agreementAction).toContain('Finance verifies a receipt');
 });
 const plan = (

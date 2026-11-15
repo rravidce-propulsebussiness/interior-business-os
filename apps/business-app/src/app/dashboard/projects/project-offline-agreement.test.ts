@@ -24,7 +24,9 @@ describe('optional offline agreement with final quotation', () => {
 
   it('offers the offline choice only when the database identifies the owner', () => {
     expectSource(designWorkflow).toContain('<SkipAgreementUpload');
-    expectSource(designWorkflow).toContain('agreement?.canAuthorizeException && hasOwnerAccess');
+    expectSource(designWorkflow).toContain(
+      'agreement?.canAuthorizeException && hasOwnerAccess',
+    );
     expectSource(forms).toContain('I am the company owner');
     expectSource(forms).toContain('disabled={pending||saved||!confirmed}');
     expectSource(forms).toContain(
@@ -33,16 +35,39 @@ describe('optional offline agreement with final quotation', () => {
   });
 
   it('records the owner-confirmed offline homeowner approval without claiming a digital signature', () => {
-    expectSource(action).toContain(
-      "call(projectId, contractId, 'owner_exception'",
-    );
+    expectSource(action).toContain("p_action: 'owner_exception'");
     expectSource(forms).toContain(
       'confirm the homeowner approved this final quotation or agreement offline.',
     );
     expectSource(forms).toContain('Record offline homeowner approval');
-    expectSource(forms).toContain('confirm the homeowner approved this final quotation or agreement offline.');
+    expectSource(forms).toContain(
+      'confirm the homeowner approved this final quotation or agreement offline.',
+    );
     expectSource(data).toContain(
       "['signed_copy_recorded','owner_exception'].includes(stringValue(agreement.clearance_type))",
+    );
+  });
+
+  it('accepts an optional scanned agreement PDF and keeps the attachment linked to the owner record', () => {
+    expectSource(forms).toContain('Scanned agreement PDF');
+    expectSource(forms).toContain('accept="application/pdf,.pdf"');
+    expectSource(forms).toContain("form.set('file', file)");
+    expectSource(action).toContain("p_category: 'agreement'");
+    expectSource(action).toContain("file.type !== 'application/pdf'");
+    expectSource(action).toContain("toString('ascii') !== '%PDF'");
+    expectSource(action).toContain(
+      'Scanned agreement PDF: ${filename} [${mediaId}]',
+    );
+  });
+
+  it('keeps the owner acknowledgement and scanned PDF controls usable on narrow screens', () => {
+    const css = read('./project-v2.css');
+    expectSource(css).toContain(
+      '.pv2-page .pv2-offline-agreement-ack>input[type=checkbox]',
+    );
+    expectSource(css).toContain('width:18px!important;height:18px!important');
+    expectSource(css).toContain(
+      '@media(max-width:640px){.pv2-page .pv2-offline-agreement',
     );
   });
 
