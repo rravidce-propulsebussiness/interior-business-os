@@ -94,6 +94,31 @@ begin
  raise notice 'PASS: scoped multi-role records, dependency persistence, version guards';
 end$$;
 
+-- Current settings payloads include an existing-payment marker and optional
+-- work/QC guide fields. Saving this template must preserve them intact.
+do $$
+declare
+ org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+ saved jsonb;
+begin
+ perform public.organization_construction_payment_defaults_save(org,
+  jsonb_build_array(jsonb_build_object(
+   'name','Planning','percent',100,
+   'areas',jsonb_build_array('PRECONSTRUCTION','DESIGN'),
+   'steps',jsonb_build_array(
+    jsonb_build_object('kind','payment','name','Planning','area','PRECONSTRUCTION'),
+    jsonb_build_object('kind','work','name','Price Freeze','area','PRECONSTRUCTION',
+     'guideText','Confirm the agreed price before design work begins.',
+     'guideVideoUrl','https://example.test/price-freeze')))));
+ saved:=public.organization_construction_payment_defaults_read(org);
+ if saved->0->'steps'->0->>'kind'<>'payment' or
+    saved->0->'steps'->1->>'guideText'<>'Confirm the agreed price before design work begins.' or
+    saved->0->'steps'->1->>'guideVideoUrl'<>'https://example.test/price-freeze' then
+  raise exception 'FAIL: company payment and guide settings were not preserved';
+ end if;
+ raise notice 'PASS: company payment markers and guide fields persist in settings';
+end$$;
+
 -- Read-only restrictions: one watchman sees no construction engineering stage.
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 do $$
