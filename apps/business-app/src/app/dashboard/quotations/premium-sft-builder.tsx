@@ -166,7 +166,7 @@ export function PremiumSftBuilder({
   const openMaterials=()=>{setDraftSections(sections.map(s=>({...s})));setDrawer(true);};
   const cancelMaterials=()=>{setDraftSections([]);setDrawer(false);};
   const [message,setMessage]=useState('');
-  const [saved,setSaved]=useState(false);
+  const [saved,setSaved]=useState(Boolean(initialSchedule));
   const [dirty,setDirty]=useState(false);
   const [savedVersion,setSavedVersion]=useState(version);
   useEffect(()=>{setSavedVersion(version);},[version]);
