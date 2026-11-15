@@ -250,3 +250,33 @@ a.ush-tile:focus-visible{outline:2px solid #f76b25;outline-offset:3px}
 @media(max-width:1190px){.us-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.us-categories{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:850px){.us-columns{grid-template-columns:1fr}.us-preview{position:static}.us-card{padding:17px}.us-heading h1{font-size:26px}}
 @media(max-width:550px){.us-shell{padding:17px 12px 90px}.us-grid{grid-template-columns:1fr 1fr;gap:11px}.us-field:has(textarea),.us-field:has(input[name="tradeName"]),.us-field:has(input[name="businessType"]),.us-field:has(input[name="email"]),.us-field:has(input[name="website"]),.us-field:has(input[name="bankAccount"]),.us-field:has(input[name="bankHolder"]){grid-column:1/-1}.us-card{padding:16px 13px}.us-card-heading{gap:9px;flex-wrap:wrap}.us-extra{margin-left:0}.us-synced{font-size:9px}.us-categories{grid-template-columns:1fr 1fr;gap:13px 8px}.us-categories label{font-size:10px}.us-link-cards{grid-template-columns:1fr}.us-master form{grid-template-columns:1fr}.us-heading p{font-size:12px}.us-actions{position:sticky;bottom:5px;background:#fffefef7;border-radius:11px;border:1px solid #e7ebf3;box-shadow:0 -6px 24px #2e3e6017;padding:10px}.us-actions>*{flex:1}}
+
+/* Construction workflow: attach practical work and QC guidance to each reusable item. */
+.us-payment-guide-action{
+ margin-top:5px;padding:4px 8px;min-height:26px;border:1px solid #f2cfb8;
+ border-radius:7px;background:#fff8f2;color:#b84f19;font-size:10px;font-weight:800;
+ cursor:pointer
+}
+.us-guide-editor{
+ display:grid;grid-template-columns:minmax(0,1.35fr) minmax(220px,.65fr);
+ gap:14px;margin:12px 0;padding:16px;border:1px solid #f0cfb7;border-radius:14px;
+ background:linear-gradient(135deg,#fff8f2,#fff)
+}
+.us-guide-editor>div:first-child{grid-column:1/-1}
+.us-guide-editor>div:first-child strong{display:block;color:#3d2d24;font-size:14px}
+.us-guide-editor>div:first-child p{margin:4px 0 0;color:#738096;font-size:11px;line-height:1.5}
+.us-guide-editor>label{display:grid;align-content:start;gap:7px;color:#3d4a5c;font-size:11px;font-weight:800}
+.us-guide-editor textarea,.us-guide-editor input{
+ width:100%;min-width:0;border:1px solid #e2d4c8;border-radius:9px;background:#fff;
+ color:#29394d;padding:10px 11px;font:inherit;font-size:12px;line-height:1.6
+}
+.us-guide-editor textarea{resize:vertical;min-height:115px}
+.us-guide-editor small{justify-self:end;color:#8390a0;font-size:10px;font-weight:500}
+.us-guide-editor>a{align-self:center;color:#bd5523;font-size:11px;font-weight:800;overflow-wrap:anywhere}
+.us-guide-editor-actions{grid-column:1/-1;display:flex;gap:8px;align-items:center}
+.us-guide-editor-actions>button{min-height:38px;padding:8px 13px;border:1px solid #e5d4c6;border-radius:9px;background:#fff;color:#7b4a30;font-size:11px;font-weight:800;cursor:pointer}
+.us-guide-editor-actions>.us-save{border-color:#f97316;background:#f97316;color:#fff}
+@media(max-width:680px){
+ .us-guide-editor{grid-template-columns:minmax(0,1fr);padding:12px}
+ .us-guide-editor>div:first-child,.us-guide-editor-actions{grid-column:auto}
+}
