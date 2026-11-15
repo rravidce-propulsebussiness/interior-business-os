@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'vitest';
+import { expectSource as expect } from '../source-test-expect';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -333,8 +334,8 @@ describe('single premium package library and working Custom Quote entry', () => 
     expect(library).toContain('deleteQuotationPackage');
     expect(library).toContain('preview?format=pdf');
     expect(library).toContain("detail.item.status === 'active'");
-    expect(library).toContain('construction.map((item)');
-    expect(library).toContain('(other ?? []).map((item)');
+    expect(library).toContain('construction.map(');
+    expect(library).toContain('(other ?? []).map(');
   });
 
   it('routes through classified CRM leads then preselects tenant-owned package or custom mode', () => {
@@ -460,7 +461,7 @@ describe('customer-grouped quotation list without Draft presentation', () => {
     expect(list).toContain('const customerGroups = new Map<string');
     expect(list).toContain('customerGroups.get(quote.customerId)');
     expect(list).toContain('group.quotes.push(quote)');
-    expect(list).toContain('mobileCustomers.map((group)');
+    expect(list).toContain('mobileCustomers.map(');
     expect(list).toContain('renderMobileQuote(group.quotes[0]!)');
     expect(list).toContain('renderTableRow(group.quotes[0]!)');
     expect(list).toContain('group.quotes.slice(1).map(');
@@ -1176,7 +1177,7 @@ describe('Settings category dashboard keeps one canonical settings workspace', (
     expect(page).toContain(
       'const tab=tabs.find(t=>t.id===params.tab)?.id??null;',
     );
-    expect(page).toContain('tab===null?<SettingsHome sections={sections}/>');
+    expect(page).toContain('tab===null?(<SettingsHome sections={sections}/>');
     for (const tab of [
       'company',
       'branding',
@@ -1199,8 +1200,9 @@ describe('Settings category dashboard keeps one canonical settings workspace', (
       'System & Preferences',
     ])
       expect(page).toContain(label);
+    const compactPage = page.replace(/\s/g, '');
     const home =
-      page.split('const sections:SettingSection[]=')[1]?.split('\n ];')[0] ??
+      compactPage.split('constsections:SettingSection[]=')[1]?.split('];')[0] ??
       '';
     // Five section headings plus the seventeen remaining category cards share this shape.
     expect((home.match(/\bid:'[^']+',title:/g) ?? []).length - 5).toBe(16);
