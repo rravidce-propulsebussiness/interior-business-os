@@ -102,7 +102,7 @@ export function QuotationStudioEditor({
           </button>
         ))}
       </nav>
-      <div className={'qs-studio-grid' + (step === 'payments' ? ' qs-studio-grid-full' : '')}>
+      <div className={'qs-studio-grid' + (isConstruction || step === 'payments' ? ' qs-studio-grid-full' : '')}>
         <div className="qs-editor">
           {step === 'quote' && (
             <>
@@ -205,11 +205,6 @@ export function QuotationStudioEditor({
             </span>
           </div>
         </aside>}
-      </div>
-      <div className="qs-studio-bottom-actions">
-        <a className="qs-btn" href={url + '/preview'} target="_blank" rel="noopener noreferrer">
-          View saved quotation ↗
-        </a>
       </div>
     </>
   );
