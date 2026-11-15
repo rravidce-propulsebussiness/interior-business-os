@@ -2,6 +2,7 @@
 
 import {useActionState,useEffect,useState} from 'react';
 import {companyWorkAreaLabel,inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
+import {customerPaymentMilestoneName} from '@business-os/core/quotation-payment-plan';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
 type Kind=CompanyWorkStep['kind'];
@@ -277,7 +278,7 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
         <button type="button" onClick={saveEdit}>Save</button>
         <button type="button" onClick={()=>{setEditing(null);setError('');}}>Cancel</button>
        </div>:
-       <span>{item.kind==='payment'?'Payment due · '+row.name+' · '+Number(row.percent||0).toLocaleString(undefined,{maximumFractionDigits:2})+'% of total':item.name}</span>}
+       <span>{item.kind==='payment'?'Payment due · '+customerPaymentMilestoneName(row.name,areas)+' · '+Number(row.percent||0).toLocaleString(undefined,{maximumFractionDigits:2})+'% of total':item.name}</span>}
       {canEdit&&item.kind!=='material'&&item.kind!=='payment'&&<button type="button" className="us-payment-guide-action"
        onClick={()=>startGuideEdit(position)}>
        {item.guideText||item.guideVideoUrl?'Edit guide':'＋ Add guide'}
