@@ -42,6 +42,7 @@ describe('quotation payment steps projected into one project timeline', () => {
   it('retains the exact saved payment count, order and percentages without splitting', () => {
     const saved = savedFlow({
       '0': [
+        { kind: 'payment', code: 'FOUNDATION', index: 0 },
         { kind: 'work', code: 'FOUNDATION', index: 0 },
         { kind: 'check', code: 'FOUNDATION', index: 0 },
         { kind: 'qc', code: 'FOUNDATION', index: 0 },
@@ -65,6 +66,12 @@ describe('quotation payment steps projected into one project timeline', () => {
     ]);
     const requirements = defaultStageRequirements('FOUNDATION');
     expect(result[0]?.steps).toEqual([
+      {
+        kind: 'payment',
+        code: 'FOUNDATION',
+        index: 0,
+        title: 'Payment due · Foundation package',
+      },
       {
         kind: 'work',
         code: 'FOUNDATION',
@@ -129,6 +136,9 @@ describe('quotation payment steps projected into one project timeline', () => {
     );
     expect(source('./project-quote-payment-flow.tsx')).toContain(
       'd.stageProgress.work',
+    );
+    expect(source('./project-quote-payment-flow.tsx')).toContain(
+      "step.kind === 'payment'",
     );
   });
 });
