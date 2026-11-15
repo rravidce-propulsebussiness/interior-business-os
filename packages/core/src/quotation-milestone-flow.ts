@@ -102,8 +102,10 @@ export function projectStageFlowFromMilestones(
 ):{kind:'work'|'check'|'test'|'qc'|'material';index:number}[] {
  const stage=stages[code]??defaultStageRequirements(code);
  const steps=Object.keys(plan).sort((a,b)=>Number(a)-Number(b))
-  .flatMap(key=>plan[key]??[]).filter(item=>item.code===code&&item.kind!=='payment')
-  .map(({kind,index})=>({kind,index}));
+  .flatMap(key=>(plan[key]??[]).filter(
+   (item):item is Exclude<QuotationMilestoneStep,{kind:'payment'}> =>
+    item.code===code&&item.kind!=='payment',
+  )).map(({kind,index})=>({kind,index}));
  const known=new Set(steps.filter(item=>item.kind!=='qc').map(item=>
   (item.kind==='test'?'check':item.kind)+':'+item.index));
  for(let index=0;index<stage.work.length;index++){
