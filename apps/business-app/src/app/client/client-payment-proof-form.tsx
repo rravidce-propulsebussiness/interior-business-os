@@ -16,7 +16,7 @@ export function ClientPaymentProofForm({
   const [done, setDone] = useState(false);
   return (
     <details className="pc-payment-evidence">
-      <summary>I've Paid · Upload screenshot</summary>
+      <summary>I&apos;ve Paid · Upload screenshot</summary>
       <p className="pc-empty">
         Your screenshot is submitted for bank verification. Payment stays
         pending until the builder verifies the actual credit.

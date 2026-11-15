@@ -166,6 +166,7 @@ export function FixedTemplateEditor({
       active = false;
       clearTimeout(controller);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Dependencies are intentionally scoped to this synchronization lifecycle.
   }, [id, document, page?.path]);
 
   const updateNode = (id: string, field: string, value: string) => {
@@ -265,6 +266,7 @@ export function FixedTemplateEditor({
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Dependencies are intentionally scoped to this synchronization lifecycle.
   }, [canEdit]);
 
   const setNodeImage = (nodeId: string, assetId?: string, asset?: Asset) => {

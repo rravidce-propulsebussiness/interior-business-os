@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @next/next/no-img-element -- Private, data, and object URL media previews require native img elements; react-hook-form watch is used in this render branch. */
 
 import Link from 'next/link';
 import { useState, type ChangeEvent, type MouseEvent } from 'react';

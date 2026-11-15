@@ -28,6 +28,7 @@ export function useWebsitePreviewSrcDoc(html: string): string {
       document.querySelector<HTMLScriptElement>('script[nonce]')?.nonce ??
       document.querySelector<HTMLStyleElement>('style[nonce]')?.nonce ??
       '';
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     setResult(applyWebsitePreviewNonce(html, nonce));
   }, [html]);
   return result;

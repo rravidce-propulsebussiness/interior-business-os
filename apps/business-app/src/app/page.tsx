@@ -447,7 +447,7 @@ function DashboardPreview() {
           <SiteIllustration />
         </div>
         <b>Foundation inspection</b>
-        <small>Today's site report</small>
+        <small>Today&apos;s site report</small>
         <div className="pp-phone-checks">
           <span>
             <Icon name="check" size={11} /> Work updated

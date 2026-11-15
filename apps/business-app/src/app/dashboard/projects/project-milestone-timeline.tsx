@@ -15,6 +15,7 @@ import { ProjectItemSchedule } from './project-item-schedule';
 import { StageButton } from './project-flow-controls';
 import { RccSubstageGroups } from './project-rcc-substage-groups';
 import { ProjectMilestoneAutoScroll } from './project-milestone-stage-list';
+import { ProjectMilestoneStageCarousel } from './project-milestone-stage-carousel';
 import {
   ProjectDesignPaymentAndAgreement,
   ProjectDesignPlansWorkflow,
@@ -170,6 +171,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       'supervisor',
     ].includes(site?.role ?? '');
   const today = dayKey(new Date());
+  // eslint-disable-next-line react-hooks/purity -- This render-time timestamp is used to calculate a live project timeline.
   const tomorrow = dayKey(new Date(Date.now() + 86400000));
   const photos = (site?.media ?? [])
     .filter((row) => stringValue(row.mime).startsWith('image/'))
@@ -520,6 +522,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       const days = durationByCode[code] ?? 10;
       const start = addDays(startDate, quoteOffset);
       const finish = addDays(start, Math.max(days - 1, 0));
+      // eslint-disable-next-line react-hooks/immutability -- This callback handles an external editor message and updates React state.
       quoteOffset += days;
       return { ...stage, start, finish };
     });
@@ -631,6 +634,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   }
   const rounds: CuringRoundView[] = (d.flow.curing?.rounds ?? []).map(
     (round) => {
+      // eslint-disable-next-line react-hooks/purity -- This render-time timestamp is used to calculate a live project timeline.
       const age = Date.now() - new Date(round.roundAt).getTime();
       return {
         key: round.planId + round.roundAt,
@@ -1344,13 +1348,17 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
           </div>
         </div>
         <ProjectMilestoneAutoScroll focusIndex={firstStageIndex} />
-        <div className="pmt-stage-list">
+        <ProjectMilestoneStageCarousel
+          currentIndex={firstStageIndex}
+          todayIndex={todayStageIndex}
+          stageTitles={timelineCards.map((card) => card.title)}
+        >
           {timelineCards.map((card, index) =>
             card.id === 'design-stage'
               ? renderDesignStageCard(index)
               : renderStageCard(card.stages[0]!, index),
           )}
-        </div>
+        </ProjectMilestoneStageCarousel>
       </section>
     </div>
   );

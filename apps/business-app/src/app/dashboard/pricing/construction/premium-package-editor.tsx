@@ -803,8 +803,8 @@ export function PremiumPackageEditor({
                 </div>
                 <p className="px-3 pb-4 pt-3 text-[10px] text-slate-500">
                   Sample: 1,000 sq ft × {currency(rate)} ={' '}
-                  {currency(moneyPreview)}. Final quantities use the customer's
-                  approved quote.
+                  {currency(moneyPreview)}. Final quantities use the
+                  customer&apos;s approved quote.
                 </p>
               </div>
             </section>
@@ -813,7 +813,7 @@ export function PremiumPackageEditor({
                 PDF & branding
               </h3>
               <p className="mt-1 text-xs text-slate-500">
-                Choose a colour for this company's quotation.
+                Choose a colour for this company&apos;s quotation.
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {['#F97316', '#EA580C', '#155EEF', '#089E9C', '#334155'].map(

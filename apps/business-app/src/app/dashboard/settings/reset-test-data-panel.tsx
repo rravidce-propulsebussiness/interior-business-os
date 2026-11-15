@@ -141,7 +141,7 @@ export function ResetTestDataPanel() {
                   onChange={(e) => setAck(e.target.checked)}
                   disabled={busy || result?.success}
                 />
-                I understand this permanently erases this company's test
+                I understand this permanently erases this company&apos;s test
                 business records.
               </label>
               <button

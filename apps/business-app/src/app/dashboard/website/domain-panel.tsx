@@ -123,8 +123,8 @@ export function DomainPanel({
                 <p className="mt-1">
                   For a subdomain such as <code>www</code>, create a CNAME
                   record for that subdomain. For a root/apex hostname, use an
-                  ALIAS/ANAME record or your DNS provider's CNAME flattening on
-                  host <code>@</code>. In both cases the target is{' '}
+                  ALIAS/ANAME record or your DNS provider&apos;s CNAME
+                  flattening on host <code>@</code>. In both cases the target is{' '}
                   <code>{cnameTarget || 'CNAME target not configured'}</code>.
                   A-only DNS providers require a separate apex-proxying service.
                 </p>

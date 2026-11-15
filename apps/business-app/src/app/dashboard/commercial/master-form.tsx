@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @next/next/no-img-element, react-hooks/incompatible-library -- Private, data, and object URL media previews require native img elements; react-hook-form watch is used in this render branch. */
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';

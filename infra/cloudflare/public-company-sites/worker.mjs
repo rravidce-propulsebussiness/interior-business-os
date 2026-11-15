@@ -53,7 +53,7 @@ function routableHostname(hostname) {
   return true;
 }
 
-export default {
+const worker = {
   async fetch(request, env) {
     const input = new URL(request.url);
     const originalHost = input.hostname.toLowerCase();
@@ -124,3 +124,5 @@ export default {
     return new Response(response.body, { status: response.status, headers });
   },
 };
+
+export default worker;

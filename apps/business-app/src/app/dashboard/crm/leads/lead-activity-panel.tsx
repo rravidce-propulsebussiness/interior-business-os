@@ -1,4 +1,5 @@
-import { crmServices, resultSchema } from '../service';
+import type { crmServices } from '../service';
+import { resultSchema } from '../service';
 import {
   LeadActivityQueue,
   type ActivityQueueItem,

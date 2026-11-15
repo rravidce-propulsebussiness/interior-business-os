@@ -83,9 +83,9 @@ export function ClientAccess({
         <span className="text-xs text-slate-500">Private project access</span>
       </div>
       <p className="mb-4 text-sm text-slate-600">
-        Invite the client's email to see this project's approved plans, updates
-        and requests. They cannot view your company's dashboard or other
-        projects.
+        Invite the client&apos;s email to see this project&apos;s approved
+        plans, updates and requests. They cannot view your company&apos;s
+        dashboard or other projects.
       </p>
       {projects.length ? (
         <form

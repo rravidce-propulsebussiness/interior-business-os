@@ -113,7 +113,6 @@ export async function renderQuotationFallbackPdf(
   const coverImage = await embeddedImage(doc, input.coverImageDataUri);
   let page: PDFPage = doc.addPage([PAGE_W, PAGE_H]);
   let y = PAGE_H - 110;
-  let pageIndex = 0;
 
   const fittedText = (
     content: string,
@@ -290,7 +289,6 @@ export async function renderQuotationFallbackPdf(
 
   const startContentPage = () => {
     page = doc.addPage([PAGE_W, PAGE_H]);
-    pageIndex++;
     y = PAGE_H - 115;
     page.drawRectangle({
       x: 0,

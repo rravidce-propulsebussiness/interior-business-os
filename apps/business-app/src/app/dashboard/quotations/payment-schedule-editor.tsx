@@ -272,6 +272,7 @@ export function PaymentScheduleEditor({
       // The last installment absorbs penny rounding so 100% equals the quote total.
       const value =
         valid && index === rows.length - 1 ? cents - allocated : calculated;
+      // eslint-disable-next-line react-hooks/immutability -- This callback handles an external editor message and updates React state.
       allocated += value;
       return value / 100;
     });

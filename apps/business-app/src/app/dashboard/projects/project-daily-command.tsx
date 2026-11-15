@@ -342,7 +342,7 @@ export function ProjectDailyCommand({
             <OwnerIcon name="calendar" size={22} />
           </span>
           <span className="daily-section-copy">
-            <strong>Today's Work</strong>
+            <strong>Today&apos;s Work</strong>
             <small>{displayDate.format(now)}</small>
           </span>
           <span className="daily-ring" style={progressStyle}>
@@ -397,7 +397,7 @@ export function ProjectDailyCommand({
           )}
           {!!todayReports.length && (
             <div className="daily-report-note">
-              <strong>Today's recorded progress</strong>
+              <strong>Today&apos;s recorded progress</strong>
               {todayReports.slice(0, 2).map((row) => (
                 <p key={row.id}>{stringValue(row.completed_work)}</p>
               ))}
@@ -415,13 +415,13 @@ export function ProjectDailyCommand({
                 id="daily-report-update"
               >
                 <summary>
-                  <OwnerIcon name="projects" size={17} /> Update Today's
+                  <OwnerIcon name="projects" size={17} /> Update Today&apos;s
                   Progress
                 </summary>
                 <div className="daily-action-form">
                   <p className="daily-help">
-                    Record today's work and tomorrow's plan together in the
-                    existing site report.
+                    Record today&apos;s work and tomorrow&apos;s plan together
+                    in the existing site report.
                   </p>
                   <SiteReportForm id={d.project.id} />
                 </div>
@@ -483,7 +483,7 @@ export function ProjectDailyCommand({
             <OwnerIcon name="calendar" size={22} />
           </span>
           <span className="daily-section-copy">
-            <strong>Tomorrow's Plan</strong>
+            <strong>Tomorrow&apos;s Plan</strong>
             <small>{displayDate.format(tomorrowDate)}</small>
           </span>
           <Chip kind="purple">{tomorrowPlan ? 'Planned' : 'Not planned'}</Chip>
@@ -523,16 +523,16 @@ export function ProjectDailyCommand({
             <div className="daily-empty">
               <strong>No plan recorded for tomorrow</strong>
               <p>
-                Use Today's Progress above to record the next day's activities,
-                workers and required checks. Work is not automatically marked
-                complete.
+                Use Today&apos;s Progress above to record the next day&apos;s
+                activities, workers and required checks. Work is not
+                automatically marked complete.
               </p>
             </div>
           )}
           {tomorrowPlan && (
             <p className="daily-help">
-              Plan comes from today's daily work report. Update it through the
-              same report workflow to avoid duplicate plans.
+              Plan comes from today&apos;s daily work report. Update it through
+              the same report workflow to avoid duplicate plans.
             </p>
           )}
         </div>
@@ -741,7 +741,7 @@ export function ProjectDailyCommand({
         <p className="daily-help daily-photo-caption">
           {mostRecentPhotos.length} site photo
           {mostRecentPhotos.length === 1 ? '' : 's'} available through your
-          project's existing media register.
+          project&apos;s existing media register.
         </p>
       )}
     </div>

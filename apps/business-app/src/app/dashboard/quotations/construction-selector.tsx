@@ -39,6 +39,7 @@ function CustomizedQuote({
   const [pending, start] = useTransition();
   const [savedVersion, setSavedVersion] = useState(version);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     setSavedVersion((v) => Math.max(v, version));
   }, [version]);
   const [area, setArea] = useState(initialQuote?.areaSqft ?? '');

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import './no-company-workspace.css';
 import { WorkspaceOnboardingHeader } from './company/onboarding-header';
 
@@ -179,7 +180,7 @@ export function NoCompanyWorkspace() {
             </span>
           </div>
           <div className="bo-cards">
-            <a
+            <Link
               className="bo-option bo-featured"
               href="/dashboard/company/apply"
             >
@@ -195,8 +196,8 @@ export function NoCompanyWorkspace() {
               <span className="bo-card-cta">
                 Create your workspace <i aria-hidden="true">→</i>
               </span>
-            </a>
-            <a className="bo-option" href="/auth/propulse">
+            </Link>
+            <Link className="bo-option" href="/auth/propulse">
               <span className="bo-option-tag">NO DUPLICATE SETUP</span>
               <span className="bo-option-icon">
                 <OptionIcon kind="import" />
@@ -209,8 +210,8 @@ export function NoCompanyWorkspace() {
               <span className="bo-card-cta">
                 Connect existing company <i aria-hidden="true">→</i>
               </span>
-            </a>
-            <a className="bo-option" href="/dashboard/company/invitations">
+            </Link>
+            <Link className="bo-option" href="/dashboard/company/invitations">
               <span className="bo-option-tag">TEAM ACCESS</span>
               <span className="bo-option-icon">
                 <OptionIcon kind="join" />
@@ -223,7 +224,7 @@ export function NoCompanyWorkspace() {
               <span className="bo-card-cta">
                 Enter invitation code <i aria-hidden="true">→</i>
               </span>
-            </a>
+            </Link>
           </div>
         </section>
         <section className="bo-help">

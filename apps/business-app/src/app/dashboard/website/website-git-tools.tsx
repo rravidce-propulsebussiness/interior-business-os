@@ -79,6 +79,7 @@ export function WebsiteGitTools({
     // This is a per-browser shortcut only. No GitHub tokens are stored here.
     try {
       const previous = localStorage.getItem(savedKey);
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
       if (previous) setUrl(previous);
     } catch {
       /* Private browsing does not always permit local storage. */
@@ -357,9 +358,9 @@ export function WebsiteGitTools({
             </button>
             {!canPull && (
               <p>
-                Static HTML/CSS import is unavailable for this website's current
-                plan or your editing permissions. Developer Mode and Custom Code
-                must be enabled to import files. You can still use{' '}
+                Static HTML/CSS import is unavailable for this website&apos;s
+                current plan or your editing permissions. Developer Mode and
+                Custom Code must be enabled to import files. You can still use{' '}
                 <strong>Browse source files — multiple languages</strong> below.
               </p>
             )}

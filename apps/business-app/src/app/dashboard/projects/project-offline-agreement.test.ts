@@ -63,7 +63,7 @@ describe('optional offline agreement with final quotation', () => {
   it('keeps the owner acknowledgement and scanned PDF controls usable on narrow screens', () => {
     const css = read('./project-v2.css');
     expectSource(css).toContain(
-      '.pv2-page .pv2-offline-agreement-ack>input[type=checkbox]',
+      ".pv2-page .pv2-offline-agreement-ack>input[type=\'checkbox\']",
     );
     expectSource(css).toContain('width:18px!important;height:18px!important');
     expectSource(css).toContain(

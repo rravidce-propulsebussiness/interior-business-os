@@ -776,7 +776,7 @@ export function SiteReportForm({ id }: { id: string }) {
         </label>
       </div>
       <label>
-        Today's completed work
+        Today&apos;s completed work
         <textarea
           name="completed_work"
           rows={3}

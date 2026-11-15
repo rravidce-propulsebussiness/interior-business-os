@@ -223,7 +223,7 @@ export function WebsiteDesignStudio({
             <span className="wd-eyebrow">WEBSITE STUDIO / DESIGN SYSTEM</span>
             <h1>Design &amp; appearance</h1>
             <p>
-              Fine-tune your website's personality, colors, typography and
+              Fine-tune your website&apos;s personality, colors, typography and
               layout.
             </p>
           </div>

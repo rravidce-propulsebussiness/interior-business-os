@@ -116,7 +116,7 @@ export function StageExecutionFlowEditor({
   const insert = (after: number) => {
     const flow = [...steps];
     const trimmed = title.replace(/\s+/g, ' ').trim();
-    let work = [...value.work],
+    const work = [...value.work],
       checks = [...value.checks];
     if (kind === 'payment') {
       const index = Number(paymentIndex);

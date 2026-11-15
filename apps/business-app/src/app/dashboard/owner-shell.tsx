@@ -177,6 +177,7 @@ export function OwnerShell({
   useEffect(() => {
     if (!menuOpen) return;
     if (window.innerWidth > 1199) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
       setMenuOpen(false);
       return;
     }

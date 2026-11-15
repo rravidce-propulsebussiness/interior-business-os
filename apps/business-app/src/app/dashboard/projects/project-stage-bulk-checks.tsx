@@ -131,7 +131,9 @@ export function BulkStageChecks({
                   setConfirmed(false);
                 }}
               >
-                <option value="">Keep each check's existing evidence</option>
+                <option value="">
+                  Keep each check&apos;s existing evidence
+                </option>
                 {photos.map((photo) => (
                   <option key={photo.id} value={photo.id}>
                     {photo.filename}

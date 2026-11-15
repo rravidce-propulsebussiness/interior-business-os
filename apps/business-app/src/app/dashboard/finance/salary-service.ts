@@ -1,5 +1,5 @@
 import 'server-only';
-import { createServerDatabase } from '@business-os/database/server';
+import type { createServerDatabase } from '@business-os/database/server';
 import { DomainError } from '@business-os/shared';
 
 export type SalaryRow = {

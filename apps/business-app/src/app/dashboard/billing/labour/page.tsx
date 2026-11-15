@@ -351,8 +351,8 @@ export default async function LabourPayments({
         )}
       </section>
       <p className="labour-footnote">
-        CSV is an accountant's supporting workpaper, not a GST return, statutory
-        payslip, or proof of bank transfer.
+        CSV is an accountant&apos;s supporting workpaper, not a GST return,
+        statutory payslip, or proof of bank transfer.
       </p>
     </main>
   );
