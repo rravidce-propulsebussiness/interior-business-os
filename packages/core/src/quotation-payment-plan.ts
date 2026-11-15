@@ -130,6 +130,20 @@ const PAYMENT_STAGE_WORDS: Record<string, RegExp> = {
 export const stageTemplateOf = (instanceCode: string) =>
   instanceCode.split('/')[0] ?? instanceCode;
 
+/** Give the homeowner a plain-language purpose for the linked planning payment. */
+export function customerPaymentMilestoneName(
+  name: string,
+  stageCodes: readonly string[],
+): string {
+  const normalized=name.trim().replace(/\s+/g,' ').toLowerCase();
+  const stages=new Set(stageCodes.map(stageTemplateOf));
+  if(
+    /^(planning|planning fee|planning payment)$/.test(normalized)&&
+    stages.has('PRECONSTRUCTION')&&stages.has('DESIGN')
+  )return 'Planning — Price freeze & design payment';
+  return name;
+}
+
 export function inferStagePaymentLinks(
   paymentNames: readonly string[],
   stageCodes: readonly string[],
