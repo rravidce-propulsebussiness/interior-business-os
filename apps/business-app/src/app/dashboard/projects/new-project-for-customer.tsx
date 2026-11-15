@@ -3,10 +3,16 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-type Customer = { id: string; name: string };
+type Customer = {
+  id: string;
+  name: string;
+  phone?: string;
+  email?: string;
+  location?: string;
+};
 type Quote = { revisionId: string; number: string; status: string };
 
-/** Projects enter execution from an existing customer's quotation. */
+/** Start from an existing customer record, or begin a quote for a new customer. */
 export function NewProjectForCustomer({
   customers,
   quotesByCustomer = {},
@@ -28,77 +34,97 @@ export function NewProjectForCustomer({
     ? '/dashboard/quotations/new?customer=' + encodeURIComponent(customerId)
     : '/dashboard/quotations/new';
 
-  if (!customers.length)
-    return (
-      <Link href="/dashboard/crm/leads" className="pv2-button pv2-primary">
-        Start with a customer enquiry
-      </Link>
-    );
-
   return (
     <div className="pv2-new-project">
       <button
         type="button"
         className="pv2-button pv2-primary"
         aria-expanded={expanded}
+        aria-controls="pv2-create-project-panel"
         onClick={() => setExpanded(!expanded)}
       >
-        {expanded ? 'Close' : '＋ Start Project'}
+        {expanded ? 'Close project setup' : '＋ Create Project'}
       </button>
       {expanded && (
         <section
+          id="pv2-create-project-panel"
           className="pv2-new-project-panel"
-          aria-label="Start a project from an existing customer quotation"
+          aria-label="Create project"
         >
-          <h2>Start with a quotation</h2>
+          <h2>Select a customer</h2>
           <p className="pv2-muted">
-            Select an existing customer and continue a quotation, or create one
-            first. The customer’s latest quotation is Final by default. When the
-            delivery project is created, its planned milestones sync from that
-            quote without recording homeowner acceptance, a signed agreement, or payment.
+            Review the customer’s saved details and quotations. A delivery
+            project starts from the customer’s accepted quotation and agreement.
           </p>
-          <label>
-            Customer
-            <select
-              required
-              value={customerId}
-              onChange={(event) => setCustomerId(event.target.value)}
-            >
-              {customers.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          {quotes.length > 0 ? (
-            <div className="pv2-project-quotes" aria-label="Open quotations">
-              <strong>Open quotations for {customer?.name ?? 'this customer'}</strong>
-              {quotes.map((quote) => (
-                <Link
-                  key={quote.revisionId}
-                  href={'/dashboard/quotations/' + quote.revisionId + '/studio'}
-                  className="pv2-button pv2-outline"
+          {customers.length ? (
+            <>
+              <label className="pv2-project-customer-select">
+                Existing customer
+                <select
+                  required
+                  value={customerId}
+                  onChange={(event) => setCustomerId(event.target.value)}
                 >
-                  Continue {quote.number} · {quote.status}
+                  {customers.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {customer && (
+                <div className="pv2-project-customer-details" aria-label="Customer details">
+                  <strong>{customer.name}</strong>
+                  <span>{customer.phone || 'No phone number saved'}</span>
+                  <span>{customer.email || 'No email saved'}</span>
+                  {customer.location && <span>{customer.location}</span>}
+                </div>
+              )}
+              {quotes.length > 0 ? (
+                <div className="pv2-project-quotes" aria-label="Open quotations">
+                  <strong>Open quotations for {customer?.name ?? 'this customer'}</strong>
+                  {quotes.map((quote) => (
+                    <Link
+                      key={quote.revisionId}
+                      href={'/dashboard/quotations/' + quote.revisionId + '/studio'}
+                      className="pv2-button pv2-outline"
+                    >
+                      Continue {quote.number} · {quote.status}
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <p className="pv2-muted" role="status">
+                  No draft or issued quotation is linked to this customer yet.
+                </p>
+              )}
+              {canCreateQuote ? (
+                <Link href={quoteUrl} className="pv2-button pv2-primary">
+                  {quotes.length ? '＋ Create another quotation' : '＋ Create quotation'}
+                  {customer ? ' for ' + customer.name : ''}
                 </Link>
-              ))}
-            </div>
+              ) : (
+                <p className="pv2-muted" role="status">
+                  Quotation creation permission is required to continue.
+                </p>
+              )}
+            </>
           ) : (
             <p className="pv2-muted" role="status">
-              No draft or issued quotation is linked to this customer yet.
+              No existing customer records are available. Start a quotation for a
+              new customer enquiry.
             </p>
           )}
-          {canCreateQuote ? (
-            <Link href={quoteUrl} className="pv2-button pv2-primary">
-              {quotes.length ? '＋ Create another quotation' : '＋ Create quotation'}
-              {customer ? ' for ' + customer.name : ''}
-            </Link>
-          ) : (
-            <p className="pv2-muted" role="status">
-              Quotation creation permission is required to start a new project.
-            </p>
-          )}
+          <div className="pv2-new-customer-quote">
+            <span>New customer?</span>
+            {canCreateQuote ? (
+              <Link href="/dashboard/quotations/new" className="pv2-button pv2-outline">
+                Create a quotation
+              </Link>
+            ) : (
+              <span className="pv2-muted">Quotation creation permission is required.</span>
+            )}
+          </div>
         </section>
       )}
     </div>
