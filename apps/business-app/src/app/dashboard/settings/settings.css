@@ -307,3 +307,15 @@ a.ush-tile:focus-visible{outline:2px solid #f76b25;outline-offset:3px}
 .us-payment-stage-order{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .us-payment-stage-order>button:not(.us-payment-remove){width:34px;height:36px;border:1px solid #e7d9cd;border-radius:8px;background:#fff;color:#a54b1d;font-size:17px;font-weight:800;cursor:pointer}
 .us-payment-stage-order>button:disabled{opacity:.35;cursor:not-allowed}
+
+
+/* Drag ordering and explicit stage/item sequence controls. */
+.us-payment-stage[draggable="true"],.us-payment-step[draggable="true"]{cursor:grab}
+.us-payment-stage[draggable="true"]:active,.us-payment-step[draggable="true"]:active{cursor:grabbing}
+.us-payment-stage-drag,.us-payment-step-drag{display:inline-flex;align-items:center;justify-content:center;color:#9b796d;font-size:20px;letter-spacing:-4px;cursor:grab;user-select:none}
+.us-payment-stage-drag{margin-right:6px}
+.us-payment-step-drag{width:24px;flex:0 0 24px}
+.us-order-number{width:58px;min-height:38px;padding:6px 5px;border:1px solid #ead9cf;border-radius:9px;background:#fff;color:#49352e;font-size:14px;font-weight:800;text-align:center}
+.us-payment-stage-order label{display:grid;gap:4px;color:#80665d;font-size:10px;font-weight:800}
+.us-payment-step-number.us-order-number{flex:0 0 58px}
+@media(max-width:640px){.us-order-number{width:52px}.us-payment-stage-order{flex-wrap:wrap}.us-payment-stage-drag{font-size:18px}}
