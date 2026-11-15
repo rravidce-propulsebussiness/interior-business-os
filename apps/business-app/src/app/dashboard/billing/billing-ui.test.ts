@@ -34,7 +34,7 @@ describe('Finance navigation and single-source billing',()=>{
  it('uses SG Homes responsive finance shell',()=>{
   expect(finance).toContain('dashboardBrand');
   expect(finance).toContain('OwnerMobileNav');
-  expect(css).toContain('fe5105');
+  expect(css).toContain('#BD5C3F');
   expect(css).toContain('@media(max-width:760px)');
  });
 
