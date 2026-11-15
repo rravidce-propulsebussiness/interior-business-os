@@ -115,6 +115,13 @@ describe('minimal quotation studio navigation', () => {
     expect(studio).not.toContain('qs-method-tabs');
   });
 
+  it('keeps the saved state visible until the quotation is edited again', () => {
+    expect(sft).toContain('disabled={pending||(saved&&!dirty)}');
+    expect(sft).toContain("saved&&!dirty?'✓ Saved':'▣ Save quotation →'");
+    expect(sft).toContain("className={'qs-work-summary-save'+(saved&&!dirty?' is-saved':'')}");
+    expect(sft).toContain("const touch=()=>{setSaved(false);setDirty(true);setMessage('');}");
+  });
+
   it('Save delegates to real persisted child actions, not a refresh fake', () => {
     expect(studio).not.toContain('saveButton.click()');
     expect(studio).not.toContain('router.refresh();');
@@ -618,7 +625,7 @@ describe('save resiliency and floor auto-inheritance', () => {
   const action = file('./construction-actions.ts');
 
   it('accepts Save taps and reports invalid row fields rather than disabling the button', () => {
-    expect(builder).toContain('disabled={pending}');
+    expect(builder).toContain('disabled={pending||(saved&&!dirty)}');
     expect(builder).toContain('if(validationMessage)');
     expect(builder).toContain('setMessage(validationMessage)');
     expect(builder).toContain('setSavedVersion(data.version??savedVersion+1)');

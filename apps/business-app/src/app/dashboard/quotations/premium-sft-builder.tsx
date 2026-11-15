@@ -521,8 +521,11 @@ export function PremiumSftBuilder({
         <small>Total estimate · {floorCount} floors · {area.toLocaleString('en-IN',{maximumFractionDigits:2})} SFT</small>
         <strong>{displayedTotal>0?fmt(displayedTotal):'Enter dimensions'}</strong>
       </div>
-      <button data-studio-save="quote" type="button" className="qs-work-summary-save"
-        onClick={save} disabled={pending}>{pending?'Saving…':'▣ Save quotation →'}</button>
+      <button data-studio-save="quote" type="button"
+        className={'qs-work-summary-save'+(saved&&!dirty?' is-saved':'')}
+        onClick={save} disabled={pending||(saved&&!dirty)}>
+        {pending?'Saving…':saved&&!dirty?'✓ Saved':'▣ Save quotation →'}
+      </button>
       {message&&<p className="qs-work-save-message" role="status">{message}</p>}
       {saved&&<p className="qs-work-save-message">Saved. Your PDF preview is ready to open.</p>}
     </div>

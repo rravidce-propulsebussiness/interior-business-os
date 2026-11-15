@@ -1501,6 +1501,8 @@
 .qs-work-summary-save{background:linear-gradient(100deg,#ff8634,#f7640e);border:0;border-radius:10px;
   min-height:45px;padding:12px 17px;cursor:pointer;color:#fff;font-size:11px;font-weight:850;white-space:nowrap}
 .qs-work-summary-save:disabled{opacity:.55;cursor:not-allowed}
+.qs-work-summary-save.is-saved{background:#eaf7ef;border:1px solid #b9e2c7;color:#28744a;
+  opacity:1;box-shadow:none;cursor:default}
 .qs-work-save-message{flex:0 0 100%;margin:0;color:#345b72;font-size:11px}
 .qs-work-alert{background:#fff6eb;border:1px solid #f6d0a2;color:#9d601a;
   border-radius:8px;padding:12px;margin-top:12px;font-size:11px}
