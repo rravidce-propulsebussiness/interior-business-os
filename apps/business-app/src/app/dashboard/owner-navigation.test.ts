@@ -41,7 +41,6 @@ describe('one authorized company navigation on every dashboard page', () => {
       'Marketplace',
       'Purchases',
       'Finance',
-      'Billing & Plans',
       'Reports',
       'Team',
       'Website Studio',
@@ -52,12 +51,26 @@ describe('one authorized company navigation on every dashboard page', () => {
     expect(canonical).not.toContain("label: 'All Projects'");
     expect(canonical).toContain("if (has('project.view', 'projects'))");
     expect(canonical).toContain("label: 'Projects'");
-    expect(canonical).toMatch(
-      /label: 'Billing & Plans',\s*href: '\/dashboard\/billing'/,
-    );
+    expect(canonical).not.toContain("label: 'Billing & Plans'");
+    expect(canonical).not.toContain("href: '/dashboard/billing'");
     expect(canonical).toMatch(
       /label: 'Finance',\s*href: '\/dashboard\/finance'/,
     );
+    const menuOrder = [
+      'Dashboard',
+      'Leads',
+      'Quotations',
+      'BOQ & Estimating',
+      'Finance',
+      'Projects',
+      'Marketplace',
+    ];
+    let previousIndex = -1;
+    for (const label of menuOrder) {
+      const index = canonical.indexOf(`label: '${label}'`);
+      expect(index).toBeGreaterThan(previousIndex);
+      previousIndex = index;
+    }
     expect(canonical).not.toContain("href: '/dashboard/company/settings'");
     expect(canonical).not.toContain("label: 'Clients'");
   });
