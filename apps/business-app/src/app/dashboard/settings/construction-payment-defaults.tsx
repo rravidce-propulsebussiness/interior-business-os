@@ -7,6 +7,7 @@ import {
   type CompanyConstructionPaymentRow,
   type CompanyWorkStep,
 } from '@business-os/core/company-construction-defaults';
+import { customerPaymentMilestoneName } from '@business-os/core/quotation-payment-plan';
 import { saveConstructionPaymentDefaults } from './payment-default-actions';
 
 type Kind = CompanyWorkStep['kind'];
@@ -687,7 +688,7 @@ function DefaultPaymentStage({
                     <span>
                       {item.kind === 'payment'
                         ? 'Payment due · ' +
-                          row.name +
+                          customerPaymentMilestoneName(row.name, areas) +
                           ' · ' +
                           Number(row.percent || 0).toLocaleString(undefined, {
                             maximumFractionDigits: 2,

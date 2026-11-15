@@ -6,6 +6,7 @@ import { premiumCss, premiumSections } from './premium-quotation';
 import {
   savedStagePaymentPlan,
   savedStagePaymentLinks,
+  customerPaymentMilestoneName,
 } from './quotation-payment-plan';
 import { guidanceForConstructionStage } from './construction-payment-schedule';
 import { customerTermSections } from './quotation-terms';
@@ -164,7 +165,12 @@ export function renderQuotationDocument(
             paidCents += cents;
             return (
               '<tr><td>' +
-              escape(row.name) +
+              escape(
+                customerPaymentMilestoneName(
+                  row.name,
+                  paymentStageLinks?.[index] ?? [],
+                ),
+              ) +
               '</td><td>' +
               row.percent.toFixed(2) +
               '%</td><td class="amount">' +
