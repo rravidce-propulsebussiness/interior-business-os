@@ -8,6 +8,8 @@ In the browser Network panel, select the failed POST and read its **Response** J
 
 - `WEBSITE_BUILD_SIGNATURE_MISMATCH`: the Business App's private `WEBSITE_BUILD_SIGNING_KEY` and `WEBSITE_BUILD_KEY_ID` must match an active record in the **same** Supabase project's `private.website_build_keys` table. Do not log, paste, or check in key values.
 - `WEBSITE_MEDIA_RPC_MISSING`: the Business App is pointing at a database without the required `website_asset_save` RPC, or PostgREST needs its schema cache refreshed. Verify the **correct project URL** and apply the documented website migrations through the normal deployment process.
+- `WEBSITE_MEDIA_MIME_SCHEMA`: the original website database constraint permits only WebP images even though the editor validates JPEG/PNG/AVIF. Apply `20261103203000_website_image_mime_alignment.sql` to the connected database with the standard migration process and redeploy the upload endpoint. The migration adds JPEG, PNG and AVIF while retaining WebP, PDF and MP4; it does not change or delete existing website assets.
+- `WEBSITE_MEDIA_CONSTRAINT`: another database validation rule rejected the upload. Review the request ID and SQLSTATE in the server logs; do not bypass database constraints.
 - `WEBSITE_MEDIA_QUOTA`: the tenant's website media allocation is full.
 - `WEBSITE_MEDIA_PERMISSION`: recheck website membership/ownership and the `website.media.manage` permission.
 - `WEBSITE_IMAGE_UNSUPPORTED`: use a valid JPEG, PNG, WebP or AVIF up to 10 MB; decoded images must be below 40 megapixels.

@@ -4,6 +4,7 @@ import { prepareMarketingImage } from '@business-os/shared/media';
 import { websiteServices, signWebsite } from '../../../service';
 import { isAllowedWebsiteUploadOrigin } from '../../../upload-origin';
 import { classifyWebsiteMediaSaveFailure } from '../../../media-upload-error';
+import { isSupportedWebsiteMp4 } from '../../../upload-media-type';
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
@@ -49,14 +50,8 @@ export async function POST(
       mime = 'application/pdf';
       if (!data.subarray(-2048).includes(Buffer.from('%%EOF')))
         throw new Error('Invalid PDF');
-    } else if (data.subarray(4, 8).toString() === 'ftyp') {
+    } else if (isSupportedWebsiteMp4(data)) {
       mime = 'video/mp4';
-      if (
-        !['isom', 'iso2', 'mp41', 'mp42', 'avc1', 'M4V '].includes(
-          data.subarray(8, 12).toString(),
-        )
-      )
-        throw new Error('Unsupported video container');
     } else {
       const result = await prepareMarketingImage(data);
       data = result.data;

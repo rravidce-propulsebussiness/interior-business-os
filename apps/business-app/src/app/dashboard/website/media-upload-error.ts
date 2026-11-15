@@ -12,6 +12,11 @@ export function classifyWebsiteMediaSaveFailure(reason: string, sqlState = ''): 
       code: 'WEBSITE_MEDIA_RPC_MISSING', status: 503,
       message: 'The website media upload function is missing from the configured Supabase database or its API schema cache. An administrator must apply the website database migrations to the correct Business OS project, then reload the API schema.',
     };
+  if (/website_assets_mime_check/i.test(reason))
+    return {
+      code: 'WEBSITE_MEDIA_MIME_SCHEMA', status: 503,
+      message: 'The website database is using the old WebP-only image constraint. An administrator must apply the website image MIME migration to allow JPG, PNG and AVIF uploads.',
+    };
   if (/Media storage limit reached/i.test(reason))
     return {
       code: 'WEBSITE_MEDIA_QUOTA', status: 413,
@@ -21,6 +26,11 @@ export function classifyWebsiteMediaSaveFailure(reason: string, sqlState = ''): 
     return {
       code: 'WEBSITE_MEDIA_PERMISSION', status: 403,
       message: 'Media upload permission was denied. Check the website membership, media permission and tenant ownership.',
+    };
+  if (sqlState === '23514')
+    return {
+      code: 'WEBSITE_MEDIA_CONSTRAINT', status: 422,
+      message: 'The website media data failed a database validation rule. An administrator should verify the website media migrations and review this request ID in server logs.',
     };
   return {
     code: 'WEBSITE_MEDIA_REJECTED', status: 400,
