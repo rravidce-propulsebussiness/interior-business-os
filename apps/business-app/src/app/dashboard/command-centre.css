@@ -9,57 +9,6 @@
 .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-workspace {
   background: radial-gradient(circle at 80% 2%, #fff3eb 0%, transparent 550px), #fffaf7;
 }
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-sidebar {
-  background: #fff;
-  border-right: 1px solid #f2e8e2;
-  color: #17243e;
-  padding: 18px 14px;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-brand {
-  color: #13203b !important;
-  padding: 2px 8px 24px;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-brand-icon {
-  background: linear-gradient(140deg, #ff791c, #ff4e02);
-  color: #fff;
-  box-shadow: 0 5px 15px #ff700c20;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-brand strong {
-  font-size: 18px;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-brand small {
-  color: #64748b;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-nav-item {
-  color: #37455f !important;
-  font-size: 13px;
-  font-weight: 600;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-nav-item:hover,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-nav-group-toggle:hover {
-  background: #fff0e6;
-  color: #fd520a !important;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-nav-item.owner-nav-active {
-  background: linear-gradient(120deg, #ff6a0b, #ff4600);
-  box-shadow: 0 8px 18px #ff691b28;
-  color: #fff !important;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-subnav {
-  border-left-color: #ffe0ca;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-subnav-link {
-  color: #68758a !important;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-subnav-link:hover,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-subnav-active {
-  background: #fff3ea;
-  color: #ed530b !important;
-}
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-sidebar-bottom,
-.owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-plan-card {
-  display: none;
-}
 .owner-layout:has(:is(.command-dashboard, .proj-dashboard, .project-detail-dashboard, .fw-page, .finance-document-workspace, .website-dashboard, .pv2-page)) .owner-topbar {
   min-height: 70px;
   border-color: #f3eae5;
