@@ -3,7 +3,7 @@ import { addressSchema, brandingSchema } from './commercial';
 import { parseSftEstimate } from './sft-quotation';
 import { parseCustomBrandQuote } from './custom-brand-quote';
 import { premiumCss, premiumSections } from './premium-quotation';
-import { savedStagePaymentPlan,savedStagePaymentLinks } from './quotation-payment-plan';
+import { savedStagePaymentPlan,savedStagePaymentLinks,customerPaymentMilestoneName } from './quotation-payment-plan';
 import { guidanceForConstructionStage } from './construction-payment-schedule';
 import { customerTermSections } from './quotation-terms';
 import { savedStageRequirements,defaultStageRequirements } from './quotation-stage-requirements';
@@ -130,7 +130,7 @@ export function renderQuotationDocument(
           ? fullCents - paidCents
           : Math.round(fullCents * row.percent / 100);
         paidCents += cents;
-        return '<tr><td>' + escape(row.name) + '</td><td>' + row.percent.toFixed(2) +
+        return '<tr><td>' + escape(customerPaymentMilestoneName(row.name,paymentStageLinks?.[index]??[])) + '</td><td>' + row.percent.toFixed(2) +
           '%</td><td class="amount">' + money((cents / 100).toFixed(2)) + '</td></tr>'+
           stepLabel(index);
       }).join('') +
