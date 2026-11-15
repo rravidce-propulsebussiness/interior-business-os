@@ -62,7 +62,6 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const [error,setError]=useState('');
  const [after,setAfter]=useState<number|null>(null);
  const [sequence,setSequence]=useState('1');
- const [draggedStep,setDraggedStep]=useState<number|null>(null);
  const [showAll,setShowAll]=useState(false);
  const [editing,setEditing]=useState<number|null>(null);
  const [editDraft,setEditDraft]=useState('');
@@ -186,7 +185,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   if(!validQcOrder(updated)){
    setError('Company QC must remain after its linked site check/test.');return;
   }
-  editRows(updated);setEditing(null);setDraggedStep(null);
+  editRows(updated);setEditing(null);
  };
  return <li className={'us-payment-stage'+(expanded?' is-expanded':'')} draggable={canEdit}
   onDragStart={event=>{event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','stage:'+index);}}
@@ -249,7 +248,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
    <div id={'company-payment-items-'+index} className="us-payment-step-list">
     {visible.map((item,position)=><div key={item.kind+'-'+item.area+'-'+item.name} className="us-payment-step"
      draggable={canEdit}
-     onDragStart={event=>{event.stopPropagation();event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','step:'+position);setDraggedStep(position);}}
+     onDragStart={event=>{event.stopPropagation();event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain','step:'+position);}}
      onDragOver={event=>event.preventDefault()}
      onDrop={event=>{event.preventDefault();event.stopPropagation();const value=event.dataTransfer.getData('text/plain');
       if(value.startsWith('step:'))moveStep(Number(value.slice(5)),position);}}>
