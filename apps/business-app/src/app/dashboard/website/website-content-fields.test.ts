@@ -3,7 +3,7 @@ import { createNode, type ComponentType } from '@business-os/website-builder';
 import { editableContentFields } from './website-content-fields';
 
 const keys = (type: ComponentType) =>
-  editableContentFields(createNode(type, 'example')).map(field => field.key);
+  editableContentFields(createNode(type, 'example')).map((field) => field.key);
 
 describe('visual website editor contextual content fields', () => {
   it('shows only the heading text for a heading', () => {
@@ -11,7 +11,9 @@ describe('visual website editor contextual content fields', () => {
     const node = createNode('heading', 'heading');
     node.props.text = '';
     node.props.title = 'Legacy headline';
-    expect(editableContentFields(node).map(field => field.key)).toEqual(['title']);
+    expect(editableContentFields(node).map((field) => field.key)).toEqual([
+      'title',
+    ]);
   });
 
   it('offers body text only for paragraphs and destination for buttons', () => {
@@ -19,7 +21,10 @@ describe('visual website editor contextual content fields', () => {
     expect(keys('button')).toEqual(['text', 'href']);
     const button = createNode('button', 'button');
     button.props.label = 'Contact us';
-    expect(editableContentFields(button).map(field => field.key)).toEqual(['label', 'href']);
+    expect(editableContentFields(button).map((field) => field.key)).toEqual([
+      'label',
+      'href',
+    ]);
   });
 
   it('gives hero and content sections meaningful heading and description fields', () => {
@@ -34,20 +39,34 @@ describe('visual website editor contextual content fields', () => {
     expect(keys('logo')).toEqual(['text']);
     const logo = createNode('logo', 'logo');
     logo.props.asset = 'exampleAsset';
-    expect(editableContentFields(logo).map(field => field.key)).toEqual(['alt']);
+    expect(editableContentFields(logo).map((field) => field.key)).toEqual([
+      'alt',
+    ]);
   });
 
   it('never shows irrelevant text controls for spacers and advanced components', () => {
-    for (const type of ['divider', 'spacer', 'lead_form', 'navigation', 'custom', 'embed'] as const)
+    for (const type of [
+      'divider',
+      'spacer',
+      'lead_form',
+      'navigation',
+      'custom',
+      'embed',
+    ] as const)
       expect(keys(type)).toEqual([]);
   });
 
   it('honors field length constraints of the published document schema', () => {
     const fields = editableContentFields(createNode('hero', 'hero'));
-    expect(fields.find(field => field.key === 'title')?.maxLength).toBe(300);
-    expect(fields.find(field => field.key === 'subtitle')?.maxLength).toBe(1000);
-    expect(fields.find(field => field.key === 'text')?.maxLength).toBe(12000);
-    expect(editableContentFields(createNode('button', 'button'))
-      .find(field => field.key === 'href')?.maxLength).toBe(2048);
+    expect(fields.find((field) => field.key === 'title')?.maxLength).toBe(300);
+    expect(fields.find((field) => field.key === 'subtitle')?.maxLength).toBe(
+      1000,
+    );
+    expect(fields.find((field) => field.key === 'text')?.maxLength).toBe(12000);
+    expect(
+      editableContentFields(createNode('button', 'button')).find(
+        (field) => field.key === 'href',
+      )?.maxLength,
+    ).toBe(2048);
   });
 });

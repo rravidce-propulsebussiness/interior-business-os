@@ -24,11 +24,14 @@ const MIME_TYPES: Record<string, 'image' | 'video' | 'audio' | 'document'> = {
   'audio/ogg': 'audio',
   'application/pdf': 'document',
   'application/msword': 'document',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': 'document',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+    'document',
   'application/vnd.ms-excel': 'document',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': 'document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+    'document',
   'application/vnd.ms-powerpoint': 'document',
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation': 'document',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+    'document',
   'text/plain': 'document',
   'text/csv': 'document',
 };
@@ -69,19 +72,19 @@ export async function POST(request: Request) {
     const { organizationId } = await whatsappContext('automation.manage');
     const connection = await getConnection(organizationId, connectionId);
     const version = process.env.META_GRAPH_API_VERSION ?? '';
-    if (!/^v\d+\.0$/.test(version))
-      throw new Error('META_API_UNAVAILABLE');
+    if (!/^v\d+\.0$/.test(version)) throw new Error('META_API_UNAVAILABLE');
 
     const upload = new FormData();
     upload.append('messaging_product', 'whatsapp');
     upload.append('type', file.type);
-    const fileName = file.name
-      .replaceAll(String.fromCharCode(92), '_')
-      .replaceAll('/', '_')
-      .replaceAll(String.fromCharCode(13), '_')
-      .replaceAll(String.fromCharCode(10), '_')
-      .replaceAll('"', '_')
-      .slice(0, 120) || 'attachment';
+    const fileName =
+      file.name
+        .replaceAll(String.fromCharCode(92), '_')
+        .replaceAll('/', '_')
+        .replaceAll(String.fromCharCode(13), '_')
+        .replaceAll(String.fromCharCode(10), '_')
+        .replaceAll('"', '_')
+        .slice(0, 120) || 'attachment';
     upload.append('file', file, fileName);
     const response = await fetch(
       `https://graph.facebook.com/${version}/${connection.phone_number_id}/media`,
@@ -93,11 +96,14 @@ export async function POST(request: Request) {
         signal: AbortSignal.timeout(30000),
       },
     );
-    const data = (await response.json().catch(() => null)) as
-      | { id?: string; error?: unknown }
-      | null;
+    const data = (await response.json().catch(() => null)) as {
+      id?: string;
+      error?: unknown;
+    } | null;
     if (!response.ok || !data?.id) {
-      const failure = whatsappFailure(data?.error ?? new Error('MEDIA_UPLOAD_FAILED'));
+      const failure = whatsappFailure(
+        data?.error ?? new Error('MEDIA_UPLOAD_FAILED'),
+      );
       return Response.json(failure.body, {
         status: failure.status,
         headers: privateHeaders,
@@ -124,8 +130,14 @@ export async function GET(request: Request) {
     const url = new URL(request.url);
     const connectionId = url.searchParams.get('connectionId') ?? '';
     const mediaId = url.searchParams.get('mediaId') ?? '';
-    if (!/^[0-9a-f-]{36}$/i.test(connectionId) || !/^[A-Za-z0-9._-]{1,200}$/.test(mediaId))
-      return new Response('Not found', { status: 404, headers: privateHeaders });
+    if (
+      !/^[0-9a-f-]{36}$/i.test(connectionId) ||
+      !/^[A-Za-z0-9._-]{1,200}$/.test(mediaId)
+    )
+      return new Response('Not found', {
+        status: 404,
+        headers: privateHeaders,
+      });
 
     const { organizationId } = await whatsappContext('automation.view');
     const connection = await getConnection(organizationId, connectionId);
@@ -134,14 +146,20 @@ export async function GET(request: Request) {
       connection.accessToken,
     );
     if (!media.url || !media.mime_type)
-      return new Response('Media unavailable', { status: 404, headers: privateHeaders });
+      return new Response('Media unavailable', {
+        status: 404,
+        headers: privateHeaders,
+      });
     const mediaUrl = new URL(media.url);
     if (
       mediaUrl.protocol !== 'https:' ||
       (mediaUrl.hostname !== 'lookaside.fbsbx.com' &&
         !mediaUrl.hostname.endsWith('.fbcdn.net'))
     )
-      return new Response('Media unavailable', { status: 502, headers: privateHeaders });
+      return new Response('Media unavailable', {
+        status: 502,
+        headers: privateHeaders,
+      });
 
     const response = await fetch(mediaUrl, {
       headers: { Authorization: `Bearer ${connection.accessToken}` },
@@ -149,7 +167,10 @@ export async function GET(request: Request) {
       signal: AbortSignal.timeout(30000),
     });
     if (!response.ok || !response.body)
-      return new Response('Media unavailable', { status: 502, headers: privateHeaders });
+      return new Response('Media unavailable', {
+        status: 502,
+        headers: privateHeaders,
+      });
 
     const headers = new Headers(privateHeaders);
     headers.set('Content-Type', media.mime_type);

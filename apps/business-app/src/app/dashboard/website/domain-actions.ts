@@ -16,7 +16,11 @@ function domainFailureMessage(error: unknown) {
   const reason = error instanceof Error ? error.message : '';
   if (/custom domain capability|required|not included in.*plan/i.test(reason))
     return 'Custom domains are not included in this website plan. Ask your Business OS administrator to enable the Custom Domain plan feature.';
-  if (/quota has been allocated|SSL for SaaS|no quota|not been enabled/i.test(reason))
+  if (
+    /quota has been allocated|SSL for SaaS|no quota|not been enabled/i.test(
+      reason,
+    )
+  )
     return 'Custom-domain certificates are not enabled for this Cloudflare account yet. The platform administrator must enable Cloudflare for SaaS before customers can connect domains.';
   if (/fallback origin|CLOUDFLARE_SAAS_/i.test(reason))
     return 'The platform custom-domain gateway is not fully configured. Please contact the Business OS administrator.';
@@ -38,7 +42,8 @@ export async function addWebsiteDomain(
     const host = hostname.trim().toLowerCase().replace(/\.$/, '');
     if (!cloudflareSaasConfigured())
       return {
-        message: 'Custom domains are not enabled by the platform administrator yet.',
+        message:
+          'Custom domains are not enabled by the platform administrator yet.',
         records: [],
       };
 
@@ -54,7 +59,8 @@ export async function addWebsiteDomain(
       p_website_id: site,
       p_hostname: host,
     });
-    if (r.error || !r.data) throw r.error ?? new Error('Domain could not be registered');
+    if (r.error || !r.data)
+      throw r.error ?? new Error('Domain could not be registered');
 
     const cloudflare = await ensureCloudflareHostname(host);
     const saved = await s.client
@@ -64,12 +70,14 @@ export async function addWebsiteDomain(
       .eq('website_id', site)
       .eq('organization_id', s.context.organizationId)
       .single();
-    if (saved.error || !saved.data) throw new Error('Domain registration could not be read');
+    if (saved.error || !saved.data)
+      throw new Error('Domain registration could not be read');
 
     revalidatePath(`/dashboard/website/${site}/domains`);
     revalidatePath('/admin/domains');
     return {
-      message: 'Domain registered. Add the Business OS TXT record and point the hostname to the CNAME target shown below. Then verify DNS and HTTPS.',
+      message:
+        'Domain registered. Add the Business OS TXT record and point the hostname to the CNAME target shown below. Then verify DNS and HTTPS.',
       hostname: saved.data.hostname,
       challenge: saved.data.challenge,
       records: cloudflareDnsInstructions(cloudflare),
@@ -101,24 +109,32 @@ export async function checkWebsiteDomain(
       !r.data ||
       r.data.kind !== 'custom' ||
       r.data.status === 'removed'
-    ) throw new Error('Unavailable domain');
+    )
+      throw new Error('Unavailable domain');
     const domain = r.data;
 
     if (!cloudflareSaasConfigured())
       return {
-        message: 'The platform custom-domain gateway is not configured yet. Contact the Business OS administrator.',
+        message:
+          'The platform custom-domain gateway is not configured yet. Contact the Business OS administrator.',
         records: [],
       };
 
     const config = organizationId
-      ? await s.client.from('website_platform_settings').select('base_domain').single()
+      ? await s.client
+          .from('website_platform_settings')
+          .select('base_domain')
+          .single()
       : await s.client.rpc('website_configuration', {
           p_organization_id: s.context.organizationId,
         });
-    if (config.error) throw new Error('Platform domain configuration unavailable');
+    if (config.error)
+      throw new Error('Platform domain configuration unavailable');
     const base = organizationId
-      ? (config.data as { base_domain?: string | null }).base_domain ?? undefined
-      : ((config.data as { platform?: { baseDomain?: string } } | null)?.platform?.baseDomain);
+      ? ((config.data as { base_domain?: string | null }).base_domain ??
+        undefined)
+      : (config.data as { platform?: { baseDomain?: string } } | null)?.platform
+          ?.baseDomain;
     if (!base) throw new Error('Platform domain not configured');
 
     // The Business OS ownership proof is separate from Cloudflare's own
@@ -132,8 +148,9 @@ export async function checkWebsiteDomain(
     ]);
     const ownership =
       txtResult[0].status === 'fulfilled' &&
-      txtResult[0].value.some(parts =>
-        parts.join('') === 'business-os-verification=' + domain.challenge,
+      txtResult[0].value.some(
+        (parts) =>
+          parts.join('') === 'business-os-verification=' + domain.challenge,
       );
 
     // Cloudflare status=active means it accepted the customer's CNAME/hostname

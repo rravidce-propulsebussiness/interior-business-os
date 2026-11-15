@@ -80,14 +80,20 @@ export async function syncQuotedConstructionTimeline(
     description: line.description,
     optional: line.optional,
   }));
-  const {data:revision,error:revisionError}=await client.from('quotation_revisions')
-   .select('terms').eq('organization_id',org.organizationId)
-   .eq('id',parsedContract.revision_id).single();
-  if(revisionError||!revision)throw new Error('Accepted quotation requirements cannot be read');
+  const { data: revision, error: revisionError } = await client
+    .from('quotation_revisions')
+    .select('terms')
+    .eq('organization_id', org.organizationId)
+    .eq('id', parsedContract.revision_id)
+    .single();
+  if (revisionError || !revision)
+    throw new Error('Accepted quotation requirements cannot be read');
   const plan = projectTimelineFromQuote(
     industry.key,
     quotedLines.filter((line) => !line.optional),
-    industry.key==='construction'?savedStageRequirements(revision.terms):{},
+    industry.key === 'construction'
+      ? savedStageRequirements(revision.terms)
+      : {},
   );
   if (!plan) {
     return { created: false, reason: 'quote_incomplete', projectId };
@@ -104,11 +110,19 @@ export async function syncQuotedConstructionTimeline(
     'workflow' in existing.data &&
     existing.data.workflow
   ) {
-    if(industry.key==='construction'){
-      const sync=await client.rpc('project_quote_stage_guidance_import' as never,{
-       p_org:org.organizationId,p_contract:id,
-      } as never);
-      if(sync.error)throw new Error('Cannot synchronize quoted material and report requirements: '+sync.error.message);
+    if (industry.key === 'construction') {
+      const sync = await client.rpc(
+        'project_quote_stage_guidance_import' as never,
+        {
+          p_org: org.organizationId,
+          p_contract: id,
+        } as never,
+      );
+      if (sync.error)
+        throw new Error(
+          'Cannot synchronize quoted material and report requirements: ' +
+            sync.error.message,
+        );
     }
     return { created: false, reason: 'exists', projectId };
   }
@@ -153,11 +167,19 @@ export async function syncQuotedConstructionTimeline(
         workflow.error.message,
     );
   }
-  if(industry.key==='construction'){
-    const sync=await client.rpc('project_quote_stage_guidance_import' as never,{
-     p_org:org.organizationId,p_contract:id,
-    } as never);
-    if(sync.error)throw new Error('Project stages created; importing quoted material/report guidance needs retry: '+sync.error.message);
+  if (industry.key === 'construction') {
+    const sync = await client.rpc(
+      'project_quote_stage_guidance_import' as never,
+      {
+        p_org: org.organizationId,
+        p_contract: id,
+      } as never,
+    );
+    if (sync.error)
+      throw new Error(
+        'Project stages created; importing quoted material/report guidance needs retry: ' +
+          sync.error.message,
+      );
   }
   return { created: true, reason: 'created', projectId };
 }

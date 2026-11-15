@@ -9,7 +9,9 @@ describe('website media upload error categories', () => {
     expect(result.message).not.toContain('secret=');
   });
   it('identifies absent RPCs and quota failures', () => {
-    expect(classify('Could not find function', 'PGRST202').code).toBe('WEBSITE_MEDIA_RPC_MISSING');
+    expect(classify('Could not find function', 'PGRST202').code).toBe(
+      'WEBSITE_MEDIA_RPC_MISSING',
+    );
     expect(classify('Media storage limit reached').status).toBe(413);
   });
   it('identifies permission issues and defaults to generic safe error', () => {

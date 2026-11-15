@@ -26,7 +26,9 @@ describe('single project milestones and drawing progress', () => {
     expectSource(journey).toContain(
       "'structural_design',\n    'electrical_plan',\n    'plumbing_plan'",
     );
-    expectSource(journey).toContain('Each current revision needs technical review');
+    expectSource(journey).toContain(
+      'Each current revision needs technical review',
+    );
     const drawingAction = read('./project-design-actions.ts');
     expectSource(drawingAction).not.toContain("'project_preflight_read'");
   });
@@ -54,7 +56,9 @@ describe('single project milestones and drawing progress', () => {
     expectSource(migration).toContain(
       "WHEN 'electrical_plan' THEN 'structural_design'",
     );
-    expectSource(migration).toContain("WHEN 'plumbing_plan' THEN 'electrical_plan'");
+    expectSource(migration).toContain(
+      "WHEN 'plumbing_plan' THEN 'electrical_plan'",
+    );
     expectSource(migration).toContain(
       "'electrical_plan','plumbing_plan']::text[]",
     );
@@ -75,9 +79,7 @@ describe('single project milestones and drawing progress', () => {
       'const firstStageIndex = todayStageIndex >= 0',
     );
     expectSource(timeline).toContain('<ProjectMilestoneStageCarousel');
-    expectSource(timeline).toContain(
-      'open={cardIndex === firstStageIndex}',
-    );
+    expectSource(timeline).toContain('open={cardIndex === firstStageIndex}');
     expectSource(styles).toContain('grid-auto-flow:column');
     expectSource(styles).toContain('scroll-snap-type:x mandatory');
     expectSource(carousel).toContain(
@@ -124,13 +126,17 @@ describe('single project milestones and drawing progress', () => {
     expectSource(workflow).toContain("'plumbing_plan'");
     expectSource(workflow).toContain('<DesignDecisionForm');
     expectSource(workflow).toContain('Release approved plans for site marking');
-    expectSource(workflow).toContain('enter the meeting, call, or message reference');
+    expectSource(workflow).toContain(
+      'enter the meeting, call, or message reference',
+    );
     expectSource(timeline).toContain('action="mark_complete"');
     expectSource(timeline).toContain('!DESIGN_STAGE_CODES.includes(code)');
     const completion = read(
       '../../../../../../packages/database/supabase/migrations/20261114193000_site_prep_completion_without_qc.sql',
     );
-    expectSource(completion).toContain("status IN ('in_progress', 'on_hold', 'ready_for_qc', 'completed')");
+    expectSource(completion).toContain(
+      "status IN ('in_progress', 'on_hold', 'ready_for_qc', 'completed')",
+    );
     expectSource(completion).toContain("v_stage.template_code <> 'SITE_PREP'");
     expectSource(completion).toContain('site_preparation_completed');
   });

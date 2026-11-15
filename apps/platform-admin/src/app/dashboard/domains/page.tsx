@@ -45,14 +45,20 @@ export default async function DomainManagement() {
             </p>
           </div>
         </div>
-        <Link className="os-action os-domain-top-action" href="/dashboard/plans">
+        <Link
+          className="os-action os-domain-top-action"
+          href="/dashboard/plans"
+        >
           <OsIcon name="crown" size={18} />
           Membership plans
           <OsIcon name="arrow" size={17} />
         </Link>
       </div>
 
-      <section className="os-domain-highlights" aria-label="Domain configuration summary">
+      <section
+        className="os-domain-highlights"
+        aria-label="Domain configuration summary"
+      >
         <div className="os-domain-highlight">
           <span className="os-domain-highlight-icon">
             <OsIcon name="domain" size={25} />
@@ -62,7 +68,9 @@ export default async function DomainManagement() {
             <strong className="os-domain-hostname">
               {settings.data.base_domain || 'Not configured'}
             </strong>
-            <small>Destination for managed subdomains and custom-domain DNS</small>
+            <small>
+              Destination for managed subdomains and custom-domain DNS
+            </small>
           </div>
         </div>
         <div className="os-domain-highlight">
@@ -76,7 +84,9 @@ export default async function DomainManagement() {
                 ? 'Marked configured'
                 : 'Not configured'}
             </strong>
-            <small>Live certificate and routing checks are still required</small>
+            <small>
+              Live certificate and routing checks are still required
+            </small>
           </div>
         </div>
         <div className="os-domain-highlight">
@@ -91,14 +101,22 @@ export default async function DomainManagement() {
         </div>
       </section>
 
-      <section className="os-domain-panel os-domain-config" aria-labelledby="os-domain-config-title">
+      <section
+        className="os-domain-panel os-domain-config"
+        aria-labelledby="os-domain-config-title"
+      >
         <div className="os-domain-section-heading">
           <span className="os-domain-section-icon">
             <OsIcon name="settings" size={20} />
           </span>
           <div>
-            <h2 id="os-domain-config-title">Platform domain and plan configuration</h2>
-            <p>Shared infrastructure settings only — company website content stays private.</p>
+            <h2 id="os-domain-config-title">
+              Platform domain and plan configuration
+            </h2>
+            <p>
+              Shared infrastructure settings only — company website content
+              stays private.
+            </p>
           </div>
         </div>
         <WebsitePlatformControls
@@ -135,14 +153,21 @@ export default async function DomainManagement() {
         />
       </section>
 
-      <section className="os-domain-panel os-domain-guide" aria-labelledby="os-domain-guide-title">
+      <section
+        className="os-domain-panel os-domain-guide"
+        aria-labelledby="os-domain-guide-title"
+      >
         <div className="os-domain-section-heading">
           <span className="os-domain-section-icon">
             <OsIcon name="domain" size={20} />
           </span>
           <div>
-            <h2 id="os-domain-guide-title">How companies connect their domains</h2>
-            <p>Companies use the Business App to manage their own website domain.</p>
+            <h2 id="os-domain-guide-title">
+              How companies connect their domains
+            </h2>
+            <p>
+              Companies use the Business App to manage their own website domain.
+            </p>
           </div>
         </div>
         <ol className="os-domain-steps">
@@ -154,8 +179,8 @@ export default async function DomainManagement() {
             <div>
               <h3>Add a custom domain</h3>
               <p>
-                The authorized company user registers a hostname under
-                Website Studio → Domains.
+                The authorized company user registers a hostname under Website
+                Studio → Domains.
               </p>
             </div>
           </li>
@@ -167,8 +192,8 @@ export default async function DomainManagement() {
             <div>
               <h3>Configure external DNS</h3>
               <p>
-                Add the ownership TXT record and point the hostname to
-                the platform's configured destination.
+                Add the ownership TXT record and point the hostname to the
+                platform's configured destination.
               </p>
             </div>
           </li>
@@ -180,16 +205,16 @@ export default async function DomainManagement() {
             <div>
               <h3>Verify HTTPS and publish</h3>
               <p>
-                Hosting or the optional Cloudflare adapter provisions TLS;
-                DNS and HTTPS must pass before activation.
+                Hosting or the optional Cloudflare adapter provisions TLS; DNS
+                and HTTPS must pass before activation.
               </p>
             </div>
           </li>
         </ol>
         <p className="os-domain-caution">
           <OsIcon name="check" size={18} />
-          Connecting a domain does not buy or transfer its registration.
-          A configured TLS flag alone does not prove that HTTPS is live.
+          Connecting a domain does not buy or transfer its registration. A
+          configured TLS flag alone does not prove that HTTPS is live.
         </p>
       </section>
     </main>

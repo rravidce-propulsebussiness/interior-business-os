@@ -41,7 +41,9 @@ export function whatsappPlaceholderLabel(body: string): string | null {
 }
 
 /** One-line preview for conversation and contact lists. */
-export function whatsappMessagePreview(body: string | null | undefined): string {
+export function whatsappMessagePreview(
+  body: string | null | undefined,
+): string {
   const text = (body ?? '').trim();
   if (!text) return '';
   const media = MEDIA.exec(text);

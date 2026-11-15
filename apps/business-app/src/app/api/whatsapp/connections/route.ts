@@ -11,9 +11,7 @@ import { whatsappFailure } from '@/lib/whatsapp-meta-error';
 
 export const dynamic = 'force-dynamic';
 
-const disconnectSchema = z
-  .object({ connectionId: z.string().uuid() })
-  .strict();
+const disconnectSchema = z.object({ connectionId: z.string().uuid() }).strict();
 const registerSchema = z
   .object({ connectionId: z.string().uuid(), pin: z.string().regex(/^\d{6}$/) })
   .strict();
@@ -79,7 +77,6 @@ export async function DELETE(request: Request) {
   }
 }
 
-
 export async function POST(request: Request) {
   try {
     if (!validSameOrigin(request))
@@ -100,7 +97,10 @@ export async function POST(request: Request) {
     );
     if (!parsed.success)
       return Response.json(
-        { message: 'Enter a valid six-digit WhatsApp two-step verification PIN.' },
+        {
+          message:
+            'Enter a valid six-digit WhatsApp two-step verification PIN.',
+        },
         { status: 400, headers: privateHeaders },
       );
 

@@ -26,7 +26,8 @@ export function ProjectDesignPaymentAndAgreement({
   const revisionId = agreement?.revisionId ?? data.quotations[0]?.revisionId;
   const hasOwnerAccess = data.site?.canManage === true;
   const ownerApprovalRecorded = agreement?.clearanceType === 'owner_exception';
-  const activationNeeded = ownerApprovalRecorded && agreement?.status === 'pending';
+  const activationNeeded =
+    ownerApprovalRecorded && agreement?.status === 'pending';
 
   return (
     <section
@@ -38,7 +39,11 @@ export function ProjectDesignPaymentAndAgreement({
           <strong>Payment & agreement</strong>
           <p>Use the accepted quotation and its existing payment schedule.</p>
         </div>
-        <span className={agreement?.authorized || ownerApprovalRecorded ? 'is-ready' : ''}>
+        <span
+          className={
+            agreement?.authorized || ownerApprovalRecorded ? 'is-ready' : ''
+          }
+        >
           {agreement?.authorized
             ? 'Authorized'
             : ownerApprovalRecorded
@@ -59,11 +64,14 @@ export function ProjectDesignPaymentAndAgreement({
       ) : ownerApprovalRecorded && agreement ? (
         <>
           <p className="pmt-design-note">
-            The homeowner’s offline approval is recorded. {activationNeeded
+            The homeowner’s offline approval is recorded.{' '}
+            {activationNeeded
               ? 'Activate the quote-based project to open its confirmed payment schedule and continue.'
               : 'The existing advance policy still controls when design work can proceed.'}
           </p>
-          {activationNeeded && hasOwnerAccess && data.permissions.contractManage &&
+          {activationNeeded &&
+            hasOwnerAccess &&
+            data.permissions.contractManage &&
             typeof agreement.version === 'number' && (
               <ProjectContractActivation
                 contractId={agreement.contractId}
@@ -71,11 +79,13 @@ export function ProjectDesignPaymentAndAgreement({
                 offlineAgreement
               />
             )}
-          {activationNeeded && (!hasOwnerAccess || !data.permissions.contractManage) && (
-            <p className="pmt-design-note">
-              A company owner with contract management access must activate this project.
-            </p>
-          )}
+          {activationNeeded &&
+            (!hasOwnerAccess || !data.permissions.contractManage) && (
+              <p className="pmt-design-note">
+                A company owner with contract management access must activate
+                this project.
+              </p>
+            )}
         </>
       ) : agreement?.canAuthorizeException && hasOwnerAccess ? (
         <SkipAgreementUpload

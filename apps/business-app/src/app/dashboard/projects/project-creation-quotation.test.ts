@@ -31,7 +31,6 @@ describe('delivery project creation starts from a customer quotation', () => {
     expectSource(projectsPage).toContain("['draft','issued'].includes(status)");
   });
 
-
   it('shows one Create Project entry point and keeps quote creation inside its customer flow', () => {
     const directory = file('./project-v2-list.tsx');
     expectSource(directory).toContain('Choose Create Project');
@@ -40,7 +39,9 @@ describe('delivery project creation starts from a customer quotation', () => {
     expectSource(projectStart).toContain('aria-label="Customer details"');
     expectSource(projectStart).toContain('New customer?');
     expectSource(projectStart).toContain('href="/dashboard/quotations/new"');
-    expectSource(projectsPage).toContain("select('id,display_name,phone,email,billing_address')");
+    expectSource(projectsPage).toContain(
+      "select('id,display_name,phone,email,billing_address')",
+    );
   });
 
   it('creates direct customer quotes from the selected company customer record', () => {

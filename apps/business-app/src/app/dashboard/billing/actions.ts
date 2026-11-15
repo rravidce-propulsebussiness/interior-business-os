@@ -102,10 +102,12 @@ export async function saveGstDocument(form: FormData) {
   let attachmentWarning = false;
   try {
     const { org, authorization, client } = await workspace();
-    const access=await authorization.requirePermission(org, 'invoice.create');
-    const owner=access.roles.some(role=>role.name.toLowerCase()==='owner');
-    const gst=createGstRepository(client);
-    const profile=await gst.profile(org);
+    const access = await authorization.requirePermission(org, 'invoice.create');
+    const owner = access.roles.some(
+      (role) => role.name.toLowerCase() === 'owner',
+    );
+    const gst = createGstRepository(client);
+    const profile = await gst.profile(org);
     const existingId = String(form.get('id') ?? '').trim();
     const marketplaceOrderId = String(
       form.get('marketplaceOrderId') ?? '',
@@ -139,34 +141,48 @@ export async function saveGstDocument(form: FormData) {
     const input = parsed as GstDocumentInput;
     // GST invoice is only valid for a GST-registered supplier; non-GST
     // documents must have a qualifying category, independently validated.
-    const reason=String(form.get('nonGstReason')??'');
-    if(input.kind==='sales_invoice'){
-      if(input.documentType==='tax_invoice'&&!profile?.gstin)
+    const reason = String(form.get('nonGstReason') ?? '');
+    if (input.kind === 'sales_invoice') {
+      if (input.documentType === 'tax_invoice' && !profile?.gstin)
         throw new DomainError('VALIDATION_FAILED');
-      if(input.documentType==='bill_of_supply'&&
-        (!profile?.gstin||!['exempt','composition'].includes(reason)))
+      if (
+        input.documentType === 'bill_of_supply' &&
+        (!profile?.gstin || !['exempt', 'composition'].includes(reason))
+      )
         throw new DomainError('VALIDATION_FAILED');
-      if(input.documentType==='commercial_invoice'&&
-        (profile?.gstin?reason!=='non_taxable':reason!=='unregistered'))
+      if (
+        input.documentType === 'commercial_invoice' &&
+        (profile?.gstin ? reason !== 'non_taxable' : reason !== 'unregistered')
+      )
         throw new DomainError('VALIDATION_FAILED');
-      if(input.documentType!=='tax_invoice'&&
-        (input.reverseCharge||input.lines.some(line=>line.gstRate!==0)))
+      if (
+        input.documentType !== 'tax_invoice' &&
+        (input.reverseCharge || input.lines.some((line) => line.gstRate !== 0))
+      )
         throw new DomainError('VALIDATION_FAILED');
-      if(input.documentType!=='tax_invoice'){
+      if (input.documentType !== 'tax_invoice') {
         // Keep the classification on the saved document for future audit.
-        const nl=String.fromCharCode(10);
-        const clean=input.notes.startsWith('Non-GST category: ')
-          ?input.notes.substring(input.notes.indexOf(nl)+1):input.notes;
-        const memo='Non-GST category: '+reason+nl+clean;
-        if(memo.length>3000)throw new DomainError('VALIDATION_FAILED');
-        input.notes=memo;
+        const nl = String.fromCharCode(10);
+        const clean = input.notes.startsWith('Non-GST category: ')
+          ? input.notes.substring(input.notes.indexOf(nl) + 1)
+          : input.notes;
+        const memo = 'Non-GST category: ' + reason + nl + clean;
+        if (memo.length > 3000) throw new DomainError('VALIDATION_FAILED');
+        input.notes = memo;
       }
     }
 
     const attachment = form.get('supplierBillFile');
-    const supplierFile = attachment instanceof File && attachment.size > 0 ? attachment : null;
-    if (supplierFile && (input.kind !== 'purchase_bill' || supplierFile.size > 8 * 1024 * 1024 ||
-        !['application/pdf','image/png','image/jpeg','image/webp'].includes(supplierFile.type)))
+    const supplierFile =
+      attachment instanceof File && attachment.size > 0 ? attachment : null;
+    if (
+      supplierFile &&
+      (input.kind !== 'purchase_bill' ||
+        supplierFile.size > 8 * 1024 * 1024 ||
+        !['application/pdf', 'image/png', 'image/jpeg', 'image/webp'].includes(
+          supplierFile.type,
+        ))
+    )
       throw new DomainError('VALIDATION_FAILED');
     // Every tenant uses the same platform-admin-approved appearance.
     // The database ignores client-selected template IDs as a second check.
@@ -178,60 +194,91 @@ export async function saveGstDocument(form: FormData) {
     const customerId = String(form.get('customerId') ?? '').trim();
     // Stage invoices must stay tied to the accepted quote. Ordinary invoices
     // may optionally reference an existing tenant customer without conversion.
-    if ((stageRequested && (customerId || wonLeadId)) || (customerId && wonLeadId))
+    if (
+      (stageRequested && (customerId || wonLeadId)) ||
+      (customerId && wonLeadId)
+    )
       throw new DomainError('VALIDATION_FAILED');
-    if(input.kind==='sales_invoice'){
+    if (input.kind === 'sales_invoice') {
       // Owner-facing Save is an atomic "save + issue", never a draft.
       // The database commits the saved invoice, original customer/stage link,
       // official invoice number, and issuance together or not at all.
-      await authorization.requirePermission(org,'invoice.issue');
-      const checkedLead=stageRequested?idSchema.parse(leadId):null;
-      const checkedRevision=stageRequested?idSchema.parse(revisionId):null;
-      const checkedStage=stageRequested?
-        z.coerce.number().int().min(1).max(40).parse(stageNumber):null;
-      if(stageRequested){
-        const choice=invoiceStageChoices(await gst.stageOptions(org),profile?.stateCode??'36')
-          .find(item=>item.leadId===checkedLead&&item.revisionId===checkedRevision);
-        const stage=choice?.stages.find(item=>item.number===checkedStage);
-        if(!stage||!input.lines.length)throw new DomainError('VALIDATION_FAILED');
-        const primary=input.lines[0]!;
-        const amount=Math.round((primary.quantity*primary.unitPrice-primary.discount)*100);
-        const full=Math.round(stage.amount*100);
-        if(!Number.isSafeInteger(amount)||amount<=0||amount>full)
+      await authorization.requirePermission(org, 'invoice.issue');
+      const checkedLead = stageRequested ? idSchema.parse(leadId) : null;
+      const checkedRevision = stageRequested
+        ? idSchema.parse(revisionId)
+        : null;
+      const checkedStage = stageRequested
+        ? z.coerce.number().int().min(1).max(40).parse(stageNumber)
+        : null;
+      if (stageRequested) {
+        const choice = invoiceStageChoices(
+          await gst.stageOptions(org),
+          profile?.stateCode ?? '36',
+        ).find(
+          (item) =>
+            item.leadId === checkedLead && item.revisionId === checkedRevision,
+        );
+        const stage = choice?.stages.find(
+          (item) => item.number === checkedStage,
+        );
+        if (!stage || !input.lines.length)
           throw new DomainError('VALIDATION_FAILED');
-        if(amount<full&&(form.get('allowPartialStage')!=='true'||!owner))
+        const primary = input.lines[0]!;
+        const amount = Math.round(
+          (primary.quantity * primary.unitPrice - primary.discount) * 100,
+        );
+        const full = Math.round(stage.amount * 100);
+        if (!Number.isSafeInteger(amount) || amount <= 0 || amount > full)
+          throw new DomainError('VALIDATION_FAILED');
+        if (
+          amount < full &&
+          (form.get('allowPartialStage') !== 'true' || !owner)
+        )
           throw new DomainError('FORBIDDEN');
       }
-      const issued=await client.rpc('gst_sales_invoice_save_and_issue',{
-        p_org:org,p_input:input,
-        ...(customerId?{p_customer:idSchema.parse(customerId)}:{}),
-        ...(wonLeadId?{p_won_lead:idSchema.parse(wonLeadId)}:{}),
-        ...(checkedLead?{p_stage_lead:checkedLead}:{}),
-        ...(checkedRevision?{p_revision:checkedRevision}:{}),
-        ...(checkedStage?{p_stage:checkedStage}:{}),
+      const issued = await client.rpc('gst_sales_invoice_save_and_issue', {
+        p_org: org,
+        p_input: input,
+        ...(customerId ? { p_customer: idSchema.parse(customerId) } : {}),
+        ...(wonLeadId ? { p_won_lead: idSchema.parse(wonLeadId) } : {}),
+        ...(checkedLead ? { p_stage_lead: checkedLead } : {}),
+        ...(checkedRevision ? { p_revision: checkedRevision } : {}),
+        ...(checkedStage ? { p_stage: checkedStage } : {}),
       });
-      if(issued.error||!issued.data){
-        throw new Error(issued.error?.message??'Could not issue invoice');
+      if (issued.error || !issued.data) {
+        throw new Error(issued.error?.message ?? 'Could not issue invoice');
       }
-      id=issued.data;
-    }else{
-      if(stageRequested||customerId||wonLeadId)
+      id = issued.data;
+    } else {
+      if (stageRequested || customerId || wonLeadId)
         throw new DomainError('VALIDATION_FAILED');
       // Supplier purchase bills retain the existing draft/review workflow.
-      id=await createGstTemplatesRepository(client).saveDocument(org,input,null);
+      id = await createGstTemplatesRepository(client).saveDocument(
+        org,
+        input,
+        null,
+      );
     }
     // The GST bill is canonical. A failed attachment does not duplicate it.
     if (input.kind === 'purchase_bill' && supplierFile) {
-      try { await saveSupplierBillAttachment(org, id, supplierFile); }
-      catch { attachmentWarning = true; }
+      try {
+        await saveSupplierBillAttachment(org, id, supplierFile);
+      } catch {
+        attachmentWarning = true;
+      }
     }
     revalidatePath('/dashboard/billing');
     revalidatePath('/dashboard/finance');
-    if(input.kind==='sales_invoice')revalidatePath('/client','layout');
+    if (input.kind === 'sales_invoice') revalidatePath('/client', 'layout');
   } catch (error) {
     redirect(path + '?error=' + encodeURIComponent(safeFailure(error).message));
   }
-  redirect('/dashboard/billing/' + id + (attachmentWarning ? '?attachment=failed' : '?saved=1'));
+  redirect(
+    '/dashboard/billing/' +
+      id +
+      (attachmentWarning ? '?attachment=failed' : '?saved=1'),
+  );
 }
 export async function finalizeGstDocument(_state: State, form: FormData) {
   try {

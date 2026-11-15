@@ -204,7 +204,10 @@ export async function POST(request: Request) {
         );
       if (mediaRequest.mediaType === 'audio' && mediaRequest.caption)
         return Response.json(
-          { message: 'Send audio without a caption, or send the text separately.' },
+          {
+            message:
+              'Send audio without a caption, or send the text separately.',
+          },
           { status: 400, headers: privateHeaders },
         );
       const attachment = {

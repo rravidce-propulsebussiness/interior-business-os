@@ -3,7 +3,11 @@
 import { useEffect } from 'react';
 
 /** Scroll the page to the stage scheduled for today when the project opens. */
-export function ProjectMilestoneAutoScroll({ focusIndex }: { focusIndex: number }) {
+export function ProjectMilestoneAutoScroll({
+  focusIndex,
+}: {
+  focusIndex: number;
+}) {
   useEffect(() => {
     const stage = document.getElementById('project-stage-' + focusIndex);
     if (!stage) return;
