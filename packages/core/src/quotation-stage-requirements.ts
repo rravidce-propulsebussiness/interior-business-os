@@ -13,7 +13,9 @@ export const stageItemGuideSchema=z.object({
  kind:z.enum(['work','material','check','test','qc']),
  index:z.number().int().min(0).max(49),
  text:z.string().max(1800),
- videoUrl:z.string().max(1000).optional(),
+ videoUrl:z.string().trim().max(1000).optional().refine(value=>!value||(()=>{
+  try{return new URL(value).protocol==='https:';}catch{return false;}
+ })(),'Guide video links must be valid https URLs'),
 }).strict().superRefine((guide,ctx)=>{
  if(guide.videoUrl&&guide.videoUrl.trim()&&!/^https:\/\//i.test(guide.videoUrl.trim()))
   ctx.addIssue({code:'custom',message:'Guide video links must use https'});
