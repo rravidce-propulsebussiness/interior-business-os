@@ -339,5 +339,30 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
    </div>
    {state.message&&<p role="status" className={state.saved?'us-info':'us-payment-error'}>{state.message}</p>}
   </form>
+  <section className="us-workflow-preview" aria-labelledby="us-workflow-preview-title">
+   <div className="us-workflow-preview-heading">
+    <div><strong id="us-workflow-preview-title">How it appears in a quotation</strong>
+     <p>New construction quotations use these saved payment milestones and work items automatically.</p>
+    </div>
+    <span>Read-only preview</span>
+   </div>
+   <div className="us-workflow-preview-list">
+    {rows.map((row,index)=>{
+     const work=(row.steps??[]).filter(item=>item.kind==='work');
+     const quality=(row.steps??[]).filter(item=>['check','test','qc'].includes(item.kind));
+     return <article className="us-workflow-preview-stage" key={index}>
+      <div className="us-workflow-preview-stage-head">
+       <strong>{row.name||'Untitled milestone'}</strong>
+       <span className="us-work-milestone-type">Work milestone</span>
+       <b>{Number(row.percent||0).toLocaleString(undefined,{maximumFractionDigits:2})}%</b>
+      </div>
+      {work.length?<ol>{work.map((item,workIndex)=><li key={workIndex}>{item.name}</li>)}</ol>:
+       <p className="us-workflow-preview-empty">No work items are linked yet.</p>}
+      {!!quality.length&&<small>{quality.filter(item=>item.kind!=='qc').length} checks/tests ·
+       {' '}{quality.filter(item=>item.kind==='qc').length} company QC checkpoints</small>}
+     </article>;
+    })}
+   </div>
+  </section>
  </div>;
 }
