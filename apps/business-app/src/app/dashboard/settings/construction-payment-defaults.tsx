@@ -222,7 +222,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
         <button type="button" onClick={()=>{setEditing(null);setError('');}}>Cancel</button>
        </div>:
        <span>{item.name}</span>}
-      {canEdit&&<button type="button" className="us-payment-guide-action"
+      {canEdit&&item.kind!=='material'&&<button type="button" className="us-payment-guide-action"
        onClick={()=>startGuideEdit(position)}>
        {item.guideText||item.guideVideoUrl?'Edit guide':'＋ Add guide'}
       </button>}
