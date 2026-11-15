@@ -39,7 +39,7 @@ describe('quotation payment steps projected into one project timeline', () => {
       'completed',
     );
   });
-  it('retains the exact saved payment count, order and percentages without splitting', () => {
+  it('retains the existing payment and the ordered payment marker without splitting', () => {
     const saved = savedFlow({
       '0': [
         { kind: 'payment', code: 'FOUNDATION', index: 0 },
