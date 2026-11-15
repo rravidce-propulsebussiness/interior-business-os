@@ -183,6 +183,7 @@ describe('lead-driven quotation creation', () => {
     expect(form).toContain('Quotation service');
     expect(form).toContain('quoteWithoutLead ? { industryKey: industry } : { leadId }');
     expect(form).toContain('Prepare quotation →');
+    expect(css).toContain('.qs-no-leads-callout');
     expect(action).toContain('select a service for a quote without a lead.');
     expect(action).toContain("Choose an active service before preparing a quote without a lead.");
     expect(action).toContain("createProspect('quotation_prospect_project_create'");
