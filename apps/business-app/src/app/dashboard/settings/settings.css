@@ -162,6 +162,10 @@
 .us-payment-default-footer>strong{font-size:16px;color:#263147;font-variant-numeric:tabular-nums}
 .us-payment-default-footer .us-save{min-height:43px}
 .us-payment-error{color:#b5362b;font-size:11px;line-height:1.55;margin-top:10px}
+.us-payment-error p{margin:0}
+.us-payment-route-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+.us-payment-route-actions button{min-height:36px;padding:8px 11px;border:1px solid #dca287;border-radius:9px;background:#fff;color:#9d4527;font:inherit;font-weight:800;cursor:pointer}
+.us-payment-route-actions button:hover{background:#fff2e9;border-color:#c97752}
 @media(max-width:850px){
  .us-payment-step{grid-template-columns:28px 88px minmax(0,1fr);gap:7px}
  .us-payment-step-actions{grid-column:2/-1;justify-self:end}

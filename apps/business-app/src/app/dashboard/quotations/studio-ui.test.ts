@@ -929,14 +929,18 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(section).not.toContain("Payment methods',href:");
   expect(section).not.toContain("Invoices & stage collections");
  });
- it('keeps internal stage mapping but removes all repetitive work-area fields',()=>{
+ it('routes typed work to its matching payment milestone without work-area fields',()=>{
   expect(stageEditor).not.toContain('className="us-payment-work-areas"');
   expect(stageEditor).not.toContain('className="us-payment-area-tags"');
   expect(stageEditor).not.toContain('Type construction work area name');
   expect(stageEditor).not.toContain('<label>Work area');
   expect(stageEditor).not.toContain('Type default step work area');
   expect(stageEditor).toContain('workAreaFor(title,after??steps.length-1)');
-  expect(stageEditor).toContain("setError('This work belongs to another construction stage.");
+  expect(stageEditor).toContain('const targets=allRows.flatMap');
+  expect(stageEditor).toContain('companyWorkAreaLabel(row,inferred)');
+  expect(stageEditor).toContain('Add to {target.name}');
+  expect(stageEditor).toContain('onRouteStep={(targetIndex,step)=>');
+  expect(stageEditor).not.toContain('This work belongs to another construction stage.');
   expect(stageEditor).toContain('steps:updated');
  });
  it('renders one accordion per payment milestone, first open only',()=>{

@@ -1,7 +1,7 @@
 'use client';
 
 import {useActionState,useState} from 'react';
-import {inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
+import {companyWorkAreaLabel,inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
 type Kind=CompanyWorkStep['kind'];
@@ -34,10 +34,11 @@ function ActionIcon({action}:{action:'up'|'down'|'edit'|'delete'}) {
  </svg>;
 }
 
-function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRemove,totalRows,onMove}:{
+function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChange,onRemove,totalRows,onMove,onRouteStep}:{
  row:CompanyConstructionPaymentRow;index:number;canEdit:boolean;expanded:boolean;totalRows:number;
+ allRows:CompanyConstructionPaymentRow[];
  onToggle:()=>void;onChange:(next:CompanyConstructionPaymentRow)=>void;onRemove:()=>void;
- onMove:(direction:number)=>void;
+ onMove:(direction:number)=>void;onRouteStep:(targetIndex:number,step:CompanyWorkStep)=>void;
 }) {
  const steps=row.steps??[];
  const areas=row.areas?.length?row.areas:[...new Set(steps.map(item=>item.area))];
@@ -52,6 +53,8 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const [editingGuide,setEditingGuide]=useState<number|null>(null);
  const [guideTextDraft,setGuideTextDraft]=useState('');
  const [guideVideoDraft,setGuideVideoDraft]=useState('');
+ const [routeStep,setRouteStep]=useState<CompanyWorkStep|null>(null);
+ const [routeTargets,setRouteTargets]=useState<number[]>([]);
  const prior=steps.slice(0,after===null?steps.length:after+1).filter(isCheck);
  const current=checkRef?prior.find(x=>link(x)===checkRef):prior.at(-1);
  const counts=kinds.map(type=>({type,count:steps.filter(item=>item.kind===type).length}));
@@ -84,7 +87,17 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   }
   const chosen=kind==='qc'?current!.area:workAreaFor(title,after??steps.length-1);
   if(!chosen){
-   setError('This work belongs to another construction stage. Add it under the corresponding payment milestone.');return;
+   const inferred=inferCompanyWorkAreaCode(title);
+   const targets=allRows.flatMap((candidate,candidateIndex)=>{
+    if(candidateIndex===index)return [];
+    const candidateAreas=candidate.areas?.length?candidate.areas:[...new Set((candidate.steps??[]).map(item=>item.area))];
+    return inferred&&candidateAreas.includes(inferred)?[candidateIndex]:[];
+   });
+   if(inferred&&targets.length){
+    setRouteStep({kind,name:title,area:inferred});setRouteTargets(targets);
+    setError(`“${title}” maps to ${companyWorkAreaLabel(row,inferred)}. Add it to the matching payment milestone:`);return;
+   }
+   setError('This item maps to another construction stage. Add or update a payment milestone for that stage first.');return;
   }
   const next:CompanyWorkStep={kind,name:title,area:chosen};
   if(steps.some(item=>item.area===next.area&&item.name.toLowerCase()===next.name.toLowerCase()&&
@@ -94,7 +107,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   const updated=[...steps];updated.splice((after??steps.length-1)+1,0,next);
   onChange({...row,steps:updated,areas:areas.includes(chosen)?row.areas:[...areas,chosen]});
   if(updated.length>limit)setShowAll(true);
-  setError('');setAfter(null);setName('');setCheckRef('');
+  setError('');setRouteStep(null);setAfter(null);setName('');setCheckRef('');
  };
  const startEdit=(position:number)=>{
   setEditing(position);setEditDraft(steps[position]?.name??'');setError('');
@@ -299,7 +312,22 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
      <button type="button" onClick={()=>{setAfter(null);setError('');}}>Cancel</button>
     </div>
    </div>}
-   {error&&<p role="alert" className="us-payment-error">{error}</p>}
+   {error&&<div role="alert" className="us-payment-error">
+   <p>{error}</p>
+   {routeStep&&<div className="us-payment-route-actions">
+    {routeTargets.map(targetIndex=>{
+     const target=allRows[targetIndex];
+     if(!target)return null;
+     return <button key={targetIndex} type="button" onClick={()=>{
+      if((target.steps??[]).some(item=>item.area===routeStep.area&&item.name.toLowerCase()===routeStep.name.toLowerCase()&&
+       (item.kind===routeStep.kind||(isCheck(item)&&isCheck(routeStep))))){
+       setError('This item is already included in that payment milestone.');setRouteStep(null);return;
+      }
+      onRouteStep(targetIndex,routeStep);setAfter(null);setName('');setCheckRef('');setRouteStep(null);setRouteTargets([]);setError('');
+     }}>Add to {target.name}</button>;
+    })}
+   </div>}
+  </div>}
   </div>}
  </li>;
 }
@@ -337,11 +365,19 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
   <form action={action}>
    <input type="hidden" name="rows" value={JSON.stringify(rows)}/>
    <ol className="us-payment-default-list">
-    {rows.map((row,index)=><DefaultPaymentStage key={row.name+'-'+index} row={row} index={index}
+    {rows.map((row,index)=><DefaultPaymentStage key={row.name+'-'+index} row={row} index={index} allRows={rows}
      expanded={expandedIndex===index} onToggle={()=>
       setExpandedIndex(value=>value===index?null:index)}
      canEdit={canEdit} totalRows={rows.length} onMove={direction=>moveStage(index,direction)}
-     onChange={next=>update(index,next)} onRemove={()=>remove(index)}/>)}
+     onChange={next=>update(index,next)} onRemove={()=>remove(index)}
+     onRouteStep={(targetIndex,step)=>{
+      setRows(previous=>previous.map((candidate,i)=>i===targetIndex?{
+       ...candidate,
+       areas:[...new Set([...(candidate.areas?.length?candidate.areas:(candidate.steps??[]).map(item=>item.area)),step.area])],
+       steps:[...(candidate.steps??[]),step],
+      }:candidate));
+      setExpandedIndex(targetIndex);
+     }}/>) }
    </ol>
    {canEdit&&<button type="button" className="us-payment-add" disabled={rows.length>=40}
     onClick={()=>{setRows(previous=>[...previous,{name:'New construction milestone',percent:0,areas:[],steps:[]}]);
