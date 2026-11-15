@@ -105,7 +105,10 @@ export function projectStageFlowFromMilestones(
   .flatMap(key=>(plan[key]??[]).filter(
    (item):item is Exclude<QuotationMilestoneStep,{kind:'payment'}> =>
     item.code===code&&item.kind!=='payment',
-  )).map(({kind,index})=>({kind,index}));
+  )).map(({kind,index})=>({
+   kind:kind as Exclude<QuotationMilestoneStep['kind'],'payment'>,
+   index,
+  }));
  const known=new Set(steps.filter(item=>item.kind!=='qc').map(item=>
   (item.kind==='test'?'check':item.kind)+':'+item.index));
  for(let index=0;index<stage.work.length;index++){
