@@ -322,7 +322,7 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
    {canEdit&&after!==null&&<div className="us-payment-step-form">
     <label>Type of item
      <select aria-label="New default step type" value={kind}
-      onChange={e=>{setKind(e.target.value as Kind);setCheckRef('');setSelectedArea('');}}>
+      onChange={e=>{setKind(e.target.value as Kind);setCheckRef('');}}>
       <option value="payment">Payment milestone</option>
       <option value="work">Work</option>
       <option value="material">Material required</option>
