@@ -65,9 +65,12 @@ describe('one authorized company navigation on every dashboard page', () => {
       'Projects',
       'Marketplace',
     ];
+    const orderStart = canonical.indexOf('const navigationOrder = [');
+    const orderEnd = canonical.indexOf('];', orderStart);
+    const navigationOrderSource = canonical.slice(orderStart, orderEnd);
     let previousIndex = -1;
     for (const label of menuOrder) {
-      const index = canonical.indexOf(`label: '${label}'`);
+      const index = navigationOrderSource.indexOf(`'${label}'`);
       expect(index).toBeGreaterThan(previousIndex);
       previousIndex = index;
     }
