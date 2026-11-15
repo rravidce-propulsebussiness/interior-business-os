@@ -34,9 +34,10 @@ function ActionIcon({action}:{action:'up'|'down'|'edit'|'delete'}) {
  </svg>;
 }
 
-function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRemove}:{
- row:CompanyConstructionPaymentRow;index:number;canEdit:boolean;expanded:boolean;
+function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRemove,totalRows,onMove}:{
+ row:CompanyConstructionPaymentRow;index:number;canEdit:boolean;expanded:boolean;totalRows:number;
  onToggle:()=>void;onChange:(next:CompanyConstructionPaymentRow)=>void;onRemove:()=>void;
+ onMove:(direction:number)=>void;
 }) {
  const steps=row.steps??[];
  const areas=row.areas?.length?row.areas:[...new Set(steps.map(item=>item.area))];
@@ -188,9 +189,13 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
        onChange={e=>onChange({...row,percent:Number(e.target.value)})}/> %
      </span>
     </label>
-    {canEdit&&<button type="button" className="us-payment-remove" onClick={onRemove}>
-     Remove stage
-    </button>}
+    {canEdit&&<div className="us-payment-stage-order">
+     <button type="button" aria-label={'Move stage '+(index+1)+' up'} disabled={index===0}
+      onClick={()=>onMove(-1)}>↑</button>
+     <button type="button" aria-label={'Move stage '+(index+1)+' down'} disabled={index===totalRows-1}
+      onClick={()=>onMove(1)}>↓</button>
+     <button type="button" className="us-payment-remove" onClick={onRemove}>Remove stage</button>
+    </div>}
    </div>
    <p className="us-payment-note">
     These items define the scope of this payment stage. Edit the order here, or
@@ -314,6 +319,17 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
   setRows(previous=>previous.filter((_,i)=>i!==index));
   setExpandedIndex(value=>value===null?null:value===index?null:value>index?value-1:value);
  };
+ const moveStage=(from:number,direction:number)=>{
+  const to=from+direction;
+  if(to<0||to>=rows.length)return;
+  setRows(previous=>{
+   const next=[...previous];const [item]=next.splice(from,1);
+   if(item)next.splice(to,0,item);return next;
+  });
+  setExpandedIndex(value=>value===from?to:value===null?null:
+   from<to&&value>from&&value<=to?value-1:
+   from>to&&value>=to&&value<from?value+1:value);
+ };
  return <div className="us-payment-defaults">
   <p className="us-info">Configure payment stages, work, materials, site checks and company QC once.
    Add text and video guides to each work or QC item; saved defaults populate new quotations and their project timelines.</p>
@@ -323,7 +339,8 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
     {rows.map((row,index)=><DefaultPaymentStage key={index} row={row} index={index}
      expanded={expandedIndex===index} onToggle={()=>
       setExpandedIndex(value=>value===index?null:index)}
-     canEdit={canEdit} onChange={next=>update(index,next)} onRemove={()=>remove(index)}/>)}
+     canEdit={canEdit} totalRows={rows.length} onMove={direction=>moveStage(index,direction)}
+     onChange={next=>update(index,next)} onRemove={()=>remove(index)}/>)}
    </ol>
    {canEdit&&<button type="button" className="us-payment-add" disabled={rows.length>=40}
     onClick={()=>{setRows(previous=>[...previous,{name:'New construction milestone',percent:0,areas:[],steps:[]}]);
