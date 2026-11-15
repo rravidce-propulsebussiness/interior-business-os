@@ -40,6 +40,7 @@ describe('Finance navigation and single-source billing',()=>{
   expect(financeEntity).toContain('const user = await s.authorization.requireAuthenticatedUser();');
   expect(financeEntity).toContain('customer_id: query.customer_id ??');
   expect(financeEntity).toContain('selected.customer_id');
+  expect(financeEntity).toContain('const choices = {');
  });
 
  it('uses one set of Finance tabs without repeating them in the sidebar or Quick Actions',()=>{
