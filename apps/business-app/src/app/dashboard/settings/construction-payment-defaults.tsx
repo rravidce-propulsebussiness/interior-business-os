@@ -57,7 +57,7 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
  const areas=row.areas?.length?row.areas:[...new Set(steps.map(item=>item.area))];
  const [kind,setKind]=useState<Kind>('work');
  const [name,setName]=useState('');
- const [selectedAreas,setSelectedAreas]=useState<string[]>([]);
+ const [selectedArea,setSelectedArea]=useState('');
  const [checkRef,setCheckRef]=useState('');
  const [error,setError]=useState('');
  const [after,setAfter]=useState<number|null>(null);
@@ -87,7 +87,7 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
  const editRows=(next:CompanyWorkStep[])=>{onChange({...row,steps:next});setError('');};
  const add=(position:number)=>{
   setAfter(position);setSequence(String(position+2));setName('');setKind('work');setCheckRef('');
-  setSelectedAreas([]);setRouteStep(null);setRouteTargets([]);setError('');
+  setSelectedArea('');setRouteStep(null);setRouteTargets([]);setError('');
  };
  const save=()=>{
   const title=kind==='qc'?current?.name:name.trim().replace(/\s+/g,' ');
@@ -104,9 +104,8 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
   if(!Number.isInteger(insertAt)||insertAt<0||insertAt>steps.length){
    setError('Enter a sequence number from 1 to '+(steps.length+1)+'.');return;
   }
-  const chosenAreas=kind==='qc'?[current!.area]:
-   selectedAreas.length?selectedAreas:[workAreaFor(title,insertAt-1)].filter((value):value is string=>Boolean(value));
-  if(!chosenAreas.length){
+  const chosenArea=kind==='qc'?current!.area:selectedArea||workAreaFor(title,insertAt-1);
+  if(!chosenArea){
    const inferred=kind==='qc'?null:inferCompanyWorkAreaCode(title);
    const targets=inferred?allRows.flatMap((candidate,candidateIndex)=>{
     if(candidateIndex===index)return [];
@@ -120,23 +119,23 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
    }
    setError(inferred?'This item maps to another construction stage. Add or update a payment milestone for that stage first.':'Choose at least one construction stage for this item.');return;
   }
-  if(areas.length&&chosenAreas.some(area=>!areas.includes(area))){
-   setError('Select construction stages linked to this payment milestone.');return;
+  if(areas.length&&!areas.includes(chosenArea)){
+   setError('Choose a construction stage linked to this payment milestone.');return;
   }
-  const nextItems:CompanyWorkStep[]=chosenAreas.map(area=>({kind,name:title,area}));
+  const nextItems:CompanyWorkStep[]=[{kind,name:title,area:chosenArea}];
   const duplicate=nextItems.some(next=>steps.some(item=>item.area===next.area&&
    item.name.toLowerCase()===next.name.toLowerCase()&&
    (item.kind===next.kind||(isCheck(item)&&isCheck(next)))));
   if(duplicate){
-   setError('This item already exists in one of the selected construction stages.');return;
+   setError('This item is already included in this construction stage.');return;
   }
   const updated=[...steps];updated.splice(insertAt,0,...nextItems);
   if(!validQcOrder(updated)){
    setError('Company QC must remain after its linked site check/test.');return;
   }
-  onChange({...row,steps:updated,areas:[...new Set([...areas,...chosenAreas])]});
+  onChange({...row,steps:updated,areas:[...new Set([...areas,chosenArea])]});
   if(updated.length>limit)setShowAll(true);
-  setError('');setRouteStep(null);setRouteTargets([]);setAfter(null);setSequence('1');setName('');setCheckRef('');setSelectedAreas([]);
+  setError('');setRouteStep(null);setRouteTargets([]);setAfter(null);setSequence('1');setName('');setCheckRef('');setSelectedArea('');
  };
  const startEdit=(position:number)=>{
   setEditing(position);setEditDraft(steps[position]?.name??'');setError('');
@@ -336,16 +335,14 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
       value={sequence} aria-label="New item sequence number"
       onChange={event=>setSequence(event.target.value)}/>
     </label>
-    {kind!=='qc'&&<fieldset className="us-item-area-choices">
-     <legend>Use in construction stages</legend>
-     {areas.length?areas.map(area=><label key={area}>
-      <input type="checkbox" checked={selectedAreas.includes(area)}
-       onChange={event=>setSelectedAreas(current=>event.target.checked
-        ?[...new Set([...current,area])]:current.filter(value=>value!==area))}/>
-      <span>{companyWorkAreaLabel(row,area)}</span>
-     </label>):<small>Stage will be inferred from the item name.</small>}
-     <small>Select one or more stages linked to this payment milestone.</small>
-    </fieldset>}
+    {kind!=='qc'&&(areas.length?<label>Construction stage
+     <select value={selectedArea} aria-label="Construction stage for new item"
+      onChange={event=>setSelectedArea(event.target.value)}>
+      <option value="">Use stage inferred from item name</option>
+      {areas.map(area=><option key={area} value={area}>{companyWorkAreaLabel(row,area)}</option>)}
+     </select>
+     <small>To use this item in another stage, add it again and choose that stage.</small>
+    </label>:<small>Stage will be inferred from the item name.</small>)}
     {kind==='qc'?<label>QC for which earlier site check/test?
      <select value={current?link(current):''} onChange={e=>setCheckRef(e.target.value)}
       aria-label="QC linked site check">
@@ -358,7 +355,7 @@ function DefaultPaymentStage({row,index,allRows,canEdit,expanded,onToggle,onChan
        aria-label="New default work item name" onChange={e=>setName(e.target.value)}/>
      </label>}
     <div className="us-payment-step-form-actions">
-     <button type="button" className="us-payment-save-item" onClick={save}>Add {labels[kind]}{kind!=='qc'&&selectedAreas.length>1?' to stages':''}</button>
+     <button type="button" className="us-payment-save-item" onClick={save}>Add {labels[kind]}</button>
      <button type="button" onClick={()=>{setAfter(null);setError('');}}>Cancel</button>
     </div>
    </div>}
