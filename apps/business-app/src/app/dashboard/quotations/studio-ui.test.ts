@@ -890,6 +890,21 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(css).toContain('.qs-payment-panel');
     expect(css).toContain('grid-template-areas:"grip stage stage remove"');
   });
+
+  it('uses company payment settings as the read-only construction schedule', () => {
+    const payments = file('./payment-schedule-editor.tsx');
+    expect(page).toContain('organization_construction_payment_defaults_read');
+    expect(page).toContain(
+      'companyDefaults={companyPayments.error ? [] : companyPayments.data}',
+    );
+    expect(payments).toContain(
+      "const canEditSchedule = editable && industry !== 'construction';",
+    );
+    expect(payments).toContain('editable={canEditSchedule}');
+    expect(payments).toContain('Save Company Schedule to Quotation');
+    expect(payments).toContain('Company payment and work settings are ready');
+    expect(payments).not.toContain('draggable={editable && !pending}');
+  });
 });
 
 describe('tenant-priced calculated Custom Quote package', () => {
