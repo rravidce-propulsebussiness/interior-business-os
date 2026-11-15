@@ -6,7 +6,7 @@ import {milestoneConstructionStages} from './construction-payment-schedule';
 
 const validAreas=new Set(milestoneConstructionStages().map(x=>x.code));
 export const companyWorkStep=z.object({
- kind:z.enum(['work','material','check','test','qc']),
+ kind:z.enum(['payment','work','material','check','test','qc']),
  name:z.string().trim().min(2).max(180),
  area:z.string().regex(/^[A-Z][A-Z_]*$/).max(45),
  guideText:z.string().trim().max(1800).optional(),
@@ -127,7 +127,14 @@ export function applyCompanyWorkDefaults(
   const activeCodes=new Set<string>();
   for(const item of template){
    const code=payment.stageCodes.find(x=>family(x)===item.area);
-   if(!code||seenCodes.has(code))continue;
+   if(!code)continue;
+   // This is a sequence marker for the current priced milestone, not a second
+   // payment, invoice or work item. The quotation flow keeps the amount in Finance.
+   if(item.kind==='payment'){
+    steps.push({kind:'payment',code,index:i});
+    continue;
+   }
+   if(seenCodes.has(code))continue;
    if(!activeCodes.has(code)){
     activeCodes.add(code);
     const baseline=defaultStageRequirements(code);
@@ -213,8 +220,8 @@ export function applyCompanyWorkDefaults(
  }
 }
 
-/** The first priced Planning milestone. Payment is already represented by
- * the milestone amount in Finance; do not duplicate it as a work task. */
+/** The first priced Planning milestone. Payment remains the Finance amount;
+ * an optional payment marker can be ordered in its workflow without duplicating it. */
 export const planningWorkDefaults:readonly CompanyWorkStep[]=[
  {kind:'work',name:'Price Freeze',area:'PRECONSTRUCTION'},
  {kind:'work',name:'Agreement',area:'PRECONSTRUCTION'},
