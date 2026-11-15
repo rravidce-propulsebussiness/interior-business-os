@@ -148,7 +148,7 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
                         : ''}
                       {' · '}
                       {payment.steps.length
-                        ? payment.steps.length + ' saved work/check steps'
+                        ? payment.steps.length + ' ordered timeline steps'
                         : payment.stageCodes.length
                           ? payment.stageCodes.length + ' linked work stages'
                           : 'No work-stage link saved'}
