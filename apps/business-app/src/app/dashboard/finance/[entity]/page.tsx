@@ -153,7 +153,8 @@ export default async function FinanceList({
     s.allowed('contract.view') ? s.finance.search('contracts', { q: query.lookup ?? '' }, lookupPage) : Promise.resolve({ rows: [] }),
     s.repository.organization(s.org),
   ]);
-  const choices: Record<string, { value: string; label: string }[]> = {
+  type FinanceChoiceKey = 'customer_id' | 'project_id' | 'branch_id' | 'contract_id';
+  const choices: Record<FinanceChoiceKey, { value: string; label: string }[]> = {
     customer_id: (customers.data ?? []).map((row) => ({ value: row.id, label: row.display_name })),
     project_id: (projects.data ?? []).map((row) => ({ value: row.id, label: row.name })),
     branch_id: (branches.data ?? []).map((row) => ({ value: row.id, label: row.name })),
@@ -190,7 +191,8 @@ export default async function FinanceList({
     { label: 'Team', href: '/dashboard/company/team', icon: 'team' },
     { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
   ];
-  const email = s.user.email ?? '';
+  const { data: { user } } = await s.client.auth.getUser();
+  const email = user?.email ?? '';
   const isContracts = entity === 'contracts';
 
   return (
