@@ -947,7 +947,6 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(stageEditor).toContain('const nextItems:CompanyWorkStep[]=[{kind,name:title,area:chosenArea}]');
   expect(stageEditor).toContain('item.area===next.area');
   expect(stageEditor).toContain('const targets=inferred?allRows.flatMap');
-  expect(stageEditor).toContain('item.area===next.area');
   expect(stageEditor).toContain('companyWorkAreaLabel(row,inferred)');
   expect(stageEditor).toContain('Add to {target.name}');
   expect(stageEditor).toContain('onRouteStep={(targetIndex,step)=>');
