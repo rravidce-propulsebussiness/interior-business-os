@@ -57,6 +57,28 @@ describe('editable work inside company payment defaults',()=>{
   expect(migrated[0]?.steps?.some(s=>s.kind==='work')).toBe(true);
   expect(companyConstructionPaymentRows.parse(migrated)).toEqual(migrated);
  });
+ it('links an ordered payment marker to its existing priced milestone',()=>{
+  const payments=[{stageCodes:['FOUNDATION']}];
+  const defaults=companyConstructionPaymentRows.parse([{
+   name:'Foundation payment',percent:100,areas:['FOUNDATION'],steps:[
+    {kind:'payment',name:'Foundation payment',area:'FOUNDATION'},
+    {kind:'work',name:'Excavation',area:'FOUNDATION'},
+   ],
+  }]);
+  expect(companyConstructionPaymentRows.parse(defaults)).toEqual(defaults);
+  const result=applyCompanyWorkDefaults(payments,defaults);
+  expect(result.flow['0']?.[0]).toEqual({
+   kind:'payment',code:'FOUNDATION',index:0,
+  });
+  expect(validateMilestoneFlow(result.flow,result.requirements,payments)).toEqual(result.flow);
+  expect(result.requirements.FOUNDATION?.work).not.toContain('Foundation payment');
+ });
+ it('rejects a payment marker linked to a missing or unrelated milestone',()=>{
+  const payments=[{stageCodes:['FOUNDATION']}];
+  expect(()=>validateMilestoneFlow({
+   '0':[{kind:'payment',code:'FOUNDATION',index:1}],
+  },{},payments)).toThrow('Choose an existing payment milestone');
+ });
  it('clones ordered material/check/QC against real quotation stage codes',()=>{
   const payments=[{stageCodes:['PRECONSTRUCTION']},{stageCodes:['FOUNDATION']}];
   const defaults=companyConstructionPaymentRows.parse([

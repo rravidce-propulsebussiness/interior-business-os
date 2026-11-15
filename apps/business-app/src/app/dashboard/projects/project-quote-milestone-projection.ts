@@ -8,7 +8,7 @@ import {
  * This is a read-only projection for the project timeline, never a new
  * schedule, a payment request, or a separate execution workflow. */
 export type QuotedTimelineStep = {
-  kind: 'work' | 'material' | 'check' | 'test' | 'qc';
+  kind: 'payment' | 'work' | 'material' | 'check' | 'test' | 'qc';
   code: string;
   index: number;
   title: string;
@@ -95,8 +95,14 @@ export function quoteMilestoneProjection(
     stageCodes: [...payment.stageCodes],
     durationHint: referenceDuration(payment.name, payment.stageCodes),
     steps: (flow[String(paymentIndex)] ?? []).flatMap((step) => {
-      // Only work explicitly saved inside THIS payment is rendered.
+      // Only items linked to the stages inside THIS payment are rendered.
       if (!payment.stageCodes.includes(step.code)) return [];
+      if (step.kind === 'payment') {
+        const linkedPayment = payments[step.index];
+        return linkedPayment
+          ? [{ ...step, title: 'Payment due · ' + linkedPayment.name }]
+          : [];
+      }
       const stage =
         requirements[step.code] ?? defaultStageRequirements(step.code);
       const field =
