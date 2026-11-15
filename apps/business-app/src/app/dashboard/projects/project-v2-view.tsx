@@ -644,13 +644,14 @@ function Documents({ d }: { d: WorkspaceData }) {
                     digital signature is not required.
                   </p>
                 )}
-                {signedRecorded &&
+                {(signedRecorded || ownerQuoteChoice) &&
                   d.agreement.status === 'pending' &&
                   d.permissions.contractManage &&
                   typeof d.agreement.version === 'number' && (
                     <ProjectContractActivation
                       contractId={d.agreement.contractId}
                       version={d.agreement.version}
+                      offlineAgreement={ownerQuoteChoice}
                     />
                   )}
 

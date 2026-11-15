@@ -1,6 +1,7 @@
 import { formatMoney, pretty, type WorkspaceData } from './project-v2-data';
 import {
   PrepareAgreement,
+  ProjectContractActivation,
   ProjectDrawingForm,
   ProjectForm,
   SkipAgreementUpload,
@@ -24,6 +25,8 @@ export function ProjectDesignPaymentAndAgreement({
   const agreement = data.agreement;
   const revisionId = agreement?.revisionId ?? data.quotations[0]?.revisionId;
   const hasOwnerAccess = data.site?.canManage === true;
+  const ownerApprovalRecorded = agreement?.clearanceType === 'owner_exception';
+  const activationNeeded = ownerApprovalRecorded && agreement?.status === 'pending';
 
   return (
     <section
@@ -35,12 +38,16 @@ export function ProjectDesignPaymentAndAgreement({
           <strong>Payment & agreement</strong>
           <p>Use the accepted quotation and its existing payment schedule.</p>
         </div>
-        <span className={agreement?.authorized ? 'is-ready' : ''}>
+        <span className={agreement?.authorized || ownerApprovalRecorded ? 'is-ready' : ''}>
           {agreement?.authorized
             ? 'Authorized'
-            : agreement
-              ? pretty(agreement.status)
-              : 'Not prepared'}
+            : ownerApprovalRecorded
+              ? activationNeeded
+                ? 'Approval recorded'
+                : 'Offline approval recorded'
+              : agreement
+                ? pretty(agreement.status)
+                : 'Not prepared'}
         </span>
       </header>
 
@@ -49,6 +56,27 @@ export function ProjectDesignPaymentAndAgreement({
           The agreement is authorized. Drawing submissions follow the project’s
           existing advance policy.
         </p>
+      ) : ownerApprovalRecorded && agreement ? (
+        <>
+          <p className="pmt-design-note">
+            The homeowner’s offline approval is recorded. {activationNeeded
+              ? 'Activate the quote-based project to open its confirmed payment schedule and continue.'
+              : 'The existing advance policy still controls when design work can proceed.'}
+          </p>
+          {activationNeeded && hasOwnerAccess && data.permissions.contractManage &&
+            typeof agreement.version === 'number' && (
+              <ProjectContractActivation
+                contractId={agreement.contractId}
+                version={agreement.version}
+                offlineAgreement
+              />
+            )}
+          {activationNeeded && (!hasOwnerAccess || !data.permissions.contractManage) && (
+            <p className="pmt-design-note">
+              A company owner with contract management access must activate this project.
+            </p>
+          )}
+        </>
       ) : agreement?.canAuthorizeException && hasOwnerAccess ? (
         <SkipAgreementUpload
           projectId={data.project.id}
