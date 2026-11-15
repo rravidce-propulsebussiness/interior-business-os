@@ -1,5 +1,11 @@
 'use client';
-import { useActionState, useTransition, useState, type ReactNode } from 'react';
+import {
+  useActionState,
+  useTransition,
+  useState,
+  useRef,
+  type ReactNode,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { saveProjectSite, uploadProjectSiteMedia } from './[id]/site/actions';
 import {
@@ -190,12 +196,15 @@ export function SkipAgreementUpload({
   const [message, setMessage] = useState('');
   const [saved, setSaved] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [uploadedMediaId, setUploadedMediaId] = useState('');
+  const [uploadedFilename, setUploadedFilename] = useState('');
   return (
     <div className="pv2-offline-agreement">
       <p className="pv2-hint">
-        If the homeowner approved the final quotation or agreement offline, the
-        company owner can record that approval here. No separate signed upload
-        or digital signature is required.
+        Record the homeowner’s offline approval here. Attach a scanned copy of
+        the paper agreement if you have one; a digital signature is not
+        required.
       </p>
       <label className="pv2-offline-agreement-ack">
         <input
@@ -204,12 +213,37 @@ export function SkipAgreementUpload({
           onChange={(event) => setConfirmed(event.currentTarget.checked)}
           disabled={pending || saved}
         />
-        I am the company owner and confirm the homeowner approved this final
-        quotation or agreement offline.
+        <span>
+          <strong>Owner confirmation</strong>
+          <span>
+            I am the company owner and confirm the homeowner approved this final
+            quotation or agreement offline.
+          </span>
+        </span>
+      </label>
+      <label className="pv2-offline-agreement-file">
+        <span>
+          Scanned agreement PDF <small>Optional · PDF up to 8 MB</small>
+        </span>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="application/pdf,.pdf"
+          disabled={pending || saved || Boolean(uploadedMediaId)}
+          onChange={(event) =>
+            setUploadedFilename(event.currentTarget.files?.[0]?.name ?? '')
+          }
+        />
+        {uploadedMediaId && (
+          <small className="pv2-offline-agreement-uploaded" role="status">
+            PDF uploaded and ready to record:{' '}
+            {uploadedFilename || 'scanned agreement'}
+          </small>
+        )}
       </label>
       <button
         type="button"
-        className="pv2-button"
+        className="pv2-button pv2-primary"
         disabled={pending || saved || !confirmed}
         onClick={() => {
           start(async () => {
@@ -218,13 +252,24 @@ export function SkipAgreementUpload({
               'reason',
               'Company owner confirms the homeowner approved the final quotation offline; no separate signed agreement upload or digital signature was used.',
             );
-            form.set('reference', 'Owner-recorded offline homeowner approval');
+            form.set(
+              'reference',
+              'Owner-recorded offline homeowner approval for the accepted final quotation.',
+            );
+            const file = fileRef.current?.files?.[0];
+            if (file) form.set('file', file);
+            else if (uploadedMediaId) form.set('media_id', uploadedMediaId);
             const result = await createAgreementException(
               projectId,
               contractId,
               form,
             );
             setMessage(result.message);
+            if (result.mediaId) {
+              setUploadedMediaId(result.mediaId);
+              if (result.uploaded && fileRef.current)
+                fileRef.current.value = '';
+            }
             if (result.saved) {
               setSaved(true);
               router.refresh();

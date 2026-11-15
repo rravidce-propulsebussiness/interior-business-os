@@ -1305,10 +1305,19 @@
  .pv2-page .pq-payment-title strong{font-size:12px}
  .pv2-page .pq-steps li{gap:7px}
 }
-.pv2-offline-agreement{display:grid;gap:.75rem;max-width:720px;padding:.85rem;border:1px solid #e7d9d4;border-radius:12px;background:#fffaf8}
-.pv2-offline-agreement-ack{display:flex;align-items:flex-start;gap:.65rem;line-height:1.45;color:#352a28}
-.pv2-offline-agreement-ack input{flex:0 0 auto;margin-top:.18rem;accent-color:#88352b}
-@media(max-width:640px){.pv2-offline-agreement{padding:.7rem}.pv2-offline-agreement>.pv2-button{width:100%;white-space:normal}}
+.pv2-page .pv2-offline-agreement{display:grid;gap:14px;width:100%;max-width:760px;min-width:0;padding:clamp(14px,2.5vw,20px);border:1px solid #ead8cf;border-radius:16px;background:linear-gradient(150deg,#fffaf7,#fff);box-shadow:0 8px 24px #5b2b1b0a;box-sizing:border-box}
+.pv2-page .pv2-offline-agreement>.pv2-hint{margin:0;color:#68788d;font-size:12px;line-height:1.6}
+.pv2-page .pv2-offline-agreement-ack{display:grid;grid-template-columns:20px minmax(0,1fr);align-items:start;gap:11px;padding:13px;border:1px solid #eadfd9;border-radius:12px;background:#fff;line-height:1.5;color:#352a28;min-width:0;cursor:pointer}
+.pv2-page .pv2-offline-agreement-ack>input[type=checkbox]{display:block!important;width:18px!important;height:18px!important;min-width:18px!important;max-width:18px!important;min-height:18px!important;margin:2px 0 0!important;padding:0!important;border:0!important;box-shadow:none!important;flex:0 0 18px!important;accent-color:#88352b;cursor:pointer}
+.pv2-page .pv2-offline-agreement-ack>span{display:grid;gap:4px;min-width:0;font-size:12px;font-weight:500;overflow-wrap:anywhere}
+.pv2-page .pv2-offline-agreement-ack strong{color:#293950;font-size:13px;font-weight:800}
+.pv2-page .pv2-offline-agreement-file{display:grid;gap:8px;min-width:0;padding:13px;border:1px dashed #d8b9a9;border-radius:12px;background:#fffdfb;color:#334862;font-size:12px;font-weight:800;box-sizing:border-box}
+.pv2-page .pv2-offline-agreement-file>span{display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.pv2-page .pv2-offline-agreement-file>span small,.pv2-page .pv2-offline-agreement-uploaded{color:#718098;font-size:11px;font-weight:500;line-height:1.5}
+.pv2-page .pv2-offline-agreement-file>input[type=file]{display:block;width:100%;min-width:0;max-width:100%;min-height:44px;padding:8px;border:1px solid #e4dcd5;border-radius:9px;background:#fff;color:#43546a;font-size:12px;box-sizing:border-box}
+.pv2-page .pv2-offline-agreement-uploaded{color:#147a55;font-weight:700;overflow-wrap:anywhere}
+.pv2-page .pv2-offline-agreement>.pv2-button{justify-self:start;max-width:100%;white-space:normal}
+@media(max-width:640px){.pv2-page .pv2-offline-agreement{gap:12px;padding:12px;border-radius:13px}.pv2-page .pv2-offline-agreement-ack,.pv2-page .pv2-offline-agreement-file{padding:11px}.pv2-page .pv2-offline-agreement>.pv2-button{width:100%;justify-content:center}}
 .pf-flow.pf-milestone-mode {
   margin-bottom: 10px;
 }
