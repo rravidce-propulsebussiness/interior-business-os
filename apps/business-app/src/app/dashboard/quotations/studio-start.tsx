@@ -232,7 +232,7 @@ export function QuotationStudioStart({
       <div className="qs-clean-form-actions">
         <button className="qs-clean-next" type="submit"
           disabled={pending || (!existingCustomer && !quoteWithoutLead && !leadId) || !industry}>
-          {pending ? 'Creating quotation…' : 'Next →'}
+          {pending ? 'Creating quotation…' : quoteWithoutLead ? 'Prepare quotation →' : 'Next →'}
         </button>
       </div>
     </form>
