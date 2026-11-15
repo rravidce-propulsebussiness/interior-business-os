@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 const path=(x:string)=>new URL(x,import.meta.url);
 const finance=readFileSync(path('../finance/page.tsx'),'utf8');
 const css=readFileSync(path('../finance/finance-home.css'),'utf8');
+const financeEntity=readFileSync(path('../finance/[entity]/page.tsx'),'utf8');
 const billing=readFileSync(path('./page.tsx'),'utf8');
 const settings=readFileSync(path('../settings/page.tsx'),'utf8');
 const actions=readFileSync(path('./actions.ts'),'utf8');
@@ -36,6 +37,9 @@ describe('Finance navigation and single-source billing',()=>{
   expect(finance).toContain('OwnerMobileNav');
   expect(css).toContain('#BD5C3F');
   expect(css).toContain('@media(max-width:760px)');
+  expect(financeEntity).toContain('const user = await s.authorization.requireAuthenticatedUser();');
+  expect(financeEntity).toContain('customer_id: query.customer_id ??');
+  expect(financeEntity).toContain('selected.customer_id');
  });
 
  it('uses one set of Finance tabs without repeating them in the sidebar or Quick Actions',()=>{
