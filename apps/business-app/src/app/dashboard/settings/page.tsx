@@ -28,7 +28,7 @@ const tabs:{id:Tab;label:string;icon:string}[]=[
   {id:'branding',label:'Branding',icon:'◈'},
   {id:'invoice',label:'Invoice & GST',icon:'▤'},
   {id:'documents',label:'Documents',icon:'▧'},
-  {id:'payments',label:'Payment Settings',icon:'♧'},
+  {id:'payments',label:'Construction Workflow',icon:'♧'},
   {id:'team',label:'Team & Access',icon:'♙'},
   {id:'preferences',label:'Preferences',icon:'⚙'},
 ];
@@ -182,10 +182,8 @@ export default async function SettingsPage({searchParams}:{
   {id:'construction',title:'Project & Construction',
    description:'Set up construction templates, payment stages and site workflows.',
    icon:'preferences',cards:[
-    {id:'payments',title:'Payment Settings',description:'Default payment stages, work, materials, checks and QC',
+    {id:'payments',title:'Construction Workflow',description:'Payment milestones, ordered work, site checks, work guides and QC videos',
      icon:'payments',tone:'orange',href:'/dashboard/settings?tab=payments#company-payment-stages'},
-    {id:'construction-items',title:'Construction Items',description:'Manage work items, materials, checks, tests and company QC',
-     icon:'construction',tone:'blue',href:'/dashboard/settings?tab=payments#company-payment-stages'},
     ...(canBrand?[{id:'quote-settings',title:'Quote Settings',description:'Terms, conditions and quotation preferences',
      icon:'quote',tone:'green',href:'/dashboard/settings?tab=branding#quotation-template-settings'}] as const:[]),
   ]},
@@ -378,7 +376,7 @@ export default async function SettingsPage({searchParams}:{
     <p className="us-info">No duplicate document store or permission bypass is created in Settings.</p>
    </section>}
    {tab==='payments'&&<section className="us-card us-wide">
-    <Header icon="♧" title="Payment Stage Settings" detail="Define payment milestones and included work items."/>
+    <Header icon="♧" title="Construction Workflow Settings" detail="Define payment milestones, ordered work, site checks, work instructions and QC guidance once for new quotations and project timelines."/>
      <div className="us-payment-template-section" id="company-payment-stages">
       <h3>Default construction payment schedule</h3>
       {constructionDefaultsResponse.error?
