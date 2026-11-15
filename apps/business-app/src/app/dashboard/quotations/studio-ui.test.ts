@@ -102,8 +102,9 @@ describe('minimal quotation studio navigation', () => {
   it('keeps only the three editing tabs and links directly to the saved premium preview', () => {
     expect(studio).not.toContain('qs-studio-compact-bar');
     expect(studio).not.toContain('qs-studio-hero');
-    expect(studio).toContain("href={url + '/preview'}");
-    expect(studio).toContain('View saved quotation');
+    expect(studio).toContain('srcDoc={previewHtml}');
+    expect(studio).toContain("url + '/preview?version=' + revisionVersion");
+    expect(studio).not.toContain('View saved quotation');
     expect(studio).not.toContain("step === 'preview'");
     expect(studio).not.toContain("setStep('preview')");
     expect(studio).not.toContain('Preview &amp; Share');
@@ -569,7 +570,8 @@ describe('PDF attachment sharing and reliable file operations', () => {
     const list = file('./page.tsx');
     const studio = file('./studio-editor.tsx');
     expect(list).toContain("const preview = '/dashboard/quotations/' + row.id + '/preview'");
-    expect(studio).toContain("href={url + '/preview'}");
+    expect(studio).toContain('srcDoc={previewHtml}');
+    expect(studio).toContain("url + '/preview?version=' + revisionVersion");
     expect(studio).not.toContain("'/pdf?view=1&version=' + revisionVersion");
     expect(studio).not.toContain('Print A4 design / Save as PDF');
     expect(studio).not.toContain('qs-studio-compact-bar');
@@ -709,7 +711,7 @@ describe('streamlined quote, terms and payment Studio', () => {
   it('keeps only three editing tabs and removes duplicate client and branding panels', () => {
     expect(studio).toContain("{ id: 'quote', title: 'Scope' }");
     expect(studio).toContain("{ id: 'files', title: 'Terms & Inclusions' }");
-    expect(studio).toContain("{ id: 'payments', title: 'Payment Schedule' }");
+    expect(studio).toContain("{ id: 'payments', title: 'Payments & Work' }");
     expect(studio).not.toContain("id: 'client'");
     expect(studio).not.toContain("step === 'client'");
     expect(studio).not.toContain('qs-client-strip');
@@ -935,8 +937,9 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(stageEditor).not.toContain('Type construction work area name');
   expect(stageEditor).not.toContain('<label>Work area');
   expect(stageEditor).not.toContain('Type default step work area');
-  expect(stageEditor).toContain('workAreaFor(title,after??steps.length-1)');
-  expect(stageEditor).toContain("setError('This work belongs to another construction stage.");
+  expect(stageEditor).toContain('workAreaFor(title,insertAt-1)');
+  expect(stageEditor).toContain('Use in construction stages');
+  expect(stageEditor).toContain('chosenAreas.map(area=>({kind,name:title,area}))');
   expect(stageEditor).toContain('steps:updated');
  });
  it('renders one accordion per payment milestone, first open only',()=>{
@@ -965,8 +968,10 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   expect(stageEditor).toContain('saveEdit');
   expect(stageEditor).toContain('startEdit(position)');
   expect(stageEditor).toContain('onClick={()=>removeStep(position)}');
-  expect(stageEditor).toContain('onClick={()=>move(position,-1)}');
-  expect(stageEditor).toContain('onClick={()=>move(position,1)}');
+  expect(stageEditor).toContain('us-payment-step-drag');
+  expect(stageEditor).toContain('onCommit={target=>moveStep(position,target)}');
+  expect(stageEditor).toContain('New item sequence number');
+  expect(stageEditor).toContain('draggable={canEdit}');
   expect(stageEditor).toContain('New default work item name');
   expect(stageEditor).toContain('Company QC');
  });
@@ -989,12 +994,12 @@ describe('Settings category dashboard keeps one canonical settings workspace',()
   expect(page).not.toContain('<nav className="us-tabs"');
   expect(page).toContain('href="/dashboard/settings" className="ush-back"');
  });
- it('matches five grouped sections with 17 visual category cards, without new forms',()=>{
+ it('matches five grouped sections with 16 visual category cards, without new forms',()=>{
   for(const label of ['Business & Company','Project & Construction','People & Access',
    'Documents & Templates','System & Preferences'])expect(page).toContain(label);
   const home=page.split('const sections:SettingSection[]=')[1]?.split('\n ];')[0]??'';
   // Five section headings plus the seventeen remaining category cards share this shape.
-  expect((home.match(/\bid:'[^']+',title:/g)??[]).length-5).toBe(17);
+  expect((home.match(/\bid:'[^']+',title:/g)??[]).length-5).toBe(16);
   expect(page).toContain("href:'/dashboard/settings?tab=payments#company-payment-stages'");
   expect(page).toContain("href:'/dashboard/settings?tab=branding#quotation-template-settings'");
   expect(page).toContain("href:'/dashboard/settings?tab=invoice'");
