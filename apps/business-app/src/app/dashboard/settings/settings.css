@@ -325,3 +325,8 @@ a.ush-tile:focus-visible{outline:2px solid #f76b25;outline-offset:3px}
 .us-item-area-choices label{display:inline-flex;align-items:center;gap:6px;color:#4c3d39;font-size:12px;font-weight:700}
 .us-item-area-choices input{accent-color:#bd5c3f}
 .us-item-area-choices small{flex:1 0 100%;color:#7b8aa0;font-size:10px}
+
+.us-payment-error p{margin:0}
+.us-payment-route-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+.us-payment-route-actions button{min-height:36px;padding:8px 11px;border:1px solid #dca287;border-radius:9px;background:#fff;color:#9d4527;font:inherit;font-weight:800;cursor:pointer}
+.us-payment-route-actions button:hover{background:#fff2e9;border-color:#c97752}
