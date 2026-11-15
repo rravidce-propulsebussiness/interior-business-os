@@ -1557,3 +1557,10 @@
     padding: 8px;
   }
 }
+
+.pv2-project-customer-select{display:grid;gap:6px;margin:0 0 11px;color:#334862;font-size:12px;font-weight:750}
+.pv2-project-customer-select select{width:100%;min-height:43px;border:1px solid #dfdfe8;background:#fff;border-radius:10px;padding:9px 11px;color:#1e3350;font:inherit;font-weight:550}
+.pv2-project-customer-details{display:grid;gap:5px;margin:0 0 12px;padding:12px;border:1px solid #eee3dc;border-radius:12px;background:#fffaf7;color:#667389;font-size:12px;overflow-wrap:anywhere}
+.pv2-project-customer-details strong{color:#25354d;font-size:14px}
+.pv2-new-customer-quote{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid #eee7e2;color:#334862;font-size:12px;font-weight:750}
+@media(max-width:700px){.pv2-new-customer-quote{align-items:stretch;flex-direction:column}.pv2-new-customer-quote>.pv2-button{width:100%;justify-content:center}}
