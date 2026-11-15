@@ -109,8 +109,9 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   if(editingGuide===null)return;
   const text=guideTextDraft.trim(),video=guideVideoDraft.trim();
   if(text.length>1800){setError('Keep the guide under 1,800 characters.');return;}
-  if(video&&!/^https:\/\//i.test(video)){
-   setError('Use a secure https video link.');return;
+  if(video){
+   try{if(new URL(video).protocol!=='https:')throw new Error('https required');}
+   catch{setError('Enter a valid secure https video link.');return;}
   }
   editRows(steps.map((item,position)=>position===editingGuide
    ?{...item,guideText:text,guideVideoUrl:video}:item));
@@ -336,7 +337,7 @@ export function ConstructionPaymentDefaults({initial,canEdit}:{
   <form action={action}>
    <input type="hidden" name="rows" value={JSON.stringify(rows)}/>
    <ol className="us-payment-default-list">
-    {rows.map((row,index)=><DefaultPaymentStage key={index} row={row} index={index}
+    {rows.map((row,index)=><DefaultPaymentStage key={row.name+'-'+index} row={row} index={index}
      expanded={expandedIndex===index} onToggle={()=>
       setExpandedIndex(value=>value===index?null:index)}
      canEdit={canEdit} totalRows={rows.length} onMove={direction=>moveStage(index,direction)}
