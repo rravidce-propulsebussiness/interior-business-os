@@ -202,7 +202,7 @@ it('explains the planning payment purpose in the homeowner payment schedule',()=
  d.totals.final_amount='100000.00';
  d.terms='[STAGE_PAYMENT_PLAN]\nPlanning|10.00\nFoundation payment|90.00\n[/STAGE_PAYMENT_PLAN]\n'+
   encodeStagePaymentLinks([['PRECONSTRUCTION','DESIGN'],['FOUNDATION']]);
- const html=renderQuotationDocument(d);
+ const html=renderQuotationDocument(d, { kind: 'agreement' });
  expect(html).toContain('Planning — Price freeze &amp; design payment');
  expect(html).toContain('10,000');
  expect(html).toContain('Foundation payment');
