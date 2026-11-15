@@ -1,7 +1,24 @@
 import { describe, expect, it } from 'vitest';
 import { customerTermSections } from './quotation-terms';
 import { defaultStageRequirements,encodeStageRequirements,savedStageRequirements } from './quotation-stage-requirements';
-import { savedStagePaymentPlan, hasSavedStagePaymentPlan, savedStagePaymentLinks,encodeStagePaymentLinks } from './quotation-payment-plan';
+import { savedStagePaymentPlan, hasSavedStagePaymentPlan, savedStagePaymentLinks,encodeStagePaymentLinks,customerPaymentMilestoneName } from './quotation-payment-plan';
+
+describe('customer-facing construction payment names',()=>{
+ it('explains what a linked planning payment covers',()=>{
+  expect(customerPaymentMilestoneName('Planning',['PRECONSTRUCTION','DESIGN']))
+   .toBe('Planning — Price freeze & design payment');
+  expect(customerPaymentMilestoneName('Planning fee',['PRECONSTRUCTION','DESIGN']))
+   .toBe('Planning — Price freeze & design payment');
+ });
+ it('keeps custom and non-planning payment names unchanged',()=>{
+  expect(customerPaymentMilestoneName('Planning',['PRECONSTRUCTION']))
+   .toBe('Planning');
+  expect(customerPaymentMilestoneName('Foundation payment',['FOUNDATION']))
+   .toBe('Foundation payment');
+  expect(customerPaymentMilestoneName('  Planning  ',['PRECONSTRUCTION','DESIGN']))
+   .toBe('Planning — Price freeze & design payment');
+ });
+});
 
 describe('saved stage-wise payment milestones', () => {
   it('returns null for absent or invalid suggested-only plans', () => {
