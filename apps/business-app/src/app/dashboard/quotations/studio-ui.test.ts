@@ -176,6 +176,17 @@ describe('lead-driven quotation creation', () => {
     expect(form).toContain("industry === 'construction' && !initialCustomizedQuote ? 'sft' : 'custom'");
   });
 
+  it('offers quote preparation without creating a CRM lead when none are available', () => {
+    expect(form).toContain('No CRM leads yet? Prepare a quote now.');
+    expect(form).toContain('canPrepareWithoutLead');
+    expect(form).toContain('Quotation service');
+    expect(form).toContain('quoteWithoutLead ? { industryKey: industry } : { leadId }');
+    expect(form).toContain('Prepare quotation →');
+    expect(action).toContain('select a service for a quote without a lead.');
+    expect(action).toContain("Choose an active service before preparing a quote without a lead.");
+    expect(action).toContain("createProspect('quotation_prospect_project_create'");
+  });
+
   it('requires a quotation before project conversion and no longer opens blank projects', () => {
     const inlineProject = file('../crm/leads/lead-project-action.tsx');
     const linkAction = file('../crm/leads/lead-project-actions.ts');
