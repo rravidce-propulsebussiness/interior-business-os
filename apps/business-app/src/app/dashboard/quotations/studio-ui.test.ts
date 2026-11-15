@@ -903,6 +903,10 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(payments).toContain('editable={canEditSchedule}');
     expect(payments).toContain('Save Company Schedule to Quotation');
     expect(payments).toContain('Company payment and work settings are ready');
+    expect(payments).toContain('Manage payments and work in Settings →');
+    expect(payments).toContain(
+      'href="/dashboard/settings?tab=payments#company-payment-stages"',
+    );
     expect(payments).not.toContain('draggable={editable && !pending}');
   });
 });
