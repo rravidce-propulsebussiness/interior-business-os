@@ -9,6 +9,8 @@ describe('customer-facing construction payment names',()=>{
    .toBe('Planning — Price freeze & design payment');
   expect(customerPaymentMilestoneName('Planning fee',['PRECONSTRUCTION','DESIGN']))
    .toBe('Planning — Price freeze & design payment');
+  expect(customerPaymentMilestoneName('Planning',[]))
+   .toBe('Planning — Price freeze & design payment');
  });
  it('keeps custom and non-planning payment names unchanged',()=>{
   expect(customerPaymentMilestoneName('Planning',['PRECONSTRUCTION']))
