@@ -319,3 +319,9 @@ a.ush-tile:focus-visible{outline:2px solid #f76b25;outline-offset:3px}
 .us-payment-stage-order label{display:grid;gap:4px;color:#80665d;font-size:10px;font-weight:800}
 .us-payment-step-number.us-order-number{flex:0 0 58px}
 @media(max-width:640px){.us-order-number{width:52px}.us-payment-stage-order{flex-wrap:wrap}.us-payment-stage-drag{font-size:18px}}
+
+.us-item-area-choices{display:flex;flex-wrap:wrap;gap:8px 12px;margin:0;padding:10px 12px;border:1px solid #ecd8ca;border-radius:10px;background:#fffaf7}
+.us-item-area-choices legend{padding:0 4px;color:#80665d;font-size:11px;font-weight:850}
+.us-item-area-choices label{display:inline-flex;align-items:center;gap:6px;color:#4c3d39;font-size:12px;font-weight:700}
+.us-item-area-choices input{accent-color:#bd5c3f}
+.us-item-area-choices small{flex:1 0 100%;color:#7b8aa0;font-size:10px}
