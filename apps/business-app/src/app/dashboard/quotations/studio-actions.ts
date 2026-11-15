@@ -27,15 +27,10 @@ const createInput = z
       .default('INR'),
   })
   .strict()
-  .refine(
-    (values) =>
-      Boolean(values.leadId) !== Boolean(values.customerId) ||
-      (!values.leadId && !values.customerId && Boolean(values.industryKey)),
-    {
-      message:
-        'Choose a lead or customer, or select a service for a quote without a lead.',
-    },
-  )
+  .refine((values) => Boolean(values.leadId) !== Boolean(values.customerId) ||
+    (!values.leadId && !values.customerId && Boolean(values.industryKey)), {
+    message: 'Choose a lead or customer, or select a service for a quote without a lead.',
+  })
   .refine((values) => Boolean(values.leadId) || Boolean(values.industryKey), {
     message: 'Choose the service for this quotation.',
   });
@@ -58,30 +53,18 @@ export async function createStudioQuotation(input: unknown): Promise<{
     const s = await commercialServices('quotation.create', 'quotation');
     // A salesperson may prepare a quotation without project.create permission.
     // Projects are execution workspaces and have a separate conversion gate.
-    if (
-      !values.customerId &&
-      !(
-        s.allowed('customer.create', 'crm') ||
-        s.allowed('customer.create', 'quotation')
-      )
-    )
+    if (!values.customerId &&
+        !(s.allowed('customer.create', 'crm') ||
+          s.allowed('customer.create', 'quotation')))
       throw new DomainError('FORBIDDEN');
 
     const industries = await s.repository.industries();
     let lead: {
-      id: string;
-      lead_number: string;
-      phone: string;
-      email: string;
-      industry_id: string | null;
-      service_type: string;
-      requirements: unknown;
+      id: string; lead_number: string; phone: string; email: string;
+      industry_id: string | null; service_type: string; requirements: unknown;
     } | null = null;
     let existingCustomer: {
-      id: string;
-      display_name: string;
-      phone: string;
-      email: string;
+      id: string; display_name: string; phone: string; email: string;
       billing_address: unknown;
     } | null = null;
     let activeIndustry: (typeof industries)[number] | undefined;
@@ -89,97 +72,51 @@ export async function createStudioQuotation(input: unknown): Promise<{
     if (values.leadId) {
       // The stored CRM lead remains the source of category for lead quotes.
       if (!s.allowed('lead.view', 'crm'))
-        return {
-          ok: false,
-          message: 'Lead access is required to quote an enquiry.',
-        };
+        return { ok: false, message: 'Lead access is required to quote an enquiry.' };
       const { data, error } = await s.client
         .from('leads')
-        .select(
-          'id,lead_number,phone,email,industry_id,service_type,requirements',
-        )
+        .select('id,lead_number,phone,email,industry_id,service_type,requirements')
         .eq('organization_id', s.org)
         .eq('id', values.leadId)
         .maybeSingle();
       if (error || !data)
         return { ok: false, message: 'The selected lead is not available.' };
       lead = data;
-      const samePhone = Boolean(
-        lead.phone &&
-        values.phone &&
-        normalizedCustomerPhone(lead.phone) ===
-          normalizedCustomerPhone(values.phone),
-      );
-      const sameEmail = Boolean(
-        lead.email &&
-        values.email &&
-        lead.email.toLowerCase() === values.email.toLowerCase(),
-      );
+      const samePhone = Boolean(lead.phone && values.phone &&
+        normalizedCustomerPhone(lead.phone) === normalizedCustomerPhone(values.phone));
+      const sameEmail = Boolean(lead.email && values.email &&
+        lead.email.toLowerCase() === values.email.toLowerCase());
       if (!samePhone && !sameEmail)
-        return {
-          ok: false,
-          message: 'Customer contact details must match the selected lead.',
-        };
-      const assignedIndustry = industries.find(
-        (entry) => entry.id === lead?.industry_id && entry.status === 'active',
-      );
+        return { ok: false, message: 'Customer contact details must match the selected lead.' };
+      const assignedIndustry = industries.find((entry) =>
+        entry.id === lead?.industry_id && entry.status === 'active');
       const legacyCategory = !lead.industry_id
         ? resolveLeadCategory(lead, industries)
         : null;
-      activeIndustry =
-        assignedIndustry ??
-        industries.find(
-          (entry) => entry.status === 'active' && entry.key === legacyCategory,
-        );
+      activeIndustry = assignedIndustry ?? industries.find((entry) =>
+        entry.status === 'active' && entry.key === legacyCategory);
       if (!activeIndustry)
-        return {
-          ok: false,
-          message: 'Classify this lead in CRM before creating its quotation.',
-        };
+        return { ok: false, message: 'Classify this lead in CRM before creating its quotation.' };
     } else if (values.customerId) {
-      if (
-        !s.allowed('customer.view', 'crm') &&
-        !s.allowed('customer.view', 'quotation')
-      )
-        return {
-          ok: false,
-          message: 'Customer access is required to create a linked quotation.',
-        };
-      const { data, error } = await s.client
-        .from('customers')
-        .select(
-          'id,display_name,phone,email,billing_address,status,is_sales_prospect',
-        )
-        .eq('organization_id', s.org)
-        .eq('id', values.customerId)
-        .eq('status', 'active')
-        .eq('is_sales_prospect', false)
-        .maybeSingle();
+      if (!s.allowed('customer.view', 'crm') && !s.allowed('customer.view', 'quotation'))
+        return { ok: false, message: 'Customer access is required to create a linked quotation.' };
+      const { data, error } = await s.client.from('customers')
+        .select('id,display_name,phone,email,billing_address,status,is_sales_prospect')
+        .eq('organization_id', s.org).eq('id', values.customerId)
+        .eq('status', 'active').eq('is_sales_prospect', false).maybeSingle();
       if (error || !data)
-        return {
-          ok: false,
-          message: 'Select an active existing customer in this company.',
-        };
+        return { ok: false, message: 'Select an active existing customer in this company.' };
       existingCustomer = data;
-      activeIndustry = industries.find(
-        (entry) =>
-          entry.key === values.industryKey && entry.status === 'active',
-      );
+      activeIndustry = industries.find((entry) =>
+        entry.key === values.industryKey && entry.status === 'active');
       if (!activeIndustry)
-        return {
-          ok: false,
-          message: 'Choose an active service before creating the quotation.',
-        };
-      const address =
-        existingCustomer.billing_address &&
+        return { ok: false, message: 'Choose an active service before creating the quotation.' };
+      const address = existingCustomer.billing_address &&
         typeof existingCustomer.billing_address === 'object' &&
         !Array.isArray(existingCustomer.billing_address)
-          ? (existingCustomer.billing_address as Record<string, unknown>)
-          : {};
-      const customerCity =
-        typeof address.city === 'string' && address.city.trim().length > 0
-          ? address.city
-          : values.location;
+        ? existingCustomer.billing_address as Record<string, unknown> : {};
+      const customerCity = typeof address.city === 'string' && address.city.trim().length > 0
+        ? address.city : values.location;
       quoteClient = {
         ...values,
         clientName: existingCustomer.display_name,
@@ -188,22 +125,12 @@ export async function createStudioQuotation(input: unknown): Promise<{
         location: customerCity,
       };
       if (quoteClient.phone.trim().length < 3)
-        return {
-          ok: false,
-          message:
-            'Add a valid phone number to this customer record before quoting.',
-        };
+        return { ok: false, message: 'Add a valid phone number to this customer record before quoting.' };
     } else {
-      activeIndustry = industries.find(
-        (entry) =>
-          entry.key === values.industryKey && entry.status === 'active',
-      );
+      activeIndustry = industries.find((entry) =>
+        entry.key === values.industryKey && entry.status === 'active');
       if (!activeIndustry)
-        return {
-          ok: false,
-          message:
-            'Choose an active service before preparing a quote without a lead.',
-        };
+        return { ok: false, message: 'Choose an active service before preparing a quote without a lead.' };
     }
     if (!activeIndustry)
       return { ok: false, message: 'Choose a valid quotation source.' };
@@ -243,8 +170,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
     // Fail before creating customer records if the quote-only prospect SQL
     // is not installed or the signed-in actor lacks quotation permission.
     const checkProspect = s.client.rpc.bind(s.client) as unknown as (
-      name: string,
-      args: Record<string, string>,
+      name: string, args: Record<string, string>,
     ) => Promise<{ data: boolean | null; error: { message: string } | null }>;
     const prospectReady = await checkProspect('quotation_prospect_ready', {
       p_organization_id: s.org,
@@ -252,8 +178,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
     if (prospectReady.error || prospectReady.data !== true)
       return {
         ok: false,
-        message:
-          'Quote-only prospect support is not ready. ' +
+        message: 'Quote-only prospect support is not ready. ' +
           'Apply the latest quotation database migration before creating a quote.',
       };
 
@@ -272,81 +197,59 @@ export async function createStudioQuotation(input: unknown): Promise<{
     // automatically on the server, regardless of which browser was used.
     // Names alone cannot prove identity; confirmed phone/email must match.
     let matches: {
-      id: string;
-      display_name: string;
-      phone: string;
-      email: string;
-      created_at: string;
+      id: string; display_name: string; phone: string; email: string; created_at: string;
     }[] = [];
     if (!existingCustomer) {
-      const escapedName = quoteClient.clientName
-        .replaceAll('\\', '\\\\')
-        .replaceAll('%', '\\%')
-        .replaceAll('_', '\\_');
-      const escapedEmail = quoteClient.email
-        .replaceAll('\\', '\\\\')
-        .replaceAll('%', '\\%')
-        .replaceAll('_', '\\_');
-      const phoneKey = normalizedCustomerPhone(quoteClient.phone);
-      const lookups = [
-        s.client
-          .from('customers')
+    const escapedName = quoteClient.clientName
+      .replaceAll('\\', '\\\\')
+      .replaceAll('%', '\\%')
+      .replaceAll('_', '\\_');
+    const escapedEmail = quoteClient.email
+      .replaceAll('\\', '\\\\')
+      .replaceAll('%', '\\%')
+      .replaceAll('_', '\\_');
+    const phoneKey = normalizedCustomerPhone(quoteClient.phone);
+    const lookups = [
+      s.client.from('customers')
+        .select('id,display_name,phone,email,created_at')
+        .eq('organization_id', s.org)
+        .eq('status', 'active')
+        .ilike('display_name', escapedName)
+        .limit(250),
+      ...(phoneKey.length >= 4
+        ? [s.client.from('customers')
           .select('id,display_name,phone,email,created_at')
           .eq('organization_id', s.org)
           .eq('status', 'active')
-          .ilike('display_name', escapedName)
-          .limit(250),
-        ...(phoneKey.length >= 4
-          ? [
-              s.client
-                .from('customers')
-                .select('id,display_name,phone,email,created_at')
-                .eq('organization_id', s.org)
-                .eq('status', 'active')
-                // Broad indexed-by-suffix candidate search, then exact normalization.
-                // Also matches +91 and spaced legacy mobile numbers.
-                .ilike('phone', '%' + phoneKey.slice(-4))
-                .limit(300),
-            ]
-          : []),
-        ...(quoteClient.email
-          ? [
-              s.client
-                .from('customers')
-                .select('id,display_name,phone,email,created_at')
-                .eq('organization_id', s.org)
-                .eq('status', 'active')
-                .ilike('email', escapedEmail)
-                .limit(100),
-            ]
-          : []),
-      ];
-      const results = await Promise.all(lookups);
-      if (results.some((result) => result.error))
-        return {
-          ok: false,
-          message: 'Could not verify the client identity. Please retry.',
-        };
+          // Broad indexed-by-suffix candidate search, then exact normalization.
+          // Also matches +91 and spaced legacy mobile numbers.
+          .ilike('phone', '%' + phoneKey.slice(-4))
+          .limit(300)]
+        : []),
+      ...(quoteClient.email
+        ? [s.client.from('customers')
+          .select('id,display_name,phone,email,created_at')
+          .eq('organization_id', s.org)
+          .eq('status', 'active')
+          .ilike('email', escapedEmail)
+          .limit(100)]
+        : []),
+    ];
+    const results = await Promise.all(lookups);
+    if (results.some((result) => result.error))
+      return { ok: false, message: 'Could not verify the client identity. Please retry.' };
 
-      matches = [
-        ...new Map(
-          results
-            .flatMap((result) => result.data ?? [])
-            .filter(
-              (candidate) =>
-                contactMatches(candidate, quoteClient) &&
-                (!lead ||
-                  contactMatches(candidate, {
-                    phone: lead.phone,
-                    email: lead.email,
-                  })),
-            )
-            .map((candidate) => [candidate.id, candidate]),
-        ).values(),
-      ].sort(
-        (a, b) =>
-          a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id),
-      );
+    matches = [...new Map(
+      results.flatMap((result) => result.data ?? [])
+        .filter((candidate) =>
+          contactMatches(candidate, quoteClient) &&
+          (!lead || contactMatches(candidate, {
+            phone: lead.phone,
+            email: lead.email,
+          })))
+        .map((candidate) => [candidate.id, candidate]),
+    ).values()].sort((a, b) =>
+      a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
     }
 
     // Prefer the CRN already attached to a previous quote from this exact lead.
@@ -361,36 +264,27 @@ export async function createStudioQuotation(input: unknown): Promise<{
         p_lead_id: lead.id,
       });
       if (!linked.error && Array.isArray(linked.data)) {
-        leadQuotationProjectIds.push(
-          ...linked.data.flatMap((item: unknown) =>
-            item !== null &&
-            typeof item === 'object' &&
-            !Array.isArray(item) &&
-            'project_id' in item &&
-            typeof item.project_id === 'string'
-              ? [item.project_id]
-              : [],
-          ),
-        );
+        leadQuotationProjectIds.push(...linked.data.flatMap((item: unknown) =>
+          item !== null && typeof item === 'object' && !Array.isArray(item) &&
+          'project_id' in item && typeof item.project_id === 'string'
+            ? [item.project_id]
+            : []));
         const firstProjectId = leadQuotationProjectIds[0];
         if (firstProjectId) {
-          const { data: previousProject } = await s.client
-            .from('projects')
+          const { data: previousProject } = await s.client.from('projects')
             .select('customer_id')
             .eq('organization_id', s.org)
             .eq('id', firstProjectId)
             .maybeSingle();
-          const previousCustomer = matches.find(
-            (item) => item.id === previousProject?.customer_id,
-          );
+          const previousCustomer = matches.find((item) =>
+            item.id === previousProject?.customer_id);
           if (previousCustomer) leadCustomerId = previousCustomer.id;
         }
       }
     }
 
     let createdCustomer = false;
-    let customerId =
-      existingCustomer?.id || leadCustomerId || matches[0]?.id || '';
+    let customerId = existingCustomer?.id || leadCustomerId || matches[0]?.id || '';
     if (!customerId) {
       customerId = randomUUID();
       await s.commercial.saveEntity(s.org, 'customers', {
@@ -415,13 +309,8 @@ export async function createStudioQuotation(input: unknown): Promise<{
     let projectId = '';
     // The customer supplies no project name at quotation time. Use a stable,
     // lead-based internal reference to satisfy the existing quotation FK.
-    const prospectName = [
-      'Quotation',
-      activeIndustry.name,
-      lead?.lead_number || customerId.slice(0, 8),
-    ]
-      .join(' · ')
-      .slice(0, 200);
+    const prospectName = ['Quotation', activeIndustry.name,
+      lead?.lead_number || customerId.slice(0, 8)].join(' · ').slice(0, 200);
     // Quote alternatives for the same lead share one hidden pre-sale reference.
     // Never pick an unrelated customer project or a confirmed execution job.
     if (leadQuotationProjectIds.length) {
@@ -437,11 +326,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
         .order('created_at', { ascending: true })
         .limit(1);
       if (error)
-        return {
-          ok: false,
-          message:
-            'Could not check existing quotation requirements. Try again.',
-        };
+        return { ok: false, message: 'Could not check existing quotation requirements. Try again.' };
       projectId = existing?.[0]?.id ?? '';
     }
     if (!projectId) {
@@ -451,9 +336,8 @@ export async function createStudioQuotation(input: unknown): Promise<{
         name: string,
         args: Record<string, string | boolean>,
       ) => Promise<{ data: string | null; error: { message: string } | null }>;
-      const { data: prospectId, error: prospectError } = await createProspect(
-        'quotation_prospect_project_create',
-        {
+      const { data: prospectId, error: prospectError } =
+        await createProspect('quotation_prospect_project_create', {
           p_organization_id: s.org,
           p_customer_id: customerId,
           p_industry_id: activeIndustry.id,
@@ -461,21 +345,14 @@ export async function createStudioQuotation(input: unknown): Promise<{
           p_project_type: values.projectType,
           p_site_city: quoteClient.location,
           p_notes: [
-            quoteClient.plotSize
-              ? 'Plot / project size: ' + quoteClient.plotSize
-              : '',
+            quoteClient.plotSize ? 'Plot / project size: ' + quoteClient.plotSize : '',
             values.notes,
-          ]
-            .filter(Boolean)
-            .join('\\n'),
+          ].filter(Boolean).join('\\n'),
           p_new_customer: createdCustomer,
-        },
-      );
+        });
       if (prospectError || !prospectId)
         return {
-          ok: false,
-          message:
-            'Could not prepare the quote-only sales reference. ' +
+          ok: false, message: 'Could not prepare the quote-only sales reference. ' +
             'Confirm the latest quotation database migration is installed.',
         };
       projectId = prospectId;
@@ -488,23 +365,19 @@ export async function createStudioQuotation(input: unknown): Promise<{
       // If deployment has not run the migration yet, never pretend the
       // association was saved; the quotation itself remains accessible.
       const rpc = s.client.rpc.bind(s.client) as unknown as (
-        fn: string,
-        args: Record<string, string | boolean>,
+        fn: string, args: Record<string, string | boolean>,
       ) => Promise<{ error: { message: string } | null }>;
       const provisional = createdCustomer || createdProspect;
       const linked = await rpc(
-        provisional ? 'lead_quotation_link_provisional' : 'lead_quotation_link',
-        {
+        provisional ? 'lead_quotation_link_provisional' : 'lead_quotation_link', {
           p_organization_id: s.org,
           p_lead_id: values.leadId,
           p_quotation_id: quotationId,
           p_project_id: projectId,
-          ...(provisional
-            ? {
-                p_new_customer: createdCustomer,
-                p_new_project: createdProspect,
-              }
-            : {}),
+          ...(provisional ? {
+            p_new_customer: createdCustomer,
+            p_new_project: createdProspect,
+          } : {}),
         },
       );
       return linked.error
@@ -539,8 +412,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
     revalidatePath('/dashboard/crm/leads');
     return {
       ok: true,
-      message:
-        'Quotation saved. You can edit, preview or share it.' + linkWarning,
+      message: 'Quotation saved. You can edit, preview or share it.' + linkWarning,
       revisionId,
     };
   } catch (error) {
