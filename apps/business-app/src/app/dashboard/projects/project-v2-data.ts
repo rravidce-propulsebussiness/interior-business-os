@@ -514,7 +514,8 @@ export async function projectWorkspace(id:string,autoSynced=false):Promise<Works
    return imported??null;
   const base=frozenStageRequirements[stage.instance_code]??defaultStageRequirements(stage.instance_code);
   return {stageId:stage.id,materials:imported?.materials??base.materials,
-   reports:imported?.reports??base.reports,flow:ordered,guides:imported?.guides??base.guides??[]};
+   reports:imported?.reports??base.reports,flow:ordered,
+   guides:imported?.guides?.length?imported.guides:base.guides??[]};
  }).filter((item):item is StageGuidance=>item!==null);
   // Explicit links saved on the quote win; otherwise payment stages are matched
  // to the quoted construction stages by name (never guessed beyond that).
