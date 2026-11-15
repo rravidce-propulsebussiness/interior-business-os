@@ -10,8 +10,9 @@ export const companyWorkStep=z.object({
  name:z.string().trim().min(2).max(180),
  area:z.string().regex(/^[A-Z][A-Z_]*$/).max(45),
  guideText:z.string().trim().max(1800).optional(),
- guideVideoUrl:z.string().trim().max(1000).optional().refine(value=>!value||/^https:\/\//i.test(value),
-  'Guide video links must use https'),
+ guideVideoUrl:z.string().trim().max(1000).optional().refine(value=>!value||(()=>{
+  try{return new URL(value).protocol==='https:';}catch{return false;}
+ })(),'Guide video links must be valid https URLs'),
 }).strict().superRefine((item,ctx)=>{
  if(!validAreas.has(item.area))ctx.addIssue({code:'custom',message:'Unknown construction work area'});
 });
