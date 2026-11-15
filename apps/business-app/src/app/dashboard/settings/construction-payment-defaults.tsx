@@ -1,7 +1,7 @@
 'use client';
 
 import {useActionState,useEffect,useState} from 'react';
-import {inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
+import {companyWorkAreaLabel,inferCompanyWorkAreaCode,type CompanyConstructionPaymentRow,type CompanyWorkStep} from '@business-os/core/company-construction-defaults';
 import {saveConstructionPaymentDefaults} from './payment-default-actions';
 
 type Kind=CompanyWorkStep['kind'];
@@ -57,6 +57,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const areas=row.areas?.length?row.areas:[...new Set(steps.map(item=>item.area))];
  const [kind,setKind]=useState<Kind>('work');
  const [name,setName]=useState('');
+ const [selectedAreas,setSelectedAreas]=useState<string[]>([]);
  const [checkRef,setCheckRef]=useState('');
  const [error,setError]=useState('');
  const [after,setAfter]=useState<number|null>(null);
@@ -79,13 +80,15 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
  const workAreaFor=(title:string,position:number):string|null=>{
   const inferred=inferCompanyWorkAreaCode(title);
   if(inferred&&areas.includes(inferred))return inferred;
-  if(inferred&&!areas.length)return inferred;
-  if(inferred&&!areas.includes(inferred))return null;
-  return steps[position]?.area??steps[position+1]?.area??areas[0]??inferCompanyWorkAreaCode(row.name);
+  // An item name can describe work spanning a different part of a linked
+  // milestone. Keep it assignable to the milestone's selected area(s).
+  return steps[position]?.area??steps[position+1]?.area??areas[0]??inferred??inferCompanyWorkAreaCode(row.name);
  };
  const editRows=(next:CompanyWorkStep[])=>{onChange({...row,steps:next});setError('');};
  const add=(position:number)=>{
-  setAfter(position);setSequence(String(position+2));setName('');setKind('work');setCheckRef('');setError('');
+  setAfter(position);setSequence(String(position+2));setName('');setKind('work');setCheckRef('');
+  const nearby=steps[position]?.area??steps[position+1]?.area??areas[0];
+  setSelectedAreas(nearby?[nearby]:[]);setError('');
  };
  const save=()=>{
   const title=kind==='qc'?current?.name:name.trim().replace(/\s+/g,' ');
@@ -102,22 +105,28 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
   if(!Number.isInteger(insertAt)||insertAt<0||insertAt>steps.length){
    setError('Enter a sequence number from 1 to '+(steps.length+1)+'.');return;
   }
-  const chosen=kind==='qc'?current!.area:workAreaFor(title,insertAt-1);
-  if(!chosen){
-   setError('This work belongs to another construction stage. Add it under the corresponding payment milestone.');return;
+  const chosenAreas=kind==='qc'?[current!.area]:
+   selectedAreas.length?selectedAreas:[workAreaFor(title,insertAt-1)].filter((value):value is string=>Boolean(value));
+  if(!chosenAreas.length){
+   setError('Choose at least one construction stage for this item.');return;
   }
-  const next:CompanyWorkStep={kind,name:title,area:chosen};
-  if(steps.some(item=>item.area===next.area&&item.name.toLowerCase()===next.name.toLowerCase()&&
-   (item.kind===next.kind||(isCheck(item)&&isCheck(next))))){
-   setError('This item already exists in the payment stage.');return;
+  if(areas.length&&chosenAreas.some(area=>!areas.includes(area))){
+   setError('Select construction stages linked to this payment milestone.');return;
   }
-  const updated=[...steps];updated.splice(insertAt,0,next);
+  const nextItems:CompanyWorkStep[]=chosenAreas.map(area=>({kind,name:title,area}));
+  const duplicate=nextItems.some(next=>steps.some(item=>item.area===next.area&&
+   item.name.toLowerCase()===next.name.toLowerCase()&&
+   (item.kind===next.kind||(isCheck(item)&&isCheck(next)))));
+  if(duplicate){
+   setError('This item already exists in one of the selected construction stages.');return;
+  }
+  const updated=[...steps];updated.splice(insertAt,0,...nextItems);
   if(!validQcOrder(updated)){
    setError('Company QC must remain after its linked site check/test.');return;
   }
-  onChange({...row,steps:updated,areas:areas.includes(chosen)?row.areas:[...areas,chosen]});
+  onChange({...row,steps:updated,areas:[...new Set([...areas,...chosenAreas])]});
   if(updated.length>limit)setShowAll(true);
-  setError('');setAfter(null);setSequence('1');setName('');setCheckRef('');
+  setError('');setAfter(null);setSequence('1');setName('');setCheckRef('');setSelectedAreas([]);
  };
  const startEdit=(position:number)=>{
   setEditing(position);setEditDraft(steps[position]?.name??'');setError('');
@@ -317,6 +326,16 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
       value={sequence} aria-label="New item sequence number"
       onChange={event=>setSequence(event.target.value)}/>
     </label>
+    {kind!=='qc'&&<fieldset className="us-item-area-choices">
+     <legend>Use in construction stages</legend>
+     {areas.length?areas.map(area=><label key={area}>
+      <input type="checkbox" checked={selectedAreas.includes(area)}
+       onChange={event=>setSelectedAreas(current=>event.target.checked
+        ?[...new Set([...current,area])]:current.filter(value=>value!==area))}/>
+      <span>{companyWorkAreaLabel(row,area)}</span>
+     </label>):<small>Stage will be inferred from the item name.</small>}
+     <small>Select one or more stages linked to this payment milestone.</small>
+    </fieldset>}
     {kind==='qc'?<label>QC for which earlier site check/test?
      <select value={current?link(current):''} onChange={e=>setCheckRef(e.target.value)}
       aria-label="QC linked site check">
@@ -329,7 +348,7 @@ function DefaultPaymentStage({row,index,canEdit,expanded,onToggle,onChange,onRem
        aria-label="New default work item name" onChange={e=>setName(e.target.value)}/>
      </label>}
     <div className="us-payment-step-form-actions">
-     <button type="button" className="us-payment-save-item" onClick={save}>Add {labels[kind]}</button>
+     <button type="button" className="us-payment-save-item" onClick={save}>Add {labels[kind]}{kind!=='qc'&&selectedAreas.length>1?' to stages':''}</button>
      <button type="button" onClick={()=>{setAfter(null);setError('');}}>Cancel</button>
     </div>
    </div>}
