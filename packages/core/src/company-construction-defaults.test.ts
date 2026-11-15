@@ -65,6 +65,7 @@ describe('editable work inside company payment defaults',()=>{
     {kind:'work',name:'Excavation',area:'FOUNDATION'},
    ],
   }]);
+  expect(companyConstructionPaymentRows.parse(defaults)).toEqual(defaults);
   const result=applyCompanyWorkDefaults(payments,defaults);
   expect(result.flow['0']?.[0]).toEqual({
    kind:'payment',code:'FOUNDATION',index:0,
