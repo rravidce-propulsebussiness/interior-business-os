@@ -7,7 +7,7 @@ import { NewProjectForCustomer } from './new-project-for-customer';
 
 export function ProjectsDirectory({projects,customers=[],quotesByCustomer={},canCreateProject=false,
  canCreateQuote=false,clientName='',clientId=''}:{
- projects:ProjectEntry[];customers?:{id:string;name:string}[];
+ projects:ProjectEntry[];customers?:{id:string;name:string;phone?:string;email?:string;location?:string}[];
  quotesByCustomer?:Record<string,{revisionId:string;number:string;status:string}[]>;
  canCreateProject?:boolean;canCreateQuote?:boolean;
  clientName?:string;clientId?:string;
@@ -58,9 +58,8 @@ export function ProjectsDirectory({projects,customers=[],quotesByCustomer={},can
    <div className="pv2-blank pv2-directory-empty"><OwnerIcon name="projects" size={36}/>
     <h2>{projects.length?'No matching projects':'No projects yet'}</h2>
     <p>{projects.length?'Try another status or search term.':
-     clientId?'This customer has no delivery projects yet. Start from a quotation above.':
-     'Start from a customer quotation. Projects are created from the accepted quote and agreement.'}</p>
-    <Link href="/dashboard/quotations/new" className="pv2-button pv2-primary">Create quotation</Link>
+     clientId?'This customer has no delivery projects yet. Choose Create Project to review their details and quotation options.':
+     'Choose Create Project to review an existing customer or start a quotation for a new customer.'}</p>
    </div>}
  </main>;
 }

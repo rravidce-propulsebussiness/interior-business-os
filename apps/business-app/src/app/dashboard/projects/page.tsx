@@ -18,11 +18,16 @@ export default async function ProjectsPage({searchParams}:{
   canAccess(s.context,{organizationId:s.org,permission:'customer.view',moduleKey:'quotation'});
  const services=mayCreate&&mayReadCustomers?await pageServices():null;
  const customerResult=services
-  ?await services.client.from('customers').select('id,display_name')
+  ?await services.client.from('customers').select('id,display_name,phone,email,billing_address')
     .eq('organization_id',s.org).eq('status','active').eq('is_sales_prospect',false)
     .order('display_name').limit(250):null;
  const customers=(customerResult&&!customerResult.error?customerResult.data??[]:[])
-  .map(c=>({id:c.id,name:c.display_name||'Customer'}));
+  .map(c=>{
+   const address=c.billing_address&&typeof c.billing_address==='object'&&!Array.isArray(c.billing_address)
+    ?c.billing_address as Record<string,unknown>:{};
+   return {id:c.id,name:c.display_name||'Customer',phone:c.phone||'',email:c.email||'',
+    location:typeof address.city==='string'?address.city:''};
+  });
  const mayCreateQuote=canAccess(s.context,{organizationId:s.org,permission:'quotation.create',moduleKey:'quotation'});
  const mayReadQuotes=canAccess(s.context,{organizationId:s.org,permission:'quotation.view',moduleKey:'quotation'});
  const quoteResult=services&&mayReadQuotes&&customers.length
