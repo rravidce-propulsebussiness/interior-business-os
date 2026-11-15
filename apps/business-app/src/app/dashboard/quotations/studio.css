@@ -1882,18 +1882,6 @@
 
 
 
-/* Preview is accessible after each section without recreating a top quote card. */
-.qs-studio-bottom-actions{display:flex;justify-content:flex-end;margin:13px 0 20px;}
-.qs-studio-bottom-actions .qs-btn{
-  border:1px solid #ffd3b3;border-radius:11px;padding:12px 20px;
-  color:white;background:linear-gradient(95deg,#ff8229,#f46a18);
-  font-size:12px;font-weight:850;min-height:43px;
-}
-@media(max-width:650px){
-  .qs-studio-bottom-actions{margin:13px 0;}
-  .qs-studio-bottom-actions .qs-btn{width:100%;}
-}
-
 /* Customer-driven Custom Quote: responsive, single saved SFT rate, no repeated material rows. */
 .qs-custom-price-workspace{display:grid;gap:17px;min-width:0}
 .qs-custom-intro{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:20px;
