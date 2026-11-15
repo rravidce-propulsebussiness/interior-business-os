@@ -640,7 +640,7 @@ describe('save resiliency and floor auto-inheritance', () => {
   const action = file('./construction-actions.ts');
 
   it('accepts Save taps and reports invalid row fields rather than disabling the button', () => {
-    expect(builder).toContain('disabled={pending}');
+    expect(builder).toContain('disabled={pending||(saved&&!dirty)}');
     expect(builder).toContain('if(validationMessage)');
     expect(builder).toContain('setMessage(validationMessage)');
     expect(builder).toContain('setSavedVersion(data.version??savedVersion+1)');
