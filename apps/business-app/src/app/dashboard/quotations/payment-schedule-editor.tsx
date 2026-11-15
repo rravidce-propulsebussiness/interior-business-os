@@ -133,6 +133,9 @@ export function PaymentScheduleEditor({
   const parsedDefaults =
     companyConstructionPaymentRows.safeParse(companyDefaults);
   const defaultCompanyRows = parsedDefaults.success ? parsedDefaults.data : [];
+  // Construction payment and work templates have one source of truth: company
+  // Payment Settings. Draft quotes may save a snapshot, but cannot edit it here.
+  const canEditSchedule = editable && industry !== 'construction';
   const initialRows = readPlan(
     initial.terms,
     industry,
@@ -654,13 +657,19 @@ export function PaymentScheduleEditor({
               ? 'Payment schedule saved in this quotation.'
               : savedPlan
                 ? 'You have unsaved changes. Save to update the customer PDF.'
-                : editable
-                  ? 'Not saved yet — these percentages are suggestions. Save to include them in the PDF.'
-                  : 'No payment schedule was saved with this quotation.'}
+                : editable &&
+                    industry === 'construction' &&
+                    defaultCompanyRows.length
+                  ? 'Company payment and work settings are ready to save into this quotation.'
+                  : editable && industry === 'construction'
+                    ? 'Set the company payment schedule in Settings before saving this quotation.'
+                    : editable
+                      ? 'Not saved yet — these percentages are suggestions. Save to include them in the PDF.'
+                      : 'No payment schedule was saved with this quotation.'}
         </span>
       </div>
 
-      {editable && (
+      {canEditSchedule && (
         <div className="qs-payment-actions">
           <button
             type="button"
@@ -686,7 +695,7 @@ export function PaymentScheduleEditor({
       {industry === 'construction' &&
         !floorNames.length &&
         !savedPlan &&
-        editable && (
+        canEditSchedule && (
           <p className="qs-payment-footnote">
             Save the floor-wise SFT quotation scope first to generate slab,
             brickwork and finishing payments for the actual floors. You can
@@ -705,17 +714,18 @@ export function PaymentScheduleEditor({
               <li
                 className="qs-payment-row"
                 key={index}
-                draggable={editable && !pending}
+                draggable={canEditSchedule && !pending}
                 onDragStart={(event) => {
+                  if (!canEditSchedule) return;
                   dragging.current = index;
                   event.dataTransfer.effectAllowed = 'move';
                 }}
                 onDragOver={(event) => {
-                  if (editable) event.preventDefault();
+                  if (canEditSchedule) event.preventDefault();
                 }}
                 onDrop={(event) => {
                   event.preventDefault();
-                  if (dragging.current !== null) {
+                  if (canEditSchedule && dragging.current !== null) {
                     const from = dragging.current;
                     reorderMilestones(from, index);
                   }
@@ -728,7 +738,7 @@ export function PaymentScheduleEditor({
                 <button
                   type="button"
                   className="qs-payment-grip"
-                  disabled={!editable || pending || index === 0}
+                  disabled={!canEditSchedule || pending || index === 0}
                   title="Move up one stage (or drag the row to reorder)"
                   aria-label={'Move milestone ' + (index + 1) + ' up'}
                   onClick={() => reorderMilestones(index, index - 1)}
@@ -752,7 +762,7 @@ export function PaymentScheduleEditor({
                     aria-label={'Milestone ' + (index + 1)}
                     value={row.name}
                     maxLength={100}
-                    disabled={!editable}
+                    disabled={!canEditSchedule}
                     placeholder="Enter milestone"
                     onChange={(event) =>
                       update(index, 'name', event.target.value)
@@ -767,7 +777,7 @@ export function PaymentScheduleEditor({
                     <div className="qs-payment-linked">
                       Covers {row.stageCodes.length} quote-defined work stage
                       {row.stageCodes.length === 1 ? '' : 's'}.
-                      {editable &&
+                      {canEditSchedule &&
                         row.name.toLowerCase().includes('brickwork') &&
                         rows[index + 1]?.name
                           .toLowerCase()
@@ -800,7 +810,7 @@ export function PaymentScheduleEditor({
                       min="0.01"
                       max="100"
                       value={row.percent}
-                      disabled={!editable}
+                      disabled={!canEditSchedule}
                       onChange={(event) =>
                         update(index, 'percent', event.target.value)
                       }
@@ -828,7 +838,7 @@ export function PaymentScheduleEditor({
                           .map((item) => item.code),
                     )}
                     requirements={visibleRequirements}
-                    editable={editable}
+                    editable={canEditSchedule}
                     onChange={(steps, changed) =>
                       changeWorkflow(index, steps, changed)
                     }
@@ -836,7 +846,7 @@ export function PaymentScheduleEditor({
                     onLinkStage={(code) => linkWorkStage(index, code)}
                   />
                 )}
-                {editable && (
+                {canEditSchedule && (
                   <button
                     type="button"
                     className="qs-payment-remove"
@@ -906,7 +916,7 @@ export function PaymentScheduleEditor({
         </div>
       </div>
 
-      {editable && (
+      {editable && (industry !== 'construction' || !savedPlan) && (
         <button
           type="button"
           className="qs-payment-save"
@@ -925,7 +935,11 @@ export function PaymentScheduleEditor({
           >
             <path d="M5 3h12l4 4v14H3V3h2Zm2 0v7h10V3M7 21v-8h10v8" />
           </svg>
-          {pending ? 'Saving Payment Schedule…' : 'Save Payment Schedule'}
+          {pending
+            ? 'Saving Payment Schedule…'
+            : industry === 'construction'
+              ? 'Save Company Schedule to Quotation'
+              : 'Save Payment Schedule'}
         </button>
       )}
       {feedback?.type === 'success' && (
