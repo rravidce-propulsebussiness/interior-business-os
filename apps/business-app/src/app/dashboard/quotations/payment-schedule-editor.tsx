@@ -351,8 +351,8 @@ export function PaymentScheduleEditor({
           </svg>
         </span>
         <div>
-          <h2>Payment Schedule</h2>
-          <p>Each payment stage has one price and one + Add workflow. Add work, material, check, test or QC in site order.</p>
+          <h2>Payments &amp; Work</h2>
+          <p>Each payment milestone carries its amount and linked work sequence. Construction defaults from Settings populate new quotations automatically.</p>
         </div>
       </div>
 
@@ -389,7 +389,7 @@ export function PaymentScheduleEditor({
         </p>}
       <div className="qs-payment-stages">
         <div className="qs-payment-table-head" aria-hidden="true">
-          <span>Stage / Milestone</span><span>%</span><span>Amount</span>
+          <span>Payment &amp; work milestone</span><span>%</span><span>Amount</span>
         </div>
         {rows.length ? (
           <ol className="qs-payment-list">
@@ -414,11 +414,13 @@ export function PaymentScheduleEditor({
                   <span aria-hidden="true">⠿</span>
                 </button>
                 <div className="qs-payment-stage-name">
-                  <label className="qs-payment-mobile-label" htmlFor={'qs-pay-stage-' + index}>{'Stage '+(index+1)+' · Payment / Fee'}</label>
+                  <label className="qs-payment-mobile-label" htmlFor={'qs-pay-stage-' + index}>{'Stage '+(index+1)+' · '+(industry==='construction'?'Work milestone':'Payment / Fee')}</label>
                   <input id={'qs-pay-stage-' + index} aria-label={'Milestone ' + (index + 1)}
                     value={row.name} maxLength={100} disabled={!editable}
                     placeholder="Enter milestone"
                     onChange={(event) => update(index, 'name', event.target.value)} />
+                  {industry==='construction'&&row.stageCodes.length>0&&
+                   <span className="qs-work-milestone-badge">Work milestone</span>}
                   {row.stageCodes.length>0&&<div className="qs-payment-linked">
                     Covers {row.stageCodes.length} quote-defined work stage{row.stageCodes.length===1?'':'s'}.
                     {editable&&row.name.toLowerCase().includes('brickwork')&&
