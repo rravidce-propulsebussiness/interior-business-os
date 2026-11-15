@@ -328,7 +328,8 @@ describe('automatic CRN reuse from selected lead', () => {
     expect(action).toContain('customerId: z.uuid().optional()');
     expect(action).toContain("await s.client.rpc('lead_quotation_list'");
     expect(action).toContain('contactMatches(candidate, quoteClient)');
-    expect(action).toContain('phone: lead?.phone');
+    expect(action).toContain('phone: lead.phone');
+    expect(action).toContain('(!lead || contactMatches(candidate, {');
     expect(action).toContain('let customerId = existingCustomer?.id || leadCustomerId || matches[0]?.id ||');
     expect(action).toContain('if (!customerId) {');
   });
