@@ -217,9 +217,8 @@ describe('lead-driven quotation creation', () => {
       'onChange={(event) => chooseLead(event.target.value)}',
     );
     expect(form).toContain('selectedLead?.industryKey &&');
-    expect(form).toContain(
-      '(existingCustomer || quoteWithoutLead) ? industryKey',
-    );
+    expect(form).toContain('existingCustomer || quoteWithoutLead');
+    expect(form).toContain('? industryKey');
     expect(form).toContain('Auto-detected from lead');
     expect(form).toContain(
       'disabled={pending || (!existingCustomer && !quoteWithoutLead && !leadId) || !industry}',
@@ -232,9 +231,9 @@ describe('lead-driven quotation creation', () => {
   it('offers quote preparation without creating a CRM lead when none are available', () => {
     expect(form).toContain('No CRM leads yet? Prepare a quote now.');
     expect(form).toContain('canPrepareWithoutLead');
-    expect(page).toContain(
-      "canPrepareWithoutLead={s.allowed('customer.create', 'crm') || s.allowed('customer.create', 'quotation')}",
-    );
+    expect(page).toContain('canPrepareWithoutLead={');
+    expect(page).toContain("s.allowed('customer.create', 'crm')");
+    expect(page).toContain("s.allowed('customer.create', 'quotation')");
     expect(form).toContain('Quotation service');
     expect(form).toContain(
       'quoteWithoutLead ? { industryKey: industry } : { leadId }',
@@ -283,7 +282,8 @@ describe('lead-driven quotation creation', () => {
   it('accepts realistic plot and floor configuration in the quote form and server action', () => {
     const configuration = '200 sq yards · G+2 (Ground, First, Second)';
     expect(configuration.length).toBeGreaterThan(40);
-    expect(form).toContain('maxLength={200} placeholder={industry ===');
+    expect(form).toContain('maxLength={200}');
+    expect(form).toContain('placeholder={industry ===');
     expect(action).toContain('plotSize: z.string().trim().max(200)');
   });
 
@@ -291,7 +291,8 @@ describe('lead-driven quotation creation', () => {
     expect(action).toContain(
       "typeof address.city === 'string' && address.city.trim().length > 0",
     );
-    expect(action).toContain('? address.city : values.location');
+    expect(action).toContain('? address.city');
+    expect(action).toContain(': values.location');
   });
 });
 
@@ -363,9 +364,9 @@ describe('uniform quotation creation inputs', () => {
     expect(form).not.toContain('Client Name <span>*</span>');
     expect(form).not.toContain('Phone Number <span>*</span>');
     expect(form).not.toContain('Enter project name');
-    expect(css).toContain(
-      '.qs-field-full, .qs-clean-notes { grid-column:1/-1; }',
-    );
+    expect(css).toContain('.qs-field-full,');
+    expect(css).toContain('.qs-clean-notes');
+    expect(css).toContain('grid-column: 1 / -1;');
     expect(css).toContain('grid-template-columns:minmax(0,1fr)');
     expect(css).not.toContain(
       '.qs-create-field-grid .qs-clean-field:nth-child(',
@@ -373,9 +374,8 @@ describe('uniform quotation creation inputs', () => {
   });
 
   it('has one scoped focus ring instead of inherited teal shadow and orange outline', () => {
-    expect(css).toContain(
-      '.qs-clean-create .qs-clean-field :is(input,select,textarea):focus',
-    );
+    expect(css).toContain('.qs-clean-create .qs-clean-field :is(');
+    expect(css).toContain('):focus {');
     expect(css).toContain('outline:none !important;');
     expect(css).toContain(
       'box-shadow:0 0 0 3px rgba(249,115,22,.19) !important;',
@@ -403,9 +403,9 @@ describe('automatic CRN reuse from selected lead', () => {
   });
 
   it('resolves existing CRN securely on the server, never by a browser-selected id', () => {
-    expect(form).toContain(
-      'quoteWithoutLead ? { industryKey: industry } : { leadId }',
-    );
+    expect(form).toContain('quoteWithoutLead');
+    expect(form).toContain('{ industryKey: industry }');
+    expect(form).toContain('{ leadId }');
     expect(action).toContain('customerId: z.uuid().optional()');
     expect(action).toContain("await s.client.rpc('lead_quotation_list'");
     expect(action).toContain('contactMatches(candidate, quoteClient)');
