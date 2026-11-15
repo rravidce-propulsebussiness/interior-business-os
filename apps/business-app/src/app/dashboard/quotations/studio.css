@@ -2108,7 +2108,418 @@ Total output lines: 5112
   .qs-build-package-rate strong {
     font-size: 13px;
   }
-  .qs-build-floor-option …4595 tokens truncated…s-link {
+  .qs-build-floor-option {
+    flex: 1;
+    padding: 9px 10px;
+    min-width: 64px;
+  }
+  .qs-build-floor {
+    padding: 8px 9px;
+    gap: 7px;
+  }
+  .qs-build-floor-badge {
+    flex-basis: 28px;
+    width: 28px;
+    height: 28px;
+  }
+  .qs-build-floor > label input {
+    width: 75px;
+  }
+  .qs-build-total-bottom {
+    padding: 11px 13px 15px;
+  }
+  .qs-build-save {
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qs-build-workspace * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Premium work-wise construction quotation 2026 */
+.qs-workflow {
+  --qw-orange: #f36a19;
+  --qw-border: #e8ebf1;
+  display: grid;
+  gap: 15px;
+  min-width: 0;
+}
+.qs-work-card {
+  background: #fff;
+  border: 1px solid #e8ebf0;
+  border-radius: 20px;
+  padding: 18px 19px;
+  box-shadow: 0 10px 35px #2530410b;
+  min-width: 0;
+  animation: qs-work-appear 0.28s ease-out both;
+}
+.qs-work-card:nth-child(2) {
+  animation-delay: 0.09s;
+}
+.qs-work-card:nth-child(3) {
+  animation-delay: 0.16s;
+}
+@keyframes qs-work-appear {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.qs-work-heading {
+  display: flex;
+  gap: 11px;
+  align-items: center;
+  min-width: 0;
+  margin-bottom: 15px;
+}
+.qs-work-heading > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.qs-work-heading-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border-radius: 12px;
+  color: #ed6819;
+  background: #fff1e8;
+  font-size: 24px;
+  font-weight: 800;
+}
+.qs-work-heading h3 {
+  font-size: 16px;
+  font-weight: 850;
+  letter-spacing: -0.3px;
+  color: #1c2a43;
+  margin: 0;
+}
+.qs-work-heading p {
+  margin: 4px 0 0;
+  color: #8b99aa;
+  font-size: 11px;
+  line-height: 1.5;
+}
+.qs-work-unit-badge {
+  color: #d65e1c;
+  border: 1px solid #ffd9c1;
+  background: #fff1e7;
+  border-radius: 9px;
+  padding: 8px 12px;
+  font-size: 10px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.qs-work-unit-badge span {
+  color: #8f9bac;
+}
+.qs-work-floor-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 13px;
+}
+.qs-work-floor-tabs button {
+  border: 1px solid #dfe5eb;
+  border-radius: 9px;
+  background: #fff;
+  padding: 9px 13px;
+  color: #445b74;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+.qs-work-floor-tabs button:hover {
+  border-color: #eea276;
+  transform: translateY(-1px);
+}
+.qs-work-floor-tabs button.active {
+  background: linear-gradient(110deg, #fc792d, #fa5906);
+  color: #fff;
+  border-color: #f36c1d;
+}
+.qs-work-floor-tabs button:last-child {
+  margin-left: auto;
+  color: #e65f14;
+  background: #fff5ef;
+  border-color: #ffddc6;
+}
+.qs-work-floor-tabs button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.qs-work-table-scroll {
+  min-width: 0;
+  width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+  border: 1px solid #eef0f5;
+  border-radius: 11px;
+}
+.qs-work-table {
+  width: 100%;
+  min-width: 880px;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  table-layout: auto;
+}
+.qs-work-table th {
+  padding: 12px 8px;
+  background: #f6f8fb;
+  text-align: left;
+  color: #708097;
+  font-size: 10px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+.qs-work-table td {
+  border-top: 1px solid #eef0f5;
+  padding: 7px 6px;
+  color: #25344a;
+  font-size: 11px;
+  vertical-align: middle;
+}
+.qs-work-table td:first-child,
+.qs-work-table th:first-child {
+  padding-left: 12px;
+}
+.qs-work-index {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: #eef3ff;
+  color: #426aaf;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 850;
+}
+.qs-work-table input,
+.qs-work-table select {
+  width: 100%;
+  min-width: 0;
+  height: 37px;
+  color: #23354e;
+  border: 1px solid #e3e8ef;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 11px;
+  font-weight: 750;
+  background: #fff;
+}
+.qs-work-…2595 tokens truncated…k-summary-share {
+    padding: 10px 8px;
+  }
+  .qs-work-summary-save {
+    padding: 12px 9px;
+  }
+  .qs-work-drawer {
+    height: 94dvh;
+    align-self: end;
+    border-radius: 20px 20px 0 0;
+  }
+  @keyframes qs-work-slide {
+    from {
+      transform: translateY(95%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qs-workflow * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Approved white quotation identity summary replaces the oversized hero. */
+/* Split-floor pricing: parking and penthouse are scoped to their own floor. */
+.qs-work-floor-splits {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 9px;
+}
+.qs-work-split {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 9px;
+  border: 1px solid #ebedf3;
+  background: #fcfdff;
+  border-radius: 11px;
+  padding: 12px;
+}
+.qs-work-split > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+.qs-work-split strong {
+  display: block;
+  color: #24324a;
+  font-size: 12px;
+  font-weight: 850;
+}
+.qs-work-split small {
+  display: block;
+  color: #7a8b9e;
+  font-size: 10px;
+  margin-top: 3px;
+  line-height: 1.5;
+}
+.qs-work-split-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.qs-work-split-buttons button {
+  border-radius: 8px;
+  border: 1px solid #ffcaab;
+  background: #fff3eb;
+  color: #d65613;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+.qs-work-split-buttons button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.qs-work-copy-hint {
+  margin: 5px 0 12px;
+  color: #8490a3;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.qs-work-table .qs-work-name input:read-only {
+  background: #f5f7fb;
+  color: #1e3450;
+  cursor: default;
+}
+.qs-work-pdf-message {
+  padding: 11px 12px;
+  margin: 12px 0 0;
+  border: 1px solid #f7d5b9;
+  border-radius: 10px;
+  color: #a74e19;
+  background: #fff6ee;
+  font-size: 12px;
+  font-weight: 700;
+}
+@media (max-width: 700px) {
+  .qs-work-floor-splits {
+    grid-template-columns: 1fr;
+  }
+  .qs-work-split {
+    padding: 11px;
+  }
+}
+
+/* Upper-floor linkage is explicit; users can keep a floor independent. */
+.qs-work-floor-follow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 35px;
+  border: 1px solid #cce2d1;
+  background: #f0fbf3;
+  border-radius: 9px;
+  padding: 7px 9px;
+  color: #245b36;
+  font-size: 10px;
+  font-weight: 850;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.qs-work-floor-follow input {
+  height: 15px;
+  width: 15px;
+  accent-color: #16804b;
+  cursor: pointer;
+}
+.qs-work-summary-save:not(:disabled) {
+  opacity: 1;
+  box-shadow: 0 7px 16px #e76d2833;
+}
+.qs-work-save-message {
+  white-space: normal;
+  line-height: 1.6;
+}
+@media (max-width: 650px) {
+  .qs-work-split-buttons {
+    width: 100%;
+    align-items: center;
+  }
+  .qs-work-floor-follow {
+    margin-right: auto;
+  }
+}
+
+/* Quotation Payment Schedule — single clean, fully responsive editor. */
+.qs-studio-grid.qs-studio-grid-full {
+  grid-template-columns: minmax(0, 1fr);
+}
+.qs-payment-panel {
+  width: 100%;
+  min-width: 0;
+  padding: clamp(16px, 2.6vw, 30px);
+  background: #fff;
+  border: 1px solid #e7ebf2;
+  border-radius: 22px;
+  box-shadow: 0 10px 28px rgba(21, 39, 65, 0.05);
+  color: #111b32;
+}
+.qs-payment-heading {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 23px;
+}
+.qs-payment-heading-icon {
+  width: 78px;
+  height: 78px;
+  flex: 0 0 78px;
+  border-radius: 21px;
+  display: grid;
+  place-items: center;
+  color: #f65e13;
+  background: linear-gradient(145deg, #fff5ee, #fff0e3);
+}
+.qs-payment-heading-icon svg {
+  width: 37px;
+  height: 37px;
+}
+.qs-payment-heading h2 {
+  margin: 3px 0 9px;
+  font-size: clamp(23px, 2.5vw, 30px);
+  font-weight: 850;
+  letter-spacing: -0.055em;
+  line-height: 1.13;
+}
+.qs-payment-heading p {
+  margin: 4px 0;
+  color: #55647d;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.qs-payment-settings-link {
   display: inline-flex;
   margin-top: 7px;
   color: #b64f2f;
