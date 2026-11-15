@@ -38,9 +38,9 @@ const createInput = z
 /**
  * Real quote creation from client and quotation details.
  *
- * Saves a versioned quotation under a lead or an explicitly selected existing
- * customer. Until an accepted agreement activates it, the required project FK
- * remains a hidden sales-prospect reference, not an execution project.
+ * Saves a versioned quotation under a lead, an existing customer, or a new
+ * quote-only prospect with an explicitly selected industry. Until an accepted
+ * agreement activates it, the project FK remains hidden from execution work.
  * Never use elevated credentials to bypass the actor's permissions.
  */
 export async function createStudioQuotation(input: unknown): Promise<{
