@@ -179,6 +179,7 @@ describe('lead-driven quotation creation', () => {
   it('offers quote preparation without creating a CRM lead when none are available', () => {
     expect(form).toContain('No CRM leads yet? Prepare a quote now.');
     expect(form).toContain('canPrepareWithoutLead');
+    expect(page).toContain("canPrepareWithoutLead={s.allowed('customer.create', 'crm') || s.allowed('customer.create', 'quotation')}");
     expect(form).toContain('Quotation service');
     expect(form).toContain('quoteWithoutLead ? { industryKey: industry } : { leadId }');
     expect(form).toContain('Prepare quotation →');
