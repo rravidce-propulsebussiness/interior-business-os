@@ -27,11 +27,12 @@ const createInput = z
       .default('INR'),
   })
   .strict()
-  .refine((values) => Boolean(values.leadId) !== Boolean(values.customerId), {
-    message: 'Choose either a lead or an existing customer.',
+  .refine((values) => Boolean(values.leadId) !== Boolean(values.customerId) ||
+    (!values.leadId && !values.customerId && Boolean(values.industryKey)), {
+    message: 'Choose a lead or customer, or select a service for a quote without a lead.',
   })
-  .refine((values) => !values.customerId || Boolean(values.industryKey), {
-    message: 'Choose the service for this customer quotation.',
+  .refine((values) => Boolean(values.leadId) || Boolean(values.industryKey), {
+    message: 'Choose the service for this quotation.',
   });
 
 /**
@@ -125,6 +126,11 @@ export async function createStudioQuotation(input: unknown): Promise<{
       };
       if (quoteClient.phone.trim().length < 3)
         return { ok: false, message: 'Add a valid phone number to this customer record before quoting.' };
+    } else {
+      activeIndustry = industries.find((entry) =>
+        entry.key === values.industryKey && entry.status === 'active');
+      if (!activeIndustry)
+        return { ok: false, message: 'Choose an active service before preparing a quote without a lead.' };
     }
     if (!activeIndustry)
       return { ok: false, message: 'Choose a valid quotation source.' };
@@ -237,10 +243,10 @@ export async function createStudioQuotation(input: unknown): Promise<{
       results.flatMap((result) => result.data ?? [])
         .filter((candidate) =>
           contactMatches(candidate, quoteClient) &&
-          contactMatches(candidate, {
-            phone: lead?.phone ?? '',
-            email: lead?.email ?? '',
-          }))
+          (!lead || contactMatches(candidate, {
+            phone: lead.phone,
+            email: lead.email,
+          })))
         .map((candidate) => [candidate.id, candidate]),
     ).values()].sort((a, b) =>
       a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id));
