@@ -20,6 +20,7 @@ export function QuotationStudioStart({
   initialPackageIndustry = '',
   initialCustomizedQuote = false,
   existingCustomer,
+  canPrepareWithoutLead = false,
 }: {
   leads: QuoteLead[];
   industries: Industry[];
@@ -29,14 +30,19 @@ export function QuotationStudioStart({
   initialPackageIndustry?: string;
   initialCustomizedQuote?: boolean;
   existingCustomer?: ExistingCustomer | null;
+  canPrepareWithoutLead?: boolean;
 }) {
   const router = useRouter();
   const initialLead = leads.find((entry) => entry.id === initialLeadId);
   const [leadId, setLeadId] = useState(initialLead?.id ?? '');
-  const [industryKey, setIndustryKey] = useState('');
+  const quoteWithoutLead = !existingCustomer && leads.length === 0 && canPrepareWithoutLead;
+  const [industryKey, setIndustryKey] = useState(
+    quoteWithoutLead && industries.some((entry) => entry.key === initialPackageIndustry)
+      ? initialPackageIndustry : '',
+  );
   const selectedLead = leads.find((entry) => entry.id === leadId);
-  // Quote industry is sourced only from the CRM lead, never chosen a second time.
-  const industry = existingCustomer ? industryKey : selectedLead?.industryKey &&
+  // A lead supplies its saved industry. Leadless and existing-customer quotes select one explicitly.
+  const industry = (existingCustomer || quoteWithoutLead) ? industryKey : selectedLead?.industryKey &&
     industries.some((entry) => entry.key === selectedLead.industryKey)
       ? selectedLead.industryKey : '';
   const industryName = industries.find((entry) => entry.key === industry)?.name ?? '';
@@ -72,15 +78,16 @@ export function QuotationStudioStart({
   return <div className="qs-create-start">
     <form className="qs-create-form" onSubmit={(event) => {
       event.preventDefault();
-      if ((!existingCustomer && !leadId) || !industry) {
-        setFeedback(existingCustomer ? 'Choose a service before continuing.' : 'Select a classified lead before continuing.');
+      if ((!existingCustomer && !quoteWithoutLead && !leadId) || !industry) {
+        setFeedback(existingCustomer || quoteWithoutLead ? 'Choose a service before continuing.' : 'Select a classified lead before continuing.');
         return;
       }
       setFeedback('');
       start(async () => {
         const result = await createStudioQuotation({
           ...data,
-          ...(existingCustomer ? { customerId: existingCustomer.id, industryKey: industry } : { leadId }),
+          ...(existingCustomer ? { customerId: existingCustomer.id, industryKey: industry }
+            : quoteWithoutLead ? { industryKey: industry } : { leadId }),
           currency: defaultCurrency,
         });
         if (!result.ok || !result.revisionId) {
@@ -104,8 +111,9 @@ export function QuotationStudioStart({
         <span className="qs-clean-form-icon" aria-hidden="true">♙</span>
         <h2>Client &amp; Quotation Details</h2>
         {(initialCustomizedQuote || initialPackageId) && <p className="qs-muted">
-          {initialCustomizedQuote ? 'Custom Quote · Select a classified lead to start'
-            : 'Package selected · Your lead determines the quote industry'}
+          {initialCustomizedQuote ? (quoteWithoutLead ? 'Custom Quote · Choose a service to start' : 'Custom Quote · Select a classified lead to start')
+            : quoteWithoutLead ? 'Package selected · Choose the service for this quote'
+              : 'Package selected · Your lead determines the quote industry'}
         </p>}
       </div>
 
@@ -133,6 +141,21 @@ export function QuotationStudioStart({
               </option>)}
             </select>
           </label>
+        ) : quoteWithoutLead ? (
+          <>
+            <div className="qs-no-leads-callout" role="status">
+              <strong>No CRM leads yet? Prepare a quote now.</strong>
+              <span>Enter the client details below and choose a service. This creates a quotation-only prospect, not a CRM lead or project.</span>
+              <Link href="/dashboard/crm/leads">Add a lead instead</Link>
+            </div>
+            <label className="qs-clean-field qs-source-picker">
+              <span className="qs-field-label">Quotation service <span className="qs-field-required" aria-hidden="true">*</span></span>
+              <select required value={industryKey} onChange={(event) => setIndustryKey(event.target.value)}>
+                <option value="">Choose a service</option>
+                {industries.map((entry) => <option key={entry.key} value={entry.key}>{entry.name}</option>)}
+              </select>
+            </label>
+          </>
         ) : (
           <p className="qs-source-guidance">
             No leads available. <Link href="/dashboard/crm/leads">Add a lead</Link> before creating a quote.
@@ -144,13 +167,17 @@ export function QuotationStudioStart({
         {initialPackageId && industry && initialPackageIndustry &&
           initialPackageIndustry !== industry && (
             <p className="qs-source-warning" role="status">
-              The selected package belongs to {initialPackageIndustry}, but this lead is
-              {' '}{industryName}. The quotation will use this lead’s industry instead.
+              The selected package belongs to {initialPackageIndustry}, but {quoteWithoutLead ? 'this quote uses' : 'this lead is'}
+              {' '}{industryName}. The quotation will use the selected service instead.
             </p>
           )}
         {!existingCustomer && selectedLead && industry ? (
           <p className="qs-source-service" role="status">
             <span className="qs-source-indicator" aria-hidden="true"/> {industryName} · Auto-detected from lead
+          </p>
+        ) : quoteWithoutLead && industry ? (
+          <p className="qs-source-service" role="status">
+            <span className="qs-source-indicator" aria-hidden="true"/> {industryName} · Selected for this quote
           </p>
         ) : !existingCustomer && selectedLead ? (
           <p className="qs-source-warning" role="alert">
@@ -204,7 +231,7 @@ export function QuotationStudioStart({
       {feedback && <p role="alert" className="qs-clean-feedback">{feedback}</p>}
       <div className="qs-clean-form-actions">
         <button className="qs-clean-next" type="submit"
-          disabled={pending || (!existingCustomer && !leadId) || !industry}>
+          disabled={pending || (!existingCustomer && !quoteWithoutLead && !leadId) || !industry}>
           {pending ? 'Creating quotation…' : 'Next →'}
         </button>
       </div>
