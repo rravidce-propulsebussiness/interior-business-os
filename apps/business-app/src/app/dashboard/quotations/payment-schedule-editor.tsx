@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   savedStagePaymentPlan,
   savedStagePaymentLinks,
@@ -73,11 +74,12 @@ function readPlan(
       stageCodes: links?.[index] ?? [],
     }));
   // Suggestions are editable only, never part of the PDF before explicitly saved.
-  return editable
-    ? industry === 'construction'
+  if (!editable) return [];
+  if (industry === 'construction')
+    return companyRows.length
       ? applyCompanyPaymentDefaults(suggestions(industry, floors), companyRows)
-      : suggestions(industry, floors)
-    : [];
+      : [];
+  return suggestions(industry, floors);
 }
 
 function moveStage(rows: Milestone[], from: number, to: number): Milestone[] {
@@ -629,10 +631,18 @@ export function PaymentScheduleEditor({
         <div>
           <h2>Payments &amp; Work</h2>
           <p>
-            Each payment milestone carries its amount and linked work sequence.
-            Construction defaults from Settings populate new quotations
-            automatically.
+            {industry === 'construction'
+              ? 'Construction payment milestones and linked work come from company Payment Settings and are read-only in this quotation.'
+              : 'Each payment milestone carries its amount and linked work sequence.'}
           </p>
+          {industry === 'construction' && (
+            <Link
+              className="qs-payment-settings-link"
+              href="/dashboard/settings?tab=payments#company-payment-stages"
+            >
+              Manage payments and work in Settings →
+            </Link>
+          )}
         </div>
       </div>
 
@@ -693,13 +703,13 @@ export function PaymentScheduleEditor({
       )}
 
       {industry === 'construction' &&
-        !floorNames.length &&
         !savedPlan &&
-        canEditSchedule && (
+        editable &&
+        (!floorNames.length || !defaultCompanyRows.length) && (
           <p className="qs-payment-footnote">
-            Save the floor-wise SFT quotation scope first to generate slab,
-            brickwork and finishing payments for the actual floors. You can
-            still add a fully custom schedule using Add milestone.
+            {!defaultCompanyRows.length
+              ? 'Set up the company payment and work template in Settings before saving this construction quotation.'
+              : 'Save the floor-wise SFT quotation scope first to generate payments for the actual floors.'}
           </p>
         )}
       <div className="qs-payment-stages">
