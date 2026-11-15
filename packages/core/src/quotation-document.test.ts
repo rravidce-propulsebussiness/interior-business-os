@@ -197,6 +197,17 @@ it('renders company theme and saved package brand, grade, allowance safely', () 
   expect(html).toContain('&lt;script&gt;unsafe&lt;/script&gt;');
 });
 
+it('explains the planning payment purpose in the homeowner payment schedule',()=>{
+ const d=quotationDocumentFixture();
+ d.totals.final_amount='100000.00';
+ d.terms='[STAGE_PAYMENT_PLAN]\\nPlanning|10.00\\nFoundation payment|90.00\\n[/STAGE_PAYMENT_PLAN]\\n'+
+  encodeStagePaymentLinks([['PRECONSTRUCTION','DESIGN'],['FOUNDATION']]);
+ const html=renderQuotationDocument(d);
+ expect(html).toContain('Planning — Price freeze &amp; design payment');
+ expect(html).toContain('10,000');
+ expect(html).toContain('Foundation payment');
+});
+
 it('prints the unchanged grouped payment milestones in the linked agreement PDF without leaking metadata', () => {
   const d = quotationDocumentFixture();
   d.totals.final_amount = '100000.00';
