@@ -182,13 +182,6 @@ export function ownerWorkspaceNavigation(
       href: '/dashboard/finance',
       icon: 'billing',
     });
-  // Billing & Plans is the company subscription page, not the customer invoice register.
-  if (has('organization.view') || has('invoice.view', 'billing'))
-    items.push({
-      label: 'Billing & Plans',
-      href: '/dashboard/billing',
-      icon: 'crown',
-    });
   if (
     has('report.view') ||
     has('report.financial') ||
@@ -229,5 +222,34 @@ export function ownerWorkspaceNavigation(
       href: '/dashboard/settings',
       icon: 'settings',
     });
+  // Keep the shared sidebar in the same product order on every dashboard route.
+  const navigationOrder = [
+    'Dashboard',
+    'Leads',
+    'Quotations',
+    'BOQ & Estimating',
+    'Finance',
+    'Projects',
+    'Project Management',
+    'My Sites',
+    'Marketplace',
+    'Purchases',
+    'Website Studio',
+    'Reports',
+    'WhatsApp',
+    'Automations',
+    'Employees',
+    'Team',
+    'Settings',
+  ];
+  const orderIndex = new Map(
+    navigationOrder.map((label, index) => [label, index]),
+  );
+  items.sort(
+    (left, right) =>
+      (orderIndex.get(left.label) ?? Number.MAX_SAFE_INTEGER) -
+      (orderIndex.get(right.label) ?? Number.MAX_SAFE_INTEGER),
+  );
+
   return items;
 }
