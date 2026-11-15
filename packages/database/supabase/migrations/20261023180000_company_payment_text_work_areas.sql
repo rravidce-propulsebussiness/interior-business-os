@@ -1,7 +1,3 @@
--- Allow an explicit payment point in the ordered company stage template.
--- The marker references the existing priced milestone; it does not create a
--- second payment row, invoice, or finance ledger entry.
-
 -- Extend the existing tenant-owned company construction payment template with
 -- ordered work/material/check/test/QC entries. Legacy name/percent rows remain valid.
 create or replace function public.organization_construction_payment_defaults_save(p_org uuid,p_rows jsonb)
@@ -73,7 +69,7 @@ begin
    kind:=item->>'kind';
    if length(name) not between 2 and 180
     or area !~ '^[A-Z][A-Z_]*$' or length(area)>45
-    or kind not in ('payment','work','material','check','test','qc')
+    or kind not in ('work','material','check','test','qc')
     or (r ? 'areas' and jsonb_array_length(r->'areas')>0
       and not (r->'areas' ? area)) then
     raise exception 'Invalid work/check type, title or work area' using errcode='22023';end if;
