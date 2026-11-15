@@ -170,9 +170,9 @@ describe('lead-driven quotation creation', () => {
     expect(css).not.toContain('.qs-create-type');
     expect(form).toContain('onChange={(event) => chooseLead(event.target.value)}');
     expect(form).toContain('selectedLead?.industryKey &&');
-    expect(form).toContain('existingCustomer ? industryKey');
+    expect(form).toContain('(existingCustomer || quoteWithoutLead) ? industryKey');
     expect(form).toContain('Auto-detected from lead');
-    expect(form).toContain('disabled={pending || (!existingCustomer && !leadId) || !industry}');
+    expect(form).toContain('disabled={pending || (!existingCustomer && !quoteWithoutLead && !leadId) || !industry}');
     expect(form).toContain("industry === 'construction' && !initialCustomizedQuote ? 'sft' : 'custom'");
   });
 
@@ -322,7 +322,7 @@ describe('automatic CRN reuse from selected lead', () => {
   });
 
   it('resolves existing CRN securely on the server, never by a browser-selected id', () => {
-    expect(form).toContain('...(existingCustomer ? { customerId: existingCustomer.id, industryKey: industry } : { leadId })');
+    expect(form).toContain('quoteWithoutLead ? { industryKey: industry } : { leadId }');
     expect(action).toContain('customerId: z.uuid().optional()');
     expect(action).toContain("await s.client.rpc('lead_quotation_list'");
     expect(action).toContain('contactMatches(candidate, quoteClient)');
