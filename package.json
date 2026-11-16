@@ -39,7 +39,8 @@
     "security:client": "node scripts/check-client-bundles.mjs",
     "hostinger:build": "node scripts/hostinger-build.mjs",
     "hostinger:start": "node server.js",
-    "postinstall": "node scripts/hostinger-postinstall.mjs"
+    "postinstall": "node scripts/hostinger-postinstall.mjs",
+    "security:audit": "pnpm audit --prod --audit-level=high"
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
