@@ -11,7 +11,7 @@ export const quotationMilestoneStep=z.object({
 }).strict();
 export type QuotationMilestoneStep=z.infer<typeof quotationMilestoneStep>;
 export type QuotationMilestoneFlow=Record<string,QuotationMilestoneStep[]>;
-const MAX_SERIALIZED=7000;
+const MAX_SERIALIZED=50000;
 const MARK=/\[QUOTATION_MILESTONE_FLOW\]([\s\S]*?)\[\/QUOTATION_MILESTONE_FLOW\]/g;
 const data=z.object({
  version:z.literal(1),
@@ -33,7 +33,7 @@ export function validateMilestoneFlow(
   const passedChecks=new Set<string>();
   for(const step of steps){
    total++;
-   if(total>150)throw new Error('Too many execution steps; simplify the sequence');
+   if(total>600)throw new Error('Too many execution steps; simplify the sequence');
    if(!row.stageCodes.includes(step.code))
     throw new Error('Choose a construction stage linked to this payment');
    const key=step.code+':'+step.kind+':'+step.index;

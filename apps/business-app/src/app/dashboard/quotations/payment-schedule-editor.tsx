@@ -76,18 +76,24 @@ export function PaymentScheduleEditor({
 }) {
   const parsedDefaults=companyConstructionPaymentRows.safeParse(companyDefaults);
   const defaultCompanyRows=parsedDefaults.success?parsedDefaults.data:[];
-  const initialRows=readPlan(initial.terms,industry,editable,floorNames,defaultCompanyRows);
+  const savedPlan=savedStagePaymentPlan(initial.terms);
+  const storedRows=readPlan(initial.terms,industry,editable,floorNames,defaultCompanyRows);
+  const companySchedule=industry==='construction'&&floorNames.length&&defaultCompanyRows.length
+    ?applyCompanyPaymentDefaults(suggestions(industry,floorNames),defaultCompanyRows):null;
+  const syncingCompanySchedule=Boolean(editable&&companySchedule?.length&&
+    JSON.stringify(storedRows)!==JSON.stringify(companySchedule));
+  const initialRows=syncingCompanySchedule?companySchedule!:storedRows;
   const originalRequirements=savedStageRequirements(initial.terms);
-  const freshConstructionQuote=industry==='construction'&&editable&&
-    !savedStagePaymentPlan(initial.terms);
-  const inheritedWork=freshConstructionQuote&&defaultCompanyRows.some(row=>(row.steps??[]).length>0)
-    ?applyCompanyWorkDefaults(initialRows,defaultCompanyRows,originalRequirements):null;
+  const inheritedWork=syncingCompanySchedule&&defaultCompanyRows.some(row=>(row.steps??[]).length>0)
+    ?applyCompanyWorkDefaults(initialRows,defaultCompanyRows,{},true):null;
   const [rows, setRows] = useState<Milestone[]>(()=>initialRows);
   const [stageRequirements,setStageRequirements]=useState<StageRequirementsMap>(
-    ()=>inheritedWork?.requirements??originalRequirements);
-  const seededFlow=visibleMilestoneFlow(initial.terms,initialRows,originalRequirements);
-  const prefilledFlow=industry==='construction'&&
-    !Object.keys(seededFlow).length&&editable
+    ()=>inheritedWork?.requirements??(syncingCompanySchedule?{}:originalRequirements));
+  const seededFlow=syncingCompanySchedule?{}:
+    visibleMilestoneFlow(initial.terms,initialRows,originalRequirements);
+  const prefilledFlow=syncingCompanySchedule
+    ?(inheritedWork?.flow??standardMilestoneWorkflow(initialRows,{}))
+    :industry==='construction'&&!Object.keys(seededFlow).length&&editable
       ?(inheritedWork?.flow??standardMilestoneWorkflow(initialRows,originalRequirements)):seededFlow;
   const [milestoneFlow,setMilestoneFlow]=useState<QuotationMilestoneFlow>(()=>prefilledFlow);
   const stageCodes=[...new Set(rows.flatMap(row=>row.stageCodes))];
@@ -123,7 +129,6 @@ export function PaymentScheduleEditor({
   const dragging = useRef<number | null>(null);
   const snapshotAttempted=useRef(false);
   const router = useRouter();
-  const savedPlan = savedStagePaymentPlan(initial.terms);
   // Construction schedules are company-managed in Settings and shown as a fixed quote snapshot.
   const scheduleEditable=editable&&industry!=='construction';
   const hasChanges = JSON.stringify(rows) !== JSON.stringify(initialRows)
@@ -326,10 +331,11 @@ export function PaymentScheduleEditor({
   }
 
   useEffect(()=>{
-    if(!editable||industry!=='construction'||savedPlan||!rows.length||!valid||snapshotAttempted.current)return;
+    if(!editable||industry!=='construction'||!syncingCompanySchedule||
+       !rows.length||!valid||snapshotAttempted.current)return;
     snapshotAttempted.current=true;
     save();
-  },[editable,industry,savedPlan,rows.length,valid,save]);
+  },[editable,industry,syncingCompanySchedule,rows.length,valid,save]);
 
   function combineBrickwork(index:number){
     const first=rows[index],next=rows[index+1];
@@ -367,10 +373,12 @@ export function PaymentScheduleEditor({
 
       <div className={'qs-payment-status ' + (
         feedback?.type === 'error' ? 'qs-payment-status-error' :
-        (industry==='construction'&&savedPlan)||savedPlan&&!hasChanges ? 'qs-payment-status-saved' : 'qs-payment-status-unsaved'
+        (industry==='construction'&&savedPlan&&!syncingCompanySchedule)||savedPlan&&!hasChanges
+          ? 'qs-payment-status-saved' : 'qs-payment-status-unsaved'
       )} role="status">
-        <span className="qs-payment-status-mark" aria-hidden="true">{((industry==='construction'&&savedPlan)||savedPlan&&!hasChanges)&&feedback?.type!=='error'?'✓':'ⓘ'}</span>
+        <span className="qs-payment-status-mark" aria-hidden="true">{((industry==='construction'&&savedPlan&&!syncingCompanySchedule)||savedPlan&&!hasChanges)&&feedback?.type!=='error'?'✓':'ⓘ'}</span>
         <span>{feedback?.type === 'error' ? feedback.text
+          : syncingCompanySchedule ? 'Updating this draft from the '+defaultCompanyRows.length+' company stages in Settings…'
           : industry==='construction'&&savedPlan ? 'Payment and work milestones are fixed from this quotation.'
           : savedPlan && !hasChanges ? 'Payment schedule saved in this quotation.'
           : savedPlan ? 'You have unsaved changes. Save to update the customer PDF.'
@@ -379,7 +387,7 @@ export function PaymentScheduleEditor({
           : 'No payment schedule was saved with this quotation.'}</span>
       </div>
 
-      {industry==='construction'&&editable&&!savedPlan&&feedback?.type==='error'&&(
+      {industry==='construction'&&editable&&syncingCompanySchedule&&feedback?.type==='error'&&(
         <button type="button" className="qs-payment-save" onClick={()=>{snapshotAttempted.current=false;save();}}>
           Retry saving company defaults
         </button>
