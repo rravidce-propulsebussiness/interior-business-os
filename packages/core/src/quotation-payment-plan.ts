@@ -22,7 +22,7 @@ export function savedStagePaymentPlan(
     if (
       !name ||
       name.length > 100 ||
-      !/^\d+(?:\.\d{1,2})?$/.test(rawPercent) ||
+      !/^\d+(?:\.\d{1,8})?$/.test(rawPercent) ||
       !Number.isFinite(percent) ||
       percent <= 0 ||
       percent > 100
