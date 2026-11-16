@@ -13,9 +13,9 @@ test('public Business App home shows guest navigation only to anonymous visitors
   await expect(
     page.getByRole('link', { name: 'Start Your Business', exact: true }).first(),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { level: 1 })).toContainText(
-    'One platform.',
-  );
+  await expect(
+    page.getByRole('heading', { level: 1 }),
+  ).toContainText('One platform.');
   await expect(
     page.getByRole('link', { name: 'Marketplace', exact: true }),
   ).toBeVisible();
@@ -59,7 +59,9 @@ test('protected dashboards require authentication', async ({ page }, info) => {
   );
   await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Welcome back' }),
+  ).toBeVisible();
 });
 test('login provides accessible form fields and validation', async ({
   page,
@@ -150,7 +152,9 @@ test('unconfigured ProPulse SSO refuses login and returns a safe notice', async 
     destination.searchParams.get('provider_error'),
   );
   await page.goto(destination.pathname + destination.search);
-  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Welcome back' }),
+  ).toBeVisible();
   await expect(page.locator('.pp-login-notice[role="alert"]')).toContainText(
     /ProPulse sign-in is not yet activated|temporarily unavailable/,
   );
