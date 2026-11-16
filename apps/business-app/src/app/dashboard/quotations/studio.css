@@ -5155,48 +5155,48 @@
 }
 
 .qs-construction-program {
-  padding: 28px;
+  padding: 16px;
 }
 .qs-program-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
-  margin-bottom: 22px;
+  gap: 14px;
+  margin-bottom: 12px;
 }
 .qs-program-header h2 {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
   color: #17233b;
-  font-size: 26px;
+  font-size: 18px;
+  line-height: 1.25;
 }
 .qs-program-header p {
-  max-width: 760px;
+  max-width: 980px;
   margin: 0;
   color: #63748c;
-  line-height: 1.55;
+  font-size: 12px;
+  line-height: 1.4;
 }
 .qs-program-start {
   display: grid;
-  gap: 4px;
-  min-width: 150px;
-  padding: 12px 16px;
-  border: 1px solid #e6edf4;
-  border-radius: 12px;
-  background: #f7f9fc;
-  color: #53647c;
+  gap: 3px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 .qs-program-synced-notice {
   display: flex;
   align-items: center;
-  gap: 14px;
-  margin: 0 0 16px;
-  padding: 12px 16px;
+  gap: 12px;
+  margin: 0 0 10px;
+  padding: 8px 12px;
   border: 1px solid #f1cfb8;
-  border-radius: 11px;
+  border-radius: 9px;
   background: #fff5ea;
   color: #80502e;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11px;
+  line-height: 1.35;
 }
 .qs-program-synced-notice strong {
   flex: 0 0 auto;
@@ -5204,46 +5204,53 @@
 }
 .qs-program-calendar {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 16px;
-  padding: 15px 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 10px;
+  padding: 10px 14px;
   border: 1px solid #d8e7ff;
-  border-radius: 14px;
+  border-radius: 10px;
   background: #f1f6ff;
 }
 .qs-program-calendar > div {
   display: grid;
-  gap: 5px;
+  gap: 3px;
+  padding: 0 10px;
+  border-right: 1px solid #d8e1ef;
+}
+.qs-program-calendar > div:last-child {
+  border-right: 0;
 }
 .qs-program-calendar span {
   color: #667a98;
-  font-size: 12px;
+  font-size: 10px;
 }
 .qs-program-calendar strong {
   color: #21314b;
-  font-size: 14px;
+  font-size: 12px;
 }
 .qs-program-start input {
   width: 100%;
   max-width: 220px;
-  padding: 8px 10px;
+  padding: 5px 7px;
   border: 1px solid #e7d9d0;
-  border-radius: 9px;
+  border-radius: 7px;
   background: #fff;
   color: #21314b;
+  font: inherit;
+  font-size: 12px;
 }
 .qs-program-skip-sundays {
   display: flex;
   align-items: center;
   gap: 7px;
   color: #344966;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
 }
 .qs-program-skip-sundays input {
-  width: 17px;
-  height: 17px;
+  width: 15px;
+  height: 15px;
   accent-color: #b6532e;
 }
 .qs-program-start strong {
@@ -5251,20 +5258,21 @@
 }
 .qs-program-stage {
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   border: 1px solid #e8ddd5;
-  border-radius: 14px;
+  border-radius: 10px;
   background: #fff;
 }
 .qs-program-stage-toggle {
   display: grid;
   width: 100%;
   grid-template-columns:
-    42px minmax(190px, 1fr) minmax(180px, 260px) minmax(150px, 210px)
-    28px;
+    30px minmax(200px, 1fr) minmax(220px, 1.1fr) minmax(170px, 0.8fr)
+    20px;
   align-items: center;
-  gap: 12px;
-  padding: 14px;
+  gap: 9px;
+  min-height: 42px;
+  padding: 6px 10px;
   border: 0;
   background: #fff;
   color: #1c2940;
@@ -5280,56 +5288,65 @@
 .qs-program-stage-dates,
 .qs-program-stage-payment {
   display: grid;
-  gap: 3px;
+  gap: 2px;
+  min-width: 0;
 }
 .qs-program-stage-dates small,
 .qs-program-stage-payment small {
   color: #738198;
-  font-size: 11px;
+  font-size: 9px;
 }
 .qs-program-stage-dates strong {
-  font-size: 12px;
+  font-size: 10px;
+  line-height: 1.25;
 }
 .qs-program-stage-payment {
   justify-items: end;
-  padding: 7px 10px;
-  border-radius: 9px;
+  padding: 5px 9px;
+  border-radius: 8px;
   background: #fff4ec;
 }
 .qs-program-stage-payment strong {
   color: #a64718;
+  font-size: 12px;
 }
 .qs-program-stage-chevron {
   color: #a64718;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 800;
   text-align: center;
 }
 .qs-program-stage-content {
-  padding: 0 14px 14px;
+  padding: 0 10px 10px;
 }
 .qs-program-number {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  background: #fff1e8;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #ffeadb;
   color: #a4491a;
+  font-size: 12px;
   font-weight: 800;
 }
 .qs-program-stage-title {
-  display: grid;
-  gap: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 3px 9px;
+}
+.qs-program-stage-title strong {
+  font-size: 13px;
 }
 .qs-program-stage-title .qs-program-repeat-badge,
 .qs-program-stage-title .qs-program-once-badge {
   justify-self: start;
-  padding: 4px 8px;
+  padding: 3px 7px;
   border-radius: 999px;
   background: #edf4ff;
   color: #426895;
-  font-size: 10px;
+  font-size: 8px;
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -5338,65 +5355,68 @@
   color: #a64718;
 }
 .qs-program-floor + .qs-program-floor {
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid #efdfd6;
 }
 .qs-program-floor-heading {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 8px;
+  gap: 10px;
+  margin-bottom: 5px;
   color: #596b83;
-  font-size: 14px;
+  font-size: 11px;
 }
 .qs-program-floor-heading span {
   color: #738198;
-  font-size: 12px;
+  font-size: 10px;
 }
 .qs-program-work-table {
   overflow-x: auto;
   border: 1px solid #eadfd6;
-  border-radius: 9px;
+  border-radius: 8px;
 }
 .qs-program-work-head,
 .qs-program-work-row {
   display: grid;
   min-width: 900px;
   grid-template-columns:
-    34px minmax(210px, 2fr) minmax(190px, 1.2fr)
-    70px 120px 120px;
+    25px minmax(180px, 2fr) minmax(180px, 1.3fr)
+    58px 90px 110px;
   align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
+  gap: 7px;
+  padding: 5px 8px;
 }
 .qs-program-work-head {
-  background: #f2f5f9;
+  background: #f4f1ef;
   color: #596982;
-  font-size: 11px;
+  font-size: 9px;
   font-weight: 850;
 }
 .qs-program-work-row {
+  min-height: 28px;
   border-top: 1px solid #eee6df;
   color: #344158;
-  font-size: 12px;
+  font-size: 9px;
+  line-height: 1.25;
 }
 .qs-program-work-index {
   color: #a64718;
+  font-size: 10px;
   font-weight: 800;
   text-align: center;
 }
 .qs-program-work-name {
   display: grid;
-  gap: 3px;
+  gap: 1px;
 }
 .qs-program-work-name small {
   color: #a94f1f;
-  font-size: 10px;
+  font-size: 8px;
   text-transform: uppercase;
 }
 .qs-program-work-name p {
-  margin: 2px 0 0;
+  margin: 1px 0 0;
   color: #64758d;
 }
 .qs-program-work-row a {
@@ -5406,12 +5426,12 @@
 .qs-program-check-chip,
 .qs-program-qc-chip {
   display: inline-block;
-  margin-right: 4px;
-  padding: 4px 7px;
+  margin-right: 2px;
+  padding: 3px 5px;
   border-radius: 999px;
   background: #e8f8ee;
   color: #18814a;
-  font-size: 10px;
+  font-size: 8px;
 }
 .qs-program-qc-chip {
   background: #fff0e5;
@@ -5421,43 +5441,45 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  margin-top: 8px;
-  padding: 9px 12px;
+  gap: 10px;
+  margin-top: 5px;
+  padding: 6px 9px;
   border: 1px solid #f1d5c4;
-  border-radius: 9px;
+  border-radius: 8px;
   background: #fff7f1;
   color: #71462f;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 750;
 }
 .qs-program-payment-entry > strong {
   color: #a64718;
-  font-size: 14px;
+  font-size: 12px;
 }
 .qs-program-payment-entry label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   color: #a64718;
 }
 .qs-program-payment-entry input {
-  width: 150px;
-  padding: 7px 9px;
+  width: 120px;
+  padding: 5px 7px;
   border: 1px solid #e8c9b6;
-  border-radius: 8px;
+  border-radius: 7px;
   background: white;
   color: #263752;
+  font-size: 11px;
 }
 .qs-program-feedback {
-  padding: 12px 16px;
-  border-radius: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
   background: #effaf3;
   color: #21774a;
+  font-size: 12px;
 }
 @media (max-width: 760px) {
   .qs-construction-program {
-    padding: 18px;
+    padding: 12px;
   }
   .qs-program-header {
     display: grid;
@@ -5465,15 +5487,15 @@
   .qs-program-synced-notice {
     align-items: flex-start;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
   }
   .qs-program-calendar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    padding: 12px;
+    padding: 9px;
   }
   .qs-program-stage-toggle {
-    grid-template-columns: 38px minmax(0, 1fr) 25px;
-    gap: 8px;
+    grid-template-columns: 30px minmax(0, 1fr) 18px;
+    gap: 7px;
   }
   .qs-program-stage-dates,
   .qs-program-stage-payment {

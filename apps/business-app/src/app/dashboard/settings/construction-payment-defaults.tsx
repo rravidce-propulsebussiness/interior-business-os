@@ -125,6 +125,12 @@ export function ConstructionPaymentDefaults({
                 >
                   {stage.repeatsPerFloor ? 'REPEAT FOR EACH FLOOR' : 'ONE TIME'}
                 </span>
+                <p className="us-stage-description">
+                  {stageDescriptions[stage.id]}
+                  {stage.repeatsPerFloor && (
+                    <span> · Automatically repeats for each quoted floor</span>
+                  )}
+                </p>
               </div>
               <label className="us-stage-duration">
                 Stage duration
@@ -157,12 +163,6 @@ export function ConstructionPaymentDefaults({
                 {expandedStage === stage.id ? '⌃' : '⌄'}
               </button>
             </header>
-            <p className="us-stage-description">
-              {stageDescriptions[stage.id]}
-              {stage.repeatsPerFloor && (
-                <span> · Automatically repeats for each quoted floor</span>
-              )}
-            </p>
             <p className="us-stage-total">
               Stage total: {totalDays} days · {workItems.length} work/check
               steps
