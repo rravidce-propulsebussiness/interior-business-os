@@ -1,55 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { expandConstructionStages } from './construction-workflow';
 import {
-  proposedConstructionPayments,
   milestoneConstructionStages,
   guidanceForConstructionStage,
 } from './construction-payment-schedule';
 import { constructionPlanFromQuotedDescriptions } from './quote-construction-handoff';
 import { calculateSftEstimate, encodeSftEstimate } from './sft-quotation';
 
-describe('quoted construction milestone payments', () => {
-  it('creates independent slab/brickwork milestones for each quoted floor, totaling 100%', () => {
-    const stages = proposedConstructionPayments([
-      'Ground Floor',
-      '1st Floor',
-      '2nd Floor',
-    ]);
-    expect(stages.filter((s) => s.name.includes('slab payment'))).toHaveLength(
-      3,
-    );
-    expect(stages.filter((s) => s.name.includes('brickwork'))).toHaveLength(3);
-    expect(stages.reduce((sum, r) => sum + Number(r.percent), 0)).toBeCloseTo(
-      100,
-      8,
-    );
-    expect(stages[0]!.name).toBe('Planning');
-    expect(stages[0]!.percent).toBe('10.00');
-    expect(stages[0]!.stageCodes).toEqual(['PRECONSTRUCTION', 'DESIGN']);
-    expect(stages[0]!.stageCodes).not.toContain('SITE_PREP');
-    expect(
-      stages.find((s) => s.name.startsWith('Foundation'))!.stageCodes,
-    ).toEqual(['SITE_PREP', 'FOUNDATION', 'PLINTH']);
-    expect(
-      stages.find((s) => s.name.includes('1st Floor slab'))!.stageCodes,
-    ).toContain('RCC/F_1ST_FLOOR');
-    expect(
-      stages.find((s) => s.name.includes('2nd Floor brickwork'))!.stageCodes,
-    ).toContain('MASONRY/F_2ND_FLOOR');
-  });
-  it('groups brickwork automatically only when very tall quotes exceed 40 lines', () => {
-    const floors = Array.from({ length: 18 }, (_, i) => 'Level ' + (i + 1));
-    const plan = proposedConstructionPayments(floors);
-    expect(plan.length).toBeLessThanOrEqual(40);
-    expect(plan.filter((p) => p.name.includes('slab payment'))).toHaveLength(
-      18,
-    );
-    expect(plan.filter((p) => p.name.includes('brickwork'))).toHaveLength(9);
-    expect(plan.reduce((sum, r) => sum + Number(r.percent), 0)).toBeCloseTo(
-      100,
-      8,
-    );
-  });
+describe('reusable construction stage mapping', () => {
   it('allows first-floor brickwork while third-floor slab continues', () => {
     const floorNames = ['Ground', 'First', 'Second', 'Third'];
     const floors = floorNames.map((name) => ({

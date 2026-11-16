@@ -10,6 +10,10 @@ import {
 } from '@business-os/core/quotation-payment-plan';
 import { constructionPlanFromQuotedDescriptions } from '@business-os/core/quote-construction-handoff';
 import {
+  encodeQuotationConstructionProgram,
+  type QuotationConstructionProgram,
+} from '@business-os/core/quotation-construction-program';
+import {
   encodeStageRequirements,
   savedStageRequirements,
   validateStageRequirements,
@@ -66,7 +70,7 @@ const payload = z.discriminatedUnion('kind', [
                     .regex(/^[A-Z][A-Z0-9_]*(?:\/[A-Z][A-Z0-9_]*)?$/)
                     .max(120),
                 )
-                .max(18)
+                .max(54)
                 .optional(),
             })
             .strict(),
@@ -75,6 +79,7 @@ const payload = z.discriminatedUnion('kind', [
         .max(40),
       stageRequirements: z.record(z.string(), z.unknown()).optional(),
       milestoneFlow: z.record(z.string(), z.unknown()).optional(),
+      program: z.unknown().optional(),
     })
     .strict(),
 ]);
@@ -227,6 +232,22 @@ export async function POST(
           422,
         );
       const saved = splitQuotationTerms(current.terms);
+      let programMarker = '';
+      if (incoming.program !== undefined) {
+        try {
+          const program = incoming.program as QuotationConstructionProgram;
+          programMarker = encodeQuotationConstructionProgram(program);
+        } catch {
+          return reply(
+            {
+              message:
+                'Review the seven stage templates, floor list and planned start date.',
+              reference: ref,
+            },
+            422,
+          );
+        }
+      }
       if (incoming.stages.some((row) => row.stageCodes?.length)) {
         const items = await s.client
           .from('quotation_items')
@@ -266,6 +287,20 @@ export async function POST(
         const validKeys = new Set(
           planned.stages.map((stage) => stage.instanceCode),
         );
+        if (
+          incoming.program &&
+          JSON.stringify(
+            (incoming.program as QuotationConstructionProgram).floors,
+          ) !== JSON.stringify(planned.floors.map((floor) => floor.name))
+        )
+          return reply(
+            {
+              message:
+                'The quotation floor list changed. Refresh the construction schedule.',
+              reference: ref,
+            },
+            422,
+          );
         if (
           incoming.stages.some((row) =>
             row.stageCodes?.some((key) => !validKeys.has(key)),
@@ -364,7 +399,9 @@ export async function POST(
       const custom = encodeStageRequirements(overrides);
       terms = joinQuotationTerms({
         ...saved,
-        paymentPlan: [mark, links, custom, sequence].filter(Boolean).join('\n'),
+        paymentPlan: [mark, links, custom, sequence, programMarker]
+          .filter(Boolean)
+          .join('\n'),
       });
       if (
         !savedStagePaymentPlan(terms) ||

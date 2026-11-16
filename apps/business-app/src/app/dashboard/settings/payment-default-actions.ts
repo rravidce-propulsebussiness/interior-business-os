@@ -1,7 +1,7 @@
 'use server';
 import { revalidatePath } from 'next/cache';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
-import { companyConstructionPaymentRows } from '@business-os/core/company-construction-defaults';
+import { companyConstructionStages } from '@business-os/core/company-construction-defaults';
 
 export type DefaultPaymentState = { saved: boolean; message: string };
 export async function saveConstructionPaymentDefaults(
@@ -17,7 +17,7 @@ export async function saveConstructionPaymentDefaults(
   } catch {
     return { saved: false, message: 'Invalid payment schedule.' };
   }
-  const validated = companyConstructionPaymentRows.safeParse(payload);
+  const validated = companyConstructionStages.safeParse(payload);
   if (!validated.success)
     return {
       saved: false,
@@ -48,7 +48,7 @@ export async function saveConstructionPaymentDefaults(
     return {
       saved: true,
       message:
-        'Construction workflow and work/QC guides saved. Existing quotations and projects are unchanged.',
+        'Construction stages, days, payment shares and site guides saved.',
     };
   } catch {
     return {

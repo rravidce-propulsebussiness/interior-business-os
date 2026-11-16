@@ -13,7 +13,7 @@ const sections = [
   'Dispute resolution',
 ] as const;
 const stageBlock =
-  /\[(STAGE_PAYMENT_PLAN|STAGE_PAYMENT_LINKS|STAGE_CUSTOM_REQUIREMENTS|QUOTATION_MILESTONE_FLOW)\][\s\S]*?\[\/\1\]/g;
+  /\[(STAGE_PAYMENT_PLAN|STAGE_PAYMENT_LINKS|STAGE_CUSTOM_REQUIREMENTS|QUOTATION_MILESTONE_FLOW|QUOTATION_CONSTRUCTION_PROGRAM)\][\s\S]*?\[\/\1\]/g;
 const headings =
   /^(Inclusions|Exclusions|Warranty|Additional terms|Work programme & completion|Termination & indemnification|Dispute resolution):[ \t]*$/gim;
 

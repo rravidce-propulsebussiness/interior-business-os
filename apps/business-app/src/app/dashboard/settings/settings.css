@@ -1983,3 +1983,151 @@ a.ush-tile:focus-visible {
   background: #fff2e9;
   border-color: #c97752;
 }
+
+.us-company-stage-editor {
+  display: grid;
+  gap: 18px;
+}
+.us-company-stage-card {
+  padding: 20px;
+  border: 1px solid #ead7ca;
+  border-radius: 18px;
+  background: #fffaf6;
+}
+.us-company-stage-heading {
+  display: grid;
+  grid-template-columns: 24px 42px minmax(180px, 1fr) 180px 130px;
+  gap: 12px;
+  align-items: center;
+}
+.us-stage-grip {
+  color: #9b7160;
+  cursor: grab;
+  font-size: 22px;
+}
+.us-stage-number {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #fff0e5;
+  color: #a64718;
+  font-weight: 800;
+}
+.us-company-stage-heading input,
+.us-company-stage-item input,
+.us-company-stage-item select,
+.us-company-stage-add input,
+.us-company-stage-add select {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #e8dcd3;
+  border-radius: 10px;
+  background: white;
+  color: #28344a;
+}
+.us-company-stage-heading label,
+.us-company-stage-item label {
+  display: grid;
+  gap: 5px;
+  color: #77675f;
+  font-size: 12px;
+  font-weight: 700;
+}
+.us-company-stage-heading label input,
+.us-company-stage-item label input {
+  width: 100%;
+}
+.us-company-stage-heading label span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.us-company-stage-heading label span input {
+  width: 110px;
+}
+.us-company-stage-items {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+.us-company-stage-item {
+  display: grid;
+  grid-template-columns: 22px 54px 130px minmax(180px, 1fr) 90px auto;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #eee1d8;
+  border-radius: 12px;
+  background: white;
+}
+.us-company-stage-item .us-order-number {
+  width: 54px;
+}
+.us-company-stage-item details {
+  grid-column: 3 / -1;
+  color: #a64718;
+}
+.us-company-stage-item details textarea,
+.us-company-stage-item details input {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+}
+.us-company-stage-item details textarea {
+  min-height: 78px;
+  padding: 10px;
+  border: 1px solid #e8dcd3;
+  border-radius: 10px;
+}
+.us-company-stage-add {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+.us-company-stage-add input {
+  flex: 1;
+}
+.us-company-stage-add button,
+.us-company-stage-item button {
+  border: 1px solid #f1c6ae;
+  border-radius: 10px;
+  padding: 9px 14px;
+  background: #fff4ec;
+  color: #a64718;
+  font-weight: 700;
+}
+.us-company-stage-save {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 2px;
+}
+@media (max-width: 760px) {
+  .us-company-stage-heading {
+    grid-template-columns: 24px 38px minmax(0, 1fr);
+  }
+  .us-company-stage-heading > label {
+    grid-column: 3;
+  }
+  .us-company-stage-item {
+    grid-template-columns: 20px 48px minmax(0, 1fr) 70px;
+  }
+  .us-company-stage-item > select {
+    grid-column: 3;
+  }
+  .us-company-stage-item .us-stage-item-title {
+    grid-column: 3 / 5;
+  }
+  .us-company-stage-item details {
+    grid-column: 3 / -1;
+  }
+  .us-company-stage-add {
+    flex-wrap: wrap;
+  }
+  .us-company-stage-add input {
+    min-width: 100%;
+  }
+}
