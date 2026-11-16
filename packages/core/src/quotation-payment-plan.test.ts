@@ -114,6 +114,18 @@ describe('quote-stage payment mappings', () => {
     ).toBeNull();
     expect(() => encodeStagePaymentLinks([['unknown.stage']])).toThrow();
   });
+  it('keeps all three linked work families for each of eighteen quoted floors', () => {
+    const links = Array.from({ length: 18 }, (_, index) => [
+      `INTERNAL_PLASTER/FLOOR_${index + 1}`,
+      `EXTERNAL_PLASTER/FLOOR_${index + 1}`,
+      `PLUMBING_PAINT/FLOOR_${index + 1}`,
+    ]).flat();
+    const encoded = encodeStagePaymentLinks([links]);
+    const terms =
+      '[STAGE_PAYMENT_PLAN]\nElectrical & plumbing|100.00\n[/STAGE_PAYMENT_PLAN]\n' +
+      encoded;
+    expect(savedStagePaymentLinks(terms)?.[0]).toHaveLength(54);
+  });
 });
 
 describe('custom construction stage requirements in accepted quotation terms', () => {

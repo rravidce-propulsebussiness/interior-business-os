@@ -21,7 +21,7 @@ const HEADINGS = [
   ['Dispute resolution', 'disputeResolution'],
 ] as const;
 const STAGE =
-  /\[(STAGE_PAYMENT_PLAN|STAGE_PAYMENT_LINKS|STAGE_CUSTOM_REQUIREMENTS|QUOTATION_MILESTONE_FLOW)\][\s\S]*?\[\/\1\]/g;
+  /\[(STAGE_PAYMENT_PLAN|STAGE_PAYMENT_LINKS|STAGE_CUSTOM_REQUIREMENTS|QUOTATION_MILESTONE_FLOW|QUOTATION_CONSTRUCTION_PROGRAM)\][\s\S]*?\[\/\1\]/g;
 const HEADER =
   /^(Inclusions|Exclusions|Warranty|Additional terms|Work programme & completion|Termination & indemnification|Dispute resolution):[ \t]*$/gim;
 

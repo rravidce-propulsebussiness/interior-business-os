@@ -5,11 +5,9 @@ import { z } from 'zod';
 import { canAccess } from '@business-os/auth';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
 import { emptyAddress } from '@business-os/core/commercial';
-import { proposedConstructionPayments } from '@business-os/core/construction-payment-schedule';
 import {
-  companyConstructionPaymentRows,
-  defaultCompanyWorkRows,
-  hydrateCompanyWorkDefaults,
+  companyConstructionStages,
+  defaultCompanyConstructionStages,
 } from '@business-os/core/company-construction-defaults';
 import { createGstRepository } from '@business-os/database/gst';
 import { ActionForm } from '@business-os/ui/action-form';
@@ -1122,7 +1120,7 @@ export default async function SettingsPage({
               className="us-payment-template-section"
               id="company-payment-stages"
             >
-              <h3>Default construction payment schedule</h3>
+              <h3>Reusable stages, payment shares & work sequence</h3>
               {constructionDefaultsResponse.error ? (
                 <p className="us-info">
                   Company payment defaults are temporarily unavailable.
@@ -1130,20 +1128,15 @@ export default async function SettingsPage({
               ) : (
                 <ConstructionPaymentDefaults
                   canEdit={canEdit}
-                  initial={hydrateCompanyWorkDefaults(
-                    companyConstructionPaymentRows.safeParse(
+                  initial={
+                    companyConstructionStages.safeParse(
                       constructionDefaultsResponse.data,
                     ).success
-                      ? companyConstructionPaymentRows.parse(
+                      ? companyConstructionStages.parse(
                           constructionDefaultsResponse.data,
                         )
-                      : defaultCompanyWorkRows(
-                          proposedConstructionPayments(['Ground']),
-                        ),
-                    defaultCompanyWorkRows(
-                      proposedConstructionPayments(['Ground']),
-                    ),
-                  )}
+                      : defaultCompanyConstructionStages
+                  }
                 />
               )}
             </div>

@@ -94,29 +94,31 @@ begin
  raise notice 'PASS: scoped multi-role records, dependency persistence, version guards';
 end$$;
 
--- Current settings payloads include an existing-payment marker and optional
--- work/QC guide fields. Saving this template must preserve them intact.
+-- The reusable stage programme persists stage durations and text/video guides.
 do $$
 declare
  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
  saved jsonb;
 begin
  perform public.organization_construction_payment_defaults_save(org,
-  jsonb_build_array(jsonb_build_object(
-   'name','Planning','percent',100,
-   'areas',jsonb_build_array('PRECONSTRUCTION','DESIGN'),
-   'steps',jsonb_build_array(
-    jsonb_build_object('kind','payment','name','Planning','area','PRECONSTRUCTION'),
-    jsonb_build_object('kind','work','name','Price Freeze','area','PRECONSTRUCTION',
-     'guideText','Confirm the agreed price before design work begins.',
-     'guideVideoUrl','https://example.test/price-freeze')))));
+  jsonb_build_array(
+   jsonb_build_object('id','preconstruction','name','Pre-construction','percent',10,'repeatsPerFloor',false,'days',7,
+    'items',jsonb_build_array(jsonb_build_object('id','price-freeze','kind','work','title','Price Freeze','days',1,
+     'guideText','Confirm the agreed price before design work begins.','guideVideoUrl','https://example.test/price-freeze'))),
+   jsonb_build_object('id','foundation','name','Foundation','percent',18,'repeatsPerFloor',false,'days',20,'items','[]'::jsonb),
+   jsonb_build_object('id','slabs','name','Slabs','percent',27,'repeatsPerFloor',true,'days',15,'items','[]'::jsonb),
+   jsonb_build_object('id','brickwork','name','Brickwork','percent',15,'repeatsPerFloor',true,'days',15,'items','[]'::jsonb),
+   jsonb_build_object('id','electrical-plumbing','name','Electrical & plumbing','percent',14,'repeatsPerFloor',true,'days',14,'items','[]'::jsonb),
+   jsonb_build_object('id','tiles','name','Tiles','percent',9,'repeatsPerFloor',true,'days',10,'items','[]'::jsonb),
+   jsonb_build_object('id','painting','name','Painting','percent',7,'repeatsPerFloor',true,'days',10,'items','[]'::jsonb)));
  saved:=public.organization_construction_payment_defaults_read(org);
- if saved->0->'steps'->0->>'kind'<>'payment' or
-    saved->0->'steps'->1->>'guideText'<>'Confirm the agreed price before design work begins.' or
-    saved->0->'steps'->1->>'guideVideoUrl'<>'https://example.test/price-freeze' then
-  raise exception 'FAIL: company payment and guide settings were not preserved';
+ if saved->0->>'id'<>'preconstruction' or saved->0->>'days'<>'7' or
+    saved->0->'items'->0->>'title'<>'Price Freeze' or
+    saved->0->'items'->0->>'guideText'<>'Confirm the agreed price before design work begins.' or
+    saved->0->'items'->0->>'guideVideoUrl'<>'https://example.test/price-freeze' then
+  raise exception 'FAIL: reusable construction stage and guide settings were not preserved';
  end if;
- raise notice 'PASS: company payment markers and guide fields persist in settings';
+ raise notice 'PASS: reusable stage days and site guides persist in settings';
 end$$;
 
 -- Read-only restrictions: one watchman sees no construction engineering stage.

@@ -8,6 +8,7 @@
     "./commercial": "./src/commercial.ts",
     "./quotation-document": "./src/quotation-document.ts",
     "./quotation-payment-plan": "./src/quotation-payment-plan.ts",
+    "./quotation-construction-program": "./src/quotation-construction-program.ts",
     "./quotation-stage-requirements": "./src/quotation-stage-requirements.ts",
     "./quotation-milestone-flow": "./src/quotation-milestone-flow.ts",
     "./company-construction-defaults": "./src/company-construction-defaults.ts",
@@ -28,7 +29,8 @@
     "./operations-document": "./src/operations-document.ts",
     "./automation": "./src/automation.ts",
     "./report-document": "./src/report-document.ts",
-    "./construction-payment-schedule": "./src/construction-payment-schedule.ts"
+    "./construction-payment-schedule": "./src/construction-payment-schedule.ts",
+    "./construction-floor-code": "./src/construction-floor-code.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

@@ -61,7 +61,7 @@ export function savedStagePaymentLinks(terms: string): string[][] | null {
     for (const row of decoded) {
       if (
         !Array.isArray(row) ||
-        row.length > 18 ||
+        row.length > 54 ||
         !row.every(
           (x) =>
             typeof x === 'string' &&
@@ -89,7 +89,7 @@ export function encodeStagePaymentLinks(
     result.length > 8000 ||
     linked.some(
       (row) =>
-        row.length > 18 ||
+        row.length > 54 ||
         new Set(row).size !== row.length ||
         row.some(
           (key) =>
