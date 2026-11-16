@@ -1,0 +1,34 @@
+name: Format quotation stage updates (temporary)
+on:
+  push:
+    branches:
+      - fix/quotation-floor-payment-items
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.ref == 'refs/heads/fix/quotation-floor-payment-items'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format eight changed files
+        run: |
+          pnpm exec prettier --write 'apps/business-app/src/app/dashboard/quotations/construction-program-editor.tsx' 'apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts' 'apps/business-app/src/app/dashboard/quotations/studio.css' 'apps/business-app/src/app/dashboard/settings/construction-payment-defaults.tsx' 'packages/core/src/company-construction-defaults.test.ts' 'packages/core/src/company-construction-defaults.ts' 'packages/core/src/quotation-construction-program.test.ts' 'packages/core/src/quotation-construction-program.ts'
+      - name: Commit formatting only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- 'apps/business-app/src/app/dashboard/quotations/construction-program-editor.tsx' 'apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts' 'apps/business-app/src/app/dashboard/quotations/studio.css' 'apps/business-app/src/app/dashboard/settings/construction-payment-defaults.tsx' 'packages/core/src/company-construction-defaults.test.ts' 'packages/core/src/company-construction-defaults.ts' 'packages/core/src/quotation-construction-program.test.ts' 'packages/core/src/quotation-construction-program.ts'
+          if ! git diff --cached --quiet; then
+            git commit -m "style: format floor payment and QC stage changes"
+            git push origin HEAD:fix/quotation-floor-payment-items
+          fi
