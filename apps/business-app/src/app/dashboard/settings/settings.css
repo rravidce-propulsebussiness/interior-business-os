@@ -513,9 +513,7 @@
   }
 }
 
-/* Company construction payment settings — one premium accordion per milestone.
-   The item list is intentionally NOT max-height limited: Show fewer/Show all
-   controls the actual number of rendered rows instead of hiding them in a scroller. */
+/* Company construction programme: reusable stages, substage durations and guides. */
 .us-payment-template-section {
   background: #fffaf7;
   border: 1px solid #eee1d8;
@@ -1986,17 +1984,48 @@ a.ush-tile:focus-visible {
 
 .us-company-stage-editor {
   display: grid;
-  gap: 18px;
+  gap: 14px;
+}
+.us-workflow-intro {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+.us-workflow-saved {
+  padding: 9px 14px;
+  border: 1px solid #a9e4be;
+  border-radius: 999px;
+  background: #ebf8ef;
+  color: #237344;
+  font-size: 13px;
+  font-weight: 800;
+}
+.us-project-calendar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 24px;
+  padding: 14px 18px;
+  border: 1px solid #d9e8ff;
+  border-radius: 14px;
+  background: #f0f6ff;
+  color: #5b7192;
+  font-size: 13px;
+}
+.us-project-calendar strong,
+.us-project-calendar b {
+  color: #263752;
 }
 .us-company-stage-card {
-  padding: 20px;
+  padding: 18px;
   border: 1px solid #ead7ca;
   border-radius: 18px;
   background: #fffaf6;
 }
 .us-company-stage-heading {
   display: grid;
-  grid-template-columns: 24px 42px minmax(180px, 1fr) 160px;
+  grid-template-columns: 24px 42px minmax(180px, 1fr) 140px;
   gap: 12px;
   align-items: center;
 }
@@ -2015,6 +2044,32 @@ a.ush-tile:focus-visible {
   color: #a64718;
   font-weight: 800;
 }
+.us-company-stage-title {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+.us-company-stage-title > input {
+  font-size: 16px;
+  font-weight: 800;
+}
+.us-stage-repeat,
+.us-stage-once {
+  padding: 6px 9px;
+  border-radius: 999px;
+  background: #fff0e5;
+  color: #a64718;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+.us-stage-once {
+  background: #eef5ff;
+  color: #426895;
+}
 .us-company-stage-heading input,
 .us-company-stage-item input,
 .us-company-stage-item select,
@@ -2027,7 +2082,6 @@ a.ush-tile:focus-visible {
   background: white;
   color: #28344a;
 }
-.us-company-stage-heading label,
 .us-company-stage-item label {
   display: grid;
   gap: 5px;
@@ -2035,9 +2089,42 @@ a.ush-tile:focus-visible {
   font-size: 12px;
   font-weight: 700;
 }
-.us-company-stage-heading label input,
 .us-company-stage-item label input {
   width: 100%;
+}
+.us-stage-duration {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 7px;
+  align-items: center;
+  color: #77675f;
+  font-size: 12px;
+  font-weight: 700;
+}
+.us-stage-duration > input {
+  grid-column: 1;
+  width: 100%;
+}
+.us-stage-duration > span {
+  grid-column: 2;
+  grid-row: 2;
+}
+.us-stage-total {
+  margin: 10px 0 14px 78px;
+  color: #738198;
+  font-size: 12px;
+}
+.us-stage-items-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 16px;
+  margin: 0 0 8px 78px;
+  color: #44342c;
+}
+.us-stage-items-heading span {
+  color: #75839a;
+  font-size: 12px;
 }
 .us-company-stage-heading label span {
   display: flex;
@@ -2068,6 +2155,13 @@ a.ush-tile:focus-visible {
 .us-company-stage-item details {
   grid-column: 3 / -1;
   color: #a64718;
+}
+.us-company-stage-item details summary {
+  display: inline-block;
+  cursor: pointer;
+  color: #a64718;
+  font-size: 12px;
+  font-weight: 800;
 }
 .us-company-stage-item details textarea,
 .us-company-stage-item details input {
@@ -2106,11 +2200,31 @@ a.ush-tile:focus-visible {
   padding: 10px 2px;
 }
 @media (max-width: 760px) {
+  .us-workflow-intro {
+    grid-template-columns: 1fr;
+  }
+  .us-workflow-saved {
+    justify-self: start;
+  }
   .us-company-stage-heading {
     grid-template-columns: 24px 38px minmax(0, 1fr);
   }
-  .us-company-stage-heading > label {
+  .us-company-stage-title {
     grid-column: 3;
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+  .us-stage-repeat,
+  .us-stage-once {
+    justify-self: start;
+  }
+  .us-stage-duration {
+    grid-column: 3;
+    grid-template-columns: minmax(0, 100px) auto;
+  }
+  .us-stage-total,
+  .us-stage-items-heading {
+    margin-left: 0;
   }
   .us-company-stage-item {
     grid-template-columns: 20px 48px minmax(0, 1fr) 70px;
