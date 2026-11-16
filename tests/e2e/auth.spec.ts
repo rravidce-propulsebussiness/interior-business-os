@@ -62,7 +62,10 @@ test('protected dashboards require authentication', async ({ page }, info) => {
   await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/login$/);
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Welcome back' }),
+    page.getByRole('heading', {
+      level: 1,
+      name: info.project.name === 'business-app' ? 'Welcome back' : 'Sign in',
+    }),
   ).toBeVisible();
 });
 test('login provides accessible form fields and validation', async ({
