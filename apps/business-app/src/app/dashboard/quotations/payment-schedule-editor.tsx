@@ -401,8 +401,7 @@ export function PaymentScheduleEditor({
 
       {industry==='construction'&&!floorNames.length&&!savedPlan&&editable&&
         <p className="qs-payment-footnote">
-          Save the floor-wise SFT quotation scope first to generate slab, brickwork and finishing payments for the actual floors.
-          You can still add a fully custom schedule using Add milestone.
+          Save the floor-wise SFT quotation scope first. Company payment defaults and linked work will then be added automatically.
         </p>}
       <div className="qs-payment-stages">
         <div className="qs-payment-table-head" aria-hidden="true">
