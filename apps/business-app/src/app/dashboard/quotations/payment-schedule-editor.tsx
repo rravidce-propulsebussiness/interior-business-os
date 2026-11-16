@@ -19,6 +19,7 @@ import {
   applyCompanyPaymentDefaults,
   applyCompanyWorkDefaults,
   companyConstructionPaymentRows,
+  companyWorkSnapshotNeedsSync,
   type CompanyConstructionPaymentRow,
 } from '@business-os/core/company-construction-defaults';
 import {
@@ -170,7 +171,11 @@ export function PaymentScheduleEditor({
       : null;
   const workSnapshotNeedsSync = Boolean(
     companyWorkSnapshot &&
-    JSON.stringify(savedWorkflow) !== JSON.stringify(companyWorkSnapshot.flow),
+    companyWorkSnapshotNeedsSync(
+      savedWorkflow,
+      originalRequirements,
+      companyWorkSnapshot,
+    ),
   );
   // Drafts without a payment snapshot, or with missing/outdated company work,
   // must copy the Settings template into their quotation before it is shown.

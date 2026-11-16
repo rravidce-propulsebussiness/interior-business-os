@@ -1273,32 +1273,26 @@ describe('construction quotation snapshots use the current company payment stage
   const editor = file('./payment-schedule-editor.tsx');
 
   it('copies configured company work into new or outdated editable quotation snapshots', () => {
-    expect(editor).toContain(
-      "const companySchedule=industry==='construction'&&floorNames.length&&defaultCompanyRows.length",
+    expect(editor).toMatch(
+      /const companySchedule\s*=\s*industry === 'construction' &&\s*floorNames\.length &&\s*defaultCompanyRows\.length/,
     );
-    expect(editor).toContain(
-      'const syncingCompanySchedule=Boolean(editable&&companySchedule?.length&&',
+    expect(editor).toMatch(
+      /const savedWorkflow\s*=\s*visibleMilestoneFlow\(\s*initial\.terms,\s*initialRows,\s*originalRequirements,\s*\)/,
     );
-    expect(editor).toContain(
-      'JSON.stringify(storedRows)!==JSON.stringify(companySchedule)',
+    expect(editor).toMatch(
+      /const hasCompanyWorkDefaults\s*=\s*defaultCompanyRows\.some\(\s*\(row\) => \(row\.steps \?\? \[\]\)\.length > 0/,
     );
-    expect(editor).toContain(
-      'const savedWorkflow=visibleMilestoneFlow(initial.terms,initialRows,originalRequirements)',
+    expect(editor).toMatch(
+      /companyWorkSnapshotNeedsSync\(\s*savedWorkflow,\s*originalRequirements,\s*companyWorkSnapshot/,
     );
-    expect(editor).toContain(
-      'const hasCompanyWorkDefaults=defaultCompanyRows.some(row=>(row.steps??[]).length>0)',
+    expect(editor).toMatch(
+      /const syncingCompanySchedule\s*=\s*Boolean\(\s*editable &&\s*companySchedule\?\.length &&\s*\(!savedPlan \|\|[\s\S]*workSnapshotNeedsSync/,
     );
-    expect(editor).toContain(
-      'JSON.stringify(savedWorkflow)!==JSON.stringify(companyWorkSnapshot.flow)',
+    expect(editor).toMatch(
+      /const inheritedWork\s*=\s*syncingCompanySchedule && companyWorkSnapshot/,
     );
-    expect(editor).toContain(
-      '(!savedPlan||JSON.stringify(storedRows)!==JSON.stringify(companySchedule)||',
-    );
-    expect(editor).toContain(
-      'const inheritedWork=syncingCompanySchedule&&companyWorkSnapshot',
-    );
-    expect(editor).toContain(
-      "if(!editable||industry!=='construction'||!syncingCompanySchedule",
+    expect(editor).toMatch(
+      /if \(\s*!editable \|\|\s*industry !== 'construction' \|\|\s*!syncingCompanySchedule/,
     );
     expect(editor).toContain('Updating this draft from the');
   });

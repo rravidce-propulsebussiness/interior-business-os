@@ -7,6 +7,7 @@ import {
   hydrateCompanyWorkDefaults,
   inferCompanyWorkAreaCode,
   companyWorkAreaLabel,
+  companyWorkSnapshotNeedsSync,
   planningWorkDefaults,
   foundationWorkDefaults,
 } from './company-construction-defaults';
@@ -18,6 +19,38 @@ import {
 } from './quotation-milestone-flow';
 
 describe('company construction defaults vs quotation snapshot', () => {
+  it('resyncs changed work content when item references stayed the same', () => {
+    const flow = {
+      '0': [{ kind: 'work' as const, code: 'PRECONSTRUCTION', index: 0 }],
+    };
+    const oldRequirements = {
+      PRECONSTRUCTION: {
+        work: ['Old planning item'],
+        materials: [],
+        checks: [],
+        reports: [],
+      },
+    };
+    const configured = {
+      flow,
+      requirements: {
+        PRECONSTRUCTION: {
+          work: ['Configured planning item'],
+          materials: [],
+          checks: [],
+          reports: [],
+        },
+      },
+    };
+
+    expect(
+      companyWorkSnapshotNeedsSync(flow, oldRequirements, configured),
+    ).toBe(true);
+    expect(
+      companyWorkSnapshotNeedsSync(flow, configured.requirements, configured),
+    ).toBe(false);
+  });
+
   it('validates percentages and preserves current quotation floor codes', () => {
     const saved = companyConstructionPaymentRows.parse([
       { name: 'Advance & Design Fee', percent: 20 },
