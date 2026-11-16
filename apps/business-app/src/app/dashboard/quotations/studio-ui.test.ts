@@ -891,7 +891,7 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(payments).toContain('Save payment schedule');
     expect(program).toContain('data-studio-save="payments"');
     expect(program).toContain('Project start date');
-    expect(program).toContain('Target handover');
+    expect(program).toContain('Estimated handover');
     expect(payments).toContain('qs-payment-summary');
     expect(payments).toContain('qs-payment-row');
     expect(payments).not.toContain('<table');
@@ -907,10 +907,8 @@ describe('streamlined quote, terms and payment Studio', () => {
       'companyDefaults={companyPayments.error ? [] : companyPayments.data}',
     );
     expect(payments).toContain('companyDefaults={props.companyDefaults}');
-    expect(program).toContain(
-      'Work, payment, check and QC items come from Company Settings.',
-    );
-    expect(program).toContain('Company Settings.');
+    expect(program).toContain('Synced from Company Settings');
+    expect(program).toContain('Work sequence is read only');
     expect(program).not.toContain('+ Add work');
     expect(program).not.toContain('Remove item');
   });
@@ -1208,14 +1206,12 @@ describe('construction quotation schedule is managed from company settings', () 
   const editor = file('./construction-program-editor.tsx');
 
   it('renders a settings-synced quote schedule with automatic floor dates and no work editing', () => {
-    expect(editor).toContain(
-      'BOQ-linked payment defaults loaded. Change any amount',
-    );
+    expect(editor).toContain('Synced from Company Settings');
     expect(editor).toContain('Project start date');
     expect(editor).toContain('Skip Sundays');
-    expect(editor).toContain('Schedule duration');
-    expect(editor).toContain('Target handover');
-    expect(editor).toContain('Company Settings.');
+    expect(editor).toContain('Total planned duration');
+    expect(editor).toContain('Estimated handover');
+    expect(editor).toContain('Work sequence is read only');
     expect(editor).not.toContain('+ Add work');
     expect(editor).not.toContain('Share of quotation (%)');
     expect(editor).not.toContain('Existing construction work, materials');

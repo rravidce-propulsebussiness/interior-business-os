@@ -2025,9 +2025,21 @@ a.ush-tile:focus-visible {
 }
 .us-company-stage-heading {
   display: grid;
-  grid-template-columns: 24px 42px minmax(180px, 1fr) 140px;
+  grid-template-columns: 24px 42px minmax(180px, 1fr) 140px 38px;
   gap: 12px;
   align-items: center;
+}
+.us-stage-toggle {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #ead7ca;
+  border-radius: 50%;
+  background: #fff;
+  color: #9b4c22;
+  font-size: 19px;
+  font-weight: 800;
 }
 .us-stage-grip {
   color: #9b7160;
@@ -2113,6 +2125,15 @@ a.ush-tile:focus-visible {
   margin: 10px 0 14px 78px;
   color: #738198;
   font-size: 12px;
+}
+.us-stage-description {
+  margin: 10px 0 0 78px;
+  color: #64758d;
+  font-size: 13px;
+}
+.us-stage-description span {
+  color: #a44c20;
+  font-weight: 700;
 }
 .us-stage-items-heading {
   display: flex;
@@ -2207,7 +2228,7 @@ a.ush-tile:focus-visible {
     justify-self: start;
   }
   .us-company-stage-heading {
-    grid-template-columns: 24px 38px minmax(0, 1fr);
+    grid-template-columns: 24px 38px minmax(0, 1fr) 38px;
   }
   .us-company-stage-title {
     grid-column: 3;
@@ -2222,8 +2243,13 @@ a.ush-tile:focus-visible {
     grid-column: 3;
     grid-template-columns: minmax(0, 100px) auto;
   }
+  .us-stage-toggle {
+    grid-column: 4;
+    grid-row: 1;
+  }
   .us-stage-total,
-  .us-stage-items-heading {
+  .us-stage-items-heading,
+  .us-stage-description {
     margin-left: 0;
   }
   .us-company-stage-item {

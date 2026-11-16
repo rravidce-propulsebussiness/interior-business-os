@@ -178,10 +178,7 @@ export function ConstructionProgramEditor({
     ? parsed.data
     : defaultCompanyConstructionStages;
   const saved = savedQuotationConstructionProgram(initial.terms);
-  // Keep a quotation revision's own work and payment markers stable even
-  // if the company later edits its reusable template.
   // Company Settings is the source of truth for reusable stages and work.
-  // Refresh old quotation snapshots from the current configured workflow.
   const stages = defaults;
   const [startDate, setStartDate] = useState(
     saved?.startDate ?? dateAt(new Date()),
@@ -227,6 +224,10 @@ export function ConstructionProgramEditor({
     return { ...fromBoq, ...fromSaved };
   });
   const [feedback, setFeedback] = useState('');
+  const [expandedStages, setExpandedStages] = useState<string[]>([
+    'preconstruction',
+    'slabs',
+  ]);
   const [pending, start] = useTransition();
   const router = useRouter();
   const fmt = (value: number) =>
@@ -347,17 +348,34 @@ export function ConstructionProgramEditor({
     <section className="qs-card qs-construction-program">
       <header className="qs-program-header">
         <div>
-          <h2>Payments &amp; Work</h2>
+          <h2>Construction workflow · Payments &amp; Work</h2>
           <p>
-            Work, payment, check and QC items come from Company Settings. Each
-            payment item is priced separately for its floor in this quotation.
+            Seven stages follow the same reusable Company Settings workflow.
+            Finish stages repeat floor by floor.
           </p>
         </div>
+      </header>
+      <div className="qs-program-synced-notice">
+        <strong>
+          Synced from Company Settings · Work sequence is read only
+        </strong>
+        <span>
+          Work, checks, QC guides and stage durations are managed in Settings.
+          Payment amounts can be set for this quotation.
+        </span>
+      </div>
+      {feedback && (
+        <p role="status" className="qs-program-feedback">
+          {feedback}
+        </p>
+      )}
+      <div className="qs-program-calendar">
         <div className="qs-program-start">
-          <label htmlFor="construction-program-start">Project start date</label>
+          <span>Project start date</span>
           {editable ? (
             <input
               id="construction-program-start"
+              aria-label="Project start date"
               type="date"
               value={startDate}
               onChange={(event) => setStartDate(event.target.value)}
@@ -366,24 +384,14 @@ export function ConstructionProgramEditor({
             <strong>{showDate(new Date(startDate + 'T12:00:00'))}</strong>
           )}
         </div>
-      </header>
-      <p className="qs-note">
-        {Object.keys(boqPaymentAmounts).length
-          ? 'BOQ-linked payment defaults loaded. Change any amount to override it for this quotation only.'
-          : 'No stage-and-floor BOQ payment breakdown is linked to this quotation. Enter the agreed amount for each payment marker.'}
-      </p>
-      {feedback && (
-        <p role="status" className="qs-program-feedback">
-          {feedback}
-        </p>
-      )}
-      <div className="qs-program-calendar">
         <div>
           <span>Calendar basis</span>
-          <strong>{skipSundays ? 'Working days' : 'Calendar days'}</strong>
+          <strong>
+            {skipSundays ? 'Working days (Sundays excluded)' : 'Calendar days'}
+          </strong>
         </div>
         {editable && (
-          <label>
+          <label className="qs-program-skip-sundays">
             <input
               type="checkbox"
               checked={skipSundays}
@@ -393,125 +401,208 @@ export function ConstructionProgramEditor({
           </label>
         )}
         <div>
-          <span>Schedule duration</span>
+          <span>Estimated handover</span>
+          <strong>{targetHandover ? showDate(targetHandover) : '—'}</strong>
+        </div>
+        <div>
+          <span>Total planned duration</span>
           <strong>
             {plannedDays} {skipSundays ? 'working days' : 'calendar days'}
           </strong>
         </div>
-        <div>
-          <span>Target handover</span>
-          <strong>{targetHandover ? showDate(targetHandover) : '—'}</strong>
-        </div>
       </div>
       <div className="qs-program-list">
-        <div className="qs-program-columns">
-          <span>#</span>
-          <span>Stage / work</span>
-          <span>Payment amount</span>
-          <span>Target dates</span>
-        </div>
-        {datedStages.map(({ stage, floors }, stageIndex) => (
-          <article className="qs-program-stage" key={stage.id}>
-            <div className="qs-program-payment">
-              <span className="qs-program-number">{stageIndex + 1}</span>
-              <div className="qs-program-stage-title">
-                <strong>{stage.name}</strong>
-                <small>
-                  {stage.repeatsPerFloor
-                    ? 'Repeats for every quoted floor'
-                    : 'One-time stage'}
-                </small>
-              </div>
-              <strong>
-                {fmt(
-                  allocations
-                    .filter((row) => row.stageId === stage.id)
-                    .reduce((sum, row) => sum + row.amount, 0),
-                )}
-              </strong>
-              <span>
-                {showDate(floors[0]!.start)} –{' '}
-                {showDate(floors[floors.length - 1]!.end)}
-              </span>
-            </div>
-            <div className="qs-program-work">
-              {floors.map((floor, floorIndex) => (
-                <section
-                  className="qs-program-floor"
-                  key={stage.id + '-' + floorIndex}
-                >
-                  <h3>
-                    {floor.floorName || stage.name} · {showDate(floor.start)} –{' '}
-                    {showDate(floor.end)}
-                  </h3>
-                  <ol>
-                    {floor.items
-                      .filter((item) => item.kind !== 'payment')
-                      .map((item) => (
-                        <li key={item.id}>
-                          <div>
-                            <span className="qs-program-kind">
-                              {item.kind === 'qc'
-                                ? 'QC'
-                                : item.kind === 'check'
-                                  ? 'Site check'
-                                  : item.kind}
-                            </span>
-                            <strong>{item.title}</strong>
-                            {item.guideText && <p>{item.guideText}</p>}
-                            {item.guideVideoUrl && (
-                              <a
-                                href={item.guideVideoUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                Watch site guide
-                              </a>
-                            )}
-                          </div>
-                          <span>{item.days} planned days</span>
-                        </li>
-                      ))}
-                  </ol>
-                  {stagePaymentItems(stage).map((item) => {
-                    const key = paymentItemKey(stage.id, floorIndex, item.id);
+        {datedStages.map(({ stage, floors }, stageIndex) => {
+          const stageAllocations = allocations.filter(
+            (row) => row.stageId === stage.id,
+          );
+          const stageAmount = stageAllocations.reduce(
+            (sum, row) => sum + row.amount,
+            0,
+          );
+          const isExpanded = expandedStages.includes(stage.id);
+          const stageDuration =
+            floors.length *
+            Math.max(
+              stage.days,
+              stage.items.reduce((days, item) => days + item.days, 0),
+            );
+          return (
+            <article className="qs-program-stage" key={stage.id}>
+              <button
+                className="qs-program-stage-toggle"
+                type="button"
+                aria-expanded={isExpanded}
+                onClick={() =>
+                  setExpandedStages((current) =>
+                    isExpanded
+                      ? current.filter((id) => id !== stage.id)
+                      : [...current, stage.id],
+                  )
+                }
+              >
+                <span className="qs-program-number">{stageIndex + 1}</span>
+                <span className="qs-program-stage-title">
+                  <strong>{stage.name}</strong>
+                  <small>
+                    {stage.repeatsPerFloor
+                      ? 'Repeats: ' + floorNames.join(', ')
+                      : 'One time'}
+                  </small>
+                </span>
+                <span className="qs-program-stage-dates">
+                  <small>Planned</small>
+                  <strong>
+                    {showDate(floors[0]!.start)} –{' '}
+                    {showDate(floors[floors.length - 1]!.end)}
+                  </strong>
+                  <small>
+                    {stageDuration} {skipSundays ? 'working days' : 'days'}
+                  </small>
+                </span>
+                <span className="qs-program-stage-payment">
+                  <small>Payment milestone</small>
+                  <strong>{fmt(stageAmount)}</strong>
+                </span>
+                <span className="qs-program-stage-chevron">
+                  {isExpanded ? '⌃' : '⌄'}
+                </span>
+              </button>
+              {isExpanded && (
+                <div className="qs-program-stage-content">
+                  {floors.map((floor, floorIndex) => {
+                    const floorPayments = stagePaymentItems(stage).map(
+                      (item) => ({
+                        item,
+                        amount:
+                          allocations.find(
+                            (row) =>
+                              row.stageId === stage.id &&
+                              row.floorIndex === floorIndex &&
+                              row.item.id === item.id,
+                          )?.amount ?? 0,
+                      }),
+                    );
                     return (
-                      <div className="qs-program-payment-entry" key={key}>
-                        <strong>Payment · {item.title}</strong>
-                        <label>
-                          Amount ({currency})
-                          <input
-                            aria-label={
-                              'Payment amount for ' +
-                              stage.name +
-                              ' ' +
-                              (floor.floorName || 'building') +
-                              ' ' +
-                              item.title
-                            }
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            inputMode="decimal"
-                            value={values[key] ?? ''}
-                            disabled={!editable}
-                            onChange={(event) =>
-                              setValues((current) => ({
-                                ...current,
-                                [key]: event.target.value,
-                              }))
-                            }
-                            placeholder="Enter amount"
-                          />
-                        </label>
-                      </div>
+                      <section
+                        className="qs-program-floor"
+                        key={stage.id + '-' + floorIndex}
+                      >
+                        <header className="qs-program-floor-heading">
+                          <strong>
+                            {floor.floorName || 'Whole project'}
+                            {stage.repeatsPerFloor ? ' floor' : ''}
+                          </strong>
+                          <span>
+                            {showDate(floor.start)} – {showDate(floor.end)}
+                          </span>
+                        </header>
+                        <div className="qs-program-work-table">
+                          <div className="qs-program-work-head">
+                            <span>#</span>
+                            <span>Work item</span>
+                            <span>Planned dates</span>
+                            <span>Days</span>
+                            <span>Check / QC</span>
+                            <span>Guide</span>
+                          </div>
+                          {floor.items
+                            .filter((item) => item.kind !== 'payment')
+                            .map((item, itemIndex) => (
+                              <div
+                                className="qs-program-work-row"
+                                key={item.id}
+                              >
+                                <span className="qs-program-work-index">
+                                  {itemIndex + 1}
+                                </span>
+                                <span className="qs-program-work-name">
+                                  <strong>{item.title}</strong>
+                                  <small>{item.kind}</small>
+                                  {item.guideText && <p>{item.guideText}</p>}
+                                </span>
+                                <span>
+                                  {showDate(item.start)} – {showDate(item.end)}
+                                </span>
+                                <span>{item.days} days</span>
+                                <span>
+                                  {item.kind === 'check' ||
+                                  item.kind === 'test' ? (
+                                    <b className="qs-program-check-chip">
+                                      ✓ Check
+                                    </b>
+                                  ) : null}
+                                  {item.kind === 'qc' ? (
+                                    <b className="qs-program-qc-chip">QC</b>
+                                  ) : null}
+                                </span>
+                                <span>
+                                  {item.guideVideoUrl ? (
+                                    <a
+                                      href={item.guideVideoUrl}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                    >
+                                      Watch guide ↗
+                                    </a>
+                                  ) : item.guideText ? (
+                                    'Guide included'
+                                  ) : (
+                                    '—'
+                                  )}
+                                </span>
+                              </div>
+                            ))}
+                        </div>
+                        {floorPayments.map(({ item, amount }) => {
+                          const key = paymentItemKey(
+                            stage.id,
+                            floorIndex,
+                            item.id,
+                          );
+                          return (
+                            <div className="qs-program-payment-entry" key={key}>
+                              <span>Payment milestone · {item.title}</span>
+                              {editable ? (
+                                <label>
+                                  <span>{currency}</span>
+                                  <input
+                                    aria-label={
+                                      'Payment amount for ' +
+                                      stage.name +
+                                      ' ' +
+                                      (floor.floorName || 'building') +
+                                      ' ' +
+                                      item.title
+                                    }
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    inputMode="decimal"
+                                    value={values[key] ?? ''}
+                                    onChange={(event) =>
+                                      setValues((current) => ({
+                                        ...current,
+                                        [key]: event.target.value,
+                                      }))
+                                    }
+                                    placeholder="Enter amount"
+                                  />
+                                </label>
+                              ) : (
+                                <strong>{fmt(amount)}</strong>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </section>
                     );
                   })}
-                </section>
-              ))}
-            </div>
-          </article>
-        ))}
+                </div>
+              )}
+            </article>
+          );
+        })}
       </div>
       <footer className="qs-program-summary">
         <strong>
