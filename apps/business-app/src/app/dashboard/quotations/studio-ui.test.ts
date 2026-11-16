@@ -120,7 +120,6 @@ describe('consistent premium quotation document across previews and PDF routes',
 describe('minimal quotation studio navigation', () => {
   const studio = file('./studio-editor.tsx');
   const sft = file('./premium-sft-builder.tsx');
-  const payments = file('./payment-schedule-editor.tsx');
   const interior = file('./interior-room-builder.tsx');
   const construction = file('./construction-selector.tsx');
   const page = file('./[id]/studio/page.tsx');
@@ -1060,8 +1059,7 @@ describe('customer final quotation selection', () => {
 describe('quotation stage requirements inline editing', () => {
   const editor = file('./stage-requirements-editor.tsx');
   const styles = file('./studio.css');
-  const schedule = file('./payment-schedule-editor.tsx');
-
+ 
   it('provides inline Save item and Cancel without removing checklist toggles', () => {
     expect(editor).toContain('const saveEdit = () =>');
     expect(editor).toContain('setEditing(label)');
