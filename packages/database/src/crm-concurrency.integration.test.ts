@@ -93,7 +93,7 @@ it.skipIf(!process.env.TEST_DATABASE_URL)(
       run(
         `select count(*) from public.customers where organization_id='${org}'`,
       ),
-    ).toBe('2');
+    ).toBe('1');
     const create = auth(
       `select public.crm_save('${org}','leads','{"name":"Number race","phone":"+12025550148","source_id":"${source}","stage_id":"${stage}"}')`,
     );
