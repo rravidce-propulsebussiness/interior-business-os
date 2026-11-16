@@ -25,7 +25,7 @@ describe('company construction stage templates', () => {
       'tiles',
       'painting',
     ]);
-    expect(defaultCompanyConstructionStages.every((stage) => stage.percent === undefined)).toBe(true);
+    expect(defaultCompanyConstructionStages.every((stage) => !('percent' in stage))).toBe(true);
   });
 
   it('accepts per-quote payment markers but rejects incomplete stages and unsafe guides', () => {
