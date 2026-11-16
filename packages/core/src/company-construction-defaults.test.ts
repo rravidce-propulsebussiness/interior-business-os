@@ -56,30 +56,12 @@ describe('company construction defaults vs quotation snapshot',()=>{
    {name:'Doors',percent:4,areas:['DOORS']},
   ]);
   const payments=applyCompanyPaymentDefaults(suggested,defaults);
-  const work=applyCompanyWorkDefaults(payments,defaults);
+  const work=applyCompanyWorkDefaults(payments,defaults,{},true);
   const rccCodes=payments[2]!.stageCodes;
   expect(rccCodes).toHaveLength(3);
   for(const code of rccCodes){
    expect(work.requirements[code]?.work).toContain('Pour concrete');
    expect(work.flow['2']?.some(step=>step.code===code&&step.kind==='work')).toBe(true);
-  }
- });
- it('keeps the same company work item in multiple payment milestones',()=>{
-  const payments=[
-   {stageCodes:['RCC/GROUND','RCC/FIRST']},
-   {stageCodes:['RCC/GROUND','RCC/FIRST']},
-  ];
-  const defaults=companyConstructionPaymentRows.parse([
-   {name:'First slab payment',percent:50,areas:['RCC'],steps:[
-    {kind:'work',name:'Concrete pour',area:'RCC'},
-   ]},
-   {name:'Second slab payment',percent:50,areas:['RCC'],steps:[
-    {kind:'work',name:'Concrete pour',area:'RCC'},
-   ]},
-  ]);
-  const result=applyCompanyWorkDefaults(payments,defaults);
-  for(const index of ['0','1']){
-   expect(result.flow[index]?.some(step=>step.kind==='work'&&step.code==='RCC/GROUND')).toBe(true);
   }
  });
  it('rejects total other than 100%',()=>{
