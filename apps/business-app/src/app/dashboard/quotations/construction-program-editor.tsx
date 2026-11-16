@@ -140,7 +140,8 @@ export function ConstructionProgramEditor({
   const defaults = parsed.success ? parsed.data : defaultCompanyConstructionStages;
   const saved = savedQuotationConstructionProgram(initial.terms);
   // Keep a quotation revision's own work and payment markers stable even
-  // if the company later edits its reusable template.\n  const stages = saved?.stages ?? defaults;
+  // if the company later edits its reusable template.
+  const stages = saved?.stages ?? defaults;
   const startDate = saved?.startDate ?? dateAt(new Date());
   const amount = Number(total) || 0;
   const storedPlan = savedStagePaymentPlan(initial.terms);
