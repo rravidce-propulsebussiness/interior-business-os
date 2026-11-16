@@ -26,12 +26,8 @@ export function ConstructionPaymentDefaults({
     saveConstructionPaymentDefaults,
     initialState,
   );
-  const [stages, setStages] = useState(initial);
+  const [stages, setStages] = useState<CompanyConstructionStage[]>(() =>\n    initial.map((stage) => ({\n      id: stage.id,\n      name: stage.name,\n      repeatsPerFloor: stage.repeatsPerFloor,\n      days: stage.days,\n      items: stage.items,\n    })),\n  );
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const total = stages.reduce(
-    (sum, stage) => sum + Number(stage.percent || 0),
-    0,
-  );
   const patchStage = (
     index: number,
     patch: Partial<CompanyConstructionStage>,
@@ -60,10 +56,7 @@ export function ConstructionPaymentDefaults({
     <form action={action} className="us-company-stage-editor">
       <input type="hidden" name="rows" value={JSON.stringify(stages)} />
       <p className="us-info">
-        Set the payment share and expected days once. Pre-construction and
-        foundation happen once; the remaining stages repeat for each quoted
-        floor. Work items, checks and QC instructions are copied into each new
-        quotation.
+        Set stage days and the order of work, materials, checks, QC and payment\n        markers. Pre-construction and foundation happen once; the remaining\n        stages repeat for each quoted floor. Payment amounts are entered in\n        quotations, never fixed across every project.
       </p>
       {stages.map((stage, index) => (
         <section
@@ -94,25 +87,7 @@ export function ConstructionPaymentDefaults({
                 patchStage(index, { name: event.target.value })
               }
             />
-            <label>
-              Payment share{' '}
-              <span>
-                <input
-                  type="number"
-                  min="0.01"
-                  max="100"
-                  step="0.01"
-                  value={stage.percent}
-                  disabled={!canEdit}
-                  onChange={(event) =>
-                    patchStage(index, { percent: Number(event.target.value) })
-                  }
-                />
-                %
-              </span>
-            </label>
-            <label>
-              Stage days{' '}
+            <label>\n              Stage days{' '}
               <input
                 type="number"
                 min="0"
@@ -193,7 +168,7 @@ export function ConstructionPaymentDefaults({
                     })
                   }
                 >
-                  {['work', 'material', 'check', 'test', 'qc'].map((kind) => (
+                  {['work', 'material', 'check', 'test', 'qc', 'payment'].map((kind) => (
                     <option key={kind} value={kind}>
                       {kind === 'qc'
                         ? 'QC'
@@ -273,7 +248,7 @@ export function ConstructionPaymentDefaults({
                 defaultValue="work"
                 aria-label="New item type"
               >
-                {['work', 'material', 'check', 'test', 'qc'].map((kind) => (
+                {['work', 'material', 'check', 'test', 'qc', 'payment'].map((kind) => (
                   <option key={kind} value={kind}>
                     {kind}
                   </option>
@@ -287,7 +262,7 @@ export function ConstructionPaymentDefaults({
                     [stage.id]: event.target.value,
                   }))
                 }
-                placeholder="Add work, material, check or QC"
+                placeholder="Add work, material, check, QC or payment"
               />
               <button
                 type="button"
@@ -305,7 +280,7 @@ export function ConstructionPaymentDefaults({
                         kind: (select?.value ??
                           'work') as CompanyStageItem['kind'],
                         title,
-                        days: 1,
+                        days: select?.value === 'payment' ? 0 : 1,
                       },
                     ],
                   });
@@ -319,12 +294,12 @@ export function ConstructionPaymentDefaults({
         </section>
       ))}
       <footer className="us-company-stage-save">
-        <strong>Total payment share: {total.toFixed(2)}%</strong>
+        <strong>Payment amounts are set per quotation and floor.</strong>
         {canEdit && (
           <button
             className="us-button-primary"
             type="submit"
-            disabled={pending || Math.abs(total - 100) > 0.001}
+            disabled={pending}
           >
             {pending ? 'Saving…' : 'Save stages & work'}
           </button>
