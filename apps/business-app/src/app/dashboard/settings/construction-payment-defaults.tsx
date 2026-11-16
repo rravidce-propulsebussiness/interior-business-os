@@ -26,7 +26,15 @@ export function ConstructionPaymentDefaults({
     saveConstructionPaymentDefaults,
     initialState,
   );
-  const [stages, setStages] = useState<CompanyConstructionStage[]>(() =>\n    initial.map((stage) => ({\n      id: stage.id,\n      name: stage.name,\n      repeatsPerFloor: stage.repeatsPerFloor,\n      days: stage.days,\n      items: stage.items,\n    })),\n  );
+  const [stages, setStages] = useState<CompanyConstructionStage[]>(() =>
+    initial.map((stage) => ({
+      id: stage.id,
+      name: stage.name,
+      repeatsPerFloor: stage.repeatsPerFloor,
+      days: stage.days,
+      items: stage.items,
+    })),
+  );
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const patchStage = (
     index: number,
@@ -56,7 +64,10 @@ export function ConstructionPaymentDefaults({
     <form action={action} className="us-company-stage-editor">
       <input type="hidden" name="rows" value={JSON.stringify(stages)} />
       <p className="us-info">
-        Set stage days and the order of work, materials, checks, QC and payment\n        markers. Pre-construction and foundation happen once; the remaining\n        stages repeat for each quoted floor. Payment amounts are entered in\n        quotations, never fixed across every project.
+        Set stage days and the order of work, materials, checks, QC and payment
+        markers. Pre-construction and foundation happen once; the remaining
+        stages repeat for each quoted floor. Payment amounts are entered in
+        quotations, never fixed across every project.
       </p>
       {stages.map((stage, index) => (
         <section
@@ -87,7 +98,8 @@ export function ConstructionPaymentDefaults({
                 patchStage(index, { name: event.target.value })
               }
             />
-            <label>\n              Stage days{' '}
+            <label>
+              Stage days{' '}
               <input
                 type="number"
                 min="0"
