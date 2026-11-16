@@ -25,6 +25,7 @@ type Props = {
 
 const codeMap: Record<string, (floor: string) => string[]> = {
   preconstruction: () => ['PRECONSTRUCTION', 'DESIGN'],
+  design: () => ['DESIGN'],
   foundation: () => ['SITE_PREP', 'FOUNDATION', 'PLINTH'],
   slabs: (floor) => ['RCC/' + quotedConstructionFloorCode(floor)],
   brickwork: (floor) => ['MASONRY/' + quotedConstructionFloorCode(floor)],
@@ -37,7 +38,8 @@ const codeMap: Record<string, (floor: string) => string[]> = {
   painting: (floor) => ['DOORS/' + quotedConstructionFloorCode(floor)],
 };
 const paymentName: Record<string, string> = {
-  preconstruction: 'Design payment',
+  preconstruction: 'Price freeze payment',
+  design: 'Design payment',
   foundation: 'Foundation payment',
   slabs: 'Slab payment',
   brickwork: 'Brickwork payment',

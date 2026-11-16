@@ -903,7 +903,7 @@ describe('streamlined quote, terms and payment Studio', () => {
     const payments = file('./payment-schedule-editor.tsx');
     const program = file('./construction-program-editor.tsx');
     const settingsCss = file('../settings/settings.css');
-    expect(page).toContain('organization_construction_payment_defaults_read');
+    expect(page).toContain('organization_industry_workflow_read');
     expect(page).toContain(
       'companyDefaults={companyPayments.error ? [] : companyPayments.data}',
     );
