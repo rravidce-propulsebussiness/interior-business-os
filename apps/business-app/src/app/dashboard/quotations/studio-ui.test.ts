@@ -1037,3 +1037,18 @@ describe('Settings category dashboard keeps one canonical settings workspace',()
   expect(css).not.toContain('.us-tabs{display:flex');
  });
 });
+
+
+describe('construction quotation schedule is managed from company settings',()=>{
+ const editor=file('./payment-schedule-editor.tsx');
+ const workflow=file('./milestone-workflow-builder.tsx');
+
+ it('renders construction payments and work without quotation editing controls',()=>{
+  expect(editor).toContain("const scheduleEditable=editable&&industry!=='construction'");
+  expect(editor).toContain('editable={scheduleEditable}');
+  expect(editor).toContain('className="qs-payment-stage-readonly"');
+  expect(editor).toContain('className="qs-payment-percent-readonly"');
+  expect(editor).toContain('Payment and work milestones are fixed from this quotation.');
+  expect(workflow).toContain('{editable&&<div className="qs-one-flow-footer">');
+ });
+});
