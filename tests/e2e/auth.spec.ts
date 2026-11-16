@@ -44,7 +44,9 @@ test('public marketplace teaser never leaks private supplier rates', async ({
   await expect(
     market.getByRole('link', { name: 'Access marketplace' }),
   ).toHaveAttribute('href', '/register');
-  await expect(market).toContainText('Seller access and purchasing depend on approval');
+  await expect(market).toContainText(
+    'Seller access and purchasing depend on approval',
+  );
   await expect(market).not.toContainText('Unit price');
   await page.setViewportSize({ width: 375, height: 812 });
   await expect(market.getByRole('heading', { level: 2 })).toBeVisible();
