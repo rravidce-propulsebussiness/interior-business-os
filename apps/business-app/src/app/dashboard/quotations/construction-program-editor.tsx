@@ -117,7 +117,7 @@ function stagedDates(stages: CompanyConstructionStage[], floors: string[], start
       const items = stage.items.map((item) => {
         const itemStart = new Date(itemCursor);
         const itemEnd = addWorkingDays(itemStart, Math.max(0, item.days - 1));
-        itemCursor = addWorkingDays(itemEnd, 1);
+        if (item.days > 0) itemCursor = addWorkingDays(itemEnd, 1);
         return { ...item, start: itemStart, end: itemEnd };
       });
       cursor = addWorkingDays(end, 1);
@@ -139,7 +139,8 @@ export function ConstructionProgramEditor({
   const parsed = companyConstructionStages.safeParse(companyDefaults);
   const defaults = parsed.success ? parsed.data : defaultCompanyConstructionStages;
   const saved = savedQuotationConstructionProgram(initial.terms);
-  const stages = editable ? defaults : (saved?.stages ?? defaults);
+  // Keep a quotation revision's own work and payment markers stable even
+  // if the company later edits its reusable template.\n  const stages = saved?.stages ?? defaults;
   const startDate = saved?.startDate ?? dateAt(new Date());
   const amount = Number(total) || 0;
   const storedPlan = savedStagePaymentPlan(initial.terms);
