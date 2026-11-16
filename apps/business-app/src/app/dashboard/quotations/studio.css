@@ -5326,3 +5326,97 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Per-floor payment items belong to quotation revisions, not company settings. */
+.qs-construction-program .qs-program-columns {
+  grid-template-columns: minmax(160px, 1fr) 105px minmax(150px, 1fr) 185px;
+}
+.qs-construction-program .qs-program-columns span:first-child { grid-column: auto; }
+.qs-construction-program .qs-program-payment {
+  grid-template-columns: 44px minmax(170px, 1fr) minmax(140px, auto) minmax(155px, auto);
+}
+.qs-program-payment-entry {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) repeat(2, minmax(140px, 190px));
+  align-items: end;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 15px;
+  border: 1px solid #ecd7cb;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgb(90 45 28 / 5%);
+}
+.qs-program-payment-entry > strong {
+  align-self: center;
+  color: #753c2e;
+}
+.qs-program-payment-entry label {
+  display: grid;
+  gap: 6px;
+  color: #655c57;
+  font-weight: 700;
+  font-size: 12px;
+}
+.qs-program-payment-entry input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #dccbbf;
+  border-radius: 10px;
+  background: white;
+  color: #243147;
+  font-size: 15px;
+}
+.qs-program-payment-entry input:focus-visible {
+  outline: 2px solid #bd5c3f;
+  outline-offset: 1px;
+}
+.qs-program-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  padding: 18px;
+  border: 1px solid #e9ddd5;
+  border-radius: 14px;
+  background: #fffaf6;
+}
+.qs-program-summary strong { color: #753c2e; }
+.qs-program-summary span { color: #56637a; }
+.qs-program-summary button {
+  margin-left: auto;
+  min-height: 44px;
+  padding: 11px 20px;
+  border: 0;
+  border-radius: 12px;
+  background: #88352b;
+  color: white;
+  font-weight: 800;
+}
+.qs-program-summary button:disabled { opacity: .5; cursor: not-allowed; }
+@media (max-width: 800px) {
+  .qs-construction-program .qs-program-columns { display: none; }
+  .qs-construction-program .qs-program-payment {
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 10px;
+  }
+  .qs-construction-program .qs-program-payment > strong,
+  .qs-construction-program .qs-program-payment > span:last-child {
+    grid-column: 2;
+  }
+  .qs-construction-program .qs-program-work {
+    margin: 0 10px 12px;
+    padding: 12px;
+  }
+  .qs-program-payment-entry {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .qs-program-payment-entry > strong { grid-column: 1 / -1; }
+  .qs-program-summary button { width: 100%; margin-left: 0; }
+}
+@media (max-width: 460px) {
+  .qs-program-payment-entry { grid-template-columns: minmax(0, 1fr); }
+  .qs-program-payment-entry > strong { grid-column: auto; }
+}
