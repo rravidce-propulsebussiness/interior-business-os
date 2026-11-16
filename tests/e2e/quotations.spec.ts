@@ -44,7 +44,9 @@ test('customer document renders and prints multiple A4 pages', async ({
   await expect(
     page.getByRole('heading', { name: 'Studio North Interiors' }),
   ).toBeVisible();
-  await expect(page.getByText('Wardrobe 24', { exact: true }).first()).toBeVisible();
+  await expect(
+    page.getByText('Wardrobe 24', { exact: true }).first(),
+  ).toBeVisible();
   const pdf = await renderQuotationPdf(html);
   expect(pdf.subarray(0, 5).toString()).toBe('%PDF-');
   expect(pdf.length).toBeGreaterThan(20000);
