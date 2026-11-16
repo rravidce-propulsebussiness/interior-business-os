@@ -1,26 +1,26 @@
-'use client';
+"use client";
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useState } from "react";
 import {
   type CompanyConstructionStage,
   type CompanyStageItem,
   defaultCompanyConstructionStages,
   defaultInteriorStages,
-} from '@business-os/core/company-construction-defaults';
+} from "@business-os/core/company-construction-defaults";
 import {
   saveConstructionPaymentDefaults,
   type DefaultPaymentState,
-} from './payment-default-actions';
+} from "./payment-default-actions";
 
-const initialState: DefaultPaymentState = { saved: false, message: '' };
+const initialState: DefaultPaymentState = { saved: false, message: "" };
 const stageDescriptions: Record<string, string> = {
-  preconstruction: 'Price freeze, agreement and planning approvals.',
-  foundation: 'Site preparation, excavation, footing and plinth work.',
-  slabs: 'Formwork, reinforcement, services, concrete, curing and slab QC.',
-  brickwork: 'External and internal brick or block masonry for each floor.',
-  'electrical-plumbing': 'Electrical conduits, wiring, plumbing and testing.',
-  tiles: 'Floor and wall tiling, grout, finishing and checks.',
-  painting: 'Surface preparation, putty, primer and final coats.',
+  preconstruction: "Price freeze, agreement and planning approvals.",
+  foundation: "Site preparation, excavation, footing and plinth work.",
+  slabs: "Formwork, reinforcement, services, concrete, curing and slab QC.",
+  brickwork: "External and internal brick or block masonry for each floor.",
+  "electrical-plumbing": "Electrical conduits, wiring, plumbing and testing.",
+  tiles: "Floor and wall tiling, grout, finishing and checks.",
+  painting: "Surface preparation, putty, primer and final coats.",
 };
 const move = <T,>(values: T[], from: number, to: number) => {
   const next = [...values];
@@ -29,44 +29,44 @@ const move = <T,>(values: T[], from: number, to: number) => {
   return next;
 };
 const defaultStages = (industry: string): CompanyConstructionStage[] => {
-  if (industry === 'construction')
+  if (industry === "construction")
     return structuredClone(defaultCompanyConstructionStages);
-  if (industry === 'interior') return structuredClone(defaultInteriorStages);
-  const names = ['Planning', 'Delivery', 'Quality review'];
+  if (industry === "interior") return structuredClone(defaultInteriorStages);
+  const names = ["Planning", "Delivery", "Quality review"];
   return names.map((name, index) => ({
     id: `${industry}-${index + 1}`,
     name,
-    description: '',
-    repeatsPerFloor: industry === 'interior' && index >= 2 && index <= 4,
+    description: "",
+    repeatsPerFloor: industry === "interior" && index >= 2 && index <= 4,
     days: index === 0 ? 5 : 10,
     items:
-      index === 0 && industry === 'interior'
+      index === 0 && industry === "interior"
         ? [
             {
               id: `${industry}-price-freeze`,
-              kind: 'payment' as const,
-              title: 'Price freeze',
+              kind: "payment" as const,
+              title: "Price freeze",
               days: 0,
             },
           ]
         : [],
   }));
 };
-const itemKinds: CompanyStageItem['kind'][] = [
-  'work',
-  'material',
-  'check',
-  'test',
-  'qc',
-  'payment',
+const itemKinds: CompanyStageItem["kind"][] = [
+  "work",
+  "material",
+  "check",
+  "test",
+  "qc",
+  "payment",
 ];
-const kindLabel = (kind: CompanyStageItem['kind']) =>
-  kind === 'qc'
-    ? 'QC'
-    : kind === 'check'
-      ? 'Site check'
-      : kind === 'payment'
-        ? 'Payment'
+const kindLabel = (kind: CompanyStageItem["kind"]) =>
+  kind === "qc"
+    ? "QC"
+    : kind === "check"
+      ? "Site check"
+      : kind === "payment"
+        ? "Payment"
         : kind[0]!.toUpperCase() + kind.slice(1);
 
 function ItemKindPicker({
@@ -75,9 +75,9 @@ function ItemKindPicker({
   onChange,
   label,
 }: {
-  value: CompanyStageItem['kind'];
+  value: CompanyStageItem["kind"];
   disabled?: boolean;
-  onChange: (value: CompanyStageItem['kind']) => void;
+  onChange: (value: CompanyStageItem["kind"]) => void;
   label: string;
 }) {
   const [open, setOpen] = useState(false);
@@ -131,19 +131,19 @@ export function ConstructionPaymentDefaults({
     initialState,
   );
   const [industryKey, setIndustryKey] = useState(
-    industries[0]?.key ?? 'construction',
+    industries[0]?.key ?? "construction",
   );
   const [knownIndustries, setKnownIndustries] = useState(industries);
   const [savedByIndustry, setSavedByIndustry] = useState(initial);
   const [stages, setStages] = useState(
     savedByIndustry[industryKey] ?? defaultStages(industryKey),
   );
-  const [newIndustryName, setNewIndustryName] = useState('');
+  const [newIndustryName, setNewIndustryName] = useState("");
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [draftKinds, setDraftKinds] = useState<
-    Record<string, CompanyStageItem['kind']>
+    Record<string, CompanyStageItem["kind"]>
   >({});
-  const [expandedStage, setExpandedStage] = useState<string | null>('slabs');
+  const [expandedStage, setExpandedStage] = useState<string | null>("slabs");
   const savedStages =
     savedByIndustry[industryKey] ?? defaultStages(industryKey);
   const dirty = JSON.stringify(stages) !== JSON.stringify(savedStages);
@@ -198,7 +198,7 @@ export function ConstructionPaymentDefaults({
             type="button"
             role="tab"
             aria-selected={industry.key === industryKey}
-            className={industry.key === industryKey ? 'is-active' : ''}
+            className={industry.key === industryKey ? "is-active" : ""}
             onClick={() => switchIndustry(industry.key)}
           >
             {industry.name}
@@ -218,8 +218,8 @@ export function ConstructionPaymentDefaults({
                 const name = newIndustryName.trim();
                 const key = name
                   .toLowerCase()
-                  .replace(/[^a-z0-9]+/g, '-')
-                  .replace(/^-|-$/g, '')
+                  .replace(/[^a-z0-9]+/g, "-")
+                  .replace(/^-|-$/g, "")
                   .slice(0, 60);
                 if (
                   !name ||
@@ -228,7 +228,7 @@ export function ConstructionPaymentDefaults({
                 )
                   return;
                 setKnownIndustries((all) => [...all, { key, name }]);
-                setNewIndustryName('');
+                setNewIndustryName("");
                 switchIndustry(key);
               }}
             >
@@ -239,7 +239,7 @@ export function ConstructionPaymentDefaults({
       </div>
       <div className="us-workflow-intro">
         <span className="us-workflow-saved">
-          {dirty ? '• Unsaved changes' : '✓ Saved'}
+          {dirty ? "• Unsaved changes" : "✓ Saved"}
         </span>
         <p className="us-info">
           Configure a separate reusable workflow for each industry. Mark a stage
@@ -256,7 +256,7 @@ export function ConstructionPaymentDefaults({
         <span>Sunday is excluded when quotation dates are calculated.</span>
       </div>
       {stages.map((stage, index) => {
-        const workItems = stage.items.filter((item) => item.kind !== 'payment');
+        const workItems = stage.items.filter((item) => item.kind !== "payment");
         const itemDays = workItems.reduce((sum, item) => sum + item.days, 0);
         const totalDays = Math.max(stage.days, itemDays);
         return (
@@ -265,12 +265,12 @@ export function ConstructionPaymentDefaults({
             key={stage.id}
             draggable={canEdit}
             onDragStart={(event) =>
-              event.dataTransfer.setData('text/plain', String(index))
+              event.dataTransfer.setData("text/plain", String(index))
             }
             onDragOver={(event) => event.preventDefault()}
             onDrop={(event) => {
               event.preventDefault();
-              const from = Number(event.dataTransfer.getData('text/plain'));
+              const from = Number(event.dataTransfer.getData("text/plain"));
               if (Number.isInteger(from) && from !== index)
                 setStages((rows) => move(rows, from, index));
             }}
@@ -292,17 +292,21 @@ export function ConstructionPaymentDefaults({
                   />
                   <span
                     className={
-                      stage.repeatsPerFloor ? 'us-stage-repeat' : 'us-stage-once'
+                      stage.repeatsPerFloor
+                        ? "us-stage-repeat"
+                        : "us-stage-once"
                     }
                   >
-                    {stage.repeatsPerFloor ? 'REPEAT FOR EACH FLOOR' : 'ONE TIME'}
+                    {stage.repeatsPerFloor
+                      ? "REPEAT FOR EACH FLOOR"
+                      : "ONE TIME"}
                   </span>
                 </div>
                 <p className="us-stage-description">
                   <textarea
                     aria-label="Stage description"
                     value={
-                      stage.description ?? stageDescriptions[stage.id] ?? ''
+                      stage.description ?? stageDescriptions[stage.id] ?? ""
                     }
                     disabled={!canEdit}
                     placeholder="Describe this stage"
@@ -323,7 +327,7 @@ export function ConstructionPaymentDefaults({
                   onChange={(event) =>
                     patchStage(index, { repeatsPerFloor: event.target.checked })
                   }
-                />{' '}
+                />{" "}
                 Repeats per floor
               </label>
               <label className="us-stage-duration">
@@ -346,7 +350,7 @@ export function ConstructionPaymentDefaults({
                   type="button"
                   aria-expanded={expandedStage === stage.id}
                   aria-label={
-                    (expandedStage === stage.id ? 'Collapse ' : 'Expand ') +
+                    (expandedStage === stage.id ? "Collapse " : "Expand ") +
                     stage.name
                   }
                   onClick={() =>
@@ -355,13 +359,13 @@ export function ConstructionPaymentDefaults({
                     )
                   }
                 >
-                  {expandedStage === stage.id ? '⌃' : '⌄'}
+                  {expandedStage === stage.id ? "⌃" : "⌄"}
                 </button>
                 {canEdit && (
                   <button
                     className="us-stage-remove"
                     type="button"
-                    aria-label={'Remove ' + stage.name}
+                    aria-label={"Remove " + stage.name}
                     onClick={() =>
                       setStages((rows) => rows.filter((_, i) => i !== index))
                     }
@@ -396,7 +400,7 @@ export function ConstructionPaymentDefaults({
                       onDragStart={(event) => {
                         event.stopPropagation();
                         event.dataTransfer.setData(
-                          'text/plain',
+                          "text/plain",
                           `${index}:${itemIndex}`,
                         );
                       }}
@@ -405,8 +409,8 @@ export function ConstructionPaymentDefaults({
                         event.preventDefault();
                         event.stopPropagation();
                         const [fromStage, fromItem] = event.dataTransfer
-                          .getData('text/plain')
-                          .split(':')
+                          .getData("text/plain")
+                          .split(":")
                           .map(Number);
                         if (
                           fromStage === index &&
@@ -441,7 +445,7 @@ export function ConstructionPaymentDefaults({
                             });
                         }}
                         onKeyDown={(event) => {
-                          if (event.key === 'Enter') event.currentTarget.blur();
+                          if (event.key === "Enter") event.currentTarget.blur();
                         }}
                       />
                       <ItemKindPicker
@@ -464,7 +468,7 @@ export function ConstructionPaymentDefaults({
                         }
                       />
                       <label>
-                        Days{' '}
+                        Days{" "}
                         <input
                           type="number"
                           min="0"
@@ -494,12 +498,12 @@ export function ConstructionPaymentDefaults({
                       <details>
                         <summary>
                           {item.guideText || item.guideVideoUrl
-                            ? 'Edit site guide'
-                            : '+ Add guide'}
+                            ? "Edit site guide"
+                            : "+ Add guide"}
                         </summary>
                         <textarea
                           aria-label="Guide text"
-                          value={item.guideText ?? ''}
+                          value={item.guideText ?? ""}
                           disabled={!canEdit}
                           onChange={(event) =>
                             patchItem(index, itemIndex, {
@@ -510,7 +514,7 @@ export function ConstructionPaymentDefaults({
                         />
                         <input
                           aria-label="Guide video URL"
-                          value={item.guideVideoUrl ?? ''}
+                          value={item.guideVideoUrl ?? ""}
                           disabled={!canEdit}
                           onChange={(event) =>
                             patchItem(index, itemIndex, {
@@ -526,14 +530,14 @@ export function ConstructionPaymentDefaults({
                 {canEdit && (
                   <div className="us-company-stage-add">
                     <ItemKindPicker
-                      value={draftKinds[stage.id] ?? 'work'}
+                      value={draftKinds[stage.id] ?? "work"}
                       label="New item type"
                       onChange={(kind) =>
                         setDraftKinds((all) => ({ ...all, [stage.id]: kind }))
                       }
                     />
                     <input
-                      value={drafts[stage.id] ?? ''}
+                      value={drafts[stage.id] ?? ""}
                       onChange={(event) =>
                         setDrafts((all) => ({
                           ...all,
@@ -545,7 +549,7 @@ export function ConstructionPaymentDefaults({
                     <button
                       type="button"
                       onClick={() => {
-                        const kind = draftKinds[stage.id] ?? 'work';
+                        const kind = draftKinds[stage.id] ?? "work";
                         const title = drafts[stage.id]?.trim();
                         if (!title) return;
                         patchStage(index, {
@@ -555,11 +559,11 @@ export function ConstructionPaymentDefaults({
                               id: crypto.randomUUID(),
                               kind,
                               title,
-                              days: kind === 'payment' ? 0 : 1,
+                              days: kind === "payment" ? 0 : 1,
                             },
                           ],
                         });
-                        setDrafts((all) => ({ ...all, [stage.id]: '' }));
+                        setDrafts((all) => ({ ...all, [stage.id]: "" }));
                       }}
                     >
                       + Add item
@@ -579,8 +583,8 @@ export function ConstructionPaymentDefaults({
             const id = `stage-${crypto.randomUUID().slice(0, 8)}`;
             const stage: CompanyConstructionStage = {
               id,
-              name: 'New stage',
-              description: '',
+              name: "New stage",
+              description: "",
               repeatsPerFloor: false,
               days: 1,
               items: [],
@@ -594,9 +598,9 @@ export function ConstructionPaymentDefaults({
       )}
       <footer className="us-company-stage-save">
         <strong>
-          {stages.length} reusable{' '}
+          {stages.length} reusable{" "}
           {knownIndustries.find((item) => item.key === industryKey)?.name ??
-            'industry'}{' '}
+            "industry"}{" "}
           stages
         </strong>
         {canEdit && (
@@ -605,12 +609,12 @@ export function ConstructionPaymentDefaults({
             type="submit"
             disabled={pending}
           >
-            {pending ? 'Saving…' : 'Save workflow settings'}
+            {pending ? "Saving…" : "Save workflow settings"}
           </button>
         )}
       </footer>
       {state.message && (
-        <p role="status" className={state.saved ? 'us-success' : 'us-error'}>
+        <p role="status" className={state.saved ? "us-success" : "us-error"}>
           {state.message}
         </p>
       )}
