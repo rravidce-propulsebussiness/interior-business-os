@@ -131,42 +131,46 @@ export function applyCompanyWorkDefaults(
   const steps:QuotationMilestoneStep[]=[];
   const activeCodes=new Set<string>();
   for(const item of template){
-   const code=payment.stageCodes.find(x=>family(x)===item.area);
-   if(!code)continue;
-   // This marks when the current priced milestone is due; it creates no new
-   // payment, invoice, or finance ledger entry.
+   const linkedCodes=payment.stageCodes.filter(code=>family(code)===item.area);
+   // One payment marker belongs to the milestone, even when its work area
+   // covers several quote floors.
    if(item.kind==='payment'){
-    steps.push({kind:'payment',code,index:i});
+    const code=linkedCodes[0];
+    if(code)steps.push({kind:'payment',code,index:i});
     continue;
    }
-   if(seenCodes.has(code))continue;
-   if(!activeCodes.has(code)){
-    activeCodes.add(code);
-    const baseline=defaultStageRequirements(code);
-    const structural=milestoneConstructionStages().find(x=>x.code===item.area)?.holdPoint==='structural';
-    requirements[code]={work:[],materials:[],checks:structural?[...baseline.checks]:[],
-      reports:[...baseline.reports]};
+   // Company area templates must seed every matching floor in a grouped
+   // payment, not only the first floor code.
+   for(const code of linkedCodes){
+    if(seenCodes.has(code))continue;
+    if(!activeCodes.has(code)){
+     activeCodes.add(code);
+     const baseline=defaultStageRequirements(code);
+     const structural=milestoneConstructionStages().find(x=>x.code===item.area)?.holdPoint==='structural';
+     requirements[code]={work:[],materials:[],checks:structural?[...baseline.checks]:[],
+       reports:[...baseline.reports]};
+    }
+    const scope=requirements[code]!;
+    const field=item.kind==='work'?'work':item.kind==='material'?'materials':'checks';
+    let index=scope[field].indexOf(item.name);
+    if(index===-1){
+     if(item.kind==='qc')continue;
+     index=scope[field].length;
+     scope[field].push(item.name);
+    }
+    if(item.guideText?.trim()||item.guideVideoUrl?.trim()){
+     const guides=scope.guides??[];
+     scope.guides=[...guides.filter(guide=>guide.kind!==item.kind||guide.index!==index),{
+      kind:item.kind,index,text:item.guideText?.trim()??'',
+      ...(item.guideVideoUrl?.trim()?{videoUrl:item.guideVideoUrl.trim()}:{})
+     }];
+    }
+    const value={kind:item.kind,code,index} as QuotationMilestoneStep;
+    if(steps.some(x=>x.code===value.code&&x.index===value.index&&
+       (x.kind===value.kind||(value.kind==='test'&&x.kind==='check')||
+         (value.kind==='check'&&x.kind==='test'))))continue;
+    steps.push(value);
    }
-   const scope=requirements[code]!;
-   const field=item.kind==='work'?'work':item.kind==='material'?'materials':'checks';
-   let index=scope[field].indexOf(item.name);
-   if(index===-1){
-    if(item.kind==='qc')continue;
-    index=scope[field].length;
-    scope[field].push(item.name);
-   }
-   if(item.guideText?.trim()||item.guideVideoUrl?.trim()){
-    const guides=scope.guides??[];
-    scope.guides=[...guides.filter(guide=>guide.kind!==item.kind||guide.index!==index),{
-     kind:item.kind,index,text:item.guideText?.trim()??'',
-     ...(item.guideVideoUrl?.trim()?{videoUrl:item.guideVideoUrl.trim()}:{})
-    }];
-   }
-   const value={kind:item.kind,code,index} as QuotationMilestoneStep;
-   if(steps.some(x=>x.code===value.code&&x.index===value.index&&
-      (x.kind===value.kind||(value.kind==='test'&&x.kind==='check')||
-        (value.kind==='check'&&x.kind==='test'))))continue;
-   steps.push(value);
   }
   for(const code of activeCodes){
    seenCodes.add(code);
