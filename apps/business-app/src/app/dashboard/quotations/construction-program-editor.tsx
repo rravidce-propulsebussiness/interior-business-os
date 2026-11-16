@@ -444,7 +444,13 @@ export function ConstructionProgramEditor({
                 <span className="qs-program-number">{stageIndex + 1}</span>
                 <span className="qs-program-stage-title">
                   <strong>{stage.name}</strong>
-                  <small>
+                  <small
+                    className={
+                      stage.repeatsPerFloor
+                        ? 'qs-program-repeat-badge'
+                        : 'qs-program-once-badge'
+                    }
+                  >
                     {stage.repeatsPerFloor
                       ? 'Repeats: ' + floorNames.join(', ')
                       : 'One time'}
@@ -489,10 +495,7 @@ export function ConstructionProgramEditor({
                         key={stage.id + '-' + floorIndex}
                       >
                         <header className="qs-program-floor-heading">
-                          <strong>
-                            {floor.floorName || 'Whole project'}
-                            {stage.repeatsPerFloor ? ' floor' : ''}
-                          </strong>
+                          <strong>{floor.floorName || 'Whole project'}</strong>
                           <span>
                             {showDate(floor.start)} – {showDate(floor.end)}
                           </span>

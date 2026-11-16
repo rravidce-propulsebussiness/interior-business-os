@@ -5185,23 +5185,26 @@
   background: #f7f9fc;
   color: #53647c;
 }
-.qs-program-start label {
-  color: #61738f;
+.qs-program-synced-notice {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border: 1px solid #f1cfb8;
+  border-radius: 11px;
+  background: #fff5ea;
+  color: #80502e;
   font-size: 12px;
-  font-weight: 750;
+  line-height: 1.5;
 }
-.qs-program-start input[type='date'] {
-  min-width: 155px;
-  padding: 8px 10px;
-  border: 1px solid #dce5ef;
-  border-radius: 9px;
-  background: #fff;
-  color: #1c2b45;
-  font: inherit;
+.qs-program-synced-notice strong {
+  flex: 0 0 auto;
+  color: #9c481b;
 }
 .qs-program-calendar {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 16px;
   padding: 15px 18px;
@@ -5238,15 +5241,7 @@
   font-size: 12px;
   font-weight: 700;
 }
-.qs-program-calendar label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #344966;
-  font-size: 13px;
-  font-weight: 750;
-}
-.qs-program-calendar input {
+.qs-program-skip-sundays input {
   width: 17px;
   height: 17px;
   accent-color: #b6532e;
@@ -5327,8 +5322,20 @@
   display: grid;
   gap: 5px;
 }
-.qs-program-stage-title small {
-  color: #75839a;
+.qs-program-stage-title .qs-program-repeat-badge,
+.qs-program-stage-title .qs-program-once-badge {
+  justify-self: start;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #edf4ff;
+  color: #426895;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+.qs-program-stage-title .qs-program-once-badge {
+  background: #fff0e5;
+  color: #a64718;
 }
 .qs-program-floor + .qs-program-floor {
   margin-top: 12px;
@@ -5344,10 +5351,6 @@
   font-size: 14px;
 }
 .qs-program-floor-heading span {
-  color: #738198;
-  font-size: 12px;
-}
-.qs-program-floor li small {
   color: #738198;
   font-size: 12px;
 }
@@ -5458,6 +5461,11 @@
   }
   .qs-program-header {
     display: grid;
+  }
+  .qs-program-synced-notice {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
   }
   .qs-program-calendar {
     grid-template-columns: repeat(2, minmax(0, 1fr));

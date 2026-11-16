@@ -902,6 +902,7 @@ describe('streamlined quote, terms and payment Studio', () => {
   it('uses company payment settings as the read-only construction schedule', () => {
     const payments = file('./payment-schedule-editor.tsx');
     const program = file('./construction-program-editor.tsx');
+    const settingsCss = file('../settings/settings.css');
     expect(page).toContain('organization_construction_payment_defaults_read');
     expect(page).toContain(
       'companyDefaults={companyPayments.error ? [] : companyPayments.data}',
@@ -911,6 +912,12 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(program).toContain('Work sequence is read only');
     expect(program).not.toContain('+ Add work');
     expect(program).not.toContain('Remove item');
+    expect(css).toContain('.qs-program-synced-notice');
+    expect(css).toContain('.qs-program-work-row');
+    expect(css).not.toContain('.qs-program-columns');
+    expect(settingsCss).toContain('.us-company-stage-card');
+    expect(settingsCss).not.toContain('.us-workflow-preview');
+    expect(settingsCss).not.toContain('.us-payment-default-list');
   });
 });
 
