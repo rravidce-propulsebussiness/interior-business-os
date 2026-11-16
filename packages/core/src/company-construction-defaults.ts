@@ -94,10 +94,13 @@ export function applyCompanyPaymentDefaults(
  return defaults.map((item,index)=>{
   const configuredAreas=item.areas?.length?item.areas:
    [...new Set((item.steps??[]).map(step=>step.area))];
-  const areas=configuredAreas.length?configuredAreas:
+  const hasConfiguredAreas=configuredAreas.length>0;
+  const areas=hasConfiguredAreas?configuredAreas:
    [inferCompanyWorkAreaCode(item.name)].filter((area):area is string=>Boolean(area));
-  let stageCodes=[...new Set(suggested.flatMap(row=>row.stageCodes)
-   .filter(code=>areas.includes(family(code))))];
+  const stageCodes=!hasConfiguredAreas&&defaults.length===suggested.length
+   ?[...suggested[index]!.stageCodes]
+   :[...new Set(suggested.flatMap(row=>row.stageCodes)
+     .filter(code=>areas.includes(family(code))))];
   if(!stageCodes.length&&defaults.length===suggested.length)
    stageCodes=[...suggested[index]!.stageCodes];
   return {name:item.name,percent:String(item.percent),stageCodes};
