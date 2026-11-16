@@ -373,10 +373,12 @@ export function PaymentScheduleEditor({
 
       <div className={'qs-payment-status ' + (
         feedback?.type === 'error' ? 'qs-payment-status-error' :
-        (industry==='construction'&&savedPlan)||savedPlan&&!hasChanges ? 'qs-payment-status-saved' : 'qs-payment-status-unsaved'
+        (industry==='construction'&&savedPlan&&!syncingCompanySchedule)||savedPlan&&!hasChanges
+          ? 'qs-payment-status-saved' : 'qs-payment-status-unsaved'
       )} role="status">
-        <span className="qs-payment-status-mark" aria-hidden="true">{((industry==='construction'&&savedPlan)||savedPlan&&!hasChanges)&&feedback?.type!=='error'?'✓':'ⓘ'}</span>
+        <span className="qs-payment-status-mark" aria-hidden="true">{((industry==='construction'&&savedPlan&&!syncingCompanySchedule)||savedPlan&&!hasChanges)&&feedback?.type!=='error'?'✓':'ⓘ'}</span>
         <span>{feedback?.type === 'error' ? feedback.text
+          : syncingCompanySchedule ? 'Updating this draft from the '+defaultCompanyRows.length+' company stages in Settings…'
           : industry==='construction'&&savedPlan ? 'Payment and work milestones are fixed from this quotation.'
           : savedPlan && !hasChanges ? 'Payment schedule saved in this quotation.'
           : savedPlan ? 'You have unsaved changes. Save to update the customer PDF.'
