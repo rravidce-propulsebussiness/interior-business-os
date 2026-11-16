@@ -197,7 +197,7 @@ BEGIN
  quote_lines:=regexp_split_to_array(btrim(split_part(split_part(
    revision.terms,'[STAGE_PAYMENT_PLAN]',2),'[/STAGE_PAYMENT_PLAN]',1)),
    E'\r?\n');
- IF array_length(quote_lines,1) IS NULL OR array_length(quote_lines,1)>40
+ IF array_length(quote_lines,1) IS NULL OR array_length(quote_lines,1)>100
  THEN RETURN 0; END IF;
 
  -- Optional stage-code mapping captured in the immutable accepted quote.
