@@ -5111,49 +5111,7 @@
   line-height: 1.3;
 }
 
-/* Company-managed construction schedules appear as fixed, non-editable quotation snapshots. */
-.qs-payment-order {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 34px;
-  min-height: 36px;
-  border-radius: 10px;
-  background: #fff4eb;
-  color: #9c4d25;
-  font-size: 13px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-.qs-payment-stage-readonly {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-width: 0;
-  min-height: 48px;
-  padding: 11px 13px;
-  border: 1px solid #e6eaf0;
-  border-radius: 12px;
-  background: #f8fafc;
-  color: #14233b;
-  font-size: 13px;
-  font-weight: 650;
-  overflow-wrap: anywhere;
-}
-.qs-payment-percent-readonly {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 48px;
-  border-radius: 12px;
-  background: #f4f6f9;
-  color: #14233b;
-  font-size: 13px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-}
-
+/* Construction workflow quotation */
 .qs-construction-program {
   padding: 16px;
 }
