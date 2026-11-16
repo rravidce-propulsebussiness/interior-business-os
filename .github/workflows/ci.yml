@@ -44,7 +44,7 @@ jobs:
       - run: pnpm check
         env:
           TEST_DATABASE_URL: postgresql://postgres@127.0.0.1:5432/business_os_test
-      - run: pnpm audit --prod --audit-level=high
+      - run: pnpm security:audit
       - run: pnpm test:recovery
 
   erp-routing-regression:
