@@ -1,13 +1,16 @@
 'use server';
 import { revalidatePath } from 'next/cache';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
-import { companyConstructionStages } from '@business-os/core/company-construction-defaults';
+import {
+  companyConstructionStages,
+  type CompanyConstructionStage,
+} from '@business-os/core/company-construction-defaults';
 
 export type DefaultPaymentState = {
   saved: boolean;
   message: string;
   industryKey?: string;
-  savedRows?: import('@business-os/core/company-construction-defaults').CompanyConstructionStage[];
+  savedRowsByIndustry?: Record<string, CompanyConstructionStage[]>;
 };
 export async function saveConstructionPaymentDefaults(
   _previous: DefaultPaymentState,
@@ -16,7 +19,7 @@ export async function saveConstructionPaymentDefaults(
   const raw = form.get('rows');
   const industryKey = form.get('industryKey');
   if (typeof raw !== 'string' || raw.length > 300000)
-    return { saved: false, message: 'Invalid payment schedule.' };
+    return { ..._previous, saved: false, message: 'Invalid payment schedule.' };
   let payload: unknown;
   try {
     payload = JSON.parse(raw);
@@ -26,6 +29,7 @@ export async function saveConstructionPaymentDefaults(
   const validated = companyConstructionStages.safeParse(payload);
   if (!validated.success)
     return {
+      ..._previous,
       saved: false,
       message: validated.error.issues[0]?.message ?? 'Invalid milestones',
     };
@@ -33,11 +37,19 @@ export async function saveConstructionPaymentDefaults(
     typeof industryKey !== 'string' ||
     !/^[a-z][a-z0-9-]{0,59}$/.test(industryKey)
   )
-    return { saved: false, message: 'Choose a valid industry workflow.' };
+    return {
+      ..._previous,
+      saved: false,
+      message: 'Choose a valid industry workflow.',
+    };
   try {
     const context = await activeOrganization();
     if (!context)
-      return { saved: false, message: 'Sign in to manage company defaults.' };
+      return {
+        ..._previous,
+        saved: false,
+        message: 'Sign in to manage company defaults.',
+      };
     const { client, authorization } = await serverServices();
     await authorization.requirePermission(
       context.organizationId,
@@ -53,6 +65,7 @@ export async function saveConstructionPaymentDefaults(
     );
     if (error)
       return {
+        ..._previous,
         saved: false,
         message: 'Unable to save company defaults: ' + error.message,
       };
@@ -62,10 +75,14 @@ export async function saveConstructionPaymentDefaults(
       message:
         'Industry stages, durations, payment markers and site guides saved.',
       industryKey,
-      savedRows: validated.data,
+      savedRowsByIndustry: {
+        ..._previous.savedRowsByIndustry,
+        [industryKey]: validated.data,
+      },
     };
   } catch {
     return {
+      ..._previous,
       saved: false,
       message: 'Only authorized company managers can save payment defaults.',
     };

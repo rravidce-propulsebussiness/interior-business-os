@@ -1,20 +1,16 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useState } from 'react';
 import {
   type CompanyConstructionStage,
   type CompanyStageItem,
   defaultCompanyConstructionStages,
   defaultInteriorStages,
 } from '@business-os/core/company-construction-defaults';
-import {
-  saveConstructionPaymentDefaults,
-  type DefaultPaymentState,
-} from './payment-default-actions';
+import { saveConstructionPaymentDefaults } from './payment-default-actions';
 
-const initialState: DefaultPaymentState = { saved: false, message: '' };
 const stageDescriptions: Record<string, string> = {
-  preconstruction: 'Price freeze, agreement, planning and design approvals.',
+  preconstruction: 'Price freeze, agreement and planning approvals.',
   foundation: 'Site preparation, excavation, footing and plinth work.',
   slabs: 'Formwork, reinforcement, services, concrete, curing and slab QC.',
   brickwork: 'External and internal brick or block masonry for each floor.',
@@ -128,13 +124,13 @@ export function ConstructionPaymentDefaults({
 }) {
   const [state, action, pending] = useActionState(
     saveConstructionPaymentDefaults,
-    initialState,
+    { saved: false, message: '', savedRowsByIndustry: initial },
   );
   const [industryKey, setIndustryKey] = useState(
     industries[0]?.key ?? 'construction',
   );
   const [knownIndustries, setKnownIndustries] = useState(industries);
-  const [savedByIndustry, setSavedByIndustry] = useState(initial);
+  const savedByIndustry = state.savedRowsByIndustry ?? initial;
   const [stages, setStages] = useState(
     savedByIndustry[industryKey] ?? defaultStages(industryKey),
   );
@@ -147,13 +143,6 @@ export function ConstructionPaymentDefaults({
   const savedStages =
     savedByIndustry[industryKey] ?? defaultStages(industryKey);
   const dirty = JSON.stringify(stages) !== JSON.stringify(savedStages);
-  useEffect(() => {
-    if (state.saved && state.industryKey && state.savedRows)
-      setSavedByIndustry((all) => ({
-        ...all,
-        [state.industryKey!]: state.savedRows!,
-      }));
-  }, [state.industryKey, state.saved, state.savedRows]);
   const switchIndustry = (key: string) => {
     setIndustryKey(key);
     setStages(savedByIndustry[key] ?? defaultStages(key));
@@ -281,21 +270,27 @@ export function ConstructionPaymentDefaults({
               </span>
               <span className="us-stage-number">{index + 1}</span>
               <div className="us-company-stage-title">
-                <input
-                  aria-label="Stage name"
-                  value={stage.name}
-                  disabled={!canEdit}
-                  onChange={(event) =>
-                    patchStage(index, { name: event.target.value })
-                  }
-                />
-                <span
-                  className={
-                    stage.repeatsPerFloor ? 'us-stage-repeat' : 'us-stage-once'
-                  }
-                >
-                  {stage.repeatsPerFloor ? 'REPEAT FOR EACH FLOOR' : 'ONE TIME'}
-                </span>
+                <div className="us-stage-title-top">
+                  <input
+                    aria-label="Stage name"
+                    value={stage.name}
+                    disabled={!canEdit}
+                    onChange={(event) =>
+                      patchStage(index, { name: event.target.value })
+                    }
+                  />
+                  <span
+                    className={
+                      stage.repeatsPerFloor
+                        ? 'us-stage-repeat'
+                        : 'us-stage-once'
+                    }
+                  >
+                    {stage.repeatsPerFloor
+                      ? 'REPEAT FOR EACH FLOOR'
+                      : 'ONE TIME'}
+                  </span>
+                </div>
                 <p className="us-stage-description">
                   <textarea
                     aria-label="Stage description"
@@ -338,33 +333,38 @@ export function ConstructionPaymentDefaults({
                 />
                 <span>days</span>
               </label>
-              <button
-                className="us-stage-toggle"
-                type="button"
-                aria-expanded={expandedStage === stage.id}
-                aria-label={
-                  (expandedStage === stage.id ? 'Collapse ' : 'Expand ') +
-                  stage.name
-                }
-                onClick={() =>
-                  setExpandedStage((current) =>
-                    current === stage.id ? null : stage.id,
-                  )
-                }
-              >
-                {expandedStage === stage.id ? '⌃' : '⌄'}
-              </button>
-              {canEdit && (
+              <div className="us-stage-actions">
                 <button
-                  className="us-stage-remove"
+                  className="us-stage-toggle"
                   type="button"
+                  aria-expanded={expandedStage === stage.id}
+                  aria-label={
+                    (expandedStage === stage.id ? 'Collapse ' : 'Expand ') +
+                    stage.name
+                  }
                   onClick={() =>
-                    setStages((rows) => rows.filter((_, i) => i !== index))
+                    setExpandedStage((current) =>
+                      current === stage.id ? null : stage.id,
+                    )
                   }
                 >
-                  Remove stage
+                  {expandedStage === stage.id ? '⌃' : '⌄'}
                 </button>
-              )}
+                {canEdit && (
+                  <button
+                    className="us-stage-remove"
+                    type="button"
+                    onClick={() =>
+                      setStages((rows) => rows.filter((_, i) => i !== index))
+                    }
+                  >
+                    <span className="us-stage-remove-label">Remove stage</span>
+                    <span className="us-stage-remove-icon" aria-hidden="true">
+                      ×
+                    </span>
+                  </button>
+                )}
+              </div>
             </header>
             <p className="us-stage-total">
               Stage total: {totalDays} days · {workItems.length} work/check
@@ -601,7 +601,7 @@ export function ConstructionPaymentDefaults({
           </button>
         )}
       </footer>
-      {state.message && (
+      {state.message && state.industryKey === industryKey && (
         <p role="status" className={state.saved ? 'us-success' : 'us-error'}>
           {state.message}
         </p>
