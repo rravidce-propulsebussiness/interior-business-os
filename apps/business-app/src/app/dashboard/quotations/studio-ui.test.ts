@@ -907,10 +907,10 @@ describe('streamlined quote, terms and payment Studio', () => {
       'companyDefaults={companyPayments.error ? [] : companyPayments.data}',
     );
     expect(payments).toContain('companyDefaults={props.companyDefaults}');
-    expect(program).toContain('No quotation edits are needed');
     expect(program).toContain(
-      'Work items, checks and site guides are managed in Company',
+      'Work, payment, check and QC items come from Company Settings.',
     );
+    expect(program).toContain('Company Settings.');
     expect(program).not.toContain('+ Add work');
     expect(program).not.toContain('Remove item');
   });
@@ -1208,15 +1208,16 @@ describe('construction quotation schedule is managed from company settings', () 
   const editor = file('./construction-program-editor.tsx');
 
   it('renders a settings-synced quote schedule with automatic floor dates and no work editing', () => {
-    expect(editor).toContain('No quotation edits are needed');
+    expect(editor).toContain(
+      'BOQ-linked payment defaults loaded. Change any amount',
+    );
     expect(editor).toContain('Project start date');
     expect(editor).toContain('Skip Sundays');
     expect(editor).toContain('Schedule duration');
     expect(editor).toContain('Target handover');
-    expect(editor).toContain(
-      'Work items, checks and site guides are managed in Company',
-    );
+    expect(editor).toContain('Company Settings.');
     expect(editor).not.toContain('+ Add work');
+    expect(editor).not.toContain('Share of quotation (%)');
     expect(editor).not.toContain('Existing construction work, materials');
   });
 });
@@ -1233,8 +1234,8 @@ describe('construction quotation snapshots use the current company payment stage
     expect(editor).toContain('startDate,');
     expect(editor).toContain('skipSundays,');
     expect(editor).toContain('floors: floorNames');
-    expect(editor).toContain(
-      '`/dashboard/quotations/${initial.revision_id}/conditions`',
-    );
+    expect(editor).toContain('const stages = defaults;');
+    expect(editor).toContain('paymentOverrides: Object.fromEntries(');
+    expect(editor).toContain("'/dashboard/quotations/' + initial.revision_id");
   });
 });
