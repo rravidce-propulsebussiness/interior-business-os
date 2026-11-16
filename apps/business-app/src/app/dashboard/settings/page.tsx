@@ -39,7 +39,7 @@ const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: 'branding', label: 'Branding', icon: '◈' },
   { id: 'invoice', label: 'Invoice & GST', icon: '▤' },
   { id: 'documents', label: 'Documents', icon: '▧' },
-  { id: 'payments', label: 'Construction Workflow', icon: '♧' },
+  { id: 'payments', label: 'Project Workflow', icon: '♧' },
   { id: 'team', label: 'Team & Access', icon: '♙' },
   { id: 'preferences', label: 'Preferences', icon: '⚙' },
 ];
@@ -422,7 +422,7 @@ export default async function SettingsPage({
       cards: [
         {
           id: 'payments',
-          title: 'Construction Workflow',
+          title: 'Project Workflow',
           description:
             'Payment milestones, ordered work, site checks, work guides and QC videos',
           icon: 'payments',

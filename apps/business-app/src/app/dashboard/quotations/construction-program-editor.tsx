@@ -26,7 +26,7 @@ type Props = {
 };
 
 const codeMap: Record<string, (floor: string) => string[]> = {
-  preconstruction: () => ['PRECONSTRUCTION', 'DESIGN'],
+  preconstruction: () => ['PRECONSTRUCTION'],
   design: () => ['DESIGN'],
   foundation: () => ['SITE_PREP', 'FOUNDATION', 'PLINTH'],
   slabs: (floor) => ['RCC/' + quotedConstructionFloorCode(floor)],
