@@ -527,8 +527,9 @@ export function MilestoneWorkflowBuilder({
       <div className="qs-one-flow-intro">
         <strong>{'Stage ' + (paymentIndex + 1) + ' · Work sequence'}</strong>
         <small>
-          Existing saved work is retained. Type the next activity and add it in
-          order.
+          {editable
+            ? 'Existing saved work is retained. Type the next activity and add it in order.'
+            : 'Work sequence managed in Settings.'}
         </small>
       </div>
       {editable && (
@@ -567,7 +568,7 @@ export function MilestoneWorkflowBuilder({
           </select>
         </details>
       )}
-      {preservedReports.length > 0 && (
+      {editable && preservedReports.length > 0 && (
         <details className="qs-one-flow-advanced qs-one-flow-reports">
           <summary>
             Previously saved reports & evidence ({preservedReports.length})
@@ -584,7 +585,7 @@ export function MilestoneWorkflowBuilder({
           </small>
         </details>
       )}
-      {catalog.length > 0 && (
+      {editable && catalog.length > 0 && (
         <details className="qs-one-flow-catalog">
           <summary>
             Existing construction work, materials, checks &amp; reports (
@@ -631,8 +632,9 @@ export function MilestoneWorkflowBuilder({
       )}
       {steps.length === 0 && (
         <p className="qs-one-flow-empty">
-          Type a new work item using + Add, or choose an existing one from the
-          library above. Your old standard item names are still available.
+          {editable
+            ? 'Type a new work item using + Add, or choose an existing one from the library above. Your old standard item names are still available.'
+            : 'No work items are configured for this stage in Settings.'}
         </p>
       )}
       {steps.length > 8 && (

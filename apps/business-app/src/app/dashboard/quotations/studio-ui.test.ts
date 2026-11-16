@@ -898,11 +898,12 @@ describe('streamlined quote, terms and payment Studio', () => {
       'companyDefaults={companyPayments.error ? [] : companyPayments.data}',
     );
     expect(payments).toContain(
-      "const canEditSchedule = editable && industry !== 'construction';",
+      "const scheduleEditable = editable && industry !== 'construction';",
     );
-    expect(payments).toContain('editable={canEditSchedule}');
-    expect(payments).toContain('Save Company Schedule to Quotation');
-    expect(payments).toContain('Company payment and work settings are ready');
+    expect(payments).toContain('editable={scheduleEditable}');
+    expect(payments).toContain(
+      'Set up the company payment and work template in Settings',
+    );
     expect(payments).toContain('Manage payments and work in Settings →');
     expect(payments).toContain(
       'href="/dashboard/settings?tab=payments#company-payment-stages"',
@@ -1255,5 +1256,57 @@ describe('Settings category dashboard keeps one canonical settings workspace', (
     expect(css).toContain('.ush-search');
     expect(css).toContain('@media(max-width:455px)');
     expect(css).not.toContain('.us-tabs{display:flex');
+  });
+});
+
+describe('construction quotation schedule is managed from company settings', () => {
+  const editor = file('./payment-schedule-editor.tsx');
+  const workflow = file('./milestone-workflow-builder.tsx');
+
+  it('renders construction payments and work without quotation editing controls', () => {
+    expect(editor).toContain(
+      "const scheduleEditable = editable && industry !== 'construction';",
+    );
+    expect(editor).toContain('editable={scheduleEditable}');
+    expect(editor).toContain('className="qs-payment-stage-readonly"');
+    expect(editor).toContain('className="qs-payment-percent-readonly"');
+    expect(editor).toContain(
+      'Payment and work milestones are fixed from this quotation.',
+    );
+    expect(workflow).toContain(
+      '{editable && (\n        <div className="qs-one-flow-footer">',
+    );
+    expect(workflow).toContain(
+      '{editable && catalog.length > 0 && (\n        <details className="qs-one-flow-catalog">',
+    );
+    expect(workflow).toContain(
+      "{editable\n            ? 'Existing saved work is retained. Type the next activity and add it in order.'\n            : 'Work sequence managed in Settings.'}",
+    );
+    expect(workflow).toContain(
+      "{editable\n            ? 'Type a new work item using + Add, or choose an existing one from the library above. Your old standard item names are still available.'\n            : 'No work items are configured for this stage in Settings.'}",
+    );
+    expect(workflow).toContain(
+      '{editable && preservedReports.length > 0 && (\n        <details className="qs-one-flow-advanced qs-one-flow-reports">',
+    );
+  });
+});
+
+describe('construction quotation snapshots use the current company payment stages', () => {
+  const editor = file('./payment-schedule-editor.tsx');
+
+  it('refreshes editable draft quotes when Settings contains a different stage list', () => {
+    expect(editor).toContain(
+      "const companySchedule =\n    industry === 'construction' &&\n    floorNames.length &&\n    defaultCompanyRows.length",
+    );
+    expect(editor).toContain(
+      'const syncingCompanySchedule = Boolean(\n    editable &&\n    companySchedule?.length &&',
+    );
+    expect(editor).toContain(
+      'JSON.stringify(storedRows) !== JSON.stringify(companySchedule)',
+    );
+    expect(editor).toContain(
+      "!editable ||\n      industry !== 'construction' ||\n      !syncingCompanySchedule",
+    );
+    expect(editor).toContain('Updating this draft from the');
   });
 });

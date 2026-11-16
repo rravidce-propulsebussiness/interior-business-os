@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState, useTransition } from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -135,42 +135,48 @@ export function PaymentScheduleEditor({
   const parsedDefaults =
     companyConstructionPaymentRows.safeParse(companyDefaults);
   const defaultCompanyRows = parsedDefaults.success ? parsedDefaults.data : [];
-  // Construction payment and work templates have one source of truth: company
-  // Payment Settings. Draft quotes may save a snapshot, but cannot edit it here.
-  const canEditSchedule = editable && industry !== 'construction';
-  const initialRows = readPlan(
+  const savedPlan = savedStagePaymentPlan(initial.terms);
+  const storedRows = readPlan(
     initial.terms,
     industry,
     editable,
     floorNames,
     defaultCompanyRows,
   );
-  const originalRequirements = savedStageRequirements(initial.terms);
-  const freshConstructionQuote =
+  const companySchedule =
     industry === 'construction' &&
-    editable &&
-    !savedStagePaymentPlan(initial.terms);
-  const inheritedWork =
-    freshConstructionQuote &&
-    defaultCompanyRows.some((row) => (row.steps ?? []).length > 0)
-      ? applyCompanyWorkDefaults(
-          initialRows,
+    floorNames.length &&
+    defaultCompanyRows.length
+      ? applyCompanyPaymentDefaults(
+          suggestions(industry, floorNames),
           defaultCompanyRows,
-          originalRequirements,
         )
+      : null;
+  const syncingCompanySchedule = Boolean(
+    editable &&
+    companySchedule?.length &&
+    JSON.stringify(storedRows) !== JSON.stringify(companySchedule),
+  );
+  const initialRows = syncingCompanySchedule ? companySchedule! : storedRows;
+  const originalRequirements = savedStageRequirements(initial.terms);
+  const inheritedWork =
+    syncingCompanySchedule &&
+    defaultCompanyRows.some((row) => (row.steps ?? []).length > 0)
+      ? applyCompanyWorkDefaults(initialRows, defaultCompanyRows, {}, true)
       : null;
   const [rows, setRows] = useState<Milestone[]>(() => initialRows);
   const [stageRequirements, setStageRequirements] =
     useState<StageRequirementsMap>(
-      () => inheritedWork?.requirements ?? originalRequirements,
+      () =>
+        inheritedWork?.requirements ??
+        (syncingCompanySchedule ? {} : originalRequirements),
     );
-  const seededFlow = visibleMilestoneFlow(
-    initial.terms,
-    initialRows,
-    originalRequirements,
-  );
-  const prefilledFlow =
-    industry === 'construction' && !Object.keys(seededFlow).length && editable
+  const seededFlow = syncingCompanySchedule
+    ? {}
+    : visibleMilestoneFlow(initial.terms, initialRows, originalRequirements);
+  const prefilledFlow = syncingCompanySchedule
+    ? (inheritedWork?.flow ?? standardMilestoneWorkflow(initialRows, {}))
+    : industry === 'construction' && !Object.keys(seededFlow).length && editable
       ? (inheritedWork?.flow ??
         standardMilestoneWorkflow(initialRows, originalRequirements))
       : seededFlow;
@@ -229,8 +235,10 @@ export function PaymentScheduleEditor({
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [pending, start] = useTransition();
   const dragging = useRef<number | null>(null);
+  const snapshotAttempted = useRef(false);
   const router = useRouter();
-  const savedPlan = savedStagePaymentPlan(initial.terms);
+  // Construction schedules are company-managed in Settings and shown as a fixed quote snapshot.
+  const scheduleEditable = editable && industry !== 'construction';
   const hasChanges =
     JSON.stringify(rows) !== JSON.stringify(initialRows) ||
     JSON.stringify(visibleRequirements) !==
@@ -478,6 +486,8 @@ export function PaymentScheduleEditor({
     setRows((all) => [...all, { name: '', percent: '', stageCodes: [] }]);
   }
 
+  // The company-snapshot effect below runs save() once, guarded by snapshotAttempted.
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- A new save() each render only re-runs that guarded effect.
   function save() {
     if (pending || !editable) return;
     if (candidateRequirements(visibleRequirements) === null) return;
@@ -568,6 +578,20 @@ export function PaymentScheduleEditor({
     });
   }
 
+  useEffect(() => {
+    if (
+      !editable ||
+      industry !== 'construction' ||
+      !syncingCompanySchedule ||
+      !rows.length ||
+      !valid ||
+      snapshotAttempted.current
+    )
+      return;
+    snapshotAttempted.current = true;
+    save();
+  }, [editable, industry, syncingCompanySchedule, rows.length, valid, save]);
+
   function combineBrickwork(index: number) {
     const first = rows[index],
       next = rows[index + 1];
@@ -652,35 +676,62 @@ export function PaymentScheduleEditor({
           'qs-payment-status ' +
           (feedback?.type === 'error'
             ? 'qs-payment-status-error'
-            : savedPlan && !hasChanges
+            : (industry === 'construction' &&
+                  savedPlan &&
+                  !syncingCompanySchedule) ||
+                (savedPlan && !hasChanges)
               ? 'qs-payment-status-saved'
               : 'qs-payment-status-unsaved')
         }
         role="status"
       >
         <span className="qs-payment-status-mark" aria-hidden="true">
-          {savedPlan && !hasChanges && feedback?.type !== 'error' ? '✓' : 'ⓘ'}
+          {((industry === 'construction' &&
+            savedPlan &&
+            !syncingCompanySchedule) ||
+            (savedPlan && !hasChanges)) &&
+          feedback?.type !== 'error'
+            ? '✓'
+            : 'ⓘ'}
         </span>
         <span>
           {feedback?.type === 'error'
             ? feedback.text
-            : savedPlan && !hasChanges
-              ? 'Payment schedule saved in this quotation.'
-              : savedPlan
-                ? 'You have unsaved changes. Save to update the customer PDF.'
-                : editable &&
-                    industry === 'construction' &&
-                    defaultCompanyRows.length
-                  ? 'Company payment and work settings are ready to save into this quotation.'
-                  : editable && industry === 'construction'
-                    ? 'Set the company payment schedule in Settings before saving this quotation.'
-                    : editable
-                      ? 'Not saved yet — these percentages are suggestions. Save to include them in the PDF.'
-                      : 'No payment schedule was saved with this quotation.'}
+            : syncingCompanySchedule
+              ? 'Updating this draft from the ' +
+                defaultCompanyRows.length +
+                ' company stages in Settings…'
+              : industry === 'construction' && savedPlan
+                ? 'Payment and work milestones are fixed from this quotation.'
+                : savedPlan && !hasChanges
+                  ? 'Payment schedule saved in this quotation.'
+                  : savedPlan
+                    ? 'You have unsaved changes. Save to update the customer PDF.'
+                    : industry === 'construction' && editable
+                      ? 'Payment and work milestones come from Company Settings and are being saved to this quotation.'
+                      : editable
+                        ? 'Not saved yet — these percentages are suggestions. Save to include them in the PDF.'
+                        : 'No payment schedule was saved with this quotation.'}
         </span>
       </div>
 
-      {canEditSchedule && (
+      {industry === 'construction' &&
+        editable &&
+        syncingCompanySchedule &&
+        feedback?.type === 'error' && (
+          <button
+            type="button"
+            className="qs-payment-save"
+            onClick={() => {
+              snapshotAttempted.current = false;
+              save();
+            }}
+          >
+            Retry saving company defaults
+          </button>
+        )}
+
+      {scheduleEditable && (
         <div className="qs-payment-actions">
           <button
             type="button"
@@ -710,7 +761,7 @@ export function PaymentScheduleEditor({
           <p className="qs-payment-footnote">
             {!defaultCompanyRows.length
               ? 'Set up the company payment and work template in Settings before saving this construction quotation.'
-              : 'Save the floor-wise SFT quotation scope first to generate payments for the actual floors.'}
+              : 'Save the floor-wise SFT quotation scope first. Company payment defaults and linked work will then be added automatically.'}
           </p>
         )}
       <div className="qs-payment-stages">
@@ -725,18 +776,17 @@ export function PaymentScheduleEditor({
               <li
                 className="qs-payment-row"
                 key={index}
-                draggable={canEditSchedule && !pending}
+                draggable={scheduleEditable && !pending}
                 onDragStart={(event) => {
-                  if (!canEditSchedule) return;
                   dragging.current = index;
                   event.dataTransfer.effectAllowed = 'move';
                 }}
                 onDragOver={(event) => {
-                  if (canEditSchedule) event.preventDefault();
+                  if (scheduleEditable) event.preventDefault();
                 }}
                 onDrop={(event) => {
                   event.preventDefault();
-                  if (canEditSchedule && dragging.current !== null) {
+                  if (scheduleEditable && dragging.current !== null) {
                     const from = dragging.current;
                     reorderMilestones(from, index);
                   }
@@ -746,16 +796,25 @@ export function PaymentScheduleEditor({
                   dragging.current = null;
                 }}
               >
-                <button
-                  type="button"
-                  className="qs-payment-grip"
-                  disabled={!canEditSchedule || pending || index === 0}
-                  title="Move up one stage (or drag the row to reorder)"
-                  aria-label={'Move milestone ' + (index + 1) + ' up'}
-                  onClick={() => reorderMilestones(index, index - 1)}
-                >
-                  <span aria-hidden="true">⠿</span>
-                </button>
+                {scheduleEditable ? (
+                  <button
+                    type="button"
+                    className="qs-payment-grip"
+                    disabled={pending || index === 0}
+                    title="Move up one stage (or drag the row to reorder)"
+                    aria-label={'Move milestone ' + (index + 1) + ' up'}
+                    onClick={() => reorderMilestones(index, index - 1)}
+                  >
+                    <span aria-hidden="true">⠿</span>
+                  </button>
+                ) : (
+                  <span
+                    className="qs-payment-order"
+                    aria-label={'Milestone ' + (index + 1)}
+                  >
+                    {index + 1}
+                  </span>
+                )}
                 <div className="qs-payment-stage-name">
                   <label
                     className="qs-payment-mobile-label"
@@ -768,17 +827,22 @@ export function PaymentScheduleEditor({
                         ? 'Work milestone'
                         : 'Payment / Fee')}
                   </label>
-                  <input
-                    id={'qs-pay-stage-' + index}
-                    aria-label={'Milestone ' + (index + 1)}
-                    value={row.name}
-                    maxLength={100}
-                    disabled={!canEditSchedule}
-                    placeholder="Enter milestone"
-                    onChange={(event) =>
-                      update(index, 'name', event.target.value)
-                    }
-                  />
+                  {scheduleEditable ? (
+                    <input
+                      id={'qs-pay-stage-' + index}
+                      aria-label={'Milestone ' + (index + 1)}
+                      value={row.name}
+                      maxLength={100}
+                      placeholder="Enter milestone"
+                      onChange={(event) =>
+                        update(index, 'name', event.target.value)
+                      }
+                    />
+                  ) : (
+                    <span className="qs-payment-stage-readonly">
+                      {row.name}
+                    </span>
+                  )}
                   {industry === 'construction' && row.stageCodes.length > 0 && (
                     <span className="qs-work-milestone-badge">
                       Work milestone
@@ -788,7 +852,7 @@ export function PaymentScheduleEditor({
                     <div className="qs-payment-linked">
                       Covers {row.stageCodes.length} quote-defined work stage
                       {row.stageCodes.length === 1 ? '' : 's'}.
-                      {canEditSchedule &&
+                      {scheduleEditable &&
                         row.name.toLowerCase().includes('brickwork') &&
                         rows[index + 1]?.name
                           .toLowerCase()
@@ -812,20 +876,28 @@ export function PaymentScheduleEditor({
                     Percentage
                   </label>
                   <div className="qs-payment-percent-field">
-                    <input
-                      id={'qs-pay-pct-' + index}
-                      aria-label={'Percent ' + (index + 1)}
-                      type="number"
-                      inputMode="decimal"
-                      step="0.01"
-                      min="0.01"
-                      max="100"
-                      value={row.percent}
-                      disabled={!canEditSchedule}
-                      onChange={(event) =>
-                        update(index, 'percent', event.target.value)
-                      }
-                    />
+                    {scheduleEditable ? (
+                      <input
+                        id={'qs-pay-pct-' + index}
+                        aria-label={'Percent ' + (index + 1)}
+                        type="number"
+                        inputMode="decimal"
+                        step="0.01"
+                        min="0.01"
+                        max="100"
+                        value={row.percent}
+                        onChange={(event) =>
+                          update(index, 'percent', event.target.value)
+                        }
+                      />
+                    ) : (
+                      <output
+                        className="qs-payment-percent-readonly"
+                        aria-label={'Percent ' + (index + 1)}
+                      >
+                        {row.percent}
+                      </output>
+                    )}
                     <span aria-hidden="true">%</span>
                   </div>
                 </div>
@@ -849,7 +921,7 @@ export function PaymentScheduleEditor({
                           .map((item) => item.code),
                     )}
                     requirements={visibleRequirements}
-                    editable={canEditSchedule}
+                    editable={scheduleEditable}
                     onChange={(steps, changed) =>
                       changeWorkflow(index, steps, changed)
                     }
@@ -857,7 +929,7 @@ export function PaymentScheduleEditor({
                     onLinkStage={(code) => linkWorkStage(index, code)}
                   />
                 )}
-                {canEditSchedule && (
+                {scheduleEditable && (
                   <button
                     type="button"
                     className="qs-payment-remove"
@@ -927,7 +999,7 @@ export function PaymentScheduleEditor({
         </div>
       </div>
 
-      {editable && (industry !== 'construction' || !savedPlan) && (
+      {scheduleEditable && (
         <button
           type="button"
           className="qs-payment-save"
@@ -946,11 +1018,7 @@ export function PaymentScheduleEditor({
           >
             <path d="M5 3h12l4 4v14H3V3h2Zm2 0v7h10V3M7 21v-8h10v8" />
           </svg>
-          {pending
-            ? 'Saving Payment Schedule…'
-            : industry === 'construction'
-              ? 'Save Company Schedule to Quotation'
-              : 'Save Payment Schedule'}
+          {pending ? 'Saving Payment Schedule…' : 'Save Payment Schedule'}
         </button>
       )}
       {feedback?.type === 'success' && (
