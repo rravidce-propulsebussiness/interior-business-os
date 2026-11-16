@@ -150,7 +150,7 @@ test('unconfigured ProPulse SSO refuses login and returns a safe notice', async 
     destination.searchParams.get('provider_error'),
   );
   await page.goto(destination.pathname + destination.search);
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
   await expect(page.locator('.pp-login-notice[role="alert"]')).toContainText(
     /ProPulse sign-in is not yet activated|temporarily unavailable/,
   );
