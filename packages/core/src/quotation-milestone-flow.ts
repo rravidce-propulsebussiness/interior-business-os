@@ -36,9 +36,7 @@ export function validateMilestoneFlow(
    if(total>150)throw new Error('Too many execution steps; simplify the sequence');
    if(!row.stageCodes.includes(step.code))
     throw new Error('Choose a construction stage linked to this payment');
-   const key=step.kind==='payment'
-    ?'payment:'+step.code+':'+step.index
-    :position+':'+step.code+':'+step.kind+':'+step.index;
+   const key=step.code+':'+step.kind+':'+step.index;
    if(step.kind==='payment'){
     const linkedPayment=payments[step.index];
     if(!linkedPayment||!linkedPayment.stageCodes.includes(step.code))
@@ -52,7 +50,7 @@ export function validateMilestoneFlow(
    if(!stage[field][step.index])
     throw new Error('Execution item no longer exists in '+step.code);
    if(step.kind==='qc'){
-    const checkKey=position+':'+step.code+':check:'+step.index;
+    const checkKey=step.code+':check:'+step.index;
     if(!passedChecks.has(checkKey))
      throw new Error('Site check or test must precede company QC');
     if(used.has(key))throw new Error('Duplicate company QC in execution order');
