@@ -13,15 +13,15 @@ test('public Business App home shows guest navigation only to anonymous visitors
   await expect(
     page.getByRole('link', { name: 'Start Your Business', exact: true }),
   ).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(
+    'One platform.',
+  );
   await expect(
-    page.getByRole('heading', { level: 1 }),
-  ).toContainText('One platform.');
-  await expect(
-    page.getByRole('link', { name: 'Explore Marketplace' }),
+    page.getByRole('link', { name: 'Marketplace', exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole('heading', {
-      name: 'Explore the B2B Materials Marketplace',
+      name: 'B2B marketplace for project materials',
     }),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sign out' })).toHaveCount(0);
