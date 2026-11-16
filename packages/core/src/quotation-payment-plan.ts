@@ -11,7 +11,7 @@ export function savedStagePaymentPlan(
   );
   if (!match) return null;
   const lines = (match[1] ?? '').trim().split(/\r?\n/);
-  if (!lines.length || lines.length > 40) return null;
+  if (!lines.length || lines.length > 100) return null;
   const result: StagePaymentMilestone[] = [];
   for (const line of lines) {
     const index = line.lastIndexOf('|');
@@ -85,7 +85,7 @@ export function encodeStagePaymentLinks(
   const result = JSON.stringify(linked);
   if (
     !linked.length ||
-    linked.length > 40 ||
+    linked.length > 100 ||
     result.length > 8000 ||
     linked.some(
       (row) =>
