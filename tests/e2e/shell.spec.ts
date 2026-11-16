@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 const titles: Record<string, string> = {
   'platform-admin': 'Platform administration',
-  'business-app': 'Run your business.Source smarter. Grow faster.',
+  'business-app': 'One platform.Every project. Total control.',
   websites: 'Business websites',
 };
 test('application shell is accessible and responsive', async ({
@@ -10,9 +10,9 @@ test('application shell is accessible and responsive', async ({
   await page.goto('/');
   if (testInfo.project.name === 'business-app') {
     const heading = page.getByRole('heading', { level: 1 });
-    await expect(heading).toContainText('Run your business.');
-    await expect(heading).toContainText('Source smarter.');
-    await expect(heading).toContainText('Grow faster.');
+    await expect(heading).toContainText('One platform.');
+    await expect(heading).toContainText('Every project.');
+    await expect(heading).toContainText('Total control.');
   } else {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(
       titles[testInfo.project.name]!,
