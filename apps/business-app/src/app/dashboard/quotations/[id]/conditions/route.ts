@@ -76,7 +76,7 @@ const payload = z.discriminatedUnion('kind', [
             .strict(),
         )
         .min(1)
-        .max(40),
+        .max(100),
       stageRequirements: z.record(z.string(), z.unknown()).optional(),
       milestoneFlow: z.record(z.string(), z.unknown()).optional(),
       program: z.unknown().optional(),
