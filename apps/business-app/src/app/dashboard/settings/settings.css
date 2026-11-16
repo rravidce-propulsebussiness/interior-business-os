@@ -1996,7 +1996,7 @@ a.ush-tile:focus-visible {
 }
 .us-company-stage-heading {
   display: grid;
-  grid-template-columns: 24px 42px minmax(180px, 1fr) 180px 130px;
+  grid-template-columns: 24px 42px minmax(180px, 1fr) 160px;
   gap: 12px;
   align-items: center;
 }

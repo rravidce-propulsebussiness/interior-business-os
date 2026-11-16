@@ -15,7 +15,7 @@ export const constructionStageKinds = [
 export const companyStageItem = z
   .object({
     id: z.string().min(1).max(80),
-    kind: z.enum(['work', 'material', 'check', 'test', 'qc']),
+    kind: z.enum(['work', 'material', 'check', 'test', 'qc', 'payment']),
     title: z.string().trim().min(2).max(180),
     days: z.coerce.number().int().min(0).max(365),
     guideText: z.string().trim().max(1800).optional(),
@@ -27,7 +27,7 @@ export const companyConstructionStage = z
   .object({
     id: z.enum(constructionStageKinds),
     name: z.string().trim().min(2).max(100),
-    percent: z.coerce.number().finite().positive().max(100),
+    // Legacy saved templates may still contain this field. New templates derive\n    // payment values from the quotation, never from company percentages.\n    percent: z.coerce.number().finite().positive().max(100).optional(),
     repeatsPerFloor: z.boolean(),
     days: z.coerce.number().int().min(0).max(365),
     items: z.array(companyStageItem).max(100),
@@ -46,14 +46,6 @@ export const companyConstructionStages = z
       ctx.addIssue({
         code: 'custom',
         message: 'All seven construction stages are required.',
-      });
-    if (
-      Math.abs(stages.reduce((sum, stage) => sum + stage.percent, 0) - 100) >
-      0.001
-    )
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Stage percentages must total exactly 100%.',
       });
     const itemIds = new Set<string>();
     let itemCount = 0;
@@ -107,57 +99,89 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'preconstruction',
     name: 'Pre-construction',
-    percent: 10,
     repeatsPerFloor: false,
     days: 7,
-    items: [],
+    items: [
+      {
+        id: 'payment-preconstruction',
+        kind: 'payment',
+        title: 'Design advance payment',
+        days: 0,
+      },
+    ],
   },
   {
     id: 'foundation',
     name: 'Foundation',
-    percent: 18,
     repeatsPerFloor: false,
     days: 20,
-    items: [],
+    items: [
+      {
+        id: 'payment-foundation',
+        kind: 'payment',
+        title: 'Foundation payment',
+        days: 0,
+      },
+    ],
   },
   {
     id: 'slabs',
     name: 'Slabs',
-    percent: 27,
     repeatsPerFloor: true,
     days: 15,
-    items: [],
+    items: [
+      { id: 'payment-slabs', kind: 'payment', title: 'Slabs payment', days: 0 },
+    ],
   },
   {
     id: 'brickwork',
     name: 'Brickwork',
-    percent: 15,
     repeatsPerFloor: true,
     days: 15,
-    items: [],
+    items: [
+      {
+        id: 'payment-brickwork',
+        kind: 'payment',
+        title: 'Brickwork payment',
+        days: 0,
+      },
+    ],
   },
   {
     id: 'electrical-plumbing',
     name: 'Electrical & plumbing',
-    percent: 14,
     repeatsPerFloor: true,
     days: 14,
-    items: [],
+    items: [
+      {
+        id: 'payment-electrical-plumbing',
+        kind: 'payment',
+        title: 'Electrical & plumbing payment',
+        days: 0,
+      },
+    ],
   },
   {
     id: 'tiles',
     name: 'Tiles',
-    percent: 9,
     repeatsPerFloor: true,
     days: 10,
-    items: [],
+    items: [
+      { id: 'payment-tiles', kind: 'payment', title: 'Tiles payment', days: 0 },
+    ],
   },
   {
     id: 'painting',
     name: 'Painting',
-    percent: 7,
     repeatsPerFloor: true,
     days: 10,
-    items: [],
+    items: [
+      {
+        id: 'payment-painting',
+        kind: 'payment',
+        title: 'Painting payment',
+        days: 0,
+      },
+    ],
   },
 ];

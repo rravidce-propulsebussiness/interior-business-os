@@ -14,7 +14,7 @@ export const quotationMilestoneStep = z
       .string()
       .regex(/^[A-Z][A-Z0-9_]*(?:\/[A-Z][A-Z0-9_]*)?$/)
       .max(120),
-    index: z.number().int().min(0).max(49),
+    index: z.number().int().min(0).max(99),
   })
   .strict();
 export type QuotationMilestoneStep = z.infer<typeof quotationMilestoneStep>;
@@ -39,7 +39,7 @@ export function validateMilestoneFlow(
 ): QuotationMilestoneFlow {
   const parsed = data.parse({ version: 1, rows: raw });
   const entries = Object.entries(parsed.rows);
-  if (entries.length > 40)
+  if (entries.length > 100)
     throw new Error('Too many milestone execution plans');
   const used = new Set<string>();
   let total = 0;
@@ -119,7 +119,7 @@ export function remapMilestoneFlow(
   const next: QuotationMilestoneFlow = {};
   for (const [old, steps] of Object.entries(flow)) {
     const index = remap(Number(old));
-    if (index === null || index < 0 || index >= 40) continue;
+    if (index === null || index < 0 || index >= 100) continue;
     const key = String(index);
     next[key] = [...(next[key] ?? []), ...steps];
   }

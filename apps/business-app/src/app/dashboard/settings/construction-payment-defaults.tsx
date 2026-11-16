@@ -26,12 +26,16 @@ export function ConstructionPaymentDefaults({
     saveConstructionPaymentDefaults,
     initialState,
   );
-  const [stages, setStages] = useState(initial);
-  const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const total = stages.reduce(
-    (sum, stage) => sum + Number(stage.percent || 0),
-    0,
+  const [stages, setStages] = useState<CompanyConstructionStage[]>(() =>
+    initial.map((stage) => ({
+      id: stage.id,
+      name: stage.name,
+      repeatsPerFloor: stage.repeatsPerFloor,
+      days: stage.days,
+      items: stage.items,
+    })),
   );
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
   const patchStage = (
     index: number,
     patch: Partial<CompanyConstructionStage>,
@@ -60,10 +64,10 @@ export function ConstructionPaymentDefaults({
     <form action={action} className="us-company-stage-editor">
       <input type="hidden" name="rows" value={JSON.stringify(stages)} />
       <p className="us-info">
-        Set the payment share and expected days once. Pre-construction and
-        foundation happen once; the remaining stages repeat for each quoted
-        floor. Work items, checks and QC instructions are copied into each new
-        quotation.
+        Set stage days and the order of work, materials, checks, QC and payment
+        markers. Pre-construction and foundation happen once; the remaining
+        stages repeat for each quoted floor. Payment amounts are entered in
+        quotations, never fixed across every project.
       </p>
       {stages.map((stage, index) => (
         <section
@@ -94,23 +98,6 @@ export function ConstructionPaymentDefaults({
                 patchStage(index, { name: event.target.value })
               }
             />
-            <label>
-              Payment share{' '}
-              <span>
-                <input
-                  type="number"
-                  min="0.01"
-                  max="100"
-                  step="0.01"
-                  value={stage.percent}
-                  disabled={!canEdit}
-                  onChange={(event) =>
-                    patchStage(index, { percent: Number(event.target.value) })
-                  }
-                />
-                %
-              </span>
-            </label>
             <label>
               Stage days{' '}
               <input
@@ -193,15 +180,17 @@ export function ConstructionPaymentDefaults({
                     })
                   }
                 >
-                  {['work', 'material', 'check', 'test', 'qc'].map((kind) => (
-                    <option key={kind} value={kind}>
-                      {kind === 'qc'
-                        ? 'QC'
-                        : kind === 'check'
-                          ? 'Site check'
-                          : kind[0]!.toUpperCase() + kind.slice(1)}
-                    </option>
-                  ))}
+                  {['work', 'material', 'check', 'test', 'qc', 'payment'].map(
+                    (kind) => (
+                      <option key={kind} value={kind}>
+                        {kind === 'qc'
+                          ? 'QC'
+                          : kind === 'check'
+                            ? 'Site check'
+                            : kind[0]!.toUpperCase() + kind.slice(1)}
+                      </option>
+                    ),
+                  )}
                 </select>
                 <input
                   className="us-stage-item-title"
@@ -273,11 +262,13 @@ export function ConstructionPaymentDefaults({
                 defaultValue="work"
                 aria-label="New item type"
               >
-                {['work', 'material', 'check', 'test', 'qc'].map((kind) => (
-                  <option key={kind} value={kind}>
-                    {kind}
-                  </option>
-                ))}
+                {['work', 'material', 'check', 'test', 'qc', 'payment'].map(
+                  (kind) => (
+                    <option key={kind} value={kind}>
+                      {kind}
+                    </option>
+                  ),
+                )}
               </select>
               <input
                 value={drafts[stage.id] ?? ''}
@@ -287,7 +278,7 @@ export function ConstructionPaymentDefaults({
                     [stage.id]: event.target.value,
                   }))
                 }
-                placeholder="Add work, material, check or QC"
+                placeholder="Add work, material, check, QC or payment"
               />
               <button
                 type="button"
@@ -305,7 +296,7 @@ export function ConstructionPaymentDefaults({
                         kind: (select?.value ??
                           'work') as CompanyStageItem['kind'],
                         title,
-                        days: 1,
+                        days: select?.value === 'payment' ? 0 : 1,
                       },
                     ],
                   });
@@ -319,12 +310,12 @@ export function ConstructionPaymentDefaults({
         </section>
       ))}
       <footer className="us-company-stage-save">
-        <strong>Total payment share: {total.toFixed(2)}%</strong>
+        <strong>Payment amounts are set per quotation and floor.</strong>
         {canEdit && (
           <button
             className="us-button-primary"
             type="submit"
-            disabled={pending || Math.abs(total - 100) > 0.001}
+            disabled={pending}
           >
             {pending ? 'Saving…' : 'Save stages & work'}
           </button>

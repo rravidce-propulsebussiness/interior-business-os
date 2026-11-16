@@ -26,21 +26,30 @@ describe('company construction stage templates', () => {
       'painting',
     ]);
     expect(
-      defaultCompanyConstructionStages.reduce(
-        (sum, stage) => sum + stage.percent,
-        0,
-      ),
-    ).toBe(100);
+      defaultCompanyConstructionStages.every((stage) => !('percent' in stage)),
+    ).toBe(true);
   });
 
-  it('rejects invalid total shares, incomplete stages and unsafe guide links', () => {
+  it('accepts per-quote payment markers but rejects incomplete stages and unsafe guides', () => {
     expect(
       companyConstructionStages.safeParse(
         defaultCompanyConstructionStages.map((stage, index) =>
-          index === 0 ? { ...stage, percent: 9 } : stage,
+          index === 0
+            ? {
+                ...stage,
+                items: [
+                  {
+                    id: 'pay-1',
+                    kind: 'payment',
+                    title: 'Payment on approval',
+                    days: 0,
+                  },
+                ],
+              }
+            : stage,
         ),
       ).success,
-    ).toBe(false);
+    ).toBe(true);
     expect(
       companyConstructionStages.safeParse(
         defaultCompanyConstructionStages.slice(1),

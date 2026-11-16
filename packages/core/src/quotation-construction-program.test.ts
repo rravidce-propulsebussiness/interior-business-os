@@ -9,7 +9,7 @@ import {
 } from './quotation-construction-program';
 
 describe('reusable construction stage programme', () => {
-  it('keeps one-time and per-floor stages with a 100% payment allocation', () => {
+  it('keeps one-time and per-floor stages without universal payment shares', () => {
     expect(
       companyConstructionStages.parse(defaultCompanyConstructionStages),
     ).toHaveLength(7);
@@ -25,11 +25,8 @@ describe('reusable construction stage programme', () => {
       'painting',
     ]);
     expect(
-      defaultCompanyConstructionStages.reduce(
-        (sum, stage) => sum + stage.percent,
-        0,
-      ),
-    ).toBe(100);
+      defaultCompanyConstructionStages.every((stage) => !('percent' in stage)),
+    ).toBe(true);
   });
 
   it('round trips a quote-specific floor and date snapshot without exposing it as terms text', () => {
@@ -37,6 +34,10 @@ describe('reusable construction stage programme', () => {
       startDate: '2026-11-16',
       floors: ['Ground', 'First'],
       stages: defaultCompanyConstructionStages,
+      paymentOverrides: {
+        'slabs|0|payment-slabs': 250000,
+        'slabs|1|payment-slabs': 330000,
+      },
     };
     const encoded = encodeQuotationConstructionProgram(program);
     expect(
