@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   companyConstructionStages,
   defaultCompanyConstructionStages,
   type CompanyConstructionStage,
+  type CompanyStageItem,
 } from '@business-os/core/company-construction-defaults';
 import { savedQuotationConstructionProgram } from '@business-os/core/quotation-construction-program';
+import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
 import { quotedConstructionFloorCode } from '@business-os/core/construction-floor-code';
 
 type Props = {
@@ -17,7 +19,10 @@ type Props = {
   floorNames: string[];
   companyDefaults: unknown;
   initial: { revision_id: string; terms: string };
+  /** Priced, stage-and-floor BOQ allocations, when an authorized pre-quote BOQ exists. */
+  boqPaymentAmounts?: Record<string, number>;
 };
+
 const codeMap: Record<string, (floor: string) => string[]> = {
   preconstruction: () => ['PRECONSTRUCTION', 'DESIGN'],
   foundation: () => ['SITE_PREP', 'FOUNDATION', 'PLINTH'],
@@ -32,17 +37,21 @@ const codeMap: Record<string, (floor: string) => string[]> = {
   painting: (floor) => ['DOORS/' + quotedConstructionFloorCode(floor)],
 };
 const paymentName: Record<string, string> = {
-  preconstruction: 'Price freeze & design payment',
+  preconstruction: 'Design payment',
   foundation: 'Foundation payment',
-  slabs: 'Slab work payment',
+  slabs: 'Slab payment',
   brickwork: 'Brickwork payment',
-  'electrical-plumbing': 'Electrical & plumbing payment',
+  'electrical-plumbing': 'Electrical and plumbing payment',
   tiles: 'Tiles payment',
   painting: 'Painting payment',
 };
 const dateAt = (date: Date) =>
-  `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-const addDays = (date: Date, days: number, skipSundays: boolean) => {
+  [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0'),
+  ].join('-');
+const addWorkingDays = (date: Date, days: number, skipSundays = true) => {
   const result = new Date(date);
   let left = Math.max(0, days);
   while (left > 0) {
@@ -59,58 +68,99 @@ const showDate = (date: Date) =>
     month: 'short',
     year: 'numeric',
   }).format(date);
+export const paymentItemKey = (
+  stageId: string,
+  floorIndex: number,
+  itemId: string,
+) => stageId + '|' + floorIndex + '|' + itemId;
+const stagePaymentItems = (
+  stage: CompanyConstructionStage,
+): CompanyStageItem[] => {
+  const payments = stage.items.filter((item) => item.kind === 'payment');
+  // Legacy templates had no payment marker. Keep their saved payment schedule
+  // editable without modifying the company's reusable settings.
+  return payments.length
+    ? payments
+    : [
+        {
+          id: 'legacy-payment-' + stage.id,
+          kind: 'payment',
+          title: paymentName[stage.id] ?? 'Payment',
+          days: 0,
+        },
+      ];
+};
+type AllocatedPayment = {
+  key: string;
+  name: string;
+  stageId: string;
+  floorName: string;
+  floorIndex: number;
+  item: CompanyStageItem;
+  amount: number;
+  stageCodes: string[];
+};
 
-function buildRows(
+function paymentAllocations(
   stages: CompanyConstructionStage[],
   floorNames: string[],
-  startDate: string,
-  amount: number,
+  values: Record<string, string>,
+): AllocatedPayment[] {
+  return stages.flatMap((stage) =>
+    (stage.repeatsPerFloor ? floorNames : ['']).flatMap(
+      (floorName, floorIndex) =>
+        stagePaymentItems(stage).map((item) => {
+          const key = paymentItemKey(stage.id, floorIndex, item.id);
+          const label = [stage.name, floorName, item.title]
+            .filter(Boolean)
+            .join(' — ');
+          return {
+            key,
+            name: label.slice(0, 100),
+            stageId: stage.id,
+            floorName,
+            floorIndex,
+            item,
+            amount: Math.max(0, Number(values[key] || 0)),
+            stageCodes: (codeMap[stage.id] ?? (() => []))(floorName),
+          };
+        }),
+    ),
+  );
+}
+function stagedDates(
+  stages: CompanyConstructionStage[],
+  floors: string[],
+  start: string,
   skipSundays: boolean,
 ) {
-  let cursor = new Date(startDate + 'T12:00:00');
-  if (skipSundays && cursor.getDay() === 0) cursor = addDays(cursor, 0, true);
+  let cursor = new Date(start + 'T12:00:00');
+  if (skipSundays && cursor.getDay() === 0)
+    cursor.setDate(cursor.getDate() + 1);
   return stages.map((stage) => {
-    const instances = stage.repeatsPerFloor ? floorNames : [''];
-    const eachPercent = Number(stage.percent) / instances.length;
-    const floors = instances.map((floorName) => {
+    const instances = stage.repeatsPerFloor ? floors : [''];
+    const rows = instances.map((floorName) => {
       const first = new Date(cursor);
-      const stageDays = Math.max(
+      const days = Math.max(
         stage.days,
         stage.items.reduce((sum, item) => sum + item.days, 0),
       );
-      const end = addDays(first, Math.max(0, stageDays - 1), skipSundays);
+      const end = addWorkingDays(first, Math.max(0, days - 1), skipSundays);
       let itemCursor = new Date(first);
       const items = stage.items.map((item) => {
         const itemStart = new Date(itemCursor);
-        const itemEnd = addDays(
+        const itemEnd = addWorkingDays(
           itemStart,
           Math.max(0, item.days - 1),
           skipSundays,
         );
-        itemCursor = addDays(itemEnd, 1, skipSundays);
+        if (item.days > 0) itemCursor = addWorkingDays(itemEnd, 1, skipSundays);
         return { ...item, start: itemStart, end: itemEnd };
       });
-      cursor = addDays(end, 1, skipSundays);
-      return {
-        floorName,
-        percent: eachPercent,
-        amount: (amount * eachPercent) / 100,
-        start: first,
-        end,
-        items,
-      };
+      cursor = addWorkingDays(end, 1, skipSundays);
+      return { floorName, start: first, end, items };
     });
-    const stageCodes = [
-      ...new Set(
-        instances.flatMap((floor) => (codeMap[stage.id] ?? (() => []))(floor)),
-      ),
-    ];
-    return {
-      stage,
-      floors,
-      stageCodes,
-      name: paymentName[stage.id] ?? stage.name,
-    };
+    return { stage, floors: rows };
   });
 }
 
@@ -121,69 +171,118 @@ export function ConstructionProgramEditor({
   floorNames,
   companyDefaults,
   initial,
+  boqPaymentAmounts = {},
 }: Props) {
   const parsed = companyConstructionStages.safeParse(companyDefaults);
   const defaults = parsed.success
     ? parsed.data
     : defaultCompanyConstructionStages;
   const saved = savedQuotationConstructionProgram(initial.terms);
-  const stages: CompanyConstructionStage[] = editable
-    ? defaults
-    : (saved?.stages ?? defaults);
+  // Keep a quotation revision's own work and payment markers stable even
+  // if the company later edits its reusable template.
+  // Company Settings is the source of truth for reusable stages and work.
+  // Refresh old quotation snapshots from the current configured workflow.
+  const stages = defaults;
   const [startDate, setStartDate] = useState(
     saved?.startDate ?? dateAt(new Date()),
   );
   const [skipSundays, setSkipSundays] = useState(saved?.skipSundays ?? true);
+  const amount = Number(total) || 0;
+  const storedPlan = savedStagePaymentPlan(initial.terms);
+  const [values, setValues] = useState<Record<string, string>>(() => {
+    const fromBoq = Object.fromEntries(
+      Object.entries(boqPaymentAmounts)
+        .filter(([, value]) => Number.isFinite(value) && value >= 0)
+        .map(([key, value]) => [key, String(value)]),
+    );
+    const fromSaved = Object.fromEntries(
+      Object.entries(saved?.paymentOverrides ?? {}).map(([key, value]) => [
+        key,
+        String(value),
+      ]),
+    );
+    // Older quotations only saved one percentage per company stage.
+    // Import their allocation for editing; it is not a new BOQ default.
+    if (
+      !saved?.paymentOverrides &&
+      storedPlan?.length === stages.length &&
+      amount > 0
+    ) {
+      stages.forEach((stage, index) => {
+        const markers = stagePaymentItems(stage);
+        const floorCount = stage.repeatsPerFloor ? floorNames.length : 1;
+        const count = markers.length * floorCount;
+        if (!count) return;
+        const perItem =
+          (amount * (storedPlan[index]?.percent ?? 0)) / 100 / count;
+        for (let floor = 0; floor < floorCount; floor++) {
+          markers.forEach((item) => {
+            fromSaved[paymentItemKey(stage.id, floor, item.id)] = String(
+              Number(perItem.toFixed(8)),
+            );
+          });
+        }
+      });
+    }
+    return { ...fromBoq, ...fromSaved };
+  });
   const [feedback, setFeedback] = useState('');
   const [pending, start] = useTransition();
   const router = useRouter();
-  const lastSubmitted = useRef('');
-  const amount = Number(total) || 0;
   const fmt = (value: number) =>
     new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency,
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 2,
     }).format(value);
-  const rows = buildRows(stages, floorNames, startDate, amount, skipSundays);
-  const plannedDays = rows.reduce(
+  const allocations = paymentAllocations(stages, floorNames, values);
+  const datedStages = stagedDates(stages, floorNames, startDate, skipSundays);
+  const plannedDays = datedStages.reduce(
     (sum, row) =>
       sum +
       row.floors.length *
         Math.max(
           row.stage.days,
-          row.stage.items.reduce((itemSum, item) => itemSum + item.days, 0),
+          row.stage.items.reduce((n, item) => n + item.days, 0),
         ),
     0,
   );
-  const targetHandover = rows.at(-1)?.floors.at(-1)?.end;
-  const signature = JSON.stringify({
-    stages,
-    floors: floorNames,
-    startDate,
-    skipSundays,
-  });
+  const targetHandover = datedStages.at(-1)?.floors.at(-1)?.end;
+  const allocated = allocations.reduce(
+    (sum, payment) => sum + payment.amount,
+    0,
+  );
+  const remaining = amount - allocated;
+  const funded = allocations.filter((entry) => entry.amount > 0);
+  const percentages = funded.map((entry) =>
+    Number(((entry.amount / (amount || 1)) * 100).toFixed(8)),
+  );
+  if (percentages.length) {
+    percentages[percentages.length - 1] = Number(
+      (
+        100 - percentages.slice(0, -1).reduce((sum, part) => sum + part, 0)
+      ).toFixed(8),
+    );
+  }
+  const valid =
+    amount > 0 &&
+    allocations.length > 0 &&
+    funded.length > 0 &&
+    funded.length === allocations.length &&
+    funded.length <= 100 &&
+    Math.abs(remaining) <= 0.01 &&
+    Object.values(values).every(
+      (value) =>
+        value === '' || (Number.isFinite(Number(value)) && Number(value) >= 0),
+    ) &&
+    percentages.every((part) => part > 0 && part <= 100);
 
-  const needsSync =
-    !saved ||
-    JSON.stringify(saved.stages) !== JSON.stringify(defaults) ||
-    JSON.stringify(saved.floors) !== JSON.stringify(floorNames) ||
-    saved.startDate !== startDate ||
-    saved.skipSundays !== skipSundays;
-  useEffect(() => {
-    if (
-      !editable ||
-      !needsSync ||
-      !floorNames.length ||
-      rows.length !== 7 ||
-      lastSubmitted.current === signature
-    )
-      return;
-    lastSubmitted.current = signature;
+  const save = () => {
+    if (!editable || !valid) return;
     start(async () => {
       try {
         const response = await fetch(
-          `/dashboard/quotations/${initial.revision_id}/conditions`,
+          '/dashboard/quotations/' + initial.revision_id + '/conditions',
           {
             method: 'POST',
             credentials: 'same-origin',
@@ -193,17 +292,22 @@ export function ConstructionProgramEditor({
               kind: 'payments',
               program: {
                 stages,
+                floors: floorNames,
                 startDate,
                 skipSundays,
-                floors: floorNames,
+                paymentOverrides: Object.fromEntries(
+                  allocations.map((row) => [
+                    row.key,
+                    Number(row.amount.toFixed(2)),
+                  ]),
+                ),
               },
-              stages: rows.map((row) => ({
+              stages: funded.map((row, index) => ({
                 name: row.name,
-                percent: Number(row.stage.percent).toFixed(2),
+                percent: percentages[index]!.toFixed(8),
                 stageCodes: row.stageCodes,
               })),
-              stageRequirements: {},
-              milestoneFlow: {},
+              // Leave saved QC/work overrides intact; the user edits them separately.
             }),
           },
         );
@@ -214,58 +318,39 @@ export function ConstructionProgramEditor({
         if (!response.ok || !result?.id) {
           setFeedback(
             result?.message ??
-              'Could not save the Settings stage programme to this quotation.',
+              'Unable to save this quotation payment schedule.',
           );
           return;
         }
         setFeedback(
-          'Payment stages and work dates saved from Company Settings.',
+          'Floor-specific payment amounts saved to the quotation. Finance will use these agreed amounts.',
         );
         router.refresh();
       } catch {
-        setFeedback('Network error saving the construction programme.');
+        setFeedback('Network error saving the payment schedule.');
       }
     });
-  }, [
-    editable,
-    floorNames,
-    initial.revision_id,
-    needsSync,
-    router,
-    rows,
-    signature,
-    skipSundays,
-    stages,
-    startDate,
-    start,
-  ]);
+  };
 
-  if (floorNames.length === 0)
+  if (!floorNames.length)
     return (
-      <section
-        className="qs-card qs-construction-program"
-        data-studio-save="payments"
-      >
-        <h2>Payments & Work</h2>
+      <section className="qs-card qs-construction-program">
+        <h2>Payments &amp; Work</h2>
         <p>
-          Add the quoted floor schedule first. Floor stages and their dates are
-          generated from that list.
+          Save the quotation floor schedule first. Payment items and target
+          dates will then repeat per quoted floor.
         </p>
       </section>
     );
 
   return (
-    <section
-      className="qs-card qs-construction-program"
-      data-studio-save="payments"
-    >
+    <section className="qs-card qs-construction-program">
       <header className="qs-program-header">
         <div>
-          <h2>Payments & Work</h2>
+          <h2>Payments &amp; Work</h2>
           <p>
-            Payments and work are synced from Company Settings. No quotation
-            edits are needed; floor stages and target dates are calculated
-            automatically from this programme.
+            Work, payment, check and QC items come from Company Settings. Each
+            payment item is priced separately for its floor in this quotation.
           </p>
         </div>
         <div className="qs-program-start">
@@ -282,79 +367,87 @@ export function ConstructionProgramEditor({
           )}
         </div>
       </header>
+      <p className="qs-note">
+        {Object.keys(boqPaymentAmounts).length
+          ? 'BOQ-linked payment defaults loaded. Change any amount to override it for this quotation only.'
+          : 'No stage-and-floor BOQ payment breakdown is linked to this quotation. Enter the agreed amount for each payment marker.'}
+      </p>
       {feedback && (
         <p role="status" className="qs-program-feedback">
           {feedback}
         </p>
       )}
-      <div className="qs-program-list">
-        <div className="qs-program-calendar">
-          <div>
-            <span>Calendar basis</span>
-            <strong>{skipSundays ? 'Working days' : 'Calendar days'}</strong>
-          </div>
+      <div className="qs-program-calendar">
+        <div>
+          <span>Calendar basis</span>
+          <strong>{skipSundays ? 'Working days' : 'Calendar days'}</strong>
+        </div>
+        {editable && (
           <label>
             <input
               type="checkbox"
               checked={skipSundays}
-              disabled={!editable}
               onChange={(event) => setSkipSundays(event.target.checked)}
             />
             Skip Sundays
           </label>
-          <div>
-            <span>Schedule duration</span>
-            <strong>
-              {plannedDays} {skipSundays ? 'working days' : 'calendar days'}
-            </strong>
-          </div>
-          <div>
-            <span>Target handover</span>
-            <strong>{targetHandover ? showDate(targetHandover) : '—'}</strong>
-          </div>
+        )}
+        <div>
+          <span>Schedule duration</span>
+          <strong>
+            {plannedDays} {skipSundays ? 'working days' : 'calendar days'}
+          </strong>
         </div>
+        <div>
+          <span>Target handover</span>
+          <strong>{targetHandover ? showDate(targetHandover) : '—'}</strong>
+        </div>
+      </div>
+      <div className="qs-program-list">
         <div className="qs-program-columns">
-          <span>Payment / work stage</span>
-          <span>Payment share</span>
-          <span>Amount</span>
-          <span>Planned dates</span>
+          <span>#</span>
+          <span>Stage / work</span>
+          <span>Payment amount</span>
+          <span>Target dates</span>
         </div>
-        {rows.map(({ stage, floors, name }, index) => (
+        {datedStages.map(({ stage, floors }, stageIndex) => (
           <article className="qs-program-stage" key={stage.id}>
             <div className="qs-program-payment">
-              <span className="qs-program-number">{index + 1}</span>
+              <span className="qs-program-number">{stageIndex + 1}</span>
               <div className="qs-program-stage-title">
-                <strong>{name}</strong>
+                <strong>{stage.name}</strong>
                 <small>
                   {stage.repeatsPerFloor
-                    ? `Repeats for ${floorNames.length} quoted floor${floorNames.length === 1 ? '' : 's'}`
+                    ? 'Repeats for every quoted floor'
                     : 'One-time stage'}
                 </small>
               </div>
-              <strong>{stage.percent}%</strong>
-              <strong>{fmt((amount * stage.percent) / 100)}</strong>
+              <strong>
+                {fmt(
+                  allocations
+                    .filter((row) => row.stageId === stage.id)
+                    .reduce((sum, row) => sum + row.amount, 0),
+                )}
+              </strong>
               <span>
-                {showDate(floors[0]!.start)} – {showDate(floors.at(-1)!.end)}
+                {showDate(floors[0]!.start)} –{' '}
+                {showDate(floors[floors.length - 1]!.end)}
               </span>
             </div>
             <div className="qs-program-work">
-              <h3>
-                {stage.name} · {stage.days} planned days per stage
-              </h3>
               {floors.map((floor, floorIndex) => (
                 <section
                   className="qs-program-floor"
-                  key={`${stage.id}-${floorIndex}`}
+                  key={stage.id + '-' + floorIndex}
                 >
-                  <h4>
-                    {stage.repeatsPerFloor
-                      ? `${floor.floorName} · ${floor.percent.toFixed(2)}% · ${fmt(floor.amount)}`
-                      : `${stage.name} · ${fmt(floor.amount)}`}{' '}
-                    · {showDate(floor.start)} – {showDate(floor.end)}
-                  </h4>
-                  {floor.items.length ? (
-                    <ol>
-                      {floor.items.map((item) => (
+                  <h3>
+                    {floor.floorName || stage.name} · {showDate(floor.start)} –{' '}
+                    {showDate(floor.end)}
+                  </h3>
+                  <ol>
+                    {floor.items
+                      .filter((item) => item.kind !== 'payment')
+                      .map((item) => (
                         <li key={item.id}>
                           <div>
                             <span className="qs-program-kind">
@@ -365,42 +458,93 @@ export function ConstructionProgramEditor({
                                   : item.kind}
                             </span>
                             <strong>{item.title}</strong>
+                            {item.guideText && <p>{item.guideText}</p>}
+                            {item.guideVideoUrl && (
+                              <a
+                                href={item.guideVideoUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                Watch site guide
+                              </a>
+                            )}
                           </div>
-                          <span>{item.days} days</span>
-                          <small>
-                            {showDate(item.start)} – {showDate(item.end)}
-                          </small>
-                          {item.guideText && <p>{item.guideText}</p>}
-                          {item.guideVideoUrl && (
-                            <a
-                              href={item.guideVideoUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              Watch site guide video ↗
-                            </a>
-                          )}
+                          <span>{item.days} planned days</span>
                         </li>
                       ))}
-                    </ol>
-                  ) : (
-                    <p>
-                      Work items, checks and site guides are managed in Company
-                      Settings.
-                    </p>
-                  )}
+                  </ol>
+                  {stagePaymentItems(stage).map((item) => {
+                    const key = paymentItemKey(stage.id, floorIndex, item.id);
+                    return (
+                      <div className="qs-program-payment-entry" key={key}>
+                        <strong>Payment · {item.title}</strong>
+                        <label>
+                          Amount ({currency})
+                          <input
+                            aria-label={
+                              'Payment amount for ' +
+                              stage.name +
+                              ' ' +
+                              (floor.floorName || 'building') +
+                              ' ' +
+                              item.title
+                            }
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            inputMode="decimal"
+                            value={values[key] ?? ''}
+                            disabled={!editable}
+                            onChange={(event) =>
+                              setValues((current) => ({
+                                ...current,
+                                [key]: event.target.value,
+                              }))
+                            }
+                            placeholder="Enter amount"
+                          />
+                        </label>
+                      </div>
+                    );
+                  })}
                 </section>
               ))}
             </div>
           </article>
         ))}
       </div>
-      {!editable && !saved && (
-        <p className="qs-program-feedback">
-          This quotation has no saved Settings programme snapshot.
+      <footer className="qs-program-summary">
+        <strong>
+          Allocated {fmt(allocated)} of {fmt(amount)}
+        </strong>
+        <span>
+          {Math.abs(remaining) <= 0.01
+            ? 'Fully allocated'
+            : 'Remaining to allocate: ' + fmt(remaining)}
+        </span>
+        {editable && (
+          <button
+            type="button"
+            onClick={save}
+            disabled={pending || !valid}
+            data-studio-save="payments"
+          >
+            {pending ? 'Saving…' : 'Save payment schedule'}
+          </button>
+        )}
+      </footer>
+      {editable && !valid && (
+        <p className="qs-note">
+          Save is available once every payment marker has a positive amount and
+          allocations total the quotation value exactly. Values are specific to
+          this quote, not to Company Settings.
         </p>
       )}
-      {pending && <p className="qs-note">Saving quotation schedule…</p>}
+      {!editable && !saved && (
+        <p className="qs-note">
+          This quotation has no saved construction payment programme.
+        </p>
+      )}
     </section>
   );
 }

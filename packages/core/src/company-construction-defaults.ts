@@ -27,7 +27,9 @@ export const companyConstructionStage = z
   .object({
     id: z.enum(constructionStageKinds),
     name: z.string().trim().min(2).max(100),
-    // Legacy saved templates may still contain this field. New templates derive\n    // payment values from the quotation, never from company percentages.\n    percent: z.coerce.number().finite().positive().max(100).optional(),
+    // Legacy saved templates may still contain this field. New templates derive
+    // payment values from the quotation, never from company percentages.
+    percent: z.coerce.number().finite().positive().max(100).optional(),
     repeatsPerFloor: z.boolean(),
     days: z.coerce.number().int().min(0).max(365),
     items: z.array(companyStageItem).max(100),

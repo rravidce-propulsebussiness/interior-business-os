@@ -28,10 +28,6 @@ export function ConstructionPaymentDefaults({
   );
   const [stages, setStages] = useState(initial);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
-  const total = stages.reduce(
-    (sum, stage) => sum + Number(stage.percent || 0),
-    0,
-  );
   const dirty = JSON.stringify(stages) !== JSON.stringify(initial);
   const patchStage = (
     index: number,
@@ -67,7 +63,8 @@ export function ConstructionPaymentDefaults({
         <p className="us-info">
           Stages marked per floor repeat automatically for every quoted floor.
           Pre-construction and foundation run once per project. Work items,
-          checks, QC guides and durations are copied to new quotations.
+          payment markers, checks, QC guides and durations are copied to new
+          quotations.
         </p>
       </div>
       <div className="us-project-calendar">
@@ -78,7 +75,8 @@ export function ConstructionPaymentDefaults({
         <span>Sunday is excluded when quotation dates are calculated.</span>
       </div>
       {stages.map((stage, index) => {
-        const itemDays = stage.items.reduce((sum, item) => sum + item.days, 0);
+        const workItems = stage.items.filter((item) => item.kind !== 'payment');
+        const itemDays = workItems.reduce((sum, item) => sum + item.days, 0);
         const totalDays = Math.max(stage.days, itemDays);
         return (
           <section
@@ -134,7 +132,7 @@ export function ConstructionPaymentDefaults({
               </label>
             </header>
             <p className="us-stage-total">
-              Stage total: {totalDays} days · {stage.items.length} work/check
+              Stage total: {totalDays} days · {workItems.length} work/check
               steps
               {itemDays > stage.days && (
                 <span> · Substage durations extend the stage duration</span>
@@ -211,15 +209,19 @@ export function ConstructionPaymentDefaults({
                       })
                     }
                   >
-                    {['work', 'material', 'check', 'test', 'qc'].map((kind) => (
-                      <option key={kind} value={kind}>
-                        {kind === 'qc'
-                          ? 'QC'
-                          : kind === 'check'
-                            ? 'Site check'
-                            : kind[0]!.toUpperCase() + kind.slice(1)}
-                      </option>
-                    ))}
+                    {['work', 'material', 'check', 'test', 'qc', 'payment'].map(
+                      (kind) => (
+                        <option key={kind} value={kind}>
+                          {kind === 'qc'
+                            ? 'QC'
+                            : kind === 'check'
+                              ? 'Site check'
+                              : kind === 'payment'
+                                ? 'Payment'
+                                : kind[0]!.toUpperCase() + kind.slice(1)}
+                        </option>
+                      ),
+                    )}
                   </select>
                   <input
                     className="us-stage-item-title"
@@ -295,11 +297,13 @@ export function ConstructionPaymentDefaults({
                   defaultValue="work"
                   aria-label="New item type"
                 >
-                  {['work', 'material', 'check', 'test', 'qc'].map((kind) => (
-                    <option key={kind} value={kind}>
-                      {kind}
-                    </option>
-                  ))}
+                  {['work', 'material', 'check', 'test', 'qc', 'payment'].map(
+                    (kind) => (
+                      <option key={kind} value={kind}>
+                        {kind}
+                      </option>
+                    ),
+                  )}
                 </select>
                 <input
                   value={drafts[stage.id] ?? ''}
@@ -327,7 +331,7 @@ export function ConstructionPaymentDefaults({
                           kind: (select?.value ??
                             'work') as CompanyStageItem['kind'],
                           title,
-                          days: 1,
+                          days: select?.value === 'payment' ? 0 : 1,
                         },
                       ],
                     });
@@ -347,7 +351,7 @@ export function ConstructionPaymentDefaults({
           <button
             className="us-button-primary"
             type="submit"
-            disabled={pending || Math.abs(total - 100) > 0.001}
+            disabled={pending}
           >
             {pending ? 'Saving…' : 'Save workflow settings'}
           </button>

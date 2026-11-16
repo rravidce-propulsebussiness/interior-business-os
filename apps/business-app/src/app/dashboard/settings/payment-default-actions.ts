@@ -48,7 +48,7 @@ export async function saveConstructionPaymentDefaults(
     return {
       saved: true,
       message:
-        'Construction stages, days, ordered payment markers and site guides saved.',
+        'Construction stages, days, payment markers and site guides saved.',
     };
   } catch {
     return {

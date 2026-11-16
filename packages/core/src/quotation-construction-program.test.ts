@@ -9,7 +9,7 @@ import {
 } from './quotation-construction-program';
 
 describe('reusable construction stage programme', () => {
-  it('keeps one-time and per-floor stages with a 100% payment allocation', () => {
+  it('keeps one-time and per-floor stages with payment markers instead of fixed shares', () => {
     expect(
       companyConstructionStages.parse(defaultCompanyConstructionStages),
     ).toHaveLength(7);
@@ -25,11 +25,13 @@ describe('reusable construction stage programme', () => {
       'painting',
     ]);
     expect(
-      defaultCompanyConstructionStages.reduce(
-        (sum, stage) => sum + stage.percent,
-        0,
+      defaultCompanyConstructionStages.every((stage) =>
+        stage.items.some((item) => item.kind === 'payment'),
       ),
-    ).toBe(100);
+    ).toBe(true);
+    expect(
+      defaultCompanyConstructionStages.every((stage) => !('percent' in stage)),
+    ).toBe(true);
   });
 
   it('round trips a quote-specific floor and date snapshot without exposing it as terms text', () => {
