@@ -11,7 +11,9 @@ test('public Business App home shows guest navigation only to anonymous visitors
     page.getByRole('link', { name: 'Sign in', exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: 'Start Your Business', exact: true }).first(),
+    page
+      .getByRole('link', { name: 'Start Your Business', exact: true })
+      .first(),
   ).toBeVisible();
   await expect(
     page.getByRole('heading', { level: 1 }),
