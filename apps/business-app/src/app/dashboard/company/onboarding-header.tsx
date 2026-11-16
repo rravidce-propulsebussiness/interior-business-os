@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { signOut } from '@business-os/auth/actions';
 import './onboarding-header.css';
 
@@ -10,7 +11,7 @@ export function WorkspaceOnboardingHeader() {
   return (
     <header className="workspace-onboarding-header">
       <div className="workspace-onboarding-header-inner">
-        <a
+        <Link
           className="workspace-onboarding-brand"
           href="/"
           aria-label="ProPulse Business OS home"
@@ -31,12 +32,12 @@ export function WorkspaceOnboardingHeader() {
             <strong>ProPulse</strong>
             <small>BUSINESS OS</small>
           </span>
-        </a>
+        </Link>
         <nav
           className="workspace-onboarding-nav"
           aria-label="Account navigation"
         >
-          <a className="workspace-onboarding-home" href="/">
+          <Link className="workspace-onboarding-home" href="/">
             <svg
               viewBox="0 0 24 24"
               fill="none"
@@ -49,7 +50,7 @@ export function WorkspaceOnboardingHeader() {
               <path d="m3 11 9-7 9 7M5 10v10h14V10M9 20v-7h6v7" />
             </svg>
             Home
-          </a>
+          </Link>
           <form action={signOut} className="workspace-onboarding-logout-form">
             <button type="submit" className="workspace-onboarding-logout">
               <svg

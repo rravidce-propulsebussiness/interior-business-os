@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @next/next/no-img-element -- Private, data, and object URL media previews require native img elements; react-hook-form watch is used in this render branch. */
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -608,7 +609,7 @@ export function ClientDashboard({
                   <Icon name="users" size={22} />
                 </span>
                 <div>
-                  <small>Today's labour</small>
+                  <small>Today&apos;s labour</small>
                   <strong>
                     {reportIsToday ? (report?.worker_count ?? '—') : '—'}
                   </strong>
@@ -906,8 +907,8 @@ export function ClientDashboard({
                   </div>
                 ) : (
                   <p className="pc-empty">
-                    The engineer's daily photos and watchman's curing photos
-                    will appear here.
+                    The engineer&apos;s daily photos and watchman&apos;s curing
+                    photos will appear here.
                   </p>
                 )}
               </section>

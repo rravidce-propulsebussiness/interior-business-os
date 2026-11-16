@@ -53,6 +53,7 @@ function OrderNumberField({
   onCommit: (position: number) => void;
 }) {
   const [value, setValue] = useState(String(index + 1));
+  // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
   useEffect(() => setValue(String(index + 1)), [index]);
   const commit = () => {
     const position = Number(value) - 1;

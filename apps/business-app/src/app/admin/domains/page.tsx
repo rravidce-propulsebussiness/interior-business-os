@@ -199,7 +199,7 @@ export default async function DomainManagement() {
               <h3>Configure external DNS</h3>
               <p>
                 Add the ownership TXT record and point the hostname to the
-                platform's configured destination.
+                platform&apos;s configured destination.
               </p>
             </div>
           </li>

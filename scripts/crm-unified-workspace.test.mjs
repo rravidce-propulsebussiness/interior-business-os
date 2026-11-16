@@ -60,7 +60,7 @@ test('daily lead actions stay before occasional quotations on desktop and mobile
     desktopRows.indexOf('className="crm-row-actions"') <
       desktopRows.indexOf('className="crm-quote-pending"'),
   );
-  assert.match(desktopRows, /<LeadQuotePreview compact/);
+  assert.match(desktopRows, /<LeadQuotePreview\s+compact/);
   assert.match(quotePreview, /if \(compact\)/);
   assert.match(quotePreview, /href=\{base\}/);
   const mobileCards = leads.slice(
@@ -78,7 +78,7 @@ test('daily lead actions stay before occasional quotations on desktop and mobile
   assert.doesNotMatch(mobileCards, /className="crm-compact-quote-toggle"/);
   assert.match(
     mobileCards,
-    /\{expanded && <div className="crm-compact-expanded">/,
+    /\{expanded &&\s*\(\s*<div className="crm-compact-expanded">/,
   );
 });
 
@@ -358,7 +358,7 @@ test('invited clients can open only explicitly granted project records', () => {
     portalSql,
     /not private\.client_portal_accessible\(m\.project_id\)/,
   );
-  assert.match(inviteUi, /'\/client\/projects\/' \+ item\.project_id/);
+  assert.match(inviteUi, /'\/client\/projects\/'\s*\+\s*item\.project_id/);
   const clientForm = readFileSync(
     fileURLToPath(
       new URL(
@@ -369,7 +369,7 @@ test('invited clients can open only explicitly granted project records', () => {
     'utf8',
   );
   assert.match(loginPage, /z\.uuid\(\)\.safeParse\(query\.project\)/);
-  assert.match(clientForm, /'\/client\/projects\/'\+projectId/);
+  assert.match(clientForm, /'\/client\/projects\/'\s*\+\s*projectId/);
   assert.match(projectPage, /client_portal_project/);
   assert.match(projectPage, /'\/client\/login\?project=' \+ id/);
   assert.match(home, /if \(projects\.length === 1\) redirect/);
@@ -576,7 +576,7 @@ test('one lead supports multiple package quotations and previews newest, with si
   );
   // A new quote stays available but uses one compact action row, rather
   // than a second button stacking below every lead's quotation.
-  assert.match(leads, /newQuoteHref=\{canQuote/);
+  assert.match(leads, /newQuoteHref=\{\s*canQuote/);
   assert.match(quotePreview, /crm-quote-new-inline/);
   assert.match(quotePreview, /href=\{newQuoteHref\}/);
   assert.match(quotePreview, /\+ New/);
@@ -591,7 +591,7 @@ test('one lead supports multiple package quotations and previews newest, with si
   assert.match(quoteList, /\?step=quote/);
   assert.match(quoteList, /Not shared/);
   assert.match(quoteList, /mobileCustomers\.map/);
-  assert.match(quoteList, /group\.quotes\.slice\(1\)\.map/);
+  assert.match(quoteList, /group\.quotes\s*\.slice\(1\)\s*\.map/);
   assert.match(quoteList, /renderMobileQuote\(group\.quotes\[0\]!\)/);
   assert.match(quoteList, /renderTableRow\(group\.quotes\[0\]!\)/);
   const revise = readFileSync(
@@ -648,6 +648,6 @@ test('Follow-ups and Visits are handled inside Leads and legacy links redirect',
   assert.match(actions, /s\.crm\.save\('site_visits'/);
   assert.match(actions, /s\.crm\.save\('lead_followups'/);
   assert.match(panel, /services\.crm\.search/);
-  assert.match(followups, /redirect\('\/dashboard\/crm\/leads\?'/);
-  assert.match(visits, /redirect\('\/dashboard\/crm\/leads\?'/);
+  assert.match(followups, /redirect\(\s*'\/dashboard\/crm\/leads\?'/);
+  assert.match(visits, /redirect\(\s*'\/dashboard\/crm\/leads\?'/);
 });

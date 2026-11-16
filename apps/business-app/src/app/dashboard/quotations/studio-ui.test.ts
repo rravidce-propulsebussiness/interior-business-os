@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'vitest';
+import { expectSource as expect } from '../source-test-expect';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -333,8 +334,8 @@ describe('single premium package library and working Custom Quote entry', () => 
     expect(library).toContain('deleteQuotationPackage');
     expect(library).toContain('preview?format=pdf');
     expect(library).toContain("detail.item.status === 'active'");
-    expect(library).toContain('construction.map((item)');
-    expect(library).toContain('(other ?? []).map((item)');
+    expect(library).toContain('construction.map(');
+    expect(library).toContain('(other ?? []).map(');
   });
 
   it('routes through classified CRM leads then preselects tenant-owned package or custom mode', () => {
@@ -460,7 +461,7 @@ describe('customer-grouped quotation list without Draft presentation', () => {
     expect(list).toContain('const customerGroups = new Map<string');
     expect(list).toContain('customerGroups.get(quote.customerId)');
     expect(list).toContain('group.quotes.push(quote)');
-    expect(list).toContain('mobileCustomers.map((group)');
+    expect(list).toContain('mobileCustomers.map(');
     expect(list).toContain('renderMobileQuote(group.quotes[0]!)');
     expect(list).toContain('renderTableRow(group.quotes[0]!)');
     expect(list).toContain('group.quotes.slice(1).map(');
@@ -889,6 +890,26 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(css).toContain('.qs-payment-panel');
     expect(css).toContain('grid-template-areas:"grip stage stage remove"');
   });
+
+  it('uses company payment settings as the read-only construction schedule', () => {
+    const payments = file('./payment-schedule-editor.tsx');
+    expect(page).toContain('organization_construction_payment_defaults_read');
+    expect(page).toContain(
+      'companyDefaults={companyPayments.error ? [] : companyPayments.data}',
+    );
+    expect(payments).toContain(
+      "const scheduleEditable = editable && industry !== 'construction';",
+    );
+    expect(payments).toContain('editable={scheduleEditable}');
+    expect(payments).toContain(
+      'Set up the company payment and work template in Settings',
+    );
+    expect(payments).toContain('Manage payments and work in Settings →');
+    expect(payments).toContain(
+      'href="/dashboard/settings?tab=payments#company-payment-stages"',
+    );
+    expect(payments).not.toContain('draggable={editable && !pending}');
+  });
 });
 
 describe('tenant-priced calculated Custom Quote package', () => {
@@ -1176,7 +1197,7 @@ describe('Settings category dashboard keeps one canonical settings workspace', (
     expect(page).toContain(
       'const tab=tabs.find(t=>t.id===params.tab)?.id??null;',
     );
-    expect(page).toContain('tab===null?<SettingsHome sections={sections}/>');
+    expect(page).toContain('tab===null?(<SettingsHome sections={sections}/>');
     for (const tab of [
       'company',
       'branding',
@@ -1199,8 +1220,9 @@ describe('Settings category dashboard keeps one canonical settings workspace', (
       'System & Preferences',
     ])
       expect(page).toContain(label);
+    const compactPage = page.replace(/\s/g, '');
     const home =
-      page.split('const sections:SettingSection[]=')[1]?.split('\n ];')[0] ??
+      compactPage.split('constsections:SettingSection[]=')[1]?.split('];')[0] ??
       '';
     // Five section headings plus the seventeen remaining category cards share this shape.
     expect((home.match(/\bid:'[^']+',title:/g) ?? []).length - 5).toBe(16);
@@ -1243,7 +1265,7 @@ describe('construction quotation schedule is managed from company settings', () 
 
   it('renders construction payments and work without quotation editing controls', () => {
     expect(editor).toContain(
-      "const scheduleEditable=editable&&industry!=='construction'",
+      "const scheduleEditable = editable && industry !== 'construction';",
     );
     expect(editor).toContain('editable={scheduleEditable}');
     expect(editor).toContain('className="qs-payment-stage-readonly"');
@@ -1252,19 +1274,19 @@ describe('construction quotation schedule is managed from company settings', () 
       'Payment and work milestones are fixed from this quotation.',
     );
     expect(workflow).toContain(
-      '{editable&&<div className="qs-one-flow-footer">',
+      '{editable && (\n        <div className="qs-one-flow-footer">',
     );
     expect(workflow).toContain(
-      '{editable&&catalog.length>0&&<details className="qs-one-flow-catalog">',
+      '{editable && catalog.length > 0 && (\n        <details className="qs-one-flow-catalog">',
     );
     expect(workflow).toContain(
-      "{editable?'Existing saved work is retained. Type the next activity and add it in order.':'Work sequence managed in Settings.'}",
+      "{editable\n            ? 'Existing saved work is retained. Type the next activity and add it in order.'\n            : 'Work sequence managed in Settings.'}",
     );
     expect(workflow).toContain(
-      "{editable?'Type a new work item using + Add, or choose an existing one from the library above. Your old standard item names are still available.':'No work items are configured for this stage in Settings.'}",
+      "{editable\n            ? 'Type a new work item using + Add, or choose an existing one from the library above. Your old standard item names are still available.'\n            : 'No work items are configured for this stage in Settings.'}",
     );
     expect(workflow).toContain(
-      '{editable&&preservedReports.length>0&&<details className="qs-one-flow-advanced qs-one-flow-reports">',
+      '{editable && preservedReports.length > 0 && (\n        <details className="qs-one-flow-advanced qs-one-flow-reports">',
     );
   });
 });

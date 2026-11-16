@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-html-link-for-pages -- Hosted Next.js routes use full navigation to avoid interrupted RSC responses. */
 'use client';
 
 import {

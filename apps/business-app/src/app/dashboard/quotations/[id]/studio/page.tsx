@@ -300,7 +300,7 @@ export default async function QuotationStudio({
         <section className="qs-card" style={{ marginTop: 18 }}>
           <h2>Next: agreement and advance</h2>
           <p className="qs-muted">
-            Open the Won lead's project to prepare an agreement from the
+            Open the Won lead&apos;s project to prepare an agreement from the
             finalized quotation. Upload the signed agreement there; separate
             online quotation approval is not required. Its saved payment
             schedule carries forward into the project.

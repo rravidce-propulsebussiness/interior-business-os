@@ -223,5 +223,5 @@ test('brochure PDF preflight verifies dimensions, links, metadata and 50-page ou
   ];
   await expect(
     renderPdf(brochureHtml(overflow, { print: true }), { brochure: true }),
-  ).rejects.toThrow('Print preflight');
+  ).rejects.toThrow('PDF_PRINT_OVERFLOW');
 });

@@ -289,6 +289,30 @@ it.skipIf(!process.env.TEST_DATABASE_URL)(
           `select public.payment_schedule_activate('${org}','${paymentSchedule}',1)`,
         ),
       );
+      const method = run(
+        `select id from public.payment_methods where organization_id='${org}' and kind='bank_transfer' limit 1`,
+      );
+      run(
+        auth(
+          `select public.payment_record('${org}','${contract}',${json({
+            idempotency_key: randomUUID(),
+            payment_date: new Date().toISOString().slice(0, 10),
+            amount: '1',
+            method_id: method,
+          })})`,
+        ),
+      );
+      run(
+        auth(
+          `select public.project_agreement_command('${org}','${project}','${contract}','owner_exception',${json(
+            {
+              reason:
+                'The company owner confirms the final quotation is the agreed execution scope for this disposable concurrency fixture.',
+              reference: 'Owner-confirmed test fixture clearance',
+            },
+          )})`,
+        ),
+      );
 
       call('operations_plan', 'status', {
         id: plan,

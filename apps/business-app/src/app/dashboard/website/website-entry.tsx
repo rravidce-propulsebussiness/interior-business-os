@@ -194,8 +194,8 @@ export function WebsiteEntry({
             <aside className="we-start-actions">
               <h2>What would you like to do?</h2>
               <p>
-                Choose a task. You don't need to work with code for everyday
-                edits.
+                Choose a task. You don&apos;t need to work with code for
+                everyday edits.
               </p>
               {canEdit && (
                 <Link className="we-action-main" href={`${base}/layout`}>

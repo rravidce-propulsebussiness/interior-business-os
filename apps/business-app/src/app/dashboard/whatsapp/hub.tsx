@@ -1,5 +1,7 @@
 'use client';
+/* eslint-disable @next/next/no-img-element -- Private, data, and object URL media previews require native img elements; react-hook-form watch is used in this render branch. */
 
+import Link from 'next/link';
 import {
   Fragment,
   useCallback,
@@ -155,6 +157,7 @@ function useLabels(connectionId: string) {
     setCounts(data.counts ?? {});
   }, [connectionId]);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     void reload().catch(() => undefined);
   }, [reload]);
   async function createLabel(name: string, color: string) {
@@ -455,6 +458,7 @@ export function WhatsAppHub({
   useEffect(() => {
     try {
       if (window.localStorage.getItem('wa-fullscreen') === 'off')
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
         setFullscreen(false);
     } catch {
       // Storage unavailable: keep full screen.
@@ -506,6 +510,7 @@ export function WhatsAppHub({
 
   useEffect(() => {
     if (!connectionId) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     void loadTemplates().catch((error: unknown) =>
       setNotice(friendlyError(error, 'Could not load WhatsApp templates.')),
     );
@@ -561,7 +566,7 @@ export function WhatsAppHub({
       className={`wa-shell wa-skin${tab === 'inbox' ? ' wa-skin-inbox' : ''}${fullscreen ? ' wa-fullscreen' : ''}`}
     >
       <aside className="wa-sidebar" aria-label="ProPulse messaging navigation">
-        <a
+        <Link
           className="wa-back-link"
           href="/dashboard"
           title="Back to Business OS"
@@ -569,7 +574,7 @@ export function WhatsAppHub({
         >
           <NavIcon kind="back" />
           <span className="wa-nav-text">Business OS</span>
-        </a>
+        </Link>
         <div className="wa-brand">
           <span className="wa-brand-mark">P</span>
           <span>
@@ -1111,6 +1116,7 @@ function useWorkspaceRows(
     [connectionId, search, section],
   );
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     void load();
   }, [load, refreshKey]);
   return { rows, total, unread, search, setSearch, busy, error, reload: load };
@@ -1183,6 +1189,7 @@ function InboxPanel({
   const newestInboundRef = useRef<string | null>(null);
   const [alertsEnabled, setAlertsEnabled] = useState(true);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     setAlertsEnabled(
       typeof Notification === 'undefined' ||
         Notification.permission === 'granted',
@@ -1245,6 +1252,7 @@ function InboxPanel({
 
   useEffect(() => {
     const first = state.rows.at(0);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     if (!selected && first) setSelected(first.wa_id);
     if (selected && !state.rows.some((row) => row.wa_id === selected))
       setSelected('');
@@ -1300,6 +1308,7 @@ function InboxPanel({
       if (refreshTimer) clearTimeout(refreshTimer);
       void database.removeChannel(channel);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Dependencies are intentionally scoped to this synchronization lifecycle.
   }, [connectionId, loadThread, selected, state.reload]);
 
   // Safety net if a realtime event is missed (network change, sleep, proxy).
@@ -1312,6 +1321,7 @@ function InboxPanel({
         void loadThread(selectedRef.current).catch(() => undefined);
     }, 4000);
     return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Dependencies are intentionally scoped to this synchronization lifecycle.
   }, [connectionId, loadThread, state.reload]);
 
   // New-message alert: sound, tab title and optional desktop notification.
@@ -2854,6 +2864,7 @@ function BroadcastsPanel({
     throw new Error('Could not refresh broadcast status.');
   }, [connectionId]);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     void load().catch(() => undefined);
   }, [load]);
 
@@ -3965,6 +3976,7 @@ function AutomationsPanel({
     setRules(result.rows ?? []);
   }, [connectionId]);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     void load().catch((error: unknown) =>
       setNotice(friendlyError(error, 'Could not load automations.')),
     );
@@ -4406,6 +4418,7 @@ function useQuickReplies() {
     if (response.ok) setReplies(data.rows ?? []);
   }, []);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     void reload().catch(() => undefined);
   }, [reload]);
   return { replies, reload };

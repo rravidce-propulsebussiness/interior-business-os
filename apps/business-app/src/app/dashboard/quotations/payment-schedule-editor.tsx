@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import {
   savedStagePaymentPlan,
   savedStagePaymentLinks,
@@ -74,11 +75,12 @@ function readPlan(
       stageCodes: links?.[index] ?? [],
     }));
   // Suggestions are editable only, never part of the PDF before explicitly saved.
-  return editable
-    ? industry === 'construction'
+  if (!editable) return [];
+  if (industry === 'construction')
+    return companyRows.length
       ? applyCompanyPaymentDefaults(suggestions(industry, floors), companyRows)
-      : suggestions(industry, floors)
-    : [];
+      : [];
+  return suggestions(industry, floors);
 }
 
 function moveStage(rows: Milestone[], from: number, to: number): Milestone[] {
@@ -302,6 +304,7 @@ export function PaymentScheduleEditor({
       // The last installment absorbs penny rounding so 100% equals the quote total.
       const value =
         valid && index === rows.length - 1 ? cents - allocated : calculated;
+      // eslint-disable-next-line react-hooks/immutability -- This callback handles an external editor message and updates React state.
       allocated += value;
       return value / 100;
     });
@@ -507,6 +510,8 @@ export function PaymentScheduleEditor({
     setRows((all) => [...all, { name: '', percent: '', stageCodes: [] }]);
   }
 
+  // The company-snapshot effect below runs save() once, guarded by snapshotAttempted.
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- A new save() each render only re-runs that guarded effect.
   function save() {
     if (pending || !editable) return;
     if (candidateRequirements(visibleRequirements) === null) return;
@@ -675,10 +680,18 @@ export function PaymentScheduleEditor({
         <div>
           <h2>Payments &amp; Work</h2>
           <p>
-            Each payment milestone carries its amount and linked work sequence.
-            Construction defaults from Settings populate new quotations
-            automatically.
+            {industry === 'construction'
+              ? 'Construction payment milestones and linked work come from company Payment Settings and are read-only in this quotation.'
+              : 'Each payment milestone carries its amount and linked work sequence.'}
           </p>
+          {industry === 'construction' && (
+            <Link
+              className="qs-payment-settings-link"
+              href="/dashboard/settings?tab=payments#company-payment-stages"
+            >
+              Manage payments and work in Settings →
+            </Link>
+          )}
         </div>
       </div>
 
@@ -766,12 +779,13 @@ export function PaymentScheduleEditor({
       )}
 
       {industry === 'construction' &&
-        !floorNames.length &&
         !savedPlan &&
-        editable && (
+        editable &&
+        (!floorNames.length || !defaultCompanyRows.length) && (
           <p className="qs-payment-footnote">
-            Save the floor-wise SFT quotation scope first. Company payment
-            defaults and linked work will then be added automatically.
+            {!defaultCompanyRows.length
+              ? 'Set up the company payment and work template in Settings before saving this construction quotation.'
+              : 'Save the floor-wise SFT quotation scope first. Company payment defaults and linked work will then be added automatically.'}
           </p>
         )}
       <div className="qs-payment-stages">

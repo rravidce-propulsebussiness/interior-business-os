@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { Metadata } from 'next';
 import { LegalPage } from '../legal-page';
 
@@ -47,7 +48,7 @@ export default function DataDeletionPage() {
       <p>
         You may also ask your workspace owner to remove your user account or
         disconnect a business integration. See our{' '}
-        <a href="/privacy-policy">Privacy Policy</a> for more information.
+        <Link href="/privacy-policy">Privacy Policy</Link> for more information.
       </p>
     </LegalPage>
   );

@@ -23,8 +23,10 @@ do $$declare q jsonb;begin
 end$$;
 set local request.jwt.claim.sub='11111111-1111-4111-8111-111111111111';
 insert into private.quotation_signing_keys(singleton,secret_hex) values(true,repeat('a',64)) on conflict(singleton) do nothing;
-do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';customer uuid;project uuid;root uuid=gen_random_uuid();revision uuid=gen_random_uuid();share jsonb;snapshot jsonb;begin
- select id,customer_id into project,customer from public.projects where organization_id=org order by id limit 1;
+do $$declare org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';customer uuid;project uuid=gen_random_uuid();root uuid=gen_random_uuid();revision uuid=gen_random_uuid();share jsonb;snapshot jsonb;begin
+ select customer_id into customer from public.projects where organization_id=org order by id limit 1;
+ if customer is null then raise exception 'A seeded customer is required for the execution fixture'; end if;
+ insert into public.projects(id,organization_id,customer_id,name,code) values(project,org,customer,'Execution concurrency fixture','EXEC-'||project::text);
  snapshot=jsonb_build_object('snapshot_version',1,'name','Original wardrobe','line_type','manual','quantity','1','unit',jsonb_build_object('key','each','label','Each'),'display_rate','1000','effective_amount','1000','final_amount','1000','discount_amount','0','minimum_amount',null,'customer_specifications','[]'::jsonb);
  insert into public.quotations(id,organization_id,customer_id,project_id,quotation_number) values(root,org,customer,project,'EXECUTION-TEST');
  insert into public.quotation_revisions(id,organization_id,quotation_id,project_id,revision_number,currency,valid_until,document_snapshot) select revision,org,root,project,1,'INR',current_date+30,jsonb_build_object('branding',branding,'customer',jsonb_build_object('name','Execution Customer','billing_address','{}'::jsonb),'project',jsonb_build_object('name','Execution Project','site_address','{}'::jsonb),'display',jsonb_build_object('quantity',true,'unit_rate',true,'specifications',true)) from public.organization_quotation_settings where organization_id=org;

@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'vitest';
+import { expectSource as expect } from '../../source-test-expect';
 import { readFileSync } from 'node:fs';
 import type { LabourDisbursement } from '@business-os/database/labour-disbursements';
 import { labourDisbursementsCsv } from './labour-csv';

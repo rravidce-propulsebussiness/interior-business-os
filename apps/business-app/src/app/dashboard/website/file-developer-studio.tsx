@@ -295,7 +295,7 @@ export function FileDeveloperStudio({
       <div className="web-files-subhead">
         <div>
           <strong>File explorer</strong>
-          <span>Changes are isolated to this company's website</span>
+          <span>Changes are isolated to this company&apos;s website</span>
         </div>
         <div className="web-files-subactions">
           <button
@@ -643,7 +643,8 @@ export function FileDeveloperStudio({
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
-                        modal === 'rename' ? rename() : add();
+                        if (modal === 'rename') rename();
+                        else add();
                       }
                     }}
                   />

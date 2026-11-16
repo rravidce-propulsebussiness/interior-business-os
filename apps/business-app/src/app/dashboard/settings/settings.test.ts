@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'vitest';
+import { expectSource as expect } from '../source-test-expect';
 import { companyCategoryOptions } from './company-categories';
 
 const read = (path: string) =>

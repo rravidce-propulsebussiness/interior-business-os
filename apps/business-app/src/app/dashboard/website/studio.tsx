@@ -114,6 +114,7 @@ export function WebsiteEditor({
       const data = event.data;
       const selectTarget = (nodeId: string) => {
         const doc = latestDocRef.current;
+        // eslint-disable-next-line react-hooks/immutability -- This callback handles an external editor message and updates React state.
         if (locateNode(doc.header, nodeId)) setArea('header');
         else if (locateNode(doc.footer, nodeId)) setArea('footer');
         else {
@@ -121,6 +122,7 @@ export function WebsiteEditor({
             locateNode(page.nodes, nodeId),
           );
           if (!found) return false;
+          // eslint-disable-next-line react-hooks/immutability -- This callback handles an external editor message and updates React state.
           setPageId(found.id);
           setArea('pages');
         }
@@ -157,6 +159,7 @@ export function WebsiteEditor({
           data.value.length > (data.field === 'title' ? 300 : 12000)
         )
           return;
+        // eslint-disable-next-line react-hooks/immutability -- This callback handles an external editor message and updates React state.
         setHistory((current) => {
           const existing = current.present.content.find(
             (c) => c.id === data.contentId,
@@ -625,7 +628,7 @@ export function WebsiteEditor({
       const result = await convertPageToCodeDraft(id, version, page.id);
       setMessage(result.message);
       if (result.created && result.pageId)
-        window.location.assign(
+        router.push(
           `/dashboard/website/${id}/developer?page=${encodeURIComponent(result.pageId)}`,
         );
     });

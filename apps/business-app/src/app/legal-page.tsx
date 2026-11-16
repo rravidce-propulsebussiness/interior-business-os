@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 
 export function LegalPage({
@@ -19,7 +20,7 @@ export function LegalPage({
       }}
     >
       <div style={{ maxWidth: 860, margin: '0 auto' }}>
-        <a
+        <Link
           href="/"
           style={{
             color: '#88352b',
@@ -28,7 +29,7 @@ export function LegalPage({
           }}
         >
           ← ProPulse Business OS
-        </a>
+        </Link>
         <article
           style={{
             marginTop: 28,

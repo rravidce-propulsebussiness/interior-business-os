@@ -364,7 +364,7 @@ export async function CustomerPaymentsPanel({
           </div>
           {!selected ? (
             <p className="fw-muted">
-              Choose the customer's contract above to record its payment.
+              Choose the customer&apos;s contract above to record its payment.
             </p>
           ) : !activeContract ? (
             <p className="fw-muted">

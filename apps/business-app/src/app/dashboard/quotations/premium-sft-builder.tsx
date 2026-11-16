@@ -308,6 +308,7 @@ export function PremiumSftBuilder({
   const [dirty, setDirty] = useState(false);
   const [savedVersion, setSavedVersion] = useState(version);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     setSavedVersion(version);
   }, [version]);
   const floors = rows.filter((r) => r.kind === 'floor');
@@ -441,7 +442,7 @@ export function PremiumSftBuilder({
       const level = floorLevel(r.name);
       return level < 0 || level < count;
     });
-    let next = [...kept];
+    const next = [...kept];
     for (let level = 0; level < count; level++) {
       if (next.some((r) => floorLevel(r.name) === level)) continue;
       const previous = next.filter((r) => floorLevel(r.name) === level - 1);
@@ -757,8 +758,8 @@ export function PremiumSftBuilder({
         </div>
         <p className="qs-work-copy-hint">
           Upper floors follow the floor below unless customized. Choosing Make
-          penthouse replaces that level's normal floor, preserving its area and
-          price once.
+          penthouse replaces that level&apos;s normal floor, preserving its area
+          and price once.
         </p>
         <div
           className="qs-work-table-scroll"

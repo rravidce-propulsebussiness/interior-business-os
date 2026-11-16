@@ -56,6 +56,7 @@ export function ProjectItemSchedule({
   // Refresh this editor when another user updates the stage schedule.
   useEffect(() => {
     if (open) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     setCurrentVersion(item?.version ?? 0);
     setStart(item?.plannedStart || baselineStart);
     setFinish(item?.plannedFinish || baselineFinish);

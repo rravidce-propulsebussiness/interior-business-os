@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useActionState, useEffect, useState } from 'react';
 
 type Result = {
@@ -92,6 +93,7 @@ export function ClientAuthForm({
           : '/dashboard',
       );
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Dependencies are intentionally scoped to this synchronization lifecycle.
   }, [state.authenticated, projectId]);
   const register = mode === 'register';
   return (
@@ -136,9 +138,9 @@ export function ClientAuthForm({
         <div className="client-auth-field-header">
           <label htmlFor="client-auth-password">Password</label>
           {!register && (
-            <a className="client-auth-forgot" href="/forgot-password">
+            <Link className="client-auth-forgot" href="/forgot-password">
               Forgot password?
-            </a>
+            </Link>
           )}
         </div>
         <div className="client-auth-input">

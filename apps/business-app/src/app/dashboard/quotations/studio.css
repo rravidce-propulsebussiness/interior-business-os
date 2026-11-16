@@ -3060,6 +3060,17 @@
   font-size: 14px;
   line-height: 1.5;
 }
+.qs-payment-settings-link {
+  display: inline-flex;
+  margin-top: 7px;
+  color: #b64f2f;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.qs-payment-settings-link:hover {
+  text-decoration: underline;
+}
 .qs-payment-status {
   display: flex;
   gap: 14px;

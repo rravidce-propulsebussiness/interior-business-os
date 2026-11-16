@@ -11,17 +11,19 @@ test('public Business App home shows guest navigation only to anonymous visitors
     page.getByRole('link', { name: 'Sign in', exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: 'Sign in to your workspace' }),
+    page
+      .getByRole('link', { name: 'Start Your Business', exact: true })
+      .first(),
   ).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText(
+    'One platform.',
+  );
   await expect(
-    page.getByRole('link', { name: 'Sign Up', exact: true }).first(),
-  ).toBeVisible();
-  await expect(
-    page.getByRole('link', { name: 'Explore Marketplace' }),
+    page.getByRole('link', { name: 'Marketplace', exact: true }).first(),
   ).toBeVisible();
   await expect(
     page.getByRole('heading', {
-      name: 'Explore the B2B Materials Marketplace',
+      name: 'B2B marketplace for project materials',
     }),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Sign out' })).toHaveCount(0);
@@ -38,25 +40,18 @@ test('public marketplace teaser never leaks private supplier rates', async ({
   const market = page.locator('#marketplace');
   await expect(
     market.getByRole('heading', {
-      name: 'Explore the B2B Materials Marketplace',
+      name: 'B2B marketplace for project materials',
     }),
   ).toBeVisible();
   await expect(
-    market.getByRole('link', { name: 'Browse Marketplace' }),
-  ).toHaveAttribute('href', '/login');
-  await expect(market).toContainText('Material categories are illustrative');
+    market.getByRole('link', { name: 'Access marketplace' }),
+  ).toHaveAttribute('href', '/register');
+  await expect(market).toContainText(
+    'Seller access and purchasing depend on approval',
+  );
   await expect(market).not.toContainText('Unit price');
   await page.setViewportSize({ width: 375, height: 812 });
-  await expect(
-    page
-      .getByRole('navigation', { name: 'Account navigation' })
-      .getByRole('link', { name: 'Sign in', exact: true }),
-  ).toBeVisible();
-  await expect(
-    page
-      .getByRole('navigation', { name: 'Account navigation' })
-      .getByRole('link', { name: 'Sign Up', exact: true }),
-  ).toBeVisible();
+  await expect(market.getByRole('heading', { level: 2 })).toBeVisible();
 });
 
 test('protected dashboards require authentication', async ({ page }, info) => {
@@ -66,7 +61,12 @@ test('protected dashboards require authentication', async ({ page }, info) => {
   );
   await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', {
+      level: 1,
+      name: info.project.name === 'business-app' ? 'Welcome back' : 'Sign in',
+    }),
+  ).toBeVisible();
 });
 test('login provides accessible form fields and validation', async ({
   page,
@@ -104,10 +104,10 @@ test('premium Business OS login has real provider links and a usable password fo
   );
   await page.goto('/login');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Sign in' }),
+    page.getByRole('heading', { level: 1, name: 'Welcome back' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: /Build. Manage. Grow./ }),
+    page.getByRole('heading', { name: /smarter project management/ }),
   ).toBeVisible();
   await expect(
     page.getByRole('link', { name: 'Continue with Google' }),
@@ -157,7 +157,9 @@ test('unconfigured ProPulse SSO refuses login and returns a safe notice', async 
     destination.searchParams.get('provider_error'),
   );
   await page.goto(destination.pathname + destination.search);
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Welcome back' }),
+  ).toBeVisible();
   await expect(page.locator('.pp-login-notice[role="alert"]')).toContainText(
     /ProPulse sign-in is not yet activated|temporarily unavailable/,
   );

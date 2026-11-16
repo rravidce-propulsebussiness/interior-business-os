@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {
   useActionState,
   useEffect,
@@ -305,8 +306,8 @@ export function TeamAccessWorkspace({
             assigned(m.id).some((a) => a.roleId === roleFilter))
         );
         // member/assignment data is immutable in this render
-        // eslint-disable-next-line react-hooks/exhaustive-deps
       }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Dependencies are intentionally scoped to this synchronization lifecycle.
     [members, assignments, roles, query, status, roleFilter],
   );
   const countPages = Math.max(1, Math.ceil(filtered.length / 8));
@@ -370,9 +371,9 @@ export function TeamAccessWorkspace({
         </div>
         <div className="team-heading-actions">
           {canOpenEmployees && (
-            <a className="team-outline" href="/dashboard/employees">
+            <Link className="team-outline" href="/dashboard/employees">
               Employee records <span aria-hidden="true">↗</span>
-            </a>
+            </Link>
           )}
           {canInvite && (
             <button
@@ -1082,9 +1083,9 @@ export function TeamAccessWorkspace({
                 )}
                 <footer className="team-detail-footer">
                   {canOpenEmployees && (
-                    <a href="/dashboard/employees" className="team-outline">
+                    <Link href="/dashboard/employees" className="team-outline">
                       Employee HR profiles <span aria-hidden="true">↗</span>
-                    </a>
+                    </Link>
                   )}
                 </footer>
               </>

@@ -44,6 +44,7 @@ function PdfActions({
   );
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     setPdf(null);
     setLoadedVersion(null);
     if (dirty) return;

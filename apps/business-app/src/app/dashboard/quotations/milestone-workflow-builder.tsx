@@ -479,7 +479,7 @@ export function MilestoneWorkflowBuilder({
         : entry.kind === 'material'
           ? 'materials'
           : 'checks';
-    let items = [...base[field]];
+    const items = [...base[field]];
     let index = items.indexOf(entry.text);
     if (index === -1) {
       if (items.length >= 50) {

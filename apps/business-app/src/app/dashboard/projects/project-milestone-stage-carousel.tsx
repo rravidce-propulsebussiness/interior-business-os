@@ -98,7 +98,7 @@ export function ProjectMilestoneStageCarousel({
         </div>
       </div>
       <div
-        className="pmt-stage-carousel-viewport"
+        className="pmt-stage-carousel-viewport pmt-stage-list"
         ref={viewportRef}
         onScroll={onScroll}
         role="group"

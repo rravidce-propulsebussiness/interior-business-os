@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-html-link-for-pages -- These finance actions require full-document navigation on Hostinger. */
 import Link from 'next/link';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
 import {

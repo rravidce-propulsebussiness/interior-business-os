@@ -96,7 +96,7 @@ export default async function SolutionPage({
         <p style={{ fontSize: '1.2rem', maxWidth: 720 }}>{item.description}</p>
         <p>
           Built for construction, interiors and growing service businesses.
-          Access your organization's enabled tools in one secure workspace.
+          Access your organization&apos;s enabled tools in one secure workspace.
         </p>
         <Link href="/register">Create your account →</Link>
       </section>

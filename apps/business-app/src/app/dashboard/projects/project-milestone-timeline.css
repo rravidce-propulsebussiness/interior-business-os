@@ -1110,9 +1110,53 @@
 
 .pmt-stage-list {
   display: grid;
-  gap: 8px;
+  grid-auto-flow: column;
+  grid-auto-columns: 100%;
+  gap: 0;
   min-width: 0;
   padding: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+}
+.pmt-stage-carousel {
+  min-width: 0;
+}
+.pmt-stage-carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 10px 8px;
+}
+.pmt-stage-carousel-current {
+  display: grid;
+  gap: 3px;
+}
+.pmt-stage-carousel-current small,
+.pmt-stage-carousel-current span {
+  color: #687b94;
+  font-size: 11px;
+}
+.pmt-stage-carousel-buttons {
+  display: flex;
+  gap: 6px;
+}
+.pmt-stage-carousel-buttons button {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #ead9ce;
+  border-radius: 50%;
+  background: #fff;
+  color: #88352b;
+  cursor: pointer;
+}
+.pmt-stage-carousel-viewport {
+  scroll-behavior: smooth;
+}
+.pmt-stage-carousel-viewport > .pmt-stage {
+  width: 100%;
+  scroll-snap-align: start;
 }
 .pmt-stage {
   scroll-margin-top: 248px;
