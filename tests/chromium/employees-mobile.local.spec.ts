@@ -2,12 +2,19 @@ import { expect, test } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const css=readFileSync(resolve(process.cwd(),
-  'apps/business-app/src/app/dashboard/employees/employees.css'),'utf8');
+const css = readFileSync(
+  resolve(
+    process.cwd(),
+    'apps/business-app/src/app/dashboard/employees/employees.css',
+  ),
+  'utf8',
+);
 
-const markup=[
+const markup = [
   '<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1">',
-  '<style>html,body{margin:0;padding:0;font-family:Arial,sans-serif;}',css,'</style></head><body>',
+  '<style>html,body{margin:0;padding:0;font-family:Arial,sans-serif;}',
+  css,
+  '</style></head><body>',
   '<main class="emp-workspace">',
   '<header class="emp-heading"><div class="emp-heading-title"><span class="emp-title-icon">♧</span>',
   '<div><h1>Employees</h1><p>Manage staff, site teams, payroll and identity records.</p></div></div>',
@@ -19,10 +26,18 @@ const markup=[
     'Active on Site|1,050|Current active site team',
     'Pending KYC|200|Missing or unverified proofs',
     'Estimated Monthly Payroll|₹98,54,32,100|Active monthly salaried staff',
-  ].map((entry)=>{
-    const [label,value,note]=entry.split('|');
-    return '<article><span class="emp-metric-icon is-orange">♧</span><div>'+
-      '<small>'+label+'</small><strong>'+value+'</strong><p>'+note+'</p></div></article>';
+  ].map((entry) => {
+    const [label, value, note] = entry.split('|');
+    return (
+      '<article><span class="emp-metric-icon is-orange">♧</span><div>' +
+      '<small>' +
+      label +
+      '</small><strong>' +
+      value +
+      '</strong><p>' +
+      note +
+      '</p></div></article>'
+    );
   }),
   '</section>',
   '<div class="emp-layout"><section class="emp-list-area">',
@@ -67,34 +82,46 @@ const markup=[
   '<button class="emp-primary">Edit Employee</button></footer></aside></div></main></body></html>',
 ].join('');
 
-test('Employees page is legible without horizontal overflow on phones, tablets and desktop',async({page})=>{
+test('Employees page is legible without horizontal overflow on phones, tablets and desktop', async ({
+  page,
+}) => {
   await page.setContent(markup);
-  for(const width of [320,360,390,430,600,768,1024,1100,1101,1366,1680]){
-    await page.setViewportSize({width,height:840});
-    const dimensions=await page.evaluate(()=>({
-      full:document.documentElement.scrollWidth,
-      viewport:document.documentElement.clientWidth,
+  for (const width of [
+    320, 360, 390, 430, 600, 768, 1024, 1100, 1101, 1366, 1680,
+  ]) {
+    await page.setViewportSize({ width, height: 840 });
+    const dimensions = await page.evaluate(() => ({
+      full: document.documentElement.scrollWidth,
+      viewport: document.documentElement.clientWidth,
     }));
-    expect(dimensions.full,'Employees page overflow at '+width).toBeLessThanOrEqual(dimensions.viewport+1);
+    expect(
+      dimensions.full,
+      'Employees page overflow at ' + width,
+    ).toBeLessThanOrEqual(dimensions.viewport + 1);
     await expect(page.locator('.emp-heading h1')).toBeVisible();
     await expect(page.locator('.emp-detail h2')).toBeVisible();
-    if(width<=1100){
+    if (width <= 1100) {
       await expect(page.locator('.emp-mobile-cards')).toBeVisible();
       await expect(page.locator('.emp-table-scroll')).toBeHidden();
-    }else{
+    } else {
       await expect(page.locator('.emp-table-scroll')).toBeVisible();
       await expect(page.locator('.emp-mobile-cards')).toBeHidden();
     }
   }
 });
 
-test('anonymous visitors cannot access employee HR or ID-proof documents',async({page,request})=>{
-  const response=await page.goto('/dashboard/employees');
+test('anonymous visitors cannot access employee HR or ID-proof documents', async ({
+  page,
+  request,
+}) => {
+  const response = await page.goto('/dashboard/employees');
   expect(response).not.toBeNull();
   await expect(page).toHaveURL(/\/login(?:\?|$)/);
-  const file=await request.get('/dashboard/employees/documents/00000000-0000-4000-8000-000000000001');
-  expect([401,403,404]).toContain(file.status());
-  const body=await file.text();
+  const file = await request.get(
+    '/dashboard/employees/documents/00000000-0000-4000-8000-000000000001',
+  );
+  expect([401, 403, 404]).toContain(file.status());
+  const body = await file.text();
   expect(body).not.toContain('storageKey');
   expect(body).not.toContain('company_employee_directory');
 });

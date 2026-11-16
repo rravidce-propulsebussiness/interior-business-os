@@ -9,8 +9,14 @@ describe('website landing workflow', () => {
     const doc = emptyWebsite('Neelima');
     expect(isUnconfiguredWebsite(doc, false)).toBe(true);
     expect(isUnconfiguredWebsite(doc, true)).toBe(false);
-    doc.pages.push({ id: 'another', title: 'New page', path: '/page-2',
-      visibility: 'draft', seo: { title: 'New page', description: '', noindex: true }, nodes: [] });
+    doc.pages.push({
+      id: 'another',
+      title: 'New page',
+      path: '/page-2',
+      visibility: 'draft',
+      seo: { title: 'New page', description: '', noindex: true },
+      nodes: [],
+    });
     expect(isUnconfiguredWebsite(doc, false)).toBe(true);
     doc.pages[0]!.nodes = [createNode('hero', 'hero')];
     expect(isUnconfiguredWebsite(doc, false)).toBe(false);
@@ -18,11 +24,17 @@ describe('website landing workflow', () => {
 
   it('does not replace a website that already has any authored content', () => {
     const doc = emptyWebsite('Neelima');
-    doc.code.push({ id:'component', name:'My component', html:'<h1>Hi</h1>', css:'', javascript:'' });
-    expect(isUnconfiguredWebsite(doc,false)).toBe(false);
+    doc.code.push({
+      id: 'component',
+      name: 'My component',
+      html: '<h1>Hi</h1>',
+      css: '',
+      javascript: '',
+    });
+    expect(isUnconfiguredWebsite(doc, false)).toBe(false);
     doc.code = [];
-    doc.header = [createNode('navigation','nav')];
-    expect(isUnconfiguredWebsite(doc,false)).toBe(false);
+    doc.header = [createNode('navigation', 'nav')];
+    expect(isUnconfiguredWebsite(doc, false)).toBe(false);
   });
 
   it('does not repeat the business name as a giant default footer on blank pages', () => {

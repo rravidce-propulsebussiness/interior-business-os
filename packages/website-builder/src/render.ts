@@ -99,19 +99,33 @@ export function renderWebsite(
     // Hero/section headings and paragraphs are rendered as child elements.
     // Override their own global typography rules when a user formats the
     // selected section in the visual editor.
-    const directText = (style: NodeStyle) => [
-      style.fontFamily ? `font-family:${style.fontFamily}` : '',
-      style.fontSize ? `font-size:${style.fontSize}px` : '',
-      style.align ? `text-align:${style.align}` : '',
-    ].filter(Boolean).join(';');
+    const directText = (style: NodeStyle) =>
+      [
+        style.fontFamily ? `font-family:${style.fontFamily}` : '',
+        style.fontSize ? `font-size:${style.fontSize}px` : '',
+        style.align ? `text-align:${style.align}` : '',
+      ]
+        .filter(Boolean)
+        .join(';');
     const addTextRules = (style: NodeStyle) => {
       const declarations = directText(style);
       return declarations
         ? `#${node.id}>h1,#${node.id}>h2,#${node.id}>p{${declarations}}`
         : '';
     };
-    if (['hero','section','cta','contact','card','footer','container'].includes(node.type)) {
-      css += addTextRules(node.style) +
+    if (
+      [
+        'hero',
+        'section',
+        'cta',
+        'contact',
+        'card',
+        'footer',
+        'container',
+      ].includes(node.type)
+    ) {
+      css +=
+        addTextRules(node.style) +
         `@media(max-width:900px){${addTextRules(node.tablet)}}` +
         `@media(max-width:600px){${addTextRules(node.mobile)}}`;
     }
@@ -231,9 +245,10 @@ export function renderWebsite(
           : 'website-container';
     return `<${tag} ${id} class="${className}">${subtitle ? `<p class="website-eyebrow">${subtitle}</p>` : ''}${title ? `<h${node.type === 'hero' ? '1' : '2'}>${title}</h${node.type === 'hero' ? '1' : '2'}>` : ''}${text ? `<p>${text}</p>` : ''}${children}</${tag}>`;
   }
-  const headerLogo = doc.settings.logo && asset(doc.settings.logo)
-    ? `<img src="${e(asset(doc.settings.logo))}" alt="${e(doc.settings.name)}" style="height:44px;width:auto;max-width:180px;object-fit:contain">`
-    : e(doc.settings.name);
+  const headerLogo =
+    doc.settings.logo && asset(doc.settings.logo)
+      ? `<img src="${e(asset(doc.settings.logo))}" alt="${e(doc.settings.name)}" style="height:44px;width:auto;max-width:180px;object-fit:contain">`
+      : e(doc.settings.name);
   const header = doc.header.length
     ? doc.header.map(render).join('')
     : `<header class="website-section" style="padding-top:24px;padding-bottom:24px"><div class="website-nav"><a class="website-logo" href="/">${headerLogo}</a>${nav(doc.navigation)}</div></header>`;
@@ -241,8 +256,10 @@ export function renderWebsite(
   // a giant auto-generated footer. Only show a fallback when there is real
   // footer/contact content; explicitly authored footers are unchanged.
   const hasFooterContact = Boolean(
-    doc.settings.address.trim() || doc.settings.phone.trim() ||
-    doc.settings.email.trim() || doc.footerNavigation.length,
+    doc.settings.address.trim() ||
+    doc.settings.phone.trim() ||
+    doc.settings.email.trim() ||
+    doc.footerNavigation.length,
   );
   const footer = doc.footer.length
     ? doc.footer.map(render).join('')
@@ -252,9 +269,11 @@ export function renderWebsite(
            <div class="website-container">
              ${doc.footerNavigation.length ? nav(doc.footerNavigation) : ''}
              ${doc.settings.address.trim() ? `<p>${e(doc.settings.address)}</p>` : ''}
-             ${doc.settings.phone.trim() || doc.settings.email.trim()
-               ? `<p>${e([doc.settings.phone.trim(), doc.settings.email.trim()].filter(Boolean).join(' · '))}</p>`
-               : ''}
+             ${
+               doc.settings.phone.trim() || doc.settings.email.trim()
+                 ? `<p>${e([doc.settings.phone.trim(), doc.settings.email.trim()].filter(Boolean).join(' · '))}</p>`
+                 : ''
+             }
            </div>
          </footer>`;
   const body = `<a class="skip" href="#main-content">Skip to content</a>${header}<main id="main-content" tabindex="-1">${page.nodes.map(render).join('')}</main>${footer}`;

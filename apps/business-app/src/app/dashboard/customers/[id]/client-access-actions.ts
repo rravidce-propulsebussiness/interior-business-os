@@ -12,16 +12,19 @@ const requestSchema = z.object({
 });
 
 export async function setClientProjectAccess(input: unknown): Promise<{
-  ok: boolean; message: string;
+  ok: boolean;
+  message: string;
 }> {
   try {
     const fields = requestSchema.parse(input);
     const services = await serverServices();
     await services.authorization.requireAuthenticatedUser();
     const organization = await activeOrganization();
-    if (!organization) return { ok: false, message: 'Select your business first.' };
+    if (!organization)
+      return { ok: false, message: 'Select your business first.' };
     const rpc = services.client.rpc.bind(services.client) as unknown as (
-      name: string, args: Record<string, string | boolean>,
+      name: string,
+      args: Record<string, string | boolean>,
     ) => Promise<{ error: { message: string } | null }>;
     const { error } = await rpc('client_portal_manage', {
       p_organization_id: organization.organizationId,
@@ -42,7 +45,10 @@ export async function setClientProjectAccess(input: unknown): Promise<{
   } catch (error) {
     return {
       ok: false,
-      message: error instanceof Error ? error.message.slice(0, 220) : 'Could not update client access.',
+      message:
+        error instanceof Error
+          ? error.message.slice(0, 220)
+          : 'Could not update client access.',
     };
   }
 }

@@ -37,7 +37,10 @@ export function whatsappErrorHelp(
         reason: 'Meta could not charge for this message',
         action:
           'Add money or a valid payment method (card/UPI) for this WhatsApp account in Meta, then send again.',
-        link: { label: 'Add money / payment in Meta', href: metaBillingUrl(wabaId) },
+        link: {
+          label: 'Add money / payment in Meta',
+          href: metaBillingUrl(wabaId),
+        },
         payment: true,
       };
     case '131047':
@@ -84,13 +87,19 @@ export function whatsappErrorHelp(
       return {
         reason: 'WhatsApp account restricted or locked',
         action: 'Open WhatsApp Manager to see the restriction and appeal it.',
-        link: { label: 'Open WhatsApp Manager', href: whatsappManagerUrl(wabaId) },
+        link: {
+          label: 'Open WhatsApp Manager',
+          href: whatsappManagerUrl(wabaId),
+        },
       };
     default:
       return {
         reason: `WhatsApp error ${value}`,
         action: 'Check WhatsApp Manager for details.',
-        link: { label: 'Open WhatsApp Manager', href: whatsappManagerUrl(wabaId) },
+        link: {
+          label: 'Open WhatsApp Manager',
+          href: whatsappManagerUrl(wabaId),
+        },
       };
   }
 }

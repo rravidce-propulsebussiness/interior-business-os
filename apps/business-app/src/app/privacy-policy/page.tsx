@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import type { Metadata } from 'next';
 import { LegalPage } from '../legal-page';
 
@@ -15,9 +16,10 @@ export default function PrivacyPolicyPage() {
   return (
     <LegalPage title="Privacy Policy" updated={updated}>
       <p>
-        ProPulse Business OS supports construction and interior business teams. This policy explains how Star Glow Home Infra Construction and
-        Interior Private Limited, operating the ProPulse service, handles
-        information when you visit the service or use a business workspace.
+        ProPulse Business OS supports construction and interior business teams.
+        This policy explains how Star Glow Home Infra Construction and Interior
+        Private Limited, operating the ProPulse service, handles information
+        when you visit the service or use a business workspace.
       </p>
 
       <h2>Information we handle</h2>
@@ -81,9 +83,9 @@ export default function PrivacyPolicyPage() {
         You can ask your workspace administrator to correct or remove business
         records managed by that workspace. For an account or connected Meta data
         deletion request, follow the steps on our{' '}
-        <a href="/data-deletion">Data Deletion page</a>. We may need to verify
-        the requester and may retain records where the law requires or permits
-        it.
+        <Link href="/data-deletion">Data Deletion page</Link>. We may need to
+        verify the requester and may retain records where the law requires or
+        permits it.
       </p>
 
       <h2>Children and changes</h2>

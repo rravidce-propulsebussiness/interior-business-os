@@ -135,12 +135,15 @@ export function customerPaymentMilestoneName(
   name: string,
   stageCodes: readonly string[],
 ): string {
-  const normalized=name.trim().replace(/\s+/g,' ').toLowerCase();
-  const stages=new Set(stageCodes.map(stageTemplateOf));
-  const isPlanning=/^(planning|planning fee|planning payment)$/.test(normalized);
-  const isLinkedPlanning=stageCodes.length===0||
-    stages.has('PRECONSTRUCTION')&&stages.has('DESIGN');
-  if(isPlanning&&isLinkedPlanning)
+  const normalized = name.trim().replace(/\s+/g, ' ').toLowerCase();
+  const stages = new Set(stageCodes.map(stageTemplateOf));
+  const isPlanning = /^(planning|planning fee|planning payment)$/.test(
+    normalized,
+  );
+  const isLinkedPlanning =
+    stageCodes.length === 0 ||
+    (stages.has('PRECONSTRUCTION') && stages.has('DESIGN'));
+  if (isPlanning && isLinkedPlanning)
     return 'Planning — Price freeze & design payment';
   return name;
 }

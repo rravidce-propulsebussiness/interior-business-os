@@ -1,7 +1,10 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { activeOrganization, pageServices } from '@business-os/auth/server';
-import { createGstRepository, type GstDocument } from '@business-os/database/gst';
+import {
+  createGstRepository,
+  type GstDocument,
+} from '@business-os/database/gst';
 import { createMarketplaceRepository } from '@business-os/database/marketplace';
 import { createGstTemplatesRepository } from '@business-os/database/gst-templates';
 import { DocumentEditor } from '../document-editor';
@@ -17,8 +20,13 @@ export const dynamic = 'force-dynamic';
 export default async function PrepareDocument({
   searchParams,
 }: {
-  searchParams: Promise<{ edit?: string; order?: string; error?: string;
-    kind?: string; lead?: string }>;
+  searchParams: Promise<{
+    edit?: string;
+    order?: string;
+    error?: string;
+    kind?: string;
+    lead?: string;
+  }>;
 }) {
   const params = await searchParams;
   // Authenticate before selecting the company, preserving the login redirect
@@ -26,7 +34,10 @@ export default async function PrepareDocument({
   const { authorization, client, user: account } = await pageServices();
   const context = await activeOrganization();
   if (!context) notFound();
-  await authorization.requirePermission(context.organizationId, 'invoice.create');
+  await authorization.requirePermission(
+    context.organizationId,
+    'invoice.create',
+  );
   const gst = createGstRepository(client);
   const profile = await gst.profile(context.organizationId);
   const templatesRepo = createGstTemplatesRepository(client);
@@ -35,90 +46,208 @@ export default async function PrepareDocument({
   if (params.edit) {
     existing = await gst.document(context.organizationId, params.edit);
     if (!existing.isOwner || existing.status !== 'draft') notFound();
-    await authorization.requirePermission(context.organizationId, 'invoice.manage');
+    await authorization.requirePermission(
+      context.organizationId,
+      'invoice.manage',
+    );
   }
   const existingLayout = existing
     ? await templatesRepo.documentLayout(context.organizationId, existing.id)
     : null;
-  let order: null | { id:string;productName:string;buyerName:string;
-    quantity:number;unitPrice:number } = null;
+  let order: null | {
+    id: string;
+    productName: string;
+    buyerName: string;
+    quantity: number;
+    unitPrice: number;
+  } = null;
   if (params.order) {
-    await authorization.requirePermission(context.organizationId, 'catalog.manage');
+    await authorization.requirePermission(
+      context.organizationId,
+      'catalog.manage',
+    );
     const orders = await createMarketplaceRepository(client).orders(
-      context.organizationId, 'seller');
-    const matched = orders.find(o => o.id===params.order && o.status==='accepted');
+      context.organizationId,
+      'seller',
+    );
+    const matched = orders.find(
+      (o) => o.id === params.order && o.status === 'accepted',
+    );
     if (!matched) notFound();
-    order = { id:matched.id,productName:matched.productName,
-      buyerName:matched.buyerName,quantity:Number(matched.quantity),
-      unitPrice:Number(matched.unitPrice) };
+    order = {
+      id: matched.id,
+      productName: matched.productName,
+      buyerName: matched.buyerName,
+      quantity: Number(matched.quantity),
+      unitPrice: Number(matched.unitPrice),
+    };
   }
-  const purchase = existing?.kind === 'purchase_bill' ||
+  const purchase =
+    existing?.kind === 'purchase_bill' ||
     (!existing && params.kind === 'purchase_bill');
-  const hasGrant = (key:string) =>
-    context.grants.some(g=>g.scope.kind==='organization'&&g.permission===key);
-  const stageContext = existing && !purchase
-    ? await gst.stageContext(context.organizationId,existing.id).catch(()=>null)
-    : null;
-  const eligible = !purchase && !order &&
-    hasGrant('lead.view') && hasGrant('lead.convert') &&
+  const hasGrant = (key: string) =>
+    context.grants.some(
+      (g) => g.scope.kind === 'organization' && g.permission === key,
+    );
+  const stageContext =
+    existing && !purchase
+      ? await gst
+          .stageContext(context.organizationId, existing.id)
+          .catch(() => null)
+      : null;
+  const eligible =
+    !purchase &&
+    !order &&
+    hasGrant('lead.view') &&
+    hasGrant('lead.convert') &&
     hasGrant('project.view');
   const eligibleOptions = eligible
     ? await gst.stageOptions(context.organizationId)
     : [];
-  const choices = invoiceStageChoices(eligibleOptions,profile?.stateCode??'36');
+  const choices = invoiceStageChoices(
+    eligibleOptions,
+    profile?.stateCode ?? '36',
+  );
   // The invoice picker must include ordinary CRM clients, not just the few
   // closed-won leads that have approved quotation payment plans.
-  const clientRows = !purchase && !order
-    ? await gst.invoiceCustomers(context.organizationId)
-    : [];
+  const clientRows =
+    !purchase && !order
+      ? await gst.invoiceCustomers(context.organizationId)
+      : [];
   const customers = invoiceCustomerChoices(
-    clientRows,choices,profile?.stateCode??'36',
+    clientRows,
+    choices,
+    profile?.stateCode ?? '36',
   );
-  const existingWonLeadId = existing && !purchase && !order
-    ? await gst.wonLeadInvoiceContext(context.organizationId, existing.id)
-    : null;
-  const existingCustomerId = existing && !purchase && !order
-    ? await gst.customerContext(context.organizationId, existing.id)
-    : null;
-  const company = await client.from('organizations').select('name')
-    .eq('id', context.organizationId).maybeSingle();
-  const navigation:OwnerNavItem[] = [
-    {label:'Dashboard',href:'/dashboard',icon:'dashboard'},
-    ...(hasGrant('lead.view')?[{label:'Leads',href:'/dashboard/crm/leads',icon:'leads' as const}]:[]),
-    ...(hasGrant('quotation.view')?[{label:'Quotations',href:'/dashboard/quotations',icon:'quotations' as const}]:[]),
-    ...(hasGrant('project.view')?[{label:'Projects',href:'/dashboard/projects',icon:'projects' as const}]:[]),
-    {label:'Finance',href:'/dashboard/finance',icon:'billing'},
-    {label:'Settings',href:'/dashboard/settings',icon:'settings'},
+  const existingWonLeadId =
+    existing && !purchase && !order
+      ? await gst.wonLeadInvoiceContext(context.organizationId, existing.id)
+      : null;
+  const existingCustomerId =
+    existing && !purchase && !order
+      ? await gst.customerContext(context.organizationId, existing.id)
+      : null;
+  const company = await client
+    .from('organizations')
+    .select('name')
+    .eq('id', context.organizationId)
+    .maybeSingle();
+  const navigation: OwnerNavItem[] = [
+    { label: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
+    ...(hasGrant('lead.view')
+      ? [
+          {
+            label: 'Leads',
+            href: '/dashboard/crm/leads',
+            icon: 'leads' as const,
+          },
+        ]
+      : []),
+    ...(hasGrant('quotation.view')
+      ? [
+          {
+            label: 'Quotations',
+            href: '/dashboard/quotations',
+            icon: 'quotations' as const,
+          },
+        ]
+      : []),
+    ...(hasGrant('project.view')
+      ? [
+          {
+            label: 'Projects',
+            href: '/dashboard/projects',
+            icon: 'projects' as const,
+          },
+        ]
+      : []),
+    { label: 'Finance', href: '/dashboard/finance', icon: 'billing' },
+    { label: 'Settings', href: '/dashboard/settings', icon: 'settings' },
   ];
-  return <OwnerShell companyName={company.data?.name??profile?.legalName??'Business OS'}
-    accountLabel={(account.email??'Account').split('@')[0]??'Account'}
-    accountEmail={account.email??''} planLabel="Business workspace"
-    navigation={navigation} search="" currentHref="/dashboard/finance"
-    notificationsEnabled={hasGrant('notification.view')} dashboardBrand>
-    <div className="finance-document-workspace">
-    {params.error && <div role="alert" style={{
-      background:'#fff1f2',border:'1px solid #fecdd3',padding:14,
-      margin:'15px 24px',borderRadius:12,color:'#9f1239',fontSize:13,
-    }}>The invoice could not be saved: {params.error}</div>}
-    {!profile ? <main className="mx-auto max-w-4xl p-8">
-      <h1 className="text-2xl font-bold">Set up your billing identity</h1>
-      <p className="my-3 text-sm">Company legal name, billing address and state code are required before preparing invoices.</p>
-      <Link href="/dashboard/settings?tab=invoice" className="text-orange-600 underline">Configure billing identity →</Link>
-    </main> : purchase || !!order ? <main id="main-content"
-      className="mx-auto max-w-7xl space-y-5 px-4 py-8 text-slate-900 sm:px-7">
-      <Link href="/dashboard/finance" className="text-sm text-slate-500">← Finance</Link>
-      <h1 className="text-2xl font-extrabold">{purchase?'Supplier purchase bill':'Marketplace invoice'}</h1>
-      <DocumentEditor existing={existing} order={order} profile={profile}
-        standard={standard} existingLayout={existingLayout}
-        requestedKind={purchase?'purchase_bill':'sales_invoice'}/>
-    </main> : <PremiumSalesInvoice profile={profile} standard={standard}
-      existing={existing} stageContext={stageContext} choices={choices}
-      customers={customers} customerAccess={true}
-      existingCustomerId={existingCustomerId}
-      existingWonLeadId={existingWonLeadId}
-      canCreateProject={hasGrant('lead.convert') && hasGrant('project.view')}
-      ownerCanAllowPartial={context.roles.some(role=>role.name.toLowerCase()==='owner')}
-      initialLead={params.lead??''}/>}
-    </div>
-  </OwnerShell>;
+  return (
+    <OwnerShell
+      companyName={company.data?.name ?? profile?.legalName ?? 'Business OS'}
+      accountLabel={(account.email ?? 'Account').split('@')[0] ?? 'Account'}
+      accountEmail={account.email ?? ''}
+      planLabel="Business workspace"
+      navigation={navigation}
+      search=""
+      currentHref="/dashboard/finance"
+      notificationsEnabled={hasGrant('notification.view')}
+      dashboardBrand
+    >
+      <div className="finance-document-workspace">
+        {params.error && (
+          <div
+            role="alert"
+            style={{
+              background: '#fff1f2',
+              border: '1px solid #fecdd3',
+              padding: 14,
+              margin: '15px 24px',
+              borderRadius: 12,
+              color: '#9f1239',
+              fontSize: 13,
+            }}
+          >
+            The invoice could not be saved: {params.error}
+          </div>
+        )}
+        {!profile ? (
+          <main className="mx-auto max-w-4xl p-8">
+            <h1 className="text-2xl font-bold">Set up your billing identity</h1>
+            <p className="my-3 text-sm">
+              Company legal name, billing address and state code are required
+              before preparing invoices.
+            </p>
+            <Link
+              href="/dashboard/settings?tab=invoice"
+              className="text-orange-600 underline"
+            >
+              Configure billing identity →
+            </Link>
+          </main>
+        ) : purchase || !!order ? (
+          <main
+            id="main-content"
+            className="mx-auto max-w-7xl space-y-5 px-4 py-8 text-slate-900 sm:px-7"
+          >
+            <Link href="/dashboard/finance" className="text-sm text-slate-500">
+              ← Finance
+            </Link>
+            <h1 className="text-2xl font-extrabold">
+              {purchase ? 'Supplier purchase bill' : 'Marketplace invoice'}
+            </h1>
+            <DocumentEditor
+              existing={existing}
+              order={order}
+              profile={profile}
+              standard={standard}
+              existingLayout={existingLayout}
+              requestedKind={purchase ? 'purchase_bill' : 'sales_invoice'}
+            />
+          </main>
+        ) : (
+          <PremiumSalesInvoice
+            profile={profile}
+            standard={standard}
+            existing={existing}
+            stageContext={stageContext}
+            choices={choices}
+            customers={customers}
+            customerAccess={true}
+            existingCustomerId={existingCustomerId}
+            existingWonLeadId={existingWonLeadId}
+            canCreateProject={
+              hasGrant('lead.convert') && hasGrant('project.view')
+            }
+            ownerCanAllowPartial={context.roles.some(
+              (role) => role.name.toLowerCase() === 'owner',
+            )}
+            initialLead={params.lead ?? ''}
+          />
+        )}
+      </div>
+    </OwnerShell>
+  );
 }

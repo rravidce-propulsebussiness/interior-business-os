@@ -1,7 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, it } from 'vitest';
+import { expectSource as expect } from '../source-test-expect';
 import { readFileSync } from 'node:fs';
 
-const source = (relative: string) => readFileSync(new URL(relative, import.meta.url), 'utf8');
+const source = (relative: string) =>
+  readFileSync(new URL(relative, import.meta.url), 'utf8');
 
 describe('two-mode company website workflow', () => {
   const gallery = source('./website-gallery.tsx');
@@ -34,7 +36,9 @@ describe('two-mode company website workflow', () => {
     expect(tabs).not.toContain('<WebsiteEditor');
     expect(tabs).not.toContain('<TemplateEditor');
     expect(tabs).toContain("if (tab === 'developer') redirect(");
-    expect(tabs).toContain("if (tab === 'design' || tab === 'navigation' || tab === 'content')");
+    expect(tabs).toContain(
+      "if (tab === 'design' || tab === 'navigation' || tab === 'content')",
+    );
     expect(tabs).toContain("canEdit={s.allowed('website.page.edit')}");
     expect(tabs).toContain("canUpload={s.allowed('website.media.manage')}");
   });
@@ -51,14 +55,18 @@ describe('two-mode company website workflow', () => {
   });
 
   it('protects saves using the existing role permissions and a template shape guard', () => {
-    expect(server).toContain("websiteServices(section === 'assets' ? 'website.media.manage' : 'website.page.edit')");
+    expect(server).toContain(
+      "websiteServices(section === 'assets' ? 'website.media.manage' : 'website.page.edit')",
+    );
     expect(server).toContain('preservesFixedTemplate(');
     expect(fixed).toContain('saveFixedTemplateSection(');
     expect(fixed).toContain('publishWebsite(');
   });
 
   it('keeps the established media upload checks in the content panel', () => {
-    expect(media).toContain("['image/jpeg', 'image/png', 'image/webp', 'image/avif']");
+    expect(media).toContain(
+      "['image/jpeg', 'image/png', 'image/webp', 'image/avif']",
+    );
     expect(media).toContain('10 * 1024 * 1024');
     expect(media).toContain("method: 'POST', body, credentials: 'same-origin'");
   });

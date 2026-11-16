@@ -19,11 +19,17 @@ describe('progressable quotation-linked milestones', () => {
   const rccOpenButton = read('./project-rcc-open-work-button.tsx');
 
   it('shows agreement preparation in the first Design sub-stage', () => {
-    expectSource(timeline).toContain("PRECONSTRUCTION: 'Design payment & agreement'");
-    expectSource(timeline).toContain('<ProjectDesignPaymentAndAgreement data={d}/>');
+    expectSource(timeline).toContain(
+      "PRECONSTRUCTION: 'Design payment & agreement'",
+    );
+    expectSource(timeline).toContain(
+      '<ProjectDesignPaymentAndAgreement data={d}/>',
+    );
     expectSource(designWorkflow).toContain('<PrepareAgreement');
     expectSource(designWorkflow).toContain('<SkipAgreementUpload');
-    expectSource(designWorkflow).toContain('The project owner can prepare the agreement');
+    expectSource(designWorkflow).toContain(
+      'The project owner can prepare the agreement',
+    );
   });
 
   it('shows current work actions inside the selected milestone', () => {
@@ -45,7 +51,7 @@ describe('progressable quotation-linked milestones', () => {
     expectSource(timeline).toContain('<StageChecklistItem');
     expectSource(timeline).toContain('<StageOnsiteQcReview');
     expectSource(timeline).toContain('!DESIGN_STAGE_CODES.includes(code)');
-    expectSource(timeline).toContain("action=\"mark_complete\"");
+    expectSource(timeline).toContain('action="mark_complete"');
     expectSource(checklist).toContain(
       'accept="image/jpeg,image/png,image/webp"',
     );

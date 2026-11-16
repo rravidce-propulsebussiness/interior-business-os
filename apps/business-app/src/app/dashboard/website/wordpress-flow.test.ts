@@ -36,17 +36,19 @@ describe('website templates and click-to-edit workflow', () => {
     const doc = emptyWebsite('Demo');
     doc.pages[0]!.nodes = [
       createNode('hero', 'hero'),
-      createNode('heading','heading'),
-      createNode('text','text'),
+      createNode('heading', 'heading'),
+      createNode('text', 'text'),
     ];
     const build = compileWebsite(doc);
-    const preview = websiteHtml(build, '/', { preview:true })!;
+    const preview = websiteHtml(build, '/', { preview: true })!;
     const publicHtml = websiteHtml(build, '/')!;
     expect(preview).toContain('website.inline-text');
     expect(preview).toContain('contenteditable');
     expect(preview).toContain('textTarget.textContent');
     expect(publicHtml).not.toContain('website.inline-text');
-    expect(source('./studio.tsx')).toContain("data?.type === 'website.inline-text'");
+    expect(source('./studio.tsx')).toContain(
+      "data?.type === 'website.inline-text'",
+    );
     expect(source('./studio.tsx')).toContain('data.value.length >');
   });
 });

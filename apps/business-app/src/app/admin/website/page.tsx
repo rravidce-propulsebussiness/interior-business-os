@@ -8,7 +8,9 @@ export default async function PlatformTemplates() {
   await services.authorization.requirePlatformPermission(
     'platform.entitlements.manage',
   );
-  await services.authorization.requirePlatformPermission('platform.catalog.view');
+  await services.authorization.requirePlatformPermission(
+    'platform.catalog.view',
+  );
 
   const templates = await services.client
     .from('website_templates')

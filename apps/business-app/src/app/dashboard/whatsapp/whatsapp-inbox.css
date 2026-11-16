@@ -2043,7 +2043,7 @@
 }
 .wa-skin .wa-message-in::before,
 .wa-skin .wa-message-out::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   width: 8px;
@@ -2055,7 +2055,11 @@
 }
 .wa-skin .wa-message-out::before {
   right: -8px;
-  background: linear-gradient(to bottom right, var(--wa-bubble-out) 50%, transparent 50%);
+  background: linear-gradient(
+    to bottom right,
+    var(--wa-bubble-out) 50%,
+    transparent 50%
+  );
 }
 .wa-skin .wa-message-bubble p:first-child {
   font-size: 14.2px;
@@ -2415,7 +2419,7 @@
   border-color: var(--wa-green) !important;
   box-shadow: 0 0 0 2px rgba(0, 168, 132, 0.15);
 }
-.wa-skin input[type="checkbox"] {
+.wa-skin input[type='checkbox'] {
   accent-color: var(--wa-green);
 }
 /* Contacts table */
@@ -2432,7 +2436,7 @@
   border-radius: 999px !important;
 }
 .wa-skin .wa-eyebrow,
-.wa-skin [class*="wa-modal"] .wa-eyebrow {
+.wa-skin [class*='wa-modal'] .wa-eyebrow {
   color: var(--wa-green-dark);
 }
 
@@ -2594,7 +2598,7 @@
   cursor: not-allowed;
   opacity: 0.55;
 }
-.wa-skin .wa-bc-person input[type="checkbox"] {
+.wa-skin .wa-bc-person input[type='checkbox'] {
   width: 18px;
   height: 18px;
   flex: none;

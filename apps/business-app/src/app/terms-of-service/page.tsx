@@ -3,8 +3,7 @@ import { LegalPage } from '../legal-page';
 
 export const metadata: Metadata = {
   title: 'Terms of Service | ProPulse Business OS',
-  description:
-    'Terms for ProPulse Business OS workspaces and integrations.',
+  description: 'Terms for ProPulse Business OS workspaces and integrations.',
   robots: { index: true, follow: true },
   alternates: { canonical: 'https://sghomesinterior.in/terms-of-service' },
 };
@@ -25,9 +24,9 @@ export default function TermsOfServicePage() {
       <p>
         You must provide accurate account information, keep your credentials
         secure and use only the access assigned to you. A workspace
-        administrator controls membership and permissions for that business.
-        You are responsible for activity carried out through your account and
-        for ensuring that your team has appropriate access.
+        administrator controls membership and permissions for that business. You
+        are responsible for activity carried out through your account and for
+        ensuring that your team has appropriate access.
       </p>
 
       <h2>Business records and communications</h2>
@@ -35,8 +34,8 @@ export default function TermsOfServicePage() {
         Your business remains responsible for the information it enters,
         imports, stores or sends through the service, including customer,
         employee, supplier and recipient information. You must have the rights,
-        notices and permissions required to use that information and must
-        comply with applicable law.
+        notices and permissions required to use that information and must comply
+        with applicable law.
       </p>
 
       <h2>Connected services and messaging</h2>
@@ -52,18 +51,18 @@ export default function TermsOfServicePage() {
       <h2>Acceptable use</h2>
       <p>
         Do not attempt to bypass workspace permissions, interfere with the
-        service, upload malicious content, access another business’s records,
-        or use the service in a way that violates law or third-party rights.
-        We may restrict access when reasonably necessary to protect users,
-        comply with law or address misuse.
+        service, upload malicious content, access another business’s records, or
+        use the service in a way that violates law or third-party rights. We may
+        restrict access when reasonably necessary to protect users, comply with
+        law or address misuse.
       </p>
 
       <h2>Service availability and changes</h2>
       <p>
         We work to keep the service available, but features may change and
         outages can occur. We may update these terms when the service or legal
-        requirements change. Continued use after an updated version is
-        published means you accept the updated terms.
+        requirements change. Continued use after an updated version is published
+        means you accept the updated terms.
       </p>
 
       <h2>Responsibility and contact</h2>

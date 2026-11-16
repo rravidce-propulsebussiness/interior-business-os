@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @next/next/no-img-element -- Private, data, and object URL media previews require native img elements; react-hook-form watch is used in this render branch. */
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
@@ -6,7 +7,10 @@ import { signOut } from '@business-os/auth/actions';
 import { ClientDesignReview } from './client-design-review';
 import { ClientPaymentProofForm } from './client-payment-proof-form';
 import { ClientProjectTimeline } from './project-timeline';
-import { ClientProjectRequests, type ProjectClientRequest } from '../project-request-widgets';
+import {
+  ClientProjectRequests,
+  type ProjectClientRequest,
+} from '../project-request-widgets';
 
 export type ClientStage = {
   id: string;
@@ -67,20 +71,34 @@ export type ClientUpdate = {
   summary: string;
   created_at: string;
 };
-export type ClientPaymentProof={
- id:string;requestId:string;amount:number;reference:string;
- status:'pending'|'approved'|'rejected'|'reversed';date:string;
- reviewNote:string;receiptId:string|null;
+export type ClientPaymentProof = {
+  id: string;
+  requestId: string;
+  amount: number;
+  reference: string;
+  status: 'pending' | 'approved' | 'rejected' | 'reversed';
+  date: string;
+  reviewNote: string;
+  receiptId: string | null;
 };
-export type ClientStagePaymentRequest={
- id:string;number:string;label:string;total:number;date:string;
- dueDate:string|null;paymentStatus:'payment_requested';
- contractNumber:string;
+export type ClientStagePaymentRequest = {
+  id: string;
+  number: string;
+  label: string;
+  total: number;
+  date: string;
+  dueDate: string | null;
+  paymentStatus: 'payment_requested';
+  contractNumber: string;
 };
-export type ClientInvoice={
- id:string;number:string;documentType:string;
- date:string;dueDate:string|null;total:number;
- paymentStatus:'payment_requested';
+export type ClientInvoice = {
+  id: string;
+  number: string;
+  documentType: string;
+  date: string;
+  dueDate: string | null;
+  total: number;
+  paymentStatus: 'payment_requested';
 };
 export type ClientDashboardData = {
   project: {
@@ -112,11 +130,31 @@ export type ClientDashboardData = {
   advance?: ClientAdvanceRequest | null;
   designStatus?: ClientDesignStatus | null;
 };
-export type ClientAdvanceRequest = { id: string; number: string | null; total: string; received: string;
-  percent: number | null; status: 'payment_requested' | 'partially_received' | 'received' };
-export type ClientDesignStatus = { floorPlanKind: string;
-  drawings: { kind: string; revision: number; reference: string; status: string; clientApprovedAt: string | null; reviewNote: string }[] };
-const inr = (v: string) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(Number(v) || 0);
+export type ClientAdvanceRequest = {
+  id: string;
+  number: string | null;
+  total: string;
+  received: string;
+  percent: number | null;
+  status: 'payment_requested' | 'partially_received' | 'received';
+};
+export type ClientDesignStatus = {
+  floorPlanKind: string;
+  drawings: {
+    kind: string;
+    revision: number;
+    reference: string;
+    status: string;
+    clientApprovedAt: string | null;
+    reviewNote: string;
+  }[];
+};
+const inr = (v: string) =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(Number(v) || 0);
 
 function Icon({ name, size = 20 }: { name: string; size?: number }) {
   const attrs = {
@@ -280,14 +318,26 @@ function advanceDate(value: string | null, offset: number) {
   d.setUTCDate(d.getUTCDate() + offset);
   return d.toISOString().slice(0, 10);
 }
-function deliveryExpectation(material:ClientMaterial,localDate:string){
- if(material.status==='delivered'||material.status==='received')return 'Received at site';
- if(!material.expected_date)return material.status==='ordered'?'Expected delivery not yet confirmed':'Not ordered yet';
- const today=localDate;
- const tomorrow=advanceDate(today,1);
- const label=material.expected_date===today?'Today':material.expected_date===tomorrow?'Tomorrow':fmt(material.expected_date);
- const window=material.expected_window&&material.expected_window!=='anytime'?' · '+pretty(material.expected_window):'';
- return label+window;
+function deliveryExpectation(material: ClientMaterial, localDate: string) {
+  if (material.status === 'delivered' || material.status === 'received')
+    return 'Received at site';
+  if (!material.expected_date)
+    return material.status === 'ordered'
+      ? 'Expected delivery not yet confirmed'
+      : 'Not ordered yet';
+  const today = localDate;
+  const tomorrow = advanceDate(today, 1);
+  const label =
+    material.expected_date === today
+      ? 'Today'
+      : material.expected_date === tomorrow
+        ? 'Tomorrow'
+        : fmt(material.expected_date);
+  const window =
+    material.expected_window && material.expected_window !== 'anytime'
+      ? ' · ' + pretty(material.expected_window)
+      : '';
+  return label + window;
 }
 function statusTone(status: string) {
   if (positiveStates.has(status) || status === 'delivered') return 'good';
@@ -559,7 +609,7 @@ export function ClientDashboard({
                   <Icon name="users" size={22} />
                 </span>
                 <div>
-                  <small>Today's labour</small>
+                  <small>Today&apos;s labour</small>
                   <strong>
                     {reportIsToday ? (report?.worker_count ?? '—') : '—'}
                   </strong>
@@ -764,7 +814,7 @@ export function ClientDashboard({
                           {short(item.description, 45)}
                         </b>
                         <small>
-                          {deliveryExpectation(item,metrics.local_date)}
+                          {deliveryExpectation(item, metrics.local_date)}
                         </small>
                         <span className={'pc-pill ' + statusTone(item.status)}>
                           {pretty(item.status)}
@@ -857,8 +907,8 @@ export function ClientDashboard({
                   </div>
                 ) : (
                   <p className="pc-empty">
-                    The engineer's daily photos and watchman's curing photos
-                    will appear here.
+                    The engineer&apos;s daily photos and watchman&apos;s curing
+                    photos will appear here.
                   </p>
                 )}
               </section>
@@ -917,7 +967,7 @@ export function ClientDashboard({
               </section>
             </div>
 
-            <ClientProjectRequests projectId={project.id} requests={requests}/>
+            <ClientProjectRequests projectId={project.id} requests={requests} />
             <details id="full-timeline" className="pc-details-panel">
               <summary>
                 <Icon name="layers" size={19} /> Full project work timeline{' '}
@@ -944,9 +994,13 @@ export function ClientDashboard({
                           {m.received_date
                             ? 'Received ' + fmt(m.received_date)
                             : m.expected_date
-                              ? 'Expected ' + deliveryExpectation(m,metrics.local_date)
-                              : m.status==='ordered'?'Ordered · delivery date pending':
-                                m.status==='approved'?'Approved · not yet ordered':'Awaiting order approval'}
+                              ? 'Expected ' +
+                                deliveryExpectation(m, metrics.local_date)
+                              : m.status === 'ordered'
+                                ? 'Ordered · delivery date pending'
+                                : m.status === 'approved'
+                                  ? 'Approved · not yet ordered'
+                                  : 'Awaiting order approval'}
                         </small>
                       </div>
                       <span className={'pc-pill ' + statusTone(m.status)}>
@@ -1028,83 +1082,252 @@ export function ClientDashboard({
                 <p className="pc-empty">No shared site photos.</p>
               )}
             </section>
-            <section id="payment-requests" className="pc-panel pc-expand-section">
-              <div className="pc-section-head"><div>
-                <h2>Invoices &amp; payment requests</h2>
-                <p>Issued bills from your builder. A bill is not a payment receipt.</p>
-              </div></div>
-              {advance&&<article className="pc-file-link" aria-label="Advance payment request"
-                style={{display:'flex',flexWrap:'wrap',alignItems:'center',gap:12,justifyContent:'space-between'}}>
-                <span><strong>Advance{advance.percent?' ('+advance.percent+'%)':''} · {advance.number??'Request'}</strong>
-                  <small style={{display:'block'}}>{inr(advance.total)} requested · {inr(advance.received)} verified by your builder&apos;s finance team</small></span>
-                <span className="pc-status">{advance.status==='received'?'Received':advance.status==='partially_received'?'Partly received':'Payment requested'}</span>
-              </article>}
-              {paymentRequests.length>0&&<div className="pc-record-list">
-               {paymentRequests.map(request=><article key={request.id}
-                 className="pc-file-link" style={{display:'flex',flexWrap:'wrap',
-                   alignItems:'center',gap:12,justifyContent:'space-between'}}>
-                 <div style={{display:'grid',gap:5}}>
-                  <b>{request.label}</b>
-                  <small>{request.number} · Certified milestone payment request</small>
-                  <strong>₹{request.total.toLocaleString('en-IN',{
-                    maximumFractionDigits:2,minimumFractionDigits:2})}</strong>
-                  {(()=>{
-                    const related=paymentProofs.filter(p=>p.requestId===request.id);
-                    const latest=related[0];
-                    const approved=related.filter(p=>p.status==='approved');
-                    const paid=approved.reduce((sum,p)=>sum+p.amount,0);
-                    const remaining=Math.max(0,Math.round((request.total-paid)*100)/100);
-                    const pending=related.find(p=>p.status==='pending');
-                    return <div style={{display:'grid',gap:6}}>
-                     <strong>{remaining===0?'Paid and verified':
-                       pending?'Bank verification pending':
-                       paid>0?'Partially paid · Balance outstanding':
-                       latest?.status==='rejected'?'Evidence rejected — resubmit':
-                       'Payment requested'}</strong>
-                     {paid>0&&<small>Verified: ₹{paid.toLocaleString('en-IN')}
-                      {' · Balance: ₹'+remaining.toLocaleString('en-IN')}</small>}
-                     {latest&&<small>Latest bank reference: {latest.reference}</small>}
-                     {latest?.reviewNote&&<small>{latest.reviewNote}</small>}
-                     {related.map(proof=><div key={proof.id} style={{display:'flex',
-                       gap:12,flexWrap:'wrap',alignItems:'center'}}>
-                      <a href={'/client/payment-proofs/'+proof.id+'/file?project='+project.id}
-                       className="pc-view-link" target="_blank" rel="noreferrer">
-                       {proof.status==='approved'?'Verified evidence':
-                        proof.status==='pending'?'Pending evidence':'Submitted evidence'}</a>
-                      {proof.status==='approved'&&proof.receiptId&&
-                       <a href={'/client/payment-proofs/'+proof.id+'/receipt?project='+project.id}
-                        className="pc-view-link">Official receipt</a>}
-                     </div>)}
-                     {remaining>0&&!pending&&<ClientPaymentProofForm
-                      projectId={project.id} requestId={request.id} amount={remaining}/>}
-                    </div>;
-                  })()}
-                 </div>
-                 <a href={'/client/payment-requests/'+request.id+'/pdf?project='+project.id}
-                   className="pc-view-link" download>
-                   <Icon name="file" size={16}/> Download PDF <Icon name="arrow" size={14}/>
-                 </a>
-               </article>)}
-              </div>}
-              {invoices.length ? <div className="pc-record-list">
-                {invoices.map(invoice=><article key={invoice.id}
-                  className="pc-file-link" style={{display:'flex',flexWrap:'wrap',
-                  alignItems:'center',gap:12,justifyContent:'space-between'}}>
-                  <div style={{display:'grid',gap:5}}>
-                    <b>{invoice.number}</b>
-                    <small>{invoice.documentType==='tax_invoice'?'GST invoice':
-                      invoice.documentType==='bill_of_supply'?'Bill of Supply':'Invoice'}
-                      {' · Issued '+fmt(invoice.date)}</small>
-                    <strong>₹{invoice.total.toLocaleString('en-IN',{
-                      maximumFractionDigits:2,minimumFractionDigits:2})}</strong>
-                    <small>Payment requested · Due: {fmt(invoice.dueDate)}</small>
-                  </div>
-                  <a href={'/client/invoices/'+invoice.id+'/pdf?project='+project.id}
-                    className="pc-view-link" download>
-                    <Icon name="file" size={16}/> Download PDF <Icon name="arrow" size={14}/>
-                  </a>
-                </article>)}
-              </div>:paymentRequests.length===0?<p className="pc-empty">No issued payment requests for this project.</p>:null}
+            <section
+              id="payment-requests"
+              className="pc-panel pc-expand-section"
+            >
+              <div className="pc-section-head">
+                <div>
+                  <h2>Invoices &amp; payment requests</h2>
+                  <p>
+                    Issued bills from your builder. A bill is not a payment
+                    receipt.
+                  </p>
+                </div>
+              </div>
+              {advance && (
+                <article
+                  className="pc-file-link"
+                  aria-label="Advance payment request"
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    gap: 12,
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <span>
+                    <strong>
+                      Advance
+                      {advance.percent
+                        ? ' (' + advance.percent + '%)'
+                        : ''} · {advance.number ?? 'Request'}
+                    </strong>
+                    <small style={{ display: 'block' }}>
+                      {inr(advance.total)} requested · {inr(advance.received)}{' '}
+                      verified by your builder&apos;s finance team
+                    </small>
+                  </span>
+                  <span className="pc-status">
+                    {advance.status === 'received'
+                      ? 'Received'
+                      : advance.status === 'partially_received'
+                        ? 'Partly received'
+                        : 'Payment requested'}
+                  </span>
+                </article>
+              )}
+              {paymentRequests.length > 0 && (
+                <div className="pc-record-list">
+                  {paymentRequests.map((request) => (
+                    <article
+                      key={request.id}
+                      className="pc-file-link"
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        gap: 12,
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <div style={{ display: 'grid', gap: 5 }}>
+                        <b>{request.label}</b>
+                        <small>
+                          {request.number} · Certified milestone payment request
+                        </small>
+                        <strong>
+                          ₹
+                          {request.total.toLocaleString('en-IN', {
+                            maximumFractionDigits: 2,
+                            minimumFractionDigits: 2,
+                          })}
+                        </strong>
+                        {(() => {
+                          const related = paymentProofs.filter(
+                            (p) => p.requestId === request.id,
+                          );
+                          const latest = related[0];
+                          const approved = related.filter(
+                            (p) => p.status === 'approved',
+                          );
+                          const paid = approved.reduce(
+                            (sum, p) => sum + p.amount,
+                            0,
+                          );
+                          const remaining = Math.max(
+                            0,
+                            Math.round((request.total - paid) * 100) / 100,
+                          );
+                          const pending = related.find(
+                            (p) => p.status === 'pending',
+                          );
+                          return (
+                            <div style={{ display: 'grid', gap: 6 }}>
+                              <strong>
+                                {remaining === 0
+                                  ? 'Paid and verified'
+                                  : pending
+                                    ? 'Bank verification pending'
+                                    : paid > 0
+                                      ? 'Partially paid · Balance outstanding'
+                                      : latest?.status === 'rejected'
+                                        ? 'Evidence rejected — resubmit'
+                                        : 'Payment requested'}
+                              </strong>
+                              {paid > 0 && (
+                                <small>
+                                  Verified: ₹{paid.toLocaleString('en-IN')}
+                                  {' · Balance: ₹' +
+                                    remaining.toLocaleString('en-IN')}
+                                </small>
+                              )}
+                              {latest && (
+                                <small>
+                                  Latest bank reference: {latest.reference}
+                                </small>
+                              )}
+                              {latest?.reviewNote && (
+                                <small>{latest.reviewNote}</small>
+                              )}
+                              {related.map((proof) => (
+                                <div
+                                  key={proof.id}
+                                  style={{
+                                    display: 'flex',
+                                    gap: 12,
+                                    flexWrap: 'wrap',
+                                    alignItems: 'center',
+                                  }}
+                                >
+                                  <a
+                                    href={
+                                      '/client/payment-proofs/' +
+                                      proof.id +
+                                      '/file?project=' +
+                                      project.id
+                                    }
+                                    className="pc-view-link"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                  >
+                                    {proof.status === 'approved'
+                                      ? 'Verified evidence'
+                                      : proof.status === 'pending'
+                                        ? 'Pending evidence'
+                                        : 'Submitted evidence'}
+                                  </a>
+                                  {proof.status === 'approved' &&
+                                    proof.receiptId && (
+                                      <a
+                                        href={
+                                          '/client/payment-proofs/' +
+                                          proof.id +
+                                          '/receipt?project=' +
+                                          project.id
+                                        }
+                                        className="pc-view-link"
+                                      >
+                                        Official receipt
+                                      </a>
+                                    )}
+                                </div>
+                              ))}
+                              {remaining > 0 && !pending && (
+                                <ClientPaymentProofForm
+                                  projectId={project.id}
+                                  requestId={request.id}
+                                  amount={remaining}
+                                />
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                      <a
+                        href={
+                          '/client/payment-requests/' +
+                          request.id +
+                          '/pdf?project=' +
+                          project.id
+                        }
+                        className="pc-view-link"
+                        download
+                      >
+                        <Icon name="file" size={16} /> Download PDF{' '}
+                        <Icon name="arrow" size={14} />
+                      </a>
+                    </article>
+                  ))}
+                </div>
+              )}
+              {invoices.length ? (
+                <div className="pc-record-list">
+                  {invoices.map((invoice) => (
+                    <article
+                      key={invoice.id}
+                      className="pc-file-link"
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        gap: 12,
+                        justifyContent: 'space-between',
+                      }}
+                    >
+                      <div style={{ display: 'grid', gap: 5 }}>
+                        <b>{invoice.number}</b>
+                        <small>
+                          {invoice.documentType === 'tax_invoice'
+                            ? 'GST invoice'
+                            : invoice.documentType === 'bill_of_supply'
+                              ? 'Bill of Supply'
+                              : 'Invoice'}
+                          {' · Issued ' + fmt(invoice.date)}
+                        </small>
+                        <strong>
+                          ₹
+                          {invoice.total.toLocaleString('en-IN', {
+                            maximumFractionDigits: 2,
+                            minimumFractionDigits: 2,
+                          })}
+                        </strong>
+                        <small>
+                          Payment requested · Due: {fmt(invoice.dueDate)}
+                        </small>
+                      </div>
+                      <a
+                        href={
+                          '/client/invoices/' +
+                          invoice.id +
+                          '/pdf?project=' +
+                          project.id
+                        }
+                        className="pc-view-link"
+                        download
+                      >
+                        <Icon name="file" size={16} /> Download PDF{' '}
+                        <Icon name="arrow" size={14} />
+                      </a>
+                    </article>
+                  ))}
+                </div>
+              ) : paymentRequests.length === 0 ? (
+                <p className="pc-empty">
+                  No issued payment requests for this project.
+                </p>
+              ) : null}
             </section>
             <section id="all-documents" className="pc-panel pc-expand-section">
               {cardHeader('Shared documents', '#drawings')}

@@ -47,15 +47,15 @@ export default async function WhatsAppPage() {
         connections={connections
           .filter((connection) => connection.status === 'connected')
           .map((connection) => ({
-          id: connection.id,
-          businessName: connection.business_name,
-          wabaId: connection.waba_id,
-          phoneNumberId: connection.phone_number_id,
-          displayPhoneNumber: connection.display_phone_number,
-          verifiedName: connection.verified_name,
-          status: connection.status,
-          lastConnectedAt: connection.last_connected_at,
-        }))}
+            id: connection.id,
+            businessName: connection.business_name,
+            wabaId: connection.waba_id,
+            phoneNumberId: connection.phone_number_id,
+            displayPhoneNumber: connection.display_phone_number,
+            verifiedName: connection.verified_name,
+            status: connection.status,
+            lastConnectedAt: connection.last_connected_at,
+          }))}
       />
       {canUseMetaTestSender && (
         <WhatsAppTestSender

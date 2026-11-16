@@ -39,14 +39,14 @@
   color: #fe5105;
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: .13em;
+  letter-spacing: 0.13em;
 }
 .os-domain-heading h1 {
   margin: 0;
   color: #342e30;
   font-size: clamp(24px, 2.5vw, 31px);
   font-weight: 850;
-  letter-spacing: -.9px;
+  letter-spacing: -0.9px;
   line-height: 1.2;
 }
 .os-domain-description {
@@ -78,7 +78,10 @@
   border-radius: 13px;
   background: #fff;
   box-shadow: 0 6px 22px #192b4e09;
-  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
 }
 .os-domain-highlight:hover {
   transform: translateY(-2px);
@@ -108,7 +111,7 @@
   display: block;
   color: #342e30;
   font-size: clamp(16px, 1.35vw, 21px);
-  letter-spacing: -.35px;
+  letter-spacing: -0.35px;
   line-height: 1.2;
   font-weight: 800;
   overflow-wrap: anywhere;
@@ -152,7 +155,7 @@
   color: #342e30;
   font-size: 18px;
   font-weight: 800;
-  letter-spacing: -.3px;
+  letter-spacing: -0.3px;
 }
 .os-domain-section-heading p {
   margin: 6px 0 0;
@@ -210,7 +213,7 @@
   flex-direction: column;
   gap: 7px;
 }
-.os-domain-field>span {
+.os-domain-field > span {
   color: #424150;
   font-size: 12px;
   font-weight: 750;
@@ -236,7 +239,7 @@
 }
 .os-domain-page .os-domain-field input:disabled,
 .os-domain-page .os-domain-field select:disabled {
-  opacity: .6;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 .os-domain-field small {
@@ -284,7 +287,9 @@
   border-radius: 99px;
   background: #d6dbe0;
   cursor: pointer;
-  transition: background .18s ease, border-color .18s ease;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease;
 }
 .os-domain-page .os-domain-switch::before {
   content: '';
@@ -296,7 +301,7 @@
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 4px #0002;
-  transition: transform .18s ease;
+  transition: transform 0.18s ease;
 }
 .os-domain-page .os-domain-switch:checked {
   border-color: #15ac65;
@@ -310,7 +315,7 @@
   outline-offset: 3px;
 }
 .os-domain-page .os-domain-switch:disabled {
-  opacity: .48;
+  opacity: 0.48;
   cursor: not-allowed;
 }
 .os-domain-limits {
@@ -362,7 +367,10 @@
   font-weight: 750;
   cursor: pointer;
   box-shadow: 0 8px 18px #fe510523;
-  transition: filter .2s ease, transform .2s ease, box-shadow .2s ease;
+  transition:
+    filter 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 .os-domain-save:hover:not(:disabled) {
   filter: saturate(1.1);
@@ -374,7 +382,7 @@
   outline-offset: 2px;
 }
 .os-domain-save:disabled {
-  opacity: .6;
+  opacity: 0.6;
   cursor: wait;
 }
 .os-domain-save-message {
@@ -410,7 +418,9 @@
   border-radius: 12px;
   background: #fffdfb;
   color: #65738c;
-  transition: border-color .2s ease, transform .2s ease;
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 .os-domain-page .os-domain-step:hover {
   border-color: #ffc59f;
@@ -473,12 +483,12 @@
   flex: 0 0 auto;
   color: #f26b10;
 }
-@media (max-width:1250px) {
+@media (max-width: 1250px) {
   .os-domain-settings {
     grid-template-columns: 1fr;
   }
 }
-@media (max-width:1000px) {
+@media (max-width: 1000px) {
   .os-domain-highlights {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -489,7 +499,7 @@
     min-height: auto;
   }
 }
-@media (max-width:740px) {
+@media (max-width: 740px) {
   .os-domain-page {
     padding-top: 0;
   }
@@ -531,7 +541,7 @@
     grid-template-columns: 1fr;
   }
 }
-@media (max-width:460px) {
+@media (max-width: 460px) {
   .os-domain-feature-grid {
     grid-template-columns: 1fr;
   }
@@ -539,7 +549,7 @@
     flex-basis: 100%;
   }
 }
-@media (prefers-reduced-motion:reduce) {
+@media (prefers-reduced-motion: reduce) {
   .os-domain-page *,
   .os-domain-page *::before,
   .os-domain-page *::after {

@@ -20,7 +20,9 @@ export function adminContentSecurityPolicy(
     // Homepage imagery is served from a single allowlisted photo CDN. No script/connect access is granted.
     "img-src 'self' data: blob: https://images.unsplash.com",
     "font-src 'self'",
-    "connect-src 'self'" + (development ? ' ws: wss:' : '') + metaConnectSources,
+    "connect-src 'self'" +
+      (development ? ' ws: wss:' : '') +
+      metaConnectSources,
     "frame-src 'self' blob:" + metaFrameSources,
     "object-src 'none'",
     "base-uri 'self'",

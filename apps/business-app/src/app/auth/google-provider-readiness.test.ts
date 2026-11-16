@@ -9,7 +9,9 @@ const config = {
 describe('Google OAuth provider readiness', () => {
   it('recognizes an enabled Google provider', async () => {
     const fetcher: typeof fetch = async (input, init) => {
-      expect(String(input)).toBe('https://example.supabase.co/auth/v1/settings');
+      expect(String(input)).toBe(
+        'https://example.supabase.co/auth/v1/settings',
+      );
       expect(init?.headers).toEqual({
         apikey: 'test-public-key',
         Accept: 'application/json',
@@ -31,7 +33,12 @@ describe('Google OAuth provider readiness', () => {
       throw new Error('Transient network failure');
     };
     expect(await googleProviderEnabled(config, fetcher)).toBe(null);
-    expect(await googleProviderEnabled(config, async () => new Response('', { status: 503 }))).toBe(null);
+    expect(
+      await googleProviderEnabled(
+        config,
+        async () => new Response('', { status: 503 }),
+      ),
+    ).toBe(null);
   });
 
   it('does not leak an API key to a non-HTTPS auth host', async () => {

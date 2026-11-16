@@ -168,22 +168,68 @@ describe('work-wise dimensions and mixed pricing units', () => {
   it('prices walls by length×height, shelves by L×W, quantities by piece, and keeps floor area separate', () => {
     const result = calculateSftEstimate({
       rows: [
-        { kind:'floor', name:'Ground Floor', unit:'sqft', lengthFeet:'40',
-          widthFeet:'25', heightFeet:'10', ratePerSqft:'1850' },
-        { kind:'additional', name:'Shelves & Sajjas', unit:'sqft',
-          lengthFeet:'12', widthFeet:'2', heightFeet:'', ratePerSqft:'1200' },
-        { kind:'additional', name:'Compound Wall', unit:'wall_sqft',
-          lengthFeet:'100', widthFeet:'1', heightFeet:'6', ratePerSqft:'750' },
-        { kind:'additional', name:'Lift', unit:'piece', quantity:'2',
-          lengthFeet:'1', widthFeet:'1', heightFeet:'', ratePerSqft:'250000' },
-        { kind:'additional', name:'Handrail', unit:'running_ft',
-          lengthFeet:'30', widthFeet:'1', heightFeet:'', ratePerSqft:'600' },
+        {
+          kind: 'floor',
+          name: 'Ground Floor',
+          unit: 'sqft',
+          lengthFeet: '40',
+          widthFeet: '25',
+          heightFeet: '10',
+          ratePerSqft: '1850',
+        },
+        {
+          kind: 'additional',
+          name: 'Shelves & Sajjas',
+          unit: 'sqft',
+          lengthFeet: '12',
+          widthFeet: '2',
+          heightFeet: '',
+          ratePerSqft: '1200',
+        },
+        {
+          kind: 'additional',
+          name: 'Compound Wall',
+          unit: 'wall_sqft',
+          lengthFeet: '100',
+          widthFeet: '1',
+          heightFeet: '6',
+          ratePerSqft: '750',
+        },
+        {
+          kind: 'additional',
+          name: 'Lift',
+          unit: 'piece',
+          quantity: '2',
+          lengthFeet: '1',
+          widthFeet: '1',
+          heightFeet: '',
+          ratePerSqft: '250000',
+        },
+        {
+          kind: 'additional',
+          name: 'Handrail',
+          unit: 'running_ft',
+          lengthFeet: '30',
+          widthFeet: '1',
+          heightFeet: '',
+          ratePerSqft: '600',
+        },
       ],
-      materialIds:[],
-      sections:[{title:'Steel',brand:'JSW',description:'Client-specific material selection'}],
+      materialIds: [],
+      sections: [
+        {
+          title: 'Steel',
+          brand: 'JSW',
+          description: 'Client-specific material selection',
+        },
+      ],
     });
-    expect(result.rows.map(r=>r.areaSqft)).toEqual([
-      '1000.00','24.00','600.00','2.00','30.00',
+    expect(result.rows.map((r) => r.areaSqft)).toEqual([
+      '1000.00',
+      '24.00',
+      '600.00',
+      '2.00',
+      '30.00',
     ]);
     expect(result.totalAreaSqft).toBe('1000.00');
     expect(result.additionalAreaSqft).toBe('624.00');
@@ -192,9 +238,17 @@ describe('work-wise dimensions and mixed pricing units', () => {
   });
 
   it('does not multiply a floor rate by its informational height', () => {
-    const a=calculateSftEstimate({
-      rows:[{name:'Ground Floor',lengthFeet:'20',widthFeet:'25',ratePerSqft:'1500',heightFeet:'12'}],
-      materialIds:[],
+    const a = calculateSftEstimate({
+      rows: [
+        {
+          name: 'Ground Floor',
+          lengthFeet: '20',
+          widthFeet: '25',
+          ratePerSqft: '1500',
+          heightFeet: '12',
+        },
+      ],
+      materialIds: [],
     });
     expect(a.total).toBe('750000.00');
   });
@@ -202,17 +256,49 @@ describe('work-wise dimensions and mixed pricing units', () => {
 
 describe('different rates for the construction, parking, and penthouse portions of each floor', () => {
   it('prices ground floor split separately, copies full area upstairs and uses penthouse rate', () => {
-    const estimate=calculateSftEstimate({
-      rows:[
-        {kind:'floor',name:'Ground Floor',unit:'sqft',lengthFeet:'20',widthFeet:'25',ratePerSqft:'1850'},
-        {kind:'floor',name:'Ground Floor — Parking',unit:'sqft',lengthFeet:'20',widthFeet:'25',ratePerSqft:'800'},
-        {kind:'floor',name:'First Floor',unit:'sqft',lengthFeet:'40',widthFeet:'25',ratePerSqft:'1850'},
-        {kind:'floor',name:'Second Floor — Penthouse',unit:'sqft',lengthFeet:'20',widthFeet:'10',ratePerSqft:'1300'},
+    const estimate = calculateSftEstimate({
+      rows: [
+        {
+          kind: 'floor',
+          name: 'Ground Floor',
+          unit: 'sqft',
+          lengthFeet: '20',
+          widthFeet: '25',
+          ratePerSqft: '1850',
+        },
+        {
+          kind: 'floor',
+          name: 'Ground Floor — Parking',
+          unit: 'sqft',
+          lengthFeet: '20',
+          widthFeet: '25',
+          ratePerSqft: '800',
+        },
+        {
+          kind: 'floor',
+          name: 'First Floor',
+          unit: 'sqft',
+          lengthFeet: '40',
+          widthFeet: '25',
+          ratePerSqft: '1850',
+        },
+        {
+          kind: 'floor',
+          name: 'Second Floor — Penthouse',
+          unit: 'sqft',
+          lengthFeet: '20',
+          widthFeet: '10',
+          ratePerSqft: '1300',
+        },
       ],
-      materialIds:[],
+      materialIds: [],
     });
-    expect(estimate.rows.map(row=>row.amount))
-      .toEqual(['925000.00','400000.00','1850000.00','260000.00']);
+    expect(estimate.rows.map((row) => row.amount)).toEqual([
+      '925000.00',
+      '400000.00',
+      '1850000.00',
+      '260000.00',
+    ]);
     expect(estimate.totalAreaSqft).toBe('2200.00');
     expect(estimate.total).toBe('3435000.00');
     expect(parseSftEstimate(encodeSftEstimate(estimate))).toEqual(estimate);
@@ -221,32 +307,78 @@ describe('different rates for the construction, parking, and penthouse portions 
 
 describe('reopening a saved construction quote does not block Save', () => {
   it('strips calculated display-only amounts while retaining real entered floor data', () => {
-    const original=calculateSftEstimate({
+    const original = calculateSftEstimate({
       rows: [
-        {kind:'floor', name:'Ground Floor', lengthFeet:'30',widthFeet:'40',
-          heightFeet:'', quantity:'',unit:'sqft',ratePerSqft:'1850'},
-        {kind:'floor', name:'First Floor', lengthFeet:'20',widthFeet:'40',
-          inheritFromPrevious:false,heightFeet:'',quantity:'',unit:'sqft',ratePerSqft:'1850'},
-        {kind:'floor', name:'Second Floor', lengthFeet:'20',widthFeet:'40',
-          inheritFromPrevious:true,heightFeet:'',quantity:'',unit:'sqft',ratePerSqft:'1850'},
-        {kind:'floor', name:'Second Floor — Penthouse', lengthFeet:'20',widthFeet:'20',
-          heightFeet:'', quantity:'',unit:'sqft',ratePerSqft:'1850'},
+        {
+          kind: 'floor',
+          name: 'Ground Floor',
+          lengthFeet: '30',
+          widthFeet: '40',
+          heightFeet: '',
+          quantity: '',
+          unit: 'sqft',
+          ratePerSqft: '1850',
+        },
+        {
+          kind: 'floor',
+          name: 'First Floor',
+          lengthFeet: '20',
+          widthFeet: '40',
+          inheritFromPrevious: false,
+          heightFeet: '',
+          quantity: '',
+          unit: 'sqft',
+          ratePerSqft: '1850',
+        },
+        {
+          kind: 'floor',
+          name: 'Second Floor',
+          lengthFeet: '20',
+          widthFeet: '40',
+          inheritFromPrevious: true,
+          heightFeet: '',
+          quantity: '',
+          unit: 'sqft',
+          ratePerSqft: '1850',
+        },
+        {
+          kind: 'floor',
+          name: 'Second Floor — Penthouse',
+          lengthFeet: '20',
+          widthFeet: '20',
+          heightFeet: '',
+          quantity: '',
+          unit: 'sqft',
+          ratePerSqft: '1850',
+        },
       ],
-      materialIds:[],
+      materialIds: [],
     });
-    const restored=parseSftEstimate(encodeSftEstimate(original));
+    const restored = parseSftEstimate(encodeSftEstimate(original));
     expect(restored).not.toBeNull();
     // The former editor copied these output fields into strict input rows.
-    expect(sftEstimateInputSchema.safeParse({
-      rows:restored!.rows,materialIds:[],
-    }).success).toBe(false);
-    const editable=editableSftRows(restored!);
+    expect(
+      sftEstimateInputSchema.safeParse({
+        rows: restored!.rows,
+        materialIds: [],
+      }).success,
+    ).toBe(false);
+    const editable = editableSftRows(restored!);
     expect(editable).toHaveLength(4);
-    expect(editable[0]).toMatchObject({name:'Ground Floor',lengthFeet:'30',widthFeet:'40'});
+    expect(editable[0]).toMatchObject({
+      name: 'Ground Floor',
+      lengthFeet: '30',
+      widthFeet: '40',
+    });
     expect(editable[0]).not.toHaveProperty('areaSqft');
     expect(editable[0]).not.toHaveProperty('amount');
     expect(editable[2]?.inheritFromPrevious).toBe(true);
-    expect(sftEstimateInputSchema.safeParse({rows:editable,materialIds:[]}).success).toBe(true);
-    expect(calculateSftEstimate({rows:editable,materialIds:[]}).total).toBe(original.total);
+    expect(
+      sftEstimateInputSchema.safeParse({ rows: editable, materialIds: [] })
+        .success,
+    ).toBe(true);
+    expect(
+      calculateSftEstimate({ rows: editable, materialIds: [] }).total,
+    ).toBe(original.total);
   });
 });

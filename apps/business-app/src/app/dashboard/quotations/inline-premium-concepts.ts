@@ -24,29 +24,38 @@ async function loadConcept(id: ConceptId): Promise<string> {
       signal: AbortSignal.timeout(4_000),
       headers: { Accept: 'image/webp' },
     });
-    if (!response.ok || response.headers.get('content-type')?.split(';')[0] !== 'image/webp')
+    if (
+      !response.ok ||
+      response.headers.get('content-type')?.split(';')[0] !== 'image/webp'
+    )
       return TRANSPARENT_PNG;
     const declaredBytes = Number(response.headers.get('content-length') || 0);
     if (declaredBytes > 1_500_000) return TRANSPARENT_PNG;
     const bytes = Buffer.from(await response.arrayBuffer());
     if (!bytes.length || bytes.length > 1_500_000) return TRANSPARENT_PNG;
     // WebP RIFF header, not an HTML error page disguised as an image.
-    if (bytes.toString('ascii', 0, 4) !== 'RIFF' ||
-        bytes.toString('ascii', 8, 12) !== 'WEBP') return TRANSPARENT_PNG;
+    if (
+      bytes.toString('ascii', 0, 4) !== 'RIFF' ||
+      bytes.toString('ascii', 8, 12) !== 'WEBP'
+    )
+      return TRANSPARENT_PNG;
     return 'data:image/webp;base64,' + bytes.toString('base64');
   } catch {
     return TRANSPARENT_PNG;
   }
 }
 
-export async function inlinePremiumConceptImages(html: string): Promise<string> {
+export async function inlinePremiumConceptImages(
+  html: string,
+): Promise<string> {
   // No public source in this particular quote (tenant photos are data URIs).
   if (!html.includes('images.unsplash.com/photo-')) return html;
   photoCache ??= Promise.all(ids.map((id) => loadConcept(id))).then(
-    ([cover, detail]) => ({
-      [ids[0]!]: cover ?? TRANSPARENT_PNG,
-      [ids[1]!]: detail ?? TRANSPARENT_PNG,
-    } as Record<ConceptId, string>),
+    ([cover, detail]) =>
+      ({
+        [ids[0]!]: cover ?? TRANSPARENT_PNG,
+        [ids[1]!]: detail ?? TRANSPARENT_PNG,
+      }) as Record<ConceptId, string>,
   );
   const images = await photoCache;
   return html.replace(

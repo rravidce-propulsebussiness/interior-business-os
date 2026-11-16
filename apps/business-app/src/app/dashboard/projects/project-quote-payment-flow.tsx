@@ -99,9 +99,10 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
             </span>
           </h2>
           <p>
-            Each existing quotation payment remains one stage. Its payment marker,
-            work and checks appear in the saved order; recorded site progress updates
-            execution status. No extra payment or invoice is created here.
+            Each existing quotation payment remains one stage. Its payment
+            marker, work and checks appear in the saved order; recorded site
+            progress updates execution status. No payment schedule or quotation
+            is changed here. No extra payment or invoice is created here.
           </p>
         </div>
       </header>

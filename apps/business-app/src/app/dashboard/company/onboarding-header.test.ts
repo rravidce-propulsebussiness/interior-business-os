@@ -11,7 +11,9 @@ describe('onboarding header', () => {
   const welcome = source('../no-company-workspace.tsx');
 
   it('provides homepage navigation and real server-side sign-out', () => {
-    expect(header).toContain("import { signOut } from '@business-os/auth/actions'");
+    expect(header).toContain(
+      "import { signOut } from '@business-os/auth/actions'",
+    );
     expect(header).toContain('href="/"');
     expect(header).toContain('<form action={signOut}');
     expect(header).toContain('type="submit"');

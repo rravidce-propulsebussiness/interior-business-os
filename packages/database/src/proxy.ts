@@ -28,7 +28,8 @@ export async function refreshSessionWithRewrite(
   const nonce = Buffer.from(crypto.randomUUID()).toString('base64');
   // The Meta SDK needs a cross-origin login bridge only on the WhatsApp
   // connection page. Keep those origins out of the rest of the workspace CSP.
-  const isWhatsAppSignupPage = request.nextUrl.pathname === '/dashboard/whatsapp';
+  const isWhatsAppSignupPage =
+    request.nextUrl.pathname === '/dashboard/whatsapp';
   const policy = adminContentSecurityPolicy(
     nonce,
     process.env.NODE_ENV === 'development',
@@ -52,8 +53,34 @@ export async function refreshSessionWithRewrite(
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  )
+  ) {
+    const pathname = request.nextUrl.pathname;
+    if (pathname.startsWith('/api/')) {
+      const status =
+        pathname.startsWith('/api/finance/') ||
+        pathname.startsWith('/api/execution/')
+          ? 403
+          : 401;
+      return protect(
+        NextResponse.json({ error: 'Authentication required' }, { status }),
+      );
+    }
+    if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
+      if (
+        pathname.endsWith('/pdf') ||
+        pathname.endsWith('/preview') ||
+        pathname.endsWith('/download') ||
+        pathname.includes('/media/') ||
+        pathname.startsWith('/dashboard/employees/documents/')
+      )
+        return protect(new NextResponse('Forbidden', { status: 403 }));
+      const login = request.nextUrl.clone();
+      login.pathname = '/login';
+      login.search = '';
+      return protect(NextResponse.redirect(login));
+    }
     return protect(responseForRequest());
+  }
   const env = parsePublicEnvironment(process.env);
   let response = responseForRequest();
   const client = createServerClient<Database>(

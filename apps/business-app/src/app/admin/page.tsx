@@ -151,8 +151,7 @@ export default async function PlatformDashboard() {
         <div>
           <h1>Super Admin Dashboard</h1>
           <p className="os-subhead">
-            Control your marketplace, tenants, plans and platform
-            settings.
+            Control your marketplace, tenants, plans and platform settings.
           </p>
         </div>
         <Link href="/admin/organizations" className="os-toolbar-link">

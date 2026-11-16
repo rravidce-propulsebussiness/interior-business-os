@@ -42,10 +42,14 @@ export function createWebsiteRepository(
       );
       if (!raw || typeof raw !== 'object' || Array.isArray(raw))
         throw new DomainError('VALIDATION_FAILED');
-      const publishedVersionValue = (raw as Record<string, unknown>).publishedVersionId;
+      const publishedVersionValue = (raw as Record<string, unknown>)
+        .publishedVersionId;
       return {
         ...raw,
-        publishedVersionId: typeof publishedVersionValue === 'string' ? publishedVersionValue : null,
+        publishedVersionId:
+          typeof publishedVersionValue === 'string'
+            ? publishedVersionValue
+            : null,
         id: String(raw.id),
         name: String(raw.name),
         slug: String(raw.slug),
@@ -98,26 +102,29 @@ export function createWebsiteRepository(
       // publishing rejection into an indistinguishable VALIDATION_FAILED.
       if (response.error) {
         const reason = (response.error.message ?? '').trim();
-        const mapping: Record<string,string> = {
+        const mapping: Record<string, string> = {
           'Invalid or expired build proof': 'WEBSITE_BUILD_SIGNATURE_MISMATCH',
           'Build proof required': 'WEBSITE_BUILD_SIGNATURE_MISMATCH',
           'Build ownership mismatch': 'WEBSITE_BUILD_OWNERSHIP_MISMATCH',
           'Custom code capability required': 'WEBSITE_CUSTOM_CODE_NOT_ENTITLED',
-          'Website forms require Forms capability and CRM': 'WEBSITE_FORMS_NOT_ENTITLED',
+          'Website forms require Forms capability and CRM':
+            'WEBSITE_FORMS_NOT_ENTITLED',
           'Stale publish': 'WEBSITE_PUBLISH_VERSION_CONFLICT',
           'Invalid build': 'WEBSITE_BUILD_INVALID',
           'Unavailable asset': 'WEBSITE_PUBLISH_MISSING_ASSET',
           'Page limit reached': 'WEBSITE_PUBLISH_PAGE_LIMIT',
           'Unavailable website': 'WEBSITE_PUBLISH_UNAVAILABLE',
         };
-        const category = response.error.code === 'PGRST202'
-          ? 'WEBSITE_PUBLISH_RPC_MISSING'
-          : mapping[reason] ??
-            (response.error.code === '42501'
-              ? 'WEBSITE_PUBLISH_PERMISSION_DENIED'
-              : 'WEBSITE_PUBLISH_DATABASE_REJECTED');
+        const category =
+          response.error.code === 'PGRST202'
+            ? 'WEBSITE_PUBLISH_RPC_MISSING'
+            : (mapping[reason] ??
+              (response.error.code === '42501'
+                ? 'WEBSITE_PUBLISH_PERMISSION_DENIED'
+                : 'WEBSITE_PUBLISH_DATABASE_REJECTED'));
         console.error('website.publish.rpc.failed', {
-          category, sqlState: response.error.code ?? 'unknown',
+          category,
+          sqlState: response.error.code ?? 'unknown',
         });
         throw new Error(category);
       }

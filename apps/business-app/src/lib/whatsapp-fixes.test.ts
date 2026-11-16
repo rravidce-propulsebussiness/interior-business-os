@@ -20,7 +20,11 @@ describe('Meta errors', () => {
         fbtrace_id: 'trace',
       },
     });
-    expect(error).toMatchObject({ code: 133010, subcode: 2494, traceId: 'trace' });
+    expect(error).toMatchObject({
+      code: 133010,
+      subcode: 2494,
+      traceId: 'trace',
+    });
     expect(JSON.stringify(error)).not.toContain('secret account detail');
   });
 
@@ -36,7 +40,9 @@ describe('Meta errors', () => {
   });
 
   it('labels automation failures', () => {
-    expect(metaErrorLabel(new MetaApiError(400, 131030, null, null))).toBe('META_131030');
+    expect(metaErrorLabel(new MetaApiError(400, 131030, null, null))).toBe(
+      'META_131030',
+    );
     expect(metaErrorLabel(new Error('x'))).toBe('META_SEND_FAILED');
   });
 
@@ -69,35 +75,54 @@ describe('Embedded Signup events', () => {
     data: { waba_id: '11111', phone_number_id: '22222' },
   });
 
-  it.each(['FINISH', 'FINISH_ONLY_WABA', 'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING'])(
-    'accepts %s',
-    (event) => {
-      expect(parseSignupEvent(JSON.stringify(finish(event)))).toEqual({
-        kind: 'finish',
-        wabaId: '11111',
-        phoneNumberId: '22222',
-      });
-    },
-  );
+  it.each([
+    'FINISH',
+    'FINISH_ONLY_WABA',
+    'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING',
+  ])('accepts %s', (event) => {
+    expect(parseSignupEvent(JSON.stringify(finish(event)))).toEqual({
+      kind: 'finish',
+      wabaId: '11111',
+      phoneNumberId: '22222',
+    });
+  });
 
   it('reports a finish with no number instead of waiting forever', () => {
     expect(
-      parseSignupEvent({ type: 'WA_EMBEDDED_SIGNUP', event: 'FINISH_ONLY_WABA', data: { waba_id: '1' } }),
+      parseSignupEvent({
+        type: 'WA_EMBEDDED_SIGNUP',
+        event: 'FINISH_ONLY_WABA',
+        data: { waba_id: '1' },
+      }),
     ).toEqual({ kind: 'missing-assets' });
   });
 
   it('separates a real error from a plain cancel', () => {
-    expect(parseSignupEvent({ type: 'WA_EMBEDDED_SIGNUP', event: 'CANCEL', data: { current_step: 'X' } })).toEqual({ kind: 'cancel' });
     expect(
-      parseSignupEvent({ type: 'WA_EMBEDDED_SIGNUP', event: 'CANCEL', data: { error_message: 'Bad', error_id: '524126' } }),
+      parseSignupEvent({
+        type: 'WA_EMBEDDED_SIGNUP',
+        event: 'CANCEL',
+        data: { current_step: 'X' },
+      }),
+    ).toEqual({ kind: 'cancel' });
+    expect(
+      parseSignupEvent({
+        type: 'WA_EMBEDDED_SIGNUP',
+        event: 'CANCEL',
+        data: { error_message: 'Bad', error_id: '524126' },
+      }),
     ).toEqual({ kind: 'error', message: 'Bad (Meta error 524126)' });
-    expect(parseSignupEvent({ type: 'WA_EMBEDDED_SIGNUP', event: 'ERROR' })?.kind).toBe('error');
+    expect(
+      parseSignupEvent({ type: 'WA_EMBEDDED_SIGNUP', event: 'ERROR' })?.kind,
+    ).toBe('error');
   });
 
   it('ignores other browser messages', () => {
     expect(parseSignupEvent('not json')).toBeNull();
     expect(parseSignupEvent({ type: 'OTHER', event: 'FINISH' })).toBeNull();
-    expect(parseSignupEvent({ type: 'WA_EMBEDDED_SIGNUP', event: 'SOMETHING_NEW' })).toBeNull();
+    expect(
+      parseSignupEvent({ type: 'WA_EMBEDDED_SIGNUP', event: 'SOMETHING_NEW' }),
+    ).toBeNull();
   });
 
   it('only trusts Meta origins', () => {
@@ -114,14 +139,21 @@ describe('webhook routing', () => {
   const a = { id: 'a', organization_id: 'org1', phone_number_id: '111' };
   const b = { id: 'b', organization_id: 'org1', phone_number_id: '222' };
   const c = { id: 'c', organization_id: 'org2', phone_number_id: '333' };
-  const onNumber = (phone: unknown) => ({ value: { metadata: { phone_number_id: phone } } });
+  const onNumber = (phone: unknown) => ({
+    value: { metadata: { phone_number_id: phone } },
+  });
 
   it('sends a message to the number that received it', () => {
-    expect(routeWebhookChange([a, b], onNumber('222'))).toEqual({ kind: 'number', connection: b });
+    expect(routeWebhookChange([a, b], onNumber('222'))).toEqual({
+      kind: 'number',
+      connection: b,
+    });
   });
 
   it('ignores a number with no live connection', () => {
-    expect(routeWebhookChange([a], onNumber('999'))).toEqual({ kind: 'ignore' });
+    expect(routeWebhookChange([a], onNumber('999'))).toEqual({
+      kind: 'ignore',
+    });
   });
 
   it('ignores everything when nothing is connected', () => {
@@ -130,36 +162,55 @@ describe('webhook routing', () => {
   });
 
   it('keeps account-level changes once per company', () => {
-    expect(routeWebhookChange([a, b, c], { field: 'x', value: { event: 'APPROVED' } })).toEqual({
+    expect(
+      routeWebhookChange([a, b, c], {
+        field: 'x',
+        value: { event: 'APPROVED' },
+      }),
+    ).toEqual({
       kind: 'account',
       organizationIds: ['org1', 'org2'],
     });
-    expect(routeWebhookChange([a], null)).toEqual({ kind: 'account', organizationIds: ['org1'] });
+    expect(routeWebhookChange([a], null)).toEqual({
+      kind: 'account',
+      organizationIds: ['org1'],
+    });
   });
 });
 
 describe('browser reply reading', () => {
   it('returns JSON replies unchanged', async () => {
-    const reply = new Response('{"message":"PIN is wrong","metaCode":133005}', { status: 424 });
-    expect(await readApiResponse(reply)).toEqual({ message: 'PIN is wrong', metaCode: 133005 });
+    const reply = new Response('{"message":"PIN is wrong","metaCode":133005}', {
+      status: 424,
+    });
+    expect(await readApiResponse(reply)).toEqual({
+      message: 'PIN is wrong',
+      metaCode: 133005,
+    });
   });
 
   it('turns a Cloudflare HTML page into a plain message', async () => {
-    const reply = new Response('<!DOCTYPE html><title>502: Bad gateway</title>', { status: 502 });
+    const reply = new Response(
+      '<!DOCTYPE html><title>502: Bad gateway</title>',
+      { status: 502 },
+    );
     const result = (await readApiResponse(reply)) as { message: string };
     expect(result.message).toContain('Try again');
     expect(result.message).not.toContain('<');
   });
 
   it('handles an empty reply', async () => {
-    const result = (await readApiResponse(new Response(''))) as { message: string };
+    const result = (await readApiResponse(new Response(''))) as {
+      message: string;
+    };
     expect(result.message).toContain('Try again');
   });
 });
 
 describe('statuses', () => {
   it('never uses a status Cloudflare replaces', async () => {
-    const { META_FAILURE_STATUS, INTERNAL_FAILURE_STATUS } = await import('./whatsapp-meta-error');
+    const { META_FAILURE_STATUS, INTERNAL_FAILURE_STATUS } =
+      await import('./whatsapp-meta-error');
     for (const status of [META_FAILURE_STATUS, INTERNAL_FAILURE_STATUS])
       expect([502, 504]).not.toContain(status);
   });

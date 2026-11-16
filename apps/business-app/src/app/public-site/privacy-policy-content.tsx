@@ -66,22 +66,22 @@ export function PrivacyPolicyContent() {
       <h2>How we use the information</h2>
       <p>
         We use this information to connect the business-selected Meta Page and
-        form, retrieve and organize enquiries, prevent duplicate imports,
-        route leads to the appropriate marketplace, calculate lead prices
-        using reported ad spend and the configured markup, and provide the
-        lead access purchased by a business. The Meta connection is used for
-        lead retrieval and related read-only ad-spend reporting; ProPulse does
-        not use it to create or edit advertising campaigns.
+        form, retrieve and organize enquiries, prevent duplicate imports, route
+        leads to the appropriate marketplace, calculate lead prices using
+        reported ad spend and the configured markup, and provide the lead access
+        purchased by a business. The Meta connection is used for lead retrieval
+        and related read-only ad-spend reporting; ProPulse does not use it to
+        create or edit advertising campaigns.
       </p>
 
       <h2>When lead information is shared</h2>
       <p>
-        Lead details are shown only to the business or businesses authorized
-        to access that lead through the ProPulse marketplace, including a
-        business that purchases lead access. We also use service providers
-        that host or secure ProPulse and process data for us under service
-        instructions. We do not make connected lead lists public or provide
-        them to general data brokers.
+        Lead details are shown only to the business or businesses authorized to
+        access that lead through the ProPulse marketplace, including a business
+        that purchases lead access. We also use service providers that host or
+        secure ProPulse and process data for us under service instructions. We
+        do not make connected lead lists public or provide them to general data
+        brokers.
       </p>
       <p>
         A business receiving a lead must use its information to respond to the
@@ -107,9 +107,9 @@ export function PrivacyPolicyContent() {
         <a href="mailto:info@propulsetechnologies.online">
           info@propulsetechnologies.online
         </a>
-        . We will review and respond to requests as applicable. Deletion may
-        not remove information a business has already received or records we
-        must retain.
+        . We will review and respond to requests as applicable. Deletion may not
+        remove information a business has already received or records we must
+        retain.
       </p>
 
       <h2>Business responsibilities</h2>
