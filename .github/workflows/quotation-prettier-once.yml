@@ -1,0 +1,33 @@
+name: Temporary quotation Prettier repair
+on:
+  push:
+    branches:
+      - fix/quotation-payment-prettier
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format only eight changed files with repository's pinned Prettier
+        run: |
+          pnpm exec prettier --write             apps/business-app/src/app/dashboard/quotations/construction-program-editor.tsx             apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts             apps/business-app/src/app/dashboard/quotations/studio.css             apps/business-app/src/app/dashboard/settings/construction-payment-defaults.tsx             packages/core/src/company-construction-defaults.test.ts             packages/core/src/company-construction-defaults.ts             packages/core/src/quotation-construction-program.test.ts             packages/core/src/quotation-construction-program.ts
+      - name: Commit formatting changes to this branch
+        run: |
+          git add --             apps/business-app/src/app/dashboard/quotations/construction-program-editor.tsx             apps/business-app/src/app/dashboard/quotations/studio-ui.test.ts             apps/business-app/src/app/dashboard/quotations/studio.css             apps/business-app/src/app/dashboard/settings/construction-payment-defaults.tsx             packages/core/src/company-construction-defaults.test.ts             packages/core/src/company-construction-defaults.ts             packages/core/src/quotation-construction-program.test.ts             packages/core/src/quotation-construction-program.ts
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Format quotation stage and payment files with Prettier"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
