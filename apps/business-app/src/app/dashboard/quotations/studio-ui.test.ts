@@ -1061,10 +1061,15 @@ describe('construction quotation schedule is managed from company settings',()=>
 describe('construction quotation snapshots use the current company payment stages',()=>{
  const editor=file('./payment-schedule-editor.tsx');
 
- it('refreshes editable draft quotes when Settings contains a different stage list',()=>{
+ it('copies configured company work into new or outdated editable quotation snapshots',()=>{
   expect(editor).toContain('const companySchedule=industry===\'construction\'&&floorNames.length&&defaultCompanyRows.length');
   expect(editor).toContain('const syncingCompanySchedule=Boolean(editable&&companySchedule?.length&&');
   expect(editor).toContain('JSON.stringify(storedRows)!==JSON.stringify(companySchedule)');
+  expect(editor).toContain('const savedWorkflow=visibleMilestoneFlow(initial.terms,initialRows,originalRequirements)');
+  expect(editor).toContain('const hasCompanyWorkDefaults=defaultCompanyRows.some(row=>(row.steps??[]).length>0)');
+  expect(editor).toContain('JSON.stringify(savedWorkflow)!==JSON.stringify(companyWorkSnapshot.flow)');
+  expect(editor).toContain('(!savedPlan||JSON.stringify(storedRows)!==JSON.stringify(companySchedule)||');
+  expect(editor).toContain('const inheritedWork=syncingCompanySchedule&&companyWorkSnapshot');
   expect(editor).toContain('if(!editable||industry!==\'construction\'||!syncingCompanySchedule');
   expect(editor).toContain('Updating this draft from the');
  });

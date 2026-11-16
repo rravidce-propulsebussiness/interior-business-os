@@ -80,17 +80,26 @@ export function PaymentScheduleEditor({
   const storedRows=readPlan(initial.terms,industry,editable,floorNames,defaultCompanyRows);
   const companySchedule=industry==='construction'&&floorNames.length&&defaultCompanyRows.length
     ?applyCompanyPaymentDefaults(suggestions(industry,floorNames),defaultCompanyRows):null;
-  const syncingCompanySchedule=Boolean(editable&&companySchedule?.length&&
-    JSON.stringify(storedRows)!==JSON.stringify(companySchedule));
-  const initialRows=syncingCompanySchedule?companySchedule!:storedRows;
+  const initialRows=companySchedule&&JSON.stringify(storedRows)!==JSON.stringify(companySchedule)
+    ?companySchedule:storedRows;
   const originalRequirements=savedStageRequirements(initial.terms);
-  const inheritedWork=syncingCompanySchedule&&defaultCompanyRows.some(row=>(row.steps??[]).length>0)
+  const savedWorkflow=visibleMilestoneFlow(initial.terms,initialRows,originalRequirements);
+  const hasCompanyWorkDefaults=defaultCompanyRows.some(row=>(row.steps??[]).length>0);
+  const companyWorkSnapshot=industry==='construction'&&hasCompanyWorkDefaults
     ?applyCompanyWorkDefaults(initialRows,defaultCompanyRows,{},true):null;
+  const workSnapshotNeedsSync=Boolean(companyWorkSnapshot&&
+    JSON.stringify(savedWorkflow)!==JSON.stringify(companyWorkSnapshot.flow));
+  // Drafts without a payment snapshot, or with missing/outdated company work,
+  // must copy the Settings template into their quotation before it is shown.
+  const syncingCompanySchedule=Boolean(editable&&companySchedule?.length&&
+    (!savedPlan||JSON.stringify(storedRows)!==JSON.stringify(companySchedule)||
+     workSnapshotNeedsSync));
+  const inheritedWork=syncingCompanySchedule&&companyWorkSnapshot
+    ?companyWorkSnapshot:null;
   const [rows, setRows] = useState<Milestone[]>(()=>initialRows);
   const [stageRequirements,setStageRequirements]=useState<StageRequirementsMap>(
     ()=>inheritedWork?.requirements??(syncingCompanySchedule?{}:originalRequirements));
-  const seededFlow=syncingCompanySchedule?{}:
-    visibleMilestoneFlow(initial.terms,initialRows,originalRequirements);
+  const seededFlow=syncingCompanySchedule?{}:savedWorkflow;
   const prefilledFlow=syncingCompanySchedule
     ?(inheritedWork?.flow??standardMilestoneWorkflow(initialRows,{}))
     :industry==='construction'&&!Object.keys(seededFlow).length&&editable
