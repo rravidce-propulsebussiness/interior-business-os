@@ -4,6 +4,7 @@ import { z } from 'zod';
  * and foundation run once; finish stages repeat for every quoted floor. */
 export const constructionStageKinds = [
   'preconstruction',
+  'design',
   'foundation',
   'slabs',
   'brickwork',
@@ -25,8 +26,9 @@ export const companyStageItem = z
 
 export const companyConstructionStage = z
   .object({
-    id: z.enum(constructionStageKinds),
+    id: z.string().regex(/^[a-z][a-z0-9-]{0,59}$/),
     name: z.string().trim().min(2).max(100),
+    description: z.string().trim().max(300).optional(),
     // Legacy saved templates may still contain this field. New templates derive
     // payment values from the quotation, never from company percentages.
     percent: z.coerce.number().finite().positive().max(100).optional(),
@@ -38,16 +40,14 @@ export const companyConstructionStage = z
 
 export const companyConstructionStages = z
   .array(companyConstructionStage)
-  .length(7)
+  .min(1)
+  .max(30)
   .superRefine((stages, ctx) => {
     const ids = stages.map((stage) => stage.id);
-    if (
-      new Set(ids).size !== 7 ||
-      constructionStageKinds.some((id) => !ids.includes(id))
-    )
+    if (new Set(ids).size !== stages.length)
       ctx.addIssue({
         code: 'custom',
-        message: 'All seven construction stages are required.',
+        message: 'Stage identifiers must be unique.',
       });
     const itemIds = new Set<string>();
     let itemCount = 0;
@@ -107,8 +107,41 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
       {
         id: 'payment-preconstruction',
         kind: 'payment',
-        title: 'Design advance payment',
+        title: 'Price freeze payment',
         days: 0,
+      },
+    ],
+  },
+  {
+    id: 'design',
+    name: 'Design',
+    description: 'Floor plans, structural design, MEP plans and approvals.',
+    repeatsPerFloor: false,
+    days: 14,
+    items: [
+      {
+        id: 'payment-design',
+        kind: 'payment',
+        title: 'Design payment',
+        days: 0,
+      },
+      {
+        id: 'design-floor-plan',
+        kind: 'work',
+        title: 'Floor plan approval',
+        days: 5,
+      },
+      {
+        id: 'design-structural',
+        kind: 'work',
+        title: 'Structural design approval',
+        days: 5,
+      },
+      {
+        id: 'design-mep',
+        kind: 'work',
+        title: 'Electrical and plumbing plans',
+        days: 4,
       },
     ],
   },
@@ -185,5 +218,70 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
         days: 0,
       },
     ],
+  },
+];
+
+export const defaultInteriorStages: CompanyConstructionStage[] = [
+  {
+    id: 'pre-design',
+    name: 'Pre-design',
+    description: 'Brief, measurements and scope confirmation.',
+    repeatsPerFloor: false,
+    days: 5,
+    items: [
+      {
+        id: 'interior-price-freeze',
+        kind: 'payment',
+        title: 'Price freeze',
+        days: 0,
+      },
+    ],
+  },
+  {
+    id: 'design',
+    name: 'Design',
+    description: 'Concept, layouts, 3D views and owner approvals.',
+    repeatsPerFloor: false,
+    days: 14,
+    items: [
+      {
+        id: 'interior-design-payment',
+        kind: 'payment',
+        title: 'Design payment',
+        days: 0,
+      },
+    ],
+  },
+  {
+    id: 'procurement',
+    name: 'Procurement',
+    description: 'Material ordering and delivery coordination.',
+    repeatsPerFloor: true,
+    days: 10,
+    items: [],
+  },
+  {
+    id: 'installation',
+    name: 'Installation',
+    description: 'Site execution and installation work.',
+    repeatsPerFloor: true,
+    days: 20,
+    items: [],
+  },
+  {
+    id: 'finishing',
+    name: 'Finishing',
+    description: 'Final finishes, snagging and quality checks.',
+    repeatsPerFloor: true,
+    days: 8,
+    items: [],
+  },
+  {
+    id: 'handover',
+    name: 'Handover',
+    description: 'Client walkthrough and completion sign-off.',
+    repeatsPerFloor: false,
+    days: 2,
+    items: [],
   },
 ];

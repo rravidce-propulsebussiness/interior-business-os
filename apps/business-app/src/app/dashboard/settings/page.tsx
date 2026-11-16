@@ -8,6 +8,7 @@ import { emptyAddress } from '@business-os/core/commercial';
 import {
   companyConstructionStages,
   defaultCompanyConstructionStages,
+  defaultInteriorStages,
 } from '@business-os/core/company-construction-defaults';
 import { createGstRepository } from '@business-os/database/gst';
 import { ActionForm } from '@business-os/ui/action-form';
@@ -192,12 +193,20 @@ export default async function SettingsPage({
       : Promise.resolve(null),
     tab === 'payments'
       ? client.rpc(
-          'organization_construction_payment_defaults_read' as never,
+          'organization_industry_workflows_read' as never,
           { p_org: context.organizationId } as never,
         )
       : Promise.resolve({ data: null, error: null }),
   ]);
   if (!org) notFound();
+  const workflowResult = constructionDefaultsResponse as {
+    data: unknown;
+    error: unknown;
+  };
+  const workflowTemplates =
+    workflowResult.data && typeof workflowResult.data === 'object'
+      ? (workflowResult.data as Record<string, unknown>)
+      : {};
   if (privateResponse.error || brandResponse.error)
     throw new Error('Settings could not load');
   const parsed = identitySchema.safeParse(privateResponse.data);
@@ -1113,30 +1122,46 @@ export default async function SettingsPage({
           <section className="us-card us-wide">
             <Header
               icon="♧"
-              title="Construction workflow settings"
-              detail="Set reusable work stages, durations and site checks once. New quotations copy this programme and calculate dates automatically."
+              title="Project workflow settings"
+              detail="Set reusable stages, durations and site checks for each industry. New quotations copy the matching workflow and calculate dates automatically."
             />
             <div
               className="us-payment-template-section"
               id="company-payment-stages"
             >
               <h3>Stages, durations & work sequence</h3>
-              {constructionDefaultsResponse.error ? (
+              {workflowResult.error ? (
                 <p className="us-info">
                   Company payment defaults are temporarily unavailable.
                 </p>
               ) : (
                 <ConstructionPaymentDefaults
                   canEdit={canEdit}
-                  initial={
-                    companyConstructionStages.safeParse(
-                      constructionDefaultsResponse.data,
-                    ).success
-                      ? companyConstructionStages.parse(
-                          constructionDefaultsResponse.data,
-                        )
-                      : defaultCompanyConstructionStages
-                  }
+                  industries={[
+                    { key: 'construction', name: 'Construction' },
+                    { key: 'interior', name: 'Interior' },
+                    ...Object.keys(workflowTemplates)
+                      .filter(
+                        (key) => !['construction', 'interior'].includes(key),
+                      )
+                      .map((key) => ({
+                        key,
+                        name: key
+                          .split('-')
+                          .map((part) => part[0]?.toUpperCase() + part.slice(1))
+                          .join(' '),
+                      })),
+                  ]}
+                  initial={Object.fromEntries(
+                    Object.entries(workflowTemplates).map(([key, value]) => [
+                      key,
+                      companyConstructionStages.safeParse(value).success
+                        ? companyConstructionStages.parse(value)
+                        : key === 'interior'
+                          ? defaultInteriorStages
+                          : defaultCompanyConstructionStages,
+                    ]),
+                  )}
                 />
               )}
             </div>

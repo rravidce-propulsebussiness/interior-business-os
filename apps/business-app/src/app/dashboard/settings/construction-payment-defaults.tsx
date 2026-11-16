@@ -1,13 +1,18 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import {
   type CompanyConstructionStage,
   type CompanyStageItem,
+  defaultCompanyConstructionStages,
+  defaultInteriorStages,
 } from '@business-os/core/company-construction-defaults';
-import { saveConstructionPaymentDefaults } from './payment-default-actions';
+import {
+  saveConstructionPaymentDefaults,
+  type DefaultPaymentState,
+} from './payment-default-actions';
 
-const initialState = { saved: false, message: '' };
+const initialState: DefaultPaymentState = { saved: false, message: '' };
 const stageDescriptions: Record<string, string> = {
   preconstruction: 'Price freeze, agreement, planning and design approvals.',
   foundation: 'Site preparation, excavation, footing and plinth work.',
@@ -23,22 +28,137 @@ const move = <T,>(values: T[], from: number, to: number) => {
   if (item) next.splice(to, 0, item);
   return next;
 };
+const defaultStages = (industry: string): CompanyConstructionStage[] => {
+  if (industry === 'construction')
+    return structuredClone(defaultCompanyConstructionStages);
+  if (industry === 'interior') return structuredClone(defaultInteriorStages);
+  const names = ['Planning', 'Delivery', 'Quality review'];
+  return names.map((name, index) => ({
+    id: `${industry}-${index + 1}`,
+    name,
+    description: '',
+    repeatsPerFloor: industry === 'interior' && index >= 2 && index <= 4,
+    days: index === 0 ? 5 : 10,
+    items:
+      index === 0 && industry === 'interior'
+        ? [
+            {
+              id: `${industry}-price-freeze`,
+              kind: 'payment' as const,
+              title: 'Price freeze',
+              days: 0,
+            },
+          ]
+        : [],
+  }));
+};
+const itemKinds: CompanyStageItem['kind'][] = [
+  'work',
+  'material',
+  'check',
+  'test',
+  'qc',
+  'payment',
+];
+const kindLabel = (kind: CompanyStageItem['kind']) =>
+  kind === 'qc'
+    ? 'QC'
+    : kind === 'check'
+      ? 'Site check'
+      : kind === 'payment'
+        ? 'Payment'
+        : kind[0]!.toUpperCase() + kind.slice(1);
+
+function ItemKindPicker({
+  value,
+  disabled,
+  onChange,
+  label,
+}: {
+  value: CompanyStageItem['kind'];
+  disabled?: boolean;
+  onChange: (value: CompanyStageItem['kind']) => void;
+  label: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="us-kind-picker">
+      <button
+        type="button"
+        className="us-kind-trigger"
+        aria-label={label}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        disabled={disabled}
+        onClick={() => setOpen((shown) => !shown)}
+      >
+        {kindLabel(value)} <span aria-hidden="true">⌄</span>
+      </button>
+      {open && (
+        <div className="us-kind-menu" role="listbox" aria-label={label}>
+          {itemKinds.map((kind) => (
+            <button
+              key={kind}
+              type="button"
+              role="option"
+              aria-selected={value === kind}
+              onClick={() => {
+                onChange(kind);
+                setOpen(false);
+              }}
+            >
+              <span>{kindLabel(kind)}</span>
+              {value === kind && <span aria-hidden="true">✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function ConstructionPaymentDefaults({
   canEdit,
   initial,
+  industries,
 }: {
   canEdit: boolean;
-  initial: CompanyConstructionStage[];
+  initial: Record<string, CompanyConstructionStage[]>;
+  industries: { key: string; name: string }[];
 }) {
   const [state, action, pending] = useActionState(
     saveConstructionPaymentDefaults,
     initialState,
   );
-  const [stages, setStages] = useState(initial);
+  const [industryKey, setIndustryKey] = useState(
+    industries[0]?.key ?? 'construction',
+  );
+  const [knownIndustries, setKnownIndustries] = useState(industries);
+  const [savedByIndustry, setSavedByIndustry] = useState(initial);
+  const [stages, setStages] = useState(
+    savedByIndustry[industryKey] ?? defaultStages(industryKey),
+  );
+  const [newIndustryName, setNewIndustryName] = useState('');
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [draftKinds, setDraftKinds] = useState<
+    Record<string, CompanyStageItem['kind']>
+  >({});
   const [expandedStage, setExpandedStage] = useState<string | null>('slabs');
-  const dirty = JSON.stringify(stages) !== JSON.stringify(initial);
+  const savedStages =
+    savedByIndustry[industryKey] ?? defaultStages(industryKey);
+  const dirty = JSON.stringify(stages) !== JSON.stringify(savedStages);
+  useEffect(() => {
+    if (state.saved && state.industryKey && state.savedRows)
+      setSavedByIndustry((all) => ({
+        ...all,
+        [state.industryKey!]: state.savedRows!,
+      }));
+  }, [state.industryKey, state.saved, state.savedRows]);
+  const switchIndustry = (key: string) => {
+    setIndustryKey(key);
+    setStages(savedByIndustry[key] ?? defaultStages(key));
+    setExpandedStage(null);
+  };
   const patchStage = (
     index: number,
     patch: Partial<CompanyConstructionStage>,
@@ -66,15 +186,66 @@ export function ConstructionPaymentDefaults({
   return (
     <form action={action} className="us-company-stage-editor">
       <input type="hidden" name="rows" value={JSON.stringify(stages)} />
+      <input type="hidden" name="industryKey" value={industryKey} />
+      <div
+        className="us-workflow-industries"
+        role="tablist"
+        aria-label="Industry workflow"
+      >
+        {knownIndustries.map((industry) => (
+          <button
+            key={industry.key}
+            type="button"
+            role="tab"
+            aria-selected={industry.key === industryKey}
+            className={industry.key === industryKey ? 'is-active' : ''}
+            onClick={() => switchIndustry(industry.key)}
+          >
+            {industry.name}
+          </button>
+        ))}
+        {canEdit && (
+          <div className="us-add-industry">
+            <input
+              aria-label="New industry"
+              value={newIndustryName}
+              onChange={(event) => setNewIndustryName(event.target.value)}
+              placeholder="Add industry"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                const name = newIndustryName.trim();
+                const key = name
+                  .toLowerCase()
+                  .replace(/[^a-z0-9]+/g, '-')
+                  .replace(/^-|-$/g, '')
+                  .slice(0, 60);
+                if (
+                  !name ||
+                  !key ||
+                  knownIndustries.some((item) => item.key === key)
+                )
+                  return;
+                setKnownIndustries((all) => [...all, { key, name }]);
+                setNewIndustryName('');
+                switchIndustry(key);
+              }}
+            >
+              + Add industry
+            </button>
+          </div>
+        )}
+      </div>
       <div className="us-workflow-intro">
         <span className="us-workflow-saved">
           {dirty ? '• Unsaved changes' : '✓ Saved'}
         </span>
         <p className="us-info">
-          Stages marked per floor repeat automatically for every quoted floor.
-          Pre-construction and foundation run once per project. Work items,
-          payment markers, checks, QC guides and durations are copied to new
-          quotations.
+          Configure a separate reusable workflow for each industry. Mark a stage
+          to repeat for every quoted floor; one-time stages run once per
+          project. Work items, payment markers, checks, QC guides and durations
+          are copied to new quotations.
         </p>
       </div>
       <div className="us-project-calendar">
@@ -126,12 +297,33 @@ export function ConstructionPaymentDefaults({
                   {stage.repeatsPerFloor ? 'REPEAT FOR EACH FLOOR' : 'ONE TIME'}
                 </span>
                 <p className="us-stage-description">
-                  {stageDescriptions[stage.id]}
+                  <textarea
+                    aria-label="Stage description"
+                    value={
+                      stage.description ?? stageDescriptions[stage.id] ?? ''
+                    }
+                    disabled={!canEdit}
+                    placeholder="Describe this stage"
+                    onChange={(event) =>
+                      patchStage(index, { description: event.target.value })
+                    }
+                  />
                   {stage.repeatsPerFloor && (
                     <span> · Automatically repeats for each quoted floor</span>
                   )}
                 </p>
               </div>
+              <label className="us-repeat-toggle">
+                <input
+                  type="checkbox"
+                  checked={stage.repeatsPerFloor}
+                  disabled={!canEdit}
+                  onChange={(event) =>
+                    patchStage(index, { repeatsPerFloor: event.target.checked })
+                  }
+                />{' '}
+                Repeats per floor
+              </label>
               <label className="us-stage-duration">
                 Stage duration
                 <input
@@ -162,6 +354,17 @@ export function ConstructionPaymentDefaults({
               >
                 {expandedStage === stage.id ? '⌃' : '⌄'}
               </button>
+              {canEdit && (
+                <button
+                  className="us-stage-remove"
+                  type="button"
+                  onClick={() =>
+                    setStages((rows) => rows.filter((_, i) => i !== index))
+                  }
+                >
+                  Remove stage
+                </button>
+              )}
             </header>
             <p className="us-stage-total">
               Stage total: {totalDays} days · {workItems.length} work/check
@@ -233,36 +436,14 @@ export function ConstructionPaymentDefaults({
                           if (event.key === 'Enter') event.currentTarget.blur();
                         }}
                       />
-                      <select
+                      <ItemKindPicker
                         value={item.kind}
                         disabled={!canEdit}
-                        aria-label="Item type"
-                        onChange={(event) =>
-                          patchItem(index, itemIndex, {
-                            kind: event.target
-                              .value as CompanyStageItem['kind'],
-                          })
+                        label="Item type"
+                        onChange={(kind) =>
+                          patchItem(index, itemIndex, { kind })
                         }
-                      >
-                        {[
-                          'work',
-                          'material',
-                          'check',
-                          'test',
-                          'qc',
-                          'payment',
-                        ].map((kind) => (
-                          <option key={kind} value={kind}>
-                            {kind === 'qc'
-                              ? 'QC'
-                              : kind === 'check'
-                                ? 'Site check'
-                                : kind === 'payment'
-                                  ? 'Payment'
-                                  : kind[0]!.toUpperCase() + kind.slice(1)}
-                          </option>
-                        ))}
-                      </select>
+                      />
                       <input
                         className="us-stage-item-title"
                         aria-label="Work item title"
@@ -336,24 +517,13 @@ export function ConstructionPaymentDefaults({
                 </div>
                 {canEdit && (
                   <div className="us-company-stage-add">
-                    <select
-                      id={`kind-${stage.id}`}
-                      defaultValue="work"
-                      aria-label="New item type"
-                    >
-                      {[
-                        'work',
-                        'material',
-                        'check',
-                        'test',
-                        'qc',
-                        'payment',
-                      ].map((kind) => (
-                        <option key={kind} value={kind}>
-                          {kind}
-                        </option>
-                      ))}
-                    </select>
+                    <ItemKindPicker
+                      value={draftKinds[stage.id] ?? 'work'}
+                      label="New item type"
+                      onChange={(kind) =>
+                        setDraftKinds((all) => ({ ...all, [stage.id]: kind }))
+                      }
+                    />
                     <input
                       value={drafts[stage.id] ?? ''}
                       onChange={(event) =>
@@ -367,9 +537,7 @@ export function ConstructionPaymentDefaults({
                     <button
                       type="button"
                       onClick={() => {
-                        const select = document.getElementById(
-                          `kind-${stage.id}`,
-                        ) as HTMLSelectElement | null;
+                        const kind = draftKinds[stage.id] ?? 'work';
                         const title = drafts[stage.id]?.trim();
                         if (!title) return;
                         patchStage(index, {
@@ -377,10 +545,9 @@ export function ConstructionPaymentDefaults({
                             ...stage.items,
                             {
                               id: crypto.randomUUID(),
-                              kind: (select?.value ??
-                                'work') as CompanyStageItem['kind'],
+                              kind,
                               title,
-                              days: select?.value === 'payment' ? 0 : 1,
+                              days: kind === 'payment' ? 0 : 1,
                             },
                           ],
                         });
@@ -396,8 +563,34 @@ export function ConstructionPaymentDefaults({
           </section>
         );
       })}
+      {canEdit && stages.length < 30 && (
+        <button
+          className="us-stage-add"
+          type="button"
+          onClick={() => {
+            const id = `stage-${crypto.randomUUID().slice(0, 8)}`;
+            const stage: CompanyConstructionStage = {
+              id,
+              name: 'New stage',
+              description: '',
+              repeatsPerFloor: false,
+              days: 1,
+              items: [],
+            };
+            setStages((rows) => [...rows, stage]);
+            setExpandedStage(id);
+          }}
+        >
+          + Add stage
+        </button>
+      )}
       <footer className="us-company-stage-save">
-        <strong>{stages.length} reusable construction stages</strong>
+        <strong>
+          {stages.length} reusable{' '}
+          {knownIndustries.find((item) => item.key === industryKey)?.name ??
+            'industry'}{' '}
+          stages
+        </strong>
         {canEdit && (
           <button
             className="us-button-primary"

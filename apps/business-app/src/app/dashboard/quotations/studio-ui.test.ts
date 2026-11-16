@@ -903,7 +903,7 @@ describe('streamlined quote, terms and payment Studio', () => {
     const payments = file('./payment-schedule-editor.tsx');
     const program = file('./construction-program-editor.tsx');
     const settingsCss = file('../settings/settings.css');
-    expect(page).toContain('organization_construction_payment_defaults_read');
+    expect(page).toContain('organization_industry_workflow_read');
     expect(page).toContain(
       'companyDefaults={companyPayments.error ? [] : companyPayments.data}',
     );
@@ -1118,8 +1118,8 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
     expect(section).not.toContain("Payment methods',href:");
     expect(section).not.toContain('Invoices & stage collections');
   });
-  it('edits a reusable seven-stage programme with ordered, timed work and guides', () => {
-    expect(paymentSettings).toContain('Construction workflow settings');
+  it('edits industry-specific stage programmes with timed work and guides', () => {
+    expect(paymentSettings).toContain('Project workflow settings');
     expect(stageEditor).toContain('REPEAT FOR EACH FLOOR');
     expect(stageEditor).toContain('ONE TIME');
     expect(stageEditor).toContain('Stage duration');
@@ -1130,6 +1130,8 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
     expect(stageEditor).toContain('+ Add guide');
     expect(stageEditor).toContain('Guide video URL');
     expect(stageEditor).toContain('Save workflow settings');
+    expect(stageEditor).toContain('+ Add stage');
+    expect(stageEditor).toContain('Add industry');
     expect(stageEditor).not.toContain('Payment share');
   });
   it('does not double number the work items', () => {

@@ -218,13 +218,26 @@ function GenericPaymentSchedule({ total, currency, editable, initial }: Props) {
 }
 
 export function PaymentScheduleEditor(props: Props) {
-  if (props.industry === 'construction')
+  const hasCompanyWorkflow =
+    Array.isArray(props.companyDefaults) && props.companyDefaults.length > 0;
+  if (
+    props.industry === 'construction' ||
+    props.industry === 'interior' ||
+    hasCompanyWorkflow
+  )
     return (
       <ConstructionProgramEditor
         total={props.total}
         currency={props.currency}
         editable={props.editable}
-        floorNames={props.floorNames ?? []}
+        floorNames={
+          props.floorNames?.length
+            ? props.floorNames
+            : props.industry === 'construction'
+              ? []
+              : ['Project']
+        }
+        industry={props.industry}
         companyDefaults={props.companyDefaults}
         initial={{
           revision_id: props.initial.revision_id,

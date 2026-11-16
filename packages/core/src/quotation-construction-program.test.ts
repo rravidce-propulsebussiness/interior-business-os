@@ -12,7 +12,7 @@ describe('reusable construction stage programme', () => {
   it('keeps one-time and per-floor stages with payment markers instead of fixed shares', () => {
     expect(
       companyConstructionStages.parse(defaultCompanyConstructionStages),
-    ).toHaveLength(7);
+    ).toHaveLength(8);
     expect(
       defaultCompanyConstructionStages
         .filter((stage) => stage.repeatsPerFloor)

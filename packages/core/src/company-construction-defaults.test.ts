@@ -8,12 +8,12 @@ describe('company construction stage templates', () => {
   it('has one-time pre-construction and foundation plus reusable floor stages', () => {
     expect(
       companyConstructionStages.parse(defaultCompanyConstructionStages),
-    ).toHaveLength(7);
+    ).toHaveLength(8);
     expect(
       defaultCompanyConstructionStages
         .filter((stage) => !stage.repeatsPerFloor)
         .map((stage) => stage.id),
-    ).toEqual(['preconstruction', 'foundation']);
+    ).toEqual(['preconstruction', 'design', 'foundation']);
     expect(
       defaultCompanyConstructionStages
         .filter((stage) => stage.repeatsPerFloor)
@@ -35,7 +35,7 @@ describe('company construction stage templates', () => {
     ).toBe(true);
   });
 
-  it('accepts legacy shares, rejects incomplete stages and unsafe guide links', () => {
+  it('accepts legacy shares and editable stage counts, rejects duplicate IDs and unsafe guide links', () => {
     expect(
       companyConstructionStages.safeParse(
         defaultCompanyConstructionStages.map((stage, index) =>
@@ -44,9 +44,10 @@ describe('company construction stage templates', () => {
       ).success,
     ).toBe(true);
     expect(
-      companyConstructionStages.safeParse(
-        defaultCompanyConstructionStages.slice(1),
-      ).success,
+      companyConstructionStages.safeParse([
+        ...defaultCompanyConstructionStages,
+        defaultCompanyConstructionStages[0]!,
+      ]).success,
     ).toBe(false);
     const withUnsafeGuide = defaultCompanyConstructionStages.map(
       (stage, index) =>

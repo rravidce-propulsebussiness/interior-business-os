@@ -3,12 +3,18 @@ import { revalidatePath } from 'next/cache';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
 import { companyConstructionStages } from '@business-os/core/company-construction-defaults';
 
-export type DefaultPaymentState = { saved: boolean; message: string };
+export type DefaultPaymentState = {
+  saved: boolean;
+  message: string;
+  industryKey?: string;
+  savedRows?: import('@business-os/core/company-construction-defaults').CompanyConstructionStage[];
+};
 export async function saveConstructionPaymentDefaults(
   _previous: DefaultPaymentState,
   form: FormData,
 ): Promise<DefaultPaymentState> {
   const raw = form.get('rows');
+  const industryKey = form.get('industryKey');
   if (typeof raw !== 'string' || raw.length > 300000)
     return { saved: false, message: 'Invalid payment schedule.' };
   let payload: unknown;
@@ -23,6 +29,11 @@ export async function saveConstructionPaymentDefaults(
       saved: false,
       message: validated.error.issues[0]?.message ?? 'Invalid milestones',
     };
+  if (
+    typeof industryKey !== 'string' ||
+    !/^[a-z][a-z0-9-]{0,59}$/.test(industryKey)
+  )
+    return { saved: false, message: 'Choose a valid industry workflow.' };
   try {
     const context = await activeOrganization();
     if (!context)
@@ -33,9 +44,10 @@ export async function saveConstructionPaymentDefaults(
       'organization.manage',
     );
     const { error } = await client.rpc(
-      'organization_construction_payment_defaults_save' as never,
+      'organization_industry_workflow_save' as never,
       {
         p_org: context.organizationId,
+        p_industry: industryKey,
         p_rows: validated.data,
       } as never,
     );
@@ -48,7 +60,9 @@ export async function saveConstructionPaymentDefaults(
     return {
       saved: true,
       message:
-        'Construction stages, days, payment markers and site guides saved.',
+        'Industry stages, durations, payment markers and site guides saved.',
+      industryKey,
+      savedRows: validated.data,
     };
   } catch {
     return {

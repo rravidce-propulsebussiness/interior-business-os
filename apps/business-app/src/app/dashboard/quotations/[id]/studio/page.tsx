@@ -85,13 +85,10 @@ export default async function QuotationStudio({
 
   const industry = allIndustries.find((row) => row.id === project.industry_id);
   const industryKey = industry?.key ?? 'construction';
-  const companyPayments =
-    industryKey === 'construction'
-      ? await s.client.rpc(
-          'organization_construction_payment_defaults_read' as never,
-          { p_org: s.org } as never,
-        )
-      : { data: [], error: null };
+  const companyPayments = await s.client.rpc(
+    'organization_industry_workflow_read' as never,
+    { p_org: s.org, p_industry: industryKey } as never,
+  );
   const mode =
     query.mode === 'custom' || query.mode === 'pdf'
       ? query.mode
