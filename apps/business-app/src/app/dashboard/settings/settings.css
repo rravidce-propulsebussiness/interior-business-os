@@ -335,7 +335,7 @@
 .us-master form > label:has(textarea) {
   grid-column: 1/-1;
 }
-.us-master form button[type="submit"] {
+.us-master form button[type='submit'] {
   grid-column: 1/-1;
   background: #fb5a19;
   color: white;
@@ -349,7 +349,7 @@
   display: grid;
   gap: 16px;
 }
-.us-invoice-form button[type="submit"] {
+.us-invoice-form button[type='submit'] {
   background: #fb5a19;
   color: #fff;
   border-radius: 9px;
@@ -954,12 +954,12 @@ a.ush-tile:focus-visible {
     gap: 11px;
   }
   .us-field:has(textarea),
-  .us-field:has(input[name="tradeName"]),
-  .us-field:has(input[name="businessType"]),
-  .us-field:has(input[name="email"]),
-  .us-field:has(input[name="website"]),
-  .us-field:has(input[name="bankAccount"]),
-  .us-field:has(input[name="bankHolder"]) {
+  .us-field:has(input[name='tradeName']),
+  .us-field:has(input[name='businessType']),
+  .us-field:has(input[name='email']),
+  .us-field:has(input[name='website']),
+  .us-field:has(input[name='bankAccount']),
+  .us-field:has(input[name='bankHolder']) {
     grid-column: 1/-1;
   }
   .us-card {
@@ -1116,10 +1116,9 @@ a.ush-tile:focus-visible {
 }
 .us-company-stage-heading {
   display: grid;
-  grid-template-columns: 24px 38px minmax(250px, 1fr) minmax(
-      145px,
-      auto
-    ) 150px 84px;
+  grid-template-columns:
+    24px 38px minmax(250px, 1fr) minmax(145px, auto)
+    150px 84px;
   gap: 10px;
   align-items: center;
 }
@@ -1395,7 +1394,7 @@ a.ush-tile:focus-visible {
   font-size: 12px;
   cursor: pointer;
 }
-.us-kind-menu button[aria-selected="true"],
+.us-kind-menu button[aria-selected='true'],
 .us-kind-menu button:hover {
   background: #fff2e9;
   color: #a64e1c;
