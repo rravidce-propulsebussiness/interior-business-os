@@ -322,7 +322,7 @@ export async function POST(
             (row) =>
               row.name.replaceAll('|', '-') +
               '|' +
-              Number(row.percent).toFixed(2),
+              Number(row.percent).toFixed(8),
           )
           .join('\n') +
         '\n[/STAGE_PAYMENT_PLAN]';
