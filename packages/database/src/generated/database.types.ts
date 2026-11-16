@@ -12714,18 +12714,6 @@ export interface Database {
         Args: { p_org: string; p_rows: Json };
         Returns: undefined;
       };
-      organization_industry_workflow_read: {
-        Args: { p_org: string; p_industry: string };
-        Returns: Json;
-      };
-      organization_industry_workflow_save: {
-        Args: { p_org: string; p_industry: string; p_rows: Json };
-        Returns: undefined;
-      };
-      organization_industry_workflows_read: {
-        Args: { p_org: string };
-        Returns: Json;
-      };
       organization_context: {
         Args: { p_organization_id: string };
         Returns: Json;
@@ -12737,6 +12725,18 @@ export interface Database {
       organization_identity_settings_save: {
         Args: { p_org: string; p_input: Json };
         Returns: undefined;
+      };
+      organization_industry_workflow_read: {
+        Args: { p_org: string; p_industry: string };
+        Returns: Json;
+      };
+      organization_industry_workflow_save: {
+        Args: { p_org: string; p_industry: string; p_rows: Json };
+        Returns: undefined;
+      };
+      organization_industry_workflows_read: {
+        Args: { p_org: string };
+        Returns: Json;
       };
       owner_test_data_reset_execute: {
         Args: { p_org: string; p_phrase: string; p_signature: string };
