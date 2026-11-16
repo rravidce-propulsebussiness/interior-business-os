@@ -1053,14 +1053,16 @@ a.ush-tile:focus-visible {
   color: #263752;
 }
 .us-company-stage-card {
-  padding: 14px 16px;
+  padding: 7px 14px;
   border: 1px solid #ead7ca;
-  border-radius: 16px;
+  border-radius: 15px;
   background: #fffaf7;
 }
 .us-company-stage-heading {
   display: grid;
-  grid-template-columns: 24px 38px minmax(0, 1fr) 170px 34px;
+  grid-template-columns:
+    24px 38px minmax(190px, 0.85fr) auto minmax(260px, 1.5fr)
+    210px 34px;
   gap: 10px;
   align-items: center;
 }
@@ -1085,23 +1087,20 @@ a.ush-tile:focus-visible {
 .us-stage-number {
   display: grid;
   place-items: center;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   background: #ffeadb;
   color: #a64718;
   font-weight: 800;
 }
 .us-company-stage-title {
-  display: grid;
-  grid-template-columns: minmax(150px, auto) auto minmax(160px, 1fr);
-  gap: 12px;
-  align-items: center;
-  min-width: 0;
+  display: contents;
 }
 .us-company-stage-title > input {
-  min-height: 40px;
-  padding: 8px 12px !important;
+  min-height: 38px;
+  width: 100%;
+  padding: 7px 11px !important;
   border-radius: 10px !important;
   font-size: 15px;
   font-weight: 800;
@@ -1116,6 +1115,7 @@ a.ush-tile:focus-visible {
   font-weight: 850;
   letter-spacing: 0.03em;
   white-space: nowrap;
+  justify-self: start;
 }
 .us-stage-once {
   background: #e8f1ff;
@@ -1145,9 +1145,10 @@ a.ush-tile:focus-visible {
 }
 .us-stage-duration {
   display: grid;
-  grid-template-columns: auto 76px auto;
+  grid-template-columns: max-content 76px max-content;
   gap: 7px;
   align-items: center;
+  white-space: nowrap;
   color: #77675f;
   font-size: 11px;
   font-weight: 700;
@@ -1172,7 +1173,7 @@ a.ush-tile:focus-visible {
   font-size: 11px;
 }
 .us-stage-description {
-  grid-column: 3;
+  grid-column: 5;
   grid-row: 1;
   margin: 0;
   color: #64758d;
@@ -1180,15 +1181,14 @@ a.ush-tile:focus-visible {
   line-height: 1.4;
 }
 .us-stage-description span {
-  color: #a44c20;
-  font-weight: 700;
+  display: none;
 }
 .us-stage-items-heading {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 8px 16px;
-  margin: 12px 0 8px 68px;
+  margin: 10px 0 7px 60px;
   color: #44342c;
   font-size: 13px;
 }
@@ -1207,7 +1207,7 @@ a.ush-tile:focus-visible {
 .us-company-stage-items {
   display: grid;
   gap: 0;
-  margin: 0 0 0 68px;
+  margin: 0 0 0 60px;
   overflow: hidden;
   border: 1px solid #e8ddd5;
   border-radius: 10px;
@@ -1300,20 +1300,37 @@ a.ush-tile:focus-visible {
   border-radius: 10px;
 }
 .us-company-stage-add {
-  display: flex;
-  gap: 10px;
-  margin: 10px 0 0 68px;
+  display: grid;
+  grid-template-columns: 145px minmax(0, 1fr) minmax(112px, auto);
+  gap: 9px;
+  margin: 9px 0 0 60px;
+  align-items: center;
+}
+.us-company-stage-add select {
+  width: 145px;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid #e8dcd3;
+  border-radius: 9px;
+  background: #fff;
+  color: #28344a;
+  font-size: 12px;
 }
 .us-company-stage-add input {
-  flex: 1;
+  width: 100%;
+  min-height: 38px;
+  padding: 8px 10px;
+  font-size: 12px;
 }
 .us-company-stage-add button {
+  min-height: 38px;
   border: 1px solid #f1c6ae;
   border-radius: 10px;
   padding: 9px 14px;
   background: #fff4ec;
   color: #a64718;
   font-weight: 700;
+  white-space: nowrap;
 }
 .us-company-stage-save {
   display: flex;
@@ -1333,9 +1350,14 @@ a.ush-tile:focus-visible {
     grid-template-columns: 24px 38px minmax(0, 1fr) 38px;
   }
   .us-company-stage-title {
+    display: grid;
     grid-column: 3;
+    grid-row: 1;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 7px;
+  }
+  .us-company-stage-title > input {
+    grid-column: 1 / -1;
   }
   .us-stage-description {
     grid-column: 1 / -1;
@@ -1347,7 +1369,8 @@ a.ush-tile:focus-visible {
   }
   .us-stage-duration {
     grid-column: 3;
-    grid-template-columns: auto minmax(60px, 90px) auto;
+    grid-row: 2;
+    grid-template-columns: max-content minmax(60px, 90px) max-content;
   }
   .us-stage-toggle {
     grid-column: 4;
@@ -1389,6 +1412,13 @@ a.ush-tile:focus-visible {
   .us-company-stage-items,
   .us-company-stage-add {
     margin-left: 0;
+  }
+  .us-company-stage-add {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .us-company-stage-add select {
+    grid-column: 1 / -1;
+    width: 100%;
   }
   .us-company-stage-add input {
     min-width: 100%;
