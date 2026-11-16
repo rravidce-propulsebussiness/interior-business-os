@@ -249,7 +249,7 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
  const button=(text:string,onClick:()=>void,disabled=false)=><button type="button" disabled={disabled} onClick={onClick}>{text}</button>;
  return <div className="qs-one-flow">
   <div className="qs-one-flow-intro"><strong>{'Stage '+(paymentIndex+1)+' · Work sequence'}</strong>
-   <small>Existing saved work is retained. Type the next activity and add it in order.</small>
+   <small>{editable?'Existing saved work is retained. Type the next activity and add it in order.':'Work sequence managed in Settings.'}</small>
   </div>
   {editable&&<details className="qs-one-flow-area-picker">
    <summary>Advanced · Change underlying construction stage mapping</summary>
@@ -262,14 +262,14 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
      <option key={value} value={value}>{label(value)}</option>)}
    </select>
   </details>}
-  {preservedReports.length>0&&<details className="qs-one-flow-advanced qs-one-flow-reports">
+  {editable&&preservedReports.length>0&&<details className="qs-one-flow-advanced qs-one-flow-reports">
    <summary>Previously saved reports & evidence ({preservedReports.length})</summary>
    <ul>{preservedReports.map((item,index)=><li key={item.area+'-'+index}>
     {item.report} <small>({label(item.area)})</small>
    </li>)}</ul>
    <small>These reports are retained in the quotation and project record.</small>
   </details>}
-  {catalog.length>0&&<details className="qs-one-flow-catalog">
+  {editable&&catalog.length>0&&<details className="qs-one-flow-catalog">
    <summary>Existing construction work, materials, checks &amp; reports ({catalog.length})</summary>
    <p>These are the original standard items or saved quotation items, not deleted data.
     Search or tap Add to place any item into the sequence without retyping.</p>
@@ -286,7 +286,7 @@ export function MilestoneWorkflowBuilder({paymentIndex,paymentName,steps,codes,a
     </li>)}</ul>
    {filteredCatalog.length>45&&<small>Showing 45 items. Search to find more.</small>}
   </details>}
-  {steps.length===0&&<p className="qs-one-flow-empty">Type a new work item using + Add, or choose an existing one from the library above. Your old standard item names are still available.</p>}
+  {steps.length===0&&<p className="qs-one-flow-empty">{editable?'Type a new work item using + Add, or choose an existing one from the library above. Your old standard item names are still available.':'No work items are configured for this stage in Settings.'}</p>}
   {steps.length>8&&<button type="button" className="qs-one-flow-expand"
    onClick={()=>setShowAllWork(!showAllWork)}>
    {showAllWork?'Show first 8 items':'Show all '+steps.length+' default & saved steps'}
