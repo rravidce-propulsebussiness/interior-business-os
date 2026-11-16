@@ -18,11 +18,27 @@ describe('company construction defaults vs quotation snapshot',()=>{
   expect(quote[1]?.stageCodes).toEqual(['FOUNDATION','PLINTH']);
   expect(source[1]?.percent).toBe('90');
  });
- it('never overwrites suggested floor payments if stage count differs',()=>{
-  const source=[{name:'Ground RCC',percent:'100',stageCodes:['RCC/GROUND']}];
-  expect(applyCompanyPaymentDefaults(source,[
-   {name:'Advance',percent:20},{name:'Foundation',percent:80},
-  ])).toEqual(source);
+ it('uses all configured company milestones even when the generated floor plan has a different row count',()=>{
+  const source=proposedConstructionPayments(['Ground','First','Second']);
+  const defaults=companyConstructionPaymentRows.parse([
+   {name:'Planning',percent:10,areas:['PRECONSTRUCTION','DESIGN']},
+   {name:'Foundation',percent:18,areas:['SITE_PREP','FOUNDATION','PLINTH']},
+   {name:'Slab work',percent:27,areas:['RCC']},
+   {name:'Masonry',percent:15,areas:['MASONRY']},
+   {name:'Inside plaster',percent:7,areas:['INTERNAL_PLASTER']},
+   {name:'Outer plaster',percent:5,areas:['EXTERNAL_PLASTER']},
+   {name:'Plumbing and painting',percent:8,areas:['PLUMBING_PAINT']},
+   {name:'Tiles',percent:6,areas:['TILES']},
+   {name:'Doors',percent:4,areas:['DOORS']},
+  ]);
+  const quote=applyCompanyPaymentDefaults(source,defaults);
+  expect(quote).toHaveLength(9);
+  expect(quote.map(row=>row.name)).toEqual(defaults.map(row=>row.name));
+  expect(quote.map(row=>row.percent)).toEqual(defaults.map(row=>String(row.percent)));
+  expect(quote[2]?.stageCodes).toEqual(source.flatMap(row=>row.stageCodes)
+   .filter(code=>code.startsWith('RCC/')));
+  expect(quote[3]?.stageCodes).toEqual(source.flatMap(row=>row.stageCodes)
+   .filter(code=>code.startsWith('MASONRY/')));
  });
  it('rejects total other than 100%',()=>{
   expect(companyConstructionPaymentRows.safeParse([
