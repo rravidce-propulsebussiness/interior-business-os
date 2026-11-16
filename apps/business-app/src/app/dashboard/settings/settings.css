@@ -1117,8 +1117,8 @@ a.ush-tile:focus-visible {
 .us-company-stage-heading {
   display: grid;
   grid-template-columns:
-    24px 38px minmax(250px, 1fr) minmax(145px, auto)
-    150px 84px;
+    24px 38px minmax(220px, 1fr) minmax(132px, max-content)
+    minmax(190px, max-content) 74px;
   gap: 10px;
   align-items: center;
 }
@@ -1505,7 +1505,7 @@ a.ush-tile:focus-visible {
   gap: 16px;
   padding: 10px 2px;
 }
-@media (max-width: 760px) {
+@media (max-width: 1024px) {
   .us-workflow-intro {
     grid-template-columns: 1fr;
   }
@@ -1569,6 +1569,7 @@ a.ush-tile:focus-visible {
   }
   .us-repeat-toggle {
     grid-column: 3 / 5;
+    white-space: nowrap;
     grid-row: 3;
   }
   .us-stage-toggle {
