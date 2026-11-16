@@ -11,7 +11,7 @@ test('public Business App home shows guest navigation only to anonymous visitors
     page.getByRole('link', { name: 'Sign in', exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: 'Start Your Business', exact: true }),
+    page.getByRole('link', { name: 'Start Your Business', exact: true }).first(),
   ).toBeVisible();
   await expect(page.getByRole('heading', { level: 1 })).toContainText(
     'One platform.',
@@ -59,7 +59,7 @@ test('protected dashboards require authentication', async ({ page }, info) => {
   );
   await page.goto('/dashboard');
   await expect(page).toHaveURL(/\/login$/);
-  await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
 });
 test('login provides accessible form fields and validation', async ({
   page,
@@ -97,10 +97,10 @@ test('premium Business OS login has real provider links and a usable password fo
   );
   await page.goto('/login');
   await expect(
-    page.getByRole('heading', { level: 1, name: 'Sign in' }),
+    page.getByRole('heading', { level: 1, name: 'Welcome back' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: /Build. Manage. Grow./ }),
+    page.getByRole('heading', { name: /smarter project management/ }),
   ).toBeVisible();
   await expect(
     page.getByRole('link', { name: 'Continue with Google' }),
