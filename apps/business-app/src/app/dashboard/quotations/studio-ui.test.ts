@@ -1050,6 +1050,10 @@ describe('construction quotation schedule is managed from company settings',()=>
   expect(editor).toContain('className="qs-payment-percent-readonly"');
   expect(editor).toContain('Payment and work milestones are fixed from this quotation.');
   expect(workflow).toContain('{editable&&<div className="qs-one-flow-footer">');
+  expect(workflow).toContain('{editable&&catalog.length>0&&<details className="qs-one-flow-catalog">');
+  expect(workflow).toContain("{editable?'Existing saved work is retained. Type the next activity and add it in order.':'Work sequence managed in Settings.'}");
+  expect(workflow).toContain("{editable?'Type a new work item using + Add, or choose an existing one from the library above. Your old standard item names are still available.':'No work items are configured for this stage in Settings.'}");
+  expect(workflow).toContain('{editable&&preservedReports.length>0&&<details className="qs-one-flow-advanced qs-one-flow-reports">');
  });
 });
 
