@@ -25,11 +25,31 @@ describe('company construction stage templates', () => {
       'tiles',
       'painting',
     ]);
-    expect(defaultCompanyConstructionStages.every((stage) => !('percent' in stage))).toBe(true);
+    expect(
+      defaultCompanyConstructionStages.every((stage) => !('percent' in stage)),
+    ).toBe(true);
   });
 
   it('accepts per-quote payment markers but rejects incomplete stages and unsafe guides', () => {
-    expect(companyConstructionStages.safeParse(defaultCompanyConstructionStages.map((stage,index) => index === 0 ? {...stage, items: [{id:'pay-1',kind:'payment',title:'Payment on approval',days:0}]} : stage)).success).toBe(true);
+    expect(
+      companyConstructionStages.safeParse(
+        defaultCompanyConstructionStages.map((stage, index) =>
+          index === 0
+            ? {
+                ...stage,
+                items: [
+                  {
+                    id: 'pay-1',
+                    kind: 'payment',
+                    title: 'Payment on approval',
+                    days: 0,
+                  },
+                ],
+              }
+            : stage,
+        ),
+      ).success,
+    ).toBe(true);
     expect(
       companyConstructionStages.safeParse(
         defaultCompanyConstructionStages.slice(1),

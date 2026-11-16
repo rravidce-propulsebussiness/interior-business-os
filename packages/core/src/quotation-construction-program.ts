@@ -7,7 +7,12 @@ const snapshot = z
     floors: z.array(z.string().trim().min(1).max(80)).min(1).max(18),
     stages: companyConstructionStages,
     // Amounts are quote-specific and never written back into the company template.
-    paymentOverrides: z.record(z.string().min(1).max(160), z.number().finite().nonnegative().max(1000000000000)).optional(),
+    paymentOverrides: z
+      .record(
+        z.string().min(1).max(160),
+        z.number().finite().nonnegative().max(1000000000000),
+      )
+      .optional(),
   })
   .strict();
 export type QuotationConstructionProgram = z.infer<typeof snapshot>;

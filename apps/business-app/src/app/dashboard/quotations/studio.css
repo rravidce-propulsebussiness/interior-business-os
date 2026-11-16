@@ -5331,9 +5331,14 @@
 .qs-construction-program .qs-program-columns {
   grid-template-columns: minmax(160px, 1fr) 105px minmax(150px, 1fr) 185px;
 }
-.qs-construction-program .qs-program-columns span:first-child { grid-column: auto; }
+.qs-construction-program .qs-program-columns span:first-child {
+  grid-column: auto;
+}
 .qs-construction-program .qs-program-payment {
-  grid-template-columns: 44px minmax(170px, 1fr) minmax(140px, auto) minmax(155px, auto);
+  grid-template-columns: 44px minmax(170px, 1fr) minmax(140px, auto) minmax(
+      155px,
+      auto
+    );
 }
 .qs-program-payment-entry {
   display: grid;
@@ -5383,8 +5388,12 @@
   border-radius: 14px;
   background: #fffaf6;
 }
-.qs-program-summary strong { color: #753c2e; }
-.qs-program-summary span { color: #56637a; }
+.qs-program-summary strong {
+  color: #753c2e;
+}
+.qs-program-summary span {
+  color: #56637a;
+}
 .qs-program-summary button {
   margin-left: auto;
   min-height: 44px;
@@ -5395,9 +5404,14 @@
   color: white;
   font-weight: 800;
 }
-.qs-program-summary button:disabled { opacity: .5; cursor: not-allowed; }
+.qs-program-summary button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 @media (max-width: 800px) {
-  .qs-construction-program .qs-program-columns { display: none; }
+  .qs-construction-program .qs-program-columns {
+    display: none;
+  }
   .qs-construction-program .qs-program-payment {
     grid-template-columns: 38px minmax(0, 1fr);
     gap: 10px;
@@ -5413,10 +5427,19 @@
   .qs-program-payment-entry {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .qs-program-payment-entry > strong { grid-column: 1 / -1; }
-  .qs-program-summary button { width: 100%; margin-left: 0; }
+  .qs-program-payment-entry > strong {
+    grid-column: 1 / -1;
+  }
+  .qs-program-summary button {
+    width: 100%;
+    margin-left: 0;
+  }
 }
 @media (max-width: 460px) {
-  .qs-program-payment-entry { grid-template-columns: minmax(0, 1fr); }
-  .qs-program-payment-entry > strong { grid-column: auto; }
+  .qs-program-payment-entry {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .qs-program-payment-entry > strong {
+    grid-column: auto;
+  }
 }

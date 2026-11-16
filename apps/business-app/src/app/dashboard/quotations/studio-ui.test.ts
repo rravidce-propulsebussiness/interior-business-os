@@ -158,11 +158,21 @@ describe('minimal quotation studio navigation', () => {
     expect(studio).not.toContain('router.refresh();');
     expect(sft).toContain('data-studio-save="quote"');
     expect(construction).toContain('data-studio-save="quote"');
-    expect(interior).toContain("data-studio-save={!selectedPackage ? 'quote' : undefined}");
-    expect(file('./construction-program-editor.tsx')).toContain("kind: 'payments'");
-    expect(file('./construction-program-editor.tsx')).toContain('Save quotation payments');
-    expect(file('./payment-schedule-editor.tsx')).toContain('Save payment schedule');
-    expect(file('./quotation-terms-editor.tsx')).toContain('data-studio-save="files"');
+    expect(interior).toContain(
+      "data-studio-save={!selectedPackage ? 'quote' : undefined}",
+    );
+    expect(file('./construction-program-editor.tsx')).toContain(
+      "kind: 'payments'",
+    );
+    expect(file('./construction-program-editor.tsx')).toContain(
+      'Save quotation payments',
+    );
+    expect(file('./payment-schedule-editor.tsx')).toContain(
+      'Save payment schedule',
+    );
+    expect(file('./quotation-terms-editor.tsx')).toContain(
+      'data-studio-save="files"',
+    );
   });
 
   it('preserves independent revision workflow and redirects legacy studio preview links', () => {
@@ -891,9 +901,13 @@ describe('streamlined quote, terms and payment Studio', () => {
     const editor = file('./payment-schedule-editor.tsx');
     const construction = file('./construction-program-editor.tsx');
     expect(page).toContain('organization_construction_payment_defaults_read');
-    expect(page).toContain('companyDefaults={companyPayments.error ? [] : companyPayments.data}');
+    expect(page).toContain(
+      'companyDefaults={companyPayments.error ? [] : companyPayments.data}',
+    );
     expect(editor).toContain('editable={props.editable}');
-    expect(construction).toContain('paymentItemKey(stage.id, floorIndex, item.id)');
+    expect(construction).toContain(
+      'paymentItemKey(stage.id, floorIndex, item.id)',
+    );
     expect(construction).toContain('setValues');
     expect(construction).toContain('paymentOverrides: Object.fromEntries(');
     expect(construction).not.toContain('const eachPercent');
@@ -1059,7 +1073,7 @@ describe('customer final quotation selection', () => {
 describe('quotation stage requirements inline editing', () => {
   const editor = file('./stage-requirements-editor.tsx');
   const styles = file('./studio.css');
- 
+
   it('provides inline Save item and Cancel without removing checklist toggles', () => {
     expect(editor).toContain('const saveEdit = () =>');
     expect(editor).toContain('setEditing(label)');
@@ -1077,8 +1091,12 @@ describe('quotation stage requirements inline editing', () => {
     const route = file('./[id]/conditions/route.ts');
     expect(construction).toContain("kind: 'payments'");
     expect(construction).toContain('paymentOverrides');
-    expect(route).toContain('incoming.stageRequirements ?? savedStageRequirements(current.terms)');
-    expect(route).toContain('incoming.milestoneFlow ?? savedMilestoneFlow(current.terms)');
+    expect(route).toContain(
+      'incoming.stageRequirements ?? savedStageRequirements(current.terms)',
+    );
+    expect(route).toContain(
+      'incoming.milestoneFlow ?? savedMilestoneFlow(current.terms)',
+    );
     expect(route).toContain('encodeStageRequirements(overrides)');
   });
 });
@@ -1100,7 +1118,9 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
     expect(stageEditor).toContain('stage.items.map((item, itemIndex)');
     expect(stageEditor).toContain('patchStage(index');
     expect(stageEditor).toContain('patchItem(index, itemIndex');
-    expect(stageEditor).toContain("['work', 'material', 'check', 'test', 'qc', 'payment']");
+    expect(stageEditor).toContain(
+      "['work', 'material', 'check', 'test', 'qc', 'payment']",
+    );
     expect(stageEditor).not.toContain('Payment share');
     expect(stageEditor).not.toContain('total.toFixed(2)');
   });
@@ -1229,9 +1249,15 @@ describe('construction quotation snapshots use the current company payment stage
     const construction = file('./construction-program-editor.tsx');
     expect(editor).toContain('companyDefaults={props.companyDefaults}');
     expect(editor).toContain('floorNames={props.floorNames ?? []}');
-    expect(construction).toContain('companyConstructionStages.safeParse(companyDefaults)');
-    expect(construction).toContain('savedQuotationConstructionProgram(initial.terms)');
-    expect(construction).toContain('paymentItemKey(stage.id, floorIndex, item.id)');
+    expect(construction).toContain(
+      'companyConstructionStages.safeParse(companyDefaults)',
+    );
+    expect(construction).toContain(
+      'savedQuotationConstructionProgram(initial.terms)',
+    );
+    expect(construction).toContain(
+      'paymentItemKey(stage.id, floorIndex, item.id)',
+    );
     expect(construction).toContain('paymentOverrides: Object.fromEntries(');
     expect(construction).not.toContain('const eachPercent');
   });

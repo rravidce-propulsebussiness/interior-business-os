@@ -24,7 +24,9 @@ describe('reusable construction stage programme', () => {
       'tiles',
       'painting',
     ]);
-    expect(defaultCompanyConstructionStages.every((stage) => !('percent' in stage))).toBe(true);
+    expect(
+      defaultCompanyConstructionStages.every((stage) => !('percent' in stage)),
+    ).toBe(true);
   });
 
   it('round trips a quote-specific floor and date snapshot without exposing it as terms text', () => {
@@ -32,7 +34,10 @@ describe('reusable construction stage programme', () => {
       startDate: '2026-11-16',
       floors: ['Ground', 'First'],
       stages: defaultCompanyConstructionStages,
-      paymentOverrides: {'slabs|0|payment-slabs': 250000, 'slabs|1|payment-slabs': 330000},
+      paymentOverrides: {
+        'slabs|0|payment-slabs': 250000,
+        'slabs|1|payment-slabs': 330000,
+      },
     };
     const encoded = encodeQuotationConstructionProgram(program);
     expect(

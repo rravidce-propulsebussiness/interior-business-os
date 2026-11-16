@@ -180,15 +180,17 @@ export function ConstructionPaymentDefaults({
                     })
                   }
                 >
-                  {['work', 'material', 'check', 'test', 'qc', 'payment'].map((kind) => (
-                    <option key={kind} value={kind}>
-                      {kind === 'qc'
-                        ? 'QC'
-                        : kind === 'check'
-                          ? 'Site check'
-                          : kind[0]!.toUpperCase() + kind.slice(1)}
-                    </option>
-                  ))}
+                  {['work', 'material', 'check', 'test', 'qc', 'payment'].map(
+                    (kind) => (
+                      <option key={kind} value={kind}>
+                        {kind === 'qc'
+                          ? 'QC'
+                          : kind === 'check'
+                            ? 'Site check'
+                            : kind[0]!.toUpperCase() + kind.slice(1)}
+                      </option>
+                    ),
+                  )}
                 </select>
                 <input
                   className="us-stage-item-title"
@@ -260,11 +262,13 @@ export function ConstructionPaymentDefaults({
                 defaultValue="work"
                 aria-label="New item type"
               >
-                {['work', 'material', 'check', 'test', 'qc', 'payment'].map((kind) => (
-                  <option key={kind} value={kind}>
-                    {kind}
-                  </option>
-                ))}
+                {['work', 'material', 'check', 'test', 'qc', 'payment'].map(
+                  (kind) => (
+                    <option key={kind} value={kind}>
+                      {kind}
+                    </option>
+                  ),
+                )}
               </select>
               <input
                 value={drafts[stage.id] ?? ''}

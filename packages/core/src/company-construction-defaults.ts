@@ -101,48 +101,87 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
     name: 'Pre-construction',
     repeatsPerFloor: false,
     days: 7,
-    items: [{ id: 'payment-preconstruction', kind: 'payment', title: 'Design advance payment', days: 0 }],
+    items: [
+      {
+        id: 'payment-preconstruction',
+        kind: 'payment',
+        title: 'Design advance payment',
+        days: 0,
+      },
+    ],
   },
   {
     id: 'foundation',
     name: 'Foundation',
     repeatsPerFloor: false,
     days: 20,
-    items: [{ id: 'payment-foundation', kind: 'payment', title: 'Foundation payment', days: 0 }],
+    items: [
+      {
+        id: 'payment-foundation',
+        kind: 'payment',
+        title: 'Foundation payment',
+        days: 0,
+      },
+    ],
   },
   {
     id: 'slabs',
     name: 'Slabs',
     repeatsPerFloor: true,
     days: 15,
-    items: [{ id: 'payment-slabs', kind: 'payment', title: 'Slabs payment', days: 0 }],
+    items: [
+      { id: 'payment-slabs', kind: 'payment', title: 'Slabs payment', days: 0 },
+    ],
   },
   {
     id: 'brickwork',
     name: 'Brickwork',
     repeatsPerFloor: true,
     days: 15,
-    items: [{ id: 'payment-brickwork', kind: 'payment', title: 'Brickwork payment', days: 0 }],
+    items: [
+      {
+        id: 'payment-brickwork',
+        kind: 'payment',
+        title: 'Brickwork payment',
+        days: 0,
+      },
+    ],
   },
   {
     id: 'electrical-plumbing',
     name: 'Electrical & plumbing',
     repeatsPerFloor: true,
     days: 14,
-    items: [{ id: 'payment-electrical-plumbing', kind: 'payment', title: 'Electrical & plumbing payment', days: 0 }],
+    items: [
+      {
+        id: 'payment-electrical-plumbing',
+        kind: 'payment',
+        title: 'Electrical & plumbing payment',
+        days: 0,
+      },
+    ],
   },
   {
     id: 'tiles',
     name: 'Tiles',
     repeatsPerFloor: true,
     days: 10,
-    items: [{ id: 'payment-tiles', kind: 'payment', title: 'Tiles payment', days: 0 }],
+    items: [
+      { id: 'payment-tiles', kind: 'payment', title: 'Tiles payment', days: 0 },
+    ],
   },
   {
     id: 'painting',
     name: 'Painting',
     repeatsPerFloor: true,
     days: 10,
-    items: [{ id: 'payment-painting', kind: 'payment', title: 'Painting payment', days: 0 }],
+    items: [
+      {
+        id: 'payment-painting',
+        kind: 'payment',
+        title: 'Painting payment',
+        days: 0,
+      },
+    ],
   },
 ];
