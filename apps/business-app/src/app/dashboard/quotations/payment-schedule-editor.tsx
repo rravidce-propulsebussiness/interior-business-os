@@ -121,8 +121,11 @@ export function PaymentScheduleEditor({
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [pending, start] = useTransition();
   const dragging = useRef<number | null>(null);
+  const snapshotAttempted=useRef(false);
   const router = useRouter();
   const savedPlan = savedStagePaymentPlan(initial.terms);
+  // Construction schedules are company-managed in Settings and shown as a fixed quote snapshot.
+  const scheduleEditable=editable&&industry!=='construction';
   const hasChanges = JSON.stringify(rows) !== JSON.stringify(initialRows)
     || JSON.stringify(visibleRequirements)!==JSON.stringify(inheritedWork?.requirements??originalRequirements)
     || JSON.stringify(milestoneFlow)!==JSON.stringify(prefilledFlow)
@@ -322,6 +325,12 @@ export function PaymentScheduleEditor({
     });
   }
 
+  useEffect(()=>{
+    if(!editable||industry!=='construction'||savedPlan||!rows.length||!valid||snapshotAttempted.current)return;
+    snapshotAttempted.current=true;
+    save();
+  },[editable,industry,savedPlan,rows.length,valid,save]);
+
   function combineBrickwork(index:number){
     const first=rows[index],next=rows[index+1];
     if(!first||!next||!first.name.toLowerCase().includes('brickwork')||
@@ -358,17 +367,25 @@ export function PaymentScheduleEditor({
 
       <div className={'qs-payment-status ' + (
         feedback?.type === 'error' ? 'qs-payment-status-error' :
-        savedPlan && !hasChanges ? 'qs-payment-status-saved' : 'qs-payment-status-unsaved'
+        (industry==='construction'&&savedPlan)||savedPlan&&!hasChanges ? 'qs-payment-status-saved' : 'qs-payment-status-unsaved'
       )} role="status">
-        <span className="qs-payment-status-mark" aria-hidden="true">{savedPlan && !hasChanges && feedback?.type !== 'error' ? '✓' : 'ⓘ'}</span>
+        <span className="qs-payment-status-mark" aria-hidden="true">{((industry==='construction'&&savedPlan)||savedPlan&&!hasChanges)&&feedback?.type!=='error'?'✓':'ⓘ'}</span>
         <span>{feedback?.type === 'error' ? feedback.text
+          : industry==='construction'&&savedPlan ? 'Payment and work milestones are fixed from this quotation.'
           : savedPlan && !hasChanges ? 'Payment schedule saved in this quotation.'
           : savedPlan ? 'You have unsaved changes. Save to update the customer PDF.'
+          : industry==='construction'&&editable ? 'Payment and work milestones come from Company Settings and are being saved to this quotation.'
           : editable ? 'Not saved yet — these percentages are suggestions. Save to include them in the PDF.'
           : 'No payment schedule was saved with this quotation.'}</span>
       </div>
 
-      {editable && (
+      {industry==='construction'&&editable&&!savedPlan&&feedback?.type==='error'&&(
+        <button type="button" className="qs-payment-save" onClick={()=>{snapshotAttempted.current=false;save();}}>
+          Retry saving company defaults
+        </button>
+      )}
+
+      {scheduleEditable && (
         <div className="qs-payment-actions">
           <button type="button" className="qs-payment-reset" disabled={pending}
             onClick={resetMilestones}>
@@ -395,35 +412,35 @@ export function PaymentScheduleEditor({
           <ol className="qs-payment-list">
             {rows.map((row, index) => (
               <li className="qs-payment-row" key={index}
-                draggable={editable && !pending}
+                draggable={scheduleEditable && !pending}
                 onDragStart={(event) => { dragging.current = index; event.dataTransfer.effectAllowed = 'move'; }}
-                onDragOver={(event) => { if (editable) event.preventDefault(); }}
+                onDragOver={(event) => { if (scheduleEditable) event.preventDefault(); }}
                 onDrop={(event) => {
                   event.preventDefault();
-                  if (dragging.current !== null) {
+                  if (scheduleEditable&&dragging.current !== null) {
                     const from = dragging.current;
                     reorderMilestones(from,index);
                   }
                   dragging.current = null;
                 }}
                 onDragEnd={() => { dragging.current = null; }}>
-                <button type="button" className="qs-payment-grip" disabled={!editable || pending || index === 0}
+                {scheduleEditable?<button type="button" className="qs-payment-grip" disabled={pending||index===0}
                   title="Move up one stage (or drag the row to reorder)"
-                  aria-label={'Move milestone ' + (index + 1) + ' up'}
-                  onClick={() => reorderMilestones(index,index-1)}>
+                  aria-label={'Move milestone '+(index+1)+' up'}
+                  onClick={()=>reorderMilestones(index,index-1)}>
                   <span aria-hidden="true">⠿</span>
-                </button>
+                </button>:<span className="qs-payment-order" aria-label={'Milestone '+(index+1)}>{index+1}</span>}
                 <div className="qs-payment-stage-name">
                   <label className="qs-payment-mobile-label" htmlFor={'qs-pay-stage-' + index}>{'Stage '+(index+1)+' · '+(industry==='construction'?'Work milestone':'Payment / Fee')}</label>
-                  <input id={'qs-pay-stage-' + index} aria-label={'Milestone ' + (index + 1)}
-                    value={row.name} maxLength={100} disabled={!editable}
-                    placeholder="Enter milestone"
-                    onChange={(event) => update(index, 'name', event.target.value)} />
+                  {scheduleEditable?<input id={'qs-pay-stage-'+index} aria-label={'Milestone '+(index+1)}
+                    value={row.name} maxLength={100} placeholder="Enter milestone"
+                    onChange={event=>update(index,'name',event.target.value)} />
+                    :<span className="qs-payment-stage-readonly">{row.name}</span>}
                   {industry==='construction'&&row.stageCodes.length>0&&
                    <span className="qs-work-milestone-badge">Work milestone</span>}
                   {row.stageCodes.length>0&&<div className="qs-payment-linked">
                     Covers {row.stageCodes.length} quote-defined work stage{row.stageCodes.length===1?'':'s'}.
-                    {editable&&row.name.toLowerCase().includes('brickwork')&&
+                    {scheduleEditable&&row.name.toLowerCase().includes('brickwork')&&
                      rows[index+1]?.name.toLowerCase().includes('brickwork')&&
                      <button type="button" disabled={pending} onClick={()=>combineBrickwork(index)}>
                       Combine with next floor brickwork
@@ -434,10 +451,10 @@ export function PaymentScheduleEditor({
                 <div className="qs-payment-percent">
                   <label className="qs-payment-mobile-label" htmlFor={'qs-pay-pct-' + index}>Percentage</label>
                   <div className="qs-payment-percent-field">
-                    <input id={'qs-pay-pct-' + index} aria-label={'Percent ' + (index + 1)}
+                    {scheduleEditable?<input id={'qs-pay-pct-'+index} aria-label={'Percent '+(index+1)}
                       type="number" inputMode="decimal" step="0.01" min="0.01" max="100"
-                      value={row.percent} disabled={!editable}
-                      onChange={(event) => update(index, 'percent', event.target.value)} />
+                      value={row.percent} onChange={event=>update(index,'percent',event.target.value)} />
+                      :<output className="qs-payment-percent-readonly" aria-label={'Percent '+(index+1)}>{row.percent}</output>}
                     <span aria-hidden="true">%</span>
                   </div>
                 </div>
@@ -450,11 +467,11 @@ export function PaymentScheduleEditor({
                   codes={row.stageCodes} allCodes={allCodes}
                   plannedWorkCodes={Object.values(milestoneFlow).flatMap(items=>
                    items.filter(item=>item.kind==='work').map(item=>item.code))}
-                  requirements={visibleRequirements} editable={editable}
+                  requirements={visibleRequirements} editable={scheduleEditable}
                   onChange={(steps,changed)=>changeWorkflow(index,steps,changed)}
                   onAddPayment={()=>addMilestoneAfter(index)}
                   onLinkStage={code=>linkWorkStage(index,code)}/>}
-                {editable && (
+                {scheduleEditable && (
                   <button type="button" className="qs-payment-remove" disabled={pending}
                     title="Remove milestone" aria-label={'Remove milestone ' + (index + 1)}
                     onClick={() => removeMilestone(index)}>
@@ -475,7 +492,7 @@ export function PaymentScheduleEditor({
         <div><span>Balance</span><strong className={remaining === 0 ? 'qs-payment-summary-ok' : 'qs-payment-summary-warning'}>{remainingLabel}</strong><small>{remaining === 0 ? 'All stages covered' : remaining > 0 ? 'Still to allocate' : 'Over allocated'}</small></div>
       </div>
 
-      {editable && (
+      {scheduleEditable && (
         <button type="button" className="qs-payment-save" data-studio-save="payments"
           disabled={pending} onClick={save}>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
