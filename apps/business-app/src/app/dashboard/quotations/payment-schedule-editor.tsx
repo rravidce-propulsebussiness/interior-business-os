@@ -197,6 +197,7 @@ function GenericPaymentSchedule({ total, currency, editable, initial }: Props) {
           <button
             className="qs-payment-save"
             type="button"
+            data-studio-save="payments"
             disabled={pending || !valid}
             onClick={save}
           >

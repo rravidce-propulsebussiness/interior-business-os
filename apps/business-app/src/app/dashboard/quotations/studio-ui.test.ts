@@ -882,7 +882,7 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(studio).not.toContain("step !== 'preview' &&");
     expect(studio).toContain("step === 'payments' ? ' qs-studio-grid-full'");
     expect(studio).toContain("step !== 'payments' && <aside");
-    expect(payments).toContain('Save Payment Schedule');
+    expect(payments).toContain('Save payment schedule');
     expect(payments).toContain('data-studio-save="payments"');
     expect(payments).toContain('qs-payment-summary');
     expect(payments).toContain('qs-payment-row');
@@ -893,22 +893,20 @@ describe('streamlined quote, terms and payment Studio', () => {
 
   it('uses company payment settings as the read-only construction schedule', () => {
     const payments = file('./payment-schedule-editor.tsx');
+    const program = file('./construction-program-editor.tsx');
     expect(page).toContain('organization_construction_payment_defaults_read');
     expect(page).toContain(
       'companyDefaults={companyPayments.error ? [] : companyPayments.data}',
     );
-    expect(payments).toContain(
-      "const scheduleEditable = editable && industry !== 'construction';",
+    expect(payments).toContain("if (props.industry === 'construction')");
+    expect(payments).toContain('<ConstructionProgramEditor');
+    expect(payments).toContain('companyDefaults={props.companyDefaults}');
+    expect(program).toContain(
+      'companyConstructionStages.safeParse(companyDefaults)',
     );
-    expect(payments).toContain('editable={scheduleEditable}');
-    expect(payments).toContain(
-      'Set up the company payment and work template in Settings',
-    );
-    expect(payments).toContain('Manage payments and work in Settings →');
-    expect(payments).toContain(
-      'href="/dashboard/settings?tab=payments#company-payment-stages"',
-    );
-    expect(payments).not.toContain('draggable={editable && !pending}');
+    expect(program).toContain('These stages come from Company Settings.');
+    expect(program).not.toContain('<input');
+    expect(program).not.toContain('draggable');
   });
 });
 
@@ -1085,16 +1083,18 @@ describe('quotation stage requirements inline editing', () => {
     expect(styles).toContain('.qs-stage-item-edit-button');
   });
 
-  it('persists customized stage labels with the payment schedule', () => {
-    expect(schedule).toContain(
-      'onChange={(steps,changed)=>changeWorkflow(index,steps,changed)}',
-    );
-    expect(schedule).toContain('milestoneFlow');
-    expect(schedule).toContain('encodeMilestoneFlow(milestoneFlow)');
-    expect(schedule).toContain('<MilestoneWorkflowBuilder');
+  it('persists the Settings stage programme with the payment schedule', () => {
+    const program = file('./construction-program-editor.tsx');
+    const route = file('./[id]/conditions/route.ts');
+    expect(schedule).not.toContain('<MilestoneWorkflowBuilder');
     expect(schedule).not.toContain('<StageRequirementsEditor');
-    expect(schedule).toContain('stageRequirements:visibleRequirements');
-    expect(schedule).toContain('encodeStageRequirements(visibleRequirements)');
+    expect(program).toContain(
+      'program: { stages, startDate, floors: floorNames }',
+    );
+    expect(program).toContain('stageCodes: row.stageCodes');
+    expect(route).toContain('program: z.unknown().optional()');
+    expect(route).toContain('encodeQuotationConstructionProgram(program)');
+    expect(route).toContain('[mark, links, custom, sequence, programMarker]');
   });
 });
 
@@ -1110,82 +1110,59 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
     expect(section).not.toContain("Payment methods',href:");
     expect(section).not.toContain('Invoices & stage collections');
   });
-  it('inherits each item stage from its payment milestone and allows reuse in other milestones', () => {
+  it('keeps work items inside their own reusable stage without work-area pickers', () => {
     expect(stageEditor).not.toContain('className="us-payment-work-areas"');
     expect(stageEditor).not.toContain('className="us-payment-area-tags"');
     expect(stageEditor).not.toContain('Type construction work area name');
     expect(stageEditor).not.toContain('<label>Work area');
-    expect(stageEditor).not.toContain('Type default step work area');
-    expect(stageEditor).toContain('workAreaFor(title,insertAt-1)');
     expect(stageEditor).not.toContain('Use in construction stages');
     expect(stageEditor).not.toContain('type="checkbox"');
-    expect(stageEditor).not.toContain(
-      'aria-label="Construction stage for new item"',
-    );
     expect(stageEditor).not.toContain('<label>Construction stage');
+    expect(stageEditor).toContain('<input type="hidden" name="rows"');
+    expect(stageEditor).toContain('value={JSON.stringify(stages)}');
+    expect(stageEditor).toContain('fromStage === index &&');
     expect(stageEditor).toContain(
-      "const chosenArea=kind==='qc'?current!.area:workAreaFor(title,insertAt-1)",
+      'items: move(stage.items, fromItem, itemIndex)',
     );
-    expect(stageEditor).toContain(
-      'steps[position]?.area??steps[position+1]?.area??areas[0]',
-    );
-    expect(stageEditor).toContain(
-      'const nextItems:CompanyWorkStep[]=[{kind,name:title,area:chosenArea}]',
-    );
-    expect(stageEditor).toContain('item.area===next.area');
-    expect(stageEditor).toContain('const targets=inferred?allRows.flatMap');
-    expect(stageEditor).toContain('companyWorkAreaLabel(row,inferred)');
-    expect(stageEditor).toContain('Add to {target.name}');
-    expect(stageEditor).toContain('onRouteStep={(targetIndex,step)=>');
-    expect(stageEditor).not.toContain(
-      'This work belongs to another construction stage.',
-    );
-    expect(stageEditor).toContain('steps:updated');
+    expect(stageEditor).toContain('id: crypto.randomUUID()');
+    expect(stageEditor).toContain('+ Add item');
   });
-  it('renders one accordion per payment milestone, first open only', () => {
+  it('renders one card per reusable stage with payment share, days and floor repeat', () => {
+    expect(stageEditor).toContain('className="us-company-stage-card"');
+    expect(stageEditor).toContain('aria-label="Stage name"');
+    expect(stageEditor).toContain('Payment share');
+    expect(stageEditor).toContain('Stage days');
+    expect(stageEditor).toContain("'Repeats for every quoted floor'");
+    expect(stageEditor).toContain("'One-time stage'");
     expect(stageEditor).toContain(
-      'const [expandedIndex,setExpandedIndex]=useState<number|null>(0)',
+      'setStages((rows) => move(rows, from, index))',
     );
-    expect(stageEditor).toContain('className="us-payment-stage-toggle"');
-    expect(stageEditor).toContain('aria-expanded={expanded}');
-    expect(stageEditor).toContain('onToggle={()');
-    expect(stageEditor).toContain('expanded={expandedIndex===index}');
-    expect(stageEditor).not.toContain('className="us-payment-stage-work"');
-    expect(stageEditor).toContain('us-payment-stage-stats');
-    expect(stageEditor).toContain('kinds.map(type=>');
+    expect(stageEditor).toContain(
+      'disabled={pending || Math.abs(total - 100) > 0.001}',
+    );
   });
-  it('Show all and Show fewer actually change the rendered item count with no scrollbar cap', () => {
+  it('renders every stage item without a scrollbar cap', () => {
     const style = file('../settings/settings.css');
-    expect(stageEditor).toContain('const limit=6');
-    expect(stageEditor).toContain(
-      'const visible=showAll?steps:steps.slice(0,limit)',
-    );
-    expect(stageEditor).toContain(
-      "{showAll?'Show fewer items':'Show all '+steps.length+' items'}",
-    );
-    expect(stageEditor).toContain('setShowAll(value=>!value)');
-    expect(stageEditor).toContain('visible.map((item,position)');
-    expect(style).toContain('.us-payment-step-list{');
-    expect(style).toContain('overflow:visible;max-height:none');
+    expect(stageEditor).not.toContain('const limit=6');
+    expect(stageEditor).toContain('stage.items.map((item, itemIndex)');
+    expect(style).toContain('.us-company-stage-items');
     expect(style).not.toContain('overflow-y:auto');
   });
-  it('renders one compact action row with edit, move and delete for each work step', () => {
-    expect(stageEditor).toContain('us-payment-step-name');
-    expect(stageEditor).toContain('saveEdit');
-    expect(stageEditor).toContain('startEdit(position)');
-    expect(stageEditor).toContain('onClick={()=>removeStep(position)}');
-    expect(stageEditor).toContain('us-payment-step-drag');
+  it('renders one compact row with order, type, title, days, guide and remove for each item', () => {
+    expect(stageEditor).toContain('aria-label="Item number"');
+    expect(stageEditor).toContain('aria-label="Item type"');
+    expect(stageEditor).toContain('aria-label="Work item title"');
+    expect(stageEditor).toContain('Site guide: text & video');
+    expect(stageEditor).toContain('aria-label="Guide video URL"');
     expect(stageEditor).toContain(
-      'onCommit={target=>moveStep(position,target)}',
+      'items: stage.items.filter((_, i) => i !== itemIndex)',
     );
-    expect(stageEditor).toContain('New item sequence number');
     expect(stageEditor).toContain('draggable={canEdit}');
-    expect(stageEditor).toContain('New default work item name');
-    expect(stageEditor).toContain('Company QC');
+    expect(stageEditor).toContain("kind === 'qc'");
   });
   it('does not double number the work items', () => {
-    expect(stageEditor).toContain('className="us-payment-step-list"');
-    expect(stageEditor).not.toContain('<ol className="us-payment-step-list">');
+    expect(stageEditor).toContain('className="us-company-stage-items"');
+    expect(stageEditor).not.toContain('<ol');
   });
 });
 
@@ -1260,62 +1237,38 @@ describe('Settings category dashboard keeps one canonical settings workspace', (
 });
 
 describe('construction quotation schedule is managed from company settings', () => {
-  const editor = file('./payment-schedule-editor.tsx');
-  const workflow = file('./milestone-workflow-builder.tsx');
+  const program = file('./construction-program-editor.tsx');
 
   it('renders construction payments and work without quotation editing controls', () => {
-    expect(editor).toContain(
-      "const scheduleEditable = editable && industry !== 'construction';",
+    expect(program).not.toContain('<input');
+    expect(program).not.toContain('<button');
+    expect(program).not.toContain('draggable');
+    expect(program).toContain(
+      'const stages: CompanyConstructionStage[] = editable ? defaults : (saved?.stages ?? defaults);',
     );
-    expect(editor).toContain('editable={scheduleEditable}');
-    expect(editor).toContain('className="qs-payment-stage-readonly"');
-    expect(editor).toContain('className="qs-payment-percent-readonly"');
-    expect(editor).toContain(
-      'Payment and work milestones are fixed from this quotation.',
+    expect(program).toContain('{!editable && !saved && <p');
+    expect(program).toContain(
+      'This quotation has no saved Settings programme snapshot.',
     );
-    expect(workflow).toContain(
-      '{editable && (\n        <div className="qs-one-flow-footer">',
-    );
-    expect(workflow).toContain(
-      '{editable && catalog.length > 0 && (\n        <details className="qs-one-flow-catalog">',
-    );
-    expect(workflow).toContain(
-      "{editable\n            ? 'Existing saved work is retained. Type the next activity and add it in order.'\n            : 'Work sequence managed in Settings.'}",
-    );
-    expect(workflow).toContain(
-      "{editable\n            ? 'Type a new work item using + Add, or choose an existing one from the library above. Your old standard item names are still available.'\n            : 'No work items are configured for this stage in Settings.'}",
-    );
-    expect(workflow).toContain(
-      '{editable && preservedReports.length > 0 && (\n        <details className="qs-one-flow-advanced qs-one-flow-reports">',
+    expect(program).toContain(
+      'Work items, checks and site guides are managed in Company Settings.',
     );
   });
 });
 
 describe('construction quotation snapshots use the current company payment stages', () => {
-  const editor = file('./payment-schedule-editor.tsx');
+  const program = file('./construction-program-editor.tsx');
 
-  it('copies configured company work into new or outdated editable quotation snapshots', () => {
-    expect(editor).toMatch(
-      /const companySchedule\s*=\s*industry === 'construction' &&\s*floorNames\.length &&\s*defaultCompanyRows\.length/,
+  it('copies configured company stages into new or outdated editable quotation snapshots', () => {
+    expect(program).toMatch(
+      /const needsSync\s*=\s*!saved \|\|\s*JSON\.stringify\(saved\.stages\) !== JSON\.stringify\(defaults\) \|\|\s*JSON\.stringify\(saved\.floors\) !== JSON\.stringify\(floorNames\)/,
     );
-    expect(editor).toMatch(
-      /const savedWorkflow\s*=\s*visibleMilestoneFlow\(\s*initial\.terms,\s*initialRows,\s*originalRequirements,\s*\)/,
+    expect(program).toMatch(
+      /if \(\s*!editable \|\|\s*!needsSync \|\|\s*!floorNames\.length \|\|\s*rows\.length !== 7 \|\|\s*attempted\.current\s*\)\s*return;/,
     );
-    expect(editor).toMatch(
-      /const hasCompanyWorkDefaults\s*=\s*defaultCompanyRows\.some\(\s*\(row\) => \(row\.steps \?\? \[\]\)\.length > 0/,
+    expect(program).toContain('attempted.current = true;');
+    expect(program).toContain(
+      'Payment stages and work dates saved from Company Settings.',
     );
-    expect(editor).toMatch(
-      /companyWorkSnapshotNeedsSync\(\s*savedWorkflow,\s*originalRequirements,\s*companyWorkSnapshot/,
-    );
-    expect(editor).toMatch(
-      /const syncingCompanySchedule\s*=\s*Boolean\(\s*editable &&\s*companySchedule\?\.length &&\s*\(!savedPlan \|\|[\s\S]*workSnapshotNeedsSync/,
-    );
-    expect(editor).toMatch(
-      /const inheritedWork\s*=\s*syncingCompanySchedule && companyWorkSnapshot/,
-    );
-    expect(editor).toMatch(
-      /if \(\s*!editable \|\|\s*industry !== 'construction' \|\|\s*!syncingCompanySchedule/,
-    );
-    expect(editor).toContain('Updating this draft from the');
   });
 });
