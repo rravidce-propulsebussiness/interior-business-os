@@ -26,16 +26,13 @@ export function ConstructionPaymentDefaults({
     saveConstructionPaymentDefaults,
     initialState,
   );
-  const [stages, setStages] = useState<CompanyConstructionStage[]>(() =>
-    initial.map((stage) => ({
-      id: stage.id,
-      name: stage.name,
-      repeatsPerFloor: stage.repeatsPerFloor,
-      days: stage.days,
-      items: stage.items,
-    })),
-  );
+  const [stages, setStages] = useState(initial);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const total = stages.reduce(
+    (sum, stage) => sum + Number(stage.percent || 0),
+    0,
+  );
+  const dirty = JSON.stringify(stages) !== JSON.stringify(initial);
   const patchStage = (
     index: number,
     patch: Partial<CompanyConstructionStage>,
@@ -63,125 +60,158 @@ export function ConstructionPaymentDefaults({
   return (
     <form action={action} className="us-company-stage-editor">
       <input type="hidden" name="rows" value={JSON.stringify(stages)} />
-      <p className="us-info">
-        Set stage days and the order of work, materials, checks, QC and payment
-        markers. Pre-construction and foundation happen once; the remaining
-        stages repeat for each quoted floor. Payment amounts are entered in
-        quotations, never fixed across every project.
-      </p>
-      {stages.map((stage, index) => (
-        <section
-          className="us-company-stage-card"
-          key={stage.id}
-          draggable={canEdit}
-          onDragStart={(event) =>
-            event.dataTransfer.setData('text/plain', String(index))
-          }
-          onDragOver={(event) => event.preventDefault()}
-          onDrop={(event) => {
-            event.preventDefault();
-            const from = Number(event.dataTransfer.getData('text/plain'));
-            if (Number.isInteger(from) && from !== index)
-              setStages((rows) => move(rows, from, index));
-          }}
-        >
-          <header className="us-company-stage-heading">
-            <span className="us-stage-grip" aria-label="Drag to reorder">
-              ⠿
-            </span>
-            <span className="us-stage-number">{index + 1}</span>
-            <input
-              aria-label="Stage name"
-              value={stage.name}
-              disabled={!canEdit}
-              onChange={(event) =>
-                patchStage(index, { name: event.target.value })
-              }
-            />
-            <label>
-              Stage days{' '}
-              <input
-                type="number"
-                min="0"
-                max="365"
-                value={stage.days}
-                disabled={!canEdit}
-                onChange={(event) =>
-                  patchStage(index, { days: Number(event.target.value) })
-                }
-              />
-            </label>
-          </header>
-          <p className="us-info">
-            {stage.repeatsPerFloor
-              ? 'Repeats for every quoted floor'
-              : 'One-time stage'}{' '}
-            · Items: {stage.items.length} · {stage.days} planned days
-          </p>
-          <div className="us-company-stage-items">
-            {stage.items.map((item, itemIndex) => (
-              <article
-                className="us-company-stage-item"
-                key={item.id}
-                draggable={canEdit}
-                onDragStart={(event) => {
-                  event.stopPropagation();
-                  event.dataTransfer.setData(
-                    'text/plain',
-                    `${index}:${itemIndex}`,
-                  );
-                }}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  event.stopPropagation();
-                  const [fromStage, fromItem] = event.dataTransfer
-                    .getData('text/plain')
-                    .split(':')
-                    .map(Number);
-                  if (
-                    fromStage === index &&
-                    fromItem !== undefined &&
-                    Number.isInteger(fromItem) &&
-                    fromItem !== itemIndex
-                  )
-                    patchStage(index, {
-                      items: move(stage.items, fromItem, itemIndex),
-                    });
-                }}
-              >
-                <span className="us-stage-grip">⠿</span>
+      <div className="us-workflow-intro">
+        <span className="us-workflow-saved">
+          {dirty ? '• Unsaved changes' : '✓ Saved'}
+        </span>
+        <p className="us-info">
+          Stages marked per floor repeat automatically for every quoted floor.
+          Pre-construction and foundation run once per project. Work items,
+          checks, QC guides and durations are copied to new quotations.
+        </p>
+      </div>
+      <div className="us-project-calendar">
+        <strong>Project calendar</strong>
+        <span>
+          Duration unit: <b>Working days</b>
+        </span>
+        <span>Sunday is excluded when quotation dates are calculated.</span>
+      </div>
+      {stages.map((stage, index) => {
+        const itemDays = stage.items.reduce((sum, item) => sum + item.days, 0);
+        const totalDays = Math.max(stage.days, itemDays);
+        return (
+          <section
+            className="us-company-stage-card"
+            key={stage.id}
+            draggable={canEdit}
+            onDragStart={(event) =>
+              event.dataTransfer.setData('text/plain', String(index))
+            }
+            onDragOver={(event) => event.preventDefault()}
+            onDrop={(event) => {
+              event.preventDefault();
+              const from = Number(event.dataTransfer.getData('text/plain'));
+              if (Number.isInteger(from) && from !== index)
+                setStages((rows) => move(rows, from, index));
+            }}
+          >
+            <header className="us-company-stage-heading">
+              <span className="us-stage-grip" aria-label="Drag to reorder">
+                ⠿
+              </span>
+              <span className="us-stage-number">{index + 1}</span>
+              <div className="us-company-stage-title">
                 <input
-                  className="us-order-number"
-                  type="number"
-                  min="1"
-                  max={stage.items.length}
-                  aria-label="Item number"
-                  key={`${item.id}:${itemIndex}`}
-                  defaultValue={itemIndex + 1}
-                  onBlur={(event) => {
-                    const n = Number(event.currentTarget.value) - 1;
-                    if (Number.isInteger(n) && n >= 0 && n < stage.items.length)
-                      patchStage(index, {
-                        items: move(stage.items, itemIndex, n),
-                      });
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') event.currentTarget.blur();
-                  }}
-                />
-                <select
-                  value={item.kind}
+                  aria-label="Stage name"
+                  value={stage.name}
                   disabled={!canEdit}
-                  aria-label="Item type"
                   onChange={(event) =>
-                    patchItem(index, itemIndex, {
-                      kind: event.target.value as CompanyStageItem['kind'],
-                    })
+                    patchStage(index, { name: event.target.value })
+                  }
+                />
+                <span
+                  className={
+                    stage.repeatsPerFloor ? 'us-stage-repeat' : 'us-stage-once'
                   }
                 >
-                  {['work', 'material', 'check', 'test', 'qc', 'payment'].map(
-                    (kind) => (
+                  {stage.repeatsPerFloor ? 'REPEAT FOR EACH FLOOR' : 'ONE TIME'}
+                </span>
+              </div>
+              <label className="us-stage-duration">
+                Stage duration
+                <input
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={stage.days}
+                  disabled={!canEdit}
+                  onChange={(event) =>
+                    patchStage(index, { days: Number(event.target.value) })
+                  }
+                />
+                <span>days</span>
+              </label>
+            </header>
+            <p className="us-stage-total">
+              Stage total: {totalDays} days · {stage.items.length} work/check
+              steps
+              {itemDays > stage.days && (
+                <span> · Substage durations extend the stage duration</span>
+              )}
+            </p>
+            <div className="us-stage-items-heading">
+              <strong>Work sequence</strong>
+              <span>Drag to reorder or enter a sequence number.</span>
+            </div>
+            <div className="us-company-stage-items">
+              {stage.items.map((item, itemIndex) => (
+                <article
+                  className="us-company-stage-item"
+                  key={item.id}
+                  draggable={canEdit}
+                  onDragStart={(event) => {
+                    event.stopPropagation();
+                    event.dataTransfer.setData(
+                      'text/plain',
+                      `${index}:${itemIndex}`,
+                    );
+                  }}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const [fromStage, fromItem] = event.dataTransfer
+                      .getData('text/plain')
+                      .split(':')
+                      .map(Number);
+                    if (
+                      fromStage === index &&
+                      fromItem !== undefined &&
+                      Number.isInteger(fromItem) &&
+                      fromItem !== itemIndex
+                    )
+                      patchStage(index, {
+                        items: move(stage.items, fromItem, itemIndex),
+                      });
+                  }}
+                >
+                  <span className="us-stage-grip">⠿</span>
+                  <input
+                    className="us-order-number"
+                    type="number"
+                    min="1"
+                    max={stage.items.length}
+                    aria-label="Item number"
+                    key={`${item.id}:${itemIndex}`}
+                    defaultValue={itemIndex + 1}
+                    disabled={!canEdit}
+                    onBlur={(event) => {
+                      const n = Number(event.currentTarget.value) - 1;
+                      if (
+                        Number.isInteger(n) &&
+                        n >= 0 &&
+                        n < stage.items.length
+                      )
+                        patchStage(index, {
+                          items: move(stage.items, itemIndex, n),
+                        });
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') event.currentTarget.blur();
+                    }}
+                  />
+                  <select
+                    value={item.kind}
+                    disabled={!canEdit}
+                    aria-label="Item type"
+                    onChange={(event) =>
+                      patchItem(index, itemIndex, {
+                        kind: event.target.value as CompanyStageItem['kind'],
+                      })
+                    }
+                  >
+                    {['work', 'material', 'check', 'test', 'qc'].map((kind) => (
                       <option key={kind} value={kind}>
                         {kind === 'qc'
                           ? 'QC'
@@ -189,135 +219,137 @@ export function ConstructionPaymentDefaults({
                             ? 'Site check'
                             : kind[0]!.toUpperCase() + kind.slice(1)}
                       </option>
-                    ),
-                  )}
-                </select>
-                <input
-                  className="us-stage-item-title"
-                  aria-label="Work item title"
-                  value={item.title}
-                  disabled={!canEdit}
-                  onChange={(event) =>
-                    patchItem(index, itemIndex, { title: event.target.value })
-                  }
-                />
-                <label>
-                  Days{' '}
+                    ))}
+                  </select>
                   <input
-                    type="number"
-                    min="0"
-                    max="365"
-                    value={item.days}
+                    className="us-stage-item-title"
+                    aria-label="Work item title"
+                    value={item.title}
                     disabled={!canEdit}
                     onChange={(event) =>
-                      patchItem(index, itemIndex, {
-                        days: Number(event.target.value),
-                      })
+                      patchItem(index, itemIndex, { title: event.target.value })
                     }
                   />
-                </label>
-                <button
-                  type="button"
-                  disabled={!canEdit}
-                  onClick={() =>
-                    patchStage(index, {
-                      items: stage.items.filter((_, i) => i !== itemIndex),
-                    })
-                  }
+                  <label>
+                    Days{' '}
+                    <input
+                      type="number"
+                      min="0"
+                      max="365"
+                      value={item.days}
+                      disabled={!canEdit}
+                      onChange={(event) =>
+                        patchItem(index, itemIndex, {
+                          days: Number(event.target.value),
+                        })
+                      }
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    disabled={!canEdit}
+                    onClick={() =>
+                      patchStage(index, {
+                        items: stage.items.filter((_, i) => i !== itemIndex),
+                      })
+                    }
+                  >
+                    Remove
+                  </button>
+                  <details>
+                    <summary>
+                      {item.guideText || item.guideVideoUrl
+                        ? 'Edit site guide'
+                        : '+ Add guide'}
+                    </summary>
+                    <textarea
+                      aria-label="Guide text"
+                      value={item.guideText ?? ''}
+                      disabled={!canEdit}
+                      onChange={(event) =>
+                        patchItem(index, itemIndex, {
+                          guideText: event.target.value,
+                        })
+                      }
+                      placeholder="How the site engineer should do or verify this item"
+                    />
+                    <input
+                      aria-label="Guide video URL"
+                      value={item.guideVideoUrl ?? ''}
+                      disabled={!canEdit}
+                      onChange={(event) =>
+                        patchItem(index, itemIndex, {
+                          guideVideoUrl: event.target.value,
+                        })
+                      }
+                      placeholder="https:// video guide"
+                    />
+                  </details>
+                </article>
+              ))}
+            </div>
+            {canEdit && (
+              <div className="us-company-stage-add">
+                <select
+                  id={`kind-${stage.id}`}
+                  defaultValue="work"
+                  aria-label="New item type"
                 >
-                  Remove
-                </button>
-                <details>
-                  <summary>Site guide: text & video</summary>
-                  <textarea
-                    aria-label="Guide text"
-                    value={item.guideText ?? ''}
-                    disabled={!canEdit}
-                    onChange={(event) =>
-                      patchItem(index, itemIndex, {
-                        guideText: event.target.value,
-                      })
-                    }
-                    placeholder="How the site engineer should do or verify this item"
-                  />
-                  <input
-                    aria-label="Guide video URL"
-                    value={item.guideVideoUrl ?? ''}
-                    disabled={!canEdit}
-                    onChange={(event) =>
-                      patchItem(index, itemIndex, {
-                        guideVideoUrl: event.target.value,
-                      })
-                    }
-                    placeholder="https:// video guide"
-                  />
-                </details>
-              </article>
-            ))}
-          </div>
-          {canEdit && (
-            <div className="us-company-stage-add">
-              <select
-                id={`kind-${stage.id}`}
-                defaultValue="work"
-                aria-label="New item type"
-              >
-                {['work', 'material', 'check', 'test', 'qc', 'payment'].map(
-                  (kind) => (
+                  {['work', 'material', 'check', 'test', 'qc'].map((kind) => (
                     <option key={kind} value={kind}>
                       {kind}
                     </option>
-                  ),
-                )}
-              </select>
-              <input
-                value={drafts[stage.id] ?? ''}
-                onChange={(event) =>
-                  setDrafts((all) => ({
-                    ...all,
-                    [stage.id]: event.target.value,
-                  }))
-                }
-                placeholder="Add work, material, check, QC or payment"
-              />
-              <button
-                type="button"
-                onClick={() => {
-                  const select = document.getElementById(
-                    `kind-${stage.id}`,
-                  ) as HTMLSelectElement | null;
-                  const title = drafts[stage.id]?.trim();
-                  if (!title) return;
-                  patchStage(index, {
-                    items: [
-                      ...stage.items,
-                      {
-                        id: crypto.randomUUID(),
-                        kind: (select?.value ??
-                          'work') as CompanyStageItem['kind'],
-                        title,
-                        days: select?.value === 'payment' ? 0 : 1,
-                      },
-                    ],
-                  });
-                  setDrafts((all) => ({ ...all, [stage.id]: '' }));
-                }}
-              >
-                + Add item
-              </button>
-            </div>
-          )}
-        </section>
-      ))}
+                  ))}
+                </select>
+                <input
+                  value={drafts[stage.id] ?? ''}
+                  onChange={(event) =>
+                    setDrafts((all) => ({
+                      ...all,
+                      [stage.id]: event.target.value,
+                    }))
+                  }
+                  placeholder="Add work, material, check or QC"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const select = document.getElementById(
+                      `kind-${stage.id}`,
+                    ) as HTMLSelectElement | null;
+                    const title = drafts[stage.id]?.trim();
+                    if (!title) return;
+                    patchStage(index, {
+                      items: [
+                        ...stage.items,
+                        {
+                          id: crypto.randomUUID(),
+                          kind: (select?.value ??
+                            'work') as CompanyStageItem['kind'],
+                          title,
+                          days: 1,
+                        },
+                      ],
+                    });
+                    setDrafts((all) => ({ ...all, [stage.id]: '' }));
+                  }}
+                >
+                  + Add item
+                </button>
+              </div>
+            )}
+          </section>
+        );
+      })}
       <footer className="us-company-stage-save">
-        <strong>Payment amounts are set per quotation and floor.</strong>
+        <strong>{stages.length} reusable construction stages</strong>
         {canEdit && (
           <button
             className="us-button-primary"
             type="submit"
-            disabled={pending}
+            disabled={pending || Math.abs(total - 100) > 0.001}
           >
-            {pending ? 'Saving…' : 'Save stages & work'}
+            {pending ? 'Saving…' : 'Save workflow settings'}
           </button>
         )}
       </footer>
