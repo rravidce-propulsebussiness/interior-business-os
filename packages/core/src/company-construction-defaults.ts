@@ -90,13 +90,18 @@ export function applyCompanyPaymentDefaults(
  suggested:readonly {name:string;percent:string;stageCodes:string[]}[],
  defaults:readonly CompanyConstructionPaymentRow[],
 ):{name:string;percent:string;stageCodes:string[]}[] {
- if(!defaults.length||defaults.length!==suggested.length)return suggested.map(x=>({
-  ...x,stageCodes:[...x.stageCodes],
- }));
- return suggested.map((row,i)=>({
-  ...row,name:defaults[i]!.name,percent:String(defaults[i]!.percent),
-  stageCodes:[...row.stageCodes],
- }));
+ if(!defaults.length)return suggested.map(x=>({...x,stageCodes:[...x.stageCodes]}));
+ return defaults.map((item,index)=>{
+  const configuredAreas=item.areas?.length?item.areas:
+   [...new Set((item.steps??[]).map(step=>step.area))];
+  const areas=configuredAreas.length?configuredAreas:
+   [inferCompanyWorkAreaCode(item.name)].filter((area):area is string=>Boolean(area));
+  let stageCodes=[...new Set(suggested.flatMap(row=>row.stageCodes)
+   .filter(code=>areas.includes(family(code))))];
+  if(!stageCodes.length&&defaults.length===suggested.length)
+   stageCodes=[...suggested[index]!.stageCodes];
+  return {name:item.name,percent:String(item.percent),stageCodes};
+ });
 }
 const family=(code:string)=>code.split('/')[0]??code;
 function matches(row:{stageCodes:readonly string[]},template:CompanyConstructionPaymentRow){
