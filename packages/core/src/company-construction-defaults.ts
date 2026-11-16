@@ -142,13 +142,14 @@ export function applyCompanyWorkDefaults(
    // Company area templates must seed every matching floor in a grouped
    // payment, not only the first floor code.
    for(const code of linkedCodes){
-    if(seenCodes.has(code))continue;
     if(!activeCodes.has(code)){
      activeCodes.add(code);
-     const baseline=defaultStageRequirements(code);
-     const structural=milestoneConstructionStages().find(x=>x.code===item.area)?.holdPoint==='structural';
-     requirements[code]={work:[],materials:[],checks:structural?[...baseline.checks]:[],
+     if(!seenCodes.has(code)){
+      const baseline=defaultStageRequirements(code);
+      const structural=milestoneConstructionStages().find(x=>x.code===item.area)?.holdPoint==='structural';
+      requirements[code]={work:[],materials:[],checks:structural?[...baseline.checks]:[],
        reports:[...baseline.reports]};
+     }
     }
     const scope=requirements[code]!;
     const field=item.kind==='work'?'work':item.kind==='material'?'materials':'checks';
