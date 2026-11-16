@@ -8,6 +8,7 @@ import {
   defaultInteriorStages,
 } from '@business-os/core/company-construction-defaults';
 import { saveConstructionPaymentDefaults } from './payment-default-actions';
+
 const stageDescriptions: Record<string, string> = {
   preconstruction: 'Price freeze, agreement and planning approvals.',
   foundation: 'Site preparation, excavation, footing and plinth work.',
@@ -121,11 +122,10 @@ export function ConstructionPaymentDefaults({
   initial: Record<string, CompanyConstructionStage[]>;
   industries: { key: string; name: string }[];
 }) {
-  const [state, action, pending] = useActionState(saveConstructionPaymentDefaults, {
-    saved: false,
-    message: '',
-    savedRowsByIndustry: initial,
-  });
+  const [state, action, pending] = useActionState(
+    saveConstructionPaymentDefaults,
+    { saved: false, message: '', savedRowsByIndustry: initial },
+  );
   const [industryKey, setIndustryKey] = useState(
     industries[0]?.key ?? 'construction',
   );
@@ -354,7 +354,6 @@ export function ConstructionPaymentDefaults({
                   <button
                     className="us-stage-remove"
                     type="button"
-                    aria-label={'Remove ' + stage.name}
                     onClick={() =>
                       setStages((rows) => rows.filter((_, i) => i !== index))
                     }
