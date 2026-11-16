@@ -85,7 +85,7 @@ export function PaymentScheduleEditor({
   const initialRows=syncingCompanySchedule?companySchedule!:storedRows;
   const originalRequirements=savedStageRequirements(initial.terms);
   const inheritedWork=syncingCompanySchedule&&defaultCompanyRows.some(row=>(row.steps??[]).length>0)
-    ?applyCompanyWorkDefaults(initialRows,defaultCompanyRows,{}):null;
+    ?applyCompanyWorkDefaults(initialRows,defaultCompanyRows,{},true):null;
   const [rows, setRows] = useState<Milestone[]>(()=>initialRows);
   const [stageRequirements,setStageRequirements]=useState<StageRequirementsMap>(
     ()=>inheritedWork?.requirements??(syncingCompanySchedule?{}:originalRequirements));
