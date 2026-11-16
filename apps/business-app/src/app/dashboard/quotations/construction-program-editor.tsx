@@ -163,7 +163,7 @@ export function ConstructionProgramEditor({
         const perItem = (amount * (storedPlan[index]?.percent ?? 0)) / 100 / count;
         for (let floor = 0; floor < floorCount; floor++) {
           markers.forEach((item) => {
-            fromSaved[paymentItemKey(stage.id, floor, item.id)] = String(Number(perItem.toFixed(2)));
+            fromSaved[paymentItemKey(stage.id, floor, item.id)] = String(Number(perItem.toFixed(8)));
           });
         }
       });
@@ -180,9 +180,9 @@ export function ConstructionProgramEditor({
   const allocated = allocations.reduce((sum, payment) => sum + payment.amount, 0);
   const remaining = amount - allocated;
   const funded = allocations.filter((entry) => entry.amount > 0);
-  const percentages = funded.map((entry) => Number(((entry.amount / (amount || 1)) * 100).toFixed(2)));
+  const percentages = funded.map((entry) => Number(((entry.amount / (amount || 1)) * 100).toFixed(8)));
   if (percentages.length) {
-    percentages[percentages.length - 1] = Number((100 - percentages.slice(0, -1).reduce((sum, part) => sum + part, 0)).toFixed(2));
+    percentages[percentages.length - 1] = Number((100 - percentages.slice(0, -1).reduce((sum, part) => sum + part, 0)).toFixed(8));
   }
   const valid =
     amount > 0 &&
@@ -215,7 +215,7 @@ export function ConstructionProgramEditor({
             },
             stages: funded.map((row, index) => ({
               name: row.name,
-              percent: percentages[index]!.toFixed(2),
+              percent: percentages[index]!.toFixed(8),
               stageCodes: row.stageCodes,
             })),
             // Leave saved QC/work overrides intact; the user edits them separately.
@@ -310,7 +310,7 @@ export function ConstructionProgramEditor({
                             disabled={!editable || amount <= 0}
                             onChange={(event) => setValues((current) => ({
                               ...current,
-                              [key]: event.target.value === '' ? '' : String(Number(((Number(event.target.value) / 100) * amount).toFixed(2))),
+                              [key]: event.target.value === '' ? '' : String(Number(((Number(event.target.value) / 100) * amount).toFixed(8))),
                             }))}
                             placeholder="0"
                           />
