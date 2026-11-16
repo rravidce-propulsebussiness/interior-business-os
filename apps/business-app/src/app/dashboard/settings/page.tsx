@@ -1122,8 +1122,8 @@ export default async function SettingsPage({
           <section className="us-card us-wide">
             <Header
               icon="♧"
-              title="Construction workflow settings"
-              detail="Set reusable work stages, durations and site checks once. New quotations copy this programme and calculate dates automatically."
+              title="Project workflow settings"
+              detail="Set reusable stages, durations and site checks for each industry. New quotations copy the matching workflow and calculate dates automatically."
             />
             <div
               className="us-payment-template-section"

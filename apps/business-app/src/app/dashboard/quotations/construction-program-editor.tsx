@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   companyConstructionStages,
   defaultCompanyConstructionStages,
+  defaultInteriorStages,
   type CompanyConstructionStage,
   type CompanyStageItem,
 } from '@business-os/core/company-construction-defaults';
@@ -13,6 +14,7 @@ import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan'
 import { quotedConstructionFloorCode } from '@business-os/core/construction-floor-code';
 
 type Props = {
+  industry: string;
   total: string;
   currency: string;
   editable: boolean;
@@ -167,6 +169,7 @@ function stagedDates(
 }
 
 export function ConstructionProgramEditor({
+  industry,
   total,
   currency,
   editable,
@@ -178,7 +181,13 @@ export function ConstructionProgramEditor({
   const parsed = companyConstructionStages.safeParse(companyDefaults);
   const defaults = parsed.success
     ? parsed.data
-    : defaultCompanyConstructionStages;
+    : industry === 'interior'
+      ? defaultInteriorStages
+      : defaultCompanyConstructionStages;
+  const industryLabel = industry
+    .split('-')
+    .map((part) => part[0]?.toUpperCase() + part.slice(1))
+    .join(' ');
   const saved = savedQuotationConstructionProgram(initial.terms);
   // Company Settings is the source of truth for reusable stages and work.
   const stages = defaults;
@@ -350,10 +359,11 @@ export function ConstructionProgramEditor({
     <section className="qs-card qs-construction-program">
       <header className="qs-program-header">
         <div>
-          <h2>Construction workflow · Payments &amp; Work</h2>
+          <h2>{industryLabel} workflow · Payments &amp; Work</h2>
           <p>
-            Seven stages follow the same reusable Company Settings workflow.
-            Finish stages repeat floor by floor.
+            {stages.length} stages follow the reusable {industryLabel} workflow
+            from Company Settings. Repeating stages are scheduled for each
+            quoted floor.
           </p>
         </div>
       </header>

@@ -52,6 +52,70 @@ const defaultStages = (industry: string): CompanyConstructionStage[] => {
         : [],
   }));
 };
+const itemKinds: CompanyStageItem['kind'][] = [
+  'work',
+  'material',
+  'check',
+  'test',
+  'qc',
+  'payment',
+];
+const kindLabel = (kind: CompanyStageItem['kind']) =>
+  kind === 'qc'
+    ? 'QC'
+    : kind === 'check'
+      ? 'Site check'
+      : kind === 'payment'
+        ? 'Payment'
+        : kind[0]!.toUpperCase() + kind.slice(1);
+
+function ItemKindPicker({
+  value,
+  disabled,
+  onChange,
+  label,
+}: {
+  value: CompanyStageItem['kind'];
+  disabled?: boolean;
+  onChange: (value: CompanyStageItem['kind']) => void;
+  label: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="us-kind-picker">
+      <button
+        type="button"
+        className="us-kind-trigger"
+        aria-label={label}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        disabled={disabled}
+        onClick={() => setOpen((shown) => !shown)}
+      >
+        {kindLabel(value)} <span aria-hidden="true">⌄</span>
+      </button>
+      {open && (
+        <div className="us-kind-menu" role="listbox" aria-label={label}>
+          {itemKinds.map((kind) => (
+            <button
+              key={kind}
+              type="button"
+              role="option"
+              aria-selected={value === kind}
+              onClick={() => {
+                onChange(kind);
+                setOpen(false);
+              }}
+            >
+              <span>{kindLabel(kind)}</span>
+              {value === kind && <span aria-hidden="true">✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function ConstructionPaymentDefaults({
   canEdit,
@@ -76,6 +140,9 @@ export function ConstructionPaymentDefaults({
   );
   const [newIndustryName, setNewIndustryName] = useState('');
   const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [draftKinds, setDraftKinds] = useState<
+    Record<string, CompanyStageItem['kind']>
+  >({});
   const [expandedStage, setExpandedStage] = useState<string | null>('slabs');
   const savedStages =
     savedByIndustry[industryKey] ?? defaultStages(industryKey);
@@ -369,36 +436,14 @@ export function ConstructionPaymentDefaults({
                           if (event.key === 'Enter') event.currentTarget.blur();
                         }}
                       />
-                      <select
+                      <ItemKindPicker
                         value={item.kind}
                         disabled={!canEdit}
-                        aria-label="Item type"
-                        onChange={(event) =>
-                          patchItem(index, itemIndex, {
-                            kind: event.target
-                              .value as CompanyStageItem['kind'],
-                          })
+                        label="Item type"
+                        onChange={(kind) =>
+                          patchItem(index, itemIndex, { kind })
                         }
-                      >
-                        {[
-                          'work',
-                          'material',
-                          'check',
-                          'test',
-                          'qc',
-                          'payment',
-                        ].map((kind) => (
-                          <option key={kind} value={kind}>
-                            {kind === 'qc'
-                              ? 'QC'
-                              : kind === 'check'
-                                ? 'Site check'
-                                : kind === 'payment'
-                                  ? 'Payment'
-                                  : kind[0]!.toUpperCase() + kind.slice(1)}
-                          </option>
-                        ))}
-                      </select>
+                      />
                       <input
                         className="us-stage-item-title"
                         aria-label="Work item title"
@@ -472,24 +517,13 @@ export function ConstructionPaymentDefaults({
                 </div>
                 {canEdit && (
                   <div className="us-company-stage-add">
-                    <select
-                      id={`kind-${stage.id}`}
-                      defaultValue="work"
-                      aria-label="New item type"
-                    >
-                      {[
-                        'work',
-                        'material',
-                        'check',
-                        'test',
-                        'qc',
-                        'payment',
-                      ].map((kind) => (
-                        <option key={kind} value={kind}>
-                          {kind}
-                        </option>
-                      ))}
-                    </select>
+                    <ItemKindPicker
+                      value={draftKinds[stage.id] ?? 'work'}
+                      label="New item type"
+                      onChange={(kind) =>
+                        setDraftKinds((all) => ({ ...all, [stage.id]: kind }))
+                      }
+                    />
                     <input
                       value={drafts[stage.id] ?? ''}
                       onChange={(event) =>
@@ -503,9 +537,7 @@ export function ConstructionPaymentDefaults({
                     <button
                       type="button"
                       onClick={() => {
-                        const select = document.getElementById(
-                          `kind-${stage.id}`,
-                        ) as HTMLSelectElement | null;
+                        const kind = draftKinds[stage.id] ?? 'work';
                         const title = drafts[stage.id]?.trim();
                         if (!title) return;
                         patchStage(index, {
@@ -513,10 +545,9 @@ export function ConstructionPaymentDefaults({
                             ...stage.items,
                             {
                               id: crypto.randomUUID(),
-                              kind: (select?.value ??
-                                'work') as CompanyStageItem['kind'],
+                              kind,
                               title,
-                              days: select?.value === 'payment' ? 0 : 1,
+                              days: kind === 'payment' ? 0 : 1,
                             },
                           ],
                         });
