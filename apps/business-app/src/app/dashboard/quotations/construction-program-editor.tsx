@@ -188,6 +188,7 @@ export function ConstructionProgramEditor({
     amount > 0 &&
     allocations.length > 0 &&
     funded.length > 0 &&
+    funded.length === allocations.length &&
     funded.length <= 100 &&
     Math.abs(remaining) <= 0.01 &&
     Object.values(values).every((value) => value === '' || (Number.isFinite(Number(value)) && Number(value) >= 0)) &&
@@ -328,7 +329,7 @@ export function ConstructionProgramEditor({
         <span>{Math.abs(remaining) <= 0.01 ? 'Fully allocated' : 'Remaining to allocate: ' + fmt(remaining)}</span>
         {editable && <button type="button" onClick={save} disabled={pending || !valid}>{pending ? 'Saving…' : 'Save quotation payments'}</button>}
       </footer>
-      {editable && !valid && <p className="qs-note">Save is available once positive payment amounts total the quotation value exactly. Values are specific to this quote, not to Company Settings.</p>}
+      {editable && !valid && <p className="qs-note">Save is available once every payment marker has a positive amount and allocations total the quotation value exactly. Values are specific to this quote, not to Company Settings.</p>}
       {!editable && !saved && <p className="qs-note">This quotation has no saved construction payment programme.</p>}
     </section>
   );
