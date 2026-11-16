@@ -40,6 +40,30 @@ describe('company construction defaults vs quotation snapshot',()=>{
   expect(quote[3]?.stageCodes).toEqual(source.flatMap(row=>row.stageCodes)
    .filter(code=>code.startsWith('MASONRY/')));
  });
+ it('copies a grouped company work template to every linked quotation floor',()=>{
+  const suggested=proposedConstructionPayments(['Ground','First','Second']);
+  const defaults=companyConstructionPaymentRows.parse([
+   {name:'Planning',percent:10,areas:['PRECONSTRUCTION','DESIGN']},
+   {name:'Foundation',percent:18,areas:['SITE_PREP','FOUNDATION','PLINTH']},
+   {name:'Slab work',percent:27,areas:['RCC'],steps:[
+    {kind:'work',name:'Pour concrete',area:'RCC'},
+   ]},
+   {name:'Masonry',percent:15,areas:['MASONRY']},
+   {name:'Inside plaster',percent:7,areas:['INTERNAL_PLASTER']},
+   {name:'Outer plaster',percent:5,areas:['EXTERNAL_PLASTER']},
+   {name:'Plumbing and painting',percent:8,areas:['PLUMBING_PAINT']},
+   {name:'Tiles',percent:6,areas:['TILES']},
+   {name:'Doors',percent:4,areas:['DOORS']},
+  ]);
+  const payments=applyCompanyPaymentDefaults(suggested,defaults);
+  const work=applyCompanyWorkDefaults(payments,defaults);
+  const rccCodes=payments[2]!.stageCodes;
+  expect(rccCodes).toHaveLength(3);
+  for(const code of rccCodes){
+   expect(work.requirements[code]?.work).toContain('Pour concrete');
+   expect(work.flow['2']?.some(step=>step.code===code&&step.kind==='work')).toBe(true);
+  }
+ });
  it('rejects total other than 100%',()=>{
   expect(companyConstructionPaymentRows.safeParse([
    {name:'Advance',percent:20},{name:'Foundation',percent:70},
