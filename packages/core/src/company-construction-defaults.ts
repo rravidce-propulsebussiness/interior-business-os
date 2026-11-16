@@ -97,7 +97,7 @@ export function applyCompanyPaymentDefaults(
   const hasConfiguredAreas=configuredAreas.length>0;
   const areas=hasConfiguredAreas?configuredAreas:
    [inferCompanyWorkAreaCode(item.name)].filter((area):area is string=>Boolean(area));
-  const stageCodes=!hasConfiguredAreas&&defaults.length===suggested.length
+  let stageCodes=!hasConfiguredAreas&&defaults.length===suggested.length
    ?[...suggested[index]!.stageCodes]
    :[...new Set(suggested.flatMap(row=>row.stageCodes)
      .filter(code=>areas.includes(family(code))))];
@@ -120,6 +120,7 @@ export function applyCompanyWorkDefaults(
  payments:readonly {stageCodes:string[]}[],
  defaults:readonly CompanyConstructionPaymentRow[],
  original:StageRequirementsMap={},
+ expandLinkedAreas=false,
 ):{requirements:StageRequirementsMap;flow:QuotationMilestoneFlow} {
  const requirements:StageRequirementsMap={...original};
  const planned:QuotationMilestoneFlow={};
@@ -142,17 +143,18 @@ export function applyCompanyWorkDefaults(
     if(code)steps.push({kind:'payment',code,index:i});
     continue;
    }
-   // Company area templates must seed every matching floor in a grouped
-   // payment, not only the first floor code.
-   for(const code of linkedCodes){
+   // Existing consumers keep the historical first-match mapping. New
+   // company schedules can expand a generic area template across every
+   // matching floor code in the grouped payment.
+   const codesToApply=expandLinkedAreas?linkedCodes:linkedCodes.slice(0,1);
+   for(const code of codesToApply){
+    if(seenCodes.has(code))continue;
     if(!activeCodes.has(code)){
      activeCodes.add(code);
-     if(!seenCodes.has(code)){
-      const baseline=defaultStageRequirements(code);
-      const structural=milestoneConstructionStages().find(x=>x.code===item.area)?.holdPoint==='structural';
-      requirements[code]={work:[],materials:[],checks:structural?[...baseline.checks]:[],
-       reports:[...baseline.reports]};
-     }
+     const baseline=defaultStageRequirements(code);
+     const structural=milestoneConstructionStages().find(x=>x.code===item.area)?.holdPoint==='structural';
+     requirements[code]={work:[],materials:[],checks:structural?[...baseline.checks]:[],
+      reports:[...baseline.reports]};
     }
     const scope=requirements[code]!;
     const field=item.kind==='work'?'work':item.kind==='material'?'materials':'checks';
