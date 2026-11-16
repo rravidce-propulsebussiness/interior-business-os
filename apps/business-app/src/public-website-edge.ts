@@ -21,13 +21,17 @@ export function verifiedEdgeHostname(input: {
   if (!isPublicWebsiteHost(host, baseDomain)) return null;
   const timestamp = headers.get(EDGE_TIME_HEADER) ?? '';
   const signature = headers.get(EDGE_SIGNATURE_HEADER) ?? '';
-  if (!/^\d{10}$/.test(timestamp) || !/^[0-9a-f]{64}$/.test(signature)) return null;
+  if (!/^\d{10}$/.test(timestamp) || !/^[0-9a-f]{64}$/.test(signature))
+    return null;
   const seconds = input.now ?? Math.floor(Date.now() / 1000);
   if (Math.abs(seconds - Number(timestamp)) > 120) return null;
-  const payload = [timestamp, host, method.toUpperCase(), pathAndSearch].join('\n');
+  const payload = [timestamp, host, method.toUpperCase(), pathAndSearch].join(
+    '\n',
+  );
   const expected = createHmac('sha256', secret).update(payload).digest();
   const supplied = Buffer.from(signature, 'hex');
-  return supplied.length === expected.length && timingSafeEqual(supplied, expected)
+  return supplied.length === expected.length &&
+    timingSafeEqual(supplied, expected)
     ? host
     : null;
 }

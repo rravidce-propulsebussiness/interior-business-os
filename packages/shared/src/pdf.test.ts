@@ -16,18 +16,30 @@ afterEach(() => {
 });
 
 test('classifies Chromium shared-host failures without including logs or paths', () => {
-  expect(chromiumLaunchFailureCategory(new Error('Executable doesn\'t exist at /private/path')))
-    .toBe('missing-binary');
-  expect(chromiumLaunchFailureCategory(new Error('error while loading shared libraries: libnss3.so')))
-    .toBe('missing-libraries');
-  expect(chromiumLaunchFailureCategory(new Error('Operation not permitted')))
-    .toBe('execution-blocked');
-  expect(chromiumLaunchFailureCategory(new Error('ENOMEM cannot allocate memory')))
-    .toBe('resource-exhausted');
-  expect(chromiumLaunchFailureCategory(new Error('browserType.launch: Timeout 15000ms exceeded')))
-    .toBe('launch-timeout');
-  expect(chromiumLaunchFailureCategory(new Error('unexpected browser crash')))
-    .toBe('unknown');
+  expect(
+    chromiumLaunchFailureCategory(
+      new Error("Executable doesn't exist at /private/path"),
+    ),
+  ).toBe('missing-binary');
+  expect(
+    chromiumLaunchFailureCategory(
+      new Error('error while loading shared libraries: libnss3.so'),
+    ),
+  ).toBe('missing-libraries');
+  expect(
+    chromiumLaunchFailureCategory(new Error('Operation not permitted')),
+  ).toBe('execution-blocked');
+  expect(
+    chromiumLaunchFailureCategory(new Error('ENOMEM cannot allocate memory')),
+  ).toBe('resource-exhausted');
+  expect(
+    chromiumLaunchFailureCategory(
+      new Error('browserType.launch: Timeout 15000ms exceeded'),
+    ),
+  ).toBe('launch-timeout');
+  expect(
+    chromiumLaunchFailureCategory(new Error('unexpected browser crash')),
+  ).toBe('unknown');
 });
 
 test('the Node hosting default selects Chromium without guessing a Workers provider', () => {
@@ -44,9 +56,12 @@ test('provisioned Cloudflare Browser Rendering produces the same premium HTML PD
     CF_BROWSER_API_TOKEN: 'token',
   };
   expect(configuredPdfProvider(cloudflare)).toBe('cloudflare-rest');
-  expect(configuredPdfProvider({ ...cloudflare, PDF_RENDERER: 'node' })).toBe('node');
-  expect(configuredPdfProvider({ ...cloudflare, PDF_RENDERER: 'cloudflare-rest' }))
-    .toBe('cloudflare-rest');
+  expect(configuredPdfProvider({ ...cloudflare, PDF_RENDERER: 'node' })).toBe(
+    'node',
+  );
+  expect(
+    configuredPdfProvider({ ...cloudflare, PDF_RENDERER: 'cloudflare-rest' }),
+  ).toBe('cloudflare-rest');
 });
 
 test('Cloudflare backend requires explicit provisioned account and token', async () => {
@@ -104,11 +119,12 @@ test('Cloudflare REST adapter accepts only PDF bytes from an explicit provider',
 });
 
 test('invalid premium HTML fails with an actionable safe PDF error code', async () => {
-  await expect(renderPdf('<img src="https://unknown.example/private-image.png">'))
-    .rejects.toMatchObject({
-      code: 'PDF_PRINT_HTML_INVALID',
-      status: 503,
-    });
+  await expect(
+    renderPdf('<img src="https://unknown.example/private-image.png">'),
+  ).rejects.toMatchObject({
+    code: 'PDF_PRINT_HTML_INVALID',
+    status: 503,
+  });
 });
 
 test('when Chromium cannot start, a configured browser PDF service prints identical HTML', async () => {
@@ -117,15 +133,19 @@ test('when Chromium cannot start, a configured browser PDF service prints identi
   vi.stubEnv('CF_BROWSER_API_TOKEN', 'secret-test-token');
   const html = '<html><head></head><body><h1>Premium quote</h1></body></html>';
   const nodeRenderer = await import('./pdf.node');
-  const chromium = vi.spyOn(nodeRenderer, 'renderNodePdf')
+  const chromium = vi
+    .spyOn(nodeRenderer, 'renderNodePdf')
     .mockRejectedValueOnce(new Error('PDF_CHROMIUM_UNAVAILABLE'));
   const doc = await PDFDocument.create();
   doc.addPage([595, 842]);
   const sample = await doc.save();
-  const remote = vi.fn(async () => new Response(Uint8Array.from(sample).buffer, {
-    status: 200,
-    headers: { 'content-type': 'application/pdf' },
-  }));
+  const remote = vi.fn(
+    async () =>
+      new Response(Uint8Array.from(sample).buffer, {
+        status: 200,
+        headers: { 'content-type': 'application/pdf' },
+      }),
+  );
   vi.stubGlobal('fetch', remote);
   try {
     const result = await renderPdf(html, { title: 'Premium quote' });
@@ -170,7 +190,6 @@ test('embedded media and links are safe but active content and remote fetches fa
   }
 });
 
-
 test('package PDF preview is a valid multi-page A4 document without Chromium', async () => {
   const document = await renderConstructionPackageSamplePdf({
     company: 'SG Homes',
@@ -183,13 +202,18 @@ test('package PDF preview is a valid multi-page A4 document without Chromium', a
       title: 'Material specification ' + (index + 1),
       brand: 'Sample brand',
       grade: 'Grade A',
-      description: 'Approved specifications and installation terms. '.repeat(15),
+      description: 'Approved specifications and installation terms. '.repeat(
+        15,
+      ),
       allowancePerSqft: '85',
     })),
   });
   expect(document.toString('ascii', 0, 5)).toBe('%PDF-');
   const pdf = await PDFDocument.load(document);
   expect(pdf.getPageCount()).toBeGreaterThan(1);
-  expect(pdf.getPages()[0]?.getSize()).toMatchObject({ width: 595, height: 842 });
+  expect(pdf.getPages()[0]?.getSize()).toMatchObject({
+    width: 595,
+    height: 842,
+  });
   expect(pdf.getTitle()).toContain('Royal Construction');
 });

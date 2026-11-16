@@ -740,7 +740,9 @@
     transform: translateX(-105%);
     visibility: hidden;
     pointer-events: none;
-    transition: transform 0.2s ease, visibility 0.2s ease;
+    transition:
+      transform 0.2s ease,
+      visibility 0.2s ease;
     width: min(300px, 86vw);
     max-width: 86vw;
     box-shadow: 10px 0 35px #0b183328;

@@ -36,8 +36,9 @@ describe('OAuth public URL selection behind Hostinger', () => {
       NODE_ENV: 'production',
       APP_ORIGIN: 'http://127.0.0.1:3131',
     };
-    expect(publicAuthOrigin('http://127.0.0.1:3131/login', fixture))
-      .toBe('http://127.0.0.1:3131');
+    expect(publicAuthOrigin('http://127.0.0.1:3131/login', fixture)).toBe(
+      'http://127.0.0.1:3131',
+    );
   });
 
   it('supports local development but rejects proxy-internal staging', () => {

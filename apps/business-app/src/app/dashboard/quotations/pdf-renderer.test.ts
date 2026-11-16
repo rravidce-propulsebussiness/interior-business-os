@@ -28,7 +28,9 @@ it('keeps tenant-uploaded logo and cover images in the exact premium PDF HTML', 
   const html = safeQuotationPrintHtml(renderQuotationDocument(saved));
   expect(html).toContain('data:image/jpeg;base64,AA==');
   expect(html).toContain('data:image/png;base64,AA==');
-  expect(validatePrintHtml(html)).toContain('Company-provided project photograph');
+  expect(validatePrintHtml(html)).toContain(
+    'Company-provided project photograph',
+  );
 });
 
 it('does not silently replace a premium quotation with a different fallback PDF on a missing browser', async () => {
@@ -37,12 +39,13 @@ it('does not silently replace a premium quotation with a different fallback PDF 
   vi.stubEnv('CF_BROWSER_API_TOKEN', '');
   try {
     const saved = quotationDocumentFixture();
-    await expect(renderQuotationPdf(renderQuotationDocument(saved), saved))
-      .rejects.toMatchObject({
-        name: 'PdfServiceError',
-        code: 'PDF_RENDERER_UNAVAILABLE',
-        status: 503,
-      });
+    await expect(
+      renderQuotationPdf(renderQuotationDocument(saved), saved),
+    ).rejects.toMatchObject({
+      name: 'PdfServiceError',
+      code: 'PDF_RENDERER_UNAVAILABLE',
+      status: 503,
+    });
   } finally {
     vi.unstubAllEnvs();
   }
@@ -51,13 +54,16 @@ it('does not silently replace a premium quotation with a different fallback PDF 
 it('keeps quotation PDF clean and preserves grouped payment terms in the linked agreement PDF', () => {
   const saved = quotationDocumentFixture();
   saved.totals.final_amount = '5550000.00';
-  saved.terms = 'Inclusions:\nCement and steel\n\nWarranty:\n10 years\n\n' +
+  saved.terms =
+    'Inclusions:\nCement and steel\n\nWarranty:\n10 years\n\n' +
     '[STAGE_PAYMENT_PLAN]\nAdvance|10.00\nRCC|60.00\nHandover|30.00\n[/STAGE_PAYMENT_PLAN]';
   const quote = safeQuotationPrintHtml(renderQuotationDocument(saved));
   expect(quote).not.toContain('Stage-wise payment schedule');
   expect(quote).not.toContain('Agreement conditions');
   expect(quote).not.toContain('10 years');
-  const printable = safeQuotationPrintHtml(renderQuotationDocument(saved, { kind: 'agreement' }));
+  const printable = safeQuotationPrintHtml(
+    renderQuotationDocument(saved, { kind: 'agreement' }),
+  );
   expect(printable).toContain('Stage-wise payment schedule');
   expect(printable).toContain('Advance');
   expect(printable).toContain('RCC');
@@ -65,18 +71,25 @@ it('keeps quotation PDF clean and preserves grouped payment terms in the linked 
   expect(printable).toContain('Agreement conditions');
   expect(printable).toContain('10 years');
   expect(printable).toContain('55,50,000');
-  expect(validatePrintHtml(printable)).toContain('<section class="pb-page pb-payment-page">');
+  expect(validatePrintHtml(printable)).toContain(
+    '<section class="pb-page pb-payment-page">',
+  );
 });
-
 
 it('uses the same embedded concept photography for preview and secure premium PDF output', async () => {
   const sample = Buffer.alloc(32);
   sample.write('RIFF', 0, 'ascii');
   sample.write('WEBP', 8, 'ascii');
-  const stub = vi.fn(async () => new Response(new Uint8Array(sample), {
-    status: 200,
-    headers: { 'Content-Type': 'image/webp', 'Content-Length': String(sample.length) },
-  }));
+  const stub = vi.fn(
+    async () =>
+      new Response(new Uint8Array(sample), {
+        status: 200,
+        headers: {
+          'Content-Type': 'image/webp',
+          'Content-Length': String(sample.length),
+        },
+      }),
+  );
   vi.stubGlobal('fetch', stub);
   try {
     const html = renderQuotationDocument(quotationDocumentFixture());

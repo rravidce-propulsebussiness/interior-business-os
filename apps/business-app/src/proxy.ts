@@ -46,10 +46,14 @@ export async function proxy(request: NextRequest) {
   const start = Date.now();
   if (category)
     console.log(
-      '[Business OS] http.request.start id=' + requestId +
-      ' category=' + category +
-      ' method=' + requestLogMethod(request.method) +
-      ' pid=' + process.pid,
+      '[Business OS] http.request.start id=' +
+        requestId +
+        ' category=' +
+        category +
+        ' method=' +
+        requestLogMethod(request.method) +
+        ' pid=' +
+        process.pid,
     );
   // A visitor must not be allowed to supply internal tenant-scope headers.
   request.headers.delete(WORKSPACE_SLUG_HEADER);
@@ -78,15 +82,21 @@ export async function proxy(request: NextRequest) {
   request.headers.delete(EDGE_SIGNATURE_HEADER);
   request.headers.delete(EDGE_TIME_HEADER);
   if (verifiedHost) request.headers.set(PUBLIC_SITE_HOST_HEADER, verifiedHost);
-  const host = verifiedHost ?? request.headers.get('host') ?? request.nextUrl.hostname;
-  if (request.nextUrl.pathname === '/public-site' ||
-      request.nextUrl.pathname.startsWith('/public-site/')) {
+  const host =
+    verifiedHost ?? request.headers.get('host') ?? request.nextUrl.hostname;
+  if (
+    request.nextUrl.pathname === '/public-site' ||
+    request.nextUrl.pathname.startsWith('/public-site/')
+  ) {
     return new NextResponse('Not found', {
       status: 404,
       headers: { 'Cache-Control': 'private, no-store' },
     });
   }
-  if (publicWebsiteRouting && (verifiedHost !== null || isManagedWebsiteHost(host, baseDomain))) {
+  if (
+    publicWebsiteRouting &&
+    (verifiedHost !== null || isManagedWebsiteHost(host, baseDomain))
+  ) {
     // The health probe verifies that this hostname reaches the same Node app.
     if (request.nextUrl.pathname === '/api/health') {
       return NextResponse.next({ request: { headers: request.headers } });
@@ -105,10 +115,10 @@ export async function proxy(request: NextRequest) {
     response.headers.set(
       'Content-Security-Policy',
       "default-src 'self'; script-src 'self' 'unsafe-inline'; " +
-      "style-src 'self' 'unsafe-inline'; img-src 'self'; media-src 'self'; " +
-      "connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com " +
-      "https://www.google.com https://www.openstreetmap.org; object-src 'none'; " +
-      "base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+        "style-src 'self' 'unsafe-inline'; img-src 'self'; media-src 'self'; " +
+        "connect-src 'self'; frame-src 'self' https://www.youtube-nocookie.com " +
+        "https://www.google.com https://www.openstreetmap.org; object-src 'none'; " +
+        "base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
     );
     return response;
   }
@@ -151,10 +161,14 @@ export async function proxy(request: NextRequest) {
     response = await refreshSessionWithRewrite(request, rewrite);
   } catch (error) {
     console.error(
-      '[Business OS] http.proxy.error id=' + requestId +
-      ' category=' + (category ?? 'other') +
-      ' name=' + requestErrorName(error) +
-      ' duration_ms=' + (Date.now() - start),
+      '[Business OS] http.proxy.error id=' +
+        requestId +
+        ' category=' +
+        (category ?? 'other') +
+        ' name=' +
+        requestErrorName(error) +
+        ' duration_ms=' +
+        (Date.now() - start),
     );
     throw error;
   }
@@ -171,9 +185,12 @@ export async function proxy(request: NextRequest) {
   }
   if (category)
     console.log(
-      '[Business OS] http.proxy.complete id=' + requestId +
-      ' category=' + category +
-      ' duration_ms=' + (Date.now() - start),
+      '[Business OS] http.proxy.complete id=' +
+        requestId +
+        ' category=' +
+        category +
+        ' duration_ms=' +
+        (Date.now() - start),
     );
   return response;
 }

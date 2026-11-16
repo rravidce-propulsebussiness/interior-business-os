@@ -52,7 +52,9 @@ export async function manageShare(
  *
  * The user must confirm draft issuance before calling this action.
  */
-export async function authorizeWhatsAppPdfAttachment(revisionId: string): Promise<{
+export async function authorizeWhatsAppPdfAttachment(
+  revisionId: string,
+): Promise<{
   ok: boolean;
   message: string;
 }> {
@@ -68,10 +70,16 @@ export async function authorizeWhatsAppPdfAttachment(revisionId: string): Promis
     if (revisionError || !revision)
       return { ok: false, message: 'Quotation not found.' };
     if (revision.status !== 'draft' && revision.status !== 'issued')
-      return { ok: false, message: 'This revision cannot be shared. Open the latest quotation.' };
+      return {
+        ok: false,
+        message: 'This revision cannot be shared. Open the latest quotation.',
+      };
     const header = documentHeaderSchema.safeParse(revision.document_snapshot);
     if (!header.success)
-      return { ok: false, message: 'Save complete customer and company details before sharing.' };
+      return {
+        ok: false,
+        message: 'Save complete customer and company details before sharing.',
+      };
     const { data: quote, error: quoteError } = await s.client
       .from('quotations')
       .select('id,status')
@@ -79,12 +87,21 @@ export async function authorizeWhatsAppPdfAttachment(revisionId: string): Promis
       .eq('id', revision.quotation_id)
       .maybeSingle();
     if (quoteError || !quote || quote.status === 'cancelled')
-      return { ok: false, message: 'This quotation is not available to share.' };
+      return {
+        ok: false,
+        message: 'This quotation is not available to share.',
+      };
     if (revision.status === 'draft') {
       if (!s.allowed('quotation.issue', 'quotation'))
-        return { ok: false, message: 'Issuing permission is required before sharing a draft.' };
+        return {
+          ok: false,
+          message: 'Issuing permission is required before sharing a draft.',
+        };
       if (!hasSavedStagePaymentPlan(revision.terms))
-        return { ok: false, message: 'Save the stage-wise payment schedule before sharing.' };
+        return {
+          ok: false,
+          message: 'Save the stage-wise payment schedule before sharing.',
+        };
       const { data: items, error: itemError } = await s.client
         .from('quotation_items')
         .select('id')
@@ -92,7 +109,10 @@ export async function authorizeWhatsAppPdfAttachment(revisionId: string): Promis
         .eq('revision_id', id)
         .limit(1);
       if (itemError || !items?.length)
-        return { ok: false, message: 'Save at least one priced quotation item first.' };
+        return {
+          ok: false,
+          message: 'Save at least one priced quotation item first.',
+        };
       await s.commercial.commit(s.org, {
         action: 'issue',
         revision_id: id,
@@ -101,7 +121,10 @@ export async function authorizeWhatsAppPdfAttachment(revisionId: string): Promis
     }
     revalidatePath('/dashboard/quotations', 'layout');
     revalidatePath('/dashboard/crm/leads');
-    return { ok: true, message: 'Quotation approved. Preparing PDF attachment…' };
+    return {
+      ok: true,
+      message: 'Quotation approved. Preparing PDF attachment…',
+    };
   } catch (error) {
     return { ok: false, message: safeFailure(error).message };
   }

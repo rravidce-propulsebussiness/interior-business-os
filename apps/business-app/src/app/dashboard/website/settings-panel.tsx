@@ -50,11 +50,18 @@ export function WebsiteSettings({
   const save = (key: string, value: unknown) =>
     start(async () => {
       let nextVersion = version;
-      if ((key === 'settings' || key === 'pages') &&
-          JSON.stringify(doc.assets) !== JSON.stringify(savedAssets)) {
+      if (
+        (key === 'settings' || key === 'pages') &&
+        JSON.stringify(doc.assets) !== JSON.stringify(savedAssets)
+      ) {
         // Attach uploaded assets before saving logo/favicon settings so the
         // saved document never refers to an unattached image.
-        const attachment = await saveAction(id, nextVersion, 'assets', doc.assets);
+        const attachment = await saveAction(
+          id,
+          nextVersion,
+          'assets',
+          doc.assets,
+        );
         setMessage(attachment.message);
         if (!attachment.version) return;
         nextVersion = attachment.version;
@@ -166,7 +173,7 @@ export function WebsiteSettings({
                 />
               </label>
             ))}
-            {(['logo', 'favicon'] as const).map(key => (
+            {(['logo', 'favicon'] as const).map((key) => (
               <WebsiteMediaPicker
                 key={key}
                 id={id}
@@ -175,20 +182,26 @@ export function WebsiteSettings({
                 label={key === 'logo' ? 'Company logo' : 'Browser favicon'}
                 disabled={!canEdit || pending}
                 canPreview={canPreviewMedia}
-                unsaved={JSON.stringify(doc.assets) !== JSON.stringify(savedAssets) ||
-                  JSON.stringify(doc.settings) !== JSON.stringify(savedSettings)}
-                onUploaded={asset => {
-                  setDoc(current => ({
+                unsaved={
+                  JSON.stringify(doc.assets) !== JSON.stringify(savedAssets) ||
+                  JSON.stringify(doc.settings) !== JSON.stringify(savedSettings)
+                }
+                onUploaded={(asset) => {
+                  setDoc((current) => ({
                     ...current,
                     assets: [...current.assets, asset],
                     settings: { ...current.settings, [key]: asset.id },
                   }));
-                  setMessage('Image uploaded. Save SEO to keep your logo or favicon.');
+                  setMessage(
+                    'Image uploaded. Save SEO to keep your logo or favicon.',
+                  );
                 }}
-                onChange={assetId => setDoc(current => ({
-                  ...current,
-                  settings: { ...current.settings, [key]: assetId },
-                }))}
+                onChange={(assetId) =>
+                  setDoc((current) => ({
+                    ...current,
+                    settings: { ...current.settings, [key]: assetId },
+                  }))
+                }
               />
             ))}
             <label>
@@ -248,32 +261,43 @@ export function WebsiteSettings({
                   label={`Social sharing image for ${page.title}`}
                   disabled={!canEdit || pending}
                   canPreview={canPreviewMedia}
-                  unsaved={JSON.stringify(doc.assets) !== JSON.stringify(savedAssets) ||
-                    JSON.stringify(doc.settings) !== JSON.stringify(savedSettings) ||
-                    JSON.stringify(doc.pages) !== JSON.stringify(savedPages)}
-                  onUploaded={asset => {
-                    setDoc(current => {
+                  unsaved={
+                    JSON.stringify(doc.assets) !==
+                      JSON.stringify(savedAssets) ||
+                    JSON.stringify(doc.settings) !==
+                      JSON.stringify(savedSettings) ||
+                    JSON.stringify(doc.pages) !== JSON.stringify(savedPages)
+                  }
+                  onUploaded={(asset) => {
+                    setDoc((current) => {
                       const pages = structuredClone(current.pages);
-                      const target = pages.find(item => item.id === page.id);
+                      const target = pages.find((item) => item.id === page.id);
                       if (target) target.seo.image = asset.id;
                       return {
                         ...current,
                         pages,
-                        assets: current.assets.some(item => item.id === asset.id)
-                          ? current.assets : [...current.assets, asset],
+                        assets: current.assets.some(
+                          (item) => item.id === asset.id,
+                        )
+                          ? current.assets
+                          : [...current.assets, asset],
                       };
                     });
-                    setMessage('Social image uploaded. Save page SEO to keep it in your draft.');
+                    setMessage(
+                      'Social image uploaded. Save page SEO to keep it in your draft.',
+                    );
                   }}
-                  onChange={assetId => setDoc(current => {
-                    const pages = structuredClone(current.pages);
-                    const target = pages.find(item => item.id === page.id);
-                    if (target) {
-                      if (assetId) target.seo.image = assetId;
-                      else delete target.seo.image;
-                    }
-                    return { ...current, pages };
-                  })}
+                  onChange={(assetId) =>
+                    setDoc((current) => {
+                      const pages = structuredClone(current.pages);
+                      const target = pages.find((item) => item.id === page.id);
+                      if (target) {
+                        if (assetId) target.seo.image = assetId;
+                        else delete target.seo.image;
+                      }
+                      return { ...current, pages };
+                    })
+                  }
                 />
               </div>
               <label className="text-sm">

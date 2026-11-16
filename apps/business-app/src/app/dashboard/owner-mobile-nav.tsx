@@ -18,8 +18,11 @@ export function OwnerMobileNav({
   return (
     <nav className="command-mobile-nav" aria-label="Workspace shortcuts">
       {navigation.slice(0, 5).map((item) => (
-        <a href={item.href} key={item.href}
-          aria-current={item.href === currentHref ? 'page' : undefined}>
+        <a
+          href={item.href}
+          key={item.href}
+          aria-current={item.href === currentHref ? 'page' : undefined}
+        >
           <OwnerIcon name={item.icon} size={20} />
           <span>{item.label}</span>
         </a>

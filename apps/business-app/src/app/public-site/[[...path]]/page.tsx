@@ -1,6 +1,10 @@
 import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
-import { isPropulsePrivacyPage, privacyPolicyMetadata, PrivacyPolicyContent } from '../privacy-policy-content';
+import {
+  isPropulsePrivacyPage,
+  privacyPolicyMetadata,
+  PrivacyPolicyContent,
+} from '../privacy-policy-content';
 import {
   currentWebsite,
   publicWebsiteHostname,

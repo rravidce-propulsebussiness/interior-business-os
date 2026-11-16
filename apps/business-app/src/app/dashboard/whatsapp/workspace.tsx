@@ -31,7 +31,9 @@ export function WhatsAppWorkspace({
   const [notice, setNotice] = useState('');
   const [busy, setBusy] = useState(false);
   const [templatesLoading, setTemplatesLoading] = useState(false);
-  const [templatesCheckedAt, setTemplatesCheckedAt] = useState<Date | null>(null);
+  const [templatesCheckedAt, setTemplatesCheckedAt] = useState<Date | null>(
+    null,
+  );
   const [newName, setNewName] = useState('');
   const [newBody, setNewBody] = useState('');
   const [newCategory, setNewCategory] = useState('UTILITY');
@@ -54,8 +56,8 @@ export function WhatsAppWorkspace({
         const list = data.templates ?? [];
         setTemplates(list);
         setTemplatesCheckedAt(new Date());
-        const firstApproved = list.find(
-          (item) => ['APPROVED', 'ACTIVE'].includes(item.status.toUpperCase()),
+        const firstApproved = list.find((item) =>
+          ['APPROVED', 'ACTIVE'].includes(item.status.toUpperCase()),
         );
         if (firstApproved) {
           setTemplateName(firstApproved.name);
@@ -382,7 +384,8 @@ export function WhatsAppWorkspace({
             );
           })}
           <span className="text-neutral-500">
-            {templates.length} template{templates.length === 1 ? '' : 's'} from Meta
+            {templates.length} template{templates.length === 1 ? '' : 's'} from
+            Meta
             {templatesCheckedAt
               ? ` · Updated ${templatesCheckedAt.toLocaleTimeString()}`
               : ''}

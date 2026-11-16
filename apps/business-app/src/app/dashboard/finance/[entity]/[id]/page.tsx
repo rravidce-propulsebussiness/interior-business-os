@@ -12,8 +12,11 @@ import { titles, text, RecordList, Metrics } from '../../presentation';
 function redirectLegacyInvoiceDetail(entity: string, invoiceNumber: string) {
   // Keep Finance invoice routes backward compatible without rendering
   // a second invoice screen. Caller has already checked invoice permission.
-  if (entity === 'invoices') redirect('/dashboard/finance?tab=invoices' +
-    (invoiceNumber ? '&q=' + encodeURIComponent(invoiceNumber) : ''));
+  if (entity === 'invoices')
+    redirect(
+      '/dashboard/finance?tab=invoices' +
+        (invoiceNumber ? '&q=' + encodeURIComponent(invoiceNumber) : ''),
+    );
 }
 export default async function FinanceDetail({
   params,
@@ -34,16 +37,28 @@ export default async function FinanceDetail({
     version = r.version;
   // Payment details are displayed in the canonical Finance receipt ledger.
   if (entity === 'payments' && s.allowed('invoice.view')) {
-    redirect('/dashboard/finance?tab=payments' +
-      (contractId ? '&contract_id=' + encodeURIComponent(contractId) : ''));
+    redirect(
+      '/dashboard/finance?tab=payments' +
+        (contractId ? '&contract_id=' + encodeURIComponent(contractId) : ''),
+    );
   }
   // Use the existing project Quote & Agreement section for company users.
   // Keep Finance contract detail for finance-only staff who cannot view the
   // project; do not strand them behind project access restrictions.
-  if (entity === 'contracts' && text(r, 'project_id') && canAccess(s.context, {
-    organizationId: s.org, permission: 'project.view', moduleKey: 'projects',
-  })) {
-    redirect('/dashboard/projects/' + encodeURIComponent(text(r, 'project_id')) + '/documents#project-agreement');
+  if (
+    entity === 'contracts' &&
+    text(r, 'project_id') &&
+    canAccess(s.context, {
+      organizationId: s.org,
+      permission: 'project.view',
+      moduleKey: 'projects',
+    })
+  ) {
+    redirect(
+      '/dashboard/projects/' +
+        encodeURIComponent(text(r, 'project_id')) +
+        '/documents#project-agreement',
+    );
   }
   redirectLegacyInvoiceDetail(entity, text(r, 'invoice_number'));
   const items = Array.isArray(r.items)

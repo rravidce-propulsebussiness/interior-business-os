@@ -65,10 +65,12 @@ test('Server Action key validation is optional and never exposes key contents', 
 
 test('Hostinger builds bound both Next.js and Rust worker concurrency', () => {
   const nextConfig = readFileSync(
-    new URL('../apps/business-app/next.config.ts', import.meta.url), 'utf8',
+    new URL('../apps/business-app/next.config.ts', import.meta.url),
+    'utf8',
   );
   const buildScript = readFileSync(
-    new URL('./hostinger-build.mjs', import.meta.url), 'utf8',
+    new URL('./hostinger-build.mjs', import.meta.url),
+    'utf8',
   );
   assert.match(nextConfig, /BUSINESS_OS_HOSTED_BUILD === '1'/);
   assert.match(nextConfig, /cpus: 2/);

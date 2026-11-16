@@ -1,6 +1,7 @@
 import type { WebsiteNode } from '@business-os/website-builder';
 
-export type EditableContentKey = 'title' | 'text' | 'subtitle' | 'href' | 'alt' | 'label';
+export type EditableContentKey =
+  'title' | 'text' | 'subtitle' | 'href' | 'alt' | 'label';
 export type WebsiteContentField = {
   key: EditableContentKey;
   label: string;
@@ -8,10 +9,21 @@ export type WebsiteContentField = {
   maxLength: number;
   placeholder: string;
 };
-const field = (key: EditableContentKey, label: string): WebsiteContentField => ({
-  key, label,
+const field = (
+  key: EditableContentKey,
+  label: string,
+): WebsiteContentField => ({
+  key,
+  label,
   multiline: key === 'text' || key === 'subtitle',
-  maxLength: { title: 300, text: 12000, subtitle: 1000, href: 2048, alt: 500, label: 200 }[key],
+  maxLength: {
+    title: 300,
+    text: 12000,
+    subtitle: 1000,
+    href: 2048,
+    alt: 500,
+    label: 200,
+  }[key],
   placeholder: {
     title: 'Enter a heading',
     text: 'Write your text here',
@@ -26,7 +38,9 @@ const field = (key: EditableContentKey, label: string): WebsiteContentField => (
  * Previously every node exposed title, body text, subtitle and URL even
  * when the website renderer ignored them. Never change existing document
  * data when switching selections or when hiding advanced controls. */
-export function editableContentFields(node: Pick<WebsiteNode, 'type' | 'props'>): WebsiteContentField[] {
+export function editableContentFields(
+  node: Pick<WebsiteNode, 'type' | 'props'>,
+): WebsiteContentField[] {
   const props = node.props;
   switch (node.type) {
     case 'heading':
@@ -41,7 +55,9 @@ export function editableContentFields(node: Pick<WebsiteNode, 'type' | 'props'>)
     case 'image':
       return [field('alt', 'Image description')];
     case 'logo':
-      return props.asset ? [field('alt', 'Logo description')] : [field('text', 'Company name')];
+      return props.asset
+        ? [field('alt', 'Logo description')]
+        : [field('text', 'Company name')];
     case 'hero':
       return [
         field('title', 'Main headline'),

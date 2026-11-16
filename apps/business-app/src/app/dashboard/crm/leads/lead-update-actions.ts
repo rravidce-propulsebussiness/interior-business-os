@@ -5,22 +5,33 @@ import { z } from 'zod';
 import { crmServices } from '../service';
 import { safeFailure } from '@business-os/shared';
 
-const logSchema = z.object({
-  leadId: z.uuid(),
-  activityType: z.enum(['phone_call', 'whatsapp_note', 'meeting', 'email_note', 'note']),
-  outcome: z.string().trim().min(1).max(200),
-  note: z.string().trim().max(3000),
-  nextFollowUpAt: z.iso.datetime({ offset: true }).nullable(),
-}).strict();
+const logSchema = z
+  .object({
+    leadId: z.uuid(),
+    activityType: z.enum([
+      'phone_call',
+      'whatsapp_note',
+      'meeting',
+      'email_note',
+      'note',
+    ]),
+    outcome: z.string().trim().min(1).max(200),
+    note: z.string().trim().max(3000),
+    nextFollowUpAt: z.iso.datetime({ offset: true }).nullable(),
+  })
+  .strict();
 
 /** One database transaction logs the contact and optionally schedules a callback. */
-export async function logLeadUpdate(input: unknown): Promise<{ok: boolean; message: string}> {
+export async function logLeadUpdate(
+  input: unknown,
+): Promise<{ ok: boolean; message: string }> {
   try {
     const value = logSchema.parse(input);
     const s = await crmServices('crm.activity.create');
     const rpc = s.client.rpc.bind(s.client) as unknown as (
-      name: string, args: Record<string, unknown>,
-    ) => Promise<{error: {code?: string; message: string} | null}>;
+      name: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ error: { code?: string; message: string } | null }>;
     const { error } = await rpc('crm_lead_log_update', {
       p_organization_id: s.org,
       p_lead_id: value.leadId,
@@ -31,7 +42,11 @@ export async function logLeadUpdate(input: unknown): Promise<{ok: boolean; messa
     });
     if (error) {
       console.error('[crm.lead.update]', error.code, error.message);
-      return { ok: false, message: 'Unable to record this update. Check follow-up permissions or retry.' };
+      return {
+        ok: false,
+        message:
+          'Unable to record this update. Check follow-up permissions or retry.',
+      };
     }
     revalidatePath('/dashboard/crm/leads');
     revalidatePath('/dashboard/crm/leads/' + value.leadId);
@@ -42,23 +57,30 @@ export async function logLeadUpdate(input: unknown): Promise<{ok: boolean; messa
   }
 }
 
-const prioritySchema = z.object({
-  leadId: z.uuid(),
-  version: z.number().int().positive(),
-  priority: z.enum(['low', 'normal', 'high', 'urgent']),
-}).strict();
+const prioritySchema = z
+  .object({
+    leadId: z.uuid(),
+    version: z.number().int().positive(),
+    priority: z.enum(['low', 'normal', 'high', 'urgent']),
+  })
+  .strict();
 
 /** Update just the lead priority; the tenant RPC enforces lead.manage,
  * optimistic version checks, and records an audit/history event.
  */
-export async function changeLeadPriority(input: unknown): Promise<{ok: boolean; message: string}> {
+export async function changeLeadPriority(
+  input: unknown,
+): Promise<{ ok: boolean; message: string }> {
   try {
     const value = prioritySchema.parse(input);
     const s = await crmServices('lead.manage');
     const rpc = s.client.rpc.bind(s.client) as unknown as (
       name: string,
       args: Record<string, unknown>,
-    ) => Promise<{ data: string | null; error: {code?: string; message: string} | null }>;
+    ) => Promise<{
+      data: string | null;
+      error: { code?: string; message: string } | null;
+    }>;
     const { data, error } = await rpc('crm_save', {
       p_organization_id: s.org,
       p_entity: 'leads',
@@ -70,8 +92,14 @@ export async function changeLeadPriority(input: unknown): Promise<{ok: boolean; 
     });
     if (error || !data) {
       if (error?.code === '40001')
-        return { ok: false, message: 'This lead was updated elsewhere. Refresh and try again.' };
-      return { ok: false, message: 'Could not update priority. Check permissions or retry.' };
+        return {
+          ok: false,
+          message: 'This lead was updated elsewhere. Refresh and try again.',
+        };
+      return {
+        ok: false,
+        message: 'Could not update priority. Check permissions or retry.',
+      };
     }
     revalidatePath('/dashboard/crm/leads');
     revalidatePath('/dashboard/crm/leads/' + value.leadId);
@@ -81,23 +109,30 @@ export async function changeLeadPriority(input: unknown): Promise<{ok: boolean; 
   }
 }
 
-const scheduleSchema = z.object({
-  leadId: z.uuid(),
-  dueAt: z.iso.datetime({ offset: true }),
-  assignedTo: z.uuid().nullable(),
-}).strict();
+const scheduleSchema = z
+  .object({
+    leadId: z.uuid(),
+    dueAt: z.iso.datetime({ offset: true }),
+    assignedTo: z.uuid().nullable(),
+  })
+  .strict();
 
 /** Schedule from the main Leads list without navigating away. */
-export async function scheduleLeadFollowUp(input: unknown): Promise<{ok: boolean; message: string}> {
+export async function scheduleLeadFollowUp(
+  input: unknown,
+): Promise<{ ok: boolean; message: string }> {
   try {
     const value = scheduleSchema.parse(input);
     if (new Date(value.dueAt).getTime() <= Date.now())
       return { ok: false, message: 'Choose a future follow-up time.' };
     const s = await crmServices('crm.followup.manage');
     const user = await s.authorization.requireAuthenticatedUser();
-    const { data: lead, error } = await s.client.from('leads')
+    const { data: lead, error } = await s.client
+      .from('leads')
       .select('id,lifecycle,assigned_to')
-      .eq('organization_id', s.org).eq('id', value.leadId).maybeSingle();
+      .eq('organization_id', s.org)
+      .eq('id', value.leadId)
+      .maybeSingle();
     if (error || !lead || lead.lifecycle === 'archived')
       return { ok: false, message: 'Lead not available.' };
     await s.crm.save('lead_followups', {

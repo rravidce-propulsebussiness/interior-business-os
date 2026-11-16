@@ -20,10 +20,15 @@ export function routeWebhookChange(
   change: unknown,
 ): WebhookRoute {
   if (connections.length === 0) return { kind: 'ignore' };
-  const value = (change as { value?: { metadata?: { phone_number_id?: unknown } } } | null)
-    ?.value;
+  const value = (
+    change as { value?: { metadata?: { phone_number_id?: unknown } } } | null
+  )?.value;
   const phoneNumberId = value?.metadata?.phone_number_id;
-  if (phoneNumberId === undefined || phoneNumberId === null || phoneNumberId === '')
+  if (
+    phoneNumberId === undefined ||
+    phoneNumberId === null ||
+    phoneNumberId === ''
+  )
     return {
       kind: 'account',
       organizationIds: [...new Set(connections.map((c) => c.organization_id))],

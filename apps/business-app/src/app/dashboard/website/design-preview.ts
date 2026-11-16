@@ -1,6 +1,9 @@
 'use server';
 
-import { validateDocument, type WebsiteDocument } from '@business-os/website-builder';
+import {
+  validateDocument,
+  type WebsiteDocument,
+} from '@business-os/website-builder';
 import { compileWebsite } from '@business-os/website-builder/compiler';
 import { websiteHtml } from '@business-os/website-builder/render';
 import { websiteServices } from './service';
@@ -23,7 +26,7 @@ export async function renderWebsiteThemePreview(
     throw new Error('Custom code access required');
   const build = compileWebsite({
     ...document,
-    pages: document.pages.map(page => ({ ...page, visibility: 'public' })),
+    pages: document.pages.map((page) => ({ ...page, visibility: 'public' })),
   });
   return websiteHtml(build, path, {
     preview: true,

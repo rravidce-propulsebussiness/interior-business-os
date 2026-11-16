@@ -4,7 +4,10 @@ import { preservesFixedTemplate } from './fixed-template-guard';
 
 function example() {
   const website = emptyWebsite('Acme');
-  website.pages[0]!.nodes = [createNode('hero', 'heroA'), createNode('text', 'textA')];
+  website.pages[0]!.nodes = [
+    createNode('hero', 'heroA'),
+    createNode('text', 'textA'),
+  ];
   return website;
 }
 
@@ -64,7 +67,11 @@ describe('fixed template content guard', () => {
     const original = example();
     const changed = structuredClone(original);
     changed.content.push({
-      id: 'cardA', kind: 'services', title: 'Example', text: '', published: false,
+      id: 'cardA',
+      kind: 'services',
+      title: 'Example',
+      text: '',
+      published: false,
     });
     expect(preservesFixedTemplate(original, changed, 'content')).toBe(false);
   });

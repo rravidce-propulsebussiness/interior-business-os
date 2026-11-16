@@ -1,5 +1,8 @@
 import { renderPdf } from '@business-os/shared/pdf';
-import { customerDocumentSchema, type CustomerDocument } from '@business-os/core/quotation-document';
+import {
+  customerDocumentSchema,
+  type CustomerDocument,
+} from '@business-os/core/quotation-document';
 import type { QuotationDocumentKind } from '@business-os/core/quotation-document';
 
 /**
@@ -36,9 +39,15 @@ export async function renderQuotationPdf(
   }
   return renderPdf(safeQuotationPrintHtml(html), {
     brochure: true,
-    ...(document ? {
-      title: (kind === 'agreement' ? 'Agreement draft ' : 'Quotation ') + document.number + ' R' + document.revision,
-      author: document.header.branding.name,
-    } : {}),
+    ...(document
+      ? {
+          title:
+            (kind === 'agreement' ? 'Agreement draft ' : 'Quotation ') +
+            document.number +
+            ' R' +
+            document.revision,
+          author: document.header.branding.name,
+        }
+      : {}),
   });
 }

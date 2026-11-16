@@ -19,7 +19,9 @@ export function WebsiteCreate({
   initialTemplate?: string;
 }) {
   const [message, setMessage] = useState('');
-  const [template, setTemplate] = useState(initialTemplate || templates[0]?.id || '');
+  const [template, setTemplate] = useState(
+    initialTemplate || templates[0]?.id || '',
+  );
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
   const [slugChanged, setSlugChanged] = useState(false);
@@ -75,7 +77,8 @@ export function WebsiteCreate({
             <p>NEW WEBSITE</p>
             <h2 id="website-create-title">Create your website</h2>
             <span>
-              Choose a fixed template and enter your business name. You can replace text and photos without changing the design.
+              Choose a fixed template and enter your business name. You can
+              replace text and photos without changing the design.
             </span>
           </div>
           <button
@@ -116,10 +119,12 @@ export function WebsiteCreate({
             value={template}
             onChange={(event) => setTemplate(event.target.value)}
           >
-            {templates.map(entry => (
-              <option key={entry.id} value={entry.id}>{entry.name}</option>
+            {templates.map((entry) => (
+              <option key={entry.id} value={entry.id}>
+                {entry.name}
+              </option>
             ))}
-</select>
+          </select>
           <p className="website-form-hint">
             {templates.length
               ? 'You can replace the template text, photos and logos. Layout, colors and sections remain fixed.'

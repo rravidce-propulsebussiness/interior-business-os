@@ -257,7 +257,9 @@ export function WebsiteHome({
                         <OwnerIcon name="globe" size={42} />
                       </div>
                       <strong>Your website takes shape here.</strong>
-                      <span>Open your website to preview it or choose a template.</span>
+                      <span>
+                        Open your website to preview it or choose a template.
+                      </span>
                       <Link href={base}>Open website →</Link>
                     </div>
                   </div>

@@ -29,7 +29,7 @@ export function NewProjectForCustomer({
     initialCustomerId || customers[0]?.id || '',
   );
   const customer = customers.find((item) => item.id === customerId);
-  const quotes = customerId ? quotesByCustomer[customerId] ?? [] : [];
+  const quotes = customerId ? (quotesByCustomer[customerId] ?? []) : [];
   const quoteUrl = customerId
     ? '/dashboard/quotations/new?customer=' + encodeURIComponent(customerId)
     : '/dashboard/quotations/new';
@@ -73,7 +73,10 @@ export function NewProjectForCustomer({
                 </select>
               </label>
               {customer && (
-                <div className="pv2-project-customer-details" aria-label="Customer details">
+                <div
+                  className="pv2-project-customer-details"
+                  aria-label="Customer details"
+                >
                   <strong>{customer.name}</strong>
                   <span>{customer.phone || 'No phone number saved'}</span>
                   <span>{customer.email || 'No email saved'}</span>
@@ -81,12 +84,19 @@ export function NewProjectForCustomer({
                 </div>
               )}
               {quotes.length > 0 ? (
-                <div className="pv2-project-quotes" aria-label="Open quotations">
-                  <strong>Open quotations for {customer?.name ?? 'this customer'}</strong>
+                <div
+                  className="pv2-project-quotes"
+                  aria-label="Open quotations"
+                >
+                  <strong>
+                    Open quotations for {customer?.name ?? 'this customer'}
+                  </strong>
                   {quotes.map((quote) => (
                     <Link
                       key={quote.revisionId}
-                      href={'/dashboard/quotations/' + quote.revisionId + '/studio'}
+                      href={
+                        '/dashboard/quotations/' + quote.revisionId + '/studio'
+                      }
                       className="pv2-button pv2-outline"
                     >
                       Continue {quote.number} · {quote.status}
@@ -100,7 +110,9 @@ export function NewProjectForCustomer({
               )}
               {canCreateQuote ? (
                 <Link href={quoteUrl} className="pv2-button pv2-primary">
-                  {quotes.length ? '＋ Create another quotation' : '＋ Create quotation'}
+                  {quotes.length
+                    ? '＋ Create another quotation'
+                    : '＋ Create quotation'}
                   {customer ? ' for ' + customer.name : ''}
                 </Link>
               ) : (
@@ -111,18 +123,23 @@ export function NewProjectForCustomer({
             </>
           ) : (
             <p className="pv2-muted" role="status">
-              No existing customer records are available. Start a quotation for a
-              new customer enquiry.
+              No existing customer records are available. Start a quotation for
+              a new customer enquiry.
             </p>
           )}
           <div className="pv2-new-customer-quote">
             <span>New customer?</span>
             {canCreateQuote ? (
-              <Link href="/dashboard/quotations/new" className="pv2-button pv2-outline">
+              <Link
+                href="/dashboard/quotations/new"
+                className="pv2-button pv2-outline"
+              >
                 Create a quotation
               </Link>
             ) : (
-              <span className="pv2-muted">Quotation creation permission is required.</span>
+              <span className="pv2-muted">
+                Quotation creation permission is required.
+              </span>
             )}
           </div>
         </section>

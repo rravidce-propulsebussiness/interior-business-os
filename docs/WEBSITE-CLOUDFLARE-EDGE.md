@@ -1,6 +1,7 @@
 # Business OS public websites and customer-owned domains
 
 The existing `apps/business-app` Hostinger Node.js deployment serves:
+
 - the Business OS platform at `sghomesinterior.in`;
 - managed company subdomains such as `company.sghomesinterior.in`;
 - customer-owned apex and subdomain hostnames such as `company.com` and `www.company.com`.
@@ -17,10 +18,10 @@ Enable Cloudflare for SaaS for the `sghomesinterior.in` zone and obtain hostname
 
 Use a Worker as the fallback origin. In the `sghomesinterior.in` DNS zone configure:
 
-| Type | Name | Target / content | Proxy |
-|---|---|---|---|
-| AAAA | `proxy-fallback` | `100::` (originless Worker fallback) | DNS only |
-| CNAME | `customers` | `proxy-fallback.sghomesinterior.in` | Proxied |
+| Type  | Name             | Target / content                     | Proxy    |
+| ----- | ---------------- | ------------------------------------ | -------- |
+| AAAA  | `proxy-fallback` | `100::` (originless Worker fallback) | DNS only |
+| CNAME | `customers`      | `proxy-fallback.sghomesinterior.in`  | Proxied  |
 
 Set the Cloudflare for SaaS fallback origin to:
 `proxy-fallback.sghomesinterior.in`
@@ -76,6 +77,7 @@ The Worker secret `BUSINESS_OS_PUBLIC_EDGE_SECRET` and Hostinger secret must mat
 ## 5. Customer onboarding: www and root domain
 
 Each customer hostname is registered separately in Website Studio → Domains. A customer may add both:
+
 - `www.customer.com`
 - `customer.com`
 
@@ -84,6 +86,7 @@ Business OS shows a per-hostname ownership TXT challenge. The customer also adds
 ### www / other subdomain
 
 At the customer's DNS provider:
+
 - CNAME host: `www`
 - Target: `customers.sghomesinterior.in`
 - Use DNS-only unless the customer's Cloudflare zone has the required SaaS O2O configuration.
@@ -91,6 +94,7 @@ At the customer's DNS provider:
 ### Root / apex
 
 At the customer's DNS provider, point the root host `@` to `customers.sghomesinterior.in` using one of:
+
 - ALIAS;
 - ANAME;
 - provider-supported CNAME flattening.
@@ -100,6 +104,7 @@ A standard DNS CNAME is not allowed at the zone apex by many providers. An A-onl
 ### Activation checks
 
 Cloudflare custom hostname readiness requires both:
+
 - custom hostname `status = active`;
 - certificate `ssl.status = active`.
 
@@ -114,6 +119,7 @@ Managed `*.sghomesinterior.in` company subdomains are separate and do not requir
 ## 7. Verification and rollback
 
 Test:
+
 1. `https://sghomesinterior.in/api/health`
 2. an active managed company subdomain homepage and nested page;
 3. a registered `www.customer.com` hostname;

@@ -14,9 +14,11 @@ export function ProjectTimelineExpandControl() {
         const root = document.getElementById('project-timeline');
         if (!root) return;
         const next = !expanded;
-        root.querySelectorAll<HTMLDetailsElement>(':scope > details.pmt-stage').forEach((stage) => {
-          stage.open = next;
-        });
+        root
+          .querySelectorAll<HTMLDetailsElement>(':scope > details.pmt-stage')
+          .forEach((stage) => {
+            stage.open = next;
+          });
         setExpanded(next);
       }}
     >

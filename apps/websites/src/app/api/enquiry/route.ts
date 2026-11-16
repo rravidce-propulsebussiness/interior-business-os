@@ -3,7 +3,11 @@ import {
   isSupabaseConfigured,
 } from '@business-os/database/server';
 import { websiteJson } from '@business-os/database/website';
-import { currentWebsite, normalizeHostname, publicWebsiteHostname } from '../../../website';
+import {
+  currentWebsite,
+  normalizeHostname,
+  publicWebsiteHostname,
+} from '../../../website';
 import { escapeHtml } from '@business-os/website-builder/compiler';
 export async function POST(request: Request) {
   const host = publicWebsiteHostname(request.headers);

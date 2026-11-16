@@ -162,21 +162,11 @@ function StudioIcon({
   );
 }
 
-function Thumbnail({
-  template,
-  brand,
-}: {
-  template: Template;
-  brand: string;
-}) {
+function Thumbnail({ template, brand }: { template: Template; brand: string }) {
   return (
-    <div
-      className={'ps-thumbnail ps-thumbnail-' + template.style}
-    >
+    <div className={'ps-thumbnail ps-thumbnail-' + template.style}>
       <div className="ps-thumbnail-top">
-        <span className="ps-thumbnail-logo">
-          ⌂ {brand}
-        </span>
+        <span className="ps-thumbnail-logo">⌂ {brand}</span>
         <span>Home　 About　 Services　 Contact</span>
       </div>
       <div className="ps-thumbnail-body">

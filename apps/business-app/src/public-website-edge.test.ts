@@ -1,7 +1,9 @@
 import { createHmac } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import {
-  EDGE_HOST_HEADER, EDGE_SIGNATURE_HEADER, EDGE_TIME_HEADER,
+  EDGE_HOST_HEADER,
+  EDGE_SIGNATURE_HEADER,
+  EDGE_TIME_HEADER,
   verifiedEdgeHostname,
 } from './public-website-edge';
 
@@ -10,19 +12,31 @@ const host = 'neelima-constructions.sghomesinterior.in';
 const secret = 'a'.repeat(64);
 const now = 1793440000;
 
-function signed(name = host, path = '/projects?x=1', method = 'GET', time = now) {
+function signed(
+  name = host,
+  path = '/projects?x=1',
+  method = 'GET',
+  time = now,
+) {
   const stamp = String(time);
   const message = [stamp, name, method, path].join('\n');
   return new Headers({
     [EDGE_HOST_HEADER]: name,
     [EDGE_TIME_HEADER]: stamp,
-    [EDGE_SIGNATURE_HEADER]: createHmac('sha256', secret).update(message).digest('hex'),
+    [EDGE_SIGNATURE_HEADER]: createHmac('sha256', secret)
+      .update(message)
+      .digest('hex'),
   });
 }
 function verify(headers: Headers, extra: Record<string, unknown> = {}) {
   return verifiedEdgeHostname({
-    headers, secret, baseDomain, method: 'GET',
-    pathAndSearch: '/projects?x=1', now, ...extra,
+    headers,
+    secret,
+    baseDomain,
+    method: 'GET',
+    pathAndSearch: '/projects?x=1',
+    now,
+    ...extra,
   });
 }
 describe('authenticated company website edge routing', () => {

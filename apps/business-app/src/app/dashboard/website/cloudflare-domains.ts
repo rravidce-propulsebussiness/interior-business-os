@@ -56,11 +56,14 @@ function normalizedConfiguredHostname(value: string | undefined) {
     !host ||
     host.length > 253 ||
     !host.includes('.') ||
-    !host.split('.').every(label =>
-      label.length <= 63 &&
-      /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label),
-    )
-  ) return '';
+    !host
+      .split('.')
+      .every(
+        (label) =>
+          label.length <= 63 && /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(label),
+      )
+  )
+    return '';
   return host;
 }
 
@@ -78,15 +81,15 @@ export function cloudflareSaasFallbackOrigin() {
 }
 
 export function cloudflareSaasCnameTarget() {
-  return normalizedConfiguredHostname(
-    process.env.CLOUDFLARE_SAAS_CNAME_TARGET,
-  );
+  return normalizedConfiguredHostname(process.env.CLOUDFLARE_SAAS_CNAME_TARGET);
 }
 
 export function cloudflareSaasConfigured() {
-  return cloudflareSaasEnabled() &&
+  return (
+    cloudflareSaasEnabled() &&
     Boolean(cloudflareSaasFallbackOrigin()) &&
-    Boolean(cloudflareSaasCnameTarget());
+    Boolean(cloudflareSaasCnameTarget())
+  );
 }
 
 async function cloudflareRequest<T>(
@@ -118,9 +121,13 @@ async function cloudflareRequest<T>(
     errors?: { message?: string }[];
   } | null;
   if (!response.ok || data?.success !== true || data.result == null) {
-    const reason = data?.errors?.map(item => item.message).filter(Boolean).join('; ');
+    const reason = data?.errors
+      ?.map((item) => item.message)
+      .filter(Boolean)
+      .join('; ');
     throw new Error(
-      reason || 'Cloudflare for SaaS API unavailable (HTTP ' + response.status + ')',
+      reason ||
+        'Cloudflare for SaaS API unavailable (HTTP ' + response.status + ')',
     );
   }
   return data.result;
@@ -130,9 +137,13 @@ async function cloudflareRequest<T>(
 export async function ensureCloudflareFallbackOrigin() {
   const configuredOrigin = cloudflareSaasFallbackOrigin();
   if (!configuredOrigin)
-    throw new Error('Set CLOUDFLARE_SAAS_FALLBACK_ORIGIN in the platform environment');
+    throw new Error(
+      'Set CLOUDFLARE_SAAS_FALLBACK_ORIGIN in the platform environment',
+    );
   if (!cloudflareSaasCnameTarget())
-    throw new Error('Set CLOUDFLARE_SAAS_CNAME_TARGET in the platform environment');
+    throw new Error(
+      'Set CLOUDFLARE_SAAS_CNAME_TARGET in the platform environment',
+    );
 
   let existing: FallbackOrigin | null = null;
   try {
@@ -143,20 +154,16 @@ export async function ensureCloudflareFallbackOrigin() {
     // Quota/permission errors are deliberately not swallowed.
     if (!/404|not found|no fallback origin/i.test(reason)) throw error;
   }
-  if (
-    existing?.origin === configuredOrigin &&
-    existing.status === 'active'
-  ) return existing;
+  if (existing?.origin === configuredOrigin && existing.status === 'active')
+    return existing;
 
   const updated = await cloudflareRequest<FallbackOrigin>(
     '/fallback_origin',
     'PUT',
     { origin: configuredOrigin },
   );
-  if (
-    updated.origin !== configuredOrigin ||
-    updated.status !== 'active'
-  ) throw new Error('Cloudflare fallback origin is not active yet');
+  if (updated.origin !== configuredOrigin || updated.status !== 'active')
+    throw new Error('Cloudflare fallback origin is not active yet');
   return updated;
 }
 
@@ -166,7 +173,7 @@ async function findHostname(hostname: string) {
   );
   if (!Array.isArray(rows))
     throw new Error('Invalid Cloudflare hostname response');
-  return rows.find(row => row.hostname === hostname) ?? null;
+  return rows.find((row) => row.hostname === hostname) ?? null;
 }
 
 /** Idempotent across retries; each customer hostname is provisioned once. */
@@ -175,18 +182,14 @@ export async function ensureCloudflareHostname(hostname: string) {
   const existing = await findHostname(hostname);
   if (existing) return existing;
   try {
-    const created = await cloudflareRequest<CloudflareHostname>(
-      '',
-      'POST',
-      {
-        hostname,
-        ssl: {
-          method: 'txt',
-          type: 'dv',
-          settings: { min_tls_version: '1.2', http2: 'on' },
-        },
+    const created = await cloudflareRequest<CloudflareHostname>('', 'POST', {
+      hostname,
+      ssl: {
+        method: 'txt',
+        type: 'dv',
+        settings: { min_tls_version: '1.2', http2: 'on' },
       },
-    );
+    });
     // Cloudflare may omit DCV tokens from the create response. Re-read the
     // hostname so the UI can display any TXT validation records immediately.
     const refreshed = await findHostname(hostname);
@@ -231,7 +234,7 @@ export function cloudflareDnsInstructions(
   return records.filter(
     (entry, index, all) =>
       all.findIndex(
-        candidate =>
+        (candidate) =>
           candidate.name === entry.name && candidate.value === entry.value,
       ) === index,
   );

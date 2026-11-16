@@ -5,34 +5,64 @@ import { compileWebsite } from '@business-os/website-builder/compiler';
 import { websiteHtml } from '@business-os/website-builder/render';
 import { readFileSync } from 'node:fs';
 
-function request(origin: string | null, host: string, forwarded?: string): Request {
+function request(
+  origin: string | null,
+  host: string,
+  forwarded?: string,
+): Request {
   const headers = new Headers({ host });
   if (origin) headers.set('origin', origin);
   if (forwarded) headers.set('x-forwarded-host', forwarded);
-  return new Request('http://localhost:3000/dashboard/website/site/uploads/media', {
-    method: 'POST', headers,
-  });
+  return new Request(
+    'http://localhost:3000/dashboard/website/site/uploads/media',
+    {
+      method: 'POST',
+      headers,
+    },
+  );
 }
 
 describe('Website upload behind reverse proxies', () => {
   it('permits same-public-host Origin when internal Request.url differs', () => {
-    expect(isAllowedWebsiteUploadOrigin(
-      request('https://sghomesinterior.in', 'localhost:3000', 'sghomesinterior.in'),
-    )).toBe(true);
-    expect(isAllowedWebsiteUploadOrigin(
-      request('https://sghomesinterior.in', 'sghomesinterior.in'),
-    )).toBe(true);
+    expect(
+      isAllowedWebsiteUploadOrigin(
+        request(
+          'https://sghomesinterior.in',
+          'localhost:3000',
+          'sghomesinterior.in',
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      isAllowedWebsiteUploadOrigin(
+        request('https://sghomesinterior.in', 'sghomesinterior.in'),
+      ),
+    ).toBe(true);
   });
   it('rejects cross-site and missing Origin values', () => {
-    expect(isAllowedWebsiteUploadOrigin(
-      request('https://attacker.example', 'localhost:3000', 'sghomesinterior.in'),
-    )).toBe(false);
-    expect(isAllowedWebsiteUploadOrigin(
-      request(null, 'localhost:3000', 'sghomesinterior.in'),
-    )).toBe(false);
-    expect(isAllowedWebsiteUploadOrigin(
-      request('https://sghomesinterior.in.evil.example', 'localhost:3000', 'sghomesinterior.in'),
-    )).toBe(false);
+    expect(
+      isAllowedWebsiteUploadOrigin(
+        request(
+          'https://attacker.example',
+          'localhost:3000',
+          'sghomesinterior.in',
+        ),
+      ),
+    ).toBe(false);
+    expect(
+      isAllowedWebsiteUploadOrigin(
+        request(null, 'localhost:3000', 'sghomesinterior.in'),
+      ),
+    ).toBe(false);
+    expect(
+      isAllowedWebsiteUploadOrigin(
+        request(
+          'https://sghomesinterior.in.evil.example',
+          'localhost:3000',
+          'sghomesinterior.in',
+        ),
+      ),
+    ).toBe(false);
   });
 });
 
@@ -53,8 +83,10 @@ describe('Website visual-first UI', () => {
     expect(src).toContain('<WebsiteMediaPicker');
     const doc = emptyWebsite('Demo');
     doc.pages[0]!.nodes.push(createNode('image', 'image'));
-    const html = websiteHtml(compileWebsite(doc), '/', {preview:true})!;
+    const html = websiteHtml(compileWebsite(doc), '/', { preview: true })!;
     expect(html).toContain('website.replace-image');
-    expect(websiteHtml(compileWebsite(doc), '/')!).not.toContain('website.replace-image');
+    expect(websiteHtml(compileWebsite(doc), '/')!).not.toContain(
+      'website.replace-image',
+    );
   });
 });

@@ -38,7 +38,11 @@ describe('WhatsApp rich messages', () => {
       type: 'contacts',
       contacts: [
         {
-          name: { formatted_name: 'Ravi Kumar', first_name: 'Ravi', last_name: 'Kumar' },
+          name: {
+            formatted_name: 'Ravi Kumar',
+            first_name: 'Ravi',
+            last_name: 'Kumar',
+          },
           phones: [{ phone: '+919123456789', wa_id: '919123456789' }],
         },
       ],

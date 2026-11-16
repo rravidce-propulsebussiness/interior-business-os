@@ -31,18 +31,18 @@ export default function DataDeletionPage() {
           Use the subject line <strong>Data deletion request</strong>.
         </li>
         <li>
-          Include your business/workspace name and identify the Meta or
-          WhatsApp Business account to disconnect or delete. Do not send
-          passwords, access tokens or message contents.
+          Include your business/workspace name and identify the Meta or WhatsApp
+          Business account to disconnect or delete. Do not send passwords,
+          access tokens or message contents.
         </li>
       </ol>
       <p>
-        We will verify that the requester is authorized, acknowledge the
-        request and remove or de-identify the requested information where
-        applicable. Some records may be retained where required for legal,
-        security, accounting or dispute-resolution purposes. Connected Meta or
-        WhatsApp assets may also need to be removed by an administrator in
-        Meta Business Settings.
+        We will verify that the requester is authorized, acknowledge the request
+        and remove or de-identify the requested information where applicable.
+        Some records may be retained where required for legal, security,
+        accounting or dispute-resolution purposes. Connected Meta or WhatsApp
+        assets may also need to be removed by an administrator in Meta Business
+        Settings.
       </p>
       <p>
         You may also ask your workspace owner to remove your user account or

@@ -1,20 +1,32 @@
 import type { CustomerDocument } from './quotation-document';
 
-const escape = (value: string) => value.replaceAll('&', '&amp;')
-  .replaceAll('<', '&lt;').replaceAll('>', '&gt;')
-  .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+const escape = (value: string) =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 
 // Curated architectural concept photos, not representations of a tenant's past
 // work. Companies override all of these from their saved quotation branding.
 // Every illustration is explicitly marked as a concept in the customer PDF.
 // https://unsplash.com/license (free photographs).
-const conceptVilla = 'https://images.unsplash.com/photo-1756435292384-1bf32eff7baf?auto=format&fit=crop&w=1500&q=80';
-const conceptInterior = 'https://images.unsplash.com/photo-1751945965597-71171ec7a458?auto=format&fit=crop&w=1400&q=80';
+const conceptVilla =
+  'https://images.unsplash.com/photo-1756435292384-1bf32eff7baf?auto=format&fit=crop&w=1500&q=80';
+const conceptInterior =
+  'https://images.unsplash.com/photo-1751945965597-71171ec7a458?auto=format&fit=crop&w=1400&q=80';
 
 const friendlyDate = (value: string): string => {
   const date = new Date(value + 'T12:00:00Z');
-  return Number.isNaN(date.getTime()) ? value :
-    new Intl.DateTimeFormat('en-IN', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' }).format(date);
+  return Number.isNaN(date.getTime())
+    ? value
+    : new Intl.DateTimeFormat('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        timeZone: 'UTC',
+      }).format(date);
 };
 
 export const premiumCss = `<style>
@@ -269,71 +281,168 @@ export function premiumSections(document: CustomerDocument) {
   const firstSpace = rawCompany.indexOf(' ');
   const prefix = firstSpace >= 0 ? rawCompany.slice(0, firstSpace) : rawCompany;
   const suffix = firstSpace >= 0 ? rawCompany.slice(firstSpace) : '';
-  const companyName = '<span class="pb-company-name"><b>'+escape(prefix)+'</b>'+escape(suffix)+'</span>';
-  const miniBrand = '<span class="pb-brand-name"><b>'+escape(prefix)+'</b>'+escape(suffix)+'</span>';
-  const contact = [brand.address.line1,brand.address.line2,brand.address.city,
-    brand.address.region,brand.address.postal_code].filter(Boolean).map(escape).join(', ');
+  const companyName =
+    '<span class="pb-company-name"><b>' +
+    escape(prefix) +
+    '</b>' +
+    escape(suffix) +
+    '</span>';
+  const miniBrand =
+    '<span class="pb-brand-name"><b>' +
+    escape(prefix) +
+    '</b>' +
+    escape(suffix) +
+    '</span>';
+  const contact = [
+    brand.address.line1,
+    brand.address.line2,
+    brand.address.city,
+    brand.address.region,
+    brand.address.postal_code,
+  ]
+    .filter(Boolean)
+    .map(escape)
+    .join(', ');
   const siteAddress = document.header.project.site_address;
-  const location = [siteAddress.city, siteAddress.region].filter(Boolean).map(escape).join(', ');
+  const location = [siteAddress.city, siteAddress.region]
+    .filter(Boolean)
+    .map(escape)
+    .join(', ');
   const projectImage = brand.detail_image_data_uri || conceptInterior;
   const houseImage = brand.cover_image_data_uri || conceptVilla;
   const materialImage = brand.materials_image_data_uri || projectImage;
   const conceptCover = !brand.cover_image_data_uri;
   const conceptDetail = !brand.detail_image_data_uri;
   const conceptMaterial = !brand.materials_image_data_uri;
-  const logo = brand.logo_data_uri ? '<img class="pb-cover-logo" alt="Company logo" src="'+escape(brand.logo_data_uri)+'">' : companyName;
+  const logo = brand.logo_data_uri
+    ? '<img class="pb-cover-logo" alt="Company logo" src="' +
+      escape(brand.logo_data_uri) +
+      '">'
+    : companyName;
   const number = escape(document.number);
-  const displayMoney = new Intl.NumberFormat('en-IN',{style:'currency',currency:document.currency,
-    maximumFractionDigits:2,minimumFractionDigits:2}).format(Number(document.totals.final_amount));
+  const displayMoney = new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: document.currency,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  }).format(Number(document.totals.final_amount));
   const valid = friendlyDate(document.valid_until);
-  const proposalImage = '<img class="pb-cover-photo" src="'+escape(houseImage)+'" alt="'+
-    (conceptCover ? 'Illustrative architectural concept' : 'Company-provided project photograph')+'">';
-  const cover = '<section class="pb-cover"><div class="pb-cover-photo-fallback"></div>'+proposalImage+
-    '<div class="pb-cover-shade"></div><div class="pb-cover-top"><div>'+logo+
-    '<span class="pb-subbrand">Quotation proposal</span></div>'+
-    '<span class="pb-proposal-tag">Project proposal</span></div>'+
-    '<div class="pb-cover-main"><div class="pb-cover-copy">'+
-    '<div class="pb-cover-kicker">Prepared for '+escape(document.header.customer.name)+'</div>'+
-    '<h1>Building your<br>next <em>chapter.</em></h1>'+
-    '<p class="pb-cover-project">'+escape(document.header.project.name)+'</p>'+
-    '<p class="pb-cover-number">'+number+' · Revision '+document.revision+'</p>'+
-    '<div class="pb-investment"><small>Total project cost</small>'+
-    '<strong>'+escape(displayMoney)+'</strong></div>'+
-    '</div></div>'+
-    '<div class="pb-cover-bottom"><div class="pb-cover-client"><strong>Prepared for '+escape(document.header.customer.name)+'</strong>'+
-    (location || contact)+'</div><div class="pb-cover-status"><strong>Valid until '+escape(valid)+'</strong>'+
-    escape(document.status.toUpperCase())+'</div></div>'+
-    (conceptCover ? '<div class="pb-cover-photo-note">Illustrative architectural concept; not an image of the proposed project.</div>' : '')+
+  const proposalImage =
+    '<img class="pb-cover-photo" src="' +
+    escape(houseImage) +
+    '" alt="' +
+    (conceptCover
+      ? 'Illustrative architectural concept'
+      : 'Company-provided project photograph') +
+    '">';
+  const cover =
+    '<section class="pb-cover"><div class="pb-cover-photo-fallback"></div>' +
+    proposalImage +
+    '<div class="pb-cover-shade"></div><div class="pb-cover-top"><div>' +
+    logo +
+    '<span class="pb-subbrand">Quotation proposal</span></div>' +
+    '<span class="pb-proposal-tag">Project proposal</span></div>' +
+    '<div class="pb-cover-main"><div class="pb-cover-copy">' +
+    '<div class="pb-cover-kicker">Prepared for ' +
+    escape(document.header.customer.name) +
+    '</div>' +
+    '<h1>Building your<br>next <em>chapter.</em></h1>' +
+    '<p class="pb-cover-project">' +
+    escape(document.header.project.name) +
+    '</p>' +
+    '<p class="pb-cover-number">' +
+    number +
+    ' · Revision ' +
+    document.revision +
+    '</p>' +
+    '<div class="pb-investment"><small>Total project cost</small>' +
+    '<strong>' +
+    escape(displayMoney) +
+    '</strong></div>' +
+    '</div></div>' +
+    '<div class="pb-cover-bottom"><div class="pb-cover-client"><strong>Prepared for ' +
+    escape(document.header.customer.name) +
+    '</strong>' +
+    (location || contact) +
+    '</div><div class="pb-cover-status"><strong>Valid until ' +
+    escape(valid) +
+    '</strong>' +
+    escape(document.status.toUpperCase()) +
+    '</div></div>' +
+    (conceptCover
+      ? '<div class="pb-cover-photo-note">Illustrative architectural concept; not an image of the proposed project.</div>'
+      : '') +
     '</section>';
-  const photoPage = '<div class="pb-project-photo"><img alt="'+
-    (conceptDetail ? 'Illustrative interior concept image' : 'Company-supplied project photograph')+
-    '" src="'+escape(projectImage)+'"><div class="pb-project-photo-shade"></div>'+
-    '<div class="pb-project-photo-text"><small>Project proposal</small>'+
-    escape(document.header.project.name)+'</div>'+
-    (conceptDetail ? '<div class="pb-photo-illustrative">Illustrative concept</div>' : '')+
+  const photoPage =
+    '<div class="pb-project-photo"><img alt="' +
+    (conceptDetail
+      ? 'Illustrative interior concept image'
+      : 'Company-supplied project photograph') +
+    '" src="' +
+    escape(projectImage) +
+    '"><div class="pb-project-photo-shade"></div>' +
+    '<div class="pb-project-photo-text"><small>Project proposal</small>' +
+    escape(document.header.project.name) +
+    '</div>' +
+    (conceptDetail
+      ? '<div class="pb-photo-illustrative">Illustrative concept</div>'
+      : '') +
     '</div>';
-  const specHero = '<div class="pb-material-hero"><img alt="'+
-    (conceptMaterial ? 'Illustrative interior and finishes' : 'Company-supplied materials photograph')+
-    '" src="'+escape(materialImage)+'"><div class="pb-material-hero-content">'+
-    '<small>Project specifications</small><h2>Materials &amp;<br>Specifications</h2>'+
-    '<p>Only the brands, grades, allowances and inclusions saved in this quotation are specified below.</p></div>'+
-    (conceptMaterial ? '<span class="pb-illustrative-label">Illustrative concept</span>' : '')+'</div>';
-  const close = '<section class="pb-end"><img class="pb-end-photo" src="'+escape(houseImage)+'" alt="Architectural background">'+
-    '<div class="pb-end-shade"></div><div class="pb-end-content">'+logo+
-    '<h2>Thank you for<br>considering <em>'+escape(rawCompany)+'.</em></h2>'+
-    '<p>We look forward to discussing your project and its next steps together.</p></div>'+
-    '<div class="pb-end-bottom">'+companyName+
-    '<div class="pb-end-contact"><div><strong>Contact</strong><p>'+escape(brand.phone)+
-    '<br>'+escape(brand.email)+'</p></div><div><strong>Office</strong><p>'+
-    (contact || 'Address available on request')+'</p></div></div>'+
-    '<p class="pb-end-disclaimer">Quotation '+number+' · Revision '+document.revision+
-    '. This proposal is not a signed construction contract. The saved specifications and written terms govern its scope.</p>'+
-    (conceptCover ? '<p class="pb-end-disclaimer">Background is an illustrative architecture image.</p>' : '')+
+  const specHero =
+    '<div class="pb-material-hero"><img alt="' +
+    (conceptMaterial
+      ? 'Illustrative interior and finishes'
+      : 'Company-supplied materials photograph') +
+    '" src="' +
+    escape(materialImage) +
+    '"><div class="pb-material-hero-content">' +
+    '<small>Project specifications</small><h2>Materials &amp;<br>Specifications</h2>' +
+    '<p>Only the brands, grades, allowances and inclusions saved in this quotation are specified below.</p></div>' +
+    (conceptMaterial
+      ? '<span class="pb-illustrative-label">Illustrative concept</span>'
+      : '') +
+    '</div>';
+  const close =
+    '<section class="pb-end"><img class="pb-end-photo" src="' +
+    escape(houseImage) +
+    '" alt="Architectural background">' +
+    '<div class="pb-end-shade"></div><div class="pb-end-content">' +
+    logo +
+    '<h2>Thank you for<br>considering <em>' +
+    escape(rawCompany) +
+    '.</em></h2>' +
+    '<p>We look forward to discussing your project and its next steps together.</p></div>' +
+    '<div class="pb-end-bottom">' +
+    companyName +
+    '<div class="pb-end-contact"><div><strong>Contact</strong><p>' +
+    escape(brand.phone) +
+    '<br>' +
+    escape(brand.email) +
+    '</p></div><div><strong>Office</strong><p>' +
+    (contact || 'Address available on request') +
+    '</p></div></div>' +
+    '<p class="pb-end-disclaimer">Quotation ' +
+    number +
+    ' · Revision ' +
+    document.revision +
+    '. This proposal is not a signed construction contract. The saved specifications and written terms govern its scope.</p>' +
+    (conceptCover
+      ? '<p class="pb-end-disclaimer">Background is an illustrative architecture image.</p>'
+      : '') +
     '</div></section>';
   const pageHeader = (label: string) =>
-    '<div class="pb-page-header">'+miniBrand+'<small>'+escape(label)+'</small></div>';
+    '<div class="pb-page-header">' +
+    miniBrand +
+    '<small>' +
+    escape(label) +
+    '</small></div>';
   const pageFooter = (label: string) =>
-    '<div class="pb-page-footer"><span>'+number+' · Revision '+document.revision+
-    '</span><strong>'+escape(label)+'</strong></div>';
+    '<div class="pb-page-footer"><span>' +
+    number +
+    ' · Revision ' +
+    document.revision +
+    '</span><strong>' +
+    escape(label) +
+    '</strong></div>';
   return { cover, photoPage, specHero, close, pageHeader, pageFooter };
 }

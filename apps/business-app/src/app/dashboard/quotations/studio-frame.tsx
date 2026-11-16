@@ -26,7 +26,11 @@ export function QuotationStudioFrame({
       planLabel="Business workspace"
       navigation={[]}
       search=""
-      currentHref={pathname.startsWith('/dashboard/quotations') ? '/dashboard/quotations' : pathname}
+      currentHref={
+        pathname.startsWith('/dashboard/quotations')
+          ? '/dashboard/quotations'
+          : pathname
+      }
       dashboardBrand
       notificationsEnabled={false}
       searchAction="/dashboard/quotations"

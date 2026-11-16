@@ -42,7 +42,8 @@ export function WebsitePlatformControls({
   const [message, setMessage] = useState('');
   const [pending, start] = useTransition();
   const [selectedPlan, setSelectedPlan] = useState(plans[0]?.id ?? '');
-  const selectedConfig = plans.find((plan) => plan.id === selectedPlan)?.configuration ?? {};
+  const selectedConfig =
+    plans.find((plan) => plan.id === selectedPlan)?.configuration ?? {};
 
   return (
     <div className="os-domain-settings">
@@ -93,9 +94,16 @@ export function WebsitePlatformControls({
         <label className="os-domain-toggle-row">
           <span className="os-domain-toggle-copy">
             <strong>Wildcard routing and HTTPS configured</strong>
-            <small>Enable only after the hosting provider has configured both.</small>
+            <small>
+              Enable only after the hosting provider has configured both.
+            </small>
           </span>
-          <input className="os-domain-switch" type="checkbox" name="tls" defaultChecked={managedTls} />
+          <input
+            className="os-domain-switch"
+            type="checkbox"
+            name="tls"
+            defaultChecked={managedTls}
+          />
         </label>
 
         <label className="os-domain-field">
@@ -136,10 +144,8 @@ export function WebsitePlatformControls({
             if (!selectedPlan) return;
             setMessage('');
             const config: PlanConfig = {};
-            for (const [key] of limits)
-              config[key] = Number(form.get(key));
-            for (const [key] of features)
-              config[key] = form.get(key) === 'on';
+            for (const [key] of limits) config[key] = Number(form.get(key));
+            for (const [key] of features) config[key] = form.get(key) === 'on';
             const result = await savePlatformWebsite('plan', {
               planId: selectedPlan,
               configuration: config,
@@ -168,7 +174,9 @@ export function WebsitePlatformControls({
           >
             {plans.length === 0 && <option value="">No plans available</option>}
             {plans.map((plan) => (
-              <option key={plan.id} value={plan.id}>{plan.name}</option>
+              <option key={plan.id} value={plan.id}>
+                {plan.name}
+              </option>
             ))}
           </select>
         </label>
@@ -185,7 +193,9 @@ export function WebsitePlatformControls({
                 step="1"
                 required
                 disabled={!selectedPlan}
-                defaultValue={Number(selectedConfig[key] ?? [1, 50, 52428800][index])}
+                defaultValue={Number(
+                  selectedConfig[key] ?? [1, 50, 52428800][index],
+                )}
               />
             </label>
           ))}
@@ -194,7 +204,11 @@ export function WebsitePlatformControls({
           Storage quotas use bytes; 50 MiB equals 52,428,800 bytes.
         </p>
 
-        <div className="os-domain-feature-grid" role="group" aria-label="Plan website features">
+        <div
+          className="os-domain-feature-grid"
+          role="group"
+          aria-label="Plan website features"
+        >
           {features.map(([key, label]) => (
             <label className="os-domain-feature" key={key}>
               <span>{label}</span>
@@ -210,13 +224,19 @@ export function WebsitePlatformControls({
           ))}
         </div>
         <div className="os-domain-form-footer">
-          <button className="os-domain-save" disabled={pending || !selectedPlan} type="submit">
+          <button
+            className="os-domain-save"
+            disabled={pending || !selectedPlan}
+            type="submit"
+          >
             <OsIcon name="check" size={18} />
             {pending ? 'Saving…' : 'Save plan capabilities'}
           </button>
         </div>
       </form>
-      <p className="os-domain-save-message" role="status" aria-live="polite">{message}</p>
+      <p className="os-domain-save-message" role="status" aria-live="polite">
+        {message}
+      </p>
     </div>
   );
 }

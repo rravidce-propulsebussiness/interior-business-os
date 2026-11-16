@@ -4,13 +4,21 @@ import { useRef, useState } from 'react';
 import { leadQuoteLabel } from './lead-quote-display';
 import { authorizeWhatsAppPdfAttachment } from '../../quotations/sharing-actions';
 import {
-  fetchQuotationPdfFile, supportsPdfFileSharing, sharePdfFile,
+  fetchQuotationPdfFile,
+  supportsPdfFileSharing,
+  sharePdfFile,
   downloadQuotationPdfFile,
 } from '../../quotations/quotation-pdf-file';
 
 export function LeadQuotePreview({
-  revisionId, number, status, amount, shared = false, canShare = false,
-  newQuoteHref, compact = false,
+  revisionId,
+  number,
+  status,
+  amount,
+  shared = false,
+  canShare = false,
+  newQuoteHref,
+  compact = false,
 }: {
   revisionId: string;
   number: string;
@@ -33,9 +41,11 @@ export function LeadQuotePreview({
 
   const base = '/dashboard/quotations/' + encodeURIComponent(revisionId);
   const visibleStatus = leadQuoteLabel(status, shared);
-  const formatted = amount !== null && Number.isFinite(Number(amount))
-    ? '₹' + Number(amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })
-    : null;
+  const formatted =
+    amount !== null && Number.isFinite(Number(amount))
+      ? '₹' +
+        Number(amount).toLocaleString('en-IN', { maximumFractionDigits: 0 })
+      : null;
 
   async function openPreview() {
     if (!dialog.current) return;
@@ -55,19 +65,26 @@ export function LeadQuotePreview({
         headers: { Accept: 'text/html' },
         signal: controller.signal,
       });
-      if (!response.ok) throw new Error(response.status === 401 || response.status === 403
-        ? 'Preview access expired. Sign in again or open the quotation.'
-        : 'Could not load the quotation preview (HTTP ' + response.status + ').');
+      if (!response.ok)
+        throw new Error(
+          response.status === 401 || response.status === 403
+            ? 'Preview access expired. Sign in again or open the quotation.'
+            : 'Could not load the quotation preview (HTTP ' +
+                response.status +
+                ').',
+        );
       const type = response.headers.get('content-type') ?? '';
-      if (!type.includes('text/html')) throw new Error('The preview response was not HTML.');
+      if (!type.includes('text/html'))
+        throw new Error('The preview response was not HTML.');
       const markup = await response.text();
       if (!/<html[\s>]/i.test(markup))
         throw new Error('The server did not return a quotation preview.');
       if (!controller.signal.aborted) setHtml(markup);
     } catch (error) {
-      if (!controller.signal.aborted) setPreviewError(
-        error instanceof Error ? error.message : 'Unable to load preview.',
-      );
+      if (!controller.signal.aborted)
+        setPreviewError(
+          error instanceof Error ? error.message : 'Unable to load preview.',
+        );
     } finally {
       if (!controller.signal.aborted) setLoading(false);
     }
@@ -94,18 +111,26 @@ export function LeadQuotePreview({
       // This MUST be called during the tap; fetching the PDF first would lose
       // Android's transient user activation and silently fail.
       void sharePdfFile(preparedPdf, number)
-        .then(() => setShareMessage(
-          'PDF handed to the selected app. Complete sending in WhatsApp.',
-        ))
+        .then(() =>
+          setShareMessage(
+            'PDF handed to the selected app. Complete sending in WhatsApp.',
+          ),
+        )
         .catch((error: unknown) => {
           if (error instanceof Error && error.name === 'AbortError') return;
-          setShareError('Could not open the share sheet. Download and attach the PDF in WhatsApp.');
+          setShareError(
+            'Could not open the share sheet. Download and attach the PDF in WhatsApp.',
+          );
         });
       return;
     }
-    if (status === 'draft' && !window.confirm(
-      'Prepare this saved quotation for customer sharing? It will be finalized before the PDF is shared.',
-    )) return;
+    if (
+      status === 'draft' &&
+      !window.confirm(
+        'Prepare this saved quotation for customer sharing? It will be finalized before the PDF is shared.',
+      )
+    )
+      return;
     setSharing(true);
     setShareMessage('');
     void (async () => {
@@ -114,11 +139,15 @@ export function LeadQuotePreview({
         if (!result.ok) throw new Error(result.message);
         const file = await fetchQuotationPdfFile(revisionId, number);
         setPreparedPdf(file);
-        setShareMessage(supportsPdfFileSharing(file)
-          ? 'PDF ready. Tap WhatsApp PDF again, choose WhatsApp and select the customer.'
-          : 'PDF ready. Tap Download PDF, then attach it in the customer’s WhatsApp chat.');
+        setShareMessage(
+          supportsPdfFileSharing(file)
+            ? 'PDF ready. Tap WhatsApp PDF again, choose WhatsApp and select the customer.'
+            : 'PDF ready. Tap Download PDF, then attach it in the customer’s WhatsApp chat.',
+        );
       } catch (error) {
-        setShareError(error instanceof Error ? error.message : 'Could not prepare the PDF.');
+        setShareError(
+          error instanceof Error ? error.message : 'Could not prepare the PDF.',
+        );
       } finally {
         setSharing(false);
       }
@@ -128,21 +157,31 @@ export function LeadQuotePreview({
   // Do not represent an unpriced private revision as a ₹0 quotation.
   // Reuse this state across the lead list, drawer, board and history.
   if (!shared && status === 'draft' && (!amount || Number(amount) <= 0)) {
-    return <div className="crm-quote-summary crm-quote-incomplete">
-      <span>Quotation not priced yet</span>
-      <a href={base + '/studio?step=quote'}>Continue quotation</a>
-    </div>;
+    return (
+      <div className="crm-quote-summary crm-quote-incomplete">
+        <span>Quotation not priced yet</span>
+        <a href={base + '/studio?step=quote'}>Continue quotation</a>
+      </div>
+    );
   }
 
   // On the Leads table, sharing is intentionally a secondary workflow:
   // open the quotation when it is needed instead of showing a large PDF CTA
   // beside every daily follow-up action.
   if (compact) {
-    return <div className="crm-quote-summary crm-quote-secondary">
-      <span className="crm-quote-secondary-label" title={number}>{number}</span>
-      <span className="crm-quote-secondary-meta">{formatted || 'Saved'} · {visibleStatus}</span>
-      <a href={base} aria-label={'Open quotation ' + number}>View quote</a>
-    </div>;
+    return (
+      <div className="crm-quote-summary crm-quote-secondary">
+        <span className="crm-quote-secondary-label" title={number}>
+          {number}
+        </span>
+        <span className="crm-quote-secondary-meta">
+          {formatted || 'Saved'} · {visibleStatus}
+        </span>
+        <a href={base} aria-label={'Open quotation ' + number}>
+          View quote
+        </a>
+      </div>
+    );
   }
 
   return (
@@ -158,55 +197,117 @@ export function LeadQuotePreview({
       </div>
       {formatted && <strong className="crm-quote-amount">{formatted}</strong>}
       <div className="crm-quote-buttons">
-        <button type="button" onClick={() => void openPreview()}>Preview</button>
+        <button type="button" onClick={() => void openPreview()}>
+          Preview
+        </button>
         <a href={base}>Open</a>
-        {canShare && (status === 'draft' || status === 'issued') &&
-          <button type="button" className="crm-quote-whatsapp"
-            disabled={sharing} onClick={() => void shareOnWhatsApp()}>
-            {sharing ? 'Preparing PDF…' : preparedPdf ? 'Share PDF File' : 'WhatsApp PDF'}
-          </button>}
-        {newQuoteHref && <a className="crm-quote-new-inline"
-          title="Create another quotation for this lead" href={newQuoteHref}>
-          + New
-        </a>}
+        {canShare && (status === 'draft' || status === 'issued') && (
+          <button
+            type="button"
+            className="crm-quote-whatsapp"
+            disabled={sharing}
+            onClick={() => void shareOnWhatsApp()}
+          >
+            {sharing
+              ? 'Preparing PDF…'
+              : preparedPdf
+                ? 'Share PDF File'
+                : 'WhatsApp PDF'}
+          </button>
+        )}
+        {newQuoteHref && (
+          <a
+            className="crm-quote-new-inline"
+            title="Create another quotation for this lead"
+            href={newQuoteHref}
+          >
+            + New
+          </a>
+        )}
       </div>
-      {shareError && <p className="crm-quote-share-error" role="alert">{shareError}</p>}
-      {shareMessage && <div className="crm-quote-share-ready" role="status">
-        <p>{shareMessage}</p>
-        {preparedPdf && <button type="button"
-          onClick={() => downloadQuotationPdfFile(preparedPdf)}>Download PDF</button>}
-      </div>}
+      {shareError && (
+        <p className="crm-quote-share-error" role="alert">
+          {shareError}
+        </p>
+      )}
+      {shareMessage && (
+        <div className="crm-quote-share-ready" role="status">
+          <p>{shareMessage}</p>
+          {preparedPdf && (
+            <button
+              type="button"
+              onClick={() => downloadQuotationPdfFile(preparedPdf)}
+            >
+              Download PDF
+            </button>
+          )}
+        </div>
+      )}
 
-      <dialog ref={dialog} className="crm-quote-dialog"
+      <dialog
+        ref={dialog}
+        className="crm-quote-dialog"
         aria-label={'Quotation preview ' + number}
-        onClose={() => { activeRequest.current?.abort(); setHtml(''); }}>
+        onClose={() => {
+          activeRequest.current?.abort();
+          setHtml('');
+        }}
+      >
         <div className="crm-quote-dialog-head">
           <div>
             <strong>{number}</strong>
-            <span>{shared ? 'Shared with customer' : 'Company quotation'}
-              {formatted ? ' · ' + formatted : ''}</span>
+            <span>
+              {shared ? 'Shared with customer' : 'Company quotation'}
+              {formatted ? ' · ' + formatted : ''}
+            </span>
           </div>
-          <button type="button" onClick={closePreview} aria-label="Close quotation preview">×</button>
+          <button
+            type="button"
+            onClick={closePreview}
+            aria-label="Close quotation preview"
+          >
+            ×
+          </button>
         </div>
-        {loading && <div className="crm-quote-preview-state" role="status">
-          Loading saved quotation preview…
-        </div>}
-        {previewError && <div className="crm-quote-preview-state" role="alert">
-          <strong>Preview unavailable</strong>
-          <p>{previewError}</p>
-          <button type="button" onClick={() => void openPreview()}>Try again</button>
-          <a href={base + '/preview'} target="_blank"
-            rel="noopener noreferrer">Open full preview ↗</a>
-        </div>}
-        {html && !loading && <iframe srcDoc={html} sandbox=""
-          title={'Preview ' + number} />}
+        {loading && (
+          <div className="crm-quote-preview-state" role="status">
+            Loading saved quotation preview…
+          </div>
+        )}
+        {previewError && (
+          <div className="crm-quote-preview-state" role="alert">
+            <strong>Preview unavailable</strong>
+            <p>{previewError}</p>
+            <button type="button" onClick={() => void openPreview()}>
+              Try again
+            </button>
+            <a
+              href={base + '/preview'}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open full preview ↗
+            </a>
+          </div>
+        )}
+        {html && !loading && (
+          <iframe srcDoc={html} sandbox="" title={'Preview ' + number} />
+        )}
         <div className="crm-quote-dialog-footer">
-          <a href={base + '/preview'} target="_blank"
-            rel="noopener noreferrer">Full Preview</a>
-          <a href={base + '/pdf?view=1'} target="_blank"
-            rel="noopener noreferrer">View PDF</a>
+          <a href={base + '/preview'} target="_blank" rel="noopener noreferrer">
+            Full Preview
+          </a>
+          <a
+            href={base + '/pdf?view=1'}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            View PDF
+          </a>
           <a href={base}>Open quotation</a>
-          <button type="button" onClick={closePreview}>Close</button>
+          <button type="button" onClick={closePreview}>
+            Close
+          </button>
         </div>
       </dialog>
     </div>
