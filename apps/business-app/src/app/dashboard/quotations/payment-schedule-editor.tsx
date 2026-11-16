@@ -80,7 +80,7 @@ export function PaymentScheduleEditor({
   const storedRows=readPlan(initial.terms,industry,editable,floorNames,defaultCompanyRows);
   const companySchedule=industry==='construction'&&floorNames.length&&defaultCompanyRows.length
     ?applyCompanyPaymentDefaults(suggestions(industry,floorNames),defaultCompanyRows):null;
-  const initialRows=JSON.stringify(storedRows)!==JSON.stringify(companySchedule)&&companySchedule?.length
+  const initialRows=companySchedule&&JSON.stringify(storedRows)!==JSON.stringify(companySchedule)
     ?companySchedule:storedRows;
   const originalRequirements=savedStageRequirements(initial.terms);
   const savedWorkflow=visibleMilestoneFlow(initial.terms,initialRows,originalRequirements);
