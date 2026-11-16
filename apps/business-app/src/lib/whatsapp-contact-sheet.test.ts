@@ -22,11 +22,9 @@ describe('broadcast contact sheet', () => {
   });
 
   it('reads a sheet without headers', () => {
-    expect(parseContactSheet('9876543210,Ravi\n9123456789').contacts).toEqual(
-      [
-        { phone: '919876543210', name: 'Ravi' },
-        { phone: '919123456789', name: '' },
-      ],
-    );
+    expect(parseContactSheet('9876543210,Ravi\n9123456789').contacts).toEqual([
+      { phone: '919876543210', name: 'Ravi' },
+      { phone: '919123456789', name: '' },
+    ]);
   });
 });

@@ -64,7 +64,8 @@ export async function POST(request: Request) {
         .insert({ organization_id: organizationId, name: labelName })
         .select('id')
         .single();
-      if (created.error || !created.data) throw new Error('LABEL_CREATE_FAILED');
+      if (created.error || !created.data)
+        throw new Error('LABEL_CREATE_FAILED');
       labelId = created.data.id;
     }
 

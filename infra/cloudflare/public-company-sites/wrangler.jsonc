@@ -9,7 +9,7 @@
   "routes": [
     {
       "pattern": "*/*",
-      "zone_name": "sghomesinterior.in"
-    }
-  ]
+      "zone_name": "sghomesinterior.in",
+    },
+  ],
 }

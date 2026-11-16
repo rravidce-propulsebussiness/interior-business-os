@@ -29,30 +29,34 @@ export function starterTemplate(
 ): WebsiteDocument {
   if (kind === 'blank') return emptyWebsite(name);
   if (kind === 'custom') {
-    const doc=emptyWebsite(name);
-    doc.code=[{
-      id:'customHome',name:'Custom home page',
-      html:'<main><h1>Your company</h1><p>Build your website with your own HTML and CSS.</p></main>',
-      css:'main { padding: 48px; font-family: sans-serif; }',
-      javascript:'',
-    }];
-    const node=createNode('custom','customPage');
-    node.props={code:'customHome'};
-    doc.pages[0]!.nodes=[node];
+    const doc = emptyWebsite(name);
+    doc.code = [
+      {
+        id: 'customHome',
+        name: 'Custom home page',
+        html: '<main><h1>Your company</h1><p>Build your website with your own HTML and CSS.</p></main>',
+        css: 'main { padding: 48px; font-family: sans-serif; }',
+        javascript: '',
+      },
+    ];
+    const node = createNode('custom', 'customPage');
+    node.props = { code: 'customHome' };
+    doc.pages[0]!.nodes = [node];
     return validateTemplate(doc);
   }
   // Every visual starter is a finished six-page website with editable
   // services, packages, project cards, header menu and footer.
-  const doc=businessShowcaseTemplate(name);
+  const doc = businessShowcaseTemplate(name);
   if (kind === 'construction') {
-    doc.pages[0]!.nodes[0]!.props.title='Building better spaces, together.';
-    doc.pages[0]!.nodes[0]!.props.subtitle='CONSTRUCTION · PLANNING · EXECUTION';
+    doc.pages[0]!.nodes[0]!.props.title = 'Building better spaces, together.';
+    doc.pages[0]!.nodes[0]!.props.subtitle =
+      'CONSTRUCTION · PLANNING · EXECUTION';
   }
   if (kind === 'services') {
-    doc.pages[0]!.nodes[0]!.props.title='Expert service. Personal attention.';
-    doc.pages[0]!.nodes[0]!.props.subtitle='TRUSTED BUSINESS SERVICES';
-    doc.theme.primary='#8A624E';
-    doc.theme.accent='#BE845D';
+    doc.pages[0]!.nodes[0]!.props.title = 'Expert service. Personal attention.';
+    doc.pages[0]!.nodes[0]!.props.subtitle = 'TRUSTED BUSINESS SERVICES';
+    doc.theme.primary = '#8A624E';
+    doc.theme.accent = '#BE845D';
   }
   return validateTemplate(doc);
 }

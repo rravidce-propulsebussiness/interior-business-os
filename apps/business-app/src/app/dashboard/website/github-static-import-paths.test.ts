@@ -1,10 +1,20 @@
 import { describe, expect, it } from 'vitest';
-import { importableHtmlPath, importedPageSlug, importableStylesheetPath } from './github-static-import-paths';
+import {
+  importableHtmlPath,
+  importedPageSlug,
+  importableStylesheetPath,
+} from './github-static-import-paths';
 
 describe('static GitHub import paths', () => {
   it('accepts static exports from common framework build output', () => {
-    for (const file of ['index.html', 'pages/contact.html', 'out/index.html',
-      'out/about/index.html', 'dist/services.html', 'build/projects/index.html']) {
+    for (const file of [
+      'index.html',
+      'pages/contact.html',
+      'out/index.html',
+      'out/about/index.html',
+      'dist/services.html',
+      'build/projects/index.html',
+    ]) {
       expect(importableHtmlPath(file)).toBe(true);
     }
     expect(importedPageSlug('index.html')).toBe('git-home');
@@ -13,8 +23,14 @@ describe('static GitHub import paths', () => {
   });
 
   it('rejects unsafe paths, executable source and unreasonable nesting', () => {
-    for (const file of ['../index.html', '/out/index.html', 'out/../index.html',
-      'server.php', 'src/app/page.tsx', 'out/a/b/c/d/e/index.html']) {
+    for (const file of [
+      '../index.html',
+      '/out/index.html',
+      'out/../index.html',
+      'server.php',
+      'src/app/page.tsx',
+      'out/a/b/c/d/e/index.html',
+    ]) {
       expect(importableHtmlPath(file)).toBe(false);
     }
   });

@@ -108,49 +108,60 @@ export function CuringRounds({
     );
   return (
     <div className="pf-round-list">
-      {hasOtherDays && <div className="pf-rounds-toolbar">
-        <span>{showAll ? 'All available curing days' : 'Today’s curing log'}</span>
-        <button type="button" aria-expanded={showAll}
-          onClick={() => setShowAll((value) => !value)}>
-          {showAll ? 'Show today only' : 'Show all days'}
-        </button>
-      </div>}
-      {!visibleRounds.length
-        ? <p className="pf-empty pf-rounds-empty">No curing rounds scheduled for today.</p>
-        : <ol className="pf-rounds">
-      {visibleRounds.map((round) => (
-        <li key={round.key} className={'pf-round pf-round-' + round.status}>
+      {hasOtherDays && (
+        <div className="pf-rounds-toolbar">
+          <span>
+            {showAll ? 'All available curing days' : 'Today’s curing log'}
+          </span>
           <button
             type="button"
-            className="pf-round-head"
-            aria-expanded={open === round.key}
-            disabled={!canRecord || !round.recordable}
-            onClick={() => setOpen(open === round.key ? '' : round.key)}
+            aria-expanded={showAll}
+            onClick={() => setShowAll((value) => !value)}
           >
-            <span className="pf-round-time">
-              <b>{round.time}</b>
-              <small>{round.day}</small>
-            </span>
-            <span className="pf-round-title">
-              {round.title}
-              {round.remarks && (
-                <small>
-                  {round.remarks}
-                  {round.hasPhoto ? ' · 📷' : ''}
-                </small>
-              )}
-            </span>
-            <span className={'pf-pill pf-pill-' + round.status}>
-              {label[round.status]}
-              {round.late ? ' · late' : ''}
-            </span>
+            {showAll ? 'Show today only' : 'Show all days'}
           </button>
-          {canRecord && round.recordable && open === round.key && (
-            <RoundForm projectId={projectId} round={round} />
-          )}
-        </li>
-      ))}
-    </ol>}
+        </div>
+      )}
+      {!visibleRounds.length ? (
+        <p className="pf-empty pf-rounds-empty">
+          No curing rounds scheduled for today.
+        </p>
+      ) : (
+        <ol className="pf-rounds">
+          {visibleRounds.map((round) => (
+            <li key={round.key} className={'pf-round pf-round-' + round.status}>
+              <button
+                type="button"
+                className="pf-round-head"
+                aria-expanded={open === round.key}
+                disabled={!canRecord || !round.recordable}
+                onClick={() => setOpen(open === round.key ? '' : round.key)}
+              >
+                <span className="pf-round-time">
+                  <b>{round.time}</b>
+                  <small>{round.day}</small>
+                </span>
+                <span className="pf-round-title">
+                  {round.title}
+                  {round.remarks && (
+                    <small>
+                      {round.remarks}
+                      {round.hasPhoto ? ' · 📷' : ''}
+                    </small>
+                  )}
+                </span>
+                <span className={'pf-pill pf-pill-' + round.status}>
+                  {label[round.status]}
+                  {round.late ? ' · late' : ''}
+                </span>
+              </button>
+              {canRecord && round.recordable && open === round.key && (
+                <RoundForm projectId={projectId} round={round} />
+              )}
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   );
 }
@@ -221,8 +232,9 @@ export function CuringPlanForm({
       <input type="hidden" name="round_times" value="07:00,12:00,17:00" />
       <input type="hidden" name="grace_minutes" value="60" />
       <p className="pf-help pf-span">
-        This routine repeats every day with morning, afternoon and evening rounds.
-        Dates and times are set automatically; each round still needs a site record and photo.
+        This routine repeats every day with morning, afternoon and evening
+        rounds. Dates and times are set automatically; each round still needs a
+        site record and photo.
       </p>
       <button className="pf-btn pf-btn-primary" disabled={pending}>
         {pending ? 'Saving…' : 'Start daily curing routine'}

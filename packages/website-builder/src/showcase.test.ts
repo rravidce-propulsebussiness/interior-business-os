@@ -7,40 +7,56 @@ import { websiteHtml } from './render';
 describe('Business Showcase multi-page template', () => {
   const doc = starterTemplate('Example Construction', 'showcase');
 
-  it.each(['construction','services','showcase'] as const)(
+  it.each(['construction', 'services', 'showcase'] as const)(
     '%s starter includes all six business pages rather than a blank one-page site',
-    kind => {
-      const site=starterTemplate('Test Company',kind);
-      expect(site.pages.map(page=>page.path)).toEqual([
-        '/','/about','/services','/projects','/packages','/contact',
+    (kind) => {
+      const site = starterTemplate('Test Company', kind);
+      expect(site.pages.map((page) => page.path)).toEqual([
+        '/',
+        '/about',
+        '/services',
+        '/projects',
+        '/packages',
+        '/contact',
       ]);
-      expect(site.pages.every(page=>page.nodes.length>0)).toBe(true);
+      expect(site.pages.every((page) => page.nodes.length > 0)).toBe(true);
     },
   );
 
   it('creates complete editable pages with linked navigation and footer', () => {
-    expect(doc.pages.map(page => page.path)).toEqual([
-      '/', '/about', '/services', '/projects', '/packages', '/contact',
+    expect(doc.pages.map((page) => page.path)).toEqual([
+      '/',
+      '/about',
+      '/services',
+      '/projects',
+      '/packages',
+      '/contact',
     ]);
-    for (const link of [...doc.navigation,...doc.footerNavigation])
-      expect(doc.pages.some(page => page.path === link.href)).toBe(true);
-    expect(doc.pages.every(page => page.nodes.length > 0)).toBe(true);
+    for (const link of [...doc.navigation, ...doc.footerNavigation])
+      expect(doc.pages.some((page) => page.path === link.href)).toBe(true);
+    expect(doc.pages.every((page) => page.nodes.length > 0)).toBe(true);
     expect(doc.footerNavigation.length).toBeGreaterThan(0);
     expect(validateDocument(doc, true)).toBeTruthy();
   });
 
   it('includes finished package tiers and multiple service and portfolio cards', () => {
-    const home=doc.pages.find(page=>page.path==='/')!;
-    const packages=doc.pages.find(page=>page.path==='/packages')!;
-    const grid=packages.nodes.find(node=>node.type==='grid')!;
-    expect(grid.children.map(card=>card.props.title)).toEqual([
-      'Standard','Premium','Elite',
+    const home = doc.pages.find((page) => page.path === '/')!;
+    const packages = doc.pages.find((page) => page.path === '/packages')!;
+    const grid = packages.nodes.find((node) => node.type === 'grid')!;
+    expect(grid.children.map((card) => card.props.title)).toEqual([
+      'Standard',
+      'Premium',
+      'Elite',
     ]);
-    expect(home.nodes.some(node=>node.type==='grid')).toBe(true);
-    expect(doc.content.filter(item=>item.kind==='services')).toHaveLength(6);
-    expect(doc.content.filter(item=>item.kind==='projects')).toHaveLength(3);
-    expect(doc.navigation.map(link=>link.href)).toContain('/packages');
-    const html=websiteHtml(compileWebsite(doc),'/packages')!;
+    expect(home.nodes.some((node) => node.type === 'grid')).toBe(true);
+    expect(doc.content.filter((item) => item.kind === 'services')).toHaveLength(
+      6,
+    );
+    expect(doc.content.filter((item) => item.kind === 'projects')).toHaveLength(
+      3,
+    );
+    expect(doc.navigation.map((link) => link.href)).toContain('/packages');
+    const html = websiteHtml(compileWebsite(doc), '/packages')!;
     expect(html).toContain('Elite');
     expect(html).toContain('Premium');
     expect(html).toContain('Request package details');
@@ -48,7 +64,14 @@ describe('Business Showcase multi-page template', () => {
 
   it('renders each page independently with a shared business header and footer', () => {
     const build = compileWebsite(doc);
-    for (const path of ['/', '/about', '/services', '/projects', '/packages', '/contact']) {
+    for (const path of [
+      '/',
+      '/about',
+      '/services',
+      '/projects',
+      '/packages',
+      '/contact',
+    ]) {
       const html = websiteHtml(build, path);
       expect(html).toContain('Example Construction');
       expect(html).toContain('href="/contact"');
@@ -57,8 +80,10 @@ describe('Business Showcase multi-page template', () => {
   });
 
   it('lets the editor edit project and service card content, including photos', () => {
-    const html = websiteHtml(compileWebsite(doc), '/', { preview:true })!;
-    expect(html).toContain('data-website-content-id="showcaseServiceConstruction"');
+    const html = websiteHtml(compileWebsite(doc), '/', { preview: true })!;
+    expect(html).toContain(
+      'data-website-content-id="showcaseServiceConstruction"',
+    );
     expect(html).toContain('data-website-content-field="title"');
     expect(html).toContain('data-website-add-photo');
     expect(html).toContain('website.replace-content-image');

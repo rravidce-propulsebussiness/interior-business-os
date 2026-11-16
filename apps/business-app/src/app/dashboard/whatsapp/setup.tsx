@@ -67,9 +67,15 @@ export function WhatsAppSetup({
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
   const [disconnectBusy, setDisconnectBusy] = useState(false);
   const [message, setMessage] = useState(initialMessage);
-  const [registrationPins, setRegistrationPins] = useState<Record<string, string>>({});
-  const [registrationMessages, setRegistrationMessages] = useState<Record<string, string>>({});
-  const [registrationBusyId, setRegistrationBusyId] = useState<string | null>(null);
+  const [registrationPins, setRegistrationPins] = useState<
+    Record<string, string>
+  >({});
+  const [registrationMessages, setRegistrationMessages] = useState<
+    Record<string, string>
+  >({});
+  const [registrationBusyId, setRegistrationBusyId] = useState<string | null>(
+    null,
+  );
   const codeRef = useRef<string | null>(null);
   const assetRef = useRef<SignupAsset | null>(null);
   const submittedRef = useRef(false);
@@ -175,7 +181,8 @@ export function WhatsAppSetup({
     if (!/^\d{6}$/.test(pin)) {
       setRegistrationMessages((current) => ({
         ...current,
-        [connectionId]: 'Enter the six-digit WhatsApp two-step verification PIN.',
+        [connectionId]:
+          'Enter the six-digit WhatsApp two-step verification PIN.',
       }));
       return;
     }
@@ -196,11 +203,14 @@ export function WhatsAppSetup({
         message?: string;
       };
       if (!response.ok || !result.registered)
-        throw new Error(result.message ?? 'Meta could not register this phone number.');
+        throw new Error(
+          result.message ?? 'Meta could not register this phone number.',
+        );
       setRegistrationPins((current) => ({ ...current, [connectionId]: '' }));
       setRegistrationMessages((current) => ({
         ...current,
-        [connectionId]: 'Meta accepted the registration. Refresh WhatsApp Manager to confirm the number status.',
+        [connectionId]:
+          'Meta accepted the registration. Refresh WhatsApp Manager to confirm the number status.',
       }));
     } catch (error) {
       setRegistrationMessages((current) => ({
@@ -235,7 +245,9 @@ export function WhatsAppSetup({
       router.refresh();
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : 'Could not disconnect WhatsApp.',
+        error instanceof Error
+          ? error.message
+          : 'Could not disconnect WhatsApp.',
       );
     } finally {
       setDisconnectBusy(false);
@@ -398,7 +410,9 @@ export function WhatsAppSetup({
                     onChange={(event) =>
                       setRegistrationPins((current) => ({
                         ...current,
-                        [connection.id]: event.target.value.replace(/\D/g, '').slice(0, 6),
+                        [connection.id]: event.target.value
+                          .replace(/\D/g, '')
+                          .slice(0, 6),
                       }))
                     }
                     className={inputClass}
@@ -421,7 +435,11 @@ export function WhatsAppSetup({
                   id={`whatsapp-register-help-${connection.id}`}
                   className="text-xs leading-5 text-neutral-600"
                 >
-                  Meta requires a six-digit two-step verification PIN to register a phone for Cloud API messaging. The PIN is sent to Meta for this request and is not saved by Business OS. If the display name is In Review in Meta, wait for approval before registering.
+                  Meta requires a six-digit two-step verification PIN to
+                  register a phone for Cloud API messaging. The PIN is sent to
+                  Meta for this request and is not saved by Business OS. If the
+                  display name is In Review in Meta, wait for approval before
+                  registering.
                 </p>
                 {registrationMessages[connection.id] && (
                   <p role="status" className="text-sm text-neutral-700">
@@ -468,10 +486,10 @@ export function WhatsAppSetup({
 
       <p className="text-xs leading-5 text-neutral-500">
         Meta handles authentication and asset selection. Business OS never asks
-        for a Facebook password or SMS verification code. The registration PIN is
-        sent to Meta for the phone activation request and is not stored. The billing link opens Meta so
-        you can add or manage the payment method or funding options available to
-        your account.
+        for a Facebook password or SMS verification code. The registration PIN
+        is sent to Meta for the phone activation request and is not stored. The
+        billing link opens Meta so you can add or manage the payment method or
+        funding options available to your account.
       </p>
     </section>
   );

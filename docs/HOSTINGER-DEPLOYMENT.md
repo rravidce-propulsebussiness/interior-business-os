@@ -132,6 +132,7 @@ that lacks this marker. Verify PDF visual parity before sharing:
 open Preview, View PDF, and Download PDF for the same saved revision.
 Mobile sharing uses two taps when needed: prepare the actual PDF file,
 then Share PDF File to open the Android share sheet and choose WhatsApp.
+
 ## Single-website Business App and Super Admin deployment
 
 **The production website uses ONE Hostinger Node.js deployment** at `https://sghomesinterior.in`. Do not deploy `BUSINESS_OS_SERVICE=platform-admin` to the existing domain. The Super Admin routes are integrated into the Business App and share the same origin, deployment, Supabase project, and existing login session:

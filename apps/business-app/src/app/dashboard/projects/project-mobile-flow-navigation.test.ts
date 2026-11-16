@@ -23,8 +23,12 @@ describe('mobile project milestone navigation', () => {
     expectSource(view).toContain('milestones: Milestones');
     expectSource(primaryFlow).toContain('<ProjectFlow d={d} milestoneMode />');
     expectSource(primaryFlow).not.toContain('<ProjectMilestoneSection');
-    expectSource(read('./project-milestone-timeline.tsx')).toContain('<h1>Project milestones</h1>');
-    expectSource(read('./project-milestone-timeline.tsx')).toContain('Delayed ');
+    expectSource(read('./project-milestone-timeline.tsx')).toContain(
+      '<h1>Project milestones</h1>',
+    );
+    expectSource(read('./project-milestone-timeline.tsx')).toContain(
+      'Delayed ',
+    );
     const styles = read('./project-daily-command.css');
     expectSource(styles).toContain(
       'grid-template-columns:repeat(4,minmax(0,1fr))',

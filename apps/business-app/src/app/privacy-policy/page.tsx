@@ -15,9 +15,10 @@ export default function PrivacyPolicyPage() {
   return (
     <LegalPage title="Privacy Policy" updated={updated}>
       <p>
-        ProPulse Business OS supports construction and interior business teams. This policy explains how Star Glow Home Infra Construction and
-        Interior Private Limited, operating the ProPulse service, handles
-        information when you visit the service or use a business workspace.
+        ProPulse Business OS supports construction and interior business teams.
+        This policy explains how Star Glow Home Infra Construction and Interior
+        Private Limited, operating the ProPulse service, handles information
+        when you visit the service or use a business workspace.
       </p>
 
       <h2>Information we handle</h2>

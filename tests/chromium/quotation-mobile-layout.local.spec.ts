@@ -2,14 +2,20 @@ import { test, expect } from '@playwright/test';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const css = readFileSync(resolve(process.cwd(),
-  'apps/business-app/src/app/dashboard/quotations/quotations-list.css'), 'utf8');
+const css = readFileSync(
+  resolve(
+    process.cwd(),
+    'apps/business-app/src/app/dashboard/quotations/quotations-list.css',
+  ),
+  'utf8',
+);
 
 const fixture = [
   '<!doctype html><html lang="en"><head>',
   '<meta name="viewport" content="width=device-width, initial-scale=1">',
   '<style>*,*::before,*::after{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif}[hidden]{display:none!important}',
-  css, '</style></head><body>',
+  css,
+  '</style></head><body>',
   '<div class="qs-layout"><main class="qs-main"><div class="qs-quotes-page">',
   '<section class="qs-quotes-mobile-list"><section class="qs-quotes-customer-card">',
   '<header class="qs-quotes-customer-header"><span class="qs-quotes-initials">R</span>',
@@ -41,46 +47,65 @@ const fixture = [
   '</script></body></html>',
 ].join('');
 
-test('Quotation actions remain 49px tall and never overlap PDF or history at mobile widths', async ({page}) => {
+test('Quotation actions remain 49px tall and never overlap PDF or history at mobile widths', async ({
+  page,
+}) => {
   await page.setContent(fixture, { waitUntil: 'load' });
   for (const width of [320, 360, 390, 430, 700]) {
-    await page.setViewportSize({width,height:844});
-    const buttons = page.locator('.qs-quotes-mobile-actions > .qs-quotes-action');
+    await page.setViewportSize({ width, height: 844 });
+    const buttons = page.locator(
+      '.qs-quotes-mobile-actions > .qs-quotes-action',
+    );
     await expect(buttons).toHaveCount(3);
-    const before = await buttons.evaluateAll(elements =>
-      elements.map(element => {
+    const before = await buttons.evaluateAll((elements) =>
+      elements.map((element) => {
         const rect = element.getBoundingClientRect();
-        return {x:rect.x,y:rect.y,width:rect.width,height:rect.height,bottom:rect.bottom,right:rect.right};
-      }));
+        return {
+          x: rect.x,
+          y: rect.y,
+          width: rect.width,
+          height: rect.height,
+          bottom: rect.bottom,
+          right: rect.right,
+        };
+      }),
+    );
     for (const item of before) {
       expect(item.height).toBeGreaterThanOrEqual(44);
       expect(item.height).toBeLessThanOrEqual(52);
       expect(item.width).toBeGreaterThan(60);
-      expect(item.right).toBeLessThanOrEqual(width+1);
+      expect(item.right).toBeLessThanOrEqual(width + 1);
     }
-    expect(Math.abs(before[0]!.height-before[1]!.height)).toBeLessThan(1);
+    expect(Math.abs(before[0]!.height - before[1]!.height)).toBeLessThan(1);
     expect(before[2]!.width).toBeGreaterThan(before[0]!.width);
     expect(before[0]!.bottom).toBeLessThanOrEqual(before[2]!.y);
     expect(before[1]!.bottom).toBeLessThanOrEqual(before[2]!.y);
     const footer = await page.locator('.qs-quotes-footer-block').boundingBox();
     expect(footer).not.toBeNull();
-    expect(before[2]!.bottom).toBeLessThan((footer?.y ?? 0));
+    expect(before[2]!.bottom).toBeLessThan(footer?.y ?? 0);
     await buttons.nth(2).click();
     await expect(page.locator('.qs-quotes-mobile-more-panel')).toBeVisible();
-    const after = await buttons.evaluateAll(elements => elements.map(e => e.getBoundingClientRect().height));
-    expect(after.every(h=>h<=52)).toBe(true);
-    const menu = await page.locator('.qs-quotes-mobile-more-panel').boundingBox();
+    const after = await buttons.evaluateAll((elements) =>
+      elements.map((e) => e.getBoundingClientRect().height),
+    );
+    expect(after.every((h) => h <= 52)).toBe(true);
+    const menu = await page
+      .locator('.qs-quotes-mobile-more-panel')
+      .boundingBox();
     const pdf = await page.locator('.qs-quotes-mobile-pdf').boundingBox();
     expect(menu).not.toBeNull();
     expect(pdf).not.toBeNull();
     const expandedMore = await buttons.nth(2).boundingBox();
     expect(expandedMore).not.toBeNull();
-    expect(menu!.y).toBeGreaterThanOrEqual(expandedMore!.y + expandedMore!.height - 1);
-    expect(menu!.y+menu!.height).toBeLessThanOrEqual(pdf!.y+1);
-    const overflow = await page.evaluate(()=>({
-      content: document.documentElement.scrollWidth, viewport: document.documentElement.clientWidth,
+    expect(menu!.y).toBeGreaterThanOrEqual(
+      expandedMore!.y + expandedMore!.height - 1,
+    );
+    expect(menu!.y + menu!.height).toBeLessThanOrEqual(pdf!.y + 1);
+    const overflow = await page.evaluate(() => ({
+      content: document.documentElement.scrollWidth,
+      viewport: document.documentElement.clientWidth,
     }));
-    expect(overflow.content).toBeLessThanOrEqual(overflow.viewport+1);
+    expect(overflow.content).toBeLessThanOrEqual(overflow.viewport + 1);
     await buttons.nth(2).click();
     await expect(page.locator('.qs-quotes-mobile-more-panel')).toBeHidden();
   }

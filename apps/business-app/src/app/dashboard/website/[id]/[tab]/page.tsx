@@ -32,7 +32,8 @@ const permissions: Record<string, string> = {
   metrics: 'website.view',
 };
 export default async function WebsiteTab({
-  params, searchParams,
+  params,
+  searchParams,
 }: {
   params: Promise<{ id: string; tab: string }>;
   searchParams: Promise<{ page?: string; file?: string }>;
@@ -57,26 +58,44 @@ export default async function WebsiteTab({
   let content;
   if (tab === 'layout') {
     const query = await searchParams;
-    content = <FixedTemplateEditor
-      key={site.version}
-      id={id}
-      name={site.name}
-      initial={site.document}
-      version={site.version}
-      {...(query.page ? { initialPageId: query.page } : {})}
-      canEdit={s.allowed('website.page.edit')}
-      canPublish={s.allowed('website.page.publish')}
-      canUpload={s.allowed('website.media.manage')}
-      canUseGithub={s.allowed('website.custom_code.view')}
-    />;
+    content = (
+      <FixedTemplateEditor
+        key={site.version}
+        id={id}
+        name={site.name}
+        initial={site.document}
+        version={site.version}
+        {...(query.page ? { initialPageId: query.page } : {})}
+        canEdit={s.allowed('website.page.edit')}
+        canPublish={s.allowed('website.page.publish')}
+        canUpload={s.allowed('website.media.manage')}
+        canUseGithub={s.allowed('website.custom_code.view')}
+      />
+    );
   } else if (tab === 'git') {
-    content = <WebsiteGitTools id={id} name={site.name}
-      version={site.version}
-      canPull={Boolean((site.limits as {custom_code?:boolean;developer_mode?:boolean})?.custom_code &&
-        (site.limits as {custom_code?:boolean;developer_mode?:boolean})?.developer_mode) &&
-        s.allowed('website.custom_code.edit') && s.allowed('website.page.create') &&
-        s.allowed('website.page.edit') && s.allowed('website.seo.manage')}
-      pages={site.document.pages.map(page => ({ path: page.path, title: page.title }))}/>;
+    content = (
+      <WebsiteGitTools
+        id={id}
+        name={site.name}
+        version={site.version}
+        canPull={
+          Boolean(
+            (site.limits as { custom_code?: boolean; developer_mode?: boolean })
+              ?.custom_code &&
+            (site.limits as { custom_code?: boolean; developer_mode?: boolean })
+              ?.developer_mode,
+          ) &&
+          s.allowed('website.custom_code.edit') &&
+          s.allowed('website.page.create') &&
+          s.allowed('website.page.edit') &&
+          s.allowed('website.seo.manage')
+        }
+        pages={site.document.pages.map((page) => ({
+          path: page.path,
+          title: page.title,
+        }))}
+      />
+    );
   } else if (tab === 'metrics') {
     const result = await s.client.rpc('website_metrics_read', {
       p_organization_id: s.context.organizationId,
@@ -229,9 +248,13 @@ export default async function WebsiteTab({
       dashboardBrand
       searchPlaceholder="Search leads, projects, quotations..."
     >
-      {tab === 'layout' || tab === 'git' ? content : (
+      {tab === 'layout' || tab === 'git' ? (
+        content
+      ) : (
         <main id="main-content" className="website-settings-workspace">
-          <div className="website-settings-back"><Link href={`/dashboard/website/${id}`}>← Website Studio</Link></div>
+          <div className="website-settings-back">
+            <Link href={`/dashboard/website/${id}`}>← Website Studio</Link>
+          </div>
           <header className="website-settings-title">
             <p>{site.name} · Website settings</p>
             <h1>{tab.replaceAll('_', ' ')}</h1>

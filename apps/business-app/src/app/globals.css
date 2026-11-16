@@ -155,7 +155,9 @@ body {
 
 /* Keep the original contrast of legacy opt-in dark pages without leaking
    their appearance into the modern company dashboard or public website studio. */
-body:has(:is(.premium-shell, .auth-shell, .dashboard-shell, .tenant-dashboard-v2)):not(:has(.owner-layout)) {
+body:has(
+    :is(.premium-shell, .auth-shell, .dashboard-shell, .tenant-dashboard-v2)
+  ):not(:has(.owner-layout)) {
   background: #07111f;
   color: #f7fafc;
   color-scheme: dark;
@@ -186,8 +188,7 @@ body:has(:is(.premium-shell, .auth-shell, .dashboard-shell, .tenant-dashboard-v2
   color: #f8fafc;
   color-scheme: dark;
 }
-:is(.premium-shell, .auth-shell, .dashboard-shell, .tenant-dashboard-v2)
-  label {
+:is(.premium-shell, .auth-shell, .dashboard-shell, .tenant-dashboard-v2) label {
   color: #dbe5f1;
 }
 

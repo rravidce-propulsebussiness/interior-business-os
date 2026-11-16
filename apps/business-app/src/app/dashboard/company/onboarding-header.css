@@ -4,7 +4,7 @@
   top: 0;
   z-index: 80;
   min-height: 76px;
-  background: rgba(255, 254, 252, .96);
+  background: rgba(255, 254, 252, 0.96);
   border-bottom: 1px solid #eee3db;
   backdrop-filter: blur(16px);
   color: #352e2a;
@@ -50,7 +50,7 @@
   display: block;
   font-size: 18px;
   font-weight: 820;
-  letter-spacing: -.7px;
+  letter-spacing: -0.7px;
   line-height: 1.05;
 }
 .workspace-onboarding-brand-text small {
@@ -85,7 +85,10 @@
   line-height: 1;
   border-radius: 11px !important;
   text-decoration: none;
-  transition: transform .18s ease, background .18s ease, border-color .18s ease;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
   box-shadow: none !important;
   cursor: pointer;
   white-space: nowrap;
@@ -123,17 +126,45 @@
 }
 @media (max-width: 560px) {
   .workspace-onboarding-header,
-  .workspace-onboarding-header-inner { min-height: 68px; }
-  .workspace-onboarding-header-inner { padding: 0 16px; gap: 10px; }
-  .workspace-onboarding-brand-mark { height: 36px; width: 36px; flex-basis: 36px; border-radius: 10px; }
-  .workspace-onboarding-brand-text strong { font-size: 15px; }
-  .workspace-onboarding-brand-text small { font-size: 9px; letter-spacing: .8px; margin-top: 4px; }
-  .workspace-onboarding-nav { gap: 7px; }
+  .workspace-onboarding-header-inner {
+    min-height: 68px;
+  }
+  .workspace-onboarding-header-inner {
+    padding: 0 16px;
+    gap: 10px;
+  }
+  .workspace-onboarding-brand-mark {
+    height: 36px;
+    width: 36px;
+    flex-basis: 36px;
+    border-radius: 10px;
+  }
+  .workspace-onboarding-brand-text strong {
+    font-size: 15px;
+  }
+  .workspace-onboarding-brand-text small {
+    font-size: 9px;
+    letter-spacing: 0.8px;
+    margin-top: 4px;
+  }
+  .workspace-onboarding-nav {
+    gap: 7px;
+  }
   .workspace-onboarding-header .workspace-onboarding-home,
-  .workspace-onboarding-header .workspace-onboarding-logout { padding: 10px; font-size: 12px; min-height: 39px; border-radius: 9px !important; }
-  .workspace-onboarding-nav svg { width: 15px; height: 15px; }
+  .workspace-onboarding-header .workspace-onboarding-logout {
+    padding: 10px;
+    font-size: 12px;
+    min-height: 39px;
+    border-radius: 9px !important;
+  }
+  .workspace-onboarding-nav svg {
+    width: 15px;
+    height: 15px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   .workspace-onboarding-header .workspace-onboarding-home,
-  .workspace-onboarding-header .workspace-onboarding-logout { transition: none; }
+  .workspace-onboarding-header .workspace-onboarding-logout {
+    transition: none;
+  }
 }

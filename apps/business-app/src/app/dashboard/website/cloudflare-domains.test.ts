@@ -57,7 +57,8 @@ describe('Cloudflare for SaaS custom domains', () => {
       status: 'pending',
       ssl: { status: 'pending_validation', method: 'txt' },
     };
-    const fetchMock = vi.fn()
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(json({ origin: fallbackOrigin, status: 'active' }))
       .mockResolvedValueOnce(json([]))
       .mockResolvedValueOnce(json(created))
@@ -66,7 +67,9 @@ describe('Cloudflare for SaaS custom domains', () => {
 
     expect((await ensureCloudflareHostname(hostname)).hostname).toBe(hostname);
     expect(fetchMock).toHaveBeenCalledTimes(4);
-    expect(String(fetchMock.mock.calls[0]![0])).toContain('/custom_hostnames/fallback_origin');
+    expect(String(fetchMock.mock.calls[0]![0])).toContain(
+      '/custom_hostnames/fallback_origin',
+    );
     const [url, options] = fetchMock.mock.calls[2]!;
     expect(url).toBe(
       'https://api.cloudflare.com/client/v4/zones/' +
@@ -93,13 +96,16 @@ describe('Cloudflare for SaaS custom domains', () => {
       status: 'active',
       ssl: { status: 'active' },
     };
-    const fetchMock = vi.fn()
+    const fetchMock = vi
+      .fn()
       .mockResolvedValueOnce(json({ origin: fallbackOrigin, status: 'active' }))
       .mockResolvedValueOnce(json([existing]));
     vi.stubGlobal('fetch', fetchMock);
     expect(await getCloudflareHostname(hostname)).toEqual(existing);
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls.every(args => args[1].method === 'GET')).toBe(true);
+    expect(fetchMock.mock.calls.every((args) => args[1].method === 'GET')).toBe(
+      true,
+    );
   });
 
   it('shows provider ownership and SSL TXT records without duplication', () => {

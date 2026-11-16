@@ -65,13 +65,18 @@ export function createConstructionRatesRepository(
       },
     ) =>
       invoke<string>('construction_rate_save', { p_org: org, p_input: input }),
-    saveCustomSettings: (org: string, rows: ReadonlyArray<{
-      id: string;
-      version: number;
-      consumptionPerSqft: string;
-    }>) => invoke<{ saved: number }>('construction_custom_package_settings_save', {
-      p_org: org, p_rows: rows,
-    }),
+    saveCustomSettings: (
+      org: string,
+      rows: ReadonlyArray<{
+        id: string;
+        version: number;
+        consumptionPerSqft: string;
+      }>,
+    ) =>
+      invoke<{ saved: number }>('construction_custom_package_settings_save', {
+        p_org: org,
+        p_rows: rows,
+      }),
     preview: (org: string, ids: string[], areaSqft: string) =>
       invoke<ConstructionQuotePreview>('construction_rate_quote_preview', {
         p_org: org,
