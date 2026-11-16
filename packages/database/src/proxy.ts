@@ -70,7 +70,8 @@ export async function refreshSessionWithRewrite(
         pathname.endsWith('/pdf') ||
         pathname.endsWith('/preview') ||
         pathname.endsWith('/download') ||
-        pathname.includes('/media/')
+        pathname.includes('/media/') ||
+        pathname.startsWith('/dashboard/employees/documents/')
       )
         return protect(new NextResponse('Forbidden', { status: 403 }));
       const login = request.nextUrl.clone();
