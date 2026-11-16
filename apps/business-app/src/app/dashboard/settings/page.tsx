@@ -1114,13 +1114,13 @@ export default async function SettingsPage({
             <Header
               icon="♧"
               title="Construction Workflow Settings"
-              detail="Define payment milestones, ordered work, site checks, work instructions and QC guidance once for new quotations and project timelines."
+              detail="Define reusable work stages, planned days, site checks, QC and payment markers. Payment amounts are decided separately in each quotation."
             />
             <div
               className="us-payment-template-section"
               id="company-payment-stages"
             >
-              <h3>Reusable stages, payment shares & work sequence</h3>
+              <h3>Reusable stages, work, QC & payment markers</h3>
               {constructionDefaultsResponse.error ? (
                 <p className="us-info">
                   Company payment defaults are temporarily unavailable.
