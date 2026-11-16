@@ -1,18 +1,13 @@
 'use client';
 
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useState } from 'react';
 import {
   type CompanyConstructionStage,
   type CompanyStageItem,
   defaultCompanyConstructionStages,
   defaultInteriorStages,
 } from '@business-os/core/company-construction-defaults';
-import {
-  saveConstructionPaymentDefaults,
-  type DefaultPaymentState,
-} from './payment-default-actions';
-
-const initialState: DefaultPaymentState = { saved: false, message: '' };
+import { saveConstructionPaymentDefaults } from './payment-default-actions';
 const stageDescriptions: Record<string, string> = {
   preconstruction: 'Price freeze, agreement and planning approvals.',
   foundation: 'Site preparation, excavation, footing and plinth work.',
@@ -126,15 +121,16 @@ export function ConstructionPaymentDefaults({
   initial: Record<string, CompanyConstructionStage[]>;
   industries: { key: string; name: string }[];
 }) {
-  const [state, action, pending] = useActionState(
-    saveConstructionPaymentDefaults,
-    initialState,
-  );
+  const [state, action, pending] = useActionState(saveConstructionPaymentDefaults, {
+    saved: false,
+    message: '',
+    savedRowsByIndustry: initial,
+  });
   const [industryKey, setIndustryKey] = useState(
     industries[0]?.key ?? 'construction',
   );
   const [knownIndustries, setKnownIndustries] = useState(industries);
-  const [savedByIndustry, setSavedByIndustry] = useState(initial);
+  const savedByIndustry = state.savedRowsByIndustry ?? initial;
   const [stages, setStages] = useState(
     savedByIndustry[industryKey] ?? defaultStages(industryKey),
   );
@@ -147,13 +143,6 @@ export function ConstructionPaymentDefaults({
   const savedStages =
     savedByIndustry[industryKey] ?? defaultStages(industryKey);
   const dirty = JSON.stringify(stages) !== JSON.stringify(savedStages);
-  useEffect(() => {
-    if (state.saved && state.industryKey && state.savedRows)
-      setSavedByIndustry((all) => ({
-        ...all,
-        [state.industryKey!]: state.savedRows!,
-      }));
-  }, [state.industryKey, state.saved, state.savedRows]);
   const switchIndustry = (key: string) => {
     setIndustryKey(key);
     setStages(savedByIndustry[key] ?? defaultStages(key));
@@ -613,7 +602,7 @@ export function ConstructionPaymentDefaults({
           </button>
         )}
       </footer>
-      {state.message && (
+      {state.message && state.industryKey === industryKey && (
         <p role="status" className={state.saved ? 'us-success' : 'us-error'}>
           {state.message}
         </p>
