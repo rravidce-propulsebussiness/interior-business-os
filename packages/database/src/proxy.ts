@@ -54,10 +54,25 @@ export async function refreshSessionWithRewrite(
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
   ) {
-    if (
-      request.nextUrl.pathname === '/dashboard' ||
-      request.nextUrl.pathname.startsWith('/dashboard/')
-    ) {
+    const pathname = request.nextUrl.pathname;
+    if (pathname.startsWith('/api/')) {
+      const status =
+        pathname.startsWith('/api/finance/') ||
+        pathname.startsWith('/api/execution/')
+          ? 403
+          : 401;
+      return protect(
+        NextResponse.json({ error: 'Authentication required' }, { status }),
+      );
+    }
+    if (pathname === '/dashboard' || pathname.startsWith('/dashboard/')) {
+      if (
+        pathname.endsWith('/pdf') ||
+        pathname.endsWith('/preview') ||
+        pathname.endsWith('/download') ||
+        pathname.includes('/media/')
+      )
+        return protect(new NextResponse('Forbidden', { status: 403 }));
       const login = request.nextUrl.clone();
       login.pathname = '/login';
       login.search = '';
