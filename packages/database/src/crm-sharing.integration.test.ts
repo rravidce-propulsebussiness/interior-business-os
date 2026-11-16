@@ -30,6 +30,7 @@ it.skipIf(!process.env.TEST_DATABASE_URL)(
 insert into private.quotation_signing_keys(singleton,secret_hex) values(true,'${key}') on conflict(singleton) do update set secret_hex=excluded.secret_hex;
 set local request.jwt.claim.sub='${actor}';
 create function pg_temp.commit_quote(payload jsonb) returns uuid language plpgsql security definer as $$declare msg text;begin msg=(payload||jsonb_build_object('operation','commit','actor','${actor}','organization_id','${org}','nonce',gen_random_uuid(),'expires',floor(extract(epoch from now()))+90))::text;return public.commit_quotation(msg,encode(extensions.hmac(convert_to(msg,'UTF8'),decode('${key}','hex'),'sha256'),'hex'));end$$;
+create function pg_temp.commit_quote_id(payload jsonb) returns uuid language plpgsql security definer as $$declare revision_id uuid;quote_id uuid;begin revision_id=pg_temp.commit_quote(payload);select quotation_id into quote_id from public.quotation_revisions where id=revision_id;return quote_id;end$$;
 create function pg_temp.assert_value(ok boolean,label text) returns void language plpgsql as $$begin if ok is distinct from true then raise exception 'FAIL: %',label;end if;raise notice 'PASS: %',label;end$$;
 create function pg_temp.denied(statement text,label text) returns void language plpgsql as $$begin begin execute statement;exception when insufficient_privilege or check_violation or invalid_parameter_value or serialization_failure then raise notice 'PASS: %',label;return;end;raise exception 'FAIL: %',label;end$$;
 create temp table share_test_state(payload jsonb);grant select,insert on share_test_state to authenticated,anon;
@@ -38,7 +39,7 @@ do $$declare lead uuid;mapping jsonb;r uuid;n uuid;expired_revision uuid;link js
  lead=public.crm_save('${org}','leads',jsonb_build_object('name','Sharing lead','phone','+49 30 123456','source_id',(select id from public.lead_sources where organization_id='${org}' and key='referral'),'stage_id',(select id from public.crm_pipeline_stages where organization_id='${org}' and key='new')));
  select id,customer_id into project,customer from public.projects where organization_id='${org}' order by id limit 1;
  if project is null or customer is null then raise exception 'A seeded project and customer are required for the sharing fixture'; end if;
- insert into public.quotations(id,organization_id,customer_id,project_id,quotation_number) values(prospect_quote,'${org}',customer,project,'SHARE-PROSPECT-'||prospect_quote::text);
+ prospect_quote=pg_temp.commit_quote_id(jsonb_build_object('action','create','project_id',project,'currency','INR'));
  perform public.lead_quotation_link('${org}',lead,prospect_quote,project);
  perform public.crm_command('${org}','stage',jsonb_build_object('id',lead,'version',1,'stage_id',(select id from public.crm_pipeline_stages where organization_id='${org}' and key='won'),'note','Signed approval received'));
  mapping=public.crm_convert('${org}',jsonb_build_object('id',lead,'version',2));
