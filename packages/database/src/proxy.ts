@@ -53,8 +53,18 @@ export async function refreshSessionWithRewrite(
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
     !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
-  )
+  ) {
+    if (
+      request.nextUrl.pathname === '/dashboard' ||
+      request.nextUrl.pathname.startsWith('/dashboard/')
+    ) {
+      const login = request.nextUrl.clone();
+      login.pathname = '/login';
+      login.search = '';
+      return protect(NextResponse.redirect(login));
+    }
     return protect(responseForRequest());
+  }
   const env = parsePublicEnvironment(process.env);
   let response = responseForRequest();
   const client = createServerClient<Database>(
