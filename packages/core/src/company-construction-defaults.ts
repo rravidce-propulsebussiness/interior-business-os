@@ -127,6 +127,23 @@ export type CompanyConstructionPaymentRow = z.infer<
   typeof companyConstructionPaymentRows
 >[number];
 
+/** A quotation snapshot is current only when both ordered references and the
+ * actual configured item content match. Work names and guides can change while
+ * the flow's code/index references stay identical. */
+export function companyWorkSnapshotNeedsSync(
+  savedFlow: QuotationMilestoneFlow,
+  savedRequirements: StageRequirementsMap,
+  snapshot: {
+    flow: QuotationMilestoneFlow;
+    requirements: StageRequirementsMap;
+  },
+): boolean {
+  return (
+    JSON.stringify(savedFlow) !== JSON.stringify(snapshot.flow) ||
+    JSON.stringify(savedRequirements) !== JSON.stringify(snapshot.requirements)
+  );
+}
+
 const areaHints: [RegExp, string][] = [
   [
     /(agreement|advance|pre.?construction|survey|permit|site\s*inspection)/i,
