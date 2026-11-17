@@ -108,14 +108,17 @@ export async function refreshSessionWithRewrite(
   );
   if (debugPublicPage)
     console.log(
-      `[Business OS] Next proxy requesting authenticated session for ${request.nextUrl.pathname}.`,
+      `[Business OS] Next proxy verifying session claims for ${request.nextUrl.pathname}.`,
     );
   try {
-    await client.auth.getUser();
+    // Verify the access-token claims locally and refresh only when needed. Using
+  // getUser() here forces every parallel request through Auth and can race the
+  // one-time refresh token when an access token expires.
+  await client.auth.getClaims();
   } finally {
     if (debugPublicPage)
       console.log(
-        `[Business OS] Next proxy session check finished for ${request.nextUrl.pathname} after ${Date.now() - diagnosticStart}ms.`,
+        `[Business OS] Next proxy claim check finished for ${request.nextUrl.pathname} after ${Date.now() - diagnosticStart}ms.`,
       );
   }
   response.headers.set('Cache-Control', 'private, no-store');
