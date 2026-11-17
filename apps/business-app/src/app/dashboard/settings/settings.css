@@ -1560,7 +1560,7 @@ a.ush-tile:focus-visible {
   cursor: not-allowed;
   opacity: 0.72;
 }
-@media (max-width: 1180px) {
+@media (max-width: 1500px) {
   .us-workflow-intro {
     grid-template-columns: 1fr;
   }
@@ -1577,6 +1577,12 @@ a.ush-tile:focus-visible {
   .us-company-stage-title {
     grid-column: 3;
     grid-row: 1;
+  }
+  .us-stage-description {
+    grid-column: auto;
+    grid-row: auto;
+    width: 100%;
+    min-width: 0;
   }
   .us-stage-actions {
     grid-column: 4;
@@ -1639,6 +1645,7 @@ a.ush-tile:focus-visible {
     grid-column: 1 / -1;
   }
 }
+
 @media (max-width: 640px) {
   .us-company-stage-editor {
     gap: 11px;
@@ -1692,15 +1699,18 @@ a.ush-tile:focus-visible {
     font-size: 13px;
   }
   .us-company-stage-title {
-    grid-column: 3;
+    grid-column: 3 / 5;
     grid-row: 1;
+    min-width: 0;
   }
   .us-stage-title-top {
     align-items: flex-start;
     gap: 7px;
+    padding-right: 78px;
   }
   .us-stage-title-top > input {
     flex: 1 1 100%;
+    width: 100%;
     min-height: 40px;
     font-size: 14px;
   }
@@ -1709,12 +1719,19 @@ a.ush-tile:focus-visible {
     min-height: 26px;
     font-size: 9px;
   }
+  .us-stage-description {
+    grid-column: auto;
+    grid-row: auto;
+    width: 100%;
+    min-width: 0;
+  }
   .us-stage-description textarea {
     min-height: 44px;
     padding-inline: 6px;
     font-size: 11px;
   }
   .us-stage-actions {
+    z-index: 1;
     grid-column: 4;
     grid-row: 1;
     flex-wrap: wrap;
@@ -1803,109 +1820,11 @@ a.ush-tile:focus-visible {
     width: 100%;
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
   .us-company-stage-card,
   .us-workflow-industries > button,
   .us-add-industry button {
     transition: none;
-  }
-}
-
-/* Keep the stage editor readable inside the dashboard's narrower main column. */
-@media (max-width: 1500px) {
-  .us-company-stage-heading {
-    grid-template-columns: 22px 38px minmax(0, 1fr) 76px;
-    gap: 9px;
-  }
-  .us-company-stage-title {
-    grid-column: 3;
-    grid-row: 1;
-  }
-  .us-stage-description {
-    grid-column: 3 / 5;
-    grid-row: 2;
-  }
-  .us-stage-actions {
-    grid-column: 4;
-    grid-row: 1;
-    align-self: start;
-  }
-  .us-repeat-toggle {
-    grid-column: 3 / 5;
-    grid-row: 3;
-    padding-top: 2px;
-  }
-  .us-stage-duration {
-    grid-column: 3 / 5;
-    grid-row: 4;
-    width: min(100%, 280px);
-  }
-  .us-stage-total,
-  .us-stage-items-heading,
-  .us-company-stage-items,
-  .us-company-stage-add {
-    margin-left: 0;
-  }
-  .us-stage-items-heading {
-    margin-top: 14px;
-  }
-  .us-company-stage-item {
-    grid-template-columns: 20px 36px minmax(0, 1fr) 72px;
-    gap: 8px;
-  }
-  .us-company-stage-item > .us-kind-picker {
-    grid-column: 3 / 5;
-    grid-row: 1;
-  }
-  .us-company-stage-item .us-stage-item-title {
-    grid-column: 2 / 5;
-    grid-row: 2;
-  }
-  .us-company-stage-item > label {
-    grid-column: 3 / 5;
-    grid-row: 3;
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-  }
-  .us-company-stage-item > button {
-    grid-column: 1 / 3;
-    grid-row: 3;
-  }
-  .us-company-stage-item details,
-  .us-company-stage-item details[open] {
-    grid-column: 1 / -1;
-    grid-row: 4;
-  }
-  .us-company-stage-item details summary {
-    width: fit-content;
-  }
-  .us-company-stage-add {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-  .us-company-stage-add > .us-kind-picker {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 640px) {
-  .us-company-stage-heading {
-    grid-template-columns: 20px 34px minmax(0, 1fr) 72px;
-    gap: 8px;
-    align-items: start;
-  }
-  .us-stage-description {
-    grid-column: 3 / 5;
-    grid-row: 2;
-  }
-  .us-repeat-toggle {
-    grid-column: 3 / 5;
-    grid-row: 3;
-    padding: 4px 0 0;
-  }
-  .us-stage-duration {
-    grid-column: 3 / 5;
-    grid-row: 4;
-    max-width: 270px;
-    padding-top: 2px;
   }
 }
