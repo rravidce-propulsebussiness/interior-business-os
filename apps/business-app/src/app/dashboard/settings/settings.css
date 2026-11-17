@@ -1932,3 +1932,245 @@ a.ush-tile:focus-visible {
     transition: none;
   }
 }
+
+/* Premium project-workflow treatment */
+.us-company-stage-editor {
+  --workflow-ink: #202d45;
+  --workflow-muted: #71809a;
+  --workflow-copper: #ad4d26;
+  --workflow-glow: #f27a3d;
+  gap: 16px;
+}
+.us-workflow-industries {
+  position: relative;
+  padding: 9px;
+  border-color: #e8e7ed;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #fff 18%, #fff9f4 100%);
+  box-shadow:
+    0 12px 28px #372a3910,
+    inset 0 1px #ffffff;
+}
+.us-workflow-industries > button {
+  border-radius: 12px;
+  box-shadow: 0 2px 5px #28324a08;
+}
+.us-workflow-industries > button.is-active {
+  border-color: #e9a17b;
+  background: linear-gradient(135deg, #fff5ec, #ffe7d8);
+  color: var(--workflow-copper);
+  box-shadow:
+    0 5px 12px #c4582b1c,
+    inset 0 1px #fff;
+}
+.us-workflow-intro .us-info,
+.us-project-calendar {
+  border-color: #d9e5fb;
+  background: linear-gradient(120deg, #f3f7ff, #edf3ff 70%, #f8f9ff);
+  box-shadow:
+    inset 0 1px #fff,
+    0 6px 16px #30466a08;
+}
+.us-company-stage-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-color: #eaded7;
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 100% 0%, #fff4e9 0, transparent 40%),
+    linear-gradient(145deg, #fff 0%, #fffdfb 52%, #fff8f3 100%);
+  box-shadow:
+    0 2px 3px #38291d08,
+    0 10px 24px #38291d08,
+    inset 0 1px #fff;
+  transform: perspective(1100px) translateZ(0);
+  transition:
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background 220ms ease;
+}
+.us-company-stage-card::before {
+  position: absolute;
+  z-index: -1;
+  top: 18px;
+  bottom: 18px;
+  left: 0;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, #f7a45f, #bd542b);
+  content: '';
+  opacity: 0;
+  transform: scaleY(0.35);
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+.us-company-stage-card.is-collapsed {
+  cursor: pointer;
+}
+.us-company-stage-card.is-collapsed:hover {
+  border-color: #dfbda9;
+  box-shadow:
+    0 4px 8px #38291d0d,
+    0 16px 30px #7c492319,
+    inset 0 1px #fff;
+  transform: perspective(1100px) translateY(-2px) rotateX(0.35deg);
+}
+.us-company-stage-card.is-expanded {
+  border-color: #e4b69a;
+  background:
+    radial-gradient(ellipse at 100% 0%, #fff0e2 0, transparent 42%),
+    linear-gradient(145deg, #fff 0%, #fffaf6 55%, #fff6ef 100%);
+  box-shadow:
+    0 3px 6px #38291d0a,
+    0 18px 42px #824b2a17,
+    inset 0 1px #fff;
+}
+.us-company-stage-card.is-expanded::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+.us-stage-number {
+  border: 1px solid #f8d8c2;
+  background: linear-gradient(145deg, #fff0e4, #ffdfc9);
+  box-shadow:
+    0 3px 8px #a84d2319,
+    inset 0 1px #fff;
+}
+.us-company-stage-card.is-collapsed .us-stage-name-preview {
+  color: var(--workflow-ink);
+  letter-spacing: -0.015em;
+}
+.us-company-stage-card.is-collapsed .us-stage-collapse-badge {
+  border: 1px solid #e1eaf9;
+  background: linear-gradient(135deg, #f0f5ff, #e8f0ff);
+  box-shadow: inset 0 1px #fff;
+}
+.us-stage-actions .us-stage-toggle {
+  border-color: #ead8cc;
+  background: linear-gradient(145deg, #fff, #fff5ed);
+  box-shadow:
+    0 2px 5px #57341b0b,
+    inset 0 1px #fff;
+  transition:
+    transform 220ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+.us-stage-actions .us-stage-toggle:hover {
+  box-shadow:
+    0 5px 10px #a9562a1c,
+    inset 0 1px #fff;
+  transform: translateY(-1px);
+}
+.us-company-stage-card.is-expanded .us-stage-toggle {
+  background: linear-gradient(145deg, #fff2e8, #ffe6d6);
+  transform: rotate(180deg);
+}
+.us-company-stage-card.is-expanded .us-stage-toggle:hover {
+  transform: rotate(180deg) translateY(-1px);
+}
+.us-company-stage-card.is-expanded .us-stage-description textarea {
+  border-color: #eee0d7;
+  background: #fffefa;
+  box-shadow: inset 0 1px 2px #32231708;
+}
+.us-company-stage-card.is-expanded .us-stage-items-heading,
+.us-company-stage-card.is-expanded .us-company-stage-items,
+.us-company-stage-card.is-expanded .us-company-stage-add {
+  animation: workflow-reveal 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.us-company-stage-items {
+  border-color: #eadfd8;
+  border-radius: 14px;
+  box-shadow:
+    0 6px 16px #3a2c2008,
+    inset 0 1px #fff;
+}
+.us-company-stage-item {
+  background: linear-gradient(100deg, #fff, #fffdfb);
+  transition: background 160ms ease;
+}
+.us-company-stage-item:hover {
+  background: linear-gradient(100deg, #fffaf6, #fff);
+}
+.us-stage-add {
+  border-style: solid;
+  border-color: #f0c0a3;
+  background: linear-gradient(135deg, #fff8f2, #ffede0);
+  box-shadow:
+    0 4px 12px #a9532a0d,
+    inset 0 1px #fff;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+.us-stage-add:hover {
+  background: linear-gradient(135deg, #fff2e7, #ffe5d3);
+  box-shadow:
+    0 7px 16px #a9532a1c,
+    inset 0 1px #fff;
+  transform: translateY(-1px);
+}
+.us-company-stage-save .us-button-primary {
+  box-shadow:
+    0 6px 16px #c44d241f,
+    inset 0 1px #ffffff38;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+.us-company-stage-save .us-button-primary:hover:not(:disabled) {
+  box-shadow:
+    0 9px 20px #c44d2430,
+    inset 0 1px #ffffff38;
+  transform: translateY(-1px);
+}
+@keyframes workflow-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-7px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (max-width: 640px) {
+  .us-company-stage-editor {
+    gap: 12px;
+  }
+  .us-company-stage-card.is-collapsed {
+    box-shadow:
+      0 2px 4px #38291d08,
+      0 6px 14px #38291d08,
+      inset 0 1px #fff;
+  }
+  .us-company-stage-card.is-expanded {
+    box-shadow:
+      0 3px 6px #38291d0a,
+      0 12px 28px #824b2a14,
+      inset 0 1px #fff;
+  }
+  .us-company-stage-card.is-expanded::before {
+    top: 14px;
+    bottom: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .us-company-stage-card,
+  .us-company-stage-card::before,
+  .us-stage-actions .us-stage-toggle,
+  .us-stage-add,
+  .us-company-stage-save .us-button-primary {
+    transition: none;
+  }
+  .us-company-stage-card.is-expanded .us-stage-items-heading,
+  .us-company-stage-card.is-expanded .us-company-stage-items,
+  .us-company-stage-card.is-expanded .us-company-stage-add {
+    animation: none;
+  }
+}
