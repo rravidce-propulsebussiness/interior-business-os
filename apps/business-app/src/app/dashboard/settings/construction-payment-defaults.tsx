@@ -139,7 +139,7 @@ export function ConstructionPaymentDefaults({
   const [draftKinds, setDraftKinds] = useState<
     Record<string, CompanyStageItem['kind']>
   >({});
-  const [expandedStage, setExpandedStage] = useState<string | null>('slabs');
+  const [expandedStage, setExpandedStage] = useState<string | null>(null);
   const savedStages =
     savedByIndustry[industryKey] ?? defaultStages(industryKey);
   const dirty = JSON.stringify(stages) !== JSON.stringify(savedStages);
@@ -250,7 +250,10 @@ export function ConstructionPaymentDefaults({
         const totalDays = Math.max(stage.days, itemDays);
         return (
           <section
-            className="us-company-stage-card"
+            className={
+              'us-company-stage-card' +
+              (expandedStage === stage.id ? ' is-expanded' : ' is-collapsed')
+            }
             key={stage.id}
             draggable={canEdit}
             onDragStart={(event) =>
@@ -271,6 +274,9 @@ export function ConstructionPaymentDefaults({
               <span className="us-stage-number">{index + 1}</span>
               <div className="us-company-stage-title">
                 <div className="us-stage-title-top">
+                  <span className="us-stage-name-preview">
+                    {stage.name || 'Untitled stage'}
+                  </span>
                   <input
                     aria-label="Stage name"
                     value={stage.name}
@@ -289,6 +295,9 @@ export function ConstructionPaymentDefaults({
                     {stage.repeatsPerFloor
                       ? 'REPEAT FOR EACH FLOOR'
                       : 'ONE TIME'}
+                  </span>
+                  <span className="us-stage-collapse-badge">
+                    {stage.repeatsPerFloor ? 'Per floor' : 'One time'}
                   </span>
                 </div>
                 <p className="us-stage-description">
@@ -366,13 +375,15 @@ export function ConstructionPaymentDefaults({
                 )}
               </div>
             </header>
-            <p className="us-stage-total">
-              Stage total: {totalDays} days · {workItems.length} work/check
-              steps
-              {itemDays > stage.days && (
-                <span> · Substage durations extend the stage duration</span>
-              )}
-            </p>
+            {expandedStage === stage.id && (
+              <p className="us-stage-total">
+                Stage total: {totalDays} days · {workItems.length} work/check
+                steps
+                {itemDays > stage.days && (
+                  <span> · Substage durations extend the stage duration</span>
+                )}
+              </p>
+            )}
             {expandedStage === stage.id && (
               <>
                 <div className="us-stage-items-heading">
