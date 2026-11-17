@@ -1034,7 +1034,10 @@ a.ush-tile:focus-visible {
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
-  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease;
 }
 .us-workflow-industries > button:hover,
 .us-add-industry button:hover {
@@ -1117,7 +1120,9 @@ a.ush-tile:focus-visible {
   border-radius: 18px;
   background: linear-gradient(145deg, #fff, #fffaf7);
   box-shadow: 0 4px 16px #54342108;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 .us-company-stage-card:hover {
   border-color: #e8c9b8;
@@ -1125,7 +1130,10 @@ a.ush-tile:focus-visible {
 }
 .us-company-stage-heading {
   display: grid;
-  grid-template-columns: 24px 40px minmax(230px, 1fr) minmax(142px, max-content) minmax(170px, max-content) 76px;
+  grid-template-columns: 24px 40px minmax(230px, 1fr) minmax(
+      142px,
+      max-content
+    ) minmax(170px, max-content) 76px;
   gap: 12px;
   align-items: center;
   min-width: 0;
