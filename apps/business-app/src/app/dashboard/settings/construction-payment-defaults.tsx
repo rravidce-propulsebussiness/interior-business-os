@@ -217,10 +217,57 @@ export function ConstructionPaymentDefaults({
           </div>
         )}
       </div>
-      <div className="us-workflow-intro">
-        <span className="us-workflow-saved">
-          {dirty ? '• Unsaved changes' : '✓ Saved'}
-        </span>
+      <div className="us-workflow-banner">
+        <div className="us-workflow-banner-main">
+          <div className="us-workflow-banner-title">
+            <span className="us-workflow-layers-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
+                <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                <polyline points="2 17 12 22 22 17" />
+                <polyline points="2 12 12 17 22 12" />
+              </svg>
+            </span>
+            <div>
+              <h2 className="us-workflow-banner-heading">
+                {knownIndustries.find((item) => item.key === industryKey)?.name ?? 'Construction'} Workflow
+              </h2>
+              <p className="us-workflow-banner-sub">
+                Set up your project stages, durations and the work sequence for each stage.
+              </p>
+            </div>
+          </div>
+          <span className="us-workflow-saved">
+            {dirty ? '• Unsaved changes' : '✓ Saved'}
+          </span>
+        </div>
+
+        {stages.length > 0 && (
+          <nav className="us-workflow-stepper" aria-label="Workflow stages overview">
+            {stages.map((stg, idx) => {
+              const isCurrent = expandedStage === stg.id || (!expandedStage && idx === 1);
+              const isPast = idx < (expandedStage ? stages.findIndex((s) => s.id === expandedStage) : 1);
+              return (
+                <button
+                  type="button"
+                  key={stg.id}
+                  className={
+                    'us-stepper-node' +
+                    (isCurrent ? ' is-current' : '') +
+                    (isPast ? ' is-completed' : '')
+                  }
+                  onClick={() => setExpandedStage(stg.id)}
+                  title={`Open ${stg.name}`}
+                >
+                  <span className="us-stepper-circle">
+                    {isPast ? '✓' : isCurrent ? <span className="us-stepper-dot" /> : null}
+                  </span>
+                  <span className="us-stepper-label">{stg.name}</span>
+                  {idx < stages.length - 1 && <span className="us-stepper-line" aria-hidden="true" />}
+                </button>
+              );
+            })}
+          </nav>
+        )}
       </div>
       <div className="us-project-calendar">
         <strong>Working days</strong>
@@ -364,6 +411,9 @@ export function ConstructionPaymentDefaults({
               <>
                 <div className="us-stage-items-heading">
                   <strong>Work sequence</strong>
+                  <span className="us-stage-items-sub">
+                    Drag to reorder work items in the sequence they are executed.
+                  </span>
                 </div>
                 <div className="us-company-stage-items">
                   {stage.items.map((item, itemIndex) => (
@@ -511,6 +561,7 @@ export function ConstructionPaymentDefaults({
                       }
                     />
                     <input
+                      aria-label="Add sequence item title"
                       value={drafts[stage.id] ?? ''}
                       onChange={(event) =>
                         setDrafts((all) => ({
@@ -518,10 +569,31 @@ export function ConstructionPaymentDefaults({
                           [stage.id]: event.target.value,
                         }))
                       }
-                      placeholder="Add work, material, check or QC"
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          const kind = draftKinds[stage.id] ?? 'work';
+                          const title = drafts[stage.id]?.trim();
+                          if (!title) return;
+                          patchStage(index, {
+                            items: [
+                              ...stage.items,
+                              {
+                                id: crypto.randomUUID(),
+                                kind,
+                                title,
+                                days: kind === 'payment' ? 0 : 1,
+                              },
+                            ],
+                          });
+                          setDrafts((all) => ({ ...all, [stage.id]: '' }));
+                        }
+                      }}
+                      placeholder="Add work, material, check or QC sequence item..."
                     />
                     <button
                       type="button"
+                      aria-label="Add sequence item"
                       onClick={() => {
                         const kind = draftKinds[stage.id] ?? 'work';
                         const title = drafts[stage.id]?.trim();

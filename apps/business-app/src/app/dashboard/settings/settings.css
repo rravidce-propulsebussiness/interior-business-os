@@ -2165,9 +2165,15 @@ a.ush-tile:focus-visible {
 }
 .us-company-stage-card.is-expanded .us-stage-items-heading {
   margin-bottom: 7px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
 }
-.us-stage-items-heading span {
-  display: none;
+.us-stage-items-heading .us-stage-items-sub {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 500;
+  color: #8c7365;
 }
 .us-stage-total {
   margin-top: 7px;
@@ -2203,4 +2209,160 @@ a.ush-tile:focus-visible {
     padding-inline: 5px;
     font-size: 9px;
   }
+}
+
+/* Workflow Stage Banner & Stepper Overview */
+.us-workflow-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #fff7f2 0%, #ffefe5 100%);
+  border: 1px solid #f2ded2;
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(184, 61, 22, 0.04);
+}
+
+.us-workflow-banner-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.us-workflow-banner-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.us-workflow-layers-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: #ffffff;
+  border: 1px solid #f2ded2;
+  border-radius: 10px;
+  color: #d95328;
+  box-shadow: 0 2px 6px rgba(217, 83, 40, 0.12);
+}
+
+.us-workflow-banner-heading {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #351115;
+  letter-spacing: -0.01em;
+}
+
+.us-workflow-banner-sub {
+  margin: 2px 0 0 0;
+  font-size: 12px;
+  color: #7d6355;
+}
+
+.us-workflow-stepper {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  padding: 4px 0 6px 0;
+  gap: 2px;
+  scrollbar-width: thin;
+}
+
+.us-stepper-node {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8c7365;
+  transition: all 0.15s ease;
+}
+
+.us-stepper-node:hover {
+  background: #ffffff88;
+  color: #351115;
+}
+
+.us-stepper-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid #d4c2b7;
+  font-size: 10px;
+  font-weight: 800;
+  background: #ffffff;
+}
+
+.us-stepper-node.is-completed .us-stepper-circle {
+  background: #d95328;
+  border-color: #d95328;
+  color: #ffffff;
+}
+
+.us-stepper-node.is-completed .us-stepper-label {
+  color: #705547;
+}
+
+.us-stepper-node.is-current .us-stepper-circle {
+  border-color: #d95328;
+  background: #fff;
+}
+
+.us-stepper-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d95328;
+}
+
+.us-stepper-node.is-current .us-stepper-label {
+  color: #d95328;
+  font-weight: 800;
+}
+
+.us-stepper-line {
+  display: inline-block;
+  width: 20px;
+  height: 1.5px;
+  background: #e2d1c6;
+  margin-left: 4px;
+}
+
+.us-stepper-node.is-completed + .us-stepper-node .us-stepper-line {
+  background: #d95328;
+}
+
+.us-company-stage-card.is-expanded .us-company-stage-add {
+  margin: 12px 0 0 0;
+  padding-top: 12px;
+  border-top: 1px dashed #ebd9cf;
+}
+
+.us-company-stage-card.is-expanded .us-company-stage-add button {
+  background: linear-gradient(135deg, #d95328 0%, #b83d16 100%);
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(217, 83, 40, 0.25);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.us-company-stage-card.is-expanded .us-company-stage-add button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(217, 83, 40, 0.35);
 }
