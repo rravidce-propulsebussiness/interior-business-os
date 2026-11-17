@@ -915,7 +915,7 @@ describe('streamlined quote, terms and payment Studio', () => {
     expect(css).toContain('.qs-program-synced-notice');
     expect(css).toContain('.qs-program-work-row');
     expect(css).not.toContain('.qs-program-columns');
-    expect(settingsCss).toContain('.us-company-stage-card');
+    expect(settingsCss).toContain('.wf-stage');
     expect(settingsCss).not.toContain('.us-workflow-preview');
     expect(settingsCss).not.toContain('.us-payment-default-list');
   });
@@ -1120,24 +1120,31 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   });
   it('edits industry-specific stage programmes with timed work and guides', () => {
     expect(paymentSettings).toContain('Project workflow settings');
-    expect(stageEditor).toContain('REPEAT FOR EACH FLOOR');
-    expect(stageEditor).toContain('ONE TIME');
+    expect(stageEditor).toContain('Workflow Settings');
+    expect(stageEditor).toContain('Per floor');
+    expect(stageEditor).toContain('One time');
+    expect(stageEditor).toContain('Yes, repeat per floor');
+    expect(stageEditor).toContain('role="switch"');
+    expect(stageEditor).toContain('Stage description');
     expect(stageEditor).toContain('Stage duration');
+    expect(stageEditor).toContain('working days');
     expect(stageEditor).toContain('Work sequence');
     expect(stageEditor).toContain('type="number"');
-    expect(stageEditor).toContain('aria-label="Item number"');
-    expect(stageEditor).toContain('draggable={canEdit}');
+    expect(stageEditor).toContain('draggable={props.canEdit}');
+    expect(stageEditor).toContain("event.key === 'ArrowUp'");
     expect(stageEditor).toContain('+ Add guide');
     expect(stageEditor).toContain('Guide video URL');
-    expect(stageEditor).toContain('Save workflow settings');
-    expect(stageEditor).toContain('+ Add stage');
+    expect(stageEditor).toContain('Preview Timeline');
+    expect(stageEditor).toContain('Save Changes');
+    expect(stageEditor).toContain('Workflow stages overview');
+    expect(stageEditor).toContain('Add stage');
     expect(stageEditor).toContain('Add industry');
     expect(stageEditor).not.toContain('Payment share');
   });
-  it('does not double number the work items', () => {
-    expect(stageEditor).toContain('aria-label="Item number"');
-    expect(stageEditor).toContain('className="us-order-number"');
-    expect(stageEditor).not.toContain('<ol className="us-order-number">');
+  it('does not number the work items; order comes from the sequence', () => {
+    expect(stageEditor).not.toContain('aria-label="Item number"');
+    expect(stageEditor).not.toContain('us-order-number');
+    expect(stageEditor).toContain('<ol className="wf-items">');
   });
 });
 

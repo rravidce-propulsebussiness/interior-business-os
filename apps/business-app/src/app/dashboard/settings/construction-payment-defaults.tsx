@@ -1,13 +1,25 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import Link from 'next/link';
+import {
+  type DragEvent,
+  type FormEvent,
+  type KeyboardEvent,
+  type ReactNode,
+  useActionState,
+  useState,
+} from 'react';
 import {
   type CompanyConstructionStage,
   type CompanyStageItem,
+  companyConstructionStages,
   defaultCompanyConstructionStages,
   defaultInteriorStages,
 } from '@business-os/core/company-construction-defaults';
-import { saveConstructionPaymentDefaults } from './payment-default-actions';
+import {
+  type DefaultPaymentState,
+  saveConstructionPaymentDefaults,
+} from './payment-default-actions';
 
 const move = <T,>(values: T[], from: number, to: number) => {
   const next = [...values];
@@ -15,30 +27,39 @@ const move = <T,>(values: T[], from: number, to: number) => {
   if (item) next.splice(to, 0, item);
   return next;
 };
+
+/** crypto.randomUUID only exists in secure contexts (https / localhost). */
+const newId = () =>
+  typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+
+/** Industry keys and stage ids must start with a letter (server regex). */
+export const industryKeyFromName = (name: string) => {
+  const slug = name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+  if (!slug) return '';
+  return (/^[a-z]/.test(slug) ? slug : `industry-${slug}`)
+    .slice(0, 60)
+    .replace(/-$/, '');
+};
+
 const defaultStages = (industry: string): CompanyConstructionStage[] => {
   if (industry === 'construction')
     return structuredClone(defaultCompanyConstructionStages);
   if (industry === 'interior') return structuredClone(defaultInteriorStages);
-  const names = ['Planning', 'Delivery', 'Quality review'];
-  return names.map((name, index) => ({
-    id: `${industry}-${index + 1}`,
+  return ['Planning', 'Delivery', 'Quality review'].map((name, index) => ({
+    id: `stage-${index + 1}`,
     name,
     description: '',
-    repeatsPerFloor: industry === 'interior' && index >= 2 && index <= 4,
+    repeatsPerFloor: false,
     days: index === 0 ? 5 : 10,
-    items:
-      index === 0 && industry === 'interior'
-        ? [
-            {
-              id: `${industry}-price-freeze`,
-              kind: 'payment' as const,
-              title: 'Price freeze',
-              days: 0,
-            },
-          ]
-        : [],
+    items: [],
   }));
 };
+
 const itemKinds: CompanyStageItem['kind'][] = [
   'work',
   'material',
@@ -52,9 +73,105 @@ const kindLabel = (kind: CompanyStageItem['kind']) =>
     ? 'QC'
     : kind === 'check'
       ? 'Site check'
-      : kind === 'payment'
-        ? 'Payment'
-        : kind[0]!.toUpperCase() + kind.slice(1);
+      : kind[0]!.toUpperCase() + kind.slice(1);
+
+/** Readable copy for the schema errors people can actually cause here. */
+const friendlyIssue = (path: PropertyKey[], fallback?: string) => {
+  const field = path.at(-1);
+  if (field === 'name') return 'Stage name needs at least 2 characters.';
+  if (field === 'title')
+    return 'Each work item needs a title of 2+ characters.';
+  if (field === 'description')
+    return 'Keep the description under 300 characters.';
+  if (field === 'guideVideoUrl')
+    return 'Guide video links must start with https://.';
+  return fallback ?? 'Check the workflow entries.';
+};
+
+const icons = {
+  layers: 'M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5',
+  calendar: 'M4 5h16v16H4zM4 10h16M9 3v4M15 3v4',
+  chevron: 'm6 9 6 6 6-6',
+  check: 'm5 12 5 5 9-10',
+  general:
+    'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z',
+  payments: 'M3 6h18v13H3zM3 10h18M7 15h4',
+  resources:
+    'M16 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 10a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 20v-2a4 4 0 0 0-3-3.9M16 2.1a4 4 0 0 1 0 7.8',
+  notifications: 'M18 8a6 6 0 0 0-12 0c0 6-3 8-3 9h18c0-1-3-3-3-9ZM10 21h4',
+  timeline:
+    'M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM18 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6ZM6 9v3a3 3 0 0 0 3 3h6',
+  plus: 'M12 5v14M5 12h14',
+  close: 'M6 6l12 12M18 6 6 18',
+  guide:
+    'M4 4h11a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3zM4 17a3 3 0 0 1 3-3h11M8 8h6',
+  trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
+} as const;
+
+function Icon({
+  name,
+  size = 16,
+}: {
+  name: keyof typeof icons;
+  size?: number;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d={icons[name]} />
+    </svg>
+  );
+}
+
+function Grip(props: {
+  label: string;
+  canEdit: boolean;
+  onDragStart: (event: DragEvent<HTMLElement>) => void;
+  onMove: (offset: -1 | 1) => void;
+}) {
+  return (
+    <span
+      className="wf-grip"
+      role="button"
+      tabIndex={props.canEdit ? 0 : -1}
+      aria-label={props.label}
+      aria-disabled={!props.canEdit}
+      draggable={props.canEdit}
+      onDragStart={props.onDragStart}
+      onKeyDown={(event: KeyboardEvent<HTMLElement>) => {
+        if (!props.canEdit) return;
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+          event.preventDefault();
+          event.stopPropagation();
+          props.onMove(event.key === 'ArrowUp' ? -1 : 1);
+        }
+      }}
+    >
+      <svg width="12" height="16" viewBox="0 0 12 16" aria-hidden="true">
+        {[2, 8, 14].flatMap((y) =>
+          [3, 9].map((x) => (
+            <circle
+              key={`${x}-${y}`}
+              cx={x}
+              cy={y}
+              r="1.5"
+              fill="currentColor"
+            />
+          )),
+        )}
+      </svg>
+    </span>
+  );
+}
 
 function ItemKindPicker({
   value,
@@ -69,20 +186,29 @@ function ItemKindPicker({
 }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="us-kind-picker">
+    <div
+      className="wf-kind-picker"
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null))
+          setOpen(false);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') setOpen(false);
+      }}
+    >
       <button
         type="button"
-        className="us-kind-trigger"
-        aria-label={label}
+        className={`wf-kind-trigger is-${value}`}
+        aria-label={`${label}: ${kindLabel(value)}`}
         aria-haspopup="listbox"
         aria-expanded={open}
         disabled={disabled}
         onClick={() => setOpen((shown) => !shown)}
       >
-        {kindLabel(value)} <span aria-hidden="true">⌄</span>
+        {kindLabel(value)}
       </button>
       {open && (
-        <div className="us-kind-menu" role="listbox" aria-label={label}>
+        <div className="wf-kind-menu" role="listbox" aria-label={label}>
           {itemKinds.map((kind) => (
             <button
               key={kind}
@@ -95,12 +221,140 @@ function ItemKindPicker({
               }}
             >
               <span>{kindLabel(kind)}</span>
-              {value === kind && <span aria-hidden="true">✓</span>}
+              {value === kind && <Icon name="check" size={14} />}
             </button>
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+const settingsTabs: {
+  label: string;
+  href: string;
+  icon: keyof typeof icons;
+  active?: boolean;
+}[] = [
+  {
+    label: 'General',
+    href: '/dashboard/settings?tab=company',
+    icon: 'general',
+  },
+  {
+    label: 'Workflow',
+    href: '/dashboard/settings?tab=payments',
+    icon: 'layers',
+    active: true,
+  },
+  {
+    label: 'Payments',
+    href: '/dashboard/settings?tab=invoice',
+    icon: 'payments',
+  },
+  {
+    label: 'Resources',
+    href: '/dashboard/settings?tab=team',
+    icon: 'resources',
+  },
+  {
+    label: 'Notifications',
+    href: '/dashboard/settings?tab=preferences',
+    icon: 'notifications',
+  },
+];
+
+/** Sequential working-day plan; per-floor stages repeat for every floor. */
+export function workflowTimeline(
+  stages: CompanyConstructionStage[],
+  floors: number,
+) {
+  let start = 0;
+  const rows = stages.map((stage) => {
+    const workDays = stage.items
+      .filter((item) => item.kind !== 'payment')
+      .reduce((sum, item) => sum + item.days, 0);
+    const once = Math.max(stage.days, workDays);
+    const span = stage.repeatsPerFloor ? once * Math.max(1, floors) : once;
+    const row = { id: stage.id, name: stage.name, start, span, once };
+    start += span;
+    return row;
+  });
+  return { rows, total: start };
+}
+
+function TimelinePreview({
+  stages,
+  onClose,
+}: {
+  stages: CompanyConstructionStage[];
+  onClose: () => void;
+}) {
+  const [floors, setFloors] = useState(2);
+  const { rows, total } = workflowTimeline(stages, floors);
+  return (
+    <section className="wf-timeline" aria-label="Timeline preview">
+      <header>
+        <div>
+          <h3>Timeline preview</h3>
+          <p>
+            {total} working days for a {floors}-floor project · Sundays excluded
+          </p>
+        </div>
+        <label className="wf-timeline-floors">
+          Floors
+          <input
+            type="number"
+            min="1"
+            max="50"
+            value={floors}
+            onChange={(event) =>
+              setFloors(
+                Math.min(50, Math.max(1, Number(event.target.value) || 1)),
+              )
+            }
+          />
+        </label>
+        <button
+          type="button"
+          className="wf-icon-button"
+          aria-label="Close timeline preview"
+          onClick={onClose}
+        >
+          <Icon name="close" />
+        </button>
+      </header>
+      <ol>
+        {rows.map((row) => (
+          <li key={row.id}>
+            <span className="wf-timeline-name">{row.name}</span>
+            <span className="wf-timeline-track">
+              <span
+                className="wf-timeline-bar"
+                style={{
+                  marginLeft: total ? `${(row.start / total) * 100}%` : 0,
+                  width: total
+                    ? `${Math.max((row.span / total) * 100, 1)}%`
+                    : 0,
+                }}
+              />
+            </span>
+            <span className="wf-timeline-days">
+              Day {row.start + 1}–{row.start + row.span}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="wf-field">
+      <span className="wf-field-label">{label}</span>
+      {children}
+    </label>
   );
 }
 
@@ -123,21 +377,44 @@ export function ConstructionPaymentDefaults({
   const [knownIndustries, setKnownIndustries] = useState(industries);
   const savedByIndustry = state.savedRowsByIndustry ?? initial;
   const [stages, setStages] = useState(
-    savedByIndustry[industryKey] ?? defaultStages(industryKey),
+    () => savedByIndustry[industryKey] ?? defaultStages(industryKey),
   );
   const [newIndustryName, setNewIndustryName] = useState('');
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [draftKinds, setDraftKinds] = useState<
     Record<string, CompanyStageItem['kind']>
   >({});
-  const [expandedStage, setExpandedStage] = useState<string | null>(null);
+  const [expandedStage, setExpandedStage] = useState<string | null>(
+    () => stages[0]?.id ?? null,
+  );
+  const [showTimeline, setShowTimeline] = useState(false);
+  const [openGuide, setOpenGuide] = useState<string | null>(null);
+  const [clientError, setClientError] = useState('');
+  // The server returns trimmed/normalised rows; adopt them after a save so the
+  // editor is not left showing "unsaved changes" for whitespace differences.
+  const [lastState, setLastState] = useState<DefaultPaymentState>(state);
+  if (lastState !== state) {
+    setLastState(state);
+    const saved =
+      state.industryKey && state.savedRowsByIndustry?.[state.industryKey];
+    if (state.saved && saved && state.industryKey === industryKey)
+      setStages(saved);
+  }
+
   const savedStages =
     savedByIndustry[industryKey] ?? defaultStages(industryKey);
   const dirty = JSON.stringify(stages) !== JSON.stringify(savedStages);
+  const industryName =
+    knownIndustries.find((item) => item.key === industryKey)?.name ??
+    'Construction';
+  const currentIndex = stages.findIndex((stage) => stage.id === expandedStage);
+
   const switchIndustry = (key: string) => {
+    const next = savedByIndustry[key] ?? defaultStages(key);
     setIndustryKey(key);
-    setStages(savedByIndustry[key] ?? defaultStages(key));
-    setExpandedStage(null);
+    setStages(next);
+    setExpandedStage(next[0]?.id ?? null);
+    setClientError('');
   };
   const patchStage = (
     index: number,
@@ -163,12 +440,116 @@ export function ConstructionPaymentDefaults({
           : stage,
       ),
     );
+  const moveStage = (from: number, to: number) => {
+    if (to < 0 || to >= stages.length || from === to) return;
+    setStages((rows) => move(rows, from, to));
+  };
+  const moveItem = (stageIndex: number, from: number, to: number) => {
+    const items = stages[stageIndex]?.items ?? [];
+    if (to < 0 || to >= items.length || from === to) return;
+    patchStage(stageIndex, { items: move(items, from, to) });
+  };
+  const addItem = (index: number, stage: CompanyConstructionStage) => {
+    const kind = draftKinds[stage.id] ?? 'work';
+    const title = drafts[stage.id]?.trim();
+    if (!title) return;
+    patchStage(index, {
+      items: [
+        ...stage.items,
+        { id: newId(), kind, title, days: kind === 'payment' ? 0 : 1 },
+      ],
+    });
+    setDrafts((all) => ({ ...all, [stage.id]: '' }));
+  };
+  const toggleStage = (id: string) =>
+    setExpandedStage((current) => (current === id ? null : id));
+  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const result = companyConstructionStages.safeParse(stages);
+    if (result.success) {
+      setClientError('');
+      return;
+    }
+    event.preventDefault();
+    const issue = result.error.issues[0];
+    const stageIndex = typeof issue?.path[0] === 'number' ? issue.path[0] : -1;
+    const stage = stages[stageIndex];
+    if (stage) setExpandedStage(stage.id);
+    setClientError(
+      (stage ? `${stage.name || `Stage ${stageIndex + 1}`}: ` : '') +
+        friendlyIssue(issue?.path ?? [], issue?.message),
+    );
+  };
+  const statusMessage =
+    clientError ||
+    (state.message && state.industryKey === industryKey ? state.message : '');
+  const statusOk = !clientError && state.saved;
+
   return (
-    <form action={action} className="us-company-stage-editor">
+    <form
+      action={action}
+      onSubmit={onSubmit}
+      className="wf-editor us-company-stage-editor"
+      aria-label="Project workflow settings"
+    >
       <input type="hidden" name="rows" value={JSON.stringify(stages)} />
       <input type="hidden" name="industryKey" value={industryKey} />
+
+      <div className="wf-page-head">
+        <div>
+          <h1>Workflow Settings</h1>
+          <p>
+            Define construction stages, durations and ordered work sequence for
+            your projects.
+          </p>
+        </div>
+        <div className="wf-page-actions">
+          <span className={'wf-save-state' + (dirty ? ' is-dirty' : '')}>
+            {dirty ? 'Unsaved changes' : 'All changes saved'}
+          </span>
+          <button
+            type="button"
+            className="wf-button wf-button-ghost"
+            aria-pressed={showTimeline}
+            onClick={() => setShowTimeline((shown) => !shown)}
+          >
+            <Icon name="timeline" /> Preview Timeline
+          </button>
+          {canEdit && (
+            <button
+              type="submit"
+              className="wf-button wf-button-primary"
+              disabled={pending}
+            >
+              <Icon name="check" /> {pending ? 'Saving…' : 'Save Changes'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <nav className="wf-tabs" aria-label="Settings sections">
+        {settingsTabs.map((tab) => (
+          <Link
+            key={tab.label}
+            href={tab.href}
+            className={tab.active ? 'is-active' : undefined}
+            aria-current={tab.active ? 'page' : undefined}
+          >
+            <Icon name={tab.icon} size={17} /> {tab.label}
+          </Link>
+        ))}
+      </nav>
+
+      {statusMessage && (
+        <p
+          role="status"
+          className={'wf-status ' + (statusOk ? 'is-ok' : 'is-bad')}
+        >
+          {statusMessage}
+        </p>
+      )}
+
       <div
-        className="us-workflow-industries"
+        className="wf-industries"
         role="tablist"
         aria-label="Industry workflow"
       >
@@ -185,485 +566,534 @@ export function ConstructionPaymentDefaults({
           </button>
         ))}
         {canEdit && (
-          <div className="us-add-industry">
+          <div className="wf-add-industry">
             <input
               aria-label="New industry"
               value={newIndustryName}
+              maxLength={60}
               onChange={(event) => setNewIndustryName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') event.preventDefault();
+              }}
               placeholder="Add industry"
             />
             <button
               type="button"
+              aria-label="Add industry"
               onClick={() => {
                 const name = newIndustryName.trim();
-                const key = name
-                  .toLowerCase()
-                  .replace(/[^a-z0-9]+/g, '-')
-                  .replace(/^-|-$/g, '')
-                  .slice(0, 60);
-                if (
-                  !name ||
-                  !key ||
-                  knownIndustries.some((item) => item.key === key)
-                )
-                  return;
-                setKnownIndustries((all) => [...all, { key, name }]);
+                const key = industryKeyFromName(name);
+                if (!name || !key) return;
+                if (!knownIndustries.some((item) => item.key === key))
+                  setKnownIndustries((all) => [...all, { key, name }]);
                 setNewIndustryName('');
                 switchIndustry(key);
               }}
             >
-              + Add industry
+              <Icon name="plus" size={14} />
             </button>
           </div>
         )}
       </div>
-      <div className="us-workflow-banner">
-        <div className="us-workflow-banner-main">
-          <div className="us-workflow-banner-title">
-            <span className="us-workflow-layers-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
-                <polygon points="12 2 2 7 12 12 22 7 12 2" />
-                <polyline points="2 17 12 22 22 17" />
-                <polyline points="2 12 12 17 22 12" />
-              </svg>
-            </span>
-            <div>
-              <h2 className="us-workflow-banner-heading">
-                {knownIndustries.find((item) => item.key === industryKey)?.name ?? 'Construction'} Workflow
-              </h2>
-              <p className="us-workflow-banner-sub">
-                Set up your project stages, durations and the work sequence for each stage.
-              </p>
-            </div>
-          </div>
-          <span className="us-workflow-saved">
-            {dirty ? '• Unsaved changes' : '✓ Saved'}
-          </span>
-        </div>
 
-        {stages.length > 0 && (
-          <nav className="us-workflow-stepper" aria-label="Workflow stages overview">
-            {stages.map((stg, idx) => {
-              const isCurrent = expandedStage === stg.id || (!expandedStage && idx === 1);
-              const isPast = idx < (expandedStage ? stages.findIndex((s) => s.id === expandedStage) : 1);
-              return (
-                <button
-                  type="button"
-                  key={stg.id}
-                  className={
-                    'us-stepper-node' +
-                    (isCurrent ? ' is-current' : '') +
-                    (isPast ? ' is-completed' : '')
-                  }
-                  onClick={() => setExpandedStage(stg.id)}
-                  title={`Open ${stg.name}`}
-                >
-                  <span className="us-stepper-circle">
-                    {isPast ? '✓' : isCurrent ? <span className="us-stepper-dot" /> : null}
-                  </span>
-                  <span className="us-stepper-label">{stg.name}</span>
-                  {idx < stages.length - 1 && <span className="us-stepper-line" aria-hidden="true" />}
-                </button>
-              );
-            })}
-          </nav>
-        )}
-      </div>
-      <div className="us-project-calendar">
-        <strong>Working days</strong>
-        <span>Sundays excluded from dates</span>
-      </div>
-      {stages.map((stage, index) => {
-        const workItems = stage.items.filter((item) => item.kind !== 'payment');
-        const itemDays = workItems.reduce((sum, item) => sum + item.days, 0);
-        const totalDays = Math.max(stage.days, itemDays);
-        return (
-          <section
-            className={
-              'us-company-stage-card' +
-              (expandedStage === stage.id ? ' is-expanded' : ' is-collapsed')
-            }
-            key={stage.id}
-            onClick={(event) => {
-              const target = event.target;
-              if (!(target instanceof HTMLElement) || !target.closest('header'))
-                return;
-              if (target.closest('button, input, textarea, label, select'))
-                return;
-              setExpandedStage((current) =>
-                current === stage.id ? null : stage.id,
-              );
-            }}
-            draggable={canEdit}
-            onDragStart={(event) =>
-              event.dataTransfer.setData('text/plain', String(index))
-            }
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={(event) => {
-              event.preventDefault();
-              const from = Number(event.dataTransfer.getData('text/plain'));
-              if (Number.isInteger(from) && from !== index)
-                setStages((rows) => move(rows, from, index));
-            }}
-          >
-            <header className="us-company-stage-heading">
-              <span className="us-stage-grip" aria-label="Drag to reorder">
-                ⠿
-              </span>
-              <span className="us-stage-number">{index + 1}</span>
-              <div className="us-company-stage-title">
-                <div className="us-stage-title-top">
-                  <span className="us-stage-name-preview">
-                    {stage.name || 'Untitled stage'}
-                  </span>
-                  <input
-                    aria-label="Stage name"
-                    value={stage.name}
-                    disabled={!canEdit}
-                    onChange={(event) =>
-                      patchStage(index, { name: event.target.value })
-                    }
-                  />
-                  <span
-                    className={
-                      stage.repeatsPerFloor
-                        ? 'us-stage-repeat'
-                        : 'us-stage-once'
-                    }
-                  >
-                    {stage.repeatsPerFloor
-                      ? 'REPEAT FOR EACH FLOOR'
-                      : 'ONE TIME'}
-                  </span>
-                  <span className="us-stage-collapse-badge">
-                    {stage.repeatsPerFloor ? 'Per floor' : 'One time'}
-                  </span>
-                  <span className="us-stage-days-preview">{stage.days}d</span>
-                </div>
-              </div>
-              <label className="us-repeat-toggle">
-                <input
-                  type="checkbox"
-                  checked={stage.repeatsPerFloor}
-                  disabled={!canEdit}
-                  onChange={(event) =>
-                    patchStage(index, { repeatsPerFloor: event.target.checked })
-                  }
-                />{' '}
-                Repeats per floor
-              </label>
-              <label className="us-stage-duration">
-                Stage duration
-                <input
-                  type="number"
-                  min="1"
-                  max="365"
-                  value={stage.days}
-                  disabled={!canEdit}
-                  onChange={(event) =>
-                    patchStage(index, { days: Number(event.target.value) })
-                  }
-                />
-                <span>days</span>
-              </label>
-              <div className="us-stage-actions">
-                <button
-                  className="us-stage-toggle"
-                  type="button"
-                  aria-expanded={expandedStage === stage.id}
-                  aria-label={
-                    (expandedStage === stage.id ? 'Collapse ' : 'Expand ') +
-                    stage.name
-                  }
-                  onClick={() =>
-                    setExpandedStage((current) =>
-                      current === stage.id ? null : stage.id,
-                    )
-                  }
-                >
-                  {expandedStage === stage.id ? '⌃' : '⌄'}
-                </button>
-                {canEdit && (
-                  <button
-                    className="us-stage-remove"
-                    type="button"
-                    onClick={() =>
-                      setStages((rows) => rows.filter((_, i) => i !== index))
-                    }
-                  >
-                    <span className="us-stage-remove-label">Remove stage</span>
-                    <span className="us-stage-remove-icon" aria-hidden="true">
-                      ×
-                    </span>
-                  </button>
-                )}
-              </div>
-            </header>
-            {expandedStage === stage.id && (
-              <p className="us-stage-total">
-                {totalDays} days · {workItems.length} items
-                {itemDays > stage.days && (
-                  <span> · Substage duration extends this stage</span>
-                )}
-              </p>
-            )}
-            {expandedStage === stage.id && (
-              <>
-                <div className="us-stage-items-heading">
-                  <strong>Work sequence</strong>
-                  <span className="us-stage-items-sub">
-                    Drag to reorder work items in the sequence they are executed.
-                  </span>
-                </div>
-                <div className="us-company-stage-items">
-                  {stage.items.map((item, itemIndex) => (
-                    <article
-                      className="us-company-stage-item"
-                      key={item.id}
-                      draggable={canEdit}
-                      onDragStart={(event) => {
-                        event.stopPropagation();
-                        event.dataTransfer.setData(
-                          'text/plain',
-                          `${index}:${itemIndex}`,
-                        );
-                      }}
-                      onDragOver={(event) => event.preventDefault()}
-                      onDrop={(event) => {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        const [fromStage, fromItem] = event.dataTransfer
-                          .getData('text/plain')
-                          .split(':')
-                          .map(Number);
-                        if (
-                          fromStage === index &&
-                          fromItem !== undefined &&
-                          Number.isInteger(fromItem) &&
-                          fromItem !== itemIndex
-                        )
-                          patchStage(index, {
-                            items: move(stage.items, fromItem, itemIndex),
-                          });
-                      }}
-                    >
-                      <span className="us-stage-grip">⠿</span>
-                      <input
-                        className="us-order-number"
-                        type="number"
-                        min="1"
-                        max={stage.items.length}
-                        aria-label="Item number"
-                        key={`${item.id}:${itemIndex}`}
-                        defaultValue={itemIndex + 1}
-                        disabled={!canEdit}
-                        onBlur={(event) => {
-                          const n = Number(event.currentTarget.value) - 1;
-                          if (
-                            Number.isInteger(n) &&
-                            n >= 0 &&
-                            n < stage.items.length
-                          )
-                            patchStage(index, {
-                              items: move(stage.items, itemIndex, n),
-                            });
-                        }}
-                        onKeyDown={(event) => {
-                          if (event.key === 'Enter') event.currentTarget.blur();
-                        }}
-                      />
-                      <ItemKindPicker
-                        value={item.kind}
-                        disabled={!canEdit}
-                        label="Item type"
-                        onChange={(kind) =>
-                          patchItem(index, itemIndex, { kind })
-                        }
-                      />
-                      <input
-                        className="us-stage-item-title"
-                        aria-label="Work item title"
-                        value={item.title}
-                        disabled={!canEdit}
-                        onChange={(event) =>
-                          patchItem(index, itemIndex, {
-                            title: event.target.value,
-                          })
-                        }
-                      />
-                      <label>
-                        Days{' '}
-                        <input
-                          type="number"
-                          min="0"
-                          max="365"
-                          value={item.days}
-                          disabled={!canEdit}
-                          onChange={(event) =>
-                            patchItem(index, itemIndex, {
-                              days: Number(event.target.value),
-                            })
-                          }
-                        />
-                      </label>
-                      <button
-                        type="button"
-                        disabled={!canEdit}
-                        onClick={() =>
-                          patchStage(index, {
-                            items: stage.items.filter(
-                              (_, i) => i !== itemIndex,
-                            ),
-                          })
-                        }
-                      >
-                        Remove
-                      </button>
-                      <details>
-                        <summary>
-                          {item.guideText || item.guideVideoUrl
-                            ? 'Edit site guide'
-                            : '+ Add guide'}
-                        </summary>
-                        <textarea
-                          aria-label="Guide text"
-                          value={item.guideText ?? ''}
-                          disabled={!canEdit}
-                          onChange={(event) =>
-                            patchItem(index, itemIndex, {
-                              guideText: event.target.value,
-                            })
-                          }
-                          placeholder="How the site engineer should do or verify this item"
-                        />
-                        <input
-                          aria-label="Guide video URL"
-                          value={item.guideVideoUrl ?? ''}
-                          disabled={!canEdit}
-                          onChange={(event) =>
-                            patchItem(index, itemIndex, {
-                              guideVideoUrl: event.target.value,
-                            })
-                          }
-                          placeholder="https:// video guide"
-                        />
-                      </details>
-                    </article>
-                  ))}
-                </div>
-                {canEdit && (
-                  <div className="us-company-stage-add">
-                    <ItemKindPicker
-                      value={draftKinds[stage.id] ?? 'work'}
-                      label="New item type"
-                      onChange={(kind) =>
-                        setDraftKinds((all) => ({ ...all, [stage.id]: kind }))
-                      }
-                    />
-                    <input
-                      aria-label="Add sequence item title"
-                      value={drafts[stage.id] ?? ''}
-                      onChange={(event) =>
-                        setDrafts((all) => ({
-                          ...all,
-                          [stage.id]: event.target.value,
-                        }))
-                      }
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          event.preventDefault();
-                          const kind = draftKinds[stage.id] ?? 'work';
-                          const title = drafts[stage.id]?.trim();
-                          if (!title) return;
-                          patchStage(index, {
-                            items: [
-                              ...stage.items,
-                              {
-                                id: crypto.randomUUID(),
-                                kind,
-                                title,
-                                days: kind === 'payment' ? 0 : 1,
-                              },
-                            ],
-                          });
-                          setDrafts((all) => ({ ...all, [stage.id]: '' }));
-                        }
-                      }}
-                      placeholder="Add work, material, check or QC sequence item..."
-                    />
+      {showTimeline && (
+        <TimelinePreview
+          stages={stages}
+          onClose={() => setShowTimeline(false)}
+        />
+      )}
+
+      <section className="wf-card">
+        <header className="wf-card-head">
+          <span className="wf-card-icon">
+            <Icon name="layers" size={26} />
+          </span>
+          <div className="wf-card-title">
+            <h2>{industryName} Workflow</h2>
+            <p>
+              Set up your project stages, durations and the work sequence for
+              each stage.
+            </p>
+          </div>
+          {stages.length > 0 && (
+            <ol className="wf-stepper" aria-label="Workflow stages overview">
+              {stages.map((stage, index) => {
+                const status =
+                  index === currentIndex
+                    ? 'is-current'
+                    : currentIndex >= 0 && index < currentIndex
+                      ? 'is-done'
+                      : '';
+                return (
+                  <li key={stage.id} className={status}>
                     <button
                       type="button"
-                      aria-label="Add sequence item"
-                      onClick={() => {
-                        const kind = draftKinds[stage.id] ?? 'work';
-                        const title = drafts[stage.id]?.trim();
-                        if (!title) return;
-                        patchStage(index, {
-                          items: [
-                            ...stage.items,
-                            {
-                              id: crypto.randomUUID(),
-                              kind,
-                              title,
-                              days: kind === 'payment' ? 0 : 1,
-                            },
-                          ],
-                        });
-                        setDrafts((all) => ({ ...all, [stage.id]: '' }));
-                      }}
+                      aria-current={index === currentIndex ? 'step' : undefined}
+                      onClick={() => setExpandedStage(stage.id)}
                     >
-                      + Add item
+                      <span className="wf-step-dot">
+                        {status === 'is-done' && (
+                          <Icon name="check" size={11} />
+                        )}
+                      </span>
+                      <span className="wf-step-label">
+                        {stage.name || `Stage ${index + 1}`}
+                      </span>
                     </button>
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </header>
+
+        <div className="wf-stages">
+          {stages.map((stage, index) => {
+            const expanded = expandedStage === stage.id;
+            const workItems = stage.items.filter(
+              (item) => item.kind !== 'payment',
+            );
+            const itemDays = workItems.reduce(
+              (sum, item) => sum + item.days,
+              0,
+            );
+            const bodyId = `wf-stage-body-${stage.id}`;
+            return (
+              <section
+                key={stage.id}
+                className={
+                  'wf-stage us-company-stage-card' +
+                  (expanded ? ' is-expanded' : '')
+                }
+                onDragOver={(event) => event.preventDefault()}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  const data = event.dataTransfer.getData('text/plain');
+                  if (!data.startsWith('stage:')) return;
+                  moveStage(Number(data.slice(6)), index);
+                }}
+              >
+                <header
+                  className="wf-stage-row"
+                  onClick={(event) => {
+                    const target = event.target as HTMLElement;
+                    if (
+                      target.closest('button, input, textarea, [role="button"]')
+                    )
+                      return;
+                    toggleStage(stage.id);
+                  }}
+                >
+                  <Grip
+                    label={`Reorder ${stage.name}. Use arrow keys to move.`}
+                    canEdit={canEdit}
+                    onMove={(offset) => moveStage(index, index + offset)}
+                    onDragStart={(event) => {
+                      event.dataTransfer.setData(
+                        'text/plain',
+                        `stage:${index}`,
+                      );
+                      const card = event.currentTarget.closest('section');
+                      if (card) event.dataTransfer.setDragImage(card, 24, 24);
+                    }}
+                  />
+                  <span className="wf-stage-number">{index + 1}</span>
+                  {expanded ? (
+                    <input
+                      className="wf-stage-name-input"
+                      aria-label="Stage name"
+                      value={stage.name}
+                      maxLength={100}
+                      disabled={!canEdit}
+                      onChange={(event) =>
+                        patchStage(index, { name: event.target.value })
+                      }
+                    />
+                  ) : (
+                    <strong className="wf-stage-name">
+                      {stage.name || 'Untitled stage'}
+                    </strong>
+                  )}
+                  <span className="wf-stage-desc">
+                    {stage.description || 'No description yet.'}
+                  </span>
+                  <span className="wf-stage-meta wf-stage-days">
+                    <Icon name="calendar" />
+                    {stage.days} working days
+                  </span>
+                  <span className="wf-stage-meta wf-stage-repeat">
+                    <Icon name="layers" />
+                    {stage.repeatsPerFloor ? 'Per floor' : 'One time'}
+                  </span>
+                  <span className="wf-stage-compact">
+                    {stage.days} days ·{' '}
+                    {stage.repeatsPerFloor ? 'Per floor' : 'One time'}
+                  </span>
+                  <button
+                    type="button"
+                    className="wf-icon-button wf-stage-toggle"
+                    aria-expanded={expanded}
+                    aria-controls={bodyId}
+                    aria-label={
+                      (expanded ? 'Collapse ' : 'Expand ') + stage.name
+                    }
+                    onClick={() => toggleStage(stage.id)}
+                  >
+                    <Icon name="chevron" size={18} />
+                  </button>
+                </header>
+
+                {expanded && (
+                  <div className="wf-stage-body" id={bodyId}>
+                    <div className="wf-stage-fields">
+                      <Field label="Stage description">
+                        <input
+                          value={stage.description ?? ''}
+                          maxLength={300}
+                          disabled={!canEdit}
+                          placeholder="What happens in this stage?"
+                          onChange={(event) =>
+                            patchStage(index, {
+                              description: event.target.value,
+                            })
+                          }
+                        />
+                      </Field>
+                      <Field label="Stage duration">
+                        <span className="wf-days-input">
+                          <input
+                            type="number"
+                            min="0"
+                            max="365"
+                            value={stage.days}
+                            disabled={!canEdit}
+                            onChange={(event) =>
+                              patchStage(index, {
+                                days: Math.min(
+                                  365,
+                                  Math.max(
+                                    0,
+                                    Math.trunc(Number(event.target.value) || 0),
+                                  ),
+                                ),
+                              })
+                            }
+                          />
+                          <span>working days</span>
+                        </span>
+                      </Field>
+                      <div className="wf-field">
+                        <span
+                          className="wf-field-label"
+                          id={`${bodyId}-repeat`}
+                        >
+                          Repeats per floor
+                        </span>
+                        <span className="wf-switch-row">
+                          <button
+                            type="button"
+                            role="switch"
+                            className="wf-switch"
+                            aria-checked={stage.repeatsPerFloor}
+                            aria-labelledby={`${bodyId}-repeat`}
+                            disabled={!canEdit}
+                            onClick={() =>
+                              patchStage(index, {
+                                repeatsPerFloor: !stage.repeatsPerFloor,
+                              })
+                            }
+                          >
+                            <span />
+                          </button>
+                          {stage.repeatsPerFloor
+                            ? 'Yes, repeat per floor'
+                            : 'No, runs one time'}
+                        </span>
+                      </div>
+                    </div>
+                    {itemDays > stage.days && (
+                      <p className="wf-note">
+                        Work items add up to {itemDays} days, which extends this
+                        stage beyond {stage.days} days.
+                      </p>
+                    )}
+
+                    <div className="wf-sequence-head">
+                      <strong>Work sequence</strong>
+                      <span>
+                        Drag to reorder work items in the sequence they are
+                        executed.
+                      </span>
+                    </div>
+                    {stage.items.length === 0 && (
+                      <p className="wf-empty">No work items yet.</p>
+                    )}
+                    <ol className="wf-items">
+                      {stage.items.map((item, itemIndex) => (
+                        <li
+                          key={item.id}
+                          className="wf-item"
+                          onDragOver={(event) => event.preventDefault()}
+                          onDrop={(event) => {
+                            const data =
+                              event.dataTransfer.getData('text/plain');
+                            if (!data.startsWith('item:')) return;
+                            event.preventDefault();
+                            event.stopPropagation();
+                            const [fromStage, fromItem] = data
+                              .slice(5)
+                              .split(':')
+                              .map(Number);
+                            if (
+                              fromStage === index &&
+                              Number.isInteger(fromItem)
+                            )
+                              moveItem(index, fromItem!, itemIndex);
+                          }}
+                        >
+                          <div className="wf-item-row">
+                            <Grip
+                              label={`Reorder ${item.title}. Use arrow keys to move.`}
+                              canEdit={canEdit}
+                              onMove={(offset) =>
+                                moveItem(index, itemIndex, itemIndex + offset)
+                              }
+                              onDragStart={(event) => {
+                                event.stopPropagation();
+                                event.dataTransfer.setData(
+                                  'text/plain',
+                                  `item:${index}:${itemIndex}`,
+                                );
+                                const row = event.currentTarget.closest('li');
+                                if (row)
+                                  event.dataTransfer.setDragImage(row, 16, 16);
+                              }}
+                            />
+                            <input
+                              className="wf-item-title"
+                              aria-label="Work item title"
+                              value={item.title}
+                              maxLength={180}
+                              disabled={!canEdit}
+                              onChange={(event) =>
+                                patchItem(index, itemIndex, {
+                                  title: event.target.value,
+                                })
+                              }
+                            />
+                            <button
+                              type="button"
+                              className={
+                                'wf-icon-button wf-guide-toggle' +
+                                (item.guideText || item.guideVideoUrl
+                                  ? ' has-guide'
+                                  : '')
+                              }
+                              aria-expanded={openGuide === item.id}
+                              aria-controls={`wf-guide-${item.id}`}
+                              aria-label={
+                                (item.guideText || item.guideVideoUrl
+                                  ? 'Edit site guide'
+                                  : '+ Add guide') +
+                                ' for ' +
+                                item.title
+                              }
+                              title={
+                                item.guideText || item.guideVideoUrl
+                                  ? 'Edit site guide'
+                                  : '+ Add guide'
+                              }
+                              onClick={() =>
+                                setOpenGuide((current) =>
+                                  current === item.id ? null : item.id,
+                                )
+                              }
+                            >
+                              <Icon name="guide" size={15} />
+                            </button>
+                            <ItemKindPicker
+                              value={item.kind}
+                              disabled={!canEdit}
+                              label="Item type"
+                              onChange={(kind) =>
+                                patchItem(index, itemIndex, {
+                                  kind,
+                                  ...(kind === 'payment' ? { days: 0 } : {}),
+                                })
+                              }
+                            />
+                            <label className="wf-item-days">
+                              <input
+                                type="number"
+                                min="0"
+                                max="365"
+                                aria-label="Item days"
+                                value={item.days}
+                                disabled={!canEdit || item.kind === 'payment'}
+                                onChange={(event) =>
+                                  patchItem(index, itemIndex, {
+                                    days: Math.min(
+                                      365,
+                                      Math.max(
+                                        0,
+                                        Math.trunc(
+                                          Number(event.target.value) || 0,
+                                        ),
+                                      ),
+                                    ),
+                                  })
+                                }
+                              />
+                              <span>d</span>
+                            </label>
+                            {canEdit && (
+                              <button
+                                type="button"
+                                className="wf-icon-button wf-item-remove"
+                                aria-label={`Remove ${item.title}`}
+                                onClick={() =>
+                                  patchStage(index, {
+                                    items: stage.items.filter(
+                                      (_, i) => i !== itemIndex,
+                                    ),
+                                  })
+                                }
+                              >
+                                <Icon name="close" size={14} />
+                              </button>
+                            )}
+                          </div>
+                          {openGuide === item.id && (
+                            <div
+                              className="wf-guide"
+                              id={`wf-guide-${item.id}`}
+                            >
+                              <textarea
+                                aria-label="Guide text"
+                                value={item.guideText ?? ''}
+                                maxLength={1800}
+                                disabled={!canEdit}
+                                onChange={(event) =>
+                                  patchItem(index, itemIndex, {
+                                    guideText: event.target.value,
+                                  })
+                                }
+                                placeholder="How the site engineer should do or verify this item"
+                              />
+                              <input
+                                aria-label="Guide video URL"
+                                type="url"
+                                value={item.guideVideoUrl ?? ''}
+                                maxLength={1000}
+                                disabled={!canEdit}
+                                onChange={(event) =>
+                                  patchItem(index, itemIndex, {
+                                    guideVideoUrl: event.target.value,
+                                  })
+                                }
+                                placeholder="https:// video guide"
+                              />
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                    {canEdit && (
+                      <div className="wf-add-item">
+                        <ItemKindPicker
+                          value={draftKinds[stage.id] ?? 'work'}
+                          label="New item type"
+                          onChange={(kind) =>
+                            setDraftKinds((all) => ({
+                              ...all,
+                              [stage.id]: kind,
+                            }))
+                          }
+                        />
+                        <input
+                          aria-label="Add sequence item title"
+                          value={drafts[stage.id] ?? ''}
+                          maxLength={180}
+                          onChange={(event) =>
+                            setDrafts((all) => ({
+                              ...all,
+                              [stage.id]: event.target.value,
+                            }))
+                          }
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter') {
+                              event.preventDefault();
+                              addItem(index, stage);
+                            }
+                          }}
+                          placeholder="Add work, material, check or QC item…"
+                        />
+                        <button
+                          type="button"
+                          className="wf-button wf-button-soft"
+                          aria-label="Add sequence item"
+                          onClick={() => addItem(index, stage)}
+                        >
+                          <Icon name="plus" size={14} /> Add item
+                        </button>
+                      </div>
+                    )}
+                    {canEdit && stages.length > 1 && (
+                      <div className="wf-stage-footer">
+                        <button
+                          type="button"
+                          className="wf-text-danger"
+                          onClick={() => {
+                            setStages((rows) =>
+                              rows.filter((_, i) => i !== index),
+                            );
+                            setExpandedStage(null);
+                          }}
+                        >
+                          <Icon name="trash" size={14} /> Remove stage
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
-              </>
-            )}
-          </section>
-        );
-      })}
-      {canEdit && stages.length < 30 && (
-        <button
-          className="us-stage-add"
-          type="button"
-          onClick={() => {
-            const id = `stage-${crypto.randomUUID().slice(0, 8)}`;
-            const stage: CompanyConstructionStage = {
-              id,
-              name: 'New stage',
-              description: '',
-              repeatsPerFloor: false,
-              days: 1,
-              items: [],
-            };
-            setStages((rows) => [...rows, stage]);
-            setExpandedStage(id);
-          }}
-        >
-          + Add stage
-        </button>
-      )}
-      <footer className="us-company-stage-save">
-        <strong>
-          {stages.length} reusable{' '}
-          {knownIndustries.find((item) => item.key === industryKey)?.name ??
-            'industry'}{' '}
-          stages
-        </strong>
-        {canEdit && (
+              </section>
+            );
+          })}
+        </div>
+
+        {canEdit && stages.length < 30 && (
           <button
-            className="us-button-primary"
-            type="submit"
-            disabled={pending}
+            className="wf-add-stage"
+            type="button"
+            onClick={() => {
+              const id = `stage-${newId()
+                .replace(/[^a-z0-9]/gi, '')
+                .slice(0, 8)
+                .toLowerCase()}`;
+              setStages((rows) => [
+                ...rows,
+                {
+                  id,
+                  name: 'New stage',
+                  description: '',
+                  repeatsPerFloor: false,
+                  days: 1,
+                  items: [],
+                },
+              ]);
+              setExpandedStage(id);
+            }}
           >
-            {pending ? 'Saving…' : 'Save workflow settings'}
+            <Icon name="plus" size={15} /> Add stage
           </button>
         )}
-      </footer>
-      {state.message && state.industryKey === industryKey && (
-        <p role="status" className={state.saved ? 'us-success' : 'us-error'}>
-          {state.message}
-        </p>
-      )}
+        <footer className="wf-card-foot">
+          <span>
+            {stages.length} reusable {industryName} stages · Working days
+            exclude Sundays
+          </span>
+        </footer>
+      </section>
     </form>
   );
 }

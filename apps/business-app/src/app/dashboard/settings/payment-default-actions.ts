@@ -17,39 +17,36 @@ export async function saveConstructionPaymentDefaults(
   form: FormData,
 ): Promise<DefaultPaymentState> {
   const raw = form.get('rows');
-  const industryKey = form.get('industryKey');
+  const rawIndustry = form.get('industryKey');
+  // Failures carry the industry key too, so the editor can show the message.
+  const fail = (message: string): DefaultPaymentState => ({
+    ..._previous,
+    saved: false,
+    message,
+    ...(typeof rawIndustry === 'string' ? { industryKey: rawIndustry } : {}),
+  });
+  if (
+    typeof rawIndustry !== 'string' ||
+    !/^[a-z][a-z0-9-]{0,59}$/.test(rawIndustry)
+  )
+    return fail('Choose a valid industry workflow.');
+  const industryKey = rawIndustry;
   if (typeof raw !== 'string' || raw.length > 300000)
-    return { ..._previous, saved: false, message: 'Invalid payment schedule.' };
+    return fail('Invalid workflow data.');
   let payload: unknown;
   try {
     payload = JSON.parse(raw);
   } catch {
-    return { saved: false, message: 'Invalid payment schedule.' };
+    return fail('Invalid workflow data.');
   }
   const validated = companyConstructionStages.safeParse(payload);
   if (!validated.success)
-    return {
-      ..._previous,
-      saved: false,
-      message: validated.error.issues[0]?.message ?? 'Invalid milestones',
-    };
-  if (
-    typeof industryKey !== 'string' ||
-    !/^[a-z][a-z0-9-]{0,59}$/.test(industryKey)
-  )
-    return {
-      ..._previous,
-      saved: false,
-      message: 'Choose a valid industry workflow.',
-    };
+    return fail(
+      validated.error.issues[0]?.message ?? 'Invalid workflow stages.',
+    );
   try {
     const context = await activeOrganization();
-    if (!context)
-      return {
-        ..._previous,
-        saved: false,
-        message: 'Sign in to manage company defaults.',
-      };
+    if (!context) return fail('Sign in to manage company defaults.');
     const { client, authorization } = await serverServices();
     await authorization.requirePermission(
       context.organizationId,
@@ -63,17 +60,11 @@ export async function saveConstructionPaymentDefaults(
         p_rows: validated.data,
       } as never,
     );
-    if (error)
-      return {
-        ..._previous,
-        saved: false,
-        message: 'Unable to save company defaults: ' + error.message,
-      };
+    if (error) return fail('Unable to save workflow: ' + error.message);
     revalidatePath('/dashboard/settings');
     return {
       saved: true,
-      message:
-        'Industry stages, durations, payment markers and site guides saved.',
+      message: 'Workflow stages, durations and work sequence saved.',
       industryKey,
       savedRowsByIndustry: {
         ..._previous.savedRowsByIndustry,
@@ -81,10 +72,6 @@ export async function saveConstructionPaymentDefaults(
       },
     };
   } catch {
-    return {
-      ..._previous,
-      saved: false,
-      message: 'Only authorized company managers can save payment defaults.',
-    };
+    return fail('Only authorized company managers can save workflow settings.');
   }
 }
