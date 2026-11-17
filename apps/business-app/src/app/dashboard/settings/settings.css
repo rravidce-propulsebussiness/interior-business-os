@@ -1130,10 +1130,9 @@ a.ush-tile:focus-visible {
 }
 .us-company-stage-heading {
   display: grid;
-  grid-template-columns: 24px 40px minmax(230px, 1fr) minmax(
-      142px,
-      max-content
-    ) minmax(170px, max-content) 76px;
+  grid-template-columns:
+    24px 40px minmax(230px, 1fr) minmax(142px, max-content)
+    minmax(170px, max-content) 76px;
   gap: 12px;
   align-items: center;
   min-width: 0;
