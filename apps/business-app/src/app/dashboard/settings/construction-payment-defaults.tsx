@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import {
+  type CSSProperties,
   type DragEvent,
   type FormEvent,
   type KeyboardEvent,
@@ -331,12 +332,15 @@ function TimelinePreview({
             <span className="wf-timeline-track">
               <span
                 className="wf-timeline-bar"
-                style={{
-                  marginLeft: total ? `${(row.start / total) * 100}%` : 0,
-                  width: total
-                    ? `${Math.max((row.span / total) * 100, 1)}%`
-                    : 0,
-                }}
+                style={
+                  {
+                    '--i': rows.indexOf(row),
+                    marginLeft: total ? `${(row.start / total) * 100}%` : 0,
+                    width: total
+                      ? `${Math.max((row.span / total) * 100, 1)}%`
+                      : 0,
+                  } as CSSProperties
+                }
               />
             </span>
             <span className="wf-timeline-days">
@@ -503,7 +507,7 @@ export function ConstructionPaymentDefaults({
           </p>
         </div>
         <div className="wf-page-actions">
-          <span className={'wf-save-state' + (dirty ? ' is-dirty' : '')}>
+          <span className="wf-sr-only" aria-live="polite">
             {dirty ? 'Unsaved changes' : 'All changes saved'}
           </span>
           <button
@@ -517,9 +521,12 @@ export function ConstructionPaymentDefaults({
           {canEdit && (
             <button
               type="submit"
-              className="wf-button wf-button-primary"
+              className={
+                'wf-button wf-button-primary' + (dirty ? ' is-dirty' : '')
+              }
               disabled={pending}
             >
+              {dirty && <span className="wf-dirty-dot" aria-hidden="true" />}
               <Icon name="check" /> {pending ? 'Saving…' : 'Save Changes'}
             </button>
           )}
@@ -616,34 +623,57 @@ export function ConstructionPaymentDefaults({
             </p>
           </div>
           {stages.length > 0 && (
-            <ol className="wf-stepper" aria-label="Workflow stages overview">
-              {stages.map((stage, index) => {
-                const status =
-                  index === currentIndex
-                    ? 'is-current'
-                    : currentIndex >= 0 && index < currentIndex
-                      ? 'is-done'
-                      : '';
-                return (
-                  <li key={stage.id} className={status}>
-                    <button
-                      type="button"
-                      aria-current={index === currentIndex ? 'step' : undefined}
-                      onClick={() => setExpandedStage(stage.id)}
+            <div className="wf-stepper-scroll">
+              <ol
+                className="wf-stepper"
+                aria-label="Workflow stages overview"
+                style={
+                  {
+                    '--n': stages.length,
+                    '--p':
+                      stages.length > 1 && currentIndex > 0
+                        ? currentIndex / (stages.length - 1)
+                        : 0,
+                  } as CSSProperties
+                }
+              >
+                <li className="wf-stepper-track" aria-hidden="true">
+                  <span />
+                </li>
+                {stages.map((stage, index) => {
+                  const status =
+                    index === currentIndex
+                      ? 'is-current'
+                      : currentIndex >= 0 && index < currentIndex
+                        ? 'is-done'
+                        : '';
+                  return (
+                    <li
+                      key={stage.id}
+                      className={'wf-step ' + status}
+                      style={{ '--i': index } as CSSProperties}
                     >
-                      <span className="wf-step-dot">
-                        {status === 'is-done' && (
-                          <Icon name="check" size={11} />
-                        )}
-                      </span>
-                      <span className="wf-step-label">
-                        {stage.name || `Stage ${index + 1}`}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
+                      <button
+                        type="button"
+                        aria-current={
+                          index === currentIndex ? 'step' : undefined
+                        }
+                        onClick={() => setExpandedStage(stage.id)}
+                      >
+                        <span className="wf-step-dot">
+                          {status === 'is-done' && (
+                            <Icon name="check" size={11} />
+                          )}
+                        </span>
+                        <span className="wf-step-label">
+                          {stage.name || `Stage ${index + 1}`}
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
           )}
         </header>
 
@@ -665,6 +695,7 @@ export function ConstructionPaymentDefaults({
                   'wf-stage us-company-stage-card' +
                   (expanded ? ' is-expanded' : '')
                 }
+                style={{ '--i': index } as CSSProperties}
                 onDragOver={(event) => event.preventDefault()}
                 onDrop={(event) => {
                   event.preventDefault();
@@ -833,6 +864,7 @@ export function ConstructionPaymentDefaults({
                         <li
                           key={item.id}
                           className="wf-item"
+                          style={{ '--i': itemIndex } as CSSProperties}
                           onDragOver={(event) => event.preventDefault()}
                           onDrop={(event) => {
                             const data =

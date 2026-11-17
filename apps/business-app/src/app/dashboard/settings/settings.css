@@ -1033,14 +1033,6 @@ a.ush-tile:focus-visible {
   gap: 10px;
   flex-wrap: wrap;
 }
-.wf-save-state {
-  font-size: 11px;
-  font-weight: 750;
-  color: #16834d;
-}
-.wf-save-state.is-dirty {
-  color: var(--wf-accent-strong);
-}
 .wf-button {
   display: inline-flex;
   align-items: center;
@@ -1216,31 +1208,45 @@ a.ush-tile:focus-visible {
   font-size: 12px;
   color: var(--wf-muted);
 }
+.wf-stepper-scroll {
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  padding: 4px 0 2px;
+}
 .wf-stepper {
+  --n: 8;
+  --p: 0;
+  position: relative;
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
-  overflow-x: auto;
-  scrollbar-width: thin;
+  min-width: calc(var(--n) * 64px);
 }
-.wf-stepper li {
-  flex: 1 0 64px;
-  position: relative;
+.wf-step {
+  flex: 1 1 0;
+  min-width: 64px;
+  animation: wf-rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms + 120ms);
 }
-.wf-stepper li + li::before {
-  content: '';
+.wf-stepper-track {
   position: absolute;
   top: 9px;
-  right: 50%;
-  width: 100%;
+  left: calc(50% / var(--n));
+  right: calc(50% / var(--n));
   height: 2px;
+  border-radius: 2px;
   background: #ead9d1;
+  pointer-events: none;
 }
-.wf-stepper li.is-done + li::before,
-.wf-stepper li.is-done::before,
-.wf-stepper li.is-current::before {
-  background: var(--wf-accent);
+.wf-stepper-track span {
+  display: block;
+  height: 100%;
+  width: calc(var(--p) * 100%);
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--wf-accent-strong), var(--wf-accent));
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .wf-stepper button {
   position: relative;
@@ -1255,7 +1261,16 @@ a.ush-tile:focus-visible {
   font: inherit;
   cursor: pointer;
 }
+.wf-stepper button:hover .wf-step-dot {
+  transform: scale(1.12);
+  border-color: var(--wf-accent);
+}
 .wf-step-dot {
+  transition:
+    transform 0.2s ease,
+    border-color 0.3s ease,
+    background 0.3s ease,
+    box-shadow 0.3s ease;
   display: grid;
   place-items: center;
   width: 20px;
@@ -1270,6 +1285,7 @@ a.ush-tile:focus-visible {
   background: var(--wf-accent-strong);
 }
 .is-current .wf-step-dot {
+  animation: wf-pulse 2.2s ease-out infinite;
   border-color: var(--wf-accent);
   box-shadow:
     inset 0 0 0 3px #fff,
@@ -1609,20 +1625,6 @@ a.ush-tile:focus-visible {
   white-space: nowrap;
   cursor: pointer;
 }
-.wf-kind-trigger.is-payment {
-  background: #e7f8ef;
-  color: #11733f;
-}
-.wf-kind-trigger.is-check,
-.wf-kind-trigger.is-test,
-.wf-kind-trigger.is-qc {
-  background: #fff1e0;
-  color: #a3480f;
-}
-.wf-kind-trigger.is-material {
-  background: #f3ecfd;
-  color: #6b3fb0;
-}
 .wf-kind-trigger:disabled {
   cursor: default;
 }
@@ -1834,7 +1836,7 @@ a.ush-tile:focus-visible {
   .wf-card-head {
     grid-template-columns: auto minmax(0, 1fr);
   }
-  .wf-stepper {
+  .wf-stepper-scroll {
     grid-column: 1 / -1;
   }
   .wf-stage-row {
@@ -1860,9 +1862,6 @@ a.ush-tile:focus-visible {
   .wf-page-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-  }
-  .wf-save-state {
-    grid-column: 1 / -1;
   }
   .wf-page-actions .wf-button {
     padding: 0 10px;
@@ -1973,5 +1972,254 @@ a.ush-tile:focus-visible {
   .wf-switch span,
   .wf-stage-toggle svg {
     transition: none;
+  }
+}
+
+/* Workflow motion */
+.wf-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+.wf-page-head,
+.wf-tabs,
+.wf-industries,
+.wf-card {
+  animation: wf-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.wf-tabs {
+  animation-delay: 60ms;
+}
+.wf-industries {
+  animation-delay: 100ms;
+}
+.wf-card {
+  animation-delay: 140ms;
+}
+.wf-stage {
+  animation: wf-rise 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 50ms + 200ms);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease,
+    background 0.25s ease;
+}
+.wf-stage:not(.is-expanded):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px #6b2a1a12;
+}
+.wf-stage.is-expanded .wf-stage-row {
+  background: linear-gradient(180deg, #fff7f2, #fffdfb);
+  border-radius: 14px 14px 0 0;
+}
+.wf-stage.is-expanded .wf-stage-number {
+  background: var(--wf-accent);
+  color: #fff;
+  transform: scale(1.06);
+}
+.wf-stage-number {
+  transition:
+    background 0.25s ease,
+    color 0.25s ease,
+    transform 0.25s ease;
+}
+.wf-stage-body {
+  animation: wf-reveal 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: top;
+}
+.wf-item {
+  animation: wf-rise 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 45ms + 80ms);
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.wf-item:hover {
+  border-color: #efcdbd;
+  background: #fff;
+  box-shadow: 0 4px 12px #6b2a1a0d;
+}
+.wf-item-days,
+.wf-guide-toggle:not(.has-guide):not([aria-expanded='true']),
+.wf-item-remove {
+  transition: opacity 0.2s ease;
+}
+@media (hover: hover) {
+  .wf-item:not(:hover):not(:focus-within) .wf-item-days,
+  .wf-item:not(:hover):not(:focus-within)
+    .wf-guide-toggle:not(.has-guide):not([aria-expanded='true']),
+  .wf-item:not(:hover):not(:focus-within) .wf-item-remove {
+    opacity: 0;
+  }
+}
+.wf-guide {
+  animation: wf-reveal 0.3s ease both;
+}
+.wf-kind-menu {
+  animation: wf-pop 0.18s ease-out both;
+  transform-origin: top right;
+}
+.wf-kind-trigger {
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.wf-kind-trigger:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px #2f5aa826;
+}
+.wf-button:active:not(:disabled),
+.wf-add-stage:active,
+.wf-industries > button:active {
+  transform: scale(0.97);
+}
+.wf-button-ghost:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px #d9541e1a;
+}
+.wf-button-primary {
+  position: relative;
+  overflow: hidden;
+}
+.wf-button-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    #ffffff59 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  transition: transform 0.7s ease;
+}
+.wf-button-primary:hover:not(:disabled)::after {
+  transform: translateX(120%);
+}
+.wf-dirty-dot {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #fff;
+  animation: wf-blink 1.4s ease-in-out infinite;
+}
+.wf-tabs a {
+  transition:
+    color 0.2s ease,
+    background 0.25s ease,
+    border-color 0.25s ease;
+}
+.wf-tabs a svg {
+  transition: transform 0.2s ease;
+}
+.wf-tabs a:hover svg {
+  transform: translateY(-1px) rotate(-6deg);
+}
+.wf-industries > button {
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease;
+}
+.wf-add-stage {
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
+}
+.wf-add-stage:hover {
+  border-color: var(--wf-accent);
+}
+.wf-add-stage:hover svg {
+  transform: rotate(90deg);
+}
+.wf-add-stage svg {
+  transition: transform 0.25s ease;
+}
+.wf-status {
+  animation: wf-rise 0.3s ease both;
+}
+.wf-timeline {
+  animation: wf-reveal 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.wf-timeline-bar {
+  transform-origin: left;
+  animation: wf-grow 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--i, 0) * 70ms + 150ms);
+  transition:
+    width 0.45s ease,
+    margin-left 0.45s ease;
+}
+.wf-switch {
+  transition:
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.wf-switch span {
+  transition: transform 0.25s cubic-bezier(0.3, 1.4, 0.5, 1);
+}
+.wf-switch[aria-checked='true'] {
+  box-shadow: 0 0 0 4px #d9541e1f;
+}
+@keyframes wf-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes wf-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scaleY(0.98);
+  }
+}
+@keyframes wf-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(-4px);
+  }
+}
+@keyframes wf-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes wf-pulse {
+  0% {
+    box-shadow:
+      inset 0 0 0 3px #fff,
+      inset 0 0 0 10px var(--wf-accent),
+      0 0 0 0 #d9541e55;
+  }
+  70%,
+  100% {
+    box-shadow:
+      inset 0 0 0 3px #fff,
+      inset 0 0 0 10px var(--wf-accent),
+      0 0 0 9px #d9541e00;
+  }
+}
+@keyframes wf-blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wf-editor *,
+  .wf-editor *::before,
+  .wf-editor *::after,
+  .wf-editor {
+    animation: none !important;
+    transition: none !important;
   }
 }
