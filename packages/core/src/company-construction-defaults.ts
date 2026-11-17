@@ -101,6 +101,7 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'preconstruction',
     name: 'Pre-construction',
+    description: 'Site readiness, approvals and initial setup.',
     repeatsPerFloor: false,
     days: 7,
     items: [
@@ -115,7 +116,8 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'design',
     name: 'Design',
-    description: 'Floor plans, structural design, MEP plans and approvals.',
+    description:
+      'Architectural, structural and MEP design, drawings and approvals.',
     repeatsPerFloor: false,
     days: 14,
     items: [
@@ -148,6 +150,7 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'foundation',
     name: 'Foundation',
+    description: 'Excavation, footing, PCC and foundation works.',
     repeatsPerFloor: false,
     days: 20,
     items: [
@@ -162,6 +165,7 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'slabs',
     name: 'Slabs',
+    description: 'RCC slabs, formwork, reinforcement and concreting.',
     repeatsPerFloor: true,
     days: 15,
     items: [
@@ -171,6 +175,7 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'brickwork',
     name: 'Brickwork',
+    description: 'Wall construction and masonry works.',
     repeatsPerFloor: true,
     days: 15,
     items: [
@@ -185,6 +190,7 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'electrical-plumbing',
     name: 'Electrical & plumbing',
+    description: 'Electrical and plumbing rough-in, conduits and fixtures.',
     repeatsPerFloor: true,
     days: 14,
     items: [
@@ -199,6 +205,7 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'tiles',
     name: 'Tiles',
+    description: 'Floor and wall tiling, grouting and finishing.',
     repeatsPerFloor: true,
     days: 10,
     items: [
@@ -208,6 +215,7 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'painting',
     name: 'Painting',
+    description: 'Surface preparation and final painting.',
     repeatsPerFloor: true,
     days: 10,
     items: [

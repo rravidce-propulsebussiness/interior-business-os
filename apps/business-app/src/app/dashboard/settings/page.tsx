@@ -39,7 +39,7 @@ const tabs: { id: Tab; label: string; icon: string }[] = [
   { id: 'branding', label: 'Branding', icon: '◈' },
   { id: 'invoice', label: 'Invoice & GST', icon: '▤' },
   { id: 'documents', label: 'Documents', icon: '▧' },
-  { id: 'payments', label: 'Project Workflow', icon: '♧' },
+  { id: 'payments', label: 'Workflow', icon: '♧' },
   { id: 'team', label: 'Team & Access', icon: '♙' },
   { id: 'preferences', label: 'Preferences', icon: '⚙' },
 ];
@@ -1119,53 +1119,45 @@ export default async function SettingsPage({
           </section>
         )}
         {tab === 'payments' && (
-          <section className="us-card us-wide">
-            <Header
-              icon="♧"
-              title="Project workflow settings"
-              detail="Set reusable stages, durations and site checks for each industry. New quotations copy the matching workflow and calculate dates automatically."
-            />
-            <div
-              className="us-payment-template-section"
-              id="company-payment-stages"
-            >
-              <h3>Stages, durations & work sequence</h3>
-              {workflowResult.error ? (
-                <p className="us-info">
-                  Company payment defaults are temporarily unavailable.
-                </p>
-              ) : (
-                <ConstructionPaymentDefaults
-                  canEdit={canEdit}
-                  industries={[
-                    { key: 'construction', name: 'Construction' },
-                    { key: 'interior', name: 'Interior' },
-                    ...Object.keys(workflowTemplates)
-                      .filter(
-                        (key) => !['construction', 'interior'].includes(key),
-                      )
-                      .map((key) => ({
-                        key,
-                        name: key
-                          .split('-')
-                          .map((part) => part[0]?.toUpperCase() + part.slice(1))
-                          .join(' '),
-                      })),
-                  ]}
-                  initial={Object.fromEntries(
-                    Object.entries(workflowTemplates).map(([key, value]) => [
-                      key,
-                      companyConstructionStages.safeParse(value).success
-                        ? companyConstructionStages.parse(value)
-                        : key === 'interior'
-                          ? defaultInteriorStages
-                          : defaultCompanyConstructionStages,
-                    ]),
-                  )}
+          <div className="wf-shell" id="company-payment-stages">
+            {workflowResult.error ? (
+              <section className="us-card us-wide">
+                <Header
+                  icon="♧"
+                  title="Project workflow settings"
+                  detail="Workflow settings are temporarily unavailable. Please refresh in a moment."
                 />
-              )}
-            </div>
-          </section>
+              </section>
+            ) : (
+              <ConstructionPaymentDefaults
+                canEdit={canEdit}
+                industries={[
+                  { key: 'construction', name: 'Construction' },
+                  { key: 'interior', name: 'Interior' },
+                  ...Object.keys(workflowTemplates)
+                    .filter(
+                      (key) => !['construction', 'interior'].includes(key),
+                    )
+                    .map((key) => ({
+                      key,
+                      name: key
+                        .split('-')
+                        .map((part) => part[0]?.toUpperCase() + part.slice(1))
+                        .join(' '),
+                    })),
+                ]}
+                initial={Object.fromEntries(
+                  Object.entries(workflowTemplates).map(([key, value]) => [
+                    key,
+                    companyConstructionStages.safeParse(value).data ??
+                      (key === 'interior'
+                        ? defaultInteriorStages
+                        : defaultCompanyConstructionStages),
+                  ]),
+                )}
+              />
+            )}
+          </div>
         )}
         {tab === 'team' && (
           <section className="us-card us-wide">
