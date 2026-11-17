@@ -1811,7 +1811,6 @@ a.ush-tile:focus-visible {
   }
 }
 
-
 /* Keep the stage editor readable inside the dashboard's narrower main column. */
 @media (max-width: 1500px) {
   .us-company-stage-heading {
