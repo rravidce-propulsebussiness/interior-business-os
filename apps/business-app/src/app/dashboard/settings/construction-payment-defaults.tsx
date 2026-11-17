@@ -255,6 +255,16 @@ export function ConstructionPaymentDefaults({
               (expandedStage === stage.id ? ' is-expanded' : ' is-collapsed')
             }
             key={stage.id}
+            onClick={(event) => {
+              const target = event.target;
+              if (!(target instanceof HTMLElement) || !target.closest('header'))
+                return;
+              if (target.closest('button, input, textarea, label, select'))
+                return;
+              setExpandedStage((current) =>
+                current === stage.id ? null : stage.id,
+              );
+            }}
             draggable={canEdit}
             onDragStart={(event) =>
               event.dataTransfer.setData('text/plain', String(index))
