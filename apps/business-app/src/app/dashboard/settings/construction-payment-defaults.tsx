@@ -9,15 +9,6 @@ import {
 } from '@business-os/core/company-construction-defaults';
 import { saveConstructionPaymentDefaults } from './payment-default-actions';
 
-const stageDescriptions: Record<string, string> = {
-  preconstruction: 'Price freeze, agreement and planning approvals.',
-  foundation: 'Site preparation, excavation, footing and plinth work.',
-  slabs: 'Formwork, reinforcement, services, concrete, curing and slab QC.',
-  brickwork: 'External and internal brick or block masonry for each floor.',
-  'electrical-plumbing': 'Electrical conduits, wiring, plumbing and testing.',
-  tiles: 'Floor and wall tiling, grout, finishing and checks.',
-  painting: 'Surface preparation, putty, primer and final coats.',
-};
 const move = <T,>(values: T[], from: number, to: number) => {
   const next = [...values];
   const [item] = next.splice(from, 1);
@@ -230,19 +221,10 @@ export function ConstructionPaymentDefaults({
         <span className="us-workflow-saved">
           {dirty ? '• Unsaved changes' : '✓ Saved'}
         </span>
-        <p className="us-info">
-          Configure a separate reusable workflow for each industry. Mark a stage
-          to repeat for every quoted floor; one-time stages run once per
-          project. Work items, payment markers, checks, QC guides and durations
-          are copied to new quotations.
-        </p>
       </div>
       <div className="us-project-calendar">
-        <strong>Project calendar</strong>
-        <span>
-          Duration unit: <b>Working days</b>
-        </span>
-        <span>Sunday is excluded when quotation dates are calculated.</span>
+        <strong>Working days</strong>
+        <span>Sundays excluded from dates</span>
       </div>
       {stages.map((stage, index) => {
         const workItems = stage.items.filter((item) => item.kind !== 'payment');
@@ -309,23 +291,8 @@ export function ConstructionPaymentDefaults({
                   <span className="us-stage-collapse-badge">
                     {stage.repeatsPerFloor ? 'Per floor' : 'One time'}
                   </span>
+                  <span className="us-stage-days-preview">{stage.days}d</span>
                 </div>
-                <p className="us-stage-description">
-                  <textarea
-                    aria-label="Stage description"
-                    value={
-                      stage.description ?? stageDescriptions[stage.id] ?? ''
-                    }
-                    disabled={!canEdit}
-                    placeholder="Describe this stage"
-                    onChange={(event) =>
-                      patchStage(index, { description: event.target.value })
-                    }
-                  />
-                  {stage.repeatsPerFloor && (
-                    <span> · Automatically repeats for each quoted floor</span>
-                  )}
-                </p>
               </div>
               <label className="us-repeat-toggle">
                 <input
@@ -387,10 +354,9 @@ export function ConstructionPaymentDefaults({
             </header>
             {expandedStage === stage.id && (
               <p className="us-stage-total">
-                Stage total: {totalDays} days · {workItems.length} work/check
-                steps
+                {totalDays} days · {workItems.length} items
                 {itemDays > stage.days && (
-                  <span> · Substage durations extend the stage duration</span>
+                  <span> · Substage duration extends this stage</span>
                 )}
               </p>
             )}
@@ -398,7 +364,6 @@ export function ConstructionPaymentDefaults({
               <>
                 <div className="us-stage-items-heading">
                   <strong>Work sequence</strong>
-                  <span>Drag to reorder or enter a sequence number.</span>
                 </div>
                 <div className="us-company-stage-items">
                   {stage.items.map((item, itemIndex) => (
@@ -627,10 +592,6 @@ export function ConstructionPaymentDefaults({
           {state.message}
         </p>
       )}
-      <p className="us-info">
-        Stage order is the project sequence. The quotation and project timeline
-        calculate target dates from the start date and the days entered here.
-      </p>
     </form>
   );
 }

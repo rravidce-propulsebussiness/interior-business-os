@@ -1198,35 +1198,6 @@ a.ush-tile:focus-visible {
   letter-spacing: 0.03em;
   white-space: nowrap;
 }
-.us-stage-description {
-  margin: 0;
-  color: #64758d;
-  font-size: 12px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-.us-stage-description textarea {
-  display: block;
-  width: 100%;
-  min-height: 38px;
-  resize: vertical;
-  padding: 5px 8px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  line-height: inherit;
-}
-.us-stage-description textarea:hover,
-.us-stage-description textarea:focus {
-  border-color: #f0d4c3;
-  background: #fff;
-}
-.us-stage-description textarea:focus {
-  outline: 2px solid #f6c7aa;
-  outline-offset: 1px;
-}
 .us-repeat-toggle {
   display: flex;
   align-items: center;
@@ -1578,12 +1549,6 @@ a.ush-tile:focus-visible {
     grid-column: 3;
     grid-row: 1;
   }
-  .us-stage-description {
-    grid-column: auto;
-    grid-row: auto;
-    width: 100%;
-    min-width: 0;
-  }
   .us-stage-actions {
     grid-column: 4;
     grid-row: 1;
@@ -1719,17 +1684,6 @@ a.ush-tile:focus-visible {
     min-height: 26px;
     font-size: 9px;
   }
-  .us-stage-description {
-    grid-column: auto;
-    grid-row: auto;
-    width: 100%;
-    min-width: 0;
-  }
-  .us-stage-description textarea {
-    min-height: 44px;
-    padding-inline: 6px;
-    font-size: 11px;
-  }
   .us-stage-actions {
     z-index: 1;
     grid-column: 4;
@@ -1840,7 +1794,6 @@ a.ush-tile:focus-visible {
 .us-company-stage-card.is-collapsed .us-stage-title-top > input,
 .us-company-stage-card.is-collapsed .us-stage-repeat,
 .us-company-stage-card.is-collapsed .us-stage-once,
-.us-company-stage-card.is-collapsed .us-stage-description,
 .us-company-stage-card.is-collapsed .us-repeat-toggle,
 .us-company-stage-card.is-collapsed .us-stage-duration {
   display: none;
@@ -2072,11 +2025,6 @@ a.ush-tile:focus-visible {
 .us-company-stage-card.is-expanded .us-stage-toggle:hover {
   transform: rotate(180deg) translateY(-1px);
 }
-.us-company-stage-card.is-expanded .us-stage-description textarea {
-  border-color: #eee0d7;
-  background: #fffefa;
-  box-shadow: inset 0 1px 2px #32231708;
-}
 .us-company-stage-card.is-expanded .us-stage-items-heading,
 .us-company-stage-card.is-expanded .us-company-stage-items,
 .us-company-stage-card.is-expanded .us-company-stage-add {
@@ -2172,5 +2120,87 @@ a.ush-tile:focus-visible {
   .us-company-stage-card.is-expanded .us-company-stage-items,
   .us-company-stage-card.is-expanded .us-company-stage-add {
     animation: none;
+  }
+}
+
+/* Keep workflow setup concise; details stay inside the expanded stage. */
+.us-workflow-intro {
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+.us-project-calendar {
+  width: fit-content;
+  min-height: 0;
+  padding: 7px 12px;
+  gap: 5px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+.us-project-calendar strong {
+  font-weight: 850;
+}
+.us-company-stage-card.is-collapsed {
+  padding: 9px 12px;
+  border-radius: 14px;
+}
+.us-company-stage-card.is-collapsed .us-company-stage-heading {
+  min-height: 34px;
+}
+.us-stage-days-preview {
+  display: none;
+}
+.us-company-stage-card.is-collapsed .us-stage-days-preview {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-height: 21px;
+  padding: 3px 7px;
+  border: 1px solid #f0e2d8;
+  border-radius: 999px;
+  background: #fff;
+  color: #775d50;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.us-company-stage-card.is-expanded .us-stage-items-heading {
+  margin-bottom: 7px;
+}
+.us-stage-items-heading span {
+  display: none;
+}
+.us-stage-total {
+  margin-top: 7px;
+}
+@media (max-width: 640px) {
+  .us-project-calendar {
+    width: auto;
+    justify-content: space-between;
+    border-radius: 12px;
+  }
+  .us-company-stage-card.is-collapsed {
+    padding: 8px 10px;
+  }
+  .us-company-stage-card.is-collapsed .us-company-stage-heading {
+    grid-template-columns: 18px 32px minmax(0, 1fr) 69px;
+    gap: 6px;
+  }
+  .us-company-stage-card.is-collapsed .us-stage-number {
+    width: 30px;
+    height: 30px;
+    margin-top: 0;
+  }
+  .us-company-stage-card.is-collapsed .us-stage-name-preview {
+    font-size: 13px;
+  }
+  .us-company-stage-card.is-collapsed .us-stage-collapse-badge {
+    min-height: 20px;
+    padding: 3px 6px;
+    font-size: 8px;
+  }
+  .us-company-stage-card.is-collapsed .us-stage-days-preview {
+    min-height: 20px;
+    padding-inline: 5px;
+    font-size: 9px;
   }
 }
