@@ -108,15 +108,14 @@ export async function refreshSessionWithRewrite(
   );
   if (debugPublicPage)
     console.log(
-      `[Business OS] Next proxy verifying session claims for ${request.nextUrl.pathname}.`,
+      `[Business OS] Next proxy requesting authenticated session for ${request.nextUrl.pathname}.`,
     );
   try {
-    // Verify claims locally so parallel requests do not race Auth refreshes.
-  await client.auth.getClaims();
+    await client.auth.getClaims();
   } finally {
     if (debugPublicPage)
       console.log(
-        `[Business OS] Next proxy claim check finished for ${request.nextUrl.pathname} after ${Date.now() - diagnosticStart}ms.`,
+        `[Business OS] Next proxy session check finished for ${request.nextUrl.pathname} after ${Date.now() - diagnosticStart}ms.`,
       );
   }
   response.headers.set('Cache-Control', 'private, no-store');
