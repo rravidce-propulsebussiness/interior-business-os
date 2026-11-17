@@ -5,6 +5,7 @@ import {
   projectWorkItems,
   flowRole,
   measurementPrompts,
+  isActionableWork,
   stageLabel,
   type WorkItem,
 } from './project-flow';
@@ -469,7 +470,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   const todayItems = items.filter((item) => {
     const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
     const when = plan?.plannedStart ?? estimatedItemDate(item);
-    return when === today && !isComplete(item.status);
+    return when === today && isActionableWork(item);
   });
   const todayStageIndex = timelineCards.findIndex((card) =>
     card.stages.some((stage) =>
@@ -479,7 +480,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   const tomorrowItems = items.filter((item) => {
     const plan = plansByKey.get(itemPlanKey(item.stage.id, 'work', item.index));
     const when = plan?.plannedStart ?? estimatedItemDate(item);
-    return when === tomorrow && !isComplete(item.status);
+    return when === tomorrow && isActionableWork(item);
   });
   const workDone = items.filter((item) => isComplete(item.status)).length;
   const delayedItems = items.filter(

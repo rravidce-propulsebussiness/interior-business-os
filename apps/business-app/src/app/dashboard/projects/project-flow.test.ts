@@ -4,6 +4,7 @@ import {
   chronologicalGroups,
   flowBuckets,
   flowRole,
+  isActionableWork,
   measurementPrompts,
   nextAction,
   parseCuring,
@@ -179,6 +180,37 @@ describe('single project flow model', () => {
     expect(b.today.some((i) => i.stage.id === 'F3_MASONRY')).toBe(false);
     expect(b.blocked[0]?.stage.id).toBe('F3_MASONRY');
     expect(b.active.map((s) => s.id).sort()).toEqual(['F1_MASONRY', 'F3_SLAB']);
+  });
+
+  it("keeps blocked stages out of tomorrow's actionable work", () => {
+    const items = projectWorkItems({
+      stages,
+      execution,
+      optional: [],
+      work: [],
+      plans: [plan('F3_MASONRY', 0, '2026-11-13')],
+    });
+    const blocked = items.find((item) => item.stage.id === 'F3_MASONRY');
+    expect(blocked).toBeDefined();
+    expect(isActionableWork(blocked!)).toBe(false);
+    const buckets = flowBuckets(items, {
+      today: '2026-11-12',
+      tomorrow: '2026-11-13',
+    });
+    expect(buckets.tomorrow).toEqual([]);
+    expect(buckets.blocked.map((row) => row.stage.id)).toContain('F3_MASONRY');
+  });
+
+  it('does not request QC for site preparation without a QC step', () => {
+    const items = projectWorkItems({
+      stages: [stage('SITE_PREP', 2, ['Site marking'], null, 'SITE_PREP')],
+      execution: [exec('SITE_PREP', 'in_progress')],
+      optional: [],
+      plans: [],
+      work: [{ stage_id: 'SITE_PREP', index: 0, status: 'completed' }],
+    });
+    const buckets = flowBuckets(items, { today: 'x', tomorrow: 'y' });
+    expect(buckets.readyForQc).toEqual([]);
   });
 
   it('offers QC submission only when every item is completed or skipped', () => {

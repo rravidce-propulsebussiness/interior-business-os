@@ -103,6 +103,12 @@ const workStatus = (v: unknown): WorkStatus =>
   ) ?? 'pending';
 
 export const isDone = (s: WorkStatus) => s === 'completed' || s === 'skipped';
+
+/** Planned dates do not make work executable while its stage is blocked or paused. */
+export const isActionableWork = (item: WorkItem): boolean =>
+  !isDone(item.status) &&
+  item.blockers.length === 0 &&
+  ['not_started', 'in_progress'].includes(item.stageStatus);
 export function shouldShowAdvancePayment(
   advance:
     { invoiceId: string | null; scheduleActive: boolean } | null | undefined,
@@ -410,7 +416,10 @@ export function flowBuckets(
   );
   const todayKeys = new Set(today.map((i) => i.key));
   const tomorrow = open.filter(
-    (i) => !todayKeys.has(i.key) && inWindow(i, days.tomorrow),
+    (i) =>
+      !todayKeys.has(i.key) &&
+      isActionableWork(i) &&
+      inWindow(i, days.tomorrow),
   );
   const stages = [...new Map(items.map((i) => [i.stage.id, i.stage])).values()];
   const of = (s: Stage) => items.filter((i) => i.stage.id === s.id);
@@ -423,7 +432,9 @@ export function flowBuckets(
     ),
     readyForQc: stages.filter(
       (s) =>
-        status(s) === 'in_progress' && of(s).every((i) => isDone(i.status)),
+        status(s) === 'in_progress' &&
+        s.template_code.split('/')[0] !== 'SITE_PREP' &&
+        of(s).every((i) => isDone(i.status)),
     ),
     awaitingQc: stages.filter((s) => status(s) === 'ready_for_qc'),
     blocked: stages
