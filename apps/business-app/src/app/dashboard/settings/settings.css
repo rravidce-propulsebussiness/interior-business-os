@@ -2223,3 +2223,89 @@ a.ush-tile:focus-visible {
     transition: none !important;
   }
 }
+
+/* Keep the workflow editor intact under the app-wide button/input rules
+   (globals.css forces borders and a 0.8rem radius with !important). */
+.wf-editor .wf-stage,
+.wf-editor .wf-item,
+.wf-editor .wf-step,
+.wf-editor .wf-card,
+.wf-editor .wf-page-head,
+.wf-editor .wf-tabs,
+.wf-editor .wf-industries {
+  /* Drop the entrance transform once it ends so cards do not stay separate
+     stacking layers that paint over an open menu. */
+  animation-fill-mode: backwards;
+}
+.wf-editor .wf-stage,
+.wf-editor .wf-item {
+  position: relative;
+}
+.wf-editor .wf-stage:has(.wf-kind-menu),
+.wf-editor .wf-item:has(.wf-kind-menu) {
+  z-index: 30;
+}
+.wf-editor .wf-add-item .wf-kind-menu {
+  left: 0;
+  right: auto;
+  transform-origin: top left;
+}
+.wf-editor .wf-stage-name-input,
+.wf-editor .wf-item-title,
+.wf-editor .wf-add-item input,
+.wf-editor .wf-add-industry input {
+  width: auto;
+  border-color: transparent !important;
+  background: transparent;
+  box-shadow: none;
+}
+.wf-editor .wf-add-industry input {
+  border: 0 !important;
+  padding: 0;
+  height: 26px;
+}
+.wf-editor .wf-stage-name-input:hover,
+.wf-editor .wf-item-title:hover {
+  border-color: var(--wf-line) !important;
+  background: #fff;
+}
+.wf-editor .wf-stage-name-input:focus,
+.wf-editor .wf-item-title:focus,
+.wf-editor .wf-add-item input:focus {
+  border-color: var(--wf-accent) !important;
+  background: #fff;
+}
+.wf-editor .wf-industries > button,
+.wf-editor .wf-kind-trigger,
+.wf-editor .wf-switch,
+.wf-editor .wf-add-industry {
+  border-radius: 999px !important;
+}
+.wf-editor .wf-add-industry button {
+  border-radius: 50% !important;
+}
+.wf-editor .wf-icon-button {
+  border-radius: 9px !important;
+}
+.wf-editor .wf-kind-menu button {
+  border-radius: 8px !important;
+}
+.wf-editor .wf-stepper button,
+.wf-editor .wf-stepper button:hover {
+  border: 0;
+  border-radius: 0 !important;
+  box-shadow: none;
+  transform: none;
+  filter: none;
+}
+.wf-editor .wf-switch:hover,
+.wf-editor .wf-kind-menu button:hover,
+.wf-editor .wf-icon-button:hover,
+.wf-editor .wf-text-danger:hover {
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+.wf-editor .wf-text-danger {
+  border: 0;
+}
