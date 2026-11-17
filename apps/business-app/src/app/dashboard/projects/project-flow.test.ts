@@ -182,7 +182,7 @@ describe('single project flow model', () => {
     expect(b.active.map((s) => s.id).sort()).toEqual(['F1_MASONRY', 'F3_SLAB']);
   });
 
-  it('keeps blocked stages out of tomorrow\'s actionable work', () => {
+  it("keeps blocked stages out of tomorrow's actionable work", () => {
     const items = projectWorkItems({
       stages,
       execution,
@@ -198,9 +198,7 @@ describe('single project flow model', () => {
       tomorrow: '2026-11-13',
     });
     expect(buckets.tomorrow).toEqual([]);
-    expect(buckets.blocked.map((row) => row.stage.id)).toContain(
-      'F3_MASONRY',
-    );
+    expect(buckets.blocked.map((row) => row.stage.id)).toContain('F3_MASONRY');
   });
 
   it('does not request QC for site preparation without a QC step', () => {
