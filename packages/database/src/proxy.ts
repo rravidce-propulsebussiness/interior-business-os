@@ -111,9 +111,7 @@ export async function refreshSessionWithRewrite(
       `[Business OS] Next proxy verifying session claims for ${request.nextUrl.pathname}.`,
     );
   try {
-    // Verify the access-token claims locally and refresh only when needed. Using
-  // getUser() here forces every parallel request through Auth and can race the
-  // one-time refresh token when an access token expires.
+    // Verify claims locally so parallel requests do not race Auth refreshes.
   await client.auth.getClaims();
   } finally {
     if (debugPublicPage)
