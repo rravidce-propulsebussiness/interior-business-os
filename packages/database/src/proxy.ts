@@ -111,7 +111,7 @@ export async function refreshSessionWithRewrite(
       `[Business OS] Next proxy requesting authenticated session for ${request.nextUrl.pathname}.`,
     );
   try {
-    await client.auth.getUser();
+    await client.auth.getClaims();
   } finally {
     if (debugPublicPage)
       console.log(
