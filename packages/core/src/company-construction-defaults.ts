@@ -18,6 +18,8 @@ export const constructionStageKinds = [
   'slabs',
   'brickwork',
   'electrical-plumbing',
+  'internal-plastering-shelves',
+  'external-plastering-elevation',
   'tiles',
   'painting',
 ] as const;
@@ -208,6 +210,41 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
         id: 'payment-electrical-plumbing',
         kind: 'payment',
         title: 'Electrical & plumbing payment',
+        days: 0,
+      },
+    ],
+  },
+  {
+    id: 'internal-plastering-shelves',
+    name: 'Internal Plastering & Shelves',
+    description:
+      'Internal wall and ceiling plaster, embedded shelves or niches, corners, curing and finish checks.',
+    repeatsPerFloor: true,
+    // Unscheduled until the stage work sequence and duration are approved.
+    days: 0,
+    items: [
+      {
+        id: 'payment-internal-plastering',
+        kind: 'payment',
+        title: 'Internal Plastering & Shelves Payment',
+        days: 0,
+      },
+    ],
+  },
+  {
+    id: 'external-plastering-elevation',
+    name: 'External Plastering & Elevation',
+    description:
+      'Whole-building exterior plaster, façade details, elevation finishes, curing and QC.',
+    // Whole-building façade work is scheduled once rather than duplicated for each floor.
+    repeatsPerFloor: false,
+    // Unscheduled until the stage work sequence and duration are approved.
+    days: 0,
+    items: [
+      {
+        id: 'payment-external-plastering',
+        kind: 'payment',
+        title: 'External Plastering & Elevation Payment',
         days: 0,
       },
     ],
