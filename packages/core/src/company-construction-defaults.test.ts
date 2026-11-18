@@ -8,12 +8,12 @@ describe('company construction stage templates', () => {
   it('has one-time pre-construction and foundation plus reusable floor stages', () => {
     expect(
       companyConstructionStages.parse(defaultCompanyConstructionStages),
-    ).toHaveLength(8);
+    ).toHaveLength(10);
     expect(
       defaultCompanyConstructionStages
         .filter((stage) => !stage.repeatsPerFloor)
         .map((stage) => stage.id),
-    ).toEqual(['preconstruction', 'design', 'foundation']);
+    ).toEqual(['preconstruction', 'design', 'foundation', 'external-plastering-elevation']);
     expect(
       defaultCompanyConstructionStages
         .filter((stage) => stage.repeatsPerFloor)
@@ -22,6 +22,7 @@ describe('company construction stage templates', () => {
       'slabs',
       'brickwork',
       'electrical-plumbing',
+      'internal-plastering-shelves',
       'tiles',
       'painting',
     ]);
@@ -33,6 +34,29 @@ describe('company construction stage templates', () => {
     expect(
       defaultCompanyConstructionStages.every((stage) => stage.percent == null),
     ).toBe(true);
+  });
+
+  it('includes both plastering stages after rough-in, with per-floor internal and one-time exterior work', () => {
+    const stages = defaultCompanyConstructionStages;
+    const electric = stages.findIndex((stage) => stage.id === 'electrical-plumbing');
+    expect(stages.slice(electric + 1, electric + 3).map((stage) => stage.id)).toEqual([
+      'internal-plastering-shelves',
+      'external-plastering-elevation',
+    ]);
+    const internal = stages[electric + 1]!;
+    const external = stages[electric + 2]!;
+    expect(internal.name).toBe('Internal Plastering & Shelves');
+    expect(external.name).toBe('External Plastering & Elevation');
+    expect(internal.repeatsPerFloor).toBe(true);
+    expect(external.repeatsPerFloor).toBe(false);
+    expect(internal.days).toBe(0);
+    expect(external.days).toBe(0);
+    expect(internal.items[0]?.kind).toBe('payment');
+    expect(external.items[0]?.kind).toBe('payment');
+    expect(internal.items[0]?.days).toBe(0);
+    expect(external.items[0]?.days).toBe(0);
+    expect(stages[electric + 3]?.id).toBe('tiles');
+    expect(companyConstructionStages.safeParse(stages).success).toBe(true);
   });
 
   it('starts construction design with payment, then four ordered design deliverables', () => {
