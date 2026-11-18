@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import {
   type CSSProperties,
   type DragEvent,
@@ -63,6 +62,7 @@ const defaultStages = (industry: string): CompanyConstructionStage[] => {
 
 const itemKinds: CompanyStageItem['kind'][] = [
   'work',
+  'design',
   'material',
   'check',
   'test',
@@ -231,39 +231,6 @@ function ItemKindPicker({
   );
 }
 
-const settingsTabs: {
-  label: string;
-  href: string;
-  icon: keyof typeof icons;
-  active?: boolean;
-}[] = [
-  {
-    label: 'General',
-    href: '/dashboard/settings?tab=company',
-    icon: 'general',
-  },
-  {
-    label: 'Workflow',
-    href: '/dashboard/settings?tab=payments',
-    icon: 'layers',
-    active: true,
-  },
-  {
-    label: 'Payments',
-    href: '/dashboard/settings?tab=invoice',
-    icon: 'payments',
-  },
-  {
-    label: 'Resources',
-    href: '/dashboard/settings?tab=team',
-    icon: 'resources',
-  },
-  {
-    label: 'Notifications',
-    href: '/dashboard/settings?tab=preferences',
-    icon: 'notifications',
-  },
-];
 
 /** Sequential working-day plan; per-floor stages repeat for every floor. */
 export function workflowTimeline(
@@ -498,18 +465,8 @@ export function ConstructionPaymentDefaults({
       <input type="hidden" name="rows" value={JSON.stringify(stages)} />
       <input type="hidden" name="industryKey" value={industryKey} />
 
-      <div className="wf-page-head">
-        <div>
-          <h1>Workflow Settings</h1>
-          <p>
-            Define construction stages, durations and ordered work sequence for
-            your projects.
-          </p>
-        </div>
+      <div className="wf-page-head wf-page-head-compact">
         <div className="wf-page-actions">
-          <span className="wf-sr-only" aria-live="polite">
-            {dirty ? 'Unsaved changes' : 'All changes saved'}
-          </span>
           <button
             type="button"
             className="wf-button wf-button-ghost"
@@ -532,19 +489,6 @@ export function ConstructionPaymentDefaults({
           )}
         </div>
       </div>
-
-      <nav className="wf-tabs" aria-label="Settings sections">
-        {settingsTabs.map((tab) => (
-          <Link
-            key={tab.label}
-            href={tab.href}
-            className={tab.active ? 'is-active' : undefined}
-            aria-current={tab.active ? 'page' : undefined}
-          >
-            <Icon name={tab.icon} size={17} /> {tab.label}
-          </Link>
-        ))}
-      </nav>
 
       {statusMessage && (
         <p
@@ -1058,7 +1002,7 @@ export function ConstructionPaymentDefaults({
                               addItem(index, stage);
                             }
                           }}
-                          placeholder="Add work, material, check or QC item…"
+                          placeholder="Add work, design, material, check or QC item…"
                         />
                         <button
                           type="button"
