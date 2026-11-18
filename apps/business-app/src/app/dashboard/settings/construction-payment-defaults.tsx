@@ -1079,8 +1079,9 @@ export function ConstructionPaymentDefaults({
                           type="button"
                           className="wf-text-danger"
                           onClick={() => {
-                            mutateStages((rows) =>
-                              rows.filter((_, i) => i !== index), true),
+                            mutateStages(
+                              (rows) => rows.filter((_, i) => i !== index),
+                              true,
                             );
                             setExpandedStage(null);
                           }}
