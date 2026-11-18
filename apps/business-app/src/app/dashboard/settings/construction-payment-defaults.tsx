@@ -17,6 +17,10 @@ import {
 } from '@business-os/core/company-construction-defaults';
 import { saveConstructionPaymentDefaults } from './payment-default-actions';
 import {
+  scheduledStageItemDays,
+  stageWithUpdatedItems,
+} from './workflow-stage-days';
+import {
   type AutosaveStatus,
   createWorkflowAutosave,
 } from './workflow-autosave';
@@ -238,9 +242,7 @@ export function workflowTimeline(
 ) {
   let start = 0;
   const rows = stages.map((stage) => {
-    const workDays = stage.items
-      .filter((item) => item.kind !== 'payment')
-      .reduce((sum, item) => sum + item.days, 0);
+    const workDays = scheduledStageItemDays(stage.items);
     const once = Math.max(stage.days, workDays);
     const span = stage.repeatsPerFloor ? once * Math.max(1, floors) : once;
     const row = { id: stage.id, name: stage.name, start, span, once };
@@ -452,9 +454,14 @@ export function ConstructionPaymentDefaults({
   ) =>
     mutateStages(
       (current) =>
-        current.map((stage, i) =>
-          i === index ? { ...stage, ...patch } : stage,
-        ),
+        current.map((stage, i) => {
+          if (i !== index) return stage;
+          if (patch.items) {
+            const synced = stageWithUpdatedItems(stage, patch.items);
+            return { ...stage, ...patch, days: synced.days };
+          }
+          return { ...stage, ...patch };
+        }),
       immediate,
     );
   const patchItem = (
@@ -463,16 +470,15 @@ export function ConstructionPaymentDefaults({
     patch: Partial<CompanyStageItem>,
   ) =>
     mutateStages((current) =>
-      current.map((stage, i) =>
-        i === stageIndex
-          ? {
-              ...stage,
-              items: stage.items.map((item, j) =>
-                j === itemIndex ? { ...item, ...patch } : item,
-              ),
-            }
-          : stage,
-      ),
+      current.map((stage, i) => {
+        if (i !== stageIndex) return stage;
+        const items = stage.items.map((item, j) =>
+          j === itemIndex ? { ...item, ...patch } : item,
+        );
+        return 'days' in patch || 'kind' in patch
+          ? stageWithUpdatedItems(stage, items, true)
+          : { ...stage, items };
+      }),
     );
   const moveStage = (from: number, to: number) => {
     if (to < 0 || to >= stages.length || from === to) return;
@@ -494,18 +500,15 @@ export function ConstructionPaymentDefaults({
       (rows) =>
         rows.map((row, i) =>
           i === index
-            ? {
-                ...row,
-                items: [
-                  ...row.items,
-                  {
-                    id: newId(),
-                    kind,
-                    title,
-                    days: kind === 'payment' ? 0 : 1,
-                  },
-                ],
-              }
+            ? stageWithUpdatedItems(row, [
+                ...row.items,
+                {
+                  id: newId(),
+                  kind,
+                  title,
+                  days: kind === 'payment' ? 0 : 1,
+                },
+              ])
             : row,
         ),
       true,
@@ -695,13 +698,7 @@ export function ConstructionPaymentDefaults({
         <div className="wf-stages">
           {stages.map((stage, index) => {
             const expanded = expandedStage === stage.id;
-            const workItems = stage.items.filter(
-              (item) => item.kind !== 'payment',
-            );
-            const itemDays = workItems.reduce(
-              (sum, item) => sum + item.days,
-              0,
-            );
+            const itemDays = scheduledStageItemDays(stage.items);
             const bodyId = `wf-stage-body-${stage.id}`;
             return (
               <section
