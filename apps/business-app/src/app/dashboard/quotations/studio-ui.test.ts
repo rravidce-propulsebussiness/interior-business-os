@@ -1120,7 +1120,8 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
   });
   it('edits industry-specific stage programmes with timed work and guides', () => {
     expect(paymentSettings).toContain('Project workflow settings');
-    expect(stageEditor).toContain('Workflow Settings');
+    expect(stageEditor).toContain('{industryName} Workflow');
+    expect(stageEditor).not.toContain('Workflow Settings</h1>');
     expect(stageEditor).toContain('Per floor');
     expect(stageEditor).toContain('One time');
     expect(stageEditor).toContain('Yes, repeat per floor');

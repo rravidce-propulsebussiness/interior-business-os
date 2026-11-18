@@ -596,7 +596,7 @@ export default async function SettingsPage({
       <main id="main-content" className="us-shell">
         {tab === null ? (
           <SettingsHome sections={sections} />
-        ) : (
+        ) : tab === 'payments' ? null : (
           <div className="ush-detail-heading">
             <Link
               href="/dashboard/settings"
