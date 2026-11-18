@@ -127,7 +127,7 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
     description:
       'Architectural, structural and MEP design, drawings and approvals.',
     repeatsPerFloor: false,
-    days: 14,
+    days: 15,
     items: [
       {
         id: 'payment-design',
