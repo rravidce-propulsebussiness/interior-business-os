@@ -40,7 +40,10 @@ describe('unified company settings', () => {
     expect(workflowEditor).not.toContain('All changes saved');
     expect(workflowEditor).not.toContain('Workflow Settings</h1>');
     expect(workflowEditor).not.toContain('className="wf-tabs"');
-    expect(workflowEditor).toContain('Save Changes');
+    expect(workflowEditor).not.toContain('Save Changes');
+    expect(workflowEditor).toContain('wf-toolbar');
+    expect(workflowEditor).toContain('void autosave.flush(industryKey)');
+    expect(workflowEditor).toContain('wf-autosave-status');
     expect(designMigration).toContain(
       "item->>'kind' not in ('work','design','material','check','test','qc','payment')",
     );
