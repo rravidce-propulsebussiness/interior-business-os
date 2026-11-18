@@ -7,6 +7,9 @@ const read = (path: string) =>
   readFileSync(new URL(path, import.meta.url), 'utf8');
 const page = read('./page.tsx');
 const workflowEditor = read('./construction-payment-defaults.tsx');
+const designMigration = read(
+  '../../../../../../packages/database/supabase/migrations/20261118134000_workflow_design_item_kind.sql',
+);
 const action = read('./actions.ts');
 const sql = read(
   '../../../../../../packages/database/supabase/migrations/20261017000600_unified_company_settings.sql',
