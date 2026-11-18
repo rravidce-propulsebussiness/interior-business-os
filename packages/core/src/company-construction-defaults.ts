@@ -16,7 +16,7 @@ export const constructionStageKinds = [
 export const companyStageItem = z
   .object({
     id: z.string().min(1).max(80),
-    kind: z.enum(['work', 'material', 'check', 'test', 'qc', 'payment']),
+    kind: z.enum(['work', 'design', 'material', 'check', 'test', 'qc', 'payment']),
     title: z.string().trim().min(2).max(180),
     days: z.coerce.number().int().min(0).max(365),
     guideText: z.string().trim().max(1800).optional(),
