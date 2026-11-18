@@ -47,11 +47,12 @@ describe('company construction stage templates', () => {
       { kind: 'design', title: 'MEP Plans' },
     ]);
     expect(stage?.days).toBe(15);
+    expect(stage?.items.reduce((total, item) => total + item.days, 0)).toBe(
+      stage?.days,
+    );
     expect(
-      stage?.items.reduce((total, item) => total + item.days, 0),
-    ).toBe(stage?.days);
-    expect(
-      companyConstructionStages.safeParse(defaultCompanyConstructionStages).success,
+      companyConstructionStages.safeParse(defaultCompanyConstructionStages)
+        .success,
     ).toBe(true);
     expect(
       defaultCompanyConstructionStages.find(
