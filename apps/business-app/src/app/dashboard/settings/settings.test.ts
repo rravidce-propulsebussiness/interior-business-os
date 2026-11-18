@@ -32,7 +32,7 @@ describe('unified company settings', () => {
     expect(companyCategoryOptions).toHaveLength(8);
   });
   it('keeps workflow settings compact and exposes design as an item type', () => {
-    expect(page).toContain("tab !== 'payments'");
+    expect(page).toContain("tab === 'payments' ? null");
     expect(workflowEditor).toContain("'design'");
     expect(workflowEditor).not.toContain('All changes saved');
     expect(workflowEditor).not.toContain('Workflow Settings</h1>');
