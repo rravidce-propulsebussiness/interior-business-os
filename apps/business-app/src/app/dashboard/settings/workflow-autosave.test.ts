@@ -71,17 +71,20 @@ describe('workflow autosave', () => {
 
   it('serializes requests and never overwrites edits made during a save', async () => {
     let release!: (result: { ok: true; rows: { value: number } }) => void;
-    const persist = vi.fn()
+    const persist = vi
+      .fn()
       .mockImplementationOnce(
         () =>
           new Promise<{ ok: true; rows: { value: number } }>((resolve) => {
             release = resolve;
           }),
       )
-      .mockImplementationOnce(async (_key: string, rows: { value: number }) => ({
-        ok: true,
-        rows,
-      }));
+      .mockImplementationOnce(
+        async (_key: string, rows: { value: number }) => ({
+          ok: true,
+          rows,
+        }),
+      );
     const commits: number[] = [];
     const controller = createWorkflowAutosave({
       initial: { construction: { value: 0 } },
