@@ -35,6 +35,21 @@ describe('company construction stage templates', () => {
     ).toBe(true);
   });
 
+  it('starts construction design with payment, then four ordered design deliverables', () => {
+    const stage = defaultCompanyConstructionStages.find(
+      (item) => item.id === 'design',
+    );
+    expect(stage?.items.map(({ kind, title }) => ({ kind, title }))).toEqual([
+      { kind: 'payment', title: 'Design and Agreement Payment' },
+      { kind: 'design', title: 'Floor Plan' },
+      { kind: 'design', title: 'Structural Plan' },
+      { kind: 'design', title: 'Elevation' },
+      { kind: 'design', title: 'MEP Plans' },
+    ]);
+    expect(companyConstructionStages.safeParse(defaultCompanyConstructionStages).success).toBe(true);
+    expect(defaultCompanyConstructionStages.find((item) => item.id === 'preconstruction')?.items[0]?.title).toBe('Price freeze payment');
+  });
+
   it('accepts legacy shares and editable stage counts, rejects duplicate IDs and unsafe guide links', () => {
     expect(
       companyConstructionStages.safeParse(
