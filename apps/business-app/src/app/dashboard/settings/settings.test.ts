@@ -41,6 +41,12 @@ describe('unified company settings', () => {
     expect(workflowEditor).not.toContain('Workflow Settings</h1>');
     expect(workflowEditor).not.toContain('className="wf-tabs"');
     expect(workflowEditor).toContain('Save Changes');
+    expect(designMigration).toContain(
+      "item->>'kind' not in ('work','design','material','check','test','qc','payment')",
+    );
+    expect(designMigration).toContain(
+      "private.has_permission(p_org,'organization.manage')",
+    );
   });
 
   it('prefills available source data, never invents GST or banking data', () => {
