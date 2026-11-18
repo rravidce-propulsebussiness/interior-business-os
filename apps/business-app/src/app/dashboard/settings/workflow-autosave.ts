@@ -121,8 +121,17 @@ export function createWorkflowAutosave<T>({
     for (const timer of timers.values()) clearTimeout(timer);
     timers.clear();
   };
+  // React Strict Mode replays effects in development; the controller must be
+  // usable again after that effect cleanup without losing queued edits.
+  const activate = () => {
+    disposed = false;
+    for (const industry of drafts.keys())
+      if (changed(industry) && !inflight.has(industry))
+        schedule(industry, delayMs);
+  };
 
   return {
+    activate,
     change,
     flush,
     getDraft: (industry: string) => drafts.get(industry),
