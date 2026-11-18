@@ -103,18 +103,8 @@ const slabSequence: readonly SlabEntry[] = [
     0,
   ],
   ['slab-check-column-levels', 'check', 'Column levels', 0],
-  [
-    'slab-check-column-mix-grade',
-    'check',
-    'Column concrete mix and grade',
-    0,
-  ],
-  [
-    'slab-check-column-concrete-quality',
-    'check',
-    'Column concrete quality',
-    0,
-  ],
+  ['slab-check-column-mix-grade', 'check', 'Column concrete mix and grade', 0],
+  ['slab-check-column-concrete-quality', 'check', 'Column concrete quality', 0],
   // Step 7 of 20
   [
     'slab-staircase-shuttering-materials',
@@ -136,24 +126,14 @@ const slabSequence: readonly SlabEntry[] = [
     0,
   ],
   // Step 9 of 20
-  [
-    'slab-staircase-rebar-fixing',
-    'work',
-    'Staircase reinforcement fixing',
-    1,
-  ],
+  ['slab-staircase-rebar-fixing', 'work', 'Staircase reinforcement fixing', 1],
   [
     'slab-check-stair-rebar-spacing',
     'check',
     'Staircase reinforcement spacing',
     0,
   ],
-  [
-    'slab-check-stair-rebar-cover',
-    'check',
-    'Staircase reinforcement cover',
-    0,
-  ],
+  ['slab-check-stair-rebar-cover', 'check', 'Staircase reinforcement cover', 0],
   [
     'slab-check-stair-anchorage',
     'check',
@@ -179,12 +159,7 @@ const slabSequence: readonly SlabEntry[] = [
   ['slab-staircase-concreting', 'work', 'Staircase concreting', 1],
   ['slab-check-stair-concrete-grade', 'check', 'Staircase concrete grade', 0],
   ['slab-check-stair-placement', 'check', 'Staircase concrete placement', 0],
-  [
-    'slab-check-stair-compaction',
-    'check',
-    'Staircase concrete compaction',
-    0,
-  ],
+  ['slab-check-stair-compaction', 'check', 'Staircase concrete compaction', 0],
   ['slab-check-stair-finishing', 'check', 'Staircase concrete finishing', 0],
   // Step 12 of 20
   [
@@ -318,12 +293,7 @@ const slabSequence: readonly SlabEntry[] = [
   // Step 19 of 20
   ['slab-beam-concreting', 'work', 'Slab and beam concreting', 1],
   ['slab-check-pour-grade', 'check', 'Slab and beam concrete grade', 0],
-  [
-    'slab-check-workability',
-    'check',
-    'Slab and beam concrete workability',
-    0,
-  ],
+  ['slab-check-workability', 'check', 'Slab and beam concrete workability', 0],
   [
     'slab-check-concrete-compaction',
     'check',
@@ -349,7 +319,7 @@ const slabSequence: readonly SlabEntry[] = [
     'work',
     'Slab curing and daily curing records',
     0,
-    'Work Log — daily after casting. Record curing rounds, condition and supporting photos or videos in the project\'s existing Daily Curing section. Curing and formwork removal periods must follow the approved engineering plan and are not included in the 16 scheduled working days.',
+    "Work Log — daily after casting. Record curing rounds, condition and supporting photos or videos in the project's existing Daily Curing section. Curing and formwork removal periods must follow the approved engineering plan and are not included in the 16 scheduled working days.",
   ],
 ];
 

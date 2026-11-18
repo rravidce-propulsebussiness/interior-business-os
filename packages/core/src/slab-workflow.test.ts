@@ -30,21 +30,29 @@ describe('approved 20-step Slabs workflow', () => {
   });
 
   it('uses the agreed sequence and durations for every scheduled work or QC item', () => {
-    expect(items.filter((item) => item.days > 0).map((item) => [
-      item.kind,
-      item.title,
-      item.days,
-    ])).toEqual([
+    expect(
+      items
+        .filter((item) => item.days > 0)
+        .map((item) => [item.kind, item.title, item.days]),
+    ).toEqual([
       ['work', 'Column marking and starter preparation', 1],
       ['work', 'Column reinforcement bar bending and fixing', 2],
       ['work', 'Column shuttering and concreting', 2],
       ['work', 'Staircase shuttering', 1],
       ['work', 'Staircase reinforcement fixing', 1],
       ['work', 'Staircase concreting', 1],
-      ['work', 'Staircase column rise / landing support columns, where specified', 1],
+      [
+        'work',
+        'Staircase column rise / landing support columns, where specified',
+        1,
+      ],
       ['work', 'Slab and beam shuttering', 3],
       ['work', 'Slab and beam reinforcement bar bending and fixing', 2],
-      ['qc', 'Final slab and beam reinforcement, shuttering and embedded-services inspection', 1],
+      [
+        'qc',
+        'Final slab and beam reinforcement, shuttering and embedded-services inspection',
+        1,
+      ],
       ['work', 'Slab and beam concreting', 1],
     ]);
     expect(items.reduce((total, item) => total + item.days, 0)).toBe(16);
@@ -103,8 +111,10 @@ describe('approved 20-step Slabs workflow', () => {
       new Set(items.map((item) => item.kind + ':' + item.title.toLowerCase()))
         .size,
     ).toBe(items.length);
-    expect(companyConstructionStages.safeParse(defaultCompanyConstructionStages).success)
-      .toBe(true);
+    expect(
+      companyConstructionStages.safeParse(defaultCompanyConstructionStages)
+        .success,
+    ).toBe(true);
     expect(items.every((item) => item.title.length <= 180)).toBe(true);
     expect(items.at(-1)?.guideText?.length).toBeLessThanOrEqual(1800);
   });
