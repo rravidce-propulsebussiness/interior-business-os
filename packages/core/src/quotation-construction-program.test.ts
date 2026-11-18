@@ -12,7 +12,7 @@ describe('reusable construction stage programme', () => {
   it('keeps one-time and per-floor stages with payment markers instead of fixed shares', () => {
     expect(
       companyConstructionStages.parse(defaultCompanyConstructionStages),
-    ).toHaveLength(8);
+    ).toHaveLength(10);
     expect(
       defaultCompanyConstructionStages
         .filter((stage) => stage.repeatsPerFloor)
@@ -21,8 +21,19 @@ describe('reusable construction stage programme', () => {
       'slabs',
       'brickwork',
       'electrical-plumbing',
+      'internal-plastering-shelves',
       'tiles',
       'painting',
+    ]);
+    expect(
+      defaultCompanyConstructionStages
+        .filter((stage) => !stage.repeatsPerFloor)
+        .map((stage) => stage.id),
+    ).toEqual([
+      'preconstruction',
+      'design',
+      'foundation',
+      'external-plastering-elevation',
     ]);
     expect(
       defaultCompanyConstructionStages.every((stage) =>
