@@ -8,10 +8,16 @@ describe('workflow autosave', () => {
   const setup = () => {
     const statuses: string[] = [];
     const commits: { key: string; value: number }[] = [];
-    const persist = vi.fn(async (_key: string, rows: { value: number }) => ({
-      ok: true,
-      rows,
-    }));
+    const persist = vi.fn(
+      async (
+        _key: string,
+        rows: { value: number },
+      ): Promise<{
+        ok: boolean;
+        rows?: { value: number };
+        message?: string;
+      }> => ({ ok: true, rows }),
+    );
     const controller = createWorkflowAutosave({
       initial: { construction: { value: 0 }, interior: { value: 0 } },
       validate: (rows) => (rows.value < 0 ? 'Invalid value' : null),
