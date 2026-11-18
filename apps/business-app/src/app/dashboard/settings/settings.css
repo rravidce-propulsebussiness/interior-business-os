@@ -2312,3 +2312,129 @@ a.ush-tile:focus-visible {
 .wf-editor .wf-text-danger {
   border: 0;
 }
+
+/* Workflow: one premium action row, with per-industry autosave feedback. */
+.wf-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid #efdfd7;
+  border-radius: 16px;
+  background: linear-gradient(115deg, #fff 0%, #fffaf7 100%);
+  box-shadow: 0 8px 24px #6b2a1a0a;
+}
+.wf-toolbar .wf-industries {
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 3px 0;
+  scrollbar-width: thin;
+}
+.wf-toolbar .wf-industries > button {
+  flex: 0 0 auto;
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 13px;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease;
+}
+.wf-toolbar .wf-industries > button.is-active {
+  box-shadow: inset 0 0 0 1px #eb9e79, 0 4px 12px #d9541e0d;
+}
+.wf-toolbar .wf-add-industry {
+  flex: 0 0 auto;
+  min-height: 38px;
+}
+.wf-toolbar-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 0;
+}
+.wf-toolbar .wf-preview-button {
+  white-space: nowrap;
+  border-color: #e8bda9;
+  background: #fff;
+  color: var(--wf-accent-strong);
+  box-shadow: 0 3px 10px #a63a150a;
+}
+.wf-autosave-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 750;
+  color: #76615b;
+}
+.wf-autosave-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #d0a185;
+}
+.wf-autosave-status.is-saved {
+  color: #28734d;
+}
+.wf-autosave-status.is-saved .wf-autosave-dot {
+  background: #2b9a68;
+}
+.wf-autosave-status.is-saving .wf-autosave-dot {
+  background: #d9541e;
+  animation: wf-saving-pulse 1.2s ease-in-out infinite;
+}
+.wf-autosave-status.is-error {
+  color: #b42318;
+}
+.wf-autosave-status.is-error .wf-autosave-dot {
+  background: #c62929;
+}
+.wf-retry-save {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #efb5ad;
+  border-radius: 9px;
+  background: #fff6f5;
+  color: #b42318;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+@keyframes wf-saving-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (max-width: 720px) {
+  .wf-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+  }
+  .wf-toolbar .wf-industries {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  .wf-toolbar-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .wf-toolbar .wf-preview-button {
+    margin-left: auto;
+    padding-inline: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wf-autosave-status.is-saving .wf-autosave-dot {
+    animation: none;
+  }
+}
