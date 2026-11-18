@@ -71,6 +71,20 @@ describe('company construction stage templates', () => {
     );
   });
 
+  it('accepts design items as a distinct saved workflow type', () => {
+    const workflow = structuredClone(defaultCompanyConstructionStages);
+    workflow[1]!.items.push({
+      id: 'design-interior-elevation',
+      kind: 'design',
+      title: 'Prepare 3D elevation and owner approval',
+      days: 3,
+    });
+    const result = companyConstructionStages.safeParse(workflow);
+    expect(result.success).toBe(true);
+    if (result.success)
+      expect(result.data[1]?.items.at(-1)?.kind).toBe('design');
+  });
+
   it('requires a site check or test before QC in each stage', () => {
     const invalid = defaultCompanyConstructionStages.map((stage, index) =>
       index === 0
