@@ -231,7 +231,6 @@ function ItemKindPicker({
   );
 }
 
-
 /** Sequential working-day plan; per-floor stages repeat for every floor. */
 export function workflowTimeline(
   stages: CompanyConstructionStage[],
