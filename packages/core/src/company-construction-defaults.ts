@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import {
+  defaultFoundationDays,
+  defaultFoundationWorkItems,
+} from './foundation-workflow';
 
 /** Reusable construction stage templates for company Settings. Pre-construction
  * and foundation run once; finish stages repeat for every quoted floor. */
@@ -164,17 +168,11 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'foundation',
     name: 'Foundation',
-    description: 'Excavation, footing, PCC and foundation works.',
+    description:
+      'Excavation, PCC, footings, columns, plinth beam, filling and soil treatment.',
     repeatsPerFloor: false,
-    days: 20,
-    items: [
-      {
-        id: 'payment-foundation',
-        kind: 'payment',
-        title: 'Foundation payment',
-        days: 0,
-      },
-    ],
+    days: defaultFoundationDays,
+    items: defaultFoundationWorkItems,
   },
   {
     id: 'slabs',
