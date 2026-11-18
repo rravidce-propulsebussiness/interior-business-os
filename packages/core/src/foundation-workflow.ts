@@ -27,7 +27,12 @@ const foundationSequence: readonly FoundationEntry[] = [
     'Excavation depth and footing dimensions',
     0,
   ],
-  ['fd-check-footing-column-layout', 'check', 'Footing and column alignment', 0],
+  [
+    'fd-check-footing-column-layout',
+    'check',
+    'Footing and column alignment',
+    0,
+  ],
   // Step 2 of 18
   ['fd-sand-excavation-pcc', 'material', 'Sand (excavation PCC)', 0],
   ['fd-cement-excavation-pcc', 'material', 'Cement (excavation PCC)', 0],
@@ -104,7 +109,12 @@ const foundationSequence: readonly FoundationEntry[] = [
   // Step 8 of 18
   ['fd-sand-column-concrete', 'material', 'Sand (column concrete)', 0],
   ['fd-cement-column-concrete', 'material', 'Cement (column concrete)', 0],
-  ['fd-20mm-column-concrete', 'material', '20 mm aggregate (column concrete)', 0],
+  [
+    'fd-20mm-column-concrete',
+    'material',
+    '20 mm aggregate (column concrete)',
+    0,
+  ],
   // Step 9 of 18
   [
     'fd-column-shuttering-concreting',
@@ -155,7 +165,12 @@ const foundationSequence: readonly FoundationEntry[] = [
   // Step 13 of 18
   ['fd-steel-plinth-beam', 'material', 'Reinforcement steel (plinth beam)', 0],
   // Step 14 of 18
-  ['fd-plinth-rebar-bending', 'work', 'Plinth beam reinforcement bar bending', 2],
+  [
+    'fd-plinth-rebar-bending',
+    'work',
+    'Plinth beam reinforcement bar bending',
+    2,
+  ],
   [
     'fd-check-plinth-rebar-spacing',
     'check',
@@ -202,7 +217,12 @@ const foundationSequence: readonly FoundationEntry[] = [
   ['fd-cement-final-pcc', 'material', 'Cement (final PCC bed)', 0],
   ['fd-40mm-final-pcc', 'material', '40 mm aggregate (final PCC bed)', 0],
   // Step 18 of 18
-  ['fd-termite-pcc-bed', 'work', 'Anti-termite treatment followed by PCC bed', 1],
+  [
+    'fd-termite-pcc-bed',
+    'work',
+    'Anti-termite treatment followed by PCC bed',
+    1,
+  ],
 ];
 
 export const defaultFoundationWorkItems: CompanyStageItem[] =

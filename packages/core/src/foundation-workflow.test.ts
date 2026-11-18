@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { companyConstructionStages, defaultCompanyConstructionStages } from './company-construction-defaults';
-import { defaultFoundationDays, defaultFoundationWorkItems } from './foundation-workflow';
+import {
+  companyConstructionStages,
+  defaultCompanyConstructionStages,
+} from './company-construction-defaults';
+import {
+  defaultFoundationDays,
+  defaultFoundationWorkItems,
+} from './foundation-workflow';
 
 describe('Foundation work sequence', () => {
   const foundation = defaultCompanyConstructionStages.find(
@@ -17,20 +23,77 @@ describe('Foundation work sequence', () => {
       days: 0,
     });
     expect(defaultFoundationWorkItems).toHaveLength(52);
-    expect(defaultFoundationWorkItems.filter((item) => item.kind === 'work'))
-      .toEqual([
-        { id: 'fd-site-marking-excavation', kind: 'work', title: 'Site marking and excavation', days: 2 },
-        { id: 'fd-excavation-dressing-pcc', kind: 'work', title: 'Excavation bed dressing and PCC laying', days: 2 },
-        { id: 'fd-footing-column-rebar', kind: 'work', title: 'Column marking and reinforcement bar bending for footings and columns', days: 3 },
-        { id: 'fd-footing-concreting', kind: 'work', title: 'Footing concreting', days: 1 },
-        { id: 'fd-column-shuttering-concreting', kind: 'work', title: 'Column shuttering and concreting', days: 1 },
-        { id: 'fd-backfilling-leveling', kind: 'work', title: 'Backfilling and leveling', days: 1 },
-        { id: 'fd-granite-plinth-base', kind: 'work', title: 'Granite masonry base for plinth beam, where specified', days: 4 },
-        { id: 'fd-plinth-rebar-bending', kind: 'work', title: 'Plinth beam reinforcement bar bending', days: 2 },
-        { id: 'fd-plinth-shuttering-concreting', kind: 'work', title: 'Plinth beam shuttering and concreting', days: 2 },
-        { id: 'fd-soil-level-compaction', kind: 'work', title: 'Soil leveling and compaction', days: 3 },
-        { id: 'fd-termite-pcc-bed', kind: 'work', title: 'Anti-termite treatment followed by PCC bed', days: 1 },
-      ]);
+    expect(
+      defaultFoundationWorkItems.filter((item) => item.kind === 'work'),
+    ).toEqual([
+      {
+        id: 'fd-site-marking-excavation',
+        kind: 'work',
+        title: 'Site marking and excavation',
+        days: 2,
+      },
+      {
+        id: 'fd-excavation-dressing-pcc',
+        kind: 'work',
+        title: 'Excavation bed dressing and PCC laying',
+        days: 2,
+      },
+      {
+        id: 'fd-footing-column-rebar',
+        kind: 'work',
+        title:
+          'Column marking and reinforcement bar bending for footings and columns',
+        days: 3,
+      },
+      {
+        id: 'fd-footing-concreting',
+        kind: 'work',
+        title: 'Footing concreting',
+        days: 1,
+      },
+      {
+        id: 'fd-column-shuttering-concreting',
+        kind: 'work',
+        title: 'Column shuttering and concreting',
+        days: 1,
+      },
+      {
+        id: 'fd-backfilling-leveling',
+        kind: 'work',
+        title: 'Backfilling and leveling',
+        days: 1,
+      },
+      {
+        id: 'fd-granite-plinth-base',
+        kind: 'work',
+        title: 'Granite masonry base for plinth beam, where specified',
+        days: 4,
+      },
+      {
+        id: 'fd-plinth-rebar-bending',
+        kind: 'work',
+        title: 'Plinth beam reinforcement bar bending',
+        days: 2,
+      },
+      {
+        id: 'fd-plinth-shuttering-concreting',
+        kind: 'work',
+        title: 'Plinth beam shuttering and concreting',
+        days: 2,
+      },
+      {
+        id: 'fd-soil-level-compaction',
+        kind: 'work',
+        title: 'Soil leveling and compaction',
+        days: 3,
+      },
+      {
+        id: 'fd-termite-pcc-bed',
+        kind: 'work',
+        title: 'Anti-termite treatment followed by PCC bed',
+        days: 1,
+      },
+    ]);
   });
 
   it('keeps material supplies and checks in order, including the QC gates before concrete pours', () => {
@@ -63,16 +126,22 @@ describe('Foundation work sequence', () => {
 
   it('sums only scheduled working days, with unique IDs and valid company schema', () => {
     const items = defaultFoundationWorkItems;
-    expect(items.filter((item) => item.kind !== 'work').every((item) => item.days === 0))
-      .toBe(true);
+    expect(
+      items
+        .filter((item) => item.kind !== 'work')
+        .every((item) => item.days === 0),
+    ).toBe(true);
     expect(defaultFoundationDays).toBe(22);
     expect(foundation?.days).toBe(22);
     expect(foundation?.repeatsPerFloor).toBe(false);
     expect(new Set(items.map((item) => item.id)).size).toBe(items.length);
     expect(
-      new Set(items.map((item) => `${item.kind}:${item.title.toLowerCase()}`)).size,
+      new Set(items.map((item) => `${item.kind}:${item.title.toLowerCase()}`))
+        .size,
     ).toBe(items.length);
-    expect(companyConstructionStages.safeParse(defaultCompanyConstructionStages).success)
-      .toBe(true);
+    expect(
+      companyConstructionStages.safeParse(defaultCompanyConstructionStages)
+        .success,
+    ).toBe(true);
   });
 });
