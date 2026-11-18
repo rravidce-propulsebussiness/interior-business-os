@@ -35,9 +35,11 @@ const configuredStage: CompanyConstructionStage = {
 describe('workflow stage duration synchronization', () => {
   it('adds scheduled item days without counting payments', () => {
     expect(scheduledStageItemDays(configuredStage.items)).toBe(24);
-    const updated = stageWithUpdatedItems(configuredStage, [
-      ...configuredStage.items,
-    ], true);
+    const updated = stageWithUpdatedItems(
+      configuredStage,
+      [...configuredStage.items],
+      true,
+    );
     expect(updated.days).toBe(24);
     expect(updated.name).toBe('Pre-Construction');
     expect(updated.id).toBe('design');
@@ -51,18 +53,27 @@ describe('workflow stage duration synchronization', () => {
     const increased = stageWithUpdatedItems(configuredStage, items, true);
     expect(increased.days).toBe(26);
 
-    const decreased = stageWithUpdatedItems(increased, increased.items.map(
-      (item) => item.id === 'design-mep' ? { ...item, days: 2 } : item,
-    ), true);
+    const decreased = stageWithUpdatedItems(
+      increased,
+      increased.items.map((item) =>
+        item.id === 'design-mep' ? { ...item, days: 2 } : item,
+      ),
+      true,
+    );
     expect(decreased.days).toBe(21);
   });
 
   it('does not overwrite manual stage days on item rename or reorder', () => {
-    expect(stageWithUpdatedItems(configuredStage, [
-      ...configuredStage.items,
-    ].reverse()).days).toBe(15);
+    expect(
+      stageWithUpdatedItems(
+        configuredStage,
+        [...configuredStage.items].reverse(),
+      ).days,
+    ).toBe(15);
     const renamed = configuredStage.items.map((item) =>
-      item.id === 'design-floor-plan' ? { ...item, title: 'Floor Layout' } : item,
+      item.id === 'design-floor-plan'
+        ? { ...item, title: 'Floor Layout' }
+        : item,
     );
     expect(stageWithUpdatedItems(configuredStage, renamed).days).toBe(15);
   });
@@ -104,7 +115,12 @@ describe('workflow stage duration synchronization', () => {
     expect(
       stageWithUpdatedItems(stage, [
         ...stage.items,
-        { id: 'payment-extra', kind: 'payment', title: 'Extra payment', days: 0 },
+        {
+          id: 'payment-extra',
+          kind: 'payment',
+          title: 'Extra payment',
+          days: 0,
+        },
       ]).days,
     ).toBe(12);
   });

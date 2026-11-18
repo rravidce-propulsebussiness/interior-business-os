@@ -33,8 +33,7 @@ export const stageWithUpdatedItems = (
   return {
     ...stage,
     items,
-    ...(hasOrHadScheduledItems &&
-    (recalculate || currentDays !== previousDays)
+    ...(hasOrHadScheduledItems && (recalculate || currentDays !== previousDays)
       ? { days: currentDays }
       : {}),
   };
