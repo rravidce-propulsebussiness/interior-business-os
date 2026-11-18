@@ -1,0 +1,34 @@
+name: Temporary Workflow Stage Days Prettier
+on:
+  push:
+    branches:
+      - fix/workflow-stage-days-from-items-20261118
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.event.head_commit.message != 'Format stage duration helper and tests'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run repository Prettier on new duration files
+        run: pnpm exec prettier --write apps/business-app/src/app/dashboard/settings/workflow-stage-days.ts apps/business-app/src/app/dashboard/settings/workflow-stage-days.test.ts
+      - name: Commit formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/business-app/src/app/dashboard/settings/workflow-stage-days.ts apps/business-app/src/app/dashboard/settings/workflow-stage-days.test.ts
+          if ! git diff --cached --quiet; then
+            git commit -m 'Format stage duration helper and tests'
+            git push origin HEAD:fix/workflow-stage-days-from-items-20261118
+          fi
