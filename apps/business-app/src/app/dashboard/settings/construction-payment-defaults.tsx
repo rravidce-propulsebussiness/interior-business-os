@@ -384,7 +384,9 @@ export function ConstructionPaymentDefaults({
         );
         return {
           ok: result.saved,
-          rows: result.savedRowsByIndustry?.[industry],
+          ...(result.savedRowsByIndustry?.[industry]
+            ? { rows: result.savedRowsByIndustry[industry] }
+            : {}),
           message: result.message,
         };
       },
