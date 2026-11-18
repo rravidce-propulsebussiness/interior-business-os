@@ -314,7 +314,7 @@ const brickworkSequence: readonly BrickworkEntry[] = [
     'work',
     'Brickwork curing and daily site inspection records',
     0,
-    'Work Log — record brickwork curing rounds, daily condition checks, photos and notes in the project\'s existing Daily Curing/inspection workflow. The required curing period follows the approved site specifications and is not reduced to the 30 scheduled working days.',
+    "Work Log — record brickwork curing rounds, daily condition checks, photos and notes in the project's existing Daily Curing/inspection workflow. The required curing period follows the approved site specifications and is not reduced to the 30 scheduled working days.",
   ],
 ];
 

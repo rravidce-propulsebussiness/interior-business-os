@@ -34,11 +34,9 @@ describe('approved 20-step, 30-day Brickwork workflow', () => {
 
   it('preserves all eleven scheduled work activities and distributes 30 days', () => {
     expect(
-      items.filter((item) => item.days > 0).map((item) => [
-        item.kind,
-        item.title,
-        item.days,
-      ]),
+      items
+        .filter((item) => item.days > 0)
+        .map((item) => [item.kind, item.title, item.days]),
     ).toEqual([
       ['work', 'Room marking and internal/external wall layout', 2],
       ['work', 'Brickwork up to 3-foot height', 6],
@@ -93,7 +91,9 @@ describe('approved 20-step, 30-day Brickwork workflow', () => {
 
   it('keeps DPC treatments conditional and records curing without adding a work day', () => {
     const mainDpc = items.find((item) => item.id === 'bw-dpc-bed-band');
-    const sillDpc = items.find((item) => item.id === 'bw-window-sill-treatment');
+    const sillDpc = items.find(
+      (item) => item.id === 'bw-window-sill-treatment',
+    );
     expect(mainDpc?.guideText).toContain('Do not duplicate');
     expect(sillDpc?.guideText).toContain('approved design');
     const log = items.at(-1);
