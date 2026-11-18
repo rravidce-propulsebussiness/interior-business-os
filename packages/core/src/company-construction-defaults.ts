@@ -3,6 +3,7 @@ import {
   defaultFoundationDays,
   defaultFoundationWorkItems,
 } from './foundation-workflow';
+import { defaultSlabDays, defaultSlabWorkItems } from './slab-workflow';
 
 /** Reusable construction stage templates for company Settings. Pre-construction
  * and foundation run once; finish stages repeat for every quoted floor. */
@@ -177,12 +178,11 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'slabs',
     name: 'Slabs',
-    description: 'RCC slabs, formwork, reinforcement and concreting.',
+    description:
+      'Column starters, reinforcement, staircase, slab and beam works with QC and daily curing.',
     repeatsPerFloor: true,
-    days: 15,
-    items: [
-      { id: 'payment-slabs', kind: 'payment', title: 'Slabs payment', days: 0 },
-    ],
+    days: defaultSlabDays,
+    items: defaultSlabWorkItems,
   },
   {
     id: 'brickwork',
