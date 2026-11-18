@@ -50,6 +50,24 @@ describe('reusable construction stage programme', () => {
     ).toBeNull();
   });
 
+  it('preserves Design items in immutable quotation programme snapshots', () => {
+    const stages = structuredClone(defaultCompanyConstructionStages);
+    stages[1]!.items.push({
+      id: 'design-owner-approval',
+      kind: 'design',
+      title: 'Owner approval for 3D elevation',
+      days: 2,
+    });
+    const encoded = encodeQuotationConstructionProgram({
+      startDate: '2026-11-18',
+      skipSundays: true,
+      floors: ['Ground'],
+      stages,
+    });
+    const snapshot = savedQuotationConstructionProgram(encoded);
+    expect(snapshot?.stages[1]?.items.at(-1)?.kind).toBe('design');
+  });
+
   it('keeps older quotation snapshots using the Sunday-excluding calendar', () => {
     const legacy = encodeQuotationConstructionProgram({
       startDate: '2026-11-16',
