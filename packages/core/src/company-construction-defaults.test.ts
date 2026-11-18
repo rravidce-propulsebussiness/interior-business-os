@@ -13,7 +13,12 @@ describe('company construction stage templates', () => {
       defaultCompanyConstructionStages
         .filter((stage) => !stage.repeatsPerFloor)
         .map((stage) => stage.id),
-    ).toEqual(['preconstruction', 'design', 'foundation', 'external-plastering-elevation']);
+    ).toEqual([
+      'preconstruction',
+      'design',
+      'foundation',
+      'external-plastering-elevation',
+    ]);
     expect(
       defaultCompanyConstructionStages
         .filter((stage) => stage.repeatsPerFloor)
@@ -38,11 +43,12 @@ describe('company construction stage templates', () => {
 
   it('includes both plastering stages after rough-in, with per-floor internal and one-time exterior work', () => {
     const stages = defaultCompanyConstructionStages;
-    const electric = stages.findIndex((stage) => stage.id === 'electrical-plumbing');
-    expect(stages.slice(electric + 1, electric + 3).map((stage) => stage.id)).toEqual([
-      'internal-plastering-shelves',
-      'external-plastering-elevation',
-    ]);
+    const electric = stages.findIndex(
+      (stage) => stage.id === 'electrical-plumbing',
+    );
+    expect(
+      stages.slice(electric + 1, electric + 3).map((stage) => stage.id),
+    ).toEqual(['internal-plastering-shelves', 'external-plastering-elevation']);
     const internal = stages[electric + 1]!;
     const external = stages[electric + 2]!;
     expect(internal.name).toBe('Internal Plastering & Shelves');
