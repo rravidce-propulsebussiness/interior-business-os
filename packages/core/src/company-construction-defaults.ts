@@ -4,6 +4,10 @@ import {
   defaultFoundationWorkItems,
 } from './foundation-workflow';
 import { defaultSlabDays, defaultSlabWorkItems } from './slab-workflow';
+import {
+  defaultBrickworkDays,
+  defaultBrickworkItems,
+} from './brickwork-workflow';
 
 /** Reusable construction stage templates for company Settings. Pre-construction
  * and foundation run once; finish stages repeat for every quoted floor. */
@@ -187,17 +191,11 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
   {
     id: 'brickwork',
     name: 'Brickwork',
-    description: 'Wall construction and masonry works.',
+    description:
+      'Room marking, masonry, door frames, DPC, lintels, sajjas, final inspection and curing.',
     repeatsPerFloor: true,
-    days: 15,
-    items: [
-      {
-        id: 'payment-brickwork',
-        kind: 'payment',
-        title: 'Brickwork payment',
-        days: 0,
-      },
-    ],
+    days: defaultBrickworkDays,
+    items: defaultBrickworkItems,
   },
   {
     id: 'electrical-plumbing',
