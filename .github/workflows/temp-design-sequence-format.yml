@@ -1,0 +1,34 @@
+name: Temporary Design sequence formatting
+on:
+  push:
+    branches:
+      - feat/construction-design-sequence-20261118
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.event.head_commit.message != 'Format construction design tests'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.34.5
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format only design sequence tests
+        run: pnpm exec prettier --write packages/core/src/company-construction-defaults.test.ts
+      - name: Commit formatting
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add packages/core/src/company-construction-defaults.test.ts
+          if ! git diff --cached --quiet; then
+            git commit -m 'Format construction design tests'
+            git push origin HEAD:feat/construction-design-sequence-20261118
+          fi
