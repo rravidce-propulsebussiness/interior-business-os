@@ -1939,11 +1939,35 @@ a.ush-tile:focus-visible {
   }
   .wf-item-row {
     grid-template-columns: 16px minmax(0, 1fr) 28px auto 28px;
+    grid-template-rows: auto auto;
     gap: 6px;
     padding: 4px 6px 4px 8px;
   }
-  .wf-item-days {
-    display: none;
+  .wf-item-row > .wf-grip {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .wf-item-row > .wf-item-title {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .wf-item-row > .wf-guide-toggle {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .wf-item-row > .wf-kind-picker {
+    grid-column: 4;
+    grid-row: 1;
+  }
+  .wf-item-row > .wf-item-remove {
+    grid-column: 5;
+    grid-row: 1;
+  }
+  .wf-item-row > .wf-item-days {
+    display: flex;
+    grid-column: 2 / 5;
+    grid-row: 2;
+    justify-self: start;
   }
   .wf-guide {
     padding-left: 30px;
@@ -2053,7 +2077,6 @@ a.ush-tile:focus-visible {
   transition: opacity 0.2s ease;
 }
 @media (hover: hover) {
-  .wf-item:not(:hover):not(:focus-within) .wf-item-days,
   .wf-item:not(:hover):not(:focus-within)
     .wf-guide-toggle:not(.has-guide):not([aria-expanded='true']),
   .wf-item:not(:hover):not(:focus-within) .wf-item-remove {
