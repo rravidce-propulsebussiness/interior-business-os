@@ -3,10 +3,9 @@
 import {
   type CSSProperties,
   type DragEvent,
-  type FormEvent,
   type KeyboardEvent,
   type ReactNode,
-  useActionState,
+  useEffect,
   useState,
 } from 'react';
 import {
@@ -16,10 +15,11 @@ import {
   defaultCompanyConstructionStages,
   defaultInteriorStages,
 } from '@business-os/core/company-construction-defaults';
+import { saveConstructionPaymentDefaults } from './payment-default-actions';
 import {
-  type DefaultPaymentState,
-  saveConstructionPaymentDefaults,
-} from './payment-default-actions';
+  type AutosaveStatus,
+  createWorkflowAutosave,
+} from './workflow-autosave';
 
 const move = <T,>(values: T[], from: number, to: number) => {
   const next = [...values];
@@ -337,68 +337,132 @@ export function ConstructionPaymentDefaults({
   initial: Record<string, CompanyConstructionStage[]>;
   industries: { key: string; name: string }[];
 }) {
-  const [state, action, pending] = useActionState(
-    saveConstructionPaymentDefaults,
-    { saved: false, message: '', savedRowsByIndustry: initial },
-  );
   const [industryKey, setIndustryKey] = useState(
     industries[0]?.key ?? 'construction',
   );
   const [knownIndustries, setKnownIndustries] = useState(industries);
-  const savedByIndustry = state.savedRowsByIndustry ?? initial;
-  const [stages, setStages] = useState(
-    () => savedByIndustry[industryKey] ?? defaultStages(industryKey),
-  );
+  const [workflows, setWorkflows] =
+    useState<Record<string, CompanyConstructionStage[]>>(initial);
+  const [saveStatuses, setSaveStatuses] = useState<
+    Record<string, AutosaveStatus>
+  >({});
   const [newIndustryName, setNewIndustryName] = useState('');
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [draftKinds, setDraftKinds] = useState<
     Record<string, CompanyStageItem['kind']>
   >({});
   const [expandedStage, setExpandedStage] = useState<string | null>(
-    () => stages[0]?.id ?? null,
+    () =>
+      (initial[industries[0]?.key ?? 'construction'] ??
+        defaultStages(industries[0]?.key ?? 'construction'))[0]?.id ?? null,
   );
   const [showTimeline, setShowTimeline] = useState(false);
   const [openGuide, setOpenGuide] = useState<string | null>(null);
   const [clientError, setClientError] = useState('');
-  // The server returns trimmed/normalised rows; adopt them after a save so the
-  // editor is not left showing "unsaved changes" for whitespace differences.
-  const [lastState, setLastState] = useState<DefaultPaymentState>(state);
-  if (lastState !== state) {
-    setLastState(state);
-    const saved =
-      state.industryKey && state.savedRowsByIndustry?.[state.industryKey];
-    if (state.saved && saved && state.industryKey === industryKey)
-      setStages(saved);
-  }
 
-  const savedStages =
-    savedByIndustry[industryKey] ?? defaultStages(industryKey);
-  const dirty = JSON.stringify(stages) !== JSON.stringify(savedStages);
+  // Each industry has its own draft and serial save queue. A slow response
+  // cannot reset newer edits or a different industry's visible stage list.
+  const [autosave] = useState(() =>
+    createWorkflowAutosave<CompanyConstructionStage[]>({
+      initial,
+      validate: (rows) => {
+        const parsed = companyConstructionStages.safeParse(rows);
+        if (parsed.success) return null;
+        const issue = parsed.error.issues[0];
+        const index = typeof issue?.path[0] === 'number' ? issue.path[0] : -1;
+        const stage = rows[index];
+        return (
+          (stage ? (stage.name || 'Stage ' + (index + 1)) + ': ' : '') +
+          friendlyIssue(issue?.path ?? [], issue?.message)
+        );
+      },
+      persist: async (industry, rows) => {
+        const form = new FormData();
+        form.set('industryKey', industry);
+        form.set('rows', JSON.stringify(rows));
+        const result = await saveConstructionPaymentDefaults(
+          { saved: false, message: '' },
+          form,
+        );
+        return {
+          ok: result.saved,
+          ...(result.savedRowsByIndustry?.[industry]
+            ? { rows: result.savedRowsByIndustry[industry] }
+            : {}),
+          message: result.message,
+        };
+      },
+      onStatus: (industry, status) =>
+        setSaveStatuses((current) => ({ ...current, [industry]: status })),
+      onCommitted: (industry, rows) =>
+        setWorkflows((current) => ({ ...current, [industry]: rows })),
+    }),
+  );
+
+  useEffect(() => {
+    autosave.activate();
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (!autosave.hasPending()) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warnBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', warnBeforeUnload);
+      autosave.dispose();
+    };
+  }, [autosave]);
+
+  const stages = workflows[industryKey] ?? defaultStages(industryKey);
   const industryName =
     knownIndustries.find((item) => item.key === industryKey)?.name ??
     'Construction';
   const currentIndex = stages.findIndex((stage) => stage.id === expandedStage);
+  const status = saveStatuses[industryKey];
 
+  const mutateStages = (
+    updater: (rows: CompanyConstructionStage[]) => CompanyConstructionStage[],
+    immediate = false,
+  ) => {
+    const latest = autosave.getDraft(industryKey) ?? defaultStages(industryKey);
+    const next = updater(latest);
+    autosave.change(industryKey, next, immediate ? 0 : 700);
+    setWorkflows((current) => ({ ...current, [industryKey]: next }));
+    setClientError('');
+  };
   const switchIndustry = (key: string) => {
-    const next = savedByIndustry[key] ?? defaultStages(key);
+    if (key === industryKey) return;
+    // Flush the previous industry immediately; preserve its draft while the
+    // request is in flight, instead of resetting it to an older saved value.
+    void autosave.flush(industryKey);
+    let next = autosave.getDraft(key);
+    if (!next) {
+      next = defaultStages(key);
+      autosave.change(key, next, 0);
+      setWorkflows((current) => ({ ...current, [key]: next! }));
+    }
     setIndustryKey(key);
-    setStages(next);
     setExpandedStage(next[0]?.id ?? null);
     setClientError('');
   };
   const patchStage = (
     index: number,
     patch: Partial<CompanyConstructionStage>,
+    immediate = false,
   ) =>
-    setStages((current) =>
-      current.map((stage, i) => (i === index ? { ...stage, ...patch } : stage)),
+    mutateStages(
+      (current) =>
+        current.map((stage, i) =>
+          i === index ? { ...stage, ...patch } : stage,
+        ),
+      immediate,
     );
   const patchItem = (
     stageIndex: number,
     itemIndex: number,
     patch: Partial<CompanyStageItem>,
   ) =>
-    setStages((current) =>
+    mutateStages((current) =>
       current.map((stage, i) =>
         i === stageIndex
           ? {
@@ -412,139 +476,147 @@ export function ConstructionPaymentDefaults({
     );
   const moveStage = (from: number, to: number) => {
     if (to < 0 || to >= stages.length || from === to) return;
-    setStages((rows) => move(rows, from, to));
+    mutateStages((rows) => move(rows, from, to), true);
   };
   const moveItem = (stageIndex: number, from: number, to: number) => {
     const items = stages[stageIndex]?.items ?? [];
     if (to < 0 || to >= items.length || from === to) return;
-    patchStage(stageIndex, { items: move(items, from, to) });
+    patchStage(stageIndex, { items: move(items, from, to) }, true);
   };
   const addItem = (index: number, stage: CompanyConstructionStage) => {
     const kind = draftKinds[stage.id] ?? 'work';
     const title = drafts[stage.id]?.trim();
-    if (!title) return;
-    patchStage(index, {
-      items: [
-        ...stage.items,
-        { id: newId(), kind, title, days: kind === 'payment' ? 0 : 1 },
-      ],
-    });
+    if (!title || title.length < 2) {
+      setClientError('Enter an item title of at least two characters.');
+      return;
+    }
+    mutateStages(
+      (rows) =>
+        rows.map((row, i) =>
+          i === index
+            ? {
+                ...row,
+                items: [
+                  ...row.items,
+                  {
+                    id: newId(),
+                    kind,
+                    title,
+                    days: kind === 'payment' ? 0 : 1,
+                  },
+                ],
+              }
+            : row,
+        ),
+      true,
+    );
     setDrafts((all) => ({ ...all, [stage.id]: '' }));
+    // Add item persists straight away; debounce applies only to typing.
+    void autosave.flush(industryKey);
   };
   const toggleStage = (id: string) =>
     setExpandedStage((current) => (current === id ? null : id));
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
-    const result = companyConstructionStages.safeParse(stages);
-    if (result.success) {
-      setClientError('');
-      return;
-    }
-    event.preventDefault();
-    const issue = result.error.issues[0];
-    const stageIndex = typeof issue?.path[0] === 'number' ? issue.path[0] : -1;
-    const stage = stages[stageIndex];
-    if (stage) setExpandedStage(stage.id);
-    setClientError(
-      (stage ? `${stage.name || `Stage ${stageIndex + 1}`}: ` : '') +
-        friendlyIssue(issue?.path ?? [], issue?.message),
-    );
-  };
   const statusMessage =
-    clientError ||
-    (state.message && state.industryKey === industryKey ? state.message : '');
-  const statusOk = !clientError && state.saved;
+    clientError || (status?.phase === 'error' ? status.message : '');
 
   return (
-    <form
-      action={action}
-      onSubmit={onSubmit}
+    <div
       className="wf-editor us-company-stage-editor"
       aria-label="Project workflow settings"
     >
-      <input type="hidden" name="rows" value={JSON.stringify(stages)} />
-      <input type="hidden" name="industryKey" value={industryKey} />
-
-      <div className="wf-page-head wf-page-head-compact">
-        <div className="wf-page-actions">
+      <div className="wf-toolbar" aria-label="Workflow controls">
+        <div
+          className="wf-industries"
+          role="tablist"
+          aria-label="Industry workflow"
+        >
+          {knownIndustries.map((industry) => (
+            <button
+              key={industry.key}
+              type="button"
+              role="tab"
+              aria-selected={industry.key === industryKey}
+              className={industry.key === industryKey ? 'is-active' : ''}
+              onClick={() => switchIndustry(industry.key)}
+            >
+              {industry.name}
+            </button>
+          ))}
+          {canEdit && (
+            <div className="wf-add-industry">
+              <input
+                aria-label="New industry"
+                value={newIndustryName}
+                maxLength={60}
+                onChange={(event) => setNewIndustryName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') event.preventDefault();
+                }}
+                placeholder="Add industry"
+              />
+              <button
+                type="button"
+                aria-label="Add industry"
+                onClick={() => {
+                  const name = newIndustryName.trim();
+                  const key = industryKeyFromName(name);
+                  if (!name || !key) return;
+                  if (!knownIndustries.some((item) => item.key === key))
+                    setKnownIndustries((all) => [...all, { key, name }]);
+                  setNewIndustryName('');
+                  switchIndustry(key);
+                }}
+              >
+                <Icon name="plus" size={14} />
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="wf-toolbar-actions">
+          {status && (
+            <span
+              role="status"
+              aria-live="polite"
+              title={status.message}
+              className={'wf-autosave-status is-' + status.phase}
+            >
+              <span className="wf-autosave-dot" aria-hidden="true" />
+              {status.phase === 'saving'
+                ? 'Saving…'
+                : status.phase === 'saved'
+                  ? 'Saved'
+                  : status.phase === 'error'
+                    ? 'Save failed'
+                    : 'Unsaved'}
+            </span>
+          )}
+          {(clientError || status?.phase === 'error') && canEdit && (
+            <button
+              type="button"
+              className="wf-retry-save"
+              onClick={() => {
+                setClientError('');
+                void autosave.flush(industryKey);
+              }}
+            >
+              Retry
+            </button>
+          )}
           <button
             type="button"
-            className="wf-button wf-button-ghost"
+            className="wf-button wf-button-ghost wf-preview-button"
             aria-pressed={showTimeline}
             onClick={() => setShowTimeline((shown) => !shown)}
           >
             <Icon name="timeline" /> Preview Timeline
           </button>
-          {canEdit && (
-            <button
-              type="submit"
-              className={
-                'wf-button wf-button-primary' + (dirty ? ' is-dirty' : '')
-              }
-              disabled={pending}
-            >
-              {dirty && <span className="wf-dirty-dot" aria-hidden="true" />}
-              <Icon name="check" /> {pending ? 'Saving…' : 'Save Changes'}
-            </button>
-          )}
         </div>
       </div>
-
       {statusMessage && (
-        <p
-          role="status"
-          className={'wf-status ' + (statusOk ? 'is-ok' : 'is-bad')}
-        >
+        <p className="wf-status is-bad" role="alert">
           {statusMessage}
         </p>
       )}
-
-      <div
-        className="wf-industries"
-        role="tablist"
-        aria-label="Industry workflow"
-      >
-        {knownIndustries.map((industry) => (
-          <button
-            key={industry.key}
-            type="button"
-            role="tab"
-            aria-selected={industry.key === industryKey}
-            className={industry.key === industryKey ? 'is-active' : ''}
-            onClick={() => switchIndustry(industry.key)}
-          >
-            {industry.name}
-          </button>
-        ))}
-        {canEdit && (
-          <div className="wf-add-industry">
-            <input
-              aria-label="New industry"
-              value={newIndustryName}
-              maxLength={60}
-              onChange={(event) => setNewIndustryName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') event.preventDefault();
-              }}
-              placeholder="Add industry"
-            />
-            <button
-              type="button"
-              aria-label="Add industry"
-              onClick={() => {
-                const name = newIndustryName.trim();
-                const key = industryKeyFromName(name);
-                if (!name || !key) return;
-                if (!knownIndustries.some((item) => item.key === key))
-                  setKnownIndustries((all) => [...all, { key, name }]);
-                setNewIndustryName('');
-                switchIndustry(key);
-              }}
-            >
-              <Icon name="plus" size={14} />
-            </button>
-          </div>
-        )}
-      </div>
 
       {showTimeline && (
         <TimelinePreview
@@ -1019,8 +1091,9 @@ export function ConstructionPaymentDefaults({
                           type="button"
                           className="wf-text-danger"
                           onClick={() => {
-                            setStages((rows) =>
-                              rows.filter((_, i) => i !== index),
+                            mutateStages(
+                              (rows) => rows.filter((_, i) => i !== index),
+                              true,
                             );
                             setExpandedStage(null);
                           }}
@@ -1045,17 +1118,20 @@ export function ConstructionPaymentDefaults({
                 .replace(/[^a-z0-9]/gi, '')
                 .slice(0, 8)
                 .toLowerCase()}`;
-              setStages((rows) => [
-                ...rows,
-                {
-                  id,
-                  name: 'New stage',
-                  description: '',
-                  repeatsPerFloor: false,
-                  days: 1,
-                  items: [],
-                },
-              ]);
+              mutateStages(
+                (rows) => [
+                  ...rows,
+                  {
+                    id,
+                    name: 'New stage',
+                    description: '',
+                    repeatsPerFloor: false,
+                    days: 1,
+                    items: [],
+                  },
+                ],
+                true,
+              );
               setExpandedStage(id);
             }}
           >
@@ -1069,6 +1145,6 @@ export function ConstructionPaymentDefaults({
           </span>
         </footer>
       </section>
-    </form>
+    </div>
   );
 }

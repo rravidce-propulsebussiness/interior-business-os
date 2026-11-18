@@ -1136,7 +1136,9 @@ describe('Payment Settings keeps work-area entry textual and removes unrelated s
     expect(stageEditor).toContain('+ Add guide');
     expect(stageEditor).toContain('Guide video URL');
     expect(stageEditor).toContain('Preview Timeline');
-    expect(stageEditor).toContain('Save Changes');
+    expect(stageEditor).not.toContain('Save Changes');
+    expect(stageEditor).toContain('wf-toolbar');
+    expect(stageEditor).toContain('autosave.flush(industryKey)');
     expect(stageEditor).toContain('Workflow stages overview');
     expect(stageEditor).toContain('Add stage');
     expect(stageEditor).toContain('Add industry');
