@@ -46,6 +46,10 @@ describe('company construction stage templates', () => {
       { kind: 'design', title: 'Elevation' },
       { kind: 'design', title: 'MEP Plans' },
     ]);
+    expect(stage?.days).toBe(15);
+    expect(
+      stage?.items.reduce((total, item) => total + item.days, 0),
+    ).toBe(stage?.days);
     expect(
       companyConstructionStages.safeParse(defaultCompanyConstructionStages).success,
     ).toBe(true);
