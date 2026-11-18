@@ -6,6 +6,7 @@ import { companyCategoryOptions } from './company-categories';
 const read = (path: string) =>
   readFileSync(new URL(path, import.meta.url), 'utf8');
 const page = read('./page.tsx');
+const workflowEditor = read('./construction-payment-defaults.tsx');
 const action = read('./actions.ts');
 const sql = read(
   '../../../../../../packages/database/supabase/migrations/20261017000600_unified_company_settings.sql',
@@ -30,6 +31,15 @@ describe('unified company settings', () => {
     expect(page).toContain('<OwnerShell');
     expect(companyCategoryOptions).toHaveLength(8);
   });
+  it('keeps workflow settings compact and exposes design as an item type', () => {
+    expect(page).toContain("tab !== 'payments'");
+    expect(workflowEditor).toContain("'design'");
+    expect(workflowEditor).not.toContain('All changes saved');
+    expect(workflowEditor).not.toContain('Workflow Settings</h1>');
+    expect(workflowEditor).not.toContain('className="wf-tabs"');
+    expect(workflowEditor).toContain('Save Changes');
+  });
+
   it('prefills available source data, never invents GST or banking data', () => {
     expect(page).toContain('repository.propulseCompanyProfile');
     expect(page).toContain('const synced=source.success?source.data:null');
