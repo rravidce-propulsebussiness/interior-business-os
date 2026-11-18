@@ -46,8 +46,14 @@ describe('company construction stage templates', () => {
       { kind: 'design', title: 'Elevation' },
       { kind: 'design', title: 'MEP Plans' },
     ]);
-    expect(companyConstructionStages.safeParse(defaultCompanyConstructionStages).success).toBe(true);
-    expect(defaultCompanyConstructionStages.find((item) => item.id === 'preconstruction')?.items[0]?.title).toBe('Price freeze payment');
+    expect(
+      companyConstructionStages.safeParse(defaultCompanyConstructionStages).success,
+    ).toBe(true);
+    expect(
+      defaultCompanyConstructionStages.find(
+        (item) => item.id === 'preconstruction',
+      )?.items[0]?.title,
+    ).toBe('Price freeze payment');
   });
 
   it('accepts legacy shares and editable stage counts, rejects duplicate IDs and unsafe guide links', () => {
