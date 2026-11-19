@@ -45,7 +45,7 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm exec playwright install chromium
       - name: Check Hostinger public Next.js renderer and health
         run: pnpm exec playwright test --config tests/chromium/live.config.ts
       - uses: actions/upload-artifact@v4
