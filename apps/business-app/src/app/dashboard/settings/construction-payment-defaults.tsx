@@ -353,11 +353,7 @@ export function ConstructionPaymentDefaults({
   const [draftKinds, setDraftKinds] = useState<
     Record<string, CompanyStageItem['kind']>
   >({});
-  const [expandedStage, setExpandedStage] = useState<string | null>(
-    () =>
-      (initial[industries[0]?.key ?? 'construction'] ??
-        defaultStages(industries[0]?.key ?? 'construction'))[0]?.id ?? null,
-  );
+  const [expandedStage, setExpandedStage] = useState<string | null>(null);
   const [showTimeline, setShowTimeline] = useState(false);
   const [openGuide, setOpenGuide] = useState<string | null>(null);
   const [clientError, setClientError] = useState('');

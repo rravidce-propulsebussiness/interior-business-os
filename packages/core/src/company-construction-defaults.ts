@@ -8,6 +8,14 @@ import {
   defaultBrickworkDays,
   defaultBrickworkItems,
 } from './brickwork-workflow';
+import {
+  defaultExternalPlasteringDays,
+  defaultExternalPlasteringItems,
+  defaultPaintingDays,
+  defaultPaintingItems,
+  defaultTilesDays,
+  defaultTilesItems,
+} from './finishing-workflows';
 
 /** Reusable construction stage templates for company Settings. Pre-construction
  * and foundation run once; finish stages repeat for every quoted floor. */
@@ -238,41 +246,26 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
       'Whole-building exterior plaster, façade details, elevation finishes, curing and QC.',
     // Whole-building façade work is scheduled once rather than duplicated for each floor.
     repeatsPerFloor: false,
-    // Unscheduled until the stage work sequence and duration are approved.
-    days: 0,
-    items: [
-      {
-        id: 'payment-external-plastering',
-        kind: 'payment',
-        title: 'External Plastering & Elevation Payment',
-        days: 0,
-      },
-    ],
+    days: defaultExternalPlasteringDays,
+    items: defaultExternalPlasteringItems,
   },
   {
     id: 'tiles',
     name: 'Tiles',
-    description: 'Floor and wall tiling, grouting and finishing.',
+    description:
+      'Wet-area waterproofing, floor and wall tiling, grouting, protection and quality checks.',
     repeatsPerFloor: true,
-    days: 10,
-    items: [
-      { id: 'payment-tiles', kind: 'payment', title: 'Tiles payment', days: 0 },
-    ],
+    days: defaultTilesDays,
+    items: defaultTilesItems,
   },
   {
     id: 'painting',
     name: 'Painting',
-    description: 'Surface preparation and final painting.',
+    description:
+      'Surface preparation, putty, primer, interior and exterior paint coats, touch-ups and QC.',
     repeatsPerFloor: true,
-    days: 10,
-    items: [
-      {
-        id: 'payment-painting',
-        kind: 'payment',
-        title: 'Painting payment',
-        days: 0,
-      },
-    ],
+    days: defaultPaintingDays,
+    items: defaultPaintingItems,
   },
 ];
 
