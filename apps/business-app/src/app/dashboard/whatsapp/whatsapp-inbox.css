@@ -2652,6 +2652,27 @@
   border: 0;
 }
 
+.wa-app-content .wa-thread-column {
+  display: none;
+  min-height: 0;
+  height: 100%;
+  border: 0;
+  background-color: var(--wa-chat-bg);
+}
+
+.wa-app-content .wa-inbox-grid.wa-mobile-thread-open .wa-conversation-panel {
+  display: none;
+}
+
+.wa-app-content .wa-inbox-grid.wa-mobile-thread-open .wa-thread-column {
+  display: flex;
+  grid-column: 1;
+}
+
+.wa-app-content .wa-mobile-back {
+  display: grid;
+}
+
 .wa-app-content .wa-conversation-toolbar {
   border: 0;
   padding: 17px 18px 9px;
