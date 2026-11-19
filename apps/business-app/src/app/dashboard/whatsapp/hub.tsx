@@ -4267,7 +4267,7 @@ function AutomationsPanel({
   }
 
   return (
-    <div className="wa-automations-grid grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]">
+    <div className="wa-automations-grid grid gap-5">
       <section className="wa-automation-card rounded-2xl border border-stone-200 p-5">
         <div className="wa-automation-stats" aria-label="Automation status">
           <span>
@@ -4705,7 +4705,7 @@ function QuickRepliesManager({ canManage }: { canManage: boolean }) {
   }
 
   return (
-    <section className="rounded-2xl border border-stone-200 p-5 xl:col-span-2">
+    <section className="rounded-2xl border border-stone-200 p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-lg font-bold text-stone-900">Quick replies</h3>
