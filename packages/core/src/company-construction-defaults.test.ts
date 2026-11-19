@@ -99,6 +99,24 @@ describe('company construction stage templates', () => {
     expect(painting.items.some((item) => item.title.includes('exterior'))).toBe(
       true,
     );
+    expect(
+      painting.items.find((item) => item.id === 'painting-work-interior-coats')
+        ?.title,
+    ).toContain('2 approved interior colour coats');
+    expect(
+      painting.items.find((item) => item.id === 'painting-check-interior-coats')
+        ?.title,
+    ).toContain('2 interior coats');
+    expect(
+      painting.items.find((item) => item.id === 'painting-work-exterior-coats')
+        ?.title,
+    ).toContain('1 weatherproof exterior finish coat');
+    expect(
+      painting.items.find((item) => item.id === 'painting-check-exterior-coats')
+        ?.title,
+    ).toContain('1 exterior coat');
+    expect(painting.description).toContain('Two interior paint coats');
+    expect(painting.description).toContain('one exterior paint coat');
   });
 
   it('starts construction design with payment, then four ordered design deliverables', () => {
