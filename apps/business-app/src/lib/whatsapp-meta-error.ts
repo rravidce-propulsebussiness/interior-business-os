@@ -68,6 +68,8 @@ const messages: Record<number, string> = {
     'This customer has not granted WhatsApp call permission. Send a permission request and wait for approval.',
   138012:
     'Meta has limited calls for this WhatsApp number. Check calling limits and retry later.',
+  138015:
+    'Meta rejected WhatsApp Calling because this business portfolio has not reached the required messaging limit of 2,000 business-initiated conversations per day. Check Messaging limits in WhatsApp Manager, complete business verification if pending, and retry after Meta raises the limit.',
 };
 
 export function metaErrorMessage(code: number | null) {
