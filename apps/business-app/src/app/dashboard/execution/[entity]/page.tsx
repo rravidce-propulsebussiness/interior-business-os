@@ -1,13 +1,13 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import {
   executionEntitySchema,
   executionPermissions,
 } from '@business-os/core/execution';
 import { executionServices } from '../service';
 import { RecordTable, titles } from '../presentation';
-import { RevisionRegister } from '../revision-register';
 import { configurationEntities, configurationPermission } from '../forms';
+import { legacyBoqDestination } from '../legacy-boq-routes';
 export default async function ExecutionList({
   params,
   searchParams,
@@ -24,8 +24,10 @@ export default async function ExecutionList({
   const { entity: raw } = await params,
     parsed = executionEntitySchema.safeParse(raw);
   if (!parsed.success) notFound();
-  const entity = parsed.data,
-    q = await searchParams,
+  const entity = parsed.data;
+  const legacyDestination = legacyBoqDestination(entity);
+  if (legacyDestination) redirect(legacyDestination);
+  const q = await searchParams,
     s = await executionServices(executionPermissions[entity], true),
     page = Math.max(1, Number(q.page) || 1);
   const projectScoped =
@@ -42,14 +44,9 @@ export default async function ExecutionList({
     },
     page,
   );
-  if (entity === 'execution_estimate_revisions') {
-    return <RevisionRegister s={s} data={data} filter={q} />;
-  }
   const configure =
     (configurationEntities as readonly string[]).includes(entity) &&
-    s.allowed(configurationPermission(entity)) &&
-    (entity !== 'estimation_recipe_item_costs' ||
-      s.allowed('estimate.view_cost'));
+    s.allowed(configurationPermission(entity));
   return (
     <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl p-6">
       <h1 className="text-3xl">{titles[entity]}</h1>

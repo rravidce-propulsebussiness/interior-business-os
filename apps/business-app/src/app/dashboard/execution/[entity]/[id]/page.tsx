@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import {
   executionEntitySchema,
   executionPermissions,
@@ -8,9 +8,8 @@ import {
 import { executionServices } from '../../service';
 import { ExecutionForm } from '../../form';
 import { configurationEntities, configurationPermission } from '../../forms';
-import { ScopeBuilder } from '../../builder';
-import { RevisionWorkspace } from '../../revision-workspace';
 import { label, records, RecordTable, text, titles } from '../../presentation';
+import { legacyBoqDestination } from '../../legacy-boq-routes';
 export default async function ExecutionDetail({
   params,
   searchParams,
@@ -21,28 +20,19 @@ export default async function ExecutionDetail({
   const { entity: raw, id } = await params,
     parsed = executionEntitySchema.safeParse(raw);
   if (!parsed.success) notFound();
-  const entity = parsed.data,
-    s = await executionServices(executionPermissions[entity], true),
+  const entity = parsed.data;
+  const legacyDestination = legacyBoqDestination(entity);
+  if (legacyDestination) redirect(legacyDestination);
+  const s = await executionServices(executionPermissions[entity], true),
     row = await s.execution.detail(entity, id),
     q = await searchParams,
     page = Math.max(1, Number(q.page) || 1);
-  // Modern BOQ detail reuses exactly the same authorized revision record and
-  // existing server-side estimate actions. Other execution entities retain
-  // their established record pages and behavior.
-  if (entity === 'execution_estimate_revisions')
-    return <RevisionWorkspace s={s} row={row} />;
   const childMap: Partial<Record<ExecutionEntity, [ExecutionEntity, string]>> =
     {
       material_categories: ['materials', 'category_id'],
       materials: ['material_variants', 'material_id'],
       material_variants: ['material_unit_conversions', 'variant_id'],
       vendors: ['vendor_contacts', 'vendor_id'],
-      estimation_recipes: ['estimation_recipe_items', 'recipe_id'],
-      execution_estimates: ['execution_estimate_revisions', 'estimate_id'],
-      execution_estimate_revisions: [
-        'execution_estimate_scope_items',
-        'revision_id',
-      ],
       purchase_requisitions: ['purchase_requisition_items', 'requisition_id'],
       purchase_requisition_items: ['purchase_requisition_sources', 'item_id'],
       rfqs: ['rfq_items', 'rfq_id'],
@@ -55,13 +45,9 @@ export default async function ExecutionDetail({
     ? await s.execution.search(child[0], { [child[1]]: id }, page)
     : null;
   const links: Record<string, ExecutionEntity> = {
-    contract_id: 'execution_estimates',
-    revision_id: 'execution_estimate_revisions',
-    scope_id: 'execution_estimate_scope_items',
     material_id: 'materials',
     variant_id: 'material_variants',
     vendor_id: 'vendors',
-    recipe_id: 'estimation_recipes',
     requisition_id: 'purchase_requisitions',
     rfq_id: 'rfqs',
     quote_id: 'vendor_quotes',
@@ -71,7 +57,6 @@ export default async function ExecutionDetail({
     requisition_item_id: 'purchase_requisition_items',
     po_id: 'purchase_orders',
     po_item_id: 'purchase_order_items',
-    estimate_line_id: 'execution_estimate_lines',
   };
   const status = text(row.status);
   const documentPermission =
@@ -311,38 +296,6 @@ export default async function ExecutionDetail({
             Material mapping
           </Link>
         </nav>
-      )}
-      {entity === 'estimation_recipes' &&
-        s.allowed('estimate.manage_recipes') && (
-          <Link
-            className="underline"
-            href="/dashboard/execution/estimation_recipe_items/new"
-          >
-            Add recipe component
-          </Link>
-        )}
-      {entity === 'estimation_recipe_items' &&
-        s.allowed('estimate.manage_recipes') &&
-        s.allowed('estimate.view_cost') && (
-          <Link
-            className="underline"
-            href="/dashboard/execution/estimation_recipe_item_costs/new"
-          >
-            Set service cost basis
-          </Link>
-        )}
-      {entity === 'execution_estimate_scope_items' && (
-        <ScopeBuilder s={s} scope={row} />
-      )}
-      {entity === 'execution_estimate_lines' && (
-        <ScopeBuilder
-          s={s}
-          scope={await s.execution.detail(
-            'execution_estimate_scope_items',
-            text(row.scope_id),
-          )}
-          line={row}
-        />
       )}
       {entity === 'purchase_requisitions' && (
         <>

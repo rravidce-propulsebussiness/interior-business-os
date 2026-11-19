@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { executionEntitySchema } from '@business-os/core/execution';
 import { executionServices } from '../../service';
 import { ExecutionForm, type ExecutionField } from '../../form';
@@ -11,6 +11,7 @@ import {
   configurationPermission,
 } from '../../forms';
 import { label, text, titles, records, RecordTable } from '../../presentation';
+import { legacyBoqDestination } from '../../legacy-boq-routes';
 export default async function ExecutionNew({
   params,
   searchParams,
@@ -28,8 +29,10 @@ export default async function ExecutionNew({
   const { entity: raw } = await params,
     parsed = executionEntitySchema.safeParse(raw);
   if (!parsed.success) notFound();
-  const entity = parsed.data,
-    q = await searchParams,
+  const entity = parsed.data;
+  const legacyDestination = legacyBoqDestination(entity);
+  if (legacyDestination) redirect(legacyDestination);
+  const q = await searchParams,
     isConfig = (configurationEntities as readonly string[]).includes(entity);
   const permission = isConfig
     ? configurationPermission(entity)
@@ -70,11 +73,6 @@ export default async function ExecutionNew({
     options: [{ value: '', label: optional ? 'None' : 'Select…' }, ...options],
   });
   if (isConfig) {
-    if (
-      entity === 'estimation_recipe_item_costs' &&
-      !s.allowed('estimate.view_cost')
-    )
-      notFound();
     const prior = q.edit ? await s.execution.detail(entity, q.edit) : {};
     const configuration = await configurationFields(s, entity, prior);
     fields = configuration.fields;

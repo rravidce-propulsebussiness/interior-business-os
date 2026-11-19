@@ -6,6 +6,7 @@ import {
 import { safeFailure } from '@business-os/shared';
 import { executionServices } from '../../../service';
 import { renderQuotationPdf } from '../../../../quotations/pdf-renderer';
+import { legacyBoqDestination } from '../../../legacy-boq-routes';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export async function GET(
@@ -23,6 +24,9 @@ export async function GET(
   };
   try {
     const { entity, id, format } = await params;
+    const legacyDestination = legacyBoqDestination(entity);
+    if (legacyDestination)
+      return Response.redirect(new URL(legacyDestination, request.url), 307);
     const permission = (
       {
         execution_estimate_revisions: 'estimate.view_cost',

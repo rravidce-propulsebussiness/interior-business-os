@@ -17,26 +17,21 @@ const company = (permissions: string[], entitlements = ['projects']): Context =>
     })),
   }) as unknown as Context;
 
-describe('permission-aware BOQ presentation', () => {
-  it('retains all old URLs and actual server-approved revision commands', () => {
+describe('manual BOQ presentation', () => {
+  it('replaces revision and recipe URLs with the manual BOQ workspace', () => {
     const list = read('./[entity]/page.tsx');
     const detail = read('./[entity]/[id]/page.tsx');
-    const workspace = read('./revision-workspace.tsx');
-    expect(list).toContain('<RevisionRegister s={s} data={data} filter={q} />');
-    expect(detail).toContain('<RevisionWorkspace s={s} row={row} />');
-    for (const check of [
-      "s.allowed('estimate.view_cost')",
-      "s.allowed('estimate.approve')",
-      "s.allowed('estimate.review')",
-      "s.allowed('estimate.edit')",
-      "s.allowed('estimate.create')",
-      "s.allowed('purchase_requisition.create')",
-    ])
-      expect(workspace).toContain(check);
-    expect(workspace).toContain("action: 'estimate'");
-    expect(workspace).not.toContain('.insert(');
-    expect(workspace).not.toContain('.update(');
-    expect(workspace).not.toContain('service_role');
+    const legacyRoutes = read('./legacy-boq-routes.ts');
+    expect(list).toContain('legacyBoqDestination(entity)');
+    expect(detail).toContain('legacyBoqDestination(entity)');
+    expect(legacyRoutes).toContain("'/dashboard/execution/boq'");
+    expect(legacyRoutes).toContain("'/dashboard/execution/boq/pricing'");
+    expect(read('./boq-workspace.tsx')).toContain('Use quotation prices');
+    expect(read('./boq-workspace.tsx')).toContain(
+      'Measured work &amp; linked quote',
+    );
+    expect(read('./boq-calculations.ts')).toContain("kind === 'column'");
+    expect(read('./boq-calculations.ts')).toContain("kind === 'wall'");
   });
   it('hides BOQ menu without grant, active project entitlement and company context', () => {
     const name = 'Project Management';
@@ -52,12 +47,10 @@ describe('permission-aware BOQ presentation', () => {
       ),
     ).toBe(false);
     expect(
-      ownerWorkspaceNavigation(company(['estimate.view'])).find(
+      ownerWorkspaceNavigation(company(['estimate.view'])).some(
         (item) => item.label === name,
-      )?.children,
-    ).toEqual([
-      { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
-    ]);
+      ),
+    ).toBe(false);
     // BOQ now has its own menu, separate from Project Management.
     const boq = 'BOQ & Estimating';
     expect(
@@ -69,14 +62,12 @@ describe('permission-aware BOQ presentation', () => {
       ),
     ).toBe(false);
     expect(
-      ownerWorkspaceNavigation(company(['estimate.view'])).find(
-        (item) => item.label === boq,
-      )?.children,
+      ownerWorkspaceNavigation(
+        company(['estimate.view', 'estimate.view_cost']),
+      ).find((item) => item.label === boq)?.children,
     ).toEqual([
-      {
-        label: 'BOQ & Estimate Revisions',
-        href: '/dashboard/execution/execution_estimate_revisions',
-      },
+      { label: 'Manual BOQ', href: '/dashboard/execution/boq' },
+      { label: 'BOQ Rates', href: '/dashboard/execution/boq/pricing' },
     ]);
   });
   it('uses shared navigation and scoped styles for execution routes', () => {

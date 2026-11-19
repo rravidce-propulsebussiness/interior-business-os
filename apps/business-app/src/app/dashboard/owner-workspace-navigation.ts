@@ -93,24 +93,16 @@ export function ownerWorkspaceNavigation(
     });
   if (has('estimate.view', 'projects')) {
     boqChildren.push({
-      label: 'BOQ & Estimate Revisions',
-      href: '/dashboard/execution/execution_estimate_revisions',
-    });
-    erpChildren.push({
-      label: 'ERP: Execution Planner',
-      href: '/dashboard/execution',
+      label: 'Manual BOQ',
+      href: '/dashboard/execution/boq',
     });
   }
-  if (has('material.view', 'projects'))
-    erpChildren.push({
-      label: 'ERP: Materials',
-      href: '/dashboard/execution/materials',
-    });
-  if (has('estimate.manage_recipes', 'projects'))
+  if (has('estimate.view_cost', 'projects')) {
     boqChildren.push({
-      label: 'Rate Recipes',
-      href: '/dashboard/execution/estimation_recipes',
+      label: 'BOQ Rates',
+      href: '/dashboard/execution/boq/pricing',
     });
+  }
   if (
     has('purchase_order.view', 'projects') &&
     context.entitlements.includes('purchasing')
@@ -141,8 +133,8 @@ export function ownerWorkspaceNavigation(
     items.push({
       label: 'BOQ & Estimating',
       href: has('estimate.view', 'projects')
-        ? '/dashboard/execution/execution_estimate_revisions'
-        : '/dashboard/execution/estimation_recipes',
+        ? '/dashboard/execution/boq'
+        : '/dashboard/execution/boq/pricing',
       icon: 'calculator',
       children: boqChildren,
     });

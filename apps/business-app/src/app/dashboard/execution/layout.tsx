@@ -34,7 +34,7 @@ export default async function ExecutionLayout({
       navigation={ownerWorkspaceNavigation(context)}
       search=""
       searchPlaceholder="Search your company workspace..."
-      currentHref="/dashboard/execution/execution_estimate_revisions"
+      currentHref="/dashboard/execution/boq"
       notificationsEnabled={ownerWorkspaceNavigation(context).some(
         (item) => item.href === '/dashboard/work',
       )}
@@ -48,9 +48,7 @@ export default async function ExecutionLayout({
           <span aria-hidden="true">/</span>
           <Link href="/dashboard/execution">Construction ERP</Link>
           <span aria-hidden="true">/</span>
-          <Link href="/dashboard/execution/execution_estimate_revisions">
-            BOQ &amp; Estimating
-          </Link>
+          <Link href="/dashboard/execution/boq">BOQ &amp; Estimating</Link>
         </nav>
         {children}
       </div>

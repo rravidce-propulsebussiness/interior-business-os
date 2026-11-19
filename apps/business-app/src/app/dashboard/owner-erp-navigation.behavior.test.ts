@@ -66,8 +66,6 @@ describe('ERP uses the existing owner workspace and access policy', () => {
       icon: 'projects',
       children: [
         { label: 'ERP: Site Execution', href: '/dashboard/operations' },
-        { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
-        { label: 'ERP: Materials', href: '/dashboard/execution/materials' },
         {
           label: 'ERP: Procurement',
           href: '/dashboard/execution/purchase_orders',
@@ -97,31 +95,28 @@ describe('ERP uses the existing owner workspace and access policy', () => {
     expect(projectManagement(company(['project.view']))).toBeUndefined();
   });
 
-  it('shows BOQ revisions and rate recipes in their own menu', () => {
-    const context = company(['estimate.view', 'estimate.manage_recipes']);
+  it('shows manual BOQ and company rates in their own menu', () => {
+    const context = company([
+      'estimate.view',
+      'estimate.view_cost',
+      'estimate.manage_recipes',
+    ]);
     expect(boq(context)).toEqual({
       label: 'BOQ & Estimating',
-      href: '/dashboard/execution/execution_estimate_revisions',
+      href: '/dashboard/execution/boq',
       icon: 'calculator',
       children: [
         {
-          label: 'BOQ & Estimate Revisions',
-          href: '/dashboard/execution/execution_estimate_revisions',
+          label: 'Manual BOQ',
+          href: '/dashboard/execution/boq',
         },
         {
-          label: 'Rate Recipes',
-          href: '/dashboard/execution/estimation_recipes',
+          label: 'BOQ Rates',
+          href: '/dashboard/execution/boq/pricing',
         },
       ],
     });
-    expect(projectManagement(context)).toEqual({
-      label: 'Project Management',
-      href: '/dashboard/execution',
-      icon: 'projects',
-      children: [
-        { label: 'ERP: Execution Planner', href: '/dashboard/execution' },
-      ],
-    });
+    expect(projectManagement(context)).toBeUndefined();
   });
 
   it('hides procurement and stock when purchasing is not entitled', () => {

@@ -21,17 +21,6 @@ export const statusField: ExecutionField = {
     { value: 'inactive', label: 'Inactive' },
   ],
 };
-export const basisOptions = [
-  'fixed',
-  'quantity',
-  'finished_area',
-  'width',
-  'height',
-  'length',
-  'depth',
-  'volume',
-  'percentage',
-].map((value) => ({ value, label: value.replaceAll('_', ' ') }));
 export async function choices(
   s: Services,
   entity: ExecutionEntity,
@@ -78,16 +67,9 @@ export const configurationEntities = [
   'vendors',
   'vendor_contacts',
   'vendor_materials',
-  'estimation_recipes',
-  'estimation_recipe_items',
-  'estimation_recipe_item_costs',
 ] as const;
 export function configurationPermission(entity: string) {
-  return entity.startsWith('vendor')
-    ? 'vendor.manage'
-    : entity.startsWith('estimation')
-      ? 'estimate.manage_recipes'
-      : 'material.manage';
+  return entity.startsWith('vendor') ? 'vendor.manage' : 'material.manage';
 }
 export async function configurationFields(
   s: Services,
@@ -228,98 +210,6 @@ export async function configurationFields(
           lead_time_days: 0,
           preferred: false,
           status: 'active',
-        },
-      };
-    case 'estimation_recipes':
-      return {
-        fields: [
-          field('name', 'Recipe name', true),
-          { key: 'description', label: 'Description', type: 'textarea' },
-          {
-            key: 'matching.item_key',
-            label: 'Finished-item code to match',
-            optional: true,
-          },
-          {
-            key: 'override_reason_required',
-            label: 'Require reason when choosing a different recipe',
-            type: 'checkbox',
-          },
-          statusField,
-        ],
-        defaults: { status: 'active', override_reason_required: true },
-      };
-    case 'estimation_recipe_items':
-      return {
-        fields: [
-          await select('recipe_id', 'Recipe', 'estimation_recipes'),
-          {
-            key: 'cost_kind',
-            label: 'Component type',
-            options: [
-              'material',
-              'labour',
-              'external_service',
-              'transport',
-              'other',
-            ].map((value) => ({ value, label: value.replaceAll('_', ' ') })),
-          },
-          await select(
-            'variant_id',
-            'Material variant (materials only)',
-            'material_variants',
-            true,
-          ),
-          field('description', 'Component description', true),
-          field('unit', 'Service unit', true),
-          { key: 'rule.basis', label: 'Quantity basis', options: basisOptions },
-          field('rule.factor', 'Quantity factor', true),
-          {
-            key: 'waste_percentage',
-            label: 'Waste (%) — blank uses material default',
-            optional: true,
-          },
-          {
-            key: 'sort_order',
-            label: 'Display order',
-            type: 'integer',
-            required: true,
-          },
-          { key: 'active', label: 'Active component', type: 'checkbox' },
-        ],
-        defaults: {
-          cost_kind: 'material',
-          unit: 'each',
-          rule: { basis: 'fixed', factor: '1' },
-          sort_order: 0,
-          active: true,
-        },
-      };
-    case 'estimation_recipe_item_costs':
-      return {
-        fields: [
-          {
-            key: 'recipe_item_id',
-            label: 'Recipe component',
-            required: true,
-            options: [
-              { value: '', label: 'Select…' },
-              ...(await choices(s, 'estimation_recipe_items')),
-            ],
-          },
-          field('currency', 'Currency', true),
-          field('unit_cost', 'Cost per purchase/service unit', true),
-          field('source_reference', 'Rate source', true),
-          {
-            key: 'effective_date',
-            label: 'Effective date',
-            type: 'date',
-            required: true,
-          },
-        ],
-        defaults: {
-          currency: s.organization.default_currency,
-          effective_date: new Date().toISOString().slice(0, 10),
         },
       };
     default:
