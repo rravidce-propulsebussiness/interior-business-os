@@ -15,7 +15,7 @@
     "@business-os/database": "workspace:*",
     "@business-os/shared": "workspace:*",
     "@business-os/ui": "workspace:*",
-    "next": "16.4.1",
+    "next": "16.4.6",
     "playwright": "1.63.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",

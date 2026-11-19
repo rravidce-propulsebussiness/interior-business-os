@@ -43,9 +43,9 @@
     "@business-os/brochure-builder": "workspace:*"
   },
   "devDependencies": {
-    "next": "16.4.1"
+    "next": "16.4.6"
   },
   "peerDependencies": {
-    "next": "16.4.1"
+    "next": "16.4.6"
   }
 }

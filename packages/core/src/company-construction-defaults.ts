@@ -105,11 +105,11 @@ export const companyConstructionStages = z
           });
       }
     }
-    if (itemCount > 250)
+    if (itemCount > 400)
       ctx.addIssue({
         code: 'custom',
         message:
-          'A construction programme supports up to 250 work and inspection items.',
+          'A construction programme supports up to 400 work and inspection items.',
       });
   });
 

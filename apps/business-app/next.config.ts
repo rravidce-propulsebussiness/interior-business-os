@@ -23,6 +23,7 @@ const config: NextConfig = {
   // Project photo/PDF/short MP4 evidence is capped separately at 8 MiB,
   // but multipart Server Action posts need some additional framing room.
   experimental: {
+    agentUpgrade: 'security',
     serverActions: { bodySizeLimit: '10mb' },
     // Hostinger exposes the host's CPU count but limits process/thread creation.
     // Without this cap, Next.js attempted 63 page-data workers and SIGABRT'd
