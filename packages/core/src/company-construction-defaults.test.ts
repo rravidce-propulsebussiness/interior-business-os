@@ -56,13 +56,49 @@ describe('company construction stage templates', () => {
     expect(internal.repeatsPerFloor).toBe(true);
     expect(external.repeatsPerFloor).toBe(false);
     expect(internal.days).toBe(0);
-    expect(external.days).toBe(0);
+    expect(external.days).toBe(12);
     expect(internal.items[0]?.kind).toBe('payment');
     expect(external.items[0]?.kind).toBe('payment');
     expect(internal.items[0]?.days).toBe(0);
     expect(external.items[0]?.days).toBe(0);
+    expect(external.items.some((item) => item.kind === 'material')).toBe(true);
+    expect(external.items.some((item) => item.kind === 'work')).toBe(true);
+    expect(external.items.some((item) => item.kind === 'check')).toBe(true);
+    expect(external.items.some((item) => item.kind === 'qc')).toBe(true);
     expect(stages[electric + 3]?.id).toBe('tiles');
     expect(companyConstructionStages.safeParse(stages).success).toBe(true);
+  });
+
+  it('provides complete per-floor tile and painting work, materials, checks and QC', () => {
+    const tiles = defaultCompanyConstructionStages.find(
+      (stage) => stage.id === 'tiles',
+    )!;
+    const painting = defaultCompanyConstructionStages.find(
+      (stage) => stage.id === 'painting',
+    )!;
+
+    for (const stage of [tiles, painting]) {
+      expect(stage.repeatsPerFloor).toBe(true);
+      expect(stage.items[0]?.kind).toBe('payment');
+      expect(stage.items.some((item) => item.kind === 'material')).toBe(true);
+      expect(stage.items.some((item) => item.kind === 'work')).toBe(true);
+      expect(stage.items.some((item) => item.kind === 'check')).toBe(true);
+      expect(stage.items.at(-1)?.kind).toBe('qc');
+      expect(
+        stage.items.reduce(
+          (total, item) => total + (item.kind === 'payment' ? 0 : item.days),
+          0,
+        ),
+      ).toBe(stage.days);
+    }
+
+    expect(tiles.items.some((item) => item.kind === 'test')).toBe(true);
+    expect(
+      tiles.items.find((item) => item.id === 'tiles-qc-waterproofing')?.title,
+    ).toContain('before tile covering');
+    expect(painting.items.some((item) => item.title.includes('exterior'))).toBe(
+      true,
+    );
   });
 
   it('starts construction design with payment, then four ordered design deliverables', () => {

@@ -10,6 +10,9 @@ const workflowEditor = read('./construction-payment-defaults.tsx');
 const designMigration = read(
   '../../../../../../packages/database/supabase/migrations/20261118134000_workflow_design_item_kind.sql',
 );
+const finishingMigration = read(
+  '../../../../../../packages/database/supabase/migrations/20261119134500_seed_finishing_workflows.sql',
+);
 const action = read('./actions.ts');
 const sql = read(
   '../../../../../../packages/database/supabase/migrations/20261017000600_unified_company_settings.sql',
@@ -50,6 +53,11 @@ describe('unified company settings', () => {
     expect(designMigration).toContain(
       "private.has_permission(p_org,'organization.manage')",
     );
+    expect(workflowEditor).toContain('useState<string | null>(null)');
+    expect(finishingMigration).toContain('external-plastering-elevation');
+    expect(finishingMigration).toContain('tiles-test-waterproofing');
+    expect(finishingMigration).toContain('painting-qc-final');
+    expect(finishingMigration).toContain("where existing_items.value->>'id'");
   });
 
   it('prefills available source data, never invents GST or banking data', () => {
