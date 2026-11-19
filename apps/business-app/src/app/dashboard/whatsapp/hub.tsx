@@ -1288,7 +1288,10 @@ function InboxPanel({
 
   useEffect(() => {
     const first = state.rows.at(0);
-    if (!selected && first && window.matchMedia('(min-width: 681px)').matches) {
+    const appWidth =
+      document.querySelector('.wa-app-frame')?.getBoundingClientRect().width ??
+      window.innerWidth;
+    if (!selected && first && appWidth > 680) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Select the first chat after the inbox rows arrive on desktop.
       setSelected(first.wa_id);
     }
