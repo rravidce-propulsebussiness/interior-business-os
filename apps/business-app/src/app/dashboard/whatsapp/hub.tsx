@@ -714,7 +714,8 @@ export function WhatsAppHub({
             </h2>
           </div>
           {tab === 'automations' ? (
-            canManage && (
+            canManage &&
+            automationView === 'replies' && (
               <button
                 type="button"
                 className="wa-add-contact"

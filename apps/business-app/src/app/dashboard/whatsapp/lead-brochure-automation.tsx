@@ -141,8 +141,19 @@ export function LeadBrochureAutomationPanel({
       ) : !data.forms.length ? (
         <div className="rounded-2xl border border-stone-200 bg-white p-6 sm:p-8">
           <div className="mx-auto max-w-lg text-center">
-            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-2xl text-emerald-700">
-              ↗
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
+              <svg
+                aria-hidden="true"
+                className="h-6 w-6"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z" />
+              </svg>
             </div>
             <h4 className="mt-4 text-lg font-bold text-stone-900">
               Connect a lead form to get started
