@@ -597,8 +597,9 @@ export async function saveLeadBrochureAutomation(
         interiors_brochure_url: value.interiorsUrl,
         construction_brochure_image_url: value.constructionImageUrl,
         interiors_brochure_image_url: value.interiorsImageUrl,
-        confirm_enabled: false,
-        quote_enabled: false,
+        ...(value.enabled
+          ? { confirm_enabled: false, quote_enabled: false }
+          : {}),
       })
       .eq('organization_id', s.org)
       .eq('id', value.formId)

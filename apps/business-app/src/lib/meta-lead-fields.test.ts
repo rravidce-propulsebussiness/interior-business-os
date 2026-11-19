@@ -8,6 +8,10 @@ import {
   templateValue,
   whatsappId,
 } from './meta-lead-fields';
+import {
+  brochureTemplateForInterest,
+  classifyLeadServiceInterest,
+} from './meta-lead-brochure-automation';
 
 const lead = {
   id: '300000000000001',
@@ -24,6 +28,28 @@ const lead = {
     { name: 'budget', values: ['15 lakh'] },
   ],
 };
+
+describe('Meta lead brochure routing', () => {
+  it.each([
+    ['Home construction', 'construction'],
+    ['I need a new building', 'construction'],
+    ['Interior design', 'interiors'],
+    ['Furnishing', 'interiors'],
+    ['Construction and interiors', 'both'],
+    ['Both', 'both'],
+    ['', 'unknown'],
+    ['Not sure yet', 'unknown'],
+  ] as const)('classifies %s as %s', (answer, expected) => {
+    expect(classifyLeadServiceInterest(answer)).toBe(expected);
+  });
+
+  it('uses a carousel for combined or unspecified interest', () => {
+    expect(brochureTemplateForInterest('construction')).toBe('service');
+    expect(brochureTemplateForInterest('interiors')).toBe('service');
+    expect(brochureTemplateForInterest('both')).toBe('carousel');
+    expect(brochureTemplateForInterest('unknown')).toBe('carousel');
+  });
+});
 
 describe('mapMetaLead', () => {
   it('maps standard and custom questions onto CRM lead fields', () => {

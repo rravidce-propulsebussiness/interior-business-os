@@ -425,6 +425,11 @@ export function LeadBrochureAutomationPanel({
                   detail="Sends one approved carousel with construction and interiors brochure cards."
                 />
               </div>
+              <p className="mt-4 text-xs leading-5 text-stone-500">
+                Activating this flow replaces the existing confirmation or
+                quotation follow-up for this Meta form. Saving it paused keeps
+                the current follow-up unchanged.
+              </p>
               <p className="mt-4 rounded-xl bg-amber-50 p-3 text-xs leading-5 text-amber-900">
                 WhatsApp requires an approved template for messages sent outside
                 the 24-hour service window. Carousel card content and links must
