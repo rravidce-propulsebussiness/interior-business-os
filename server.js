@@ -68,7 +68,7 @@ if (service === 'business-app' && existsSync(deployedBrowserPath)) {
   !(process.env.CF_BROWSER_ACCOUNT_ID && process.env.CF_BROWSER_API_TOKEN)
 ) {
   console.warn(
-    '[Business OS] Premium PDF renderer unavailable; build must install Chromium or configure Browser Rendering.',
+    '[Business OS] Premium PDF renderer unavailable; build must install Chromium or configure Browser Run.',
   );
 }
 

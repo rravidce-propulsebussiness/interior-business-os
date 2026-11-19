@@ -121,9 +121,10 @@ Hostinger production requirements:
 - Publish .playwright-browsers together with the Next.js build; the launcher
   sets PLAYWRIGHT_BROWSERS_PATH at runtime.
 - Linux system libraries for Chromium must be supported by the host.
-- Alternatively configure the existing Cloudflare Browser Rendering service
-  with server-only PDF_RENDERER=cloudflare-rest, CF_BROWSER_ACCOUNT_ID
-  and CF_BROWSER_API_TOKEN. Never expose these secrets in public environment variables.
+- Alternatively configure the Cloudflare Browser Run PDF service with a token
+  scoped to Browser Run - Edit and server-only PDF_RENDERER=cloudflare-rest,
+  CF_BROWSER_ACCOUNT_ID and CF_BROWSER_API_TOKEN. Never expose these secrets
+  in public environment variables.
 - Do not force PDF_RENDERER=node unless Chromium is confirmed launchable.
 
 The authenticated PDF response is marked X-Quotation-PDF-Template: premium-html-v1.

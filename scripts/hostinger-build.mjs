@@ -46,7 +46,7 @@ runPnpm(['install', '--frozen-lockfile', '--prod=false']);
 // A production quotation PDF must be the exact premium HTML preview printed
 // to A4. The old pdf-lib fallback intentionally cannot meet that contract.
 // Provision Chromium headless-shell during the build when a managed Cloudflare
-// Browser Rendering PDF provider is not configured. Install in the deployed
+// Browser Run PDF provider is not configured. Install in the deployed
 // project root, not a transient HOME cache that Hostinger may discard.
 if (service === 'business-app') {
   const useCloudflare =
@@ -57,7 +57,7 @@ if (service === 'business-app') {
       ));
   if (useCloudflare) {
     console.log(
-      '[Business OS] Premium PDFs use configured Cloudflare Browser Rendering.',
+      '[Business OS] Premium PDFs use configured Cloudflare Browser Run.',
     );
   } else {
     const browserPath = resolve(root, '.playwright-browsers');
