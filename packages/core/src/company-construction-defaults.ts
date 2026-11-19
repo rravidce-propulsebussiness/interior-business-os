@@ -262,7 +262,7 @@ export const defaultCompanyConstructionStages: CompanyConstructionStage[] = [
     id: 'painting',
     name: 'Painting',
     description:
-      'Surface preparation, putty, primer, interior and exterior paint coats, touch-ups and QC.',
+      'Two interior paint coats and one exterior paint coat, with surface preparation and QC.',
     repeatsPerFloor: true,
     days: defaultPaintingDays,
     items: defaultPaintingItems,

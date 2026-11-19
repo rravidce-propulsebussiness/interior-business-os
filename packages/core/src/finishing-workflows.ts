@@ -232,14 +232,15 @@ const paintingSequence: readonly WorkflowEntry[] = [
   [
     'painting-material-putty-primer',
     'material',
-    'Approved wall putty, interior primer and exterior primer',
+    'Approved wall putty (2 coats) and primer (1 coat)',
     0,
   ],
   [
     'painting-material-coats',
     'material',
-    'Approved interior paint, weather-resistant exterior paint and tint',
+    'Approved interior paint (2 coats) and exterior paint (1 coat)',
     0,
+    'Use the brand and finish in the accepted quotation. Scope is two interior finish coats and one weatherproof exterior finish coat; primer and putty coats are listed separately.',
   ],
   [
     'painting-material-protection',
@@ -262,7 +263,7 @@ const paintingSequence: readonly WorkflowEntry[] = [
   [
     'painting-work-putty',
     'work',
-    'Apply approved putty coats and sand between coats',
+    'Apply 2 approved wall putty coats and sand between coats',
     2,
   ],
   [
@@ -274,7 +275,7 @@ const paintingSequence: readonly WorkflowEntry[] = [
   [
     'painting-work-primer',
     'work',
-    'Apply interior and exterior primer to prepared surfaces',
+    'Apply 1 primer coat to prepared interior and exterior surfaces',
     1,
   ],
   [
@@ -286,43 +287,43 @@ const paintingSequence: readonly WorkflowEntry[] = [
   [
     'painting-work-interior-coats',
     'work',
-    'Apply approved interior colour coats to walls and ceilings',
+    'Apply 2 approved interior colour coats to walls and ceilings',
     2,
   ],
   [
     'painting-check-interior-coats',
     'check',
-    'Colour approval, uniform coverage, cut-ins and visible patching',
+    'Verify 2 interior coats, approved colour, uniform coverage and cut-ins',
     0,
   ],
   [
     'painting-work-exterior-coats',
     'work',
-    'Apply weatherproof exterior finish coats to this floor elevation',
-    2,
+    'Apply 1 weatherproof exterior finish coat to this floor elevation',
+    1,
   ],
   [
     'painting-check-exterior-coats',
     'check',
-    'Exterior coverage, rain edges, drips, uniform colour and finish',
+    'Verify 1 exterior coat covers the elevation, rain edges, drips and joints',
     0,
   ],
   [
     'painting-work-touchups',
     'work',
     'Complete touch-ups and remove masking after adjoining work is clear',
-    1,
+    2,
   ],
   [
     'painting-check-final-finish',
     'check',
-    'Final finish in daylight; protect switches, fittings and finished floors',
+    'Confirm 2 interior coats and 1 exterior coat; protect fittings and floors',
     0,
   ],
   [
     'painting-qc-final',
     'qc',
-    'Final interior and exterior painting inspection',
+    'Final painting QC: 2 interior coats and 1 exterior coat',
     0,
   ],
 ];
