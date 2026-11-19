@@ -35,6 +35,8 @@ describe('Meta errors', () => {
 
   it('explains known codes and names unknown ones', () => {
     expect(metaErrorMessage(133005)).toContain('PIN');
+    expect(metaErrorMessage(138015)).toContain('2,000 business-initiated');
+    expect(metaErrorMessage(138015)).toContain('WhatsApp Manager');
     expect(metaErrorMessage(999)).toContain('999');
     expect(metaErrorMessage(null)).not.toContain('null');
   });
