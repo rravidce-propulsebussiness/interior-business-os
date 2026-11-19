@@ -520,7 +520,51 @@ export function WhatsAppHub({
     { id: 'settings', label: 'Settings', icon: 'settings' },
   ];
 
-  if (!connections.length) return null;
+  if (!connections.length) {
+    return (
+      <section className="wa-skin wa-app-frame wa-first-connect-frame">
+        <header className="wa-app-header wa-first-connect-header">
+          <div className="wa-first-connect-topline">
+            <a
+              className="wa-first-connect-back"
+              href="/dashboard"
+              aria-label="Back to dashboard"
+              title="Back to dashboard"
+            >
+              <NavIcon kind="back" />
+            </a>
+            <div className="wa-business-identity">
+              <span className="wa-business-avatar" aria-hidden="true">
+                WA
+              </span>
+              <span className="wa-business-name">
+                <strong>WhatsApp</strong>
+                <small>Connect a business account</small>
+              </span>
+            </div>
+          </div>
+        </header>
+        <main className="wa-first-connect-content">
+          <div className="wa-first-connect-intro">
+            <span className="wa-eyebrow">WHATSAPP BUSINESS PLATFORM</span>
+            <h1>Connect your WhatsApp</h1>
+            <p>
+              Link this workspace to your company’s own Meta Business Portfolio
+              and WhatsApp number. Your conversations stay separate from other
+              businesses on Business OS.
+            </p>
+          </div>
+          {settingsPanel ? (
+            <div className="wa-first-connect-panel">{settingsPanel}</div>
+          ) : (
+            <p className="wa-first-connect-unavailable" role="status">
+              Ask a workspace administrator to set up WhatsApp for this company.
+            </p>
+          )}
+        </main>
+      </section>
+    );
+  }
 
   async function saveContact(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

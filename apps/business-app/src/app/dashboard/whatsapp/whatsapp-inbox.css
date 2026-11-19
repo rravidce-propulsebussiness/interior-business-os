@@ -2409,6 +2409,85 @@
   background: #fff;
 }
 
+.wa-first-connect-header {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.wa-first-connect-topline {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.wa-first-connect-back {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--wa-icon);
+}
+
+.wa-first-connect-back:hover {
+  background: var(--wa-panel);
+}
+
+.wa-first-connect-back svg {
+  width: 22px;
+  height: 22px;
+}
+
+.wa-first-connect-header .wa-business-name small {
+  color: var(--wa-muted);
+}
+
+.wa-first-connect-content {
+  width: min(100%, 760px);
+  min-height: 0;
+  flex: 1;
+  align-self: center;
+  overflow: auto;
+  padding: clamp(22px, 5vw, 40px);
+}
+
+.wa-first-connect-intro {
+  max-width: 620px;
+  margin: 0 auto 24px;
+}
+
+.wa-first-connect-intro h1 {
+  margin: 7px 0 8px;
+  color: var(--wa-text);
+  font-size: clamp(25px, 6vw, 34px);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+}
+
+.wa-first-connect-intro p {
+  max-width: 560px;
+  margin: 0;
+  color: var(--wa-muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.wa-first-connect-panel,
+.wa-first-connect-unavailable {
+  max-width: 620px;
+  margin-inline: auto;
+}
+
+.wa-first-connect-unavailable {
+  border: 1px solid var(--wa-line);
+  border-radius: 14px;
+  padding: 16px;
+  color: var(--wa-muted);
+  background: #fff;
+}
+
 .wa-top-automation,
 .wa-tools-wrap > button {
   display: flex;
