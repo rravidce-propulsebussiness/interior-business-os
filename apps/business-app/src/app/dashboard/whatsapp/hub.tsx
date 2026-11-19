@@ -4631,6 +4631,16 @@ function AutomationsPanel({
             promotional content through this service reply.
           </div>
         </form>
+      ) : canManage ? (
+        <div className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-sm leading-6 text-stone-600">
+          <p className="font-semibold text-stone-800">
+            Ready to set up replies?
+          </p>
+          <p className="mt-1">
+            Choose New automation to create a rule. It will be saved paused so
+            you can review it before turning it on.
+          </p>
+        </div>
       ) : (
         <div className="rounded-2xl border border-stone-200 bg-stone-50 p-5 text-sm leading-6 text-stone-600">
           Ask a workspace administrator with WhatsApp management access to
