@@ -50,7 +50,7 @@ test('the Node hosting default selects Chromium without guessing a Workers provi
   );
 });
 
-test('provisioned Cloudflare Browser Rendering produces the same premium HTML PDF on hosts without Chromium', () => {
+test('provisioned Cloudflare Browser Run produces the same premium HTML PDF on hosts without Chromium', () => {
   const cloudflare = {
     CF_BROWSER_ACCOUNT_ID: 'a'.repeat(32),
     CF_BROWSER_API_TOKEN: 'token',
@@ -116,6 +116,20 @@ test('Cloudflare REST adapter accepts only PDF bytes from an explicit provider',
   expect(fetchMock).toHaveBeenCalledOnce();
   const request = fetchMock.mock.calls[0];
   expect(request).toBeDefined();
+});
+
+test('Cloudflare rejects rendered HTML over the provider request-size limit before fetch', async () => {
+  vi.stubEnv('PDF_RENDERER', 'cloudflare-rest');
+  vi.stubEnv('CF_BROWSER_ACCOUNT_ID', 'b'.repeat(32));
+  vi.stubEnv('CF_BROWSER_API_TOKEN', 'staging-token');
+  const fetchMock = vi.fn();
+  vi.stubGlobal('fetch', fetchMock);
+  const html = '<html><body>' + 'x'.repeat(50_000_000) + '</body></html>';
+  await expect(renderPdf(html)).rejects.toMatchObject({
+    code: 'PDF_REQUEST_TOO_LARGE',
+    status: 413,
+  });
+  expect(fetchMock).not.toHaveBeenCalled();
 });
 
 test('invalid premium HTML fails with an actionable safe PDF error code', async () => {

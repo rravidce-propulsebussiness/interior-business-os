@@ -91,17 +91,19 @@ export async function GET(
     const failure = safeFailure(error);
     const pdfCode = error instanceof PdfServiceError ? error.code : null;
     const pdfHelp =
-      pdfCode === 'PDF_CHROMIUM_UNAVAILABLE'
-        ? 'Premium PDF browser missing on the server. Install Chromium and its Linux dependencies or enable Cloudflare Browser Rendering.'
-        : pdfCode === 'PDF_RENDERER_UNAVAILABLE'
-          ? 'Premium PDF service is not configured. Install the browser renderer or configure Cloudflare Browser Rendering.'
-          : pdfCode === 'PDF_PRINT_HTML_INVALID'
-            ? 'Quotation contains unsupported remote media for secure PDF printing. Update the quotation branding images.'
-            : pdfCode === 'PDF_RENDERER_BUSY'
-              ? 'Premium PDF engine is busy. Please retry.'
-              : pdfCode === 'PDF_PRINT_OVERFLOW'
-                ? 'Premium document contains a section that does not fit on the printed page.'
-                : 'Premium PDF generation failed on the server. Check the Hostinger runtime PDF logs.';
+      pdfCode === 'PDF_REQUEST_TOO_LARGE'
+        ? 'This document is too large for secure PDF rendering. Reduce embedded media or content and try again.'
+        : pdfCode === 'PDF_CHROMIUM_UNAVAILABLE'
+          ? 'Premium PDF browser missing on the server. Install Chromium and its Linux dependencies or enable Cloudflare Browser Run.'
+          : pdfCode === 'PDF_RENDERER_UNAVAILABLE'
+            ? 'Premium PDF service is not configured. Install the browser renderer or configure Cloudflare Browser Run.'
+            : pdfCode === 'PDF_PRINT_HTML_INVALID'
+              ? 'Quotation contains unsupported remote media for secure PDF printing. Update the quotation branding images.'
+              : pdfCode === 'PDF_RENDERER_BUSY'
+                ? 'Premium PDF engine is busy. Please retry.'
+                : pdfCode === 'PDF_PRINT_OVERFLOW'
+                  ? 'Premium document contains a section that does not fit on the printed page.'
+                  : 'Premium PDF generation failed on the server. Check the Hostinger runtime PDF logs.';
     return new Response(
       denied
         ? failure.message

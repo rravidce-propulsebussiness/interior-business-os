@@ -10,17 +10,20 @@ export type PdfProvider = 'node' | 'cloudflare-rest';
 
 export class PdfServiceError extends Error {
   readonly code: string;
-  readonly status = 503;
+  readonly status: number;
 
   constructor(code: string) {
     super(code);
     this.name = 'PdfServiceError';
     this.code = code;
+    this.status = code === 'PDF_REQUEST_TOO_LARGE' ? 413 : 503;
   }
 }
 
 const MAX_HTML_BYTES = 80_000_000;
 const MAX_EMBEDDED_BYTES = 50_000_000;
+// Cloudflare Browser Run's PDF endpoint accepts request bodies up to 50 MB.
+const MAX_CLOUDFLARE_REQUEST_BYTES = 50_000_000;
 const MAX_PDF_BYTES = 25_000_000;
 const RENDER_TIMEOUT_MS = 30_000;
 let active = 0;
@@ -82,7 +85,7 @@ export function configuredPdfProvider(
   if (value === 'cloudflare-rest') return 'cloudflare-rest';
   if (value === 'node' && !isWorker) return 'node';
   // Hostinger may not have a Chromium binary, but can use the already
-  // provisioned Browser Rendering REST adapter to print the EXACT same
+  // provisioned Browser Run REST adapter to print the EXACT same
   // premium quotation HTML seen in Leads, Quotations and Studio.
   if (!value && env.CF_BROWSER_ACCOUNT_ID && env.CF_BROWSER_API_TOKEN)
     return 'cloudflare-rest';
@@ -127,6 +130,9 @@ export function cloudflarePdfRequest(
 
 async function cloudflarePdf(html: string, options: PdfOptions) {
   const request = cloudflarePdfRequest(html, options);
+  const body = JSON.stringify(request.body);
+  if (Buffer.byteLength(body, 'utf8') > MAX_CLOUDFLARE_REQUEST_BYTES)
+    throw new PdfServiceError('PDF_REQUEST_TOO_LARGE');
   let response: Response;
   try {
     response = await fetch(request.url, {
@@ -135,7 +141,7 @@ async function cloudflarePdf(html: string, options: PdfOptions) {
         Authorization: `Bearer ${request.token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(request.body),
+      body,
       signal: AbortSignal.timeout(RENDER_TIMEOUT_MS),
       redirect: 'error',
     });
@@ -164,7 +170,7 @@ async function applyMetadata(bytes: Uint8Array, options: PdfOptions) {
 
 /**
  * Node uses isolated Chromium. Workers use only the explicitly configured
- * Cloudflare Browser Rendering REST provider. No plain-text fallback.
+ * Cloudflare Browser Run REST provider. No plain-text fallback.
  * Authentication, allowed data projections and snapshot integrity remain
  * the responsibility of the existing protected route and repository.
  */
@@ -247,7 +253,7 @@ export async function renderPdf(
         ).renderNodePdf(safeHtml, options);
       } catch (localError) {
         // Two trustworthy engines, *one HTML template*. When a host lacks
-        // Chromium, fail over to the configured Browser Rendering provider.
+        // Chromium, fail over to the configured Browser Run provider.
         // Never downgrade to the unrelated PDF-lib quotation layout.
         if (
           process.env.CF_BROWSER_ACCOUNT_ID &&
