@@ -4272,28 +4272,28 @@ function AutomationsPanel({
   }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]">
-      <section className="rounded-2xl border border-stone-200 p-5">
+    <div className="wa-automations-grid grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]">
+      <section className="wa-automation-card rounded-2xl border border-stone-200 p-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-lg font-bold text-stone-900">
               Reply automations
             </h3>
-            <p className="mt-1 text-sm leading-6 text-stone-500">
+            <p className="wa-automation-description mt-1 text-sm leading-6 text-stone-500">
               Like WhatsApp Business: a greeting for new customers, an away
               message outside business hours, and keyword replies. One automatic
               reply is sent per customer message.
             </p>
           </div>
-          <span className="rounded-full bg-[#f9eee9] px-3 py-1 text-xs font-semibold text-[#88352B]">
-            {rules.length} rules
+          <span className="wa-rule-count rounded-full bg-[#f9eee9] px-3 py-1 text-xs font-semibold text-[#88352B]">
+            {rules.length} {rules.length === 1 ? 'rule' : 'rules'}
           </span>
         </div>
         <div className="mt-4 space-y-3">
           {rules.map((rule) => (
             <article
               key={rule.id}
-              className="rounded-xl border border-stone-200 bg-stone-50/70 p-4"
+              className="wa-automation-rule rounded-xl border border-stone-200 bg-stone-50/70 p-4"
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
@@ -4333,7 +4333,7 @@ function AutomationsPanel({
             </article>
           ))}
           {!rules.length && (
-            <div className="rounded-xl border border-dashed border-stone-300 p-8 text-center">
+            <div className="wa-automation-empty rounded-xl border border-dashed border-stone-300 p-8 text-center">
               <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-[#f9eee9] text-xl">
                 ↗
               </div>
@@ -4359,7 +4359,7 @@ function AutomationsPanel({
       {canManage ? (
         <form
           onSubmit={saveRule}
-          className="space-y-4 rounded-2xl border border-stone-200 bg-[#fffdfa] p-5"
+          className="wa-automation-form space-y-4 rounded-2xl border border-stone-200 bg-[#fffdfa] p-5"
         >
           <div>
             <h3 className="text-lg font-bold text-stone-900">

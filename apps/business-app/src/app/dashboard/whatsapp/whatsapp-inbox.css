@@ -1324,26 +1324,66 @@
   .wa-sidebar {
     padding: 10px 8px;
   }
-  /* Keep every WhatsApp workspace destination visible on phones. The
-     horizontally scrolling strip used at tablet widths hid the later tabs
-     with no clear indication that more navigation was available. */
-  .wa-nav {
+  /* WhatsApp's own mobile navigation stays in one compact horizontal row.
+     A two-column grid made the header taller than the inbox on narrow phones. */
+  .wa-skin .wa-sidebar {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 5px;
-    overflow: visible;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 42px 48px 44px;
+    gap: 2px;
+    align-items: center;
+    padding: 7px 10px 5px;
+    border-right: 0;
+    border-bottom: 1px solid var(--wa-line);
+  }
+  .wa-skin .wa-back-link {
+    justify-self: start;
+    width: 38px;
+    height: 38px;
+    margin: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgb(17 27 33 / 10%);
+  }
+  .wa-skin .wa-brand {
+    align-self: center;
+    justify-self: center;
     padding: 0;
   }
-  .wa-nav-item {
-    min-width: 0;
-    min-height: 40px;
-    justify-content: flex-start;
-    padding-inline: 9px;
-    white-space: nowrap;
+  .wa-skin .wa-brand-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
   }
-  .wa-nav-item span:not(.wa-nav-count) {
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .wa-skin .wa-account-health {
+    display: none;
+  }
+  .wa-skin .wa-nav {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    flex-direction: row;
+    justify-content: space-between;
+    gap: 3px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0 1px 3px;
+    border-bottom: 1px solid #d5dadd;
+    scrollbar-width: none;
+  }
+  .wa-skin .wa-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .wa-skin .wa-nav-item {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    flex: 0 0 36px;
+  }
+  .wa-skin .wa-nav-item svg {
+    width: 19px;
+    height: 19px;
   }
   .wa-topbar {
     align-items: flex-start;
@@ -1353,6 +1393,7 @@
   .wa-topbar-actions {
     width: 100%;
     flex-wrap: wrap;
+    gap: 8px;
   }
   .wa-connection-select {
     max-width: none;
@@ -1366,6 +1407,50 @@
   }
   .wa-content {
     padding: 12px 9px;
+  }
+  .wa-skin:not(.wa-skin-inbox) .wa-content {
+    padding: 14px 12px calc(24px + env(safe-area-inset-bottom));
+  }
+  .wa-skin .wa-section-heading {
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+  }
+  .wa-skin .wa-section-heading h2 {
+    font-size: 23px;
+  }
+  .wa-skin .wa-section-heading .wa-add-contact {
+    min-height: 42px;
+    padding: 0 13px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .wa-automations-grid {
+    gap: 14px;
+  }
+  .wa-automation-card,
+  .wa-automation-form {
+    border-radius: 18px;
+    padding: 17px;
+  }
+  .wa-automation-card > div:first-child {
+    align-items: flex-start;
+  }
+  .wa-automation-card h3,
+  .wa-automation-form h3 {
+    font-size: 18px;
+    line-height: 1.25;
+  }
+  .wa-automation-description {
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  .wa-automation-rule {
+    border-radius: 16px;
+    padding: 14px;
+  }
+  .wa-automation-empty {
+    padding: 24px 14px;
   }
   .wa-inbox-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -2795,29 +2880,30 @@
   .wa-skin.wa-fullscreen .wa-sidebar {
     min-height: 0;
     align-items: center;
-    padding: 6px 8px;
+    grid-template-rows: 42px 48px 44px;
+    padding: 7px 10px 5px;
   }
 
   .wa-skin.wa-fullscreen .wa-brand {
-    padding: 0 0 6px;
+    padding: 0;
   }
 
   .wa-skin.wa-fullscreen .wa-nav {
     display: flex;
     width: 100%;
     flex-direction: row;
-    justify-content: flex-start;
-    gap: 4px;
+    justify-content: space-between;
+    gap: 3px;
     overflow-x: auto;
-    padding: 0 0 2px;
+    padding: 0 1px 3px;
   }
 
   .wa-skin.wa-fullscreen .wa-nav-item {
-    width: 40px;
-    min-width: 40px;
-    height: 40px;
-    min-height: 40px;
-    flex: 0 0 40px;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    flex: 0 0 36px;
     justify-content: center;
     padding: 0;
   }
@@ -2878,6 +2964,64 @@
   .wa-mobile-back svg {
     width: 22px;
     height: 22px;
+  }
+}
+
+/* Automation screen cards use the same clean, green-accented mobile style as
+   the WhatsApp inbox while keeping the editor available below the rule list. */
+.wa-skin .wa-automation-card,
+.wa-skin .wa-automation-form {
+  border-color: var(--wa-line);
+  background: #fff;
+  box-shadow: 0 12px 32px -28px rgb(17 27 33 / 45%);
+}
+.wa-skin .wa-automation-card h3,
+.wa-skin .wa-automation-form h3 {
+  color: var(--wa-text);
+  letter-spacing: -0.035em;
+}
+.wa-skin .wa-automation-description {
+  color: var(--wa-muted);
+}
+.wa-skin .wa-rule-count {
+  background: #e7fce3;
+  color: var(--wa-green-dark);
+}
+.wa-skin .wa-automation-rule {
+  border-color: var(--wa-line);
+  background: #fbfcfc;
+}
+.wa-skin .wa-automation-rule > p {
+  background: #fff;
+  color: var(--wa-text);
+}
+.wa-skin .wa-automation-empty {
+  border-color: #cbd5d7;
+}
+.wa-skin .wa-automation-form input,
+.wa-skin .wa-automation-form select,
+.wa-skin .wa-automation-form textarea {
+  min-height: 42px;
+  border: 1px solid #d8dfe2 !important;
+  border-radius: 11px !important;
+  padding: 10px 12px;
+  background: #fff;
+  color: var(--wa-text);
+  font-size: 14px;
+}
+.wa-skin .wa-automation-form textarea {
+  min-height: 112px;
+}
+
+@media (max-width: 680px) {
+  .wa-skin .wa-automation-form > button[type='submit'],
+  .wa-skin .wa-automation-form > button:not([type]) {
+    min-height: 44px;
+  }
+  .wa-skin .wa-rule-count {
+    min-width: 62px;
+    padding: 10px 12px;
+    text-align: center;
   }
 }
 
