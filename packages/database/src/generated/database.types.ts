@@ -5105,6 +5105,14 @@ export interface Database {
           form_name: string;
           status: string;
           whatsapp_connection_id: string | null;
+          brochure_automation_enabled: boolean;
+          brochure_automation_connection_id: string | null;
+          brochure_service_template_name: string;
+          brochure_service_template_language: string;
+          brochure_carousel_template_name: string;
+          brochure_carousel_template_language: string;
+          construction_brochure_url: string;
+          interiors_brochure_url: string;
           confirm_enabled: boolean;
           template_name: string;
           template_language: string;
@@ -5132,6 +5140,14 @@ export interface Database {
           form_name?: string;
           status?: string;
           whatsapp_connection_id?: string | null;
+          brochure_automation_enabled?: boolean;
+          brochure_automation_connection_id?: string | null;
+          brochure_service_template_name?: string;
+          brochure_service_template_language?: string;
+          brochure_carousel_template_name?: string;
+          brochure_carousel_template_language?: string;
+          construction_brochure_url?: string;
+          interiors_brochure_url?: string;
           confirm_enabled?: boolean;
           template_name?: string;
           template_language?: string;
@@ -5159,6 +5175,14 @@ export interface Database {
           form_name?: string;
           status?: string;
           whatsapp_connection_id?: string | null;
+          brochure_automation_enabled?: boolean;
+          brochure_automation_connection_id?: string | null;
+          brochure_service_template_name?: string;
+          brochure_service_template_language?: string;
+          brochure_carousel_template_name?: string;
+          brochure_carousel_template_language?: string;
+          construction_brochure_url?: string;
+          interiors_brochure_url?: string;
           confirm_enabled?: boolean;
           template_name?: string;
           template_language?: string;
@@ -12529,6 +12553,16 @@ export interface Database {
       marketplace_sellers_review: {
         Args: { p_status?: string };
         Returns: Json;
+      };
+      meta_lead_brochure_logged: {
+        Args: {
+          p_organization_id: string;
+          p_leadgen_id: string;
+          p_connection_id: string;
+          p_sent: boolean;
+          p_error?: string;
+        };
+        Returns: undefined;
       };
       meta_lead_confirmation_logged: {
         Args: {

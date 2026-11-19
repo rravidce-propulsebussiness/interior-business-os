@@ -297,8 +297,294 @@ type GraphTemplate = {
   name: string;
   language: string;
   status: string;
-  components?: Array<{ type: string; format?: string; text?: string }>;
+  components?: Array<{
+    type: string;
+    format?: string;
+    text?: string;
+    cards?: Array<{
+      components?: Array<{
+        type: string;
+        text?: string;
+        buttons?: Array<{ type?: string; url?: string }>;
+      }>;
+    }>;
+    buttons?: Array<{ type?: string; url?: string }>;
+  }>;
 };
+
+export type LeadBrochureTemplateOption = {
+  name: string;
+  language: string;
+  body: string;
+  kind: 'service' | 'carousel';
+  cardCount: number;
+  brochureUrls: string[];
+};
+
+function leadBrochureTemplate(
+  template: GraphTemplate,
+): LeadBrochureTemplateOption | null {
+  if (template.status !== 'APPROVED') return null;
+  const components = template.components ?? [];
+  const carousel = components.find((c) => c.type.toUpperCase() === 'CAROUSEL');
+  if (carousel) {
+    const cards = carousel.cards ?? [];
+    if (cards.length !== 2) return null;
+    const body =
+      components.find((c) => c.type.toUpperCase() === 'BODY')?.text ?? '';
+    const cardUrls = cards.flatMap((card) =>
+      (card.components ?? []).flatMap((component) =>
+        (component.buttons ?? [])
+          .filter((button) => button.type?.toUpperCase() === 'URL')
+          .map((button) => button.url ?? ''),
+      ),
+    );
+    if (
+      components.some((c) => /\{\{/.test(c.text ?? '')) ||
+      cardUrls.length !== 2 ||
+      cardUrls.some((url) => !/^https:\/\//i.test(url))
+    )
+      return null;
+    return {
+      name: template.name,
+      language: template.language,
+      body,
+      kind: 'carousel',
+      cardCount: cards.length,
+      brochureUrls: cardUrls,
+    };
+  }
+  const body =
+    components.find((c) => c.type.toUpperCase() === 'BODY')?.text ?? '';
+  if (!body || templatePlaceholderCount(body) !== 3) return null;
+  return {
+    name: template.name,
+    language: template.language,
+    body,
+    kind: 'service',
+    cardCount: 0,
+    brochureUrls: [],
+  };
+}
+
+export type LeadBrochureAutomationData = {
+  forms: Array<{
+    id: string;
+    formName: string;
+    formId: string;
+    pageName: string;
+    enabled: boolean;
+    connectionId: string;
+    serviceTemplateName: string;
+    serviceTemplateLanguage: string;
+    carouselTemplateName: string;
+    carouselTemplateLanguage: string;
+    constructionUrl: string;
+    interiorsUrl: string;
+  }>;
+  connections: Array<{ id: string; name: string; phone: string }>;
+  templates: Record<string, LeadBrochureTemplateOption[]>;
+};
+
+/** Lists linked Meta forms and approved WhatsApp templates without exposing credentials. */
+export async function loadLeadBrochureAutomationData(): Promise<
+  Result & { data: LeadBrochureAutomationData }
+> {
+  const empty: LeadBrochureAutomationData = {
+    forms: [],
+    connections: [],
+    templates: {},
+  };
+  try {
+    const { s, database } = await manager();
+    await s.authorization.requirePermission(s.org, 'automation.view');
+    const [formsResult, connectionResult] = await Promise.all([
+      database
+        .from('meta_lead_forms')
+        .select(
+          'id,form_id,form_name,status,brochure_automation_enabled,brochure_automation_connection_id,brochure_service_template_name,brochure_service_template_language,brochure_carousel_template_name,brochure_carousel_template_language,construction_brochure_url,interiors_brochure_url,page_row_id',
+        )
+        .eq('organization_id', s.org)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false }),
+      database
+        .from('whatsapp_business_connections')
+        .select('id,business_name,verified_name,display_phone_number,status')
+        .eq('organization_id', s.org)
+        .eq('status', 'connected'),
+    ]);
+    if (formsResult.error || connectionResult.error) throw new Error('lookup');
+    const pageIds = [
+      ...new Set((formsResult.data ?? []).map((row) => row.page_row_id)),
+    ];
+    const pagesResult = pageIds.length
+      ? await database
+          .from('meta_lead_pages')
+          .select('id,page_name')
+          .eq('organization_id', s.org)
+          .in('id', pageIds)
+      : { data: [], error: null };
+    if (pagesResult.error) throw new Error('lookup');
+    const pages = new Map(
+      (pagesResult.data ?? []).map((page) => [page.id, page.page_name]),
+    );
+    const connections = (connectionResult.data ?? []).map((item) => ({
+      id: item.id,
+      name: item.verified_name || item.business_name || 'WhatsApp business',
+      phone: item.display_phone_number || '',
+    }));
+    const templates: LeadBrochureAutomationData['templates'] = {};
+    await Promise.all(
+      connections.map(async (connection) => {
+        try {
+          const { all } = await approvedTemplates(s.org, connection.id);
+          templates[connection.id] = all
+            .map(leadBrochureTemplate)
+            .filter(
+              (item): item is LeadBrochureTemplateOption => item !== null,
+            );
+        } catch {
+          templates[connection.id] = [];
+        }
+      }),
+    );
+    return {
+      ok: true,
+      message: '',
+      data: {
+        forms: (formsResult.data ?? []).map((row) => ({
+          id: row.id,
+          formName: row.form_name,
+          formId: row.form_id,
+          pageName: pages.get(row.page_row_id) ?? 'Facebook Page',
+          enabled: row.brochure_automation_enabled,
+          connectionId: row.brochure_automation_connection_id ?? '',
+          serviceTemplateName: row.brochure_service_template_name,
+          serviceTemplateLanguage: row.brochure_service_template_language,
+          carouselTemplateName: row.brochure_carousel_template_name,
+          carouselTemplateLanguage: row.brochure_carousel_template_language,
+          constructionUrl: row.construction_brochure_url,
+          interiorsUrl: row.interiors_brochure_url,
+        })),
+        connections,
+        templates,
+      },
+    };
+  } catch (error) {
+    return {
+      ...failure(error, 'Could not load lead-form automation settings.'),
+      data: empty,
+    };
+  }
+}
+
+const brochureAutomationInput = z
+  .object({
+    formId: z.uuid(),
+    enabled: z.boolean(),
+    connectionId: z.union([z.uuid(), z.literal('')]),
+    serviceTemplateName: z.string().max(512),
+    serviceTemplateLanguage: z.string().max(10),
+    carouselTemplateName: z.string().max(512),
+    carouselTemplateLanguage: z.string().max(10),
+    constructionUrl: z.string().trim().max(2048),
+    interiorsUrl: z.string().trim().max(2048),
+  })
+  .strict();
+
+/** Save the lead-to-brochure workflow on one linked Meta form. */
+export async function saveLeadBrochureAutomation(
+  input: unknown,
+): Promise<Result> {
+  try {
+    const parsed = brochureAutomationInput.safeParse(input);
+    if (!parsed.success)
+      throw new MetaLeadError('Check the lead-form automation settings.');
+    const value = parsed.data;
+    const { s, database } = await manager();
+    await s.authorization.requirePermission(s.org, 'automation.manage');
+    for (const url of [value.constructionUrl, value.interiorsUrl]) {
+      if (url) {
+        let parsedUrl: URL;
+        try {
+          parsedUrl = new URL(url);
+        } catch {
+          throw new MetaLeadError('Enter valid HTTPS brochure links.');
+        }
+        if (parsedUrl.protocol !== 'https:')
+          throw new MetaLeadError('Brochure links must use HTTPS.');
+      }
+    }
+    if (value.enabled) {
+      if (!value.connectionId)
+        throw new MetaLeadError('Choose a connected WhatsApp number.');
+      if (!value.constructionUrl || !value.interiorsUrl)
+        throw new MetaLeadError(
+          'Add both brochure links before activating this workflow.',
+        );
+      const { all } = await approvedTemplates(s.org, value.connectionId);
+      const service = all
+        .map(leadBrochureTemplate)
+        .find(
+          (template) =>
+            template?.kind === 'service' &&
+            template.name === value.serviceTemplateName &&
+            template.language === value.serviceTemplateLanguage,
+        );
+      const carousel = all
+        .map(leadBrochureTemplate)
+        .find(
+          (template) =>
+            template?.kind === 'carousel' &&
+            template.name === value.carouselTemplateName &&
+            template.language === value.carouselTemplateLanguage &&
+            [value.constructionUrl, value.interiorsUrl].every((url) =>
+              template.brochureUrls.includes(url),
+            ),
+        );
+      if (!service)
+        throw new MetaLeadError(
+          'Select an approved service template with exactly three body variables.',
+        );
+      if (!carousel)
+        throw new MetaLeadError(
+          'Select an approved two-card carousel template with static brochure links.',
+        );
+    }
+    const { data, error } = await database
+      .from('meta_lead_forms')
+      .update({
+        brochure_automation_enabled: value.enabled,
+        brochure_automation_connection_id: value.connectionId || null,
+        brochure_service_template_name: value.serviceTemplateName,
+        brochure_service_template_language: value.serviceTemplateLanguage,
+        brochure_carousel_template_name: value.carouselTemplateName,
+        brochure_carousel_template_language: value.carouselTemplateLanguage,
+        construction_brochure_url: value.constructionUrl,
+        interiors_brochure_url: value.interiorsUrl,
+        confirm_enabled: false,
+        quote_enabled: false,
+      })
+      .eq('organization_id', s.org)
+      .eq('id', value.formId)
+      .eq('status', 'active')
+      .select('id');
+    if (error || !data.length)
+      throw new MetaLeadError(
+        'Could not save the brochure automation for this form.',
+      );
+    revalidatePath('/dashboard/whatsapp');
+    revalidatePath('/dashboard/crm/leads');
+    return {
+      ok: true,
+      message: value.enabled
+        ? 'Lead brochure automation is active. New Meta leads will receive the matching brochure or two-card carousel.'
+        : 'Lead brochure automation is paused.',
+    };
+  } catch (error) {
+    return failure(error, 'Could not save lead-form automation.');
+  }
+}
 
 /** A template can be sent automatically only if we can fill every variable. */
 function usableTemplate(template: GraphTemplate): MetaTemplateOption | null {

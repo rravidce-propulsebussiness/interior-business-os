@@ -17,6 +17,7 @@ import {
   mapMetaLead,
   type MetaLead,
 } from './meta-lead-fields';
+import { classifyLeadServiceInterest } from './meta-lead-brochure-automation';
 
 /**
  * Meta (Facebook/Instagram) Lead Ads → CRM.
@@ -433,9 +434,17 @@ type FormRow = {
   template_language: string;
   template_parameters: number;
   default_country_code: string;
+  brochure_automation_enabled: boolean;
+  brochure_automation_connection_id: string | null;
+  brochure_service_template_name: string;
+  brochure_service_template_language: string;
+  brochure_carousel_template_name: string;
+  brochure_carousel_template_language: string;
+  construction_brochure_url: string;
+  interiors_brochure_url: string;
 };
 const FORM_COLUMNS =
-  'id,organization_id,page_row_id,form_id,form_name,whatsapp_connection_id,confirm_enabled,template_name,template_language,template_parameters,default_country_code';
+  'id,organization_id,page_row_id,form_id,form_name,whatsapp_connection_id,confirm_enabled,template_name,template_language,template_parameters,default_country_code,brochure_automation_enabled,brochure_automation_connection_id,brochure_service_template_name,brochure_service_template_language,brochure_carousel_template_name,brochure_carousel_template_language,construction_brochure_url,interiors_brochure_url';
 
 async function noteFormError(
   database: Database,
@@ -536,8 +545,18 @@ export async function processMetaLead(input: {
     lead_name?: string;
     company_name?: string;
   };
-  if (result.status !== 'imported' || !input.notify || !form.confirm_enabled)
+  if (result.status !== 'imported' || !input.notify)
     return { status: result.status };
+
+  if (form.brochure_automation_enabled) {
+    const whatsapp = await sendLeadBrochure(database, form, input.leadgenId, {
+      waId: mapped.wa_id,
+      name: mapped.name,
+      serviceType: mapped.service_type,
+    });
+    return { status: 'imported', whatsapp };
+  }
+  if (!form.confirm_enabled) return { status: result.status };
 
   const whatsapp = await sendConfirmation(database, form, input.leadgenId, {
     waId: mapped.wa_id,
@@ -546,6 +565,112 @@ export async function processMetaLead(input: {
     companyName: result.company_name ?? '',
   });
   return { status: 'imported', whatsapp };
+}
+
+async function sendLeadBrochure(
+  database: Database,
+  form: FormRow,
+  leadgenId: string,
+  lead: { waId: string; name: string; serviceType: string },
+): Promise<'sent' | 'skipped' | 'failed'> {
+  const connectionId = form.brochure_automation_connection_id;
+  const log = (sent: boolean, error?: string) =>
+    connectionId
+      ? database.rpc('meta_lead_brochure_logged', {
+          p_organization_id: form.organization_id,
+          p_leadgen_id: leadgenId,
+          p_connection_id: connectionId,
+          p_sent: sent,
+          ...(error ? { p_error: error } : {}),
+        })
+      : Promise.resolve({ data: null, error: null });
+  if (!connectionId) return 'skipped';
+  try {
+    if (!lead.waId) {
+      await log(
+        false,
+        'The phone number on the form is not a WhatsApp-ready number',
+      );
+      return 'failed';
+    }
+    const contact = await database
+      .from('whatsapp_contacts')
+      .select('opted_out_at')
+      .eq('organization_id', form.organization_id)
+      .eq('connection_id', connectionId)
+      .eq('wa_id', lead.waId)
+      .maybeSingle();
+    if (contact.data?.opted_out_at) {
+      await log(false, 'This contact has opted out of WhatsApp messages');
+      return 'skipped';
+    }
+    const interest = classifyLeadServiceInterest(lead.serviceType);
+    const singleService =
+      interest === 'construction' || interest === 'interiors';
+    const connection = await getConnection(form.organization_id, connectionId);
+    const templateName = singleService
+      ? form.brochure_service_template_name
+      : form.brochure_carousel_template_name;
+    const templateLanguage = singleService
+      ? form.brochure_service_template_language
+      : form.brochure_carousel_template_language;
+    const parameters = singleService
+      ? [
+          lead.name.trim() || 'there',
+          interest === 'construction' ? 'Home construction' : 'Home interiors',
+          interest === 'construction'
+            ? form.construction_brochure_url
+            : form.interiors_brochure_url,
+        ]
+      : [];
+    const sent = await graphRequest<{ messages?: Array<{ id?: string }> }>(
+      `${connection.phone_number_id}/messages`,
+      connection.accessToken,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: lead.waId,
+          type: 'template',
+          template: {
+            name: templateName,
+            language: { code: templateLanguage },
+            ...(parameters.length
+              ? {
+                  components: [
+                    {
+                      type: 'body',
+                      parameters: parameters.map((text) => ({
+                        type: 'text',
+                        text,
+                      })),
+                    },
+                  ],
+                }
+              : {}),
+          },
+        }),
+      },
+    );
+    const providerId = sent.messages?.[0]?.id ?? '';
+    if (!providerId) throw new Error('META_MESSAGE_ID_MISSING');
+    await database.rpc('whatsapp_message_log_outbound', {
+      p_organization_id: form.organization_id,
+      p_connection_id: connectionId,
+      p_to: lead.waId,
+      p_provider_id: providerId,
+      p_body: singleService
+        ? `Lead brochure · ${interest}`
+        : 'Lead brochure carousel · construction and interiors',
+      p_type: 'template',
+    });
+    await log(true);
+    return 'sent';
+  } catch (error) {
+    await log(false, whatsappErrorText(error));
+    return 'failed';
+  }
 }
 
 async function sendConfirmation(

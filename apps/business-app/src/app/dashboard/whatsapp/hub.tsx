@@ -22,6 +22,7 @@ import {
 import { createBrowserDatabase } from '@business-os/database/browser';
 import { parseContactSheet } from '@/lib/whatsapp-contact-sheet';
 import { metaBillingUrl, whatsappErrorHelp } from '@/lib/whatsapp-error-help';
+import { LeadBrochureAutomationPanel } from './lead-brochure-automation';
 
 type Connection = { id: string; name: string; phone: string; status: string };
 type Template = {
@@ -465,6 +466,9 @@ export function WhatsAppHub({
   const connections = liveConnections.length ? liveConnections : allConnections;
   const [tab, setTab] = useState<Tab>(initialTab);
   const [automationFormOpen, setAutomationFormOpen] = useState(false);
+  const [automationView, setAutomationView] = useState<
+    'lead-forms' | 'replies'
+  >('lead-forms');
   const [toolsMenuOpen, setToolsMenuOpen] = useState(false);
   useEffect(() => {
     const previous = document.body.style.overflow;
@@ -714,9 +718,12 @@ export function WhatsAppHub({
               <button
                 type="button"
                 className="wa-add-contact"
-                onClick={() => setAutomationFormOpen(true)}
+                onClick={() => {
+                  setAutomationView('replies');
+                  setAutomationFormOpen(true);
+                }}
               >
-                <NavIcon kind="compose" /> New automation
+                <NavIcon kind="compose" /> New reply rule
               </button>
             )
           ) : tab === 'contacts' ? (
@@ -788,12 +795,44 @@ export function WhatsAppHub({
           />
         )}
         {tab === 'automations' && (
-          <AutomationsPanel
-            connectionId={connectionId}
-            canManage={canManage}
-            formOpen={automationFormOpen}
-            onFormClose={() => setAutomationFormOpen(false)}
-          />
+          <>
+            <div
+              className="flex gap-2 px-4 pt-3 sm:px-6"
+              role="tablist"
+              aria-label="WhatsApp automation type"
+            >
+              {(
+                [
+                  ['lead-forms', 'Lead forms'],
+                  ['replies', 'Reply automations'],
+                ] as const
+              ).map(([view, label]) => (
+                <button
+                  key={view}
+                  type="button"
+                  role="tab"
+                  aria-selected={automationView === view}
+                  onClick={() => {
+                    setAutomationView(view);
+                    setAutomationFormOpen(false);
+                  }}
+                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${automationView === view ? 'bg-emerald-100 text-emerald-800' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+            {automationView === 'lead-forms' ? (
+              <LeadBrochureAutomationPanel canManage={canManage} />
+            ) : (
+              <AutomationsPanel
+                connectionId={connectionId}
+                canManage={canManage}
+                formOpen={automationFormOpen}
+                onFormClose={() => setAutomationFormOpen(false)}
+              />
+            )}
+          </>
         )}
         {tab === 'templates' && (
           <TemplatesPanel
