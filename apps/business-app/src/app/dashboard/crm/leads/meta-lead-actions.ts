@@ -304,6 +304,7 @@ type GraphTemplate = {
     cards?: Array<{
       components?: Array<{
         type: string;
+        format?: string;
         text?: string;
         buttons?: Array<{ type?: string; url?: string }>;
       }>;
@@ -319,6 +320,7 @@ export type LeadBrochureTemplateOption = {
   kind: 'service' | 'carousel';
   cardCount: number;
   brochureUrls: string[];
+  imageCards: boolean;
 };
 
 function leadBrochureTemplate(
@@ -339,10 +341,18 @@ function leadBrochureTemplate(
           .map((button) => button.url ?? ''),
       ),
     );
+    const imageCards = cards.every((card) =>
+      card.components?.some(
+        (component) =>
+          component.type.toUpperCase() === 'HEADER' &&
+          component.format?.toUpperCase() === 'IMAGE',
+      ),
+    );
     if (
       components.some((c) => /\{\{/.test(c.text ?? '')) ||
       cardUrls.length !== 2 ||
-      cardUrls.some((url) => !/^https:\/\//i.test(url))
+      cardUrls.some((url) => !/^https:\/\//i.test(url) || /\{\{/.test(url)) ||
+      !imageCards
     )
       return null;
     return {
@@ -352,10 +362,17 @@ function leadBrochureTemplate(
       kind: 'carousel',
       cardCount: cards.length,
       brochureUrls: cardUrls,
+      imageCards,
     };
   }
   const body =
     components.find((c) => c.type.toUpperCase() === 'BODY')?.text ?? '';
+  const header = components.find((c) => c.type.toUpperCase() === 'HEADER');
+  if (
+    header &&
+    (header.format?.toUpperCase() !== 'TEXT' || /\{\{/.test(header.text ?? ''))
+  )
+    return null;
   if (!body || templatePlaceholderCount(body) !== 3) return null;
   return {
     name: template.name,
@@ -364,6 +381,7 @@ function leadBrochureTemplate(
     kind: 'service',
     cardCount: 0,
     brochureUrls: [],
+    imageCards: false,
   };
 }
 
@@ -381,6 +399,8 @@ export type LeadBrochureAutomationData = {
     carouselTemplateLanguage: string;
     constructionUrl: string;
     interiorsUrl: string;
+    constructionImageUrl: string;
+    interiorsImageUrl: string;
   }>;
   connections: Array<{ id: string; name: string; phone: string }>;
   templates: Record<string, LeadBrochureTemplateOption[]>;
@@ -402,7 +422,7 @@ export async function loadLeadBrochureAutomationData(): Promise<
       database
         .from('meta_lead_forms')
         .select(
-          'id,form_id,form_name,status,brochure_automation_enabled,brochure_automation_connection_id,brochure_service_template_name,brochure_service_template_language,brochure_carousel_template_name,brochure_carousel_template_language,construction_brochure_url,interiors_brochure_url,page_row_id',
+          'id,form_id,form_name,status,brochure_automation_enabled,brochure_automation_connection_id,brochure_service_template_name,brochure_service_template_language,brochure_carousel_template_name,brochure_carousel_template_language,construction_brochure_url,interiors_brochure_url,construction_brochure_image_url,interiors_brochure_image_url,page_row_id',
         )
         .eq('organization_id', s.org)
         .eq('status', 'active')
@@ -465,6 +485,8 @@ export async function loadLeadBrochureAutomationData(): Promise<
           carouselTemplateLanguage: row.brochure_carousel_template_language,
           constructionUrl: row.construction_brochure_url,
           interiorsUrl: row.interiors_brochure_url,
+          constructionImageUrl: row.construction_brochure_image_url,
+          interiorsImageUrl: row.interiors_brochure_image_url,
         })),
         connections,
         templates,
@@ -489,6 +511,8 @@ const brochureAutomationInput = z
     carouselTemplateLanguage: z.string().max(10),
     constructionUrl: z.string().trim().max(2048),
     interiorsUrl: z.string().trim().max(2048),
+    constructionImageUrl: z.string().trim().max(2048),
+    interiorsImageUrl: z.string().trim().max(2048),
   })
   .strict();
 
@@ -503,7 +527,12 @@ export async function saveLeadBrochureAutomation(
     const value = parsed.data;
     const { s, database } = await manager();
     await s.authorization.requirePermission(s.org, 'automation.manage');
-    for (const url of [value.constructionUrl, value.interiorsUrl]) {
+    for (const url of [
+      value.constructionUrl,
+      value.interiorsUrl,
+      value.constructionImageUrl,
+      value.interiorsImageUrl,
+    ]) {
       if (url) {
         let parsedUrl: URL;
         try {
@@ -521,6 +550,10 @@ export async function saveLeadBrochureAutomation(
       if (!value.constructionUrl || !value.interiorsUrl)
         throw new MetaLeadError(
           'Add both brochure links before activating this workflow.',
+        );
+      if (!value.constructionImageUrl || !value.interiorsImageUrl)
+        throw new MetaLeadError(
+          'Add a cover image link for each carousel card before activating.',
         );
       const { all } = await approvedTemplates(s.org, value.connectionId);
       const service = all
@@ -562,6 +595,8 @@ export async function saveLeadBrochureAutomation(
         brochure_carousel_template_language: value.carouselTemplateLanguage,
         construction_brochure_url: value.constructionUrl,
         interiors_brochure_url: value.interiorsUrl,
+        construction_brochure_image_url: value.constructionImageUrl,
+        interiors_brochure_image_url: value.interiorsImageUrl,
         confirm_enabled: false,
         quote_enabled: false,
       })

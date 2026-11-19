@@ -78,6 +78,8 @@ export function LeadBrochureAutomationPanel({
       carouselTemplateLanguage: selected.carouselTemplateLanguage,
       constructionUrl: selected.constructionUrl,
       interiorsUrl: selected.interiorsUrl,
+      constructionImageUrl: selected.constructionImageUrl,
+      interiorsImageUrl: selected.interiorsImageUrl,
     });
     setBusy(false);
     if (!result.ok) setError(result.message);
@@ -279,6 +281,30 @@ export function LeadBrochureAutomationPanel({
                           className={inputClass}
                         />
                       </label>
+                      <label className="mt-3 block text-sm font-medium text-stone-700">
+                        Construction carousel cover image URL
+                        <input
+                          type="url"
+                          value={selected.constructionImageUrl}
+                          onChange={(event) =>
+                            update({ constructionImageUrl: event.target.value })
+                          }
+                          placeholder="https://example.com/construction-cover.jpg"
+                          className={inputClass}
+                        />
+                      </label>
+                      <label className="mt-3 block text-sm font-medium text-stone-700">
+                        Interiors carousel cover image URL
+                        <input
+                          type="url"
+                          value={selected.interiorsImageUrl}
+                          onChange={(event) =>
+                            update({ interiorsImageUrl: event.target.value })
+                          }
+                          placeholder="https://example.com/interiors-cover.jpg"
+                          className={inputClass}
+                        />
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -365,9 +391,9 @@ export function LeadBrochureAutomationPanel({
                       </label>
                       {!carouselTemplates.length && selected.connectionId && (
                         <p className="mt-1 text-xs text-amber-800">
-                          No approved 2-card carousel template found. Create one
-                          in WhatsApp Manager with both brochure links in its
-                          cards.
+                          No approved 2-card image carousel template found.
+                          Create one in WhatsApp Manager with both brochure
+                          links in its cards.
                         </p>
                       )}
                     </div>

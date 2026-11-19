@@ -5113,6 +5113,8 @@ export interface Database {
           brochure_carousel_template_language: string;
           construction_brochure_url: string;
           interiors_brochure_url: string;
+          construction_brochure_image_url: string;
+          interiors_brochure_image_url: string;
           confirm_enabled: boolean;
           template_name: string;
           template_language: string;
@@ -5148,6 +5150,8 @@ export interface Database {
           brochure_carousel_template_language?: string;
           construction_brochure_url?: string;
           interiors_brochure_url?: string;
+          construction_brochure_image_url?: string;
+          interiors_brochure_image_url?: string;
           confirm_enabled?: boolean;
           template_name?: string;
           template_language?: string;
@@ -5183,6 +5187,8 @@ export interface Database {
           brochure_carousel_template_language?: string;
           construction_brochure_url?: string;
           interiors_brochure_url?: string;
+          construction_brochure_image_url?: string;
+          interiors_brochure_image_url?: string;
           confirm_enabled?: boolean;
           template_name?: string;
           template_language?: string;

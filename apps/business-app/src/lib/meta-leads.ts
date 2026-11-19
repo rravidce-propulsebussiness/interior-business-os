@@ -442,9 +442,11 @@ type FormRow = {
   brochure_carousel_template_language: string;
   construction_brochure_url: string;
   interiors_brochure_url: string;
+  construction_brochure_image_url: string;
+  interiors_brochure_image_url: string;
 };
 const FORM_COLUMNS =
-  'id,organization_id,page_row_id,form_id,form_name,whatsapp_connection_id,confirm_enabled,template_name,template_language,template_parameters,default_country_code,brochure_automation_enabled,brochure_automation_connection_id,brochure_service_template_name,brochure_service_template_language,brochure_carousel_template_name,brochure_carousel_template_language,construction_brochure_url,interiors_brochure_url';
+  'id,organization_id,page_row_id,form_id,form_name,whatsapp_connection_id,confirm_enabled,template_name,template_language,template_parameters,default_country_code,brochure_automation_enabled,brochure_automation_connection_id,brochure_service_template_name,brochure_service_template_language,brochure_carousel_template_name,brochure_carousel_template_language,construction_brochure_url,interiors_brochure_url,construction_brochure_image_url,interiors_brochure_image_url';
 
 async function noteFormError(
   database: Database,
@@ -623,6 +625,43 @@ async function sendLeadBrochure(
             : form.interiors_brochure_url,
         ]
       : [];
+    const carouselComponents = singleService
+      ? undefined
+      : [
+          {
+            type: 'carousel',
+            cards: [
+              {
+                card_index: 0,
+                components: [
+                  {
+                    type: 'header',
+                    parameters: [
+                      {
+                        type: 'image',
+                        image: { link: form.construction_brochure_image_url },
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                card_index: 1,
+                components: [
+                  {
+                    type: 'header',
+                    parameters: [
+                      {
+                        type: 'image',
+                        image: { link: form.interiors_brochure_image_url },
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ];
     const sent = await graphRequest<{ messages?: Array<{ id?: string }> }>(
       `${connection.phone_number_id}/messages`,
       connection.accessToken,
@@ -649,6 +688,7 @@ async function sendLeadBrochure(
                   ],
                 }
               : {}),
+            ...(carouselComponents ? { components: carouselComponents } : {}),
           },
         }),
       },
