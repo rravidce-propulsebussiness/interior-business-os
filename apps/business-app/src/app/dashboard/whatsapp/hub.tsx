@@ -242,8 +242,6 @@ function triggerLabel(rule: Rule) {
 }
 type Tab =
   | 'inbox'
-  | 'updates'
-  | 'communities'
   | 'calling'
   | 'contacts'
   | 'broadcasts'
@@ -559,58 +557,6 @@ export function WhatsAppHub({
   return (
     <section className="wa-skin wa-app-frame">
       <header className="wa-app-header">
-        <div className="wa-app-brand">
-          <span className="wa-app-logo" aria-hidden="true">
-            <NavIcon kind="whatsapp" />
-          </span>
-          <h1>WhatsApp</h1>
-        </div>
-        <div className="wa-app-header-actions">
-          <button
-            type="button"
-            aria-label="Updates"
-            title="Updates"
-            onClick={() => setTab('updates')}
-          >
-            <NavIcon kind="camera" />
-          </button>
-          <div className="wa-tools-wrap">
-            <button
-              type="button"
-              aria-label="More WhatsApp tools"
-              aria-expanded={toolsMenuOpen}
-              onClick={() => setToolsMenuOpen((open) => !open)}
-            >
-              <NavIcon kind="more" />
-            </button>
-            {toolsMenuOpen && (
-              <div className="wa-tools-menu" role="menu">
-                {[
-                  ['contacts', 'Contacts', 'people'],
-                  ['broadcasts', 'Broadcasts', 'broadcast'],
-                  ['templates', 'Templates', 'template'],
-                  ['analytics', 'Analytics', 'analytics'],
-                ].map(([id, label, icon]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      setTab(id as Tab);
-                      setToolsMenuOpen(false);
-                      setNotice('');
-                    }}
-                  >
-                    <NavIcon kind={icon ?? 'message'} /> {label ?? ''}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <div className="wa-business-bar">
         <div className="wa-business-identity">
           <span className="wa-business-avatar" aria-hidden="true">
             SG
@@ -650,17 +596,52 @@ export function WhatsAppHub({
           </select>
         </label>
         <button
-          className={`wa-automation-shortcut${tab === 'automations' ? ' is-current' : ''}`}
+          className={`wa-top-automation${tab === 'automations' ? ' is-current' : ''}`}
           type="button"
+          aria-label="Automations"
+          title="Automations"
           onClick={() => {
             setTab('automations');
             setAutomationFormOpen(false);
             setNotice('');
           }}
         >
-          <NavIcon kind="automation" /> Automations
+          <NavIcon kind="automation" />
         </button>
-      </div>
+        <div className="wa-tools-wrap">
+          <button
+            type="button"
+            aria-label="More WhatsApp tools"
+            aria-expanded={toolsMenuOpen}
+            onClick={() => setToolsMenuOpen((open) => !open)}
+          >
+            <NavIcon kind="more" />
+          </button>
+          {toolsMenuOpen && (
+            <div className="wa-tools-menu" role="menu">
+              {[
+                ['contacts', 'Contacts', 'people'],
+                ['broadcasts', 'Broadcasts', 'broadcast'],
+                ['templates', 'Templates', 'template'],
+                ['analytics', 'Analytics', 'analytics'],
+              ].map(([id, label, icon]) => (
+                <button
+                  key={id}
+                  type="button"
+                  role="menuitem"
+                  onClick={() => {
+                    setTab(id as Tab);
+                    setToolsMenuOpen(false);
+                    setNotice('');
+                  }}
+                >
+                  <NavIcon kind={icon ?? 'message'} /> {label ?? ''}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </header>
 
       <div className="wa-app-content">
         <WhatsAppCalling
@@ -680,11 +661,7 @@ export function WhatsAppHub({
             <h2>
               {tab === 'inbox'
                 ? 'Chats'
-                : tab === 'updates' || tab === 'communities'
-                  ? tab === 'updates'
-                    ? 'Updates'
-                    : 'Communities'
-                  : tabs.find((item) => item.id === tab)?.label}
+                : tabs.find((item) => item.id === tab)?.label}
             </h2>
           </div>
           {tab === 'automations' ? (
@@ -803,36 +780,12 @@ export function WhatsAppHub({
             settingsPanel={settingsPanel}
           />
         )}
-        {tab === 'updates' && (
-          <WhatsAppUnavailablePanel
-            title="Updates"
-            message="WhatsApp Status updates aren’t available through the Business Platform connection. View or post status from the WhatsApp Business app on your phone."
-          />
-        )}
-        {tab === 'communities' && (
-          <WhatsAppUnavailablePanel
-            title="Communities"
-            message="Communities aren’t available through this WhatsApp Business Platform connection."
-          />
-        )}
-        {tab === 'inbox' && (
-          <button
-            type="button"
-            className="wa-floating-compose"
-            aria-label="Start a new chat"
-            title="Start a new chat"
-            onClick={() => setTab('contacts')}
-          >
-            <NavIcon kind="compose" />
-          </button>
-        )}
       </div>
 
       <nav className="wa-app-bottom-nav" aria-label="WhatsApp navigation">
         {[
           ['inbox', 'Chats', 'message'],
-          ['updates', 'Updates', 'updates'],
-          ['communities', 'Communities', 'people'],
+          ['automations', 'Automations', 'automation'],
           ['calling', 'Calls', 'phone'],
           ['settings', 'Settings', 'settings'],
         ].map(([id, label, icon]) => (
@@ -950,24 +903,6 @@ export function WhatsAppHub({
   );
 }
 
-function WhatsAppUnavailablePanel({
-  title,
-  message,
-}: {
-  title: string;
-  message: string;
-}) {
-  return (
-    <section className="wa-native-empty-state">
-      <span className="wa-native-empty-icon">
-        <NavIcon kind={title === 'Updates' ? 'updates' : 'people'} />
-      </span>
-      <h3>{title}</h3>
-      <p>{message}</p>
-    </section>
-  );
-}
-
 function NavIcon({ kind }: { kind: string }) {
   const paths: Record<string, ReactNode> = {
     back: <path d="M15 18 9 12l6-6" />,
@@ -1005,6 +940,9 @@ function NavIcon({ kind }: { kind: string }) {
         <path d="M4 7h3l2-2h6l2 2h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" />
         <circle cx="12" cy="13" r="3" />
       </>
+    ),
+    attachment: (
+      <path d="m21.4 11.1-8.5 8.5a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5" />
     ),
     whatsapp: (
       <>
@@ -1829,6 +1767,17 @@ function InboxPanel({
             );
           })}
         </div>
+        {!selected && (
+          <button
+            type="button"
+            className="wa-floating-compose"
+            aria-label="Start a new chat"
+            title="Start a new chat"
+            onClick={() => onNavigate('contacts')}
+          >
+            <NavIcon kind="compose" />
+          </button>
+        )}
       </aside>
       <div className="wa-thread-column">
         {!selected || !contact ? (
@@ -2135,7 +2084,7 @@ function InboxPanel({
                         disabled={busy}
                         onClick={() => setAttachMenu((open) => !open)}
                       >
-                        <NavIcon kind="plus" />
+                        <NavIcon kind="attachment" />
                       </button>
                       {attachMenu && (
                         <div className="wa-attach-menu" role="menu">
@@ -2275,6 +2224,16 @@ function InboxPanel({
                         placeholder="Type a message…"
                       />
                     </label>
+                    <button
+                      type="button"
+                      className="wa-composer-camera"
+                      aria-label="Take a photo"
+                      title="Camera"
+                      disabled={busy}
+                      onClick={() => cameraInput.current?.click()}
+                    >
+                      <NavIcon kind="camera" />
+                    </button>
                     <button
                       type="button"
                       className="wa-composer-emoji"
