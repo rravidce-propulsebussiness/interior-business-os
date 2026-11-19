@@ -114,6 +114,10 @@ describe('one authorized company navigation on every dashboard page', () => {
     expect(canonical).toContain("has('milestone.view', 'projects')");
     expect(canonical).not.toContain("label: 'Brochures'");
     expect(canonical).toContain("has('automation.view')");
+    expect(canonical).toMatch(
+      /label: 'WhatsApp',[\s\S]*?href: '\/dashboard\/whatsapp',[\s\S]*?parentLink: true,[\s\S]*?label: 'Automations',[\s\S]*?href: '\/dashboard\/whatsapp\?tab=automations'/,
+    );
+    expect(shell).toContain('owner-nav-group-link');
     expect(canonical).toContain("has('catalog.view', 'catalog')");
     expect(canonical).toContain("has('pricing.view', 'pricing')");
     expect(canonical).toContain("label: 'Projects'");

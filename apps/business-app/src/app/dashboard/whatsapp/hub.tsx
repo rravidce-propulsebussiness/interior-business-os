@@ -441,10 +441,12 @@ export function WhatsAppHub({
   connections: allConnections,
   canManage,
   settingsPanel,
+  initialTab = 'inbox',
 }: {
   connections: Connection[];
   canManage: boolean;
   settingsPanel?: ReactNode;
+  initialTab?: Tab;
 }) {
   // Disconnected rows are kept for message history but are not offered as
   // live numbers; fall back to them only when nothing is connected.
@@ -452,7 +454,7 @@ export function WhatsAppHub({
     (item) => item.status === 'connected',
   );
   const connections = liveConnections.length ? liveConnections : allConnections;
-  const [tab, setTab] = useState<Tab>('inbox');
+  const [tab, setTab] = useState<Tab>(initialTab);
   // Full-screen WhatsApp workspace (remembered per browser), like WhatsApp Web.
   const [fullscreen, setFullscreen] = useState(true);
   const [fullscreenLoaded, setFullscreenLoaded] = useState(false);

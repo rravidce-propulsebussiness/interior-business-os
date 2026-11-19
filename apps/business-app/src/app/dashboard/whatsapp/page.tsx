@@ -6,7 +6,12 @@ import { serverServices } from '@business-os/auth/server';
 
 export const dynamic = 'force-dynamic';
 
-export default async function WhatsAppPage() {
+export default async function WhatsAppPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const query = await searchParams;
   const services = await automationServices('automation.view', true);
   const { data, error } = await services.client
     .from('whatsapp_business_connections')
@@ -73,6 +78,7 @@ export default async function WhatsAppPage() {
   return (
     <main id="main-content" tabIndex={-1} className="wa-page-main">
       <WhatsAppHub
+        initialTab={query.tab === 'automations' ? 'automations' : 'inbox'}
         canManage={services.context.grants.some(
           (grant) => grant.permission === 'automation.manage',
         )}

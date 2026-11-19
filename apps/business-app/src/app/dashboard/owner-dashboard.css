@@ -1102,6 +1102,15 @@ a.owner-stat:hover {
 .owner-nav-group {
   flex: 0 0 auto;
 }
+.owner-nav-group-header {
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+}
+.owner-nav-group-link {
+  flex: 1;
+  min-width: 0;
+}
 .owner-nav-group-toggle {
   width: 100%;
   border: 0;
@@ -1109,6 +1118,22 @@ a.owner-stat:hover {
   cursor: pointer;
   background: transparent;
   font: inherit;
+}
+.owner-nav-group-toggle-icon {
+  display: grid;
+  flex: 0 0 42px;
+  width: 42px;
+  min-height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: inherit;
+  cursor: pointer;
+  background: transparent;
+}
+.owner-nav-group-toggle-icon[aria-expanded='true'] {
+  background: #ff8c4a24;
 }
 .owner-nav-group-toggle > span:nth-child(2) {
   flex: 1;

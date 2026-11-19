@@ -89,6 +89,7 @@ export type OwnerNavItem = {
   label: string;
   href: string;
   icon: OwnerIconName;
+  parentLink?: boolean;
   children?: { label: string; href: string }[];
 };
 
@@ -375,35 +376,79 @@ export function OwnerShell({
                 <Fragment key={item.href}>
                   {sectionHeading}
                   <div className="owner-nav-group">
-                    <button
-                      type="button"
-                      className={
-                        'owner-nav-item owner-nav-group-toggle' +
-                        (selected || childActive ? ' owner-nav-active' : '')
-                      }
-                      aria-expanded={isExpanded}
-                      aria-controls={
-                        'owner-subnav-' + item.href.replace(/[^a-z0-9]/gi, '-')
-                      }
-                      onClick={() =>
-                        setExpanded((previous) => ({
-                          ...previous,
-                          [item.href]: !isExpanded,
-                        }))
-                      }
-                    >
-                      <OwnerIcon name={item.icon} size={20} />
-                      <span>{item.label}</span>
-                      <span
+                    {item.parentLink ? (
+                      <div className="owner-nav-group-header">
+                        <a
+                          href={item.href}
+                          className={
+                            'owner-nav-item owner-nav-group-link' +
+                            (selected || childActive ? ' owner-nav-active' : '')
+                          }
+                          aria-current={selected ? 'page' : undefined}
+                          onClick={() => setMenuOpen(false)}
+                        >
+                          <OwnerIcon name={item.icon} size={20} />
+                          <span>{item.label}</span>
+                        </a>
+                        <button
+                          type="button"
+                          className="owner-nav-group-toggle owner-nav-group-toggle-icon"
+                          aria-label={`${isExpanded ? 'Collapse' : 'Expand'} ${item.label} menu`}
+                          aria-expanded={isExpanded}
+                          aria-controls={
+                            'owner-subnav-' +
+                            item.href.replace(/[^a-z0-9]/gi, '-')
+                          }
+                          onClick={() =>
+                            setExpanded((previous) => ({
+                              ...previous,
+                              [item.href]: !isExpanded,
+                            }))
+                          }
+                        >
+                          <span
+                            className={
+                              'owner-nav-chevron' +
+                              (isExpanded ? ' owner-nav-chevron-open' : '')
+                            }
+                            aria-hidden="true"
+                          >
+                            <OwnerIcon name="chevron" size={16} />
+                          </span>
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
                         className={
-                          'owner-nav-chevron' +
-                          (isExpanded ? ' owner-nav-chevron-open' : '')
+                          'owner-nav-item owner-nav-group-toggle' +
+                          (selected || childActive ? ' owner-nav-active' : '')
                         }
-                        aria-hidden="true"
+                        aria-expanded={isExpanded}
+                        aria-controls={
+                          'owner-subnav-' +
+                          item.href.replace(/[^a-z0-9]/gi, '-')
+                        }
+                        onClick={() =>
+                          setExpanded((previous) => ({
+                            ...previous,
+                            [item.href]: !isExpanded,
+                          }))
+                        }
                       >
-                        <OwnerIcon name="chevron" size={16} />
-                      </span>
-                    </button>
+                        <OwnerIcon name={item.icon} size={20} />
+                        <span>{item.label}</span>
+                        <span
+                          className={
+                            'owner-nav-chevron' +
+                            (isExpanded ? ' owner-nav-chevron-open' : '')
+                          }
+                          aria-hidden="true"
+                        >
+                          <OwnerIcon name="chevron" size={16} />
+                        </span>
+                      </button>
+                    )}
                     {isExpanded && (
                       <div
                         className="owner-subnav"

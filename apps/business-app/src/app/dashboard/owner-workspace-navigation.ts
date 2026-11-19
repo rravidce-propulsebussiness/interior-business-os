@@ -197,10 +197,11 @@ export function ownerWorkspaceNavigation(
       label: 'WhatsApp',
       href: '/dashboard/whatsapp',
       icon: 'message',
+      parentLink: true,
       children: [
         {
           label: 'Automations',
-          href: '/dashboard/automations',
+          href: '/dashboard/whatsapp?tab=automations',
         },
       ],
     });
