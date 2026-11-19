@@ -930,15 +930,6 @@
   .wa-inbox-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-  .wa-conversation-panel {
-    min-height: 255px;
-    max-height: 300px;
-    border-right: 0;
-    border-bottom: 1px solid #eee8e4;
-  }
-  .wa-thread-column {
-    min-height: 520px;
-  }
   .wa-contact-profile {
     grid-template-columns: 1fr;
   }
@@ -2649,6 +2640,8 @@
 .wa-app-content .wa-conversation-panel {
   min-height: 0;
   height: 100%;
+  max-height: none;
+  overflow: hidden;
   border: 0;
 }
 

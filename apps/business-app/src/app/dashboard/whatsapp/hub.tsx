@@ -437,6 +437,16 @@ function friendlyError(value: unknown, fallback: string) {
   return value instanceof Error ? value.message : fallback;
 }
 
+function businessDisplayName(value: string) {
+  return (
+    value
+      .split(/\s+[-–—]\s+/)
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .at(-1) ?? value
+  );
+}
+
 export function WhatsAppHub({
   connections: allConnections,
   canManage,
@@ -607,8 +617,10 @@ export function WhatsAppHub({
           </span>
           <span className="wa-business-name">
             <strong>
-              {connections.find((item) => item.id === connectionId)?.name ??
-                'SG Homes'}
+              {businessDisplayName(
+                connections.find((item) => item.id === connectionId)?.name ??
+                  'SG Homes',
+              )}
             </strong>
             <small>
               <i /> Connected
@@ -616,9 +628,6 @@ export function WhatsAppHub({
           </span>
         </div>
         <label className="wa-connection-select">
-          <span className="wa-connection-grid" aria-hidden="true">
-            ▦
-          </span>
           <select
             value={connectionId}
             disabled={callInProgress}
@@ -635,7 +644,7 @@ export function WhatsAppHub({
           >
             {connections.map((item) => (
               <option key={item.id} value={item.id}>
-                {item.name} · {item.phone}
+                {businessDisplayName(item.name)} · {item.phone}
               </option>
             ))}
           </select>
