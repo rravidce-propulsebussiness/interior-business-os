@@ -2409,10 +2409,7 @@
   background: #fff;
 }
 
-.wa-app-header-actions,
-.wa-app-header-actions > button,
 .wa-top-automation,
-.wa-tools-wrap > button,
 .wa-tools-wrap > button {
   display: flex;
   align-items: center;
@@ -2829,44 +2826,6 @@
   border-radius: 4px 4px 0 0;
   background: #00a884;
   content: '';
-}
-
-.wa-native-empty-state {
-  display: grid;
-  justify-items: center;
-  gap: 12px;
-  margin: auto;
-  padding: 32px 24px;
-  text-align: center;
-}
-
-.wa-native-empty-icon {
-  display: grid;
-  width: 64px;
-  height: 64px;
-  place-items: center;
-  border-radius: 50%;
-  background: #e7fce3;
-  color: var(--wa-green-dark);
-}
-
-.wa-native-empty-icon svg {
-  width: 30px;
-  height: 30px;
-}
-
-.wa-native-empty-state h3 {
-  margin: 0;
-  color: var(--wa-text);
-  font-size: 21px;
-}
-
-.wa-native-empty-state p {
-  max-width: 360px;
-  margin: 0;
-  color: var(--wa-muted);
-  font-size: 14px;
-  line-height: 1.55;
 }
 
 .wa-skin .wa-automation-card,
