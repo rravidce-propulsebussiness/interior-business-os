@@ -197,11 +197,12 @@ export function ownerWorkspaceNavigation(
       label: 'WhatsApp',
       href: '/dashboard/whatsapp',
       icon: 'message',
-    });
-    items.push({
-      label: 'Automations',
-      href: '/dashboard/automations',
-      icon: 'zap',
+      children: [
+        {
+          label: 'Automations',
+          href: '/dashboard/automations',
+        },
+      ],
     });
   }
   if (has('team.manage'))
@@ -225,6 +226,7 @@ export function ownerWorkspaceNavigation(
   // Keep the shared sidebar in the same product order on every dashboard route.
   const navigationOrder = [
     'Dashboard',
+    'WhatsApp',
     'Leads',
     'Quotations',
     'BOQ & Estimating',
@@ -236,8 +238,6 @@ export function ownerWorkspaceNavigation(
     'Purchases',
     'Website Studio',
     'Reports',
-    'WhatsApp',
-    'Automations',
     'Employees',
     'Team',
     'Settings',

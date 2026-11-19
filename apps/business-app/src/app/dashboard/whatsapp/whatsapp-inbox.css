@@ -2782,3 +2782,251 @@
 .wa-skin .wa-row-action {
   transform: none;
 }
+
+/* Keep the full-screen inbox usable on narrow phones. The app shell's mobile
+   two-column navigation caused the icon rail to become a tall panel above the
+   chat list; use a compact horizontal rail and show one inbox pane at a time. */
+@media (max-width: 680px) {
+  .wa-skin.wa-fullscreen {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .wa-skin.wa-fullscreen .wa-sidebar {
+    min-height: 0;
+    align-items: center;
+    padding: 6px 8px;
+  }
+
+  .wa-skin.wa-fullscreen .wa-brand {
+    padding: 0 0 6px;
+  }
+
+  .wa-skin.wa-fullscreen .wa-nav {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 0 0 2px;
+  }
+
+  .wa-skin.wa-fullscreen .wa-nav-item {
+    width: 40px;
+    min-width: 40px;
+    height: 40px;
+    min-height: 40px;
+    flex: 0 0 40px;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .wa-skin.wa-fullscreen .wa-main {
+    min-height: 0;
+  }
+
+  .wa-fullscreen.wa-skin-inbox .wa-content {
+    display: flex;
+    min-height: 0;
+    padding: 0;
+  }
+
+  .wa-skin-inbox .wa-inbox-grid,
+  .wa-skin-inbox .wa-inbox-grid.wa-inbox-with-profile {
+    min-height: 0;
+    height: 100%;
+    flex: 1;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wa-skin-inbox .wa-conversation-panel,
+  .wa-skin-inbox .wa-thread-column {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .wa-skin-inbox .wa-conversation-panel {
+    max-height: none;
+    border-bottom: 0;
+  }
+
+  .wa-skin-inbox .wa-thread-column {
+    grid-column: 1;
+  }
+
+  .wa-skin-inbox .wa-mobile-thread-open .wa-conversation-panel {
+    display: none;
+  }
+
+  .wa-skin-inbox .wa-inbox-grid:not(.wa-mobile-thread-open) .wa-thread-column {
+    display: none;
+  }
+
+  .wa-mobile-back {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--wa-icon);
+  }
+
+  .wa-mobile-back svg {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+.wa-mobile-back {
+  display: none;
+}
+
+.wa-unsupported-message {
+  display: flex;
+  max-width: 320px;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid rgb(84 101 111 / 14%);
+  border-radius: 10px;
+  padding: 9px 11px;
+  background: rgb(255 255 255 / 72%);
+  color: var(--wa-text, #334155);
+}
+
+.wa-unsupported-message > span:first-child {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e9edef;
+  color: #54656f;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.wa-unsupported-message strong,
+.wa-unsupported-message small {
+  display: block;
+}
+
+.wa-unsupported-message strong {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.wa-unsupported-message small {
+  margin-top: 2px;
+  color: #667781;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.wa-sticker-image {
+  width: auto;
+  max-width: min(220px, 65vw);
+  max-height: 220px;
+  border-radius: 0;
+}
+
+.wa-rich-card {
+  display: grid;
+  max-width: min(340px, 72vw);
+  gap: 5px;
+  border: 1px solid rgb(84 101 111 / 14%);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: rgb(255 255 255 / 84%);
+  color: #111b21;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.wa-rich-card > strong {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.wa-rich-card > span,
+.wa-rich-contact span {
+  color: #54656f;
+  overflow-wrap: anywhere;
+}
+
+.wa-rich-card > a {
+  width: fit-content;
+  color: #008069;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.wa-rich-coordinates {
+  font-size: 11px;
+}
+
+.wa-rich-contact-list {
+  min-width: 220px;
+}
+
+.wa-rich-contact {
+  display: grid;
+  gap: 2px;
+  border-top: 1px solid #e9edef;
+  padding-top: 6px;
+}
+
+.wa-rich-contact b {
+  font-weight: 650;
+}
+
+.wa-rich-order-item {
+  border-top: 1px solid #e9edef;
+  padding-top: 5px;
+}
+
+.wa-rich-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 5px 9px;
+  background: rgb(255 255 255 / 84%);
+  color: #54656f;
+  font-size: 12px;
+}
+
+.wa-rich-reaction > span:first-child {
+  font-size: 19px;
+}
+
+.wa-rich-details {
+  margin-top: 3px;
+  border-top: 1px solid #e9edef;
+  padding-top: 5px;
+  color: #54656f;
+  font-size: 11px;
+}
+
+.wa-rich-details summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+
+.wa-rich-details pre {
+  max-width: min(320px, 68vw);
+  max-height: 220px;
+  overflow: auto;
+  margin-top: 5px;
+  border-radius: 7px;
+  padding: 7px;
+  background: #f0f2f5;
+  color: #374151;
+  font-size: 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

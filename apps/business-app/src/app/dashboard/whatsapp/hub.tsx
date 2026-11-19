@@ -15,6 +15,7 @@ import './whatsapp-inbox.css';
 import { WhatsAppCalling } from './calling';
 import { readApiResponse } from '@/lib/whatsapp-response';
 import {
+  parseWhatsAppRichMessage,
   whatsappMessagePreview,
   whatsappPlaceholderLabel,
 } from '@/lib/whatsapp-message-label';
@@ -1252,8 +1253,10 @@ function InboxPanel({
 
   useEffect(() => {
     const first = state.rows.at(0);
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
-    if (!selected && first) setSelected(first.wa_id);
+    if (!selected && first && window.matchMedia('(min-width: 681px)').matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Select the first chat after the inbox rows arrive on desktop.
+      setSelected(first.wa_id);
+    }
     if (selected && !state.rows.some((row) => row.wa_id === selected))
       setSelected('');
   }, [selected, state.rows]);
@@ -1599,7 +1602,9 @@ function InboxPanel({
 
   return (
     <div
-      className={`wa-inbox-grid${showProfile ? ' wa-inbox-with-profile' : ''}`}
+      className={`wa-inbox-grid${showProfile ? ' wa-inbox-with-profile' : ''}${
+        selected ? ' wa-mobile-thread-open' : ''
+      }`}
     >
       <aside className="wa-conversation-panel">
         <div className="wa-conversation-toolbar">
@@ -1770,6 +1775,18 @@ function InboxPanel({
         ) : (
           <>
             <header className="wa-thread-header">
+              <button
+                type="button"
+                className="wa-mobile-back"
+                aria-label="Back to chats"
+                onClick={() => {
+                  setSelected('');
+                  setContact(null);
+                  setShowProfile(false);
+                }}
+              >
+                <NavIcon kind="back" />
+              </button>
               <button
                 type="button"
                 className="wa-thread-who"
@@ -2495,8 +2512,35 @@ function MessageBody({
   message: Message;
   connectionId: string;
 }) {
+  if (message.body.trim() === '[unsupported message]') {
+    return (
+      <div className="wa-unsupported-message">
+        <span aria-hidden="true">i</span>
+        <span>
+          <strong>Unsupported message format</strong>
+          <small>
+            WhatsApp did not provide this message’s content to the Business
+            Platform.
+          </small>
+        </span>
+      </div>
+    );
+  }
+  const rich = parseWhatsAppRichMessage(message.body);
+  if (rich) return <RichMessageBody message={rich} />;
+  const unreadableRichType = /^\[\[WA_JSON:([a-z_]{1,40})\]\]/.exec(
+    message.body,
+  )?.[1];
+  if (unreadableRichType) {
+    return (
+      <div className="wa-rich-card">
+        <strong>{unreadableRichType.replace(/_/g, ' ')}</strong>
+        <span>Message details could not be decoded.</span>
+      </div>
+    );
+  }
   const match =
-    /^\[\[WA_MEDIA:([A-Za-z0-9._-]{1,200}):(image|video|audio|document)\]\](?:\r?\n([\s\S]*))?$/.exec(
+    /^\[\[WA_MEDIA:([A-Za-z0-9._-]{1,200}):(image|video|audio|document|sticker)\]\](?:\r?\n([\s\S]*))?$/.exec(
       message.body,
     );
   if (!match) {
@@ -2515,12 +2559,15 @@ function MessageBody({
   const source = `/api/whatsapp/media?connectionId=${encodeURIComponent(connectionId)}&mediaId=${encodeURIComponent(mediaId)}`;
   return (
     <div className="space-y-2">
-      {kind === 'image' ? (
+      {kind === 'image' || kind === 'sticker' ? (
         <a href={source} target="_blank" rel="noreferrer">
           <img
-            className="max-h-80 max-w-full rounded-lg object-contain"
+            className={`max-h-80 max-w-full object-contain${kind === 'sticker' ? ' wa-sticker-image' : ' rounded-lg'}`}
             src={source}
-            alt={caption || 'WhatsApp image'}
+            alt={
+              caption ||
+              (kind === 'sticker' ? 'WhatsApp sticker' : 'WhatsApp image')
+            }
             loading="lazy"
           />
         </a>
@@ -2564,6 +2611,175 @@ function MessageBody({
           {caption}
         </p>
       )}
+    </div>
+  );
+}
+
+function richString(value: unknown) {
+  return typeof value === 'string' || typeof value === 'number'
+    ? String(value)
+    : '';
+}
+
+function richObject(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
+function RichMessageBody({
+  message,
+}: {
+  message: NonNullable<ReturnType<typeof parseWhatsAppRichMessage>>;
+}) {
+  const { type, payload, content } = message;
+  const details = (
+    <details className="wa-rich-details">
+      <summary>Message details</summary>
+      <pre>{JSON.stringify(payload, null, 2)}</pre>
+    </details>
+  );
+
+  if (type === 'location') {
+    const latitude = Number(content.latitude);
+    const longitude = Number(content.longitude);
+    const hasCoordinates =
+      Number.isFinite(latitude) &&
+      Number.isFinite(longitude) &&
+      latitude >= -90 &&
+      latitude <= 90 &&
+      longitude >= -180 &&
+      longitude <= 180;
+    const mapUrl = hasCoordinates
+      ? `https://maps.google.com/?q=${latitude},${longitude}`
+      : '';
+    return (
+      <div className="wa-rich-card">
+        <strong>{richString(content.name) || 'Shared location'}</strong>
+        {richString(content.address) && (
+          <span>{richString(content.address)}</span>
+        )}
+        {hasCoordinates && (
+          <span className="wa-rich-coordinates">
+            {latitude}, {longitude}
+          </span>
+        )}
+        {mapUrl && (
+          <a href={mapUrl} target="_blank" rel="noreferrer">
+            Open map
+          </a>
+        )}
+        {details}
+      </div>
+    );
+  }
+
+  if (type === 'contacts') {
+    const contacts = Array.isArray(content.contacts) ? content.contacts : [];
+    return (
+      <div className="wa-rich-card wa-rich-contact-list">
+        <strong>
+          {contacts.length === 1
+            ? 'Shared contact'
+            : `Shared ${contacts.length} contacts`}
+        </strong>
+        {contacts.slice(0, 10).map((value, index) => {
+          const entry = richObject(value);
+          const name = richObject(entry.name);
+          const phones = Array.isArray(entry.phones) ? entry.phones : [];
+          const emails = Array.isArray(entry.emails) ? entry.emails : [];
+          const displayName =
+            richString(name.formatted_name) ||
+            [name.first_name, name.middle_name, name.last_name]
+              .map(richString)
+              .filter(Boolean)
+              .join(' ') ||
+            `Contact ${index + 1}`;
+          return (
+            <div className="wa-rich-contact" key={`${displayName}-${index}`}>
+              <b>{displayName}</b>
+              {phones.slice(0, 5).map((phone, phoneIndex) => {
+                const number = richString(richObject(phone).phone);
+                return number ? (
+                  <span key={`${number}-${phoneIndex}`}>{number}</span>
+                ) : null;
+              })}
+              {emails.slice(0, 5).map((email, emailIndex) => {
+                const address = richString(richObject(email).email);
+                return address ? (
+                  <span key={`${address}-${emailIndex}`}>{address}</span>
+                ) : null;
+              })}
+            </div>
+          );
+        })}
+        {details}
+      </div>
+    );
+  }
+
+  if (type === 'order') {
+    const items = Array.isArray(content.product_items)
+      ? content.product_items
+      : [];
+    return (
+      <div className="wa-rich-card">
+        <strong>Order received</strong>
+        {items.slice(0, 30).map((value, index) => {
+          const item = richObject(value);
+          const quantity = richString(item.quantity) || '1';
+          const product =
+            richString(item.product_retailer_id) || `Item ${index + 1}`;
+          const price = richString(item.item_price);
+          const currency = richString(item.currency);
+          return (
+            <span className="wa-rich-order-item" key={`${product}-${index}`}>
+              {quantity} × {product}
+              {price && ` · ${price} ${currency}`.trim()}
+            </span>
+          );
+        })}
+        {details}
+      </div>
+    );
+  }
+
+  if (type === 'reaction') {
+    return (
+      <div className="wa-rich-reaction">
+        <span aria-hidden="true">{richString(content.emoji) || '↪'}</span>
+        <span>Reaction</span>
+        {details}
+      </div>
+    );
+  }
+
+  if (type === 'interactive' || type === 'button') {
+    const reply =
+      type === 'button'
+        ? content
+        : richObject(
+            content.button_reply ?? content.list_reply ?? content.nfm_reply,
+          );
+    const title = richString(reply.title) || richString(reply.text);
+    const description = richString(reply.description) || richString(reply.body);
+    return (
+      <div className="wa-rich-card">
+        <strong>
+          {title || (type === 'button' ? 'Button reply' : 'Interactive reply')}
+        </strong>
+        {description && <span>{description}</span>}
+        {details}
+      </div>
+    );
+  }
+
+  const label =
+    whatsappPlaceholderLabel(`[${type} message]`) || 'WhatsApp message';
+  return (
+    <div className="wa-rich-card">
+      <strong>{label}</strong>
+      {details}
     </div>
   );
 }
