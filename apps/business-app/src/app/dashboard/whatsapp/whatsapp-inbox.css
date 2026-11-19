@@ -3041,6 +3041,347 @@
   color: var(--wa-text, #334155);
 }
 
+/* The mobile messaging workspace follows the WhatsApp-style reference: a
+   compact account header, labeled section tabs, then the selected workspace. */
+.wa-mobile-tabs {
+  display: none;
+}
+.wa-automation-stats {
+  display: none;
+}
+
+@media (max-width: 680px) {
+  .wa-skin.wa-fullscreen {
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: #f7f8fa;
+  }
+
+  .wa-skin.wa-fullscreen .wa-sidebar {
+    display: none;
+  }
+
+  .wa-skin.wa-fullscreen .wa-main {
+    display: flex;
+    width: 100%;
+    min-height: 100dvh;
+    height: auto;
+    flex-direction: column;
+    overflow: visible;
+  }
+
+  .wa-skin .wa-topbar {
+    min-height: 66px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 14px;
+  }
+
+  .wa-skin .wa-topbar-title {
+    min-width: 0;
+    flex: 0 0 auto;
+    gap: 9px;
+  }
+
+  .wa-skin .wa-whatsapp-mark {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    place-items: center;
+    border: 2px solid var(--wa-green);
+    border-radius: 50%;
+  }
+
+  .wa-skin .wa-whatsapp-mark svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .wa-skin .wa-topbar-title h1 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.15;
+  }
+
+  .wa-skin .wa-topbar-title p {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+    color: var(--wa-green-dark);
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .wa-skin .wa-topbar-title p .wa-online-dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .wa-skin .wa-topbar-actions {
+    width: auto;
+    min-width: 0;
+    flex: 1 1 auto;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    gap: 0;
+  }
+
+  .wa-skin .wa-topbar-actions > :not(.wa-connection-select) {
+    display: none;
+  }
+
+  .wa-skin .wa-connection-select {
+    min-width: 0;
+    max-width: 48vw;
+    height: 40px;
+    flex: 0 1 48vw;
+    padding: 0 9px;
+  }
+
+  .wa-skin .wa-connection-select select {
+    min-width: 0;
+    font-size: 12px;
+  }
+
+  .wa-mobile-tabs {
+    display: flex;
+    width: 100%;
+    gap: 0;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--wa-line);
+    background: #fff;
+    scrollbar-width: none;
+  }
+
+  .wa-mobile-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wa-mobile-tabs button {
+    position: relative;
+    display: flex;
+    min-width: 71px;
+    min-height: 66px;
+    flex: 1 0 auto;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 7px 8px 9px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    color: var(--wa-icon);
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .wa-mobile-tabs button svg {
+    width: 19px;
+    height: 19px;
+  }
+
+  .wa-mobile-tabs button.wa-mobile-tab-active {
+    color: var(--wa-green-dark);
+    font-weight: 700;
+  }
+
+  .wa-mobile-tabs button.wa-mobile-tab-active::after {
+    position: absolute;
+    right: 8px;
+    bottom: 0;
+    left: 8px;
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    background: var(--wa-green);
+    content: '';
+  }
+
+  .wa-skin .wa-content,
+  .wa-skin:not(.wa-skin-inbox) .wa-content {
+    min-height: 0;
+    flex: 1 0 auto;
+    overflow: visible;
+    padding: 18px 14px calc(28px + env(safe-area-inset-bottom));
+    background: #f7f8fa;
+  }
+
+  .wa-skin .wa-section-heading {
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 0 0 14px;
+  }
+
+  .wa-skin .wa-section-heading .wa-eyebrow {
+    font-size: 10px;
+  }
+
+  .wa-skin .wa-section-heading h2 {
+    margin-top: 3px;
+    font-size: 25px;
+    line-height: 1.15;
+  }
+
+  .wa-skin .wa-section-heading .wa-add-contact {
+    min-height: 42px;
+    flex: 0 0 auto;
+    gap: 6px;
+    padding: 0 12px;
+    border-radius: 14px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .wa-skin .wa-automations-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .wa-skin .wa-automation-card {
+    min-width: 0;
+    padding: 16px;
+    border-radius: 19px;
+    background: #fff;
+    box-shadow: none;
+  }
+
+  .wa-automation-stats {
+    display: flex;
+    gap: 9px;
+    margin: 0 0 15px;
+  }
+
+  .wa-automation-stats span {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    gap: 7px;
+    padding: 0 13px;
+    border-radius: 999px;
+    background: #e7fce3;
+    color: var(--wa-green-dark);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .wa-automation-stats span + span {
+    background: #f0f2f5;
+    color: var(--wa-text);
+  }
+
+  .wa-automation-stats i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #1daa61;
+  }
+
+  .wa-skin .wa-automation-card > div:first-of-type:not(.wa-automation-stats) {
+    align-items: flex-start;
+  }
+
+  .wa-skin .wa-automation-card h3 {
+    font-size: 19px;
+  }
+
+  .wa-skin .wa-automation-description {
+    font-size: 13px;
+    line-height: 1.55;
+  }
+
+  .wa-skin .wa-automation-rule {
+    position: relative;
+    padding: 15px 14px;
+    border-radius: 17px;
+    background: #fff;
+  }
+
+  .wa-skin .wa-automation-rule > div:first-child {
+    align-items: center;
+    padding-right: 58px;
+  }
+
+  .wa-skin .wa-automation-rule h4 {
+    color: var(--wa-text);
+    font-size: 17px;
+  }
+
+  .wa-skin .wa-automation-rule > div:first-child > p {
+    color: var(--wa-muted);
+  }
+
+  .wa-rule-switch {
+    position: absolute;
+    top: 20px;
+    right: 14px;
+    width: 43px;
+    height: 24px;
+    padding: 3px;
+    border: 0;
+    border-radius: 999px;
+    background: #aeb4b7;
+  }
+
+  .wa-rule-switch[aria-pressed='true'] {
+    background: var(--wa-green);
+  }
+
+  .wa-rule-switch span {
+    display: block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgb(0 0 0 / 18%);
+    transition: transform 160ms ease;
+  }
+
+  .wa-rule-switch[aria-pressed='true'] span {
+    transform: translateX(19px);
+  }
+
+  .wa-rule-status {
+    display: inline-flex;
+    min-height: 26px;
+    align-items: center;
+    margin-top: 8px;
+    padding: 0 11px;
+    border-radius: 999px;
+    background: #f0f2f5;
+    color: var(--wa-muted);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .wa-rule-status.is-active {
+    background: #e7fce3;
+    color: var(--wa-green-dark);
+  }
+
+  .wa-skin .wa-automation-form {
+    padding: 17px;
+    border-radius: 18px;
+    background: #fff;
+  }
+
+  .wa-form-close {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: #f0f2f5;
+    color: var(--wa-icon);
+    font-size: 23px;
+  }
+}
+
 .wa-unsupported-message > span:first-child {
   display: grid;
   width: 18px;

@@ -458,6 +458,7 @@ export function WhatsAppHub({
   // Full-screen WhatsApp workspace (remembered per browser), like WhatsApp Web.
   const [fullscreen, setFullscreen] = useState(true);
   const [fullscreenLoaded, setFullscreenLoaded] = useState(false);
+  const [automationFormOpen, setAutomationFormOpen] = useState(false);
   useEffect(() => {
     try {
       if (window.localStorage.getItem('wa-fullscreen') === 'off')
@@ -640,14 +641,14 @@ export function WhatsAppHub({
       <div className="wa-main">
         <header className="wa-topbar">
           <div className="wa-topbar-title">
-            <span className="wa-whatsapp-mark">◉</span>
+            <span className="wa-whatsapp-mark" aria-hidden="true">
+              <NavIcon kind="message" />
+            </span>
             <div>
-              <h1>
-                {tab === 'inbox'
-                  ? 'WhatsApp Inbox'
-                  : `WhatsApp · ${tab === 'overview' ? 'Overview' : (tabs.find((item) => item.id === tab)?.label ?? '')}`}
-              </h1>
-              <p>Team conversations and customer care</p>
+              <h1>WhatsApp</h1>
+              <p>
+                <i className="wa-online-dot" /> Connected
+              </p>
             </div>
           </div>
           <div className="wa-topbar-actions">
@@ -714,6 +715,24 @@ export function WhatsAppHub({
           </div>
         </header>
 
+        <nav className="wa-mobile-tabs" aria-label="WhatsApp sections">
+          {tabs.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                setTab(item.id);
+                setNotice('');
+              }}
+              aria-current={tab === item.id ? 'page' : undefined}
+              className={tab === item.id ? 'wa-mobile-tab-active' : ''}
+            >
+              <NavIcon kind={item.icon} />
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </nav>
+
         <div className="wa-content">
           <WhatsAppCalling
             key={connectionId}
@@ -737,20 +756,32 @@ export function WhatsAppHub({
                     : tabs.find((item) => item.id === tab)?.label}
               </h2>
             </div>
-            <button
-              type="button"
-              className="wa-add-contact"
-              onClick={() =>
-                setContactModal({
-                  name: '',
-                  phone: '',
-                  consentSource: 'Customer enquiry form',
-                  confirmOptIn: true,
-                })
-              }
-            >
-              <NavIcon kind="people" /> Add contact
-            </button>
+            {tab === 'automations' ? (
+              canManage && (
+                <button
+                  type="button"
+                  className="wa-add-contact"
+                  onClick={() => setAutomationFormOpen(true)}
+                >
+                  <NavIcon kind="compose" /> New automation
+                </button>
+              )
+            ) : (
+              <button
+                type="button"
+                className="wa-add-contact"
+                onClick={() =>
+                  setContactModal({
+                    name: '',
+                    phone: '',
+                    consentSource: 'Customer enquiry form',
+                    confirmOptIn: true,
+                  })
+                }
+              >
+                <NavIcon kind="people" /> Add contact
+              </button>
+            )}
           </div>
           {notice && (
             <p className="wa-global-notice" role="status">
@@ -814,6 +845,8 @@ export function WhatsAppHub({
             <AutomationsPanel
               connectionId={connectionId}
               canManage={canManage}
+              formOpen={automationFormOpen}
+              onFormClose={() => setAutomationFormOpen(false)}
             />
           )}
           {tab === 'templates' && (
@@ -4160,9 +4193,13 @@ function ContactsPanel({
 function AutomationsPanel({
   connectionId,
   canManage,
+  formOpen,
+  onFormClose,
 }: {
   connectionId: string;
   canManage: boolean;
+  formOpen: boolean;
+  onFormClose: () => void;
 }) {
   const [rules, setRules] = useState<Rule[]>([]);
   const [busy, setBusy] = useState(false);
@@ -4175,6 +4212,8 @@ function AutomationsPanel({
   const [replyText, setReplyText] = useState(
     'Hi {{name}}, thanks for messaging us. Our team will reply shortly.',
   );
+  const activeCount = rules.filter((rule) => rule.status === 'active').length;
+  const pausedCount = rules.length - activeCount;
 
   const load = useCallback(async () => {
     if (!connectionId) return;
@@ -4274,6 +4313,14 @@ function AutomationsPanel({
   return (
     <div className="wa-automations-grid grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,.8fr)]">
       <section className="wa-automation-card rounded-2xl border border-stone-200 p-5">
+        <div className="wa-automation-stats" aria-label="Automation status">
+          <span>
+            <i /> {activeCount} active
+          </span>
+          <span>
+            <b>Ⅱ</b> {pausedCount} paused
+          </span>
+        </div>
         <div className="flex items-start justify-between gap-3">
           <div>
             <h3 className="text-lg font-bold text-stone-900">
@@ -4305,16 +4352,21 @@ function AutomationsPanel({
                 {canManage && (
                   <button
                     type="button"
-                    className={
-                      rule.status === 'active' ? primaryButton : softButton
-                    }
+                    className="wa-rule-switch"
                     disabled={busy}
+                    aria-label={`${rule.status === 'active' ? 'Pause' : 'Activate'} ${rule.name}`}
+                    aria-pressed={rule.status === 'active'}
                     onClick={() => void toggleRule(rule)}
                   >
-                    {rule.status === 'active' ? 'Pause' : 'Turn on'}
+                    <span />
                   </button>
                 )}
               </div>
+              <span
+                className={`wa-rule-status ${rule.status === 'active' ? 'is-active' : ''}`}
+              >
+                {rule.status === 'active' ? 'Active' : 'Ⅱ Paused'}
+              </span>
               <p className="mt-3 rounded-lg bg-white p-3 text-sm leading-6 text-stone-700">
                 {rule.reply_text}
               </p>
@@ -4356,18 +4408,28 @@ function AutomationsPanel({
           </p>
         )}
       </section>
-      {canManage ? (
+      {canManage && formOpen ? (
         <form
           onSubmit={saveRule}
           className="wa-automation-form space-y-4 rounded-2xl border border-stone-200 bg-[#fffdfa] p-5"
         >
-          <div>
-            <h3 className="text-lg font-bold text-stone-900">
-              Create a reply rule
-            </h3>
-            <p className="mt-1 text-sm text-stone-500">
-              New rules start paused.
-            </p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h3 className="text-lg font-bold text-stone-900">
+                Create a reply rule
+              </h3>
+              <p className="mt-1 text-sm text-stone-500">
+                New rules start paused.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="wa-form-close"
+              onClick={onFormClose}
+              aria-label="Close automation form"
+            >
+              ×
+            </button>
           </div>
           <label className="block space-y-1.5 text-xs font-semibold text-stone-600">
             Rule name
