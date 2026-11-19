@@ -99,7 +99,14 @@ describe('project management navigation and trusted portfolio boundaries', () =>
       icon: 'projects',
     });
     expect(navigation.some((item) => item.label === 'Brochures')).toBe(false);
-    expect(navigation.some((item) => item.label === 'Automations')).toBe(true);
+    expect(navigation[1]?.label).toBe('WhatsApp');
+    expect(
+      navigation.find((item) => item.label === 'WhatsApp')?.children,
+    ).toContainEqual({
+      label: 'Automations',
+      href: '/dashboard/whatsapp?tab=automations',
+    });
+    expect(navigation.some((item) => item.label === 'Automations')).toBe(false);
     expect(navigation.some((item) => item.label === 'My Work')).toBe(false);
     expect(
       navigation.find((item) => item.label === 'Quotations')?.children,
