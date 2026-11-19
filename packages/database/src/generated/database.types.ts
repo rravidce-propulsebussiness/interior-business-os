@@ -5105,16 +5105,6 @@ export interface Database {
           form_name: string;
           status: string;
           whatsapp_connection_id: string | null;
-          brochure_automation_enabled: boolean;
-          brochure_automation_connection_id: string | null;
-          brochure_service_template_name: string;
-          brochure_service_template_language: string;
-          brochure_carousel_template_name: string;
-          brochure_carousel_template_language: string;
-          construction_brochure_url: string;
-          interiors_brochure_url: string;
-          construction_brochure_image_url: string;
-          interiors_brochure_image_url: string;
           confirm_enabled: boolean;
           template_name: string;
           template_language: string;
@@ -5132,6 +5122,16 @@ export interface Database {
           created_by: string;
           created_at: string;
           updated_at: string;
+          brochure_automation_enabled: boolean;
+          brochure_automation_connection_id: string | null;
+          brochure_service_template_name: string;
+          brochure_service_template_language: string;
+          brochure_carousel_template_name: string;
+          brochure_carousel_template_language: string;
+          construction_brochure_url: string;
+          interiors_brochure_url: string;
+          construction_brochure_image_url: string;
+          interiors_brochure_image_url: string;
         };
         Insert: {
           id?: string;
@@ -5142,16 +5142,6 @@ export interface Database {
           form_name?: string;
           status?: string;
           whatsapp_connection_id?: string | null;
-          brochure_automation_enabled?: boolean;
-          brochure_automation_connection_id?: string | null;
-          brochure_service_template_name?: string;
-          brochure_service_template_language?: string;
-          brochure_carousel_template_name?: string;
-          brochure_carousel_template_language?: string;
-          construction_brochure_url?: string;
-          interiors_brochure_url?: string;
-          construction_brochure_image_url?: string;
-          interiors_brochure_image_url?: string;
           confirm_enabled?: boolean;
           template_name?: string;
           template_language?: string;
@@ -5169,16 +5159,6 @@ export interface Database {
           created_by: string;
           created_at?: string;
           updated_at?: string;
-        };
-        Update: {
-          id?: string;
-          organization_id?: string;
-          page_row_id?: string;
-          page_id?: string;
-          form_id?: string;
-          form_name?: string;
-          status?: string;
-          whatsapp_connection_id?: string | null;
           brochure_automation_enabled?: boolean;
           brochure_automation_connection_id?: string | null;
           brochure_service_template_name?: string;
@@ -5189,6 +5169,16 @@ export interface Database {
           interiors_brochure_url?: string;
           construction_brochure_image_url?: string;
           interiors_brochure_image_url?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          page_row_id?: string;
+          page_id?: string;
+          form_id?: string;
+          form_name?: string;
+          status?: string;
+          whatsapp_connection_id?: string | null;
           confirm_enabled?: boolean;
           template_name?: string;
           template_language?: string;
@@ -5206,6 +5196,16 @@ export interface Database {
           created_by?: string;
           created_at?: string;
           updated_at?: string;
+          brochure_automation_enabled?: boolean;
+          brochure_automation_connection_id?: string | null;
+          brochure_service_template_name?: string;
+          brochure_service_template_language?: string;
+          brochure_carousel_template_name?: string;
+          brochure_carousel_template_language?: string;
+          construction_brochure_url?: string;
+          interiors_brochure_url?: string;
+          construction_brochure_image_url?: string;
+          interiors_brochure_image_url?: string;
         };
         Relationships: [
           {
