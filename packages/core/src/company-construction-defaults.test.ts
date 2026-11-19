@@ -181,4 +181,33 @@ describe('company construction stage templates', () => {
     );
     expect(companyConstructionStages.safeParse(valid).success).toBe(true);
   });
+
+  it('supports a detailed programme with up to 400 work and inspection items', () => {
+    const makeStages = (total: number) =>
+      Array.from({ length: Math.ceil(total / 100) }, (_, stageIndex) => {
+        const count = Math.min(100, total - stageIndex * 100);
+        return {
+          id: `load-stage-${stageIndex}`,
+          name: `Load stage ${stageIndex}`,
+          repeatsPerFloor: false,
+          days: 1,
+          items: Array.from({ length: count }, (_, itemIndex) => {
+            const index = stageIndex * 100 + itemIndex;
+            return {
+              id: `load-item-${index}`,
+              kind: 'work' as const,
+              title: `Work item ${index}`,
+              days: 1,
+            };
+          }),
+        };
+      });
+
+    expect(companyConstructionStages.safeParse(makeStages(400)).success).toBe(
+      true,
+    );
+    expect(companyConstructionStages.safeParse(makeStages(401)).success).toBe(
+      false,
+    );
+  });
 });
