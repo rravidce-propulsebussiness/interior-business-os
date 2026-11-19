@@ -76,7 +76,7 @@ export default async function WhatsAppPage({
   );
 
   return (
-    <main id="main-content" tabIndex={-1} className="wa-page-main">
+    <main id="main-content" tabIndex={-1}>
       <WhatsAppHub
         initialTab={query.tab === 'automations' ? 'automations' : 'inbox'}
         canManage={services.context.grants.some(

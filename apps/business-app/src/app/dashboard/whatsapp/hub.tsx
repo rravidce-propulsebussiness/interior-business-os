@@ -1,7 +1,6 @@
 'use client';
 /* eslint-disable @next/next/no-img-element -- Private, data, and object URL media previews require native img elements; react-hook-form watch is used in this render branch. */
 
-import Link from 'next/link';
 import {
   Fragment,
   useCallback,
@@ -242,8 +241,9 @@ function triggerLabel(rule: Rule) {
   return 'Any message · once per customer every 24 hours';
 }
 type Tab =
-  | 'overview'
   | 'inbox'
+  | 'updates'
+  | 'communities'
   | 'calling'
   | 'contacts'
   | 'broadcasts'
@@ -455,34 +455,15 @@ export function WhatsAppHub({
   );
   const connections = liveConnections.length ? liveConnections : allConnections;
   const [tab, setTab] = useState<Tab>(initialTab);
-  // Full-screen WhatsApp workspace (remembered per browser), like WhatsApp Web.
-  const [fullscreen, setFullscreen] = useState(true);
-  const [fullscreenLoaded, setFullscreenLoaded] = useState(false);
   const [automationFormOpen, setAutomationFormOpen] = useState(false);
+  const [toolsMenuOpen, setToolsMenuOpen] = useState(false);
   useEffect(() => {
-    try {
-      if (window.localStorage.getItem('wa-fullscreen') === 'off')
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
-        setFullscreen(false);
-    } catch {
-      // Storage unavailable: keep full screen.
-    }
-    setFullscreenLoaded(true);
-  }, []);
-  useEffect(() => {
-    if (!fullscreenLoaded) return;
-    try {
-      window.localStorage.setItem('wa-fullscreen', fullscreen ? 'on' : 'off');
-    } catch {
-      // Storage can be unavailable (private mode); the toggle still works.
-    }
-    if (!fullscreen) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [fullscreen, fullscreenLoaded]);
+  }, []);
   const [connectionId, setConnectionId] = useState(connections[0]?.id ?? '');
   const [callTarget, setCallTarget] = useState('');
   const [callInProgress, setCallInProgress] = useState(false);
@@ -566,262 +547,152 @@ export function WhatsAppHub({
   }
 
   return (
-    <section
-      className={`wa-shell wa-skin${tab === 'inbox' ? ' wa-skin-inbox' : ''}${fullscreen ? ' wa-fullscreen' : ''}`}
-    >
-      <aside className="wa-sidebar" aria-label="ProPulse messaging navigation">
-        <Link
-          className="wa-back-link"
-          href="/dashboard"
-          title="Back to Business OS"
-          aria-label="Back to Business OS"
-        >
-          <NavIcon kind="back" />
-          <span className="wa-nav-text">Business OS</span>
-        </Link>
-        <div className="wa-brand">
-          <span className="wa-brand-mark">P</span>
-          <span>
-            <strong>ProPulse</strong>
-            <small>Business OS</small>
+    <section className="wa-skin wa-app-frame">
+      <header className="wa-app-header">
+        <div className="wa-app-brand">
+          <span className="wa-app-logo" aria-hidden="true">
+            <NavIcon kind="whatsapp" />
           </span>
+          <h1>WhatsApp</h1>
         </div>
-        <div className="wa-nav-label">WORKSPACE</div>
-        <nav className="wa-nav">
+        <div className="wa-app-header-actions">
           <button
-            className={`wa-nav-item ${tab === 'overview' ? 'wa-nav-item-active' : ''}`}
             type="button"
-            aria-current={tab === 'overview' ? 'page' : undefined}
-            title="Overview"
-            onClick={() => setTab('overview')}
+            aria-label="Updates"
+            title="Updates"
+            onClick={() => setTab('updates')}
           >
-            <NavIcon kind="overview" />{' '}
-            <span className="wa-nav-text">Overview</span>
+            <NavIcon kind="camera" />
           </button>
-          {tabs.map((item) => (
+          <div className="wa-tools-wrap">
             <button
-              key={item.id}
               type="button"
-              onClick={() => {
-                setTab(item.id);
-                setNotice('');
-              }}
-              aria-current={tab === item.id ? 'page' : undefined}
-              title={item.label}
-              className={`wa-nav-item ${tab === item.id ? 'wa-nav-item-active' : ''}`}
+              aria-label="More WhatsApp tools"
+              aria-expanded={toolsMenuOpen}
+              onClick={() => setToolsMenuOpen((open) => !open)}
             >
-              <NavIcon kind={item.icon} />{' '}
-              <span className="wa-nav-text">{item.label}</span>
-              {item.id === 'inbox' && (
-                <span className="wa-nav-count">{/* filled from inbox */}•</span>
-              )}
+              <NavIcon kind="more" />
             </button>
-          ))}
-        </nav>
-        <div className="wa-sidebar-promo">
-          <span className="wa-promo-icon">
-            <NavIcon kind="automation" />
-          </span>
-          <strong>Grow with automations</strong>
-          <p>Save time and respond automatically.</p>
-          <button type="button" onClick={() => setTab('automations')}>
-            Go to Automations <span>→</span>
-          </button>
-        </div>
-        <div className="wa-account-health">
-          <span className="wa-online-dot" />
-          <span>
-            <strong>WhatsApp account</strong>
-            <small>Connected</small>
-          </span>
-          <span className="wa-account-ellipsis">•••</span>
-        </div>
-      </aside>
-
-      <div className="wa-main">
-        <header className="wa-topbar">
-          <div className="wa-topbar-title">
-            <span className="wa-whatsapp-mark" aria-hidden="true">
-              <NavIcon kind="message" />
-            </span>
-            <div>
-              <h1>WhatsApp</h1>
-              <p>
-                <i className="wa-online-dot" /> Connected
-              </p>
-            </div>
-          </div>
-          <div className="wa-topbar-actions">
-            <label className="wa-connection-select">
-              <span aria-hidden="true">▦</span>
-              <select
-                value={connectionId}
-                disabled={callInProgress}
-                title={
-                  callInProgress
-                    ? 'End the WhatsApp call before switching business numbers.'
-                    : undefined
-                }
-                onChange={(event) => {
-                  setConnectionId(event.target.value);
-                  setCallTarget('');
-                }}
-                aria-label="Connected business number"
-              >
-                {connections.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.name} · {item.phone}
-                  </option>
+            {toolsMenuOpen && (
+              <div className="wa-tools-menu" role="menu">
+                {[
+                  ['contacts', 'Contacts', 'people'],
+                  ['broadcasts', 'Broadcasts', 'broadcast'],
+                  ['templates', 'Templates', 'template'],
+                  ['analytics', 'Analytics', 'analytics'],
+                ].map(([id, label, icon]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    role="menuitem"
+                    onClick={() => {
+                      setTab(id as Tab);
+                      setToolsMenuOpen(false);
+                      setNotice('');
+                    }}
+                  >
+                    <NavIcon kind={icon ?? 'message'} /> {label ?? ''}
+                  </button>
                 ))}
-              </select>
-            </label>
-            <span className="wa-connected-badge">
-              <i /> Connected
-            </span>
-            <div className="wa-topbar-avatars" aria-label="Workspace team">
-              <span title="ProPulse workspace">PP</span>
-            </div>
-            <button
-              className="wa-icon-button"
-              type="button"
-              aria-label={fullscreen ? 'Exit full screen' : 'Full screen'}
-              title={fullscreen ? 'Exit full screen' : 'Full screen'}
-              onClick={() => setFullscreen((value) => !value)}
-            >
-              <NavIcon kind={fullscreen ? 'collapse' : 'expand'} />
-            </button>
-            <button
-              className="wa-icon-button"
-              type="button"
-              aria-label="Search"
-              onClick={() => setTab('contacts')}
-            >
-              <NavIcon kind="search" />
-            </button>
-            <button
-              className="wa-icon-button wa-notification"
-              type="button"
-              aria-label="Notifications"
-            >
-              <NavIcon kind="bell" />
-            </button>
-            <button
-              className="wa-new-message"
-              type="button"
-              onClick={() => setTab('templates')}
-            >
-              <NavIcon kind="compose" /> New message
-            </button>
+              </div>
+            )}
           </div>
-        </header>
+        </div>
+      </header>
 
-        <nav className="wa-mobile-tabs" aria-label="WhatsApp sections">
-          {tabs.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => {
-                setTab(item.id);
-                setNotice('');
-              }}
-              aria-current={tab === item.id ? 'page' : undefined}
-              className={tab === item.id ? 'wa-mobile-tab-active' : ''}
-            >
-              <NavIcon kind={item.icon} />
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="wa-content">
-          <WhatsAppCalling
-            key={connectionId}
-            connectionId={connectionId}
-            selectedWaId={callTarget}
-            active={tab === 'calling'}
-            canManage={canManage}
-            onOpen={() => setTab('calling')}
-            onCallActivityChange={setCallInProgress}
-          />
-          <div
-            className={`wa-section-heading${tab === 'inbox' ? ' wa-hidden-on-inbox' : ''}`}
+      <div className="wa-business-bar">
+        <div className="wa-business-identity">
+          <span className="wa-business-avatar" aria-hidden="true">
+            SG
+          </span>
+          <span className="wa-business-name">
+            <strong>
+              {connections.find((item) => item.id === connectionId)?.name ??
+                'SG Homes'}
+            </strong>
+            <small>
+              <i /> Connected
+            </small>
+          </span>
+        </div>
+        <label className="wa-connection-select">
+          <span className="wa-connection-grid" aria-hidden="true">
+            ▦
+          </span>
+          <select
+            value={connectionId}
+            disabled={callInProgress}
+            title={
+              callInProgress
+                ? 'End the WhatsApp call before switching business numbers.'
+                : undefined
+            }
+            onChange={(event) => {
+              setConnectionId(event.target.value);
+              setCallTarget('');
+            }}
+            aria-label="Connected business number"
           >
-            <div>
-              <span className="wa-eyebrow">PROPULSE MESSAGING</span>
-              <h2>
-                {tab === 'overview'
-                  ? 'Overview'
-                  : tab === 'inbox'
-                    ? 'Inbox'
-                    : tabs.find((item) => item.id === tab)?.label}
-              </h2>
-            </div>
-            {tab === 'automations' ? (
-              canManage && (
-                <button
-                  type="button"
-                  className="wa-add-contact"
-                  onClick={() => setAutomationFormOpen(true)}
-                >
-                  <NavIcon kind="compose" /> New automation
-                </button>
-              )
-            ) : (
+            {connections.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name} · {item.phone}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          className={`wa-automation-shortcut${tab === 'automations' ? ' is-current' : ''}`}
+          type="button"
+          onClick={() => {
+            setTab('automations');
+            setAutomationFormOpen(false);
+            setNotice('');
+          }}
+        >
+          <NavIcon kind="automation" /> Automations
+        </button>
+      </div>
+
+      <div className="wa-app-content">
+        <WhatsAppCalling
+          key={connectionId}
+          connectionId={connectionId}
+          selectedWaId={callTarget}
+          active={tab === 'calling'}
+          canManage={canManage}
+          onOpen={() => setTab('calling')}
+          onCallActivityChange={setCallInProgress}
+        />
+        <div
+          className={`wa-section-heading${tab === 'inbox' ? ' wa-hidden-on-inbox' : ''}`}
+        >
+          <div>
+            <span className="wa-eyebrow">PROPULSE MESSAGING</span>
+            <h2>
+              {tab === 'inbox'
+                ? 'Chats'
+                : tab === 'updates' || tab === 'communities'
+                  ? tab === 'updates'
+                    ? 'Updates'
+                    : 'Communities'
+                  : tabs.find((item) => item.id === tab)?.label}
+            </h2>
+          </div>
+          {tab === 'automations' ? (
+            canManage && (
               <button
                 type="button"
                 className="wa-add-contact"
-                onClick={() =>
-                  setContactModal({
-                    name: '',
-                    phone: '',
-                    consentSource: 'Customer enquiry form',
-                    confirmOptIn: true,
-                  })
-                }
+                onClick={() => setAutomationFormOpen(true)}
               >
-                <NavIcon kind="people" /> Add contact
+                <NavIcon kind="compose" /> New automation
               </button>
-            )}
-          </div>
-          {notice && (
-            <p className="wa-global-notice" role="status">
-              {notice}
-            </p>
-          )}
-          {tab === 'overview' && (
-            <OverviewPanel
-              connectionId={connectionId}
-              refreshKey={contactRefresh}
-              onNavigate={setTab}
-            />
-          )}
-          {tab === 'inbox' && (
-            <InboxPanel
-              connectionId={connectionId}
-              canManage={canManage}
-              refreshKey={contactRefresh}
-              onEditContact={(contact) =>
-                setContactModal({
-                  name: contact.name,
-                  phone: `+${contact.wa_id}`,
-                  consentSource:
-                    contact.template_opt_in_source || 'Customer enquiry form',
-                  confirmOptIn: true,
-                })
-              }
-              onNavigate={setTab}
-              onCallContact={(waId) => {
-                setCallTarget(waId);
-                setTab('calling');
-              }}
-            />
-          )}
-          {tab === 'contacts' && (
-            <ContactsPanel
-              connectionId={connectionId}
-              refreshKey={contactRefresh}
-              canManage={canManage}
-              onAddContact={() =>
+            )
+          ) : tab === 'contacts' ? (
+            <button
+              type="button"
+              className="wa-add-contact"
+              onClick={() =>
                 setContactModal({
                   name: '',
                   phone: '',
@@ -829,58 +700,148 @@ export function WhatsAppHub({
                   confirmOptIn: true,
                 })
               }
-              onEditContact={(contact, resume) =>
-                setContactModal({
-                  name: contact.name,
-                  phone: `+${contact.wa_id}`,
-                  consentSource: resume
-                    ? 'Customer asked to receive messages again'
-                    : contact.template_opt_in_source || 'Customer enquiry form',
-                  confirmOptIn: true,
-                })
-              }
-            />
-          )}
-          {tab === 'automations' && (
-            <AutomationsPanel
-              connectionId={connectionId}
-              canManage={canManage}
-              formOpen={automationFormOpen}
-              onFormClose={() => setAutomationFormOpen(false)}
-            />
-          )}
-          {tab === 'templates' && (
-            <TemplatesPanel
-              connectionId={connectionId}
-              canManage={canManage}
-              templates={templates}
-              loadTemplates={loadTemplates}
-              notice={notice}
-              setNotice={setNotice}
-            />
-          )}
-          {tab === 'broadcasts' && (
-            <BroadcastsPanel
-              templates={templates}
-              onNavigate={setTab}
-              connectionId={connectionId}
-              canManage={canManage}
-            />
-          )}
-          {tab === 'analytics' && (
-            <AnalyticsPanel
-              connectionId={connectionId}
-              refreshKey={contactRefresh}
-            />
-          )}
-          {tab === 'settings' && (
-            <SettingsPanel
-              connections={connections}
-              settingsPanel={settingsPanel}
-            />
-          )}
+            >
+              <NavIcon kind="people" /> Add contact
+            </button>
+          ) : null}
         </div>
+        {notice && (
+          <p className="wa-global-notice" role="status">
+            {notice}
+          </p>
+        )}
+        {tab === 'inbox' && (
+          <InboxPanel
+            connectionId={connectionId}
+            canManage={canManage}
+            refreshKey={contactRefresh}
+            onEditContact={(contact) =>
+              setContactModal({
+                name: contact.name,
+                phone: `+${contact.wa_id}`,
+                consentSource:
+                  contact.template_opt_in_source || 'Customer enquiry form',
+                confirmOptIn: true,
+              })
+            }
+            onNavigate={setTab}
+            onCallContact={(waId) => {
+              setCallTarget(waId);
+              setTab('calling');
+            }}
+          />
+        )}
+        {tab === 'contacts' && (
+          <ContactsPanel
+            connectionId={connectionId}
+            refreshKey={contactRefresh}
+            canManage={canManage}
+            onAddContact={() =>
+              setContactModal({
+                name: '',
+                phone: '',
+                consentSource: 'Customer enquiry form',
+                confirmOptIn: true,
+              })
+            }
+            onEditContact={(contact, resume) =>
+              setContactModal({
+                name: contact.name,
+                phone: `+${contact.wa_id}`,
+                consentSource: resume
+                  ? 'Customer asked to receive messages again'
+                  : contact.template_opt_in_source || 'Customer enquiry form',
+                confirmOptIn: true,
+              })
+            }
+          />
+        )}
+        {tab === 'automations' && (
+          <AutomationsPanel
+            connectionId={connectionId}
+            canManage={canManage}
+            formOpen={automationFormOpen}
+            onFormClose={() => setAutomationFormOpen(false)}
+          />
+        )}
+        {tab === 'templates' && (
+          <TemplatesPanel
+            connectionId={connectionId}
+            canManage={canManage}
+            templates={templates}
+            loadTemplates={loadTemplates}
+            notice={notice}
+            setNotice={setNotice}
+          />
+        )}
+        {tab === 'broadcasts' && (
+          <BroadcastsPanel
+            templates={templates}
+            onNavigate={setTab}
+            connectionId={connectionId}
+            canManage={canManage}
+          />
+        )}
+        {tab === 'analytics' && (
+          <AnalyticsPanel
+            connectionId={connectionId}
+            refreshKey={contactRefresh}
+          />
+        )}
+        {tab === 'settings' && (
+          <SettingsPanel
+            connections={connections}
+            settingsPanel={settingsPanel}
+          />
+        )}
+        {tab === 'updates' && (
+          <WhatsAppUnavailablePanel
+            title="Updates"
+            message="WhatsApp Status updates aren’t available through the Business Platform connection. View or post status from the WhatsApp Business app on your phone."
+          />
+        )}
+        {tab === 'communities' && (
+          <WhatsAppUnavailablePanel
+            title="Communities"
+            message="Communities aren’t available through this WhatsApp Business Platform connection."
+          />
+        )}
+        {tab === 'inbox' && (
+          <button
+            type="button"
+            className="wa-floating-compose"
+            aria-label="Start a new chat"
+            title="Start a new chat"
+            onClick={() => setTab('contacts')}
+          >
+            <NavIcon kind="compose" />
+          </button>
+        )}
       </div>
+
+      <nav className="wa-app-bottom-nav" aria-label="WhatsApp navigation">
+        {[
+          ['inbox', 'Chats', 'message'],
+          ['updates', 'Updates', 'updates'],
+          ['communities', 'Communities', 'people'],
+          ['calling', 'Calls', 'phone'],
+          ['settings', 'Settings', 'settings'],
+        ].map(([id, label, icon]) => (
+          <button
+            key={id}
+            type="button"
+            className={tab === id ? 'is-active' : ''}
+            aria-current={tab === id ? 'page' : undefined}
+            onClick={() => {
+              setTab(id as Tab);
+              setNotice('');
+            }}
+          >
+            <NavIcon kind={icon ?? 'message'} />
+            <span>{label ?? ''}</span>
+          </button>
+        ))}
+      </nav>
 
       {contactModal && (
         <div
@@ -980,6 +941,24 @@ export function WhatsAppHub({
   );
 }
 
+function WhatsAppUnavailablePanel({
+  title,
+  message,
+}: {
+  title: string;
+  message: string;
+}) {
+  return (
+    <section className="wa-native-empty-state">
+      <span className="wa-native-empty-icon">
+        <NavIcon kind={title === 'Updates' ? 'updates' : 'people'} />
+      </span>
+      <h3>{title}</h3>
+      <p>{message}</p>
+    </section>
+  );
+}
+
 function NavIcon({ kind }: { kind: string }) {
   const paths: Record<string, ReactNode> = {
     back: <path d="M15 18 9 12l6-6" />,
@@ -1012,6 +991,24 @@ function NavIcon({ kind }: { kind: string }) {
         <circle cx="12" cy="19" r="1.4" />
       </>
     ),
+    camera: (
+      <>
+        <path d="M4 7h3l2-2h6l2 2h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z" />
+        <circle cx="12" cy="13" r="3" />
+      </>
+    ),
+    whatsapp: (
+      <>
+        <path d="M20.3 11.8a8.3 8.3 0 0 1-12.2 7.3L4 20l.9-4.1a8.3 8.3 0 1 1 15.4-4.1z" />
+        <path d="M9 8.8c.2-.5.5-.6.8-.6h.5c.2 0 .4.1.5.4l.7 1.6c.1.2 0 .4-.1.6l-.5.6c-.2.2-.2.4 0 .6.5.9 1.2 1.5 2.1 2 .2.1.4.1.6-.1l.7-.8c.2-.2.4-.2.6-.1l1.6.8c.2.1.3.3.3.5 0 .4-.2 1-.6 1.3-.4.4-1 .6-1.7.5-1.1-.1-2.5-.8-3.9-2.1-1.2-1.1-2-2.5-2.1-3.5-.1-.8.2-1.4.5-1.7z" />
+      </>
+    ),
+    updates: (
+      <>
+        <circle cx="12" cy="12" r="9" />
+        <circle cx="12" cy="12" r="5.5" />
+      </>
+    ),
     close: <path d="M18 6 6 18M6 6l12 12" />,
     plus: <path d="M12 5v14M5 12h14" />,
     smile: (
@@ -1022,12 +1019,6 @@ function NavIcon({ kind }: { kind: string }) {
       </>
     ),
     send: <path d="M4 12 20 4l-4 16-4-6-8-2z" />,
-    overview: (
-      <>
-        <path d="m3 10 9-7 9 7" />
-        <path d="M5 9v11h14V9M9 20v-6h6v6" />
-      </>
-    ),
     message: (
       <>
         <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 4a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z" />
@@ -1208,7 +1199,7 @@ function InboxPanel({
   );
   const fileInput = useRef<HTMLInputElement>(null);
   const [conversationFilter, setConversationFilter] = useState<
-    'all' | 'unread'
+    'all' | 'unread' | 'favorites' | 'groups'
   >('all');
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState('');
@@ -1622,11 +1613,20 @@ function InboxPanel({
     }
   }
 
-  const visibleRows = (
-    conversationFilter === 'unread'
-      ? state.rows.filter((row) => row.unread)
-      : state.rows
-  ).filter(
+  const favoriteLabelId = labelState.labels.find((label) =>
+    ['favorite', 'favorites'].includes(label.name.trim().toLowerCase()),
+  )?.id;
+  const filteredRows = state.rows.filter((row) => {
+    if (conversationFilter === 'unread') return row.unread;
+    if (conversationFilter === 'favorites')
+      return Boolean(
+        favoriteLabelId &&
+        (labelState.assignments[row.id] ?? []).includes(favoriteLabelId),
+      );
+    if (conversationFilter === 'groups') return row.wa_id.includes('@g.us');
+    return true;
+  });
+  const visibleRows = filteredRows.filter(
     (row) =>
       !labelFilter ||
       (labelState.assignments[row.id] ?? []).includes(labelFilter),
@@ -1711,6 +1711,30 @@ function InboxPanel({
               onClick={() => setConversationFilter('unread')}
             >
               Unread{state.unread ? ` ${state.unread}` : ''}
+            </button>
+            <button
+              type="button"
+              className={
+                conversationFilter === 'favorites' ? 'wa-chip-active' : ''
+              }
+              onClick={() => {
+                setConversationFilter('favorites');
+                setLabelFilter('');
+              }}
+            >
+              Favorites
+            </button>
+            <button
+              type="button"
+              className={
+                conversationFilter === 'groups' ? 'wa-chip-active' : ''
+              }
+              onClick={() => {
+                setConversationFilter('groups');
+                setLabelFilter('');
+              }}
+            >
+              Groups
             </button>
             {labelState.labels.map((label) => (
               <button
@@ -2960,91 +2984,6 @@ function ContactProfile({
         </button>
       </div>
     </aside>
-  );
-}
-
-function OverviewPanel({
-  connectionId,
-  refreshKey,
-  onNavigate,
-}: {
-  connectionId: string;
-  refreshKey: number;
-  onNavigate: (tab: Tab) => void;
-}) {
-  const state = useWorkspaceRows('inbox', connectionId, refreshKey);
-  return (
-    <section className="wa-feature-page">
-      <div className="wa-feature-hero">
-        <span className="wa-feature-icon">
-          <NavIcon kind="overview" />
-        </span>
-        <div>
-          <span className="wa-eyebrow">WORKSPACE OVERVIEW</span>
-          <h3>Keep every WhatsApp conversation moving</h3>
-          <p>
-            Review new conversations, manage your contacts, and prepare approved
-            template messages.
-          </p>
-        </div>
-      </div>
-      {state.error && (
-        <p role="status" className="wa-global-notice">
-          {state.error}
-        </p>
-      )}
-      <div className="wa-feature-cards">
-        <article>
-          <span>Contacts</span>
-          <strong>{state.total}</strong>
-          <small>For this business number</small>
-        </article>
-        <article>
-          <span>Unread</span>
-          <strong>{state.unread}</strong>
-          <small>Waiting for your team</small>
-        </article>
-        <article>
-          <span>Account</span>
-          <strong>{state.busy ? 'Loading' : 'Connected'}</strong>
-          <small>WhatsApp Cloud API</small>
-        </article>
-      </div>
-      <div className="wa-overview-actions">
-        <button type="button" onClick={() => onNavigate('inbox')}>
-          <NavIcon kind="message" />
-          <span>
-            <strong>Open inbox</strong>
-            <small>Read and reply to conversations</small>
-          </span>
-          <b>→</b>
-        </button>
-        <button type="button" onClick={() => onNavigate('contacts')}>
-          <NavIcon kind="people" />
-          <span>
-            <strong>Manage contacts</strong>
-            <small>Search or add a WhatsApp contact</small>
-          </span>
-          <b>→</b>
-        </button>
-        <button type="button" onClick={() => onNavigate('automations')}>
-          <NavIcon kind="automation" />
-          <span>
-            <strong>Set up automations</strong>
-            <small>Create a paused reply rule</small>
-          </span>
-          <b>→</b>
-        </button>
-        <button type="button" onClick={() => onNavigate('templates')}>
-          <NavIcon kind="template" />
-          <span>
-            <strong>Review templates</strong>
-            <small>Check Meta approval status</small>
-          </span>
-          <b>→</b>
-        </button>
-      </div>
-    </section>
   );
 }
 
