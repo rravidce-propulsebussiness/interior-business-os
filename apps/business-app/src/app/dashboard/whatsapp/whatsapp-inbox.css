@@ -2342,6 +2342,27 @@
   color: var(--wa-text, #334155);
 }
 
+.wa-unsupported-message > span:first-child {
+  flex: none;
+  line-height: 1.4;
+}
+
+.wa-unsupported-message > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.wa-unsupported-message strong,
+.wa-unsupported-message small {
+  display: block;
+  line-height: 1.4;
+}
+
+.wa-unsupported-message small {
+  color: var(--wa-muted, #667781);
+}
+
 /* Native WhatsApp-style app shell */
 .wa-skin.wa-app-frame {
   --wa-green: #00a884;
@@ -2949,6 +2970,12 @@
   .wa-app-content .wa-inbox-grid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* The WhatsApp shell stays phone-width on desktop. Keep its pages single
+   column even when the browser viewport activates Tailwind's xl utilities. */
+.wa-app-frame .wa-automations-grid {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 @media (max-width: 390px) {

@@ -4055,8 +4055,13 @@ function ContactsPanel({
           {state.error}
         </p>
       )}
-      <div className="mt-5 overflow-hidden rounded-2xl border border-stone-200">
-        <div className="grid grid-cols-[minmax(140px,1.1fr)_minmax(120px,.8fr)_minmax(150px,1.3fr)_100px_150px] gap-3 bg-stone-50 px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-stone-500">
+      <div
+        className="mt-5 overflow-x-auto rounded-2xl border border-stone-200"
+        role="region"
+        aria-label="WhatsApp contacts"
+        tabIndex={0}
+      >
+        <div className="grid min-w-[740px] grid-cols-[minmax(140px,1.1fr)_minmax(120px,.8fr)_minmax(150px,1.3fr)_100px_150px] gap-3 bg-stone-50 px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-stone-500">
           <span>Name</span>
           <span>WhatsApp number</span>
           <span>Latest message</span>
@@ -4066,7 +4071,7 @@ function ContactsPanel({
         {state.rows.map((row) => (
           <div
             key={row.id}
-            className="grid grid-cols-[minmax(140px,1.1fr)_minmax(120px,.8fr)_minmax(150px,1.3fr)_100px_150px] items-center gap-3 border-t border-stone-100 px-4 py-3 text-sm"
+            className="grid min-w-[740px] grid-cols-[minmax(140px,1.1fr)_minmax(120px,.8fr)_minmax(150px,1.3fr)_100px_150px] items-center gap-3 border-t border-stone-100 px-4 py-3 text-sm"
           >
             <div className="truncate font-semibold text-stone-900">
               {row.name || 'Unknown contact'}
@@ -4129,7 +4134,7 @@ function ContactsPanel({
           </div>
         ))}
         {!state.busy && state.rows.length === 0 && (
-          <p className="p-8 text-center text-sm text-stone-500">
+          <p className="min-w-[740px] p-8 text-center text-sm text-stone-500">
             Contacts will appear after the first inbound WhatsApp message.
           </p>
         )}
