@@ -124,6 +124,89 @@ begin
  raise notice 'PASS: reusable stage days and site guides persist in settings';
 end$$;
 
+-- Both current and compatibility workflow RPCs accept 400 items and reject 401.
+create function pg_temp.test_industry_workflow(p_total integer) returns jsonb
+language sql immutable as $$
+  with per_stage as (
+    select stage_index,
+      jsonb_agg(jsonb_build_object(
+        'id','workflow-item-'||stage_index||'-'||item_index,
+        'kind','work','title','Workflow task '||stage_index||'-'||item_index,'days',1
+      ) order by item_index) as items
+    from generate_series(0,ceil(p_total/100.0)::integer-1) as stages(stage_index)
+    cross join lateral generate_series(0,least(99,p_total-stage_index*100)) as tasks(item_index)
+    group by stage_index
+  )
+  select jsonb_agg(jsonb_build_object(
+    'id','workflow-stage-'||stage_index,
+    'name','Workflow stage '||stage_index,
+    'description','Workflow limit regression fixture.',
+    'repeatsPerFloor',false,'days',1,'items',items
+  ) order by stage_index)
+  from per_stage;
+$$;
+
+create function pg_temp.test_legacy_workflow(p_extra integer default 0) returns jsonb
+language sql immutable as $$
+  with stage_config(stage_index,id,name,repeats_per_floor,item_count) as (
+    values
+      (0,'preconstruction','Pre-construction',false,58+p_extra),
+      (1,'foundation','Foundation',false,57),
+      (2,'slabs','Slabs',true,57),
+      (3,'brickwork','Brickwork',true,57),
+      (4,'electrical-plumbing','Electrical & plumbing',true,57),
+      (5,'tiles','Tiles',true,57),
+      (6,'painting','Painting',true,57)
+  )
+  select jsonb_agg(jsonb_build_object(
+    'id',id,'name',name,'repeatsPerFloor',repeats_per_floor,'days',1,
+    'items',(select jsonb_agg(jsonb_build_object(
+      'id','legacy-'||id||'-'||item_index,'kind','work',
+      'title','Legacy workflow task '||stage_index||'-'||item_index,'days',1
+    ) order by item_index)
+    from generate_series(0,item_count-1) as tasks(item_index))
+  ) order by stage_index)
+  from stage_config;
+$$;
+
+do $$
+declare
+  org uuid='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+  saved jsonb;
+  item_count integer;
+begin
+  perform public.organization_industry_workflow_save(
+    org,'construction',pg_temp.test_industry_workflow(400));
+  saved:=public.organization_industry_workflow_read(org,'construction');
+  select coalesce(sum(jsonb_array_length(stage->'items')),0)::integer
+    into item_count from jsonb_array_elements(saved) as workflow_stages(stage);
+  if item_count<>400 then
+    raise exception 'FAIL: industry workflow RPC did not persist all 400 items';
+  end if;
+  begin
+    perform public.organization_industry_workflow_save(
+      org,'construction',pg_temp.test_industry_workflow(401));
+    raise exception 'FAIL: industry workflow RPC accepted 401 items';
+  exception when invalid_parameter_value then null;
+  end;
+
+  perform public.organization_construction_payment_defaults_save(
+    org,pg_temp.test_legacy_workflow());
+  saved:=public.organization_construction_payment_defaults_read(org);
+  select coalesce(sum(jsonb_array_length(stage->'items')),0)::integer
+    into item_count from jsonb_array_elements(saved) as workflow_stages(stage);
+  if item_count<>400 then
+    raise exception 'FAIL: compatibility workflow RPC did not persist all 400 items';
+  end if;
+  begin
+    perform public.organization_construction_payment_defaults_save(
+      org,pg_temp.test_legacy_workflow(1));
+    raise exception 'FAIL: compatibility workflow RPC accepted 401 items';
+  exception when invalid_parameter_value then null;
+  end;
+  raise notice 'PASS: workflow save RPCs persist 400 items and reject 401';
+end$$;
+
 -- Read-only restrictions: one watchman sees no construction engineering stage.
 select set_config('request.jwt.claim.sub','11111111-1111-4111-8111-111111111111',true);
 do $$
