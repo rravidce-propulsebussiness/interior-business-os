@@ -62,6 +62,7 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/execution/boq-calculations.test.ts',
       'apps/business-app/src/app/dashboard/execution/boq-pricing.test.ts',
       'apps/business-app/src/app/dashboard/execution/boq-project-quote.test.ts',
+      'apps/business-app/src/app/dashboard/settings/test-reset-actions.test.ts',
       'apps/business-app/src/app/dashboard/project-management/tasks/tasks-board.test.ts',
     ],
     clearMocks: true,

@@ -582,7 +582,8 @@ export function BoqWorkspace({
                     {projects.find(
                       (project) => project.id === document.project_id,
                     )?.name || 'No project linked'}{' '}
-                    · {document.status}
+                    ·{' '}
+                    {document.status === 'final' ? 'Final' : 'Saved · editable'}
                   </small>
                 </span>
                 <span className="boq-register-arrow">›</span>
@@ -646,7 +647,9 @@ export function BoqWorkspace({
                     ? 'Earlier quotation revision'
                     : projectId
                       ? 'No active quotation'
-                      : 'Choose a project'}
+                      : projects.length
+                        ? 'Choose a project'
+                        : 'No projects yet'}
               </strong>
               <small>
                 {currentQuote
@@ -657,7 +660,9 @@ export function BoqWorkspace({
                     ? 'This BOQ was made from an earlier quotation revision'
                     : projectId
                       ? 'Prepare the Final quotation for this project in Quotations'
-                      : 'The Final quotation is picked automatically'}
+                      : projects.length
+                        ? 'The Final quotation is picked automatically'
+                        : 'A project is created when a lead with a quotation is marked Won. Its Final quotation then appears here.'}
               </small>
             </div>
             <label>
@@ -668,7 +673,7 @@ export function BoqWorkspace({
                   setStatus(event.target.value as 'draft' | 'final')
                 }
               >
-                <option value="draft">Draft</option>
+                <option value="draft">Saved · editable</option>
                 <option value="final">Final</option>
               </select>
             </label>
