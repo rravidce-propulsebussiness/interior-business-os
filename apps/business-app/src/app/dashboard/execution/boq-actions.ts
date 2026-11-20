@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import type { SupabaseClient } from '@business-os/database';
 import { executionServices } from './service';
+import { normalizeStructuralSettings } from '@business-os/core/construction-boq';
 
 const lineSchema = z.object({
   id: z.string().uuid(),
@@ -20,13 +21,47 @@ const lineSchema = z.object({
         name: z.string().max(160),
         quantity: z.number().finite().nonnegative(),
         unit: z.string().max(30),
-        source: z.string().max(50).optional(),
+        source: z.string().max(300).optional(),
+        material: z.string().max(40).optional(),
+        rate: z.number().finite().nonnegative().optional(),
+        rods: z.number().int().nonnegative().optional(),
+        diameter: z.number().finite().nonnegative().optional(),
       }),
     )
     .max(100),
   quotedPrice: z.number().finite().nonnegative().optional(),
   quoteLineId: z.string().uuid().optional(),
   notes: z.string().max(2000).default(''),
+  origin: z
+    .enum([
+      'quotation-structure',
+      'quotation-allowance',
+      'quotation-additional',
+    ])
+    .optional(),
+});
+const generatorSchema = z.object({
+  revisionId: z.string().uuid(),
+  generatedAt: z.string().max(40),
+  settings: z.record(z.string(), z.number().finite()),
+  counts: z.object({
+    mainDoors: z.number().int().nonnegative(),
+    internalDoors: z.number().int().nonnegative(),
+    bathrooms: z.number().int().nonnegative(),
+  }),
+  floors: z
+    .array(
+      z.object({
+        name: z.string().max(90),
+        areaSqft: z.number().finite().nonnegative(),
+        lengthFeet: z.number().finite().nonnegative(),
+        widthFeet: z.number().finite().nonnegative(),
+        heightFeet: z.number().finite().positive(),
+        heightAssumed: z.boolean().optional(),
+      }),
+    )
+    .max(20),
+  warnings: z.array(z.string().max(500)).max(50).default([]),
 });
 const saveSchema = z.object({
   id: z.string().uuid().optional(),
@@ -40,6 +75,9 @@ const saveSchema = z.object({
     .regex(/^[A-Z]{3}$/)
     .default('INR'),
   items: z.array(lineSchema).max(500),
+  /** Chosen brand / source per material group, e.g. bricks → Karimnagar. */
+  selections: z.record(z.string().max(40), z.string().max(80)).default({}),
+  generator: generatorSchema.optional(),
 });
 const ratesSchema = z.object({
   items: z
@@ -50,9 +88,13 @@ const ratesSchema = z.object({
         unit: z.string().trim().min(1).max(30),
         rate: z.number().finite().nonnegative(),
         category: z.enum(['material', 'labour', 'other']),
+        material: z.string().trim().max(40).optional(),
+        variant: z.string().trim().max(80).optional(),
+        isDefault: z.boolean().optional(),
       }),
     )
     .max(500),
+  structural: z.record(z.string(), z.number().finite()).optional(),
 });
 
 type DbReply = { data?: unknown; error?: { message?: string } | null };
@@ -64,7 +106,11 @@ export async function saveManualBoq(input: unknown) {
       value.id ? 'estimate.edit' : 'estimate.create',
     );
     const client = s.client as unknown as SupabaseClient;
-    const document = { items: value.items };
+    const document = {
+      items: value.items,
+      selections: value.selections,
+      ...(value.generator ? { generator: value.generator } : {}),
+    };
     let reply: DbReply;
     if (value.id) {
       const result = await client
@@ -106,7 +152,11 @@ export async function saveManualBoq(input: unknown) {
         .single();
     }
     if (reply.error)
-      throw new Error(reply.error.message || 'Unable to save BOQ');
+      throw new Error(
+        (reply.error as { code?: string }).code === '23505'
+          ? 'A BOQ generated from this quotation already exists. Open it from Saved BOQs.'
+          : reply.error.message || 'Unable to save BOQ',
+      );
     revalidatePath('/dashboard/execution/boq');
     revalidatePath('/dashboard/projects');
     return {
@@ -153,12 +203,20 @@ export async function saveBoqRates(input: unknown) {
     const client = s.client as unknown as SupabaseClient;
     const previous = await client
       .from('construction_boq_rate_cards')
-      .select('version')
+      .select('version,rates')
       .eq('organization_id', s.org)
       .maybeSingle();
     if (previous.error)
       throw new Error(previous.error.message || 'Unable to read rates');
     const version = Number(previous.data?.version ?? 0) + 1;
+    // Saving prices alone keeps the company's saved structural settings.
+    const savedStructural = (
+      previous.data?.rates as { structural?: unknown } | null | undefined
+    )?.structural;
+    if (value.structural || savedStructural)
+      value.structural = normalizeStructuralSettings(
+        value.structural ?? savedStructural,
+      );
     const result = previous.data
       ? await client
           .from('construction_boq_rate_cards')

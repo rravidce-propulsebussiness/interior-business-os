@@ -45,7 +45,19 @@ type Material = {
   brand?: string;
   grade?: string;
   allowancePerSqft?: string;
+  // Package pricing basis, carried into the quote so the project BOQ can
+  // price allowances (e.g. ₹10,000 per door).
+  unit?: SectionUnit;
+  pricingTreatment?: 'included' | 'allowance' | 'extra' | 'excluded';
+  allowanceValue?: string;
 };
+type SectionUnit = NonNullable<
+  NonNullable<SftEstimateDetails['sections']>[number]['unit']
+>;
+const allowanceAmount = (value: string | undefined) =>
+  /^(0|[1-9][0-9]{0,7})(\.[0-9]{1,2})?$/.test((value ?? '').trim())
+    ? (value ?? '').trim()
+    : '';
 const names = [
   'Ground Floor',
   'First Floor',
@@ -255,6 +267,13 @@ export function PremiumSftBuilder({
             brand: s.brand,
             grade: s.grade,
             allowancePerSqft: s.allowancePerSqft,
+            ...(s.unit ? { unit: s.unit } : {}),
+            ...(s.pricingTreatment
+              ? { pricingTreatment: s.pricingTreatment }
+              : {}),
+            ...(allowanceAmount(s.allowanceValue)
+              ? { allowanceValue: allowanceAmount(s.allowanceValue) }
+              : {}),
           }))
         : defaultSpecs.map((title) => ({
             title,
@@ -383,7 +402,8 @@ export function PremiumSftBuilder({
         nonempty(s.description) ||
         nonempty(s.brand) ||
         nonempty(s.grade) ||
-        nonempty(s.allowancePerSqft),
+        nonempty(s.allowancePerSqft) ||
+        nonempty(s.allowanceValue),
     ),
   };
   const parsedInput = sftEstimateInputSchema.safeParse(savePayload);
@@ -468,6 +488,10 @@ export function PremiumSftBuilder({
           construction?.ratePerSqft || packageRate,
         ),
         ...copied,
+        heightFeet:
+          construction?.heightFeet ||
+          previous.find((r) => r.heightFeet)?.heightFeet ||
+          '',
         inheritFromPrevious: level > 0,
       });
     }
@@ -774,7 +798,9 @@ export function PremiumSftBuilder({
                 <th>Work item</th>
                 <th>Length (ft)</th>
                 <th>Width (ft)</th>
-                <th>Height (ft)</th>
+                <th title="Floors: floor-to-floor (slab) height, used for the project BOQ. Not billed.">
+                  Height (ft)
+                </th>
                 <th>Area / Qty</th>
                 <th>Rate (₹)</th>
                 <th>Amount (₹)</th>
@@ -789,7 +815,10 @@ export function PremiumSftBuilder({
                 const piece = u === 'piece' || u === 'lumpsum';
                 const lengthUsed = !piece;
                 const widthUsed = u === 'sqft' || u === 'cubic_ft';
-                const heightUsed = u === 'wall_sqft' || u === 'cubic_ft';
+                // Floor rows record floor-to-floor (slab) height for the
+                // project BOQ steel and masonry. It is never billed on SFT.
+                const heightUsed =
+                  u === 'wall_sqft' || u === 'cubic_ft' || r.kind === 'floor';
                 return (
                   <tr key={r.kind + ':' + r.name + ':' + i}>
                     <td>
@@ -850,7 +879,18 @@ export function PremiumSftBuilder({
                           max="9999.99"
                           step="0.01"
                           disabled={!used}
-                          placeholder={used ? '0' : '—'}
+                          title={
+                            field === 'heightFeet' && r.kind === 'floor'
+                              ? 'Floor-to-floor (slab) height for the BOQ. Not billed.'
+                              : undefined
+                          }
+                          placeholder={
+                            !used
+                              ? '—'
+                              : field === 'heightFeet' && r.kind === 'floor'
+                                ? '10'
+                                : '0'
+                          }
                           value={used ? (r[field] ?? '') : ''}
                           onChange={(e) =>
                             updateRow(i, { [field]: e.target.value })

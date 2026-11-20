@@ -30,7 +30,8 @@
     "./automation": "./src/automation.ts",
     "./report-document": "./src/report-document.ts",
     "./construction-payment-schedule": "./src/construction-payment-schedule.ts",
-    "./construction-floor-code": "./src/construction-floor-code.ts"
+    "./construction-floor-code": "./src/construction-floor-code.ts",
+    "./construction-boq": "./src/construction-boq.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

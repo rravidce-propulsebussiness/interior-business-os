@@ -1,10 +1,17 @@
 import { executionServices } from '../service';
 import type { SupabaseClient } from '@business-os/database';
 import { BoqWorkspace } from '../boq-workspace';
+import { parseSftEstimate } from '@business-os/core/sft-quotation';
+import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ManualBoqPage() {
+export default async function ManualBoqPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ open?: string; project?: string }>;
+}) {
+  const query = await searchParams;
   const s = await executionServices('estimate.view', true);
   const db = s.client as unknown as SupabaseClient;
   const [documentsResult, projectsResult, revisionsResult, ratesResult] =
@@ -80,7 +87,16 @@ export default async function ManualBoqPage() {
       area: string;
     }[]
   >();
+  const scheduleByRevision = new Map<string, SftEstimateDetails>();
   for (const line of quoteLinesResult.data || []) {
+    const schedule = parseSftEstimate(String(line.description || ''));
+    if (schedule) {
+      // The floor-wise schedule drives the generated BOQ; it is not a
+      // separate priced line in the quote line picker.
+      if (!scheduleByRevision.has(line.revision_id))
+        scheduleByRevision.set(line.revision_id, schedule);
+      continue;
+    }
     const list = linesByRevision.get(line.revision_id) || [];
     const snapshot = line.snapshot || {};
     const amount = Number(
@@ -109,6 +125,7 @@ export default async function ManualBoqPage() {
       projectId: revision.project_id,
       label: `${projectMap.get(revision.project_id) || 'Project'} · Quote v${revision.revision_number} · ${revision.status}`,
       lines: linesByRevision.get(revision.id) || [],
+      schedule: scheduleByRevision.get(revision.id) ?? null,
     }),
   );
   const rates = (ratesResult.data?.rates?.items || []) as {
@@ -117,13 +134,23 @@ export default async function ManualBoqPage() {
     unit: string;
     rate: number;
     category: 'material' | 'labour' | 'other';
+    material?: string;
+    variant?: string;
+    isDefault?: boolean;
   }[];
+  const structural = (ratesResult.data?.rates?.structural ?? null) as Record<
+    string,
+    number
+  > | null;
   return (
     <BoqWorkspace
       documents={documentsResult.data || []}
       projects={projectsResult.data || []}
       quotes={quotes}
       rates={rates}
+      structural={structural}
+      initialOpenId={query.open ?? null}
+      initialProjectId={query.project ?? null}
       canEdit={s.allowed('estimate.edit')}
       canCreate={s.allowed('estimate.create')}
       canViewCost={s.allowed('estimate.view_cost')}

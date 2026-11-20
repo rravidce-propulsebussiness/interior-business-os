@@ -40,6 +40,35 @@ export const sftSectionSchema = z
     brand: z.string().trim().max(120).optional(),
     grade: z.string().trim().max(120).optional(),
     allowancePerSqft: z.string().trim().max(40).optional(),
+    // Package pricing basis carried from the construction package so the
+    // project BOQ can price allowances (e.g. ₹10,000 per door). Optional:
+    // older quotation snapshots remain valid without them.
+    unit: z
+      .enum([
+        'none',
+        'sqft',
+        'bathroom',
+        'door',
+        'piece',
+        'kg',
+        'tonne',
+        'bag',
+        'cubic_meter',
+        'running_ft',
+        'point',
+        'lumpsum',
+        'meter',
+        'bhk',
+      ])
+      .optional(),
+    pricingTreatment: z
+      .enum(['included', 'allowance', 'extra', 'excluded'])
+      .optional(),
+    allowanceValue: z
+      .string()
+      .trim()
+      .regex(/^$|^(0|[1-9][0-9]{0,7})(\.[0-9]{1,2})?$/)
+      .optional(),
   })
   .strict();
 
