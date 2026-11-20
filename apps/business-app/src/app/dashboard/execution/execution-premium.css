@@ -1526,10 +1526,10 @@
   display: grid;
   grid-template-columns:
     minmax(120px, 1.3fr) minmax(80px, 0.8fr) minmax(80px, 0.8fr)
-    minmax(120px, 1fr);
+    minmax(110px, 1fr) minmax(90px, 0.8fr);
   align-items: center;
   gap: 10px;
-  min-width: 440px;
+  min-width: 540px;
   padding: 7px 3px;
   border-bottom: 1px solid #f1eceb;
   color: #5c5356;
@@ -1859,4 +1859,83 @@
   border-radius: 8px;
   padding: 4px 6px;
   font-size: 11px;
+}
+
+/* Structural drawing schedule */
+.boq-design {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #f1eceb;
+}
+.boq-design-toggle {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  color: #45383a;
+  font-size: 11px;
+}
+.boq-design-toggle span {
+  display: grid;
+  gap: 2px;
+}
+.boq-design-toggle small {
+  color: #8a7f81;
+  font-size: 10px;
+}
+.boq-design-table caption {
+  padding: 6px 2px;
+  color: #45383a;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: left;
+}
+.boq-design-table table {
+  min-width: 900px;
+}
+.boq-design-table select {
+  width: 100%;
+  min-height: 32px;
+  border: 1px solid #e9e1df;
+  border-radius: 8px;
+  font-size: 11px;
+}
+.boq-design-table input[aria-invalid='true'] {
+  border-color: #d9534f;
+}
+.boq-design-pair {
+  white-space: nowrap;
+}
+.boq-design-pair input {
+  width: 52px;
+  min-width: 44px;
+  margin-right: 3px;
+}
+.boq-design-foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 10px;
+  color: #5c5356;
+}
+.boq-design-foot label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.boq-design-foot input {
+  width: 90px;
+}
+.boq-rate-cell {
+  display: grid;
+  gap: 2px;
+}
+.boq-rate-cell input {
+  width: 100%;
+  max-width: 110px;
+}
+.boq-rate-cell small {
+  color: #988d8f;
+  font-size: 9px;
 }

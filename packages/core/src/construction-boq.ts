@@ -28,8 +28,14 @@ export type GeneratedOutput = {
   unit: string;
   /** Rate-card material group, priced from the brand/source chosen on the BOQ. */
   material?: string;
-  /** Fixed unit rate (e.g. quoted allowance per door). */
+  /** Fixed unit cost entered on the BOQ (overrides the rate card). */
   rate?: number;
+  /**
+   * What the quotation charges the customer per unit (package allowance).
+   * Reference only: the BOQ is the cost of the work, priced from the rate
+   * card.
+   */
+  quotedRate?: number;
   source?: string;
   /** Stock bars to buy (reinforcement is quantified in rods). */
   rods?: number;
@@ -998,10 +1004,32 @@ export function floorsFromQuote(
     levels.set(level, entry);
   }
   return [...levels.entries()].map(([name, entry]) => {
-    const single = entry.rows.length === 1 ? entry.rows[0] : undefined;
-    const length = Number(single?.lengthFeet);
-    const width = Number(single?.widthFeet);
-    const realRectangle = single && length > 1 && width > 1;
+    // One row: its own size. Several rows (e.g. parking + shop) along the
+    // same frontage: the common width and the combined depth.
+    const sizes = entry.rows.map((row) => ({
+      length: Number(row.lengthFeet),
+      width: Number(row.widthFeet),
+    }));
+    const realRectangle =
+      sizes.length > 0 &&
+      sizes.every((size) => size.length > 1 && size.width > 1);
+    const width = realRectangle
+      ? sizes.length === 1
+        ? sizes[0]!.width
+        : (sizes
+            .flatMap((size) => [size.width, size.length])
+            .find((side) =>
+              sizes.every(
+                (size) => size.width === side || size.length === side,
+              ),
+            ) ??
+          Math.max(...sizes.map((size) => Math.min(size.length, size.width))))
+      : 0;
+    const length = realRectangle
+      ? sizes.length === 1
+        ? sizes[0]!.length
+        : round(entry.area / Math.max(1, width))
+      : 0;
     const side = Math.sqrt(Math.max(entry.area, 1));
     const heightAssumed = !(entry.height > 0);
     return {
@@ -1094,6 +1122,109 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
       estimated.compoundWallFeet,
       100000,
     ),
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Structural design schedule (from the engineer's drawing)
+
+/** Bars written as on the drawing: "6-16", "4-16+2-12", "4 × 20 + 2 × 16". */
+export function parseBars(text: string): { dia: number; count: number }[] {
+  return String(text ?? '')
+    .split(/[+,]/)
+    .map((part) => /(\d+)\s*(?:no\.?s?)?\s*[-×x*#]\s*(\d+)/i.exec(part.trim()))
+    .filter((match): match is RegExpExecArray => Boolean(match))
+    .map((match) => ({ count: Number(match[1]), dia: Number(match[2]) }))
+    .filter(
+      (bar) =>
+        bar.count > 0 && bar.count <= 40 && bar.dia >= 6 && bar.dia <= 40,
+    );
+}
+
+/** One column type of the drawing, with its footing. */
+export type DesignColumnType = {
+  label: string;
+  count: number;
+  /** Floors it rises through from the ground floor (0 = every floor). */
+  floors: number;
+  widthIn: number;
+  depthIn: number;
+  bars: string;
+  tieDia: number;
+  tieSpacingIn: number;
+  footingLengthFeet: number;
+  footingWidthFeet: number;
+  footingThicknessIn: number;
+  footingBarDia: number;
+  footingBarSpacingIn: number;
+};
+/** One beam type of the drawing; running feet under each floor's roof. */
+export type DesignBeamType = {
+  label: string;
+  widthIn: number;
+  depthIn: number;
+  /** Main bars, e.g. "4-20+2-16" (top + bottom + extra). */
+  bars: string;
+  stirrupDia: number;
+  stirrupSpacingIn: number;
+  /** Running feet per floor roof, in floor order. */
+  runFeet: number[];
+};
+export type StructuralDesign = {
+  columns: DesignColumnType[];
+  beams: DesignBeamType[];
+  /** Plinth beam running feet (0 = from the column grid). */
+  plinthRunFeet: number;
+};
+
+const num = (value: unknown, fallback: number, min: number, max: number) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed)
+    ? Math.min(max, Math.max(min, parsed))
+    : fallback;
+};
+
+/** Validated design schedule, or null when none is entered. */
+export function normalizeDesign(raw: unknown): StructuralDesign | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const value = raw as Record<string, unknown>;
+  const columns = (Array.isArray(value.columns) ? value.columns : [])
+    .slice(0, 20)
+    .map((item: Record<string, unknown>, index): DesignColumnType => ({
+      label: String(item?.label ?? `C${index + 1}`).slice(0, 40),
+      count: Math.round(num(item?.count, 0, 0, 200)),
+      floors: Math.round(num(item?.floors, 0, 0, 20)),
+      widthIn: num(item?.widthIn, 9, 6, 48),
+      depthIn: num(item?.depthIn, 12, 6, 60),
+      bars: String(item?.bars ?? '').slice(0, 60),
+      tieDia: num(item?.tieDia, 8, 6, 16),
+      tieSpacingIn: num(item?.tieSpacingIn, 6, 3, 12),
+      footingLengthFeet: num(item?.footingLengthFeet, 5, 0, 20),
+      footingWidthFeet: num(item?.footingWidthFeet, 5, 0, 20),
+      footingThicknessIn: num(item?.footingThicknessIn, 12, 6, 48),
+      footingBarDia: num(item?.footingBarDia, 12, 8, 25),
+      footingBarSpacingIn: num(item?.footingBarSpacingIn, 6, 3, 12),
+    }))
+    .filter((item) => item.count > 0 && parseBars(item.bars).length > 0);
+  const beams = (Array.isArray(value.beams) ? value.beams : [])
+    .slice(0, 20)
+    .map((item: Record<string, unknown>, index): DesignBeamType => ({
+      label: String(item?.label ?? `B${index + 1}`).slice(0, 40),
+      widthIn: num(item?.widthIn, 9, 6, 36),
+      depthIn: num(item?.depthIn, 15, 6, 48),
+      bars: String(item?.bars ?? '').slice(0, 60),
+      stirrupDia: num(item?.stirrupDia, 8, 6, 16),
+      stirrupSpacingIn: num(item?.stirrupSpacingIn, 6, 3, 12),
+      runFeet: (Array.isArray(item?.runFeet) ? item.runFeet : [])
+        .slice(0, 20)
+        .map((run: unknown) => num(run, 0, 0, 5000)),
+    }))
+    .filter((item) => parseBars(item.bars).length > 0);
+  if (!columns.length && !beams.length) return null;
+  return {
+    columns,
+    beams,
+    plinthRunFeet: num(value.plinthRunFeet, 0, 0, 5000),
   };
 }
 
@@ -1304,6 +1435,7 @@ export type QuotationBoqResult = {
   floors: BoqFloor[];
   counts: BoqCounts;
   settings: StructuralSettings;
+  design: StructuralDesign | null;
   warnings: string[];
   /** Steel summary across all structural lines, by diameter. */
   steel: { diameter: number; kg: number; bars: number }[];
@@ -1316,12 +1448,15 @@ export type QuotationBoqInput = {
   floors?: BoqFloor[];
   /** Edited counts per floor; missing values are estimated. */
   counts?: unknown;
+  /** Column / beam / footing schedule from the structural drawing. */
+  design?: unknown;
 };
 
 export function generateQuotationBoq(
   input: QuotationBoqInput,
 ): QuotationBoqResult {
   const s = normalizeStructuralSettings(input.settings);
+  const design = normalizeDesign(input.design);
   const floors = (
     input.floors?.length
       ? input.floors
@@ -1354,63 +1489,137 @@ export function generateQuotationBoq(
   if (floors.length) {
     const ground = floors[0]!;
     const groundGrid = columnGrid(ground, s);
-    const columnBars = [
-      { dia: s.columnBar1Dia, count: s.columnBar1Count },
-      { dia: s.columnBar2Dia, count: s.columnBar2Count },
-    ].filter((bar) => bar.dia > 0 && bar.count > 0);
-    const footingT = s.footingThicknessIn / 12;
+    // Column types: the drawing's schedule, or one type from the rules.
+    type ColumnType = {
+      label: string;
+      widthIn: number;
+      depthIn: number;
+      bars: { dia: number; count: number }[];
+      tieDia: number;
+      tieSpacingIn: number;
+      footing: {
+        lengthFeet: number;
+        widthFeet: number;
+        thicknessIn: number;
+        barDia: number;
+        spacingIn: number;
+      };
+      countAt: (floorIndex: number) => number;
+    };
+    const columnTypes: ColumnType[] = design?.columns.length
+      ? design.columns.map((type) => ({
+          label: type.label,
+          widthIn: type.widthIn,
+          depthIn: type.depthIn,
+          bars: parseBars(type.bars),
+          tieDia: type.tieDia,
+          tieSpacingIn: type.tieSpacingIn,
+          footing: {
+            lengthFeet: type.footingLengthFeet,
+            widthFeet: type.footingWidthFeet,
+            thicknessIn: type.footingThicknessIn,
+            barDia: type.footingBarDia,
+            spacingIn: type.footingBarSpacingIn,
+          },
+          countAt: (floorIndex: number) =>
+            !type.floors || floorIndex < type.floors ? type.count : 0,
+        }))
+      : [
+          {
+            label: 'Columns',
+            widthIn: s.columnWidthIn,
+            depthIn: s.columnDepthIn,
+            bars: [
+              { dia: s.columnBar1Dia, count: s.columnBar1Count },
+              { dia: s.columnBar2Dia, count: s.columnBar2Count },
+            ].filter((bar) => bar.dia > 0 && bar.count > 0),
+            tieDia: s.columnTieDia,
+            tieSpacingIn: s.columnTieSpacingIn,
+            footing: {
+              lengthFeet: s.footingLengthFeet,
+              widthFeet: s.footingWidthFeet,
+              thicknessIn: s.footingThicknessIn,
+              barDia: s.footingBarDia,
+              spacingIn: s.footingBarSpacingIn,
+            },
+            countAt: (floorIndex: number) =>
+              floorIndex === 0
+                ? groundGrid.columns
+                : Math.min(
+                    columnGrid(floors[floorIndex]!, s, ground).columns,
+                    groundGrid.columns,
+                  ),
+          },
+        ];
+    const groundColumns = columnTypes.reduce(
+      (sum, type) => sum + type.countAt(0),
+      0,
+    );
+    const footingT = Math.max(
+      ...columnTypes.map((type) => type.footing.thicknessIn / 12),
+    );
+    const sizeText = (type: ColumnType) =>
+      `${type.countAt(0)} × ${type.footing.lengthFeet}×${type.footing.widthFeet} ft`;
 
     // --- Foundation: excavation, PCC, footings ---------------------------
     {
-      const footings = groundGrid.columns;
-      const excavation =
-        footings *
-        (s.footingLengthFeet + 2) *
-        (s.footingWidthFeet + 2) *
-        s.foundationDepthFeet *
-        CUM_PER_CFT;
-      const pcc =
-        footings *
-        (s.footingLengthFeet + 0.5) *
-        (s.footingWidthFeet + 0.5) *
-        (s.pccThicknessIn / 12) *
-        CUM_PER_CFT;
-      const footingConcrete =
-        footings *
-        s.footingLengthFeet *
-        s.footingWidthFeet *
-        footingT *
-        CUM_PER_CFT;
+      const footings = groundColumns;
+      let excavation = 0;
+      let pcc = 0;
+      let footingConcrete = 0;
       const tally: SteelTally = new Map();
-      const spacing = s.footingBarSpacingIn / 12;
-      const bendUp = Math.max(0, footingT - 2 * cover);
-      for (const [span, across] of [
-        [s.footingLengthFeet, s.footingWidthFeet],
-        [s.footingWidthFeet, s.footingLengthFeet],
-      ] as const) {
-        const barsPerFooting =
-          Math.floor(Math.max(0, across - 2 * cover) / spacing) + 1;
-        const piece = Math.max(0, span - 2 * cover) + 2 * bendUp;
-        const plan = cutPlan(piece, barsPerFooting * footings, stock, 0);
-        addSteel(
-          tally,
-          s.footingBarDia,
-          plan.bars * stock * M_PER_FT,
-          plan.bars,
-          `footing mesh ${barsPerFooting * footings} pcs × ${ft(piece)}`,
-        );
+      for (const type of columnTypes) {
+        const n = type.countAt(0);
+        const f = type.footing;
+        if (!(n > 0) || !(f.lengthFeet > 0) || !(f.widthFeet > 0)) continue;
+        const t = f.thicknessIn / 12;
+        excavation +=
+          n *
+          (f.lengthFeet + 2) *
+          (f.widthFeet + 2) *
+          s.foundationDepthFeet *
+          CUM_PER_CFT;
+        pcc +=
+          n *
+          (f.lengthFeet + 0.5) *
+          (f.widthFeet + 0.5) *
+          (s.pccThicknessIn / 12) *
+          CUM_PER_CFT;
+        footingConcrete += n * f.lengthFeet * f.widthFeet * t * CUM_PER_CFT;
+        const spacing = f.spacingIn / 12;
+        const bendUp = Math.max(0, t - 2 * cover);
+        for (const [span, across] of [
+          [f.lengthFeet, f.widthFeet],
+          [f.widthFeet, f.lengthFeet],
+        ] as const) {
+          const barsPerFooting =
+            Math.floor(Math.max(0, across - 2 * cover) / spacing) + 1;
+          const piece = Math.max(0, span - 2 * cover) + 2 * bendUp;
+          const plan = cutPlan(piece, barsPerFooting * n, stock, 0);
+          addSteel(
+            tally,
+            f.barDia,
+            plan.bars * stock * M_PER_FT,
+            plan.bars,
+            `${type.label} footing mesh ${barsPerFooting * n} pcs × ${ft(piece)}`,
+          );
+        }
       }
       mergeSteel(tally);
       drafts.push({
         origin: 'quotation-structure',
         draft: {
-          name: `Foundation: ${footings} footings (${s.footingLengthFeet}×${s.footingWidthFeet} ft)`,
+          name: design?.columns.length
+            ? `Foundation: ${footings} footings (${columnTypes.map(sizeText).join(', ')})`
+            : `Foundation: ${footings} footings (${s.footingLengthFeet}×${s.footingWidthFeet} ft)`,
           section: 'Foundation',
           kind: 'quote-foundation',
           unit: 'm³',
           inputs: {
             footings,
-            grid: `${groundGrid.nx} × ${groundGrid.ny} columns`,
+            grid: design?.columns.length
+              ? 'From the structural drawing'
+              : `${groundGrid.nx} × ${groundGrid.ny} columns`,
             depthFeet: s.foundationDepthFeet,
           },
           outputs: [
@@ -1446,7 +1655,7 @@ export function generateQuotationBoq(
     // Column bars run through the pedestal from the footing, so only the
     // pedestal's concrete and its own rings are added here.
     if (s.pedestalHeightFeet > 0) {
-      const pedestals = groundGrid.columns;
+      const pedestals = groundColumns;
       const width = s.pedestalWidthIn / 12;
       const depth = s.pedestalDepthIn / 12;
       const concrete =
@@ -1498,14 +1707,8 @@ export function generateQuotationBoq(
 
     // --- Columns, one lift per stage so steel is brought floor by floor ---
     {
-      const columnArea =
-        (s.columnWidthIn / 12) * (s.columnDepthIn / 12) * CUM_PER_CFT;
-      const tieLength =
-        2 *
-          (Math.max(0, s.columnWidthIn / 12 - 2 * cover) +
-            Math.max(0, s.columnDepthIn / 12 - 2 * cover)) +
-        20 * s.columnTieDia * FT_PER_MM;
-      const maxDia = Math.max(0, ...columnBars.map((bar) => bar.dia));
+      const allBars = columnTypes.flatMap((type) => type.bars);
+      const maxDia = Math.max(0, ...allBars.map((bar) => bar.dia));
       const maxLap = lapFeet(maxDia, s.lapDiameters);
       const maxBend = Math.max(0.75, 12 * maxDia * FT_PER_MM);
       const belowPlinth = Math.max(0, s.foundationDepthFeet - footingT);
@@ -1531,7 +1734,6 @@ export function generateQuotationBoq(
         floorIndex: number;
         height: number;
         foundation: boolean;
-        columns: number;
       };
       const lifts: Lift[] = [
         {
@@ -1545,7 +1747,6 @@ export function generateQuotationBoq(
             s.plinthHeightFeet +
             (throughGround ? ground.heightFeet : 0),
           foundation: true,
-          columns: groundGrid.columns,
         },
         ...floors
           .map((floor, index) => ({ floor, index }))
@@ -1556,77 +1757,104 @@ export function generateQuotationBoq(
             floorIndex: index,
             height: floor.heightFeet,
             foundation: false,
-            columns: Math.min(
-              columnGrid(floor, s, ground).columns,
-              groundGrid.columns,
-            ),
           })),
       ];
       const lastFloor = floors.length - 1;
       for (const lift of lifts) {
         const tally: SteelTally = new Map();
         const notes: string[] = [];
-        // The lift that reaches the top roof needs a lap only for starters.
-        const reachesTop =
-          lift.floorIndex === lastFloor && (!lift.foundation || throughGround);
-        for (const bar of columnBars) {
-          const lapLength = lapFeet(bar.dia, s.lapDiameters);
-          const lap = reachesTop && !s.topStarters ? 0 : lapLength;
-          const bend = lift.foundation
-            ? Math.max(0.75, 12 * bar.dia * FT_PER_MM)
-            : 0;
-          const required = lift.height + lap + bend;
-          const pieces = lift.columns * bar.count;
-          const preferred = lift.foundation ? s.foundationCuts : s.floorCuts;
-          const plan = cutPlan(required, pieces, stock, lapLength, preferred);
-          if (plan.adjusted)
-            warnings.push(
-              `${lift.label} columns, ${bar.dia} mm: needs ${ft(required)} (height ${ft(lift.height)} + lap ${ft(lap)}${bend ? ` + bend ${ft(bend)}` : ''}); ${ft(stock / preferred)} pieces (${preferred} per bar) are too short, so ${plan.piecesPerBar || 'spliced'} per bar is used.`,
+        let concrete = 0;
+        let columns = 0;
+        const types = columnTypes
+          .map((type) => ({ type, n: type.countAt(lift.floorIndex) }))
+          .filter(({ n }) => n > 0);
+        for (const { type, n } of types) {
+          columns += n;
+          const tag = design?.columns.length ? `${type.label} ` : '';
+          // The last lift of this type needs a lap only for starters.
+          const typeTop =
+            lift.floorIndex === lastFloor ||
+            type.countAt(lift.floorIndex + 1) === 0;
+          const reachesTop = typeTop && (!lift.foundation || throughGround);
+          for (const bar of type.bars) {
+            const lapLength = lapFeet(bar.dia, s.lapDiameters);
+            const lap = reachesTop && !s.topStarters ? 0 : lapLength;
+            const bend = lift.foundation
+              ? Math.max(0.75, 12 * bar.dia * FT_PER_MM)
+              : 0;
+            const required = lift.height + lap + bend;
+            const pieces = n * bar.count;
+            const preferred = lift.foundation ? s.foundationCuts : s.floorCuts;
+            const plan = cutPlan(required, pieces, stock, lapLength, preferred);
+            if (plan.adjusted)
+              warnings.push(
+                `${lift.label} ${tag ? tag.trim() : 'columns'}, ${bar.dia} mm: needs ${ft(required)} (height ${ft(lift.height)} + lap ${ft(lap)}${bend ? ` + bend ${ft(bend)}` : ''}); ${ft(stock / preferred)} pieces (${preferred} per bar) are too short, so ${plan.piecesPerBar || 'spliced'} per bar is used.`,
+              );
+            addSteel(
+              tally,
+              bar.dia,
+              plan.bars * stock * M_PER_FT,
+              plan.bars,
+              `${type.label} ${pieces} pcs × ${ft(plan.pieceFeet)}`,
             );
+            notes.push(
+              `${lift.label} · ${tag}${bar.dia} mm: ${pieces} pcs, need ${ft(required)} (${ft(lift.height)} + lap ${ft(lap)}${bend ? ` + bend ${ft(bend)}` : ''}), cut ${plan.piecesPerBar ? `${plan.piecesPerBar}/bar @ ${ft(plan.pieceFeet)}` : 'spliced'} → ${plan.bars} bars${plan.offcutFeetPerBar > 0.05 ? `, offcut ${ft(plan.offcutFeetPerBar)}/bar` : ''}`,
+            );
+          }
+          const tieLength =
+            2 *
+              (Math.max(0, type.widthIn / 12 - 2 * cover) +
+                Math.max(0, type.depthIn / 12 - 2 * cover)) +
+            20 * type.tieDia * FT_PER_MM;
+          const ties = n * (ceil((lift.height * 12) / type.tieSpacingIn) + 1);
+          const tiePlan = cutPlan(tieLength, ties, stock, 0);
           addSteel(
             tally,
-            bar.dia,
-            plan.bars * stock * M_PER_FT,
-            plan.bars,
-            `${pieces} pcs × ${ft(plan.pieceFeet)}`,
+            type.tieDia,
+            tiePlan.bars * stock * M_PER_FT,
+            tiePlan.bars,
+            `${type.label} ${ties} rings × ${ft(tieLength)}`,
           );
-          notes.push(
-            `${lift.label} · ${bar.dia} mm: ${pieces} pcs, need ${ft(required)} (${ft(lift.height)} + lap ${ft(lap)}${bend ? ` + bend ${ft(bend)}` : ''}), cut ${plan.piecesPerBar ? `${plan.piecesPerBar}/bar @ ${ft(plan.pieceFeet)}` : 'spliced'} → ${plan.bars} bars${plan.offcutFeetPerBar > 0.05 ? `, offcut ${ft(plan.offcutFeetPerBar)}/bar` : ''}`,
-          );
+          concrete +=
+            n *
+            lift.height *
+            (type.widthIn / 12) *
+            (type.depthIn / 12) *
+            CUM_PER_CFT;
         }
-        const ties =
-          lift.columns * (ceil((lift.height * 12) / s.columnTieSpacingIn) + 1);
-        const tiePlan = cutPlan(tieLength, ties, stock, 0);
-        addSteel(
-          tally,
-          s.columnTieDia,
-          tiePlan.bars * stock * M_PER_FT,
-          tiePlan.bars,
-          `${ties} rings × ${ft(tieLength)}`,
-        );
+        if (!columns) continue;
         mergeSteel(tally);
+        const single = types.length === 1 ? types[0]!.type : undefined;
         drafts.push({
           origin: 'quotation-structure',
           draft: {
-            name: `${lift.label}: ${lift.columns} columns (${s.columnWidthIn}×${s.columnDepthIn} in)`,
+            name: single
+              ? `${lift.label}: ${columns} columns (${single.widthIn}×${single.depthIn} in)`
+              : `${lift.label}: ${columns} columns (${types.map(({ type, n }) => `${n} ${type.label}`).join(', ')})`,
             section: lift.stage,
             kind: 'quote-columns',
             unit: 'm³',
             inputs: {
-              columns: lift.columns,
+              columns,
               liftHeightFeet: round(lift.height, 2),
-              mainBars: columnBars
-                .map((bar) => `${bar.count}×${bar.dia} mm`)
-                .join(' + '),
-              rings: `${s.columnTieDia} mm @ ${s.columnTieSpacingIn} in`,
+              mainBars: types
+                .map(
+                  ({ type }) =>
+                    `${single ? '' : `${type.label}: `}${type.bars.map((bar) => `${bar.count}×${bar.dia} mm`).join(' + ')}`,
+                )
+                .join(' · ')
+                .slice(0, 200),
+              rings: [
+                ...new Set(
+                  types.map(
+                    ({ type }) => `${type.tieDia} mm @ ${type.tieSpacingIn} in`,
+                  ),
+                ),
+              ].join(', '),
               lap: `${s.lapDiameters}d`,
             },
             outputs: [
-              ...concreteOutputs(
-                lift.columns * lift.height * columnArea,
-                'Column',
-                s,
-              ),
+              ...concreteOutputs(concrete, 'Column', s),
               ...steelOutputs(tally, stock),
             ],
             notes: notes.join('\n').slice(0, 2000),
@@ -1641,6 +1869,7 @@ export function generateQuotationBoq(
       stage: string;
       floor: BoqFloor;
       slab: boolean;
+      index: number;
     }[] = [
       ...(s.plinthBeam
         ? [
@@ -1649,14 +1878,16 @@ export function generateQuotationBoq(
               stage: 'Foundation',
               floor: ground,
               slab: false,
+              index: -1,
             },
           ]
         : []),
-      ...floors.map((floor) => ({
+      ...floors.map((floor, index) => ({
         name: `${floor.name} roof`,
         stage: floor.name,
         floor,
         slab: true,
+        index,
       })),
     ];
     const slabT = s.slabThicknessIn / 12;
@@ -1664,74 +1895,156 @@ export function generateQuotationBoq(
       const grid = columnGrid(level.floor, s, ground);
       const tally: SteelTally = new Map();
       const outputs: GeneratedOutput[] = [];
-      // Plinth beams have their own section; floor beams carry top, bottom
-      // and extra / side bars.
-      const beamB = (level.slab ? s.beamWidthIn : s.plinthBeamWidthIn) / 12;
-      const beamD = (level.slab ? s.beamDepthIn : s.plinthBeamDepthIn) / 12;
-      const stirrupLength =
-        2 * (Math.max(0, beamB - 2 * cover) + Math.max(0, beamD - 2 * cover)) +
-        20 * s.beamStirrupDia * FT_PER_MM;
-      const beamBars = level.slab
+      // Beam types at this level: the drawing's schedule (running feet per
+      // floor roof), or one type from the rules along every column line.
+      type BeamAt = {
+        label: string;
+        widthIn: number;
+        depthIn: number;
+        bars: { dia: number; count: number; label: string }[];
+        stirrupDia: number;
+        stirrupSpacingIn: number;
+        segments: { runs: number; span: number }[];
+      };
+      const longest = Math.max(
+        1,
+        level.floor.lengthFeet,
+        level.floor.widthFeet,
+      );
+      // A schedule gives only the total run: split it into lines no longer
+      // than the building so laps and anchorage are counted.
+      const runSegments = (run: number) => {
+        if (!(run > 0)) return [];
+        const lines = Math.max(1, ceil(run / longest));
+        return [{ runs: lines, span: run / lines }];
+      };
+      const gridSegments = [
+        { runs: grid.ny, span: level.floor.lengthFeet },
+        { runs: grid.nx, span: level.floor.widthFeet },
+        { runs: s.extraBeamFeet > 0 ? 1 : 0, span: s.extraBeamFeet },
+      ];
+      const beamTypes: BeamAt[] = !level.slab
         ? [
-            { dia: s.beamTopDia, count: s.beamTopCount, label: 'top' },
-            { dia: s.beamBottomDia, count: s.beamBottomCount, label: 'bottom' },
-            { dia: s.beamExtraDia, count: s.beamExtraCount, label: 'extra' },
-          ]
-        : [
             {
-              dia: s.plinthBeamBarDia,
-              count: s.plinthBeamBarCount,
-              label: 'main',
+              label: 'Plinth beam',
+              widthIn: s.plinthBeamWidthIn,
+              depthIn: s.plinthBeamDepthIn,
+              bars: [
+                {
+                  dia: s.plinthBeamBarDia,
+                  count: s.plinthBeamBarCount,
+                  label: 'main',
+                },
+              ],
+              stirrupDia: s.beamStirrupDia,
+              stirrupSpacingIn: s.beamStirrupSpacingIn,
+              segments: design?.plinthRunFeet
+                ? runSegments(design.plinthRunFeet)
+                : gridSegments,
             },
-          ];
-      // Beams: continuous bars along every line, anchored at both ends.
-      for (const bar of beamBars.filter(
-        (item) => item.dia > 0 && item.count > 0,
-      )) {
-        const lap = lapFeet(bar.dia, s.lapDiameters);
-        const anchor = 2 * lap;
-        let bars = 0;
-        let metres = 0;
-        for (const [runs, span] of [
-          [grid.ny, level.floor.lengthFeet],
-          [grid.nx, level.floor.widthFeet],
-          [s.extraBeamFeet > 0 ? 1 : 0, s.extraBeamFeet],
-        ] as const) {
-          if (!(runs > 0) || !(span > 0)) continue;
-          const plan = cutPlan(span + anchor, runs * bar.count, stock, lap);
-          bars += plan.bars;
-          metres += plan.bars * stock * M_PER_FT;
+          ]
+        : design?.beams.length
+          ? design.beams.map((type) => ({
+              label: type.label,
+              widthIn: type.widthIn,
+              depthIn: type.depthIn,
+              bars: parseBars(type.bars).map((bar) => ({
+                ...bar,
+                label: 'main',
+              })),
+              stirrupDia: type.stirrupDia,
+              stirrupSpacingIn: type.stirrupSpacingIn,
+              segments: runSegments(
+                type.runFeet[level.index] ?? type.runFeet.at(-1) ?? 0,
+              ),
+            }))
+          : [
+              {
+                label: 'Beams',
+                widthIn: s.beamWidthIn,
+                depthIn: s.beamDepthIn,
+                bars: [
+                  { dia: s.beamTopDia, count: s.beamTopCount, label: 'top' },
+                  {
+                    dia: s.beamBottomDia,
+                    count: s.beamBottomCount,
+                    label: 'bottom',
+                  },
+                  {
+                    dia: s.beamExtraDia,
+                    count: s.beamExtraCount,
+                    label: 'extra',
+                  },
+                ],
+                stirrupDia: s.beamStirrupDia,
+                stirrupSpacingIn: s.beamStirrupSpacingIn,
+                segments: gridSegments,
+              },
+            ];
+      let concrete = 0;
+      let shuttering = 0;
+      let totalRun = 0;
+      for (const type of beamTypes) {
+        const segments = type.segments.filter(
+          (segment) => segment.runs > 0 && segment.span > 0,
+        );
+        const run = segments.reduce(
+          (sum, segment) => sum + segment.runs * segment.span,
+          0,
+        );
+        if (!(run > 0)) continue;
+        totalRun += run;
+        const beamB = type.widthIn / 12;
+        const beamD = type.depthIn / 12;
+        // Beams: continuous bars along every line, anchored at both ends.
+        for (const bar of type.bars.filter(
+          (item) => item.dia > 0 && item.count > 0,
+        )) {
+          const lap = lapFeet(bar.dia, s.lapDiameters);
+          const anchor = 2 * lap;
+          let bars = 0;
+          let metres = 0;
+          for (const segment of segments) {
+            const plan = cutPlan(
+              segment.span + anchor,
+              segment.runs * bar.count,
+              stock,
+              lap,
+            );
+            bars += plan.bars;
+            metres += plan.bars * stock * M_PER_FT;
+          }
+          addSteel(
+            tally,
+            bar.dia,
+            metres,
+            bars,
+            `${level.name} ${type.label} ${bar.label === 'main' ? '' : `${bar.label} `}${bar.count} bars × ${ft(run)} run`,
+          );
         }
+        const stirrupLength =
+          2 *
+            (Math.max(0, beamB - 2 * cover) + Math.max(0, beamD - 2 * cover)) +
+          20 * type.stirrupDia * FT_PER_MM;
+        const stirrups = segments.reduce(
+          (sum, segment) =>
+            sum +
+            segment.runs *
+              (ceil((segment.span * 12) / type.stirrupSpacingIn) + 1),
+          0,
+        );
+        const stirrupBars = cutPlan(stirrupLength, stirrups, stock, 0).bars;
         addSteel(
           tally,
-          bar.dia,
-          metres,
-          bars,
-          `${level.name} beam ${bar.label} ${bar.count} bars × ${ft(grid.beamRunFeet)} run`,
+          type.stirrupDia,
+          stirrupBars * stock * M_PER_FT,
+          stirrupBars,
+          `${type.label} ${stirrups} stirrups × ${ft(stirrupLength)}`,
         );
+        const below = level.slab ? Math.max(0, beamD - slabT) : beamD;
+        concrete += run * beamB * below * CUM_PER_CFT;
+        shuttering += run * (beamB + 2 * below);
       }
-      const stirrups =
-        grid.ny *
-          (ceil((level.floor.lengthFeet * 12) / s.beamStirrupSpacingIn) + 1) +
-        grid.nx *
-          (ceil((level.floor.widthFeet * 12) / s.beamStirrupSpacingIn) + 1) +
-        (s.extraBeamFeet > 0
-          ? ceil((s.extraBeamFeet * 12) / s.beamStirrupSpacingIn) + 1
-          : 0);
-      const stirrupBars = cutPlan(stirrupLength, stirrups, stock, 0).bars;
-      addSteel(
-        tally,
-        s.beamStirrupDia,
-        stirrupBars * stock * M_PER_FT,
-        stirrupBars,
-        `${stirrups} stirrups × ${ft(stirrupLength)}`,
-      );
-      const beamDepthBelowSlab = level.slab
-        ? Math.max(0, beamD - slabT)
-        : beamD;
-      let concrete =
-        grid.beamRunFeet * beamB * beamDepthBelowSlab * CUM_PER_CFT;
-      let shuttering = grid.beamRunFeet * (beamB + 2 * beamDepthBelowSlab);
       if (level.slab) {
         const area = level.floor.lengthFeet * level.floor.widthFeet;
         concrete += area * slabT * CUM_PER_CFT;
@@ -1790,13 +2103,16 @@ export function generateQuotationBoq(
         draft: {
           name: level.slab
             ? `${level.name} slab + beams (${round(level.floor.lengthFeet * level.floor.widthFeet, 0)} sqft)`
-            : `Plinth beams (${round(grid.beamRunFeet, 0)} rft)`,
+            : `Plinth beams (${round(totalRun, 0)} rft)`,
           section: level.stage,
           kind: level.slab ? 'quote-slab' : 'quote-plinth-beam',
           unit: 'm³',
           inputs: {
-            beamRunFeet: round(grid.beamRunFeet, 1),
-            beam: `${s.beamWidthIn}×${s.beamDepthIn} in`,
+            beamRunFeet: round(totalRun, 1),
+            beam: beamTypes
+              .map((type) => `${type.label} ${type.widthIn}×${type.depthIn} in`)
+              .join(', ')
+              .slice(0, 200),
             ...(level.slab
               ? {
                   slab: `${s.slabThicknessIn} in · ${s.slabMainDia} mm @ ${s.slabMainSpacingIn} in / ${s.slabDistDia} mm @ ${s.slabDistSpacingIn} in`,
@@ -2077,27 +2393,29 @@ export function generateQuotationBoq(
   ): GeneratedOutput[] => {
     if (!(quantity > 0) || included.has(category)) return [];
     const quoted = allowances.get(category);
-    // A quoted sump allowance is a lump sum, not a rate per litre.
-    const lumpSum = Boolean(quoted) && category === 'sump';
+    // Quantities only come from the quotation; the cost comes from the rate
+    // card. The quoted allowance is kept for comparison.
     return [
-      quoted
-        ? {
-            name,
-            quantity: lumpSum ? 1 : round(quantity, 2),
-            unit: lumpSum ? 'LS' : unit,
-            rate: quoted.rate,
-            source: (
-              `${quoted.extra ? 'Chargeable extra' : 'Package allowance'}: ${quoted.label}` +
-              (source ? ` · ${source}` : '')
-            ).slice(0, 300),
-          }
-        : {
-            name,
-            quantity: round(quantity, 2),
-            unit,
-            material,
-            ...(source ? { source: source.slice(0, 300) } : {}),
-          },
+      {
+        name,
+        quantity: round(quantity, 2),
+        unit,
+        material,
+        ...(quoted ? { quotedRate: quoted.rate } : {}),
+        ...(source || quoted
+          ? {
+              source: [
+                source,
+                quoted
+                  ? `quoted ${quoted.extra ? 'extra' : 'allowance'}: ${quoted.label}`
+                  : '',
+              ]
+                .filter(Boolean)
+                .join(' · ')
+                .slice(0, 300),
+            }
+          : {}),
+      },
     ];
   };
 
@@ -2512,13 +2830,13 @@ export function generateQuotationBoq(
             name: section.title.slice(0, 160),
             quantity: round(quantity, 2),
             unit: unitLabel(unit),
-            rate: allowance,
-            source: basis.slice(0, 300),
+            quotedRate: allowance,
+            source: `${basis} · enter the cost rate`.slice(0, 300),
           },
         ],
         notes: extra
-          ? 'Chargeable extra in the quotation package.'
-          : 'Allowance included in the quoted package rate.',
+          ? 'Chargeable extra in the quotation package. Enter the actual cost.'
+          : 'Allowance in the quoted package. Enter the actual cost.',
       },
     });
   }
@@ -2532,7 +2850,7 @@ export function generateQuotationBoq(
       draft: {
         name: row.name,
         section: 'Additional quoted works',
-        kind: 'quoted',
+        kind: 'quote-additional',
         unit: unitLabel(unit),
         inputs: { quantity: Number(row.areaSqft) || 0 },
         outputs: [
@@ -2540,7 +2858,7 @@ export function generateQuotationBoq(
             name: row.name,
             quantity: Number(row.areaSqft) || 0,
             unit: unitLabel(unit),
-            source: 'Quoted item: break down materials and labour manually',
+            source: 'Quoted item: enter its cost or break it down',
           },
         ],
         quotedPrice: Number(row.amount) || 0,
@@ -2634,6 +2952,7 @@ export function generateQuotationBoq(
     floors,
     counts,
     settings: s,
+    design,
     warnings,
     steel: [...totalSteel.entries()]
       .sort(([a], [b]) => a - b)
