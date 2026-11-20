@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { rateForOutput, type Rate } from './boq-pricing';
+import {
+  brandSelectionsFromQuote,
+  MATERIAL_GROUPS,
+  rateForOutput,
+  starterRate,
+  type Rate,
+} from './boq-pricing';
 
 const rates: Rate[] = [
   {
@@ -120,5 +126,43 @@ describe('BOQ rate resolution', () => {
     expect(
       rateForOutput({ name: 'Internal plaster', unit: 'sqft' }, rates),
     ).toBe(22);
+  });
+});
+
+describe('BOQ default prices and quoted brands', () => {
+  it('prices a steel rod from the brand price per kg', () => {
+    const steel16 = MATERIAL_GROUPS.find((group) => group.key === 'steel_16')!;
+    // 16 mm: 16² / 162 × 12 m = 18.96 kg; Vizag ₹68/kg.
+    expect(starterRate(steel16, 'Vizag (RINL)')).toBe(1289);
+    expect(starterRate(steel16, 'JSW')).toBe(1365);
+    const labour = MATERIAL_GROUPS.find(
+      (group) => group.key === 'labour_brickwork_9',
+    )!;
+    expect(starterRate(labour, 'Contract')).toBe(30);
+  });
+
+  it('picks the brands named in the quotation specifications', () => {
+    const withVizag: Rate[] = [
+      ...rates,
+      {
+        key: 'steel_16::vizag-(rinl)',
+        label: 'Vizag (RINL)',
+        unit: 'rod',
+        rate: 1289,
+        category: 'material',
+        material: 'steel_16',
+        variant: 'Vizag (RINL)',
+      },
+    ];
+    expect(
+      brandSelectionsFromQuote(
+        [
+          { title: 'Steel / TMT', brand: 'Visakha or JSW', description: '' },
+          { title: 'Bricks / blocks', description: 'Local red bricks 9 in' },
+          { title: 'Flooring tiles', brand: 'Kajaria' },
+        ],
+        withVizag,
+      ),
+    ).toEqual({ steel: 'Vizag (RINL)', bricks: 'Local' });
   });
 });

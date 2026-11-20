@@ -6,6 +6,7 @@ import { saveBoqRates } from './boq-actions';
 import {
   GROUP_SECTIONS,
   MATERIAL_GROUPS,
+  starterRate,
   variantKey,
   type Rate,
 } from './boq-pricing';
@@ -27,7 +28,7 @@ function startingVariants(saved: Rate[]): Rate[] {
       key: variantKey(group.key, variant),
       label: variant,
       unit: group.unit,
-      rate: group.defaultRate ?? 0,
+      rate: starterRate(group, variant),
       category: group.category,
       material: group.key,
       variant,

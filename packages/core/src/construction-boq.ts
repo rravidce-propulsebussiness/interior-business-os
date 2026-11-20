@@ -60,6 +60,8 @@ export type BoqFloor = {
   heightFeet: number;
   /** True when the height was not entered on the quotation. */
   heightAssumed?: boolean;
+  /** Part of the area quoted as parking / stilt (few walls, parking floor). */
+  parkingSqft?: number;
 };
 
 /** Doors, windows and bathrooms on one floor (editable per floor). */
@@ -71,6 +73,8 @@ export type FloorCounts = {
   windows: number;
   ventilators: number;
   bathrooms: number;
+  kitchens: number;
+  rollingShutters: number;
 };
 export const FLOOR_COUNT_FIELDS = [
   ['mainDoors', 'Main doors'],
@@ -80,6 +84,8 @@ export const FLOOR_COUNT_FIELDS = [
   ['windows', 'Windows'],
   ['ventilators', 'Ventilators'],
   ['bathrooms', 'Bathrooms'],
+  ['kitchens', 'Kitchens'],
+  ['rollingShutters', 'Rolling shutters'],
 ] as const satisfies readonly (readonly [keyof FloorCounts, string])[];
 
 export type BoqCounts = {
@@ -238,6 +244,40 @@ export const STRUCTURAL_FIELDS = [
     step: 1,
   },
   {
+    key: 'plinthBeamWidthIn',
+    label: 'Plinth beam width (in)',
+    group: 'Foundation',
+    value: 9,
+    min: 6,
+    max: 24,
+  },
+  {
+    key: 'plinthBeamDepthIn',
+    label: 'Plinth beam depth (in)',
+    group: 'Foundation',
+    value: 12,
+    min: 9,
+    max: 36,
+  },
+  {
+    key: 'plinthBeamBarDia',
+    label: 'Plinth beam bar (mm)',
+    group: 'Foundation',
+    value: 12,
+    min: 8,
+    max: 25,
+    step: 1,
+  },
+  {
+    key: 'plinthBeamBarCount',
+    label: 'Plinth beam bars',
+    group: 'Foundation',
+    value: 6,
+    min: 2,
+    max: 12,
+    step: 1,
+  },
+  {
     key: 'pedestalHeightFeet',
     label: 'Pedestal height (ft, 0 = none)',
     group: 'Foundation',
@@ -271,6 +311,34 @@ export const STRUCTURAL_FIELDS = [
     min: 6,
     max: 25,
     help: 'Column count is estimated from each floor footprint on this grid.',
+  },
+  {
+    key: 'columnRows',
+    label: 'Column rows along the length (0 = from grid)',
+    group: 'Columns',
+    value: 0,
+    min: 0,
+    max: 30,
+    step: 1,
+    help: 'From the structural drawing, e.g. 6 rows of 2 = 12 columns.',
+  },
+  {
+    key: 'columnsPerRow',
+    label: 'Columns per row across the width (0 = from grid)',
+    group: 'Columns',
+    value: 0,
+    min: 0,
+    max: 10,
+    step: 1,
+  },
+  {
+    key: 'extraColumns',
+    label: 'Extra columns (lift / stair)',
+    group: 'Columns',
+    value: 0,
+    min: 0,
+    max: 20,
+    step: 1,
   },
   {
     key: 'columnWidthIn',
@@ -395,6 +463,33 @@ export const STRUCTURAL_FIELDS = [
     step: 1,
   },
   {
+    key: 'beamExtraDia',
+    label: 'Beam extra / side bar (mm)',
+    group: 'Beams',
+    value: 12,
+    min: 0,
+    max: 32,
+    step: 1,
+  },
+  {
+    key: 'beamExtraCount',
+    label: 'Extra / side bars per beam',
+    group: 'Beams',
+    value: 2,
+    min: 0,
+    max: 8,
+    step: 1,
+  },
+  {
+    key: 'extraBeamFeet',
+    label: 'Extra beam run per floor (ft, lift / stair)',
+    group: 'Beams',
+    value: 0,
+    min: 0,
+    max: 500,
+    step: 1,
+  },
+  {
     key: 'beamStirrupDia',
     label: 'Stirrup (mm)',
     group: 'Beams',
@@ -463,6 +558,65 @@ export const STRUCTURAL_FIELDS = [
     max: 60,
     step: 1,
   },
+  {
+    key: 'stairsPerFloor',
+    label: 'Staircases per floor (0 = none)',
+    group: 'Staircase',
+    value: 1,
+    min: 0,
+    max: 4,
+    step: 1,
+  },
+  {
+    key: 'stairWidthFeet',
+    label: 'Stair width (ft)',
+    group: 'Staircase',
+    value: 3.5,
+    min: 2.5,
+    max: 8,
+  },
+  {
+    key: 'stairLandingFeet',
+    label: 'Landing length (ft)',
+    group: 'Staircase',
+    value: 7,
+    min: 3,
+    max: 15,
+  },
+  {
+    key: 'stairWaistIn',
+    label: 'Waist slab (in)',
+    group: 'Staircase',
+    value: 6,
+    min: 4,
+    max: 9,
+  },
+  {
+    key: 'stairMainDia',
+    label: 'Stair main bar (mm)',
+    group: 'Staircase',
+    value: 10,
+    min: 8,
+    max: 16,
+    step: 1,
+  },
+  {
+    key: 'stairDistDia',
+    label: 'Stair distribution bar (mm)',
+    group: 'Staircase',
+    value: 8,
+    min: 6,
+    max: 12,
+    step: 1,
+  },
+  {
+    key: 'stairBarSpacingIn',
+    label: 'Stair bar spacing (in)',
+    group: 'Staircase',
+    value: 6,
+    min: 3,
+    max: 12,
+  },
   // Masonry & plaster
   {
     key: 'externalWallIn',
@@ -516,6 +670,16 @@ export const STRUCTURAL_FIELDS = [
     min: 0,
     max: 15,
     step: 0.5,
+  },
+  {
+    key: 'parkingWallPercent',
+    label: 'Parking floor walls (% of a normal floor)',
+    group: 'Masonry & plaster',
+    value: 30,
+    min: 0,
+    max: 100,
+    step: 1,
+    help: 'Parking / stilt floors have few walls.',
   },
   // Quantities for allowances
   {
@@ -585,9 +749,38 @@ export const STRUCTURAL_FIELDS = [
     step: 1,
   },
   {
+    key: 'kitchenPlatformSqft',
+    label: 'Kitchen platform per kitchen (sq ft)',
+    group: 'Finishes & services',
+    value: 20,
+    min: 0,
+    max: 100,
+    step: 1,
+  },
+  {
+    key: 'kitchenWallTileSqft',
+    label: 'Kitchen wall tiles per kitchen (sq ft)',
+    group: 'Finishes & services',
+    value: 30,
+    min: 0,
+    max: 200,
+    step: 1,
+    help: 'About 2 ft high above the platform.',
+  },
+  {
+    key: 'labourItemized',
+    label: 'Labour: itemized (1) or one contract rate (0)',
+    group: 'Finishes & services',
+    value: 1,
+    min: 0,
+    max: 1,
+    step: 1,
+    help: 'Itemized: RCC, brickwork, plastering and centering priced separately.',
+  },
+  {
     key: 'parapetHeightFeet',
     label: 'Parapet wall height (ft, 0 = none)',
-    group: 'Parapet & compound wall',
+    group: 'External works',
     value: 3,
     min: 0,
     max: 6,
@@ -595,7 +788,7 @@ export const STRUCTURAL_FIELDS = [
   {
     key: 'parapetWallIn',
     label: 'Parapet wall thickness (in)',
-    group: 'Parapet & compound wall',
+    group: 'External works',
     value: 4.5,
     min: 3,
     max: 9,
@@ -603,7 +796,7 @@ export const STRUCTURAL_FIELDS = [
   {
     key: 'compoundWallHeightFeet',
     label: 'Compound wall height (ft)',
-    group: 'Parapet & compound wall',
+    group: 'External works',
     value: 5,
     min: 2,
     max: 10,
@@ -611,10 +804,28 @@ export const STRUCTURAL_FIELDS = [
   {
     key: 'compoundWallIn',
     label: 'Compound wall thickness (in)',
-    group: 'Parapet & compound wall',
+    group: 'External works',
     value: 9,
     min: 4,
     max: 14,
+  },
+  {
+    key: 'sumpLitres',
+    label: 'Underground sump (litres, 0 = none)',
+    group: 'External works',
+    value: 6500,
+    min: 0,
+    max: 100000,
+    step: 100,
+  },
+  {
+    key: 'overheadTankLitres',
+    label: 'Overhead tank (litres, 0 = none)',
+    group: 'External works',
+    value: 4000,
+    min: 0,
+    max: 20000,
+    step: 100,
   },
   {
     key: 'sandTonPerCum',
@@ -762,13 +973,25 @@ export function floorsFromQuote(
 ): BoqFloor[] {
   const levels = new Map<
     string,
-    { area: number; rows: SftEstimateDetails['rows']; height: number }
+    {
+      area: number;
+      parking: number;
+      rows: SftEstimateDetails['rows'];
+      height: number;
+    }
   >();
   for (const row of details.rows) {
     if ((row.kind ?? 'floor') !== 'floor') continue;
     const level = LEVEL_PREFIX.exec(row.name)?.[1]?.trim() || row.name;
-    const entry = levels.get(level) ?? { area: 0, rows: [], height: 0 };
+    const entry = levels.get(level) ?? {
+      area: 0,
+      parking: 0,
+      rows: [],
+      height: 0,
+    };
     entry.area += Number(row.areaSqft) || 0;
+    if (/ — Parking$/.test(row.name))
+      entry.parking += Number(row.areaSqft) || 0;
     entry.rows.push(row);
     const height = Number(row.heightFeet);
     if (Number.isFinite(height) && height > entry.height) entry.height = height;
@@ -788,9 +1011,14 @@ export function floorsFromQuote(
       widthFeet: realRectangle ? width : round(side),
       heightFeet: heightAssumed ? defaultHeightFeet : entry.height,
       ...(heightAssumed ? { heightAssumed: true } : {}),
+      ...(entry.parking > 0 ? { parkingSqft: round(entry.parking) } : {}),
     };
   });
 }
+
+/** Area of a floor that is not parking / stilt. */
+export const livingSqft = (floor: BoqFloor) =>
+  Math.max(0, floor.areaSqft - (floor.parkingSqft ?? 0));
 
 /** Default counts per floor from the quoted areas; every count is editable. */
 export function estimateCounts(
@@ -800,21 +1028,27 @@ export function estimateCounts(
 ): BoqCounts {
   const perFloor: Record<string, FloorCounts> = {};
   floors.forEach((floor, index) => {
-    const bathrooms = Math.max(
-      1,
-      Math.round(floor.areaSqft / settings.sqftPerBathroom),
-    );
+    const living = livingSqft(floor);
+    const bathrooms =
+      living > 0
+        ? Math.max(1, Math.round(living / settings.sqftPerBathroom))
+        : 0;
     perFloor[floor.name] = {
-      mainDoors: index === 0 ? 1 : 0,
-      internalDoors: Math.max(
-        1,
-        Math.round(floor.areaSqft / settings.sqftPerInternalDoor),
-      ),
+      mainDoors: index === 0 || floor.parkingSqft ? (living > 0 ? 1 : 0) : 0,
+      internalDoors:
+        living > 0
+          ? Math.max(1, Math.round(living / settings.sqftPerInternalDoor))
+          : 0,
       bathroomDoors: bathrooms,
-      poojaDoors: index === 0 ? 1 : 0,
-      windows: Math.max(2, Math.round(floor.areaSqft / settings.sqftPerWindow)),
+      poojaDoors: index === 0 && living > 0 ? 1 : 0,
+      windows:
+        living > 0
+          ? Math.max(2, Math.round(living / settings.sqftPerWindow))
+          : 0,
       ventilators: bathrooms,
       bathrooms,
+      kitchens: living >= 400 ? Math.max(1, Math.round(living / 1200)) : 0,
+      rollingShutters: 0,
     };
   });
   // A quoted compound wall (running ft) sets its length.
@@ -866,15 +1100,34 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
 // ---------------------------------------------------------------------------
 // Structure
 
-const columnGrid = (floor: BoqFloor, spacing: number) => {
-  const nx = ceil(floor.lengthFeet / spacing) + 1;
-  const ny = ceil(floor.widthFeet / spacing) + 1;
+/**
+ * Column positions and beam runs for a floor. From the structural drawing
+ * when rows / columns per row are set (upper floors scale with their
+ * length), otherwise from a square grid at the column spacing.
+ */
+const columnGrid = (
+  floor: BoqFloor,
+  s: StructuralSettings,
+  ground: BoqFloor = floor,
+) => {
+  const fromDrawing = s.columnRows > 0 && s.columnsPerRow > 0;
+  const nx = fromDrawing
+    ? Math.max(
+        2,
+        Math.round(
+          (s.columnRows * floor.lengthFeet) / Math.max(1, ground.lengthFeet),
+        ),
+      )
+    : ceil(floor.lengthFeet / s.columnSpacingFeet) + 1;
+  const ny = fromDrawing
+    ? s.columnsPerRow
+    : ceil(floor.widthFeet / s.columnSpacingFeet) + 1;
   return {
     nx,
     ny,
-    columns: nx * ny,
-    // Every grid line carries a continuous beam.
-    beamRunFeet: ny * floor.lengthFeet + nx * floor.widthFeet,
+    columns: nx * ny + s.extraColumns,
+    // Every column line carries a continuous beam, plus lift / stair beams.
+    beamRunFeet: ny * floor.lengthFeet + nx * floor.widthFeet + s.extraBeamFeet,
     longestRunFeet: Math.max(floor.lengthFeet, floor.widthFeet),
   };
 };
@@ -959,8 +1212,8 @@ const brickworkOutputs = (
       source: `${round(volume, 2)} m³ wall × ${s.bricksPerCubicMetre}/m³`,
     },
     {
-      name: 'Cement',
-      material: 'cement',
+      name: 'Cement (brickwork & plaster)',
+      material: 'cement_masonry',
       quantity: round(
         (volume * 1.5 + internalPlaster * 0.0058 + externalPlaster * 0.0136) *
           waste,
@@ -979,7 +1232,7 @@ const brickworkOutputs = (
       ? [
           {
             name: 'Internal plaster',
-            material: 'plaster_labour',
+            ...(s.labourItemized ? { material: 'plaster_labour' } : {}),
             quantity: round(internalPlaster, 0),
             unit: 'sqft',
           },
@@ -989,7 +1242,7 @@ const brickworkOutputs = (
       ? [
           {
             name: 'External plaster',
-            material: 'plaster_labour',
+            ...(s.labourItemized ? { material: 'plaster_labour' } : {}),
             quantity: round(externalPlaster, 0),
             unit: 'sqft',
           },
@@ -997,6 +1250,24 @@ const brickworkOutputs = (
       : []),
   ];
 };
+
+/** Wall area, priced with brickwork labour (9 in / 4.5 in) when itemized. */
+const wallOutput = (
+  label: string,
+  thicknessIn: number,
+  areaSqft: number,
+  s: StructuralSettings,
+): GeneratedOutput => ({
+  name: `${thicknessIn} in ${label}`,
+  quantity: round(areaSqft, 0),
+  unit: 'sqft',
+  ...(s.labourItemized
+    ? {
+        material:
+          thicknessIn >= 6 ? 'labour_brickwork_9' : 'labour_brickwork_4',
+      }
+    : {}),
+});
 
 const steelOutputs = (
   tally: SteelTally,
@@ -1082,7 +1353,7 @@ export function generateQuotationBoq(
 
   if (floors.length) {
     const ground = floors[0]!;
-    const groundGrid = columnGrid(ground, s.columnSpacingFeet);
+    const groundGrid = columnGrid(ground, s);
     const columnBars = [
       { dia: s.columnBar1Dia, count: s.columnBar1Count },
       { dia: s.columnBar2Dia, count: s.columnBar2Count },
@@ -1286,7 +1557,7 @@ export function generateQuotationBoq(
             height: floor.heightFeet,
             foundation: false,
             columns: Math.min(
-              columnGrid(floor, s.columnSpacingFeet).columns,
+              columnGrid(floor, s, ground).columns,
               groundGrid.columns,
             ),
           })),
@@ -1389,20 +1660,34 @@ export function generateQuotationBoq(
       })),
     ];
     const slabT = s.slabThicknessIn / 12;
-    const beamB = s.beamWidthIn / 12;
-    const beamD = s.beamDepthIn / 12;
-    const stirrupLength =
-      2 * (Math.max(0, beamB - 2 * cover) + Math.max(0, beamD - 2 * cover)) +
-      20 * s.beamStirrupDia * FT_PER_MM;
     for (const level of beamLevels) {
-      const grid = columnGrid(level.floor, s.columnSpacingFeet);
+      const grid = columnGrid(level.floor, s, ground);
       const tally: SteelTally = new Map();
       const outputs: GeneratedOutput[] = [];
-      // Beams: continuous bars along every grid line, anchored at both ends.
-      for (const bar of [
-        { dia: s.beamTopDia, count: s.beamTopCount, label: 'top' },
-        { dia: s.beamBottomDia, count: s.beamBottomCount, label: 'bottom' },
-      ].filter((item) => item.dia > 0 && item.count > 0)) {
+      // Plinth beams have their own section; floor beams carry top, bottom
+      // and extra / side bars.
+      const beamB = (level.slab ? s.beamWidthIn : s.plinthBeamWidthIn) / 12;
+      const beamD = (level.slab ? s.beamDepthIn : s.plinthBeamDepthIn) / 12;
+      const stirrupLength =
+        2 * (Math.max(0, beamB - 2 * cover) + Math.max(0, beamD - 2 * cover)) +
+        20 * s.beamStirrupDia * FT_PER_MM;
+      const beamBars = level.slab
+        ? [
+            { dia: s.beamTopDia, count: s.beamTopCount, label: 'top' },
+            { dia: s.beamBottomDia, count: s.beamBottomCount, label: 'bottom' },
+            { dia: s.beamExtraDia, count: s.beamExtraCount, label: 'extra' },
+          ]
+        : [
+            {
+              dia: s.plinthBeamBarDia,
+              count: s.plinthBeamBarCount,
+              label: 'main',
+            },
+          ];
+      // Beams: continuous bars along every line, anchored at both ends.
+      for (const bar of beamBars.filter(
+        (item) => item.dia > 0 && item.count > 0,
+      )) {
         const lap = lapFeet(bar.dia, s.lapDiameters);
         const anchor = 2 * lap;
         let bars = 0;
@@ -1410,7 +1695,9 @@ export function generateQuotationBoq(
         for (const [runs, span] of [
           [grid.ny, level.floor.lengthFeet],
           [grid.nx, level.floor.widthFeet],
+          [s.extraBeamFeet > 0 ? 1 : 0, s.extraBeamFeet],
         ] as const) {
+          if (!(runs > 0) || !(span > 0)) continue;
           const plan = cutPlan(span + anchor, runs * bar.count, stock, lap);
           bars += plan.bars;
           metres += plan.bars * stock * M_PER_FT;
@@ -1427,7 +1714,10 @@ export function generateQuotationBoq(
         grid.ny *
           (ceil((level.floor.lengthFeet * 12) / s.beamStirrupSpacingIn) + 1) +
         grid.nx *
-          (ceil((level.floor.widthFeet * 12) / s.beamStirrupSpacingIn) + 1);
+          (ceil((level.floor.widthFeet * 12) / s.beamStirrupSpacingIn) + 1) +
+        (s.extraBeamFeet > 0
+          ? ceil((s.extraBeamFeet * 12) / s.beamStirrupSpacingIn) + 1
+          : 0);
       const stirrupBars = cutPlan(stirrupLength, stirrups, stock, 0).bars;
       addSteel(
         tally,
@@ -1521,8 +1811,13 @@ export function generateQuotationBoq(
     // --- Masonry and plaster per floor ------------------------------------
     for (const floor of floors) {
       const perimeter = 2 * (floor.lengthFeet + floor.widthFeet);
-      const wallHeight = Math.max(0, floor.heightFeet - beamD);
-      const solid = 1 - s.openingsPercent / 100;
+      const wallHeight = Math.max(0, floor.heightFeet - s.beamDepthIn / 12);
+      // Parking / stilt portions have few walls.
+      const parkingShare =
+        (floor.parkingSqft ?? 0) / Math.max(1, floor.areaSqft);
+      const wallShare =
+        1 - parkingShare + (parkingShare * s.parkingWallPercent) / 100;
+      const solid = (1 - s.openingsPercent / 100) * wallShare;
       const externalArea = perimeter * wallHeight * solid;
       const internalArea = perimeter * s.internalWallRatio * wallHeight * solid;
       const volume =
@@ -1546,26 +1841,28 @@ export function generateQuotationBoq(
             openings: `${s.openingsPercent}%`,
           },
           outputs: [
-            {
-              name: `${s.externalWallIn} in external wall`,
-              quantity: round(externalArea, 0),
-              unit: 'sqft',
-            },
-            {
-              name: `${s.internalWallIn} in internal wall`,
-              quantity: round(internalArea, 0),
-              unit: 'sqft',
-            },
+            wallOutput('external wall', s.externalWallIn, externalArea, s),
+            wallOutput('internal wall', s.internalWallIn, internalArea, s),
             ...brickworkOutputs(volume, internalPlaster, externalPlaster, s),
           ],
         },
       });
     }
 
-    // --- Parapet wall and terrace waterproofing on the top floor ----------
+    // --- Parapet walls and terrace waterproofing -------------------------
+    // The roof edge is the widest floor's perimeter (open terrace around a
+    // smaller penthouse); a smaller top floor adds its own roof parapet.
     const top = floors[floors.length - 1]!;
+    const widest = floors.reduce((a, b) =>
+      b.lengthFeet * b.widthFeet > a.lengthFeet * a.widthFeet ? b : a,
+    );
     if (s.parapetHeightFeet > 0) {
-      const perimeter = 2 * (top.lengthFeet + top.widthFeet);
+      const edge = 2 * (widest.lengthFeet + widest.widthFeet);
+      const topIsSmaller =
+        top !== widest &&
+        top.lengthFeet * top.widthFeet < widest.lengthFeet * widest.widthFeet;
+      const perimeter =
+        edge + (topIsSmaller ? 2 * (top.lengthFeet + top.widthFeet) : 0);
       const area = perimeter * s.parapetHeightFeet;
       const volume = area * (s.parapetWallIn / 12) * CUM_PER_CFT;
       drafts.push({
@@ -1581,22 +1878,89 @@ export function generateQuotationBoq(
             thickness: `${s.parapetWallIn} in`,
           },
           outputs: [
-            {
-              name: `${s.parapetWallIn} in parapet wall`,
-              quantity: round(area, 0),
-              unit: 'sqft',
-            },
+            wallOutput('parapet wall', s.parapetWallIn, area, s),
             ...brickworkOutputs(volume, 0, 2 * area, s),
             {
               name: 'Terrace waterproofing',
               material: 'waterproofing',
-              quantity: round(top.lengthFeet * top.widthFeet, 0),
+              quantity: round(widest.lengthFeet * widest.widthFeet, 0),
               unit: 'sqft',
+              source: topIsSmaller ? 'Open terrace and top roof' : 'Top roof',
             },
           ],
         },
       });
     }
+
+    // --- Staircase from each floor to the next (and to the terrace) -------
+    if (s.stairsPerFloor > 0)
+      for (const floor of floors) {
+        const risers = ceil((floor.heightFeet * 12) / 6);
+        const flightRise = floor.heightFeet / 2;
+        const flightRun = ((risers / 2) * 10) / 12;
+        const flight = Math.hypot(flightRun, flightRise);
+        const w = s.stairWidthFeet;
+        const waist = s.stairWaistIn / 12;
+        const slabArea = 2 * flight * w + s.stairLandingFeet * w;
+        const steps = risers * 0.5 * (10 / 12) * (6 / 12) * w;
+        const volume =
+          s.stairsPerFloor * (slabArea * waist + steps) * CUM_PER_CFT;
+        const tally: SteelTally = new Map();
+        const spacing = s.stairBarSpacingIn / 12;
+        const main = s.stairsPerFloor * 2 * (Math.floor(w / spacing) + 1);
+        const mainLength = flight + s.stairLandingFeet / 2 + 1.5;
+        const mainPlan = cutPlan(
+          mainLength,
+          main,
+          stock,
+          lapFeet(s.stairMainDia, s.lapDiameters),
+        );
+        addSteel(
+          tally,
+          s.stairMainDia,
+          mainPlan.bars * stock * M_PER_FT,
+          mainPlan.bars,
+          `stair main ${main} pcs × ${ft(mainLength)}`,
+        );
+        const dist =
+          s.stairsPerFloor *
+          (2 * (Math.floor(flight / spacing) + 1) +
+            Math.floor(s.stairLandingFeet / spacing) +
+            1);
+        const distPlan = cutPlan(w, dist, stock, 0);
+        addSteel(
+          tally,
+          s.stairDistDia,
+          distPlan.bars * stock * M_PER_FT,
+          distPlan.bars,
+          `stair distribution ${dist} pcs × ${ft(w)}`,
+        );
+        mergeSteel(tally);
+        drafts.push({
+          origin: 'quotation-structure',
+          draft: {
+            name: `${floor.name}: staircase (${s.stairsPerFloor} × ${risers} risers)`,
+            section: floor.name,
+            kind: 'quote-staircase',
+            unit: 'm³',
+            inputs: {
+              risers,
+              widthFeet: w,
+              waist: `${s.stairWaistIn} in`,
+            },
+            outputs: [
+              ...concreteOutputs(volume, 'Staircase', s),
+              ...steelOutputs(tally, stock),
+              {
+                name: 'Centering & shuttering',
+                material: 'shuttering',
+                quantity: round(s.stairsPerFloor * slabArea, 0),
+                unit: 'sqft',
+              },
+            ],
+          },
+        });
+      }
     // Order structure stage by stage: Foundation, then each floor.
     const stageOrder = ['Foundation', ...floors.map((floor) => floor.name)];
     const rank = (section: string) => {
@@ -1713,12 +2077,14 @@ export function generateQuotationBoq(
   ): GeneratedOutput[] => {
     if (!(quantity > 0) || included.has(category)) return [];
     const quoted = allowances.get(category);
+    // A quoted sump allowance is a lump sum, not a rate per litre.
+    const lumpSum = Boolean(quoted) && category === 'sump';
     return [
       quoted
         ? {
             name,
-            quantity: round(quantity, 2),
-            unit,
+            quantity: lumpSum ? 1 : round(quantity, 2),
+            unit: lumpSum ? 'LS' : unit,
             rate: quoted.rate,
             source: (
               `${quoted.extra ? 'Chargeable extra' : 'Package allowance'}: ${quoted.label}` +
@@ -1745,11 +2111,21 @@ export function generateQuotationBoq(
     const doors =
       fc.mainDoors + fc.internalDoors + fc.bathroomDoors + fc.poojaDoors;
     const windowArea = fc.windows * s.windowSqft;
-    const floorTiles = (floor.areaSqft * s.tileCoveragePercent) / 100;
+    const living = livingSqft(floor);
+    const parking = floor.parkingSqft ?? 0;
+    const floorTiles = (living * s.tileCoveragePercent) / 100;
     const wallTiles = fc.bathrooms * s.bathroomWallTileSqft;
+    const kitchenTiles = fc.kitchens * s.kitchenWallTileSqft;
     const interiorPaint = walls.internalPlaster + floor.areaSqft;
     const exteriorPaint = walls.externalPlaster;
-    const points = ceil(floor.areaSqft / s.sqftPerElectricalPoint);
+    const points =
+      ceil(living / s.sqftPerElectricalPoint) + ceil(parking / 100);
+    // Staircase flooring: treads and risers of each flight plus the landing.
+    const risers = ceil((floor.heightFeet * 12) / 6);
+    const stairGranite =
+      s.stairsPerFloor *
+      s.stairWidthFeet *
+      (risers * (16 / 12) + s.stairLandingFeet);
     const finishLine = (
       kind: string,
       title: string,
@@ -1810,6 +2186,13 @@ export function generateQuotationBoq(
           'each',
           'ventilator',
         ),
+        ...item(
+          'rollingShutters',
+          'Rolling shutter',
+          fc.rollingShutters,
+          'each',
+          'rolling_shutter',
+        ),
         ...(doors > 0
           ? [
               {
@@ -1833,7 +2216,7 @@ export function generateQuotationBoq(
           floorTiles,
           'sqft',
           'floor_tiles',
-          `${s.tileCoveragePercent}% of ${round(floor.areaSqft, 0)} sq ft`,
+          `${s.tileCoveragePercent}% of ${round(living, 0)} sq ft`,
         ),
         ...item(
           'wallTiles',
@@ -1843,14 +2226,88 @@ export function generateQuotationBoq(
           'wall_tiles',
           `${fc.bathrooms} bathrooms × ${s.bathroomWallTileSqft} sq ft`,
         ),
+        ...item(
+          'kitchenWallTiles',
+          'Kitchen wall tiles',
+          kitchenTiles,
+          'sqft',
+          'kitchen_wall_tiles',
+          `${fc.kitchens} kitchens × ${s.kitchenWallTileSqft} sq ft`,
+        ),
+        ...item(
+          'staircaseGranite',
+          'Staircase granite',
+          stairGranite,
+          'sqft',
+          'staircase_granite',
+          `${risers} steps × ${s.stairWidthFeet} ft + landing`,
+        ),
+        ...(parking > 0
+          ? [
+              {
+                name: 'Parking flooring',
+                material: 'parking_flooring',
+                quantity: round(parking, 0),
+                unit: 'sqft',
+              },
+            ]
+          : []),
+        // Bedding mortar: floors 40 mm 1:4, wall tiles 12 mm 1:3.
+        ...(floorTiles + stairGranite + parking + wallTiles + kitchenTiles > 0
+          ? [
+              {
+                name: 'Cement (tile bedding)',
+                material: 'cement_masonry',
+                quantity: round(
+                  ((floorTiles + stairGranite + parking) * 0.028 +
+                    (wallTiles + kitchenTiles) * 0.0104) *
+                    (1 + s.materialWastagePercent / 100),
+                  1,
+                ),
+                unit: 'bag',
+                source: 'Floor bed 40 mm 1:4 · wall tile bed 12 mm 1:3',
+              },
+              sandOutput(
+                ((floorTiles + stairGranite + parking) * 0.00387 +
+                  (wallTiles + kitchenTiles) * 0.00109) *
+                  (1 + s.materialWastagePercent / 100),
+                s,
+              ),
+            ]
+          : []),
         {
-          name: 'Tile laying labour',
+          name: 'Tile & granite laying labour',
           material: 'labour_tiling',
-          quantity: round(floorTiles + wallTiles, 0),
+          quantity: round(
+            floorTiles + wallTiles + kitchenTiles + stairGranite + parking,
+            0,
+          ),
           unit: 'sqft',
         },
       ],
       { builtUpSqft: floor.areaSqft, bathrooms: fc.bathrooms },
+    );
+    finishLine(
+      'quote-kitchen',
+      'kitchen',
+      [
+        ...item(
+          'kitchenPlatform',
+          'Kitchen platform (granite)',
+          fc.kitchens * s.kitchenPlatformSqft,
+          'sqft',
+          'kitchen_platform',
+          `${fc.kitchens} kitchens × ${s.kitchenPlatformSqft} sq ft`,
+        ),
+        ...item(
+          'kitchenSink',
+          'Kitchen sink',
+          fc.kitchens,
+          'each',
+          'kitchen_sink',
+        ),
+      ],
+      { kitchens: fc.kitchens },
     );
     finishLine(
       'quote-painting',
@@ -1925,13 +2382,22 @@ export function generateQuotationBoq(
       'quote-civil-labour',
       'civil labour',
       [
-        {
-          name: 'Civil labour (concrete, brickwork, plastering)',
-          material: 'labour_civil',
-          quantity: round(floor.areaSqft, 0),
-          unit: 'sqft',
-          source: 'Per sq ft of built-up area; centering is priced separately',
-        },
+        s.labourItemized
+          ? {
+              name: 'RCC labour (steel fixing, concreting, curing)',
+              material: 'labour_rcc',
+              quantity: round(floor.areaSqft, 0),
+              unit: 'sqft',
+              source:
+                'Per sq ft built-up. Brickwork, plastering and centering are priced on their own lines.',
+            }
+          : {
+              name: 'Civil labour contract (concrete, brickwork, plastering)',
+              material: 'labour_civil',
+              quantity: round(floor.areaSqft, 0),
+              unit: 'sqft',
+              source: 'Per sq ft built-up; centering is priced separately',
+            },
       ],
       { builtUpSqft: floor.areaSqft },
     );
@@ -1954,11 +2420,7 @@ export function generateQuotationBoq(
           thickness: `${s.compoundWallIn} in`,
         },
         outputs: [
-          {
-            name: `${s.compoundWallIn} in compound wall`,
-            quantity: round(area, 0),
-            unit: 'sqft',
-          },
+          wallOutput('compound wall', s.compoundWallIn, area, s),
           ...brickworkOutputs(volume, 0, 2 * area, s),
           ...item(
             'paintExterior',
@@ -1990,6 +2452,40 @@ export function generateQuotationBoq(
         unit: 'each',
         inputs: { gates: counts.entranceGates },
         outputs: gates,
+      },
+    });
+
+  // Water storage: underground sump and overhead tank.
+  const water = [
+    ...item(
+      'sump',
+      `Underground sump (${s.sumpLitres} L)`,
+      s.sumpLitres > 0 ? s.sumpLitres : 0,
+      'litre',
+      'sump',
+      'Excavation, brickwork / RCC, plaster and waterproofing',
+    ),
+    ...item(
+      'overheadTank',
+      `Overhead tank (${s.overheadTankLitres} L)`,
+      s.overheadTankLitres > 0 ? 1 : 0,
+      'each',
+      'overhead_tank',
+    ),
+  ];
+  if (water.length)
+    drafts.push({
+      origin: 'quotation-structure',
+      draft: {
+        name: 'Water storage: sump & overhead tank',
+        section: 'External works',
+        kind: 'quote-water',
+        unit: 'each',
+        inputs: {
+          sumpLitres: s.sumpLitres,
+          overheadTankLitres: s.overheadTankLitres,
+        },
+        outputs: water,
       },
     });
 
@@ -2193,7 +2689,14 @@ export type AllowanceCategory =
   | 'paintExterior'
   | 'electrical'
   | 'sanitary'
-  | 'plumbing';
+  | 'plumbing'
+  | 'kitchenPlatform'
+  | 'kitchenWallTiles'
+  | 'kitchenSink'
+  | 'staircaseGranite'
+  | 'rollingShutters'
+  | 'overheadTank'
+  | 'sump';
 
 /**
  * Which counted items a package allowance prices, from its title and unit.
@@ -2205,6 +2708,17 @@ export function allowanceCategories(
 ): AllowanceCategory[] {
   const t = title.toLowerCase();
   const perItem = ['door', 'piece', 'lumpsum'].includes(unit);
+  const piece = unit === 'piece' || unit === 'lumpsum';
+  if (/shutter/.test(t)) return piece ? ['rollingShutters'] : [];
+  if (/sump/.test(t)) return piece ? ['sump'] : [];
+  if (/overhead|water tank|\btank\b/.test(t))
+    return piece ? ['overheadTank'] : [];
+  if (/stair/.test(t)) return unit === 'sqft' ? ['staircaseGranite'] : [];
+  if (/sink/.test(t)) return piece ? ['kitchenSink'] : [];
+  if (/kitchen/.test(t) && /til/.test(t))
+    return unit === 'sqft' ? ['kitchenWallTiles'] : [];
+  if (/platform|countertop|counter top|kitchen/.test(t))
+    return unit === 'sqft' ? ['kitchenPlatform'] : [];
   if (/gate/.test(t))
     return unit === 'piece' || unit === 'door' ? ['gates'] : [];
   if (/door/.test(t)) {
