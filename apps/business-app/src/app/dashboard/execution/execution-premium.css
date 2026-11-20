@@ -1967,3 +1967,47 @@
   padding: 4px 6px;
   font-size: 11px;
 }
+
+/* Floor-wise cost estimate */
+.boq-floor-cost {
+  margin-top: 8px;
+  border: 1px solid #f1eceb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.boq-floor-cost summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  background: #fbf7f6;
+  font-size: 12px;
+}
+.boq-floor-cost summary span {
+  color: #7a2e1f;
+  font-weight: 800;
+}
+.boq-floor-cost table {
+  margin: 0;
+}
+.boq-floor-cost tr.unpriced td {
+  color: #a8999b;
+}
+.boq-floor-cost tr.subtotal td {
+  font-style: italic;
+}
+.boq-floor-grand {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #7a2e1f;
+  color: #fff;
+  font-size: 13px;
+}
+
+.boq-gen-count-table td.boq-window-sizes input {
+  min-width: 150px;
+}
