@@ -22,79 +22,248 @@ export type PricedOutput = {
   unit: string;
   material?: string | undefined;
   rate?: number | undefined;
+  diameter?: number | undefined;
 };
 
-export const MATERIAL_GROUPS = [
-  {
-    key: 'steel',
-    label: 'Steel / TMT',
-    unit: 'kg',
-    category: 'material',
-    starters: ['JSW', 'Vizag (RINL)', 'Local ISI'],
-  },
-  {
-    key: 'cement',
-    label: 'Cement',
-    unit: 'bag',
-    category: 'material',
-    starters: ['UltraTech', 'Maha', 'Ramco'],
-  },
-  {
-    key: 'bricks',
-    label: 'Bricks',
-    unit: 'each',
-    category: 'material',
-    starters: ['Local', 'Karimnagar'],
-  },
-  {
-    key: 'sand',
-    label: 'Sand',
-    unit: 'm³',
-    category: 'material',
-    starters: ['River sand', 'M-sand'],
-  },
-  {
-    key: 'aggregate',
-    label: 'Aggregate',
-    unit: 'm³',
-    category: 'material',
-    starters: ['Standard'],
-  },
-  {
-    key: 'binding_wire',
-    label: 'Binding wire',
-    unit: 'kg',
-    category: 'material',
-    starters: ['Standard'],
-  },
-  {
-    key: 'excavation',
-    label: 'Excavation',
-    unit: 'm³',
-    category: 'labour',
-    starters: ['JCB', 'Manual'],
-  },
-  {
-    key: 'shuttering',
-    label: 'Centering & shuttering',
-    unit: 'sqft',
-    category: 'labour',
-    starters: ['Standard'],
-  },
-  {
-    key: 'plaster_labour',
-    label: 'Plastering labour',
-    unit: 'sqft',
-    category: 'labour',
-    starters: ['Standard'],
-  },
-] as const satisfies readonly {
+type GroupDef = {
   key: string;
   label: string;
   unit: string;
   category: RateCategory;
+  section: string;
   starters: readonly string[];
-}[];
+  /** Default rate for new rate cards (labour and fees); materials start at 0. */
+  defaultRate?: number;
+  note?: string;
+};
+const STEEL_DIAMETERS = [8, 10, 12, 16, 20, 25] as const;
+const steelBrands = ['JSW', 'Vizag (RINL)', 'Local ISI'] as const;
+const group = (
+  key: string,
+  label: string,
+  unit: string,
+  section: string,
+  starters: readonly string[] = ['Standard'],
+  extra: Partial<GroupDef> = {},
+): GroupDef => ({
+  key,
+  label,
+  unit,
+  category: section === 'Labour' ? 'labour' : 'material',
+  section,
+  starters,
+  ...extra,
+});
+
+/**
+ * Rate-card groups, in purchase units: steel per rod (by diameter), cement
+ * per bag, bricks per number, sand and aggregate per tonne. Labour and fees
+ * start with typical Hyderabad rates (Nov 2026); everything is editable.
+ */
+export const MATERIAL_GROUPS: readonly GroupDef[] = [
+  ...STEEL_DIAMETERS.map((diameter) =>
+    group(
+      `steel_${diameter}`,
+      `${diameter} mm TMT`,
+      'rod',
+      'Steel (per rod)',
+      steelBrands,
+    ),
+  ),
+  group('cement', 'Cement', 'bag', 'Structure materials', [
+    'UltraTech',
+    'Maha',
+    'Ramco',
+  ]),
+  group('bricks', 'Bricks', 'nos', 'Structure materials', [
+    'Local',
+    'Karimnagar',
+  ]),
+  group('sand', 'Sand', 't', 'Structure materials', ['River sand', 'M-sand']),
+  group('aggregate', 'Aggregate (20 / 40 mm)', 't', 'Structure materials'),
+  group('binding_wire', 'Binding wire', 'kg', 'Structure materials'),
+  group(
+    'waterproofing',
+    'Terrace waterproofing',
+    'sqft',
+    'Structure materials',
+    ['Standard'],
+    {
+      defaultRate: 45,
+      note: 'Typical supply + apply; check your applicator.',
+    },
+  ),
+  group('door_main', 'Main door', 'door', 'Doors & windows', [
+    'Teak',
+    'Sal wood',
+  ]),
+  group('door_internal', 'Bedroom / internal door', 'door', 'Doors & windows', [
+    'Flush door',
+    'WPC',
+  ]),
+  group('door_bathroom', 'Bathroom door', 'door', 'Doors & windows', [
+    'WPC',
+    'PVC',
+  ]),
+  group('door_pooja', 'Pooja door', 'door', 'Doors & windows', [
+    'Teak',
+    'Carved',
+  ]),
+  group('window', 'Windows', 'sqft', 'Doors & windows', ['UPVC', 'Aluminium']),
+  group('ventilator', 'Ventilators', 'each', 'Doors & windows'),
+  group('gate', 'Entrance gate', 'each', 'Doors & windows', ['MS fabricated']),
+  group('floor_tiles', 'Floor tiles', 'sqft', 'Finishes', [
+    'Vitrified 2×2',
+    'Granite',
+  ]),
+  group('wall_tiles', 'Bathroom wall tiles', 'sqft', 'Finishes', ['Ceramic']),
+  group('paint_interior', 'Interior paint material', 'sqft', 'Finishes', [
+    'Asian Paints',
+    'Berger',
+  ]),
+  group('paint_exterior', 'Exterior paint material', 'sqft', 'Finishes', [
+    'Asian Paints',
+    'Berger',
+  ]),
+  group(
+    'electrical_point',
+    'Electrical material per point',
+    'point',
+    'Services',
+    ['Finolex + Anchor', 'Polycab + Legrand'],
+  ),
+  group('sanitary_cp', 'Sanitary ware & CP fittings', 'bathroom', 'Services', [
+    'Hindware',
+    'Jaquar',
+  ]),
+  group(
+    'plumbing_bathroom',
+    'Plumbing pipes & fittings',
+    'bathroom',
+    'Services',
+    ['Ashirvad', 'Supreme'],
+  ),
+  group(
+    'labour_civil',
+    'Civil labour (concrete, brickwork, plaster)',
+    'sqft',
+    'Labour',
+    ['Contract'],
+    {
+      defaultRate: 350,
+      note: 'Per sq ft of built-up area.',
+    },
+  ),
+  group(
+    'shuttering',
+    'Centering & shuttering',
+    'sqft',
+    'Labour',
+    ['Contract'],
+    {
+      defaultRate: 35,
+      note: 'Per sq ft of shuttered area (Hyderabad ₹30–35).',
+    },
+  ),
+  group('labour_tiling', 'Tile laying labour', 'sqft', 'Labour', ['Contract'], {
+    defaultRate: 70,
+  }),
+  group('labour_painting', 'Painting labour', 'sqft', 'Labour', ['Contract'], {
+    defaultRate: 15,
+    note: 'Hyderabad ₹8–20 per sq ft.',
+  }),
+  group(
+    'labour_electrical',
+    'Electrical labour',
+    'point',
+    'Labour',
+    ['Contract'],
+    {
+      defaultRate: 300,
+      note: 'Labour only, ₹150–350 per point.',
+    },
+  ),
+  group(
+    'labour_plumbing',
+    'Plumbing labour',
+    'bathroom',
+    'Labour',
+    ['Contract'],
+    {
+      defaultRate: 15000,
+      note: 'Estimate; confirm with your plumber.',
+    },
+  ),
+  group(
+    'labour_door_fixing',
+    'Door fixing labour',
+    'door',
+    'Labour',
+    ['Carpenter'],
+    { defaultRate: 1500 },
+  ),
+  group(
+    'plaster_labour',
+    'Plastering labour',
+    'sqft',
+    'Labour',
+    ['Included in civil'],
+    {
+      note: 'Leave 0 when civil labour includes plastering.',
+    },
+  ),
+  group('excavation', 'Excavation', 'm³', 'Labour', ['JCB', 'Manual']),
+  group(
+    'design_fees',
+    'Architectural & structural design',
+    'sqft',
+    'Design & handover',
+    ['Standard'],
+    {
+      defaultRate: 20,
+    },
+  ),
+  group('soil_test', 'Soil test', 'LS', 'Design & handover', ['Standard'], {
+    defaultRate: 15000,
+  }),
+  group(
+    'building_permission',
+    'Building permission & approvals',
+    'LS',
+    'Design & handover',
+  ),
+  group(
+    'handover_cleaning',
+    'Final cleaning',
+    'sqft',
+    'Design & handover',
+    ['Standard'],
+    {
+      defaultRate: 5,
+    },
+  ),
+  group(
+    'handover_snags',
+    'Testing & snag rectification',
+    'LS',
+    'Design & handover',
+  ),
+];
+
+export const GROUP_SECTIONS = [
+  'Steel (per rod)',
+  'Structure materials',
+  'Doors & windows',
+  'Finishes',
+  'Services',
+  'Labour',
+  'Design & handover',
+] as const;
+
+/** Rate-card group for an output (steel is priced per rod by diameter). */
+export function rateGroupKey(material: string, diameter?: number) {
+  return material === 'steel' && diameter ? `steel_${diameter}` : material;
+}
 
 export const variantKey = (material: string, variant: string) =>
   `${material}::${variant.trim().toLowerCase()}`;
@@ -107,10 +276,18 @@ export function materialForOutput(output: PricedOutput): string | undefined {
   const name = output.name.toLowerCase();
   const unit = output.unit.toLowerCase();
   if (unit === 'bag' && name.startsWith('cement')) return 'cement';
-  if (unit === 'm³' && name.includes('sand')) return 'sand';
-  if (unit === 'm³' && name.includes('aggregate')) return 'aggregate';
-  if (unit === 'each' && name === 'bricks') return 'bricks';
+  if (unit === 't' && name.includes('sand')) return 'sand';
+  if (unit === 't' && name.includes('aggregate')) return 'aggregate';
+  if ((unit === 'nos' || unit === 'each') && name === 'bricks') return 'bricks';
+  if (unit === 'rod' && diameterOf(output)) return 'steel';
   return undefined;
+}
+
+/** Bar diameter of a reinforcement output ("16 mm main bars" → 16). */
+export function diameterOf(output: PricedOutput): number | undefined {
+  if (output.diameter) return output.diameter;
+  const match = /^(\d+) mm\b/.exec(output.name.trim());
+  return match ? Number(match[1]) : undefined;
 }
 
 /** Variants of one material group, default first. */
@@ -148,7 +325,12 @@ export function rateForOutput(
     return output.rate;
   const material = materialForOutput(output);
   if (material) {
-    const variant = selectedVariant(rates, material, selections);
+    // Steel: one brand choice per BOQ, priced per rod for each diameter.
+    const group = rateGroupKey(material, diameterOf(output));
+    const variant = selectedVariant(rates, group, {
+      ...selections,
+      [group]: selections[material] ?? selections[group] ?? '',
+    });
     if (variant) return variant.rate;
   }
   const key = plainKey(output.name, output.unit);

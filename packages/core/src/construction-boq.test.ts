@@ -160,12 +160,15 @@ describe('quotation-driven construction BOQ', () => {
   it('groups the BOQ stage by stage so steel is brought floor by floor', () => {
     const result = generateQuotationBoq({ details: quote() });
     const sections = [...new Set(result.lines.map((line) => line.section))];
+    // Design to handover, floor by floor.
     expect(sections).toEqual([
+      'Design & approvals',
       'Foundation',
       'Ground Floor',
       'First Floor',
-      'Finishes & fittings',
+      'External works',
       'Additional quoted works',
+      'Handover',
     ]);
     const columns = result.lines.filter(
       (line) => line.kind === 'quote-columns',
@@ -188,9 +191,10 @@ describe('quotation-driven construction BOQ', () => {
     const steel16 = columns[0]?.outputs.find(
       (output) => output.diameter === 16,
     );
-    expect(steel16?.rods).toBe(40);
+    // Steel is bought in rods; the weight comes along for reference.
+    expect(steel16).toMatchObject({ quantity: 40, unit: 'rod', rods: 40 });
     // Whole bars purchased: 40 × 12.19 m × 1.58 kg/m.
-    expect(steel16?.quantity).toBeCloseTo(40 * 40 * 0.3048 * (256 / 162), 0);
+    expect(steel16?.weightKg).toBeCloseTo(40 * 40 * 0.3048 * (256 / 162), 0);
     // Every stage has its own binding wire.
     expect(
       result.lines
@@ -235,35 +239,163 @@ describe('quotation-driven construction BOQ', () => {
     ).toBe(true);
   });
 
-  it('prices package allowances per door, bathroom and sq ft', () => {
+  it('prices package allowances floor by floor from the counts', () => {
+    const floorCounts = {
+      mainDoors: 0,
+      internalDoors: 6,
+      bathroomDoors: 3,
+      poojaDoors: 0,
+      windows: 8,
+      ventilators: 3,
+      bathrooms: 3,
+    };
     const result = generateQuotationBoq({
       details: quote(),
-      counts: { mainDoors: 1, internalDoors: 12, bathrooms: 5 },
+      counts: {
+        floors: {
+          'Ground Floor': {
+            ...floorCounts,
+            mainDoors: 1,
+            poojaDoors: 1,
+            bathroomDoors: 2,
+            bathrooms: 2,
+          },
+          'First Floor': floorCounts,
+        },
+      },
     });
-    const allowances = result.lines
-      .filter((line) => line.origin === 'quotation-allowance')
-      .map((line) => ({
-        name: line.name,
-        quantity: line.outputs[0]?.quantity,
-        unit: line.outputs[0]?.unit,
-        rate: line.outputs[0]?.rate,
-      }));
-    expect(allowances).toEqual([
-      { name: 'Main door', quantity: 1, unit: 'door', rate: 25000 },
+    const outputs = (section: string, kind: string) =>
+      result.lines
+        .find((line) => line.section === section && line.kind === kind)!
+        .outputs.map((output) => ({
+          name: output.name,
+          quantity: output.quantity,
+          unit: output.unit,
+          rate: output.rate,
+          material: output.material,
+        }));
+    expect(outputs('Ground Floor', 'quote-doors-windows')).toEqual([
       {
-        name: 'Internal doors · Greenply',
-        quantity: 12,
+        name: 'Main door',
+        quantity: 1,
+        unit: 'door',
+        rate: 25000,
+        material: undefined,
+      },
+      {
+        name: 'Bedroom / internal door',
+        quantity: 6,
         unit: 'door',
         rate: 10000,
+        material: undefined,
+      },
+      // "Internal doors" also prices bathroom and pooja doors.
+      {
+        name: 'Bathroom door',
+        quantity: 2,
+        unit: 'door',
+        rate: 10000,
+        material: undefined,
       },
       {
-        name: 'Bathroom fittings & plumbing',
-        quantity: 5,
-        unit: 'bathroom',
-        rate: 45000,
+        name: 'Pooja door',
+        quantity: 1,
+        unit: 'door',
+        rate: 10000,
+        material: undefined,
       },
-      // 85% of 2,400 sqft built-up.
-      { name: 'Flooring tiles', quantity: 2040, unit: 'sqft', rate: 60 },
+      // No window allowance: priced from the rate card.
+      {
+        name: 'Windows',
+        quantity: 128,
+        unit: 'sqft',
+        rate: undefined,
+        material: 'window',
+      },
+      {
+        name: 'Ventilators',
+        quantity: 3,
+        unit: 'each',
+        rate: undefined,
+        material: 'ventilator',
+      },
+      {
+        name: 'Door fixing labour',
+        quantity: 10,
+        unit: 'door',
+        rate: undefined,
+        material: 'labour_door_fixing',
+      },
+    ]);
+    // 85% of 1,200 sqft at the quoted ₹60.
+    expect(outputs('First Floor', 'quote-flooring')[0]).toEqual({
+      name: 'Floor tiles',
+      quantity: 1020,
+      unit: 'sqft',
+      rate: 60,
+      material: undefined,
+    });
+    // "Bathroom fittings & plumbing" is charged once per bathroom.
+    const services = outputs('First Floor', 'quote-services');
+    expect(
+      services.find((o) => o.name === 'Sanitary ware & CP fittings'),
+    ).toMatchObject({
+      quantity: 3,
+      rate: 45000,
+    });
+    expect(services.some((o) => o.name === 'Plumbing pipes & fittings')).toBe(
+      false,
+    );
+    expect(services.find((o) => o.name === 'Plumbing labour')).toMatchObject({
+      quantity: 3,
+      material: 'labour_plumbing',
+    });
+    expect(
+      result.lines.some((line) => line.origin === 'quotation-allowance'),
+    ).toBe(false);
+  });
+
+  it('adds parapet, compound wall, gate, design and handover items', () => {
+    const result = generateQuotationBoq({ details: quote() });
+    const parapet = result.lines.find((line) => line.kind === 'quote-parapet');
+    // Top floor only: 140 ft perimeter × 3 ft.
+    expect(parapet?.section).toBe('First Floor');
+    expect(parapet?.outputs[0]).toMatchObject({ quantity: 420, unit: 'sqft' });
+    expect(parapet?.outputs.some((o) => o.material === 'waterproofing')).toBe(
+      true,
+    );
+    // Compound wall length comes from the quoted running-ft row.
+    const compound = result.lines.find(
+      (line) => line.kind === 'quote-compound-wall',
+    );
+    expect(compound).toMatchObject({ section: 'External works' });
+    expect(compound?.inputs.lengthFeet).toBe(140);
+    expect(
+      result.lines.find((line) => line.kind === 'quote-gate')?.outputs[0],
+    ).toMatchObject({
+      quantity: 1,
+      material: 'gate',
+    });
+    expect(result.lines[0]).toMatchObject({ section: 'Design & approvals' });
+    expect(result.lines.at(-1)).toMatchObject({ section: 'Handover' });
+    // Purchase units.
+    const units = new Set(
+      result.lines.flatMap((line) =>
+        line.outputs
+          .filter((o) =>
+            ['sand', 'aggregate', 'cement', 'bricks', 'steel'].includes(
+              o.material ?? '',
+            ),
+          )
+          .map((o) => `${o.material}:${o.unit}`),
+      ),
+    );
+    expect([...units].sort()).toEqual([
+      'aggregate:t',
+      'bricks:nos',
+      'cement:bag',
+      'sand:t',
+      'steel:rod',
     ]);
   });
 

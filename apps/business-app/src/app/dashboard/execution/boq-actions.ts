@@ -26,6 +26,7 @@ const lineSchema = z.object({
         rate: z.number().finite().nonnegative().optional(),
         rods: z.number().int().nonnegative().optional(),
         diameter: z.number().finite().nonnegative().optional(),
+        weightKg: z.number().finite().nonnegative().optional(),
       }),
     )
     .max(100),
@@ -45,9 +46,14 @@ const generatorSchema = z.object({
   generatedAt: z.string().max(40),
   settings: z.record(z.string(), z.number().finite()),
   counts: z.object({
-    mainDoors: z.number().int().nonnegative(),
-    internalDoors: z.number().int().nonnegative(),
-    bathrooms: z.number().int().nonnegative(),
+    floors: z
+      .record(
+        z.string().max(90),
+        z.record(z.string().max(40), z.number().int().nonnegative()),
+      )
+      .refine((floors) => Object.keys(floors).length <= 20),
+    entranceGates: z.number().int().nonnegative(),
+    compoundWallFeet: z.number().int().nonnegative(),
   }),
   floors: z
     .array(

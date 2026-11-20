@@ -20,18 +20,44 @@ Lead → quotation → project → BOQ:
 
 ## What is generated
 
-| Section            | From                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------ |
-| Foundation         | Footings on the column grid: excavation, PCC 1:4:8, M20 concrete, footing mesh steel |
-| Columns            | Column count from each floor footprint; steel cut lift by lift (below)               |
-| Plinth / slabs     | Beams along every grid line + slab bars, concrete, centering & shuttering            |
-| Masonry            | External and internal walls per floor height, bricks, mortar, plaster                |
-| Finishes, fittings | Package allowances × quantity (doors, bathrooms, tile area, windows …)               |
-| Additional works   | Quote's additional rows (compound wall, sump …) with their quoted price, to detail   |
+The BOQ runs from design to handover, floor by floor:
 
-Everything else is added manually with the existing takeoff templates.
-Quantities on every line can be edited. **Regenerate BOQ** replaces only the
-generated lines; manual lines are kept.
+| Stage              | Items                                                                                             |
+| ------------------ | ------------------------------------------------------------------------------------------------- |
+| Design & approvals | Architectural & structural design (per sq ft), soil test, building permission                     |
+| Foundation         | Excavation, PCC, footing grid mat, optional pedestals, foundation column lift, plinth beams       |
+| Each floor         | Column lift, roof slab + beams, brickwork + plaster, doors & windows, flooring & tiles, painting, |
+|                    | electrical & plumbing, civil labour                                                               |
+| Top floor          | + Parapet wall and terrace waterproofing                                                          |
+| External works     | Compound wall (length from the quote's compound wall row, or entered), entrance gate              |
+| Additional works   | Other quoted extras (sump, borewell …) with their quoted price, to break down                     |
+| Handover           | Final cleaning, testing & snag rectification                                                      |
+
+**Counts per floor** (editable on the BOQ before generating): main doors,
+bedroom / internal doors, bathroom doors, pooja doors, windows, ventilators
+and bathrooms, plus entrance gates and compound wall length. Defaults are
+estimated from each floor's area.
+
+**Purchase units:** cement in bags, bricks in numbers, sand and aggregate in
+tonnes (from m³ using the density in the structural rules), steel in rods of
+each diameter (weight shown alongside). Rates are entered in the same units.
+
+**Package allowances** from the quotation (₹ per door, per bathroom, per sq
+ft …) price the matching counted items on every floor: main / internal /
+bathroom / pooja doors, windows, ventilators, gates, floor and wall tiles,
+painting, electrical points, sanitary & CP fittings, plumbing. A generic
+"Internal doors" allowance also covers bathroom and pooja doors unless they
+have their own. Items without an allowance are priced from the rate card.
+
+**Labour defaults** (editable, Configure rates → Labour): civil labour
+₹350/sq ft built-up (concrete, brickwork, plastering), centering ₹35/sq ft,
+tile laying ₹70/sq ft, painting ₹15/sq ft, electrical ₹300/point, plumbing
+₹15,000/bathroom (estimate), door fixing ₹1,500/door; design ₹20/sq ft, soil
+test ₹15,000, final cleaning ₹5/sq ft. Material prices start blank.
+
+The BOQ shows the **estimate by stage** with the total and cost per sq ft.
+Every quantity can be edited. **Regenerate BOQ** replaces only the generated
+lines; manual lines are kept.
 
 ### Steel floor by floor, with laps
 
