@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { publicAuthOrigin } from '@business-os/auth/origin';
 import { crmServices } from '@/app/dashboard/crm/service';
 import {
   META_STATE_COOKIE,
@@ -11,13 +12,13 @@ import {
 export const dynamic = 'force-dynamic';
 
 /** Starts Facebook Login so a CRM manager can share the Pages that run lead ads. */
-export async function GET() {
+export async function GET(request: Request) {
   const { origin } = metaLeadConfig();
   const back = (reason: string) =>
     NextResponse.redirect(
       new URL(
         '/dashboard/crm/leads?panel=meta&meta=' + reason,
-        origin || 'http://localhost:3001',
+        origin || publicAuthOrigin(request.url),
       ),
       { status: 303, headers: { 'Cache-Control': 'private, no-store' } },
     );
@@ -40,7 +41,13 @@ export async function GET() {
       maxAge: 15 * 60,
     });
     return response;
-  } catch {
-    return back('forbidden');
+  } catch (error) {
+    // Do not misreport a session/database failure as insufficient permissions.
+    // Never log OAuth state, cookies, secrets, or access tokens.
+    console.error(
+      '[Meta Lead Ads] oauth.start.failed',
+      error instanceof Error ? error.name : 'UnknownError',
+    );
+    return back('unavailable');
   }
 }
