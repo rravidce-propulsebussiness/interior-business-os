@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   brandSelectionsFromQuote,
+  costHead,
   effectiveRates,
   MATERIAL_GROUPS,
   rateForOutput,
@@ -196,5 +197,25 @@ describe('BOQ default prices and quoted brands', () => {
         [],
       ),
     ).toBe(400);
+  });
+
+  it('defaults M20 at ₹5,000 / m³ and structural labour at ₹400 / sq ft', () => {
+    const fresh = effectiveRates([]);
+    expect(
+      rateForOutput(
+        { name: 'Slab concrete', unit: 'm³', material: 'concrete_m20' },
+        fresh,
+      ),
+    ).toBe(5000);
+    expect(
+      rateForOutput(
+        { name: 'Structural labour', unit: 'sqft', material: 'labour_civil' },
+        fresh,
+      ),
+    ).toBe(400);
+    expect(costHead('concrete_m20')).toBe('Concrete (M20)');
+    expect(costHead('shuttering')).toBe('Structural labour');
+    expect(costHead('plumbing_drainage')).toBe('Plumbing & sanitary');
+    expect(costHead('steel_16')).toBe('Steel');
   });
 });

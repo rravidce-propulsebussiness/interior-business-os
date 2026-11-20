@@ -809,13 +809,33 @@ export const STRUCTURAL_FIELDS = [
   },
   {
     key: 'labourItemized',
-    label: 'Labour: itemized (1) or one contract rate (0)',
+    label: 'Labour: one contract rate (0) or itemized (1)',
+    group: 'Finishes & services',
+    value: 0,
+    min: 0,
+    max: 1,
+    step: 1,
+    help: 'Contract: one structural labour rate per sq ft built-up (shuttering, concreting, brickwork, plastering). Itemized: each trade priced separately.',
+  },
+  {
+    key: 'readyMixConcrete',
+    label: 'RCC concrete: ready-mix M20 (1) or site mix (0)',
     group: 'Finishes & services',
     value: 1,
     min: 0,
     max: 1,
     step: 1,
-    help: 'Itemized: RCC, brickwork, plastering and centering priced separately.',
+    help: 'Ready-mix: footings, columns, beams, slabs and stairs priced per m³ of M20. Site mix: cement, sand and aggregate.',
+  },
+  {
+    key: 'bathroomWaterproofSqft',
+    label: 'Bathroom waterproofing per bathroom (sq ft)',
+    group: 'Finishes & services',
+    value: 60,
+    min: 0,
+    max: 300,
+    step: 1,
+    help: 'Floor plus about 1 ft up the walls.',
   },
   {
     key: 'parapetHeightFeet',
@@ -1393,18 +1413,33 @@ const concreteOutputs = (
   volume: number,
   label: string,
   s: StructuralSettings,
-): GeneratedOutput[] => [
-  { name: `${label} concrete (M20)`, quantity: round(volume, 3), unit: 'm³' },
-  {
-    name: 'Cement',
-    material: 'cement',
-    quantity: round(volume * 8.06, 1),
-    unit: 'bag',
-    source: 'M20 nominal mix 1:1.5:3 · 8.06 bags/m³',
-  },
-  sandOutput(volume * 0.42, s),
-  aggregateOutput(volume * 0.84, s, '20 mm aggregate'),
-];
+): GeneratedOutput[] =>
+  s.readyMixConcrete
+    ? [
+        {
+          name: `${label} concrete (M20 ready-mix)`,
+          material: 'concrete_m20',
+          quantity: round(volume * (1 + s.materialWastagePercent / 100), 2),
+          unit: 'm³',
+          source: `${round(volume, 2)} m³ + ${s.materialWastagePercent}% wastage`,
+        },
+      ]
+    : [
+        {
+          name: `${label} concrete (M20)`,
+          quantity: round(volume, 3),
+          unit: 'm³',
+        },
+        {
+          name: 'Cement',
+          material: 'cement',
+          quantity: round(volume * 8.06, 1),
+          unit: 'bag',
+          source: 'M20 nominal mix 1:1.5:3 · 8.06 bags/m³',
+        },
+        sandOutput(volume * 0.42, s),
+        aggregateOutput(volume * 0.84, s, '20 mm aggregate'),
+      ];
 
 /**
  * Bricks, mortar and plaster materials for a wall volume (m³) and plastered
@@ -1792,7 +1827,7 @@ export function generateQuotationBoq(
             ...steelOutputs(tally, stock),
             {
               name: 'Centering & shuttering',
-              material: 'shuttering',
+              ...(s.labourItemized ? { material: 'shuttering' } : {}),
               quantity: round(
                 pedestals * 2 * (width + depth) * s.pedestalHeightFeet,
                 0,
@@ -2192,7 +2227,7 @@ export function generateQuotationBoq(
         ...steelOutputs(tally, stock),
         {
           name: 'Centering & shuttering',
-          material: 'shuttering',
+          ...(s.labourItemized ? { material: 'shuttering' } : {}),
           quantity: round(shuttering, 0),
           unit: 'sqft',
         },
@@ -2368,7 +2403,7 @@ export function generateQuotationBoq(
               ...steelOutputs(tally, stock),
               {
                 name: 'Centering & shuttering',
-                material: 'shuttering',
+                ...(s.labourItemized ? { material: 'shuttering' } : {}),
                 quantity: round(s.stairsPerFloor * slabArea, 0),
                 unit: 'sqft',
               },
@@ -2470,12 +2505,7 @@ export function generateQuotationBoq(
   }
   // A generic "Internal doors" allowance also covers bathroom and pooja
   // doors unless the package prices those separately.
-  // One per-bathroom allowance covering fittings and plumbing is charged
-  // once, on the fittings line; the plumbing material line is not repeated.
   const included = new Set<AllowanceCategory>();
-  const fittings = allowances.get('sanitary');
-  if (fittings && allowances.get('plumbing') === fittings)
-    included.add('plumbing');
   const generic = allowances.get('internalDoors');
   if (generic) {
     if (!allowances.has('bathroomDoors'))
@@ -2795,19 +2825,51 @@ export function generateQuotationBoq(
           'bathroom',
           'sanitary_cp',
         ),
+        // Plumbing materials are not part of the fittings allowance:
+        // supply and drainage lines per wet area, risers per floor and
+        // bathroom waterproofing.
         ...item(
           'plumbing',
-          'Plumbing pipes & fittings',
-          fc.bathrooms,
-          'bathroom',
-          'plumbing_bathroom',
+          'Water supply pipes & fittings (CPVC, valves, joints)',
+          fc.bathrooms + fc.kitchens,
+          'set',
+          'plumbing_water',
+          `${fc.bathrooms} bathrooms + ${fc.kitchens} kitchens`,
         ),
-        {
-          name: 'Plumbing labour',
-          material: 'labour_plumbing',
-          quantity: fc.bathrooms,
-          unit: 'bathroom',
-        },
+        ...(fc.bathrooms + fc.kitchens > 0
+          ? [
+              {
+                name: 'Drainage & waste pipes (PVC / SWR, traps, joints)',
+                material: 'plumbing_drainage',
+                quantity: fc.bathrooms + fc.kitchens,
+                unit: 'set',
+                source: `${fc.bathrooms} bathrooms + ${fc.kitchens} kitchens`,
+              },
+              {
+                name: 'Risers, down-take & rainwater pipes',
+                material: 'plumbing_risers',
+                quantity: 1,
+                unit: 'floor',
+              },
+            ]
+          : []),
+        ...(fc.bathrooms > 0
+          ? [
+              {
+                name: 'Bathroom waterproofing',
+                material: 'bathroom_waterproofing',
+                quantity: fc.bathrooms * s.bathroomWaterproofSqft,
+                unit: 'sqft',
+                source: `${fc.bathrooms} bathrooms × ${s.bathroomWaterproofSqft} sq ft`,
+              },
+              {
+                name: 'Plumbing labour',
+                material: 'labour_plumbing',
+                quantity: fc.bathrooms,
+                unit: 'bathroom',
+              },
+            ]
+          : []),
       ],
       { points, bathrooms: fc.bathrooms },
     );
@@ -2825,11 +2887,11 @@ export function generateQuotationBoq(
                 'Per sq ft built-up. Brickwork, plastering and centering are priced on their own lines.',
             }
           : {
-              name: 'Civil labour contract (concrete, brickwork, plastering)',
+              name: 'Structural labour (shuttering, concreting, brickwork, plastering)',
               material: 'labour_civil',
               quantity: round(floor.areaSqft, 0),
               unit: 'sqft',
-              source: 'Per sq ft built-up; centering is priced separately',
+              source: 'Contract rate per sq ft built-up',
             },
       ],
       { builtUpSqft: floor.areaSqft },
@@ -3178,9 +3240,10 @@ export function allowanceCategories(
     return unit === 'point' ? ['electrical'] : [];
   if (/plumb/.test(t)) {
     if (unit !== 'bathroom') return [];
-    // "Bathroom fittings & plumbing": one allowance covers both.
-    return /fitting|sanitary|\bcp\b|fixture/.test(t)
-      ? ['sanitary', 'plumbing']
+    // "Bathroom fittings & plumbing" is the fittings allowance (sanitary
+    // ware, taps, accessories); pipes are costed on their own.
+    return /fitting|sanitary|\bcp\b|fixture|accessor/.test(t)
+      ? ['sanitary']
       : ['plumbing'];
   }
   if (/sanitary|cp fitting|bathroom fitting|fixture|bathroom/.test(t))

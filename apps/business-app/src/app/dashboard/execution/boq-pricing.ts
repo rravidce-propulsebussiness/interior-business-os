@@ -150,6 +150,17 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     },
   ),
   group(
+    'concrete_m20',
+    'M20 concrete (ready-mix)',
+    'm³',
+    'Structure materials',
+    ['Ready-mix M20'],
+    {
+      defaultRate: 5000,
+      note: 'Per m³ delivered, for footings, columns, beams, slabs and stairs.',
+    },
+  ),
+  group(
     'binding_wire',
     'Binding wire',
     'kg',
@@ -310,14 +321,57 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     { defaultRate: 25000 },
   ),
   group(
+    'plumbing_water',
+    'Water supply pipes & fittings',
+    'set',
+    'Services',
+    ['Prince CPVC'],
+    {
+      defaultRate: 9000,
+      note: 'Per bathroom / kitchen: CPVC pipes, elbows, tees, valves, joints. Estimate.',
+    },
+  ),
+  group(
+    'plumbing_drainage',
+    'Drainage & waste pipes',
+    'set',
+    'Services',
+    ['Prince PVC / SWR'],
+    {
+      defaultRate: 7000,
+      note: 'Per bathroom / kitchen: SWR / PVC pipes, traps, joints. Estimate.',
+    },
+  ),
+  group(
+    'plumbing_risers',
+    'Risers, down-take & rainwater pipes',
+    'floor',
+    'Services',
+    ['Prince'],
+    {
+      defaultRate: 12000,
+      note: 'Per floor: vertical supply / drainage lines and rainwater pipes. Estimate.',
+    },
+  ),
+  group(
+    'bathroom_waterproofing',
+    'Bathroom waterproofing',
+    'sqft',
+    'Services',
+    ['Dr. Fixit'],
+    {
+      defaultRate: 45,
+      note: 'Estimate, supply + apply.',
+    },
+  ),
+  group(
     'plumbing_bathroom',
-    'Plumbing pipes & fittings',
+    'Plumbing pipes & fittings (older BOQs)',
     'bathroom',
     'Services',
     ['Prince CPVC / PVC'],
     {
       defaultRate: 18000,
-      note: 'Estimate.',
     },
   ),
   group('sump', 'Underground sump', 'litre', 'Services', ['Brick / RCC'], {
@@ -384,13 +438,13 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
   ),
   group(
     'labour_civil',
-    'Civil labour contract (all-in)',
+    'Structural labour (shuttering, concreting, brickwork, plastering)',
     'sqft',
     'Labour',
     ['Contract'],
     {
-      defaultRate: 350,
-      note: 'Used only when labour is set to one contract rate.',
+      defaultRate: 400,
+      note: 'One contract rate per sq ft built-up.',
     },
   ),
   group(
@@ -707,4 +761,95 @@ export function effectiveRates(saved: readonly Rate[]): Rate[] {
     ...saved.filter((rate) => !rate.material),
     ...startingVariants([...saved]),
   ];
+}
+
+/** Simple cost heads for the floor-wise estimate. */
+export const COST_HEADS = [
+  'Concrete (M20)',
+  'Cement',
+  'Sand',
+  'Aggregate',
+  'Steel',
+  'Bricks',
+  'Structural labour',
+  'Doors & windows',
+  'Flooring, tiles & kitchen',
+  'Painting',
+  'Electrical',
+  'Plumbing & sanitary',
+  'Waterproofing',
+  'Water storage',
+  'Design & approvals',
+  'Handover',
+  'Other',
+] as const;
+export type CostHead = (typeof COST_HEADS)[number];
+/** Heads shown as quantity × rate (bought by bag, tonne, kg, number). */
+export const QUANTITY_HEADS: Partial<Record<CostHead, string>> = {
+  'Concrete (M20)': 'm³',
+  Cement: 'bag',
+  Sand: 't',
+  Aggregate: 't',
+  Steel: 'kg',
+  Bricks: 'nos',
+};
+export function costHead(group: string | undefined): CostHead {
+  if (!group) return 'Other';
+  if (group.startsWith('steel_') || group === 'binding_wire') return 'Steel';
+  if (group === 'concrete_m20') return 'Concrete (M20)';
+  if (group.startsWith('cement')) return 'Cement';
+  if (group === 'sand') return 'Sand';
+  if (group === 'aggregate') return 'Aggregate';
+  if (group === 'bricks') return 'Bricks';
+  if (
+    group.startsWith('door_') ||
+    [
+      'window',
+      'ventilator',
+      'rolling_shutter',
+      'gate',
+      'labour_door_fixing',
+    ].includes(group)
+  )
+    return 'Doors & windows';
+  if (
+    [
+      'floor_tiles',
+      'wall_tiles',
+      'kitchen_wall_tiles',
+      'staircase_granite',
+      'kitchen_platform',
+      'kitchen_sink',
+      'parking_flooring',
+      'labour_tiling',
+    ].includes(group)
+  )
+    return 'Flooring, tiles & kitchen';
+  if (group.startsWith('paint_') || group === 'labour_painting')
+    return 'Painting';
+  if (group === 'electrical_point' || group === 'labour_electrical')
+    return 'Electrical';
+  if (
+    group.startsWith('plumbing_') ||
+    ['sanitary_cp', 'labour_plumbing', 'bathroom_waterproofing'].includes(group)
+  )
+    return 'Plumbing & sanitary';
+  if (group === 'waterproofing') return 'Waterproofing';
+  if (
+    [
+      'labour_civil',
+      'labour_rcc',
+      'labour_brickwork_9',
+      'labour_brickwork_4',
+      'plaster_labour',
+      'shuttering',
+      'excavation',
+    ].includes(group)
+  )
+    return 'Structural labour';
+  if (group === 'sump' || group === 'overhead_tank') return 'Water storage';
+  if (['design_fees', 'soil_test', 'building_permission'].includes(group))
+    return 'Design & approvals';
+  if (group.startsWith('handover_')) return 'Handover';
+  return 'Other';
 }

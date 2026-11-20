@@ -80,10 +80,36 @@ their cost. The page shows the quotation value, the BOQ cost and the margin.
 plan, `nos × width × height` in feet, e.g. `2×4×4, 2×4×6`. The window count
 and area follow; without sizes, a typical window size is assumed.
 
-**Floor-wise cost estimate:** each stage lists every item as quantity × rate
-= amount (cement bags, sand and aggregate tonnes, steel rods per size,
-bricks, paint, each labour trade …), labour per sq ft, the floor total and
-₹ / sq ft, then the total project cost.
+**Cost estimate, floor by floor:** the BOQ opens with each stage's cost and
+₹ / sq ft and the total project cost. Open a floor to see it in simple heads:
+M20 concrete (m³ × rate), cement (bags × rate), sand and aggregate (tonnes ×
+rate), steel (kg × rate), bricks (nos × rate), structural labour (₹400 × the
+floor's sq ft), then doors & windows, flooring & tiles, painting, electrical,
+plumbing & sanitary. The item-by-item takeoff is under **Show detailed
+takeoff**, where any quantity or rate can be edited.
+
+**Labour:** one structural labour contract rate, ₹400 / sq ft built-up,
+covers shuttering, concreting, brickwork and plastering (Configure rates →
+Labour). Tile laying, painting, electrical and plumbing labour are priced
+with their trades. To price each structural trade separately, set _Labour:
+one contract rate (0) or itemized (1)_ to 1.
+
+**Concrete:** footings, columns, beams, slabs and stairs are M20 ready-mix at
+₹5,000 / m³ (plus wastage). Set _RCC concrete: ready-mix (1) or site mix
+(0)_ to 0 to quantify cement, sand and aggregate instead. PCC, brickwork,
+plaster and tile bedding always use cement and sand.
+
+**Plumbing:** the quote's bathroom fittings allowance covers sanitary ware
+and accessories only. Plumbing materials are costed on their own, per floor:
+water supply pipes and fittings (CPVC, valves, joints) and drainage & waste
+pipes (PVC / SWR, traps) per bathroom and kitchen, risers / down-take /
+rainwater pipes per floor, bathroom waterproofing, and plumbing labour.
+
+**Entering details without a plan:** everything the BOQ needs can be typed
+on it: floor heights and parking area, per-floor doors, windows (with sizes),
+ventilators, bathrooms, kitchens, rolling shutters, gates, compound wall,
+and, if available, the structural drawing schedule. Without a drawing the
+column grid and bar rules in Configure rates are used.
 
 **Default prices** (editable, Configure rates; Hyderabad, Nov 2026 — confirm
 with your suppliers):
@@ -95,22 +121,19 @@ with your suppliers):
 | Cement (masonry)       | Birla 43 ₹330, UltraTech 43 ₹360, Maha 43 ₹320 / bag           |
 | Bricks                 | Karimnagar ₹9.5, local ₹8.5 each                               |
 | Sand / aggregate       | River ₹1,750, M-sand ₹1,300, aggregate ₹750 / t                |
-| RCC labour             | ₹120 / sq ft built-up (steel fixing, concreting)               |
+| Structural labour      | ₹400 / sq ft built-up (contract)                               |
+| M20 ready-mix concrete | ₹5,000 / m³                                                    |
 | Brickwork labour       | 9 in ₹30, 4.5 in ₹19 / sq ft of wall                           |
 | Plaster, centering     | ₹22, ₹35 / sq ft                                               |
 | Tiles, painting labour | ₹70, ₹15 / sq ft                                               |
-| Electrical, plumbing   | ₹300 / point, ₹15,000 / bathroom                               |
+| Electrical, plumbing   | ₹300 / point, ₹15,000 / bathroom (labour)                      |
+| Plumbing materials     | ₹9,000 supply + ₹7,000 drainage per wet area, ₹12,000 / floor  |
 | Sump, overhead tank    | ₹18 / litre, ₹29,000 (4,000 L)                                 |
 | Design, soil, cleaning | ₹20 / sq ft, ₹15,000, ₹5 / sq ft                               |
 
-Labour is itemized by default (RCC, brickwork, plaster, centering, tiling,
-painting …). Set **Labour: itemized** to 0 to use one civil labour contract
-rate (₹350/sq ft) instead. Doors, windows, tiles, fittings, granite, sink,
-shutter and gate start at the standard package values; replace them with
-your purchase prices.
-
-The BOQ shows the **estimate by stage** with the total and cost per sq ft.
-Every quantity can be edited. **Regenerate BOQ** replaces only the generated
+Doors, windows, tiles, fittings, granite, sink, shutter and gate start at
+the standard package values and take the quote's package rate when it has
+one. Every quantity can be edited. **Regenerate BOQ** replaces only the generated
 lines; manual lines are kept.
 
 ### Steel floor by floor, with laps

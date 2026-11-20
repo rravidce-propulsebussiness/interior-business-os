@@ -355,8 +355,13 @@ describe('quotation-driven construction BOQ', () => {
       quotedRate: 45000,
       material: 'sanitary_cp',
     });
-    expect(services.some((o) => o.name === 'Plumbing pipes & fittings')).toBe(
-      false,
+    // The fittings allowance is accessories only: pipes are costed too.
+    expect(services.find((o) => o.material === 'plumbing_water')).toMatchObject(
+      { quantity: 4, quotedRate: undefined },
+    );
+    expect(services.some((o) => o.material === 'plumbing_drainage')).toBe(true);
+    expect(services.some((o) => o.material === 'bathroom_waterproofing')).toBe(
+      true,
     );
     expect(services.find((o) => o.name === 'Plumbing labour')).toMatchObject({
       quantity: 3,
@@ -434,8 +439,12 @@ describe('quotation-driven construction BOQ', () => {
     );
     expect(pedestals?.section).toBe('Foundation');
     expect(pedestals?.inputs.pedestals).toBe(20);
-    // 20 × 15 in × 15 in × 2 ft = 62.5 cft ≈ 1.77 m³
-    expect(pedestals?.outputs[0]?.quantity).toBeCloseTo(1.77, 2);
+    // 20 × 15 in × 15 in × 2 ft = 62.5 cft ≈ 1.77 m³, ready-mix M20 + 3%.
+    expect(pedestals?.outputs[0]).toMatchObject({
+      material: 'concrete_m20',
+      unit: 'm³',
+    });
+    expect(pedestals?.outputs[0]?.quantity).toBeCloseTo(1.82, 2);
     expect(pedestals?.outputs.some((output) => output.diameter === 8)).toBe(
       true,
     );
@@ -639,6 +648,43 @@ describe('quotation-driven construction BOQ', () => {
     // 2 × 16 + 2 × 24 = 80 sq ft.
     expect(windows).toMatchObject({ quantity: 80, material: 'window' });
     expect(result.counts.windowSizes?.['Ground Floor']).toBe('2×4×4, 2×4×6');
+  });
+
+  it('prices structural labour as one contract rate per sq ft by default', () => {
+    const result = generateQuotationBoq({ details: quote() });
+    const outputs = result.lines.flatMap((line) => line.outputs);
+    expect(
+      outputs
+        .filter((o) => o.material === 'labour_civil')
+        .map((o) => o.quantity),
+    ).toEqual([1200, 1200]);
+    // Shuttering, brickwork and plaster are in that rate, not extra lines.
+    expect(
+      outputs.some((o) =>
+        [
+          'shuttering',
+          'labour_rcc',
+          'labour_brickwork_9',
+          'plaster_labour',
+        ].includes(o.material ?? ''),
+      ),
+    ).toBe(false);
+  });
+
+  it('prices RCC as ready-mix M20 per m³, or site mix when chosen', () => {
+    const readyMix = generateQuotationBoq({ details: quote() });
+    const slab = readyMix.lines.find((line) => line.kind === 'quote-slab')!;
+    expect(slab.outputs[0]).toMatchObject({ material: 'concrete_m20' });
+    expect(slab.outputs.some((o) => o.material === 'cement')).toBe(false);
+    const siteMix = generateQuotationBoq({
+      details: quote(),
+      settings: { readyMixConcrete: 0 },
+    });
+    expect(
+      siteMix.lines
+        .find((line) => line.kind === 'quote-slab')!
+        .outputs.some((o) => o.material === 'cement'),
+    ).toBe(true);
   });
 
   it('normalizes and clamps company settings', () => {
