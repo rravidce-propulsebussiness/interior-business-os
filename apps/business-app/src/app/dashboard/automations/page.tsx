@@ -39,9 +39,6 @@ export default async function AutomationsPage({
         </Link>
       </header>
       <nav className="flex flex-wrap gap-5" aria-label="Automation sections">
-        <Link className="underline" href="/dashboard/automations/settings">
-          Settings
-        </Link>
         {['rules', 'history', 'events', 'emails', 'templates'].map((v) => (
           <Link
             key={v}
