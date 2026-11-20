@@ -1761,3 +1761,28 @@
   color: var(--erp-muted);
   font-size: 10px;
 }
+.boq-quote-source {
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  color: #65595d;
+  font-size: 10px;
+  font-weight: 750;
+}
+.boq-quote-source strong {
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #f0ddd6;
+  border-radius: 9px;
+  padding: 8px 10px;
+  background: #fff8f5;
+  color: #332d30;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+.boq-quote-source small {
+  color: var(--erp-muted);
+  font-size: 9px;
+  font-weight: 500;
+}

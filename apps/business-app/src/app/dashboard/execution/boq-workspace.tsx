@@ -86,10 +86,17 @@ type Quote = {
   id: string;
   projectId: string;
   label: string;
+  isFinal: boolean;
   lines: QuoteLine[];
   schedule: SftEstimateDetails | null;
 };
-type Project = { id: string; name: string; code: string };
+type Project = {
+  id: string;
+  name: string;
+  code: string;
+  customer_id: string | null;
+  customerName: string | null;
+};
 const money = (value: number, currency = 'INR') =>
   new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -133,11 +140,19 @@ export function BoqWorkspace({
   const [title, setTitle] = useState(
     initialDocument?.title ?? 'Construction BOQ',
   );
+  // A project's BOQ always uses that project's Final (or latest active)
+  // quotation; with a single project, it is chosen automatically.
+  const defaultProjectId =
+    initialProjectId ?? (projects.length === 1 ? projects[0]!.id : '');
+  const quoteForProject = (id: string) =>
+    quotes.find((quote) => quote.projectId === id)?.id ?? '';
   const [projectId, setProjectId] = useState(
-    initialDocument?.project_id ?? initialProjectId ?? '',
+    initialDocument ? (initialDocument.project_id ?? '') : defaultProjectId,
   );
   const [quoteId, setQuoteId] = useState(
-    initialDocument?.quotation_revision_id ?? '',
+    initialDocument
+      ? (initialDocument.quotation_revision_id ?? '')
+      : quoteForProject(defaultProjectId),
   );
   const [status, setStatus] = useState<'draft' | 'final'>(
     initialDocument?.status ?? 'draft',
@@ -270,15 +285,21 @@ export function BoqWorkspace({
     0,
   );
 
+  function selectProject(id: string) {
+    setProjectId(id);
+    setQuoteId(quoteForProject(id));
+    setSelectedQuoteLines([]);
+    setGenFloors([]);
+    setGenCounts(null);
+  }
   function startNew() {
     setActive(null);
+    const project = projects.find((item) => item.id === defaultProjectId);
     setTitle(
-      activeProject
-        ? `${activeProject.name} · Construction BOQ`
-        : 'Construction BOQ',
+      project ? `${project.name} · Construction BOQ` : 'Construction BOQ',
     );
-    setProjectId('');
-    setQuoteId('');
+    setProjectId(defaultProjectId);
+    setQuoteId(quoteForProject(defaultProjectId));
     setStatus('draft');
     setLines([]);
     setSelections({});
@@ -603,49 +624,42 @@ export function BoqWorkspace({
               Project
               <select
                 value={projectId}
-                onChange={(event) => {
-                  setProjectId(event.target.value);
-                  setQuoteId('');
-                  setGenFloors([]);
-                  setGenCounts(null);
-                }}
+                onChange={(event) => selectProject(event.target.value)}
               >
-                <option value="">Choose project</option>
+                {projects.length !== 1 && (
+                  <option value="">Choose project</option>
+                )}
                 {projects.map((project) => (
                   <option key={project.id} value={project.id}>
+                    {project.customerName ? `${project.customerName} · ` : ''}
                     {project.name}
-                    {project.code ? ` · ${project.code}` : ''}
                   </option>
                 ))}
               </select>
             </label>
-            <label>
-              Quotation price source
-              <select
-                value={quoteId}
-                onChange={(event) => {
-                  const selected = quotes.find(
-                    (quote) => quote.id === event.target.value,
-                  );
-                  setQuoteId(event.target.value);
-                  setProjectId(selected?.projectId || projectId);
-                  setSelectedQuoteLines([]);
-                  setGenFloors([]);
-                  setGenCounts(null);
-                }}
-              >
-                <option value="">No quotation linked</option>
-                {quotes
-                  .filter(
-                    (quote) => !projectId || quote.projectId === projectId,
-                  )
-                  .map((quote) => (
-                    <option key={quote.id} value={quote.id}>
-                      {quote.label}
-                    </option>
-                  ))}
-              </select>
-            </label>
+            <div className="boq-quote-source">
+              <span>Quotation</span>
+              <strong>
+                {currentQuote
+                  ? currentQuote.label
+                  : quoteId
+                    ? 'Earlier quotation revision'
+                    : projectId
+                      ? 'No active quotation'
+                      : 'Choose a project'}
+              </strong>
+              <small>
+                {currentQuote
+                  ? currentQuote.isFinal
+                    ? "The project's Final quotation"
+                    : 'No Final quotation is marked; the latest active one is used'
+                  : quoteId
+                    ? 'This BOQ was made from an earlier quotation revision'
+                    : projectId
+                      ? 'Prepare the Final quotation for this project in Quotations'
+                      : 'The Final quotation is picked automatically'}
+              </small>
+            </div>
             <label>
               Document status
               <select
