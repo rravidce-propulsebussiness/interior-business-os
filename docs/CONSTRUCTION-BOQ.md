@@ -22,21 +22,28 @@ Lead → quotation → project → BOQ:
 
 The BOQ runs from design to handover, floor by floor:
 
-| Stage              | Items                                                                                             |
-| ------------------ | ------------------------------------------------------------------------------------------------- |
-| Design & approvals | Architectural & structural design (per sq ft), soil test, building permission                     |
-| Foundation         | Excavation, PCC, footing grid mat, optional pedestals, foundation column lift, plinth beams       |
-| Each floor         | Column lift, roof slab + beams, brickwork + plaster, doors & windows, flooring & tiles, painting, |
-|                    | electrical & plumbing, civil labour                                                               |
-| Top floor          | + Parapet wall and terrace waterproofing                                                          |
-| External works     | Compound wall (length from the quote's compound wall row, or entered), entrance gate              |
-| Additional works   | Other quoted extras (sump, borewell …) with their quoted price, to break down                     |
-| Handover           | Final cleaning, testing & snag rectification                                                      |
+| Stage              | Items                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------- |
+| Design & approvals | Architectural & structural design (per sq ft), soil test, building permission               |
+| Foundation         | Excavation, PCC, footing grid mat, optional pedestals, foundation column lift, plinth beams |
+| Each floor         | Column lift, roof slab + beams, staircase, brickwork + plaster, doors, windows & shutters,  |
+|                    | flooring & tiles (with bedding mortar), kitchen, painting, electrical & plumbing, labour    |
+| Top floor          | + Parapet wall and terrace waterproofing                                                    |
+| External works     | Compound wall (length from the quote's compound wall row, or entered), entrance gate, sump  |
+|                    | (litres) and overhead tank                                                                  |
+| Additional works   | Other quoted extras (sump, borewell …) with their quoted price, to break down               |
+| Handover           | Final cleaning, testing & snag rectification                                                |
 
 **Counts per floor** (editable on the BOQ before generating): main doors,
 bedroom / internal doors, bathroom doors, pooja doors, windows, ventilators
-and bathrooms, plus entrance gates and compound wall length. Defaults are
-estimated from each floor's area.
+bathrooms, kitchens and rolling shutters, plus entrance gates and compound wall
+length. Defaults are estimated from each floor's area; enter the real counts
+from the floor plan.
+
+**From the structural drawing** (BOQ → Configure rates → structural rules):
+column grid (rows × columns per row + extra columns, e.g. 6 × 2 + 2 = 14),
+column size and bars, footing size and mat, plinth beam, beam bars (top,
+bottom, extra), slab thickness and bar spacing, staircase waist and bars.
 
 **Purchase units:** cement in bags, bricks in numbers, sand and aggregate in
 tonnes (from m³ using the density in the structural rules), steel in rods of
@@ -49,11 +56,30 @@ painting, electrical points, sanitary & CP fittings, plumbing. A generic
 "Internal doors" allowance also covers bathroom and pooja doors unless they
 have their own. Items without an allowance are priced from the rate card.
 
-**Labour defaults** (editable, Configure rates → Labour): civil labour
-₹350/sq ft built-up (concrete, brickwork, plastering), centering ₹35/sq ft,
-tile laying ₹70/sq ft, painting ₹15/sq ft, electrical ₹300/point, plumbing
-₹15,000/bathroom (estimate), door fixing ₹1,500/door; design ₹20/sq ft, soil
-test ₹15,000, final cleaning ₹5/sq ft. Material prices start blank.
+**Default prices** (editable, Configure rates; Hyderabad, Nov 2026 — confirm
+with your suppliers):
+
+| Item                   | Default                                                        |
+| ---------------------- | -------------------------------------------------------------- |
+| Steel per 12 m rod     | from ₹/kg × rod weight: Vizag ₹68, JSW ₹72, local ISI ₹60 / kg |
+| Cement (RCC)           | UltraTech 53 ₹390, Birla 53 ₹360, Maha 53 ₹350 / bag           |
+| Cement (masonry)       | Birla 43 ₹330, UltraTech 43 ₹360, Maha 43 ₹320 / bag           |
+| Bricks                 | Karimnagar ₹9.5, local ₹8.5 each                               |
+| Sand / aggregate       | River ₹1,750, M-sand ₹1,300, aggregate ₹750 / t                |
+| RCC labour             | ₹120 / sq ft built-up (steel fixing, concreting)               |
+| Brickwork labour       | 9 in ₹30, 4.5 in ₹19 / sq ft of wall                           |
+| Plaster, centering     | ₹22, ₹35 / sq ft                                               |
+| Tiles, painting labour | ₹70, ₹15 / sq ft                                               |
+| Electrical, plumbing   | ₹300 / point, ₹15,000 / bathroom                               |
+| Sump, overhead tank    | ₹18 / litre, ₹29,000 (4,000 L)                                 |
+| Design, soil, cleaning | ₹20 / sq ft, ₹15,000, ₹5 / sq ft                               |
+
+Labour is itemized by default (RCC, brickwork, plaster, centering, tiling,
+painting …). Set **Labour: itemized** to 0 to use one civil labour contract
+rate (₹350/sq ft) instead. Allowance items (doors ₹7,000, windows ₹450/sq ft,
+fittings ₹25,000 per bathroom, tiles ₹60, granite ₹70 / ₹150, sink, shutter,
+gate) default to the standard package values and are replaced by the
+quotation's own allowances.
 
 The BOQ shows the **estimate by stage** with the total and cost per sq ft.
 Every quantity can be edited. **Regenerate BOQ** replaces only the generated
@@ -115,6 +141,12 @@ Steel (JSW, Vizag …), Cement (UltraTech, Maha …), Bricks (Local, Karimnagar)
 Sand (River, M-sand) and so on. The ★ default is used unless a BOQ picks
 another in **Brand & source for this BOQ**. Changing a rate or choice reprices
 the BOQ immediately; quoted allowances keep the quoted value.
+
+**Brands from the quotation:** when the BOQ is generated, brands named in the
+quote's specifications are picked automatically, e.g. _Steel / TMT · Vizag /
+JSW_ → Vizag, _Cement · UltraTech 53, Birla 43_ → UltraTech 53 for RCC and
+Birla 43 for masonry, _Bricks · Karimnagar_ → Karimnagar. A choice already
+made on the BOQ is kept.
 
 These are pre-design estimates. Final procurement follows the structural
 engineer's drawings and bar bending schedule.

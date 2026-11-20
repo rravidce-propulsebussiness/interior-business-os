@@ -32,12 +32,20 @@ type GroupDef = {
   category: RateCategory;
   section: string;
   starters: readonly string[];
-  /** Default rate for new rate cards (labour and fees); materials start at 0. */
+  /** Default rate for new rate cards, per starter (or one for all). */
   defaultRate?: number;
+  starterRates?: Readonly<Record<string, number>>;
   note?: string;
 };
 const STEEL_DIAMETERS = [8, 10, 12, 16, 20, 25] as const;
-const steelBrands = ['JSW', 'Vizag (RINL)', 'Local ISI'] as const;
+/** Brand price per kg (Hyderabad dealer listings, Nov 2026). */
+const STEEL_PER_KG: Readonly<Record<string, number>> = {
+  'Vizag (RINL)': 68,
+  JSW: 72,
+  'Local ISI': 60,
+};
+/** Weight of one 12 m (40 ft) bar: d² / 162 kg per metre. */
+const kgPerRod = (diameter: number) => ((diameter * diameter) / 162) * 12;
 const group = (
   key: string,
   label: string,
@@ -56,9 +64,14 @@ const group = (
 });
 
 /**
- * Rate-card groups, in purchase units: steel per rod (by diameter), cement
- * per bag, bricks per number, sand and aggregate per tonne. Labour and fees
- * start with typical Hyderabad rates (Nov 2026); everything is editable.
+ * Rate-card groups in purchase units: steel per rod (by diameter), cement per
+ * bag, bricks per number, sand and aggregate per tonne.
+ *
+ * Defaults (editable): brand prices from Hyderabad dealer listings
+ * (Nov 2026); allowances from the company's standard quotation (doors
+ * ₹7,000, windows ₹450/sq ft, fittings ₹25,000 per bathroom, tiles, granite,
+ * sink, shutter, gate); labour from Hyderabad rate guides. Items marked
+ * "estimate" have no reliable public price; confirm with suppliers.
  */
 export const MATERIAL_GROUPS: readonly GroupDef[] = [
   ...STEEL_DIAMETERS.map((diameter) =>
@@ -67,21 +80,84 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
       `${diameter} mm TMT`,
       'rod',
       'Steel (per rod)',
-      steelBrands,
+      Object.keys(STEEL_PER_KG),
+      {
+        starterRates: Object.fromEntries(
+          Object.entries(STEEL_PER_KG).map(([brand, perKg]) => [
+            brand,
+            Math.round(kgPerRod(diameter) * perKg),
+          ]),
+        ),
+        note: `12 m rod ≈ ${kgPerRod(diameter).toFixed(1)} kg; Vizag ₹68/kg, JSW ₹72/kg.`,
+      },
     ),
   ),
-  group('cement', 'Cement', 'bag', 'Structure materials', [
-    'UltraTech',
-    'Maha',
-    'Ramco',
-  ]),
-  group('bricks', 'Bricks', 'nos', 'Structure materials', [
-    'Local',
-    'Karimnagar',
-  ]),
-  group('sand', 'Sand', 't', 'Structure materials', ['River sand', 'M-sand']),
-  group('aggregate', 'Aggregate (20 / 40 mm)', 't', 'Structure materials'),
-  group('binding_wire', 'Binding wire', 'kg', 'Structure materials'),
+  group(
+    'cement',
+    'Cement (RCC: slabs, columns)',
+    'bag',
+    'Structure materials',
+    ['UltraTech 53', 'Maha 53', 'Birla 53'],
+    {
+      starterRates: { 'UltraTech 53': 390, 'Maha 53': 350, 'Birla 53': 360 },
+      note: 'Hyderabad ₹340–420 per 50 kg bag.',
+    },
+  ),
+  group(
+    'cement_masonry',
+    'Cement (brickwork & plaster)',
+    'bag',
+    'Structure materials',
+    ['Birla 43', 'UltraTech 43', 'Maha 43'],
+    {
+      starterRates: { 'Birla 43': 330, 'UltraTech 43': 360, 'Maha 43': 320 },
+      note: 'Hyderabad Birla 43 ₹295–350 per bag.',
+    },
+  ),
+  group(
+    'bricks',
+    'Bricks',
+    'nos',
+    'Structure materials',
+    ['Karimnagar', 'Local'],
+    {
+      starterRates: { Karimnagar: 9.5, Local: 8.5 },
+      note: 'Karimnagar red brick ₹9.10–11 each.',
+    },
+  ),
+  group(
+    'sand',
+    'Sand',
+    't',
+    'Structure materials',
+    ['River sand', 'Robo / M-sand'],
+    {
+      starterRates: { 'River sand': 1750, 'Robo / M-sand': 1300 },
+      note: 'River sand ~₹1,750/t (Nov 2026).',
+    },
+  ),
+  group(
+    'aggregate',
+    'Aggregate (20 / 40 mm)',
+    't',
+    'Structure materials',
+    ['Govt approved quarry'],
+    {
+      defaultRate: 750,
+      note: 'Hyderabad 20 mm ₹700–750/t.',
+    },
+  ),
+  group(
+    'binding_wire',
+    'Binding wire',
+    'kg',
+    'Structure materials',
+    ['Standard'],
+    {
+      defaultRate: 80,
+      note: 'Estimate.',
+    },
+  ),
   group(
     'waterproofing',
     'Terrace waterproofing',
@@ -90,70 +166,209 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     ['Standard'],
     {
       defaultRate: 45,
-      note: 'Typical supply + apply; check your applicator.',
+      note: 'Estimate, supply + apply.',
     },
   ),
-  group('door_main', 'Main door', 'door', 'Doors & windows', [
-    'Teak',
-    'Sal wood',
-  ]),
-  group('door_internal', 'Bedroom / internal door', 'door', 'Doors & windows', [
-    'Flush door',
-    'WPC',
-  ]),
-  group('door_bathroom', 'Bathroom door', 'door', 'Doors & windows', [
-    'WPC',
-    'PVC',
-  ]),
-  group('door_pooja', 'Pooja door', 'door', 'Doors & windows', [
-    'Teak',
-    'Carved',
-  ]),
-  group('window', 'Windows', 'sqft', 'Doors & windows', ['UPVC', 'Aluminium']),
-  group('ventilator', 'Ventilators', 'each', 'Doors & windows'),
-  group('gate', 'Entrance gate', 'each', 'Doors & windows', ['MS fabricated']),
-  group('floor_tiles', 'Floor tiles', 'sqft', 'Finishes', [
-    'Vitrified 2×2',
-    'Granite',
-  ]),
-  group('wall_tiles', 'Bathroom wall tiles', 'sqft', 'Finishes', ['Ceramic']),
-  group('paint_interior', 'Interior paint material', 'sqft', 'Finishes', [
-    'Asian Paints',
-    'Berger',
-  ]),
-  group('paint_exterior', 'Exterior paint material', 'sqft', 'Finishes', [
-    'Asian Paints',
-    'Berger',
-  ]),
+  group('door_main', 'Main door', 'door', 'Doors & windows', ['Teak'], {
+    defaultRate: 25000,
+    note: 'Estimate.',
+  }),
+  group(
+    'door_internal',
+    'Bedroom / internal door',
+    'door',
+    'Doors & windows',
+    ['Flush door, teak frame'],
+    {
+      defaultRate: 7000,
+    },
+  ),
+  group(
+    'door_bathroom',
+    'Bathroom door',
+    'door',
+    'Doors & windows',
+    ['WPC frame, waterproof flush'],
+    {
+      defaultRate: 7000,
+    },
+  ),
+  group('door_pooja', 'Pooja door', 'door', 'Doors & windows', ['Teak'], {
+    defaultRate: 12000,
+    note: 'Estimate.',
+  }),
+  group('window', 'Windows', 'sqft', 'Doors & windows', ['UPVC 3-track'], {
+    defaultRate: 450,
+  }),
+  group('ventilator', 'Ventilators', 'each', 'Doors & windows', ['Standard'], {
+    defaultRate: 1500,
+    note: 'Estimate.',
+  }),
+  group(
+    'rolling_shutter',
+    'Rolling shutter',
+    'each',
+    'Doors & windows',
+    ['MS with gear'],
+    {
+      defaultRate: 35000,
+    },
+  ),
+  group('gate', 'Entrance gate', 'each', 'Doors & windows', ['MS fabricated'], {
+    defaultRate: 20000,
+  }),
+  group('floor_tiles', 'Floor tiles', 'sqft', 'Finishes', ['Vitrified 2×2'], {
+    defaultRate: 60,
+  }),
+  group('wall_tiles', 'Bathroom wall tiles', 'sqft', 'Finishes', ['Ceramic'], {
+    defaultRate: 50,
+  }),
+  group(
+    'kitchen_wall_tiles',
+    'Kitchen wall tiles',
+    'sqft',
+    'Finishes',
+    ['Ceramic'],
+    { defaultRate: 45 },
+  ),
+  group(
+    'staircase_granite',
+    'Staircase granite',
+    'sqft',
+    'Finishes',
+    ['Granite'],
+    { defaultRate: 70 },
+  ),
+  group(
+    'kitchen_platform',
+    'Kitchen platform granite',
+    'sqft',
+    'Finishes',
+    ['Granite'],
+    { defaultRate: 150 },
+  ),
+  group(
+    'kitchen_sink',
+    'Kitchen sink',
+    'each',
+    'Finishes',
+    ['SS single bowl'],
+    { defaultRate: 2000 },
+  ),
+  group(
+    'parking_flooring',
+    'Parking flooring',
+    'sqft',
+    'Finishes',
+    ['Parking tiles'],
+    {
+      defaultRate: 45,
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'paint_interior',
+    'Interior paint material',
+    'sqft',
+    'Finishes',
+    ['Asian putty + Tractor emulsion'],
+    {
+      defaultRate: 12,
+      note: 'Estimate: 2 putty, 1 primer, 2 emulsion.',
+    },
+  ),
+  group(
+    'paint_exterior',
+    'Exterior paint material',
+    'sqft',
+    'Finishes',
+    ['Asian primer + Ace emulsion'],
+    {
+      defaultRate: 15,
+      note: 'Estimate.',
+    },
+  ),
   group(
     'electrical_point',
     'Electrical material per point',
     'point',
     'Services',
-    ['Finolex + Anchor', 'Polycab + Legrand'],
+    ['Finolex + Maru'],
+    {
+      defaultRate: 800,
+      note: 'Estimate: wire, conduit, switch, box.',
+    },
   ),
-  group('sanitary_cp', 'Sanitary ware & CP fittings', 'bathroom', 'Services', [
-    'Hindware',
-    'Jaquar',
-  ]),
+  group(
+    'sanitary_cp',
+    'Sanitary ware & CP fittings',
+    'bathroom',
+    'Services',
+    ['Cera'],
+    { defaultRate: 25000 },
+  ),
   group(
     'plumbing_bathroom',
     'Plumbing pipes & fittings',
     'bathroom',
     'Services',
-    ['Ashirvad', 'Supreme'],
+    ['Prince CPVC / PVC'],
+    {
+      defaultRate: 18000,
+      note: 'Estimate.',
+    },
+  ),
+  group('sump', 'Underground sump', 'litre', 'Services', ['Brick / RCC'], {
+    defaultRate: 18,
+    note: '₹8–22 per litre built.',
+  }),
+  group(
+    'overhead_tank',
+    'Overhead tank',
+    'each',
+    'Services',
+    ['Triple layer 4000 L'],
+    {
+      defaultRate: 29000,
+    },
   ),
   group(
-    'labour_civil',
-    'Civil labour (concrete, brickwork, plaster)',
+    'labour_rcc',
+    'RCC labour (steel fixing, concreting)',
     'sqft',
     'Labour',
     ['Contract'],
     {
-      defaultRate: 350,
-      note: 'Per sq ft of built-up area.',
+      defaultRate: 120,
+      note: 'Per sq ft built-up. Estimate within ₹250–350 total civil labour.',
     },
   ),
+  group(
+    'labour_brickwork_9',
+    'Brickwork labour, 9 in',
+    'sqft',
+    'Labour',
+    ['Contract'],
+    {
+      defaultRate: 30,
+      note: 'Hyderabad ₹28–35 per sq ft of wall.',
+    },
+  ),
+  group(
+    'labour_brickwork_4',
+    'Brickwork labour, 4.5 in',
+    'sqft',
+    'Labour',
+    ['Contract'],
+    {
+      defaultRate: 19,
+      note: 'Hyderabad ₹18–20 per sq ft of wall.',
+    },
+  ),
+  group('plaster_labour', 'Plastering labour', 'sqft', 'Labour', ['Contract'], {
+    defaultRate: 22,
+    note: 'Hyderabad ₹18–25 per sq ft.',
+  }),
   group(
     'shuttering',
     'Centering & shuttering',
@@ -162,12 +377,28 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     ['Contract'],
     {
       defaultRate: 35,
-      note: 'Per sq ft of shuttered area (Hyderabad ₹30–35).',
+      note: 'Hyderabad ₹30–35 per sq ft.',
     },
   ),
-  group('labour_tiling', 'Tile laying labour', 'sqft', 'Labour', ['Contract'], {
-    defaultRate: 70,
-  }),
+  group(
+    'labour_civil',
+    'Civil labour contract (all-in)',
+    'sqft',
+    'Labour',
+    ['Contract'],
+    {
+      defaultRate: 350,
+      note: 'Used only when labour is set to one contract rate.',
+    },
+  ),
+  group(
+    'labour_tiling',
+    'Tile & granite laying labour',
+    'sqft',
+    'Labour',
+    ['Contract'],
+    { defaultRate: 70 },
+  ),
   group('labour_painting', 'Painting labour', 'sqft', 'Labour', ['Contract'], {
     defaultRate: 15,
     note: 'Hyderabad ₹8–20 per sq ft.',
@@ -180,7 +411,7 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     ['Contract'],
     {
       defaultRate: 300,
-      note: 'Labour only, ₹150–350 per point.',
+      note: 'Labour only ₹150–350 per point.',
     },
   ),
   group(
@@ -191,7 +422,7 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     ['Contract'],
     {
       defaultRate: 15000,
-      note: 'Estimate; confirm with your plumber.',
+      note: 'Estimate.',
     },
   ),
   group(
@@ -202,17 +433,10 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     ['Carpenter'],
     { defaultRate: 1500 },
   ),
-  group(
-    'plaster_labour',
-    'Plastering labour',
-    'sqft',
-    'Labour',
-    ['Included in civil'],
-    {
-      note: 'Leave 0 when civil labour includes plastering.',
-    },
-  ),
-  group('excavation', 'Excavation', 'm³', 'Labour', ['JCB', 'Manual']),
+  group('excavation', 'Excavation', 'm³', 'Labour', ['JCB'], {
+    defaultRate: 150,
+    note: 'Estimate.',
+  }),
   group(
     'design_fees',
     'Architectural & structural design',
@@ -249,6 +473,11 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     'Design & handover',
   ),
 ];
+
+/** Default rate of a starter variant. */
+export function starterRate(group: GroupDef, variant: string) {
+  return group.starterRates?.[variant] ?? group.defaultRate ?? 0;
+}
 
 export const GROUP_SECTIONS = [
   'Steel (per rod)',
@@ -346,4 +575,98 @@ export function rateForOutput(
         rate.unit.toLowerCase() === output.unit.toLowerCase(),
     )?.rate ?? 0
   );
+}
+
+type QuoteSection = {
+  title?: string | undefined;
+  brand?: string | undefined;
+  grade?: string | undefined;
+  description?: string | undefined;
+};
+/** Which rate groups a quote specification line can name a brand for. */
+const QUOTE_BRAND_TARGETS: readonly {
+  test: RegExp;
+  groups: readonly string[];
+}[] = [
+  { test: /steel|tmt/, groups: ['steel'] },
+  { test: /cement/, groups: ['cement', 'cement_masonry'] },
+  { test: /brick|block/, groups: ['bricks'] },
+  { test: /sand/, groups: ['sand'] },
+];
+const BRAND_ALIASES: Readonly<Record<string, readonly string[]>> = {
+  'vizag (rinl)': ['vizag', 'visakha', 'rinl'],
+  'robo / m-sand': ['robo', 'm-sand', 'm sand', 'msand', 'manufactured sand'],
+  'river sand': ['river'],
+  'local isi': ['local'],
+};
+/** Names a quote may use for a variant; aliases count as the full name. */
+function variantNames(variant: string) {
+  const name = variant.toLowerCase();
+  const first = name.split(/[\s(]/)[0] ?? name;
+  return [
+    ...[name, ...(BRAND_ALIASES[name] ?? [])].map((text) => ({
+      text,
+      full: true,
+    })),
+    ...(first.length > 2 ? [{ text: first, full: false }] : []),
+  ];
+}
+
+/**
+ * Brand / source choices named in the quotation's specifications, e.g.
+ * "Steel / TMT · Vizag or JSW" → Vizag (the first one named), "Cement ·
+ * UltraTech 53, Birla 43" → UltraTech for RCC and Birla for masonry.
+ */
+export function brandSelectionsFromQuote(
+  sections: readonly QuoteSection[] | undefined,
+  rates: readonly Rate[],
+): Record<string, string> {
+  const picks: Record<string, string> = {};
+  for (const section of sections ?? []) {
+    const title = (section.title ?? '').toLowerCase();
+    const text = [
+      section.brand,
+      section.grade,
+      section.description,
+      section.title,
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    for (const target of QUOTE_BRAND_TARGETS) {
+      if (!target.test.test(title)) continue;
+      for (const groupKey of target.groups) {
+        if (picks[groupKey]) continue;
+        const variants = [
+          ...new Set(
+            rates
+              .filter((rate) =>
+                groupKey === 'steel'
+                  ? rate.material?.startsWith('steel_')
+                  : rate.material === groupKey,
+              )
+              .map((rate) => rate.variant)
+              .filter((variant): variant is string => Boolean(variant)),
+          ),
+        ];
+        // A full variant name ("Birla 43") beats a brand word ("Birla");
+        // otherwise the brand named first wins.
+        let best: { variant: string; score: number } | undefined;
+        for (const variant of variants) {
+          for (const name of variantNames(variant)) {
+            const at = text.search(
+              new RegExp(
+                `(^|[^a-z])${name.text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}`,
+              ),
+            );
+            const score = (name.full ? 0 : 10_000) + at;
+            if (at >= 0 && (!best || score < best.score))
+              best = { variant, score };
+          }
+        }
+        if (best) picks[groupKey] = best.variant;
+      }
+    }
+  }
+  return picks;
 }

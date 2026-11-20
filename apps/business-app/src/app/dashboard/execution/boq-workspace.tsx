@@ -21,6 +21,7 @@ import {
   MATERIAL_GROUPS,
   diameterOf,
   materialForOutput,
+  brandSelectionsFromQuote,
   rateForOutput,
   variantsFor,
   type Rate,
@@ -430,6 +431,9 @@ export function BoqWorkspace({
     });
     const kept = lines.filter((line) => !line.origin);
     setLines([...result.lines, ...kept]);
+    // Brands named in the quotation's specifications, unless already chosen.
+    const quoted = brandSelectionsFromQuote(schedule.sections, initialRates);
+    setSelections((prior) => ({ ...quoted, ...prior }));
     setGenerator({
       revisionId: quoteId,
       generatedAt: new Date().toISOString(),

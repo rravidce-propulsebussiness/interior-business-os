@@ -441,6 +441,51 @@ describe('quotation-driven construction BOQ', () => {
     ]);
   });
 
+  it('builds the drawing column grid, kitchens, shutters, water storage and itemized labour', () => {
+    const counts = {
+      floors: {
+        'Ground Floor': { rollingShutters: 1, bathrooms: 1, kitchens: 0 },
+        'First Floor': { kitchens: 2, bathrooms: 3 },
+      },
+      entranceGates: 1,
+      compoundWallFeet: 0,
+    };
+    const result = generateQuotationBoq({
+      details: quote(),
+      counts,
+      settings: {
+        columnRows: 6,
+        columnsPerRow: 2,
+        extraColumns: 2,
+        sumpLitres: 6500,
+        overheadTankLitres: 4000,
+        labourItemized: 1,
+      },
+    });
+    const outputs = (section: string) =>
+      result.lines
+        .filter((line) => line.section === section)
+        .flatMap((line) => line.outputs);
+    const columns = result.lines.find(
+      (line) => line.section === 'Foundation' && line.kind === 'quote-columns',
+    );
+    expect(columns?.inputs.columns).toBe(14);
+    const first = outputs('First Floor');
+    expect(first.find((o) => o.material === 'kitchen_sink')?.quantity).toBe(2);
+    expect(first.some((o) => o.name === 'Cement (tile bedding)')).toBe(true);
+    expect(first.some((o) => o.material === 'labour_rcc')).toBe(true);
+    expect(first.some((o) => o.material === 'labour_civil')).toBe(false);
+    expect(
+      outputs('Ground Floor').find((o) => o.material === 'rolling_shutter')
+        ?.quantity,
+    ).toBe(1);
+    const external = outputs('External works');
+    expect(external.find((o) => o.material === 'sump')?.quantity).toBe(6500);
+    expect(external.find((o) => o.material === 'overhead_tank')?.quantity).toBe(
+      1,
+    );
+  });
+
   it('normalizes and clamps company settings', () => {
     const settings = normalizeStructuralSettings({
       stockBarFeet: '1000',
