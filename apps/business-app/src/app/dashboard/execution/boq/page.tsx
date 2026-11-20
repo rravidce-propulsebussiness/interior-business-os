@@ -260,6 +260,9 @@ export default async function ManualBoqPage({
       quotes={quotes}
       rates={rates}
       structural={structural}
+      defaultUnit={
+        ratesResult.data?.rates?.preferences?.lengthUnit === 'ft' ? 'ft' : 'm'
+      }
       initialOpenId={query.open ?? null}
       initialProjectId={query.project ?? null}
       canEdit={s.allowed('estimate.edit')}

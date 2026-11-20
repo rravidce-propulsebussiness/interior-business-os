@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BOQ_TEMPLATES,
@@ -10,6 +10,13 @@ import {
   type BoqInputs,
 } from './boq-calculations';
 import { removeManualBoq, saveManualBoq } from './boq-actions';
+import {
+  fieldKind,
+  toDisplay,
+  toMetric,
+  unitLabel,
+  type LengthUnit,
+} from './boq-units';
 import {
   MATERIAL_GROUPS,
   materialForOutput,
@@ -113,6 +120,7 @@ export function BoqWorkspace({
   quotes,
   rates: initialRates,
   structural,
+  defaultUnit,
   initialOpenId,
   initialProjectId,
   canEdit,
@@ -124,6 +132,7 @@ export function BoqWorkspace({
   quotes: Quote[];
   rates: Rate[];
   structural: Record<string, number> | null;
+  defaultUnit: LengthUnit;
   initialOpenId: string | null;
   initialProjectId: string | null;
   canEdit: boolean;
@@ -174,6 +183,33 @@ export function BoqWorkspace({
   );
   const [selectedTemplate, setSelectedTemplate] = useState('column');
   const [newName, setNewName] = useState('');
+  // Takeoff inputs are always metric; `typed` keeps what the person typed
+  // in feet / inches so conversion never fights the cursor.
+  const [unit, setUnitState] = useState<LengthUnit>(defaultUnit);
+  const [typed, setTyped] = useState<Record<string, string>>({});
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem('boq-length-unit');
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Restores this viewer's saved unit after hydration.
+      if (saved === 'm' || saved === 'ft') setUnitState(saved);
+    } catch {
+      // Storage unavailable: keep the company default.
+    }
+  }, []);
+  function setUnit(next: LengthUnit) {
+    setUnitState(next);
+    setTyped({});
+    try {
+      window.localStorage.setItem('boq-length-unit', next);
+    } catch {
+      // Storage unavailable: the choice lasts for this visit.
+    }
+  }
+  const defsFor = (kind: string) => inputDefinitions[kind] || [];
+  const kindOf = (templateKind: string, key: string) => {
+    const def = defsFor(templateKind).find((item) => item.key === key);
+    return def ? fieldKind(def) : null;
+  };
   const [inputs, setInputs] = useState<BoqInputs>(() =>
     Object.fromEntries(
       (inputDefinitions.column ?? []).map((item) => [item.key, item.value]),
@@ -378,6 +414,7 @@ export function BoqWorkspace({
     setSelectedTemplate(kind);
     const values = inputDefinitions[kind] || [];
     setInputs(Object.fromEntries(values.map((item) => [item.key, item.value])));
+    setTyped({});
     setNewName(
       kind === 'surface'
         ? 'Internal plaster'
@@ -514,6 +551,28 @@ export function BoqWorkspace({
           </p>
         </div>
         <div className="erp-header-actions">
+          <div
+            className="boq-unit-toggle"
+            role="group"
+            aria-label="Measurement units"
+          >
+            {(
+              [
+                ['m', 'Metres'],
+                ['ft', 'Feet'],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={unit === value}
+                className={unit === value ? 'active' : ''}
+                onClick={() => setUnit(value)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           {canViewCost && canEdit && (
             <Link
               className="erp-button"
@@ -891,7 +950,7 @@ export function BoqWorkspace({
                 )
                 .map((definition) => (
                   <label key={definition.key}>
-                    {definition.label}
+                    {unitLabel(definition.label, fieldKind(definition), unit)}
                     {definition.key === 'thickness' &&
                     selectedTemplate === 'wall' ? (
                       <select
@@ -919,15 +978,27 @@ export function BoqWorkspace({
                         }
                         min="0"
                         step="any"
-                        value={String(
-                          inputs[definition.key] ?? definition.value,
-                        )}
-                        onChange={(event) =>
+                        value={
+                          typed[definition.key] ??
+                          toDisplay(
+                            inputs[definition.key] ?? definition.value,
+                            fieldKind(definition),
+                            unit,
+                          )
+                        }
+                        onChange={(event) => {
+                          const text = event.target.value;
+                          const kind = fieldKind(definition);
+                          if (kind && unit !== 'm')
+                            setTyped((prior) => ({
+                              ...prior,
+                              [definition.key]: text,
+                            }));
                           setInputs((prior) => ({
                             ...prior,
-                            [definition.key]: event.target.value,
-                          }))
-                        }
+                            [definition.key]: toMetric(text, kind, unit),
+                          }));
+                        }}
                       />
                     )}
                   </label>
@@ -1076,15 +1147,31 @@ export function BoqWorkspace({
                       <div className="boq-dimensions">
                         {Object.entries(line.inputs)
                           .filter(([key]) => key !== 'outputName')
-                          .map(([key, value]) => (
-                            <span key={key}>
-                              {key.replace(
-                                /[A-Z]/g,
-                                (letter) => ` ${letter.toLowerCase()}`,
-                              )}{' '}
-                              <b>{String(value)}</b>
-                            </span>
-                          ))}
+                          .map(([key, value]) => {
+                            const kind = kindOf(line.kind, key);
+                            return (
+                              <span key={key}>
+                                {key.replace(
+                                  /[A-Z]/g,
+                                  (letter) => ` ${letter.toLowerCase()}`,
+                                )}{' '}
+                                <b>
+                                  {toDisplay(value, kind, unit)}
+                                  {kind === 'len'
+                                    ? ` ${unit}`
+                                    : kind === 'area'
+                                      ? unit === 'ft'
+                                        ? ' sq ft'
+                                        : ' m²'
+                                      : kind === 'spacing'
+                                        ? unit === 'ft'
+                                          ? ' in'
+                                          : ' mm'
+                                        : ''}
+                                </b>
+                              </span>
+                            );
+                          })}
                       </div>
                     )}
                     <div className="boq-output-table">
