@@ -1939,3 +1939,31 @@
   color: #988d8f;
   font-size: 9px;
 }
+
+.boq-design-rules {
+  margin-top: 12px;
+  font-size: 10px;
+  color: #5c5356;
+}
+.boq-design-rules > strong {
+  display: block;
+  margin-bottom: 6px;
+  color: #45383a;
+  font-size: 11px;
+}
+.boq-design-rules > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.boq-design-rules label {
+  display: grid;
+  gap: 3px;
+}
+.boq-design-rules input {
+  min-height: 30px;
+  border: 1px solid #e9e1df;
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-size: 11px;
+}

@@ -6,7 +6,7 @@ import { saveBoqRates } from './boq-actions';
 import {
   GROUP_SECTIONS,
   MATERIAL_GROUPS,
-  starterRate,
+  startingVariants,
   variantKey,
   type Rate,
 } from './boq-pricing';
@@ -17,25 +17,6 @@ import {
 } from '@business-os/core/construction-boq';
 
 const groupNames = [...new Set(STRUCTURAL_FIELDS.map((field) => field.group))];
-function startingVariants(saved: Rate[]): Rate[] {
-  const savedVariants = saved.filter((rate) => rate.material && rate.variant);
-  return MATERIAL_GROUPS.flatMap((group) => {
-    const existing = savedVariants.filter(
-      (rate) => rate.material === group.key,
-    );
-    if (existing.length) return existing;
-    return group.starters.map((variant, index) => ({
-      key: variantKey(group.key, variant),
-      label: variant,
-      unit: group.unit,
-      rate: starterRate(group, variant),
-      category: group.category,
-      material: group.key,
-      variant,
-      isDefault: index === 0,
-    }));
-  });
-}
 const defaults: Rate[] = [
   // Cement, sand, aggregate, bricks and steel are priced from the
   // purchase-unit groups above (bag, tonne, number, rod).

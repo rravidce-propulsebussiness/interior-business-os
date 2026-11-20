@@ -578,9 +578,13 @@ describe('quotation-driven construction BOQ', () => {
           },
         ],
         plinthRunFeet: 200,
+        settings: { slabDistSpacingIn: 6, coverMm: 25 },
       },
     });
     expect(result.design?.columns).toHaveLength(2);
+    // The drawing's slab spacing and cover win over the company rules.
+    expect(result.settings.slabDistSpacingIn).toBe(6);
+    expect(result.settings.coverMm).toBe(25);
     const line = (section: string, kind: string) =>
       result.lines.find(
         (item) => item.section === section && item.kind === kind,

@@ -75,6 +75,7 @@ const generatorSchema = z.object({
       columns: z.array(z.record(z.string(), z.unknown())).max(20),
       beams: z.array(z.record(z.string(), z.unknown())).max(20),
       plinthRunFeet: z.number().finite().nonnegative(),
+      settings: z.record(z.string().max(40), z.number().finite()).optional(),
     })
     .nullable()
     .optional(),

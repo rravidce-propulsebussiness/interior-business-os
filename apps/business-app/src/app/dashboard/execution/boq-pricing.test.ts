@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   brandSelectionsFromQuote,
+  effectiveRates,
   MATERIAL_GROUPS,
   rateForOutput,
   starterRate,
@@ -164,5 +165,22 @@ describe('BOQ default prices and quoted brands', () => {
         withVizag,
       ),
     ).toEqual({ steel: 'Vizag (RINL)', bricks: 'Local' });
+  });
+
+  it('prices an unsaved rate card at the default prices, saved rates first', () => {
+    const fresh = effectiveRates([]);
+    expect(
+      rateForOutput(
+        { name: '16 mm main bars', quantity: 1, unit: 'rod', diameter: 16 },
+        fresh,
+      ),
+    ).toBe(1289);
+    const saved = effectiveRates(rates);
+    expect(
+      rateForOutput(
+        { name: 'Bricks', quantity: 1, unit: 'nos', material: 'bricks' },
+        saved,
+      ),
+    ).toBe(9.5);
   });
 });

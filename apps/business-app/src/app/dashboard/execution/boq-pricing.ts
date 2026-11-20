@@ -670,3 +670,36 @@ export function brandSelectionsFromQuote(
   }
   return picks;
 }
+
+/**
+ * Brand / source variants for every material group: the saved ones, and the
+ * default starters for groups not saved yet (so an unsaved rate card still
+ * prices the BOQ at the researched defaults).
+ */
+export function startingVariants(saved: Rate[]): Rate[] {
+  const savedVariants = saved.filter((rate) => rate.material && rate.variant);
+  return MATERIAL_GROUPS.flatMap((group) => {
+    const existing = savedVariants.filter(
+      (rate) => rate.material === group.key,
+    );
+    if (existing.length) return existing;
+    return group.starters.map((variant, index) => ({
+      key: variantKey(group.key, variant),
+      label: variant,
+      unit: group.unit,
+      rate: starterRate(group, variant),
+      category: group.category,
+      material: group.key,
+      variant,
+      isDefault: index === 0,
+    }));
+  });
+}
+
+/** Saved plain rates plus every group's variants. */
+export function effectiveRates(saved: readonly Rate[]): Rate[] {
+  return [
+    ...saved.filter((rate) => !rate.material),
+    ...startingVariants([...saved]),
+  ];
+}

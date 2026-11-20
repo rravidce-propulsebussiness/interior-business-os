@@ -1097,6 +1097,7 @@ export function BoqWorkspace({
               <BoqDesignSchedule
                 design={genDesign}
                 floors={floorsForGeneration}
+                defaults={settings}
                 onChange={setGenDesign}
               />
               {generator?.revisionId === quoteId &&

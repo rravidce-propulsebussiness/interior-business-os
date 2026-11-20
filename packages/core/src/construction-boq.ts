@@ -1175,7 +1175,31 @@ export type StructuralDesign = {
   beams: DesignBeamType[];
   /** Plinth beam running feet (0 = from the column grid). */
   plinthRunFeet: number;
+  /** This drawing's slab, plinth beam, staircase and cover values. */
+  settings?: Partial<Record<DesignSettingKey, number>>;
 };
+
+/** Structural rules a drawing can set for its own project. */
+export const DESIGN_SETTING_KEYS = [
+  'slabThicknessIn',
+  'slabMainDia',
+  'slabMainSpacingIn',
+  'slabDistDia',
+  'slabDistSpacingIn',
+  'plinthBeamWidthIn',
+  'plinthBeamDepthIn',
+  'plinthBeamBarDia',
+  'plinthBeamBarCount',
+  'stairWaistIn',
+  'stairWidthFeet',
+  'stairMainDia',
+  'stairDistDia',
+  'stairBarSpacingIn',
+  'coverMm',
+  'plinthHeightFeet',
+  'foundationDepthFeet',
+] as const;
+export type DesignSettingKey = (typeof DESIGN_SETTING_KEYS)[number];
 
 const num = (value: unknown, fallback: number, min: number, max: number) => {
   const parsed = Number(value);
@@ -1221,10 +1245,25 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     }))
     .filter((item) => parseBars(item.bars).length > 0);
   if (!columns.length && !beams.length) return null;
+  const rawSettings =
+    value.settings && typeof value.settings === 'object'
+      ? (value.settings as Record<string, unknown>)
+      : {};
+  const settings: Partial<Record<DesignSettingKey, number>> = {};
+  for (const key of DESIGN_SETTING_KEYS) {
+    const parsed = Number(rawSettings[key]);
+    if (
+      rawSettings[key] !== undefined &&
+      rawSettings[key] !== '' &&
+      Number.isFinite(parsed)
+    )
+      settings[key] = parsed;
+  }
   return {
     columns,
     beams,
     plinthRunFeet: num(value.plinthRunFeet, 0, 0, 5000),
+    ...(Object.keys(settings).length ? { settings } : {}),
   };
 }
 
@@ -1455,8 +1494,14 @@ export type QuotationBoqInput = {
 export function generateQuotationBoq(
   input: QuotationBoqInput,
 ): QuotationBoqResult {
-  const s = normalizeStructuralSettings(input.settings);
   const design = normalizeDesign(input.design);
+  // The drawing's own slab / staircase / cover values win over the company's.
+  const s = normalizeStructuralSettings({
+    ...(input.settings && typeof input.settings === 'object'
+      ? input.settings
+      : {}),
+    ...design?.settings,
+  });
   const floors = (
     input.floors?.length
       ? input.floors

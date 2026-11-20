@@ -1,7 +1,10 @@
 'use client';
 
 import {
+  DESIGN_SETTING_KEYS,
   parseBars,
+  STRUCTURAL_FIELDS,
+  type DesignSettingKey,
   type BoqFloor,
   type DesignBeamType,
   type DesignColumnType,
@@ -70,13 +73,20 @@ function NumberCell({
  * on, footings, column lifts and beams are quantified type by type instead of
  * from the company's column-grid rules.
  */
+const DESIGN_FIELDS = DESIGN_SETTING_KEYS.map((key) =>
+  STRUCTURAL_FIELDS.find((field) => field.key === key)!,
+).filter(Boolean);
+
 export function BoqDesignSchedule({
   design,
   floors,
+  defaults,
   onChange,
 }: {
   design: StructuralDesign | null;
   floors: readonly BoqFloor[];
+  /** Company structural rules, shown until the drawing's value is typed. */
+  defaults: Readonly<Record<string, number>>;
   onChange: (design: StructuralDesign | null) => void;
 }) {
   const on = Boolean(design);
@@ -393,6 +403,42 @@ export function BoqDesignSchedule({
                 ))}
               </tbody>
             </table>
+            <div className="boq-design-rules">
+              <strong>
+                Slab, plinth beam, staircase and covers on this drawing
+              </strong>
+              <div>
+                {DESIGN_FIELDS.map((field) => {
+                  const key = field.key as DesignSettingKey;
+                  return (
+                    <label key={key}>
+                      {field.label}
+                      <input
+                        type="number"
+                        step="any"
+                        min={field.min}
+                        max={field.max}
+                        value={
+                          design.settings?.[key] ?? defaults[key] ?? field.value
+                        }
+                        onChange={(event) => {
+                          const value = Number(event.target.value);
+                          onChange({
+                            ...design,
+                            settings: {
+                              ...design.settings,
+                              [key]: Number.isFinite(value)
+                                ? value
+                                : field.value,
+                            },
+                          });
+                        }}
+                      />
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
             <div className="boq-design-foot">
               <button
                 type="button"
