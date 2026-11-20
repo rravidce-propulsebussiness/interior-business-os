@@ -24,23 +24,26 @@ import {
   brandSelectionsFromQuote,
   rateForOutput,
   rateGroupKey,
+  COST_HEADS,
+  QUANTITY_HEADS,
+  costHead,
+  type CostHead,
   variantsFor,
   type Rate,
 } from './boq-pricing';
 import {
   estimateCounts,
-  FLOOR_COUNT_FIELDS,
   normalizeCounts,
   floorsFromQuote,
   generateQuotationBoq,
   normalizeStructuralSettings,
   normalizeDesign,
-  parseOpenings,
   type BoqCounts,
   type BoqFloor,
   type StructuralDesign,
 } from '@business-os/core/construction-boq';
 import { BoqDesignSchedule } from './boq-design-schedule';
+import { BoqFloorInputs } from './boq-floor-inputs';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 
 type Generator = {
@@ -66,6 +69,7 @@ type SavedLine = {
     source?: string;
     rate?: number;
     quotedRate?: number;
+    order?: string;
     material?: string;
     rods?: number;
     diameter?: number;
@@ -374,66 +378,46 @@ export function BoqWorkspace({
     (sum, item) => sum + item.amount,
     0,
   );
-  // Estimate by stage (design, foundation, each floor, external, handover),
-  // in BOQ order.
-  const stageCost = new Map<string, number>();
-  for (const line of lines)
-    stageCost.set(
-      line.section,
-      (stageCost.get(line.section) ?? 0) +
-        line.outputs.reduce(
-          (sum, output) => sum + output.quantity * priceOf(output),
-          0,
-        ),
-    );
-  // Floor-wise cost: every material and labour item per stage, quantity ×
-  // rate = amount, so each floor's cost can be read line by line.
-  const groupByKey = new Map(
-    MATERIAL_GROUPS.map((group) => [group.key, group]),
-  );
-  const floorBreakdown = new Map<
-    string,
-    Map<
-      string,
-      {
-        name: string;
-        unit: string;
-        quantity: number;
-        amount: number;
-        labour: boolean;
-      }
-    >
-  >();
+  // Floor-wise cost in simple heads: cement, sand, aggregate, steel and
+  // bricks as quantity × rate; structural labour as rate × sq ft; finishes
+  // and services as amounts.
+  type HeadTotal = {
+    amount: number;
+    quantity: number;
+    unit: string;
+    mixed: boolean;
+  };
+  const floorBreakdown = new Map<string, Map<CostHead, HeadTotal>>();
+  // What to order per floor (tiles and boxes, coils, pipes …).
+  const floorOrders = new Map<string, string[]>();
   for (const row of allOutputs) {
     if (!(row.quantity > 0)) continue;
+    if (row.order)
+      floorOrders.set(row.section, [
+        ...(floorOrders.get(row.section) ?? []),
+        `${row.name}: ${row.order}`,
+      ]);
     const material = materialForOutput(row);
-    const groupKey = material
-      ? rateGroupKey(material, diameterOf(row))
-      : undefined;
-    const group = groupKey ? groupByKey.get(groupKey) : undefined;
-    const key = group ? group.key : keyFor(row.name, row.unit);
+    const head = costHead(
+      material ? rateGroupKey(material, diameterOf(row)) : undefined,
+    );
+    const isSteel = head === 'Steel';
+    const quantity = isSteel
+      ? (row.weightKg ?? (row.unit === 'kg' ? row.quantity : 0))
+      : row.quantity;
+    const unitOf = isSteel ? 'kg' : row.unit;
     const stage =
-      floorBreakdown.get(row.section) ??
-      new Map<
-        string,
-        {
-          name: string;
-          unit: string;
-          quantity: number;
-          amount: number;
-          labour: boolean;
-        }
-      >();
-    const prior = stage.get(key);
-    stage.set(key, {
-      name: group?.label ?? row.name,
-      unit: row.unit,
-      quantity: (prior?.quantity ?? 0) + row.quantity,
+      floorBreakdown.get(row.section) ?? new Map<CostHead, HeadTotal>();
+    const prior = stage.get(head);
+    stage.set(head, {
       amount: (prior?.amount ?? 0) + row.quantity * row.rate,
-      labour: group?.category === 'labour' || /labour/i.test(row.name),
+      quantity: (prior?.quantity ?? 0) + quantity,
+      unit: prior?.unit ?? unitOf,
+      mixed: Boolean(prior && (prior.mixed || prior.unit !== unitOf)),
     });
     floorBreakdown.set(row.section, stage);
   }
+  const [showTakeoff, setShowTakeoff] = useState(false);
   const floorArea = new Map(
     (generator?.floors ?? []).map((floor) => [floor.name, floor.areaSqft]),
   );
@@ -1066,96 +1050,12 @@ export function BoqWorkspace({
                   </div>
                 ))}
               </div>
-              <div className="boq-gen-count-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Floor</th>
-                      {FLOOR_COUNT_FIELDS.map(([key, label]) => (
-                        <th key={key}>{label}</th>
-                      ))}
-                      <th>Window sizes (nos × W × H ft)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {floorsForGeneration.map((floor) => {
-                      const row = countsForGeneration.floors[floor.name];
-                      if (!row) return null;
-                      return (
-                        <tr key={floor.name}>
-                          <th scope="row">{floor.name}</th>
-                          {FLOOR_COUNT_FIELDS.map(([key, label]) => (
-                            <td key={key}>
-                              <input
-                                type="number"
-                                min="0"
-                                step="1"
-                                aria-label={`${floor.name} ${label}`}
-                                value={row[key]}
-                                onChange={(event) =>
-                                  setGenCounts({
-                                    ...countsForGeneration,
-                                    floors: {
-                                      ...countsForGeneration.floors,
-                                      [floor.name]: {
-                                        ...row,
-                                        [key]: Math.max(
-                                          0,
-                                          Math.round(
-                                            Number(event.target.value) || 0,
-                                          ),
-                                        ),
-                                      },
-                                    },
-                                  })
-                                }
-                              />
-                            </td>
-                          ))}
-                          <td className="boq-window-sizes">
-                            <input
-                              type="text"
-                              placeholder="2×4×4, 2×4×6"
-                              aria-label={`${floor.name} window sizes`}
-                              maxLength={200}
-                              value={
-                                countsForGeneration.windowSizes?.[floor.name] ??
-                                ''
-                              }
-                              onChange={(event) => {
-                                const text = event.target.value;
-                                const openings = parseOpenings(text);
-                                setGenCounts({
-                                  ...countsForGeneration,
-                                  windowSizes: {
-                                    ...countsForGeneration.windowSizes,
-                                    [floor.name]: text,
-                                  },
-                                  floors: {
-                                    ...countsForGeneration.floors,
-                                    [floor.name]: {
-                                      ...row,
-                                      ...(openings.length
-                                        ? {
-                                            windows: openings.reduce(
-                                              (sum, opening) =>
-                                                sum + opening.count,
-                                              0,
-                                            ),
-                                          }
-                                        : {}),
-                                    },
-                                  },
-                                });
-                              }}
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <BoqFloorInputs
+                floors={floorsForGeneration}
+                counts={countsForGeneration}
+                defaults={settings}
+                onChange={setGenCounts}
+              />
               <div className="boq-gen-counts">
                 <label>
                   Entrance gates
@@ -1219,6 +1119,343 @@ export function BoqWorkspace({
                 )}
             </section>
           )}
+          {canViewCost && floorBreakdown.size > 0 && (
+            <section className="boq-materials boq-floor-costs">
+              <div className="boq-steel-summary">
+                <h3>Cost estimate, floor by floor</h3>
+                <p className="boq-steel-note">
+                  Materials at today&apos;s brand prices, package items at the
+                  quoted rates, structural labour at the contract rate per sq
+                  ft. Open a floor to see quantity × rate.
+                </p>
+                <table className="boq-floor-overview">
+                  <thead>
+                    <tr>
+                      <th>Stage</th>
+                      <th>Built-up</th>
+                      <th>Cost</th>
+                      <th>Per sq ft</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...floorBreakdown.entries()].map(([stage, heads]) => {
+                      const total = [...heads.values()].reduce(
+                        (sum, head) => sum + head.amount,
+                        0,
+                      );
+                      const area = floorArea.get(stage);
+                      return (
+                        <tr key={stage}>
+                          <td>{stage}</td>
+                          <td>
+                            {area
+                              ? `${area.toLocaleString('en-IN')} sq ft`
+                              : '—'}
+                          </td>
+                          <td>{money(total)}</td>
+                          <td>{area ? money(total / area) : '—'}</td>
+                        </tr>
+                      );
+                    })}
+                    <tr className="total">
+                      <td>Total project cost</td>
+                      <td>
+                        {builtUpSqft > 0
+                          ? `${builtUpSqft.toLocaleString('en-IN')} sq ft`
+                          : ''}
+                      </td>
+                      <td>{money(materialCost)}</td>
+                      <td>
+                        {builtUpSqft > 0
+                          ? money(materialCost / builtUpSqft)
+                          : '—'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                {[...floorBreakdown.entries()].map(([stage, heads]) => {
+                  const rows = COST_HEADS.map(
+                    (head) => [head, heads.get(head)] as const,
+                  ).filter((entry): entry is readonly [CostHead, HeadTotal] =>
+                    Boolean(entry[1] && entry[1].amount > 0),
+                  );
+                  const total = rows.reduce(
+                    (sum, [, value]) => sum + value.amount,
+                    0,
+                  );
+                  const area = floorArea.get(stage);
+                  return (
+                    <details key={stage} className="boq-floor-cost">
+                      <summary>
+                        <strong>{stage}</strong>
+                        <span>
+                          {money(total)}
+                          {area ? ` · ${money(total / area)}/sq ft` : ''}
+                        </span>
+                      </summary>
+                      <table>
+                        <tbody>
+                          {rows.map(([head, value]) => {
+                            const showQty =
+                              !value.mixed &&
+                              value.quantity > 0 &&
+                              (head in QUANTITY_HEADS ||
+                                head === 'Structural labour');
+                            return (
+                              <tr key={head}>
+                                <td>{head}</td>
+                                <td>
+                                  {showQty
+                                    ? `${value.quantity.toLocaleString(
+                                        'en-IN',
+                                        {
+                                          maximumFractionDigits: 1,
+                                        },
+                                      )} ${value.unit} × ${money(
+                                        value.amount / value.quantity,
+                                      )}`
+                                    : ''}
+                                </td>
+                                <td>{money(value.amount)}</td>
+                              </tr>
+                            );
+                          })}
+                          <tr className="total">
+                            <td>{stage} total</td>
+                            <td>
+                              {area ? `${money(total / area)} per sq ft` : ''}
+                            </td>
+                            <td>{money(total)}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      {(floorOrders.get(stage)?.length ?? 0) > 0 && (
+                        <ul className="boq-floor-orders">
+                          {floorOrders.get(stage)!.map((text) => (
+                            <li key={text}>{text}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </details>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+          <section className="boq-takeoff">
+            <div className="boq-section-title">
+              <div>
+                <h3>Detailed takeoff</h3>
+                <p>
+                  Every item with its dimensions, quantities and rate. Edit a
+                  quantity or rate here; the floor-wise estimate updates.
+                </p>
+              </div>
+              <span className="boq-count-pill">{lines.length} items</span>
+              {lines.length > 0 && (
+                <button
+                  type="button"
+                  className="erp-button erp-button-quiet"
+                  onClick={() => setShowTakeoff((open) => !open)}
+                >
+                  {showTakeoff
+                    ? 'Hide detailed takeoff'
+                    : 'Show detailed takeoff'}
+                </button>
+              )}
+            </div>
+            {!lines.length ? (
+              <div className="boq-empty-takeoff">
+                <span>∑</span>
+                <strong>Your takeoff will appear here</strong>
+                <small>Add a measured work item or import quote lines.</small>
+              </div>
+            ) : !showTakeoff ? null : (
+              lines.map((line, index) => (
+                <details className="boq-line-card" key={line.id}>
+                  <summary>
+                    <span className="boq-line-index">
+                      {String(index + 1).padStart(2, '0')}
+                    </span>
+                    <span className="boq-line-summary">
+                      <strong>{line.name}</strong>
+                      <small>
+                        {line.section} ·{' '}
+                        {line.origin === 'quotation-structure'
+                          ? 'Generated from quotation'
+                          : line.origin === 'quotation-allowance'
+                            ? 'Quoted package allowance'
+                            : line.kind === 'quoted'
+                              ? 'Quotation linked'
+                              : 'Manual takeoff'}
+                      </small>
+                    </span>
+                    <span className="boq-line-total">
+                      {line.kind === 'quoted' && line.quotedPrice !== undefined
+                        ? money(line.quotedPrice)
+                        : money(
+                            line.outputs.reduce(
+                              (sum, output) =>
+                                sum + output.quantity * priceOf(output),
+                              0,
+                            ),
+                          )}
+                    </span>
+                    <span className="boq-expand">⌄</span>
+                  </summary>
+                  <div className="boq-line-detail">
+                    {line.kind !== 'quoted' && (
+                      <div className="boq-dimensions">
+                        {Object.entries(line.inputs)
+                          .filter(([key]) => key !== 'outputName')
+                          .map(([key, value]) => {
+                            const kind = kindOf(line.kind, key);
+                            return (
+                              <span key={key}>
+                                {key.replace(
+                                  /[A-Z]/g,
+                                  (letter) => ` ${letter.toLowerCase()}`,
+                                )}{' '}
+                                <b>
+                                  {toDisplay(value, kind, unit)}
+                                  {kind === 'len'
+                                    ? ` ${unit}`
+                                    : kind === 'area'
+                                      ? unit === 'ft'
+                                        ? ' sq ft'
+                                        : ' m²'
+                                      : kind === 'spacing'
+                                        ? unit === 'ft'
+                                          ? ' in'
+                                          : ' mm'
+                                        : ''}
+                                </b>
+                              </span>
+                            );
+                          })}
+                      </div>
+                    )}
+                    <div className="boq-output-table">
+                      <div
+                        className={`boq-output-head ${canViewCost ? '' : 'quantity-only'}`}
+                      >
+                        <span>Material / labour</span>
+                        <span>Quantity</span>
+                        {canViewCost && (
+                          <>
+                            <span>Unit rate</span>
+                            <span>Amount</span>
+                          </>
+                        )}
+                      </div>
+                      {line.outputs.map((output, outputIndex) => {
+                        const rate = priceOf(output);
+                        return (
+                          <div
+                            className={`boq-output-row ${canViewCost ? '' : 'quantity-only'}`}
+                            key={`${output.name}-${outputIndex}`}
+                          >
+                            <span>
+                              {output.name}
+                              {output.source && <small>{output.source}</small>}
+                              {output.order && (
+                                <small>To order: {output.order}</small>
+                              )}
+                            </span>
+                            <span className="boq-qty-cell">
+                              {line.kind === 'quoted' ? (
+                                output.quantity.toLocaleString('en-IN')
+                              ) : (
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="any"
+                                  aria-label={`${output.name} quantity`}
+                                  value={output.quantity}
+                                  onChange={(event) =>
+                                    updateOutputQuantity(
+                                      index,
+                                      outputIndex,
+                                      Number(event.target.value),
+                                    )
+                                  }
+                                />
+                              )}{' '}
+                              {output.unit}
+                              {output.rods ? (
+                                <small>{output.rods} bars</small>
+                              ) : null}
+                            </span>
+                            {canViewCost && (
+                              <>
+                                <span className="boq-rate-cell">
+                                  {line.kind === 'quoted' ? (
+                                    '—'
+                                  ) : (materialForOutput(output) &&
+                                      output.quotedRate === undefined) ||
+                                    !canEdit ? (
+                                    money(rate)
+                                  ) : (
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="any"
+                                      aria-label={`${output.name} cost rate`}
+                                      value={output.rate ?? rate}
+                                      onChange={(event) =>
+                                        updateOutputRate(
+                                          index,
+                                          outputIndex,
+                                          Number(event.target.value),
+                                        )
+                                      }
+                                    />
+                                  )}
+                                  {output.quotedRate !== undefined && (
+                                    <small>Package rate from the quote</small>
+                                  )}
+                                </span>
+                                <strong>
+                                  {line.kind === 'quoted'
+                                    ? 'Included in quoted value'
+                                    : money(output.quantity * rate)}
+                                </strong>
+                              </>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {line.quotedPrice !== undefined && (
+                      <div className="boq-quote-price">
+                        <span>Quotation price snapshot</span>
+                        <strong>{money(line.quotedPrice)}</strong>
+                      </div>
+                    )}
+                    <label className="boq-note">
+                      Notes
+                      <input
+                        value={line.notes || ''}
+                        onChange={(event) =>
+                          updateLine(index, { notes: event.target.value })
+                        }
+                        placeholder="Drawing reference, assumptions or scope note"
+                      />
+                    </label>
+                    <button
+                      className="boq-remove-line"
+                      type="button"
+                      onClick={() =>
+                        setLines((prior) => prior.filter((_, i) => i !== index))
+                      }
+                    >
+                      Remove item
+                    </button>
+                  </div>
+                </details>
+              ))
+            )}
+          </section>
           <section className="boq-add-work">
             <div className="boq-section-title">
               <div>
@@ -1405,342 +1642,6 @@ export function BoqWorkspace({
               </button>
             </div>
           </section>
-          <section className="boq-takeoff">
-            <div className="boq-section-title">
-              <div>
-                <h3>Measured work &amp; linked quote</h3>
-                <p>
-                  Expand any item to review its dimensions and calculated
-                  material quantities.
-                </p>
-              </div>
-              <span className="boq-count-pill">{lines.length} items</span>
-            </div>
-            {!lines.length ? (
-              <div className="boq-empty-takeoff">
-                <span>∑</span>
-                <strong>Your takeoff will appear here</strong>
-                <small>Add a measured work item or import quote lines.</small>
-              </div>
-            ) : (
-              lines.map((line, index) => (
-                <details className="boq-line-card" key={line.id}>
-                  <summary>
-                    <span className="boq-line-index">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span className="boq-line-summary">
-                      <strong>{line.name}</strong>
-                      <small>
-                        {line.section} ·{' '}
-                        {line.origin === 'quotation-structure'
-                          ? 'Generated from quotation'
-                          : line.origin === 'quotation-allowance'
-                            ? 'Quoted package allowance'
-                            : line.kind === 'quoted'
-                              ? 'Quotation linked'
-                              : 'Manual takeoff'}
-                      </small>
-                    </span>
-                    <span className="boq-line-total">
-                      {line.kind === 'quoted' && line.quotedPrice !== undefined
-                        ? money(line.quotedPrice)
-                        : money(
-                            line.outputs.reduce(
-                              (sum, output) =>
-                                sum + output.quantity * priceOf(output),
-                              0,
-                            ),
-                          )}
-                    </span>
-                    <span className="boq-expand">⌄</span>
-                  </summary>
-                  <div className="boq-line-detail">
-                    {line.kind !== 'quoted' && (
-                      <div className="boq-dimensions">
-                        {Object.entries(line.inputs)
-                          .filter(([key]) => key !== 'outputName')
-                          .map(([key, value]) => {
-                            const kind = kindOf(line.kind, key);
-                            return (
-                              <span key={key}>
-                                {key.replace(
-                                  /[A-Z]/g,
-                                  (letter) => ` ${letter.toLowerCase()}`,
-                                )}{' '}
-                                <b>
-                                  {toDisplay(value, kind, unit)}
-                                  {kind === 'len'
-                                    ? ` ${unit}`
-                                    : kind === 'area'
-                                      ? unit === 'ft'
-                                        ? ' sq ft'
-                                        : ' m²'
-                                      : kind === 'spacing'
-                                        ? unit === 'ft'
-                                          ? ' in'
-                                          : ' mm'
-                                        : ''}
-                                </b>
-                              </span>
-                            );
-                          })}
-                      </div>
-                    )}
-                    <div className="boq-output-table">
-                      <div
-                        className={`boq-output-head ${canViewCost ? '' : 'quantity-only'}`}
-                      >
-                        <span>Material / labour</span>
-                        <span>Quantity</span>
-                        {canViewCost && (
-                          <>
-                            <span>Unit rate</span>
-                            <span>Amount</span>
-                          </>
-                        )}
-                      </div>
-                      {line.outputs.map((output, outputIndex) => {
-                        const rate = priceOf(output);
-                        return (
-                          <div
-                            className={`boq-output-row ${canViewCost ? '' : 'quantity-only'}`}
-                            key={`${output.name}-${outputIndex}`}
-                          >
-                            <span>
-                              {output.name}
-                              {output.source && <small>{output.source}</small>}
-                            </span>
-                            <span className="boq-qty-cell">
-                              {line.kind === 'quoted' ? (
-                                output.quantity.toLocaleString('en-IN')
-                              ) : (
-                                <input
-                                  type="number"
-                                  min="0"
-                                  step="any"
-                                  aria-label={`${output.name} quantity`}
-                                  value={output.quantity}
-                                  onChange={(event) =>
-                                    updateOutputQuantity(
-                                      index,
-                                      outputIndex,
-                                      Number(event.target.value),
-                                    )
-                                  }
-                                />
-                              )}{' '}
-                              {output.unit}
-                              {output.rods ? (
-                                <small>{output.rods} bars</small>
-                              ) : null}
-                            </span>
-                            {canViewCost && (
-                              <>
-                                <span className="boq-rate-cell">
-                                  {line.kind === 'quoted' ? (
-                                    '—'
-                                  ) : (materialForOutput(output) &&
-                                      output.quotedRate === undefined) ||
-                                    !canEdit ? (
-                                    money(rate)
-                                  ) : (
-                                    <input
-                                      type="number"
-                                      min="0"
-                                      step="any"
-                                      aria-label={`${output.name} cost rate`}
-                                      value={output.rate ?? rate}
-                                      onChange={(event) =>
-                                        updateOutputRate(
-                                          index,
-                                          outputIndex,
-                                          Number(event.target.value),
-                                        )
-                                      }
-                                    />
-                                  )}
-                                  {output.quotedRate !== undefined && (
-                                    <small>Package rate from the quote</small>
-                                  )}
-                                </span>
-                                <strong>
-                                  {line.kind === 'quoted'
-                                    ? 'Included in quoted value'
-                                    : money(output.quantity * rate)}
-                                </strong>
-                              </>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                    {line.quotedPrice !== undefined && (
-                      <div className="boq-quote-price">
-                        <span>Quotation price snapshot</span>
-                        <strong>{money(line.quotedPrice)}</strong>
-                      </div>
-                    )}
-                    <label className="boq-note">
-                      Notes
-                      <input
-                        value={line.notes || ''}
-                        onChange={(event) =>
-                          updateLine(index, { notes: event.target.value })
-                        }
-                        placeholder="Drawing reference, assumptions or scope note"
-                      />
-                    </label>
-                    <button
-                      className="boq-remove-line"
-                      type="button"
-                      onClick={() =>
-                        setLines((prior) => prior.filter((_, i) => i !== index))
-                      }
-                    >
-                      Remove item
-                    </button>
-                  </div>
-                </details>
-              ))
-            )}
-          </section>
-          {canViewCost && stageCost.size > 0 && (
-            <section className="boq-materials">
-              <div className="boq-steel-summary">
-                <h3>Estimate by stage</h3>
-                <p className="boq-steel-note">
-                  Materials at the brands chosen above, labour at company rates,
-                  and quoted package allowances.
-                </p>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Stage</th>
-                      <th>Amount</th>
-                      <th>Share</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[...stageCost.entries()].map(([stage, amount]) => (
-                      <tr key={stage}>
-                        <td>{stage}</td>
-                        <td>{money(amount)}</td>
-                        <td>
-                          {materialCost > 0
-                            ? Math.round((amount / materialCost) * 100) + '%'
-                            : '—'}
-                        </td>
-                      </tr>
-                    ))}
-                    <tr className="total">
-                      <td>Total</td>
-                      <td>{money(materialCost)}</td>
-                      <td>
-                        {builtUpSqft > 0
-                          ? money(materialCost / builtUpSqft) + '/sq ft'
-                          : ''}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </section>
-          )}
-          {canViewCost && floorBreakdown.size > 0 && (
-            <section className="boq-materials boq-floor-costs">
-              <div className="boq-steel-summary">
-                <h3>Floor-wise cost estimate</h3>
-                <p className="boq-steel-note">
-                  Quantity × rate = amount for every material and labour item on
-                  each floor. Rates come from Configure rates and the brands
-                  chosen for this BOQ.
-                </p>
-                {[...floorBreakdown.entries()].map(([stage, items]) => {
-                  const rows = [...items.values()].sort(
-                    (a, b) =>
-                      Number(a.labour) - Number(b.labour) ||
-                      b.amount - a.amount,
-                  );
-                  const total = rows.reduce((sum, row) => sum + row.amount, 0);
-                  const labour = rows
-                    .filter((row) => row.labour)
-                    .reduce((sum, row) => sum + row.amount, 0);
-                  const area = floorArea.get(stage);
-                  return (
-                    <details key={stage} className="boq-floor-cost">
-                      <summary>
-                        <strong>{stage}</strong>
-                        <span>
-                          {money(total)}
-                          {area ? ` · ${money(total / area)}/sq ft` : ''}
-                        </span>
-                      </summary>
-                      <table>
-                        <thead>
-                          <tr>
-                            <th>Item</th>
-                            <th>Quantity</th>
-                            <th>Rate</th>
-                            <th>Amount</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {rows.map((row) => (
-                            <tr
-                              key={row.name + row.unit}
-                              className={row.amount ? '' : 'unpriced'}
-                            >
-                              <td>{row.name}</td>
-                              <td>
-                                {row.quantity.toLocaleString('en-IN', {
-                                  maximumFractionDigits: 2,
-                                })}{' '}
-                                {row.unit}
-                              </td>
-                              <td>
-                                {row.quantity > 0 && row.amount > 0
-                                  ? `× ${money(row.amount / row.quantity)}`
-                                  : 'Enter rate'}
-                              </td>
-                              <td>{money(row.amount)}</td>
-                            </tr>
-                          ))}
-                          {labour > 0 && (
-                            <tr className="subtotal">
-                              <td>Labour on this floor</td>
-                              <td colSpan={2}>
-                                {area
-                                  ? `${money(labour / area)}/sq ft × ${area.toLocaleString('en-IN')} sq ft`
-                                  : ''}
-                              </td>
-                              <td>{money(labour)}</td>
-                            </tr>
-                          )}
-                          <tr className="total">
-                            <td>{stage} total</td>
-                            <td colSpan={2}>
-                              {area ? `${money(total / area)}/sq ft` : ''}
-                            </td>
-                            <td>{money(total)}</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </details>
-                  );
-                })}
-                <div className="boq-floor-grand">
-                  <span>Total project cost</span>
-                  <strong>
-                    {money(materialCost)}
-                    {builtUpSqft > 0
-                      ? ` · ${money(materialCost / builtUpSqft)}/sq ft`
-                      : ''}
-                  </strong>
-                </div>
-              </div>
-            </section>
-          )}
           {(usedMaterials.size > 0 || steelSummary.size > 0) && (
             <section className="boq-materials">
               {canViewCost && (

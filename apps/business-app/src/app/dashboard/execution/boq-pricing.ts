@@ -150,6 +150,17 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     },
   ),
   group(
+    'concrete_m20',
+    'M20 concrete (ready-mix)',
+    'm³',
+    'Structure materials',
+    ['Ready-mix M20'],
+    {
+      defaultRate: 5000,
+      note: 'Per m³ delivered, for footings, columns, beams, slabs and stairs.',
+    },
+  ),
+  group(
     'binding_wire',
     'Binding wire',
     'kg',
@@ -219,9 +230,27 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
   group('gate', 'Entrance gate', 'each', 'Doors & windows', ['MS fabricated'], {
     defaultRate: 20000,
   }),
-  group('floor_tiles', 'Floor tiles', 'sqft', 'Finishes', ['Vitrified 2×2'], {
-    defaultRate: 60,
-  }),
+  group(
+    'floor_tiles',
+    'Room flooring tiles',
+    'sqft',
+    'Finishes',
+    ['Vitrified 2×2'],
+    {
+      defaultRate: 60,
+    },
+  ),
+  group(
+    'bath_floor_tiles',
+    'Bathroom floor tiles (anti-skid)',
+    'sqft',
+    'Finishes',
+    ['Ceramic anti-skid 1×1'],
+    {
+      defaultRate: 45,
+      note: 'Estimate.',
+    },
+  ),
   group('wall_tiles', 'Bathroom wall tiles', 'sqft', 'Finishes', ['Ceramic'], {
     defaultRate: 50,
   }),
@@ -292,32 +321,287 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
   ),
   group(
     'electrical_point',
-    'Electrical material per point',
+    'Electrical material per point (older BOQs)',
     'point',
-    'Services',
+    'Electrical',
     ['Finolex + Maru'],
     {
       defaultRate: 800,
-      note: 'Estimate: wire, conduit, switch, box.',
     },
   ),
+  group(
+    'wire_15',
+    'Wire 1.5 sq mm (90 m coil)',
+    'coil',
+    'Electrical',
+    ['Finolex FR', 'Polycab FR'],
+    {
+      starterRates: { 'Finolex FR': 1900, 'Polycab FR': 1850 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'wire_25',
+    'Wire 2.5 sq mm (90 m coil)',
+    'coil',
+    'Electrical',
+    ['Finolex FR', 'Polycab FR'],
+    {
+      starterRates: { 'Finolex FR': 3000, 'Polycab FR': 2950 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'wire_40',
+    'Wire 4 sq mm (90 m coil)',
+    'coil',
+    'Electrical',
+    ['Finolex FR', 'Polycab FR'],
+    {
+      starterRates: { 'Finolex FR': 4800, 'Polycab FR': 4700 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'wire_60',
+    'Feeder cable 6 sq mm',
+    'm',
+    'Electrical',
+    ['Finolex FR', 'Polycab FR'],
+    {
+      starterRates: { 'Finolex FR': 115, 'Polycab FR': 110 },
+      note: 'Per metre. Estimate.',
+    },
+  ),
+  group(
+    'conduit',
+    'PVC conduit 25 mm (3 m)',
+    'pipe',
+    'Electrical',
+    ['Sudhakar', 'Precision'],
+    {
+      starterRates: { Sudhakar: 90, Precision: 85 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'switch_6a',
+    'Switch 6 A',
+    'nos',
+    'Electrical',
+    ['Maru', 'Anchor Roma'],
+    {
+      starterRates: { Maru: 40, 'Anchor Roma': 55 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'switch_16a',
+    'Switch 16 A',
+    'nos',
+    'Electrical',
+    ['Maru', 'Anchor Roma'],
+    {
+      starterRates: { Maru: 90, 'Anchor Roma': 120 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'socket_6a',
+    'Socket 6 A',
+    'nos',
+    'Electrical',
+    ['Maru', 'Anchor Roma'],
+    {
+      starterRates: { Maru: 70, 'Anchor Roma': 95 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'socket_16a',
+    'Socket 16 A',
+    'nos',
+    'Electrical',
+    ['Maru', 'Anchor Roma'],
+    {
+      starterRates: { Maru: 150, 'Anchor Roma': 190 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'fan_regulator',
+    'Fan regulator',
+    'nos',
+    'Electrical',
+    ['Maru', 'Anchor Roma'],
+    {
+      starterRates: { Maru: 300, 'Anchor Roma': 400 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'switch_board',
+    'Switch board (box + plate)',
+    'nos',
+    'Electrical',
+    ['Maru', 'Anchor Roma'],
+    {
+      starterRates: { Maru: 180, 'Anchor Roma': 250 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'db_box',
+    'Distribution board 8-way',
+    'nos',
+    'Electrical',
+    ['Havells', 'Legrand'],
+    {
+      starterRates: { Havells: 1800, Legrand: 2200 },
+      note: 'Estimate.',
+    },
+  ),
+  group('mcb', 'MCB single pole', 'nos', 'Electrical', ['Havells', 'Legrand'], {
+    starterRates: { Havells: 220, Legrand: 260 },
+    note: 'Estimate.',
+  }),
   group(
     'sanitary_cp',
     'Sanitary ware & CP fittings',
     'bathroom',
-    'Services',
+    'Plumbing & sanitary',
     ['Cera'],
     { defaultRate: 25000 },
   ),
   group(
+    'cpvc_half',
+    'CPVC ½ in pipe (3 m)',
+    'pipe',
+    'Plumbing & sanitary',
+    ['Prince', 'Ashirvad'],
+    {
+      starterRates: { Prince: 220, Ashirvad: 240 },
+      note: 'SDR 11. Estimate.',
+    },
+  ),
+  group(
+    'cpvc_fittings',
+    'CPVC fittings (avg)',
+    'nos',
+    'Plumbing & sanitary',
+    ['Prince', 'Ashirvad'],
+    {
+      starterRates: { Prince: 25, Ashirvad: 28 },
+      note: 'Elbows, tees, sockets. Estimate.',
+    },
+  ),
+  group(
+    'cpvc_riser',
+    'CPVC 1 in pipe (3 m)',
+    'pipe',
+    'Plumbing & sanitary',
+    ['Prince', 'Ashirvad'],
+    {
+      starterRates: { Prince: 600, Ashirvad: 640 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'concealed_valve',
+    'Concealed stop valve',
+    'nos',
+    'Plumbing & sanitary',
+    ['Standard'],
+    {
+      defaultRate: 650,
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'swr_110',
+    'SWR 110 mm pipe (3 m)',
+    'pipe',
+    'Plumbing & sanitary',
+    ['Prince', 'Supreme'],
+    {
+      starterRates: { Prince: 700, Supreme: 720 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'swr_75',
+    'SWR 75 mm pipe (3 m)',
+    'pipe',
+    'Plumbing & sanitary',
+    ['Prince', 'Supreme'],
+    {
+      starterRates: { Prince: 480, Supreme: 500 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'floor_trap',
+    'Floor / nahani trap',
+    'nos',
+    'Plumbing & sanitary',
+    ['Standard'],
+    {
+      defaultRate: 300,
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'swr_fittings',
+    'SWR fittings (avg)',
+    'nos',
+    'Plumbing & sanitary',
+    ['Prince', 'Supreme'],
+    {
+      starterRates: { Prince: 120, Supreme: 125 },
+      note: 'Bends, tees, door bends. Estimate.',
+    },
+  ),
+  group(
+    'rainwater_pipe',
+    'Rainwater pipe 110 mm (3 m)',
+    'pipe',
+    'Plumbing & sanitary',
+    ['Prince', 'Supreme'],
+    {
+      starterRates: { Prince: 550, Supreme: 570 },
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'plumbing_sundries',
+    'Plumbing sundries (solvent, tape, clamps)',
+    'floor',
+    'Plumbing & sanitary',
+    ['Standard'],
+    {
+      defaultRate: 1500,
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'bathroom_waterproofing',
+    'Bathroom waterproofing',
+    'sqft',
+    'Plumbing & sanitary',
+    ['Dr. Fixit'],
+    {
+      defaultRate: 45,
+      note: 'Estimate, supply + apply.',
+    },
+  ),
+  group(
     'plumbing_bathroom',
-    'Plumbing pipes & fittings',
+    'Plumbing pipes & fittings (older BOQs)',
     'bathroom',
-    'Services',
+    'Plumbing & sanitary',
     ['Prince CPVC / PVC'],
     {
       defaultRate: 18000,
-      note: 'Estimate.',
     },
   ),
   group('sump', 'Underground sump', 'litre', 'Services', ['Brick / RCC'], {
@@ -384,13 +668,13 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
   ),
   group(
     'labour_civil',
-    'Civil labour contract (all-in)',
+    'Structural labour (shuttering, concreting, brickwork, plastering)',
     'sqft',
     'Labour',
     ['Contract'],
     {
-      defaultRate: 350,
-      note: 'Used only when labour is set to one contract rate.',
+      defaultRate: 400,
+      note: 'One contract rate per sq ft built-up.',
     },
   ),
   group(
@@ -486,6 +770,8 @@ export const GROUP_SECTIONS = [
   'Structure materials',
   'Doors & windows',
   'Finishes',
+  'Electrical',
+  'Plumbing & sanitary',
   'Services',
   'Labour',
   'Design & handover',
@@ -597,6 +883,33 @@ const QUOTE_BRAND_TARGETS: readonly {
   { test: /cement/, groups: ['cement', 'cement_masonry'] },
   { test: /brick|block/, groups: ['bricks'] },
   { test: /sand/, groups: ['sand'] },
+  {
+    test: /electric|wir|cable/,
+    groups: ['wire_15', 'wire_25', 'wire_40', 'wire_60', 'conduit'],
+  },
+  {
+    test: /electric|switch/,
+    groups: [
+      'switch_6a',
+      'switch_16a',
+      'socket_6a',
+      'socket_16a',
+      'fan_regulator',
+      'switch_board',
+    ],
+  },
+  {
+    test: /plumb|cpvc|pipe/,
+    groups: [
+      'cpvc_half',
+      'cpvc_fittings',
+      'cpvc_riser',
+      'swr_110',
+      'swr_75',
+      'swr_fittings',
+      'rainwater_pipe',
+    ],
+  },
 ];
 const BRAND_ALIASES: Readonly<Record<string, readonly string[]>> = {
   'vizag (rinl)': ['vizag', 'visakha', 'rinl'],
@@ -639,7 +952,7 @@ export function brandSelectionsFromQuote(
       .join(' ')
       .toLowerCase();
     for (const target of QUOTE_BRAND_TARGETS) {
-      if (!target.test.test(title)) continue;
+      if (!target.test.test(title) && !/scope|inclusion/.test(title)) continue;
       for (const groupKey of target.groups) {
         if (picks[groupKey]) continue;
         const variants = [
@@ -707,4 +1020,106 @@ export function effectiveRates(saved: readonly Rate[]): Rate[] {
     ...saved.filter((rate) => !rate.material),
     ...startingVariants([...saved]),
   ];
+}
+
+/** Simple cost heads for the floor-wise estimate, one per trade. */
+export const COST_HEADS = [
+  'Concrete (M20)',
+  'Cement',
+  'Sand',
+  'Aggregate',
+  'Steel',
+  'Bricks',
+  'Excavation',
+  'Structural labour',
+  'Doors & windows',
+  'Room flooring tiles',
+  'Bathroom tiles',
+  'Kitchen (granite, tiles, sink)',
+  'Staircase granite',
+  'Parking tiles',
+  'Tile & granite laying',
+  'Painting',
+  'Electrical',
+  'Plumbing',
+  'Sanitary & CP fittings',
+  'Waterproofing',
+  'Water storage',
+  'Design & approvals',
+  'Handover',
+  'Other',
+] as const;
+export type CostHead = (typeof COST_HEADS)[number];
+/** Heads shown as quantity × rate (bought by m³, bag, tonne, kg, number). */
+export const QUANTITY_HEADS: Partial<Record<CostHead, string>> = {
+  'Concrete (M20)': 'm³',
+  Cement: 'bag',
+  Sand: 't',
+  Aggregate: 't',
+  Steel: 'kg',
+  Bricks: 'nos',
+  'Room flooring tiles': 'sqft',
+  'Staircase granite': 'sqft',
+  'Parking tiles': 'sqft',
+};
+const HEAD_BY_GROUP: Readonly<Record<string, CostHead>> = {
+  concrete_m20: 'Concrete (M20)',
+  binding_wire: 'Steel',
+  sand: 'Sand',
+  aggregate: 'Aggregate',
+  bricks: 'Bricks',
+  window: 'Doors & windows',
+  ventilator: 'Doors & windows',
+  rolling_shutter: 'Doors & windows',
+  gate: 'Doors & windows',
+  labour_door_fixing: 'Doors & windows',
+  floor_tiles: 'Room flooring tiles',
+  bath_floor_tiles: 'Bathroom tiles',
+  wall_tiles: 'Bathroom tiles',
+  kitchen_wall_tiles: 'Kitchen (granite, tiles, sink)',
+  kitchen_platform: 'Kitchen (granite, tiles, sink)',
+  kitchen_sink: 'Kitchen (granite, tiles, sink)',
+  staircase_granite: 'Staircase granite',
+  parking_flooring: 'Parking tiles',
+  labour_tiling: 'Tile & granite laying',
+  labour_painting: 'Painting',
+  electrical_point: 'Electrical',
+  labour_electrical: 'Electrical',
+  conduit: 'Electrical',
+  fan_regulator: 'Electrical',
+  switch_board: 'Electrical',
+  db_box: 'Electrical',
+  mcb: 'Electrical',
+  sanitary_cp: 'Sanitary & CP fittings',
+  labour_plumbing: 'Plumbing',
+  concealed_valve: 'Plumbing',
+  floor_trap: 'Plumbing',
+  rainwater_pipe: 'Plumbing',
+  bathroom_waterproofing: 'Waterproofing',
+  waterproofing: 'Waterproofing',
+  labour_civil: 'Structural labour',
+  labour_rcc: 'Structural labour',
+  labour_brickwork_9: 'Structural labour',
+  labour_brickwork_4: 'Structural labour',
+  plaster_labour: 'Structural labour',
+  shuttering: 'Structural labour',
+  excavation: 'Excavation',
+  sump: 'Water storage',
+  overhead_tank: 'Water storage',
+  design_fees: 'Design & approvals',
+  soil_test: 'Design & approvals',
+  building_permission: 'Design & approvals',
+};
+export function costHead(group: string | undefined): CostHead {
+  if (!group) return 'Other';
+  const direct = HEAD_BY_GROUP[group];
+  if (direct) return direct;
+  if (group.startsWith('steel_')) return 'Steel';
+  if (group.startsWith('cement')) return 'Cement';
+  if (group.startsWith('door_')) return 'Doors & windows';
+  if (group.startsWith('paint_')) return 'Painting';
+  if (/^(wire_|switch_|socket_)/.test(group)) return 'Electrical';
+  if (/^(cpvc_|swr_|plumbing_)/.test(group)) return 'Plumbing';
+  if (group.startsWith('handover_')) return 'Handover';
+  return 'Other';
 }

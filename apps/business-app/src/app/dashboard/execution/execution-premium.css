@@ -2011,3 +2011,90 @@
 .boq-gen-count-table td.boq-window-sizes input {
   min-width: 150px;
 }
+
+/* Bars picker, floor inputs, rooms */
+.boq-bars {
+  display: grid;
+  gap: 4px;
+}
+.boq-bars-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  white-space: nowrap;
+}
+.boq-bars select {
+  min-height: 30px;
+  border: 1px solid #e9e1df;
+  border-radius: 8px;
+  font-size: 11px;
+}
+.boq-floor-inputs .boq-gen-count-table caption {
+  padding: 8px 2px 4px;
+  color: #45383a;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: left;
+}
+.boq-gen-count-table td.boq-size-pair {
+  white-space: nowrap;
+}
+.boq-gen-count-table td.boq-size-pair input {
+  width: 56px;
+  min-width: 48px;
+  margin: 0 3px;
+}
+.boq-rooms {
+  margin-top: 14px;
+  font-size: 11px;
+  color: #5c5356;
+}
+.boq-rooms h4 {
+  margin: 0 0 4px;
+  color: #45383a;
+  font-size: 12px;
+}
+.boq-rooms-floor {
+  margin-top: 6px;
+  border: 1px solid #f1eceb;
+  border-radius: 10px;
+}
+.boq-rooms-floor summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.boq-rooms-floor table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.boq-rooms-floor td,
+.boq-rooms-floor th {
+  padding: 4px 8px;
+  text-align: left;
+}
+.boq-rooms-floor input {
+  width: 100%;
+  min-height: 30px;
+  border: 1px solid #e9e1df;
+  border-radius: 8px;
+  padding: 3px 6px;
+}
+.boq-rooms-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+}
+.boq-floor-orders {
+  margin: 6px 0 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fbf7f6;
+  font-size: 11px;
+}
+.boq-floor-orders li {
+  margin: 2px 0;
+}

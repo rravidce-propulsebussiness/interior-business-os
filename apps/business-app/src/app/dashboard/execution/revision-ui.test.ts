@@ -27,9 +27,7 @@ describe('manual BOQ presentation', () => {
     expect(legacyRoutes).toContain("'/dashboard/execution/boq'");
     expect(legacyRoutes).toContain("'/dashboard/execution/boq/pricing'");
     expect(read('./boq-workspace.tsx')).toContain('Use quotation prices');
-    expect(read('./boq-workspace.tsx')).toContain(
-      'Measured work &amp; linked quote',
-    );
+    expect(read('./boq-workspace.tsx')).toContain('Detailed takeoff');
     expect(read('./boq-calculations.ts')).toContain("kind === 'column'");
     expect(read('./boq-calculations.ts')).toContain("kind === 'wall'");
   });
