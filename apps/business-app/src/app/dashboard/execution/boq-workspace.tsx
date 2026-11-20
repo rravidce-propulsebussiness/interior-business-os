@@ -33,9 +33,12 @@ import {
   floorsFromQuote,
   generateQuotationBoq,
   normalizeStructuralSettings,
+  normalizeDesign,
   type BoqCounts,
   type BoqFloor,
+  type StructuralDesign,
 } from '@business-os/core/construction-boq';
+import { BoqDesignSchedule } from './boq-design-schedule';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 
 type Generator = {
@@ -44,6 +47,7 @@ type Generator = {
   settings: Record<string, number>;
   counts: BoqCounts;
   floors: BoqFloor[];
+  design?: StructuralDesign | null;
   warnings: string[];
 };
 type SavedLine = {
@@ -59,6 +63,7 @@ type SavedLine = {
     unit: string;
     source?: string;
     rate?: number;
+    quotedRate?: number;
     material?: string;
     rods?: number;
     diameter?: number;
@@ -185,6 +190,9 @@ export function BoqWorkspace({
   );
   const [genCounts, setGenCounts] = useState<BoqCounts | null>(
     initialDocument?.document?.generator?.counts ?? null,
+  );
+  const [genDesign, setGenDesign] = useState<StructuralDesign | null>(
+    normalizeDesign(initialDocument?.document?.generator?.design),
   );
   const [selectedTemplate, setSelectedTemplate] = useState('column');
   const [newName, setNewName] = useState('');
@@ -380,10 +388,13 @@ export function BoqWorkspace({
     (sum, floor) => sum + floor.areaSqft,
     0,
   );
-  const quotedValue = lines.reduce(
-    (sum, line) => sum + (line.quotedPrice ?? 0),
-    0,
-  );
+  // The quotation is what the customer pays; the BOQ is the cost of the
+  // work. Compare them, never mix them.
+  const quotedValue =
+    generator && schedule && generator.revisionId === quoteId
+      ? Number(schedule.total) || 0
+      : lines.reduce((sum, line) => sum + (line.quotedPrice ?? 0), 0);
+  const margin = quotedValue > 0 ? quotedValue - materialCost : 0;
 
   function selectProject(id: string) {
     setProjectId(id);
@@ -391,6 +402,7 @@ export function BoqWorkspace({
     setSelectedQuoteLines([]);
     setGenFloors([]);
     setGenCounts(null);
+    setGenDesign(null);
   }
   function startNew() {
     setActive(null);
@@ -406,6 +418,7 @@ export function BoqWorkspace({
     setGenerator(null);
     setGenFloors([]);
     setGenCounts(null);
+    setGenDesign(null);
     setMessage('');
   }
   function openDocument(document: Document) {
@@ -419,6 +432,7 @@ export function BoqWorkspace({
     setGenerator(document.document?.generator ?? null);
     setGenFloors(document.document?.generator?.floors ?? []);
     setGenCounts(document.document?.generator?.counts ?? null);
+    setGenDesign(normalizeDesign(document.document?.generator?.design));
     setMessage('');
   }
   function generateFromQuote() {
@@ -428,6 +442,7 @@ export function BoqWorkspace({
       settings,
       floors: floorsForGeneration,
       counts: countsForGeneration,
+      design: genDesign,
     });
     const kept = lines.filter((line) => !line.origin);
     setLines([...result.lines, ...kept]);
@@ -440,6 +455,7 @@ export function BoqWorkspace({
       settings: result.settings,
       counts: result.counts,
       floors: result.floors,
+      design: result.design,
       warnings: result.warnings,
     });
     setGenFloors(result.floors);
@@ -469,6 +485,29 @@ export function BoqWorkspace({
                       quantity: Number.isFinite(quantity)
                         ? Math.max(0, quantity)
                         : 0,
+                    }
+                  : output,
+              ),
+            }
+          : line,
+      ),
+    );
+  }
+  function updateOutputRate(
+    lineIndex: number,
+    outputIndex: number,
+    rate: number,
+  ) {
+    setLines((prior) =>
+      prior.map((line, i) =>
+        i === lineIndex
+          ? {
+              ...line,
+              outputs: line.outputs.map((output, j) =>
+                j === outputIndex
+                  ? {
+                      ...output,
+                      rate: Number.isFinite(rate) ? Math.max(0, rate) : 0,
                     }
                   : output,
               ),
@@ -669,9 +708,17 @@ export function BoqWorkspace({
           <strong>{canViewCost ? money(materialCost) : 'Restricted'}</strong>
         </div>
         <div>
-          <span>Imported quotation value</span>
+          <span>Quotation value (customer price)</span>
           <strong>{money(quotedValue)}</strong>
         </div>
+        {canViewCost && quotedValue > 0 && (
+          <div>
+            <span>Margin over cost</span>
+            <strong>
+              {money(margin)} ({Math.round((margin / quotedValue) * 100)}%)
+            </strong>
+          </div>
+        )}
         <div>
           <span>Measured items</span>
           <strong>{lines.length}</strong>
@@ -886,6 +933,7 @@ export function BoqWorkspace({
                   <span>Area</span>
                   <span>Size (ft)</span>
                   <span>Floor height (ft)</span>
+                  <span>Parking (sqft)</span>
                 </div>
                 {floorsForGeneration.map((floor, floorIndex) => (
                   <div className="boq-gen-floor" key={floor.name}>
@@ -908,10 +956,8 @@ export function BoqWorkspace({
                             floorsForGeneration.map((item, i) =>
                               i === floorIndex
                                 ? {
-                                    name: item.name,
-                                    areaSqft: item.areaSqft,
-                                    lengthFeet: item.lengthFeet,
-                                    widthFeet: item.widthFeet,
+                                    ...item,
+                                    heightAssumed: false,
                                     heightFeet:
                                       heightFeet > 0 ? heightFeet : 10,
                                   }
@@ -923,6 +969,29 @@ export function BoqWorkspace({
                       {floor.heightAssumed && (
                         <small>Not on quote — assumed</small>
                       )}
+                    </label>
+                    <label>
+                      <span className="sr-only">{floor.name} parking area</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max={floor.areaSqft}
+                        step="1"
+                        value={floor.parkingSqft ?? 0}
+                        onChange={(event) => {
+                          const parkingSqft = Math.min(
+                            floor.areaSqft,
+                            Math.max(0, Number(event.target.value) || 0),
+                          );
+                          setGenFloors(
+                            floorsForGeneration.map((item, i) =>
+                              i === floorIndex
+                                ? { ...item, parkingSqft }
+                                : item,
+                            ),
+                          );
+                        }}
+                      />
                     </label>
                   </div>
                 ))}
@@ -1025,6 +1094,12 @@ export function BoqWorkspace({
                   </Link>
                 )}
               </div>
+              <BoqDesignSchedule
+                design={genDesign}
+                floors={floorsForGeneration}
+                defaults={settings}
+                onChange={setGenDesign}
+              />
               {generator?.revisionId === quoteId &&
                 generator.warnings.length > 0 && (
                   <ul className="boq-gen-warnings">
@@ -1259,7 +1334,7 @@ export function BoqWorkspace({
                       </small>
                     </span>
                     <span className="boq-line-total">
-                      {line.quotedPrice !== undefined
+                      {line.kind === 'quoted' && line.quotedPrice !== undefined
                         ? money(line.quotedPrice)
                         : money(
                             line.outputs.reduce(
@@ -1353,8 +1428,32 @@ export function BoqWorkspace({
                             </span>
                             {canViewCost && (
                               <>
-                                <span>
-                                  {line.kind === 'quoted' ? '—' : money(rate)}
+                                <span className="boq-rate-cell">
+                                  {line.kind === 'quoted' ? (
+                                    '—'
+                                  ) : materialForOutput(output) || !canEdit ? (
+                                    money(rate)
+                                  ) : (
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      step="any"
+                                      aria-label={`${output.name} cost rate`}
+                                      value={output.rate ?? rate}
+                                      onChange={(event) =>
+                                        updateOutputRate(
+                                          index,
+                                          outputIndex,
+                                          Number(event.target.value),
+                                        )
+                                      }
+                                    />
+                                  )}
+                                  {output.quotedRate !== undefined && (
+                                    <small>
+                                      Quoted {money(output.quotedRate)}
+                                    </small>
+                                  )}
                                 </span>
                                 <strong>
                                   {line.kind === 'quoted'
@@ -1547,9 +1646,15 @@ export function BoqWorkspace({
               </strong>
             </div>
             <div>
-              <span>Quotation value imported</span>
+              <span>Quotation value (customer price)</span>
               <strong>{money(quotedValue)}</strong>
             </div>
+            {canViewCost && quotedValue > 0 && (
+              <div>
+                <span>Margin over cost</span>
+                <strong>{money(margin)}</strong>
+              </div>
+            )}
           </section>
           <div className="boq-savebar">
             <span>

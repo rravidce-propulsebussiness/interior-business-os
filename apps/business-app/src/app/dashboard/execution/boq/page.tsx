@@ -1,3 +1,4 @@
+import { effectiveRates, type Rate } from '../boq-pricing';
 import { executionServices } from '../service';
 import type { SupabaseClient } from '@business-os/database';
 import { BoqWorkspace } from '../boq-workspace';
@@ -234,16 +235,10 @@ export default async function ManualBoqPage({
       schedule,
     };
   });
-  const rates = (ratesResult.data?.rates?.items || []) as {
-    key: string;
-    label: string;
-    unit: string;
-    rate: number;
-    category: 'material' | 'labour' | 'other';
-    material?: string;
-    variant?: string;
-    isDefault?: boolean;
-  }[];
+  // Groups not saved on the rate card yet use the default prices.
+  const rates = effectiveRates(
+    (ratesResult.data?.rates?.items || []) as Rate[],
+  );
   const structural = (ratesResult.data?.rates?.structural ?? null) as Record<
     string,
     number

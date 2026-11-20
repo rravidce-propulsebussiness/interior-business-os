@@ -40,21 +40,36 @@ bathrooms, kitchens and rolling shutters, plus entrance gates and compound wall
 length. Defaults are estimated from each floor's area; enter the real counts
 from the floor plan.
 
-**From the structural drawing** (BOQ → Configure rates → structural rules):
-column grid (rows × columns per row + extra columns, e.g. 6 × 2 + 2 = 14),
-column size and bars, footing size and mat, plinth beam, beam bars (top,
-bottom, extra), slab thickness and bar spacing, staircase waist and bars.
+**Steel as per the structural design.** On the BOQ, turn on **Use the
+structural drawing** and enter the engineer's schedule:
+
+- **Columns and footings**, one row per column type: number, the floor it
+  rises to (e.g. C7–C12 stop at the third floor while C1–C6 continue to the
+  penthouse), size, main bars as written on the drawing (`6-16`,
+  `4-16+2-12`), rings, footing size and mesh.
+- **Beams**, one row per beam type: size, bars (`4-20+2-16`), stirrups and the
+  running feet under each floor's roof (taken off the beam layout).
+- **Plinth beam** running feet.
+
+Footings, every column lift and every roof's beams are then quantified type
+by type, with the same 2-per-bar foundation and 3-per-bar floor cuts and
+laps. Slab, staircase, plinth-beam section and covers come from the
+structural rules (Configure rates). Without a schedule, the column grid and
+bar rules in Configure rates are used. A floor quoted as parking + shop keeps
+its real frontage and depth.
 
 **Purchase units:** cement in bags, bricks in numbers, sand and aggregate in
 tonnes (from m³ using the density in the structural rules), steel in rods of
 each diameter (weight shown alongside). Rates are entered in the same units.
 
-**Package allowances** from the quotation (₹ per door, per bathroom, per sq
-ft …) price the matching counted items on every floor: main / internal /
-bathroom / pooja doors, windows, ventilators, gates, floor and wall tiles,
-painting, electrical points, sanitary & CP fittings, plumbing. A generic
-"Internal doors" allowance also covers bathroom and pooja doors unless they
-have their own. Items without an allowance are priced from the rate card.
+**The BOQ is the cost of the work, not the customer price.** The quotation
+gives the quantities: floors, sizes, heights, and which package items apply
+(doors, windows, tiles, fittings …). Every item is priced from the rate card
+(Configure rates), i.e. what the company pays. The quoted allowance (e.g.
+_Internal doors · ₹7,000 per door_) is shown next to the cost as "Quoted
+₹7,000" for comparison only. Quoted items with no rate-card group (other
+allowances, additional quoted works) start at zero: type their cost on the
+BOQ. The page shows the quotation value, the cost and the margin.
 
 **Default prices** (editable, Configure rates; Hyderabad, Nov 2026 — confirm
 with your suppliers):
@@ -76,10 +91,9 @@ with your suppliers):
 
 Labour is itemized by default (RCC, brickwork, plaster, centering, tiling,
 painting …). Set **Labour: itemized** to 0 to use one civil labour contract
-rate (₹350/sq ft) instead. Allowance items (doors ₹7,000, windows ₹450/sq ft,
-fittings ₹25,000 per bathroom, tiles ₹60, granite ₹70 / ₹150, sink, shutter,
-gate) default to the standard package values and are replaced by the
-quotation's own allowances.
+rate (₹350/sq ft) instead. Doors, windows, tiles, fittings, granite, sink,
+shutter and gate start at the standard package values; replace them with
+your purchase prices.
 
 The BOQ shows the **estimate by stage** with the total and cost per sq ft.
 Every quantity can be edited. **Regenerate BOQ** replaces only the generated

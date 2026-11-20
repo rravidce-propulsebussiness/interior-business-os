@@ -24,6 +24,7 @@ const lineSchema = z.object({
         source: z.string().max(300).optional(),
         material: z.string().max(40).optional(),
         rate: z.number().finite().nonnegative().optional(),
+        quotedRate: z.number().finite().nonnegative().optional(),
         rods: z.number().int().nonnegative().optional(),
         diameter: z.number().finite().nonnegative().optional(),
         weightKg: z.number().finite().nonnegative().optional(),
@@ -64,9 +65,20 @@ const generatorSchema = z.object({
         widthFeet: z.number().finite().nonnegative(),
         heightFeet: z.number().finite().positive(),
         heightAssumed: z.boolean().optional(),
+        parkingSqft: z.number().finite().nonnegative().optional(),
       }),
     )
     .max(20),
+  /** Column / beam / footing schedule from the structural drawing. */
+  design: z
+    .object({
+      columns: z.array(z.record(z.string(), z.unknown())).max(20),
+      beams: z.array(z.record(z.string(), z.unknown())).max(20),
+      plinthRunFeet: z.number().finite().nonnegative(),
+      settings: z.record(z.string().max(40), z.number().finite()).optional(),
+    })
+    .nullable()
+    .optional(),
   warnings: z.array(z.string().max(500)).max(50).default([]),
 });
 const saveSchema = z.object({

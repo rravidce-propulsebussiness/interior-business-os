@@ -6,6 +6,7 @@ import {
   generateQuotationBoq,
   lapFeet,
   normalizeStructuralSettings,
+  parseBars,
 } from './construction-boq';
 import { calculateSftEstimate } from './sft-quotation';
 
@@ -239,7 +240,7 @@ describe('quotation-driven construction BOQ', () => {
     ).toBe(true);
   });
 
-  it('prices package allowances floor by floor from the counts', () => {
+  it('takes quantities from the quote and costs from the rate card', () => {
     const floorCounts = {
       mainDoors: 0,
       internalDoors: 6,
@@ -272,6 +273,7 @@ describe('quotation-driven construction BOQ', () => {
           quantity: output.quantity,
           unit: output.unit,
           rate: output.rate,
+          quotedRate: output.quotedRate,
           material: output.material,
         }));
     expect(outputs('Ground Floor', 'quote-doors-windows')).toEqual([
@@ -279,30 +281,34 @@ describe('quotation-driven construction BOQ', () => {
         name: 'Main door',
         quantity: 1,
         unit: 'door',
-        rate: 25000,
-        material: undefined,
+        rate: undefined,
+        quotedRate: 25000,
+        material: 'door_main',
       },
       {
         name: 'Bedroom / internal door',
         quantity: 6,
         unit: 'door',
-        rate: 10000,
-        material: undefined,
+        rate: undefined,
+        quotedRate: 10000,
+        material: 'door_internal',
       },
       // "Internal doors" also prices bathroom and pooja doors.
       {
         name: 'Bathroom door',
         quantity: 2,
         unit: 'door',
-        rate: 10000,
-        material: undefined,
+        rate: undefined,
+        quotedRate: 10000,
+        material: 'door_bathroom',
       },
       {
         name: 'Pooja door',
         quantity: 1,
         unit: 'door',
-        rate: 10000,
-        material: undefined,
+        rate: undefined,
+        quotedRate: 10000,
+        material: 'door_pooja',
       },
       // No window allowance: priced from the rate card.
       {
@@ -310,6 +316,7 @@ describe('quotation-driven construction BOQ', () => {
         quantity: 128,
         unit: 'sqft',
         rate: undefined,
+        quotedRate: undefined,
         material: 'window',
       },
       {
@@ -317,6 +324,7 @@ describe('quotation-driven construction BOQ', () => {
         quantity: 3,
         unit: 'each',
         rate: undefined,
+        quotedRate: undefined,
         material: 'ventilator',
       },
       {
@@ -324,16 +332,18 @@ describe('quotation-driven construction BOQ', () => {
         quantity: 10,
         unit: 'door',
         rate: undefined,
+        quotedRate: undefined,
         material: 'labour_door_fixing',
       },
     ]);
-    // 85% of 1,200 sqft at the quoted ₹60.
+    // 85% of 1,200 sqft; the quoted ₹60 is kept only for comparison.
     expect(outputs('First Floor', 'quote-flooring')[0]).toEqual({
       name: 'Floor tiles',
       quantity: 1020,
       unit: 'sqft',
-      rate: 60,
-      material: undefined,
+      rate: undefined,
+      quotedRate: 60,
+      material: 'floor_tiles',
     });
     // "Bathroom fittings & plumbing" is charged once per bathroom.
     const services = outputs('First Floor', 'quote-services');
@@ -341,7 +351,8 @@ describe('quotation-driven construction BOQ', () => {
       services.find((o) => o.name === 'Sanitary ware & CP fittings'),
     ).toMatchObject({
       quantity: 3,
-      rate: 45000,
+      quotedRate: 45000,
+      material: 'sanitary_cp',
     });
     expect(services.some((o) => o.name === 'Plumbing pipes & fittings')).toBe(
       false,
@@ -483,6 +494,128 @@ describe('quotation-driven construction BOQ', () => {
     expect(external.find((o) => o.material === 'sump')?.quantity).toBe(6500);
     expect(external.find((o) => o.material === 'overhead_tank')?.quantity).toBe(
       1,
+    );
+  });
+
+  it('keeps the frontage when a floor is quoted as parking + shop', () => {
+    const details = calculateSftEstimate({
+      rows: [
+        {
+          kind: 'floor',
+          name: 'Ground Floor — Parking',
+          lengthFeet: '44',
+          widthFeet: '25',
+          heightFeet: '10',
+          ratePerSqft: '900',
+        },
+        {
+          kind: 'floor',
+          name: 'Ground Floor',
+          lengthFeet: '17.5',
+          widthFeet: '25',
+          heightFeet: '10',
+          ratePerSqft: '1380',
+        },
+      ],
+      materialIds: [],
+    });
+    expect(floorsFromQuote(details)[0]).toMatchObject({
+      name: 'Ground Floor',
+      areaSqft: 1537.5,
+      widthFeet: 25,
+      lengthFeet: 61.5,
+      parkingSqft: 1100,
+    });
+  });
+
+  it('reads bars as written on the drawing', () => {
+    expect(parseBars('4-16+2-12')).toEqual([
+      { count: 4, dia: 16 },
+      { count: 2, dia: 12 },
+    ]);
+    expect(parseBars('6 × 16')).toEqual([{ count: 6, dia: 16 }]);
+    expect(parseBars('rings')).toEqual([]);
+  });
+
+  it('quantifies footings, column lifts and beams type by type from the drawing', () => {
+    const column = (
+      label: string,
+      count: number,
+      floors: number,
+      bars: string,
+      footing: number,
+    ) => ({
+      label,
+      count,
+      floors,
+      widthIn: 9,
+      depthIn: 15,
+      bars,
+      tieDia: 8,
+      tieSpacingIn: 6,
+      footingLengthFeet: footing,
+      footingWidthFeet: footing,
+      footingThicknessIn: 12,
+      footingBarDia: 12,
+      footingBarSpacingIn: 6,
+    });
+    const result = generateQuotationBoq({
+      details: quote(),
+      design: {
+        columns: [
+          column('C1–C4', 4, 0, '6-16', 5),
+          column('C5–C6', 2, 1, '4-16+2-12', 4),
+        ],
+        beams: [
+          {
+            label: 'B1',
+            widthIn: 9,
+            depthIn: 15,
+            bars: '4-20+2-16',
+            stirrupDia: 8,
+            stirrupSpacingIn: 6,
+            runFeet: [80, 60],
+          },
+        ],
+        plinthRunFeet: 200,
+        settings: { slabDistSpacingIn: 6, coverMm: 25 },
+      },
+    });
+    expect(result.design?.columns).toHaveLength(2);
+    // The drawing's slab spacing and cover win over the company rules.
+    expect(result.settings.slabDistSpacingIn).toBe(6);
+    expect(result.settings.coverMm).toBe(25);
+    const line = (section: string, kind: string) =>
+      result.lines.find(
+        (item) => item.section === section && item.kind === kind,
+      )!;
+    expect(line('Foundation', 'quote-foundation').name).toContain(
+      '6 footings (4 × 5×5 ft, 2 × 4×4 ft)',
+    );
+    // Foundation lift: (4 × 6 + 2 × 4) 16 mm pieces, 2 per bar.
+    const rods = (section: string, kind: string, diameter: number) =>
+      line(section, kind).outputs.find(
+        (output) => output.unit === 'rod' && output.diameter === diameter,
+      )?.quantity;
+    expect(rods('Foundation', 'quote-columns', 16)).toBe(16);
+    expect(rods('Foundation', 'quote-columns', 12)).toBe(2);
+    // C5–C6 stop below the first floor: only C1–C4 rise, 24 pieces, 3 per bar.
+    expect(line('First Floor', 'quote-columns').inputs.columns).toBe(4);
+    expect(rods('First Floor', 'quote-columns', 16)).toBe(8);
+    expect(rods('First Floor', 'quote-columns', 12)).toBeUndefined();
+    // B1 carries 20 mm bars; the plinth beam uses its own run.
+    expect(rods('Ground Floor', 'quote-slab', 20)).toBeGreaterThan(0);
+    expect(line('Foundation', 'quote-plinth-beam').inputs.beamRunFeet).toBe(
+      200,
+    );
+  });
+
+  it('never prices the BOQ from the customer quotation', () => {
+    const result = generateQuotationBoq({ details: quote() });
+    const outputs = result.lines.flatMap((line) => line.outputs);
+    expect(outputs.some((output) => output.rate !== undefined)).toBe(false);
+    expect(outputs.find((output) => output.name === 'Main door')).toMatchObject(
+      { material: 'door_main', quotedRate: 25000 },
     );
   });
 
