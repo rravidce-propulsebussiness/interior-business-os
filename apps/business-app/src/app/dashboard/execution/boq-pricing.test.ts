@@ -215,7 +215,10 @@ describe('BOQ default prices and quoted brands', () => {
     ).toBe(400);
     expect(costHead('concrete_m20')).toBe('Concrete (M20)');
     expect(costHead('shuttering')).toBe('Structural labour');
-    expect(costHead('plumbing_drainage')).toBe('Plumbing & sanitary');
+    expect(costHead('cpvc_half')).toBe('Plumbing');
+    expect(costHead('sanitary_cp')).toBe('Sanitary & CP fittings');
+    expect(costHead('wire_15')).toBe('Electrical');
+    expect(costHead('wall_tiles')).toBe('Bathroom tiles');
     expect(costHead('steel_16')).toBe('Steel');
   });
 });

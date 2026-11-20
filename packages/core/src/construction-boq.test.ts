@@ -337,10 +337,10 @@ describe('quotation-driven construction BOQ', () => {
         material: 'labour_door_fixing',
       },
     ]);
-    // 85% of 1,200 sqft; the quoted ₹60 is kept only for comparison.
+    // No rooms entered: 85% of 1,200 sqft + 5% wastage, at the quoted ₹60.
     expect(outputs('First Floor', 'quote-flooring')[0]).toEqual({
-      name: 'Floor tiles',
-      quantity: 1020,
+      name: 'Room flooring tiles',
+      quantity: 1071,
       unit: 'sqft',
       rate: undefined,
       quotedRate: 60,
@@ -356,10 +356,14 @@ describe('quotation-driven construction BOQ', () => {
       material: 'sanitary_cp',
     });
     // The fittings allowance is accessories only: pipes are costed too.
-    expect(services.find((o) => o.material === 'plumbing_water')).toMatchObject(
-      { quantity: 4, quotedRate: undefined },
-    );
-    expect(services.some((o) => o.material === 'plumbing_drainage')).toBe(true);
+    // 3 bathrooms × 6 + 1 kitchen × 2 = 20 water points × 3 m = 20 pipes.
+    expect(services.find((o) => o.material === 'cpvc_half')).toMatchObject({
+      quantity: 20,
+      unit: 'pipe',
+      quotedRate: undefined,
+    });
+    expect(services.find((o) => o.material === 'floor_trap')?.quantity).toBe(4);
+    expect(services.some((o) => o.material === 'swr_110')).toBe(true);
     expect(services.some((o) => o.material === 'bathroom_waterproofing')).toBe(
       true,
     );
@@ -685,6 +689,84 @@ describe('quotation-driven construction BOQ', () => {
         .find((line) => line.kind === 'quote-slab')!
         .outputs.some((o) => o.material === 'cement'),
     ).toBe(true);
+  });
+
+  it('tiles each room entered, with skirting, and says how many boxes to order', () => {
+    const result = generateQuotationBoq({
+      details: quote(),
+      counts: {
+        floors: { 'Ground Floor': { bathrooms: 2, kitchens: 1 } },
+        finishes: {
+          'Ground Floor': {
+            rooms: [
+              { name: 'Hall', lengthFeet: 12, widthFeet: 14 },
+              { name: 'Bedroom', lengthFeet: 10, widthFeet: 12 },
+            ],
+            bathroomLengthFeet: 8,
+            bathroomWidthFeet: 4,
+            kitchenPlatformFeet: 12,
+          },
+        },
+      },
+    });
+    const flooring = result.lines.find(
+      (line) =>
+        line.section === 'Ground Floor' && line.kind === 'quote-flooring',
+    )!.outputs;
+    // 168 + 120 = 288 sq ft + skirting (52 + 44 ft × 4 in = 32) = 320 × 1.05.
+    const room = flooring.find((o) => o.name === 'Room flooring tiles')!;
+    expect(room.quantity).toBe(336);
+    // 336 sq ft of 2×2 ft tiles = 84 tiles, 21 boxes of 4.
+    expect(room.order).toBe('84 tiles of 2×2 ft · 21 boxes of 4');
+    // Bathrooms 8×4: floor 2 × 32 sq ft; walls 2 × (24 × 7 − 17.5).
+    expect(
+      flooring.find((o) => o.name === 'Bathroom floor tiles (anti-skid)')
+        ?.quantity,
+    ).toBe(67.2);
+    expect(
+      flooring.find((o) => o.name === 'Bathroom wall tiles')?.quantity,
+    ).toBe(316.1);
+    const kitchen = result.lines.find(
+      (line) =>
+        line.section === 'Ground Floor' && line.kind === 'quote-kitchen',
+    )!.outputs;
+    // 12 ft × 2 ft granite + 5%.
+    expect(
+      kitchen.find((o) => o.material === 'kitchen_platform')?.quantity,
+    ).toBe(25.2);
+    expect(result.counts.finishes?.['Ground Floor']?.rooms).toHaveLength(2);
+  });
+
+  it('itemizes electrical from the points on each floor', () => {
+    const result = generateQuotationBoq({
+      details: quote(),
+      counts: {
+        floors: {
+          'Ground Floor': {
+            lightPoints: 12,
+            fanPoints: 4,
+            socketPoints: 10,
+            powerPoints: 5,
+            kitchens: 1,
+          },
+        },
+      },
+    });
+    const electrical = result.lines.find(
+      (line) =>
+        line.section === 'Ground Floor' && line.kind === 'quote-electrical',
+    )!.outputs;
+    const qty = (material: string) =>
+      electrical.find((o) => o.material === material)?.quantity;
+    // 16 light / fan points × 15 m = 240 m → 3 coils of 90 m.
+    expect(qty('wire_15')).toBe(3);
+    expect(qty('wire_25')).toBe(2);
+    expect(qty('wire_40')).toBe(2);
+    expect(qty('switch_6a')).toBe(26);
+    expect(qty('socket_16a')).toBe(5);
+    expect(qty('fan_regulator')).toBe(4);
+    expect(qty('db_box')).toBe(1);
+    expect(qty('labour_electrical')).toBe(31);
   });
 
   it('normalizes and clamps company settings', () => {

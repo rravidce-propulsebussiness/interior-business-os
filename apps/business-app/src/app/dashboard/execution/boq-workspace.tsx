@@ -33,18 +33,17 @@ import {
 } from './boq-pricing';
 import {
   estimateCounts,
-  FLOOR_COUNT_FIELDS,
   normalizeCounts,
   floorsFromQuote,
   generateQuotationBoq,
   normalizeStructuralSettings,
   normalizeDesign,
-  parseOpenings,
   type BoqCounts,
   type BoqFloor,
   type StructuralDesign,
 } from '@business-os/core/construction-boq';
 import { BoqDesignSchedule } from './boq-design-schedule';
+import { BoqFloorInputs } from './boq-floor-inputs';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 
 type Generator = {
@@ -70,6 +69,7 @@ type SavedLine = {
     source?: string;
     rate?: number;
     quotedRate?: number;
+    order?: string;
     material?: string;
     rods?: number;
     diameter?: number;
@@ -388,8 +388,15 @@ export function BoqWorkspace({
     mixed: boolean;
   };
   const floorBreakdown = new Map<string, Map<CostHead, HeadTotal>>();
+  // What to order per floor (tiles and boxes, coils, pipes …).
+  const floorOrders = new Map<string, string[]>();
   for (const row of allOutputs) {
     if (!(row.quantity > 0)) continue;
+    if (row.order)
+      floorOrders.set(row.section, [
+        ...(floorOrders.get(row.section) ?? []),
+        `${row.name}: ${row.order}`,
+      ]);
     const material = materialForOutput(row);
     const head = costHead(
       material ? rateGroupKey(material, diameterOf(row)) : undefined,
@@ -1043,96 +1050,12 @@ export function BoqWorkspace({
                   </div>
                 ))}
               </div>
-              <div className="boq-gen-count-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Floor</th>
-                      {FLOOR_COUNT_FIELDS.map(([key, label]) => (
-                        <th key={key}>{label}</th>
-                      ))}
-                      <th>Window sizes (nos × W × H ft)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {floorsForGeneration.map((floor) => {
-                      const row = countsForGeneration.floors[floor.name];
-                      if (!row) return null;
-                      return (
-                        <tr key={floor.name}>
-                          <th scope="row">{floor.name}</th>
-                          {FLOOR_COUNT_FIELDS.map(([key, label]) => (
-                            <td key={key}>
-                              <input
-                                type="number"
-                                min="0"
-                                step="1"
-                                aria-label={`${floor.name} ${label}`}
-                                value={row[key]}
-                                onChange={(event) =>
-                                  setGenCounts({
-                                    ...countsForGeneration,
-                                    floors: {
-                                      ...countsForGeneration.floors,
-                                      [floor.name]: {
-                                        ...row,
-                                        [key]: Math.max(
-                                          0,
-                                          Math.round(
-                                            Number(event.target.value) || 0,
-                                          ),
-                                        ),
-                                      },
-                                    },
-                                  })
-                                }
-                              />
-                            </td>
-                          ))}
-                          <td className="boq-window-sizes">
-                            <input
-                              type="text"
-                              placeholder="2×4×4, 2×4×6"
-                              aria-label={`${floor.name} window sizes`}
-                              maxLength={200}
-                              value={
-                                countsForGeneration.windowSizes?.[floor.name] ??
-                                ''
-                              }
-                              onChange={(event) => {
-                                const text = event.target.value;
-                                const openings = parseOpenings(text);
-                                setGenCounts({
-                                  ...countsForGeneration,
-                                  windowSizes: {
-                                    ...countsForGeneration.windowSizes,
-                                    [floor.name]: text,
-                                  },
-                                  floors: {
-                                    ...countsForGeneration.floors,
-                                    [floor.name]: {
-                                      ...row,
-                                      ...(openings.length
-                                        ? {
-                                            windows: openings.reduce(
-                                              (sum, opening) =>
-                                                sum + opening.count,
-                                              0,
-                                            ),
-                                          }
-                                        : {}),
-                                    },
-                                  },
-                                });
-                              }}
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
+              <BoqFloorInputs
+                floors={floorsForGeneration}
+                counts={countsForGeneration}
+                defaults={settings}
+                onChange={setGenCounts}
+              />
               <div className="boq-gen-counts">
                 <label>
                   Entrance gates
@@ -1306,6 +1229,13 @@ export function BoqWorkspace({
                           </tr>
                         </tbody>
                       </table>
+                      {(floorOrders.get(stage)?.length ?? 0) > 0 && (
+                        <ul className="boq-floor-orders">
+                          {floorOrders.get(stage)!.map((text) => (
+                            <li key={text}>{text}</li>
+                          ))}
+                        </ul>
+                      )}
                     </details>
                   );
                 })}
@@ -1428,6 +1358,9 @@ export function BoqWorkspace({
                             <span>
                               {output.name}
                               {output.source && <small>{output.source}</small>}
+                              {output.order && (
+                                <small>To order: {output.order}</small>
+                              )}
                             </span>
                             <span className="boq-qty-cell">
                               {line.kind === 'quoted' ? (

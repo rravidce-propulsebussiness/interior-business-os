@@ -25,6 +25,7 @@ const lineSchema = z.object({
         material: z.string().max(40).optional(),
         rate: z.number().finite().nonnegative().optional(),
         quotedRate: z.number().finite().nonnegative().optional(),
+        order: z.string().max(200).optional(),
         rods: z.number().int().nonnegative().optional(),
         diameter: z.number().finite().nonnegative().optional(),
         weightKg: z.number().finite().nonnegative().optional(),
@@ -56,6 +57,25 @@ const generatorSchema = z.object({
     entranceGates: z.number().int().nonnegative(),
     compoundWallFeet: z.number().int().nonnegative(),
     windowSizes: z.record(z.string().max(90), z.string().max(200)).optional(),
+    finishes: z
+      .record(
+        z.string().max(90),
+        z.object({
+          rooms: z
+            .array(
+              z.object({
+                name: z.string().max(60),
+                lengthFeet: z.number().finite().nonnegative(),
+                widthFeet: z.number().finite().nonnegative(),
+              }),
+            )
+            .max(40),
+          bathroomLengthFeet: z.number().finite().nonnegative(),
+          bathroomWidthFeet: z.number().finite().nonnegative(),
+          kitchenPlatformFeet: z.number().finite().nonnegative(),
+        }),
+      )
+      .optional(),
   }),
   floors: z
     .array(

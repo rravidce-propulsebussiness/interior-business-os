@@ -73,6 +73,91 @@ function NumberCell({
  * on, footings, column lifts and beams are quantified type by type instead of
  * from the company's column-grid rules.
  */
+const BAR_DIAMETERS = [8, 10, 12, 16, 20, 25, 32] as const;
+const BAR_COUNTS = Array.from({ length: 20 }, (_, i) => i + 1);
+
+/** Bars as on the drawing, picked as "4 nos × 16 mm" rows (no typing). */
+function BarsPicker({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (bars: string) => void;
+}) {
+  const sets = parseBars(value);
+  const rows = sets.length ? sets : [{ count: 4, dia: 12 }];
+  const save = (next: { count: number; dia: number }[]) =>
+    onChange(next.map((bar) => `${bar.count}-${bar.dia}`).join('+'));
+  return (
+    <div className="boq-bars">
+      {rows.map((bar, index) => (
+        <span key={index} className="boq-bars-row">
+          <select
+            aria-label={`${label} set ${index + 1} number of bars`}
+            value={bar.count}
+            onChange={(event) =>
+              save(
+                rows.map((item, i) =>
+                  i === index
+                    ? { ...item, count: Number(event.target.value) }
+                    : item,
+                ),
+              )
+            }
+          >
+            {BAR_COUNTS.map((count) => (
+              <option key={count} value={count}>
+                {count} nos
+              </option>
+            ))}
+          </select>
+          ×
+          <select
+            aria-label={`${label} set ${index + 1} bar diameter`}
+            value={bar.dia}
+            onChange={(event) =>
+              save(
+                rows.map((item, i) =>
+                  i === index
+                    ? { ...item, dia: Number(event.target.value) }
+                    : item,
+                ),
+              )
+            }
+          >
+            {BAR_DIAMETERS.map((dia) => (
+              <option key={dia} value={dia}>
+                {dia} mm
+              </option>
+            ))}
+          </select>
+          {rows.length > 1 && (
+            <button
+              type="button"
+              className="erp-button erp-button-quiet"
+              aria-label={`Remove ${label} set ${index + 1}`}
+              onClick={() => save(rows.filter((_, i) => i !== index))}
+            >
+              ×
+            </button>
+          )}
+        </span>
+      ))}
+      {rows.length < 4 && (
+        <button
+          type="button"
+          className="erp-button erp-button-quiet"
+          onClick={() => save([...rows, { count: 2, dia: 12 }])}
+        >
+          + bars
+        </button>
+      )}
+    </div>
+  );
+}
+
 const DESIGN_FIELDS = DESIGN_SETTING_KEYS.map((key) =>
   STRUCTURAL_FIELDS.find((field) => field.key === key)!,
 ).filter(Boolean);
@@ -106,7 +191,6 @@ export function BoqDesignSchedule({
         i === index ? { ...item, ...patch } : item,
       ),
     });
-  const badBars = (text: string) => !parseBars(text).length;
 
   return (
     <div className="boq-design">
@@ -198,15 +282,10 @@ export function BoqDesignSchedule({
                       />
                     </td>
                     <td>
-                      <input
-                        aria-label={`${column.label} main bars`}
-                        aria-invalid={badBars(column.bars)}
-                        placeholder="4-16+2-12"
+                      <BarsPicker
+                        label={`${column.label} main bars`}
                         value={column.bars}
-                        maxLength={60}
-                        onChange={(event) =>
-                          updateColumn(index, { bars: event.target.value })
-                        }
+                        onChange={(bars) => updateColumn(index, { bars })}
                       />
                     </td>
                     <td className="boq-design-pair">
@@ -342,15 +421,10 @@ export function BoqDesignSchedule({
                       />
                     </td>
                     <td>
-                      <input
-                        aria-label={`${beam.label} main bars`}
-                        aria-invalid={badBars(beam.bars)}
-                        placeholder="4-20+2-16"
+                      <BarsPicker
+                        label={`${beam.label} main bars`}
                         value={beam.bars}
-                        maxLength={60}
-                        onChange={(event) =>
-                          updateBeam(index, { bars: event.target.value })
-                        }
+                        onChange={(bars) => updateBeam(index, { bars })}
                       />
                     </td>
                     <td className="boq-design-pair">
