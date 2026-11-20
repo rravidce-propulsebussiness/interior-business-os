@@ -22,14 +22,32 @@ const rates: Rate[] = [
     isDefault: true,
   },
   {
-    key: 'steel::jsw',
+    key: 'steel_16::jsw',
     label: 'JSW',
-    unit: 'kg',
-    rate: 68,
+    unit: 'rod',
+    rate: 1250,
     category: 'material',
-    material: 'steel',
+    material: 'steel_16',
     variant: 'JSW',
     isDefault: true,
+  },
+  {
+    key: 'steel_16::vizag',
+    label: 'Vizag',
+    unit: 'rod',
+    rate: 1180,
+    category: 'material',
+    material: 'steel_16',
+    variant: 'Vizag',
+  },
+  {
+    key: 'steel_12::vizag',
+    label: 'Vizag',
+    unit: 'rod',
+    rate: 660,
+    category: 'material',
+    material: 'steel_12',
+    variant: 'Vizag',
   },
   {
     key: 'internal plaster::sqft',
@@ -56,10 +74,32 @@ describe('BOQ rate resolution', () => {
     ).toBe(9.5);
     expect(
       rateForOutput(
-        { name: '16 mm TMT', unit: 'kg', material: 'steel' },
+        { name: '16 mm TMT', unit: 'rod', material: 'steel', diameter: 16 },
         rates,
       ),
-    ).toBe(68);
+    ).toBe(1250);
+  });
+
+  it('prices steel per rod by diameter for the brand chosen on the BOQ', () => {
+    const choice = { steel: 'Vizag' };
+    expect(
+      rateForOutput(
+        { name: '16 mm TMT', unit: 'rod', material: 'steel', diameter: 16 },
+        rates,
+        choice,
+      ),
+    ).toBe(1180);
+    expect(
+      rateForOutput(
+        { name: '12 mm TMT', unit: 'rod', material: 'steel', diameter: 12 },
+        rates,
+        choice,
+      ),
+    ).toBe(660);
+    // Manual takeoff bars carry the diameter in their name.
+    expect(
+      rateForOutput({ name: '12 mm main bars', unit: 'rod' }, rates, choice),
+    ).toBe(660);
   });
 
   it('prices manual takeoff bricks through the material group', () => {

@@ -3,6 +3,9 @@ export type BoqOutput = {
   quantity: number;
   unit: string;
   source?: string;
+  material?: string;
+  diameter?: number;
+  weightKg?: number;
 };
 export type BoqInputs = Record<string, string | number | boolean>;
 const number = (inputs: BoqInputs, key: string, fallback = 0) => {
@@ -13,11 +16,52 @@ const ceil = (n: number) => Math.ceil(Math.max(0, n));
 const round = (n: number, places = 3) => Number(Math.max(0, n).toFixed(places));
 const steelKgPerMetre = (diameterMm: number) => (diameterMm * diameterMm) / 162;
 
+/** Loose bulk densities used to buy sand and aggregate by the tonne. */
+export const SAND_TONNES_PER_CUM = 1.6;
+export const AGGREGATE_TONNES_PER_CUM = 1.5;
+
+/**
+ * Takeoff quantities in purchase units: sand and aggregate in tonnes, bricks
+ * in numbers, reinforcement in rods (with diameter and weight for pricing).
+ */
 export function calculateBoq(kind: string, input: BoqInputs): BoqOutput[] {
+  return measuredQuantities(kind, input).map(toPurchaseUnits);
+}
+
+function toPurchaseUnits(output: BoqOutput): BoqOutput {
+  const name = output.name.toLowerCase();
+  if (output.unit === 'm³' && /sand|aggregate/.test(name)) {
+    const density = name.includes('sand')
+      ? SAND_TONNES_PER_CUM
+      : AGGREGATE_TONNES_PER_CUM;
+    return {
+      ...output,
+      quantity: round(output.quantity * density, 2),
+      unit: 't',
+      source: `${output.quantity} m³ × ${density} t/m³`,
+    };
+  }
+  if (output.unit === 'each' && name === 'bricks')
+    return { ...output, unit: 'nos' };
+  if (output.unit === 'rod') {
+    const diameter = Number(/^(\d+) mm/.exec(output.name)?.[1]);
+    const kg = Number(/([\d.]+) kg/.exec(output.source ?? '')?.[1]);
+    if (diameter > 0)
+      return {
+        ...output,
+        material: 'steel',
+        diameter,
+        ...(Number.isFinite(kg) && kg > 0 ? { weightKg: kg } : {}),
+      };
+  }
+  return output;
+}
+
+function measuredQuantities(kind: string, input: BoqInputs): BoqOutput[] {
   // A pedestal is a short, wider column on the footing; a plinth beam is a
   // beam at plinth level. Same concrete and steel rules, own templates.
-  if (kind === 'pedestal') return calculateBoq('column', input);
-  if (kind === 'plinth_beam') return calculateBoq('beam', input);
+  if (kind === 'pedestal') return measuredQuantities('column', input);
+  if (kind === 'plinth_beam') return measuredQuantities('beam', input);
   if (kind === 'column') {
     const count = number(input, 'count', 1);
     const length = number(input, 'length');

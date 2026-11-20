@@ -1808,3 +1808,55 @@
   background: var(--erp-burgundy);
   color: #fff;
 }
+
+.boq-variant-section {
+  margin: 16px 0 8px;
+  color: #462629;
+  font-size: 12px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.boq-variant-note {
+  margin: -4px 0 8px;
+  color: var(--erp-muted);
+  font-size: 9px;
+}
+
+.boq-gen-count-table {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+.boq-gen-count-table table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+.boq-gen-count-table th {
+  padding: 6px 4px;
+  color: #988d8f;
+  font-size: 8px;
+  font-weight: 800;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.boq-gen-count-table tbody th {
+  color: #45383a;
+  font-size: 10px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+.boq-gen-count-table td {
+  padding: 4px;
+}
+.boq-gen-count-table input {
+  width: 100%;
+  min-width: 52px;
+  min-height: 32px;
+  border: 1px solid #e9e1df;
+  border-radius: 8px;
+  padding: 4px 6px;
+  font-size: 11px;
+}

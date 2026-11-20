@@ -19,6 +19,7 @@ import {
 } from './boq-units';
 import {
   MATERIAL_GROUPS,
+  diameterOf,
   materialForOutput,
   rateForOutput,
   variantsFor,
@@ -26,6 +27,8 @@ import {
 } from './boq-pricing';
 import {
   estimateCounts,
+  FLOOR_COUNT_FIELDS,
+  normalizeCounts,
   floorsFromQuote,
   generateQuotationBoq,
   normalizeStructuralSettings,
@@ -58,6 +61,7 @@ type SavedLine = {
     material?: string;
     rods?: number;
     diameter?: number;
+    weightKg?: number;
   }[];
   quotedPrice?: number;
   quoteLineId?: string;
@@ -237,8 +241,12 @@ export function BoqWorkspace({
   // Edited floor heights / counts belong to the selected quotation and are
   // reset whenever the quotation changes.
   const floorsForGeneration = genFloors.length ? genFloors : scheduleFloors;
-  const countsForGeneration =
-    genCounts ?? estimateCounts(floorsForGeneration, settings);
+  // Saved or edited counts merged over the estimates (older BOQs saved a
+  // different shape; anything missing is estimated again).
+  const countsForGeneration = normalizeCounts(
+    genCounts,
+    estimateCounts(floorsForGeneration, settings, schedule ?? undefined),
+  );
   const usedMaterials = new Set(
     lines.flatMap((line) =>
       line.outputs
@@ -246,16 +254,19 @@ export function BoqWorkspace({
         .filter((value): value is string => Boolean(value)),
     ),
   );
+  // Reinforcement is bought in rods; weight comes along for reference.
   const steelSummary = new Map<number, { kg: number; rods: number }>();
   for (const line of lines)
-    for (const output of line.outputs)
-      if (output.diameter && output.unit === 'kg') {
-        const prior = steelSummary.get(output.diameter) ?? { kg: 0, rods: 0 };
-        steelSummary.set(output.diameter, {
-          kg: prior.kg + output.quantity,
-          rods: prior.rods + (output.rods ?? 0),
+    for (const output of line.outputs) {
+      const diameter = diameterOf(output);
+      if (diameter && output.unit === 'rod') {
+        const prior = steelSummary.get(diameter) ?? { kg: 0, rods: 0 };
+        steelSummary.set(diameter, {
+          kg: prior.kg + (output.weightKg ?? 0),
+          rods: prior.rods + output.quantity,
         });
       }
+    }
   // Steel order per stage (Foundation, Ground Floor, First Floor …), in BOQ
   // order, so steel can be brought floor by floor.
   const diameters = [...steelSummary.keys()].sort((a, b) => a - b);
@@ -264,19 +275,55 @@ export function BoqWorkspace({
     { kg: number; bars: Map<number, number> }
   >();
   for (const line of lines)
-    for (const output of line.outputs)
-      if (output.diameter && output.unit === 'kg') {
+    for (const output of line.outputs) {
+      const diameter = diameterOf(output);
+      if (diameter && output.unit === 'rod') {
         const stage = stageSteel.get(line.section) ?? {
           kg: 0,
           bars: new Map<number, number>(),
         };
-        stage.kg += output.quantity;
+        stage.kg += output.weightKg ?? 0;
         stage.bars.set(
-          output.diameter,
-          (stage.bars.get(output.diameter) ?? 0) + (output.rods ?? 0),
+          diameter,
+          (stage.bars.get(diameter) ?? 0) + output.quantity,
         );
         stageSteel.set(line.section, stage);
       }
+    }
+  // Brand / source choices: one Steel brand for every diameter.
+  const steelBrands = [
+    ...new Set(
+      initialRates
+        .filter((rate) => rate.material?.startsWith('steel_') && rate.variant)
+        .map((rate) => rate.variant!),
+    ),
+  ];
+  const brandPicks = [
+    ...(usedMaterials.has('steel')
+      ? [
+          {
+            key: 'steel',
+            label: 'Steel / TMT',
+            options: steelBrands.map((brand) => ({
+              key: 'steel::' + brand,
+              variant: brand,
+              text: brand,
+            })),
+          },
+        ]
+      : []),
+    ...MATERIAL_GROUPS.filter(
+      (group) => usedMaterials.has(group.key) && group.key !== 'steel',
+    ).map((group) => ({
+      key: group.key,
+      label: group.label,
+      options: variantsFor(initialRates, group.key).map((option) => ({
+        key: option.key,
+        variant: option.variant!,
+        text: `${option.variant} · ${money(option.rate)}/${option.unit}`,
+      })),
+    })),
+  ].filter((pick) => pick.options.length > 1 || pick.key === 'steel');
   const tonnes = (kg: number) =>
     (kg / 1000).toLocaleString('en-IN', { maximumFractionDigits: 2 });
   const activeProject = projects.find((project) => project.id === projectId);
@@ -314,6 +361,22 @@ export function BoqWorkspace({
   }
   const materialCost = [...grouped.values()].reduce(
     (sum, item) => sum + item.amount,
+    0,
+  );
+  // Estimate by stage (design, foundation, each floor, external, handover),
+  // in BOQ order.
+  const stageCost = new Map<string, number>();
+  for (const line of lines)
+    stageCost.set(
+      line.section,
+      (stageCost.get(line.section) ?? 0) +
+        line.outputs.reduce(
+          (sum, output) => sum + output.quantity * priceOf(output),
+          0,
+        ),
+    );
+  const builtUpSqft = (generator?.floors ?? []).reduce(
+    (sum, floor) => sum + floor.areaSqft,
     0,
   );
   const quotedValue = lines.reduce(
@@ -860,39 +923,101 @@ export function BoqWorkspace({
                   </div>
                 ))}
               </div>
+              <div className="boq-gen-count-table">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Floor</th>
+                      {FLOOR_COUNT_FIELDS.map(([key, label]) => (
+                        <th key={key}>{label}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {floorsForGeneration.map((floor) => {
+                      const row = countsForGeneration.floors[floor.name];
+                      if (!row) return null;
+                      return (
+                        <tr key={floor.name}>
+                          <th scope="row">{floor.name}</th>
+                          {FLOOR_COUNT_FIELDS.map(([key, label]) => (
+                            <td key={key}>
+                              <input
+                                type="number"
+                                min="0"
+                                step="1"
+                                aria-label={`${floor.name} ${label}`}
+                                value={row[key]}
+                                onChange={(event) =>
+                                  setGenCounts({
+                                    ...countsForGeneration,
+                                    floors: {
+                                      ...countsForGeneration.floors,
+                                      [floor.name]: {
+                                        ...row,
+                                        [key]: Math.max(
+                                          0,
+                                          Math.round(
+                                            Number(event.target.value) || 0,
+                                          ),
+                                        ),
+                                      },
+                                    },
+                                  })
+                                }
+                              />
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
               <div className="boq-gen-counts">
-                {(
-                  [
-                    ['mainDoors', 'Main doors'],
-                    ['internalDoors', 'Internal doors'],
-                    ['bathrooms', 'Bathrooms'],
-                  ] as const
-                ).map(([key, label]) => (
-                  <label key={key}>
-                    {label}
-                    <input
-                      type="number"
-                      min="0"
-                      step="1"
-                      value={countsForGeneration[key]}
-                      onChange={(event) =>
-                        setGenCounts({
-                          ...countsForGeneration,
-                          [key]: Math.max(
-                            0,
-                            Math.round(Number(event.target.value) || 0),
-                          ),
-                        })
-                      }
-                    />
-                  </label>
-                ))}
+                <label>
+                  Entrance gates
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={countsForGeneration.entranceGates}
+                    onChange={(event) =>
+                      setGenCounts({
+                        ...countsForGeneration,
+                        entranceGates: Math.max(
+                          0,
+                          Math.round(Number(event.target.value) || 0),
+                        ),
+                      })
+                    }
+                  />
+                </label>
+                <label>
+                  Compound wall (running ft, 0 = none)
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={countsForGeneration.compoundWallFeet}
+                    onChange={(event) =>
+                      setGenCounts({
+                        ...countsForGeneration,
+                        compoundWallFeet: Math.max(
+                          0,
+                          Math.round(Number(event.target.value) || 0),
+                        ),
+                      })
+                    }
+                  />
+                </label>
                 {canViewCost && canEdit && (
                   <Link
                     className="boq-gen-settings-link"
                     href="/dashboard/execution/boq/pricing"
                   >
-                    Column grid, bar sizes, lap &amp; cuts →
+                    Rules: column grid, bars, laps, parapet, tile &amp; painting
+                    quantities →
                   </Link>
                 )}
               </div>
@@ -1268,44 +1393,88 @@ export function BoqWorkspace({
               ))
             )}
           </section>
+          {canViewCost && stageCost.size > 0 && (
+            <section className="boq-materials">
+              <div className="boq-steel-summary">
+                <h3>Estimate by stage</h3>
+                <p className="boq-steel-note">
+                  Materials at the brands chosen above, labour at company rates,
+                  and quoted package allowances.
+                </p>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Stage</th>
+                      <th>Amount</th>
+                      <th>Share</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...stageCost.entries()].map(([stage, amount]) => (
+                      <tr key={stage}>
+                        <td>{stage}</td>
+                        <td>{money(amount)}</td>
+                        <td>
+                          {materialCost > 0
+                            ? Math.round((amount / materialCost) * 100) + '%'
+                            : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                    <tr className="total">
+                      <td>Total</td>
+                      <td>{money(materialCost)}</td>
+                      <td>
+                        {builtUpSqft > 0
+                          ? money(materialCost / builtUpSqft) + '/sq ft'
+                          : ''}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
           {(usedMaterials.size > 0 || steelSummary.size > 0) && (
             <section className="boq-materials">
               {canViewCost && (
                 <div className="boq-brand-picks">
                   <h3>Brand &amp; source for this BOQ</h3>
                   <div>
-                    {MATERIAL_GROUPS.filter((group) =>
-                      usedMaterials.has(group.key),
-                    ).map((group) => {
-                      const options = variantsFor(initialRates, group.key);
-                      return (
-                        <label key={group.key}>
-                          {group.label}
-                          <select
-                            value={
-                              selections[group.key] ?? options[0]?.variant ?? ''
-                            }
-                            onChange={(event) =>
-                              setSelections((prior) => ({
-                                ...prior,
-                                [group.key]: event.target.value,
-                              }))
-                            }
-                            disabled={!options.length}
-                          >
-                            {!options.length && (
-                              <option value="">Set rates first</option>
-                            )}
-                            {options.map((option) => (
-                              <option key={option.key} value={option.variant}>
-                                {option.variant} · {money(option.rate)}/
-                                {option.unit}
-                              </option>
-                            ))}
-                          </select>
-                        </label>
-                      );
-                    })}
+                    {brandPicks.map((pick) => (
+                      <label key={pick.key}>
+                        {pick.label}
+                        <select
+                          value={
+                            selections[pick.key] ??
+                            pick.options[0]?.variant ??
+                            ''
+                          }
+                          onChange={(event) =>
+                            setSelections((prior) => ({
+                              ...prior,
+                              [pick.key]: event.target.value,
+                            }))
+                          }
+                          disabled={!pick.options.length}
+                        >
+                          {!pick.options.length && (
+                            <option value="">Set rates first</option>
+                          )}
+                          {pick.options.map((option) => (
+                            <option key={option.key} value={option.variant}>
+                              {option.text}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    ))}
+                    {!brandPicks.length && (
+                      <p className="boq-steel-note">
+                        Add more than one brand or source to a material in
+                        Configure rates to choose here.
+                      </p>
+                    )}
                   </div>
                 </div>
               )}

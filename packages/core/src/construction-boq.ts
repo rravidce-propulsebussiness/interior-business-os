@@ -31,9 +31,11 @@ export type GeneratedOutput = {
   /** Fixed unit rate (e.g. quoted allowance per door). */
   rate?: number;
   source?: string;
-  /** Stock bars required, for reinforcement outputs measured in kg. */
+  /** Stock bars to buy (reinforcement is quantified in rods). */
   rods?: number;
   diameter?: number;
+  /** Weight of those rods, for reinforcement outputs. */
+  weightKg?: number;
 };
 
 export type GeneratedLine = {
@@ -60,10 +62,32 @@ export type BoqFloor = {
   heightAssumed?: boolean;
 };
 
-export type BoqCounts = {
+/** Doors, windows and bathrooms on one floor (editable per floor). */
+export type FloorCounts = {
   mainDoors: number;
   internalDoors: number;
+  bathroomDoors: number;
+  poojaDoors: number;
+  windows: number;
+  ventilators: number;
   bathrooms: number;
+};
+export const FLOOR_COUNT_FIELDS = [
+  ['mainDoors', 'Main doors'],
+  ['internalDoors', 'Bedroom / internal doors'],
+  ['bathroomDoors', 'Bathroom doors'],
+  ['poojaDoors', 'Pooja doors'],
+  ['windows', 'Windows'],
+  ['ventilators', 'Ventilators'],
+  ['bathrooms', 'Bathrooms'],
+] as const satisfies readonly (readonly [keyof FloorCounts, string])[];
+
+export type BoqCounts = {
+  /** Keyed by floor name, e.g. "Ground Floor". */
+  floors: Record<string, FloorCounts>;
+  entranceGates: number;
+  /** Compound wall running length in feet (0 = none). */
+  compoundWallFeet: number;
 };
 
 type FieldDef = {
@@ -504,23 +528,14 @@ export const STRUCTURAL_FIELDS = [
     step: 1,
   },
   {
-    key: 'windowPercent',
-    label: 'Windows: % of built-up area',
-    group: 'Allowances',
-    value: 10,
-    min: 0,
-    max: 40,
-    step: 0.5,
-  },
-  {
     key: 'sqftPerInternalDoor',
-    label: 'Built-up sq ft per internal door',
+    label: 'Built-up sq ft per bedroom / internal door',
     group: 'Allowances',
     value: 200,
     min: 50,
     max: 600,
     step: 1,
-    help: 'Used only when door count is not entered.',
+    help: 'Default count only; edit the counts per floor on the BOQ.',
   },
   {
     key: 'sqftPerBathroom',
@@ -530,7 +545,96 @@ export const STRUCTURAL_FIELDS = [
     min: 100,
     max: 2000,
     step: 1,
-    help: 'Used only when bathroom count is not entered.',
+    help: 'Default count only; edit the counts per floor on the BOQ.',
+  },
+  {
+    key: 'sqftPerWindow',
+    label: 'Built-up sq ft per window',
+    group: 'Allowances',
+    value: 120,
+    min: 30,
+    max: 600,
+    step: 1,
+    help: 'Default count only; edit the counts per floor on the BOQ.',
+  },
+  {
+    key: 'windowSqft',
+    label: 'Average window size (sq ft)',
+    group: 'Finishes & services',
+    value: 16,
+    min: 4,
+    max: 60,
+  },
+  {
+    key: 'bathroomWallTileSqft',
+    label: 'Wall tiles per bathroom (sq ft)',
+    group: 'Finishes & services',
+    value: 180,
+    min: 0,
+    max: 600,
+    step: 1,
+    help: 'About 7 ft dado around a 6×8 ft bathroom, less the door.',
+  },
+  {
+    key: 'sqftPerElectricalPoint',
+    label: 'Built-up sq ft per electrical point',
+    group: 'Finishes & services',
+    value: 25,
+    min: 5,
+    max: 100,
+    step: 1,
+  },
+  {
+    key: 'parapetHeightFeet',
+    label: 'Parapet wall height (ft, 0 = none)',
+    group: 'Parapet & compound wall',
+    value: 3,
+    min: 0,
+    max: 6,
+  },
+  {
+    key: 'parapetWallIn',
+    label: 'Parapet wall thickness (in)',
+    group: 'Parapet & compound wall',
+    value: 4.5,
+    min: 3,
+    max: 9,
+  },
+  {
+    key: 'compoundWallHeightFeet',
+    label: 'Compound wall height (ft)',
+    group: 'Parapet & compound wall',
+    value: 5,
+    min: 2,
+    max: 10,
+  },
+  {
+    key: 'compoundWallIn',
+    label: 'Compound wall thickness (in)',
+    group: 'Parapet & compound wall',
+    value: 9,
+    min: 4,
+    max: 14,
+  },
+  {
+    key: 'sandTonPerCum',
+    label: 'Sand: tonnes per m³',
+    group: 'Purchase units',
+    value: 1.6,
+    min: 1,
+    max: 2.2,
+    step: 0.05,
+    help: 'Loose sand is about 1.5–1.6 t/m³; check your supplier.',
+  },
+  {
+    key: 'aggregateTonPerCum',
+    label: 'Aggregate: tonnes per m³',
+    group: 'Purchase units',
+    value: 1.5,
+    min: 1,
+    max: 2.2,
+    step: 0.05,
+    help: 'Loose 20/40 mm aggregate is about 1.4–1.6 t/m³.',
   },
   {
     key: 'defaultFloorHeightFeet',
@@ -688,24 +792,75 @@ export function floorsFromQuote(
   });
 }
 
-/** Default door / bathroom counts from the quoted areas. */
+/** Default counts per floor from the quoted areas; every count is editable. */
 export function estimateCounts(
   floors: readonly BoqFloor[],
   settings: StructuralSettings = DEFAULT_STRUCTURAL_SETTINGS,
+  details?: SftEstimateDetails,
 ): BoqCounts {
-  let internalDoors = 0;
-  let bathrooms = 0;
-  for (const floor of floors) {
-    internalDoors += Math.max(
-      1,
-      Math.round(floor.areaSqft / settings.sqftPerInternalDoor),
-    );
-    bathrooms += Math.max(
+  const perFloor: Record<string, FloorCounts> = {};
+  floors.forEach((floor, index) => {
+    const bathrooms = Math.max(
       1,
       Math.round(floor.areaSqft / settings.sqftPerBathroom),
     );
+    perFloor[floor.name] = {
+      mainDoors: index === 0 ? 1 : 0,
+      internalDoors: Math.max(
+        1,
+        Math.round(floor.areaSqft / settings.sqftPerInternalDoor),
+      ),
+      bathroomDoors: bathrooms,
+      poojaDoors: index === 0 ? 1 : 0,
+      windows: Math.max(2, Math.round(floor.areaSqft / settings.sqftPerWindow)),
+      ventilators: bathrooms,
+      bathrooms,
+    };
+  });
+  // A quoted compound wall (running ft) sets its length.
+  const compound = details?.rows.find(
+    (row) =>
+      row.kind === 'additional' &&
+      /compound|boundary/i.test(row.name) &&
+      (row.unit ?? 'sqft') === 'running_ft',
+  );
+  return {
+    floors: perFloor,
+    entranceGates: floors.length ? 1 : 0,
+    compoundWallFeet: compound ? Number(compound.areaSqft) || 0 : 0,
+  };
+}
+
+/** Merge edited counts over the estimates; anything missing or invalid falls back. */
+export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
+  const source =
+    raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const floorsRaw =
+    source.floors && typeof source.floors === 'object'
+      ? (source.floors as Record<string, unknown>)
+      : {};
+  const floors: Record<string, FloorCounts> = {};
+  for (const [name, defaults] of Object.entries(estimated.floors)) {
+    const edited =
+      floorsRaw[name] && typeof floorsRaw[name] === 'object'
+        ? (floorsRaw[name] as Record<string, unknown>)
+        : {};
+    floors[name] = Object.fromEntries(
+      FLOOR_COUNT_FIELDS.map(([key]) => [
+        key,
+        validCount(edited[key], defaults[key]),
+      ]),
+    ) as FloorCounts;
   }
-  return { mainDoors: floors.length ? 1 : 0, internalDoors, bathrooms };
+  return {
+    floors,
+    entranceGates: validCount(source.entranceGates, estimated.entranceGates),
+    compoundWallFeet: validCount(
+      source.compoundWallFeet,
+      estimated.compoundWallFeet,
+      100000,
+    ),
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -743,7 +898,35 @@ const addSteel = (
   tally.set(diameter, entry);
 };
 
-const concreteOutputs = (volume: number, label: string): GeneratedOutput[] => [
+/** Sand bought by the tonne; the m³ is kept in the source note. */
+const sandOutput = (
+  cubicMetres: number,
+  s: StructuralSettings,
+  name = 'Sand',
+): GeneratedOutput => ({
+  name,
+  material: 'sand',
+  quantity: round(cubicMetres * s.sandTonPerCum, 2),
+  unit: 't',
+  source: `${round(cubicMetres, 3)} m³ × ${s.sandTonPerCum} t/m³`,
+});
+const aggregateOutput = (
+  cubicMetres: number,
+  s: StructuralSettings,
+  name: string,
+): GeneratedOutput => ({
+  name,
+  material: 'aggregate',
+  quantity: round(cubicMetres * s.aggregateTonPerCum, 2),
+  unit: 't',
+  source: `${round(cubicMetres, 3)} m³ × ${s.aggregateTonPerCum} t/m³`,
+});
+
+const concreteOutputs = (
+  volume: number,
+  label: string,
+  s: StructuralSettings,
+): GeneratedOutput[] => [
   { name: `${label} concrete (M20)`, quantity: round(volume, 3), unit: 'm³' },
   {
     name: 'Cement',
@@ -752,19 +935,68 @@ const concreteOutputs = (volume: number, label: string): GeneratedOutput[] => [
     unit: 'bag',
     source: 'M20 nominal mix 1:1.5:3 · 8.06 bags/m³',
   },
-  {
-    name: 'Sand',
-    material: 'sand',
-    quantity: round(volume * 0.42, 3),
-    unit: 'm³',
-  },
-  {
-    name: '20 mm aggregate',
-    material: 'aggregate',
-    quantity: round(volume * 0.84, 3),
-    unit: 'm³',
-  },
+  sandOutput(volume * 0.42, s),
+  aggregateOutput(volume * 0.84, s, '20 mm aggregate'),
 ];
+
+/**
+ * Bricks, mortar and plaster materials for a wall volume (m³) and plastered
+ * faces (sq ft). Internal plaster 12 mm 1:6, external 20 mm 1:4.
+ */
+const brickworkOutputs = (
+  volume: number,
+  internalPlaster: number,
+  externalPlaster: number,
+  s: StructuralSettings,
+): GeneratedOutput[] => {
+  const waste = 1 + s.materialWastagePercent / 100;
+  return [
+    {
+      name: 'Bricks',
+      material: 'bricks',
+      quantity: ceil(volume * s.bricksPerCubicMetre * waste),
+      unit: 'nos',
+      source: `${round(volume, 2)} m³ wall × ${s.bricksPerCubicMetre}/m³`,
+    },
+    {
+      name: 'Cement',
+      material: 'cement',
+      quantity: round(
+        (volume * 1.5 + internalPlaster * 0.0058 + externalPlaster * 0.0136) *
+          waste,
+        1,
+      ),
+      unit: 'bag',
+      source:
+        'Mortar 1:6 · 12 mm internal plaster 1:6 · 20 mm external plaster 1:4',
+    },
+    sandOutput(
+      (volume * 0.32 + internalPlaster * 0.0012 + externalPlaster * 0.0019) *
+        waste,
+      s,
+    ),
+    ...(internalPlaster > 0
+      ? [
+          {
+            name: 'Internal plaster',
+            material: 'plaster_labour',
+            quantity: round(internalPlaster, 0),
+            unit: 'sqft',
+          },
+        ]
+      : []),
+    ...(externalPlaster > 0
+      ? [
+          {
+            name: 'External plaster',
+            material: 'plaster_labour',
+            quantity: round(externalPlaster, 0),
+            unit: 'sqft',
+          },
+        ]
+      : []),
+  ];
+};
 
 const steelOutputs = (
   tally: SteelTally,
@@ -777,12 +1009,13 @@ const steelOutputs = (
       return {
         name: `${diameter} mm TMT`,
         material: 'steel',
-        quantity: round(kg, 1),
-        unit: 'kg',
+        quantity: entry.bars,
+        unit: 'rod',
         rods: entry.bars,
         diameter,
+        weightKg: round(kg, 1),
         source:
-          `${entry.bars} bars of ${stockFeet} ft · ${entry.details.join(' · ')}`.slice(
+          `${round(kg, 1)} kg · ${stockFeet} ft rods · ${entry.details.join(' · ')}`.slice(
             0,
             300,
           ),
@@ -810,7 +1043,8 @@ export type QuotationBoqInput = {
   settings?: unknown;
   /** Edited floors (e.g. corrected heights); defaults come from the quote. */
   floors?: BoqFloor[];
-  counts?: Partial<BoqCounts>;
+  /** Edited counts per floor; missing values are estimated. */
+  counts?: unknown;
 };
 
 export function generateQuotationBoq(
@@ -822,17 +1056,16 @@ export function generateQuotationBoq(
       ? input.floors
       : floorsFromQuote(input.details, s.defaultFloorHeightFeet)
   ).filter((floor) => floor.areaSqft > 0);
-  const estimated = estimateCounts(floors, s);
-  const counts: BoqCounts = {
-    mainDoors: validCount(input.counts?.mainDoors, estimated.mainDoors),
-    internalDoors: validCount(
-      input.counts?.internalDoors,
-      estimated.internalDoors,
-    ),
-    bathrooms: validCount(input.counts?.bathrooms, estimated.bathrooms),
-  };
+  const counts = normalizeCounts(
+    input.counts,
+    estimateCounts(floors, s, input.details),
+  );
   const warnings: string[] = [];
   const drafts: { draft: LineDraft; origin: BoqOrigin }[] = [];
+  const wallsByFloor = new Map<
+    string,
+    { internalPlaster: number; externalPlaster: number }
+  >();
   const stock = s.stockBarFeet;
   const cover = s.coverMm * FT_PER_MM;
   const totalSteel: SteelTally = new Map();
@@ -929,19 +1162,9 @@ export function generateQuotationBoq(
               unit: 'bag',
               source: 'PCC 1:4:8 · 3.4 bags/m³',
             },
-            {
-              name: 'Sand',
-              material: 'sand',
-              quantity: round(pcc * 0.47, 3),
-              unit: 'm³',
-            },
-            {
-              name: '40 mm aggregate',
-              material: 'aggregate',
-              quantity: round(pcc * 0.94, 3),
-              unit: 'm³',
-            },
-            ...concreteOutputs(footingConcrete, 'Footing'),
+            sandOutput(pcc * 0.47, s),
+            aggregateOutput(pcc * 0.94, s, '40 mm aggregate'),
+            ...concreteOutputs(footingConcrete, 'Footing', s),
             ...steelOutputs(tally, stock),
           ],
         },
@@ -986,7 +1209,7 @@ export function generateQuotationBoq(
             heightFeet: s.pedestalHeightFeet,
           },
           outputs: [
-            ...concreteOutputs(concrete, 'Pedestal'),
+            ...concreteOutputs(concrete, 'Pedestal', s),
             ...steelOutputs(tally, stock),
             {
               name: 'Centering & shuttering',
@@ -1131,6 +1354,7 @@ export function generateQuotationBoq(
               ...concreteOutputs(
                 lift.columns * lift.height * columnArea,
                 'Column',
+                s,
               ),
               ...steelOutputs(tally, stock),
             ],
@@ -1261,6 +1485,7 @@ export function generateQuotationBoq(
         ...concreteOutputs(
           concrete,
           level.slab ? 'Beam + slab' : 'Plinth beam',
+          s,
         ),
         ...steelOutputs(tally, stock),
         {
@@ -1304,9 +1529,9 @@ export function generateQuotationBoq(
         (externalArea * (s.externalWallIn / 12) +
           internalArea * (s.internalWallIn / 12)) *
         CUM_PER_CFT;
-      const waste = 1 + s.materialWastagePercent / 100;
       const internalPlaster = externalArea + 2 * internalArea;
       const externalPlaster = externalArea * 1.1;
+      wallsByFloor.set(floor.name, { internalPlaster, externalPlaster });
       drafts.push({
         origin: 'quotation-structure',
         draft: {
@@ -1331,56 +1556,47 @@ export function generateQuotationBoq(
               quantity: round(internalArea, 0),
               unit: 'sqft',
             },
+            ...brickworkOutputs(volume, internalPlaster, externalPlaster, s),
+          ],
+        },
+      });
+    }
+
+    // --- Parapet wall and terrace waterproofing on the top floor ----------
+    const top = floors[floors.length - 1]!;
+    if (s.parapetHeightFeet > 0) {
+      const perimeter = 2 * (top.lengthFeet + top.widthFeet);
+      const area = perimeter * s.parapetHeightFeet;
+      const volume = area * (s.parapetWallIn / 12) * CUM_PER_CFT;
+      drafts.push({
+        origin: 'quotation-structure',
+        draft: {
+          name: `${top.name}: parapet wall (${s.parapetHeightFeet} ft) + terrace waterproofing`,
+          section: top.name,
+          kind: 'quote-parapet',
+          unit: 'sqft',
+          inputs: {
+            parapetFeet: round(perimeter, 1),
+            heightFeet: s.parapetHeightFeet,
+            thickness: `${s.parapetWallIn} in`,
+          },
+          outputs: [
             {
-              name: 'Bricks',
-              material: 'bricks',
-              quantity: ceil(volume * s.bricksPerCubicMetre * waste),
-              unit: 'each',
-              source: `${round(volume, 2)} m³ wall × ${s.bricksPerCubicMetre}/m³`,
-            },
-            {
-              name: 'Cement',
-              material: 'cement',
-              quantity: round(
-                (volume * 1.5 +
-                  internalPlaster * 0.0058 +
-                  externalPlaster * 0.0136) *
-                  waste,
-                1,
-              ),
-              unit: 'bag',
-              source:
-                'Mortar 1:6 · 12 mm internal plaster 1:6 · 20 mm external plaster 1:4',
-            },
-            {
-              name: 'Sand',
-              material: 'sand',
-              quantity: round(
-                (volume * 0.32 +
-                  internalPlaster * 0.0012 +
-                  externalPlaster * 0.0019) *
-                  waste,
-                3,
-              ),
-              unit: 'm³',
-            },
-            {
-              name: 'Internal plaster',
-              material: 'plaster_labour',
-              quantity: round(internalPlaster, 0),
+              name: `${s.parapetWallIn} in parapet wall`,
+              quantity: round(area, 0),
               unit: 'sqft',
             },
+            ...brickworkOutputs(volume, 0, 2 * area, s),
             {
-              name: 'External plaster',
-              material: 'plaster_labour',
-              quantity: round(externalPlaster, 0),
+              name: 'Terrace waterproofing',
+              material: 'waterproofing',
+              quantity: round(top.lengthFeet * top.widthFeet, 0),
               unit: 'sqft',
             },
           ],
         },
       });
     }
-
     // Order structure stage by stage: Foundation, then each floor.
     const stageOrder = ['Foundation', ...floors.map((floor) => floor.name)];
     const rank = (section: string) => {
@@ -1392,10 +1608,10 @@ export function generateQuotationBoq(
     const stageKg = new Map<string, number>();
     for (const { draft } of drafts)
       for (const output of draft.outputs)
-        if (output.material === 'steel')
+        if (output.material === 'steel' && output.weightKg)
           stageKg.set(
             draft.section,
-            (stageKg.get(draft.section) ?? 0) + output.quantity,
+            (stageKg.get(draft.section) ?? 0) + output.weightKg,
           );
     for (const [stage, kg] of stageKg) {
       const index = drafts.reduce(
@@ -1424,8 +1640,18 @@ export function generateQuotationBoq(
     }
   }
 
-  // --- Package allowances (₹ per door, per bathroom, per sq ft …) ---------
+  // --- Package allowances → categories counted floor by floor -----------
   const builtUp = floors.reduce((sum, floor) => sum + floor.areaSqft, 0);
+  const allowances = new Map<
+    AllowanceCategory,
+    { rate: number; label: string; extra: boolean }
+  >();
+  const unmatched: {
+    section: NonNullable<SftEstimateDetails['sections']>[number];
+    allowance: number;
+    unit: string;
+    extra: boolean;
+  }[] = [];
   for (const section of input.details.sections ?? []) {
     const allowance = Number(
       section.allowanceValue || section.allowancePerSqft || '',
@@ -1445,13 +1671,336 @@ export function generateQuotationBoq(
           ? 'sqft'
           : 'none';
     if (unit === 'none') continue;
-    const title = section.title;
-    const { quantity, basis } = allowanceQuantity(title, unit, {
-      builtUp,
-      counts,
-      settings: s,
+    const label = [section.title, section.brand, section.grade]
+      .filter(Boolean)
+      .join(' · ')
+      .slice(0, 160);
+    const categories = allowanceCategories(section.title, unit);
+    if (!categories.length) {
+      unmatched.push({
+        section,
+        allowance,
+        unit,
+        extra: treatment === 'extra',
+      });
+      continue;
+    }
+    const quoted = { rate: allowance, label, extra: treatment === 'extra' };
+    for (const category of categories)
+      if (!allowances.has(category)) allowances.set(category, quoted);
+  }
+  // A generic "Internal doors" allowance also covers bathroom and pooja
+  // doors unless the package prices those separately.
+  // One per-bathroom allowance covering fittings and plumbing is charged
+  // once, on the fittings line; the plumbing material line is not repeated.
+  const included = new Set<AllowanceCategory>();
+  const fittings = allowances.get('sanitary');
+  if (fittings && allowances.get('plumbing') === fittings)
+    included.add('plumbing');
+  const generic = allowances.get('internalDoors');
+  if (generic) {
+    if (!allowances.has('bathroomDoors'))
+      allowances.set('bathroomDoors', generic);
+    if (!allowances.has('poojaDoors')) allowances.set('poojaDoors', generic);
+  }
+  const item = (
+    category: AllowanceCategory,
+    name: string,
+    quantity: number,
+    unit: string,
+    material: string,
+    source?: string,
+  ): GeneratedOutput[] => {
+    if (!(quantity > 0) || included.has(category)) return [];
+    const quoted = allowances.get(category);
+    return [
+      quoted
+        ? {
+            name,
+            quantity: round(quantity, 2),
+            unit,
+            rate: quoted.rate,
+            source: (
+              `${quoted.extra ? 'Chargeable extra' : 'Package allowance'}: ${quoted.label}` +
+              (source ? ` · ${source}` : '')
+            ).slice(0, 300),
+          }
+        : {
+            name,
+            quantity: round(quantity, 2),
+            unit,
+            material,
+            ...(source ? { source: source.slice(0, 300) } : {}),
+          },
+    ];
+  };
+
+  // --- Finishes, services and labour, floor by floor ---------------------
+  for (const floor of floors) {
+    const fc = counts.floors[floor.name]!;
+    const walls = wallsByFloor.get(floor.name) ?? {
+      internalPlaster: 0,
+      externalPlaster: 0,
+    };
+    const doors =
+      fc.mainDoors + fc.internalDoors + fc.bathroomDoors + fc.poojaDoors;
+    const windowArea = fc.windows * s.windowSqft;
+    const floorTiles = (floor.areaSqft * s.tileCoveragePercent) / 100;
+    const wallTiles = fc.bathrooms * s.bathroomWallTileSqft;
+    const interiorPaint = walls.internalPlaster + floor.areaSqft;
+    const exteriorPaint = walls.externalPlaster;
+    const points = ceil(floor.areaSqft / s.sqftPerElectricalPoint);
+    const finishLine = (
+      kind: string,
+      title: string,
+      outputs: GeneratedOutput[],
+      inputs: Record<string, string | number>,
+    ) => {
+      if (outputs.length)
+        drafts.push({
+          origin: 'quotation-structure',
+          draft: {
+            name: `${floor.name}: ${title}`,
+            section: floor.name,
+            kind,
+            unit: 'each',
+            inputs,
+            outputs,
+          },
+        });
+    };
+    finishLine(
+      'quote-doors-windows',
+      'doors & windows',
+      [
+        ...item('mainDoors', 'Main door', fc.mainDoors, 'door', 'door_main'),
+        ...item(
+          'internalDoors',
+          'Bedroom / internal door',
+          fc.internalDoors,
+          'door',
+          'door_internal',
+        ),
+        ...item(
+          'bathroomDoors',
+          'Bathroom door',
+          fc.bathroomDoors,
+          'door',
+          'door_bathroom',
+        ),
+        ...item(
+          'poojaDoors',
+          'Pooja door',
+          fc.poojaDoors,
+          'door',
+          'door_pooja',
+        ),
+        ...item(
+          'windows',
+          'Windows',
+          windowArea,
+          'sqft',
+          'window',
+          `${fc.windows} windows × ${s.windowSqft} sq ft`,
+        ),
+        ...item(
+          'ventilators',
+          'Ventilators',
+          fc.ventilators,
+          'each',
+          'ventilator',
+        ),
+        ...(doors > 0
+          ? [
+              {
+                name: 'Door fixing labour',
+                material: 'labour_door_fixing',
+                quantity: doors,
+                unit: 'door',
+              },
+            ]
+          : []),
+      ],
+      { ...fc },
+    );
+    finishLine(
+      'quote-flooring',
+      'flooring & tiles',
+      [
+        ...item(
+          'floorTiles',
+          'Floor tiles',
+          floorTiles,
+          'sqft',
+          'floor_tiles',
+          `${s.tileCoveragePercent}% of ${round(floor.areaSqft, 0)} sq ft`,
+        ),
+        ...item(
+          'wallTiles',
+          'Bathroom wall tiles',
+          wallTiles,
+          'sqft',
+          'wall_tiles',
+          `${fc.bathrooms} bathrooms × ${s.bathroomWallTileSqft} sq ft`,
+        ),
+        {
+          name: 'Tile laying labour',
+          material: 'labour_tiling',
+          quantity: round(floorTiles + wallTiles, 0),
+          unit: 'sqft',
+        },
+      ],
+      { builtUpSqft: floor.areaSqft, bathrooms: fc.bathrooms },
+    );
+    finishLine(
+      'quote-painting',
+      'painting',
+      [
+        ...item(
+          'paintInterior',
+          'Interior painting (putty, primer, 2 coats)',
+          interiorPaint,
+          'sqft',
+          'paint_interior',
+          'Walls and ceiling',
+        ),
+        ...item(
+          'paintExterior',
+          'Exterior painting',
+          exteriorPaint,
+          'sqft',
+          'paint_exterior',
+        ),
+        {
+          name: 'Painting labour',
+          material: 'labour_painting',
+          quantity: round(interiorPaint + exteriorPaint, 0),
+          unit: 'sqft',
+        },
+      ],
+      { builtUpSqft: floor.areaSqft },
+    );
+    finishLine(
+      'quote-services',
+      'electrical & plumbing',
+      [
+        ...item(
+          'electrical',
+          'Electrical points (wiring, switches)',
+          points,
+          'point',
+          'electrical_point',
+          `1 point per ${s.sqftPerElectricalPoint} sq ft`,
+        ),
+        {
+          name: 'Electrical labour',
+          material: 'labour_electrical',
+          quantity: points,
+          unit: 'point',
+        },
+        ...item(
+          'sanitary',
+          'Sanitary ware & CP fittings',
+          fc.bathrooms,
+          'bathroom',
+          'sanitary_cp',
+        ),
+        ...item(
+          'plumbing',
+          'Plumbing pipes & fittings',
+          fc.bathrooms,
+          'bathroom',
+          'plumbing_bathroom',
+        ),
+        {
+          name: 'Plumbing labour',
+          material: 'labour_plumbing',
+          quantity: fc.bathrooms,
+          unit: 'bathroom',
+        },
+      ],
+      { points, bathrooms: fc.bathrooms },
+    );
+    finishLine(
+      'quote-civil-labour',
+      'civil labour',
+      [
+        {
+          name: 'Civil labour (concrete, brickwork, plastering)',
+          material: 'labour_civil',
+          quantity: round(floor.areaSqft, 0),
+          unit: 'sqft',
+          source: 'Per sq ft of built-up area; centering is priced separately',
+        },
+      ],
+      { builtUpSqft: floor.areaSqft },
+    );
+  }
+
+  // --- External works: compound wall and entrance gate -------------------
+  if (counts.compoundWallFeet > 0) {
+    const area = counts.compoundWallFeet * s.compoundWallHeightFeet;
+    const volume = area * (s.compoundWallIn / 12) * CUM_PER_CFT;
+    drafts.push({
+      origin: 'quotation-structure',
+      draft: {
+        name: `Compound wall (${counts.compoundWallFeet} rft × ${s.compoundWallHeightFeet} ft)`,
+        section: 'External works',
+        kind: 'quote-compound-wall',
+        unit: 'sqft',
+        inputs: {
+          lengthFeet: counts.compoundWallFeet,
+          heightFeet: s.compoundWallHeightFeet,
+          thickness: `${s.compoundWallIn} in`,
+        },
+        outputs: [
+          {
+            name: `${s.compoundWallIn} in compound wall`,
+            quantity: round(area, 0),
+            unit: 'sqft',
+          },
+          ...brickworkOutputs(volume, 0, 2 * area, s),
+          ...item(
+            'paintExterior',
+            'Compound wall painting',
+            2 * area,
+            'sqft',
+            'paint_exterior',
+          ),
+        ],
+        notes:
+          'Brickwork, plaster and paint only. Add the wall footing and pillars as takeoff items.',
+      },
     });
-    const label = [title, section.brand, section.grade]
+  }
+  const gates = item(
+    'gates',
+    'Entrance gate',
+    counts.entranceGates,
+    'each',
+    'gate',
+  );
+  if (gates.length)
+    drafts.push({
+      origin: 'quotation-structure',
+      draft: {
+        name: 'Entrance gate',
+        section: 'External works',
+        kind: 'quote-gate',
+        unit: 'each',
+        inputs: { gates: counts.entranceGates },
+        outputs: gates,
+      },
+    });
+
+  // Package allowances that don't map to a counted item stay building-level.
+  for (const { section, allowance, unit, extra } of unmatched) {
+    const { quantity, basis } = otherAllowanceQuantity(
+      section.title,
+      unit,
+      builtUp,
+    );
+    const label = [section.title, section.brand, section.grade]
       .filter(Boolean)
       .join(' · ');
     drafts.push({
@@ -1461,25 +2010,24 @@ export function generateQuotationBoq(
         section: 'Finishes & fittings',
         kind: 'quote-allowance',
         unit: unitLabel(unit),
-        inputs: { allowance, per: unitLabel(unit), treatment },
+        inputs: { allowance, per: unitLabel(unit) },
         outputs: [
           {
-            name: title.slice(0, 160),
+            name: section.title.slice(0, 160),
             quantity: round(quantity, 2),
             unit: unitLabel(unit),
             rate: allowance,
             source: basis.slice(0, 300),
           },
         ],
-        notes:
-          treatment === 'extra'
-            ? 'Chargeable extra in the quotation package.'
-            : 'Allowance included in the quoted package rate.',
+        notes: extra
+          ? 'Chargeable extra in the quotation package.'
+          : 'Allowance included in the quoted package rate.',
       },
     });
   }
 
-  // --- Additional quoted works (compound wall, sump …) -------------------
+  // --- Additional quoted works (sump, borewell …) ------------------------
   for (const row of input.details.rows) {
     if ((row.kind ?? 'floor') !== 'additional') continue;
     const unit = row.unit ?? 'sqft';
@@ -1496,13 +2044,89 @@ export function generateQuotationBoq(
             name: row.name,
             quantity: Number(row.areaSqft) || 0,
             unit: unitLabel(unit),
-            source: 'Break down materials and labour manually',
+            source: 'Quoted item: break down materials and labour manually',
           },
         ],
         quotedPrice: Number(row.amount) || 0,
       },
     });
   }
+
+  // --- Design & approvals, and handover ----------------------------------
+  if (builtUp > 0) {
+    drafts.push({
+      origin: 'quotation-structure',
+      draft: {
+        name: 'Design, soil test & approvals',
+        section: 'Design & approvals',
+        kind: 'quote-design',
+        unit: 'sqft',
+        inputs: { builtUpSqft: round(builtUp, 0) },
+        outputs: [
+          {
+            name: 'Architectural & structural design',
+            material: 'design_fees',
+            quantity: round(builtUp, 0),
+            unit: 'sqft',
+          },
+          {
+            name: 'Soil test',
+            material: 'soil_test',
+            quantity: 1,
+            unit: 'LS',
+          },
+          {
+            name: 'Building permission & approvals',
+            material: 'building_permission',
+            quantity: 1,
+            unit: 'LS',
+          },
+        ],
+      },
+    });
+    drafts.push({
+      origin: 'quotation-structure',
+      draft: {
+        name: 'Handover: cleaning, testing & snags',
+        section: 'Handover',
+        kind: 'quote-handover',
+        unit: 'sqft',
+        inputs: { builtUpSqft: round(builtUp, 0) },
+        outputs: [
+          {
+            name: 'Final cleaning',
+            material: 'handover_cleaning',
+            quantity: round(builtUp, 0),
+            unit: 'sqft',
+          },
+          {
+            name: 'Testing & snag rectification',
+            material: 'handover_snags',
+            quantity: 1,
+            unit: 'LS',
+          },
+        ],
+      },
+    });
+  }
+
+  // Design → foundation → each floor → external works → handover.
+  const stageOrder = [
+    'Design & approvals',
+    'Foundation',
+    ...floors.map((floor) => floor.name),
+    'External works',
+    'Finishes & fittings',
+    'Additional quoted works',
+    'Handover',
+  ];
+  const stageRank = (section: string) => {
+    const index = stageOrder.indexOf(section);
+    return index < 0 ? stageOrder.length : index;
+  };
+  drafts.sort(
+    (a, b) => stageRank(a.draft.section) - stageRank(b.draft.section),
+  );
 
   return {
     lines: drafts.map(({ draft, origin }) => ({
@@ -1525,13 +2149,14 @@ export function generateQuotationBoq(
   };
 }
 
-function validCount(value: unknown, fallback: number) {
+function validCount(value: unknown, fallback: number, max = 999) {
   const number = Number(value);
   return value !== undefined &&
+    value !== null &&
     value !== '' &&
     Number.isFinite(number) &&
     number >= 0
-    ? Math.min(999, Math.round(number))
+    ? Math.min(max, Math.round(number))
     : fallback;
 }
 
@@ -1554,44 +2179,75 @@ const UNIT_LABELS: Record<string, string> = {
 };
 const unitLabel = (unit: string) => UNIT_LABELS[unit] ?? unit;
 
-function allowanceQuantity(
+export type AllowanceCategory =
+  | 'mainDoors'
+  | 'internalDoors'
+  | 'bathroomDoors'
+  | 'poojaDoors'
+  | 'windows'
+  | 'ventilators'
+  | 'gates'
+  | 'floorTiles'
+  | 'wallTiles'
+  | 'paintInterior'
+  | 'paintExterior'
+  | 'electrical'
+  | 'sanitary'
+  | 'plumbing';
+
+/**
+ * Which counted items a package allowance prices, from its title and unit.
+ * Only allowances whose unit matches the counted quantity are mapped.
+ */
+export function allowanceCategories(
   title: string,
   unit: string,
-  context: { builtUp: number; counts: BoqCounts; settings: StructuralSettings },
+): AllowanceCategory[] {
+  const t = title.toLowerCase();
+  const perItem = ['door', 'piece', 'lumpsum'].includes(unit);
+  if (/gate/.test(t))
+    return unit === 'piece' || unit === 'door' ? ['gates'] : [];
+  if (/door/.test(t)) {
+    if (!perItem) return [];
+    if (/main|entrance|front/.test(t)) return ['mainDoors'];
+    if (/bath|toilet|wash/.test(t)) return ['bathroomDoors'];
+    if (/pooja|puja|prayer/.test(t)) return ['poojaDoors'];
+    return ['internalDoors'];
+  }
+  if (/ventilat/.test(t)) return unit === 'piece' ? ['ventilators'] : [];
+  if (/window/.test(t)) return unit === 'sqft' ? ['windows'] : [];
+  if (/(wall|dado|bathroom) til/.test(t))
+    return unit === 'sqft' ? ['wallTiles'] : [];
+  if (/tile|flooring|granite|marble|vitrified/.test(t))
+    return unit === 'sqft' ? ['floorTiles'] : [];
+  if (/paint/.test(t)) {
+    if (unit !== 'sqft') return [];
+    if (/exterior|external|outside/.test(t)) return ['paintExterior'];
+    if (/interior|internal|inside/.test(t)) return ['paintInterior'];
+    return ['paintInterior', 'paintExterior'];
+  }
+  if (/electric|wiring|switch/.test(t))
+    return unit === 'point' ? ['electrical'] : [];
+  if (/plumb/.test(t)) {
+    if (unit !== 'bathroom') return [];
+    // "Bathroom fittings & plumbing": one allowance covers both.
+    return /fitting|sanitary|\bcp\b|fixture/.test(t)
+      ? ['sanitary', 'plumbing']
+      : ['plumbing'];
+  }
+  if (/sanitary|cp fitting|bathroom fitting|fixture|bathroom/.test(t))
+    return unit === 'bathroom' ? ['sanitary'] : [];
+  return [];
+}
+
+function otherAllowanceQuantity(
+  title: string,
+  unit: string,
+  builtUp: number,
 ): { quantity: number; basis: string } {
-  const { builtUp, counts, settings } = context;
-  if (unit === 'door') {
-    if (/main|entrance|front/i.test(title))
-      return {
-        quantity: counts.mainDoors,
-        basis: `${counts.mainDoors} main door`,
-      };
-    return {
-      quantity: counts.internalDoors,
-      basis: `${counts.internalDoors} internal doors (edit the count if needed)`,
-    };
-  }
-  if (unit === 'bathroom')
-    return {
-      quantity: counts.bathrooms,
-      basis: `${counts.bathrooms} bathrooms (edit the count if needed)`,
-    };
   if (unit === 'lumpsum') return { quantity: 1, basis: 'Lump sum' };
-  if (unit === 'sqft') {
-    if (/window|ventilator/i.test(title))
-      return {
-        quantity: (builtUp * settings.windowPercent) / 100,
-        basis: `${settings.windowPercent}% of ${round(builtUp, 0)} sqft built-up`,
-      };
-    if (/tile|floor|granite|marble|vitrified/i.test(title))
-      return {
-        quantity: (builtUp * settings.tileCoveragePercent) / 100,
-        basis: `${settings.tileCoveragePercent}% of ${round(builtUp, 0)} sqft built-up`,
-      };
-    if (/paint|ceiling|putty/i.test(title))
-      return { quantity: builtUp, basis: `${round(builtUp, 0)} sqft built-up` };
-  }
-  if (unit === 'bhk') return { quantity: 0, basis: 'Enter BHK count' };
+  if (unit === 'sqft' && /ceiling|putty/i.test(title))
+    return { quantity: builtUp, basis: `${round(builtUp, 0)} sqft built-up` };
   return { quantity: 0, basis: 'Enter the measured quantity' };
 }
 

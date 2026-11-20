@@ -3,7 +3,12 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { saveBoqRates } from './boq-actions';
-import { MATERIAL_GROUPS, variantKey, type Rate } from './boq-pricing';
+import {
+  GROUP_SECTIONS,
+  MATERIAL_GROUPS,
+  variantKey,
+  type Rate,
+} from './boq-pricing';
 import {
   normalizeStructuralSettings,
   STRUCTURAL_FIELDS,
@@ -22,7 +27,7 @@ function startingVariants(saved: Rate[]): Rate[] {
       key: variantKey(group.key, variant),
       label: variant,
       unit: group.unit,
-      rate: 0,
+      rate: group.defaultRate ?? 0,
       category: group.category,
       material: group.key,
       variant,
@@ -31,28 +36,13 @@ function startingVariants(saved: Rate[]): Rate[] {
   });
 }
 const defaults: Rate[] = [
+  // Cement, sand, aggregate, bricks and steel are priced from the
+  // purchase-unit groups above (bag, tonne, number, rod).
   ['rcc concrete volume', 'RCC concrete volume', 'm³', 'material'],
-  ['cement (m20 nominal mix)', 'Cement (M20 nominal mix)', 'bag', 'material'],
-  ['sand (m20 nominal mix)', 'Sand (M20 nominal mix)', 'm³', 'material'],
-  [
-    '20 mm aggregate (m20 nominal mix)',
-    '20 mm aggregate (M20 nominal mix)',
-    'm³',
-    'material',
-  ],
   ['excavation volume', 'Excavation volume', 'm³', 'labour'],
   ['loose soil for disposal', 'Loose soil for disposal', 'm³', 'other'],
-  ['16 mm main bars', '16 mm main bars', 'rod', 'material'],
-  ['12 mm main bars', '12 mm main bars', 'rod', 'material'],
-  ['10 mm main bars', '10 mm main bars', 'rod', 'material'],
-  ['footing bars', 'Footing bars', 'rod', 'material'],
-  ['6 mm rings @ 150 mm', '6 mm rings', 'rod', 'material'],
-  ['8 mm beam stirrups', '8 mm beam stirrups', 'rod', 'material'],
   ['4 inch brick wall', '4 inch brick wall', 'sqft', 'labour'],
   ['9 inch brick wall', '9 inch brick wall', 'sqft', 'labour'],
-  ['bricks', 'Bricks', 'each', 'material'],
-  ['mortar sand (allowance)', 'Mortar sand', 'm³', 'material'],
-  ['cement (allowance)', 'Cement (allowance)', 'bag', 'material'],
   ['slab shuttering', 'Slab shuttering', 'sqft', 'labour'],
   ['internal plaster', 'Internal plaster', 'sqft', 'labour'],
   ['external plaster', 'External plaster', 'sqft', 'labour'],
@@ -64,13 +54,6 @@ const defaults: Rate[] = [
   ['paint (per coat allowance)', 'Paint', 'litre', 'material'],
   ['tile adhesive', 'Tile adhesive', 'kg', 'material'],
   ['tile grout', 'Tile grout', 'kg', 'material'],
-  [
-    'cement (plaster allowance)',
-    'Cement (plaster allowance)',
-    'bag',
-    'material',
-  ],
-  ['plaster sand', 'Plaster sand', 'm³', 'material'],
   ['labour', 'General labour', 'day', 'labour'],
 ].map(([, label, unit, category]) => ({
   key: `${String(label ?? '').toLowerCase()}::${String(unit ?? 'each').toLowerCase()}`,
@@ -303,80 +286,92 @@ export function BoqRateCard({
             </span>
           </div>
         </div>
-        <div className="boq-variant-groups">
-          {MATERIAL_GROUPS.map((group) => (
-            <div className="boq-variant-group" key={group.key}>
-              <div className="boq-variant-head">
-                <strong>{group.label}</strong>
-                <small>
-                  ₹ per {group.unit} ·{' '}
-                  {group.category === 'labour' ? 'Labour' : 'Material'}
-                </small>
-              </div>
-              {variants
-                .filter((row) => row.material === group.key)
-                .map((row) => (
-                  <div className="boq-variant-row" key={row.key}>
-                    <button
-                      type="button"
-                      className={`boq-variant-default ${row.isDefault ? 'active' : ''}`}
-                      aria-pressed={Boolean(row.isDefault)}
-                      aria-label={`Use ${row.variant || 'this'} as default ${group.label}`}
-                      title="Default for new BOQs"
-                      onClick={() => makeDefault(group.key, row.key)}
-                      disabled={!canEdit}
-                    >
-                      ★
-                    </button>
-                    <input
-                      aria-label={`${group.label} brand or source`}
-                      value={row.variant ?? ''}
-                      placeholder="Brand / source"
-                      onChange={(event) =>
-                        changeVariant(row.key, { variant: event.target.value })
-                      }
-                      disabled={!canEdit}
-                    />
-                    <label className="boq-rate-input">
-                      <span>₹</span>
-                      <input
-                        aria-label={`${row.variant || group.label} rate per ${group.unit}`}
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={row.rate}
-                        onChange={(event) =>
-                          changeVariant(row.key, {
-                            rate: Number(event.target.value),
-                          })
-                        }
-                        disabled={!canEdit}
-                      />
-                    </label>
+        {GROUP_SECTIONS.map((section) => (
+          <div key={section}>
+            <h3 className="boq-variant-section">{section}</h3>
+            <div className="boq-variant-groups">
+              {MATERIAL_GROUPS.filter((group) => group.section === section).map(
+                (group) => (
+                  <div className="boq-variant-group" key={group.key}>
+                    <div className="boq-variant-head">
+                      <strong>{group.label}</strong>
+                      <small>
+                        ₹ per {group.unit} ·{' '}
+                        {group.category === 'labour' ? 'Labour' : 'Material'}
+                      </small>
+                    </div>
+                    {group.note && (
+                      <p className="boq-variant-note">{group.note}</p>
+                    )}
+                    {variants
+                      .filter((row) => row.material === group.key)
+                      .map((row) => (
+                        <div className="boq-variant-row" key={row.key}>
+                          <button
+                            type="button"
+                            className={`boq-variant-default ${row.isDefault ? 'active' : ''}`}
+                            aria-pressed={Boolean(row.isDefault)}
+                            aria-label={`Use ${row.variant || 'this'} as default ${group.label}`}
+                            title="Default for new BOQs"
+                            onClick={() => makeDefault(group.key, row.key)}
+                            disabled={!canEdit}
+                          >
+                            ★
+                          </button>
+                          <input
+                            aria-label={`${group.label} brand or source`}
+                            value={row.variant ?? ''}
+                            placeholder="Brand / source"
+                            onChange={(event) =>
+                              changeVariant(row.key, {
+                                variant: event.target.value,
+                              })
+                            }
+                            disabled={!canEdit}
+                          />
+                          <label className="boq-rate-input">
+                            <span>₹</span>
+                            <input
+                              aria-label={`${row.variant || group.label} rate per ${group.unit}`}
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={row.rate}
+                              onChange={(event) =>
+                                changeVariant(row.key, {
+                                  rate: Number(event.target.value),
+                                })
+                              }
+                              disabled={!canEdit}
+                            />
+                          </label>
+                          {canEdit && (
+                            <button
+                              type="button"
+                              className="boq-variant-remove"
+                              aria-label={`Remove ${row.variant || 'variant'}`}
+                              onClick={() => removeVariant(row.key)}
+                            >
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
                     {canEdit && (
                       <button
                         type="button"
-                        className="boq-variant-remove"
-                        aria-label={`Remove ${row.variant || 'variant'}`}
-                        onClick={() => removeVariant(row.key)}
+                        className="boq-variant-add"
+                        onClick={() => addVariant(group.key)}
                       >
-                        ×
+                        ＋ Add brand / source
                       </button>
                     )}
                   </div>
-                ))}
-              {canEdit && (
-                <button
-                  type="button"
-                  className="boq-variant-add"
-                  onClick={() => addVariant(group.key)}
-                >
-                  ＋ Add brand / source
-                </button>
+                ),
               )}
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </section>
       <section className="boq-rate-panel">
         <div className="boq-panel-heading">
