@@ -388,11 +388,9 @@ export function MetaLeadPanel({
                 manages your business Page and share the Pages that run lead
                 ads.
               </p>
-              <form action="/api/meta-leads/oauth/start" method="get">
-                <button type="submit" className="crm-primary">
-                  Connect Facebook
-                </button>
-              </form>
+              <a className="crm-primary" href="/api/meta-leads/oauth/start">
+                Connect Facebook
+              </a>
             </>
           ) : (
             <div className="crm-meta-add">
@@ -474,11 +472,9 @@ export function MetaLeadPanel({
                 </div>
               )}
               <div className="crm-integrations-actions">
-                <form action="/api/meta-leads/oauth/start" method="get">
-                  <button type="submit" className="crm-outline">
-                    Reconnect / add Pages
-                  </button>
-                </form>
+                <a className="crm-outline" href="/api/meta-leads/oauth/start">
+                  Reconnect / add Pages
+                </a>
                 <button
                   type="button"
                   className="crm-outline"

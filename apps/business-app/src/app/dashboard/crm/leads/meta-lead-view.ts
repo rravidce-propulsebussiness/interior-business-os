@@ -39,12 +39,20 @@ const NOTICES: Record<string, string> = {
   connected: 'Facebook connected. Choose a Page and lead form below.',
   cancelled: 'Facebook login was cancelled.',
   expired:
-    'That Facebook login link expired. Please try Connect Facebook again.',
+    'Facebook login expired or its browser cookie was blocked. Allow cookies for this site and retry Connect Facebook.',
   no_pages:
-    'No Facebook Pages were shared. Select at least one Page when logging in.',
+    'Facebook login succeeded, but no Pages were shared. Select a Page you manage and grant its lead permissions.',
   forbidden: 'Only company owners or CRM managers can connect Facebook.',
-  not_configured: 'Meta Lead Ads is not set up on the server yet.',
-  failed: 'Facebook connection failed. Please try again.',
+  not_configured:
+    'Meta Lead Ads is missing server configuration. Ask the administrator to check the integration settings.',
+  unavailable:
+    'Unable to start Facebook login. Check your Business OS session and try again; an administrator can check the server error log.',
+  meta_rejected:
+    'Meta rejected the login request. Check Facebook Login for Business, the Meta app ID, and the registered OAuth callback URL.',
+  permission_denied:
+    'Meta did not grant the requested Page or lead permissions. Review the app permissions and reconnect.',
+  failed:
+    'Facebook login completed, but the Pages could not be saved. Check Meta app permissions and Business OS server logs.',
 };
 
 /** Everything the Meta Lead Ads panel shows. Never includes a token. */

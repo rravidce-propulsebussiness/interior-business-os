@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
+import { publicAuthOrigin } from '@business-os/auth/origin';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { crmServices } from '@/app/dashboard/crm/service';
 import {
   META_STATE_COOKIE,
+  MetaLeadError,
   metaLeadConfig,
   metaLeadMissingConfig,
   readOauthState,
@@ -23,7 +25,7 @@ export async function GET(request: Request) {
     const response = NextResponse.redirect(
       new URL(
         '/dashboard/crm/leads?panel=meta&meta=' + reason,
-        origin || 'http://localhost:3001',
+        origin || publicAuthOrigin(request.url),
       ),
       { status: 303, headers: { 'Cache-Control': 'private, no-store' } },
     );
@@ -39,7 +41,14 @@ export async function GET(request: Request) {
   const nonce = (await cookies()).get(META_STATE_COOKIE)?.value ?? '';
   const state = readOauthState(url.searchParams.get('state') ?? '', nonce);
   if (!state) return finish('expired');
-  if (url.searchParams.get('error') || !code) return finish('cancelled');
+  if (url.searchParams.get('error')) {
+    return finish(
+      url.searchParams.get('error') === 'access_denied'
+        ? 'cancelled'
+        : 'meta_rejected',
+    );
+  }
+  if (!code) return finish('cancelled');
   if (code.length > 2000) return finish('failed');
   try {
     const s = await crmServices('lead.view');
@@ -58,7 +67,18 @@ export async function GET(request: Request) {
     });
     revalidatePath('/dashboard/crm/leads');
     return finish(saved ? 'connected' : 'no_pages');
-  } catch {
-    return finish('failed');
+  } catch (error) {
+    // Meta's raw response can contain sensitive data. Only log the error
+    // class/status; the CRM gets a safe, actionable explanation.
+    console.error(
+      '[Meta Lead Ads] oauth.callback.failed',
+      error instanceof Error ? error.name : 'UnknownError',
+      error instanceof MetaLeadError ? (error.options.status ?? '') : '',
+    );
+    return finish(
+      error instanceof MetaLeadError && error.options.needsReconnect
+        ? 'permission_denied'
+        : 'failed',
+    );
   }
 }
