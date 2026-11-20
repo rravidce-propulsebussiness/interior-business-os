@@ -171,16 +171,13 @@ describe('BOQ default prices and quoted brands', () => {
     const fresh = effectiveRates([]);
     expect(
       rateForOutput(
-        { name: '16 mm main bars', quantity: 1, unit: 'rod', diameter: 16 },
+        { name: '16 mm main bars', unit: 'rod', diameter: 16 },
         fresh,
       ),
     ).toBe(1289);
     const saved = effectiveRates(rates);
     expect(
-      rateForOutput(
-        { name: 'Bricks', quantity: 1, unit: 'nos', material: 'bricks' },
-        saved,
-      ),
+      rateForOutput({ name: 'Bricks', unit: 'nos', material: 'bricks' }, saved),
     ).toBe(9.5);
   });
 });
