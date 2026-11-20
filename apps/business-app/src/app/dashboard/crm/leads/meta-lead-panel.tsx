@@ -388,6 +388,9 @@ export function MetaLeadPanel({
                 manages your business Page and share the Pages that run lead
                 ads.
               </p>
+              {/* Full-document navigation: the OAuth start route redirects to
+                  Facebook, which client-side <Link> routing would break. */}
+              {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
               <a className="crm-primary" href="/api/meta-leads/oauth/start">
                 Connect Facebook
               </a>
@@ -472,6 +475,8 @@ export function MetaLeadPanel({
                 </div>
               )}
               <div className="crm-integrations-actions">
+                {/* Full-document navigation to the OAuth start redirect. */}
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
                 <a className="crm-outline" href="/api/meta-leads/oauth/start">
                   Reconnect / add Pages
                 </a>
