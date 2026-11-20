@@ -923,114 +923,164 @@ export function generateQuotationBoq(
       });
     }
 
-    // --- Columns, lift by lift -------------------------------------------
+    // --- Columns, one lift per stage so steel is brought floor by floor ---
     {
-      const tally: SteelTally = new Map();
-      const liftNotes: string[] = [];
-      let columnConcrete = 0;
-      let tieCount = 0;
-      const section =
+      const columnArea =
         (s.columnWidthIn / 12) * (s.columnDepthIn / 12) * CUM_PER_CFT;
       const tieLength =
         2 *
           (Math.max(0, s.columnWidthIn / 12 - 2 * cover) +
             Math.max(0, s.columnDepthIn / 12 - 2 * cover)) +
         20 * s.columnTieDia * FT_PER_MM;
-      const lifts = floors.map((floor, index) => {
-        const grid = columnGrid(floor, s.columnSpacingFeet);
-        const columns = Math.min(grid.columns, groundGrid.columns);
-        const isTop = index === floors.length - 1;
-        const height =
-          index === 0
-            ? s.foundationDepthFeet -
-              footingT +
-              s.plinthHeightFeet +
-              floor.heightFeet
-            : floor.heightFeet;
-        return { floor, index, columns, isTop, height };
-      });
+      const maxDia = Math.max(0, ...columnBars.map((bar) => bar.dia));
+      const maxLap = lapFeet(maxDia, s.lapDiameters);
+      const maxBend = Math.max(0.75, 12 * maxDia * FT_PER_MM);
+      const belowPlinth = Math.max(0, s.foundationDepthFeet - footingT);
+      const foundationPiece = stock / Math.max(1, s.foundationCuts);
+      // The foundation bar (usually half a 40 ft bar) runs through the ground
+      // floor when it reaches the ground-floor roof plus the lap; otherwise it
+      // stops one lap above plinth and the ground floor gets its own lift.
+      // Every joint is a lap just above a floor level.
+      const throughGround =
+        belowPlinth +
+          s.plinthHeightFeet +
+          ground.heightFeet +
+          maxLap +
+          maxBend <=
+        foundationPiece + 1e-9;
+      if (!throughGround)
+        warnings.push(
+          `Foundation bars (${ft(foundationPiece)}) stop ${ft(maxLap)} above plinth; the ground floor columns get their own lift because footing → ground-floor roof + lap is longer than one foundation piece.`,
+        );
+      type Lift = {
+        stage: string;
+        label: string;
+        floorIndex: number;
+        height: number;
+        foundation: boolean;
+        columns: number;
+      };
+      const lifts: Lift[] = [
+        {
+          stage: 'Foundation',
+          label: throughGround
+            ? `Foundation → ${ground.name} roof`
+            : 'Foundation → plinth',
+          floorIndex: 0,
+          height:
+            belowPlinth +
+            s.plinthHeightFeet +
+            (throughGround ? ground.heightFeet : 0),
+          foundation: true,
+          columns: groundGrid.columns,
+        },
+        ...floors
+          .map((floor, index) => ({ floor, index }))
+          .filter(({ index }) => index > 0 || !throughGround)
+          .map(({ floor, index }) => ({
+            stage: floor.name,
+            label: floor.name,
+            floorIndex: index,
+            height: floor.heightFeet,
+            foundation: false,
+            columns: Math.min(
+              columnGrid(floor, s.columnSpacingFeet).columns,
+              groundGrid.columns,
+            ),
+          })),
+      ];
+      const lastFloor = floors.length - 1;
       for (const lift of lifts) {
-        columnConcrete += lift.columns * lift.height * section;
-        const ties =
-          lift.columns * (ceil((lift.height * 12) / s.columnTieSpacingIn) + 1);
-        tieCount += ties;
+        const tally: SteelTally = new Map();
+        const notes: string[] = [];
+        // The lift that reaches the top roof needs a lap only for starters.
+        const reachesTop =
+          lift.floorIndex === lastFloor && (!lift.foundation || throughGround);
         for (const bar of columnBars) {
-          const lap =
-            lift.isTop && !s.topStarters ? 0 : lapFeet(bar.dia, s.lapDiameters);
-          // Foundation bars get an L-bend into the footing mesh.
-          const bend =
-            lift.index === 0 ? Math.max(0.75, 12 * bar.dia * FT_PER_MM) : 0;
+          const lapLength = lapFeet(bar.dia, s.lapDiameters);
+          const lap = reachesTop && !s.topStarters ? 0 : lapLength;
+          const bend = lift.foundation
+            ? Math.max(0.75, 12 * bar.dia * FT_PER_MM)
+            : 0;
           const required = lift.height + lap + bend;
           const pieces = lift.columns * bar.count;
-          const plan = cutPlan(
-            required,
-            pieces,
-            stock,
-            lapFeet(bar.dia, s.lapDiameters),
-            lift.index === 0 ? s.foundationCuts : s.floorCuts,
-          );
-          const liftName =
-            lift.index === 0
-              ? `Foundation → ${lift.floor.name}`
-              : lift.floor.name;
-          if (plan.adjusted) {
-            const preferred = lift.index === 0 ? s.foundationCuts : s.floorCuts;
+          const preferred = lift.foundation ? s.foundationCuts : s.floorCuts;
+          const plan = cutPlan(required, pieces, stock, lapLength, preferred);
+          if (plan.adjusted)
             warnings.push(
-              `${liftName} columns, ${bar.dia} mm: needs ${ft(required)} (height ${ft(lift.height)} + lap ${ft(lap)}${bend ? ` + bend ${ft(bend)}` : ''}); ${ft(stock / preferred)} pieces (${preferred} per bar) are too short, so ${plan.piecesPerBar || 'spliced'} per bar is used.`,
+              `${lift.label} columns, ${bar.dia} mm: needs ${ft(required)} (height ${ft(lift.height)} + lap ${ft(lap)}${bend ? ` + bend ${ft(bend)}` : ''}); ${ft(stock / preferred)} pieces (${preferred} per bar) are too short, so ${plan.piecesPerBar || 'spliced'} per bar is used.`,
             );
-          }
           addSteel(
             tally,
             bar.dia,
             plan.bars * stock * M_PER_FT,
             plan.bars,
-            `${liftName}: ${pieces} pcs × ${ft(plan.pieceFeet)}`,
+            `${pieces} pcs × ${ft(plan.pieceFeet)}`,
           );
-          liftNotes.push(
-            `${liftName} · ${bar.dia} mm: ${pieces} pcs, need ${ft(required)}, cut ${plan.piecesPerBar ? `${plan.piecesPerBar}/bar @ ${ft(plan.pieceFeet)}` : 'spliced'} → ${plan.bars} bars${plan.offcutFeetPerBar > 0.05 ? `, offcut ${ft(plan.offcutFeetPerBar)}/bar` : ''}`,
+          notes.push(
+            `${lift.label} · ${bar.dia} mm: ${pieces} pcs, need ${ft(required)} (${ft(lift.height)} + lap ${ft(lap)}${bend ? ` + bend ${ft(bend)}` : ''}), cut ${plan.piecesPerBar ? `${plan.piecesPerBar}/bar @ ${ft(plan.pieceFeet)}` : 'spliced'} → ${plan.bars} bars${plan.offcutFeetPerBar > 0.05 ? `, offcut ${ft(plan.offcutFeetPerBar)}/bar` : ''}`,
           );
         }
-      }
-      const tiePlan = cutPlan(tieLength, tieCount, stock, 0);
-      addSteel(
-        tally,
-        s.columnTieDia,
-        tiePlan.bars * stock * M_PER_FT,
-        tiePlan.bars,
-        `${tieCount} rings × ${ft(tieLength)}`,
-      );
-      mergeSteel(tally);
-      drafts.push({
-        origin: 'quotation-structure',
-        draft: {
-          name: `Columns: ${groundGrid.columns} nos (${s.columnWidthIn}×${s.columnDepthIn} in), ${floors.length} lift${floors.length === 1 ? '' : 's'}`,
-          section: 'Structure',
-          kind: 'quote-columns',
-          unit: 'm³',
-          inputs: {
-            columns: groundGrid.columns,
-            mainBars: columnBars
-              .map((bar) => `${bar.count}×${bar.dia} mm`)
-              .join(' + '),
-            rings: `${s.columnTieDia} mm @ ${s.columnTieSpacingIn} in`,
-            lap: `${s.lapDiameters}d`,
+        const ties =
+          lift.columns * (ceil((lift.height * 12) / s.columnTieSpacingIn) + 1);
+        const tiePlan = cutPlan(tieLength, ties, stock, 0);
+        addSteel(
+          tally,
+          s.columnTieDia,
+          tiePlan.bars * stock * M_PER_FT,
+          tiePlan.bars,
+          `${ties} rings × ${ft(tieLength)}`,
+        );
+        mergeSteel(tally);
+        drafts.push({
+          origin: 'quotation-structure',
+          draft: {
+            name: `${lift.label}: ${lift.columns} columns (${s.columnWidthIn}×${s.columnDepthIn} in)`,
+            section: lift.stage,
+            kind: 'quote-columns',
+            unit: 'm³',
+            inputs: {
+              columns: lift.columns,
+              liftHeightFeet: round(lift.height, 2),
+              mainBars: columnBars
+                .map((bar) => `${bar.count}×${bar.dia} mm`)
+                .join(' + '),
+              rings: `${s.columnTieDia} mm @ ${s.columnTieSpacingIn} in`,
+              lap: `${s.lapDiameters}d`,
+            },
+            outputs: [
+              ...concreteOutputs(
+                lift.columns * lift.height * columnArea,
+                'Column',
+              ),
+              ...steelOutputs(tally, stock),
+            ],
+            notes: notes.join('\n').slice(0, 2000),
           },
-          outputs: [
-            ...concreteOutputs(columnConcrete, 'Column'),
-            ...steelOutputs(tally, stock),
-          ],
-          notes: liftNotes.join('\n').slice(0, 2000),
-        },
-      });
+        });
+      }
     }
 
     // --- Beams and slabs per level ---------------------------------------
-    const beamLevels: { name: string; floor: BoqFloor; slab: boolean }[] = [
+    const beamLevels: {
+      name: string;
+      stage: string;
+      floor: BoqFloor;
+      slab: boolean;
+    }[] = [
       ...(s.plinthBeam
-        ? [{ name: 'Plinth beams', floor: ground, slab: false }]
+        ? [
+            {
+              name: 'Plinth beams',
+              stage: 'Foundation',
+              floor: ground,
+              slab: false,
+            },
+          ]
         : []),
       ...floors.map((floor) => ({
         name: `${floor.name} roof`,
+        stage: floor.name,
         floor,
         slab: true,
       })),
@@ -1147,7 +1197,7 @@ export function generateQuotationBoq(
           name: level.slab
             ? `${level.name} slab + beams (${round(level.floor.lengthFeet * level.floor.widthFeet, 0)} sqft)`
             : `Plinth beams (${round(grid.beamRunFeet, 0)} rft)`,
-          section: 'Structure',
+          section: level.stage,
           kind: level.slab ? 'quote-slab' : 'quote-plinth-beam',
           unit: 'm³',
           inputs: {
@@ -1182,7 +1232,7 @@ export function generateQuotationBoq(
         origin: 'quotation-structure',
         draft: {
           name: `${floor.name}: brickwork + plaster`,
-          section: 'Masonry',
+          section: floor.name,
           kind: 'quote-masonry',
           unit: 'sqft',
           inputs: {
@@ -1252,26 +1302,40 @@ export function generateQuotationBoq(
       });
     }
 
-    // Binding wire on the total reinforcement.
-    const totalKg = [...totalSteel.entries()].reduce(
-      (sum, [diameter, entry]) =>
-        sum + entry.metres * steelKgPerMetre(diameter),
-      0,
-    );
-    if (totalKg > 0) {
-      drafts.push({
+    // Order structure stage by stage: Foundation, then each floor.
+    const stageOrder = ['Foundation', ...floors.map((floor) => floor.name)];
+    const rank = (section: string) => {
+      const index = stageOrder.indexOf(section);
+      return index < 0 ? stageOrder.length : index;
+    };
+    drafts.sort((a, b) => rank(a.draft.section) - rank(b.draft.section));
+    // Binding wire per stage, so each floor's steel order is complete.
+    const stageKg = new Map<string, number>();
+    for (const { draft } of drafts)
+      for (const output of draft.outputs)
+        if (output.material === 'steel')
+          stageKg.set(
+            draft.section,
+            (stageKg.get(draft.section) ?? 0) + output.quantity,
+          );
+    for (const [stage, kg] of stageKg) {
+      const index = drafts.reduce(
+        (last, { draft }, i) => (draft.section === stage ? i : last),
+        -1,
+      );
+      drafts.splice(index + 1, 0, {
         origin: 'quotation-structure',
         draft: {
-          name: 'Binding wire',
-          section: 'Structure',
+          name: `${stage}: binding wire`,
+          section: stage,
           kind: 'quote-binding-wire',
           unit: 'kg',
-          inputs: { steelKg: round(totalKg, 0) },
+          inputs: { steelKg: round(kg, 0) },
           outputs: [
             {
               name: 'Binding wire',
               material: 'binding_wire',
-              quantity: round(totalKg * 0.008, 1),
+              quantity: round(kg * 0.008, 1),
               unit: 'kg',
               source: '8 kg per tonne of reinforcement',
             },

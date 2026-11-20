@@ -1751,3 +1751,13 @@
     grid-template-columns: 30px minmax(0, 1fr) 90px 26px;
   }
 }
+
+.boq-steel-summary {
+  grid-column: 1 / -1;
+  overflow-x: auto;
+}
+.boq-steel-note {
+  margin: -6px 0 8px;
+  color: var(--erp-muted);
+  font-size: 10px;
+}

@@ -33,21 +33,29 @@ Everything else is added manually with the existing takeoff templates.
 Quantities on every line can be edited. **Regenerate BOQ** replaces only the
 generated lines; manual lines are kept.
 
-### Column steel and laps
+### Steel floor by floor, with laps
 
-Stock bars are 40 ft (12 m). Each column bar is cut per lift:
+The structural BOQ is grouped by stage, **Foundation**, **Ground Floor**,
+**First Floor** …, so steel is brought for one stage at a time. Each stage
+has its column lift, beams, slab, masonry and binding wire, and the BOQ shows
+the bars of each size to bring per stage.
 
-- **Foundation lift**: footing → plinth → ground floor + lap (+ L-bend into the
-  footing). Usual practice: one bar cut into **2** (20 ft pieces).
-- **Each floor above**: floor height + lap. Usual practice: one bar cut into
-  **3** (13.33 ft pieces). With a 10 ft floor and 16 mm bars, the lap is
-  50 × 16 mm = 2.62 ft, so 12.62 ft is needed and 3 pieces fit.
+Stock bars are 40 ft (12 m). Column bars are jointed with a lap just above
+every floor level:
+
+- **Foundation**: always one bar cut into **2** (20 ft pieces), with an
+  L-bend into the footing. If 20 ft reaches the ground-floor roof plus the lap
+  (normal foundation depth), the foundation bars also form the ground-floor
+  columns. If the foundation is deeper, they stop one lap above plinth and the
+  ground floor gets its own lift (a warning says so).
+- **Each floor above**: floor height + lap, one bar cut into **3** (13.33 ft
+  pieces). With a 10 ft floor and 16 mm bars, the lap is 50 × 16 mm = 2.62 ft,
+  so 12.62 ft is needed and 3 pieces fit.
 - If a taller floor needs more than the usual piece (e.g. 11 ft + 2.62 ft =
-  13.62 ft), fewer pieces are taken from each bar (2 per bar) and the BOQ shows
+  13.62 ft), 2 pieces are taken from each bar for that floor and the BOQ shows
   a warning, so the lap is never short.
 
-Steel weights are whole bars to buy (offcuts are wastage), summarised by
-bar size in the BOQ.
+Steel weights are whole bars to buy (offcuts are wastage).
 
 All assumptions — bar length, cuts per bar, lap (× diameter), cover,
 foundation depth, column grid and size, bar diameters and spacings, slab

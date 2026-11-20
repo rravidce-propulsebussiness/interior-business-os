@@ -205,6 +205,29 @@ export function BoqWorkspace({
           rods: prior.rods + (output.rods ?? 0),
         });
       }
+  // Steel order per stage (Foundation, Ground Floor, First Floor …), in BOQ
+  // order, so steel can be brought floor by floor.
+  const diameters = [...steelSummary.keys()].sort((a, b) => a - b);
+  const stageSteel = new Map<
+    string,
+    { kg: number; bars: Map<number, number> }
+  >();
+  for (const line of lines)
+    for (const output of line.outputs)
+      if (output.diameter && output.unit === 'kg') {
+        const stage = stageSteel.get(line.section) ?? {
+          kg: 0,
+          bars: new Map<number, number>(),
+        };
+        stage.kg += output.quantity;
+        stage.bars.set(
+          output.diameter,
+          (stage.bars.get(output.diameter) ?? 0) + (output.rods ?? 0),
+        );
+        stageSteel.set(line.section, stage);
+      }
+  const tonnes = (kg: number) =>
+    (kg / 1000).toLocaleString('en-IN', { maximumFractionDigits: 2 });
   const activeProject = projects.find((project) => project.id === projectId);
   const allOutputs = lines.flatMap((line) =>
     line.outputs.map((output) => ({
@@ -1182,46 +1205,52 @@ export function BoqWorkspace({
               )}
               {steelSummary.size > 0 && (
                 <div className="boq-steel-summary">
-                  <h3>Steel by bar size</h3>
+                  <h3>Steel to bring, floor by floor</h3>
+                  <p className="boq-steel-note">
+                    Bars of the stock length for each stage, laps included.
+                  </p>
                   <table>
                     <thead>
                       <tr>
-                        <th>Bar</th>
-                        <th>Bars to buy</th>
+                        <th>Stage</th>
+                        {diameters.map((diameter) => (
+                          <th key={diameter}>{diameter} mm</th>
+                        ))}
                         <th>Weight</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {[...steelSummary.entries()]
-                        .sort(([a], [b]) => a - b)
-                        .map(([diameter, row]) => (
-                          <tr key={diameter}>
-                            <td>{diameter} mm</td>
-                            <td>{row.rods.toLocaleString('en-IN')}</td>
-                            <td>
-                              {(row.kg / 1000).toLocaleString('en-IN', {
-                                maximumFractionDigits: 2,
-                              })}{' '}
-                              t
+                      {[...stageSteel.entries()].map(([stage, row]) => (
+                        <tr key={stage}>
+                          <td>{stage}</td>
+                          {diameters.map((diameter) => (
+                            <td key={diameter}>
+                              {row.bars.get(diameter)
+                                ? row.bars
+                                    .get(diameter)!
+                                    .toLocaleString('en-IN')
+                                : '—'}
                             </td>
-                          </tr>
-                        ))}
+                          ))}
+                          <td>{tonnes(row.kg)} t</td>
+                        </tr>
+                      ))}
                       <tr className="total">
-                        <td>Total</td>
+                        <td>Total bars</td>
+                        {diameters.map((diameter) => (
+                          <td key={diameter}>
+                            {(
+                              steelSummary.get(diameter)?.rods ?? 0
+                            ).toLocaleString('en-IN')}
+                          </td>
+                        ))}
                         <td>
-                          {[...steelSummary.values()]
-                            .reduce((sum, row) => sum + row.rods, 0)
-                            .toLocaleString('en-IN')}
-                        </td>
-                        <td>
-                          {(
+                          {tonnes(
                             [...steelSummary.values()].reduce(
                               (sum, row) => sum + row.kg,
                               0,
-                            ) / 1000
-                          ).toLocaleString('en-IN', {
-                            maximumFractionDigits: 2,
-                          })}{' '}
+                            ),
+                          )}{' '}
                           t
                         </td>
                       </tr>

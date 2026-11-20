@@ -157,41 +157,79 @@ describe('quotation-driven construction BOQ', () => {
     );
   });
 
-  it('generates foundation, column, slab, masonry and allowance lines', () => {
+  it('groups the BOQ stage by stage so steel is brought floor by floor', () => {
     const result = generateQuotationBoq({ details: quote() });
-    const sections = new Set(result.lines.map((line) => line.section));
-    expect(sections).toEqual(
-      new Set([
-        'Foundation',
-        'Structure',
-        'Masonry',
-        'Finishes & fittings',
-        'Additional quoted works',
-      ]),
+    const sections = [...new Set(result.lines.map((line) => line.section))];
+    expect(sections).toEqual([
+      'Foundation',
+      'Ground Floor',
+      'First Floor',
+      'Finishes & fittings',
+      'Additional quoted works',
+    ]);
+    const columns = result.lines.filter(
+      (line) => line.kind === 'quote-columns',
     );
     // 30×40 ft on a 12 ft grid → 4 × 5 = 20 columns.
-    const columns = result.lines.find((line) => line.kind === 'quote-columns');
-    expect(columns?.inputs.columns).toBe(20);
-    // Foundation lift: 20 columns × 4 bars of 16 mm, 2 per 40 ft bar.
-    expect(columns?.notes).toContain(
-      'Foundation → Ground Floor · 16 mm: 80 pcs',
+    expect(columns.map((line) => [line.section, line.inputs.columns])).toEqual([
+      ['Foundation', 20],
+      ['First Floor', 20],
+    ]);
+    // Foundation: half a 40 ft bar reaches the ground-floor roof + lap.
+    expect(columns[0]?.notes).toContain(
+      'Foundation → Ground Floor roof · 16 mm: 80 pcs, need 19.37 ft',
     );
-    expect(columns?.notes).toContain('cut 2/bar @ 20 ft → 40 bars');
-    // First floor lift: 10 ft + lap, 3 per bar.
-    expect(columns?.notes).toContain('First Floor · 16 mm: 80 pcs');
-    expect(columns?.notes).toContain('cut 3/bar @ 13.33 ft → 27 bars');
-    const steel16 = columns?.outputs.find((output) => output.diameter === 16);
-    expect(steel16?.rods).toBe(67);
-    // Whole bars purchased: 67 × 12.19 m × 1.58 kg/m.
-    expect(steel16?.quantity).toBeCloseTo(67 * 40 * 0.3048 * (256 / 162), 0);
+    expect(columns[0]?.notes).toContain('cut 2/bar @ 20 ft → 40 bars');
+    // First floor: 10 ft + 50d lap, a third of a bar each.
+    expect(columns[1]?.notes).toContain(
+      'First Floor · 16 mm: 80 pcs, need 12.62 ft (10 ft + lap 2.62 ft)',
+    );
+    expect(columns[1]?.notes).toContain('cut 3/bar @ 13.33 ft → 27 bars');
+    const steel16 = columns[0]?.outputs.find(
+      (output) => output.diameter === 16,
+    );
+    expect(steel16?.rods).toBe(40);
+    // Whole bars purchased: 40 × 12.19 m × 1.58 kg/m.
+    expect(steel16?.quantity).toBeCloseTo(40 * 40 * 0.3048 * (256 / 162), 0);
+    // Every stage has its own binding wire.
+    expect(
+      result.lines
+        .filter((line) => line.kind === 'quote-binding-wire')
+        .map((line) => line.section),
+    ).toEqual(['Foundation', 'Ground Floor', 'First Floor']);
     expect(result.steel.map((row) => row.diameter)).toEqual([8, 10, 12, 16]);
+  });
+
+  it('gives the ground floor its own lift when the foundation is deep', () => {
+    const result = generateQuotationBoq({
+      details: quote(),
+      settings: { foundationDepthFeet: 7 },
+    });
+    const columns = result.lines.filter(
+      (line) => line.kind === 'quote-columns',
+    );
+    expect(columns.map((line) => line.section)).toEqual([
+      'Foundation',
+      'Ground Floor',
+      'First Floor',
+    ]);
+    // Foundation still 2 pieces per bar, ending one lap above plinth.
+    expect(columns[0]?.notes).toContain('Foundation → plinth · 16 mm');
+    expect(columns[0]?.notes).toContain('cut 2/bar @ 20 ft');
+    expect(columns[1]?.notes).toContain(
+      'Ground Floor · 16 mm: 80 pcs, need 12.62 ft (10 ft + lap 2.62 ft), cut 3/bar',
+    );
+    expect(result.warnings.join(' ')).toContain('stop 2.62 ft above plinth');
   });
 
   it('reduces cuts per bar when a taller floor needs more length', () => {
     const result = generateQuotationBoq({ details: quote(['10', '11']) });
-    const columns = result.lines.find((line) => line.kind === 'quote-columns');
-    expect(columns?.notes).toContain('First Floor · 16 mm: 80 pcs');
-    expect(columns?.notes).toContain('cut 2/bar');
+    const columns = result.lines.find(
+      (line) => line.kind === 'quote-columns' && line.section === 'First Floor',
+    );
+    expect(columns?.notes).toContain(
+      'First Floor · 16 mm: 80 pcs, need 13.62 ft (11 ft + lap 2.62 ft), cut 2/bar',
+    );
     expect(
       result.warnings.some((w) => w.startsWith('First Floor columns, 16 mm')),
     ).toBe(true);
