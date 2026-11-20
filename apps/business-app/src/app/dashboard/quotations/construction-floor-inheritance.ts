@@ -6,6 +6,8 @@ export type FloorWork = {
   name: string;
   lengthFeet: string;
   widthFeet: string;
+  /** Floor-to-floor (slab) height; follows the floor below with its size. */
+  heightFeet?: string | undefined;
   ratePerSqft: string;
   inheritFromPrevious?: boolean | undefined;
 };
@@ -42,13 +44,17 @@ export function followPreviousFloor<T extends FloorWork>(
   const area = previous.reduce((sum, row) => sum + numericArea(row), 0);
   if (!previous.length) return [...rows];
   // A split floor contributes its combined footprint to the next floor.
-  const dimensions =
-    source && previous.length === 1
+  const height =
+    source?.heightFeet ?? previous.find((row) => row.heightFeet)?.heightFeet;
+  const dimensions = {
+    ...(source && previous.length === 1
       ? { lengthFeet: source.lengthFeet, widthFeet: source.widthFeet }
       : {
           lengthFeet: area > 0 ? String(Number(area.toFixed(2))) : '',
           widthFeet: area > 0 ? '1' : '',
-        };
+        }),
+    ...(height ? { heightFeet: height } : {}),
+  };
   return rows.map((row) =>
     isFloor(row, level) &&
     floorZone(row.name) === 'construction' &&

@@ -140,3 +140,27 @@ describe('construction floor inheritance', () => {
     expect(custom[1]?.ratePerSqft).toBe('1950');
   });
 });
+
+describe('construction floor height inheritance', () => {
+  it('carries the floor height to following floors with the floor size', () => {
+    const rows: FloorWork[] = [
+      { ...floor('Ground Floor', '30', '40'), heightFeet: '10' },
+      { ...floor('First Floor', '30', '40', '1850', true), heightFeet: '' },
+      { ...floor('Second Floor', '30', '40', '1850', true) },
+    ];
+    const changed = propagateFloorChanges(rows, 0, { heightFeet: '11' });
+    expect(changed.map((row) => row.heightFeet)).toEqual(['11', '11', '11']);
+  });
+
+  it('keeps a customized upper floor height', () => {
+    const rows: FloorWork[] = [
+      { ...floor('Ground Floor', '30', '40'), heightFeet: '10' },
+      { ...floor('First Floor', '30', '40', '1850', true), heightFeet: '10' },
+    ];
+    const changed = propagateFloorChanges(rows, 1, { heightFeet: '12' });
+    expect(changed[1]).toMatchObject({
+      heightFeet: '12',
+      inheritFromPrevious: false,
+    });
+  });
+});

@@ -5,6 +5,7 @@ import { createHash } from 'node:crypto';
 import { projectTimelineFromQuote } from '@business-os/core/quote-project-timeline';
 import { savedStageRequirements } from '@business-os/core/quotation-stage-requirements';
 import { z } from 'zod';
+import { ensureQuotationBoq } from '../execution/boq-quotation';
 
 export type QuoteTimelineSync = {
   created: boolean;
@@ -80,6 +81,21 @@ export async function syncQuotedConstructionTimeline(
     description: line.description,
     optional: line.optional,
   }));
+  if (industry.key === 'construction') {
+    // Draft construction BOQ from the confirmed floor-wise quotation: floors,
+    // floor heights, steel cut plans and package allowances. Idempotent and
+    // best effort; it never blocks the project handoff.
+    try {
+      await ensureQuotationBoq(
+        client,
+        org.organizationId,
+        projectId,
+        parsedContract.revision_id,
+      );
+    } catch {
+      // The BOQ workspace can generate it from the quotation later.
+    }
+  }
   const { data: revision, error: revisionError } = await client
     .from('quotation_revisions')
     .select('terms')

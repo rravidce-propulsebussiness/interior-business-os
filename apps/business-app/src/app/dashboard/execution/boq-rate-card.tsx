@@ -3,14 +3,33 @@
 import Link from 'next/link';
 import { useState, useTransition } from 'react';
 import { saveBoqRates } from './boq-actions';
+import { MATERIAL_GROUPS, variantKey, type Rate } from './boq-pricing';
+import {
+  normalizeStructuralSettings,
+  STRUCTURAL_FIELDS,
+  type StructuralSettings,
+} from '@business-os/core/construction-boq';
 
-type Rate = {
-  key: string;
-  label: string;
-  unit: string;
-  rate: number;
-  category: 'material' | 'labour' | 'other';
-};
+const groupNames = [...new Set(STRUCTURAL_FIELDS.map((field) => field.group))];
+function startingVariants(saved: Rate[]): Rate[] {
+  const savedVariants = saved.filter((rate) => rate.material && rate.variant);
+  return MATERIAL_GROUPS.flatMap((group) => {
+    const existing = savedVariants.filter(
+      (rate) => rate.material === group.key,
+    );
+    if (existing.length) return existing;
+    return group.starters.map((variant, index) => ({
+      key: variantKey(group.key, variant),
+      label: variant,
+      unit: group.unit,
+      rate: 0,
+      category: group.category,
+      material: group.key,
+      variant,
+      isDefault: index === 0,
+    }));
+  });
+}
 const defaults: Rate[] = [
   ['rcc concrete volume', 'RCC concrete volume', 'm³', 'material'],
   ['cement (m20 nominal mix)', 'Cement (M20 nominal mix)', 'bag', 'material'],
@@ -69,20 +88,71 @@ const currency = (amount: number) =>
 
 export function BoqRateCard({
   saved,
+  savedStructural,
   canEdit,
 }: {
   saved: Rate[];
+  savedStructural: unknown;
   canEdit: boolean;
 }) {
   const [rates, setRates] = useState<Rate[]>(() => {
-    const byKey = new Map(saved.map((rate) => [rate.key, rate]));
+    const plain = saved.filter((rate) => !rate.material);
+    const byKey = new Map(plain.map((rate) => [rate.key, rate]));
     return [
       ...defaults.map((rate) => byKey.get(rate.key) || rate),
-      ...saved.filter(
+      ...plain.filter(
         (rate) => !defaults.some((item) => item.key === rate.key),
       ),
     ];
   });
+  const [variants, setVariants] = useState<Rate[]>(() =>
+    startingVariants(saved),
+  );
+  const [structural, setStructural] = useState<StructuralSettings>(() =>
+    normalizeStructuralSettings(savedStructural),
+  );
+  function changeVariant(key: string, update: Partial<Rate>) {
+    setVariants((prior) =>
+      prior.map((row) => (row.key === key ? { ...row, ...update } : row)),
+    );
+  }
+  function makeDefault(material: string, key: string) {
+    setVariants((prior) =>
+      prior.map((row) =>
+        row.material === material
+          ? { ...row, isDefault: row.key === key }
+          : row,
+      ),
+    );
+  }
+  function addVariant(material: string) {
+    const group = MATERIAL_GROUPS.find((item) => item.key === material);
+    if (!group) return;
+    setVariants((prior) => [
+      ...prior,
+      {
+        key: `new-${material}-${Date.now()}`,
+        label: '',
+        unit: group.unit,
+        rate: 0,
+        category: group.category,
+        material,
+        variant: '',
+        isDefault: !prior.some((row) => row.material === material),
+      },
+    ]);
+  }
+  function removeVariant(key: string) {
+    setVariants((prior) => {
+      const removed = prior.find((row) => row.key === key);
+      const rest = prior.filter((row) => row.key !== key);
+      if (!removed?.isDefault) return rest;
+      const next = rest.find((row) => row.material === removed.material);
+      return rest.map((row) =>
+        row === next ? { ...row, isDefault: true } : row,
+      );
+    });
+  }
   const [message, setMessage] = useState('');
   const [busy, startTransition] = useTransition();
   function change(index: number, update: Partial<Rate>) {
@@ -112,8 +182,30 @@ export function BoqRateCard({
         key: `${row.label.trim().toLowerCase()}::${row.unit.trim().toLowerCase()}`,
         rate: Number(row.rate) || 0,
       }));
+    const seen = new Set<string>();
+    const materialRates = variants
+      .filter((row) => (row.variant ?? '').trim() && row.material)
+      .map((row) => {
+        const variant = (row.variant ?? '').trim();
+        return {
+          ...row,
+          key: variantKey(row.material!, variant),
+          label: variant,
+          variant,
+          rate: Number(row.rate) || 0,
+        };
+      })
+      .filter((row) => !seen.has(row.key) && Boolean(seen.add(row.key)));
+    for (const group of MATERIAL_GROUPS) {
+      const rows = materialRates.filter((row) => row.material === group.key);
+      if (rows.length && !rows.some((row) => row.isDefault))
+        rows[0]!.isDefault = true;
+    }
     startTransition(async () => {
-      const result = await saveBoqRates({ items: normalized });
+      const result = await saveBoqRates({
+        items: [...normalized, ...materialRates],
+        structural,
+      });
       setMessage(
         result.ok
           ? 'Company rates saved.'
@@ -163,6 +255,134 @@ export function BoqRateCard({
           {message}
         </p>
       )}
+      <section className="boq-rate-panel">
+        <div className="boq-panel-heading">
+          <div>
+            <h2>Material prices by brand &amp; source</h2>
+            <span>
+              Add each brand or source you buy from. Every BOQ picks one (e.g.
+              bricks from Local or Karimnagar); the ★ default is used otherwise.
+            </span>
+          </div>
+        </div>
+        <div className="boq-variant-groups">
+          {MATERIAL_GROUPS.map((group) => (
+            <div className="boq-variant-group" key={group.key}>
+              <div className="boq-variant-head">
+                <strong>{group.label}</strong>
+                <small>
+                  ₹ per {group.unit} ·{' '}
+                  {group.category === 'labour' ? 'Labour' : 'Material'}
+                </small>
+              </div>
+              {variants
+                .filter((row) => row.material === group.key)
+                .map((row) => (
+                  <div className="boq-variant-row" key={row.key}>
+                    <button
+                      type="button"
+                      className={`boq-variant-default ${row.isDefault ? 'active' : ''}`}
+                      aria-pressed={Boolean(row.isDefault)}
+                      aria-label={`Use ${row.variant || 'this'} as default ${group.label}`}
+                      title="Default for new BOQs"
+                      onClick={() => makeDefault(group.key, row.key)}
+                      disabled={!canEdit}
+                    >
+                      ★
+                    </button>
+                    <input
+                      aria-label={`${group.label} brand or source`}
+                      value={row.variant ?? ''}
+                      placeholder="Brand / source"
+                      onChange={(event) =>
+                        changeVariant(row.key, { variant: event.target.value })
+                      }
+                      disabled={!canEdit}
+                    />
+                    <label className="boq-rate-input">
+                      <span>₹</span>
+                      <input
+                        aria-label={`${row.variant || group.label} rate per ${group.unit}`}
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={row.rate}
+                        onChange={(event) =>
+                          changeVariant(row.key, {
+                            rate: Number(event.target.value),
+                          })
+                        }
+                        disabled={!canEdit}
+                      />
+                    </label>
+                    {canEdit && (
+                      <button
+                        type="button"
+                        className="boq-variant-remove"
+                        aria-label={`Remove ${row.variant || 'variant'}`}
+                        onClick={() => removeVariant(row.key)}
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+              {canEdit && (
+                <button
+                  type="button"
+                  className="boq-variant-add"
+                  onClick={() => addVariant(group.key)}
+                >
+                  ＋ Add brand / source
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+      <section className="boq-rate-panel">
+        <div className="boq-panel-heading">
+          <div>
+            <h2>Structural rules for quotation BOQs</h2>
+            <span>
+              Used when a BOQ is generated from a quotation. Steel is cut from
+              stock bars lift by lift; laps are added at every floor.
+            </span>
+          </div>
+        </div>
+        <div className="boq-settings-groups">
+          {groupNames.map((group) => (
+            <fieldset className="boq-settings-group" key={group}>
+              <legend>{group}</legend>
+              {STRUCTURAL_FIELDS.filter((field) => field.group === group).map(
+                (field) => (
+                  <label
+                    key={field.key}
+                    title={'help' in field ? field.help : undefined}
+                  >
+                    {field.label}
+                    <input
+                      type="number"
+                      min={field.min}
+                      max={field.max}
+                      step={'step' in field ? field.step : 'any'}
+                      value={structural[field.key]}
+                      onChange={(event) =>
+                        setStructural((prior) => ({
+                          ...prior,
+                          [field.key]: Number(event.target.value),
+                        }))
+                      }
+                      disabled={!canEdit}
+                    />
+                    {'help' in field && <small>{field.help}</small>}
+                  </label>
+                ),
+              )}
+            </fieldset>
+          ))}
+        </div>
+      </section>
       <section className="boq-rate-panel">
         <div className="boq-panel-heading">
           <div>

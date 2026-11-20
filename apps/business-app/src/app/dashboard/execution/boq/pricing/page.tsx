@@ -16,6 +16,7 @@ export default async function BoqPricingPage() {
   return (
     <BoqRateCard
       saved={result.data?.rates?.items || []}
+      savedStructural={result.data?.rates?.structural ?? null}
       canEdit={s.allowed('estimate.edit')}
     />
   );

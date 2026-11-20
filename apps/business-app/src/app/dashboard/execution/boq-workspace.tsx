@@ -10,13 +10,30 @@ import {
   type BoqInputs,
 } from './boq-calculations';
 import { removeManualBoq, saveManualBoq } from './boq-actions';
+import {
+  MATERIAL_GROUPS,
+  materialForOutput,
+  rateForOutput,
+  variantsFor,
+  type Rate,
+} from './boq-pricing';
+import {
+  estimateCounts,
+  floorsFromQuote,
+  generateQuotationBoq,
+  normalizeStructuralSettings,
+  type BoqCounts,
+  type BoqFloor,
+} from '@business-os/core/construction-boq';
+import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 
-type Rate = {
-  key: string;
-  label: string;
-  unit: string;
-  rate: number;
-  category: 'material' | 'labour' | 'other';
+type Generator = {
+  revisionId: string;
+  generatedAt: string;
+  settings: Record<string, number>;
+  counts: BoqCounts;
+  floors: BoqFloor[];
+  warnings: string[];
 };
 type SavedLine = {
   id: string;
@@ -31,10 +48,15 @@ type SavedLine = {
     unit: string;
     source?: string;
     rate?: number;
+    material?: string;
+    rods?: number;
+    diameter?: number;
   }[];
   quotedPrice?: number;
   quoteLineId?: string;
   notes?: string;
+  origin?:
+    'quotation-structure' | 'quotation-allowance' | 'quotation-additional';
 };
 type Document = {
   id: string;
@@ -44,7 +66,11 @@ type Document = {
   quotation_revision_id: string | null;
   currency: string;
   version: number;
-  document: { items?: SavedLine[] };
+  document: {
+    items?: SavedLine[];
+    selections?: Record<string, string>;
+    generator?: Generator;
+  };
   updated_at: string;
 };
 type QuoteLine = {
@@ -61,6 +87,7 @@ type Quote = {
   projectId: string;
   label: string;
   lines: QuoteLine[];
+  schedule: SftEstimateDetails | null;
 };
 type Project = { id: string; name: string; code: string };
 const money = (value: number, currency = 'INR') =>
@@ -69,20 +96,8 @@ const money = (value: number, currency = 'INR') =>
     currency,
     maximumFractionDigits: 0,
   }).format(value || 0);
-const keyFor = (name: string, unit: string) =>
-  `${name.trim().toLowerCase()}::${unit.trim().toLowerCase()}`;
-const rateFor = (rates: Map<string, Rate>, name: string, unit: string) => {
-  const exact = rates.get(keyFor(name, unit));
-  if (exact) return exact.rate;
-  const normalized = name.trim().toLowerCase();
-  return (
-    [...rates.values()].find(
-      (rate) =>
-        normalized.startsWith(rate.label.trim().toLowerCase()) &&
-        rate.unit.toLowerCase() === unit.toLowerCase(),
-    )?.rate ?? 0
-  );
-};
+const keyFor = (name: string, unit: string, material?: string) =>
+  `${material ? material + '|' : ''}${name.trim().toLowerCase()}::${unit.trim().toLowerCase()}`;
 const uid = () => crypto.randomUUID();
 
 export function BoqWorkspace({
@@ -90,6 +105,9 @@ export function BoqWorkspace({
   projects,
   quotes,
   rates: initialRates,
+  structural,
+  initialOpenId,
+  initialProjectId,
   canEdit,
   canCreate,
   canViewCost,
@@ -98,16 +116,47 @@ export function BoqWorkspace({
   projects: Project[];
   quotes: Quote[];
   rates: Rate[];
+  structural: Record<string, number> | null;
+  initialOpenId: string | null;
+  initialProjectId: string | null;
   canEdit: boolean;
   canCreate: boolean;
   canViewCost: boolean;
 }) {
-  const [active, setActive] = useState<Document | null>(null);
-  const [title, setTitle] = useState('Construction BOQ');
-  const [projectId, setProjectId] = useState('');
-  const [quoteId, setQuoteId] = useState('');
-  const [status, setStatus] = useState<'draft' | 'final'>('draft');
-  const [lines, setLines] = useState<SavedLine[]>([]);
+  const initialDocument =
+    documents.find((document) => document.id === initialOpenId) ??
+    (initialProjectId
+      ? documents.find((document) => document.project_id === initialProjectId)
+      : undefined) ??
+    null;
+  const [active, setActive] = useState<Document | null>(initialDocument);
+  const [title, setTitle] = useState(
+    initialDocument?.title ?? 'Construction BOQ',
+  );
+  const [projectId, setProjectId] = useState(
+    initialDocument?.project_id ?? initialProjectId ?? '',
+  );
+  const [quoteId, setQuoteId] = useState(
+    initialDocument?.quotation_revision_id ?? '',
+  );
+  const [status, setStatus] = useState<'draft' | 'final'>(
+    initialDocument?.status ?? 'draft',
+  );
+  const [lines, setLines] = useState<SavedLine[]>(
+    initialDocument?.document?.items ?? [],
+  );
+  const [selections, setSelections] = useState<Record<string, string>>(
+    initialDocument?.document?.selections ?? {},
+  );
+  const [generator, setGenerator] = useState<Generator | null>(
+    initialDocument?.document?.generator ?? null,
+  );
+  const [genFloors, setGenFloors] = useState<BoqFloor[]>(
+    initialDocument?.document?.generator?.floors ?? [],
+  );
+  const [genCounts, setGenCounts] = useState<BoqCounts | null>(
+    initialDocument?.document?.generator?.counts ?? null,
+  );
   const [selectedTemplate, setSelectedTemplate] = useState('column');
   const [newName, setNewName] = useState('');
   const [inputs, setInputs] = useState<BoqInputs>(() =>
@@ -119,18 +168,73 @@ export function BoqWorkspace({
   const [message, setMessage] = useState('');
   const [busy, startTransition] = useTransition();
   const router = useRouter();
-  const rateMap = useMemo(
-    () => new Map(initialRates.map((rate) => [rate.key, rate])),
-    [initialRates],
+  const settings = useMemo(
+    () => normalizeStructuralSettings(structural),
+    [structural],
   );
+  const priceOf = (output: SavedLine['outputs'][number]) =>
+    rateForOutput(output, initialRates, selections);
   const currentQuote = quotes.find((quote) => quote.id === quoteId);
+  const schedule = currentQuote?.schedule ?? null;
+  const scheduleFloors = useMemo(
+    () =>
+      schedule
+        ? floorsFromQuote(schedule, settings.defaultFloorHeightFeet)
+        : [],
+    [schedule, settings.defaultFloorHeightFeet],
+  );
+  // Edited floor heights / counts belong to the selected quotation and are
+  // reset whenever the quotation changes.
+  const floorsForGeneration = genFloors.length ? genFloors : scheduleFloors;
+  const countsForGeneration =
+    genCounts ?? estimateCounts(floorsForGeneration, settings);
+  const usedMaterials = new Set(
+    lines.flatMap((line) =>
+      line.outputs
+        .map((output) => materialForOutput(output))
+        .filter((value): value is string => Boolean(value)),
+    ),
+  );
+  const steelSummary = new Map<number, { kg: number; rods: number }>();
+  for (const line of lines)
+    for (const output of line.outputs)
+      if (output.diameter && output.unit === 'kg') {
+        const prior = steelSummary.get(output.diameter) ?? { kg: 0, rods: 0 };
+        steelSummary.set(output.diameter, {
+          kg: prior.kg + output.quantity,
+          rods: prior.rods + (output.rods ?? 0),
+        });
+      }
+  // Steel order per stage (Foundation, Ground Floor, First Floor …), in BOQ
+  // order, so steel can be brought floor by floor.
+  const diameters = [...steelSummary.keys()].sort((a, b) => a - b);
+  const stageSteel = new Map<
+    string,
+    { kg: number; bars: Map<number, number> }
+  >();
+  for (const line of lines)
+    for (const output of line.outputs)
+      if (output.diameter && output.unit === 'kg') {
+        const stage = stageSteel.get(line.section) ?? {
+          kg: 0,
+          bars: new Map<number, number>(),
+        };
+        stage.kg += output.quantity;
+        stage.bars.set(
+          output.diameter,
+          (stage.bars.get(output.diameter) ?? 0) + (output.rods ?? 0),
+        );
+        stageSteel.set(line.section, stage);
+      }
+  const tonnes = (kg: number) =>
+    (kg / 1000).toLocaleString('en-IN', { maximumFractionDigits: 2 });
   const activeProject = projects.find((project) => project.id === projectId);
   const allOutputs = lines.flatMap((line) =>
     line.outputs.map((output) => ({
       ...output,
       lineId: line.id,
       lineName: line.name,
-      rate: Number(output.rate ?? rateFor(rateMap, output.name, output.unit)),
+      rate: priceOf(output),
       section: line.section,
     })),
   );
@@ -145,7 +249,7 @@ export function BoqWorkspace({
     }
   >();
   for (const row of allOutputs) {
-    const key = keyFor(row.name, row.unit);
+    const key = keyFor(row.name, row.unit, materialForOutput(row));
     const prior = grouped.get(key);
     const quantity = (prior?.quantity ?? 0) + row.quantity;
     const amount = (prior?.amount ?? 0) + row.quantity * row.rate;
@@ -177,6 +281,10 @@ export function BoqWorkspace({
     setQuoteId('');
     setStatus('draft');
     setLines([]);
+    setSelections({});
+    setGenerator(null);
+    setGenFloors([]);
+    setGenCounts(null);
     setMessage('');
   }
   function openDocument(document: Document) {
@@ -186,7 +294,64 @@ export function BoqWorkspace({
     setQuoteId(document.quotation_revision_id || '');
     setStatus(document.status);
     setLines(document.document?.items || []);
+    setSelections(document.document?.selections ?? {});
+    setGenerator(document.document?.generator ?? null);
+    setGenFloors(document.document?.generator?.floors ?? []);
+    setGenCounts(document.document?.generator?.counts ?? null);
     setMessage('');
+  }
+  function generateFromQuote() {
+    if (!schedule || !quoteId) return;
+    const result = generateQuotationBoq({
+      details: schedule,
+      settings,
+      floors: floorsForGeneration,
+      counts: countsForGeneration,
+    });
+    const kept = lines.filter((line) => !line.origin);
+    setLines([...result.lines, ...kept]);
+    setGenerator({
+      revisionId: quoteId,
+      generatedAt: new Date().toISOString(),
+      settings: result.settings,
+      counts: result.counts,
+      floors: result.floors,
+      warnings: result.warnings,
+    });
+    setGenFloors(result.floors);
+    setGenCounts(result.counts);
+    if (!title.trim() || title === 'Construction BOQ')
+      setTitle(
+        `${activeProject?.name ?? 'Project'} · Construction BOQ`.slice(0, 200),
+      );
+    setMessage(
+      `${result.lines.length} items generated from the quotation${kept.length ? `; ${kept.length} manual items kept` : ''}. Review and save.`,
+    );
+  }
+  function updateOutputQuantity(
+    lineIndex: number,
+    outputIndex: number,
+    quantity: number,
+  ) {
+    setLines((prior) =>
+      prior.map((line, i) =>
+        i === lineIndex
+          ? {
+              ...line,
+              outputs: line.outputs.map((output, j) =>
+                j === outputIndex
+                  ? {
+                      ...output,
+                      quantity: Number.isFinite(quantity)
+                        ? Math.max(0, quantity)
+                        : 0,
+                    }
+                  : output,
+              ),
+            }
+          : line,
+      ),
+    );
   }
   function chooseTemplate(kind: string) {
     setSelectedTemplate(kind);
@@ -216,10 +381,7 @@ export function BoqWorkspace({
         kind: selectedTemplate,
         unit: generated[0]?.unit || 'each',
         inputs: { ...inputs },
-        outputs: generated.map((output) => {
-          const rate = rateFor(rateMap, output.name, output.unit);
-          return rate > 0 ? { ...output, rate } : output;
-        }),
+        outputs: generated,
         notes: '',
       },
     ]);
@@ -281,6 +443,8 @@ export function BoqWorkspace({
         status,
         currency: 'INR',
         items: lines,
+        selections,
+        ...(generator ? { generator } : {}),
       });
       if (!result.ok) {
         setMessage(result.message || 'Could not save BOQ.');
@@ -295,7 +459,11 @@ export function BoqWorkspace({
         quotation_revision_id: quoteId || null,
         currency: 'INR',
         version: (active?.version || 0) + 1,
-        document: { items: lines },
+        document: {
+          items: lines,
+          selections,
+          ...(generator ? { generator } : {}),
+        },
         updated_at: new Date().toISOString(),
       });
       router.refresh();
@@ -438,6 +606,8 @@ export function BoqWorkspace({
                 onChange={(event) => {
                   setProjectId(event.target.value);
                   setQuoteId('');
+                  setGenFloors([]);
+                  setGenCounts(null);
                 }}
               >
                 <option value="">Choose project</option>
@@ -460,6 +630,8 @@ export function BoqWorkspace({
                   setQuoteId(event.target.value);
                   setProjectId(selected?.projectId || projectId);
                   setSelectedQuoteLines([]);
+                  setGenFloors([]);
+                  setGenCounts(null);
                 }}
               >
                 <option value="">No quotation linked</option>
@@ -535,6 +707,125 @@ export function BoqWorkspace({
                   <p>No quote line items were found for this revision.</p>
                 )}
               </div>
+            </section>
+          )}
+          {schedule && (
+            <section className="boq-import boq-generate">
+              <div className="boq-import-head">
+                <div>
+                  <h3>Generate from quotation</h3>
+                  <p>
+                    Floors, sizes and floor heights come from the quotation.
+                    Steel is cut from {settings.stockBarFeet} ft bars:{' '}
+                    {settings.foundationCuts} pieces per bar for the foundation
+                    lift and {settings.floorCuts} per bar for each floor above,
+                    with a {settings.lapDiameters}d lap at every floor. Package
+                    allowances (per door, per bathroom, per sq ft) are priced at
+                    the quoted value. Manual items are kept.
+                  </p>
+                </div>
+                <button
+                  className="erp-button erp-button-primary"
+                  type="button"
+                  onClick={generateFromQuote}
+                  disabled={!floorsForGeneration.length}
+                >
+                  {lines.some((line) => line.origin)
+                    ? 'Regenerate BOQ'
+                    : 'Generate BOQ'}
+                </button>
+              </div>
+              <div className="boq-gen-floors">
+                <div className="boq-gen-floor boq-gen-floor-head">
+                  <span>Floor</span>
+                  <span>Area</span>
+                  <span>Size (ft)</span>
+                  <span>Floor height (ft)</span>
+                </div>
+                {floorsForGeneration.map((floor, floorIndex) => (
+                  <div className="boq-gen-floor" key={floor.name}>
+                    <strong>{floor.name}</strong>
+                    <span>{floor.areaSqft.toLocaleString('en-IN')} sqft</span>
+                    <span>
+                      {floor.lengthFeet} × {floor.widthFeet}
+                    </span>
+                    <label>
+                      <span className="sr-only">{floor.name} floor height</span>
+                      <input
+                        type="number"
+                        min="7"
+                        max="20"
+                        step="0.25"
+                        value={floor.heightFeet}
+                        onChange={(event) => {
+                          const heightFeet = Number(event.target.value);
+                          setGenFloors(
+                            floorsForGeneration.map((item, i) =>
+                              i === floorIndex
+                                ? {
+                                    name: item.name,
+                                    areaSqft: item.areaSqft,
+                                    lengthFeet: item.lengthFeet,
+                                    widthFeet: item.widthFeet,
+                                    heightFeet:
+                                      heightFeet > 0 ? heightFeet : 10,
+                                  }
+                                : item,
+                            ),
+                          );
+                        }}
+                      />
+                      {floor.heightAssumed && (
+                        <small>Not on quote — assumed</small>
+                      )}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              <div className="boq-gen-counts">
+                {(
+                  [
+                    ['mainDoors', 'Main doors'],
+                    ['internalDoors', 'Internal doors'],
+                    ['bathrooms', 'Bathrooms'],
+                  ] as const
+                ).map(([key, label]) => (
+                  <label key={key}>
+                    {label}
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={countsForGeneration[key]}
+                      onChange={(event) =>
+                        setGenCounts({
+                          ...countsForGeneration,
+                          [key]: Math.max(
+                            0,
+                            Math.round(Number(event.target.value) || 0),
+                          ),
+                        })
+                      }
+                    />
+                  </label>
+                ))}
+                {canViewCost && canEdit && (
+                  <Link
+                    className="boq-gen-settings-link"
+                    href="/dashboard/execution/boq/pricing"
+                  >
+                    Column grid, bar sizes, lap &amp; cuts →
+                  </Link>
+                )}
+              </div>
+              {generator?.revisionId === quoteId &&
+                generator.warnings.length > 0 && (
+                  <ul className="boq-gen-warnings">
+                    {generator.warnings.map((warning) => (
+                      <li key={warning}>{warning}</li>
+                    ))}
+                  </ul>
+                )}
             </section>
           )}
           <section className="boq-add-work">
@@ -739,9 +1030,13 @@ export function BoqWorkspace({
                       <strong>{line.name}</strong>
                       <small>
                         {line.section} ·{' '}
-                        {line.kind === 'quoted'
-                          ? 'Quotation linked'
-                          : 'Manual takeoff'}
+                        {line.origin === 'quotation-structure'
+                          ? 'Generated from quotation'
+                          : line.origin === 'quotation-allowance'
+                            ? 'Quoted package allowance'
+                            : line.kind === 'quoted'
+                              ? 'Quotation linked'
+                              : 'Manual takeoff'}
                       </small>
                     </span>
                     <span className="boq-line-total">
@@ -750,16 +1045,7 @@ export function BoqWorkspace({
                         : money(
                             line.outputs.reduce(
                               (sum, output) =>
-                                sum +
-                                output.quantity *
-                                  Number(
-                                    output.rate ??
-                                      rateFor(
-                                        rateMap,
-                                        output.name,
-                                        output.unit,
-                                      ),
-                                  ),
+                                sum + output.quantity * priceOf(output),
                               0,
                             ),
                           )}
@@ -796,10 +1082,7 @@ export function BoqWorkspace({
                         )}
                       </div>
                       {line.outputs.map((output, outputIndex) => {
-                        const rate = Number(
-                          output.rate ??
-                            rateFor(rateMap, output.name, output.unit),
-                        );
+                        const rate = priceOf(output);
                         return (
                           <div
                             className={`boq-output-row ${canViewCost ? '' : 'quantity-only'}`}
@@ -809,9 +1092,29 @@ export function BoqWorkspace({
                               {output.name}
                               {output.source && <small>{output.source}</small>}
                             </span>
-                            <span>
-                              {output.quantity.toLocaleString('en-IN')}{' '}
+                            <span className="boq-qty-cell">
+                              {line.kind === 'quoted' ? (
+                                output.quantity.toLocaleString('en-IN')
+                              ) : (
+                                <input
+                                  type="number"
+                                  min="0"
+                                  step="any"
+                                  aria-label={`${output.name} quantity`}
+                                  value={output.quantity}
+                                  onChange={(event) =>
+                                    updateOutputQuantity(
+                                      index,
+                                      outputIndex,
+                                      Number(event.target.value),
+                                    )
+                                  }
+                                />
+                              )}{' '}
                               {output.unit}
+                              {output.rods ? (
+                                <small>{output.rods} bars</small>
+                              ) : null}
                             </span>
                             {canViewCost && (
                               <>
@@ -859,6 +1162,104 @@ export function BoqWorkspace({
               ))
             )}
           </section>
+          {(usedMaterials.size > 0 || steelSummary.size > 0) && (
+            <section className="boq-materials">
+              {canViewCost && (
+                <div className="boq-brand-picks">
+                  <h3>Brand &amp; source for this BOQ</h3>
+                  <div>
+                    {MATERIAL_GROUPS.filter((group) =>
+                      usedMaterials.has(group.key),
+                    ).map((group) => {
+                      const options = variantsFor(initialRates, group.key);
+                      return (
+                        <label key={group.key}>
+                          {group.label}
+                          <select
+                            value={
+                              selections[group.key] ?? options[0]?.variant ?? ''
+                            }
+                            onChange={(event) =>
+                              setSelections((prior) => ({
+                                ...prior,
+                                [group.key]: event.target.value,
+                              }))
+                            }
+                            disabled={!options.length}
+                          >
+                            {!options.length && (
+                              <option value="">Set rates first</option>
+                            )}
+                            {options.map((option) => (
+                              <option key={option.key} value={option.variant}>
+                                {option.variant} · {money(option.rate)}/
+                                {option.unit}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+              {steelSummary.size > 0 && (
+                <div className="boq-steel-summary">
+                  <h3>Steel to bring, floor by floor</h3>
+                  <p className="boq-steel-note">
+                    Bars of the stock length for each stage, laps included.
+                  </p>
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Stage</th>
+                        {diameters.map((diameter) => (
+                          <th key={diameter}>{diameter} mm</th>
+                        ))}
+                        <th>Weight</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[...stageSteel.entries()].map(([stage, row]) => (
+                        <tr key={stage}>
+                          <td>{stage}</td>
+                          {diameters.map((diameter) => (
+                            <td key={diameter}>
+                              {row.bars.get(diameter)
+                                ? row.bars
+                                    .get(diameter)!
+                                    .toLocaleString('en-IN')
+                                : '—'}
+                            </td>
+                          ))}
+                          <td>{tonnes(row.kg)} t</td>
+                        </tr>
+                      ))}
+                      <tr className="total">
+                        <td>Total bars</td>
+                        {diameters.map((diameter) => (
+                          <td key={diameter}>
+                            {(
+                              steelSummary.get(diameter)?.rods ?? 0
+                            ).toLocaleString('en-IN')}
+                          </td>
+                        ))}
+                        <td>
+                          {tonnes(
+                            [...steelSummary.values()].reduce(
+                              (sum, row) => sum + row.kg,
+                              0,
+                            ),
+                          )}{' '}
+                          t
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </section>
+          )}
           <section className="boq-summary">
             <div>
               <span>Material + labour cost estimate</span>
