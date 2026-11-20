@@ -20,7 +20,7 @@ export function ApplyBrandingToDrafts({ drafts }: { drafts: BrandingDraft[] }) {
   return (
     <details className="mt-7 rounded-2xl border border-orange-100 bg-white p-5 shadow-sm">
       <summary className="cursor-pointer text-sm font-extrabold text-slate-900">
-        Update branding on an existing draft quotation
+        Update branding on an existing saved quotation
       </summary>
       <p className="mt-3 max-w-2xl text-xs leading-6 text-slate-600">
         Save the company branding above first, then apply it to a draft
@@ -31,7 +31,7 @@ export function ApplyBrandingToDrafts({ drafts }: { drafts: BrandingDraft[] }) {
       {drafts.length ? (
         <div className="mt-4 flex flex-wrap items-end gap-3">
           <label className="grid min-w-52 flex-1 gap-2 text-xs font-bold text-slate-700">
-            Select draft quotation
+            Select saved quotation
             <select
               className="min-h-11 rounded-xl border border-slate-200 bg-white p-3"
               value={selected}
@@ -63,7 +63,7 @@ export function ApplyBrandingToDrafts({ drafts }: { drafts: BrandingDraft[] }) {
                   if (result.ok) router.refresh();
                 } catch {
                   setMessage(
-                    'Unable to update the draft branding. Please try again.',
+                    'Unable to update the quotation branding. Please try again.',
                   );
                 }
               });
@@ -74,7 +74,7 @@ export function ApplyBrandingToDrafts({ drafts }: { drafts: BrandingDraft[] }) {
         </div>
       ) : (
         <p className="mt-3 text-xs text-slate-600">
-          No editable draft quotations found. New quotations use these settings
+          No editable saved quotations found. New quotations use these settings
           automatically.
         </p>
       )}

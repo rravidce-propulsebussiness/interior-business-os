@@ -85,7 +85,7 @@ export default async function ManualBoqPage({
       : Promise.resolve({ data: [], error: null }),
     customerIds.length
       ? (
-          db.rpc as unknown as (
+          db.rpc.bind(db) as unknown as (
             name: string,
             args: Record<string, unknown>,
           ) => Promise<{ data: unknown; error: unknown }>
@@ -260,6 +260,9 @@ export default async function ManualBoqPage({
       quotes={quotes}
       rates={rates}
       structural={structural}
+      defaultUnit={
+        ratesResult.data?.rates?.preferences?.lengthUnit === 'ft' ? 'ft' : 'm'
+      }
       initialOpenId={query.open ?? null}
       initialProjectId={query.project ?? null}
       canEdit={s.allowed('estimate.edit')}

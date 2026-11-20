@@ -129,7 +129,7 @@ export async function saveConstructionPackage(
     return {
       id,
       message:
-        'Construction material selection added to the draft quotation. Review included components before issuing.',
+        'Construction material selection added to the saved quotation. Review included components before marking it Final.',
     };
   } catch (error) {
     return { message: safeFailure(error).message };

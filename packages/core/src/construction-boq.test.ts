@@ -276,6 +276,39 @@ describe('quotation-driven construction BOQ', () => {
     });
   });
 
+  it('adds pedestals to the foundation only when a height is set', () => {
+    const none = generateQuotationBoq({ details: quote() });
+    expect(none.lines.some((line) => line.kind === 'quote-pedestals')).toBe(
+      false,
+    );
+    const withPedestals = generateQuotationBoq({
+      details: quote(),
+      settings: { pedestalHeightFeet: 2 },
+    });
+    const pedestals = withPedestals.lines.find(
+      (line) => line.kind === 'quote-pedestals',
+    );
+    expect(pedestals?.section).toBe('Foundation');
+    expect(pedestals?.inputs.pedestals).toBe(20);
+    // 20 × 15 in × 15 in × 2 ft = 62.5 cft ≈ 1.77 m³
+    expect(pedestals?.outputs[0]?.quantity).toBeCloseTo(1.77, 2);
+    expect(pedestals?.outputs.some((output) => output.diameter === 8)).toBe(
+      true,
+    );
+    // Foundation stage stays first, footing → pedestals → column lift.
+    expect(
+      withPedestals.lines
+        .filter((line) => line.section === 'Foundation')
+        .map((line) => line.kind),
+    ).toEqual([
+      'quote-foundation',
+      'quote-pedestals',
+      'quote-columns',
+      'quote-plinth-beam',
+      'quote-binding-wire',
+    ]);
+  });
+
   it('normalizes and clamps company settings', () => {
     const settings = normalizeStructuralSettings({
       stockBarFeet: '1000',

@@ -213,6 +213,31 @@ export const STRUCTURAL_FIELDS = [
     max: 1,
     step: 1,
   },
+  {
+    key: 'pedestalHeightFeet',
+    label: 'Pedestal height (ft, 0 = none)',
+    group: 'Foundation',
+    value: 0,
+    min: 0,
+    max: 8,
+    help: 'A wider column block between footing and column, when the design has one.',
+  },
+  {
+    key: 'pedestalWidthIn',
+    label: 'Pedestal width (in)',
+    group: 'Foundation',
+    value: 15,
+    min: 9,
+    max: 48,
+  },
+  {
+    key: 'pedestalDepthIn',
+    label: 'Pedestal depth (in)',
+    group: 'Foundation',
+    value: 15,
+    min: 9,
+    max: 48,
+  },
   // Columns
   {
     key: 'columnSpacingFeet',
@@ -918,6 +943,60 @@ export function generateQuotationBoq(
             },
             ...concreteOutputs(footingConcrete, 'Footing'),
             ...steelOutputs(tally, stock),
+          ],
+        },
+      });
+    }
+
+    // --- Pedestals (optional) ---------------------------------------------
+    // Column bars run through the pedestal from the footing, so only the
+    // pedestal's concrete and its own rings are added here.
+    if (s.pedestalHeightFeet > 0) {
+      const pedestals = groundGrid.columns;
+      const width = s.pedestalWidthIn / 12;
+      const depth = s.pedestalDepthIn / 12;
+      const concrete =
+        pedestals * width * depth * s.pedestalHeightFeet * CUM_PER_CFT;
+      const ringLength =
+        2 * (Math.max(0, width - 2 * cover) + Math.max(0, depth - 2 * cover)) +
+        20 * s.columnTieDia * FT_PER_MM;
+      const rings =
+        pedestals *
+        (ceil((s.pedestalHeightFeet * 12) / s.columnTieSpacingIn) + 1);
+      const ringPlan = cutPlan(ringLength, rings, stock, 0);
+      const tally: SteelTally = new Map();
+      addSteel(
+        tally,
+        s.columnTieDia,
+        ringPlan.bars * stock * M_PER_FT,
+        ringPlan.bars,
+        `${rings} pedestal rings × ${ft(ringLength)}`,
+      );
+      mergeSteel(tally);
+      drafts.push({
+        origin: 'quotation-structure',
+        draft: {
+          name: `Pedestals: ${pedestals} nos (${s.pedestalWidthIn}×${s.pedestalDepthIn} in × ${s.pedestalHeightFeet} ft)`,
+          section: 'Foundation',
+          kind: 'quote-pedestals',
+          unit: 'm³',
+          inputs: {
+            pedestals,
+            size: `${s.pedestalWidthIn}×${s.pedestalDepthIn} in`,
+            heightFeet: s.pedestalHeightFeet,
+          },
+          outputs: [
+            ...concreteOutputs(concrete, 'Pedestal'),
+            ...steelOutputs(tally, stock),
+            {
+              name: 'Centering & shuttering',
+              material: 'shuttering',
+              quantity: round(
+                pedestals * 2 * (width + depth) * s.pedestalHeightFeet,
+                0,
+              ),
+              unit: 'sqft',
+            },
           ],
         },
       });

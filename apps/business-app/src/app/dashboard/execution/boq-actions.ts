@@ -95,6 +95,9 @@ const ratesSchema = z.object({
     )
     .max(500),
   structural: z.record(z.string(), z.number().finite()).optional(),
+  preferences: z
+    .object({ lengthUnit: z.enum(['m', 'ft']).default('m') })
+    .optional(),
 });
 
 type DbReply = { data?: unknown; error?: { message?: string } | null };
@@ -210,9 +213,14 @@ export async function saveBoqRates(input: unknown) {
       throw new Error(previous.error.message || 'Unable to read rates');
     const version = Number(previous.data?.version ?? 0) + 1;
     // Saving prices alone keeps the company's saved structural settings.
-    const savedStructural = (
-      previous.data?.rates as { structural?: unknown } | null | undefined
-    )?.structural;
+    const savedRates = previous.data?.rates as
+      | { structural?: unknown; preferences?: { lengthUnit?: 'm' | 'ft' } }
+      | null
+      | undefined;
+    const savedStructural = savedRates?.structural;
+    // Saving prices alone keeps the company's unit preference too.
+    if (!value.preferences && savedRates?.preferences?.lengthUnit)
+      value.preferences = { lengthUnit: savedRates.preferences.lengthUnit };
     if (value.structural || savedStructural)
       value.structural = normalizeStructuralSettings(
         value.structural ?? savedStructural,

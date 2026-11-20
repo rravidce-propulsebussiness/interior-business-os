@@ -89,12 +89,15 @@ const currency = (amount: number) =>
 export function BoqRateCard({
   saved,
   savedStructural,
+  savedLengthUnit,
   canEdit,
 }: {
   saved: Rate[];
   savedStructural: unknown;
+  savedLengthUnit: 'm' | 'ft';
   canEdit: boolean;
 }) {
+  const [lengthUnit, setLengthUnit] = useState<'m' | 'ft'>(savedLengthUnit);
   const [rates, setRates] = useState<Rate[]>(() => {
     const plain = saved.filter((rate) => !rate.material);
     const byKey = new Map(plain.map((rate) => [rate.key, rate]));
@@ -205,6 +208,7 @@ export function BoqRateCard({
       const result = await saveBoqRates({
         items: [...normalized, ...materialRates],
         structural,
+        preferences: { lengthUnit },
       });
       setMessage(
         result.ok
@@ -255,6 +259,40 @@ export function BoqRateCard({
           {message}
         </p>
       )}
+      <section className="boq-rate-panel">
+        <div className="boq-panel-heading">
+          <div>
+            <h2>Measurement units</h2>
+            <span>
+              Default units for typing takeoff dimensions. Each person can
+              switch on the BOQ page; quantities and rates are unchanged.
+            </span>
+          </div>
+          <div
+            className="boq-unit-toggle"
+            role="group"
+            aria-label="Default measurement units"
+          >
+            {(
+              [
+                ['m', 'Metres · mm'],
+                ['ft', 'Feet · inches'],
+              ] as const
+            ).map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={lengthUnit === value}
+                className={lengthUnit === value ? 'active' : ''}
+                onClick={() => setLengthUnit(value)}
+                disabled={!canEdit}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
       <section className="boq-rate-panel">
         <div className="boq-panel-heading">
           <div>

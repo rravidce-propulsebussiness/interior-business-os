@@ -62,6 +62,26 @@ foundation depth, column grid and size, bar diameters and spacings, slab
 thickness, wall thickness, openings, bricks per m³, door / bathroom estimates
 — are company settings on **BOQ → Configure rates**.
 
+### Foundation: footing grid mat, pedestal, column, plinth beam
+
+The Foundation stage follows the build order: excavation and PCC, footing
+**grid mat** (bars both ways), optional **pedestals** (set a pedestal height
+in the structural rules; 0 means none), the foundation column lift and
+**plinth beams**. Column bars run through the pedestal from the footing, so
+a pedestal adds its own concrete and rings only.
+
+For manual takeoffs the same order is available as templates: Footing (grid
+mat), Pedestal, RCC column, Plinth beam.
+
+## Metres or feet
+
+Choose the company default under **BOQ → Configure rates → Measurement
+units**. Anyone can switch between **Metres** and **Feet** at the top of the
+BOQ page; the choice is remembered on that browser. With feet, lengths are
+typed in ft, areas in sq ft and bar spacing in inches; bar diameters stay in
+mm. Quantities, rates and saved BOQs don't change when the unit changes:
+everything is stored in metric.
+
 ## Prices by brand and source
 
 **Configure rates** has one list per material with several brands or sources:

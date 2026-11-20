@@ -107,7 +107,9 @@ export async function ownerResetTestData(input: {
       !input.phrase.startsWith('RESET ')
     )
       return { success: false, message: 'Invalid reset confirmation.' };
-    const resetRpc = client.rpc as unknown as (
+    // Bind: an unbound supabase-js method loses `this` and throws before any
+    // request is sent, which made every reset fail.
+    const resetRpc = client.rpc.bind(client) as unknown as (
       name: 'owner_test_data_reset_execute',
       args: { p_org: string; p_phrase: string; p_signature: string },
     ) => Promise<{ data: unknown; error: { code?: string } | null }>;

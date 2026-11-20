@@ -14,6 +14,10 @@ const round = (n: number, places = 3) => Number(Math.max(0, n).toFixed(places));
 const steelKgPerMetre = (diameterMm: number) => (diameterMm * diameterMm) / 162;
 
 export function calculateBoq(kind: string, input: BoqInputs): BoqOutput[] {
+  // A pedestal is a short, wider column on the footing; a plinth beam is a
+  // beam at plinth level. Same concrete and steel rules, own templates.
+  if (kind === 'pedestal') return calculateBoq('column', input);
+  if (kind === 'plinth_beam') return calculateBoq('beam', input);
   if (kind === 'column') {
     const count = number(input, 'count', 1);
     const length = number(input, 'length');
@@ -329,10 +333,12 @@ export const BOQ_TEMPLATES = [
   },
   {
     kind: 'footing',
-    label: 'RCC footing + reinforcement',
+    label: 'Footing (grid mat)',
     section: 'Foundation',
   },
+  { kind: 'pedestal', label: 'Pedestal', section: 'Foundation' },
   { kind: 'column', label: 'RCC column + reinforcement', section: 'Structure' },
+  { kind: 'plinth_beam', label: 'Plinth beam', section: 'Foundation' },
   { kind: 'beam', label: 'RCC beam + stirrups', section: 'Structure' },
   { kind: 'slab', label: 'RCC slab + reinforcement', section: 'Structure' },
   { kind: 'wall', label: 'Brick wall (4 inch / 9 inch)', section: 'Masonry' },
@@ -360,9 +366,22 @@ export const inputDefinitions: Record<
     { key: 'length', label: 'Length (m)', value: '1.5' },
     { key: 'width', label: 'Width (m)', value: '1.5' },
     { key: 'depth', label: 'Depth (m)', value: '0.45' },
-    { key: 'barDiameter', label: 'Footing bar diameter (mm)', value: '12' },
+    { key: 'barDiameter', label: 'Grid mat bar diameter (mm)', value: '12' },
     { key: 'barSpacing', label: 'Bar spacing (mm)', value: '150' },
     { key: 'cover', label: 'Concrete cover (m)', value: '0.05' },
+    { key: 'rodLength', label: 'Stock rod length (m)', value: '12' },
+  ],
+  pedestal: [
+    { key: 'count', label: 'Same pedestals', value: '5' },
+    { key: 'length', label: 'Length (m)', value: '0.38' },
+    { key: 'width', label: 'Width (m)', value: '0.38' },
+    { key: 'height', label: 'Height (m)', value: '0.6' },
+    { key: 'main16', label: '16 mm bars / pedestal', value: '4' },
+    { key: 'main12', label: '12 mm bars / pedestal', value: '4' },
+    { key: 'main10', label: '10 mm bars / pedestal', value: '0' },
+    { key: 'ringDiameter', label: 'Ring diameter (mm)', value: '8' },
+    { key: 'ringSpacing', label: 'Ring spacing (mm)', value: '150' },
+    { key: 'cover', label: 'Concrete cover (m)', value: '0.04' },
     { key: 'rodLength', label: 'Stock rod length (m)', value: '12' },
   ],
   column: [
@@ -375,6 +394,19 @@ export const inputDefinitions: Record<
     { key: 'main10', label: '10 mm bars / column', value: '0' },
     { key: 'ringDiameter', label: 'Ring diameter (mm)', value: '6' },
     { key: 'ringSpacing', label: 'Ring spacing (mm)', value: '150' },
+    { key: 'cover', label: 'Concrete cover (m)', value: '0.04' },
+    { key: 'rodLength', label: 'Stock rod length (m)', value: '12' },
+  ],
+  plinth_beam: [
+    { key: 'count', label: 'Same plinth beams', value: '8' },
+    { key: 'length', label: 'Beam length (m)', value: '4' },
+    { key: 'width', label: 'Beam width (m)', value: '0.23' },
+    { key: 'height', label: 'Beam depth (m)', value: '0.38' },
+    { key: 'main16', label: '16 mm bars / beam', value: '0' },
+    { key: 'main12', label: '12 mm bars / beam', value: '4' },
+    { key: 'main10', label: '10 mm bars / beam', value: '0' },
+    { key: 'ringDiameter', label: 'Stirrup diameter (mm)', value: '8' },
+    { key: 'ringSpacing', label: 'Stirrup spacing (mm)', value: '150' },
     { key: 'cover', label: 'Concrete cover (m)', value: '0.04' },
     { key: 'rodLength', label: 'Stock rod length (m)', value: '12' },
   ],
