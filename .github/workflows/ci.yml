@@ -93,8 +93,6 @@ jobs:
           apps/business-app/src/app/dashboard/execution/layout.tsx
           apps/business-app/src/app/dashboard/execution/[entity]/page.tsx
           apps/business-app/src/app/dashboard/execution/[entity]/[id]/page.tsx
-          apps/business-app/src/app/dashboard/execution/revision-register.tsx
-          apps/business-app/src/app/dashboard/execution/revision-workspace.tsx
           apps/business-app/src/app/dashboard/execution/revision-cost.ts
           apps/business-app/src/app/dashboard/execution/execution-premium.css
           apps/business-app/src/app/dashboard/owner-shell.tsx
