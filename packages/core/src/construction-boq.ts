@@ -1603,8 +1603,18 @@ export function generateQuotationBoq(
     const footingT = Math.max(
       ...columnTypes.map((type) => type.footing.thicknessIn / 12),
     );
-    const sizeText = (type: ColumnType) =>
-      `${type.countAt(0)} × ${type.footing.lengthFeet}×${type.footing.widthFeet} ft`;
+    // "12 × 5×5 ft, 2 × 4×4 ft": footings grouped by size.
+    const footingSizes = () => {
+      const sizes = new Map<string, number>();
+      for (const type of columnTypes) {
+        const key = `${type.footing.lengthFeet}×${type.footing.widthFeet} ft`;
+        sizes.set(key, (sizes.get(key) ?? 0) + type.countAt(0));
+      }
+      return [...sizes]
+        .filter(([, count]) => count > 0)
+        .map(([size, count]) => `${count} × ${size}`)
+        .join(', ');
+    };
 
     // --- Foundation: excavation, PCC, footings ---------------------------
     {
@@ -1655,7 +1665,7 @@ export function generateQuotationBoq(
         origin: 'quotation-structure',
         draft: {
           name: design?.columns.length
-            ? `Foundation: ${footings} footings (${columnTypes.map(sizeText).join(', ')})`
+            ? `Foundation: ${footings} footings (${footingSizes()})`
             : `Foundation: ${footings} footings (${s.footingLengthFeet}×${s.footingWidthFeet} ft)`,
           section: 'Foundation',
           kind: 'quote-foundation',
