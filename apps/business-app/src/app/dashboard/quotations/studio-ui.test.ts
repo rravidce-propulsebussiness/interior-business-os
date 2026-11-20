@@ -419,9 +419,27 @@ describe('automatic CRN reuse from selected lead', () => {
     expect(action).toContain('phone: lead.phone');
     expect(action).toContain('(!lead || contactMatches(candidate, {');
     expect(action).toContain(
-      'let customerId = existingCustomer?.id || leadCustomerId || matches[0]?.id ||',
+      'let customerId = existingCustomer?.id || convertedProject?.customer_id || leadCustomerId || matches[0]?.id ||',
     );
     expect(action).toContain('if (!customerId) {');
+  });
+
+  it('puts quotations for a won lead on its converted project, not a new prospect', () => {
+    expect(action).toContain(
+      "'id,lead_number,phone,email,industry_id,service_type,requirements,converted_project_id'",
+    );
+    expect(action).toContain(".eq('id', lead.converted_project_id)");
+    expect(action).toContain('!converted.is_sales_prospect &&');
+    expect(action).toContain('!converted.removed_from_workspace &&');
+    expect(action).toContain('converted.industry_id === activeIndustry.id');
+    expect(action).toContain(
+      'convertedProject && convertedProject.customer_id === customerId ? convertedProject.id',
+    );
+    // A new sales-prospect container is only created without a project.
+    expect(action).toContain(
+      'if (!projectId && leadQuotationProjectIds.length) {',
+    );
+    expect(action).toContain('if (!projectId) {');
   });
 });
 

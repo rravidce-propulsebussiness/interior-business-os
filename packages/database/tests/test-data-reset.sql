@@ -10,6 +10,19 @@ DECLARE
 BEGIN
   IF NOT private.owner_test_reset_allowed(org) THEN
     RAISE EXCEPTION 'FAIL: demo Owner is unauthorized for test reset'; END IF;
+
+  -- CRM history is append-only, but the reset must still clear it.
+  INSERT INTO public.lead_activities(organization_id,lead_id,activity_type,subject)
+    SELECT org,l.id,'note','Reset coverage note' FROM public.leads l
+    WHERE l.organization_id=org LIMIT 1;
+  IF NOT FOUND THEN RAISE EXCEPTION 'FAIL: seeded lead required for reset coverage'; END IF;
+  BEGIN
+    DELETE FROM public.lead_activities WHERE organization_id=org;
+    RAISE EXCEPTION 'FAIL: lead activity deleted outside the owner reset';
+  EXCEPTION WHEN SQLSTATE '23514' THEN
+    RAISE NOTICE 'PASS: lead activities stay append-only outside the reset';
+  END;
+
   preview:=public.owner_test_data_reset_preview(org);
   IF (preview->>'total')::bigint<1 THEN
     RAISE EXCEPTION 'FAIL: expected seeded operational test records'; END IF;
@@ -40,6 +53,8 @@ BEGIN
   IF outcome->>'success' IS DISTINCT FROM 'true'
     OR (public.owner_test_data_reset_preview(org)->>'total')::bigint<>0 THEN
     RAISE EXCEPTION 'FAIL: transactional reset left operational data behind'; END IF;
+  IF EXISTS (SELECT 1 FROM public.lead_activities WHERE organization_id=org) THEN
+    RAISE EXCEPTION 'FAIL: reset left lead activity history behind'; END IF;
   IF (SELECT count(*) FROM public.organizations WHERE id<>org)<>other_count
     OR NOT EXISTS(SELECT 1 FROM public.organizations WHERE id=org)
     OR (SELECT count(*) FROM public.organization_memberships WHERE organization_id=org)<>member_count THEN

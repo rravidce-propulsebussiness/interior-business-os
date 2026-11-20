@@ -76,6 +76,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       industry_id: string | null;
       service_type: string;
       requirements: unknown;
+      converted_project_id: string | null;
     } | null = null;
     let existingCustomer: {
       id: string;
@@ -96,7 +97,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       const { data, error } = await s.client
         .from('leads')
         .select(
-          'id,lead_number,phone,email,industry_id,service_type,requirements',
+          'id,lead_number,phone,email,industry_id,service_type,requirements,converted_project_id',
         )
         .eq('organization_id', s.org)
         .eq('id', values.leadId)
@@ -388,9 +389,42 @@ export async function createStudioQuotation(input: unknown): Promise<{
       }
     }
 
+    // A won lead already has its execution project. Quotations prepared
+    // after conversion belong to that project (and its customer); a new
+    // sales-prospect container would hide them from the project and BOQ.
+    let convertedProject: { id: string; customer_id: string | null } | null =
+      null;
+    if (lead?.converted_project_id) {
+      const { data: converted, error } = await s.client
+        .from('projects')
+        .select(
+          'id,customer_id,industry_id,status,is_sales_prospect,removed_from_workspace',
+        )
+        .eq('organization_id', s.org)
+        .eq('id', lead.converted_project_id)
+        .maybeSingle();
+      if (error)
+        return {
+          ok: false,
+          message: 'Could not check the converted project. Try again.',
+        };
+      if (
+        converted &&
+        converted.status === 'active' &&
+        !converted.is_sales_prospect &&
+        !converted.removed_from_workspace &&
+        converted.industry_id === activeIndustry.id
+      )
+        convertedProject = converted;
+    }
+
     let createdCustomer = false;
     let customerId =
-      existingCustomer?.id || leadCustomerId || matches[0]?.id || '';
+      existingCustomer?.id ||
+      convertedProject?.customer_id ||
+      leadCustomerId ||
+      matches[0]?.id ||
+      '';
     if (!customerId) {
       customerId = randomUUID();
       await s.commercial.saveEntity(s.org, 'customers', {
@@ -412,7 +446,10 @@ export async function createStudioQuotation(input: unknown): Promise<{
     }
 
     let createdProspect = false;
-    let projectId = '';
+    let projectId =
+      convertedProject && convertedProject.customer_id === customerId
+        ? convertedProject.id
+        : '';
     // The customer supplies no project name at quotation time. Use a stable,
     // lead-based internal reference to satisfy the existing quotation FK.
     const prospectName = [
@@ -424,7 +461,7 @@ export async function createStudioQuotation(input: unknown): Promise<{
       .slice(0, 200);
     // Quote alternatives for the same lead share one hidden pre-sale reference.
     // Never pick an unrelated customer project or a confirmed execution job.
-    if (leadQuotationProjectIds.length) {
+    if (!projectId && leadQuotationProjectIds.length) {
       const { data: existing, error } = await s.client
         .from('projects')
         .select('id')
