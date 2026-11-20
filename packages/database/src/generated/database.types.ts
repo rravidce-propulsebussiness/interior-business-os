@@ -1180,6 +1180,126 @@ export interface Database {
           },
         ];
       };
+      construction_boq_documents: {
+        Row: {
+          id: string;
+          organization_id: string;
+          project_id: string | null;
+          quotation_revision_id: string | null;
+          title: string;
+          status: string;
+          currency: string;
+          document: Json;
+          version: number;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          organization_id: string;
+          project_id?: string | null;
+          quotation_revision_id?: string | null;
+          title: string;
+          status?: string;
+          currency?: string;
+          document?: Json;
+          version?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          organization_id?: string;
+          project_id?: string | null;
+          quotation_revision_id?: string | null;
+          title?: string;
+          status?: string;
+          currency?: string;
+          document?: Json;
+          version?: number;
+          created_by?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'construction_boq_documents_created_by_fkey';
+            columns: ['created_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'construction_boq_documents_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: false;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'construction_boq_documents_organization_id_project_id_fkey';
+            columns: ['organization_id', 'project_id'];
+            isOneToOne: false;
+            referencedRelation: 'projects';
+            referencedColumns: ['organization_id', 'id'];
+          },
+          {
+            foreignKeyName: 'construction_boq_documents_organization_id_quotation_revi_fkey1';
+            columns: ['organization_id', 'quotation_revision_id', 'project_id'];
+            isOneToOne: false;
+            referencedRelation: 'quotation_revisions';
+            referencedColumns: ['organization_id', 'id', 'project_id'];
+          },
+          {
+            foreignKeyName: 'construction_boq_documents_organization_id_quotation_revis_fkey';
+            columns: ['organization_id', 'quotation_revision_id'];
+            isOneToOne: false;
+            referencedRelation: 'quotation_revisions';
+            referencedColumns: ['organization_id', 'id'];
+          },
+        ];
+      };
+      construction_boq_rate_cards: {
+        Row: {
+          organization_id: string;
+          rates: Json;
+          version: number;
+          updated_by: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          organization_id: string;
+          rates?: Json;
+          version?: number;
+          updated_by?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          organization_id?: string;
+          rates?: Json;
+          version?: number;
+          updated_by?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'construction_boq_rate_cards_organization_id_fkey';
+            columns: ['organization_id'];
+            isOneToOne: true;
+            referencedRelation: 'organizations';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'construction_boq_rate_cards_updated_by_fkey';
+            columns: ['updated_by'];
+            isOneToOne: false;
+            referencedRelation: 'profiles';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       construction_package_spec_attachments: {
         Row: {
           id: string;
