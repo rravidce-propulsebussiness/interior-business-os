@@ -100,7 +100,41 @@ export type BoqCounts = {
   entranceGates: number;
   /** Compound wall running length in feet (0 = none). */
   compoundWallFeet: number;
+  /**
+   * Window sizes per floor as written on the plan, e.g. "2×4×4, 2×4×6"
+   * (nos × width × height in ft). When given, the window area is measured
+   * from them instead of the typical window size.
+   */
+  windowSizes?: Record<string, string>;
 };
+
+/** "2×4×4, 2×4×6" / "2*4*6" → openings (nos, width ft, height ft). */
+export function parseOpenings(
+  text: string | undefined,
+): { count: number; widthFeet: number; heightFeet: number }[] {
+  return String(text ?? '')
+    .split(/[,;+\n]/)
+    .map((part) =>
+      /^\s*(\d+)\s*(?:nos?\.?)?\s*[×x*]\s*(\d+(?:\.\d+)?)\s*[×x*]\s*(\d+(?:\.\d+)?)\s*$/i.exec(
+        part,
+      ),
+    )
+    .filter((match): match is RegExpExecArray => Boolean(match))
+    .map((match) => ({
+      count: Number(match[1]),
+      widthFeet: Number(match[2]),
+      heightFeet: Number(match[3]),
+    }))
+    .filter(
+      (opening) =>
+        opening.count > 0 &&
+        opening.count <= 200 &&
+        opening.widthFeet > 0 &&
+        opening.widthFeet <= 40 &&
+        opening.heightFeet > 0 &&
+        opening.heightFeet <= 40,
+    );
+}
 
 type FieldDef = {
   key: string;
@@ -1114,8 +1148,18 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
       ]),
     ) as FloorCounts;
   }
+  const sizesRaw =
+    source.windowSizes && typeof source.windowSizes === 'object'
+      ? (source.windowSizes as Record<string, unknown>)
+      : {};
+  const windowSizes = Object.fromEntries(
+    Object.keys(floors)
+      .map((name) => [name, String(sizesRaw[name] ?? '').slice(0, 200)])
+      .filter(([, text]) => Boolean(text?.trim())),
+  );
   return {
     floors,
+    ...(Object.keys(windowSizes).length ? { windowSizes } : {}),
     entranceGates: validCount(source.entranceGates, estimated.entranceGates),
     compoundWallFeet: validCount(
       source.compoundWallFeet,
@@ -2483,7 +2527,23 @@ export function generateQuotationBoq(
     };
     const doors =
       fc.mainDoors + fc.internalDoors + fc.bathroomDoors + fc.poojaDoors;
-    const windowArea = fc.windows * s.windowSqft;
+    // Window area from the plan's sizes when entered, else typical size.
+    const openings = parseOpenings(counts.windowSizes?.[floor.name]);
+    const windowArea = openings.length
+      ? openings.reduce(
+          (sum, opening) =>
+            sum + opening.count * opening.widthFeet * opening.heightFeet,
+          0,
+        )
+      : fc.windows * s.windowSqft;
+    const windowBasis = openings.length
+      ? openings
+          .map(
+            (opening) =>
+              `${opening.count} × ${opening.widthFeet}×${opening.heightFeet} ft`,
+          )
+          .join(' + ')
+      : `${fc.windows} windows × ${s.windowSqft} sq ft`;
     const living = livingSqft(floor);
     const parking = floor.parkingSqft ?? 0;
     const floorTiles = (living * s.tileCoveragePercent) / 100;
@@ -2550,7 +2610,7 @@ export function generateQuotationBoq(
           windowArea,
           'sqft',
           'window',
-          `${fc.windows} windows × ${s.windowSqft} sq ft`,
+          windowBasis,
         ),
         ...item(
           'ventilators',

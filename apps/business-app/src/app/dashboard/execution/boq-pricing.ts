@@ -22,6 +22,8 @@ export type PricedOutput = {
   unit: string;
   material?: string | undefined;
   rate?: number | undefined;
+  /** Package rate from the quotation (e.g. windows ₹450 / sq ft). */
+  quotedRate?: number | undefined;
   diameter?: number | undefined;
 };
 
@@ -541,9 +543,10 @@ export function selectedVariant(
 }
 
 /**
- * Unit rate for a BOQ output: a fixed rate on the output (quoted allowance)
- * wins; then the BOQ's brand / source for its material group; then a plain
- * rate line with the same name and unit.
+ * Unit rate for a BOQ output: a rate typed on the BOQ wins; then the
+ * package rate from the quotation (windows ₹450 / sq ft, tiles ₹60, doors
+ * ₹7,000 …); then the BOQ's brand / source for its material group; then a
+ * plain rate line with the same name and unit.
  */
 export function rateForOutput(
   output: PricedOutput,
@@ -552,6 +555,8 @@ export function rateForOutput(
 ): number {
   if (output.rate !== undefined && Number.isFinite(output.rate))
     return output.rate;
+  if (output.quotedRate !== undefined && Number.isFinite(output.quotedRate))
+    return output.quotedRate;
   const material = materialForOutput(output);
   if (material) {
     // Steel: one brand choice per BOQ, priced per rod for each diameter.

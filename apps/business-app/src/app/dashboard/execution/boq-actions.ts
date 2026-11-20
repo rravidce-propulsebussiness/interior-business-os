@@ -55,6 +55,7 @@ const generatorSchema = z.object({
       .refine((floors) => Object.keys(floors).length <= 20),
     entranceGates: z.number().int().nonnegative(),
     compoundWallFeet: z.number().int().nonnegative(),
+    windowSizes: z.record(z.string().max(90), z.string().max(200)).optional(),
   }),
   floors: z
     .array(

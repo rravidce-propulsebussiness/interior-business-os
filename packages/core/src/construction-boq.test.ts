@@ -7,6 +7,7 @@ import {
   lapFeet,
   normalizeStructuralSettings,
   parseBars,
+  parseOpenings,
 } from './construction-boq';
 import { calculateSftEstimate } from './sft-quotation';
 
@@ -610,13 +611,34 @@ describe('quotation-driven construction BOQ', () => {
     );
   });
 
-  it('never prices the BOQ from the customer quotation', () => {
+  it('carries the package rate from the quotation, never a fixed price', () => {
     const result = generateQuotationBoq({ details: quote() });
     const outputs = result.lines.flatMap((line) => line.outputs);
     expect(outputs.some((output) => output.rate !== undefined)).toBe(false);
     expect(outputs.find((output) => output.name === 'Main door')).toMatchObject(
       { material: 'door_main', quotedRate: 25000 },
     );
+  });
+
+  it('measures windows from the sizes on the plan', () => {
+    expect(parseOpenings('2×4×4, 2 x 4 x 6; junk')).toEqual([
+      { count: 2, widthFeet: 4, heightFeet: 4 },
+      { count: 2, widthFeet: 4, heightFeet: 6 },
+    ]);
+    const result = generateQuotationBoq({
+      details: quote(),
+      counts: { windowSizes: { 'Ground Floor': '2×4×4, 2×4×6' } },
+    });
+    const windows = result.lines
+      .find(
+        (line) =>
+          line.section === 'Ground Floor' &&
+          line.kind === 'quote-doors-windows',
+      )
+      ?.outputs.find((output) => output.name === 'Windows');
+    // 2 × 16 + 2 × 24 = 80 sq ft.
+    expect(windows).toMatchObject({ quantity: 80, material: 'window' });
+    expect(result.counts.windowSizes?.['Ground Floor']).toBe('2×4×4, 2×4×6');
   });
 
   it('normalizes and clamps company settings', () => {

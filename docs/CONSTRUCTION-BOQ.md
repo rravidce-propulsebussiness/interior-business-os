@@ -62,14 +62,28 @@ its real frontage and depth.
 tonnes (from m³ using the density in the structural rules), steel in rods of
 each diameter (weight shown alongside). Rates are entered in the same units.
 
-**The BOQ is the cost of the work, not the customer price.** The quotation
-gives the quantities: floors, sizes, heights, and which package items apply
-(doors, windows, tiles, fittings …). Every item is priced from the rate card
-(Configure rates), i.e. what the company pays. The quoted allowance (e.g.
-_Internal doors · ₹7,000 per door_) is shown next to the cost as "Quoted
-₹7,000" for comparison only. Quoted items with no rate-card group (other
-allowances, additional quoted works) start at zero: type their cost on the
-BOQ. The page shows the quotation value, the cost and the margin.
+**What comes from the quotation.** When the lead is won and the project is
+created, the BOQ takes everything the Final quotation holds: floors, sizes,
+slab (floor) heights, parking, and the package's rates. Package items are
+priced at the quoted package rate, applied to the quantities measured on the
+BOQ. For example, a standard package with windows at ₹450 / sq ft and window
+sizes `2×4×4, 2×4×6` on a floor gives 80 sq ft × ₹450. The same applies to
+tiles, granite, kitchen platform and sink, doors per door, bathroom fittings
+per bathroom, rolling shutter, gate and painting. A different package on the
+quote gives different rates. Items the package does not price (steel,
+cement, sand, aggregate, bricks, labour …) come from the rate card
+(Configure rates). Any rate can be typed over on the BOQ. Quoted items with
+no rate (other allowances, additional quoted works) start at zero: type
+their cost. The page shows the quotation value, the BOQ cost and the margin.
+
+**Window sizes:** in the counts table, type each floor's windows as on the
+plan, `nos × width × height` in feet, e.g. `2×4×4, 2×4×6`. The window count
+and area follow; without sizes, a typical window size is assumed.
+
+**Floor-wise cost estimate:** each stage lists every item as quantity × rate
+= amount (cement bags, sand and aggregate tonnes, steel rods per size,
+bricks, paint, each labour trade …), labour per sq ft, the floor total and
+₹ / sq ft, then the total project cost.
 
 **Default prices** (editable, Configure rates; Hyderabad, Nov 2026 — confirm
 with your suppliers):

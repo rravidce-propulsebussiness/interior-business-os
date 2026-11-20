@@ -180,4 +180,21 @@ describe('BOQ default prices and quoted brands', () => {
       rateForOutput({ name: 'Bricks', unit: 'nos', material: 'bricks' }, saved),
     ).toBe(9.5);
   });
+
+  it('prices package items at the rate in the quotation', () => {
+    // Windows: the standard package's ₹450 / sq ft, not the rate card.
+    expect(
+      rateForOutput(
+        { name: 'Windows', unit: 'sqft', material: 'window', quotedRate: 450 },
+        effectiveRates([]),
+      ),
+    ).toBe(450);
+    // A rate typed on the BOQ still wins.
+    expect(
+      rateForOutput(
+        { name: 'Windows', unit: 'sqft', quotedRate: 450, rate: 400 },
+        [],
+      ),
+    ).toBe(400);
+  });
 });

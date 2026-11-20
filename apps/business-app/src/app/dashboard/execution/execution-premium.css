@@ -2007,3 +2007,7 @@
   color: #fff;
   font-size: 13px;
 }
+
+.boq-gen-count-table td.boq-window-sizes input {
+  min-width: 150px;
+}

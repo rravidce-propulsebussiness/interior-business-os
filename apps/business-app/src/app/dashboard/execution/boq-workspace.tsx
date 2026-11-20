@@ -35,6 +35,7 @@ import {
   generateQuotationBoq,
   normalizeStructuralSettings,
   normalizeDesign,
+  parseOpenings,
   type BoqCounts,
   type BoqFloor,
   type StructuralDesign,
@@ -1073,6 +1074,7 @@ export function BoqWorkspace({
                       {FLOOR_COUNT_FIELDS.map(([key, label]) => (
                         <th key={key}>{label}</th>
                       ))}
+                      <th>Window sizes (nos × W × H ft)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1110,6 +1112,44 @@ export function BoqWorkspace({
                               />
                             </td>
                           ))}
+                          <td className="boq-window-sizes">
+                            <input
+                              type="text"
+                              placeholder="2×4×4, 2×4×6"
+                              aria-label={`${floor.name} window sizes`}
+                              maxLength={200}
+                              value={
+                                countsForGeneration.windowSizes?.[floor.name] ??
+                                ''
+                              }
+                              onChange={(event) => {
+                                const text = event.target.value;
+                                const openings = parseOpenings(text);
+                                setGenCounts({
+                                  ...countsForGeneration,
+                                  windowSizes: {
+                                    ...countsForGeneration.windowSizes,
+                                    [floor.name]: text,
+                                  },
+                                  floors: {
+                                    ...countsForGeneration.floors,
+                                    [floor.name]: {
+                                      ...row,
+                                      ...(openings.length
+                                        ? {
+                                            windows: openings.reduce(
+                                              (sum, opening) =>
+                                                sum + opening.count,
+                                              0,
+                                            ),
+                                          }
+                                        : {}),
+                                    },
+                                  },
+                                });
+                              }}
+                            />
+                          </td>
                         </tr>
                       );
                     })}
@@ -1500,7 +1540,9 @@ export function BoqWorkspace({
                                 <span className="boq-rate-cell">
                                   {line.kind === 'quoted' ? (
                                     '—'
-                                  ) : materialForOutput(output) || !canEdit ? (
+                                  ) : (materialForOutput(output) &&
+                                      output.quotedRate === undefined) ||
+                                    !canEdit ? (
                                     money(rate)
                                   ) : (
                                     <input
@@ -1519,9 +1561,7 @@ export function BoqWorkspace({
                                     />
                                   )}
                                   {output.quotedRate !== undefined && (
-                                    <small>
-                                      Quoted {money(output.quotedRate)}
-                                    </small>
+                                    <small>Package rate from the quote</small>
                                   )}
                                 </span>
                                 <strong>
