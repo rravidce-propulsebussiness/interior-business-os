@@ -7,6 +7,8 @@ on:
       - packages/core/src/construction-boq.ts
       - apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx
       - apps/business-app/src/app/dashboard/execution/boq-workspace.tsx
+      - apps/business-app/src/app/dashboard/execution/boq-design-schedule.tsx
+      - apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
 permissions:
   contents: write
 jobs:
@@ -34,16 +36,18 @@ jobs:
             apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx \
             apps/business-app/src/app/dashboard/execution/boq-workspace.tsx \
             apps/business-app/src/app/dashboard/execution/boq-actions.ts \
-            apps/business-app/src/app/dashboard/execution/boq-stage-builder.css
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.css \
+            apps/business-app/src/app/dashboard/execution/boq-design-schedule.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
           git diff --check
           if ! git diff --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add packages/core/src/footing-takeoff.ts packages/core/src/construction-boq.ts packages/core/src/construction-boq.test.ts apps/business-app/src/app/dashboard/execution/boq-footing-editor.tsx apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx apps/business-app/src/app/dashboard/execution/boq-workspace.tsx apps/business-app/src/app/dashboard/execution/boq-actions.ts apps/business-app/src/app/dashboard/execution/boq-stage-builder.css
+            git add apps/business-app/src/app/dashboard/execution/boq-design-schedule.tsx apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts packages/core/src/footing-takeoff.ts packages/core/src/construction-boq.ts packages/core/src/construction-boq.test.ts apps/business-app/src/app/dashboard/execution/boq-footing-editor.tsx apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx apps/business-app/src/app/dashboard/execution/boq-workspace.tsx apps/business-app/src/app/dashboard/execution/boq-actions.ts apps/business-app/src/app/dashboard/execution/boq-stage-builder.css
             git commit -m "style(boq): format independent foundation editor"
             git push origin HEAD:feat/boq-separate-footing-column-design-20261122
           fi
       - name: Structural BOQ tests
-        run: pnpm exec vitest run packages/core/src/construction-boq.test.ts
+        run: pnpm exec vitest run packages/core/src/construction-boq.test.ts apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
       - name: Business OS typecheck
         run: pnpm --filter @business-os/business-app typecheck
