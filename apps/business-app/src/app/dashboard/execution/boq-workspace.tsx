@@ -187,7 +187,11 @@ export function BoqWorkspace({
   initialMode?: 'view' | 'edit' | 'new';
 }) {
   const [screen, setScreen] = useState<'view' | 'edit' | 'new'>(
-    initialMode === 'new' ? 'new' : initialMode === 'edit' && canEdit ? 'edit' : 'view',
+    initialMode === 'new'
+      ? 'new'
+      : initialMode === 'edit' && canEdit
+        ? 'edit'
+        : 'view',
   );
   // Coming back to the BOQ page opens the BOQ being worked on: the one
   // asked for, else the project's, else the most recent one.
@@ -195,13 +199,16 @@ export function BoqWorkspace({
     initialMode === 'new'
       ? null
       : (documents.find((document) => document.id === initialOpenId) ??
-          (initialProjectId
-            ? documents.find((document) => document.project_id === initialProjectId)
-            : (documents.find(
-                (document) =>
-                  projects.length === 1 && document.project_id === projects[0]!.id,
-              ) ?? documents[0])) ??
-          null);
+        (initialProjectId
+          ? documents.find(
+              (document) => document.project_id === initialProjectId,
+            )
+          : (documents.find(
+              (document) =>
+                projects.length === 1 &&
+                document.project_id === projects[0]!.id,
+            ) ?? documents[0])) ??
+        null);
   const [active, setActive] = useState<Document | null>(initialDocument);
   const [title, setTitle] = useState(
     initialDocument?.title ?? 'Construction BOQ',
@@ -573,7 +580,9 @@ export function BoqWorkspace({
   }
   function startNew() {
     if (!newProjects.length) {
-      setMessage('Save a quotation for a project without a BOQ before creating a new one.');
+      setMessage(
+        'Save a quotation for a project without a BOQ before creating a new one.',
+      );
       return;
     }
     router.push('/dashboard/execution/boq/new');
@@ -581,7 +590,9 @@ export function BoqWorkspace({
   function openDocument(document: Document) {
     setActive(document);
     setScreen('view');
-    router.replace(`/dashboard/execution/boq?open=${encodeURIComponent(document.id)}`);
+    router.replace(
+      `/dashboard/execution/boq?open=${encodeURIComponent(document.id)}`,
+    );
     setTitle(document.title);
     setProjectId(document.project_id || '');
     setQuoteId(document.quotation_revision_id || '');
@@ -784,7 +795,9 @@ export function BoqWorkspace({
   }
   function addLine() {
     if (schedule && selectedTemplate !== 'manual') {
-      setMessage('Quotation-generated BOQs already measure the structure and finishes. Use manual entries only for extra work.');
+      setMessage(
+        'Quotation-generated BOQs already measure the structure and finishes. Use manual entries only for extra work.',
+      );
       return;
     }
     const template = BOQ_TEMPLATES.find(
@@ -850,10 +863,27 @@ export function BoqWorkspace({
     setSelectedQuoteLines([]);
   }
   function save() {
-    if (schedule && lines.some((line) =>
-      !line.origin && ['excavation', 'footing', 'pedestal', 'column', 'plinth_beam',
-        'beam', 'slab', 'wall', 'surface'].includes(line.kind))) {
-      setMessage('Remove overlapping manually measured structural or finishing items before saving. The quotation already generates these quantities.');
+    if (
+      schedule &&
+      lines.some(
+        (line) =>
+          !line.origin &&
+          [
+            'excavation',
+            'footing',
+            'pedestal',
+            'column',
+            'plinth_beam',
+            'beam',
+            'slab',
+            'wall',
+            'surface',
+          ].includes(line.kind),
+      )
+    ) {
+      setMessage(
+        'Remove overlapping manually measured structural or finishing items before saving. The quotation already generates these quantities.',
+      );
       return;
     }
     if (
@@ -901,7 +931,9 @@ export function BoqWorkspace({
         updated_at: new Date().toISOString(),
       });
       setScreen('view');
-      router.replace(`/dashboard/execution/boq?open=${encodeURIComponent(result.id || active?.id || '')}`);
+      router.replace(
+        `/dashboard/execution/boq?open=${encodeURIComponent(result.id || active?.id || '')}`,
+      );
       router.refresh();
     });
   }
@@ -921,18 +953,31 @@ export function BoqWorkspace({
     });
   }
 
-
-  const oldManualStructural = schedule && generator
-    ? lines.filter((line) =>
-        !line.origin && ['excavation', 'footing', 'pedestal', 'column', 'plinth_beam',
-          'beam', 'slab', 'wall', 'surface'].includes(line.kind),
-      )
-    : [];
+  const oldManualStructural =
+    schedule && generator
+      ? lines.filter(
+          (line) =>
+            !line.origin &&
+            [
+              'excavation',
+              'footing',
+              'pedestal',
+              'column',
+              'plinth_beam',
+              'beam',
+              'slab',
+              'wall',
+              'surface',
+            ].includes(line.kind),
+        )
+      : [];
   const stages = [...new Set(lines.map((line) => line.section || 'Other'))];
   function editDocument() {
     if (!active || !canEdit) return;
     setScreen('edit');
-    router.replace(`/dashboard/execution/boq?open=${encodeURIComponent(active.id)}&mode=edit`);
+    router.replace(
+      `/dashboard/execution/boq?open=${encodeURIComponent(active.id)}&mode=edit`,
+    );
   }
   if (screen === 'view') {
     return (
@@ -941,99 +986,281 @@ export function BoqWorkspace({
           <div>
             <p className="erp-eyebrow">Construction takeoff</p>
             <h1>Saved BOQs</h1>
-            <p>Review saved measurements, materials and costs. Edit only when changes are needed.</p>
+            <p>
+              Review saved measurements, materials and costs. Edit only when
+              changes are needed.
+            </p>
           </div>
-          {canCreate && newProjects.length > 0 &&
-            <Link className="erp-button erp-button-primary" href="/dashboard/execution/boq/new">＋ New BOQ</Link>}
+          {canCreate && newProjects.length > 0 && (
+            <Link
+              className="erp-button erp-button-primary"
+              href="/dashboard/execution/boq/new"
+            >
+              ＋ New BOQ
+            </Link>
+          )}
         </div>
-        {message && <p className="boq-notice" role="status">{message}</p>}
+        {message && (
+          <p className="boq-notice" role="status">
+            {message}
+          </p>
+        )}
         <div className="boq-layout">
           <aside className="boq-register">
             <div className="boq-panel-heading">
-              <div><h2>Saved BOQs</h2><span>{plural(documents.length, 'document', 'documents')}</span></div>
-              {canCreate && newProjects.length > 0 &&
-                <Link className="boq-add-small" href="/dashboard/execution/boq/new" aria-label="Create new BOQ">＋</Link>}
+              <div>
+                <h2>Saved BOQs</h2>
+                <span>{plural(documents.length, 'document', 'documents')}</span>
+              </div>
+              {canCreate && newProjects.length > 0 && (
+                <Link
+                  className="boq-add-small"
+                  href="/dashboard/execution/boq/new"
+                  aria-label="Create new BOQ"
+                >
+                  ＋
+                </Link>
+              )}
             </div>
-            {documents.length ? documents.map((document) => (
-              <button type="button" key={document.id}
-                className={`boq-register-item ${active?.id === document.id ? 'active' : ''}`}
-                onClick={() => openDocument(document)}>
-                <span className="boq-document-icon">B</span>
-                <span className="boq-register-copy">
-                  <strong>{document.title}</strong>
-                  <small>{projects.find((project) => project.id === document.project_id)?.name || 'No project linked'} · View / Edit</small>
-                </span>
-                <span className="boq-register-arrow">›</span>
-              </button>
-            )) : <p className="boq-empty">No saved BOQs yet.</p>}
-            {canCreate && newProjects.length === 0 &&
-              <p className="boq-empty">New BOQs require a project with a saved quotation and no existing BOQ.</p>}
+            {documents.length ? (
+              documents.map((document) => (
+                <button
+                  type="button"
+                  key={document.id}
+                  className={`boq-register-item ${active?.id === document.id ? 'active' : ''}`}
+                  onClick={() => openDocument(document)}
+                >
+                  <span className="boq-document-icon">B</span>
+                  <span className="boq-register-copy">
+                    <strong>{document.title}</strong>
+                    <small>
+                      {projects.find(
+                        (project) => project.id === document.project_id,
+                      )?.name || 'No project linked'}{' '}
+                      · View / Edit
+                    </small>
+                  </span>
+                  <span className="boq-register-arrow">›</span>
+                </button>
+              ))
+            ) : (
+              <p className="boq-empty">No saved BOQs yet.</p>
+            )}
+            {canCreate && newProjects.length === 0 && (
+              <p className="boq-empty">
+                New BOQs require a project with a saved quotation and no
+                existing BOQ.
+              </p>
+            )}
           </aside>
           <section className="boq-editor">
-            {active ? <>
-              <div className="boq-panel-heading">
-                <div><h2>View BOQ</h2><span>Revision {active.version} · Updated {new Date(active.updated_at).toLocaleDateString('en-IN')}</span></div>
-                {canEdit && <button className="erp-button erp-button-primary" type="button" onClick={editDocument}>Edit BOQ</button>}
-              </div>
-              <h3 className="boq-view-title">{title}</h3>
-              <div className="boq-view-fields">
-                <div><span>Project</span><strong>{activeProject?.name ?? 'Not linked'}</strong></div>
-                <div><span>Quotation</span><strong>{currentQuote?.label ?? 'Saved quotation revision'}</strong></div>
-              </div>
-              <div className="boq-metrics">
-                <div><span>Estimated material + labour</span><strong>{canViewCost ? money(materialCost) : 'Restricted'}</strong></div>
-                <div><span>Quotation value</span><strong>{money(quotedValue)}</strong></div>
-                {canViewCost && quotedValue > 0 && <div><span>Estimated margin</span><strong>{money(margin)}</strong></div>}
-                <div><span>Measured items</span><strong>{lines.length}</strong></div>
-              </div>
-              {oldManualStructural.length > 0 && <p role="alert" className="boq-view-warning">
-                {oldManualStructural.length} older manual structural / finishing entries may duplicate quantities already generated from the quotation.
-                Review these in Edit BOQ; existing data has not been deleted.
-              </p>}
-              {generator?.warnings?.length ? <details className="boq-view-warnings">
-                <summary>Drawing assumptions ({generator.warnings.length})</summary>
-                <ul>{generator.warnings.map((warning) => <li key={warning}>{warning}</li>)}</ul>
-              </details> : null}
-              {steelSummary.size > 0 && <section className="boq-view-steel">
-                <h3>Steel summary</h3><div className="boq-view-steel-grid">
-                  {diameters.map((diameter) => <div key={diameter}>
-                    <strong>{diameter} mm steel</strong>
-                    <span>{steelSummary.get(diameter)?.rods.toLocaleString('en-IN')} rods · {steelSummary.get(diameter)?.kg.toLocaleString('en-IN', {maximumFractionDigits:1})} kg</span>
-                  </div>)}
+            {active ? (
+              <>
+                <div className="boq-panel-heading">
+                  <div>
+                    <h2>View BOQ</h2>
+                    <span>
+                      Revision {active.version} · Updated{' '}
+                      {new Date(active.updated_at).toLocaleDateString('en-IN')}
+                    </span>
+                  </div>
+                  {canEdit && (
+                    <button
+                      className="erp-button erp-button-primary"
+                      type="button"
+                      onClick={editDocument}
+                    >
+                      Edit BOQ
+                    </button>
+                  )}
                 </div>
-              </section>}
-              <section className="boq-view-items">
-                <h3>Item-wise quantities by stage</h3>
-                {stages.map((stage) => {
-                  const items = lines.filter((line) => (line.section || 'Other') === stage);
-                  return <details className="boq-floor-cost" key={stage}>
-                    <summary>{stage} · {plural(items.length, 'item', 'items')}</summary>
-                    <div className="boq-view-table-scroll">
-                      <table className="boq-view-table">
-                        <thead><tr><th>Item / material</th><th>Quantity</th><th>Unit</th>{canViewCost && <><th>Rate</th><th>Cost</th></>}</tr></thead>
-                        <tbody>{items.map((line) => <Fragment key={line.id}>
-                          <tr className="boq-view-group"><td colSpan={canViewCost ? 5 : 3}>{line.name}</td></tr>
-                          {line.outputs.map((output, i) => <tr key={`${line.id}-${i}`}>
-                            <td>{output.name}</td><td>{output.quantity.toLocaleString('en-IN', {maximumFractionDigits:3})}</td><td>{output.unit}</td>
-                            {canViewCost && <><td>{rateMoney(priceOf(output))}</td><td>{money(output.quantity * priceOf(output))}</td></>}
-                          </tr>)}
-                        </Fragment>)}</tbody>
-                      </table>
+                <h3 className="boq-view-title">{title}</h3>
+                <div className="boq-view-fields">
+                  <div>
+                    <span>Project</span>
+                    <strong>{activeProject?.name ?? 'Not linked'}</strong>
+                  </div>
+                  <div>
+                    <span>Quotation</span>
+                    <strong>
+                      {currentQuote?.label ?? 'Saved quotation revision'}
+                    </strong>
+                  </div>
+                </div>
+                <div className="boq-metrics">
+                  <div>
+                    <span>Estimated material + labour</span>
+                    <strong>
+                      {canViewCost ? money(materialCost) : 'Restricted'}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Quotation value</span>
+                    <strong>{money(quotedValue)}</strong>
+                  </div>
+                  {canViewCost && quotedValue > 0 && (
+                    <div>
+                      <span>Estimated margin</span>
+                      <strong>{money(margin)}</strong>
                     </div>
-                  </details>;
-                })}
-                {!stages.length && <p className="boq-empty">No measured items saved.</p>}
-              </section>
-              <div className="boq-savebar">
-                <button type="button" className="erp-button" onClick={downloadCsv}>Download Excel (CSV)</button>
-                <button type="button" className="erp-button" onClick={printBoq}>Print / PDF</button>
-                {canEdit && <button type="button" className="erp-button erp-button-primary" onClick={editDocument}>Edit BOQ</button>}
+                  )}
+                  <div>
+                    <span>Measured items</span>
+                    <strong>{lines.length}</strong>
+                  </div>
+                </div>
+                {oldManualStructural.length > 0 && (
+                  <p role="alert" className="boq-view-warning">
+                    {oldManualStructural.length} older manual structural /
+                    finishing entries may duplicate quantities already generated
+                    from the quotation. Review these in Edit BOQ; existing data
+                    has not been deleted.
+                  </p>
+                )}
+                {generator?.warnings?.length ? (
+                  <details className="boq-view-warnings">
+                    <summary>
+                      Drawing assumptions ({generator.warnings.length})
+                    </summary>
+                    <ul>
+                      {generator.warnings.map((warning) => (
+                        <li key={warning}>{warning}</li>
+                      ))}
+                    </ul>
+                  </details>
+                ) : null}
+                {steelSummary.size > 0 && (
+                  <section className="boq-view-steel">
+                    <h3>Steel summary</h3>
+                    <div className="boq-view-steel-grid">
+                      {diameters.map((diameter) => (
+                        <div key={diameter}>
+                          <strong>{diameter} mm steel</strong>
+                          <span>
+                            {steelSummary
+                              .get(diameter)
+                              ?.rods.toLocaleString('en-IN')}{' '}
+                            rods ·{' '}
+                            {steelSummary
+                              .get(diameter)
+                              ?.kg.toLocaleString('en-IN', {
+                                maximumFractionDigits: 1,
+                              })}{' '}
+                            kg
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+                <section className="boq-view-items">
+                  <h3>Item-wise quantities by stage</h3>
+                  {stages.map((stage) => {
+                    const items = lines.filter(
+                      (line) => (line.section || 'Other') === stage,
+                    );
+                    return (
+                      <details className="boq-floor-cost" key={stage}>
+                        <summary>
+                          {stage} · {plural(items.length, 'item', 'items')}
+                        </summary>
+                        <div className="boq-view-table-scroll">
+                          <table className="boq-view-table">
+                            <thead>
+                              <tr>
+                                <th>Item / material</th>
+                                <th>Quantity</th>
+                                <th>Unit</th>
+                                {canViewCost && (
+                                  <>
+                                    <th>Rate</th>
+                                    <th>Cost</th>
+                                  </>
+                                )}
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {items.map((line) => (
+                                <Fragment key={line.id}>
+                                  <tr className="boq-view-group">
+                                    <td colSpan={canViewCost ? 5 : 3}>
+                                      {line.name}
+                                    </td>
+                                  </tr>
+                                  {line.outputs.map((output, i) => (
+                                    <tr key={`${line.id}-${i}`}>
+                                      <td>{output.name}</td>
+                                      <td>
+                                        {output.quantity.toLocaleString(
+                                          'en-IN',
+                                          { maximumFractionDigits: 3 },
+                                        )}
+                                      </td>
+                                      <td>{output.unit}</td>
+                                      {canViewCost && (
+                                        <>
+                                          <td>{rateMoney(priceOf(output))}</td>
+                                          <td>
+                                            {money(
+                                              output.quantity * priceOf(output),
+                                            )}
+                                          </td>
+                                        </>
+                                      )}
+                                    </tr>
+                                  ))}
+                                </Fragment>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </details>
+                    );
+                  })}
+                  {!stages.length && (
+                    <p className="boq-empty">No measured items saved.</p>
+                  )}
+                </section>
+                <div className="boq-savebar">
+                  <button
+                    type="button"
+                    className="erp-button"
+                    onClick={downloadCsv}
+                  >
+                    Download Excel (CSV)
+                  </button>
+                  <button
+                    type="button"
+                    className="erp-button"
+                    onClick={printBoq}
+                  >
+                    Print / PDF
+                  </button>
+                  {canEdit && (
+                    <button
+                      type="button"
+                      className="erp-button erp-button-primary"
+                      onClick={editDocument}
+                    >
+                      Edit BOQ
+                    </button>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="boq-view-empty">
+                <h2>Select a BOQ</h2>
+                <p>Open a saved BOQ to view its details.</p>
+                {canCreate && newProjects.length > 0 && (
+                  <Link
+                    className="erp-button erp-button-primary"
+                    href="/dashboard/execution/boq/new"
+                  >
+                    ＋ New BOQ
+                  </Link>
+                )}
               </div>
-            </> : <div className="boq-view-empty">
-              <h2>Select a BOQ</h2><p>Open a saved BOQ to view its details.</p>
-              {canCreate && newProjects.length > 0 &&
-                <Link className="erp-button erp-button-primary" href="/dashboard/execution/boq/new">＋ New BOQ</Link>}
-            </div>}
+            )}
           </section>
         </div>
       </main>
@@ -1052,7 +1279,9 @@ export function BoqWorkspace({
           </p>
         </div>
         <div className="erp-header-actions">
-          <Link href="/dashboard/execution/boq" className="erp-button">← Saved BOQs</Link>
+          <Link href="/dashboard/execution/boq" className="erp-button">
+            ← Saved BOQs
+          </Link>
           <div
             className="boq-unit-toggle"
             role="group"
@@ -1828,7 +2057,10 @@ export function BoqWorkspace({
               </div>
             </div>
             <div className="boq-template-row">
-              {(schedule ? BOQ_TEMPLATES.filter((template) => template.kind === 'manual') : BOQ_TEMPLATES).map((template) => (
+              {(schedule
+                ? BOQ_TEMPLATES.filter((template) => template.kind === 'manual')
+                : BOQ_TEMPLATES
+              ).map((template) => (
                 <button
                   key={template.kind}
                   type="button"
@@ -1991,7 +2223,11 @@ export function BoqWorkspace({
                 <input
                   value={newName}
                   onChange={(event) => setNewName(event.target.value)}
-                  placeholder={schedule ? "e.g. Extra labour or material" : "e.g. Ground floor C1–C5 columns"}
+                  placeholder={
+                    schedule
+                      ? 'e.g. Extra labour or material'
+                      : 'e.g. Ground floor C1–C5 columns'
+                  }
                 />
               </label>
               <button
