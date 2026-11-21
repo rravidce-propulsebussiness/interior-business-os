@@ -10,7 +10,7 @@ export default async function CreateBoqPage({
   const query = await searchParams;
   return (
     <ManualBoqPage
-      searchParams={Promise.resolve({ project: query.project, mode: 'new' as const })}
+      searchParams={Promise.resolve(query.project ? { project: query.project, mode: 'new' as const } : { mode: 'new' as const })}
     />
   );
 }
