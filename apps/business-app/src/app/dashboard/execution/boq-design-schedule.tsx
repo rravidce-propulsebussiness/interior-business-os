@@ -393,9 +393,13 @@ export function BoqDesignSchedule({
             <BoqFootingEditor
               footings={design.footings ?? []}
               columnLabels={design.columns.map((column) => column.label)}
-              onChange={(footings) => onChange({
-                ...design, footings, legacyFootings: false,
-              })}
+              onChange={(footings) =>
+                onChange({
+                  ...design,
+                  footings,
+                  legacyFootings: false,
+                })
+              }
             />
           </div>
           <div className="boq-gen-count-table boq-design-table">

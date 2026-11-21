@@ -89,17 +89,21 @@ describe('stage-wise miscellaneous BOQ UI', () => {
 
 describe('independent Footings editor', () => {
   it('offers six foundation types, one/two steel meshes and optional pedestal without column fields', () => {
-    const html = renderToStaticMarkup(createElement(BoqFootingEditor, {
-      footings: [{
-        ...newFootingType(0),
-        count: 4,
-        columnRefs: 'C1, C2',
-        lengthFeet: 5,
-        widthFeet: 5,
-      }],
-      columnLabels: ['C1', 'C2'],
-      onChange: noop,
-    }));
+    const html = renderToStaticMarkup(
+      createElement(BoqFootingEditor, {
+        footings: [
+          {
+            ...newFootingType(0),
+            count: 4,
+            columnRefs: 'C1, C2',
+            lengthFeet: 5,
+            widthFeet: 5,
+          },
+        ],
+        columnLabels: ['C1', 'C2'],
+        onChange: noop,
+      }),
+    );
     expect(html).toContain('Foundation configuration');
     expect(html).toContain('Isolated — single-column');
     expect(html).toContain('Combined — two or more columns');
