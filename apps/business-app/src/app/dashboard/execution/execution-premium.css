@@ -2463,9 +2463,21 @@
   text-decoration: none;
 }
 @media (max-width: 640px) {
-  .boq-view-fields { grid-template-columns: 1fr; }
-  .boq-readonly .erp-titlebar > .erp-button { width: 100%; text-align: center; }
-  .boq-readonly .boq-register-item { width: 100%; margin: 3px 0; }
-  .boq-readonly .boq-savebar .erp-button { flex: 1 1 125px; }
-  .boq-edit-page .boq-savebar .erp-button { flex: 1 1 130px; }
+  .boq-view-fields {
+    grid-template-columns: 1fr;
+  }
+  .boq-readonly .erp-titlebar > .erp-button {
+    width: 100%;
+    text-align: center;
+  }
+  .boq-readonly .boq-register-item {
+    width: 100%;
+    margin: 3px 0;
+  }
+  .boq-readonly .boq-savebar .erp-button {
+    flex: 1 1 125px;
+  }
+  .boq-edit-page .boq-savebar .erp-button {
+    flex: 1 1 130px;
+  }
 }
