@@ -22,3 +22,9 @@ The construction quotation and BOQ are different financial views:
 - Do not substitute a quote’s package allowance for actual procurement cost.
 - Source drawings may contain inconsistent labels (e.g. G+6 reinforcement header on a G+3 + penthouse project); escalate to engineer for sign-off.
 - Customer files and contract identities must **not** be committed to the application source repository.
+
+## Customer quotation PDF
+
+The PDF displays each saved floor-to-floor height, the approved slab thickness,
+and numeric price ceilings together with their units and inclusion treatment.
+Unspecified customer price ceilings are not invented.
