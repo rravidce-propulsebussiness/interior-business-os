@@ -412,7 +412,7 @@ export function ConstructionSelector({
         <PremiumSftBuilder
           key={selected}
           selectedPackageId={
-            chosen?.id ?? initialSchedule?.package?.id
+            chosen?.id ?? initialSchedule?.package?.id ?? ''
           }
           rates={rates}
           packages={packages}
