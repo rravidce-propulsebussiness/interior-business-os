@@ -197,7 +197,8 @@ describe('single package choice in the saved quotation editor', () => {
     );
     expect(construction).not.toContain('Select quotation calculation method');
     expect(construction).not.toContain('2. Customized quotation');
-    expect(construction).toContain('selectedPackageId={chosen.id}');
+    expect(construction).toContain('chosen?.id ?? initialSchedule?.package?.id');
+    expect(construction).toContain('initialConstructionPackageSelection(');
     expect(sft).not.toContain('Manage packages ↗');
   });
 
@@ -350,8 +351,8 @@ describe('single premium package library and working Custom Quote entry', () => 
     expect(creation).toContain('initialPackageIndustry === industry');
     expect(creation).toContain("route.set('package', 'custom')");
     expect(studio).toContain('initialPackageId={query.package ??');
-    expect(file('./construction-selector.tsx')).toContain(
-      "initialPackageId === 'custom'",
+    expect(file('./construction-package-selection.ts')).toContain(
+      "requestedPackageId === 'custom'",
     );
     expect(file('./interior-room-builder.tsx')).toContain(
       "initialPackageId === 'custom'",
