@@ -2098,3 +2098,27 @@
 .boq-floor-orders li {
   margin: 2px 0;
 }
+
+.boq-floor-cost tr.boq-head-row td {
+  font-weight: 700;
+  color: #45383a;
+}
+.boq-floor-cost tr.boq-item-row td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+  color: #8a7f81;
+  font-size: 10px;
+}
+.boq-floor-cost tr.boq-item-row td:first-child {
+  padding-left: 18px;
+}
+.boq-bars select {
+  min-width: 70px;
+}
+.boq-design-table td:has(.boq-bars) {
+  min-width: 200px;
+}
+
+.boq-design-table td select[aria-label$='rises to'] {
+  min-width: 110px;
+}
