@@ -700,6 +700,19 @@
   font-size: 12px;
   line-height: 1.6;
 }
+/* Floor height: required-but-missing indicator in the work table */
+.qs-height-required input {
+  border-color: #d97706 !important;
+  background: #fffbeb !important;
+}
+.qs-height-warn {
+  display: block;
+  color: #92400e;
+  font-size: 9px;
+  font-weight: 600;
+  margin-top: 2px;
+  white-space: nowrap;
+}
 .qs-divider {
   height: 1px;
   background: var(--qs-border);

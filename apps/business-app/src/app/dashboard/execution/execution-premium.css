@@ -1550,6 +1550,11 @@
   margin-top: 3px;
   color: #b0532f;
   font-size: 9px;
+  font-weight: 600;
+  background: #fff4e0;
+  border: 1px solid #f8d69b;
+  border-radius: 4px;
+  padding: 1px 4px;
 }
 .boq-gen-floor input,
 .boq-gen-counts input,

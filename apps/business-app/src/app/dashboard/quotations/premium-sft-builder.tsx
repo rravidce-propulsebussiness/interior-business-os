@@ -798,8 +798,11 @@ export function PremiumSftBuilder({
                 <th>Work item</th>
                 <th>Length (ft)</th>
                 <th>Width (ft)</th>
-                <th title="Floors: floor-to-floor (slab) height, used for the project BOQ. Not billed.">
-                  Height (ft)
+                <th title="Floor-to-floor (slab) height for the project BOQ. Required for accurate steel &amp; masonry quantities. Not billed.">
+                  Height (ft){' '}
+                  <span aria-hidden="true" style={{ color: '#d97706' }}>
+                    *
+                  </span>
                 </th>
                 <th>Area / Qty</th>
                 <th>Rate (₹)</th>
@@ -869,35 +872,51 @@ export function PremiumSftBuilder({
                         ['widthFeet', widthUsed],
                         ['heightFeet', heightUsed],
                       ] as const
-                    ).map(([field, used]) => (
-                      <td key={field}>
-                        <input
-                          aria-label={r.name + ' ' + field}
-                          type="number"
-                          inputMode="decimal"
-                          min="0.01"
-                          max="9999.99"
-                          step="0.01"
-                          disabled={!used}
-                          title={
-                            field === 'heightFeet' && r.kind === 'floor'
-                              ? 'Floor-to-floor (slab) height for the BOQ. Not billed.'
-                              : undefined
+                    ).map(([field, used]) => {
+                      const isFloorHeight =
+                        field === 'heightFeet' && r.kind === 'floor';
+                      const heightMissing =
+                        isFloorHeight && used && !r.heightFeet;
+                      return (
+                        <td
+                          key={field}
+                          className={
+                            heightMissing ? 'qs-height-required' : undefined
                           }
-                          placeholder={
-                            !used
-                              ? '—'
-                              : field === 'heightFeet' && r.kind === 'floor'
-                                ? '10'
-                                : '0'
-                          }
-                          value={used ? (r[field] ?? '') : ''}
-                          onChange={(e) =>
-                            updateRow(i, { [field]: e.target.value })
-                          }
-                        />
-                      </td>
-                    ))}
+                        >
+                          <input
+                            aria-label={r.name + ' ' + field}
+                            type="number"
+                            inputMode="decimal"
+                            min="0.01"
+                            max="9999.99"
+                            step="0.01"
+                            disabled={!used}
+                            title={
+                              isFloorHeight
+                                ? 'Floor-to-floor (slab) height for the BOQ. Required for steel & masonry quantities. Not billed.'
+                                : undefined
+                            }
+                            placeholder={
+                              !used
+                                ? '—'
+                                : isFloorHeight
+                                  ? 'Enter ft'
+                                  : '0'
+                            }
+                            value={used ? (r[field] ?? '') : ''}
+                            onChange={(e) =>
+                              updateRow(i, { [field]: e.target.value })
+                            }
+                          />
+                          {heightMissing && (
+                            <small className="qs-height-warn">
+                              ⚠ Required for BOQ
+                            </small>
+                          )}
+                        </td>
+                      );
+                    })}
                     <td>
                       {piece ? (
                         <input

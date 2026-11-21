@@ -315,10 +315,20 @@ export default async function QuotationStudio({
               Open agreement &amp; project stages →
             </Link>
           ) : (
-            <p className="qs-warning" role="status">
-              This is still a sales quotation. No execution project appears in
-              Projects until the lead is confirmed Won and converted.
-            </p>
+            <>
+              <p className="qs-warning" role="status">
+                This is still a sales quotation. No execution project appears in
+                Projects until the lead is confirmed Won and converted. Mark the
+                lead as Won in CRM to unlock the BOQ workspace for this project.
+              </p>
+              <Link
+                href="/dashboard/crm/leads?status=open"
+                className="qs-btn"
+                style={{ marginTop: 10, display: 'inline-flex' }}
+              >
+                Go to CRM Leads → Mark as Won
+              </Link>
+            </>
           )}
         </section>
       )}

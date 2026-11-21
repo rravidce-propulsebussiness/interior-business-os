@@ -448,6 +448,65 @@ export async function saveFloorwiseSftEstimate(
       .limit(2);
     if (error || !existing || existing.length > 1)
       throw new DomainError('VALIDATION_FAILED');
+
+    // One package per customer rule: when adding (not updating) a package
+    // estimate, check that no OTHER quotation under the same project already
+    // uses the same construction package.
+    if (selectedPackage && !existing[0]) {
+      const { data: revRow } = await s.client
+        .from('quotation_revisions')
+        .select('quotation_id')
+        .eq('organization_id', s.org)
+        .eq('id', rid)
+        .maybeSingle();
+      if (revRow?.quotation_id) {
+        const { data: quotRow } = await s.client
+          .from('quotations')
+          .select('project_id')
+          .eq('organization_id', s.org)
+          .eq('id', revRow.quotation_id)
+          .maybeSingle();
+        if (quotRow?.project_id) {
+          // Find all OTHER quotation_ids for the same project
+          const { data: siblingQuots } = await s.client
+            .from('quotations')
+            .select('id')
+            .eq('organization_id', s.org)
+            .eq('project_id', quotRow.project_id)
+            .neq('id', revRow.quotation_id);
+          const siblingIds = (siblingQuots ?? []).map((q) => q.id);
+          if (siblingIds.length) {
+            // Get all revision_ids for sibling quotations
+            const { data: siblingRevs } = await s.client
+              .from('quotation_revisions')
+              .select('id')
+              .eq('organization_id', s.org)
+              .in('quotation_id', siblingIds);
+            const siblingRevIds = (siblingRevs ?? []).map((r) => r.id);
+            if (siblingRevIds.length) {
+              // Check if any sibling revision already has this package
+              const { data: conflict } = await s.client
+                .from('quotation_items')
+                .select('id')
+                .eq('organization_id', s.org)
+                .in('revision_id', siblingRevIds)
+                .like(
+                  'description',
+                  `%"id":"${selectedPackage.id}"%`,
+                )
+                .limit(1);
+              if (conflict?.length) {
+                return {
+                  message: `A quotation with the "${selectedPackage.name}" (₹${selectedPackage.ratePerSqft}/sqft) package already exists for this customer. Open that quotation to revise it, or choose a different package for this quote.`,
+                  code: 'DUPLICATE_PACKAGE',
+                };
+              }
+            }
+          }
+        }
+      }
+    }
+
     // These two document tables are private by design. Their SELECT grants
     // are not available to the normal authenticated client; querying them
     // here makes Save fail before committing a perfectly valid quotation.
