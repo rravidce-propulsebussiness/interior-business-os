@@ -1,0 +1,40 @@
+name: BOQ measured takeoff formatter (temporary)
+on:
+  push:
+    branches: [fix/boq-measured-takeoffs-openings-20261122]
+    paths: [.github/workflows/boq-measure-format.yml]
+permissions: {contents: write}
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/boq-measured-takeoffs-openings-20261122
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format changed measured takeoff files
+        run: |
+          pnpm exec prettier --write \
+            packages/core/src/construction-boq.ts \
+            packages/core/src/construction-boq.test.ts \
+            apps/business-app/src/app/dashboard/execution/boq-stage-measurements.ts \
+            apps/business-app/src/app/dashboard/execution/boq-stage-measurements.test.ts \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.css \
+            apps/business-app/src/app/dashboard/execution/boq-workspace.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-actions.ts \
+            apps/business-app/src/app/dashboard/execution/boq-pricing.ts
+          git diff --check
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add packages/core/src/construction-boq.ts packages/core/src/construction-boq.test.ts apps/business-app/src/app/dashboard/execution
+            git commit -m "style(boq): format measured takeoffs and wall deductions"
+            git push origin HEAD:fix/boq-measured-takeoffs-openings-20261122
+          fi
