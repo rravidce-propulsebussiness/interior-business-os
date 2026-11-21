@@ -143,5 +143,6 @@
  .boq-stages .boq-stage-advanced, .boq-stages .boq-stage-customize,
  .boq-stages .boq-stage-tile-edit, .boq-stages .boq-stage-edit { display: none !important; }
  .boq-stage-card { break-inside: avoid; box-shadow: none; }
- .boq-stage-card-head button { print-color-adjust: exact; }
+ .manual-boq .boq-editor .boq-stage-card-head button { display: flex !important; visibility: visible !important; print-color-adjust: exact; }
+ .boq-stage-card-head button * { visibility: visible !important; }
 }
