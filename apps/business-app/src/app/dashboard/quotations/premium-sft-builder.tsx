@@ -58,6 +58,18 @@ const allowanceAmount = (value: string | undefined) =>
   /^(0|[1-9][0-9]{0,7})(\.[0-9]{1,2})?$/.test((value ?? '').trim())
     ? (value ?? '').trim()
     : '';
+const suggestedAllowanceUnit = (title: string): SectionUnit => {
+  const name = title.toLowerCase();
+  if (/railing|handrail|balustrade/.test(name)) return 'running_ft';
+  if (/door/.test(name)) return 'door';
+  if (/bathroom|sanitary|cp fitting/.test(name) && /fitting|sanitary|accessor|fixture/.test(name))
+    return 'bathroom';
+  if (/window|til|granite|flooring|platform|countertop|paint/.test(name))
+    return 'sqft';
+  if (/sink|gate|shutter|tank|sump/.test(name)) return 'piece';
+  if (/electric|wiring|switch/.test(name)) return 'point';
+  return 'sqft';
+};
 const names = [
   'Ground Floor',
   'First Floor',
@@ -1127,8 +1139,10 @@ export function PremiumSftBuilder({
               <div>
                 <h3>Edit all material specifications</h3>
                 <p>
-                  All changes affect this quotation only. The master package
-                  remains untouched.
+                  Enter the specification, price ceiling and its unit (per door,
+                  sq ft, running ft or bathroom). These limits flow into the
+                  BOQ as quoted allowances. Changes affect this quotation
+                  only; the master package remains untouched.
                 </p>
               </div>
               <button
@@ -1198,17 +1212,73 @@ export function PremiumSftBuilder({
                       />
                     </label>
                     <label>
-                      Allowance (if applicable)
-                      <input
-                        maxLength={40}
-                        value={s.allowancePerSqft ?? ''}
-                        onChange={(e) =>
+                      Pricing treatment
+                      <select
+                        aria-label={s.title + ' pricing treatment'}
+                        value={s.pricingTreatment ?? (Number(s.allowanceValue || s.allowancePerSqft || 0) > 0 ? 'allowance' : 'included')}
+                        onChange={(event) =>
                           updateMaterial(i, {
-                            allowancePerSqft: e.target.value,
+                            pricingTreatment: event.target.value as NonNullable<Material['pricingTreatment']>,
                           })
                         }
+                      >
+                        <option value="included">Included (no separate allowance)</option>
+                        <option value="allowance">Included up to a price limit</option>
+                        <option value="extra">Extra / separately chargeable</option>
+                        <option value="excluded">Excluded</option>
+                      </select>
+                    </label>
+                    <label>
+                      Allowance unit
+                      <select
+                        aria-label={s.title + ' allowance unit'}
+                        value={s.unit && s.unit !== 'none' ? s.unit : suggestedAllowanceUnit(s.title)}
+                        onChange={(event) =>
+                          updateMaterial(i, { unit: event.target.value as SectionUnit })
+                        }
+                      >
+                        <option value="sqft">₹ per sq ft</option>
+                        <option value="running_ft">₹ per running ft</option>
+                        <option value="door">₹ per door</option>
+                        <option value="bathroom">₹ per bathroom</option>
+                        <option value="piece">₹ per piece</option>
+                        <option value="point">₹ per point</option>
+                        <option value="kg">₹ per kg</option>
+                        <option value="tonne">₹ per tonne</option>
+                        <option value="bag">₹ per bag</option>
+                        <option value="cubic_meter">₹ per m³</option>
+                        <option value="meter">₹ per metre</option>
+                        <option value="bhk">₹ per BHK</option>
+                        <option value="lumpsum">₹ lump sum</option>
+                      </select>
+                    </label>
+                    <label>
+                      Price limit (₹ / selected unit)
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min="0"
+                        max="99999999.99"
+                        step="0.01"
+                        aria-label={s.title + ' price limit'}
+                        placeholder="Leave blank when no price is agreed"
+                        value={s.allowanceValue ?? allowanceAmount(s.allowancePerSqft)}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          updateMaterial(i, {
+                            allowanceValue: value,
+                            unit: s.unit && s.unit !== 'none' ? s.unit : suggestedAllowanceUnit(s.title),
+                            allowancePerSqft: '',
+                            ...(Number(value) > 0 && (!s.pricingTreatment || s.pricingTreatment === 'included')
+                              ? { pricingTreatment: 'allowance' as const }
+                              : {}),
+                          });
+                        }}
                       />
                     </label>
+                    {s.allowancePerSqft && !allowanceAmount(s.allowancePerSqft) && (
+                      <small>Earlier allowance text: {s.allowancePerSqft}. Enter a numeric limit above for BOQ pricing.</small>
+                    )}
                     <label className="qs-work-spec-wide">
                       Description / included materials
                       <textarea
@@ -1223,7 +1293,7 @@ export function PremiumSftBuilder({
                   </div>
                 </details>
               ))}
-              {draftSections.length < 18 && (
+              {draftSections.length < 32 && (
                 <button
                   type="button"
                   className="qs-work-add-material"
