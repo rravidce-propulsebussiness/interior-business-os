@@ -87,7 +87,7 @@ export const sftEstimateInputSchema = z
       .max(20)
       .refine((x) => new Set(x).size === x.length),
     packageId: z.uuid().nullable().optional(),
-    sections: z.array(sftSectionSchema).max(18).optional(),
+    sections: z.array(sftSectionSchema).max(32).optional(),
   })
   .strict();
 
@@ -131,7 +131,7 @@ const detailSchema = z
     total: z.string(),
     materials: z.array(sftMaterialSchema).max(20),
     package: sftPackageSchema.optional(),
-    sections: z.array(sftSectionSchema).max(18).optional(),
+    sections: z.array(sftSectionSchema).max(32).optional(),
   })
   .strict();
 
