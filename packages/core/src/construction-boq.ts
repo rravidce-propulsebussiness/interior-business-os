@@ -2866,8 +2866,10 @@ export function generateQuotationBoq(
   // Avoid calling Royal granite "tiles" or a three-coat paint system "two coats".
   // These descriptions are not supplier prices or measured ceiling heights.
   const packageSpecs = input.details.sections ?? [];
-  const parkingIsGranite = packageSpecs.some((spec) =>
-    /parking/i.test(spec.title) && /granite/i.test(spec.title + ' ' + spec.description),
+  const parkingIsGranite = packageSpecs.some(
+    (spec) =>
+      /parking/i.test(spec.title) &&
+      /granite/i.test(spec.title + ' ' + spec.description),
   );
   const interiorHasThreeCoats = packageSpecs.some(
     (spec) =>
@@ -3140,7 +3142,9 @@ export function generateQuotationBoq(
           'wall_tiles',
           [s.wallTileLengthIn, s.wallTileWidthIn, s.wallTilesPerBox],
           `${fc.bathrooms} bathrooms × ${round(2 * (bathL + bathW), 1)} ft walls × ${s.wallTileHeightFeet} ft, less door` +
-            (bathroomTilesToCeiling ? ' · Package specifies ceiling-height tiling: confirm actual clear height in BOQ settings' : ''),
+            (bathroomTilesToCeiling
+              ? ' · Package specifies ceiling-height tiling: confirm actual clear height in BOQ settings'
+              : ''),
         ),
         ...item(
           'staircaseGranite',

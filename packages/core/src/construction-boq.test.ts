@@ -997,7 +997,8 @@ describe('contractual specification limits and manually entered BOQ measures', (
         },
         {
           title: 'Interior painting',
-          description: 'Birla putty 2 coats; Royal Emulsion 3 coats; primer 1 coat',
+          description:
+            'Birla putty 2 coats; Royal Emulsion 3 coats; primer 1 coat',
           unit: 'none',
           pricingTreatment: 'included',
         },
