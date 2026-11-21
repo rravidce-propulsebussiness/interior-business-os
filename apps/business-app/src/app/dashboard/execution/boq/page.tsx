@@ -115,13 +115,18 @@ export default async function ManualBoqPage({
     status: string;
     created_at: string;
   }[];
-  const currentRevisionIds = quotations
-    .map((quotation) => quotation.current_revision_id)
-    .filter((id): id is string => Boolean(id));
+  const currentRevisionIds = [
+    ...new Set([
+      ...quotations.map((quotation) => quotation.current_revision_id),
+      ...(documentsResult.data || []).map(
+        (document) => document.quotation_revision_id,
+      ),
+    ]),
+  ].filter((id): id is string => Boolean(id));
   const revisionsResult = currentRevisionIds.length
     ? await db
         .from('quotation_revisions')
-        .select('id,revision_number,status')
+        .select('id,revision_number,status,quotation_id')
         .eq('organization_id', s.org)
         .in('id', currentRevisionIds)
         .limit(500)
@@ -134,6 +139,7 @@ export default async function ManualBoqPage({
         id: string;
         revision_number: number;
         status: string;
+        quotation_id: string;
       }[]
     ).map((revision) => [revision.id, revision]),
   );
@@ -162,7 +168,51 @@ export default async function ManualBoqPage({
     );
     return pick ? [{ project, ...pick }] : [];
   });
-  const revisionIds = chosen.map(({ quote }) => quote.revisionId!);
+  // An existing BOQ may refer to an older revision after the customer picks
+  // a newer Final quotation. Keep its saved source available for editing.
+  const savedSources = (documentsResult.data || []).flatMap((document) => {
+    if (
+      !document.project_id ||
+      !document.quotation_revision_id ||
+      chosen.some(
+        ({ quote }) => quote.revisionId === document.quotation_revision_id,
+      )
+    )
+      return [];
+    const project = projects.find((item) => item.id === document.project_id);
+    const revision = revisionById.get(document.quotation_revision_id);
+    const sourceQuote = quotations.find(
+      (quotation) =>
+        quotation.id === revision?.quotation_id &&
+        quotation.project_id === document.project_id,
+    );
+    if (!project || !revision || !sourceQuote) return [];
+    return [
+      {
+        project,
+        quote: {
+          quotationId: sourceQuote.id,
+          projectId: project.id,
+          customerId: sourceQuote.customer_id,
+          quotationNumber: sourceQuote.quotation_number,
+          revisionId: revision.id,
+          revisionNumber: revision.revision_number,
+          status: sourceQuote.status,
+          revisionStatus: revision.status,
+          createdAt: sourceQuote.created_at,
+        },
+        isFinal: false,
+        savedSource: true,
+      },
+    ];
+  });
+  const quoteSources = [
+    ...chosen.map((entry) => ({ ...entry, savedSource: false })),
+    ...savedSources,
+  ];
+  const revisionIds = [
+    ...new Set(quoteSources.map(({ quote }) => quote.revisionId!)),
+  ];
   const quoteLinesResult = revisionIds.length
     ? await db
         .from('quotation_items')
@@ -217,7 +267,7 @@ export default async function ManualBoqPage({
     });
     linesByRevision.set(line.revision_id, list);
   }
-  const quotes = chosen.map(({ project, quote, isFinal }) => {
+  const quotes = quoteSources.map(({ project, quote, isFinal, savedSource }) => {
     const schedule = scheduleByRevision.get(quote.revisionId!) ?? null;
     return {
       id: quote.revisionId!,
@@ -231,7 +281,7 @@ export default async function ManualBoqPage({
         quotationNumber: quote.quotationNumber,
         revisionNumber: quote.revisionNumber,
         isFinal,
-      }),
+      }).replace(/ · Latest$/, savedSource ? ' · Saved source' : ' · Latest'),
       lines: linesByRevision.get(quote.revisionId!) || [],
       schedule,
     };
