@@ -501,11 +501,6 @@
   font-weight: 500;
   margin-top: 4px;
 }
-.boq-stage-manual {
-  margin-top: 17px;
-  padding-top: 10px;
-  border-top: 1px solid #eee0da;
-}
 .boq-stage-outline {
   display: inline-flex;
   align-items: center;
@@ -523,9 +518,6 @@
 .boq-stage-outline:disabled {
   opacity: 0.4;
   cursor: not-allowed;
-}
-.boq-stage-manual > .boq-stage-outline {
-  margin-top: 11px;
 }
 .boq-stage-extra-note {
   grid-column: 1/-1;
@@ -866,5 +858,181 @@
   }
   .boq-stage-limit {
     grid-column: 1/-1;
+  }
+}
+
+/* Stage-level miscellaneous: extra items live here, not in structural editors. */
+.boq-stage-miscellaneous {
+  grid-column: 1 / -1;
+  min-width: 0;
+  margin-top: 6px;
+}
+.boq-stage-misc-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 54px;
+  padding: 11px 14px;
+  border: 1px dashed #cd9d8a;
+  border-radius: 13px;
+  background: linear-gradient(110deg, #fffaf6, #fff4ed);
+  color: #71372f;
+  cursor: pointer;
+  text-align: left;
+}
+.boq-stage-misc-trigger:hover {
+  border-color: #a74f3f;
+  background: #ffefe6;
+}
+.boq-stage-misc-trigger:focus-visible,
+.boq-stage-misc-remove:focus-visible {
+  outline: 3px solid #c17653;
+  outline-offset: 2px;
+}
+.boq-stage-misc-plus {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: #f2dfd5;
+  color: #963f31;
+  font-size: 22px;
+  font-weight: 650;
+}
+.boq-stage-misc-copy {
+  display: grid;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+.boq-stage-misc-copy strong {
+  font-size: 13px;
+  font-weight: 850;
+}
+.boq-stage-misc-copy small {
+  color: #8f716a;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.boq-stage-misc-count {
+  color: #7b4035;
+  font-size: 11px;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.boq-stage-misc-chevron {
+  margin-left: auto;
+  font-size: 20px;
+  font-weight: 750;
+}
+.boq-stage-misc-panel {
+  display: grid;
+  gap: 13px;
+  margin-top: 10px;
+  padding: 15px;
+  border: 1px solid #ead3c6;
+  border-radius: 13px;
+  background: #fffdfb;
+}
+.boq-stage-misc-heading h4,
+.boq-stage-misc-add h4 {
+  margin: 0;
+  color: #582d2e;
+  font-size: 14px;
+}
+.boq-stage-misc-heading p {
+  margin: 6px 0 0;
+  color: #8c746d;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.boq-stage-misc-item,
+.boq-stage-misc-add {
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #efdfd7;
+  border-radius: 12px;
+  background: #fff;
+}
+.boq-stage-misc-add {
+  background: #fff8f4;
+  border-color: #e6c4b4;
+}
+.boq-stage-misc-item-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+.boq-stage-misc-item-head strong {
+  color: #613732;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.boq-stage-misc-remove {
+  border: 1px solid #e2bcb3;
+  border-radius: 9px;
+  background: white;
+  padding: 7px 10px;
+  color: #954135;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.boq-stage-misc-panel .boq-stage-input-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.boq-stage-misc-add > .boq-stage-outline {
+  justify-self: start;
+}
+.boq-stage-misc-preview {
+  display: grid;
+  gap: 9px;
+  padding: 13px 15px;
+  border: 1px solid #ead9d1;
+  border-radius: 12px;
+  background: #fffaf6;
+}
+.boq-stage-misc-preview > strong {
+  color: #62362e;
+  font-size: 13px;
+}
+.boq-stage-misc-preview > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  color: #69504c;
+  font-size: 11px;
+}
+.boq-stage-misc-preview > div > strong {
+  color: #6b352e;
+}
+@media (max-width: 640px) {
+  .boq-stage-miscellaneous {
+    margin-top: 4px;
+  }
+  .boq-stage-misc-trigger {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+  }
+  .boq-stage-misc-count {
+    margin-left: 40px;
+    white-space: normal;
+  }
+  .boq-stage-misc-chevron {
+    margin-left: auto;
+  }
+  .boq-stage-misc-panel {
+    padding: 10px;
+  }
+  .boq-stage-misc-panel .boq-stage-input-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

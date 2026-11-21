@@ -65,6 +65,7 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/execution/boq-project-quote.test.ts',
       'apps/business-app/src/app/dashboard/execution/boq-export.test.ts',
       'apps/business-app/src/app/dashboard/execution/boq-number-field.test.ts',
+      'apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts',
       'apps/business-app/src/app/dashboard/settings/test-reset-actions.test.ts',
       'apps/business-app/src/app/dashboard/project-management/tasks/tasks-board.test.ts',
     ],
