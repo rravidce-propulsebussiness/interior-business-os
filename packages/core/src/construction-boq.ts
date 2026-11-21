@@ -2848,10 +2848,13 @@ export function generateQuotationBoq(
     const scopedFloor = floors.find((floor) => {
       const prefix = floor.name.toLowerCase();
       const title = section.title.toLowerCase();
-      return title.startsWith(prefix) && /[\s:—-]/.test(title.charAt(prefix.length));
+      return (
+        title.startsWith(prefix) && /[\s:—-]/.test(title.charAt(prefix.length))
+      );
     });
     const target = scopedFloor
-      ? (floorAllowances.get(scopedFloor.name) ?? new Map<AllowanceCategory, typeof quoted>())
+      ? (floorAllowances.get(scopedFloor.name) ??
+        new Map<AllowanceCategory, typeof quoted>())
       : allowances;
     for (const category of categories)
       if (!target.has(category)) target.set(category, quoted);
@@ -3012,7 +3015,15 @@ export function generateQuotationBoq(
       'quote-doors-windows',
       'doors & windows',
       [
-        ...item('mainDoors', 'Main door', fc.mainDoors, 'door', 'door_main', undefined, floor.name),
+        ...item(
+          'mainDoors',
+          'Main door',
+          fc.mainDoors,
+          'door',
+          'door_main',
+          undefined,
+          floor.name,
+        ),
         ...item(
           'internalDoors',
           'Bedroom / internal door',
@@ -3876,7 +3887,11 @@ export function allowanceCategories(
   }
   if (/ventilat/.test(t)) return unit === 'piece' ? ['ventilators'] : [];
   if (/window/.test(t)) return unit === 'sqft' ? ['windows'] : [];
-  if (/(bathroom|toilet|washroom)/.test(t) && /(floor|anti.skid)/.test(t) && /til/.test(t))
+  if (
+    /(bathroom|toilet|washroom)/.test(t) &&
+    /(floor|anti.skid)/.test(t) &&
+    /til/.test(t)
+  )
     return unit === 'sqft' ? ['bathFloorTiles'] : [];
   if (/(parking|tandur)/.test(t) && /(tile|floor|stone)/.test(t))
     return unit === 'sqft' ? ['parkingTiles'] : [];

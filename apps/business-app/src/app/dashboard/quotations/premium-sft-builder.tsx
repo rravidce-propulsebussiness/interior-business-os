@@ -62,7 +62,10 @@ const suggestedAllowanceUnit = (title: string): SectionUnit => {
   const name = title.toLowerCase();
   if (/railing|handrail|balustrade/.test(name)) return 'running_ft';
   if (/door/.test(name)) return 'door';
-  if (/bathroom|sanitary|cp fitting/.test(name) && /fitting|sanitary|accessor|fixture/.test(name))
+  if (
+    /bathroom|sanitary|cp fitting/.test(name) &&
+    /fitting|sanitary|accessor|fixture/.test(name)
+  )
     return 'bathroom';
   if (/window|til|granite|flooring|platform|countertop|paint/.test(name))
     return 'sqft';
@@ -312,7 +315,9 @@ export function PremiumSftBuilder({
         .map((s) => ({ ...s })) ?? []
     );
   });
-  const [slabThicknessIn, setSlabThicknessIn] = useState(initialSchedule?.slabThicknessIn ?? '');
+  const [slabThicknessIn, setSlabThicknessIn] = useState(
+    initialSchedule?.slabThicknessIn ?? '',
+  );
   const [materialIds, setMaterialIds] = useState<string[]>(() => {
     if (changedPackage) return [];
     return (initialSchedule?.materials ?? []).flatMap((m) => {
@@ -1165,9 +1170,9 @@ export function PremiumSftBuilder({
                 <h3>Edit all material specifications</h3>
                 <p>
                   Enter the specification, price ceiling and its unit (per door,
-                  sq ft, running ft or bathroom). These limits flow into the
-                  BOQ as quoted allowances. Changes affect this quotation
-                  only; the master package remains untouched.
+                  sq ft, running ft or bathroom). These limits flow into the BOQ
+                  as quoted allowances. Changes affect this quotation only; the
+                  master package remains untouched.
                 </p>
               </div>
               <button
@@ -1240,16 +1245,30 @@ export function PremiumSftBuilder({
                       Pricing treatment
                       <select
                         aria-label={s.title + ' pricing treatment'}
-                        value={s.pricingTreatment ?? (Number(s.allowanceValue || s.allowancePerSqft || 0) > 0 ? 'allowance' : 'included')}
+                        value={
+                          s.pricingTreatment ??
+                          (Number(s.allowanceValue || s.allowancePerSqft || 0) >
+                          0
+                            ? 'allowance'
+                            : 'included')
+                        }
                         onChange={(event) =>
                           updateMaterial(i, {
-                            pricingTreatment: event.target.value as NonNullable<Material['pricingTreatment']>,
+                            pricingTreatment: event.target.value as NonNullable<
+                              Material['pricingTreatment']
+                            >,
                           })
                         }
                       >
-                        <option value="included">Included (no separate allowance)</option>
-                        <option value="allowance">Included up to a price limit</option>
-                        <option value="extra">Extra / separately chargeable</option>
+                        <option value="included">
+                          Included (no separate allowance)
+                        </option>
+                        <option value="allowance">
+                          Included up to a price limit
+                        </option>
+                        <option value="extra">
+                          Extra / separately chargeable
+                        </option>
                         <option value="excluded">Excluded</option>
                       </select>
                     </label>
@@ -1257,9 +1276,15 @@ export function PremiumSftBuilder({
                       Allowance unit
                       <select
                         aria-label={s.title + ' allowance unit'}
-                        value={s.unit && s.unit !== 'none' ? s.unit : suggestedAllowanceUnit(s.title)}
+                        value={
+                          s.unit && s.unit !== 'none'
+                            ? s.unit
+                            : suggestedAllowanceUnit(s.title)
+                        }
                         onChange={(event) =>
-                          updateMaterial(i, { unit: event.target.value as SectionUnit })
+                          updateMaterial(i, {
+                            unit: event.target.value as SectionUnit,
+                          })
                         }
                       >
                         <option value="sqft">₹ per sq ft</option>
@@ -1287,23 +1312,35 @@ export function PremiumSftBuilder({
                         step="0.01"
                         aria-label={s.title + ' price limit'}
                         placeholder="Leave blank when no price is agreed"
-                        value={s.allowanceValue ?? allowanceAmount(s.allowancePerSqft)}
+                        value={
+                          s.allowanceValue ??
+                          allowanceAmount(s.allowancePerSqft)
+                        }
                         onChange={(event) => {
                           const value = event.target.value;
                           updateMaterial(i, {
                             allowanceValue: value,
-                            unit: s.unit && s.unit !== 'none' ? s.unit : suggestedAllowanceUnit(s.title),
+                            unit:
+                              s.unit && s.unit !== 'none'
+                                ? s.unit
+                                : suggestedAllowanceUnit(s.title),
                             allowancePerSqft: '',
-                            ...(Number(value) > 0 && (!s.pricingTreatment || s.pricingTreatment === 'included')
+                            ...(Number(value) > 0 &&
+                            (!s.pricingTreatment ||
+                              s.pricingTreatment === 'included')
                               ? { pricingTreatment: 'allowance' as const }
                               : {}),
                           });
                         }}
                       />
                     </label>
-                    {s.allowancePerSqft && !allowanceAmount(s.allowancePerSqft) && (
-                      <small>Earlier allowance text: {s.allowancePerSqft}. Enter a numeric limit above for BOQ pricing.</small>
-                    )}
+                    {s.allowancePerSqft &&
+                      !allowanceAmount(s.allowancePerSqft) && (
+                        <small>
+                          Earlier allowance text: {s.allowancePerSqft}. Enter a
+                          numeric limit above for BOQ pricing.
+                        </small>
+                      )}
                     <label className="qs-work-spec-wide">
                       Description / included materials
                       <textarea

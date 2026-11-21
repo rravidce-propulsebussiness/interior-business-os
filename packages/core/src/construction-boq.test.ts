@@ -870,10 +870,34 @@ describe('contractual specification limits and manually entered BOQ measures', (
       ],
       materialIds: [],
       sections: [
-        { title: 'Room flooring tiles', description: '', unit: 'sqft', pricingTreatment: 'allowance', allowanceValue: '80' },
-        { title: 'Bathroom floor anti-skid tiles', description: '', unit: 'sqft', pricingTreatment: 'allowance', allowanceValue: '40' },
-        { title: 'Parking area tiles', description: '', unit: 'sqft', pricingTreatment: 'allowance', allowanceValue: '45' },
-        { title: 'SS304 staircase railing', description: '', unit: 'running_ft', pricingTreatment: 'allowance', allowanceValue: '1200' },
+        {
+          title: 'Room flooring tiles',
+          description: '',
+          unit: 'sqft',
+          pricingTreatment: 'allowance',
+          allowanceValue: '80',
+        },
+        {
+          title: 'Bathroom floor anti-skid tiles',
+          description: '',
+          unit: 'sqft',
+          pricingTreatment: 'allowance',
+          allowanceValue: '40',
+        },
+        {
+          title: 'Parking area tiles',
+          description: '',
+          unit: 'sqft',
+          pricingTreatment: 'allowance',
+          allowanceValue: '45',
+        },
+        {
+          title: 'SS304 staircase railing',
+          description: '',
+          unit: 'running_ft',
+          pricingTreatment: 'allowance',
+          allowanceValue: '1200',
+        },
       ],
     });
     const initial = generateQuotationBoq({ details });
@@ -894,11 +918,16 @@ describe('contractual specification limits and manually entered BOQ measures', (
       },
     });
     const outputs = result.lines.flatMap((line) => line.outputs);
-    const match = (name: string) => outputs.find((output) => output.name === name);
+    const match = (name: string) =>
+      outputs.find((output) => output.name === name);
     expect(match('Room flooring tiles')?.quotedRate).toBe(80);
     expect(match('Bathroom floor tiles (anti-skid)')?.quotedRate).toBe(40);
     expect(match('Parking tiles')?.quotedRate).toBe(45);
-    expect(match('SS railing')).toMatchObject({ quantity: 36, unit: 'running_ft', quotedRate: 1200 });
+    expect(match('SS railing')).toMatchObject({
+      quantity: 36,
+      unit: 'running_ft',
+      quotedRate: 1200,
+    });
   });
 
   it('respects the first floor main-door price ceiling without changing other floors', () => {
@@ -906,15 +935,28 @@ describe('contractual specification limits and manually entered BOQ measures', (
     const details = {
       ...base,
       sections: [
-        { title: 'Main door', description: 'Teak door', unit: 'door' as const, pricingTreatment: 'allowance' as const, allowanceValue: '45000' },
-        { title: 'First Floor main door', description: 'Premium main door', unit: 'door' as const, pricingTreatment: 'allowance' as const, allowanceValue: '60000' },
+        {
+          title: 'Main door',
+          description: 'Teak door',
+          unit: 'door' as const,
+          pricingTreatment: 'allowance' as const,
+          allowanceValue: '45000',
+        },
+        {
+          title: 'First Floor main door',
+          description: 'Premium main door',
+          unit: 'door' as const,
+          pricingTreatment: 'allowance' as const,
+          allowanceValue: '60000',
+        },
       ],
     };
     const result = generateQuotationBoq({ details });
-    const main = (floor: string) => result.lines
-      .filter((line) => line.section === floor)
-      .flatMap((line) => line.outputs)
-      .find((output) => output.name === 'Main door');
+    const main = (floor: string) =>
+      result.lines
+        .filter((line) => line.section === floor)
+        .flatMap((line) => line.outputs)
+        .find((output) => output.name === 'Main door');
     expect(main('Ground Floor')?.quotedRate).toBe(45000);
     expect(main('First Floor')?.quotedRate).toBe(60000);
   });

@@ -1154,10 +1154,11 @@ export function BoqWorkspace({
                     Enter room dimensions, openings, column groups, beam lengths
                     and reinforcement below from the drawings. Both typed
                     schedules and code-generated takeoffs run through this same
-                    quotation BOQ engine. Steel is cut from {settings.stockBarFeet} ft bars:{' '}
-                    {settings.foundationCuts} pieces per bar for the foundation
-                    lift and {settings.floorCuts} per bar for each floor above,
-                    with a {settings.lapDiameters}d lap at every floor. Package
+                    quotation BOQ engine. Steel is cut from{' '}
+                    {settings.stockBarFeet} ft bars: {settings.foundationCuts}{' '}
+                    pieces per bar for the foundation lift and{' '}
+                    {settings.floorCuts} per bar for each floor above, with a{' '}
+                    {settings.lapDiameters}d lap at every floor. Package
                     allowances (per door, per bathroom, per sq ft) are priced at
                     the quoted value. Manual items are kept.
                   </p>
@@ -1640,8 +1641,8 @@ export function BoqWorkspace({
                                   )}
                                   {output.quotedRate !== undefined && (
                                     <small>
-                                      Quoted limit: {money(output.quotedRate)}
-                                      /{output.unit} (not supplier cost)
+                                      Quoted limit: {money(output.quotedRate)}/
+                                      {output.unit} (not supplier cost)
                                     </small>
                                   )}
                                 </span>
