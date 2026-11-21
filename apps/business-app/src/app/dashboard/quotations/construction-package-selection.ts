@@ -18,7 +18,9 @@ export function initialConstructionPackageSelection(
   if (hasCustomQuote) return 'custom';
   const matched = activePackages.find(
     (pkg) =>
-      pkg.id === saved?.package?.id || pkg.code === saved?.package?.code,
+      saved?.package?.id
+        ? pkg.id === saved.package.id
+        : pkg.code === saved?.package?.code,
   );
   if (matched) return matched.id;
   // Do not open an empty editor (or silently substitute a new package) for
