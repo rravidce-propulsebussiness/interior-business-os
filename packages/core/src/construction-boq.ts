@@ -1796,7 +1796,6 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
         .map((run: unknown) => num(run, 0, 0, 5000)),
     }))
     .filter((item) => parseBars(item.bars).length > 0);
-  if (!columns.length && !beams.length) return null;
   const rawSettings =
     value.settings && typeof value.settings === 'object'
       ? (value.settings as Record<string, unknown>)
@@ -1811,6 +1810,7 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     )
       settings[key] = parsed;
   }
+  if (!columns.length && !beams.length && !Object.keys(settings).length && !Number(value.plinthRunFeet)) return null;
   return {
     columns,
     beams,
