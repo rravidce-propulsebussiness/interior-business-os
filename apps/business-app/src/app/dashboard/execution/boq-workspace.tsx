@@ -1004,41 +1004,40 @@ export function BoqWorkspace({
     }
     setGenCounts(following);
   }
-  function repeatStageFloor(floor: string, enabled: boolean) {
+  function repeatStageFloors(targets: string[], enabled: boolean) {
     const source = floorsForGeneration[0]?.name;
-    if (!source || floor === source) return;
-    if (!enabled) {
-      setRepeatFrom((prior) => {
-        const next = { ...prior };
-        delete next[floor];
-        return next;
-      });
-      return;
+    if (!source) return;
+    const validTargets = targets.filter((floor) =>
+      floor !== source && floorsForGeneration.some((item) => item.name === floor));
+    if (!validTargets.length) return;
+    const nextRepeat = { ...repeatFrom };
+    for (const floor of validTargets) {
+      if (enabled) nextRepeat[floor] = source;
+      else delete nextRepeat[floor];
     }
-    const nextRepeat = { ...repeatFrom, [floor]: source };
     setRepeatFrom(nextRepeat);
+    if (!enabled) return; // Copies remain editable when inheritance is disabled.
     updateStageCounts(countsForGeneration, nextRepeat);
-    const index = floorsForGeneration.findIndex((item) => item.name === floor);
     setGenDesign((prior) => prior ? {
       ...prior,
       beams: prior.beams.map((beam) => ({
         ...beam,
-        runFeet: floorsForGeneration.map((_, i) =>
-          i === index ? (beam.runFeet[0] ?? 0) : (beam.runFeet[i] ?? 0)),
+        runFeet: floorsForGeneration.map((item, i) =>
+          validTargets.includes(item.name) ? (beam.runFeet[0] ?? 0) : (beam.runFeet[i] ?? 0)),
       })),
     } : null);
     setLines((prior) => {
       const originals = prior.filter((line) =>
         !line.origin && line.section === source && !line.inputs.repeatedFrom);
-      return [
-        ...prior.filter((line) => !(line.section === floor && line.inputs.repeatedFrom === source)),
-        ...originals.map((line) => ({
+      const retained = prior.filter((line) =>
+        !(validTargets.includes(line.section) && line.inputs.repeatedFrom === source));
+      return [...retained, ...validTargets.flatMap((target) =>
+        originals.map((line) => ({
           ...line,
           id: uid(),
-          section: floor,
+          section: target,
           inputs: { ...line.inputs, repeatedFrom: source, sourceLineId: line.id },
-        })),
-      ];
+        })))];
     });
   }
   function customizeStageFloor(floor: string) {
@@ -1528,7 +1527,7 @@ export function BoqWorkspace({
             onCountsChange={updateStageCounts}
             onFloorChange={setGenFloors}
             repeatFrom={repeatFrom}
-            onRepeatFloor={repeatStageFloor}
+            onRepeatFloors={repeatStageFloors}
             onCustomizeFloor={customizeStageFloor}
             onUpdateQuantity={updateOutputQuantity}
             onUpdateRate={updateOutputRate}
