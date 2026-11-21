@@ -2062,12 +2062,15 @@ export type QuotationBoqInput = {
   counts?: unknown;
   /** Column / beam / footing schedule from the structural drawing. */
   design?: unknown;
+  /** New stage-card BOQs account for roof beam and slab quantities independently. */
+  splitBeamSlab?: boolean;
 };
 
 export function generateQuotationBoq(
   input: QuotationBoqInput,
 ): QuotationBoqResult {
   const design = normalizeDesign(input.design);
+  const splitBeamSlab = input.splitBeamSlab === true;
   // The drawing's own slab / staircase / cover values win over the company's.
   const quotedSlabThickness = Number(input.details.slabThicknessIn);
   const s = normalizeStructuralSettings({
@@ -2534,6 +2537,10 @@ export function generateQuotationBoq(
     for (const level of beamLevels) {
       const grid = columnGrid(level.floor, s, ground);
       const tally: SteelTally = new Map();
+      const beamTally: SteelTally =
+        splitBeamSlab && level.slab ? new Map() : tally;
+      const slabTally: SteelTally =
+        splitBeamSlab && level.slab ? new Map() : tally;
       const outputs: GeneratedOutput[] = [];
       // Beam types at this level: the drawing's schedule (running feet per
       // floor roof), or one type from the rules along every column line.
@@ -2656,7 +2663,7 @@ export function generateQuotationBoq(
             metres += plan.bars * stock * M_PER_FT;
           }
           addSteel(
-            tally,
+            beamTally,
             bar.dia,
             metres,
             bars,
@@ -2677,7 +2684,7 @@ export function generateQuotationBoq(
         );
         const stirrupBars = cutPlan(stirrupLength, stirrups, stock, 0).bars;
         addSteel(
-          tally,
+          beamTally,
           type.stirrupDia,
           stirrupBars * stock * M_PER_FT,
           stirrupBars,
@@ -2687,6 +2694,8 @@ export function generateQuotationBoq(
         concrete += run * beamB * below * CUM_PER_CFT;
         shuttering += run * (beamB + 2 * below);
       }
+      const beamConcrete = concrete;
+      const beamShuttering = shuttering;
       if (level.slab) {
         const area = level.floor.lengthFeet * level.floor.widthFeet;
         concrete += area * slabT * CUM_PER_CFT;
@@ -2717,13 +2726,65 @@ export function generateQuotationBoq(
           const piece = bar.span + 2 * Math.max(0.5, 0.5 * lap);
           const plan = cutPlan(piece, count, stock, lap);
           addSteel(
-            tally,
+            slabTally,
             bar.dia,
             plan.bars * stock * M_PER_FT,
             plan.bars,
             `${level.name} slab ${bar.label} ${count} pcs × ${ft(piece)}`,
           );
         }
+      }
+      if (splitBeamSlab && level.slab) {
+        // Each shared roof line used to include beam + slab concrete, steel
+        // and shuttering together. Split those measured quantities at source
+        // so each stage card owns its own materials without double counting.
+        mergeSteel(beamTally);
+        mergeSteel(slabTally);
+        if (totalRun > 0) {
+          drafts.push({
+            origin: 'quotation-structure',
+            draft: {
+              name: `${level.name}: beams (${round(totalRun, 0)} rft)`,
+              section: level.stage,
+              kind: 'quote-beams',
+              unit: 'm³',
+              inputs: { beamRunFeet: round(totalRun, 1) },
+              outputs: [
+                ...concreteOutputs(beamConcrete, 'Beam', s),
+                ...steelOutputs(beamTally, stock),
+                {
+                  name: 'Beam centering & shuttering',
+                  ...(s.labourItemized ? { material: 'shuttering' } : {}),
+                  quantity: round(beamShuttering, 0),
+                  unit: 'sqft',
+                },
+              ],
+            },
+          });
+        }
+        drafts.push({
+          origin: 'quotation-structure',
+          draft: {
+            name: `${level.name}: slab (${round(level.floor.lengthFeet * level.floor.widthFeet, 0)} sqft)`,
+            section: level.stage,
+            kind: 'quote-slab',
+            unit: 'm³',
+            inputs: {
+              slab: `${s.slabThicknessIn} in · ${s.slabMainDia} mm @ ${s.slabMainSpacingIn} in / ${s.slabDistDia} mm @ ${s.slabDistSpacingIn} in`,
+            },
+            outputs: [
+              ...concreteOutputs(concrete - beamConcrete, 'Slab', s),
+              ...steelOutputs(slabTally, stock),
+              {
+                name: 'Slab centering & shuttering',
+                ...(s.labourItemized ? { material: 'shuttering' } : {}),
+                quantity: round(shuttering - beamShuttering, 0),
+                unit: 'sqft',
+              },
+            ],
+          },
+        });
+        continue;
       }
       mergeSteel(tally);
       outputs.push(
