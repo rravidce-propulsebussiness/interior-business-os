@@ -933,7 +933,7 @@ export function BoqWorkspace({
         currency: 'INR',
         items: lines,
         selections,
-        ...(generator ? { generator } : {}),
+        ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
       });
       if (!result.ok) {
         setMessage(result.message || 'Could not save BOQ.');
@@ -976,6 +976,107 @@ export function BoqWorkspace({
       }
       router.refresh();
     });
+  }
+
+  // Floor repetition is a saved, explicit copy of the ground-floor setup.
+  // Each floor keeps its own quoted dimensions; only counts, room schedules,
+  // window schedules and named manual extras are reused.
+  function updateStageCounts(next: BoqCounts, inheritance = repeatFrom) {
+    const source = floorsForGeneration[0]?.name;
+    if (!source) {
+      setGenCounts(next);
+      return;
+    }
+    const following = { ...next, floors: { ...next.floors }, finishes: { ...next.finishes }, windowSizes: { ...next.windowSizes } };
+    for (const [target, from] of Object.entries(inheritance)) {
+      const sourceCounts = following.floors[from];
+      if (!sourceCounts || target === from) continue;
+      following.floors[target] = { ...sourceCounts };
+      if (following.finishes?.[from]) {
+        following.finishes![target] = {
+          ...following.finishes![from]!,
+          rooms: following.finishes![from]!.rooms.map((room) => ({ ...room })),
+        };
+      }
+      if (following.windowSizes?.[from] !== undefined)
+        following.windowSizes![target] = following.windowSizes![from]!;
+    }
+    setGenCounts(following);
+  }
+  function repeatStageFloor(floor: string, enabled: boolean) {
+    const source = floorsForGeneration[0]?.name;
+    if (!source || floor === source) return;
+    if (!enabled) {
+      setRepeatFrom((prior) => {
+        const next = { ...prior };
+        delete next[floor];
+        return next;
+      });
+      return;
+    }
+    const nextRepeat = { ...repeatFrom, [floor]: source };
+    setRepeatFrom(nextRepeat);
+    updateStageCounts(countsForGeneration, nextRepeat);
+    const index = floorsForGeneration.findIndex((item) => item.name === floor);
+    setGenDesign((prior) => prior ? {
+      ...prior,
+      beams: prior.beams.map((beam) => ({
+        ...beam,
+        runFeet: floorsForGeneration.map((_, i) =>
+          i === index ? (beam.runFeet[0] ?? 0) : (beam.runFeet[i] ?? 0)),
+      })),
+    } : null);
+    setLines((prior) => {
+      const originals = prior.filter((line) =>
+        !line.origin && line.section === source && !line.inputs.repeatedFrom);
+      return [
+        ...prior.filter((line) => !(line.section === floor && line.inputs.repeatedFrom === source)),
+        ...originals.map((line) => ({
+          ...line,
+          id: uid(),
+          section: floor,
+          inputs: { ...line.inputs, repeatedFrom: source, sourceLineId: line.id },
+        })),
+      ];
+    });
+  }
+  function customizeStageFloor(floor: string) {
+    setRepeatFrom((prior) => {
+      const next = { ...prior };
+      delete next[floor];
+      return next;
+    });
+    setLines((prior) => prior.map((line) =>
+      line.section === floor && line.inputs.repeatedFrom
+        ? { ...line, inputs: { ...line.inputs, repeatedFrom: '' } }
+        : line,
+    ));
+  }
+  function addStageManual(stage: string, category: string, quantity: number, measureUnit: string, rate: number) {
+    if (!(quantity > 0)) return;
+    const label = ({
+      excavation: 'Excavation', soil: 'Soil Filling', pcc: 'PCC Bed',
+      footings: 'Footings', columns: 'Columns', plinth: 'Plinth Beam',
+      compound: 'Compound Wall', beams: 'Beams', slab: 'Slab',
+      staircase: 'Staircase', brickwork: 'Brickwork', plaster: 'Plastering',
+      painting: 'Painting', tiles: 'Tiles', electrical: 'Electrical',
+      plumbing: 'Plumbing', doors: 'Doors & Windows', parapet: 'Parapet Wall',
+      waterproofing: 'Waterproofing',
+    } as Record<string, string>)[category] ?? 'Additional work';
+    const item: SavedLine = {
+      id: uid(), name: label, section: stage, kind: 'manual',
+      unit: measureUnit,
+      inputs: { quantity, stageCategory: category },
+      outputs: [{ name: label, quantity, unit: measureUnit, rate }],
+      notes: '',
+    };
+    const copies = Object.entries(repeatFrom).filter(([,from]) => from === stage)
+      .map(([target, from]): SavedLine => ({
+        ...item, id: uid(), section: target,
+        inputs: { ...item.inputs, repeatedFrom: from, sourceLineId: item.id },
+      }));
+    setLines((prior) => [...prior, item, ...copies]);
+    setMessage(label + ' added to ' + stage + '. Save BOQ to keep the measurement.');
   }
 
   const oldManualStructural =
@@ -1112,7 +1213,7 @@ export function BoqWorkspace({
                     </strong>
                   </div>
                 </div>
-                <div className="boq-metrics">
+                <div className="boq-metrics boq-editor-legacy-metrics">
                   <div>
                     <span>Estimated material + labour</span>
                     <strong>
@@ -1407,6 +1508,42 @@ export function BoqWorkspace({
               </button>
             )}
           </div>
+          <BoqStageBuilder
+            floors={floorsForGeneration}
+            lines={lines}
+            projectId={projectId}
+            projects={projects.map((project) => ({
+              id: project.id,
+              name: project.name,
+              eligible: newProjects.some((item) => item.id === project.id),
+            }))}
+            onProjectChange={selectProject}
+            title={title}
+            onTitleChange={setTitle}
+            quoteLabel={currentQuote?.label ?? ''}
+            design={genDesign}
+            onDesignChange={setGenDesign}
+            counts={countsForGeneration}
+            onCountsChange={updateStageCounts}
+            onFloorChange={setGenFloors}
+            repeatFrom={repeatFrom}
+            onRepeatFloor={repeatStageFloor}
+            onCustomizeFloor={customizeStageFloor}
+            onUpdateQuantity={updateOutputQuantity}
+            onUpdateRate={updateOutputRate}
+            rateFor={priceOf}
+            onAddManual={addStageManual}
+            onRemoveManual={(index) => setLines((prior) => prior.filter((_, i) => i !== index))}
+            onSave={save}
+            onPrint={printBoq}
+            onAdvanced={() => setShowAdvanced((prior) => !prior)}
+            canViewCost={canViewCost}
+            busy={busy}
+            message={message}
+            newDocument={!active}
+          />
+          {showAdvanced && (
+            <div className="boq-advanced-content">
           <div className="boq-form-grid">
             <label>
               BOQ name
@@ -2465,6 +2602,8 @@ export function BoqWorkspace({
               </button>
             )}
           </div>
+            </div>
+          )}
         </section>
       </div>
     </main>
