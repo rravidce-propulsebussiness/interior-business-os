@@ -129,6 +129,7 @@ const generatorSchema = z.object({
   /** Column / beam / footing schedule from the structural drawing. */
   design: z
     .object({
+      footings: z.array(z.record(z.string(), z.unknown())).max(40).optional(),
       columns: z.array(z.record(z.string(), z.unknown())).max(20),
       beams: z.array(z.record(z.string(), z.unknown())).max(20),
       plinthRunFeet: z.number().finite().nonnegative(),
