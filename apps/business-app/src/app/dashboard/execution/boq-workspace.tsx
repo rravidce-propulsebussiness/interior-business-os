@@ -914,6 +914,40 @@ export function BoqWorkspace({
     setSelectedQuoteLines([]);
   }
   function save() {
+    // When a measured manual stage is later supplied by the drawing engine,
+    // require an explicit review instead of adding two competing quantities.
+    const generatedForStage: Record<string, string[]> = {
+      excavation: ['quote-foundation'],
+      pcc: ['quote-foundation'],
+      footings: ['quote-foundation', 'quote-pedestals'],
+      columns: ['quote-columns'],
+      plinth: ['quote-plinth-beam'],
+      beams: ['quote-slab'],
+      slab: ['quote-slab'],
+      staircase: ['quote-staircase'],
+      brickwork: ['quote-masonry'],
+      plaster: ['quote-masonry'],
+      compound: ['quote-compound-wall'],
+      parapet: ['quote-parapet'],
+      waterproofing: ['quote-parapet'],
+    };
+    const duplicated = lines.find((manual) => {
+      if (manual.origin || manual.kind !== 'manual') return false;
+      const kinds = generatedForStage[String(manual.inputs.stageCategory ?? '')];
+      return kinds?.some((kind) =>
+        lines.some((generated) =>
+          Boolean(generated.origin) &&
+          generated.section === manual.section &&
+          generated.kind === kind,
+        ),
+      );
+    });
+    if (duplicated) {
+      setMessage(
+        `Review ${duplicated.name} in ${duplicated.section}: both a manual measurement and a drawing-generated measurement exist. Remove one before saving to avoid duplicate quantities.`,
+      );
+      return;
+    }
     if (
       schedule &&
       lines.some(
