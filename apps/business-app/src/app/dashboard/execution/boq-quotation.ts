@@ -94,10 +94,7 @@ export async function ensureQuotationBoq(
     .eq('id', revision.data.quotation_id)
     .eq('project_id', projectId)
     .maybeSingle<{ current_revision_id: string | null }>();
-  if (
-    finalQuote.error ||
-    finalQuote.data?.current_revision_id !== revisionId
-  )
+  if (finalQuote.error || finalQuote.data?.current_revision_id !== revisionId)
     return { status: 'skipped', reason: 'final_revision_required' };
 
   const items = await db

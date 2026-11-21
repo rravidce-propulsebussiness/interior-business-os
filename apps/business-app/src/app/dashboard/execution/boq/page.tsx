@@ -267,25 +267,27 @@ export default async function ManualBoqPage({
     });
     linesByRevision.set(line.revision_id, list);
   }
-  const quotes = quoteSources.map(({ project, quote, isFinal, savedSource }) => {
-    const schedule = scheduleByRevision.get(quote.revisionId!) ?? null;
-    return {
-      id: quote.revisionId!,
-      projectId: project.id,
-      isFinal,
-      label: projectQuoteLabel({
-        customerName: project.customer_id
-          ? (customerNames.get(project.customer_id) ?? null)
-          : null,
-        packageName: schedule?.package?.name ?? null,
-        quotationNumber: quote.quotationNumber,
-        revisionNumber: quote.revisionNumber,
+  const quotes = quoteSources.map(
+    ({ project, quote, isFinal, savedSource }) => {
+      const schedule = scheduleByRevision.get(quote.revisionId!) ?? null;
+      return {
+        id: quote.revisionId!,
+        projectId: project.id,
         isFinal,
-      }).replace(/ · Latest$/, savedSource ? ' · Saved source' : ' · Latest'),
-      lines: linesByRevision.get(quote.revisionId!) || [],
-      schedule,
-    };
-  });
+        label: projectQuoteLabel({
+          customerName: project.customer_id
+            ? (customerNames.get(project.customer_id) ?? null)
+            : null,
+          packageName: schedule?.package?.name ?? null,
+          quotationNumber: quote.quotationNumber,
+          revisionNumber: quote.revisionNumber,
+          isFinal,
+        }).replace(/ · Latest$/, savedSource ? ' · Saved source' : ' · Latest'),
+        lines: linesByRevision.get(quote.revisionId!) || [],
+        schedule,
+      };
+    },
+  );
   const visibleProjects = projects.map((project) => ({
     ...project,
     customerName: project.customer_id

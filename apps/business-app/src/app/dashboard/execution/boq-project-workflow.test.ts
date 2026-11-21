@@ -32,14 +32,18 @@ describe('BOQ project selection and save invariants', () => {
   it('requires a real project and selected Final quotation at save time', () => {
     expect(save).toContain("'boq_final_quotation_choices' as never");
     expect(save).toContain(".eq('is_sales_prospect', false)");
-    expect(save).toContain('.eq(\'project_id\', value.projectId)');
-    expect(save).toContain('finalQuote.data.current_revision_id !== value.quotationRevisionId');
+    expect(save).toContain(".eq('project_id', value.projectId)");
+    expect(save).toContain(
+      'finalQuote.data.current_revision_id !== value.quotationRevisionId',
+    );
     expect(save).not.toContain('status: value.status');
     expect(save).toContain("status: 'draft'");
   });
 
   it('protects existing BOQs against project reassignment and duplicate creation', () => {
-    expect(save).toContain('original.data.project_id !== (value.projectId ?? null)');
+    expect(save).toContain(
+      'original.data.project_id !== (value.projectId ?? null)',
+    );
     expect(auto).toContain(".eq('project_id', projectId)");
     expect(auto).toContain("'boq_final_quotation_choices'");
     expect(migration).toContain('construction_boq_documents_one_per_project');

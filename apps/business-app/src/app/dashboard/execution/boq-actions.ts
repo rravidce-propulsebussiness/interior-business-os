@@ -175,11 +175,13 @@ export async function saveManualBoq(input: unknown) {
         return { ok: false, message: 'Saved BOQ could not be found.' };
       if (
         original.data.project_id !== (value.projectId ?? null) ||
-        original.data.quotation_revision_id !== (value.quotationRevisionId ?? null)
+        original.data.quotation_revision_id !==
+          (value.quotationRevisionId ?? null)
       )
         return {
           ok: false,
-          message: 'The saved project and quotation cannot be changed. Edit the existing BOQ.',
+          message:
+            'The saved project and quotation cannot be changed. Edit the existing BOQ.',
         };
       const result = await client
         .from('construction_boq_documents')
@@ -206,7 +208,8 @@ export async function saveManualBoq(input: unknown) {
       if (!value.projectId || !value.quotationRevisionId)
         return {
           ok: false,
-          message: 'Select a project with a Final quotation before creating a BOQ.',
+          message:
+            'Select a project with a Final quotation before creating a BOQ.',
         };
       const projectResult = await client
         .from('projects')
@@ -243,7 +246,8 @@ export async function saveManualBoq(input: unknown) {
       )
         return {
           ok: false,
-          message: 'The selected Final quotation does not belong to this project. Refresh and retry.',
+          message:
+            'The selected Final quotation does not belong to this project. Refresh and retry.',
         };
       const existingBoq = await client
         .from('construction_boq_documents')
@@ -257,7 +261,8 @@ export async function saveManualBoq(input: unknown) {
       if (existingBoq.data)
         return {
           ok: false,
-          message: 'This project already has a BOQ. Open it from Saved BOQs to edit.',
+          message:
+            'This project already has a BOQ. Open it from Saved BOQs to edit.',
         };
       reply = await client
         .from('construction_boq_documents')

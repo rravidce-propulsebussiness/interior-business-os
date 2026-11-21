@@ -523,7 +523,9 @@ export function BoqWorkspace({
   function selectProject(id: string) {
     if (active) return; // A saved BOQ's project/quotation cannot be reassigned.
     if (id && !newProjects.some((project) => project.id === id)) {
-      setMessage('This project already has a BOQ or no selected Final quotation.');
+      setMessage(
+        'This project already has a BOQ or no selected Final quotation.',
+      );
       return;
     }
     setProjectId(id);
@@ -825,7 +827,11 @@ export function BoqWorkspace({
     setSelectedQuoteLines([]);
   }
   function save() {
-    if (!active && (!newProjects.some((project) => project.id === projectId) || !quoteForProject(projectId))) {
+    if (
+      !active &&
+      (!newProjects.some((project) => project.id === projectId) ||
+        !quoteForProject(projectId))
+    ) {
       setMessage('Choose a new project with a selected Final quotation.');
       return;
     }
@@ -972,7 +978,11 @@ export function BoqWorkspace({
               <span>{documents.length} documents</span>
             </div>
             {canCreate && newProjects.length > 0 && (
-              <button type="button" className="boq-add-small" onClick={startNew}>
+              <button
+                type="button"
+                className="boq-add-small"
+                onClick={startNew}
+              >
                 ＋
               </button>
             )}
@@ -992,8 +1002,7 @@ export function BoqWorkspace({
                     {projects.find(
                       (project) => project.id === document.project_id,
                     )?.name || 'No project linked'}{' '}
-                    ·{' '}
-                    Saved · editable
+                    · Saved · editable
                   </small>
                 </span>
                 <span className="boq-register-arrow">›</span>
@@ -1004,8 +1013,8 @@ export function BoqWorkspace({
           )}
           {canCreate && newProjects.length === 0 && (
             <p className="boq-empty">
-              To create a BOQ, first select a Final quotation for a project
-              that does not already have one.
+              To create a BOQ, first select a Final quotation for a project that
+              does not already have one.
             </p>
           )}
         </aside>
@@ -1038,7 +1047,9 @@ export function BoqWorkspace({
               />
             </label>
             <label>
-              {active ? 'Project (saved BOQ)' : 'Project · selected Final quote'}
+              {active
+                ? 'Project (saved BOQ)'
+                : 'Project · selected Final quote'}
               <select
                 value={projectId}
                 disabled={Boolean(active)}
@@ -1046,7 +1057,9 @@ export function BoqWorkspace({
               >
                 {!active && <option value="">Choose new project</option>}
                 {(active
-                  ? projects.filter((project) => project.id === active.project_id)
+                  ? projects.filter(
+                      (project) => project.id === active.project_id,
+                    )
                   : newProjects
                 ).map((project) => (
                   <option key={project.id} value={project.id}>

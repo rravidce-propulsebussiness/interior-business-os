@@ -16,7 +16,6 @@ export function projectsReadyForNewBoq<P extends Project>(
     quotations.filter((quote) => quote.isFinal).map((quote) => quote.projectId),
   );
   return projects.filter(
-    (project) =>
-      withFinalQuote.has(project.id) && !withBoq.has(project.id),
+    (project) => withFinalQuote.has(project.id) && !withBoq.has(project.id),
   );
 }
