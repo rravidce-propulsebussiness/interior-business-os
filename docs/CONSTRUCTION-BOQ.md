@@ -62,11 +62,16 @@ structural drawing** and enter the engineer's schedule:
 16 mm`), stirrups and the
   running feet under each floor's roof (taken off the beam layout).
 - **Plinth beam** running feet.
+- **This drawing's settings**, grouped as on the drawing: slab (thickness,
+  main and distribution bars), plinth beam (size, bars and stirrups),
+  staircase (width, riser, tread, landing, waist and bars) and covers
+  (general, footing, column, beam and slab; blank = the general cover). A
+  stair beam is entered as a beam type with its running feet per floor.
 
 Footings, every column lift and every roof's beams are then quantified type
 by type, with the same 2-per-bar foundation and 3-per-bar floor cuts and
-laps. Slab, staircase, plinth-beam section and covers come from the
-structural rules (Configure rates). Without a schedule, the column grid and
+laps, each element bent inside its own cover. Settings left as they are come
+from the structural rules (Configure rates). Without a schedule, the column grid and
 bar rules in Configure rates are used. A floor quoted as parking + shop keeps
 its real frontage and depth.
 
@@ -112,15 +117,22 @@ one contract rate (0) or itemized (1)_ to 1.
 plaster and tile bedding always use cement and sand.
 
 **Entering details (no drawing needed).** Most projects have no drawing in
-the system, so everything is typed on the BOQ, floor by floor:
+the system, so everything is typed on the BOQ, floor by floor. Every feet box
+takes sizes exactly as written on the plan: `11'3"`, `11'3`, `11-3` or
+`11.25` (the box shows "= 11.25 ft"). Text that is not a size is marked in red
+and never guessed (`7'0"` is never read as 70 ft).
 
 - **Doors & windows:** main, internal, bathroom and pooja doors, windows with
   sizes (`2×4×4, 2×4×6`), ventilators, rolling shutters.
-- **Bathrooms & kitchens:** how many, the bathroom size (L × W ft) and the
-  kitchen platform length.
+- **Bathrooms & kitchens:** how many, each bathroom's size as drawn
+  (`7'0x6'9, 4'6x6'0, 6'0x6'6, 6'0x5'0`, which also sets the count; one size
+  = every bathroom on the floor) and the kitchen platform length. Tiles and
+  waterproofing are measured bathroom by bathroom; a count that differs from
+  the sizes (bathrooms or windows) is shown as a warning.
 - **Electrical points:** light, fan, 6 A socket and 16 A power points (geyser,
   AC). Points not typed follow the rooms entered.
-- **Rooms to tile:** each room's size (Hall 12×14, Bedroom 10×12 …).
+- **Rooms to tile:** each room's size as on the plan (Living hall `19'9"` ×
+  `11'8"`, Bedroom 10×12 …).
 - **Structural drawing** (optional): column and beam types with bars picked
   from lists (`4 nos × 16 mm` + `2 nos × 12 mm`), footings, slab and staircase.
 

@@ -4,11 +4,13 @@ import {
   FLOOR_COUNT_FIELDS,
   FLOOR_COUNT_GROUPS,
   parseOpenings,
+  parseSizes,
   type BoqCounts,
   type BoqFloor,
   type FloorCounts,
   type FloorFinishes,
 } from '@business-os/core/construction-boq';
+import { NumberField } from './boq-number-field';
 
 const emptyFinishes = (): FloorFinishes => ({
   rooms: [],
@@ -17,10 +19,12 @@ const emptyFinishes = (): FloorFinishes => ({
   kitchenPlatformFeet: 0,
   railingFeet: 0,
 });
-const toNumber = (value: string) => {
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
-};
+/** The bathroom sizes as shown in the box: the list, else the typical size. */
+const bathroomSizesText = (finishes: FloorFinishes) =>
+  finishes.bathroomSizes ??
+  (finishes.bathroomLengthFeet && finishes.bathroomWidthFeet
+    ? `${finishes.bathroomLengthFeet}×${finishes.bathroomWidthFeet}`
+    : '');
 
 /**
  * Everything the BOQ needs per floor, entered by hand from the site or the
@@ -42,7 +46,7 @@ export function BoqFloorInputs({
   const setCount = (
     floor: string,
     key: keyof FloorCounts,
-    value: string,
+    value: number,
     extra: Partial<BoqCounts> = {},
   ) => {
     const row = counts.floors[floor];
@@ -54,7 +58,7 @@ export function BoqFloorInputs({
         ...counts.floors,
         [floor]: {
           ...row,
-          [key]: Math.max(0, Math.round(Number(value) || 0)),
+          [key]: Math.max(0, Math.round(value || 0)),
         },
       },
     });
@@ -91,7 +95,7 @@ export function BoqFloorInputs({
                   )}
                   {group === 'Bathrooms & kitchens' && (
                     <>
-                      <th>Bathroom size L × W (ft)</th>
+                      <th>Bathroom sizes L × W (ft), one per bathroom</th>
                       <th>Kitchen platform length (ft)</th>
                       <th>Staircase / balcony railing (rft)</th>
                     </>
@@ -108,14 +112,13 @@ export function BoqFloorInputs({
                       <th scope="row">{floor.name}</th>
                       {fields.map(([key, label]) => (
                         <td key={key}>
-                          <input
-                            type="number"
-                            min="0"
-                            step="1"
-                            aria-label={`${floor.name} ${label}`}
+                          <NumberField
+                            integer
+                            max={500}
+                            label={`${floor.name} ${label}`}
                             value={row[key]}
-                            onChange={(event) =>
-                              setCount(floor.name, key, event.target.value)
+                            onChange={(value) =>
+                              setCount(floor.name, key, value)
                             }
                           />
                         </td>
@@ -124,7 +127,9 @@ export function BoqFloorInputs({
                         <td className="boq-window-sizes">
                           <input
                             type="text"
-                            placeholder="2×4×4, 2×4×6"
+                            placeholder={
+                              row.windows ? 'Type sizes, e.g. 2×4×4' : ''
+                            }
                             aria-label={`${floor.name} window sizes`}
                             maxLength={200}
                             value={counts.windowSizes?.[floor.name] ?? ''}
@@ -155,75 +160,104 @@ export function BoqFloorInputs({
                       )}
                       {group === 'Bathrooms & kitchens' && (
                         <>
-                          <td className="boq-size-pair">
+                          <td className="boq-bath-sizes">
                             <input
-                              type="number"
-                              min="0"
-                              step="0.25"
-                              aria-label={`${floor.name} bathroom length`}
-                              placeholder={String(
-                                defaults.bathroomLengthFeet ?? 7,
-                              )}
-                              value={finishes.bathroomLengthFeet || ''}
-                              onChange={(event) =>
-                                setFinishes(floor.name, {
-                                  bathroomLengthFeet: toNumber(
-                                    event.target.value,
-                                  ),
-                                })
+                              type="text"
+                              maxLength={300}
+                              aria-label={`${floor.name} bathroom sizes`}
+                              placeholder={
+                                row.bathrooms
+                                  ? `Typical ${defaults.bathroomLengthFeet ?? 7}×${defaults.bathroomWidthFeet ?? 5} · e.g. 7'0×6'9, 4'6×6'0`
+                                  : ''
                               }
+                              value={bathroomSizesText(finishes)}
+                              onChange={(event) => {
+                                const text = event.target.value;
+                                const sizes = parseSizes(text);
+                                // One size: every bathroom on the floor.
+                                // Several: one per bathroom, and the count.
+                                const typical =
+                                  sizes.length === 1 ? sizes[0]! : null;
+                                onChange({
+                                  ...counts,
+                                  finishes: {
+                                    ...counts.finishes,
+                                    [floor.name]: {
+                                      ...finishes,
+                                      bathroomSizes: text,
+                                      ...(typical
+                                        ? {
+                                            bathroomLengthFeet:
+                                              typical.lengthFeet,
+                                            bathroomWidthFeet:
+                                              typical.widthFeet,
+                                          }
+                                        : !text.trim()
+                                          ? {
+                                              bathroomLengthFeet: 0,
+                                              bathroomWidthFeet: 0,
+                                            }
+                                          : {}),
+                                    },
+                                  },
+                                  floors: {
+                                    ...counts.floors,
+                                    [floor.name]: {
+                                      ...row,
+                                      ...(sizes.length > 1
+                                        ? { bathrooms: sizes.length }
+                                        : {}),
+                                    },
+                                  },
+                                });
+                              }}
                             />
-                            ×
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.25"
-                              aria-label={`${floor.name} bathroom width`}
-                              placeholder={String(
-                                defaults.bathroomWidthFeet ?? 5,
-                              )}
-                              value={finishes.bathroomWidthFeet || ''}
-                              onChange={(event) =>
+                            {(() => {
+                              const sizes = parseSizes(
+                                bathroomSizesText(finishes),
+                              );
+                              return sizes.length > 1 ? (
+                                <small>
+                                  {sizes
+                                    .map(
+                                      (size) =>
+                                        `${Math.round(size.lengthFeet * 100) / 100}×${Math.round(size.widthFeet * 100) / 100}`,
+                                    )
+                                    .join(' · ')}{' '}
+                                  ft
+                                </small>
+                              ) : null;
+                            })()}
+                          </td>
+                          <td>
+                            <NumberField
+                              feet
+                              blankZero
+                              max={500}
+                              label={`${floor.name} kitchen platform length`}
+                              placeholder={
+                                row.kitchens
+                                  ? `Typical ${defaults.kitchenPlatformFeet ?? 10}`
+                                  : 'No kitchen'
+                              }
+                              value={finishes.kitchenPlatformFeet}
+                              onChange={(kitchenPlatformFeet) =>
                                 setFinishes(floor.name, {
-                                  bathroomWidthFeet: toNumber(
-                                    event.target.value,
-                                  ),
+                                  kitchenPlatformFeet,
                                 })
                               }
                             />
                           </td>
                           <td>
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.5"
-                              aria-label={`${floor.name} kitchen platform length`}
-                              placeholder={String(
-                                defaults.kitchenPlatformFeet ?? 10,
-                              )}
-                              value={finishes.kitchenPlatformFeet || ''}
-                              onChange={(event) =>
-                                setFinishes(floor.name, {
-                                  kitchenPlatformFeet: toNumber(
-                                    event.target.value,
-                                  ),
-                                })
-                              }
-                            />
-                          </td>
-                          <td>
-                            <input
-                              type="number"
-                              min="0"
-                              max="500"
-                              step="0.5"
-                              aria-label={`${floor.name} railing running feet`}
+                            <NumberField
+                              feet
+                              blankZero
+                              max={500}
+                              label={`${floor.name} railing running feet`}
                               placeholder="Measure from drawing"
-                              value={finishes.railingFeet || ''}
-                              onChange={(event) =>
-                                setFinishes(floor.name, {
-                                  railingFeet: toNumber(event.target.value),
-                                })
+                              value={finishes.railingFeet ?? 0}
+                              onChange={(railingFeet) =>
+                                setFinishes(floor.name, { railingFeet })
                               }
                             />
                           </td>
@@ -241,9 +275,10 @@ export function BoqFloorInputs({
       <div className="boq-rooms">
         <h4>Rooms to tile (floor tiles + skirting)</h4>
         <p>
-          Enter each room&apos;s size to order the exact number of tiles. Floors
-          without rooms use an estimate from the built-up area. Bathrooms,
-          kitchen platform, staircase and parking are measured above.
+          Enter each room&apos;s size as written on the plan (11&apos;3&quot; or
+          11.25) to order the exact number of tiles. Floors without rooms use an
+          estimate from the built-up area. Bathrooms, kitchen platform,
+          staircase and parking are measured above.
         </p>
         {floors.map((floor) => {
           const finishes = finishesOf(floor.name);
@@ -257,7 +292,7 @@ export function BoqFloorInputs({
                 <strong>{floor.name}</strong>
                 <span>
                   {finishes.rooms.length
-                    ? `${finishes.rooms.length} rooms · ${area.toLocaleString('en-IN', { maximumFractionDigits: 1 })} sq ft`
+                    ? `${finishes.rooms.length} ${finishes.rooms.length === 1 ? 'room' : 'rooms'} · ${area.toLocaleString('en-IN', { maximumFractionDigits: 1 })} sq ft`
                     : 'No rooms entered (estimated)'}
                 </span>
               </summary>
@@ -293,31 +328,25 @@ export function BoqFloorInputs({
                           />
                         </td>
                         <td>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.25"
-                            aria-label={`${room.name || 'Room'} length`}
-                            value={room.lengthFeet || ''}
-                            onChange={(event) =>
-                              update({
-                                lengthFeet: toNumber(event.target.value),
-                              })
-                            }
+                          <NumberField
+                            feet
+                            blankZero
+                            max={500}
+                            label={`${room.name || 'Room'} length`}
+                            placeholder={`e.g. 11'3"`}
+                            value={room.lengthFeet}
+                            onChange={(lengthFeet) => update({ lengthFeet })}
                           />
                         </td>
                         <td>
-                          <input
-                            type="number"
-                            min="0"
-                            step="0.25"
-                            aria-label={`${room.name || 'Room'} width`}
-                            value={room.widthFeet || ''}
-                            onChange={(event) =>
-                              update({
-                                widthFeet: toNumber(event.target.value),
-                              })
-                            }
+                          <NumberField
+                            feet
+                            blankZero
+                            max={500}
+                            label={`${room.name || 'Room'} width`}
+                            placeholder={`e.g. 10'7"`}
+                            value={room.widthFeet}
+                            onChange={(widthFeet) => update({ widthFeet })}
                           />
                         </td>
                         <td>

@@ -12,6 +12,7 @@ import {
   type DesignColumnType,
   type StructuralDesign,
 } from '@business-os/core/construction-boq';
+import { NumberField } from './boq-number-field';
 
 const newColumn = (index: number): DesignColumnType => ({
   label: `C${index + 1}`,
@@ -47,26 +48,17 @@ function NumberCell({
   value,
   label,
   onChange,
-  step = 1,
-  min = 0,
+  feet = false,
 }: {
   value: number;
   label: string;
   onChange: (value: number) => void;
+  /** Accept sizes as on the drawing, e.g. 5'0" or 4'6". */
+  feet?: boolean;
   step?: number;
-  min?: number;
 }) {
   return (
-    <input
-      type="number"
-      min={min}
-      step={step}
-      aria-label={label}
-      value={value}
-      onChange={(event) =>
-        onChange(Math.max(min, Number(event.target.value) || 0))
-      }
-    />
+    <NumberField feet={feet} label={label} value={value} onChange={onChange} />
   );
 }
 
@@ -163,6 +155,54 @@ function BarsPicker({
 const DESIGN_FIELDS = DESIGN_SETTING_KEYS.map((key) =>
   STRUCTURAL_FIELDS.find((field) => field.key === key)!,
 ).filter(Boolean);
+/** The drawing's settings, grouped as they appear on the drawing. */
+const DESIGN_GROUPS: [string, DesignSettingKey[]][] = [
+  [
+    'Slab',
+    [
+      'slabThicknessIn',
+      'slabMainDia',
+      'slabMainSpacingIn',
+      'slabDistDia',
+      'slabDistSpacingIn',
+    ],
+  ],
+  [
+    'Plinth beam',
+    [
+      'plinthBeamWidthIn',
+      'plinthBeamDepthIn',
+      'plinthBeamBarCount',
+      'plinthBeamBarDia',
+      'plinthBeamStirrupDia',
+      'plinthBeamStirrupSpacingIn',
+    ],
+  ],
+  [
+    'Staircase',
+    [
+      'stairWidthFeet',
+      'stairRiserIn',
+      'stairTreadIn',
+      'stairLandingFeet',
+      'stairWaistIn',
+      'stairMainDia',
+      'stairDistDia',
+      'stairBarSpacingIn',
+    ],
+  ],
+  [
+    'Covers (mm)',
+    [
+      'coverMm',
+      'coverFootingMm',
+      'coverColumnMm',
+      'coverBeamMm',
+      'coverSlabMm',
+    ],
+  ],
+  ['Levels', ['plinthHeightFeet', 'foundationDepthFeet']],
+];
 
 export function BoqDesignSchedule({
   design,
@@ -314,7 +354,7 @@ export function BoqDesignSchedule({
                     <td className="boq-design-pair">
                       <NumberCell
                         label={`${column.label} footing length`}
-                        step={0.25}
+                        feet
                         value={column.footingLengthFeet}
                         onChange={(footingLengthFeet) =>
                           updateColumn(index, { footingLengthFeet })
@@ -322,7 +362,7 @@ export function BoqDesignSchedule({
                       />
                       <NumberCell
                         label={`${column.label} footing width`}
-                        step={0.25}
+                        feet
                         value={column.footingWidthFeet}
                         onChange={(footingWidthFeet) =>
                           updateColumn(index, { footingWidthFeet })
@@ -455,6 +495,7 @@ export function BoqDesignSchedule({
                     {floors.map((floor, floorIndex) => (
                       <td key={floor.name}>
                         <NumberCell
+                          feet
                           label={`${beam.label} running feet under ${floor.name} roof`}
                           value={beam.runFeet[floorIndex] ?? 0}
                           onChange={(run) =>
@@ -486,42 +527,6 @@ export function BoqDesignSchedule({
                 ))}
               </tbody>
             </table>
-            <div className="boq-design-rules">
-              <strong>
-                Slab, plinth beam, staircase and covers on this drawing
-              </strong>
-              <div>
-                {DESIGN_FIELDS.map((field) => {
-                  const key = field.key as DesignSettingKey;
-                  return (
-                    <label key={key}>
-                      {field.label}
-                      <input
-                        type="number"
-                        step="any"
-                        min={field.min}
-                        max={field.max}
-                        value={
-                          design.settings?.[key] ?? defaults[key] ?? field.value
-                        }
-                        onChange={(event) => {
-                          const value = Number(event.target.value);
-                          onChange({
-                            ...design,
-                            settings: {
-                              ...design.settings,
-                              [key]: Number.isFinite(value)
-                                ? value
-                                : field.value,
-                            },
-                          });
-                        }}
-                      />
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
             <div className="boq-design-foot">
               <button
                 type="button"
@@ -541,6 +546,7 @@ export function BoqDesignSchedule({
               <label>
                 Plinth beam running ft (0 = from the column grid)
                 <NumberCell
+                  feet
                   label="Plinth beam running feet"
                   value={design.plinthRunFeet}
                   onChange={(plinthRunFeet) =>
@@ -548,6 +554,59 @@ export function BoqDesignSchedule({
                   }
                 />
               </label>
+            </div>
+            <div className="boq-design-rules">
+              <strong>
+                Slab, plinth beam, staircase and covers on this drawing
+              </strong>
+              {DESIGN_GROUPS.map(([group, keys]) => (
+                <fieldset key={group}>
+                  <legend>{group}</legend>
+                  {keys.map((key) => {
+                    const field = DESIGN_FIELDS.find(
+                      (item) => item.key === key,
+                    );
+                    if (!field) return null;
+                    const zeroMeansDefault = 'help' in field && field.help;
+                    return (
+                      <label key={key}>
+                        <span>{field.label}</span>
+                        <NumberField
+                          feet={key.endsWith('Feet')}
+                          integer={'step' in field && field.step === 1}
+                          min={field.min}
+                          max={field.max}
+                          label={field.label}
+                          placeholder={zeroMeansDefault ? 'Same' : undefined}
+                          blankZero={Boolean(zeroMeansDefault)}
+                          value={
+                            design.settings?.[key] ??
+                            defaults[key] ??
+                            field.value
+                          }
+                          onChange={(value) =>
+                            onChange({
+                              ...design,
+                              settings: { ...design.settings, [key]: value },
+                            })
+                          }
+                        />
+                      </label>
+                    );
+                  })}
+                  {group === 'Staircase' && (
+                    <small className="boq-design-note">
+                      Stair beam (waist-slab support): add it above as a beam
+                      type with its running feet per floor.
+                    </small>
+                  )}
+                  {group === 'Covers (mm)' && (
+                    <small className="boq-design-note">
+                      Blank = the concrete cover.
+                    </small>
+                  )}
+                </fieldset>
+              ))}
             </div>
           </div>
         </>

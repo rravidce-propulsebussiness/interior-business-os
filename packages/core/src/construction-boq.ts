@@ -124,6 +124,11 @@ export type FloorFinishes = {
   /** Typical bathroom on this floor (0 = company default). */
   bathroomLengthFeet: number;
   bathroomWidthFeet: number;
+  /**
+   * Each bathroom's size as drawn, e.g. "7'0x6'9, 4'6x6'0" (L × W ft). When
+   * given, tiles and waterproofing are measured bathroom by bathroom.
+   */
+  bathroomSizes?: string;
   /** Kitchen platform running length per kitchen (0 = default). */
   kitchenPlatformFeet: number;
   /** Staircase / balcony handrail length entered from the drawing (running ft). */
@@ -146,22 +151,84 @@ export type BoqCounts = {
   finishes?: Record<string, FloorFinishes>;
 };
 
-/** "2×4×4, 2×4×6" / "2*4*6" → openings (nos, width ft, height ft). */
+/**
+ * A length as written on a drawing, in feet: `11.25`, `11`, `11'3"`, `11'3`,
+ * `11' 3"`, `11'-3"`, `11-3`, `11ft 3in`, `3"` (inches only). Returns null
+ * when the text is not a length, so a mistyped size is never read as 113 ft.
+ */
+export function parseFeet(text: unknown): number | null {
+  const raw = String(text ?? '')
+    .trim()
+    .replace(/[′’‘`]/g, "'")
+    .replace(/[″”“]|''/g, '"')
+    .replace(/\s+/g, ' ')
+    .toLowerCase();
+  if (!raw) return null;
+  if (/^\d+(?:\.\d+)?$/.test(raw)) return Number(raw);
+  const match =
+    /^(\d+(?:\.\d+)?)\s*(?:'|ft|feet)\s*-?\s*(?:(\d+(?:\.\d+)?)\s*(?:"|in|inch|inches)?)?$/.exec(
+      raw,
+    ) ??
+    /^(\d+)\s*-\s*(\d+(?:\.\d+)?)$/.exec(raw) ??
+    /^()(\d+(?:\.\d+)?)\s*(?:"|in|inch|inches)$/.exec(raw);
+  if (!match) return null;
+  const feet = match[1] ? Number(match[1]) : 0;
+  const inches = match[2] ? Number(match[2]) : 0;
+  if (inches >= 12 && match[1]) return null;
+  return Math.round((feet + inches / 12) * 10000) / 10000;
+}
+
+/** Splits "2×4'6"×4" (or x / * / X) into its parts, keeping feet-inches. */
+const sizeParts = (part: string) =>
+  part
+    .replace(/(\d)\s*(?:nos?\.?)\s*/gi, '$1 ')
+    .split(/\s*[×xX*]\s*/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+/**
+ * "7'0x6'9, 4'6x6'0, 2×6x5" → one L × W (ft) per item; a leading count
+ * repeats the size (2×6x5 = two 6 × 5 ft). Items that are not sizes are
+ * skipped.
+ */
+export function parseSizes(
+  text: string | undefined,
+): { lengthFeet: number; widthFeet: number }[] {
+  const sizes: { lengthFeet: number; widthFeet: number }[] = [];
+  for (const part of String(text ?? '').split(/[,;+\n]/)) {
+    const items = sizeParts(part);
+    if (items.length < 2 || items.length > 3) continue;
+    const count = items.length === 3 ? Number(items[0]) : 1;
+    const lengthFeet = parseFeet(items[items.length - 2]);
+    const widthFeet = parseFeet(items[items.length - 1]);
+    if (
+      !Number.isInteger(count) ||
+      count < 1 ||
+      count > 50 ||
+      !lengthFeet ||
+      !widthFeet ||
+      lengthFeet > 100 ||
+      widthFeet > 100
+    )
+      continue;
+    for (let i = 0; i < count && sizes.length < 50; i++)
+      sizes.push({ lengthFeet, widthFeet });
+  }
+  return sizes;
+}
+
+/** "2×4×4, 2×4'6"×6" / "2*4*6" → openings (nos, width ft, height ft). */
 export function parseOpenings(
   text: string | undefined,
 ): { count: number; widthFeet: number; heightFeet: number }[] {
   return String(text ?? '')
     .split(/[,;+\n]/)
-    .map((part) =>
-      /^\s*(\d+)\s*(?:nos?\.?)?\s*[×x*]\s*(\d+(?:\.\d+)?)\s*[×x*]\s*(\d+(?:\.\d+)?)\s*$/i.exec(
-        part,
-      ),
-    )
-    .filter((match): match is RegExpExecArray => Boolean(match))
-    .map((match) => ({
-      count: Number(match[1]),
-      widthFeet: Number(match[2]),
-      heightFeet: Number(match[3]),
+    .map(sizeParts)
+    .filter((items) => items.length === 3 && /^\d+$/.test(items[0]!))
+    .map((items) => ({
+      count: Number(items[0]),
+      widthFeet: parseFeet(items[1]) ?? 0,
+      heightFeet: parseFeet(items[2]) ?? 0,
     }))
     .filter(
       (opening) =>
@@ -244,6 +311,46 @@ export const STRUCTURAL_FIELDS = [
     min: 15,
     max: 75,
     step: 1,
+  },
+  {
+    key: 'coverFootingMm',
+    label: 'Footing cover (mm)',
+    group: 'Steel cutting',
+    value: 0,
+    min: 0,
+    max: 75,
+    step: 1,
+    help: '0 = same as the concrete cover.',
+  },
+  {
+    key: 'coverColumnMm',
+    label: 'Column cover (mm)',
+    group: 'Steel cutting',
+    value: 0,
+    min: 0,
+    max: 75,
+    step: 1,
+    help: '0 = same as the concrete cover.',
+  },
+  {
+    key: 'coverBeamMm',
+    label: 'Beam cover (mm)',
+    group: 'Steel cutting',
+    value: 0,
+    min: 0,
+    max: 75,
+    step: 1,
+    help: '0 = same as the concrete cover.',
+  },
+  {
+    key: 'coverSlabMm',
+    label: 'Slab cover (mm)',
+    group: 'Steel cutting',
+    value: 0,
+    min: 0,
+    max: 75,
+    step: 1,
+    help: '0 = same as the concrete cover.',
   },
   // Foundation
   {
@@ -354,6 +461,25 @@ export const STRUCTURAL_FIELDS = [
     min: 2,
     max: 12,
     step: 1,
+  },
+  {
+    key: 'plinthBeamStirrupDia',
+    label: 'Plinth beam stirrup (mm)',
+    group: 'Foundation',
+    value: 0,
+    min: 0,
+    max: 12,
+    step: 1,
+    help: '0 = same as the beam stirrups.',
+  },
+  {
+    key: 'plinthBeamStirrupSpacingIn',
+    label: 'Plinth beam stirrup spacing (in)',
+    group: 'Foundation',
+    value: 0,
+    min: 0,
+    max: 12,
+    help: '0 = same as the beam stirrups.',
   },
   {
     key: 'pedestalHeightFeet',
@@ -660,6 +786,22 @@ export const STRUCTURAL_FIELDS = [
     value: 7,
     min: 3,
     max: 15,
+  },
+  {
+    key: 'stairRiserIn',
+    label: 'Riser (in)',
+    group: 'Staircase',
+    value: 6,
+    min: 4,
+    max: 8,
+  },
+  {
+    key: 'stairTreadIn',
+    label: 'Tread (in)',
+    group: 'Staircase',
+    value: 10,
+    min: 8,
+    max: 14,
   },
   {
     key: 'stairWaistIn',
@@ -1506,6 +1648,9 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
       rooms,
       bathroomLengthFeet: feet(value.bathroomLengthFeet),
       bathroomWidthFeet: feet(value.bathroomWidthFeet),
+      ...(String(value.bathroomSizes ?? '').trim()
+        ? { bathroomSizes: String(value.bathroomSizes).slice(0, 300) }
+        : {}),
       kitchenPlatformFeet: feet(value.kitchenPlatformFeet),
       railingFeet: feet(value.railingFeet),
     };
@@ -1588,12 +1733,21 @@ export const DESIGN_SETTING_KEYS = [
   'plinthBeamDepthIn',
   'plinthBeamBarDia',
   'plinthBeamBarCount',
+  'plinthBeamStirrupDia',
+  'plinthBeamStirrupSpacingIn',
   'stairWaistIn',
   'stairWidthFeet',
+  'stairRiserIn',
+  'stairTreadIn',
+  'stairLandingFeet',
   'stairMainDia',
   'stairDistDia',
   'stairBarSpacingIn',
   'coverMm',
+  'coverFootingMm',
+  'coverColumnMm',
+  'coverBeamMm',
+  'coverSlabMm',
   'plinthHeightFeet',
   'foundationDepthFeet',
 ] as const;
@@ -1936,7 +2090,12 @@ export function generateQuotationBoq(
     { internalPlaster: number; externalPlaster: number }
   >();
   const stock = s.stockBarFeet;
-  const cover = s.coverMm * FT_PER_MM;
+  // Each element uses its own cover from the drawing (0 = the general one).
+  const coverOf = (mm: number) => (mm > 0 ? mm : s.coverMm) * FT_PER_MM;
+  const footingCover = coverOf(s.coverFootingMm);
+  const columnCover = coverOf(s.coverColumnMm);
+  const beamCover = coverOf(s.coverBeamMm);
+  const slabCover = coverOf(s.coverSlabMm);
   const totalSteel: SteelTally = new Map();
   const mergeSteel = (tally: SteelTally) => {
     for (const [diameter, entry] of tally)
@@ -2060,14 +2219,14 @@ export function generateQuotationBoq(
           CUM_PER_CFT;
         footingConcrete += n * f.lengthFeet * f.widthFeet * t * CUM_PER_CFT;
         const spacing = f.spacingIn / 12;
-        const bendUp = Math.max(0, t - 2 * cover);
+        const bendUp = Math.max(0, t - 2 * footingCover);
         for (const [span, across] of [
           [f.lengthFeet, f.widthFeet],
           [f.widthFeet, f.lengthFeet],
         ] as const) {
           const barsPerFooting =
-            Math.floor(Math.max(0, across - 2 * cover) / spacing) + 1;
-          const piece = Math.max(0, span - 2 * cover) + 2 * bendUp;
+            Math.floor(Math.max(0, across - 2 * footingCover) / spacing) + 1;
+          const piece = Math.max(0, span - 2 * footingCover) + 2 * bendUp;
           const plan = cutPlan(piece, barsPerFooting * n, stock, 0);
           addSteel(
             tally,
@@ -2134,7 +2293,9 @@ export function generateQuotationBoq(
       const concrete =
         pedestals * width * depth * s.pedestalHeightFeet * CUM_PER_CFT;
       const ringLength =
-        2 * (Math.max(0, width - 2 * cover) + Math.max(0, depth - 2 * cover)) +
+        2 *
+          (Math.max(0, width - 2 * columnCover) +
+            Math.max(0, depth - 2 * columnCover)) +
         20 * s.columnTieDia * FT_PER_MM;
       const rings =
         pedestals *
@@ -2276,8 +2437,8 @@ export function generateQuotationBoq(
           }
           const tieLength =
             2 *
-              (Math.max(0, type.widthIn / 12 - 2 * cover) +
-                Math.max(0, type.depthIn / 12 - 2 * cover)) +
+              (Math.max(0, type.widthIn / 12 - 2 * columnCover) +
+                Math.max(0, type.depthIn / 12 - 2 * columnCover)) +
             20 * type.tieDia * FT_PER_MM;
           const ties = n * (ceil((lift.height * 12) / type.tieSpacingIn) + 1);
           const tiePlan = cutPlan(tieLength, ties, stock, 0);
@@ -2409,8 +2570,9 @@ export function generateQuotationBoq(
                   label: 'main',
                 },
               ],
-              stirrupDia: s.beamStirrupDia,
-              stirrupSpacingIn: s.beamStirrupSpacingIn,
+              stirrupDia: s.plinthBeamStirrupDia || s.beamStirrupDia,
+              stirrupSpacingIn:
+                s.plinthBeamStirrupSpacingIn || s.beamStirrupSpacingIn,
               segments: design?.plinthRunFeet
                 ? runSegments(design.plinthRunFeet)
                 : gridSegments,
@@ -2497,7 +2659,8 @@ export function generateQuotationBoq(
         }
         const stirrupLength =
           2 *
-            (Math.max(0, beamB - 2 * cover) + Math.max(0, beamD - 2 * cover)) +
+            (Math.max(0, beamB - 2 * beamCover) +
+              Math.max(0, beamD - 2 * beamCover)) +
           20 * type.stirrupDia * FT_PER_MM;
         const stirrups = segments.reduce(
           (sum, segment) =>
@@ -2541,7 +2704,7 @@ export function generateQuotationBoq(
           },
         ].filter((item) => item.dia > 0)) {
           const count = ceil(
-            ((Math.max(0, bar.across - 2 * cover) * 12) / bar.spacing + 1) *
+            ((Math.max(0, bar.across - 2 * slabCover) * 12) / bar.spacing + 1) *
               bar.extra,
           );
           const lap = lapFeet(bar.dia, s.lapDiameters);
@@ -2684,14 +2847,15 @@ export function generateQuotationBoq(
     // --- Staircase from each floor to the next (and to the terrace) -------
     if (s.stairsPerFloor > 0)
       for (const floor of floors) {
-        const risers = ceil((floor.heightFeet * 12) / 6);
+        const risers = ceil((floor.heightFeet * 12) / s.stairRiserIn);
         const flightRise = floor.heightFeet / 2;
-        const flightRun = ((risers / 2) * 10) / 12;
+        const flightRun = ((risers / 2) * s.stairTreadIn) / 12;
         const flight = Math.hypot(flightRun, flightRise);
         const w = s.stairWidthFeet;
         const waist = s.stairWaistIn / 12;
         const slabArea = 2 * flight * w + s.stairLandingFeet * w;
-        const steps = risers * 0.5 * (10 / 12) * (6 / 12) * w;
+        const steps =
+          risers * 0.5 * (s.stairTreadIn / 12) * (s.stairRiserIn / 12) * w;
         const volume =
           s.stairsPerFloor * (slabArea * waist + steps) * CUM_PER_CFT;
         const tally: SteelTally = new Map();
@@ -2974,14 +3138,54 @@ export function generateQuotationBoq(
     const floorTiles = roomArea + skirting;
     const bathL = fin?.bathroomLengthFeet || s.bathroomLengthFeet;
     const bathW = fin?.bathroomWidthFeet || s.bathroomWidthFeet;
-    const bathFloor = fc.bathrooms * bathL * bathW;
+    // Each bathroom as drawn; any not listed use the typical size above.
+    const listedBaths = parseSizes(fin?.bathroomSizes).slice(0, fc.bathrooms);
+    const baths = [
+      ...listedBaths,
+      ...Array.from(
+        { length: Math.max(0, fc.bathrooms - listedBaths.length) },
+        () => ({ lengthFeet: bathL, widthFeet: bathW }),
+      ),
+    ];
+    const bathSizesText = listedBaths.length
+      ? baths
+          .map(
+            (bath) =>
+              `${round(bath.lengthFeet, 2)}×${round(bath.widthFeet, 2)}`,
+          )
+          .join(' + ') + ' ft'
+      : '';
+    const bathFloor = baths.reduce(
+      (sum, bath) => sum + bath.lengthFeet * bath.widthFeet,
+      0,
+    );
     // Walls up to the tile height, less one 2.5 × 7 ft door per bathroom.
-    const wallTiles =
-      fc.bathrooms *
-      Math.max(
-        0,
-        2 * (bathL + bathW) * s.wallTileHeightFeet -
-          2.5 * Math.min(7, s.wallTileHeightFeet),
+    const wallTiles = baths.reduce(
+      (sum, bath) =>
+        sum +
+        Math.max(
+          0,
+          2 * (bath.lengthFeet + bath.widthFeet) * s.wallTileHeightFeet -
+            2.5 * Math.min(7, s.wallTileHeightFeet),
+        ),
+      0,
+    );
+    const bathWaterproofing = baths.reduce(
+      (sum, bath) =>
+        sum +
+        bath.lengthFeet * bath.widthFeet +
+        2 * (bath.lengthFeet + bath.widthFeet),
+      0,
+    );
+    const listedCount = parseSizes(fin?.bathroomSizes).length;
+    if (listedCount && listedCount !== fc.bathrooms)
+      warnings.push(
+        `${floor.name}: ${listedCount} bathroom sizes entered for ${fc.bathrooms} bathrooms.`,
+      );
+    const windowCount = openings.reduce((sum, item) => sum + item.count, 0);
+    if (openings.length && windowCount !== fc.windows)
+      warnings.push(
+        `${floor.name}: window sizes list ${windowCount} windows; the count says ${fc.windows}.`,
       );
     const platformFeet = fin?.kitchenPlatformFeet || s.kitchenPlatformFeet;
     const kitchenGranite =
@@ -3006,11 +3210,11 @@ export function generateQuotationBoq(
     const interiorPaint = walls.internalPlaster + floor.areaSqft;
     const exteriorPaint = walls.externalPlaster;
     // Staircase flooring: treads and risers of each flight plus the landing.
-    const risers = ceil((floor.heightFeet * 12) / 6);
+    const risers = ceil((floor.heightFeet * 12) / s.stairRiserIn);
     const stairGranite =
       s.stairsPerFloor *
       s.stairWidthFeet *
-      (risers * (16 / 12) + s.stairLandingFeet);
+      (risers * ((s.stairTreadIn + s.stairRiserIn) / 12) + s.stairLandingFeet);
     const finishLine = (
       kind: string,
       title: string,
@@ -3133,7 +3337,7 @@ export function generateQuotationBoq(
           bathFloor,
           'bath_floor_tiles',
           [s.bathFloorTileIn, s.bathFloorTileIn, s.bathFloorTilesPerBox],
-          `${fc.bathrooms} bathrooms × ${bathL}×${bathW} ft`,
+          bathSizesText || `${fc.bathrooms} bathrooms × ${bathL}×${bathW} ft`,
         ),
         ...tiled(
           'wallTiles',
@@ -3141,7 +3345,9 @@ export function generateQuotationBoq(
           wallTiles,
           'wall_tiles',
           [s.wallTileLengthIn, s.wallTileWidthIn, s.wallTilesPerBox],
-          `${fc.bathrooms} bathrooms × ${round(2 * (bathL + bathW), 1)} ft walls × ${s.wallTileHeightFeet} ft, less door` +
+          (bathSizesText
+            ? `${bathSizesText} walls × ${s.wallTileHeightFeet} ft, less door`
+            : `${fc.bathrooms} bathrooms × ${round(2 * (bathL + bathW), 1)} ft walls × ${s.wallTileHeightFeet} ft, less door`) +
             (bathroomTilesToCeiling
               ? ' · Package specifies ceiling-height tiling: confirm actual clear height in BOQ settings'
               : ''),
@@ -3497,12 +3703,11 @@ export function generateQuotationBoq(
                   {
                     name: 'Bathroom waterproofing',
                     material: 'bathroom_waterproofing',
-                    quantity: round(
-                      fc.bathrooms * (bathL * bathW + 2 * (bathL + bathW)),
-                      0,
-                    ),
+                    quantity: round(bathWaterproofing, 0),
                     unit: 'sqft',
-                    source: `${fc.bathrooms} × (floor ${bathL}×${bathW} + 1 ft up walls)`,
+                    source: bathSizesText
+                      ? `${bathSizesText} floors + 1 ft up walls`
+                      : `${fc.bathrooms} × (floor ${bathL}×${bathW} + 1 ft up walls)`,
                   },
                   {
                     name: 'Plumbing labour',
@@ -3555,7 +3760,7 @@ export function generateQuotationBoq(
           ? {
               name: 'RCC labour (steel fixing, concreting, curing)',
               material: 'labour_rcc',
-              quantity: round(floor.areaSqft, 0),
+              quantity: round(floor.areaSqft, 1),
               unit: 'sqft',
               source:
                 'Per sq ft built-up. Brickwork, plastering and centering are priced on their own lines.',
@@ -3563,7 +3768,7 @@ export function generateQuotationBoq(
           : {
               name: 'Structural labour (shuttering, concreting, brickwork, plastering)',
               material: 'labour_civil',
-              quantity: round(floor.areaSqft, 0),
+              quantity: round(floor.areaSqft, 1),
               unit: 'sqft',
               source: 'Contract rate per sq ft built-up',
             },

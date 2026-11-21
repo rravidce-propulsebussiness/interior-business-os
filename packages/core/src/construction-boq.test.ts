@@ -7,7 +7,9 @@ import {
   lapFeet,
   normalizeStructuralSettings,
   parseBars,
+  parseFeet,
   parseOpenings,
+  parseSizes,
 } from './construction-boq';
 import { calculateSftEstimate } from './sft-quotation';
 
@@ -1044,5 +1046,205 @@ describe('contractual specification limits and manually entered BOQ measures', (
     expect(
       outputs.find((output) => output.name === 'Bathroom wall tiles')?.source,
     ).toContain('ceiling-height');
+  });
+});
+
+describe('entering the drawings by hand', () => {
+  it('reads lengths as written on drawings, never guessing', () => {
+    expect(parseFeet('11.25')).toBe(11.25);
+    expect(parseFeet(`11'3"`)).toBe(11.25);
+    expect(parseFeet(`11'3`)).toBe(11.25);
+    expect(parseFeet(`11' 3"`)).toBe(11.25);
+    expect(parseFeet(`11'-3"`)).toBe(11.25);
+    expect(parseFeet('11-3')).toBe(11.25);
+    expect(parseFeet('11ft 3in')).toBe(11.25);
+    expect(parseFeet(`7'0"`)).toBe(7);
+    expect(parseFeet(`5'`)).toBe(5);
+    expect(parseFeet('9"')).toBe(0.75);
+    expect(parseFeet('11’8”')).toBeCloseTo(11.6667, 3);
+    // Not lengths: never read as 113 or 70 ft.
+    expect(parseFeet(`11'13"`)).toBeNull();
+    expect(parseFeet('abc')).toBeNull();
+    expect(parseFeet('')).toBeNull();
+  });
+
+  it('reads one size per bathroom and window sizes in feet-inches', () => {
+    expect(parseSizes(`7'0x6'9, 4'6×6'0, 2×6x5`)).toEqual([
+      { lengthFeet: 7, widthFeet: 6.75 },
+      { lengthFeet: 4.5, widthFeet: 6 },
+      { lengthFeet: 6, widthFeet: 5 },
+      { lengthFeet: 6, widthFeet: 5 },
+    ]);
+    expect(parseSizes('nonsense, 8x')).toEqual([]);
+    expect(parseOpenings(`2×4'6"×4, 1 nos x 3 x 2`)).toEqual([
+      { count: 2, widthFeet: 4.5, heightFeet: 4 },
+      { count: 1, widthFeet: 3, heightFeet: 2 },
+    ]);
+    // Existing plain entries still read the same.
+    expect(parseOpenings('2×4×4, 2*4*6')).toEqual([
+      { count: 2, widthFeet: 4, heightFeet: 4 },
+      { count: 2, widthFeet: 4, heightFeet: 6 },
+    ]);
+  });
+
+  it('tiles and waterproofs each bathroom at its own size', () => {
+    const run = (finishes: Record<string, unknown>, bathrooms = 2) =>
+      generateQuotationBoq({
+        details: quote(),
+        counts: {
+          floors: { 'Ground Floor': { bathrooms } },
+          finishes: { 'Ground Floor': { rooms: [], ...finishes } },
+        },
+      });
+    const output = (
+      result: ReturnType<typeof generateQuotationBoq>,
+      name: string,
+    ) =>
+      result.lines
+        .filter((line) => line.section === 'Ground Floor')
+        .flatMap((line) => line.outputs)
+        .find((item) => item.name === name)!;
+    const each = run({ bathroomSizes: `8'0x4'0, 6'0x5'0` });
+    // Floors 32 + 30 = 62 sq ft, + 5% = 65.1.
+    expect(
+      output(each, 'Bathroom floor tiles (anti-skid)').quantity,
+    ).toBeCloseTo(65.1, 1);
+    // Walls (24 + 22) × 7 − 2 × 17.5 = 287, + 5%.
+    expect(output(each, 'Bathroom wall tiles').quantity).toBeCloseTo(301.4, 1);
+    // Waterproofing: (32 + 24) + (30 + 22).
+    expect(output(each, 'Bathroom waterproofing').quantity).toBe(108);
+    expect(output(each, 'Bathroom waterproofing').source).toContain(
+      '8×4 + 6×5 ft',
+    );
+    expect(each.warnings.join(' ')).not.toContain('bathroom sizes');
+    // A typical size only: the same as before.
+    const typical = run({ bathroomLengthFeet: 8, bathroomWidthFeet: 4 });
+    expect(
+      output(typical, 'Bathroom floor tiles (anti-skid)').quantity,
+    ).toBeCloseTo(67.2, 1);
+    // More bathrooms than sizes: the rest use the typical size; warned.
+    const short = run(
+      {
+        bathroomSizes: `8'0x4'0, 6'0x5'0`,
+        bathroomLengthFeet: 7,
+        bathroomWidthFeet: 5,
+      },
+      3,
+    );
+    expect(output(short, 'Bathroom waterproofing').quantity).toBe(108 + 59);
+    expect(short.warnings.join(' ')).toContain(
+      '2 bathroom sizes entered for 3 bathrooms',
+    );
+  });
+
+  it('warns when window sizes and the window count disagree', () => {
+    const result = generateQuotationBoq({
+      details: quote(),
+      counts: {
+        floors: { 'Ground Floor': { windows: 6 } },
+        windowSizes: { 'Ground Floor': '2×4×4, 2×4×6' },
+      },
+    });
+    expect(result.warnings.join(' ')).toContain(
+      'Ground Floor: window sizes list 4 windows; the count says 6.',
+    );
+  });
+
+  it("uses each element's cover, the drawing's stair riser and tread, and plinth stirrups", () => {
+    const design = (settings: Record<string, number>) => ({
+      columns: [
+        {
+          label: 'C1',
+          count: 4,
+          floors: 0,
+          widthIn: 9,
+          depthIn: 15,
+          bars: '6-16',
+          tieDia: 8,
+          tieSpacingIn: 6,
+          footingLengthFeet: 5,
+          footingWidthFeet: 5,
+          footingThicknessIn: 12,
+          footingBarDia: 12,
+          footingBarSpacingIn: 6,
+        },
+      ],
+      beams: [],
+      plinthRunFeet: 100,
+      settings: { coverMm: 25, ...settings },
+    });
+    const rods = (
+      result: ReturnType<typeof generateQuotationBoq>,
+      section: string,
+      kind: string,
+      diameter: number,
+    ) =>
+      result.lines
+        .find((line) => line.section === section && line.kind === kind)!
+        .outputs.find(
+          (item) => item.unit === 'rod' && item.diameter === diameter,
+        )?.quantity ?? 0;
+    const base = generateQuotationBoq({ details: quote(), design: design({}) });
+    // Blank covers keep today's result.
+    const same = generateQuotationBoq({
+      details: quote(),
+      design: design({ coverFootingMm: 0, coverColumnMm: 0 }),
+    });
+    const withoutIds = (result: ReturnType<typeof generateQuotationBoq>) =>
+      result.lines.map((line) => ({ ...line, id: '' }));
+    expect(withoutIds(same)).toEqual(withoutIds(base));
+    // A thinner column cover makes longer rings.
+    const thin = generateQuotationBoq({
+      details: quote(),
+      design: design({ coverColumnMm: 20 }),
+    });
+    expect(thin.settings.coverColumnMm).toBe(20);
+    expect(
+      rods(thin, 'First Floor', 'quote-columns', 8),
+    ).toBeGreaterThanOrEqual(rods(base, 'First Floor', 'quote-columns', 8));
+    // Riser 6 in / tread 11 in: 20 risers on a 10 ft floor, longer flights.
+    const stair = (settings: Record<string, number>) =>
+      generateQuotationBoq({
+        details: quote(),
+        design: design(settings),
+      }).lines.find(
+        (line) =>
+          line.section === 'Ground Floor' && line.kind === 'quote-staircase',
+      )!;
+    expect(stair({}).inputs.risers).toBe(20);
+    expect(stair({ stairRiserIn: 7 }).inputs.risers).toBe(18);
+    const concrete = (settings: Record<string, number>) =>
+      stair(settings).outputs.find((item) => item.unit === 'm³')!.quantity;
+    expect(concrete({ stairTreadIn: 11 })).toBeGreaterThan(concrete({}));
+    // Plinth beam stirrups from the drawing, else the beam stirrups.
+    const plinth = (settings: Record<string, number>) =>
+      rods(
+        generateQuotationBoq({ details: quote(), design: design(settings) }),
+        'Foundation',
+        'quote-plinth-beam',
+        8,
+      );
+    expect(plinth({ plinthBeamStirrupSpacingIn: 4 })).toBeGreaterThan(
+      plinth({}),
+    );
+  });
+
+  it('prices structural labour on the exact built-up area', () => {
+    const result = generateQuotationBoq({
+      details: quote(),
+      floors: [
+        {
+          name: 'Ground Floor',
+          areaSqft: 1537.5,
+          lengthFeet: 61.5,
+          widthFeet: 25,
+          heightFeet: 10,
+        },
+      ],
+    });
+    const labour = result.lines
+      .flatMap((line) => line.outputs)
+      .find((item) => item.material === 'labour_civil');
+    expect(labour?.quantity).toBe(1537.5);
   });
 });
