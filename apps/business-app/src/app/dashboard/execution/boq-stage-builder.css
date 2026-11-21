@@ -1036,3 +1036,67 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Distinct foundation takeoff schedule. Footing mesh, geometry, and pedestal
+ * detail are independently expandable from the Columns schedule. */
+.boq-footing-editor {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+.boq-footing-type {
+  min-width: 0;
+  border-color: #e2c4b8;
+  background: linear-gradient(150deg, #fff, #fffaf7);
+}
+.boq-footing-editor .boq-stage-input-grid {
+  margin: 10px 0 14px;
+}
+.boq-footing-editor .boq-stage-field select,
+.boq-footing-editor .boq-stage-field input {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+.boq-footing-helper {
+  font-size: 11px;
+  line-height: 1.55;
+  color: #866b66;
+  margin: 5px 0 13px;
+}
+.boq-footing-section-label {
+  margin: 16px 0 10px;
+  padding: 9px 10px;
+  border-bottom: 1px solid #eed7cd;
+  color: #713a32;
+  font-size: 13px;
+  font-weight: 850;
+}
+.boq-footing-pedestal-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: fit-content;
+  margin-top: 13px;
+  font-size: 12px;
+  font-weight: 750;
+  color: #713e34;
+  cursor: pointer;
+}
+.boq-footing-pedestal-toggle input {
+  accent-color: #944735;
+  width: 18px;
+  height: 18px;
+}
+@media (max-width: 640px) {
+  .boq-footing-type {
+    padding: 11px;
+  }
+  .boq-footing-editor .boq-stage-input-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+  }
+  .boq-footing-editor .boq-stage-field span {
+    font-size: 10px;
+  }
+}
