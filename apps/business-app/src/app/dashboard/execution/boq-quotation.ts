@@ -87,6 +87,18 @@ export async function ensureQuotationBoq(
     selected.data?.[project.data.customer_id] !== revision.data.quotation_id
   )
     return { status: 'skipped', reason: 'final_quote_required' };
+  const finalQuote = await db
+    .from('quotations')
+    .select('current_revision_id')
+    .eq('organization_id', organizationId)
+    .eq('id', revision.data.quotation_id)
+    .eq('project_id', projectId)
+    .maybeSingle<{ current_revision_id: string | null }>();
+  if (
+    finalQuote.error ||
+    finalQuote.data?.current_revision_id !== revisionId
+  )
+    return { status: 'skipped', reason: 'final_revision_required' };
 
   const items = await db
     .from('quotation_items')
