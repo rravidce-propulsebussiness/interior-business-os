@@ -12,6 +12,11 @@ import {
   parseSizes,
 } from './construction-boq';
 import { calculateSftEstimate } from './sft-quotation';
+import {
+  footingConcreteCft,
+  footingMeshPieces,
+  newFootingType,
+} from './footing-takeoff';
 
 const quote = (
   heights: [string, string] = ['10', '10'],
@@ -1425,6 +1430,183 @@ describe('entering the drawings by hand', () => {
     expect(
       changed.outputs.find((item) => item.material === 'bricks')!.quantity,
     ).toBeLessThan(bricks.quantity);
+  });
+
+  it('measures independent F1 footing schedule without inventing columns', () => {
+    const footing = {
+      ...newFootingType(0),
+      count: 4,
+      columnRefs: 'C1, C2',
+      lengthFeet: 5,
+      widthFeet: 5,
+      thicknessIn: 12,
+      bottomBarDia: 12,
+      bottomSpacingIn: 6,
+    };
+    const result = generateQuotationBoq({
+      details: quote(),
+      design: { footings: [footing], columns: [], beams: [], plinthRunFeet: 0 },
+      splitBeamSlab: true,
+    });
+    const measured = result.lines.find((row) => row.kind === 'quote-footings');
+    expect(result.design?.footings).toHaveLength(1);
+    expect(measured?.inputs).toMatchObject({
+      footingRef: 'F1',
+      count: 4,
+      pads: 4,
+      reinforcement: 'single',
+      supportedColumns: 'C1, C2',
+    });
+    expect(measured?.outputs.some((output) => output.unit === 'rod')).toBe(
+      true,
+    );
+    expect(result.lines.some((row) => row.kind === 'quote-columns')).toBe(
+      false,
+    );
+    expect(result.lines.some((row) => row.kind === 'quote-foundation')).toBe(
+      false,
+    );
+    expect(result.warnings.join(' ')).toContain('C1');
+  });
+
+  it('counts separate top and bottom meshes without double-counting concrete', () => {
+    const footing = {
+      ...newFootingType(0),
+      count: 2,
+      lengthFeet: 5,
+      widthFeet: 6,
+      thicknessIn: 12,
+      mesh: 'single' as const,
+    };
+    const one = generateQuotationBoq({
+      details: quote(),
+      design: { footings: [footing], columns: [], beams: [], plinthRunFeet: 0 },
+      splitBeamSlab: true,
+    });
+    const two = generateQuotationBoq({
+      details: quote(),
+      design: {
+        footings: [
+          { ...footing, mesh: 'double', topBarDia: 16, topSpacingIn: 6 },
+        ],
+        columns: [],
+        beams: [],
+        plinthRunFeet: 0,
+      },
+      splitBeamSlab: true,
+    });
+    const outputs = (r: typeof one) =>
+      r.lines.find((row) => row.kind === 'quote-footings')!.outputs;
+    const concrete = (r: typeof one) =>
+      outputs(r).find((output) => output.material === 'concrete_m20')!.quantity;
+    const rods = (r: typeof one) =>
+      outputs(r)
+        .filter((output) => output.unit === 'rod')
+        .reduce((sum, output) => sum + output.quantity, 0);
+    expect(concrete(one)).toBe(concrete(two));
+    expect(rods(two)).toBeGreaterThan(rods(one));
+    expect(outputs(two).some((output) => output.diameter === 16)).toBe(true);
+  });
+
+  it('quantifies a footing pedestal separately from column main bars', () => {
+    const footing = {
+      ...newFootingType(0),
+      type: 'combined' as const,
+      count: 1,
+      columnRefs: 'C1, C2',
+      lengthFeet: 8,
+      widthFeet: 5,
+      thicknessIn: 15,
+      pedestal: true,
+      pedestalsPerGroup: 2,
+      pedestalWidthIn: 15,
+      pedestalDepthIn: 15,
+      pedestalHeightFeet: 2,
+      pedestalTieDia: 8,
+      pedestalTieSpacingIn: 6,
+    };
+    const result = generateQuotationBoq({
+      details: quote(),
+      design: { footings: [footing], columns: [], beams: [], plinthRunFeet: 0 },
+      splitBeamSlab: true,
+    });
+    const pedestal = result.lines.find((row) => row.kind === 'quote-pedestals');
+    expect(pedestal?.inputs).toMatchObject({ footingRef: 'F1', pedestals: 2 });
+    expect(
+      pedestal?.outputs.some((output) =>
+        output.name.includes('Pedestal concrete'),
+      ),
+    ).toBe(true);
+    expect(result.lines.some((row) => row.kind === 'quote-columns')).toBe(
+      false,
+    );
+  });
+
+  it('supports six foundation configurations and distinct sloped/stepped geometries', () => {
+    const footing = {
+      ...newFootingType(0),
+      count: 1,
+      lengthFeet: 6,
+      widthFeet: 5,
+      thicknessIn: 15,
+    };
+    const flat = footingConcreteCft(footing);
+    const stepped = footingConcreteCft({
+      ...footing,
+      geometry: 'stepped',
+      topLengthFeet: 4,
+      topWidthFeet: 3,
+      stepThicknessIn: 6,
+    });
+    const sloped = footingConcreteCft({
+      ...footing,
+      geometry: 'sloped',
+      edgeThicknessIn: 6,
+      topLengthFeet: 3,
+      topWidthFeet: 2,
+    });
+    expect(stepped).toBeGreaterThan(flat);
+    expect(sloped).toBeLessThan(flat);
+    expect(
+      footingMeshPieces({ ...footing, mesh: 'double' }, 0.15),
+    ).toHaveLength(4);
+    for (const type of [
+      'isolated',
+      'combined',
+      'strap',
+      'raft',
+      'strip',
+      'pile_cap',
+    ] as const) {
+      const result = generateQuotationBoq({
+        details: quote(),
+        design: {
+          footings: [
+            {
+              ...footing,
+              type,
+              ...(type === 'strap'
+                ? {
+                    padsPerGroup: 2,
+                    strapLengthFeet: 5,
+                    strapWidthIn: 9,
+                    strapDepthIn: 12,
+                  }
+                : {}),
+            },
+          ],
+          columns: [],
+          beams: [],
+          plinthRunFeet: 0,
+        },
+        splitBeamSlab: true,
+      });
+      expect(result.lines.some((line) => line.kind === 'quote-footings')).toBe(
+        true,
+      );
+      if (type === 'pile_cap')
+        expect(result.warnings.join(' ')).toContain('excludes piles');
+    }
   });
 
   it('preserves original estimate mode when no measured wall schedule is present', () => {
