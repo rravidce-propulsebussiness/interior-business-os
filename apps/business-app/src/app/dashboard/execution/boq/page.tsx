@@ -2,6 +2,7 @@ import { effectiveRates, type Rate } from '../boq-pricing';
 import { executionServices } from '../service';
 import type { SupabaseClient } from '@business-os/database';
 import { BoqWorkspace } from '../boq-workspace';
+import { projectsReadyForNewBoq } from '../boq-project-eligibility';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 import {
@@ -90,7 +91,7 @@ export default async function ManualBoqPage({
             name: string,
             args: Record<string, unknown>,
           ) => Promise<{ data: unknown; error: unknown }>
-        )('quotation_final_choices', {
+        )('boq_final_quotation_choices', {
           p_org: s.org,
           p_customer_ids: customerIds,
         })
@@ -235,6 +236,11 @@ export default async function ManualBoqPage({
       schedule,
     };
   });
+  const newProjects = projectsReadyForNewBoq(
+    projects,
+    quotes,
+    (documentsResult.data || []) as { project_id: string | null }[],
+  );
   // Groups not saved on the rate card yet use the default prices.
   const rates = effectiveRates(
     (ratesResult.data?.rates?.items || []) as Rate[],
@@ -253,6 +259,7 @@ export default async function ManualBoqPage({
           : null,
       }))}
       quotes={quotes}
+      newProjects={newProjects}
       rates={rates}
       structural={structural}
       defaultUnit={
