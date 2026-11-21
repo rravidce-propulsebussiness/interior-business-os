@@ -1153,6 +1153,7 @@ export function BoqWorkspace({
     quantity: number,
     measureUnit: string,
     rate: number,
+    itemName: string,
   ) {
     if (!(quantity > 0)) return;
     const label =
@@ -1179,14 +1180,15 @@ export function BoqWorkspace({
           waterproofing: 'Waterproofing',
         } as Record<string, string>
       )[category] ?? 'Additional work';
+    const safeName = itemName.trim().slice(0, 200) || label;
     const item: SavedLine = {
       id: uid(),
-      name: label,
+      name: safeName,
       section: stage,
       kind: 'manual',
       unit: measureUnit,
       inputs: { quantity, stageCategory: category },
-      outputs: [{ name: label, quantity, unit: measureUnit, rate }],
+      outputs: [{ name: safeName, quantity, unit: measureUnit, rate }],
       notes: '',
     };
     const copies = Object.entries(repeatFrom)
