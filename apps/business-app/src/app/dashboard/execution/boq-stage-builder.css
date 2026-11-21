@@ -810,7 +810,6 @@
   }
 }
 
-
 /* Dimension-based measured work and wall-group editor */
 .boq-stage-dimensions {
   display: grid;
@@ -858,9 +857,9 @@
 .boq-stage-dimensions .boq-stage-subcard .boq-stage-outline {
   margin-top: 10px;
 }
-@media (max-width:640px) {
+@media (max-width: 640px) {
   .boq-stage-dimensions .boq-stage-input-grid {
-    grid-template-columns: repeat(2,minmax(0,1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .boq-stage-dimensions .boq-stage-hint {
     font-size: 11px;

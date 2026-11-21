@@ -25,7 +25,9 @@ export function measuredVolume(values: MeasuredDimensions) {
   const valid = [count, lengthFeet, widthFeet, depthFeet].every(
     (n) => Number.isFinite(n) && n > 0 && n < 100000,
   );
-  const cft = valid ? Math.round(count) * lengthFeet * widthFeet * depthFeet : 0;
+  const cft = valid
+    ? Math.round(count) * lengthFeet * widthFeet * depthFeet
+    : 0;
   return { cft: round(cft, 3), m3: round(cft * CUBIC_METRES_PER_CFT) };
 }
 
@@ -36,39 +38,100 @@ export function measuredVolume(values: MeasuredDimensions) {
 export function measuredOutputs(
   kind: MeasuredKind,
   values: MeasuredDimensions,
-  settings: Pick<StructuralSettings,
-    'pccCementBagsPerM3' | 'pccSandM3PerM3' | 'pccAggregateM3PerM3' |
-    'sandTonPerCum' | 'aggregateTonPerCum'>,
+  settings: Pick<
+    StructuralSettings,
+    | 'pccCementBagsPerM3'
+    | 'pccSandM3PerM3'
+    | 'pccAggregateM3PerM3'
+    | 'sandTonPerCum'
+    | 'aggregateTonPerCum'
+  >,
 ): MeasuredOutput[] {
   const volume = measuredVolume(values);
   if (!(volume.m3 > 0)) return [];
   const source = `${values.count} × ${values.lengthFeet} × ${values.widthFeet} × ${values.depthFeet} ft = ${volume.cft} cft`;
-  if (kind === 'excavation') return [{
-    name: 'Excavation (measured)', material: 'excavation',
-    quantity: volume.m3, unit: 'm³', source,
-  }];
-  if (kind === 'soil') return [{
-    name: 'Soil filling (measured)', material: 'soil_filling',
-    quantity: volume.m3, unit: 'm³', source,
-  }];
-  if (kind === 'pcc') return [
-    { name: 'PCC concrete volume (reference only)', quantity: volume.m3, unit: 'm³', rate: 0, source },
-    { name: 'Cement (PCC)', material: 'cement', quantity: round(volume.m3 * settings.pccCementBagsPerM3, 1), unit: 'bag' },
-    { name: 'Sand (PCC)', material: 'sand', quantity: round(volume.m3 * settings.pccSandM3PerM3 * settings.sandTonPerCum, 2), unit: 't' },
-    { name: 'Aggregate (PCC)', material: 'aggregate', quantity: round(volume.m3 * settings.pccAggregateM3PerM3 * settings.aggregateTonPerCum, 2), unit: 't' },
-  ];
-  const shutteringSqft = Math.round(
-    (values.lengthFeet * values.widthFeet +
-      2 * (values.lengthFeet + values.widthFeet) * values.depthFeet) * values.count * 100,
-  ) / 100;
+  if (kind === 'excavation')
+    return [
+      {
+        name: 'Excavation (measured)',
+        material: 'excavation',
+        quantity: volume.m3,
+        unit: 'm³',
+        source,
+      },
+    ];
+  if (kind === 'soil')
+    return [
+      {
+        name: 'Soil filling (measured)',
+        material: 'soil_filling',
+        quantity: volume.m3,
+        unit: 'm³',
+        source,
+      },
+    ];
+  if (kind === 'pcc')
+    return [
+      {
+        name: 'PCC concrete volume (reference only)',
+        quantity: volume.m3,
+        unit: 'm³',
+        rate: 0,
+        source,
+      },
+      {
+        name: 'Cement (PCC)',
+        material: 'cement',
+        quantity: round(volume.m3 * settings.pccCementBagsPerM3, 1),
+        unit: 'bag',
+      },
+      {
+        name: 'Sand (PCC)',
+        material: 'sand',
+        quantity: round(
+          volume.m3 * settings.pccSandM3PerM3 * settings.sandTonPerCum,
+          2,
+        ),
+        unit: 't',
+      },
+      {
+        name: 'Aggregate (PCC)',
+        material: 'aggregate',
+        quantity: round(
+          volume.m3 *
+            settings.pccAggregateM3PerM3 *
+            settings.aggregateTonPerCum,
+          2,
+        ),
+        unit: 't',
+      },
+    ];
+  const shutteringSqft =
+    Math.round(
+      (values.lengthFeet * values.widthFeet +
+        2 * (values.lengthFeet + values.widthFeet) * values.depthFeet) *
+        values.count *
+        100,
+    ) / 100;
   return [
     {
-      name: kind === 'sajjas' ? 'Sajja concrete (measured)' : 'Shelf concrete (measured)',
-      material: 'concrete_m20', quantity: volume.m3, unit: 'm³', source,
+      name:
+        kind === 'sajjas'
+          ? 'Sajja concrete (measured)'
+          : 'Shelf concrete (measured)',
+      material: 'concrete_m20',
+      quantity: volume.m3,
+      unit: 'm³',
+      source,
     },
     {
-      name: kind === 'sajjas' ? 'Sajja shuttering (estimated)' : 'Shelf shuttering (estimated)',
-      material: 'shuttering', quantity: shutteringSqft, unit: 'sqft',
+      name:
+        kind === 'sajjas'
+          ? 'Sajja shuttering (estimated)'
+          : 'Shelf shuttering (estimated)',
+      material: 'shuttering',
+      quantity: shutteringSqft,
+      unit: 'sqft',
       source: 'One underside + four sides; confirm with formwork drawings',
     },
   ];

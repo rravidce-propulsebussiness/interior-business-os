@@ -1344,63 +1344,99 @@ describe('entering the drawings by hand', () => {
       },
       walls: {
         'Ground Floor': [
-          { id: 'ext', name: 'External 9 in', location: 'external', count: 4,
-            lengthFeet: 20, heightFeet: 10, thicknessIn: 9 },
-          { id: 'int', name: 'Room partition 4.5 in', location: 'internal', count: 2,
-            lengthFeet: 10, heightFeet: 10, thicknessIn: 4.5 },
+          {
+            id: 'ext',
+            name: 'External 9 in',
+            location: 'external',
+            count: 4,
+            lengthFeet: 20,
+            heightFeet: 10,
+            thicknessIn: 9,
+          },
+          {
+            id: 'int',
+            name: 'Room partition 4.5 in',
+            location: 'internal',
+            count: 2,
+            lengthFeet: 10,
+            heightFeet: 10,
+            thicknessIn: 4.5,
+          },
         ],
       },
       windowSizes: { 'Ground Floor': '2×4×4' },
-      doorSizes: { 'Ground Floor': {
-        mainDoors: '1×3.5×7',
-        internalDoors: '1×3×7',
-      } },
+      doorSizes: {
+        'Ground Floor': {
+          mainDoors: '1×3.5×7',
+          internalDoors: '1×3×7',
+        },
+      },
     };
     const result = generateQuotationBoq({
       details: quote(),
       counts: measuredCounts,
       splitBeamSlab: true,
     });
-    const masonry = result.lines.find((line) =>
-      line.section === 'Ground Floor' && line.kind === 'quote-masonry')!;
+    const masonry = result.lines.find(
+      (line) =>
+        line.section === 'Ground Floor' && line.kind === 'quote-masonry',
+    )!;
     const opening = masonry.inputs.openings;
     expect(String(opening)).toContain('77.5 sqft');
     const outer = masonry.outputs.find((item) =>
-      item.name.includes('External 9 in'))!;
+      item.name.includes('External 9 in'),
+    )!;
     const inner = masonry.outputs.find((item) =>
-      item.name.includes('Room partition'))!;
+      item.name.includes('Room partition'),
+    )!;
     // External gross: 4×20×10=800; main door 24.5 + windows 32.
     expect(outer.quantity).toBe(744);
     // Internal gross: 2×10×10=200; room door 21.
     expect(inner.quantity).toBeCloseTo(179, 0);
     const bricks = masonry.outputs.find((item) => item.material === 'bricks')!;
     expect(bricks.quantity).toBe(8580);
-    const cement = masonry.outputs.find((item) => item.name === 'Cement (brickwork)')!;
+    const cement = masonry.outputs.find(
+      (item) => item.name === 'Cement (brickwork)',
+    )!;
     expect(cement.quantity).toBeCloseTo(51.5, 1);
-    expect(masonry.outputs.some((item) => item.name === 'Cement (plaster)')).toBe(true);
-    expect(masonry.outputs.some((item) => item.name === 'Sand (brickwork)')).toBe(true);
+    expect(
+      masonry.outputs.some((item) => item.name === 'Cement (plaster)'),
+    ).toBe(true);
+    expect(
+      masonry.outputs.some((item) => item.name === 'Sand (brickwork)'),
+    ).toBe(true);
 
     const changed = generateQuotationBoq({
       details: quote(),
       counts: {
         ...measuredCounts,
-        doorSizes: { 'Ground Floor': {
-          mainDoors: '1×4×7', internalDoors: '1×3×7',
-        } },
+        doorSizes: {
+          'Ground Floor': {
+            mainDoors: '1×4×7',
+            internalDoors: '1×3×7',
+          },
+        },
       },
       splitBeamSlab: true,
-    }).lines.find((line) =>
-      line.section === 'Ground Floor' && line.kind === 'quote-masonry')!;
-    expect(changed.outputs.find((item) => item.material === 'bricks')!.quantity)
-      .toBeLessThan(bricks.quantity);
+    }).lines.find(
+      (line) =>
+        line.section === 'Ground Floor' && line.kind === 'quote-masonry',
+    )!;
+    expect(
+      changed.outputs.find((item) => item.material === 'bricks')!.quantity,
+    ).toBeLessThan(bricks.quantity);
   });
 
   it('preserves original estimate mode when no measured wall schedule is present', () => {
     const result = generateQuotationBoq({ details: quote() });
     const masonry = result.lines.find((line) => line.kind === 'quote-masonry')!;
-    expect(masonry.outputs.find((output) => output.name === 'Cement (brickwork & plaster)'))
-      .toBeTruthy();
-    expect(masonry.outputs.find((output) => output.name === 'Cement (brickwork)'))
-      .toBeUndefined();
+    expect(
+      masonry.outputs.find(
+        (output) => output.name === 'Cement (brickwork & plaster)',
+      ),
+    ).toBeTruthy();
+    expect(
+      masonry.outputs.find((output) => output.name === 'Cement (brickwork)'),
+    ).toBeUndefined();
   });
 });

@@ -11,7 +11,12 @@ import type {
   StructuralSettings,
   WallMeasure,
 } from '@business-os/core/construction-boq';
-import { measuredVolume, FEET_PER_METRE, type MeasuredDimensions, type MeasuredKind } from './boq-stage-measurements';
+import {
+  measuredVolume,
+  FEET_PER_METRE,
+  type MeasuredDimensions,
+  type MeasuredKind,
+} from './boq-stage-measurements';
 
 export type StageBoqOutput = {
   name: string;
@@ -54,9 +59,16 @@ type Props = {
   onCountsChange: (next: BoqCounts) => void;
   structuralSettings: StructuralSettings;
   onAddGeometry: (
-    stage: string, kind: MeasuredKind, name: string, dimensions: MeasuredDimensions
+    stage: string,
+    kind: MeasuredKind,
+    name: string,
+    dimensions: MeasuredDimensions,
   ) => void;
-  onUpdateGeometry: (lineIndex: number, dimensions: MeasuredDimensions, name: string) => void;
+  onUpdateGeometry: (
+    lineIndex: number,
+    dimensions: MeasuredDimensions,
+    name: string,
+  ) => void;
   onFloorChange: (floors: BoqFloor[]) => void;
   repeatFrom: Record<string, string>;
   onRepeatFloors: (floors: string[], repeat: boolean) => void;
@@ -309,12 +321,20 @@ export function BoqStageBuilder(props: Props) {
   const [manualUnit, setManualUnit] = useState('sqft');
   const [dimensionUnit, setDimensionUnit] = useState<'ft' | 'm'>('ft');
   const [dimensionDraft, setDimensionDraft] = useState<MeasuredDimensions>({
-    count: 1, lengthFeet: 0, widthFeet: 0, depthFeet: 0,
+    count: 1,
+    lengthFeet: 0,
+    widthFeet: 0,
+    depthFeet: 0,
   });
   const [dimensionName, setDimensionName] = useState('');
   const [wallDraft, setWallDraft] = useState<WallMeasure>({
-    id: 'new', name: '', location: 'external', count: 1,
-    lengthFeet: 0, heightFeet: 0, thicknessIn: 9,
+    id: 'new',
+    name: '',
+    location: 'external',
+    count: 1,
+    lengthFeet: 0,
+    heightFeet: 0,
+    thicknessIn: 9,
   });
   const last = props.floors[props.floors.length - 1]?.name ?? '';
   const sections = ['Foundation', ...props.floors.map((f) => f.name)];
@@ -458,11 +478,18 @@ export function BoqStageBuilder(props: Props) {
     const foundEntries = entriesFor(stage, category.key);
     const dimensionRows = props.lines
       .map((line, lineIndex) => ({ line, lineIndex }))
-      .filter(({line}) => line.section === stage && line.kind === 'measured-geometry' &&
-        line.inputs.stageCategory === category.key);
+      .filter(
+        ({ line }) =>
+          line.section === stage &&
+          line.kind === 'measured-geometry' &&
+          line.inputs.stageCategory === category.key,
+      );
     const volume = measuredVolume(dimensionDraft);
     const displayFactor = dimensionUnit === 'm' ? 1 / FEET_PER_METRE : 1;
-    const geometryValue = (field: 'lengthFeet' | 'widthFeet' | 'depthFeet', value: number) =>
+    const geometryValue = (
+      field: 'lengthFeet' | 'widthFeet' | 'depthFeet',
+      value: number,
+    ) =>
       setDimensionDraft((prior) => ({
         ...prior,
         [field]: Number((value / displayFactor).toFixed(4)),
@@ -533,14 +560,18 @@ export function BoqStageBuilder(props: Props) {
         {isGeometry(category.key) && (
           <div className="boq-stage-dimensions">
             <p className="boq-stage-hint">
-              Enter the measured count, length, width and depth. Volume is calculated
-              in cubic feet and cubic metres; material rates use m³. No value is
-              assumed from the overall floor area.
+              Enter the measured count, length, width and depth. Volume is
+              calculated in cubic feet and cubic metres; material rates use m³.
+              No value is assumed from the overall floor area.
             </p>
             <label className="boq-stage-field boq-stage-unit-switch">
               <span>Input dimension unit</span>
-              <select value={dimensionUnit}
-                onChange={(event) => setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')}>
+              <select
+                value={dimensionUnit}
+                onChange={(event) =>
+                  setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')
+                }
+              >
                 <option value="ft">Feet (ft)</option>
                 <option value="m">Metres (m)</option>
               </select>
@@ -556,67 +587,139 @@ export function BoqStageBuilder(props: Props) {
               const changeDimension = (
                 field: keyof MeasuredDimensions,
                 value: number,
-              ) => props.onUpdateGeometry(lineIndex,
-                { ...dims, [field]: field === 'count' ? Math.round(value) : Number((value / displayFactor).toFixed(4)) },
-                line.name,
-              );
+              ) =>
+                props.onUpdateGeometry(
+                  lineIndex,
+                  {
+                    ...dims,
+                    [field]:
+                      field === 'count'
+                        ? Math.round(value)
+                        : Number((value / displayFactor).toFixed(4)),
+                  },
+                  line.name,
+                );
               return (
                 <div className="boq-stage-subcard" key={line.id}>
                   <div className="boq-stage-subhead">
                     <strong>{line.name}</strong>
-                    <button type="button" onClick={() => props.onRemoveManual(lineIndex)}>Remove</button>
+                    <button
+                      type="button"
+                      onClick={() => props.onRemoveManual(lineIndex)}
+                    >
+                      Remove
+                    </button>
                   </div>
                   <div className="boq-stage-input-grid">
-                    <InputNumber label="Same items" value={dims.count} onChange={(v) => changeDimension('count', v)} />
-                    {(['lengthFeet', 'widthFeet', 'depthFeet'] as const).map((field) =>
-                      <InputNumber key={field}
-                        label={{ lengthFeet: 'Length', widthFeet: 'Width', depthFeet: 'Depth / thickness' }[field]}
-                        unit={dimensionUnit}
-                        value={Number((dims[field] * displayFactor).toFixed(3))}
-                        onChange={(v) => changeDimension(field, v)}
-                      />)}
+                    <InputNumber
+                      label="Same items"
+                      value={dims.count}
+                      onChange={(v) => changeDimension('count', v)}
+                    />
+                    {(['lengthFeet', 'widthFeet', 'depthFeet'] as const).map(
+                      (field) => (
+                        <InputNumber
+                          key={field}
+                          label={
+                            {
+                              lengthFeet: 'Length',
+                              widthFeet: 'Width',
+                              depthFeet: 'Depth / thickness',
+                            }[field]
+                          }
+                          unit={dimensionUnit}
+                          value={Number(
+                            (dims[field] * displayFactor).toFixed(3),
+                          )}
+                          onChange={(v) => changeDimension(field, v)}
+                        />
+                      ),
+                    )}
                   </div>
                   <div className="boq-stage-volume">
-                    <span>{number(measured.cft)} cft</span><strong>{number(measured.m3)} m³</strong>
+                    <span>{number(measured.cft)} cft</span>
+                    <strong>{number(measured.m3)} m³</strong>
                   </div>
                 </div>
               );
             })}
             <div className="boq-stage-subcard">
               <h4>+ Measure {category.label}</h4>
-              <InputText label="Item name" value={dimensionName}
-                placeholder={category.label} onChange={setDimensionName} />
+              <InputText
+                label="Item name"
+                value={dimensionName}
+                placeholder={category.label}
+                onChange={setDimensionName}
+              />
               <div className="boq-stage-input-grid">
-                <InputNumber label="Same items (nos)" value={dimensionDraft.count}
-                  onChange={(value) => setDimensionDraft((prior) => ({ ...prior, count: Math.round(value) }))} />
-                {(['lengthFeet', 'widthFeet', 'depthFeet'] as const).map((field) =>
-                  <InputNumber key={field}
-                    label={{ lengthFeet: 'Length', widthFeet: 'Width', depthFeet: 'Depth / thickness' }[field]}
-                    unit={dimensionUnit}
-                    value={Number((dimensionDraft[field] * displayFactor).toFixed(3))}
-                    onChange={(v) => geometryValue(field, v)}
-                  />)}
+                <InputNumber
+                  label="Same items (nos)"
+                  value={dimensionDraft.count}
+                  onChange={(value) =>
+                    setDimensionDraft((prior) => ({
+                      ...prior,
+                      count: Math.round(value),
+                    }))
+                  }
+                />
+                {(['lengthFeet', 'widthFeet', 'depthFeet'] as const).map(
+                  (field) => (
+                    <InputNumber
+                      key={field}
+                      label={
+                        {
+                          lengthFeet: 'Length',
+                          widthFeet: 'Width',
+                          depthFeet: 'Depth / thickness',
+                        }[field]
+                      }
+                      unit={dimensionUnit}
+                      value={Number(
+                        (dimensionDraft[field] * displayFactor).toFixed(3),
+                      )}
+                      onChange={(v) => geometryValue(field, v)}
+                    />
+                  ),
+                )}
               </div>
               <div className="boq-stage-volume">
-                <span>{number(volume.cft)} cft</span><strong>{number(volume.m3)} m³</strong>
+                <span>{number(volume.cft)} cft</span>
+                <strong>{number(volume.m3)} m³</strong>
               </div>
-              {category.key === 'pcc' && <small className="boq-stage-hint">
-                PCC cement, sand and aggregate are calculated using the editable mix
-                quantities in BOQ Rates. Concrete volume is informational and is not
-                also charged as ready-mix.
-              </small>}
-              {['sajjas', 'shelves'].includes(category.key) && <small className="boq-stage-hint">
-                This measures concrete and estimates shuttering. Enter reinforcement
-                separately from the structural drawing; no steel is invented.
-              </small>}
-              <button type="button" className="boq-stage-outline"
+              {category.key === 'pcc' && (
+                <small className="boq-stage-hint">
+                  PCC cement, sand and aggregate are calculated using the
+                  editable mix quantities in BOQ Rates. Concrete volume is
+                  informational and is not also charged as ready-mix.
+                </small>
+              )}
+              {['sajjas', 'shelves'].includes(category.key) && (
+                <small className="boq-stage-hint">
+                  This measures concrete and estimates shuttering. Enter
+                  reinforcement separately from the structural drawing; no steel
+                  is invented.
+                </small>
+              )}
+              <button
+                type="button"
+                className="boq-stage-outline"
                 disabled={volume.m3 <= 0}
                 onClick={() => {
-                  props.onAddGeometry(stage, category.key as MeasuredKind,
-                    dimensionName.trim() || category.label, dimensionDraft);
-                  setDimensionDraft({ count: 1, lengthFeet: 0, widthFeet: 0, depthFeet: 0 });
+                  props.onAddGeometry(
+                    stage,
+                    category.key as MeasuredKind,
+                    dimensionName.trim() || category.label,
+                    dimensionDraft,
+                  );
+                  setDimensionDraft({
+                    count: 1,
+                    lengthFeet: 0,
+                    widthFeet: 0,
+                    depthFeet: 0,
+                  });
                   setDimensionName('');
-                }}>
+                }}
+              >
                 + Add measured {category.label}
               </button>
             </div>
@@ -629,83 +732,192 @@ export function BoqStageBuilder(props: Props) {
               internal 4/4.5 inch walls separately, including same-wall count.
               Door and window areas from the Doors & Windows card are deducted
               once, instead of using an estimated opening percentage. Brick,
-              cement and sand quantities follow the editable 100 sqft rules in BOQ Rates.
+              cement and sand quantities follow the editable 100 sqft rules in
+              BOQ Rates.
             </p>
             {walls.map((wall, wallIndex) => {
               const updateWall = (patch: Partial<WallMeasure>) =>
-                updateWalls(walls.map((row, i) => i === wallIndex ? { ...row, ...patch } : row));
-              return <div className="boq-stage-subcard" key={wall.id}>
-                <div className="boq-stage-subhead">
-                  <strong>{wall.name || 'Wall ' + (wallIndex + 1)}</strong>
-                  <button type="button" onClick={() =>
-                    updateWalls(walls.filter((_, i) => i !== wallIndex))}>Remove</button>
+                updateWalls(
+                  walls.map((row, i) =>
+                    i === wallIndex ? { ...row, ...patch } : row,
+                  ),
+                );
+              return (
+                <div className="boq-stage-subcard" key={wall.id}>
+                  <div className="boq-stage-subhead">
+                    <strong>{wall.name || 'Wall ' + (wallIndex + 1)}</strong>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateWalls(walls.filter((_, i) => i !== wallIndex))
+                      }
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <div className="boq-stage-input-grid">
+                    <InputText
+                      label="Wall reference"
+                      value={wall.name}
+                      onChange={(v) => updateWall({ name: v })}
+                    />
+                    <label className="boq-stage-field">
+                      <span>Wall location</span>
+                      <select
+                        value={wall.location}
+                        onChange={(e) =>
+                          updateWall({
+                            location:
+                              e.target.value === 'internal'
+                                ? 'internal'
+                                : 'external',
+                          })
+                        }
+                      >
+                        <option value="external">External</option>
+                        <option value="internal">Internal</option>
+                      </select>
+                    </label>
+                    <InputNumber
+                      label="Same walls (nos)"
+                      value={wall.count}
+                      onChange={(v) => updateWall({ count: Math.round(v) })}
+                    />
+                    <InputNumber
+                      label="Length"
+                      unit="ft"
+                      value={wall.lengthFeet}
+                      onChange={(v) => updateWall({ lengthFeet: v })}
+                    />
+                    <InputNumber
+                      label="Height"
+                      unit="ft"
+                      value={wall.heightFeet}
+                      onChange={(v) => updateWall({ heightFeet: v })}
+                    />
+                    <InputNumber
+                      label="Thickness"
+                      unit="in"
+                      value={wall.thicknessIn}
+                      onChange={(v) => updateWall({ thicknessIn: v })}
+                    />
+                  </div>
+                  <div className="boq-stage-volume">
+                    <span>Gross wall area</span>
+                    <strong>
+                      {number(wall.count * wall.lengthFeet * wall.heightFeet)}{' '}
+                      sqft
+                    </strong>
+                  </div>
                 </div>
-                <div className="boq-stage-input-grid">
-                  <InputText label="Wall reference" value={wall.name}
-                    onChange={(v) => updateWall({ name: v })} />
-                  <label className="boq-stage-field"><span>Wall location</span>
-                    <select value={wall.location}
-                      onChange={(e) => updateWall({location: e.target.value === 'internal' ? 'internal' : 'external'})}>
-                      <option value="external">External</option><option value="internal">Internal</option>
-                    </select>
-                  </label>
-                  <InputNumber label="Same walls (nos)" value={wall.count}
-                    onChange={(v) => updateWall({ count: Math.round(v) })} />
-                  <InputNumber label="Length" unit="ft" value={wall.lengthFeet}
-                    onChange={(v) => updateWall({ lengthFeet: v })} />
-                  <InputNumber label="Height" unit="ft" value={wall.heightFeet}
-                    onChange={(v) => updateWall({ heightFeet: v })} />
-                  <InputNumber label="Thickness" unit="in" value={wall.thicknessIn}
-                    onChange={(v) => updateWall({ thicknessIn: v })} />
-                </div>
-                <div className="boq-stage-volume">
-                  <span>Gross wall area</span>
-                  <strong>{number(wall.count * wall.lengthFeet * wall.heightFeet)} sqft</strong>
-                </div>
-              </div>;
+              );
             })}
             <div className="boq-stage-subcard">
               <h4>+ Add wall type</h4>
               <div className="boq-stage-input-grid">
-                <InputText label="Wall reference" value={wallDraft.name} placeholder="W1, internal room 2"
-                  onChange={(v) => setWallDraft((prior) => ({ ...prior, name: v }))} />
-                <label className="boq-stage-field"><span>Wall location</span>
-                  <select value={wallDraft.location}
-                    onChange={(e) => setWallDraft((prior) => ({
-                      ...prior,
-                      location: e.target.value === 'internal' ? 'internal' : 'external',
-                      thicknessIn: e.target.value === 'internal' ? 4.5 : 9,
-                    }))}>
-                    <option value="external">External</option><option value="internal">Internal</option>
+                <InputText
+                  label="Wall reference"
+                  value={wallDraft.name}
+                  placeholder="W1, internal room 2"
+                  onChange={(v) =>
+                    setWallDraft((prior) => ({ ...prior, name: v }))
+                  }
+                />
+                <label className="boq-stage-field">
+                  <span>Wall location</span>
+                  <select
+                    value={wallDraft.location}
+                    onChange={(e) =>
+                      setWallDraft((prior) => ({
+                        ...prior,
+                        location:
+                          e.target.value === 'internal'
+                            ? 'internal'
+                            : 'external',
+                        thicknessIn: e.target.value === 'internal' ? 4.5 : 9,
+                      }))
+                    }
+                  >
+                    <option value="external">External</option>
+                    <option value="internal">Internal</option>
                   </select>
                 </label>
-                <InputNumber label="Same walls (nos)" value={wallDraft.count}
-                  onChange={(v) => setWallDraft((prior) => ({ ...prior, count: Math.round(v) }))} />
-                <InputNumber label="Length" unit="ft" value={wallDraft.lengthFeet}
-                  onChange={(v) => setWallDraft((prior) => ({ ...prior, lengthFeet: v }))} />
-                <InputNumber label="Height" unit="ft" value={wallDraft.heightFeet}
-                  onChange={(v) => setWallDraft((prior) => ({ ...prior, heightFeet: v }))} />
-                <InputNumber label="Thickness" unit="in" value={wallDraft.thicknessIn}
-                  onChange={(v) => setWallDraft((prior) => ({ ...prior, thicknessIn: v }))} />
+                <InputNumber
+                  label="Same walls (nos)"
+                  value={wallDraft.count}
+                  onChange={(v) =>
+                    setWallDraft((prior) => ({
+                      ...prior,
+                      count: Math.round(v),
+                    }))
+                  }
+                />
+                <InputNumber
+                  label="Length"
+                  unit="ft"
+                  value={wallDraft.lengthFeet}
+                  onChange={(v) =>
+                    setWallDraft((prior) => ({ ...prior, lengthFeet: v }))
+                  }
+                />
+                <InputNumber
+                  label="Height"
+                  unit="ft"
+                  value={wallDraft.heightFeet}
+                  onChange={(v) =>
+                    setWallDraft((prior) => ({ ...prior, heightFeet: v }))
+                  }
+                />
+                <InputNumber
+                  label="Thickness"
+                  unit="in"
+                  value={wallDraft.thicknessIn}
+                  onChange={(v) =>
+                    setWallDraft((prior) => ({ ...prior, thicknessIn: v }))
+                  }
+                />
               </div>
-              <button className="boq-stage-outline" type="button"
-                disabled={!(wallDraft.lengthFeet > 0 && wallDraft.heightFeet > 0 && wallDraft.count > 0)}
+              <button
+                className="boq-stage-outline"
+                type="button"
+                disabled={
+                  !(
+                    wallDraft.lengthFeet > 0 &&
+                    wallDraft.heightFeet > 0 &&
+                    wallDraft.count > 0
+                  )
+                }
                 onClick={() => {
-                  updateWalls([...walls, { ...wallDraft,
-                    id: 'wall-' + Date.now().toString(36),
-                    name: wallDraft.name.trim() || ('Wall ' + (walls.length + 1)),
-                  }]);
-                  setWallDraft({ id: 'new', name: '', location: 'external', count: 1,
-                    lengthFeet: 0, heightFeet: 0, thicknessIn: 9 });
-                }}>
+                  updateWalls([
+                    ...walls,
+                    {
+                      ...wallDraft,
+                      id: 'wall-' + Date.now().toString(36),
+                      name:
+                        wallDraft.name.trim() || 'Wall ' + (walls.length + 1),
+                    },
+                  ]);
+                  setWallDraft({
+                    id: 'new',
+                    name: '',
+                    location: 'external',
+                    count: 1,
+                    lengthFeet: 0,
+                    heightFeet: 0,
+                    thicknessIn: 9,
+                  });
+                }}
+              >
                 + Add measured wall
               </button>
             </div>
-            {walls.length > 0 && <p className="boq-stage-hint">
-              Wall deduction and quantities recalculate when opening sizes change.
-              For incomplete opening schedules, typical sizes are assumed and flagged
-              in the drawing warnings.
-            </p>}
+            {walls.length > 0 && (
+              <p className="boq-stage-hint">
+                Wall deduction and quantities recalculate when opening sizes
+                change. For incomplete opening schedules, typical sizes are
+                assumed and flagged in the drawing warnings.
+              </p>
+            )}
           </div>
         )}
         {isColumns && (
@@ -1058,38 +1270,54 @@ export function BoqStageBuilder(props: Props) {
           <div className="boq-stage-subcard">
             <h4>Door, window and ventilator sizes from drawing</h4>
             <p className="boq-stage-hint">
-              Enter number × width × height in feet, for example 2×3×7.
-              Window price is calculated per square foot; door package price
-              limits remain per door. The measured opening areas are deducted
-              from the correct external or internal brick wall group.
+              Enter number × width × height in feet, for example 2×3×7. Window
+              price is calculated per square foot; door package price limits
+              remain per door. The measured opening areas are deducted from the
+              correct external or internal brick wall group.
             </p>
             <div className="boq-stage-input-grid">
-              {([
-                ['mainDoors', 'Main doors (external)'],
-                ['internalDoors', 'Room doors (internal)'],
-                ['bathroomDoors', 'Bathroom doors (internal)'],
-                ['poojaDoors', 'Pooja doors (internal)'],
-                ['ventilators', 'Ventilators (external)'],
-                ['rollingShutters', 'Rolling shutters (external)'],
-              ] as const).map(([key, label]) =>
-                <InputText key={key} label={label}
+              {(
+                [
+                  ['mainDoors', 'Main doors (external)'],
+                  ['internalDoors', 'Room doors (internal)'],
+                  ['bathroomDoors', 'Bathroom doors (internal)'],
+                  ['poojaDoors', 'Pooja doors (internal)'],
+                  ['ventilators', 'Ventilators (external)'],
+                  ['rollingShutters', 'Rolling shutters (external)'],
+                ] as const
+              ).map(([key, label]) => (
+                <InputText
+                  key={key}
+                  label={label}
                   value={props.counts.doorSizes?.[stage]?.[key] ?? ''}
                   placeholder="e.g. 2×3×7"
-                  onChange={(value) => props.onCountsChange({
-                    ...props.counts,
-                    doorSizes: {
-                      ...props.counts.doorSizes,
-                      [stage]: { ...props.counts.doorSizes?.[stage], [key]: value },
-                    },
-                  })}
-                />)}
-              <InputText label="Windows (nos × W × H, ft)"
+                  onChange={(value) =>
+                    props.onCountsChange({
+                      ...props.counts,
+                      doorSizes: {
+                        ...props.counts.doorSizes,
+                        [stage]: {
+                          ...props.counts.doorSizes?.[stage],
+                          [key]: value,
+                        },
+                      },
+                    })
+                  }
+                />
+              ))}
+              <InputText
+                label="Windows (nos × W × H, ft)"
                 value={props.counts.windowSizes?.[stage] ?? ''}
                 placeholder="e.g. 2×4×4, 3×4×5"
-                onChange={(value) => props.onCountsChange({
-                  ...props.counts,
-                  windowSizes: { ...props.counts.windowSizes, [stage]: value },
-                })}
+                onChange={(value) =>
+                  props.onCountsChange({
+                    ...props.counts,
+                    windowSizes: {
+                      ...props.counts.windowSizes,
+                      [stage]: value,
+                    },
+                  })
+                }
               />
             </div>
             <p className="boq-stage-hint">
@@ -1125,133 +1353,144 @@ export function BoqStageBuilder(props: Props) {
               room-by-room dimensions.
             </p>
           )}
-        {foundEntries.some((entry) => entry.line.kind !== 'measured-geometry') &&
-          !isColumns && !isBeams && (
-          <>
-            <h4>Calculated materials & labour</h4>
-            <div className="boq-stage-output-rows">
-              {foundEntries.filter((entry) => entry.line.kind !== 'measured-geometry').map((entry) => (
-                <div
-                  className="boq-stage-output"
-                  key={entry.line.id + '-' + entry.outputIndex}
-                >
-                  <span>
-                    {entry.output.name}
-                    <small>{entry.line.name}</small>
-                  </span>
+        {foundEntries.some(
+          (entry) => entry.line.kind !== 'measured-geometry',
+        ) &&
+          !isColumns &&
+          !isBeams && (
+            <>
+              <h4>Calculated materials & labour</h4>
+              <div className="boq-stage-output-rows">
+                {foundEntries
+                  .filter((entry) => entry.line.kind !== 'measured-geometry')
+                  .map((entry) => (
+                    <div
+                      className="boq-stage-output"
+                      key={entry.line.id + '-' + entry.outputIndex}
+                    >
+                      <span>
+                        {entry.output.name}
+                        <small>{entry.line.name}</small>
+                      </span>
+                      <InputNumber
+                        label="Quantity"
+                        value={entry.output.quantity}
+                        unit={entry.output.unit}
+                        onChange={(value) =>
+                          props.onUpdateQuantity(
+                            entry.lineIndex,
+                            entry.outputIndex,
+                            value,
+                          )
+                        }
+                      />
+                      {entry.output.quotedRate !== undefined && (
+                        <small className="boq-stage-limit">
+                          Quotation package limit:
+                          {money(entry.output.quotedRate)} / {entry.output.unit}
+                        </small>
+                      )}
+                      {props.canViewCost && (
+                        <InputNumber
+                          label="Rate"
+                          value={
+                            entry.output.rate ?? props.rateFor(entry.output)
+                          }
+                          onChange={(value) =>
+                            props.onUpdateRate(
+                              entry.lineIndex,
+                              entry.outputIndex,
+                              value,
+                            )
+                          }
+                        />
+                      )}
+                      {!entry.line.origin && (
+                        <button
+                          type="button"
+                          onClick={() => props.onRemoveManual(entry.lineIndex)}
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </>
+          )}
+        {!isGeometry(category.key) &&
+          category.key !== 'brickwork' &&
+          (!designCategory ||
+            ['parapet', 'waterproofing'].includes(category.key) ||
+            !foundEntries.length) && (
+            <>
+              <div className="boq-stage-manual">
+                <h4>Add a measured item</h4>
+                <div className="boq-stage-input-grid">
+                  <InputText
+                    label="Item name"
+                    value={manualName}
+                    placeholder={
+                      category.key === 'extra'
+                        ? 'e.g. Extra waterproofing'
+                        : category.label
+                    }
+                    onChange={setManualName}
+                  />
                   <InputNumber
                     label="Quantity"
-                    value={entry.output.quantity}
-                    unit={entry.output.unit}
-                    onChange={(value) =>
-                      props.onUpdateQuantity(
-                        entry.lineIndex,
-                        entry.outputIndex,
-                        value,
-                      )
-                    }
+                    value={manualQuantity}
+                    onChange={setManualQuantity}
                   />
-                  {entry.output.quotedRate !== undefined && (
-                    <small className="boq-stage-limit">Quotation package limit:
-                      {money(entry.output.quotedRate)} / {entry.output.unit}
-                    </small>
-                  )}
+                  <label className="boq-stage-field">
+                    <span>Unit</span>
+                    <select
+                      value={manualUnit}
+                      onChange={(event) => setManualUnit(event.target.value)}
+                    >
+                      <option value="sqft">sqft</option>
+                      <option value="rft">rft</option>
+                      <option value="m³">m³</option>
+                      <option value="bag">bag</option>
+                      <option value="kg">kg</option>
+                      <option value="nos">nos</option>
+                      <option value="lot">lot</option>
+                    </select>
+                  </label>
                   {props.canViewCost && (
                     <InputNumber
-                      label="Rate"
-                      value={entry.output.rate ?? props.rateFor(entry.output)}
-                      onChange={(value) =>
-                        props.onUpdateRate(
-                          entry.lineIndex,
-                          entry.outputIndex,
-                          value,
-                        )
-                      }
+                      label="Unit rate"
+                      value={manualRate}
+                      onChange={setManualRate}
                     />
                   )}
-                  {!entry.line.origin && (
-                    <button
-                      type="button"
-                      onClick={() => props.onRemoveManual(entry.lineIndex)}
-                    >
-                      Remove
-                    </button>
-                  )}
                 </div>
-              ))}
-            </div>
-          </>
-        )}
-        {!isGeometry(category.key) && category.key !== 'brickwork' &&
-          (!designCategory || ['parapet', 'waterproofing'].includes(category.key) || !foundEntries.length) && (
-          <>
-            <div className="boq-stage-manual">
-              <h4>Add a measured item</h4>
-              <div className="boq-stage-input-grid">
-                <InputText
-                  label="Item name"
-                  value={manualName}
-                  placeholder={
-                    category.key === 'extra'
-                      ? 'e.g. Extra waterproofing'
-                      : category.label
+                <button
+                  type="button"
+                  className="boq-stage-outline"
+                  disabled={
+                    manualQuantity <= 0 ||
+                    (category.key === 'extra' && !manualName.trim())
                   }
-                  onChange={setManualName}
-                />
-                <InputNumber
-                  label="Quantity"
-                  value={manualQuantity}
-                  onChange={setManualQuantity}
-                />
-                <label className="boq-stage-field">
-                  <span>Unit</span>
-                  <select
-                    value={manualUnit}
-                    onChange={(event) => setManualUnit(event.target.value)}
-                  >
-                    <option value="sqft">sqft</option>
-                    <option value="rft">rft</option>
-                    <option value="m³">m³</option>
-                    <option value="bag">bag</option>
-                    <option value="kg">kg</option>
-                    <option value="nos">nos</option>
-                    <option value="lot">lot</option>
-                  </select>
-                </label>
-                {props.canViewCost && (
-                  <InputNumber
-                    label="Unit rate"
-                    value={manualRate}
-                    onChange={setManualRate}
-                  />
-                )}
+                  onClick={() => {
+                    props.onAddManual(
+                      stage,
+                      category.key,
+                      manualQuantity,
+                      manualUnit,
+                      props.canViewCost ? manualRate : 0,
+                      manualName.trim(),
+                    );
+                    setManualName('');
+                    setManualQuantity(0);
+                    setManualRate(0);
+                  }}
+                >
+                  + Add to {category.label}
+                </button>
               </div>
-              <button
-                type="button"
-                className="boq-stage-outline"
-                disabled={
-                  manualQuantity <= 0 ||
-                  (category.key === 'extra' && !manualName.trim())
-                }
-                onClick={() => {
-                  props.onAddManual(
-                    stage,
-                    category.key,
-                    manualQuantity,
-                    manualUnit,
-                    props.canViewCost ? manualRate : 0,
-                    manualName.trim(),
-                  );
-                  setManualName('');
-                  setManualQuantity(0);
-                  setManualRate(0);
-                }}
-              >
-                + Add to {category.label}
-              </button>
-            </div>
-          </>
-        )}
+            </>
+          )}
       </div>
     );
   };
