@@ -401,7 +401,7 @@ export function renderQuotationDocument(
                 escape(section.unit || 'item') +
                 '</p>'
               : section.allowancePerSqft
-                ? '<p><strong>Legacy material allowance:</strong> ₹' +
+                ? '<p><strong>Material allowance:</strong> ₹' +
                   escape(section.allowancePerSqft) +
                   '/SFT</p>'
                 : '') +
