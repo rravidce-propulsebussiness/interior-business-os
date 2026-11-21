@@ -173,6 +173,7 @@ function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
   if (kind === 'quote-columns') return 'columns';
   if (kind === 'quote-pedestals') return 'footings';
   if (kind === 'quote-plinth-beam') return 'plinth';
+  if (kind === 'quote-beams') return 'beams';
   if (kind === 'quote-slab') return 'slab';
   if (kind === 'quote-staircase') return 'staircase';
   if (kind === 'quote-masonry')
