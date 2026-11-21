@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { Fragment, useEffect, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BOQ_TEMPLATES,
@@ -53,6 +53,8 @@ type Generator = {
   counts: BoqCounts;
   floors: BoqFloor[];
   design?: StructuralDesign | null;
+  /** Quantities / rates edited on generated lines, kept on regenerate. */
+  overrides?: Record<string, { quantity?: number; rate?: number }>;
   warnings: string[];
 };
 type SavedLine = {
@@ -129,6 +131,11 @@ const money = (value: number, currency = 'INR') =>
 const keyFor = (name: string, unit: string, material?: string) =>
   `${material ? material + '|' : ''}${name.trim().toLowerCase()}::${unit.trim().toLowerCase()}`;
 const uid = () => crypto.randomUUID();
+/** Identifies a generated output across regenerations. */
+const overrideKey = (
+  line: { section: string; kind: string },
+  output: { name: string; unit: string },
+) => `${line.section}|${line.kind}|${output.name}|${output.unit}`.slice(0, 300);
 
 export function BoqWorkspace({
   documents,
@@ -197,6 +204,9 @@ export function BoqWorkspace({
   const [genCounts, setGenCounts] = useState<BoqCounts | null>(
     initialDocument?.document?.generator?.counts ?? null,
   );
+  const [overrides, setOverrides] = useState<
+    Record<string, { quantity?: number; rate?: number }>
+  >(initialDocument?.document?.generator?.overrides ?? {});
   const [genDesign, setGenDesign] = useState<StructuralDesign | null>(
     normalizeDesign(initialDocument?.document?.generator?.design),
   );
@@ -386,6 +396,7 @@ export function BoqWorkspace({
     quantity: number;
     unit: string;
     mixed: boolean;
+    items: Map<string, { quantity: number; unit: string; amount: number }>;
   };
   const floorBreakdown = new Map<string, Map<CostHead, HeadTotal>>();
   // What to order per floor (tiles and boxes, coils, pipes …).
@@ -409,11 +420,22 @@ export function BoqWorkspace({
     const stage =
       floorBreakdown.get(row.section) ?? new Map<CostHead, HeadTotal>();
     const prior = stage.get(head);
+    const items =
+      prior?.items ??
+      new Map<string, { quantity: number; unit: string; amount: number }>();
+    const itemKey = `${row.name}::${row.unit}`;
+    const item = items.get(itemKey);
+    items.set(itemKey, {
+      quantity: (item?.quantity ?? 0) + row.quantity,
+      unit: row.unit,
+      amount: (item?.amount ?? 0) + row.quantity * row.rate,
+    });
     stage.set(head, {
       amount: (prior?.amount ?? 0) + row.quantity * row.rate,
       quantity: (prior?.quantity ?? 0) + quantity,
       unit: prior?.unit ?? unitOf,
       mixed: Boolean(prior && (prior.mixed || prior.unit !== unitOf)),
+      items,
     });
     floorBreakdown.set(row.section, stage);
   }
@@ -440,6 +462,7 @@ export function BoqWorkspace({
     setGenFloors([]);
     setGenCounts(null);
     setGenDesign(null);
+    setOverrides({});
   }
   function startNew() {
     setActive(null);
@@ -456,6 +479,7 @@ export function BoqWorkspace({
     setGenFloors([]);
     setGenCounts(null);
     setGenDesign(null);
+    setOverrides({});
     setMessage('');
   }
   function openDocument(document: Document) {
@@ -470,9 +494,10 @@ export function BoqWorkspace({
     setGenFloors(document.document?.generator?.floors ?? []);
     setGenCounts(document.document?.generator?.counts ?? null);
     setGenDesign(normalizeDesign(document.document?.generator?.design));
+    setOverrides(document.document?.generator?.overrides ?? {});
     setMessage('');
   }
-  function generateFromQuote() {
+  function generateFromQuote(live = false, edits = overrides) {
     if (!schedule || !quoteId) return;
     const result = generateQuotationBoq({
       details: schedule,
@@ -482,7 +507,28 @@ export function BoqWorkspace({
       design: genDesign,
     });
     const kept = lines.filter((line) => !line.origin);
-    setLines([...result.lines, ...kept]);
+    // Quantities and rates edited on the takeoff survive regeneration.
+    const generated = result.lines.map((line) => ({
+      ...line,
+      outputs: line.outputs.map((output) => {
+        const edit = edits[overrideKey(line, output)];
+        return edit
+          ? {
+              ...output,
+              ...(edit.quantity !== undefined
+                ? { quantity: edit.quantity }
+                : {}),
+              ...(edit.rate !== undefined ? { rate: edit.rate } : {}),
+              source:
+                `Edited on the BOQ${output.source ? ` · ${output.source}` : ''}`.slice(
+                  0,
+                  300,
+                ),
+            }
+          : output;
+      }),
+    }));
+    setLines([...generated, ...kept]);
     // Brands named in the quotation's specifications, unless already chosen.
     const quoted = brandSelectionsFromQuote(schedule.sections, initialRates);
     setSelections((prior) => ({ ...quoted, ...prior }));
@@ -493,8 +539,12 @@ export function BoqWorkspace({
       counts: result.counts,
       floors: result.floors,
       design: result.design,
+      overrides: edits,
       warnings: result.warnings,
     });
+    // A live update keeps what is being typed; a full generate takes the
+    // normalized floors and counts back.
+    if (live) return;
     setGenFloors(result.floors);
     setGenCounts(result.counts);
     if (!title.trim() || title === 'Construction BOQ')
@@ -507,26 +557,57 @@ export function BoqWorkspace({
   }
   // A BOQ prepared from the quotation (floors, counts, drawing schedule) but
   // not generated yet is generated as soon as its quotation is available.
-  const [autoGenerated, setAutoGenerated] = useState(false);
+  // A new BOQ for a project with a floor-wise quotation is generated as
+  // soon as the quotation is chosen, once per BOQ and quotation.
+  const autoKey = `${active?.id ?? 'new'}:${quoteId}`;
+  const [autoGenerated, setAutoGenerated] = useState('');
   useEffect(() => {
-    if (
-      autoGenerated ||
-      lines.length > 0 ||
-      !schedule ||
-      !generator ||
-      generator.revisionId !== quoteId
-    )
+    const prepared = generator
+      ? generator.revisionId === quoteId
+      : !active && Boolean(quoteId);
+    if (autoGenerated === autoKey || lines.length > 0 || !schedule || !prepared)
       return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- One-time generation of a prepared BOQ.
-    setAutoGenerated(true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- One-time generation of a prepared or new BOQ.
+    setAutoGenerated(autoKey);
     generateFromQuote();
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- Runs once per prepared BOQ.
-  }, [schedule, generator, quoteId, lines.length, autoGenerated]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Runs once per BOQ and quotation.
+  }, [schedule, generator, quoteId, lines.length, autoKey, autoGenerated]);
+  // Changing a count, size, room or the drawing schedule updates a
+  // generated BOQ straight away (manual items are kept).
+  const liveKey = JSON.stringify([genFloors, genCounts, genDesign]);
+  const [lastLiveKey, setLastLiveKey] = useState(liveKey);
+  useEffect(() => {
+    if (liveKey === lastLiveKey) return;
+    const timer = window.setTimeout(() => {
+      setLastLiveKey(liveKey);
+      if (
+        lines.some((line) => line.origin) &&
+        generator?.revisionId === quoteId
+      )
+        generateFromQuote(true);
+    }, 350);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- Runs when the generation inputs change.
+  }, [liveKey]);
   function updateOutputQuantity(
     lineIndex: number,
     outputIndex: number,
     quantity: number,
   ) {
+    const target = lines[lineIndex];
+    const output = target?.outputs[outputIndex];
+    if (target?.origin && output) {
+      const key = overrideKey(target, output);
+      const next = {
+        ...overrides,
+        [key]: {
+          ...overrides[key],
+          quantity: Number.isFinite(quantity) ? Math.max(0, quantity) : 0,
+        },
+      };
+      setOverrides(next);
+      setGenerator((prior) => (prior ? { ...prior, overrides: next } : prior));
+    }
     setLines((prior) =>
       prior.map((line, i) =>
         i === lineIndex
@@ -552,6 +633,20 @@ export function BoqWorkspace({
     outputIndex: number,
     rate: number,
   ) {
+    const target = lines[lineIndex];
+    const output = target?.outputs[outputIndex];
+    if (target?.origin && output) {
+      const key = overrideKey(target, output);
+      const next = {
+        ...overrides,
+        [key]: {
+          ...overrides[key],
+          rate: Number.isFinite(rate) ? Math.max(0, rate) : 0,
+        },
+      };
+      setOverrides(next);
+      setGenerator((prior) => (prior ? { ...prior, overrides: next } : prior));
+    }
     setLines((prior) =>
       prior.map((line, i) =>
         i === lineIndex
@@ -905,7 +1000,7 @@ export function BoqWorkspace({
               </select>
             </label>
           </div>
-          {currentQuote && (
+          {currentQuote && currentQuote.lines.length > 0 && (
             <section className="boq-import">
               <div className="boq-import-head">
                 <div>
@@ -973,7 +1068,7 @@ export function BoqWorkspace({
                 <button
                   className="erp-button erp-button-primary"
                   type="button"
-                  onClick={generateFromQuote}
+                  onClick={() => generateFromQuote()}
                   disabled={!floorsForGeneration.length}
                 >
                   {lines.some((line) => line.origin)
@@ -1201,23 +1296,43 @@ export function BoqWorkspace({
                               value.quantity > 0 &&
                               (head in QUANTITY_HEADS ||
                                 head === 'Structural labour');
+                            const parts = [...value.items.entries()].filter(
+                              ([, part]) => part.amount > 0,
+                            );
                             return (
-                              <tr key={head}>
-                                <td>{head}</td>
-                                <td>
-                                  {showQty
-                                    ? `${value.quantity.toLocaleString(
-                                        'en-IN',
-                                        {
+                              <Fragment key={head}>
+                                <tr className="boq-head-row">
+                                  <td>{head}</td>
+                                  <td>
+                                    {showQty
+                                      ? `${value.quantity.toLocaleString(
+                                          'en-IN',
+                                          {
+                                            maximumFractionDigits: 1,
+                                          },
+                                        )} ${value.unit} × ${money(
+                                          value.amount / value.quantity,
+                                        )}`
+                                      : ''}
+                                  </td>
+                                  <td>{money(value.amount)}</td>
+                                </tr>
+                                {(!showQty || parts.length > 1) &&
+                                  parts.length > 0 &&
+                                  parts.map(([key, part]) => (
+                                    <tr key={key} className="boq-item-row">
+                                      <td>{key.split('::')[0]}</td>
+                                      <td>
+                                        {part.quantity.toLocaleString('en-IN', {
                                           maximumFractionDigits: 1,
-                                        },
-                                      )} ${value.unit} × ${money(
-                                        value.amount / value.quantity,
-                                      )}`
-                                    : ''}
-                                </td>
-                                <td>{money(value.amount)}</td>
-                              </tr>
+                                        })}{' '}
+                                        {part.unit} ×{' '}
+                                        {money(part.amount / part.quantity)}
+                                      </td>
+                                      <td>{money(part.amount)}</td>
+                                    </tr>
+                                  ))}
+                              </Fragment>
                             );
                           })}
                           <tr className="total">
@@ -1252,6 +1367,19 @@ export function BoqWorkspace({
                 </p>
               </div>
               <span className="boq-count-pill">{lines.length} items</span>
+              {Object.keys(overrides).length > 0 && (
+                <button
+                  type="button"
+                  className="erp-button erp-button-quiet"
+                  title="Go back to the calculated quantities and rates"
+                  onClick={() => {
+                    setOverrides({});
+                    generateFromQuote(true, {});
+                  }}
+                >
+                  Undo {Object.keys(overrides).length} edits
+                </button>
+              )}
               {lines.length > 0 && (
                 <button
                   type="button"

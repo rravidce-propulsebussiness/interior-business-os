@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import {
   DESIGN_SETTING_KEYS,
   parseBars,
@@ -175,6 +177,8 @@ export function BoqDesignSchedule({
   onChange: (design: StructuralDesign | null) => void;
 }) {
   const on = Boolean(design);
+  // Unticking keeps the schedule so a misclick never loses it.
+  const [lastDesign, setLastDesign] = useState<StructuralDesign | null>(design);
   const updateColumn = (index: number, patch: Partial<DesignColumnType>) =>
     design &&
     onChange({
@@ -198,9 +202,14 @@ export function BoqDesignSchedule({
         <input
           type="checkbox"
           checked={on}
-          onChange={(event) =>
-            onChange(event.target.checked ? emptyDesign(floors.length) : null)
-          }
+          onChange={(event) => {
+            if (event.target.checked)
+              onChange(lastDesign ?? emptyDesign(floors.length));
+            else {
+              if (design) setLastDesign(design);
+              onChange(null);
+            }
+          }}
         />
         <span>
           <strong>Use the structural drawing</strong>
