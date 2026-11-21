@@ -39,9 +39,7 @@ describe('construction quotation editor regressions', () => {
     expect(actions).toContain(".select('id,description')");
     expect(actions).toContain(".eq('organization_id', s.org)");
     expect(actions).toContain(".eq('revision_id', rid)");
-    expect(actions).toContain(
-      'originalPackage?.id === parsed.packageId',
-    );
+    expect(actions).toContain('originalPackage?.id === parsed.packageId');
     expect(actions).toContain(
       'if (parsed.packageId && !selectedPackage && !archivedPackage)',
     );

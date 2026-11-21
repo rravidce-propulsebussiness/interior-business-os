@@ -210,11 +210,10 @@ export function PremiumSftBuilder({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const activePackages = packages.filter((p) => p.status === 'active');
-  const previous = activePackages.find(
-    (p) =>
-      initialSchedule?.package?.id
-        ? p.id === initialSchedule.package.id
-        : p.code === initialSchedule?.package?.code,
+  const previous = activePackages.find((p) =>
+    initialSchedule?.package?.id
+      ? p.id === initialSchedule.package.id
+      : p.code === initialSchedule?.package?.code,
   );
   const selectedPackage =
     activePackages.find((p) => p.id === selectedPackageId) ?? previous;
@@ -332,9 +331,9 @@ export function PremiumSftBuilder({
     });
   });
   const [drawer, setDrawer] = useState(false);
-  const [editingMaterialIndex, setEditingMaterialIndex] = useState<number | null>(
-    null,
-  );
+  const [editingMaterialIndex, setEditingMaterialIndex] = useState<
+    number | null
+  >(null);
   const [draftSections, setDraftSections] = useState<Material[]>([]);
   const openMaterials = (index: number | null = null) => {
     setDraftSections(sections.map((s) => ({ ...s })));
@@ -1216,174 +1215,176 @@ export function PremiumSftBuilder({
                     className="qs-work-spec-entry"
                     open={editingMaterialIndex === i}
                   >
-                  <summary>
-                    {s.title}
-                    <span>⌄</span>
-                  </summary>
-                  <div>
-                    <label>
-                      Specification name
-                      <input
-                        maxLength={90}
-                        value={s.title}
-                        onChange={(e) =>
-                          updateMaterial(i, { title: e.target.value })
-                        }
-                      />
-                    </label>
-                    <label>
-                      Brand / manufacturer
-                      <input
-                        maxLength={120}
-                        value={s.brand ?? ''}
-                        list={'qs-material-options-' + i}
-                        onChange={(e) =>
-                          updateMaterial(i, { brand: e.target.value })
-                        }
-                      />
-                    </label>
-                    <datalist id={'qs-material-options-' + i}>
-                      {[
-                        ...new Set(
-                          activeRates
-                            .filter(
-                              (rate) =>
-                                rate.category
-                                  .toLowerCase()
-                                  .includes(s.title.toLowerCase()) ||
-                                s.title
-                                  .toLowerCase()
-                                  .includes(rate.category.toLowerCase()),
-                            )
-                            .map((rate) => rate.name),
-                        ),
-                      ].map((v) => (
-                        <option key={v} value={v} />
-                      ))}
-                    </datalist>
-                    <label>
-                      Grade / model
-                      <input
-                        maxLength={120}
-                        value={s.grade ?? ''}
-                        onChange={(e) =>
-                          updateMaterial(i, { grade: e.target.value })
-                        }
-                      />
-                    </label>
-                    <label>
-                      Pricing treatment
-                      <select
-                        aria-label={s.title + ' pricing treatment'}
-                        value={
-                          s.pricingTreatment ??
-                          (Number(s.allowanceValue || s.allowancePerSqft || 0) >
-                          0
-                            ? 'allowance'
-                            : 'included')
-                        }
-                        onChange={(event) =>
-                          updateMaterial(i, {
-                            pricingTreatment: event.target.value as NonNullable<
-                              Material['pricingTreatment']
-                            >,
-                          })
-                        }
-                      >
-                        <option value="included">
-                          Included (no separate allowance)
-                        </option>
-                        <option value="allowance">
-                          Included up to a price limit
-                        </option>
-                        <option value="extra">
-                          Extra / separately chargeable
-                        </option>
-                        <option value="excluded">Excluded</option>
-                      </select>
-                    </label>
-                    <label>
-                      Allowance unit
-                      <select
-                        aria-label={s.title + ' allowance unit'}
-                        value={
-                          s.unit && s.unit !== 'none'
-                            ? s.unit
-                            : suggestedAllowanceUnit(s.title)
-                        }
-                        onChange={(event) =>
-                          updateMaterial(i, {
-                            unit: event.target.value as SectionUnit,
-                          })
-                        }
-                      >
-                        <option value="sqft">₹ per sq ft</option>
-                        <option value="running_ft">₹ per running ft</option>
-                        <option value="door">₹ per door</option>
-                        <option value="bathroom">₹ per bathroom</option>
-                        <option value="piece">₹ per piece</option>
-                        <option value="point">₹ per point</option>
-                        <option value="kg">₹ per kg</option>
-                        <option value="tonne">₹ per tonne</option>
-                        <option value="bag">₹ per bag</option>
-                        <option value="cubic_meter">₹ per m³</option>
-                        <option value="meter">₹ per metre</option>
-                        <option value="bhk">₹ per BHK</option>
-                        <option value="lumpsum">₹ lump sum</option>
-                      </select>
-                    </label>
-                    <label>
-                      Price limit (₹ / selected unit)
-                      <input
-                        type="number"
-                        inputMode="decimal"
-                        min="0"
-                        max="99999999.99"
-                        step="0.01"
-                        aria-label={s.title + ' price limit'}
-                        placeholder="Leave blank when no price is agreed"
-                        value={
-                          s.allowanceValue ??
-                          allowanceAmount(s.allowancePerSqft)
-                        }
-                        onChange={(event) => {
-                          const value = event.target.value;
-                          updateMaterial(i, {
-                            allowanceValue: value,
-                            unit:
-                              s.unit && s.unit !== 'none'
-                                ? s.unit
-                                : suggestedAllowanceUnit(s.title),
-                            allowancePerSqft: '',
-                            ...(Number(value) > 0 &&
-                            (!s.pricingTreatment ||
-                              s.pricingTreatment === 'included')
-                              ? { pricingTreatment: 'allowance' as const }
-                              : {}),
-                          });
-                        }}
-                      />
-                    </label>
-                    {s.allowancePerSqft &&
-                      !allowanceAmount(s.allowancePerSqft) && (
-                        <small>
-                          Earlier allowance text: {s.allowancePerSqft}. Enter a
-                          numeric limit above for BOQ pricing.
-                        </small>
-                      )}
-                    <label className="qs-work-spec-wide">
-                      Description / included materials
-                      <textarea
-                        rows={3}
-                        maxLength={1100}
-                        value={s.description}
-                        onChange={(e) =>
-                          updateMaterial(i, { description: e.target.value })
-                        }
-                      />
-                    </label>
-                  </div>
-                </details>
+                    <summary>
+                      {s.title}
+                      <span>⌄</span>
+                    </summary>
+                    <div>
+                      <label>
+                        Specification name
+                        <input
+                          maxLength={90}
+                          value={s.title}
+                          onChange={(e) =>
+                            updateMaterial(i, { title: e.target.value })
+                          }
+                        />
+                      </label>
+                      <label>
+                        Brand / manufacturer
+                        <input
+                          maxLength={120}
+                          value={s.brand ?? ''}
+                          list={'qs-material-options-' + i}
+                          onChange={(e) =>
+                            updateMaterial(i, { brand: e.target.value })
+                          }
+                        />
+                      </label>
+                      <datalist id={'qs-material-options-' + i}>
+                        {[
+                          ...new Set(
+                            activeRates
+                              .filter(
+                                (rate) =>
+                                  rate.category
+                                    .toLowerCase()
+                                    .includes(s.title.toLowerCase()) ||
+                                  s.title
+                                    .toLowerCase()
+                                    .includes(rate.category.toLowerCase()),
+                              )
+                              .map((rate) => rate.name),
+                          ),
+                        ].map((v) => (
+                          <option key={v} value={v} />
+                        ))}
+                      </datalist>
+                      <label>
+                        Grade / model
+                        <input
+                          maxLength={120}
+                          value={s.grade ?? ''}
+                          onChange={(e) =>
+                            updateMaterial(i, { grade: e.target.value })
+                          }
+                        />
+                      </label>
+                      <label>
+                        Pricing treatment
+                        <select
+                          aria-label={s.title + ' pricing treatment'}
+                          value={
+                            s.pricingTreatment ??
+                            (Number(
+                              s.allowanceValue || s.allowancePerSqft || 0,
+                            ) > 0
+                              ? 'allowance'
+                              : 'included')
+                          }
+                          onChange={(event) =>
+                            updateMaterial(i, {
+                              pricingTreatment: event.target
+                                .value as NonNullable<
+                                Material['pricingTreatment']
+                              >,
+                            })
+                          }
+                        >
+                          <option value="included">
+                            Included (no separate allowance)
+                          </option>
+                          <option value="allowance">
+                            Included up to a price limit
+                          </option>
+                          <option value="extra">
+                            Extra / separately chargeable
+                          </option>
+                          <option value="excluded">Excluded</option>
+                        </select>
+                      </label>
+                      <label>
+                        Allowance unit
+                        <select
+                          aria-label={s.title + ' allowance unit'}
+                          value={
+                            s.unit && s.unit !== 'none'
+                              ? s.unit
+                              : suggestedAllowanceUnit(s.title)
+                          }
+                          onChange={(event) =>
+                            updateMaterial(i, {
+                              unit: event.target.value as SectionUnit,
+                            })
+                          }
+                        >
+                          <option value="sqft">₹ per sq ft</option>
+                          <option value="running_ft">₹ per running ft</option>
+                          <option value="door">₹ per door</option>
+                          <option value="bathroom">₹ per bathroom</option>
+                          <option value="piece">₹ per piece</option>
+                          <option value="point">₹ per point</option>
+                          <option value="kg">₹ per kg</option>
+                          <option value="tonne">₹ per tonne</option>
+                          <option value="bag">₹ per bag</option>
+                          <option value="cubic_meter">₹ per m³</option>
+                          <option value="meter">₹ per metre</option>
+                          <option value="bhk">₹ per BHK</option>
+                          <option value="lumpsum">₹ lump sum</option>
+                        </select>
+                      </label>
+                      <label>
+                        Price limit (₹ / selected unit)
+                        <input
+                          type="number"
+                          inputMode="decimal"
+                          min="0"
+                          max="99999999.99"
+                          step="0.01"
+                          aria-label={s.title + ' price limit'}
+                          placeholder="Leave blank when no price is agreed"
+                          value={
+                            s.allowanceValue ??
+                            allowanceAmount(s.allowancePerSqft)
+                          }
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            updateMaterial(i, {
+                              allowanceValue: value,
+                              unit:
+                                s.unit && s.unit !== 'none'
+                                  ? s.unit
+                                  : suggestedAllowanceUnit(s.title),
+                              allowancePerSqft: '',
+                              ...(Number(value) > 0 &&
+                              (!s.pricingTreatment ||
+                                s.pricingTreatment === 'included')
+                                ? { pricingTreatment: 'allowance' as const }
+                                : {}),
+                            });
+                          }}
+                        />
+                      </label>
+                      {s.allowancePerSqft &&
+                        !allowanceAmount(s.allowancePerSqft) && (
+                          <small>
+                            Earlier allowance text: {s.allowancePerSqft}. Enter
+                            a numeric limit above for BOQ pricing.
+                          </small>
+                        )}
+                      <label className="qs-work-spec-wide">
+                        Description / included materials
+                        <textarea
+                          rows={3}
+                          maxLength={1100}
+                          value={s.description}
+                          onChange={(e) =>
+                            updateMaterial(i, { description: e.target.value })
+                          }
+                        />
+                      </label>
+                    </div>
+                  </details>
                 ))}
               {editingMaterialIndex === null && draftSections.length < 32 && (
                 <button

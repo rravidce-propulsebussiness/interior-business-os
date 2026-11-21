@@ -197,7 +197,9 @@ describe('single package choice in the saved quotation editor', () => {
     );
     expect(construction).not.toContain('Select quotation calculation method');
     expect(construction).not.toContain('2. Customized quotation');
-    expect(construction).toContain('chosen?.id ?? initialSchedule?.package?.id');
+    expect(construction).toContain(
+      'chosen?.id ?? initialSchedule?.package?.id',
+    );
     expect(construction).toContain('initialConstructionPackageSelection(');
     expect(sft).not.toContain('Manage packages ↗');
   });

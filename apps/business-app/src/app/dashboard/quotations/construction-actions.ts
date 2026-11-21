@@ -435,7 +435,8 @@ export async function saveFloorwiseSftEstimate(
       ? parseSftEstimate(existing[0].description)?.package
       : undefined;
     const archivedPackage =
-      parsed.packageId && !selectedPackage &&
+      parsed.packageId &&
+      !selectedPackage &&
       originalPackage?.id === parsed.packageId
         ? originalPackage
         : undefined;
@@ -471,10 +472,11 @@ export async function saveFloorwiseSftEstimate(
       area_id: null,
       sort_order: 0,
       optional: false,
-      name: selectedPackage || archivedPackage
-        ? (selectedPackage?.name ?? archivedPackage?.name) +
-          ' — floor-wise construction'
-        : 'Construction — floor-wise SFT estimate',
+      name:
+        selectedPackage || archivedPackage
+          ? (selectedPackage?.name ?? archivedPackage?.name) +
+            ' — floor-wise construction'
+          : 'Construction — floor-wise SFT estimate',
       description,
       quantity: '1',
       unit: 'complete estimate',

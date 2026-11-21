@@ -335,12 +335,11 @@ export function ConstructionSelector({
   const chosen = activePackages.find((pkg) => pkg.id === selected);
   const savedPackageUnavailable = Boolean(
     initialSchedule &&
-      !activePackages.some(
-        (pkg) =>
-          initialSchedule.package?.id
-            ? pkg.id === initialSchedule.package.id
-            : pkg.code === initialSchedule.package?.code,
-      ),
+    !activePackages.some((pkg) =>
+      initialSchedule.package?.id
+        ? pkg.id === initialSchedule.package.id
+        : pkg.code === initialSchedule.package?.code,
+    ),
   );
   const editingSavedPackage =
     selected === SAVED_PACKAGE_OPTION && savedPackageUnavailable;
@@ -412,9 +411,7 @@ export function ConstructionSelector({
       ) : chosen || editingSavedPackage ? (
         <PremiumSftBuilder
           key={selected}
-          selectedPackageId={
-            chosen?.id ?? initialSchedule?.package?.id ?? ''
-          }
+          selectedPackageId={chosen?.id ?? initialSchedule?.package?.id ?? ''}
           rates={rates}
           packages={packages}
           initialSchedule={initialSchedule}
