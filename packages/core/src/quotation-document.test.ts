@@ -642,3 +642,37 @@ it('prints priced execution steps once under the matching payment stage without 
   expect(html).not.toContain('[QUOTATION_MILESTONE_FLOW]');
   expect(html).not.toContain('"version":1');
 });
+
+it('shows the saved slab thickness and customer-facing per-unit ceilings in the quotation PDF', () => {
+  const d = quotationDocumentFixture();
+  d.lines[0]!.description = encodeSftEstimate(
+    calculateSftEstimate({
+      rows: [
+        {
+          kind: 'floor',
+          name: 'Ground Floor',
+          lengthFeet: '20',
+          widthFeet: '20',
+          heightFeet: '10.5',
+          ratePerSqft: '1850',
+        },
+      ],
+      materialIds: [],
+      slabThicknessIn: '5',
+      sections: [
+        {
+          title: 'Main door',
+          description: 'Teak main door',
+          unit: 'door',
+          pricingTreatment: 'allowance',
+          allowanceValue: '45000',
+        },
+      ],
+    }),
+  );
+  const html = renderQuotationDocument(d);
+  expect(html).toContain('RCC slab thickness: 5 inches');
+  expect(html).toContain('Customer allowance ceiling');
+  expect(html).toContain('₹45000 per door');
+  expect(html).not.toContain('SFT_ESTIMATE_V2:');
+});

@@ -854,3 +854,123 @@ describe('quotation-driven construction BOQ', () => {
     );
   });
 });
+
+describe('contractual specification limits and manually entered BOQ measures', () => {
+  it('keeps bathroom, parking, and room tile allowances separate', () => {
+    const details = calculateSftEstimate({
+      rows: [
+        {
+          kind: 'floor',
+          name: 'Ground Floor',
+          lengthFeet: '20',
+          widthFeet: '30',
+          heightFeet: '10.5',
+          ratePerSqft: '1850',
+        },
+      ],
+      materialIds: [],
+      sections: [
+        {
+          title: 'Room flooring tiles',
+          description: '',
+          unit: 'sqft',
+          pricingTreatment: 'allowance',
+          allowanceValue: '80',
+        },
+        {
+          title: 'Bathroom floor anti-skid tiles',
+          description: '',
+          unit: 'sqft',
+          pricingTreatment: 'allowance',
+          allowanceValue: '40',
+        },
+        {
+          title: 'Parking area tiles',
+          description: '',
+          unit: 'sqft',
+          pricingTreatment: 'allowance',
+          allowanceValue: '45',
+        },
+        {
+          title: 'SS304 staircase railing',
+          description: '',
+          unit: 'running_ft',
+          pricingTreatment: 'allowance',
+          allowanceValue: '1200',
+        },
+      ],
+    });
+    const initial = generateQuotationBoq({ details });
+    const result = generateQuotationBoq({
+      details,
+      floors: initial.floors.map((floor) => ({ ...floor, parkingSqft: 200 })),
+      counts: {
+        ...initial.counts,
+        finishes: {
+          'Ground Floor': {
+            rooms: [{ name: 'Bedroom', lengthFeet: 10, widthFeet: 12 }],
+            bathroomLengthFeet: 7,
+            bathroomWidthFeet: 5,
+            kitchenPlatformFeet: 10,
+            railingFeet: 36,
+          },
+        },
+      },
+    });
+    const outputs = result.lines.flatMap((line) => line.outputs);
+    const match = (name: string) =>
+      outputs.find((output) => output.name === name);
+    expect(match('Room flooring tiles')?.quotedRate).toBe(80);
+    expect(match('Bathroom floor tiles (anti-skid)')?.quotedRate).toBe(40);
+    expect(match('Parking tiles')?.quotedRate).toBe(45);
+    expect(match('SS railing')).toMatchObject({
+      quantity: 36,
+      unit: 'running_ft',
+      quotedRate: 1200,
+    });
+  });
+
+  it('respects the first floor main-door price ceiling without changing other floors', () => {
+    const base = quote();
+    const details = {
+      ...base,
+      sections: [
+        {
+          title: 'Main door',
+          description: 'Teak door',
+          unit: 'door' as const,
+          pricingTreatment: 'allowance' as const,
+          allowanceValue: '45000',
+        },
+        {
+          title: 'First Floor main door',
+          description: 'Premium main door',
+          unit: 'door' as const,
+          pricingTreatment: 'allowance' as const,
+          allowanceValue: '60000',
+        },
+      ],
+    };
+    const initial = generateQuotationBoq({ details });
+    const result = generateQuotationBoq({
+      details,
+      counts: {
+        ...initial.counts,
+        floors: {
+          ...initial.counts.floors,
+          'First Floor': {
+            ...initial.counts.floors['First Floor']!,
+            mainDoors: 1,
+          },
+        },
+      },
+    });
+    const main = (floor: string) =>
+      result.lines
+        .filter((line) => line.section === floor)
+        .flatMap((line) => line.outputs)
+        .find((output) => output.name === 'Main door');
+    expect(main('Ground Floor')?.quotedRate).toBe(45000);
+    expect(main('First Floor')?.quotedRate).toBe(60000);
+  });
+});

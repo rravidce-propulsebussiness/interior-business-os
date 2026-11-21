@@ -15,6 +15,7 @@ const emptyFinishes = (): FloorFinishes => ({
   bathroomLengthFeet: 0,
   bathroomWidthFeet: 0,
   kitchenPlatformFeet: 0,
+  railingFeet: 0,
 });
 const toNumber = (value: string) => {
   const parsed = Number(value);
@@ -92,6 +93,7 @@ export function BoqFloorInputs({
                     <>
                       <th>Bathroom size L × W (ft)</th>
                       <th>Kitchen platform length (ft)</th>
+                      <th>Staircase / balcony railing (rft)</th>
                     </>
                   )}
                 </tr>
@@ -205,6 +207,22 @@ export function BoqFloorInputs({
                                   kitchenPlatformFeet: toNumber(
                                     event.target.value,
                                   ),
+                                })
+                              }
+                            />
+                          </td>
+                          <td>
+                            <input
+                              type="number"
+                              min="0"
+                              max="500"
+                              step="0.5"
+                              aria-label={`${floor.name} railing running feet`}
+                              placeholder="Measure from drawing"
+                              value={finishes.railingFeet || ''}
+                              onChange={(event) =>
+                                setFinishes(floor.name, {
+                                  railingFeet: toNumber(event.target.value),
                                 })
                               }
                             />

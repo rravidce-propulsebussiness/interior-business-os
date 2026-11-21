@@ -126,6 +126,8 @@ export type FloorFinishes = {
   bathroomWidthFeet: number;
   /** Kitchen platform running length per kitchen (0 = default). */
   kitchenPlatformFeet: number;
+  /** Staircase / balcony handrail length entered from the drawing (running ft). */
+  railingFeet?: number;
 };
 
 export type BoqCounts = {
@@ -1505,6 +1507,7 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
       bathroomLengthFeet: feet(value.bathroomLengthFeet),
       bathroomWidthFeet: feet(value.bathroomWidthFeet),
       kitchenPlatformFeet: feet(value.kitchenPlatformFeet),
+      railingFeet: feet(value.railingFeet),
     };
   }
   return {
@@ -1906,10 +1909,15 @@ export function generateQuotationBoq(
 ): QuotationBoqResult {
   const design = normalizeDesign(input.design);
   // The drawing's own slab / staircase / cover values win over the company's.
+  const quotedSlabThickness = Number(input.details.slabThicknessIn);
   const s = normalizeStructuralSettings({
     ...(input.settings && typeof input.settings === 'object'
       ? input.settings
       : {}),
+    ...(quotedSlabThickness >= 3 && quotedSlabThickness <= 12
+      ? { slabThicknessIn: quotedSlabThickness }
+      : {}),
+    // Engineer-entered drawing schedule is the final takeoff authority.
     ...design?.settings,
   });
   const floors = (
@@ -2791,6 +2799,12 @@ export function generateQuotationBoq(
     AllowanceCategory,
     { rate: number; label: string; extra: boolean }
   >();
+  // A floor-specific specification such as "First Floor main door" overrides
+  // the general main-door limit only for that floor.
+  const floorAllowances = new Map<
+    string,
+    Map<AllowanceCategory, { rate: number; label: string; extra: boolean }>
+  >();
   const unmatched: {
     section: NonNullable<SftEstimateDetails['sections']>[number];
     allowance: number;
@@ -2831,8 +2845,20 @@ export function generateQuotationBoq(
       continue;
     }
     const quoted = { rate: allowance, label, extra: treatment === 'extra' };
+    const scopedFloor = floors.find((floor) => {
+      const prefix = floor.name.toLowerCase();
+      const title = section.title.toLowerCase();
+      return (
+        title.startsWith(prefix) && /[\s:—-]/.test(title.charAt(prefix.length))
+      );
+    });
+    const target = scopedFloor
+      ? (floorAllowances.get(scopedFloor.name) ??
+        new Map<AllowanceCategory, typeof quoted>())
+      : allowances;
     for (const category of categories)
-      if (!allowances.has(category)) allowances.set(category, quoted);
+      if (!target.has(category)) target.set(category, quoted);
+    if (scopedFloor) floorAllowances.set(scopedFloor.name, target);
   }
   // A generic "Internal doors" allowance also covers bathroom and pooja
   // doors unless the package prices those separately.
@@ -2850,9 +2876,12 @@ export function generateQuotationBoq(
     unit: string,
     material: string,
     source?: string,
+    floorName?: string,
   ): GeneratedOutput[] => {
     if (!(quantity > 0) || included.has(category)) return [];
-    const quoted = allowances.get(category);
+    const quoted =
+      (floorName ? floorAllowances.get(floorName)?.get(category) : undefined) ??
+      allowances.get(category);
     // Quantities only come from the quotation; the cost comes from the rate
     // card. The quoted allowance is kept for comparison.
     return [
@@ -2986,7 +3015,15 @@ export function generateQuotationBoq(
       'quote-doors-windows',
       'doors & windows',
       [
-        ...item('mainDoors', 'Main door', fc.mainDoors, 'door', 'door_main'),
+        ...item(
+          'mainDoors',
+          'Main door',
+          fc.mainDoors,
+          'door',
+          'door_main',
+          undefined,
+          floor.name,
+        ),
         ...item(
           'internalDoors',
           'Bedroom / internal door',
@@ -3072,7 +3109,7 @@ export function generateQuotationBoq(
             : `${s.tileCoveragePercent}% of ${round(living, 0)} sq ft (enter rooms for exact)`,
         ),
         ...tiled(
-          'floorTiles',
+          'bathFloorTiles',
           'Bathroom floor tiles (anti-skid)',
           bathFloor,
           'bath_floor_tiles',
@@ -3103,15 +3140,13 @@ export function generateQuotationBoq(
                 s.parkingTileIn,
                 s.parkingTilesPerBox,
               );
-              return [
-                {
-                  name: 'Parking tiles',
-                  material: 'parking_flooring',
-                  quantity: order.quantity,
-                  unit: 'sqft',
-                  order: order.order,
-                },
-              ];
+              return item(
+                'parkingTiles',
+                'Parking tiles',
+                order.quantity,
+                'sqft',
+                'parking_flooring',
+              ).map((output) => ({ ...output, order: order.order }));
             })()
           : []),
         // Bedding mortar: floors 40 mm 1:4, wall tiles 12 mm 1:3.
@@ -3154,6 +3189,21 @@ export function generateQuotationBoq(
         },
       ],
       { builtUpSqft: floor.areaSqft, bathrooms: fc.bathrooms },
+    );
+    // Railings are measured from the drawing, not inferred from the staircase
+    // area. An unstated contractual price limit remains unspecified.
+    finishLine(
+      'quote-railings',
+      'railings & metal works',
+      item(
+        'railings',
+        'SS railing',
+        fin?.railingFeet ?? 0,
+        'running_ft',
+        'railing_ss304',
+        'Measured staircase / balcony railing in running feet',
+      ),
+      { railingFeet: fin?.railingFeet ?? 0 },
     );
     finishLine(
       'quote-kitchen',
@@ -3786,6 +3836,8 @@ export type AllowanceCategory =
   | 'ventilators'
   | 'gates'
   | 'floorTiles'
+  | 'bathFloorTiles'
+  | 'parkingTiles'
   | 'wallTiles'
   | 'paintInterior'
   | 'paintExterior'
@@ -3796,6 +3848,7 @@ export type AllowanceCategory =
   | 'kitchenWallTiles'
   | 'kitchenSink'
   | 'staircaseGranite'
+  | 'railings'
   | 'rollingShutters'
   | 'overheadTank'
   | 'sump';
@@ -3815,6 +3868,8 @@ export function allowanceCategories(
   if (/sump/.test(t)) return piece ? ['sump'] : [];
   if (/overhead|water tank|\btank\b/.test(t))
     return piece ? ['overheadTank'] : [];
+  if (/rail|handrail|balustrade/.test(t))
+    return unit === 'running_ft' ? ['railings'] : [];
   if (/stair/.test(t)) return unit === 'sqft' ? ['staircaseGranite'] : [];
   if (/sink/.test(t)) return piece ? ['kitchenSink'] : [];
   if (/kitchen/.test(t) && /til/.test(t))
@@ -3832,6 +3887,14 @@ export function allowanceCategories(
   }
   if (/ventilat/.test(t)) return unit === 'piece' ? ['ventilators'] : [];
   if (/window/.test(t)) return unit === 'sqft' ? ['windows'] : [];
+  if (
+    /(bathroom|toilet|washroom)/.test(t) &&
+    /(floor|anti.skid)/.test(t) &&
+    /til/.test(t)
+  )
+    return unit === 'sqft' ? ['bathFloorTiles'] : [];
+  if (/(parking|tandur)/.test(t) && /(tile|floor|stone)/.test(t))
+    return unit === 'sqft' ? ['parkingTiles'] : [];
   if (/(wall|dado|bathroom) til/.test(t))
     return unit === 'sqft' ? ['wallTiles'] : [];
   if (/tile|flooring|granite|marble|vitrified/.test(t))

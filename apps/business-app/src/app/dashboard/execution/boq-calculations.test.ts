@@ -130,3 +130,43 @@ describe('manual construction BOQ takeoff', () => {
     });
   });
 });
+
+describe('manual reinforcement diameter coverage', () => {
+  it('supports 20 mm beam bars and optional 8 mm column bars from the structural schedule', () => {
+    const beam = calculateBoq('beam', {
+      count: 1,
+      length: 4,
+      width: 0.23,
+      height: 0.38,
+      main20: 4,
+      main16: 0,
+      main12: 0,
+      main10: 0,
+      main8: 0,
+      ringDiameter: 8,
+      ringSpacing: 150,
+    });
+    expect(
+      beam.find((output) => output.name === '20 mm main bars'),
+    ).toMatchObject({
+      unit: 'rod',
+      quantity: 2,
+    });
+    const column = calculateBoq('column', {
+      count: 2,
+      length: 0.23,
+      width: 0.23,
+      height: 3,
+      main20: 0,
+      main16: 0,
+      main12: 4,
+      main10: 0,
+      main8: 2,
+      ringDiameter: 8,
+      ringSpacing: 150,
+    });
+    expect(column.some((output) => output.name === '8 mm main bars')).toBe(
+      true,
+    );
+  });
+});

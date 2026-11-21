@@ -1151,10 +1151,14 @@ export function BoqWorkspace({
                   <h3>Generate from quotation</h3>
                   <p>
                     Floors, sizes and floor heights come from the quotation.
-                    Steel is cut from {settings.stockBarFeet} ft bars:{' '}
-                    {settings.foundationCuts} pieces per bar for the foundation
-                    lift and {settings.floorCuts} per bar for each floor above,
-                    with a {settings.lapDiameters}d lap at every floor. Package
+                    Enter room dimensions, openings, column groups, beam lengths
+                    and reinforcement below from the drawings. Both typed
+                    schedules and code-generated takeoffs run through this same
+                    quotation BOQ engine. Steel is cut from{' '}
+                    {settings.stockBarFeet} ft bars: {settings.foundationCuts}{' '}
+                    pieces per bar for the foundation lift and{' '}
+                    {settings.floorCuts} per bar for each floor above, with a{' '}
+                    {settings.lapDiameters}d lap at every floor. Package
                     allowances (per door, per bathroom, per sq ft) are priced at
                     the quoted value. Manual items are kept.
                   </p>
@@ -1313,9 +1317,10 @@ export function BoqWorkspace({
               <div className="boq-steel-summary">
                 <h3>Cost estimate, floor by floor</h3>
                 <p className="boq-steel-note">
-                  Materials at today&apos;s brand prices, package items at the
-                  quoted rates, structural labour at the contract rate per sq
-                  ft. Open a floor to see quantity × rate.
+                  Estimated costs use today&apos;s selected material and trade
+                  rates. Quoted allowance ceilings are displayed separately;
+                  they are not supplier costs. Structural labour uses the
+                  configured contract rate. Open a floor for quantity × rate.
                 </p>
                 <table className="boq-floor-overview">
                   <thead>
@@ -1616,9 +1621,7 @@ export function BoqWorkspace({
                                 <span className="boq-rate-cell">
                                   {line.kind === 'quoted' ? (
                                     '—'
-                                  ) : (materialForOutput(output) &&
-                                      output.quotedRate === undefined) ||
-                                    !canEdit ? (
+                                  ) : !canEdit ? (
                                     money(rate)
                                   ) : (
                                     <input
@@ -1637,7 +1640,10 @@ export function BoqWorkspace({
                                     />
                                   )}
                                   {output.quotedRate !== undefined && (
-                                    <small>Package rate from the quote</small>
+                                    <small>
+                                      Quoted limit: {money(output.quotedRate)}/
+                                      {output.unit} (not supplier cost)
+                                    </small>
                                   )}
                                 </span>
                                 <strong>

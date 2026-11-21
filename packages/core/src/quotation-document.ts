@@ -285,7 +285,12 @@ export function renderQuotationDocument(
     .map(
       ({ details }) =>
         '<section class="pb-estimate"><div class="pb-section-title"><h2>Work-wise SFT estimate</h2></div>' +
-        '<p class="pb-section-subtitle">Dimensions, units, quantities and quotation-specific rates</p>' +
+        '<p class="pb-section-subtitle">Dimensions, units, quantities and quotation-specific rates. H = floor-to-floor height.</p>' +
+        (details.slabThicknessIn
+          ? '<p class="pb-section-subtitle">RCC slab thickness: ' +
+            escape(details.slabThicknessIn) +
+            ' inches, subject to the approved structural drawing.</p>'
+          : '') +
         '<table><thead><tr>' +
         '<th>Work description</th><th>L (ft)</th><th>W (ft)</th><th>H (ft)</th><th>Area / Qty</th>' +
         (h.display.unit_rate ? '<th class="amount">Rate</th>' : '') +
@@ -367,7 +372,9 @@ export function renderQuotationDocument(
             section.description.trim() ||
             section.brand?.trim() ||
             section.grade?.trim() ||
-            section.allowancePerSqft?.trim(),
+            section.allowancePerSqft?.trim() ||
+            section.allowanceValue?.trim() ||
+            section.pricingTreatment === 'excluded',
           ),
         )
         .map(
@@ -383,10 +390,23 @@ export function renderQuotationDocument(
             (section.grade
               ? '<p><strong>Grade:</strong> ' + escape(section.grade) + '</p>'
               : '') +
-            (section.allowancePerSqft
-              ? '<p><strong>Material allowance:</strong> ₹' +
-                escape(section.allowancePerSqft) +
-                '/SFT</p>'
+            (section.allowanceValue
+              ? '<p><strong>' +
+                (section.pricingTreatment === 'extra'
+                  ? 'Separately priced'
+                  : 'Customer allowance ceiling') +
+                ':</strong> ₹' +
+                escape(section.allowanceValue) +
+                ' per ' +
+                escape(section.unit || 'item') +
+                '</p>'
+              : section.allowancePerSqft
+                ? '<p><strong>Material allowance:</strong> ₹' +
+                  escape(section.allowancePerSqft) +
+                  '/SFT</p>'
+                : '') +
+            (section.pricingTreatment === 'excluded'
+              ? '<p><strong>Not included in this package</strong></p>'
               : '') +
             (section.description
               ? '<p class="text">' + escape(section.description) + '</p>'
@@ -417,7 +437,7 @@ export function renderQuotationDocument(
         (sections ||
           '<p class="muted">No additional written specifications supplied.</p>') +
         materialChoices +
-        '<p class="pb-material-footnote">The inclusions above form part of this saved quotation and do not add a second charge.</p></div>'
+        '<p class="pb-material-footnote">Inclusions and customer allowance ceilings are part of the quoted package; separately priced extras and exclusions are identified in their specification rows. Allowance limits are not contractor procurement costs.</p></div>'
       );
     })
     .join('');
