@@ -68,6 +68,12 @@ export type BoqFloor = {
   heightFeet: number;
   /** True when the height was not entered on the quotation. */
   heightAssumed?: boolean;
+  /**
+   * True when the length and width were not on the quotation and are
+   * estimated from the area (√area × √area). The user should enter
+   * the real dimensions before generating the BOQ.
+   */
+  sizeAssumed?: boolean;
   /** Part of the area quoted as parking / stilt (few walls, parking floor). */
   parkingSqft?: number;
 };
@@ -1339,6 +1345,7 @@ export function floorsFromQuote(
       widthFeet: realRectangle ? width : round(side),
       heightFeet: heightAssumed ? defaultHeightFeet : entry.height,
       ...(heightAssumed ? { heightAssumed: true } : {}),
+      ...(!realRectangle ? { sizeAssumed: true } : {}),
       ...(entry.parking > 0 ? { parkingSqft: round(entry.parking) } : {}),
     };
   });
@@ -1912,6 +1919,11 @@ export function generateQuotationBoq(
   for (const floor of floors.filter((item) => item.heightAssumed))
     warnings.push(
       `${floor.name}: floor height not on the quotation; ${floor.heightFeet} ft assumed. Enter it in the quotation work details.`,
+    );
+
+  for (const floor of floors.filter((item) => item.sizeAssumed))
+    warnings.push(
+      `${floor.name}: floor dimensions (L × W) not on the quotation; ${floor.lengthFeet} ft × ${floor.widthFeet} ft estimated from area. Enter actual dimensions in the BOQ floor table.`,
     );
 
   if (floors.length) {

@@ -796,8 +796,18 @@ export function PremiumSftBuilder({
               <tr>
                 <th>#</th>
                 <th>Work item</th>
-                <th>Length (ft)</th>
-                <th>Width (ft)</th>
+                <th title="Length (L) of the floor for the project BOQ. Required for accurate structural quantities.">
+                  L (ft){' '}
+                  <span aria-hidden="true" style={{ color: '#d97706' }}>
+                    *
+                  </span>
+                </th>
+                <th title="Breadth (B) of the floor for the project BOQ. Required for accurate structural quantities.">
+                  B (ft){' '}
+                  <span aria-hidden="true" style={{ color: '#d97706' }}>
+                    *
+                  </span>
+                </th>
                 <th title="Floor-to-floor (slab) height for the project BOQ. Required for accurate steel &amp; masonry quantities. Not billed.">
                   Height (ft){' '}
                   <span aria-hidden="true" style={{ color: '#d97706' }}>
@@ -875,13 +885,20 @@ export function PremiumSftBuilder({
                     ).map(([field, used]) => {
                       const isFloorHeight =
                         field === 'heightFeet' && r.kind === 'floor';
+                      const isFloorSize =
+                        (field === 'lengthFeet' || field === 'widthFeet') &&
+                        r.kind === 'floor';
                       const heightMissing =
                         isFloorHeight && used && !r.heightFeet;
+                      const sizeMissing =
+                        isFloorSize && used && !r[field];
                       return (
                         <td
                           key={field}
                           className={
-                            heightMissing ? 'qs-height-required' : undefined
+                            heightMissing || sizeMissing
+                              ? 'qs-height-required'
+                              : undefined
                           }
                         >
                           <input
@@ -895,21 +912,25 @@ export function PremiumSftBuilder({
                             title={
                               isFloorHeight
                                 ? 'Floor-to-floor (slab) height for the BOQ. Required for steel & masonry quantities. Not billed.'
-                                : undefined
+                                : isFloorSize
+                                  ? 'Floor dimension for the BOQ. Required for accurate structural quantities.'
+                                  : undefined
                             }
                             placeholder={
                               !used
                                 ? '—'
                                 : isFloorHeight
                                   ? 'Enter ft'
-                                  : '0'
+                                  : isFloorSize
+                                    ? 'Enter ft'
+                                    : '0'
                             }
                             value={used ? (r[field] ?? '') : ''}
                             onChange={(e) =>
                               updateRow(i, { [field]: e.target.value })
                             }
                           />
-                          {heightMissing && (
+                          {(heightMissing || sizeMissing) && (
                             <small className="qs-height-warn">
                               ⚠ Required for BOQ
                             </small>

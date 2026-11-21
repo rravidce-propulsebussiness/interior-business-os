@@ -985,17 +985,66 @@ export function BoqWorkspace({
                 <div className="boq-gen-floor boq-gen-floor-head">
                   <span>Floor</span>
                   <span>Area</span>
-                  <span>Size (ft)</span>
-                  <span>Floor height (ft)</span>
+                  <span>L (ft)</span>
+                  <span>B (ft)</span>
+                  <span>Height (ft)</span>
                   <span>Parking (sqft)</span>
                 </div>
                 {floorsForGeneration.map((floor, floorIndex) => (
                   <div className="boq-gen-floor" key={floor.name}>
                     <strong>{floor.name}</strong>
                     <span>{floor.areaSqft.toLocaleString('en-IN')} sqft</span>
-                    <span>
-                      {floor.lengthFeet} × {floor.widthFeet}
-                    </span>
+                    <label className={floor.sizeAssumed ? 'qs-height-required' : undefined}>
+                      <span className="sr-only">{floor.name} length</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="999"
+                        step="0.1"
+                        value={floor.lengthFeet}
+                        onChange={(event) => {
+                          const lengthFeet = Number(event.target.value);
+                          setGenFloors(
+                            floorsForGeneration.map((item, i) =>
+                              i === floorIndex
+                                ? {
+                                    ...item,
+                                    sizeAssumed: false,
+                                    lengthFeet: lengthFeet > 0 ? lengthFeet : item.lengthFeet,
+                                  }
+                                : item,
+                            ),
+                          );
+                        }}
+                      />
+                      {floor.sizeAssumed && (
+                        <small>Not on quote — estimated</small>
+                      )}
+                    </label>
+                    <label className={floor.sizeAssumed ? 'qs-height-required' : undefined}>
+                      <span className="sr-only">{floor.name} breadth</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="999"
+                        step="0.1"
+                        value={floor.widthFeet}
+                        onChange={(event) => {
+                          const widthFeet = Number(event.target.value);
+                          setGenFloors(
+                            floorsForGeneration.map((item, i) =>
+                              i === floorIndex
+                                ? {
+                                    ...item,
+                                    sizeAssumed: false,
+                                    widthFeet: widthFeet > 0 ? widthFeet : item.widthFeet,
+                                  }
+                                : item,
+                            ),
+                          );
+                        }}
+                      />
+                    </label>
                     <label>
                       <span className="sr-only">{floor.name} floor height</span>
                       <input
