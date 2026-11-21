@@ -1229,6 +1229,87 @@ describe('entering the drawings by hand', () => {
     );
   });
 
+  it('splits roof beam and slab measurements without losing or duplicating concrete and reinforcement', () => {
+    const design = {
+      columns: [
+        {
+          label: 'C1',
+          count: 4,
+          floors: 0,
+          widthIn: 9,
+          depthIn: 12,
+          bars: '4-16+2-12',
+          tieDia: 8,
+          tieSpacingIn: 6,
+          footingLengthFeet: 5,
+          footingWidthFeet: 5,
+          footingThicknessIn: 12,
+          footingBarDia: 12,
+          footingBarSpacingIn: 6,
+        },
+      ],
+      beams: [
+        {
+          label: 'B1',
+          widthIn: 9,
+          depthIn: 15,
+          bars: '2-16+2-12',
+          stirrupDia: 8,
+          stirrupSpacingIn: 6,
+          runFeet: [80, 70],
+        },
+      ],
+      plinthRunFeet: 120,
+      settings: {
+        slabThicknessIn: 5,
+        slabMainDia: 10,
+        slabMainSpacingIn: 6,
+        slabDistDia: 8,
+        slabDistSpacingIn: 8,
+      },
+    };
+    const legacy = generateQuotationBoq({ details: quote(), design });
+    const separated = generateQuotationBoq({
+      details: quote(),
+      design,
+      splitBeamSlab: true,
+    });
+    const concreteVolume = (items: typeof legacy.lines) =>
+      items
+        .flatMap((item) => item.outputs)
+        .filter((output) => output.unit === 'm³')
+        .reduce((sum, output) => sum + output.quantity, 0);
+    const rods = (items: typeof legacy.lines) =>
+      items
+        .flatMap((item) => item.outputs)
+        .filter((output) => output.unit === 'rod')
+        .reduce((sum, output) => sum + output.quantity, 0);
+
+    for (const section of ['Ground Floor', 'First Floor']) {
+      const original = legacy.lines.filter(
+        (item) => item.section === section && item.kind === 'quote-slab',
+      );
+      const beams = separated.lines.filter(
+        (item) => item.section === section && item.kind === 'quote-beams',
+      );
+      const slabs = separated.lines.filter(
+        (item) => item.section === section && item.kind === 'quote-slab',
+      );
+      expect(original).toHaveLength(1);
+      expect(beams).toHaveLength(1);
+      expect(slabs).toHaveLength(1);
+      // Concrete rounding happens once per material line, so allow 0.02 m³.
+      expect(concreteVolume([...beams, ...slabs])).toBeCloseTo(
+        concreteVolume(original),
+        1,
+      );
+      expect(rods([...beams, ...slabs])).toBe(rods(original));
+      expect(slabs[0]!.name).not.toContain('beams');
+      expect(beams[0]!.name).toContain('beams');
+    }
+    expect(separated.steel).toEqual(legacy.steel);
+  });
+
   it('prices structural labour on the exact built-up area', () => {
     const result = generateQuotationBoq({
       details: quote(),
