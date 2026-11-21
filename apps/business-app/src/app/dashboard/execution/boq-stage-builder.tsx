@@ -530,6 +530,184 @@ export function BoqStageBuilder(props: Props) {
             ×
           </button>
         </div>
+        {isGeometry(category.key) && (
+          <div className="boq-stage-dimensions">
+            <p className="boq-stage-hint">
+              Enter the measured count, length, width and depth. Volume is calculated
+              in cubic feet and cubic metres; material rates use m³. No value is
+              assumed from the overall floor area.
+            </p>
+            <label className="boq-stage-field boq-stage-unit-switch">
+              <span>Input dimension unit</span>
+              <select value={dimensionUnit}
+                onChange={(event) => setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')}>
+                <option value="ft">Feet (ft)</option>
+                <option value="m">Metres (m)</option>
+              </select>
+            </label>
+            {dimensionRows.map(({ line, lineIndex }) => {
+              const dims: MeasuredDimensions = {
+                count: Number(line.inputs.count) || 0,
+                lengthFeet: Number(line.inputs.lengthFeet) || 0,
+                widthFeet: Number(line.inputs.widthFeet) || 0,
+                depthFeet: Number(line.inputs.depthFeet) || 0,
+              };
+              const measured = measuredVolume(dims);
+              const changeDimension = (
+                field: keyof MeasuredDimensions,
+                value: number,
+              ) => props.onUpdateGeometry(lineIndex,
+                { ...dims, [field]: field === 'count' ? Math.round(value) : Number((value / displayFactor).toFixed(4)) },
+                line.name,
+              );
+              return (
+                <div className="boq-stage-subcard" key={line.id}>
+                  <div className="boq-stage-subhead">
+                    <strong>{line.name}</strong>
+                    <button type="button" onClick={() => props.onRemoveManual(lineIndex)}>Remove</button>
+                  </div>
+                  <div className="boq-stage-input-grid">
+                    <InputNumber label="Same items" value={dims.count} onChange={(v) => changeDimension('count', v)} />
+                    {(['lengthFeet', 'widthFeet', 'depthFeet'] as const).map((field) =>
+                      <InputNumber key={field}
+                        label={{ lengthFeet: 'Length', widthFeet: 'Width', depthFeet: 'Depth / thickness' }[field]}
+                        unit={dimensionUnit}
+                        value={Number((dims[field] * displayFactor).toFixed(3))}
+                        onChange={(v) => changeDimension(field, v)}
+                      />)}
+                  </div>
+                  <div className="boq-stage-volume">
+                    <span>{number(measured.cft)} cft</span><strong>{number(measured.m3)} m³</strong>
+                  </div>
+                </div>
+              );
+            })}
+            <div className="boq-stage-subcard">
+              <h4>+ Measure {category.label}</h4>
+              <InputText label="Item name" value={dimensionName}
+                placeholder={category.label} onChange={setDimensionName} />
+              <div className="boq-stage-input-grid">
+                <InputNumber label="Same items (nos)" value={dimensionDraft.count}
+                  onChange={(value) => setDimensionDraft((prior) => ({ ...prior, count: Math.round(value) }))} />
+                {(['lengthFeet', 'widthFeet', 'depthFeet'] as const).map((field) =>
+                  <InputNumber key={field}
+                    label={{ lengthFeet: 'Length', widthFeet: 'Width', depthFeet: 'Depth / thickness' }[field]}
+                    unit={dimensionUnit}
+                    value={Number((dimensionDraft[field] * displayFactor).toFixed(3))}
+                    onChange={(v) => geometryValue(field, v)}
+                  />)}
+              </div>
+              <div className="boq-stage-volume">
+                <span>{number(volume.cft)} cft</span><strong>{number(volume.m3)} m³</strong>
+              </div>
+              {category.key === 'pcc' && <small className="boq-stage-hint">
+                PCC cement, sand and aggregate are calculated using the editable mix
+                quantities in BOQ Rates. Concrete volume is informational and is not
+                also charged as ready-mix.
+              </small>}
+              {['sajjas', 'shelves'].includes(category.key) && <small className="boq-stage-hint">
+                This measures concrete and estimates shuttering. Enter reinforcement
+                separately from the structural drawing; no steel is invented.
+              </small>}
+              <button type="button" className="boq-stage-outline"
+                disabled={volume.m3 <= 0}
+                onClick={() => {
+                  props.onAddGeometry(stage, category.key as MeasuredKind,
+                    dimensionName.trim() || category.label, dimensionDraft);
+                  setDimensionDraft({ count: 1, lengthFeet: 0, widthFeet: 0, depthFeet: 0 });
+                  setDimensionName('');
+                }}>
+                + Add measured {category.label}
+              </button>
+            </div>
+          </div>
+        )}
+        {category.key === 'brickwork' && floor && (
+          <div className="boq-stage-dimensions">
+            <p className="boq-stage-hint">
+              Measure each wall type from the drawing. Enter external 9 inch and
+              internal 4/4.5 inch walls separately, including same-wall count.
+              Door and window areas from the Doors & Windows card are deducted
+              once, instead of using an estimated opening percentage. Brick,
+              cement and sand quantities follow the editable 100 sqft rules in BOQ Rates.
+            </p>
+            {walls.map((wall, wallIndex) => {
+              const updateWall = (patch: Partial<WallMeasure>) =>
+                updateWalls(walls.map((row, i) => i === wallIndex ? { ...row, ...patch } : row));
+              return <div className="boq-stage-subcard" key={wall.id}>
+                <div className="boq-stage-subhead">
+                  <strong>{wall.name || 'Wall ' + (wallIndex + 1)}</strong>
+                  <button type="button" onClick={() =>
+                    updateWalls(walls.filter((_, i) => i !== wallIndex))}>Remove</button>
+                </div>
+                <div className="boq-stage-input-grid">
+                  <InputText label="Wall reference" value={wall.name}
+                    onChange={(v) => updateWall({ name: v })} />
+                  <label className="boq-stage-field"><span>Wall location</span>
+                    <select value={wall.location}
+                      onChange={(e) => updateWall({location: e.target.value === 'internal' ? 'internal' : 'external'})}>
+                      <option value="external">External</option><option value="internal">Internal</option>
+                    </select>
+                  </label>
+                  <InputNumber label="Same walls (nos)" value={wall.count}
+                    onChange={(v) => updateWall({ count: Math.round(v) })} />
+                  <InputNumber label="Length" unit="ft" value={wall.lengthFeet}
+                    onChange={(v) => updateWall({ lengthFeet: v })} />
+                  <InputNumber label="Height" unit="ft" value={wall.heightFeet}
+                    onChange={(v) => updateWall({ heightFeet: v })} />
+                  <InputNumber label="Thickness" unit="in" value={wall.thicknessIn}
+                    onChange={(v) => updateWall({ thicknessIn: v })} />
+                </div>
+                <div className="boq-stage-volume">
+                  <span>Gross wall area</span>
+                  <strong>{number(wall.count * wall.lengthFeet * wall.heightFeet)} sqft</strong>
+                </div>
+              </div>;
+            })}
+            <div className="boq-stage-subcard">
+              <h4>+ Add wall type</h4>
+              <div className="boq-stage-input-grid">
+                <InputText label="Wall reference" value={wallDraft.name} placeholder="W1, internal room 2"
+                  onChange={(v) => setWallDraft((prior) => ({ ...prior, name: v }))} />
+                <label className="boq-stage-field"><span>Wall location</span>
+                  <select value={wallDraft.location}
+                    onChange={(e) => setWallDraft((prior) => ({
+                      ...prior,
+                      location: e.target.value === 'internal' ? 'internal' : 'external',
+                      thicknessIn: e.target.value === 'internal' ? 4.5 : 9,
+                    }))}>
+                    <option value="external">External</option><option value="internal">Internal</option>
+                  </select>
+                </label>
+                <InputNumber label="Same walls (nos)" value={wallDraft.count}
+                  onChange={(v) => setWallDraft((prior) => ({ ...prior, count: Math.round(v) }))} />
+                <InputNumber label="Length" unit="ft" value={wallDraft.lengthFeet}
+                  onChange={(v) => setWallDraft((prior) => ({ ...prior, lengthFeet: v }))} />
+                <InputNumber label="Height" unit="ft" value={wallDraft.heightFeet}
+                  onChange={(v) => setWallDraft((prior) => ({ ...prior, heightFeet: v }))} />
+                <InputNumber label="Thickness" unit="in" value={wallDraft.thicknessIn}
+                  onChange={(v) => setWallDraft((prior) => ({ ...prior, thicknessIn: v }))} />
+              </div>
+              <button className="boq-stage-outline" type="button"
+                disabled={!(wallDraft.lengthFeet > 0 && wallDraft.heightFeet > 0 && wallDraft.count > 0)}
+                onClick={() => {
+                  updateWalls([...walls, { ...wallDraft,
+                    id: 'wall-' + Date.now().toString(36),
+                    name: wallDraft.name.trim() || ('Wall ' + (walls.length + 1)),
+                  }]);
+                  setWallDraft({ id: 'new', name: '', location: 'external', count: 1,
+                    lengthFeet: 0, heightFeet: 0, thicknessIn: 9 });
+                }}>
+                + Add measured wall
+              </button>
+            </div>
+            {walls.length > 0 && <p className="boq-stage-hint">
+              Wall deduction and quantities recalculate when opening sizes change.
+              For incomplete opening schedules, typical sizes are assumed and flagged
+              in the drawing warnings.
+            </p>}
+          </div>
+        )}
         {isColumns && (
           <>
             <p className="boq-stage-hint">
