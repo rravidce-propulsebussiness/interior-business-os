@@ -190,7 +190,7 @@ export default async function QuotationStudio({
         constructionEditor={
           canPriceConstruction ? (
             <ConstructionSelector
-              key={mode}
+              key={revision.id + ':' + mode}
               rates={rates}
               packages={packages}
               revisionId={revision.id}
