@@ -1970,9 +1970,9 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     }))
     .filter((item) => item.count > 0 && parseBars(item.bars).length > 0);
   const hasFootingSchedule = Array.isArray(value.footings);
-  const footings = (
-    hasFootingSchedule ? (value.footings as Record<string, unknown>[])
-      : columns.map((column) => ({
+  const footingRows: Record<string, unknown>[] = hasFootingSchedule
+    ? (value.footings as Record<string, unknown>[])
+    : columns.map((column): Record<string, unknown> => ({
           label: 'F-' + column.label,
           type: 'isolated',
           count: column.count,
@@ -1982,8 +1982,8 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
           thicknessIn: column.footingThicknessIn,
           bottomBarDia: column.footingBarDia,
           bottomSpacingIn: column.footingBarSpacingIn,
-        }))
-  ).slice(0, 40).map((entry, index): DesignFootingType => {
+        }));
+  const footings = footingRows.slice(0, 40).map((entry, index): DesignFootingType => {
     const defaults = newFootingType(index);
     const type = String(entry.type ?? defaults.type);
     const geometry = String(entry.geometry ?? defaults.geometry);
@@ -2672,7 +2672,7 @@ export function generateQuotationBoq(
         if (footing.type === 'pile_cap') warnings.push(
           `${footing.label}: pile cap takeoff excludes piles, drilling and pile reinforcement. Enter them separately from the engineer's pile schedule.`,
         );
-        if (footing.type === 'strap' && footing.strapLengthFeet && !refs.length) warnings.push(
+        if (footing.type === 'strap' && footing.strapLengthFeet) warnings.push(
           `${footing.label}: strap beam reinforcement has not been specified; only measured concrete is quantified.`,
         );
         if (footing.geometry !== 'flat') warnings.push(
@@ -2773,7 +2773,7 @@ export function generateQuotationBoq(
           maxLap +
           maxBend <=
         foundationPiece + 1e-9;
-      if (!throughGround)
+      if (columnTypes.length && !throughGround)
         warnings.push(
           `Foundation bars (${ft(foundationPiece)}) stop ${ft(maxLap)} above plinth; the ground floor columns get their own lift because footing → ground-floor roof + lap is longer than one foundation piece.`,
         );
