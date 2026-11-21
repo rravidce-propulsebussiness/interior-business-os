@@ -1028,17 +1028,18 @@ export function MasterPackageStudio({
         </section>
       </div>
       {preview && previewData && (
-        <div
-          className="mp-modal-backdrop"
-          role="presentation"
-          onClick={() => setPreview(false)}
-        >
+        <div className="mp-modal-backdrop" role="presentation">
+          <button
+            type="button"
+            className="mp-modal-dismiss-area"
+            aria-label="Close master package preview"
+            onClick={() => setPreview(false)}
+          />
           <div
             className="mp-modal"
             role="dialog"
             aria-modal="true"
             aria-label="Master quotation template preview"
-            onClick={(e) => e.stopPropagation()}
           >
             <div className="mp-modal-toolbar">
               <strong>Master Template Preview</strong>
