@@ -1513,6 +1513,15 @@ export function BoqStageBuilder(props: Props) {
         const open = expanded.includes(stage);
         const inherited = Boolean(props.repeatFrom[stage]);
         const total = costForStage(stage, list);
+        const miscellaneousRows = props.lines
+          .map((line, lineIndex) => ({ line, lineIndex }))
+          .filter(
+            ({ line }) =>
+              !line.origin &&
+              line.kind === 'manual' &&
+              stageFor(line, props.floors) === stage,
+          );
+        const miscellaneousTotal = visibleCost(stage, 'miscellaneous');
         return (
           <Fragment key={stage}>
             {!isFoundation && stageIndex === 2 && props.floors.length > 1 && (
@@ -1657,6 +1666,206 @@ export function BoqStageBuilder(props: Props) {
                         (item) => item.key === editing.category,
                       ) ?? visibleList[0])!,
                     )}
+                  <div className="boq-stage-miscellaneous">
+                    {preview ? (
+                      miscellaneousRows.length > 0 && (
+                        <div className="boq-stage-misc-preview">
+                          <strong>Miscellaneous</strong>
+                          {miscellaneousRows.map(({ line }) => (
+                            <div key={line.id}>
+                              <span>{line.name}</span>
+                              <span>
+                                {number(line.outputs[0]?.quantity ?? 0)}{' '}
+                                {line.outputs[0]?.unit || line.unit || ''}
+                              </span>
+                              {props.canViewCost && (
+                                <strong>
+                                  {money(
+                                    line.outputs.reduce(
+                                      (sum, output) => sum + priced(output),
+                                      0,
+                                    ),
+                                  )}
+                                </strong>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )
+                    ) : (
+                      <>
+                        <button
+                          className="boq-stage-misc-trigger"
+                          type="button"
+                          aria-expanded={miscellaneousStage === stage}
+                          aria-controls={'boq-misc-' + stage.replace(/[^a-z0-9]/gi, '-')}
+                          onClick={() => toggleMiscellaneous(stage)}
+                        >
+                          <span className="boq-stage-misc-plus">＋</span>
+                          <span className="boq-stage-misc-copy">
+                            <strong>Miscellaneous</strong>
+                            <small>Extra materials, labour or work for {stage}</small>
+                          </span>
+                          {miscellaneousRows.length > 0 && (
+                            <span className="boq-stage-misc-count">
+                              {miscellaneousRows.length}{' '}
+                              {miscellaneousRows.length === 1 ? 'item' : 'items'}
+                              {props.canViewCost
+                                ? ' · ' + money(miscellaneousTotal)
+                                : ''}
+                            </span>
+                          )}
+                          <span className="boq-stage-misc-chevron">
+                            {miscellaneousStage === stage ? '⌃' : '⌄'}
+                          </span>
+                        </button>
+                        {miscellaneousStage === stage && (
+                          <div
+                            className="boq-stage-misc-panel"
+                            id={'boq-misc-' + stage.replace(/[^a-z0-9]/gi, '-')}
+                          >
+                            <div className="boq-stage-misc-heading">
+                              <h4>Miscellaneous — {stage}</h4>
+                              <p>
+                                Add only work not included in the measured
+                                stages or quotation. Each item contributes to
+                                this stage&apos;s BOQ total.
+                              </p>
+                            </div>
+                            {miscellaneousRows.map(({ line, lineIndex }) => {
+                              const output = line.outputs[0];
+                              const details = {
+                                name: line.name,
+                                quantity: output?.quantity ?? 0,
+                                unit: output?.unit || line.unit || 'nos',
+                                rate: output?.rate ?? (output ? props.rateFor(output) : 0),
+                              };
+                              return (
+                                <div className="boq-stage-misc-item" key={line.id}>
+                                  <div className="boq-stage-misc-item-head">
+                                    <strong>{line.name}</strong>
+                                    <button
+                                      type="button"
+                                      className="boq-stage-misc-remove"
+                                      onClick={() => props.onRemoveManual(lineIndex)}
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                  <div className="boq-stage-input-grid">
+                                    <InputText
+                                      label="Item name"
+                                      value={details.name}
+                                      onChange={(name) =>
+                                        props.onUpdateMiscellaneous(lineIndex, {
+                                          ...details,
+                                          name,
+                                        })
+                                      }
+                                    />
+                                    <InputNumber
+                                      label="Quantity"
+                                      value={details.quantity}
+                                      onChange={(quantity) =>
+                                        props.onUpdateMiscellaneous(lineIndex, {
+                                          ...details,
+                                          quantity,
+                                        })
+                                      }
+                                    />
+                                    <label className="boq-stage-field">
+                                      <span>Unit</span>
+                                      <select
+                                        value={details.unit}
+                                        onChange={(event) =>
+                                          props.onUpdateMiscellaneous(lineIndex, {
+                                            ...details,
+                                            unit: event.target.value,
+                                          })
+                                        }
+                                      >
+                                        {[details.unit, 'sqft', 'cft', 'm³', 'rft', 'nos',
+                                          'bag', 'kg', 't', 'lot', 'day']
+                                          .filter((value, index, values) => values.indexOf(value) === index)
+                                          .map((value) => <option key={value} value={value}>{value}</option>)}
+                                      </select>
+                                    </label>
+                                    {props.canViewCost && (
+                                      <InputNumber
+                                        label="Unit rate (₹)"
+                                        value={details.rate}
+                                        onChange={(rate) =>
+                                          props.onUpdateMiscellaneous(lineIndex, {
+                                            ...details,
+                                            rate,
+                                          })
+                                        }
+                                      />
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            <div className="boq-stage-misc-add">
+                              <h4>Add miscellaneous item</h4>
+                              <div className="boq-stage-input-grid">
+                                <InputText
+                                  label="Item name"
+                                  value={manualName}
+                                  placeholder="e.g. Extra material, transport or labour"
+                                  onChange={setManualName}
+                                />
+                                <InputNumber
+                                  label="Quantity"
+                                  value={manualQuantity}
+                                  onChange={setManualQuantity}
+                                />
+                                <label className="boq-stage-field">
+                                  <span>Unit</span>
+                                  <select
+                                    value={manualUnit}
+                                    onChange={(event) => setManualUnit(event.target.value)}
+                                  >
+                                    {['sqft', 'cft', 'm³', 'rft', 'nos', 'bag',
+                                      'kg', 't', 'lot', 'day'].map((unit) => (
+                                      <option key={unit} value={unit}>{unit}</option>
+                                    ))}
+                                  </select>
+                                </label>
+                                {props.canViewCost && (
+                                  <InputNumber
+                                    label="Unit rate (₹)"
+                                    value={manualRate}
+                                    onChange={setManualRate}
+                                  />
+                                )}
+                              </div>
+                              <button
+                                className="boq-stage-outline"
+                                type="button"
+                                disabled={!manualName.trim() || !(manualQuantity > 0)}
+                                onClick={() => {
+                                  props.onAddManual(
+                                    stage,
+                                    'miscellaneous',
+                                    manualQuantity,
+                                    manualUnit,
+                                    props.canViewCost ? manualRate : 0,
+                                    manualName.trim(),
+                                  );
+                                  setManualName('');
+                                  setManualQuantity(0);
+                                  setManualRate(0);
+                                }}
+                              >
+                                ＋ Add miscellaneous item
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               )}
             </article>
