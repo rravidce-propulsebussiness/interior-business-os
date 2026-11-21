@@ -635,6 +635,7 @@ export function BoqWorkspace({
     // assumptions. Legacy documents are preserved until intentionally edited.
     const measuredDesign = normalizeDesign(genDesign);
     const measuredColumns = Boolean(measuredDesign?.columns.length);
+    const measuredFootings = Boolean(measuredDesign?.footings.length);
     const measuredBeams = Boolean(
       measuredDesign?.beams.some((beam) => beam.runFeet.some((run) => run > 0)),
     );
@@ -647,12 +648,10 @@ export function BoqWorkspace({
     );
     const sourceLines = result.lines.filter((line) => {
       if (!measuredOnly) return true;
-      if (
-        ['quote-foundation', 'quote-columns', 'quote-pedestals'].includes(
-          line.kind,
-        )
-      )
-        return measuredColumns;
+      if (line.kind === 'quote-footings' || line.kind === 'quote-pedestals')
+        return measuredFootings;
+      if (line.kind === 'quote-columns') return measuredColumns;
+      if (line.kind === 'quote-foundation') return false;
       if (measuredOnly && ['quote-excavation', 'quote-pcc'].includes(line.kind))
         return false;
       // No provisional brick counts in measured BOQs: walls are quantified
@@ -671,7 +670,7 @@ export function BoqWorkspace({
       // calculator; never count wire from still-unmeasured members.
       if (line.kind === 'quote-binding-wire')
         return line.section === 'Foundation'
-          ? measuredColumns
+          ? measuredFootings && measuredColumns
           : measuredColumns && measuredBeams && measuredSlab;
       return true;
     });
@@ -968,7 +967,7 @@ export function BoqWorkspace({
     const generatedForStage: Record<string, string[]> = {
       excavation: ['quote-foundation'],
       pcc: ['quote-foundation'],
-      footings: ['quote-foundation', 'quote-pedestals'],
+      footings: ['quote-foundation', 'quote-footings', 'quote-pedestals'],
       columns: ['quote-columns'],
       plinth: ['quote-plinth-beam'],
       beams: ['quote-beams', 'quote-slab'],
