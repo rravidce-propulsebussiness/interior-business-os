@@ -2862,6 +2862,23 @@ export function generateQuotationBoq(
   }
   // A generic "Internal doors" allowance also covers bathroom and pooja
   // doors unless the package prices those separately.
+  // Finish descriptions from the final quote can vary by package.
+  // Avoid calling Royal granite "tiles" or a three-coat paint system "two coats".
+  // These descriptions are not supplier prices or measured ceiling heights.
+  const packageSpecs = input.details.sections ?? [];
+  const parkingIsGranite = packageSpecs.some((spec) =>
+    /parking/i.test(spec.title) && /granite/i.test(spec.title + ' ' + spec.description),
+  );
+  const interiorHasThreeCoats = packageSpecs.some(
+    (spec) =>
+      /interior.*paint/i.test(spec.title) &&
+      /(?:emulsion|paint)[^;]*\\b3\\s*coats\\b/i.test(spec.description),
+  );
+  const bathroomTilesToCeiling = packageSpecs.some(
+    (spec) =>
+      /bathroom.*wall.*til/i.test(spec.title) &&
+      /ceiling/i.test(spec.description),
+  );
   const included = new Set<AllowanceCategory>();
   const generic = allowances.get('internalDoors');
   if (generic) {
@@ -3122,7 +3139,8 @@ export function generateQuotationBoq(
           wallTiles,
           'wall_tiles',
           [s.wallTileLengthIn, s.wallTileWidthIn, s.wallTilesPerBox],
-          `${fc.bathrooms} bathrooms × ${round(2 * (bathL + bathW), 1)} ft walls × ${s.wallTileHeightFeet} ft, less door`,
+          `${fc.bathrooms} bathrooms × ${round(2 * (bathL + bathW), 1)} ft walls × ${s.wallTileHeightFeet} ft, less door` +
+            (bathroomTilesToCeiling ? ' · Package specifies ceiling-height tiling: confirm actual clear height in BOQ settings' : ''),
         ),
         ...item(
           'staircaseGranite',
@@ -3142,11 +3160,19 @@ export function generateQuotationBoq(
               );
               return item(
                 'parkingTiles',
-                'Parking tiles',
+                parkingIsGranite ? 'Parking granite flooring' : 'Parking tiles',
                 order.quantity,
                 'sqft',
                 'parking_flooring',
-              ).map((output) => ({ ...output, order: order.order }));
+                parkingIsGranite
+                  ? 'Granite is specified in quotation: verify that the supplier rate is for granite, not parking tiles'
+                  : undefined,
+              ).map((output) => ({
+                ...output,
+                order: parkingIsGranite
+                  ? `Granite area ${order.quantity} sq ft; confirm supplier slab size and offcuts`
+                  : order.order,
+              }));
             })()
           : []),
         // Bedding mortar: floors 40 mm 1:4, wall tiles 12 mm 1:3.
@@ -3241,11 +3267,15 @@ export function generateQuotationBoq(
       [
         ...item(
           'paintInterior',
-          'Interior painting (putty, primer, 2 coats)',
+          interiorHasThreeCoats
+            ? 'Interior painting (putty, primer, 3 coats)'
+            : 'Interior painting (putty, primer, 2 coats)',
           interiorPaint,
           'sqft',
           'paint_interior',
-          'Walls and ceiling',
+          interiorHasThreeCoats
+            ? 'Walls and ceiling; 3-coat finish specified in quotation: verify labour and paint rate'
+            : 'Walls and ceiling',
         ),
         ...item(
           'paintExterior',
