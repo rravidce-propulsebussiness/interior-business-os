@@ -1909,10 +1909,15 @@ export function generateQuotationBoq(
 ): QuotationBoqResult {
   const design = normalizeDesign(input.design);
   // The drawing's own slab / staircase / cover values win over the company's.
+  const quotedSlabThickness = Number(input.details.slabThicknessIn);
   const s = normalizeStructuralSettings({
     ...(input.settings && typeof input.settings === 'object'
       ? input.settings
       : {}),
+    ...(quotedSlabThickness >= 3 && quotedSlabThickness <= 12
+      ? { slabThicknessIn: quotedSlabThickness }
+      : {}),
+    // Engineer-entered drawing schedule is the final takeoff authority.
     ...design?.settings,
   });
   const floors = (
