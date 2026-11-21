@@ -13,14 +13,15 @@ import {
   type StructuralDesign,
 } from '@business-os/core/construction-boq';
 import { NumberField } from './boq-number-field';
+import { BoqFootingEditor } from './boq-footing-editor';
 
 const newColumn = (index: number): DesignColumnType => ({
   label: `C${index + 1}`,
-  count: 4,
+  count: 0,
   floors: 0,
   widthIn: 9,
   depthIn: 12,
-  bars: '4-12',
+  bars: '',
   tieDia: 8,
   tieSpacingIn: 6,
   footingLengthFeet: 5,
@@ -33,15 +34,15 @@ const newBeam = (index: number, floors: number): DesignBeamType => ({
   label: `B${index + 1}`,
   widthIn: 9,
   depthIn: 15,
-  bars: '2-16+2-12',
+  bars: '',
   stirrupDia: 8,
   stirrupSpacingIn: 6,
   runFeet: Array.from({ length: floors }, () => 0),
 });
 export const emptyDesign = (floors: number): StructuralDesign => ({
   footings: [],
-  columns: [newColumn(0)],
-  beams: [newBeam(0, floors)],
+  columns: [],
+  beams: [],
   plinthRunFeet: 0,
 });
 
@@ -255,9 +256,9 @@ export function BoqDesignSchedule({
         <span>
           <strong>Use the structural drawing</strong>
           <small>
-            Enter each column type (with its footing) and beam type from the
-            engineer&apos;s drawing. Steel is then quantified type by type. Off:
-            the column grid and bar rules from Configure rates are used.
+            Enter footing F1/F2 and column C1/C2 schedules separately from the
+            engineer&apos;s drawing. Steel is quantified from the entered
+            measurements, not inferred from the column grid.
           </small>
         </span>
       </label>
@@ -265,7 +266,7 @@ export function BoqDesignSchedule({
         <>
           <div className="boq-gen-count-table boq-design-table">
             <table>
-              <caption>Columns and footings</caption>
+              <caption>Columns — C1, C2, etc.</caption>
               <thead>
                 <tr>
                   <th>Type</th>
@@ -274,8 +275,6 @@ export function BoqDesignSchedule({
                   <th>Size (in)</th>
                   <th>Main bars (nos-dia)</th>
                   <th>Rings (mm @ in)</th>
-                  <th>Footing L × W (ft) × T (in)</th>
-                  <th>Footing mesh (mm @ in)</th>
                   <th />
                 </tr>
               </thead>
@@ -352,47 +351,6 @@ export function BoqDesignSchedule({
                         }
                       />
                     </td>
-                    <td className="boq-design-pair">
-                      <NumberCell
-                        label={`${column.label} footing length`}
-                        feet
-                        value={column.footingLengthFeet}
-                        onChange={(footingLengthFeet) =>
-                          updateColumn(index, { footingLengthFeet })
-                        }
-                      />
-                      <NumberCell
-                        label={`${column.label} footing width`}
-                        feet
-                        value={column.footingWidthFeet}
-                        onChange={(footingWidthFeet) =>
-                          updateColumn(index, { footingWidthFeet })
-                        }
-                      />
-                      <NumberCell
-                        label={`${column.label} footing thickness`}
-                        value={column.footingThicknessIn}
-                        onChange={(footingThicknessIn) =>
-                          updateColumn(index, { footingThicknessIn })
-                        }
-                      />
-                    </td>
-                    <td className="boq-design-pair">
-                      <NumberCell
-                        label={`${column.label} footing bar diameter`}
-                        value={column.footingBarDia}
-                        onChange={(footingBarDia) =>
-                          updateColumn(index, { footingBarDia })
-                        }
-                      />
-                      <NumberCell
-                        label={`${column.label} footing bar spacing`}
-                        value={column.footingBarSpacingIn}
-                        onChange={(footingBarSpacingIn) =>
-                          updateColumn(index, { footingBarSpacingIn })
-                        }
-                      />
-                    </td>
                     <td>
                       <button
                         type="button"
@@ -429,6 +387,16 @@ export function BoqDesignSchedule({
             >
               + Column type
             </button>
+          </div>
+          <div className="boq-design-independent-footings">
+            <h3>Foundation footings — F1, F2, etc.</h3>
+            <BoqFootingEditor
+              footings={design.footings ?? []}
+              columnLabels={design.columns.map((column) => column.label)}
+              onChange={(footings) => onChange({
+                ...design, footings, legacyFootings: false,
+              })}
+            />
           </div>
           <div className="boq-gen-count-table boq-design-table">
             <table>
