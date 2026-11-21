@@ -154,7 +154,7 @@ export function footingMeshPieces(
     for (const [span, across] of [
       [usableLength, usableWidth],
       [usableWidth, usableLength],
-    ]) {
+    ] as const) {
       if (!(span > 0 && across > 0)) continue;
       pieces.push({
         diameter: dia,
