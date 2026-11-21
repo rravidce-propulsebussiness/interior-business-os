@@ -1,0 +1,40 @@
+name: One-time format and test construction quotation
+on:
+  push:
+    branches:
+      - fix/quotation-boq-manual-parity-20261121
+permissions:
+  contents: write
+jobs:
+  format-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format changed quotation renderer and regression tests
+        run: |
+          pnpm exec prettier --write \
+            packages/core/src/quotation-document.ts \
+            packages/core/src/quotation-document.test.ts \
+            docs/quotation-manual-boq-parity.md
+      - name: Run BOQ and quotation PDF regression tests
+        run: |
+          pnpm exec vitest run \
+            packages/core/src/quotation-document.test.ts \
+            packages/core/src/construction-boq.test.ts \
+            apps/business-app/src/app/dashboard/execution/boq-calculations.test.ts
+      - name: Commit formatting and remove this one-time workflow
+        run: |
+          rm .github/workflows/boq-prettier-test-once-20261121.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -u
+          git commit -m 'style: format quote PDF and regression tests'
+          git push origin HEAD:fix/quotation-boq-manual-parity-20261121
