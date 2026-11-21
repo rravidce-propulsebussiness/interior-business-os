@@ -651,7 +651,7 @@ export function BoqWorkspace({
       if (line.kind === 'quote-footings' || line.kind === 'quote-pedestals')
         return measuredFootings;
       if (line.kind === 'quote-columns') return measuredColumns;
-      if (line.kind === 'quote-foundation') return false;
+      if (line.kind === 'quote-foundation') return Boolean(measuredDesign?.legacyFootings);
       if (measuredOnly && ['quote-excavation', 'quote-pcc'].includes(line.kind))
         return false;
       // No provisional brick counts in measured BOQs: walls are quantified
