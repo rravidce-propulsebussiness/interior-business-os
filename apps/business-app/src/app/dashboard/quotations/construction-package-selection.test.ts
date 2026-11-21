@@ -33,6 +33,17 @@ describe('quotation studio saved-package recovery', () => {
     ).toBe(SAVED_PACKAGE_OPTION);
   });
 
+  it('does not silently replace an archived package with another package using the same code', () => {
+    expect(
+      initialConstructionPackageSelection(
+        packages,
+        { package: { id: 'retired-premium-id', code: 'PREMIUM' } },
+        false,
+        'sft',
+      ),
+    ).toBe(SAVED_PACKAGE_OPTION);
+  });
+
   it('does not hide an older saved quote without package metadata', () => {
     expect(
       initialConstructionPackageSelection(packages, {}, false, 'sft'),
