@@ -198,7 +198,6 @@ export function BoqStageBuilder(props: Props) {
   const [manualQuantity, setManualQuantity] = useState(0);
   const [manualRate, setManualRate] = useState(0);
   const [manualUnit, setManualUnit] = useState('sqft');
-  const first = props.floors[0]?.name ?? '';
   const last = props.floors[props.floors.length - 1]?.name ?? '';
   const sections = ['Foundation', ...props.floors.map((f) => f.name)];
   const priced = (output: StageBoqOutput) =>
@@ -360,7 +359,7 @@ export function BoqStageBuilder(props: Props) {
               ? [['lightPoints', 'Lights'], ['fanPoints', 'Fans'], ['socketPoints', '6A sockets'], ['powerPoints', '16A power points']]
               : [['bathrooms', 'Bathrooms'], ['kitchens', 'Kitchens']]
           ).map(([key, label]) =>
-            <InputNumber key={key} label={label} value={current[key as keyof typeof current]}
+            <InputNumber key={key} label={label ?? ''} value={current[key as keyof typeof current]}
               onChange={(value) => changeCount(key as keyof typeof current, value)} />)}
         </div>}
       {current && category.key === 'compound' && <div className="boq-stage-input-grid">
