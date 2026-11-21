@@ -12994,6 +12994,18 @@ export interface Database {
       };
       platform_context: { Args: Record<string, never>; Returns: Json };
       platform_gst_summary: { Args: Record<string, never>; Returns: Json };
+      platform_master_quotation_list: {
+        Args: Record<string, never>;
+        Returns: Json;
+      };
+      platform_master_quotation_save: {
+        Args: { p_input: Json };
+        Returns: string;
+      };
+      platform_master_quotation_status: {
+        Args: { p_id: string; p_version: number; p_status: string };
+        Returns: number;
+      };
       platform_owner_directory: {
         Args: {
           p_query?: string;
