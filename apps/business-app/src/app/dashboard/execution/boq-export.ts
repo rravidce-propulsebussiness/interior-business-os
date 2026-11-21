@@ -41,9 +41,16 @@ const round = (value: number, digits = 2) => {
 
 /**
  * Totals of each material / work across every stage, grouped by cost head
- * in the order heads first appear, so the list reads like a purchase list.
+ * in the given head order (else the order heads first appear), so the list
+ * reads like a purchase list. Measured work with no material of its own
+ * (walls, plaster, shuttering area …) is listed last: its cost is in the
+ * materials and labour above.
  */
-export function materialsToOrder(rows: BoqExportRow[]): OrderLine[] {
+export const MEASURED_WORK_HEAD = 'Measured work (cost in materials & labour)';
+export function materialsToOrder(
+  rows: BoqExportRow[],
+  headOrder: readonly string[] = [],
+): OrderLine[] {
   const byKey = new Map<string, OrderLine>();
   for (const row of rows) {
     if (!(row.quantity > 0)) continue;
@@ -52,7 +59,10 @@ export function materialsToOrder(rows: BoqExportRow[]): OrderLine[] {
     const line = prior ?? {
       name: row.name,
       unit: row.unit,
-      head: row.head || 'Other',
+      head:
+        (!row.head || row.head === 'Other') && !(row.rate > 0)
+          ? MEASURED_WORK_HEAD
+          : row.head || 'Other',
       quantity: 0,
       amount: 0,
       stages: [],
@@ -64,9 +74,11 @@ export function materialsToOrder(rows: BoqExportRow[]): OrderLine[] {
     if (!line.stages.includes(row.stage)) line.stages.push(row.stage);
     byKey.set(key, line);
   }
-  const headOrder: string[] = [];
+  const order = [...headOrder];
   for (const line of byKey.values())
-    if (!headOrder.includes(line.head)) headOrder.push(line.head);
+    if (!order.includes(line.head) && line.head !== MEASURED_WORK_HEAD)
+      order.push(line.head);
+  order.push(MEASURED_WORK_HEAD);
   return [...byKey.values()]
     .map((line) => ({
       ...line,
@@ -74,7 +86,7 @@ export function materialsToOrder(rows: BoqExportRow[]): OrderLine[] {
       amount: round(line.amount),
       weightKg: round(line.weightKg),
     }))
-    .sort((a, b) => headOrder.indexOf(a.head) - headOrder.indexOf(b.head));
+    .sort((a, b) => order.indexOf(a.head) - order.indexOf(b.head));
 }
 
 /** A CSV cell, quoted, with spreadsheet formulas neutralised. */
@@ -107,6 +119,8 @@ export function boqCsv(input: {
   quotedValue?: number | undefined;
   builtUpSqft?: number | undefined;
   generatedOn?: string | undefined;
+  /** Order of cost heads in the order list. */
+  headOrder?: readonly string[] | undefined;
 }): string {
   const { rows, includeCost } = input;
   const out: string[] = [];
@@ -153,7 +167,9 @@ export function boqCsv(input: {
     }
     total += stageTotal;
     if (includeCost)
-      out.push(csvLine([`${stage} total`, '', '', '', '', '', stageTotal]));
+      out.push(
+        csvLine([`${stage} total`, '', '', '', '', '', Math.round(stageTotal)]),
+      );
   }
   out.push('');
   out.push(csvLine(['Materials and work to order, whole project']));
@@ -167,7 +183,7 @@ export function boqCsv(input: {
       'Stages',
     ]),
   );
-  for (const line of materialsToOrder(rows))
+  for (const line of materialsToOrder(rows, input.headOrder))
     out.push(
       csvLine([
         line.head,
@@ -180,12 +196,14 @@ export function boqCsv(input: {
     );
   if (includeCost) {
     out.push('');
-    out.push(csvLine(['Total cost estimate', round(total)]));
+    out.push(csvLine(['Total cost estimate', Math.round(total)]));
     if (input.builtUpSqft)
       out.push(csvLine(['Cost per sq ft', round(total / input.builtUpSqft)]));
     if (input.quotedValue && input.quotedValue > 0) {
       out.push(csvLine(['Quotation value', round(input.quotedValue)]));
-      out.push(csvLine(['Margin over cost', round(input.quotedValue - total)]));
+      out.push(
+        csvLine(['Margin over cost', Math.round(input.quotedValue - total)]),
+      );
     }
   }
   return out.join('\r\n') + '\r\n';

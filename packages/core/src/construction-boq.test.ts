@@ -11,7 +11,10 @@ import {
 } from './construction-boq';
 import { calculateSftEstimate } from './sft-quotation';
 
-const quote = (heights: [string, string] = ['10', '10']) =>
+const quote = (
+  heights: [string, string] = ['10', '10'],
+  extraRows: Record<string, string>[] = [],
+) =>
   calculateSftEstimate({
     rows: [
       {
@@ -39,6 +42,7 @@ const quote = (heights: [string, string] = ['10', '10']) =>
         unit: 'running_ft',
         ratePerSqft: '900',
       },
+      ...extraRows,
     ],
     materialIds: [],
     sections: [
@@ -169,7 +173,6 @@ describe('quotation-driven construction BOQ', () => {
       'Ground Floor',
       'First Floor',
       'External works',
-      'Additional quoted works',
       'Handover',
     ]);
     const columns = result.lines.filter(
@@ -376,6 +379,52 @@ describe('quotation-driven construction BOQ', () => {
     ).toBe(false);
   });
 
+  it('measures a compound wall quoted as wall area under External works', () => {
+    const details = calculateSftEstimate({
+      rows: [
+        {
+          kind: 'floor',
+          name: 'Ground Floor',
+          lengthFeet: '40',
+          widthFeet: '30',
+          heightFeet: '10',
+          ratePerSqft: '1650',
+        },
+        {
+          kind: 'additional',
+          name: 'Compound Wall',
+          lengthFeet: '140',
+          widthFeet: '1',
+          heightFeet: '6',
+          unit: 'wall_sqft',
+          ratePerSqft: '350',
+        },
+      ],
+      materialIds: [],
+    });
+    const result = generateQuotationBoq({ details });
+    expect(result.counts.compoundWallFeet).toBe(140);
+    const wall = result.lines.find(
+      (line) => line.kind === 'quote-compound-wall',
+    );
+    expect(wall).toMatchObject({
+      section: 'External works',
+      quotedPrice: 294000,
+      inputs: { lengthFeet: 140, heightFeet: 6 },
+    });
+    expect(wall?.outputs[0]).toMatchObject({
+      quantity: 840,
+      material: 'labour_brickwork_9',
+    });
+    expect(
+      wall?.outputs.find((output) => output.name === 'External plaster'),
+    ).toMatchObject({ quantity: 1680, material: 'plaster_labour' });
+    // Not repeated as an unpriced additional work.
+    expect(
+      result.lines.some((line) => line.section === 'Additional quoted works'),
+    ).toBe(false);
+  });
+
   it('adds parapet, compound wall, gate, design and handover items', () => {
     const result = generateQuotationBoq({ details: quote() });
     const parapet = result.lines.find((line) => line.kind === 'quote-parapet');
@@ -421,12 +470,32 @@ describe('quotation-driven construction BOQ', () => {
   });
 
   it('keeps additional quoted works as manual lines with their quoted price', () => {
-    const result = generateQuotationBoq({ details: quote() });
-    const wall = result.lines.find((line) => line.name === 'Compound wall');
-    expect(wall).toMatchObject({
-      origin: 'quotation-additional',
-      quotedPrice: 126000,
-    });
+    const details = quote(undefined, [
+      {
+        kind: 'additional',
+        name: 'Borewell',
+        lengthFeet: '1',
+        widthFeet: '1',
+        unit: 'lumpsum',
+        ratePerSqft: '90000',
+      },
+    ]);
+    const result = generateQuotationBoq({ details });
+    expect(result.lines.find((line) => line.name === 'Borewell')).toMatchObject(
+      {
+        origin: 'quotation-additional',
+        section: 'Additional quoted works',
+        quotedPrice: 90000,
+      },
+    );
+    // The quoted compound wall is measured under External works and keeps
+    // its quoted price there.
+    expect(
+      result.lines.find((line) => line.kind === 'quote-compound-wall'),
+    ).toMatchObject({ section: 'External works', quotedPrice: 126000 });
+    expect(result.lines.some((line) => line.name === 'Compound wall')).toBe(
+      false,
+    );
   });
 
   it('adds pedestals to the foundation only when a height is set', () => {
@@ -656,7 +725,10 @@ describe('quotation-driven construction BOQ', () => {
 
   it('prices structural labour as one contract rate per sq ft by default', () => {
     const result = generateQuotationBoq({ details: quote() });
-    const outputs = result.lines.flatMap((line) => line.outputs);
+    // The compound wall is outside the built-up contract rate.
+    const outputs = result.lines
+      .filter((line) => line.kind !== 'quote-compound-wall')
+      .flatMap((line) => line.outputs);
     expect(
       outputs
         .filter((o) => o.material === 'labour_civil')

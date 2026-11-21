@@ -34,6 +34,17 @@ The BOQ runs from design to handover, floor by floor:
 | Additional works   | Other quoted extras (sump, borewell …) with their quoted price, to break down               |
 | Handover           | Final cleaning, testing & snag rectification                                                |
 
+**Compound wall from the quote:** a compound / boundary wall row on the
+quotation, in running ft or as wall area (length × height), sets the
+compound wall's length and height. It is measured under External works with
+its bricks, cement, sand, plaster, paint and its brickwork and plaster
+labour (the built-up contract rate does not cover it), and keeps its quoted
+price there instead of appearing again under Additional quoted works.
+
+**Reopening:** the BOQ page opens the BOQ being worked on (the project's, or
+the most recent one). A project's quotation has one generated BOQ: choosing
+that project, or New BOQ with a single project, opens the saved one.
+
 **Counts per floor** (editable on the BOQ before generating): main doors,
 bedroom / internal doors, bathroom doors, pooja doors, windows, ventilators
 bathrooms, kitchens and rolling shutters, plus entrance gates and compound wall

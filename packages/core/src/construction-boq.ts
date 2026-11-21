@@ -1387,18 +1387,45 @@ export function estimateCounts(
       powerPoints: living > 0 ? bathrooms + kitchens * 2 + internalDoors : 0,
     };
   });
-  // A quoted compound wall (running ft) sets its length.
-  const compound = details?.rows.find(
-    (row) =>
-      row.kind === 'additional' &&
-      /compound|boundary/i.test(row.name) &&
-      (row.unit ?? 'sqft') === 'running_ft',
-  );
+  // A quoted compound wall sets its length.
+  const compound = quotedCompoundWall(details);
   return {
     floors: perFloor,
     entranceGates: floors.length ? 1 : 0,
-    compoundWallFeet: compound ? Number(compound.areaSqft) || 0 : 0,
+    compoundWallFeet: compound ? Math.round(compound.lengthFeet) : 0,
   };
+}
+
+/** The quotation's compound / boundary wall row, if it has one. */
+function compoundWallRow(details: SftEstimateDetails | undefined) {
+  return details?.rows.find(
+    (row) => row.kind === 'additional' && /compound|boundary/i.test(row.name),
+  );
+}
+
+/**
+ * Length and height of a quoted compound wall. Quoted in running ft, the
+ * quantity is the length; quoted as wall area (length × height) or any
+ * other unit, the length typed on the quote is used.
+ */
+export function quotedCompoundWall(
+  details: SftEstimateDetails | undefined,
+): { lengthFeet: number; heightFeet: number } | null {
+  const row = compoundWallRow(details);
+  if (!row) return null;
+  const length = Number(row.lengthFeet) || 0;
+  const height = Number(row.heightFeet) || 0;
+  const quantity = Number(row.areaSqft) || 0;
+  const unit = row.unit ?? 'sqft';
+  const lengthFeet =
+    unit === 'running_ft'
+      ? quantity || length
+      : length > 0
+        ? length
+        : unit === 'wall_sqft' && height > 0
+          ? quantity / height
+          : 0;
+  return lengthFeet > 0 ? { lengthFeet, heightFeet: height } : null;
 }
 
 /** Merge edited counts over the estimates; anything missing or invalid falls back. */
@@ -3462,24 +3489,38 @@ export function generateQuotationBoq(
   }
 
   // --- External works: compound wall and entrance gate -------------------
+  // A compound wall on the quotation is measured here (its quoted height
+  // wins over the company default) instead of as an additional work.
+  const quotedWall = quotedCompoundWall(input.details);
+  const quotedWallRow = compoundWallRow(input.details);
   if (counts.compoundWallFeet > 0) {
-    const area = counts.compoundWallFeet * s.compoundWallHeightFeet;
+    const wallHeight =
+      quotedWall && quotedWall.heightFeet > 0
+        ? quotedWall.heightFeet
+        : s.compoundWallHeightFeet;
+    const area = counts.compoundWallFeet * wallHeight;
+    const wallLabour = { ...s, labourItemized: 1 };
     const volume = area * (s.compoundWallIn / 12) * CUM_PER_CFT;
     drafts.push({
       origin: 'quotation-structure',
       draft: {
-        name: `Compound wall (${counts.compoundWallFeet} rft × ${s.compoundWallHeightFeet} ft)`,
+        name: `Compound wall (${counts.compoundWallFeet} rft × ${wallHeight} ft)`,
         section: 'External works',
         kind: 'quote-compound-wall',
         unit: 'sqft',
+        ...(quotedWallRow && Number(quotedWallRow.amount) > 0
+          ? { quotedPrice: Number(quotedWallRow.amount) }
+          : {}),
         inputs: {
           lengthFeet: counts.compoundWallFeet,
-          heightFeet: s.compoundWallHeightFeet,
+          heightFeet: wallHeight,
           thickness: `${s.compoundWallIn} in`,
         },
+        // The built-up contract rate does not cover the compound wall:
+        // its brickwork and plaster labour are always priced here.
         outputs: [
-          wallOutput('compound wall', s.compoundWallIn, area, s),
-          ...brickworkOutputs(volume, 0, 2 * area, s),
+          wallOutput('compound wall', s.compoundWallIn, area, wallLabour),
+          ...brickworkOutputs(volume, 0, 2 * area, wallLabour),
           ...item(
             'paintExterior',
             'Compound wall painting',
@@ -3489,7 +3530,7 @@ export function generateQuotationBoq(
           ),
         ],
         notes:
-          'Brickwork, plaster and paint only. Add the wall footing and pillars as takeoff items.',
+          'Brickwork, plaster and paint with their labour. Add the wall footing and pillars as takeoff items.',
       },
     });
   }
@@ -3584,6 +3625,8 @@ export function generateQuotationBoq(
   // --- Additional quoted works (sump, borewell …) ------------------------
   for (const row of input.details.rows) {
     if ((row.kind ?? 'floor') !== 'additional') continue;
+    // Measured under External works.
+    if (row === quotedWallRow && counts.compoundWallFeet > 0) continue;
     const unit = row.unit ?? 'sqft';
     drafts.push({
       origin: 'quotation-additional',

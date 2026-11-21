@@ -4,6 +4,7 @@ import {
   boqFileName,
   csvCell,
   materialsToOrder,
+  MEASURED_WORK_HEAD,
   type BoqExportRow,
 } from './boq-export';
 
@@ -70,6 +71,30 @@ describe('materialsToOrder', () => {
       'Steel',
       'Room tiles',
     ]);
+    expect(
+      materialsToOrder(rows, ['Steel', 'Room tiles', 'Cement']).map(
+        (line) => line.head,
+      ),
+    ).toEqual(['Steel', 'Room tiles', 'Cement']);
+  });
+
+  it('lists unpriced measured work last', () => {
+    const list = materialsToOrder([
+      {
+        stage: 'Ground Floor',
+        item: 'Walls',
+        name: '9 in external wall',
+        quantity: 900,
+        unit: 'sqft',
+        rate: 0,
+        head: 'Other',
+      },
+      ...rows,
+    ]);
+    expect(list.at(-1)).toMatchObject({
+      name: '9 in external wall',
+      head: MEASURED_WORK_HEAD,
+    });
   });
 });
 

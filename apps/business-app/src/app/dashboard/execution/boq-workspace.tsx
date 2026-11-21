@@ -168,11 +168,16 @@ export function BoqWorkspace({
   canCreate: boolean;
   canViewCost: boolean;
 }) {
+  // Coming back to the BOQ page opens the BOQ being worked on: the one
+  // asked for, else the project's, else the most recent one.
   const initialDocument =
     documents.find((document) => document.id === initialOpenId) ??
     (initialProjectId
       ? documents.find((document) => document.project_id === initialProjectId)
-      : undefined) ??
+      : (documents.find(
+          (document) =>
+            projects.length === 1 && document.project_id === projects[0]!.id,
+        ) ?? documents[0])) ??
     null;
   const [active, setActive] = useState<Document | null>(initialDocument);
   const [title, setTitle] = useState(
@@ -463,7 +468,7 @@ export function BoqWorkspace({
       weightKg: row.weightKg,
     };
   });
-  const orderList = materialsToOrder(exportRows);
+  const orderList = materialsToOrder(exportRows, COST_HEADS);
   const [showTakeoff, setShowTakeoff] = useState(false);
   const floorArea = new Map(
     (generator?.floors ?? []).map((floor) => [floor.name, floor.areaSqft]),
@@ -493,6 +498,7 @@ export function BoqWorkspace({
       quotedValue: canViewCost ? quotedValue : undefined,
       builtUpSqft: builtUpSqft || undefined,
       generatedOn: new Date().toLocaleDateString('en-IN'),
+      headOrder: COST_HEADS,
     });
     // The byte-order mark makes Excel read ₹, × and other symbols.
     const blob = new Blob(['\ufeff' + csv], {
@@ -514,7 +520,28 @@ export function BoqWorkspace({
       .forEach((element) => (element.open = true));
     window.print();
   }
+  // Only one BOQ is generated per project quotation: a project that has one
+  // opens it instead of starting a duplicate that cannot be saved.
+  const generatedBoqFor = (project: string) => {
+    const quote = quoteForProject(project);
+    return project && quote
+      ? documents.find(
+          (document) =>
+            document.project_id === project &&
+            document.quotation_revision_id === quote &&
+            Boolean(document.document?.generator),
+        )
+      : undefined;
+  };
   function selectProject(id: string) {
+    const existing = active ? undefined : generatedBoqFor(id);
+    if (existing) {
+      openDocument(existing);
+      setMessage(
+        "This project's BOQ from its quotation is already saved; it is open here.",
+      );
+      return;
+    }
     setProjectId(id);
     setQuoteId(quoteForProject(id));
     setSelectedQuoteLines([]);
@@ -524,6 +551,14 @@ export function BoqWorkspace({
     setOverrides({});
   }
   function startNew() {
+    const existing = generatedBoqFor(defaultProjectId);
+    if (existing) {
+      openDocument(existing);
+      setMessage(
+        "This project's BOQ from its quotation is already saved; it is open here. Choose another project for a new BOQ.",
+      );
+      return;
+    }
     setActive(null);
     const project = projects.find((item) => item.id === defaultProjectId);
     setTitle(
@@ -1350,14 +1385,17 @@ export function BoqWorkspace({
                       <table>
                         <tbody>
                           {rows.map(([head, value]) => {
+                            const parts = [...value.items.entries()].filter(
+                              ([, part]) => part.amount > 0,
+                            );
+                            // Labour of different trades (walls, plaster …)
+                            // is not one quantity × rate.
                             const showQty =
                               !value.mixed &&
                               value.quantity > 0 &&
                               (head in QUANTITY_HEADS ||
-                                head === 'Structural labour');
-                            const parts = [...value.items.entries()].filter(
-                              ([, part]) => part.amount > 0,
-                            );
+                                (head === 'Structural labour' &&
+                                  parts.length === 1));
                             return (
                               <Fragment key={head}>
                                 <tr className="boq-head-row">

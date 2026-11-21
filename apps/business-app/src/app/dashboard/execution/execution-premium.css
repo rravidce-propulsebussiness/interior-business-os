@@ -132,7 +132,7 @@
 }
 .boq-metrics {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   gap: 12px;
   margin: 18px 0;
 }
@@ -1519,6 +1519,9 @@
   margin-top: 12px;
 }
 .boq-gen-floors {
+  /* Positioned so screen-reader-only labels scroll with the table instead
+     of widening the page on phones. */
+  position: relative;
   margin-top: 12px;
   overflow-x: auto;
 }
@@ -1824,6 +1827,7 @@
 }
 
 .boq-gen-count-table {
+  position: relative;
   margin-top: 12px;
   overflow-x: auto;
 }
