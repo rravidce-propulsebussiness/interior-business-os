@@ -973,4 +973,76 @@ describe('contractual specification limits and manually entered BOQ measures', (
     expect(main('Ground Floor')?.quotedRate).toBe(45000);
     expect(main('First Floor')?.quotedRate).toBe(60000);
   });
+
+  it('preserves Royal package finishes and warns when procurement input is missing', () => {
+    const details = calculateSftEstimate({
+      rows: [
+        {
+          kind: 'floor',
+          name: 'Ground Floor',
+          lengthFeet: '20',
+          widthFeet: '30',
+          heightFeet: '11',
+          ratePerSqft: '2050',
+        },
+      ],
+      materialIds: [],
+      sections: [
+        {
+          title: 'Parking area granite flooring',
+          description: 'Granite flooring',
+          unit: 'sqft',
+          pricingTreatment: 'allowance',
+          allowanceValue: '70',
+        },
+        {
+          title: 'Interior painting',
+          description:
+            'Birla putty 2 coats; Royal Emulsion 3 coats; primer 1 coat',
+          unit: 'none',
+          pricingTreatment: 'included',
+        },
+        {
+          title: 'Bathroom wall tiles',
+          description: 'Tiles up to ceiling height',
+          unit: 'sqft',
+          pricingTreatment: 'allowance',
+          allowanceValue: '65',
+        },
+      ],
+    });
+    const initial = generateQuotationBoq({ details });
+    const result = generateQuotationBoq({
+      details,
+      floors: initial.floors.map((floor) => ({ ...floor, parkingSqft: 100 })),
+      counts: {
+        ...initial.counts,
+        floors: {
+          ...initial.counts.floors,
+          'Ground Floor': {
+            ...initial.counts.floors['Ground Floor']!,
+            bathrooms: 1,
+          },
+        },
+      },
+    });
+    const outputs = result.lines.flatMap((line) => line.outputs);
+    const parking = outputs.find(
+      (output) => output.name === 'Parking granite flooring',
+    );
+    expect(parking).toMatchObject({
+      material: 'parking_flooring',
+      quotedRate: 70,
+    });
+    expect(parking?.source).toContain('Granite');
+    expect(
+      outputs.some(
+        (output) =>
+          output.name === 'Interior painting (putty, primer, 3 coats)',
+      ),
+    ).toBe(true);
+    expect(
+      outputs.find((output) => output.name === 'Bathroom wall tiles')?.source,
+    ).toContain('ceiling-height');
+  });
 });

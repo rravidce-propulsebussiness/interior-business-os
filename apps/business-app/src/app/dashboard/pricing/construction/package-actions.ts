@@ -74,7 +74,7 @@ const schema = z
       .refine((v) => Number(v) > 0),
     status: z.enum(['active', 'inactive']),
     themeColor: z.string().regex(/^#[0-9a-fA-F]{6}$/),
-    specSections: z.array(section).max(18),
+    specSections: z.array(section).max(32),
   })
   .strict();
 

@@ -301,10 +301,14 @@ export function PremiumPackageEditor({
   let savedSections = sections;
   let pricingValidation = '';
   try {
-    savedSections = writeFloorRateDefaults(sections, {
-      parking: parkingRate,
-      penthouse: '',
-    });
+    savedSections = writeFloorRateDefaults(
+      sections,
+      {
+        parking: parkingRate,
+        penthouse: '',
+      },
+      32,
+    );
   } catch (error) {
     pricingValidation =
       error instanceof Error ? error.message : 'Invalid floor rates';
@@ -719,7 +723,7 @@ export function PremiumPackageEditor({
             })}
             <button
               type="button"
-              disabled={sections.length >= 18}
+              disabled={sections.length >= (parkingRate ? 31 : 32)}
               onClick={() => {
                 setSections((prev) => [
                   ...prev,
