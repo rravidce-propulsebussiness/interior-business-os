@@ -871,7 +871,16 @@
   place-items: center;
   padding: 20px;
 }
+.mp-modal-dismiss-area {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
 .mp-modal {
+  position: relative;
+  z-index: 1;
   width: min(850px, 100%);
   max-height: min(90vh, 1050px);
   display: flex;
