@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { OsIcon } from '../../dashboard-shell';
 import {
@@ -173,12 +173,6 @@ export function MasterPackageStudio({
     .at(-1);
   const previewData: Draft | null =
     draft && editing ? draft : selected ? normalize(selected) : null;
-
-  useEffect(() => {
-    if (!selectedId && filtered.length > 0) {
-      setSelectedId(filtered[0]!.id);
-    }
-  }, [selectedId, filtered]);
 
   function changeIndustry(key: string) {
     setIndustry(key);
