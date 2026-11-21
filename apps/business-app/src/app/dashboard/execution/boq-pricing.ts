@@ -719,6 +719,10 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     ['Carpenter'],
     { defaultRate: 1500 },
   ),
+  group('soil_filling', 'Soil filling + compaction', 'm³', 'Labour', ['Site filling'], {
+    defaultRate: 0,
+    note: 'Enter the actual supply and placement rate per compacted m³. Defaults to zero until quoted.',
+  }),
   group('excavation', 'Excavation', 'm³', 'Labour', ['JCB'], {
     defaultRate: 150,
     note: 'Estimate.',
@@ -1103,6 +1107,7 @@ const HEAD_BY_GROUP: Readonly<Record<string, CostHead>> = {
   labour_brickwork_4: 'Structural labour',
   plaster_labour: 'Structural labour',
   shuttering: 'Structural labour',
+  soil_filling: 'Excavation',
   excavation: 'Excavation',
   sump: 'Water storage',
   overhead_tank: 'Water storage',
