@@ -719,7 +719,7 @@ export function PremiumPackageEditor({
             })}
             <button
               type="button"
-              disabled={sections.length >= 18}
+              disabled={sections.length >= 32}
               onClick={() => {
                 setSections((prev) => [
                   ...prev,
