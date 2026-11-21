@@ -30,32 +30,32 @@ describe('BOQ project quotation', () => {
     quote('d', '2026-11-15', { projectId: 'p2' }),
   ];
 
-  it('uses the Final quotation of the project', () => {
-    expect(chooseProjectQuote('p1', 'c1', quotes, { c1: 'a' })).toMatchObject({
+  it('treats a manually selected different quote as Final', () => {
+    expect(chooseProjectQuote('p1', quotes, { p1: 'a' })).toMatchObject({
       quote: { quotationId: 'a' },
       isFinal: true,
     });
   });
 
-  it('falls back to the latest active quotation of the project', () => {
-    expect(chooseProjectQuote('p1', 'c1', quotes, {})).toMatchObject({
+  it('treats the newest saved quote returned by the database as Final by default', () => {
+    expect(chooseProjectQuote('p1', quotes, { p1: 'b' })).toMatchObject({
       quote: { quotationId: 'b' },
-      isFinal: false,
+      isFinal: true,
     });
-    // A Final quote that is cancelled or belongs to another project is ignored.
-    expect(
-      chooseProjectQuote('p1', 'c1', quotes, { c1: 'c' })?.quote.quotationId,
-    ).toBe('b');
-    expect(
-      chooseProjectQuote('p1', 'c1', quotes, { c1: 'd' })?.quote.quotationId,
-    ).toBe('b');
   });
 
-  it('returns nothing when the project has no active quotation', () => {
-    expect(chooseProjectQuote('p3', 'c1', quotes, {})).toBeNull();
+  it('never selects another project or a cancelled quote as Final', () => {
+    expect(chooseProjectQuote('p1', quotes, { p1: 'c' })).toBeNull();
+    expect(chooseProjectQuote('p1', quotes, { p1: 'd' })).toBeNull();
     expect(
-      chooseProjectQuote('p1', 'c1', [quotes[2]!], { c1: 'c' }),
-    ).toBeNull();
+      chooseProjectQuote('p2', quotes, { p2: 'd' })?.quote.quotationId,
+    ).toBe('d');
+  });
+
+  it('fails closed when the authorized effective-project lookup is missing', () => {
+    expect(chooseProjectQuote('p1', quotes, {})).toBeNull();
+    expect(chooseProjectQuote('p3', quotes, { p3: 'a' })).toBeNull();
+    expect(chooseProjectQuote('p1', [quotes[2]!], { p1: 'c' })).toBeNull();
   });
 
   it('names the quotation after the customer and package', () => {

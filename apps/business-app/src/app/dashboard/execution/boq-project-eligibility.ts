@@ -1,4 +1,4 @@
-/** A BOQ belongs to one real project and its explicitly selected Final quote.
+/** A BOQ belongs to one real project and its effective Final quote
  * Saved BOQs remain in the register but never appear as new-work choices. */
 type Project = { id: string };
 type Quotation = { projectId: string; isFinal: boolean };
@@ -35,7 +35,7 @@ export function boqProjectOptionLabel(
     state === 'saved'
       ? 'BOQ saved · open to edit'
       : state === 'needs-final'
-        ? 'Select Final quotation first'
+        ? 'Save a quotation first'
         : 'Ready for new BOQ';
   return `${title} — ${suffix}`;
 }

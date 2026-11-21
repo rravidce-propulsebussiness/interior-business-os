@@ -60,8 +60,8 @@ export async function ensureQuotationBoq(
   if (existing.error) return { status: 'skipped', reason: 'no_access' };
   if (existing.data?.id) return { status: 'exists', id: existing.data.id };
 
-  // Automatic creation must obey the same explicit Final selection as the
-  // manual page. Do not treat "latest quotation" as "Final".
+  // Automatic creation uses the newest saved project quotation by default,
+  // unless a different quote was manually marked Final for this project.
   const project = await db
     .from('projects')
     .select('name,customer_id')
@@ -78,15 +78,15 @@ export async function ensureQuotationBoq(
     .maybeSingle<{ quotation_id: string }>();
   if (revision.error || !revision.data)
     return { status: 'skipped', reason: 'quote_unavailable' };
-  const selected = await db.rpc('boq_final_quotation_choices', {
+  const selected = await db.rpc('boq_effective_project_quotes', {
     p_org: organizationId,
-    p_customer_ids: [project.data.customer_id],
+    p_project_ids: [projectId],
   });
   if (
     selected.error ||
-    selected.data?.[project.data.customer_id] !== revision.data.quotation_id
+    selected.data?.[projectId] !== revision.data.quotation_id
   )
-    return { status: 'skipped', reason: 'final_quote_required' };
+    return { status: 'skipped', reason: 'effective_final_quote_required' };
   const finalQuote = await db
     .from('quotations')
     .select('current_revision_id')

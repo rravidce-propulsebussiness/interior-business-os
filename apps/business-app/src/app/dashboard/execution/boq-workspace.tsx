@@ -199,8 +199,8 @@ export function BoqWorkspace({
   const [title, setTitle] = useState(
     initialDocument?.title ?? 'Construction BOQ',
   );
-  // For creation, only projects with an explicitly selected Final quotation
-  // and no BOQ are selectable. Saved BOQs retain their original project/quote.
+  // For creation, the newest saved quotation is Final by default unless an
+  // alternative is manually marked Final. Saved BOQs retain their source.
   const defaultProjectId =
     newProjects.find((project) => project.id === initialProjectId)?.id ??
     (newProjects.length === 1 ? newProjects[0]!.id : '');
@@ -543,7 +543,7 @@ export function BoqWorkspace({
       return;
     }
     if (id && !newProjects.some((project) => project.id === id)) {
-      setMessage('Select a Final quotation for this project first.');
+      setMessage('Save a quotation for this project first.');
       return;
     }
     setActive(null);
@@ -567,7 +567,7 @@ export function BoqWorkspace({
   function startNew() {
     if (!newProjects.length) {
       setMessage(
-        'No new BOQ projects. Mark a quotation Final for a project that does not already have a BOQ.',
+        'No new BOQ projects. Save a quotation for a project that does not already have a BOQ.',
       );
       return;
     }
@@ -858,7 +858,7 @@ export function BoqWorkspace({
       (!newProjects.some((project) => project.id === projectId) ||
         !quoteForProject(projectId))
     ) {
-      setMessage('Choose a new project with a selected Final quotation.');
+      setMessage('Choose a new project with a saved quotation.');
       return;
     }
     if (!title.trim()) {
@@ -1047,8 +1047,8 @@ export function BoqWorkspace({
           )}
           {canCreate && newProjects.length === 0 && (
             <p className="boq-empty">
-              To create a BOQ, first select a Final quotation for a project that
-              does not already have one.
+              To create a BOQ, save a quotation for a project that does not
+              already have one.
             </p>
           )}
         </aside>
@@ -1109,8 +1109,8 @@ export function BoqWorkspace({
               </select>
               <small id="boq-project-availability">
                 All {projects.length} delivery projects are listed. Select a
-                saved BOQ to edit it; projects without a Final quotation must be
-                finalized in Quotations first.
+                saved BOQ to edit it. The newest saved quotation is Final by
+                default unless you manually select another.
               </small>
               <Link href="/dashboard/projects">View all projects</Link>
             </label>
@@ -1122,7 +1122,7 @@ export function BoqWorkspace({
                   : quoteId
                     ? 'Earlier quotation revision'
                     : projectId
-                      ? 'No selected Final quotation'
+                      ? 'No saved quotation'
                       : newProjects.length
                         ? 'Choose a new project'
                         : 'No new BOQ projects'}
@@ -1135,10 +1135,10 @@ export function BoqWorkspace({
                   : quoteId
                     ? 'This BOQ was made from an earlier quotation revision'
                     : projectId
-                      ? 'Select a Final quotation for this project in Quotations'
+                      ? 'Save a quotation for this project in Quotations'
                       : newProjects.length
-                        ? 'Only the selected Final quotation is used'
-                        : 'Existing BOQs remain available on the left; new projects require a selected Final quotation.'}
+                        ? 'Latest saved quotation is Final unless manually overridden'
+                        : 'Existing BOQs remain available on the left; new projects require a saved quotation.'}
               </small>
             </div>
           </div>

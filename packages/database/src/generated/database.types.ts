@@ -11701,6 +11701,10 @@ export interface Database {
         };
         Returns: Json;
       };
+      boq_effective_project_quotes: {
+        Args: { p_org: string; p_project_ids: string[] };
+        Returns: Json;
+      };
       boq_final_quotation_choices: {
         Args: { p_org: string; p_customer_ids: string[] };
         Returns: Json;

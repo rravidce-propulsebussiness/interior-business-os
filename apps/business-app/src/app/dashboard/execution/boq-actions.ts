@@ -204,7 +204,8 @@ export async function saveManualBoq(input: unknown) {
             'This BOQ changed in another session. Refresh and save again.',
         };
     } else {
-      // Create only for a real project and its explicitly selected Final quote.
+      // Create only for a real project and its effective Final quote:
+      // newest saved, unless a different quotation was manually marked Final.
       if (!value.projectId || !value.quotationRevisionId)
         return {
           ok: false,
@@ -223,20 +224,20 @@ export async function saveManualBoq(input: unknown) {
       if (projectResult.error || !project?.customer_id)
         return { ok: false, message: 'Choose a valid active project.' };
       const selected = await client.rpc(
-        'boq_final_quotation_choices' as never,
-        { p_org: s.org, p_customer_ids: [project.customer_id] } as never,
+        'boq_effective_project_quotes' as never,
+        { p_org: s.org, p_project_ids: [value.projectId] } as never,
       );
-      const finalByCustomer = selected.data as Record<string, string> | null;
-      if (selected.error || !finalByCustomer?.[project.customer_id])
+      const effectiveByProject = selected.data as Record<string, string> | null;
+      if (selected.error || !effectiveByProject?.[value.projectId])
         return {
           ok: false,
-          message: 'Select the Final quotation in Quotations first.',
+          message: 'Save a quotation for this project before creating a BOQ.',
         };
       const finalQuote = await client
         .from('quotations')
         .select('current_revision_id')
         .eq('organization_id', s.org)
-        .eq('id', finalByCustomer[project.customer_id])
+        .eq('id', effectiveByProject[value.projectId])
         .eq('project_id', value.projectId)
         .maybeSingle();
       if (
