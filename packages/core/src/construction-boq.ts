@@ -72,6 +72,17 @@ export type BoqFloor = {
   parkingSqft?: number;
 };
 
+/** One drawn wall segment; the measurement is repeated by count. */
+export type WallMeasure = {
+  id: string;
+  name: string;
+  location: 'external' | 'internal';
+  count: number;
+  lengthFeet: number;
+  heightFeet: number;
+  thicknessIn: number;
+};
+
 /** Doors, windows and bathrooms on one floor (editable per floor). */
 export type FloorCounts = {
   mainDoors: number;
@@ -147,6 +158,13 @@ export type BoqCounts = {
    * from them instead of the typical window size.
    */
   windowSizes?: Record<string, string>;
+  /** Door and ventilator openings: "2×3×7" = two at 3 ft × 7 ft. */
+  doorSizes?: Record<string, Partial<Record<
+    'mainDoors' | 'internalDoors' | 'bathroomDoors' | 'poojaDoors' | 'ventilators' | 'rollingShutters',
+    string
+  >>>;
+  /** Measured wall segments per floor; absence preserves quotation estimates. */
+  walls?: Record<string, WallMeasure[]>;
   /** Rooms, bathroom size and kitchen platform per floor, when entered. */
   finishes?: Record<string, FloorFinishes>;
 };
@@ -890,6 +908,62 @@ export const STRUCTURAL_FIELDS = [
     min: 0,
     max: 15,
     step: 0.5,
+  },
+  {
+    key: 'masonryBricksPer100Sqft4',
+    label: '4.5 in brick wall: bricks per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 500,
+    min: 0,
+    max: 4000,
+    step: 1,
+    help: 'Editable thumb-rule estimate; replace with your actual brick size and mortar-joint count.',
+  },
+  {
+    key: 'masonryBricksPer100Sqft9',
+    label: '9 in brick wall: bricks per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 1000,
+    min: 0,
+    max: 6000,
+    step: 1,
+  },
+  {
+    key: 'masonryCementBagsPer100Sqft4',
+    label: '4.5 in brick wall: cement bags per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 3,
+    min: 0,
+    max: 60,
+    step: 0.5,
+  },
+  {
+    key: 'masonryCementBagsPer100Sqft9',
+    label: '9 in brick wall: cement bags per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 6,
+    min: 0,
+    max: 100,
+    step: 0.5,
+    help: '6 bags per 100 sq ft is an editable illustration, not a structural or mix-design standard.',
+  },
+  {
+    key: 'masonrySandM3Per100Sqft4',
+    label: '4.5 in brick wall: sand m³ per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 0.10,
+    min: 0,
+    max: 4,
+    step: 0.01,
+  },
+  {
+    key: 'masonrySandM3Per100Sqft9',
+    label: '9 in brick wall: sand m³ per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 0.20,
+    min: 0,
+    max: 8,
+    step: 0.01,
   },
   {
     key: 'parkingWallPercent',
@@ -1655,9 +1729,52 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
       railingFeet: feet(value.railingFeet),
     };
   }
+  const doorSizesRaw =
+    source.doorSizes && typeof source.doorSizes === 'object'
+      ? (source.doorSizes as Record<string, unknown>)
+      : {};
+  const doorSizeKeys = [
+    'mainDoors', 'internalDoors', 'bathroomDoors',
+    'poojaDoors', 'ventilators', 'rollingShutters',
+  ] as const;
+  const doorSizes: NonNullable<BoqCounts['doorSizes']> = {};
+  for (const floor of Object.keys(floors)) {
+    const values = doorSizesRaw[floor];
+    if (!values || typeof values !== 'object') continue;
+    const sizes = values as Record<string, unknown>;
+    const entered = Object.fromEntries(
+      doorSizeKeys.map((key) => [key, String(sizes[key] ?? '').slice(0, 200)])
+        .filter(([, value]) => Boolean(value.trim())),
+    );
+    if (Object.keys(entered).length) doorSizes[floor] = entered;
+  }
+  const wallRaw = source.walls && typeof source.walls === 'object'
+    ? (source.walls as Record<string, unknown>) : {};
+  const walls: NonNullable<BoqCounts['walls']> = {};
+  for (const floor of Object.keys(floors)) {
+    const rawWalls = Array.isArray(wallRaw[floor]) ? wallRaw[floor] as unknown[] : [];
+    const parsed = rawWalls.slice(0, 50).flatMap((input, index): WallMeasure[] => {
+      if (!input || typeof input !== 'object') return [];
+      const entry = input as Record<string, unknown>;
+      const count = validCount(entry.count, 0, 200);
+      const lengthFeet = feet(entry.lengthFeet);
+      const heightFeet = feet(entry.heightFeet);
+      const thicknessIn = num(entry.thicknessIn, 9, 3, 14);
+      if (!(count > 0 && lengthFeet > 0 && heightFeet > 0)) return [];
+      return [{
+        id: String(entry.id ?? index).slice(0, 80),
+        name: String(entry.name ?? ('Wall ' + (index + 1))).slice(0, 80),
+        location: entry.location === 'internal' ? 'internal' : 'external',
+        count, lengthFeet, heightFeet, thicknessIn,
+      }];
+    });
+    if (parsed.length) walls[floor] = parsed;
+  }
   return {
     floors,
     ...(Object.keys(windowSizes).length ? { windowSizes } : {}),
+    ...(Object.keys(doorSizes).length ? { doorSizes } : {}),
+    ...(Object.keys(walls).length ? { walls } : {}),
     ...(Object.keys(finishes).length ? { finishes } : {}),
     entranceGates: validCount(source.entranceGates, estimated.entranceGates),
     compoundWallFeet: validCount(
