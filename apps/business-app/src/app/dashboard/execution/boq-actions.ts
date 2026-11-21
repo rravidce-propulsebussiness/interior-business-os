@@ -90,6 +90,16 @@ const generatorSchema = z.object({
       }),
     )
     .max(20),
+  overrides: z
+    .record(
+      z.string().max(300),
+      z.object({
+        quantity: z.number().finite().nonnegative().optional(),
+        rate: z.number().finite().nonnegative().optional(),
+      }),
+    )
+    .refine((value) => Object.keys(value).length <= 500)
+    .optional(),
   /** Column / beam / footing schedule from the structural drawing. */
   design: z
     .object({

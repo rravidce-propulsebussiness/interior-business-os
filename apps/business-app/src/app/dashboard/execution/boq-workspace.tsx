@@ -53,6 +53,8 @@ type Generator = {
   counts: BoqCounts;
   floors: BoqFloor[];
   design?: StructuralDesign | null;
+  /** Quantities / rates edited on generated lines, kept on regenerate. */
+  overrides?: Record<string, { quantity?: number; rate?: number }>;
   warnings: string[];
 };
 type SavedLine = {
@@ -129,6 +131,11 @@ const money = (value: number, currency = 'INR') =>
 const keyFor = (name: string, unit: string, material?: string) =>
   `${material ? material + '|' : ''}${name.trim().toLowerCase()}::${unit.trim().toLowerCase()}`;
 const uid = () => crypto.randomUUID();
+/** Identifies a generated output across regenerations. */
+const overrideKey = (
+  line: { section: string; kind: string },
+  output: { name: string; unit: string },
+) => `${line.section}|${line.kind}|${output.name}|${output.unit}`.slice(0, 300);
 
 export function BoqWorkspace({
   documents,
@@ -197,6 +204,9 @@ export function BoqWorkspace({
   const [genCounts, setGenCounts] = useState<BoqCounts | null>(
     initialDocument?.document?.generator?.counts ?? null,
   );
+  const [overrides, setOverrides] = useState<
+    Record<string, { quantity?: number; rate?: number }>
+  >(initialDocument?.document?.generator?.overrides ?? {});
   const [genDesign, setGenDesign] = useState<StructuralDesign | null>(
     normalizeDesign(initialDocument?.document?.generator?.design),
   );
@@ -452,6 +462,7 @@ export function BoqWorkspace({
     setGenFloors([]);
     setGenCounts(null);
     setGenDesign(null);
+    setOverrides({});
   }
   function startNew() {
     setActive(null);
@@ -468,6 +479,7 @@ export function BoqWorkspace({
     setGenFloors([]);
     setGenCounts(null);
     setGenDesign(null);
+    setOverrides({});
     setMessage('');
   }
   function openDocument(document: Document) {
@@ -482,9 +494,10 @@ export function BoqWorkspace({
     setGenFloors(document.document?.generator?.floors ?? []);
     setGenCounts(document.document?.generator?.counts ?? null);
     setGenDesign(normalizeDesign(document.document?.generator?.design));
+    setOverrides(document.document?.generator?.overrides ?? {});
     setMessage('');
   }
-  function generateFromQuote(live = false) {
+  function generateFromQuote(live = false, edits = overrides) {
     if (!schedule || !quoteId) return;
     const result = generateQuotationBoq({
       details: schedule,
@@ -494,7 +507,28 @@ export function BoqWorkspace({
       design: genDesign,
     });
     const kept = lines.filter((line) => !line.origin);
-    setLines([...result.lines, ...kept]);
+    // Quantities and rates edited on the takeoff survive regeneration.
+    const generated = result.lines.map((line) => ({
+      ...line,
+      outputs: line.outputs.map((output) => {
+        const edit = edits[overrideKey(line, output)];
+        return edit
+          ? {
+              ...output,
+              ...(edit.quantity !== undefined
+                ? { quantity: edit.quantity }
+                : {}),
+              ...(edit.rate !== undefined ? { rate: edit.rate } : {}),
+              source:
+                `Edited on the BOQ${output.source ? ` · ${output.source}` : ''}`.slice(
+                  0,
+                  300,
+                ),
+            }
+          : output;
+      }),
+    }));
+    setLines([...generated, ...kept]);
     // Brands named in the quotation's specifications, unless already chosen.
     const quoted = brandSelectionsFromQuote(schedule.sections, initialRates);
     setSelections((prior) => ({ ...quoted, ...prior }));
@@ -505,6 +539,7 @@ export function BoqWorkspace({
       counts: result.counts,
       floors: result.floors,
       design: result.design,
+      overrides: edits,
       warnings: result.warnings,
     });
     // A live update keeps what is being typed; a full generate takes the
@@ -559,6 +594,20 @@ export function BoqWorkspace({
     outputIndex: number,
     quantity: number,
   ) {
+    const target = lines[lineIndex];
+    const output = target?.outputs[outputIndex];
+    if (target?.origin && output) {
+      const key = overrideKey(target, output);
+      const next = {
+        ...overrides,
+        [key]: {
+          ...overrides[key],
+          quantity: Number.isFinite(quantity) ? Math.max(0, quantity) : 0,
+        },
+      };
+      setOverrides(next);
+      setGenerator((prior) => (prior ? { ...prior, overrides: next } : prior));
+    }
     setLines((prior) =>
       prior.map((line, i) =>
         i === lineIndex
@@ -584,6 +633,20 @@ export function BoqWorkspace({
     outputIndex: number,
     rate: number,
   ) {
+    const target = lines[lineIndex];
+    const output = target?.outputs[outputIndex];
+    if (target?.origin && output) {
+      const key = overrideKey(target, output);
+      const next = {
+        ...overrides,
+        [key]: {
+          ...overrides[key],
+          rate: Number.isFinite(rate) ? Math.max(0, rate) : 0,
+        },
+      };
+      setOverrides(next);
+      setGenerator((prior) => (prior ? { ...prior, overrides: next } : prior));
+    }
     setLines((prior) =>
       prior.map((line, i) =>
         i === lineIndex
@@ -1304,6 +1367,19 @@ export function BoqWorkspace({
                 </p>
               </div>
               <span className="boq-count-pill">{lines.length} items</span>
+              {Object.keys(overrides).length > 0 && (
+                <button
+                  type="button"
+                  className="erp-button erp-button-quiet"
+                  title="Go back to the calculated quantities and rates"
+                  onClick={() => {
+                    setOverrides({});
+                    generateFromQuote(true, {});
+                  }}
+                >
+                  Undo {Object.keys(overrides).length} edits
+                </button>
+              )}
               {lines.length > 0 && (
                 <button
                   type="button"
