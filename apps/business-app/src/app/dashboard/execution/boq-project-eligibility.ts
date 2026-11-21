@@ -19,3 +19,23 @@ export function projectsReadyForNewBoq<P extends Project>(
     (project) => withFinalQuote.has(project.id) && !withBoq.has(project.id),
   );
 }
+
+/** Display every real project without mistaking a saved BOQ for new work. */
+export function boqProjectOptionLabel(
+  project: { name: string; customerName: string | null },
+  state: 'new' | 'saved' | 'needs-final',
+): string {
+  const name = project.name.trim();
+  const customer = project.customerName?.trim() ?? '';
+  const title =
+    customer && customer.toLocaleLowerCase() !== name.toLocaleLowerCase()
+      ? `${customer} · ${name}`
+      : name;
+  const suffix =
+    state === 'saved'
+      ? 'BOQ saved · open to edit'
+      : state === 'needs-final'
+        ? 'Select Final quotation first'
+        : 'Ready for new BOQ';
+  return `${title} — ${suffix}`;
+}

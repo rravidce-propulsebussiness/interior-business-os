@@ -31,7 +31,7 @@ export async function openOrCreateWonLeadProject(
     const s = await crmServices('lead.convert');
     const { data: lead, error } = await s.client
       .from('leads')
-      .select('id,version,lifecycle,converted_project_id,converted_at')
+      .select('id,version,lifecycle,converted_project_id,converted_at,name')
       .eq('organization_id', s.org)
       .eq('id', leadId)
       .maybeSingle();
@@ -56,40 +56,15 @@ export async function openOrCreateWonLeadProject(
       };
     }
 
-    let projectName = request.data.projectName?.trim() ?? '';
-    // Resolve an existing quote project server-side, rather than trusting a
-    // client-provided project/customer ID. All reads are tenant-scoped.
-    if (s.allowed('quotation.view', 'quotation')) {
-      const rpc = s.client.rpc.bind(s.client) as unknown as (
-        name: string,
-        args: Record<string, string>,
-      ) => Promise<{ data: unknown; error: unknown }>;
-      const linked = await rpc('lead_quotation_list', {
-        p_organization_id: s.org,
-        p_lead_id: leadId,
-      });
-      if (!linked.error && Array.isArray(linked.data)) {
-        const quote = linked.data.find((item: unknown) => {
-          if (!item || typeof item !== 'object') return false;
-          const row = item as Record<string, unknown>;
-          return (
-            typeof row.project_id === 'string' && row.status !== 'cancelled'
-          );
-        }) as Record<string, unknown> | undefined;
-        if (quote && typeof quote.project_id === 'string') {
-          const existing = await s.client
-            .from('projects')
-            .select('name,removed_from_workspace')
-            .eq('organization_id', s.org)
-            .eq('id', quote.project_id)
-            .eq('removed_from_workspace', false)
-            .maybeSingle();
-          if (existing.data?.name) projectName = existing.data.name;
-        }
-      }
-    }
+    // A converted Won lead is identified by its own name, not the name of
+    // its provisional quotation project (e.g. "Quotation · Construction · L-...").
+    // The existing quotation project is still reused by crm_convert.
+    const projectName = lead.name.trim();
     if (!projectName) {
-      return { ok: false, message: 'Enter a project name to continue.' };
+      return {
+        ok: false,
+        message: 'Lead name is required to create a project.',
+      };
     }
 
     // crm_convert selects the newest quotation-linked customer/project when

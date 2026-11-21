@@ -10,6 +10,7 @@ import {
   type BoqInputs,
 } from './boq-calculations';
 import { removeManualBoq, saveManualBoq } from './boq-actions';
+import { boqProjectOptionLabel } from './boq-project-eligibility';
 import {
   fieldKind,
   toDisplay,
@@ -533,13 +534,19 @@ export function BoqWorkspace({
     window.print();
   }
   function selectProject(id: string) {
-    if (active) return; // A saved BOQ's project/quotation cannot be reassigned.
-    if (id && !newProjects.some((project) => project.id === id)) {
-      setMessage(
-        'This project already has a BOQ or no selected Final quotation.',
-      );
+    // Selecting another project opens its existing BOQ, never reassigns the
+    // current saved document to a new project or creates a duplicate.
+    const existing = documents.find((document) => document.project_id === id);
+    if (existing) {
+      openDocument(existing);
+      setMessage('Opened the existing BOQ for editing.');
       return;
     }
+    if (id && !newProjects.some((project) => project.id === id)) {
+      setMessage('Select a Final quotation for this project first.');
+      return;
+    }
+    setActive(null);
     setProjectId(id);
     setQuoteId(quoteForProject(id));
     setTitle(
@@ -1074,27 +1081,38 @@ export function BoqWorkspace({
               />
             </label>
             <label>
-              {active
-                ? 'Project (saved BOQ)'
-                : 'Project · selected Final quote'}
+              Project
               <select
                 value={projectId}
-                disabled={Boolean(active)}
                 onChange={(event) => selectProject(event.target.value)}
+                aria-describedby="boq-project-availability"
               >
-                {!active && <option value="">Choose new project</option>}
-                {(active
-                  ? projects.filter(
-                      (project) => project.id === active.project_id,
-                    )
-                  : newProjects
-                ).map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.customerName ? `${project.customerName} · ` : ''}
-                    {project.name}
-                  </option>
-                ))}
+                <option value="">Choose a project</option>
+                {projects.map((project) => {
+                  const saved = documents.some(
+                    (document) => document.project_id === project.id,
+                  );
+                  const ready = newProjects.some(
+                    (item) => item.id === project.id,
+                  );
+                  const state = saved ? 'saved' : ready ? 'new' : 'needs-final';
+                  return (
+                    <option
+                      key={project.id}
+                      value={project.id}
+                      disabled={!saved && !ready}
+                    >
+                      {boqProjectOptionLabel(project, state)}
+                    </option>
+                  );
+                })}
               </select>
+              <small id="boq-project-availability">
+                All {projects.length} delivery projects are listed. Select a
+                saved BOQ to edit it; projects without a Final quotation must be
+                finalized in Quotations first.
+              </small>
+              <Link href="/dashboard/projects">View all projects</Link>
             </label>
             <div className="boq-quote-source">
               <span>Quotation</span>

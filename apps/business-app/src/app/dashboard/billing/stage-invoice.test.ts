@@ -166,7 +166,9 @@ describe('lead-linked GST milestone invoicing', () => {
     expect(inlineProject).toContain('convertedProjectId');
     expect(inlineProject).toContain('quotationProjectId');
     expect(projectAction).toContain("crmServices('lead.convert')");
-    expect(projectAction).toContain('lead_quotation_list');
+    expect(projectAction).toContain('const projectName = lead.name.trim()');
+    expect(projectAction).toContain('project_name: projectName');
+    expect(projectAction).not.toContain('projectName = existing.data.name');
     expect(projectAction).toContain('customer_id: null, project_id: null');
     expect(projectAction).toContain('acknowledge_duplicate: false');
     expect(conversionPage).toContain("redirect('/dashboard/crm/leads/'");
