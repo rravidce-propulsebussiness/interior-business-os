@@ -7,6 +7,7 @@ const source = (path: string) =>
 describe('construction quotation editor regressions', () => {
   const builder = source('./premium-sft-builder.tsx');
   const selector = source('./construction-selector.tsx');
+  const studio = source('./[id]/studio/page.tsx');
   const actions = source('./construction-actions.ts');
 
   it('opens only the chosen material card with its original index', () => {
@@ -26,6 +27,7 @@ describe('construction quotation editor regressions', () => {
 
   it('reopens existing quotations even after company packages are deleted', () => {
     expect(selector).toContain('initialConstructionPackageSelection(');
+    expect(studio).toContain("key={revision.id + ':' + mode}");
     expect(selector).toContain('selected === SAVED_PACKAGE_OPTION');
     expect(selector).toContain('initialSchedule?.package?.id');
     expect(builder).toContain(
