@@ -30,8 +30,6 @@ import {
 export type { DesignFootingType } from './footing-takeoff';
 export { FOOTING_TYPES, newFootingType } from './footing-takeoff';
 
-
-
 export type BoqOrigin =
   'quotation-structure' | 'quotation-allowance' | 'quotation-additional';
 
@@ -1973,59 +1971,68 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
   const footingRows: Record<string, unknown>[] = hasFootingSchedule
     ? (value.footings as Record<string, unknown>[])
     : columns.map((column): Record<string, unknown> => ({
-          label: 'F-' + column.label,
-          type: 'isolated',
-          count: column.count,
-          columnRefs: column.label,
-          lengthFeet: column.footingLengthFeet,
-          widthFeet: column.footingWidthFeet,
-          thicknessIn: column.footingThicknessIn,
-          bottomBarDia: column.footingBarDia,
-          bottomSpacingIn: column.footingBarSpacingIn,
-        }));
-  const footings = footingRows.slice(0, 40).map((entry, index): DesignFootingType => {
-    const defaults = newFootingType(index);
-    const type = String(entry.type ?? defaults.type);
-    const geometry = String(entry.geometry ?? defaults.geometry);
-    const mesh = String(entry.mesh ?? defaults.mesh);
-    return {
-      ...defaults,
-      label: String(entry.label ?? defaults.label).slice(0, 40),
-      type: FOOTING_TYPES.includes(type as DesignFootingType['type'])
-        ? type as DesignFootingType['type'] : 'isolated',
-      count: Math.round(num(entry.count, 0, 0, 200)),
-      columnRefs: String(entry.columnRefs ?? '').slice(0, 160),
-      lengthFeet: num(entry.lengthFeet, 0, 0, 250),
-      widthFeet: num(entry.widthFeet, 0, 0, 250),
-      thicknessIn: num(entry.thicknessIn, 12, 0, 120),
-      padsPerGroup: Math.round(num(entry.padsPerGroup,
-        type === 'strap' ? 2 : 1, 1, 30)),
-      geometry: ['flat', 'stepped', 'sloped'].includes(geometry)
-        ? geometry as DesignFootingType['geometry'] : 'flat',
-      topLengthFeet: num(entry.topLengthFeet, 0, 0, 250),
-      topWidthFeet: num(entry.topWidthFeet, 0, 0, 250),
-      stepThicknessIn: num(entry.stepThicknessIn, 0, 0, 120),
-      edgeThicknessIn: num(entry.edgeThicknessIn, 0, 0, 120),
-      mesh: mesh === 'double' ? 'double' : 'single',
-      bottomBarDia: num(entry.bottomBarDia, 12, 6, 40),
-      bottomSpacingIn: num(entry.bottomSpacingIn, 6, 2, 24),
-      topBarDia: num(entry.topBarDia, 12, 6, 40),
-      topSpacingIn: num(entry.topSpacingIn, 6, 2, 24),
-      strapLengthFeet: num(entry.strapLengthFeet, 0, 0, 250),
-      strapWidthIn: num(entry.strapWidthIn, 0, 0, 96),
-      strapDepthIn: num(entry.strapDepthIn, 0, 0, 96),
-      pedestal: entry.pedestal === true,
-      pedestalsPerGroup: Math.round(num(entry.pedestalsPerGroup, 1, 0, 30)),
-      pedestalWidthIn: num(entry.pedestalWidthIn, 0, 0, 96),
-      pedestalDepthIn: num(entry.pedestalDepthIn, 0, 0, 96),
-      pedestalHeightFeet: num(entry.pedestalHeightFeet, 0, 0, 40),
-      pedestalTieDia: num(entry.pedestalTieDia, 8, 6, 16),
-      pedestalTieSpacingIn: num(entry.pedestalTieSpacingIn, 6, 2, 24),
-    };
-  }).filter((entry) =>
-    entry.count > 0 && entry.lengthFeet > 0 && entry.widthFeet > 0 &&
-    entry.thicknessIn > 0
-  );
+        label: 'F-' + column.label,
+        type: 'isolated',
+        count: column.count,
+        columnRefs: column.label,
+        lengthFeet: column.footingLengthFeet,
+        widthFeet: column.footingWidthFeet,
+        thicknessIn: column.footingThicknessIn,
+        bottomBarDia: column.footingBarDia,
+        bottomSpacingIn: column.footingBarSpacingIn,
+      }));
+  const footings = footingRows
+    .slice(0, 40)
+    .map((entry, index): DesignFootingType => {
+      const defaults = newFootingType(index);
+      const type = String(entry.type ?? defaults.type);
+      const geometry = String(entry.geometry ?? defaults.geometry);
+      const mesh = String(entry.mesh ?? defaults.mesh);
+      return {
+        ...defaults,
+        label: String(entry.label ?? defaults.label).slice(0, 40),
+        type: FOOTING_TYPES.includes(type as DesignFootingType['type'])
+          ? (type as DesignFootingType['type'])
+          : 'isolated',
+        count: Math.round(num(entry.count, 0, 0, 200)),
+        columnRefs: String(entry.columnRefs ?? '').slice(0, 160),
+        lengthFeet: num(entry.lengthFeet, 0, 0, 250),
+        widthFeet: num(entry.widthFeet, 0, 0, 250),
+        thicknessIn: num(entry.thicknessIn, 12, 0, 120),
+        padsPerGroup: Math.round(
+          num(entry.padsPerGroup, type === 'strap' ? 2 : 1, 1, 30),
+        ),
+        geometry: ['flat', 'stepped', 'sloped'].includes(geometry)
+          ? (geometry as DesignFootingType['geometry'])
+          : 'flat',
+        topLengthFeet: num(entry.topLengthFeet, 0, 0, 250),
+        topWidthFeet: num(entry.topWidthFeet, 0, 0, 250),
+        stepThicknessIn: num(entry.stepThicknessIn, 0, 0, 120),
+        edgeThicknessIn: num(entry.edgeThicknessIn, 0, 0, 120),
+        mesh: mesh === 'double' ? 'double' : 'single',
+        bottomBarDia: num(entry.bottomBarDia, 12, 6, 40),
+        bottomSpacingIn: num(entry.bottomSpacingIn, 6, 2, 24),
+        topBarDia: num(entry.topBarDia, 12, 6, 40),
+        topSpacingIn: num(entry.topSpacingIn, 6, 2, 24),
+        strapLengthFeet: num(entry.strapLengthFeet, 0, 0, 250),
+        strapWidthIn: num(entry.strapWidthIn, 0, 0, 96),
+        strapDepthIn: num(entry.strapDepthIn, 0, 0, 96),
+        pedestal: entry.pedestal === true,
+        pedestalsPerGroup: Math.round(num(entry.pedestalsPerGroup, 1, 0, 30)),
+        pedestalWidthIn: num(entry.pedestalWidthIn, 0, 0, 96),
+        pedestalDepthIn: num(entry.pedestalDepthIn, 0, 0, 96),
+        pedestalHeightFeet: num(entry.pedestalHeightFeet, 0, 0, 40),
+        pedestalTieDia: num(entry.pedestalTieDia, 8, 6, 16),
+        pedestalTieSpacingIn: num(entry.pedestalTieSpacingIn, 6, 2, 24),
+      };
+    })
+    .filter(
+      (entry) =>
+        entry.count > 0 &&
+        entry.lengthFeet > 0 &&
+        entry.widthFeet > 0 &&
+        entry.thicknessIn > 0,
+    );
   const beams = (Array.isArray(value.beams) ? value.beams : [])
     .slice(0, 20)
     .map((item: Record<string, unknown>, index): DesignBeamType => ({
@@ -2404,32 +2411,32 @@ export function generateQuotationBoq(
       : splitBeamSlab
         ? []
         : [
-          {
-            label: 'Columns',
-            widthIn: s.columnWidthIn,
-            depthIn: s.columnDepthIn,
-            bars: [
-              { dia: s.columnBar1Dia, count: s.columnBar1Count },
-              { dia: s.columnBar2Dia, count: s.columnBar2Count },
-            ].filter((bar) => bar.dia > 0 && bar.count > 0),
-            tieDia: s.columnTieDia,
-            tieSpacingIn: s.columnTieSpacingIn,
-            footing: {
-              lengthFeet: s.footingLengthFeet,
-              widthFeet: s.footingWidthFeet,
-              thicknessIn: s.footingThicknessIn,
-              barDia: s.footingBarDia,
-              spacingIn: s.footingBarSpacingIn,
+            {
+              label: 'Columns',
+              widthIn: s.columnWidthIn,
+              depthIn: s.columnDepthIn,
+              bars: [
+                { dia: s.columnBar1Dia, count: s.columnBar1Count },
+                { dia: s.columnBar2Dia, count: s.columnBar2Count },
+              ].filter((bar) => bar.dia > 0 && bar.count > 0),
+              tieDia: s.columnTieDia,
+              tieSpacingIn: s.columnTieSpacingIn,
+              footing: {
+                lengthFeet: s.footingLengthFeet,
+                widthFeet: s.footingWidthFeet,
+                thicknessIn: s.footingThicknessIn,
+                barDia: s.footingBarDia,
+                spacingIn: s.footingBarSpacingIn,
+              },
+              countAt: (floorIndex: number) =>
+                floorIndex === 0
+                  ? groundGrid.columns
+                  : Math.min(
+                      columnGrid(floors[floorIndex]!, s, ground).columns,
+                      groundGrid.columns,
+                    ),
             },
-            countAt: (floorIndex: number) =>
-              floorIndex === 0
-                ? groundGrid.columns
-                : Math.min(
-                    columnGrid(floors[floorIndex]!, s, ground).columns,
-                    groundGrid.columns,
-                  ),
-          },
-        ];
+          ];
     const groundColumns = columnTypes.reduce(
       (sum, type) => sum + type.countAt(0),
       0,
@@ -2437,7 +2444,9 @@ export function generateQuotationBoq(
     const footingT = Math.max(
       0,
       ...columnTypes.map((type) => type.footing.thicknessIn / 12),
-      ...(splitBeamSlab ? (design?.footings ?? []).map((row) => row.thicknessIn / 12) : []),
+      ...(splitBeamSlab
+        ? (design?.footings ?? []).map((row) => row.thicknessIn / 12)
+        : []),
     );
     // "12 × 5×5 ft, 2 × 4×4 ft": footings grouped by size.
     const footingSizes = () => {
@@ -2658,33 +2667,48 @@ export function generateQuotationBoq(
 
     // --- New independent footing schedule --------------------------------
     if (splitBeamSlab && design?.footings.length) {
-      const columnsByLabel = new Set((design.columns ?? []).map((col) => col.label.toLowerCase()));
+      const columnsByLabel = new Set(
+        (design.columns ?? []).map((col) => col.label.toLowerCase()),
+      );
       for (const footing of design.footings) {
-        const refs = footing.columnRefs.split(/[,;+]/).map((ref) => ref.trim())
+        const refs = footing.columnRefs
+          .split(/[,;+]/)
+          .map((ref) => ref.trim())
           .filter(Boolean);
-        if (!refs.length) warnings.push(
-          `${footing.label}: select supporting column references for cross-checking; footing quantity is independently measured.`,
-        );
+        if (!refs.length)
+          warnings.push(
+            `${footing.label}: select supporting column references for cross-checking; footing quantity is independently measured.`,
+          );
         for (const ref of refs) {
           if (!columnsByLabel.has(ref.toLowerCase()))
-            warnings.push(`${footing.label}: supporting column "${ref}" is not entered in the Columns schedule.`);
+            warnings.push(
+              `${footing.label}: supporting column "${ref}" is not entered in the Columns schedule.`,
+            );
         }
-        if (footing.type === 'pile_cap') warnings.push(
-          `${footing.label}: pile cap takeoff excludes piles, drilling and pile reinforcement. Enter them separately from the engineer's pile schedule.`,
-        );
-        if (footing.type === 'strap' && footing.strapLengthFeet) warnings.push(
-          `${footing.label}: strap beam reinforcement has not been specified; only measured concrete is quantified.`,
-        );
-        if (footing.geometry !== 'flat') warnings.push(
-          `${footing.label}: ${footing.geometry} geometry volume is an estimate; verify step/taper dimensions against the structural section.`,
-        );
+        if (footing.type === 'pile_cap')
+          warnings.push(
+            `${footing.label}: pile cap takeoff excludes piles, drilling and pile reinforcement. Enter them separately from the engineer's pile schedule.`,
+          );
+        if (footing.type === 'strap' && footing.strapLengthFeet)
+          warnings.push(
+            `${footing.label}: strap beam reinforcement has not been specified; only measured concrete is quantified.`,
+          );
+        if (footing.geometry !== 'flat')
+          warnings.push(
+            `${footing.label}: ${footing.geometry} geometry volume is an estimate; verify step/taper dimensions against the structural section.`,
+          );
         const concrete = footingConcreteCft(footing) * CUM_PER_CFT;
         if (!(concrete > 0)) continue;
         const tally: SteelTally = new Map();
         for (const piece of footingMeshPieces(footing, footingCover)) {
           const plan = cutPlan(piece.lengthFeet, piece.pieces, stock, 0);
-          addSteel(tally, piece.diameter, plan.bars * stock * M_PER_FT,
-            plan.bars, `${footing.label} ${piece.layer} mesh ${piece.pieces} pcs × ${ft(piece.lengthFeet)}`);
+          addSteel(
+            tally,
+            piece.diameter,
+            plan.bars * stock * M_PER_FT,
+            plan.bars,
+            `${footing.label} ${piece.layer} mesh ${piece.pieces} pcs × ${ft(piece.lengthFeet)}`,
+          );
         }
         mergeSteel(tally);
         const pieces = padCount(footing);
@@ -2717,14 +2741,22 @@ export function generateQuotationBoq(
           const width = footing.pedestalWidthIn / 12;
           const depth = footing.pedestalDepthIn / 12;
           const ht = footing.pedestalHeightFeet;
-          const ringLength = 2 *
-            (Math.max(0, width - 2 * columnCover) + Math.max(0, depth - 2 * columnCover)) +
+          const ringLength =
+            2 *
+              (Math.max(0, width - 2 * columnCover) +
+                Math.max(0, depth - 2 * columnCover)) +
             20 * footing.pedestalTieDia * FT_PER_MM;
-          const ringCount = n * (ceil(ht * 12 / footing.pedestalTieSpacingIn) + 1);
+          const ringCount =
+            n * (ceil((ht * 12) / footing.pedestalTieSpacingIn) + 1);
           const pedSteel: SteelTally = new Map();
           const plan = cutPlan(ringLength, ringCount, stock, 0);
-          addSteel(pedSteel, footing.pedestalTieDia, plan.bars * stock * M_PER_FT,
-            plan.bars, `${footing.label} ${ringCount} pedestal rings × ${ft(ringLength)}`);
+          addSteel(
+            pedSteel,
+            footing.pedestalTieDia,
+            plan.bars * stock * M_PER_FT,
+            plan.bars,
+            `${footing.label} ${ringCount} pedestal rings × ${ft(ringLength)}`,
+          );
           mergeSteel(pedSteel);
           drafts.push({
             origin: 'quotation-structure',
@@ -2734,7 +2766,8 @@ export function generateQuotationBoq(
               kind: 'quote-pedestals',
               unit: 'm³',
               inputs: {
-                footingRef: footing.label, pedestals: n,
+                footingRef: footing.label,
+                pedestals: n,
                 size: `${footing.pedestalWidthIn} × ${footing.pedestalDepthIn} in`,
                 heightFeet: ht,
               },

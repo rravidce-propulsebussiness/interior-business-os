@@ -174,9 +174,15 @@ const newBeam = (n: number, count: number): DesignBeamType => ({
   runFeet: Array.from({ length: count }, () => 0),
 });
 const isMeasuredFooting = (design: StructuralDesign | null) =>
-  Boolean(design?.footings?.some((row) =>
-    row.count > 0 && row.lengthFeet > 0 && row.widthFeet > 0 && row.thicknessIn > 0,
-  ));
+  Boolean(
+    design?.footings?.some(
+      (row) =>
+        row.count > 0 &&
+        row.lengthFeet > 0 &&
+        row.widthFeet > 0 &&
+        row.thicknessIn > 0,
+    ),
+  );
 const isMeasuredColumn = (design: StructuralDesign | null) =>
   Boolean(
     design?.columns.some(
@@ -368,7 +374,8 @@ export function BoqStageBuilder(props: Props) {
     if (enteredManual) return false;
     if (key === 'footings') return !isMeasuredFooting(props.design);
     if (key === 'columns') return !isMeasuredColumn(props.design);
-    if (key === 'plinth') return !(props.design?.plinthRunFeet && props.design.plinthRunFeet > 0);
+    if (key === 'plinth')
+      return !(props.design?.plinthRunFeet && props.design.plinthRunFeet > 0);
     if (key === 'beams')
       return !isMeasuredBeam(
         props.design,
@@ -957,9 +964,9 @@ export function BoqStageBuilder(props: Props) {
         {isColumns && (
           <>
             <p className="boq-stage-hint">
-              Enter C1, C2 and other column types separately from F1/F2 footings.
-              Main bars and rings are calculated here; footing reinforcement
-              and pedestals belong only in the Footings editor.
+              Enter C1, C2 and other column types separately from F1/F2
+              footings. Main bars and rings are calculated here; footing
+              reinforcement and pedestals belong only in the Footings editor.
             </p>
             {drawing.columns.map((col, ci) => (
               <div className="boq-stage-subcard" key={ci}>

@@ -1,6 +1,11 @@
 /** Explicit drawing schedule for foundation footings. Never infer the reinforcement design. */
 export const FOOTING_TYPES = [
-  'isolated', 'combined', 'strap', 'raft', 'strip', 'pile_cap',
+  'isolated',
+  'combined',
+  'strap',
+  'raft',
+  'strip',
+  'pile_cap',
 ] as const;
 export type FootingType = (typeof FOOTING_TYPES)[number];
 export type FootingGeometry = 'flat' | 'stepped' | 'sloped';
@@ -73,9 +78,11 @@ export const newFootingType = (number: number): DesignFootingType => ({
   pedestalTieSpacingIn: 6,
 });
 
-const safe = (value: number) => Number.isFinite(value) ? Math.max(0, value) : 0;
+const safe = (value: number) =>
+  Number.isFinite(value) ? Math.max(0, value) : 0;
 export const padCount = (footing: DesignFootingType) =>
-  footing.count * (footing.type === 'strap' ? Math.max(2, footing.padsPerGroup) : 1);
+  footing.count *
+  (footing.type === 'strap' ? Math.max(2, footing.padsPerGroup) : 1);
 
 /** Returns cubic feet; concrete dimensions are design measurements, not defaults. */
 export function footingConcreteCft(f: DesignFootingType): number {
@@ -85,8 +92,9 @@ export function footingConcreteCft(f: DesignFootingType): number {
   if (!n || !area || !totalThickness) return 0;
   let perPad = area * totalThickness;
   if (f.geometry === 'stepped') {
-    perPad += safe(f.topLengthFeet) * safe(f.topWidthFeet) *
-      safe(f.stepThicknessIn) / 12;
+    perPad +=
+      (safe(f.topLengthFeet) * safe(f.topWidthFeet) * safe(f.stepThicknessIn)) /
+      12;
   } else if (f.geometry === 'sloped') {
     const edge = Math.min(totalThickness, safe(f.edgeThicknessIn) / 12);
     const topLength = Math.min(f.lengthFeet, safe(f.topLengthFeet));
@@ -95,21 +103,30 @@ export function footingConcreteCft(f: DesignFootingType): number {
     const midLength = (f.lengthFeet + topLength) / 2;
     const midWidth = (f.widthFeet + topWidth) / 2;
     // Prismoidal approximation for a tapered rectangular footing.
-    perPad = area * edge + upperHeight *
-      (area + 4 * midLength * midWidth + topLength * topWidth) / 6;
+    perPad =
+      area * edge +
+      (upperHeight * (area + 4 * midLength * midWidth + topLength * topWidth)) /
+        6;
   }
-  const strap = f.type === 'strap'
-    ? safe(f.strapLengthFeet) * safe(f.strapWidthIn) / 12 *
-      safe(f.strapDepthIn) / 12 * safe(f.count)
-    : 0;
+  const strap =
+    f.type === 'strap'
+      ? ((((safe(f.strapLengthFeet) * safe(f.strapWidthIn)) / 12) *
+          safe(f.strapDepthIn)) /
+          12) *
+        safe(f.count)
+      : 0;
   return perPad * n + strap;
 }
 
 export function pedestalConcreteCft(f: DesignFootingType): number {
   if (!f.pedestal) return 0;
-  return safe(f.count) * safe(f.pedestalsPerGroup) *
-    safe(f.pedestalWidthIn) / 12 * safe(f.pedestalDepthIn) / 12 *
-    safe(f.pedestalHeightFeet);
+  return (
+    ((((safe(f.count) * safe(f.pedestalsPerGroup) * safe(f.pedestalWidthIn)) /
+      12) *
+      safe(f.pedestalDepthIn)) /
+      12) *
+    safe(f.pedestalHeightFeet)
+  );
 }
 export type FootingMeshPiece = {
   diameter: number;
@@ -125,13 +142,19 @@ export function footingMeshPieces(
   const pieces: FootingMeshPiece[] = [];
   const n = padCount(f);
   if (!n || !f.lengthFeet || !f.widthFeet) return [];
-  for (const layer of (f.mesh === 'double' ? ['bottom', 'top'] : ['bottom']) as ('bottom' | 'top')[]) {
+  for (const layer of (f.mesh === 'double'
+    ? ['bottom', 'top']
+    : ['bottom']) as ('bottom' | 'top')[]) {
     const dia = layer === 'bottom' ? f.bottomBarDia : f.topBarDia;
-    const spacing = (layer === 'bottom' ? f.bottomSpacingIn : f.topSpacingIn) / 12;
+    const spacing =
+      (layer === 'bottom' ? f.bottomSpacingIn : f.topSpacingIn) / 12;
     if (!(dia > 0 && spacing > 0)) continue;
     const usableLength = Math.max(0, f.lengthFeet - 2 * coverFeet);
     const usableWidth = Math.max(0, f.widthFeet - 2 * coverFeet);
-    for (const [span, across] of [[usableLength, usableWidth], [usableWidth, usableLength]]) {
+    for (const [span, across] of [
+      [usableLength, usableWidth],
+      [usableWidth, usableLength],
+    ]) {
       if (!(span > 0 && across > 0)) continue;
       pieces.push({
         diameter: dia,
