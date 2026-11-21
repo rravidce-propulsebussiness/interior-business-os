@@ -17,6 +17,7 @@ import {
   type MeasuredDimensions,
   type MeasuredKind,
 } from './boq-stage-measurements';
+import { BoqFootingEditor } from './boq-footing-editor';
 
 export type StageBoqOutput = {
   name: string;
@@ -142,6 +143,7 @@ const money = (amount: number) =>
 const number = (amount: number) =>
   amount.toLocaleString('en-IN', { maximumFractionDigits: 2 });
 const blankDesign = (): StructuralDesign => ({
+  footings: [],
   columns: [],
   beams: [],
   plinthRunFeet: 0,
@@ -171,6 +173,10 @@ const newBeam = (n: number, count: number): DesignBeamType => ({
   stirrupSpacingIn: 6,
   runFeet: Array.from({ length: count }, () => 0),
 });
+const isMeasuredFooting = (design: StructuralDesign | null) =>
+  Boolean(design?.footings?.some((row) =>
+    row.count > 0 && row.lengthFeet > 0 && row.widthFeet > 0 && row.thicknessIn > 0,
+  ));
 const isMeasuredColumn = (design: StructuralDesign | null) =>
   Boolean(
     design?.columns.some(
@@ -201,6 +207,7 @@ function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
     if (/pcc|cement|sand|aggregate/i.test(output.name)) return 'pcc';
     return 'footings';
   }
+  if (kind === 'quote-footings') return 'footings';
   if (kind === 'quote-columns') return 'columns';
   if (kind === 'quote-pedestals') return 'footings';
   if (kind === 'quote-plinth-beam') return 'plinth';
@@ -359,12 +366,9 @@ export function BoqStageBuilder(props: Props) {
         line.inputs.stageCategory === key,
     );
     if (enteredManual) return false;
-    if (
-      key === 'columns' ||
-      (stage === 'Foundation' &&
-        ['footings', 'excavation', 'pcc', 'plinth'].includes(key))
-    )
-      return !isMeasuredColumn(props.design);
+    if (key === 'footings') return !isMeasuredFooting(props.design);
+    if (key === 'columns') return !isMeasuredColumn(props.design);
+    if (key === 'plinth') return !(props.design?.plinthRunFeet && props.design.plinthRunFeet > 0);
     if (key === 'beams')
       return !isMeasuredBeam(
         props.design,
@@ -472,6 +476,8 @@ export function BoqStageBuilder(props: Props) {
     ['excavation', 'soil', 'pcc', 'sajjas', 'shelves'].includes(key);
   const setColumns = (columns: DesignColumnType[]) =>
     props.onDesignChange({ ...drawing, columns });
+  const setFootings = (footings: StructuralDesign['footings']) =>
+    props.onDesignChange({ ...drawing, footings });
   const setBeams = (beams: DesignBeamType[]) =>
     props.onDesignChange({ ...drawing, beams });
   const setSetting = (key: DesignSettingKey, value: number) =>
@@ -559,7 +565,8 @@ export function BoqStageBuilder(props: Props) {
           i === index ? { ...beam, ...patch } : beam,
         ),
       );
-    const isColumns = category.key === 'columns' || category.key === 'footings';
+    const isColumns = category.key === 'columns';
+    const isFootings = category.key === 'footings';
     const isBeams = category.key === 'beams';
     return (
       <div className="boq-stage-edit" key={stage + ':' + category.key}>
@@ -940,12 +947,19 @@ export function BoqStageBuilder(props: Props) {
             )}
           </div>
         )}
+        {isFootings && (
+          <BoqFootingEditor
+            footings={drawing.footings ?? []}
+            columnLabels={drawing.columns.map((col) => col.label)}
+            onChange={setFootings}
+          />
+        )}
         {isColumns && (
           <>
             <p className="boq-stage-hint">
-              Enter each column type from the structural drawing, including
-              footing sizes and reinforcement. Zero or incomplete rows are not
-              treated as measured.
+              Enter C1, C2 and other column types separately from F1/F2 footings.
+              Main bars and rings are calculated here; footing reinforcement
+              and pedestals belong only in the Footings editor.
             </p>
             {drawing.columns.map((col, ci) => (
               <div className="boq-stage-subcard" key={ci}>
@@ -1010,50 +1024,6 @@ export function BoqStageBuilder(props: Props) {
                     value={col.tieSpacingIn}
                     onChange={(value) => updateCol(ci, { tieSpacingIn: value })}
                   />
-                  {category.key === 'footings' && (
-                    <>
-                      <InputNumber
-                        label="Footing length"
-                        unit="ft"
-                        value={col.footingLengthFeet}
-                        onChange={(value) =>
-                          updateCol(ci, { footingLengthFeet: value })
-                        }
-                      />
-                      <InputNumber
-                        label="Footing width"
-                        unit="ft"
-                        value={col.footingWidthFeet}
-                        onChange={(value) =>
-                          updateCol(ci, { footingWidthFeet: value })
-                        }
-                      />
-                      <InputNumber
-                        label="Footing thickness"
-                        unit="in"
-                        value={col.footingThicknessIn}
-                        onChange={(value) =>
-                          updateCol(ci, { footingThicknessIn: value })
-                        }
-                      />
-                      <InputNumber
-                        label="Mesh bar"
-                        unit="mm"
-                        value={col.footingBarDia}
-                        onChange={(value) =>
-                          updateCol(ci, { footingBarDia: value })
-                        }
-                      />
-                      <InputNumber
-                        label="Mesh spacing"
-                        unit="in"
-                        value={col.footingBarSpacingIn}
-                        onChange={(value) =>
-                          updateCol(ci, { footingBarSpacingIn: value })
-                        }
-                      />
-                    </>
-                  )}
                 </div>
               </div>
             ))}
@@ -1067,7 +1037,7 @@ export function BoqStageBuilder(props: Props) {
                 ])
               }
             >
-              + Add column / footing type
+              + Add column type
             </button>
           </>
         )}
