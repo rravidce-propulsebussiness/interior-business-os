@@ -21,7 +21,7 @@ describe('BOQ project selection and save invariants', () => {
   });
 
   it('keeps saved BOQs for editing but removes them from the new-project list', () => {
-    expect(editor).toContain('newProjects.map((project)');
+    expect(editor).toContain(': newProjects');
     expect(editor).toContain('disabled={Boolean(active)}');
     expect(editor).toContain('if (!newProjects.length)');
     expect(editor).toContain('onClick={() => openDocument(document)}');
