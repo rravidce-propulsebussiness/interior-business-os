@@ -312,6 +312,7 @@ export function PremiumSftBuilder({
         .map((s) => ({ ...s })) ?? []
     );
   });
+  const [slabThicknessIn, setSlabThicknessIn] = useState(initialSchedule?.slabThicknessIn ?? '');
   const [materialIds, setMaterialIds] = useState<string[]>(() => {
     if (changedPackage) return [];
     return (initialSchedule?.materials ?? []).flatMap((m) => {
@@ -409,6 +410,7 @@ export function PremiumSftBuilder({
     rows,
     materialIds,
     packageId: selectedPackage?.id ?? null,
+    ...(slabThicknessIn ? { slabThicknessIn } : {}),
     sections: sections.filter(
       (s) =>
         nonempty(s.description) ||
@@ -791,6 +793,29 @@ export function PremiumSftBuilder({
               </div>
             </div>
           ))}
+        </div>
+        <div className="qs-work-add">
+          <label>
+            RCC slab thickness (inches, from structural drawing)
+            <input
+              type="number"
+              min="3"
+              max="12"
+              step="0.25"
+              inputMode="decimal"
+              aria-label="RCC slab thickness in inches"
+              placeholder="Enter from approved structural design (e.g. 5)"
+              value={slabThicknessIn}
+              onChange={(event) => {
+                setSlabThicknessIn(event.target.value);
+                touch();
+              }}
+            />
+          </label>
+          <small>
+            Used for concrete and steel takeoff in the BOQ. Floor-to-floor
+            heights are entered in the rows below and are not billable areas.
+          </small>
         </div>
         <p className="qs-work-copy-hint">
           Upper floors follow the floor below unless customized. Choosing Make
