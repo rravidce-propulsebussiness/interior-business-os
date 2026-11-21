@@ -188,7 +188,7 @@ function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
   if (kind === 'quote-slab') return 'slab';
   if (kind === 'quote-staircase') return 'staircase';
   if (kind === 'quote-masonry')
-    return /^(?:Internal|External) plaster$/i.test(output.name)
+    return /^(?:Internal|External) plaster$|\(plaster\)/i.test(output.name)
       ? 'plaster'
       : 'brickwork';
   if (kind === 'quote-parapet') {
@@ -1054,6 +1054,51 @@ export function BoqStageBuilder(props: Props) {
               ))}
             </div>
           )}
+        {current && category.key === 'doors' && (
+          <div className="boq-stage-subcard">
+            <h4>Door, window and ventilator sizes from drawing</h4>
+            <p className="boq-stage-hint">
+              Enter number × width × height in feet, for example 2×3×7.
+              Window price is calculated per square foot; door package price
+              limits remain per door. The measured opening areas are deducted
+              from the correct external or internal brick wall group.
+            </p>
+            <div className="boq-stage-input-grid">
+              {([
+                ['mainDoors', 'Main doors (external)'],
+                ['internalDoors', 'Room doors (internal)'],
+                ['bathroomDoors', 'Bathroom doors (internal)'],
+                ['poojaDoors', 'Pooja doors (internal)'],
+                ['ventilators', 'Ventilators (external)'],
+                ['rollingShutters', 'Rolling shutters (external)'],
+              ] as const).map(([key, label]) =>
+                <InputText key={key} label={label}
+                  value={props.counts.doorSizes?.[stage]?.[key] ?? ''}
+                  placeholder="e.g. 2×3×7"
+                  onChange={(value) => props.onCountsChange({
+                    ...props.counts,
+                    doorSizes: {
+                      ...props.counts.doorSizes,
+                      [stage]: { ...props.counts.doorSizes?.[stage], [key]: value },
+                    },
+                  })}
+                />)}
+              <InputText label="Windows (nos × W × H, ft)"
+                value={props.counts.windowSizes?.[stage] ?? ''}
+                placeholder="e.g. 2×4×4, 3×4×5"
+                onChange={(value) => props.onCountsChange({
+                  ...props.counts,
+                  windowSizes: { ...props.counts.windowSizes, [stage]: value },
+                })}
+              />
+            </div>
+            <p className="boq-stage-hint">
+              If the drawing lists different sizes, enter each group separated
+              by a comma. Counts and size schedules should agree. Any missing
+              dimensions are labelled as assumed in the BOQ drawing warnings.
+            </p>
+          </div>
+        )}
         {current && category.key === 'compound' && (
           <div className="boq-stage-input-grid">
             <InputNumber
@@ -1080,11 +1125,12 @@ export function BoqStageBuilder(props: Props) {
               room-by-room dimensions.
             </p>
           )}
-        {foundEntries.length > 0 && !isColumns && !isBeams && (
+        {foundEntries.some((entry) => entry.line.kind !== 'measured-geometry') &&
+          !isColumns && !isBeams && (
           <>
             <h4>Calculated materials & labour</h4>
             <div className="boq-stage-output-rows">
-              {foundEntries.map((entry) => (
+              {foundEntries.filter((entry) => entry.line.kind !== 'measured-geometry').map((entry) => (
                 <div
                   className="boq-stage-output"
                   key={entry.line.id + '-' + entry.outputIndex}
@@ -1105,6 +1151,11 @@ export function BoqStageBuilder(props: Props) {
                       )
                     }
                   />
+                  {entry.output.quotedRate !== undefined && (
+                    <small className="boq-stage-limit">Quotation package limit:
+                      {money(entry.output.quotedRate)} / {entry.output.unit}
+                    </small>
+                  )}
                   {props.canViewCost && (
                     <InputNumber
                       label="Rate"
@@ -1131,9 +1182,8 @@ export function BoqStageBuilder(props: Props) {
             </div>
           </>
         )}
-        {(!designCategory ||
-          ['parapet', 'waterproofing'].includes(category.key) ||
-          !foundEntries.length) && (
+        {!isGeometry(category.key) && category.key !== 'brickwork' &&
+          (!designCategory || ['parapet', 'waterproofing'].includes(category.key) || !foundEntries.length) && (
           <>
             <div className="boq-stage-manual">
               <h4>Add a measured item</h4>
