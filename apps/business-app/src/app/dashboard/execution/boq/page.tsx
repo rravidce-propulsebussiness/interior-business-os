@@ -16,7 +16,7 @@ export const dynamic = 'force-dynamic';
 export default async function ManualBoqPage({
   searchParams,
 }: {
-  searchParams: Promise<{ open?: string; project?: string }>;
+  searchParams: Promise<{ open?: string; project?: string; mode?: 'view' | 'edit' | 'new' }>;
 }) {
   const query = await searchParams;
   const s = await executionServices('estimate.view', true);
@@ -315,6 +315,7 @@ export default async function ManualBoqPage({
       }
       initialOpenId={query.open ?? null}
       initialProjectId={query.project ?? null}
+      initialMode={query.mode === 'new' ? 'new' : query.mode === 'edit' ? 'edit' : 'view'}
       canEdit={s.allowed('estimate.edit')}
       canCreate={s.allowed('estimate.create')}
       canViewCost={s.allowed('estimate.view_cost')}
