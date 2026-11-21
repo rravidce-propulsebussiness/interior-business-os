@@ -2,7 +2,11 @@ name: Footing / column BOQ validation (temporary)
 on:
   push:
     branches: [feat/boq-separate-footing-column-design-20261122]
-    paths: [.github/workflows/boq-footing-validation.yml]
+    paths:
+      - .github/workflows/boq-footing-validation.yml
+      - packages/core/src/construction-boq.ts
+      - apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx
+      - apps/business-app/src/app/dashboard/execution/boq-workspace.tsx
 permissions:
   contents: write
 jobs:
