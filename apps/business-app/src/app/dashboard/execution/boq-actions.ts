@@ -118,7 +118,6 @@ const saveSchema = z.object({
   title: z.string().trim().min(1).max(200),
   projectId: z.string().uuid().nullable().optional(),
   quotationRevisionId: z.string().uuid().nullable().optional(),
-  status: z.enum(['draft', 'final']).default('draft'),
   currency: z
     .string()
     .regex(/^[A-Z]{3}$/)
@@ -165,13 +164,27 @@ export async function saveManualBoq(input: unknown) {
     };
     let reply: DbReply;
     if (value.id) {
+      // A saved BOQ's project and quotation remain fixed on edit.
+      const original = await client
+        .from('construction_boq_documents')
+        .select('project_id,quotation_revision_id')
+        .eq('organization_id', s.org)
+        .eq('id', value.id)
+        .maybeSingle();
+      if (original.error || !original.data)
+        return { ok: false, message: 'Saved BOQ could not be found.' };
+      if (
+        original.data.project_id !== (value.projectId ?? null) ||
+        original.data.quotation_revision_id !== (value.quotationRevisionId ?? null)
+      )
+        return {
+          ok: false,
+          message: 'The saved project and quotation cannot be changed. Edit the existing BOQ.',
+        };
       const result = await client
         .from('construction_boq_documents')
         .update({
           title: value.title,
-          project_id: value.projectId ?? null,
-          quotation_revision_id: value.quotationRevisionId ?? null,
-          status: value.status,
           currency: value.currency,
           document,
           version: (value.version ?? 1) + 1,
@@ -189,6 +202,63 @@ export async function saveManualBoq(input: unknown) {
             'This BOQ changed in another session. Refresh and save again.',
         };
     } else {
+      // Create only for a real project and its explicitly selected Final quote.
+      if (!value.projectId || !value.quotationRevisionId)
+        return {
+          ok: false,
+          message: 'Select a project with a Final quotation before creating a BOQ.',
+        };
+      const projectResult = await client
+        .from('projects')
+        .select('id,customer_id')
+        .eq('organization_id', s.org)
+        .eq('id', value.projectId)
+        .eq('is_sales_prospect', false)
+        .eq('removed_from_workspace', false)
+        .maybeSingle();
+      const project = projectResult.data;
+      if (projectResult.error || !project?.customer_id)
+        return { ok: false, message: 'Choose a valid active project.' };
+      const selected = await client.rpc(
+        'boq_final_quotation_choices' as never,
+        { p_org: s.org, p_customer_ids: [project.customer_id] } as never,
+      );
+      const finalByCustomer = selected.data as Record<string, string> | null;
+      if (selected.error || !finalByCustomer?.[project.customer_id])
+        return {
+          ok: false,
+          message: 'Select the Final quotation in Quotations first.',
+        };
+      const finalQuote = await client
+        .from('quotations')
+        .select('current_revision_id')
+        .eq('organization_id', s.org)
+        .eq('id', finalByCustomer[project.customer_id])
+        .eq('project_id', value.projectId)
+        .maybeSingle();
+      if (
+        finalQuote.error ||
+        !finalQuote.data ||
+        finalQuote.data.current_revision_id !== value.quotationRevisionId
+      )
+        return {
+          ok: false,
+          message: 'The selected Final quotation does not belong to this project. Refresh and retry.',
+        };
+      const existingBoq = await client
+        .from('construction_boq_documents')
+        .select('id')
+        .eq('organization_id', s.org)
+        .eq('project_id', value.projectId)
+        .limit(1)
+        .maybeSingle();
+      if (existingBoq.error)
+        return { ok: false, message: 'Could not check saved BOQs.' };
+      if (existingBoq.data)
+        return {
+          ok: false,
+          message: 'This project already has a BOQ. Open it from Saved BOQs to edit.',
+        };
       reply = await client
         .from('construction_boq_documents')
         .insert({
@@ -196,7 +266,7 @@ export async function saveManualBoq(input: unknown) {
           title: value.title,
           project_id: value.projectId ?? null,
           quotation_revision_id: value.quotationRevisionId ?? null,
-          status: value.status,
+          status: 'draft',
           currency: value.currency,
           document,
         })
@@ -206,7 +276,7 @@ export async function saveManualBoq(input: unknown) {
     if (reply.error)
       throw new Error(
         (reply.error as { code?: string }).code === '23505'
-          ? 'A BOQ generated from this quotation already exists. Open it from Saved BOQs.'
+          ? 'This project already has a BOQ. Open it from Saved BOQs to edit.'
           : reply.error.message || 'Unable to save BOQ',
       );
     revalidatePath('/dashboard/execution/boq');
