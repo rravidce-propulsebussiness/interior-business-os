@@ -5,7 +5,7 @@ export const SAVED_PACKAGE_OPTION = '__saved-quotation-package__';
 
 type PackageChoice = { id: string; code: string };
 type SavedSchedule = {
-  package?: { id?: string; code: string } | undefined;
+  package?: { id?: string | undefined; code: string } | undefined;
 } | null;
 
 export function initialConstructionPackageSelection(
