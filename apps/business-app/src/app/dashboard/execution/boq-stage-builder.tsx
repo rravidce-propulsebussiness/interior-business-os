@@ -89,6 +89,10 @@ type Props = {
     itemName: string,
   ) => void;
   onRemoveManual: (lineIndex: number) => void;
+  onUpdateMiscellaneous: (
+    lineIndex: number,
+    changes: { name: string; quantity: number; unit: string; rate: number },
+  ) => void;
   onSave: () => void;
   onPrint: () => void;
   onAdvanced: () => void;
@@ -186,6 +190,9 @@ const manualCategory = (line: StageBoqLine) =>
 function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
   const kind = line.kind.toLowerCase();
   const name = (line.name + ' ' + output.name).toLowerCase();
+  // Manual extras belong to one stage-level Miscellaneous area, even if
+  // a saved BOQ previously attached them to Footings, Painting, etc.
+  if (kind === 'manual') return 'miscellaneous';
   const specified = manualCategory(line);
   if (specified) return specified;
   if (kind === 'quote-foundation') {
@@ -319,6 +326,7 @@ export function BoqStageBuilder(props: Props) {
   const [manualRate, setManualRate] = useState(0);
   const [manualName, setManualName] = useState('');
   const [manualUnit, setManualUnit] = useState('sqft');
+  const [miscellaneousStage, setMiscellaneousStage] = useState<string | null>(null);
   const [dimensionUnit, setDimensionUnit] = useState<'ft' | 'm'>('ft');
   const [dimensionDraft, setDimensionDraft] = useState<MeasuredDimensions>({
     count: 1,
@@ -386,9 +394,12 @@ export function BoqStageBuilder(props: Props) {
           : stage === props.floors.at(-1)?.name
             ? terrace
             : standard;
-      const bucket = supported.some((item) => item.key === matchedCategory)
-        ? matchedCategory
-        : 'extra';
+      const bucket =
+        matchedCategory === 'miscellaneous'
+          ? 'miscellaneous'
+          : supported.some((item) => item.key === matchedCategory)
+            ? matchedCategory
+            : 'extra';
       return matchedStage === stage && category === bucket;
     });
   const visibleCost = (stage: string, category: string) =>
@@ -402,7 +413,9 @@ export function BoqStageBuilder(props: Props) {
     categories.reduce(
       (sum, category) => sum + visibleCost(stage, category.key),
       0,
-    ) + visibleCost(stage, 'extra');
+    ) +
+    visibleCost(stage, 'extra') +
+    visibleCost(stage, 'miscellaneous');
   const projectCost = sections.reduce(
     (sum, stage) =>
       sum +
@@ -425,6 +438,7 @@ export function BoqStageBuilder(props: Props) {
   const openEditor = (stage: string, category: string) => {
     if (preview) return;
     if (props.repeatFrom[stage]) props.onCustomizeFloor(stage);
+    setMiscellaneousStage(null);
     setManualName('');
     setDimensionName('');
     setDimensionDraft({ count: 1, lengthFeet: 0, widthFeet: 0, depthFeet: 0 });
@@ -435,6 +449,20 @@ export function BoqStageBuilder(props: Props) {
         ? null
         : { stage, category },
     );
+  };
+  const toggleMiscellaneous = (stage: string) => {
+    if (preview) return;
+    if (miscellaneousStage === stage) {
+      setMiscellaneousStage(null);
+      return;
+    }
+    if (props.repeatFrom[stage]) props.onCustomizeFloor(stage);
+    setEditing(null);
+    setManualName('');
+    setManualQuantity(0);
+    setManualRate(0);
+    setManualUnit('sqft');
+    setMiscellaneousStage(stage);
   };
   const drawing = props.design ?? blankDesign();
   const isGeometry = (key: string): key is MeasuredKind =>
@@ -530,17 +558,6 @@ export function BoqStageBuilder(props: Props) {
       );
     const isColumns = category.key === 'columns' || category.key === 'footings';
     const isBeams = category.key === 'beams';
-    const designCategory = [
-      'columns',
-      'footings',
-      'beams',
-      'plinth',
-      'slab',
-      'staircase',
-      'parapet',
-      'waterproofing',
-    ].includes(category.key);
-
     return (
       <div className="boq-stage-edit" key={stage + ':' + category.key}>
         <div className="boq-stage-edit-head">
@@ -1418,79 +1435,6 @@ export function BoqStageBuilder(props: Props) {
               </div>
             </>
           )}
-        {!isGeometry(category.key) &&
-          category.key !== 'brickwork' &&
-          (!designCategory ||
-            ['parapet', 'waterproofing'].includes(category.key) ||
-            !foundEntries.length) && (
-            <>
-              <div className="boq-stage-manual">
-                <h4>Add a measured item</h4>
-                <div className="boq-stage-input-grid">
-                  <InputText
-                    label="Item name"
-                    value={manualName}
-                    placeholder={
-                      category.key === 'extra'
-                        ? 'e.g. Extra waterproofing'
-                        : category.label
-                    }
-                    onChange={setManualName}
-                  />
-                  <InputNumber
-                    label="Quantity"
-                    value={manualQuantity}
-                    onChange={setManualQuantity}
-                  />
-                  <label className="boq-stage-field">
-                    <span>Unit</span>
-                    <select
-                      value={manualUnit}
-                      onChange={(event) => setManualUnit(event.target.value)}
-                    >
-                      <option value="sqft">sqft</option>
-                      <option value="rft">rft</option>
-                      <option value="m³">m³</option>
-                      <option value="bag">bag</option>
-                      <option value="kg">kg</option>
-                      <option value="nos">nos</option>
-                      <option value="lot">lot</option>
-                    </select>
-                  </label>
-                  {props.canViewCost && (
-                    <InputNumber
-                      label="Unit rate"
-                      value={manualRate}
-                      onChange={setManualRate}
-                    />
-                  )}
-                </div>
-                <button
-                  type="button"
-                  className="boq-stage-outline"
-                  disabled={
-                    manualQuantity <= 0 ||
-                    (category.key === 'extra' && !manualName.trim())
-                  }
-                  onClick={() => {
-                    props.onAddManual(
-                      stage,
-                      category.key,
-                      manualQuantity,
-                      manualUnit,
-                      props.canViewCost ? manualRate : 0,
-                      manualName.trim(),
-                    );
-                    setManualName('');
-                    setManualQuantity(0);
-                    setManualRate(0);
-                  }}
-                >
-                  + Add to {category.label}
-                </button>
-              </div>
-            </>
-          )}
       </div>
     );
   };
@@ -1565,9 +1509,7 @@ export function BoqStageBuilder(props: Props) {
         const isFoundation = stage === 'Foundation';
         const isTop = stage === last && !isFoundation;
         const list = isFoundation ? foundation : isTop ? terrace : standard;
-        const visibleList = isFoundation
-          ? list
-          : [...list, { key: 'extra', label: 'Add Item', icon: '＋' }];
+        const visibleList = list;
         const open = expanded.includes(stage);
         const inherited = Boolean(props.repeatFrom[stage]);
         const total = costForStage(stage, list);
