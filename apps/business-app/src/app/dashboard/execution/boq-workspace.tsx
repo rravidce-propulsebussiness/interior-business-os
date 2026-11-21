@@ -616,20 +616,21 @@ export function BoqWorkspace({
   }
   function generateFromQuote(live = false, edits = overrides) {
     if (!schedule || !quoteId) return;
+    const measuredOnly = !active || generator?.measuredOnly === true;
     const result = generateQuotationBoq({
       details: schedule,
       settings,
       floors: floorsForGeneration,
       counts: countsForGeneration,
       design: genDesign,
+      splitBeamSlab: measuredOnly,
     });
     const kept = lines.filter((line) => !line.origin);
     // A new BOQ must not invent column/footing/beam steel from company-grid
     // assumptions. Legacy documents are preserved until intentionally edited.
-    const measuredOnly = !active || generator?.measuredOnly === true;
     const measuredDesign = normalizeDesign(genDesign);
     const measuredColumns = Boolean(measuredDesign?.columns.length);
-    const measuredBeams = Boolean(measuredDesign?.beams.length);
+    const measuredBeams = Boolean(measuredDesign?.beams.some((beam) => beam.runFeet.some((run) => run > 0)));
     // A slab's bar diameters and spacing must come from the drawing, not
     // automatically from a company rule without an entered measurement.
     const measuredSlab = Boolean(
@@ -640,15 +641,15 @@ export function BoqWorkspace({
     const sourceLines = result.lines.filter((line) => {
       if (!measuredOnly) return true;
       if (
-        [
-          'quote-foundation',
-          'quote-columns',
-          'quote-pedestals',
-          'quote-plinth-beam',
-        ].includes(line.kind)
+        ['quote-foundation', 'quote-columns', 'quote-pedestals'].includes(
+          line.kind,
+        )
       )
         return measuredColumns;
-      if (line.kind === 'quote-slab') return measuredBeams && measuredSlab;
+      if (line.kind === 'quote-plinth-beam')
+        return Boolean(measuredDesign?.plinthRunFeet);
+      if (line.kind === 'quote-beams') return measuredBeams;
+      if (line.kind === 'quote-slab') return measuredSlab;
       // Binding wire includes multiple structural stages in the legacy
       // calculator; never count wire from still-unmeasured members.
       if (line.kind === 'quote-binding-wire')
@@ -739,9 +740,11 @@ export function BoqWorkspace({
     if (liveKey === lastLiveKey) return;
     const timer = window.setTimeout(() => {
       setLastLiveKey(liveKey);
+      // New BOQs may begin with no generated structural lines. Generate
+      // again when the first column, beam or slab measurement is entered.
       if (
-        lines.some((line) => line.origin) &&
-        generator?.revisionId === quoteId
+        generator?.revisionId === quoteId &&
+        (lines.some((line) => line.origin) || generator.measuredOnly === true)
       )
         generateFromQuote(true);
     }, 350);
@@ -924,7 +927,7 @@ export function BoqWorkspace({
       footings: ['quote-foundation', 'quote-pedestals'],
       columns: ['quote-columns'],
       plinth: ['quote-plinth-beam'],
-      beams: ['quote-slab'],
+      beams: ['quote-beams', 'quote-slab'],
       slab: ['quote-slab'],
       staircase: ['quote-staircase'],
       brickwork: ['quote-masonry'],
