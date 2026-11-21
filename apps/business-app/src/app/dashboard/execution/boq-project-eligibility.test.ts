@@ -27,12 +27,12 @@ describe('BOQ project labels', () => {
         { name: 'Ramya', customerName: 'Ramya' },
         'needs-final',
       ),
-    ).toBe('Ramya — Select Final quotation first');
+    ).toBe('Ramya — Save a quotation first');
   });
 });
 
 describe('BOQ new-project eligibility', () => {
-  it('shows only projects with an explicitly selected Final quote and no BOQ', () => {
+  it('shows only projects with an effective Final quote and no BOQ', () => {
     const result = projectsReadyForNewBoq(
       projects,
       [
