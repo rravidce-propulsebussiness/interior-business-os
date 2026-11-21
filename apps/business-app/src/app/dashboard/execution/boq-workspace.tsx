@@ -147,6 +147,7 @@ export function BoqWorkspace({
   documents,
   projects,
   quotes,
+  newProjects,
   rates: initialRates,
   structural,
   defaultUnit,
@@ -159,6 +160,7 @@ export function BoqWorkspace({
   documents: Document[];
   projects: Project[];
   quotes: Quote[];
+  newProjects: Project[];
   rates: Rate[];
   structural: Record<string, number> | null;
   defaultUnit: LengthUnit;
@@ -183,12 +185,13 @@ export function BoqWorkspace({
   const [title, setTitle] = useState(
     initialDocument?.title ?? 'Construction BOQ',
   );
-  // A project's BOQ always uses that project's Final (or latest active)
-  // quotation; with a single project, it is chosen automatically.
+  // For creation, only projects with an explicitly selected Final quotation
+  // and no BOQ are selectable. Saved BOQs retain their original project/quote.
   const defaultProjectId =
-    initialProjectId ?? (projects.length === 1 ? projects[0]!.id : '');
+    newProjects.find((project) => project.id === initialProjectId)?.id ??
+    (newProjects.length === 1 ? newProjects[0]!.id : '');
   const quoteForProject = (id: string) =>
-    quotes.find((quote) => quote.projectId === id)?.id ?? '';
+    quotes.find((quote) => quote.projectId === id && quote.isFinal)?.id ?? '';
   const [projectId, setProjectId] = useState(
     initialDocument ? (initialDocument.project_id ?? '') : defaultProjectId,
   );
@@ -196,9 +199,6 @@ export function BoqWorkspace({
     initialDocument
       ? (initialDocument.quotation_revision_id ?? '')
       : quoteForProject(defaultProjectId),
-  );
-  const [status, setStatus] = useState<'draft' | 'final'>(
-    initialDocument?.status ?? 'draft',
   );
   const [lines, setLines] = useState<SavedLine[]>(
     initialDocument?.document?.items ?? [],
@@ -492,7 +492,6 @@ export function BoqWorkspace({
         ? `${activeProject.customerName ? activeProject.customerName + ' · ' : ''}${activeProject.name}`
         : undefined,
       quotation: quotes.find((quote) => quote.id === quoteId)?.label,
-      status: status === 'final' ? 'Final' : 'Draft',
       rows: exportRows,
       includeCost: canViewCost,
       quotedValue: canViewCost ? quotedValue : undefined,
@@ -520,53 +519,45 @@ export function BoqWorkspace({
       .forEach((element) => (element.open = true));
     window.print();
   }
-  // Only one BOQ is generated per project quotation: a project that has one
-  // opens it instead of starting a duplicate that cannot be saved.
-  const generatedBoqFor = (project: string) => {
-    const quote = quoteForProject(project);
-    return project && quote
-      ? documents.find(
-          (document) =>
-            document.project_id === project &&
-            document.quotation_revision_id === quote &&
-            Boolean(document.document?.generator),
-        )
-      : undefined;
-  };
   function selectProject(id: string) {
-    const existing = active ? undefined : generatedBoqFor(id);
-    if (existing) {
-      openDocument(existing);
+    if (active) return; // A saved BOQ's project/quotation cannot be reassigned.
+    if (id && !newProjects.some((project) => project.id === id)) {
       setMessage(
-        "This project's BOQ from its quotation is already saved; it is open here.",
+        'This project already has a BOQ or no selected Final quotation.',
       );
       return;
     }
     setProjectId(id);
     setQuoteId(quoteForProject(id));
+    setTitle(
+      projects.find((project) => project.id === id)
+        ? `${projects.find((project) => project.id === id)!.name} · Construction BOQ`
+        : 'Construction BOQ',
+    );
+    setLines([]);
+    setSelections({});
+    setGenerator(null);
     setSelectedQuoteLines([]);
     setGenFloors([]);
     setGenCounts(null);
     setGenDesign(null);
     setOverrides({});
+    setMessage('');
   }
   function startNew() {
-    const existing = generatedBoqFor(defaultProjectId);
-    if (existing) {
-      openDocument(existing);
+    if (!newProjects.length) {
       setMessage(
-        "This project's BOQ from its quotation is already saved; it is open here. Choose another project for a new BOQ.",
+        'No new BOQ projects. Mark a quotation Final for a project that does not already have a BOQ.',
       );
       return;
     }
     setActive(null);
-    const project = projects.find((item) => item.id === defaultProjectId);
+    const project = newProjects.find((item) => item.id === defaultProjectId);
     setTitle(
       project ? `${project.name} · Construction BOQ` : 'Construction BOQ',
     );
     setProjectId(defaultProjectId);
     setQuoteId(quoteForProject(defaultProjectId));
-    setStatus('draft');
     setLines([]);
     setSelections({});
     setGenerator(null);
@@ -581,7 +572,6 @@ export function BoqWorkspace({
     setTitle(document.title);
     setProjectId(document.project_id || '');
     setQuoteId(document.quotation_revision_id || '');
-    setStatus(document.status);
     setLines(document.document?.items || []);
     setSelections(document.document?.selections ?? {});
     setGenerator(document.document?.generator ?? null);
@@ -836,6 +826,14 @@ export function BoqWorkspace({
     setSelectedQuoteLines([]);
   }
   function save() {
+    if (
+      !active &&
+      (!newProjects.some((project) => project.id === projectId) ||
+        !quoteForProject(projectId))
+    ) {
+      setMessage('Choose a new project with a selected Final quotation.');
+      return;
+    }
     if (!title.trim()) {
       setMessage('Enter a BOQ name.');
       return;
@@ -847,7 +845,6 @@ export function BoqWorkspace({
         title,
         projectId: projectId || null,
         quotationRevisionId: quoteId || null,
-        status,
         currency: 'INR',
         items: lines,
         selections,
@@ -861,7 +858,7 @@ export function BoqWorkspace({
       setActive({
         id: result.id || active?.id || '',
         title,
-        status,
+        status: active?.status ?? 'draft',
         project_id: projectId || null,
         quotation_revision_id: quoteId || null,
         currency: 'INR',
@@ -930,7 +927,7 @@ export function BoqWorkspace({
               Configure rates
             </Link>
           )}
-          {canCreate && (
+          {canCreate && newProjects.length > 0 && (
             <button
               className="erp-button erp-button-primary"
               type="button"
@@ -979,9 +976,15 @@ export function BoqWorkspace({
               <h2>Saved BOQs</h2>
               <span>{documents.length} documents</span>
             </div>
-            <button type="button" className="boq-add-small" onClick={startNew}>
-              ＋
-            </button>
+            {canCreate && newProjects.length > 0 && (
+              <button
+                type="button"
+                className="boq-add-small"
+                onClick={startNew}
+              >
+                ＋
+              </button>
+            )}
           </div>
           {documents.length ? (
             documents.map((document) => (
@@ -998,15 +1001,20 @@ export function BoqWorkspace({
                     {projects.find(
                       (project) => project.id === document.project_id,
                     )?.name || 'No project linked'}{' '}
-                    ·{' '}
-                    {document.status === 'final' ? 'Final' : 'Saved · editable'}
+                    · Saved · editable
                   </small>
                 </span>
                 <span className="boq-register-arrow">›</span>
               </button>
             ))
           ) : (
-            <p className="boq-empty">No BOQs yet. Start a measured takeoff.</p>
+            <p className="boq-empty">No saved BOQs yet.</p>
+          )}
+          {canCreate && newProjects.length === 0 && (
+            <p className="boq-empty">
+              To create a BOQ, first select a Final quotation for a project that
+              does not already have one.
+            </p>
           )}
         </aside>
         <section className="boq-editor">
@@ -1038,15 +1046,21 @@ export function BoqWorkspace({
               />
             </label>
             <label>
-              Project
+              {active
+                ? 'Project (saved BOQ)'
+                : 'Project · selected Final quote'}
               <select
                 value={projectId}
+                disabled={Boolean(active)}
                 onChange={(event) => selectProject(event.target.value)}
               >
-                {projects.length !== 1 && (
-                  <option value="">Choose project</option>
-                )}
-                {projects.map((project) => (
+                {!active && <option value="">Choose new project</option>}
+                {(active
+                  ? projects.filter(
+                      (project) => project.id === active.project_id,
+                    )
+                  : newProjects
+                ).map((project) => (
                   <option key={project.id} value={project.id}>
                     {project.customerName ? `${project.customerName} · ` : ''}
                     {project.name}
@@ -1062,37 +1076,25 @@ export function BoqWorkspace({
                   : quoteId
                     ? 'Earlier quotation revision'
                     : projectId
-                      ? 'No active quotation'
-                      : projects.length
-                        ? 'Choose a project'
-                        : 'No projects yet'}
+                      ? 'No selected Final quotation'
+                      : newProjects.length
+                        ? 'Choose a new project'
+                        : 'No new BOQ projects'}
               </strong>
               <small>
                 {currentQuote
                   ? currentQuote.isFinal
                     ? "The project's Final quotation"
-                    : 'No Final quotation is marked; the latest active one is used'
+                    : 'This BOQ uses its previously saved quotation'
                   : quoteId
                     ? 'This BOQ was made from an earlier quotation revision'
                     : projectId
-                      ? 'Prepare the Final quotation for this project in Quotations'
-                      : projects.length
-                        ? 'The Final quotation is picked automatically'
-                        : 'A project is created when a lead with a quotation is marked Won. Its Final quotation then appears here.'}
+                      ? 'Select a Final quotation for this project in Quotations'
+                      : newProjects.length
+                        ? 'Only the selected Final quotation is used'
+                        : 'Existing BOQs remain available on the left; new projects require a selected Final quotation.'}
               </small>
             </div>
-            <label>
-              Document status
-              <select
-                value={status}
-                onChange={(event) =>
-                  setStatus(event.target.value as 'draft' | 'final')
-                }
-              >
-                <option value="draft">Saved · editable</option>
-                <option value="final">Final</option>
-              </select>
-            </label>
           </div>
           {currentQuote && currentQuote.lines.length > 0 && (
             <section className="boq-import">
