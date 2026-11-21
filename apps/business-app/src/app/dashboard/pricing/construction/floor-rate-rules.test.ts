@@ -59,4 +59,25 @@ describe('company floor pricing defaults', () => {
       ),
     ).toThrow(/full/);
   });
+  it('allows 31 brochure items plus one parking rate metadata section at capacity 32', () => {
+    const rows = Array.from({ length: 31 }, (_, i) => ({
+      ...steel,
+      title: 'Brochure item ' + i,
+    }));
+    const saved = writeFloorRateDefaults(
+      rows,
+      { parking: '900', penthouse: '' },
+      32,
+    );
+    expect(saved).toHaveLength(32);
+    expect(saved[31]?.title).toBe(FLOOR_RATE_TITLE);
+    expect(readFloorRateDefaults(saved).parking).toBe('900');
+    expect(() =>
+      writeFloorRateDefaults(
+        [...rows, { ...steel, title: 'One too many' }],
+        { parking: '900', penthouse: '' },
+        32,
+      ),
+    ).toThrow(/full/);
+  });
 });
