@@ -45,6 +45,7 @@ import {
 } from '@business-os/core/construction-boq';
 import { BoqDesignSchedule } from './boq-design-schedule';
 import { BoqStageBuilder } from './boq-stage-builder';
+import { measuredOutputs, type MeasuredDimensions, type MeasuredKind } from './boq-stage-measurements';
 import { BoqFloorInputs } from './boq-floor-inputs';
 import { NumberField } from './boq-number-field';
 import {
@@ -648,6 +649,7 @@ export function BoqWorkspace({
         )
       )
         return measuredColumns;
+      if (measuredOnly && ['quote-excavation', 'quote-pcc'].includes(line.kind)) return false;
       if (line.kind === 'quote-plinth-beam')
         return Boolean(measuredDesign?.plinthRunFeet);
       if (line.kind === 'quote-beams') return measuredBeams;
@@ -1074,6 +1076,10 @@ export function BoqWorkspace({
       }
       if (following.windowSizes?.[from] !== undefined)
         following.windowSizes![target] = following.windowSizes![from]!;
+      if (following.doorSizes?.[from])
+        following.doorSizes = { ...following.doorSizes, [target]: { ...following.doorSizes[from]! } };
+      if (following.walls?.[from])
+        following.walls = { ...following.walls, [target]: following.walls[from]!.map((wall) => ({ ...wall, id: uid() })) };
     }
     setGenCounts(following);
   }
@@ -1151,6 +1157,62 @@ export function BoqWorkspace({
           : line,
       ),
     );
+  }
+  // A measured rectangular work item is the single source for its volume,
+  // material quantities and order rates (not an unpriced notes-only row).
+  function addStageGeometry(
+    stage: string,
+    kind: MeasuredKind,
+    name: string,
+    values: MeasuredDimensions,
+  ) {
+    const outputs = measuredOutputs(kind, values, settings);
+    if (!outputs.length) {
+      setMessage('Enter a positive count, length, width and depth for measured work.');
+      return;
+    }
+    const item: SavedLine = {
+      id: uid(),
+      name: name.trim().slice(0, 200) || ({
+        excavation: 'Excavation',
+        soil: 'Soil filling',
+        pcc: 'PCC bed',
+        sajjas: 'Sajjas / chajjas',
+        shelves: 'RCC shelves',
+      } as const)[kind],
+      section: stage,
+      kind: 'measured-geometry',
+      unit: 'm³',
+      inputs: { ...values, stageCategory: kind },
+      outputs,
+      notes: '',
+    };
+    const children = Object.entries(repeatFrom)
+      .filter(([, source]) => source === stage)
+      .map(([target, source]): SavedLine => ({
+        ...item, id: uid(), section: target,
+        inputs: { ...item.inputs, repeatedFrom: source, sourceLineId: item.id },
+      }));
+    setLines((prior) => [...prior, item, ...children]);
+    setMessage(`${item.name} measured and added. Save BOQ to keep it.`);
+  }
+  function updateStageGeometry(index: number, values: MeasuredDimensions, newName: string) {
+    const original = lines[index];
+    if (!original || original.kind !== 'measured-geometry') return;
+    const kind = original.inputs.stageCategory as MeasuredKind;
+    const outputs = measuredOutputs(kind, values, settings);
+    setLines((prior) => prior.map((line, i) =>
+      i === index ||
+      (line.inputs.repeatedFrom === original.section &&
+        line.inputs.sourceLineId === original.id)
+        ? {
+            ...line,
+            name: newName.trim().slice(0, 200) || original.name,
+            inputs: { ...line.inputs, ...values },
+            outputs,
+          }
+        : line,
+    ));
   }
   function addStageManual(
     stage: string,
@@ -1657,6 +1719,9 @@ export function BoqWorkspace({
             onDesignChange={setGenDesign}
             counts={countsForGeneration}
             onCountsChange={updateStageCounts}
+            structuralSettings={settings}
+            onAddGeometry={addStageGeometry}
+            onUpdateGeometry={updateStageGeometry}
             onFloorChange={setGenFloors}
             repeatFrom={repeatFrom}
             onRepeatFloors={repeatStageFloors}
