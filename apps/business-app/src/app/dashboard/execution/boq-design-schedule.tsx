@@ -39,7 +39,7 @@ const newBeam = (index: number, floors: number): DesignBeamType => ({
   stirrupSpacingIn: 6,
   runFeet: Array.from({ length: floors }, () => 0),
 });
-export const emptyDesign = (floors: number): StructuralDesign => ({
+export const emptyDesign = (_floors: number): StructuralDesign => ({
   footings: [],
   columns: [],
   beams: [],
