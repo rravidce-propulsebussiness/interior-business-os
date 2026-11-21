@@ -55,9 +55,7 @@ describe('BOQ project quotation', () => {
   it('fails closed when the authorized effective-project lookup is missing', () => {
     expect(chooseProjectQuote('p1', quotes, {})).toBeNull();
     expect(chooseProjectQuote('p3', quotes, { p3: 'a' })).toBeNull();
-    expect(
-      chooseProjectQuote('p1', [quotes[2]!], { p1: 'c' }),
-    ).toBeNull();
+    expect(chooseProjectQuote('p1', [quotes[2]!], { p1: 'c' })).toBeNull();
   });
 
   it('names the quotation after the customer and package', () => {

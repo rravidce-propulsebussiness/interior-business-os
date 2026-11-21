@@ -23,9 +23,13 @@ describe('BOQ project selection and save invariants', () => {
     expect(page).toContain('newProjects={newProjects}');
     expect(page).not.toContain(")('quotation_final_choices'");
     expect(defaultFinalMigration).toContain('coalesce(pinned.id, newest.id)');
-    expect(defaultFinalMigration).toContain('order by q.created_at desc, q.id desc');
+    expect(defaultFinalMigration).toContain(
+      'order by q.created_at desc, q.id desc',
+    );
     expect(defaultFinalMigration).toContain('q.project_id = p.id');
-    expect(defaultFinalMigration).toContain('selection.customer_id = p.customer_id');
+    expect(defaultFinalMigration).toContain(
+      'selection.customer_id = p.customer_id',
+    );
     expect(defaultFinalMigration).toContain('public.quotation_items');
   });
 

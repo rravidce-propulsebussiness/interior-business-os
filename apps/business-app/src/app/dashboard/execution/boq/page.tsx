@@ -160,11 +160,7 @@ export default async function ManualBoqPage({
     };
   });
   const chosen = projects.flatMap((project) => {
-    const pick = chooseProjectQuote(
-      project.id,
-      candidates,
-      effectiveByProject,
-    );
+    const pick = chooseProjectQuote(project.id, candidates, effectiveByProject);
     return pick ? [{ project, ...pick }] : [];
   });
   // An existing BOQ may refer to an older revision after the customer picks
