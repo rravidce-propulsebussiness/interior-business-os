@@ -72,6 +72,17 @@ export type BoqFloor = {
   parkingSqft?: number;
 };
 
+/** One drawn wall segment; the measurement is repeated by count. */
+export type WallMeasure = {
+  id: string;
+  name: string;
+  location: 'external' | 'internal';
+  count: number;
+  lengthFeet: number;
+  heightFeet: number;
+  thicknessIn: number;
+};
+
 /** Doors, windows and bathrooms on one floor (editable per floor). */
 export type FloorCounts = {
   mainDoors: number;
@@ -147,6 +158,23 @@ export type BoqCounts = {
    * from them instead of the typical window size.
    */
   windowSizes?: Record<string, string>;
+  /** Door and ventilator openings: "2×3×7" = two at 3 ft × 7 ft. */
+  doorSizes?: Record<
+    string,
+    Partial<
+      Record<
+        | 'mainDoors'
+        | 'internalDoors'
+        | 'bathroomDoors'
+        | 'poojaDoors'
+        | 'ventilators'
+        | 'rollingShutters',
+        string
+      >
+    >
+  >;
+  /** Measured wall segments per floor; absence preserves quotation estimates. */
+  walls?: Record<string, WallMeasure[]>;
   /** Rooms, bathroom size and kitchen platform per floor, when entered. */
   finishes?: Record<string, FloorFinishes>;
 };
@@ -418,6 +446,34 @@ export const STRUCTURAL_FIELDS = [
     value: 3,
     min: 0,
     max: 8,
+  },
+  {
+    key: 'pccCementBagsPerM3',
+    label: 'PCC: cement bags per m³',
+    group: 'Foundation',
+    value: 3.4,
+    min: 0,
+    max: 20,
+    step: 0.1,
+    help: 'Site-mixed PCC estimate. Adjust to the specified PCC mix, not ready-mix pricing.',
+  },
+  {
+    key: 'pccSandM3PerM3',
+    label: 'PCC: sand m³ per m³',
+    group: 'Foundation',
+    value: 0.47,
+    min: 0,
+    max: 3,
+    step: 0.01,
+  },
+  {
+    key: 'pccAggregateM3PerM3',
+    label: 'PCC: aggregate m³ per m³',
+    group: 'Foundation',
+    value: 0.94,
+    min: 0,
+    max: 3,
+    step: 0.01,
   },
   {
     key: 'plinthBeam',
@@ -890,6 +946,62 @@ export const STRUCTURAL_FIELDS = [
     min: 0,
     max: 15,
     step: 0.5,
+  },
+  {
+    key: 'masonryBricksPer100Sqft4',
+    label: '4.5 in brick wall: bricks per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 500,
+    min: 0,
+    max: 4000,
+    step: 1,
+    help: 'Editable thumb-rule estimate; replace with your actual brick size and mortar-joint count.',
+  },
+  {
+    key: 'masonryBricksPer100Sqft9',
+    label: '9 in brick wall: bricks per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 1000,
+    min: 0,
+    max: 6000,
+    step: 1,
+  },
+  {
+    key: 'masonryCementBagsPer100Sqft4',
+    label: '4.5 in brick wall: cement bags per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 3,
+    min: 0,
+    max: 60,
+    step: 0.5,
+  },
+  {
+    key: 'masonryCementBagsPer100Sqft9',
+    label: '9 in brick wall: cement bags per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 6,
+    min: 0,
+    max: 100,
+    step: 0.5,
+    help: '6 bags per 100 sq ft is an editable illustration, not a structural or mix-design standard.',
+  },
+  {
+    key: 'masonrySandM3Per100Sqft4',
+    label: '4.5 in brick wall: sand m³ per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 0.1,
+    min: 0,
+    max: 4,
+    step: 0.01,
+  },
+  {
+    key: 'masonrySandM3Per100Sqft9',
+    label: '9 in brick wall: sand m³ per 100 net sq ft',
+    group: 'Masonry & plaster',
+    value: 0.2,
+    min: 0,
+    max: 8,
+    step: 0.01,
   },
   {
     key: 'parkingWallPercent',
@@ -1655,9 +1767,68 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
       railingFeet: feet(value.railingFeet),
     };
   }
+  const doorSizesRaw =
+    source.doorSizes && typeof source.doorSizes === 'object'
+      ? (source.doorSizes as Record<string, unknown>)
+      : {};
+  const doorSizeKeys = [
+    'mainDoors',
+    'internalDoors',
+    'bathroomDoors',
+    'poojaDoors',
+    'ventilators',
+    'rollingShutters',
+  ] as const;
+  const doorSizes: NonNullable<BoqCounts['doorSizes']> = {};
+  for (const floor of Object.keys(floors)) {
+    const values = doorSizesRaw[floor];
+    if (!values || typeof values !== 'object') continue;
+    const sizes = values as Record<string, unknown>;
+    const entered = Object.fromEntries(
+      doorSizeKeys
+        .map((key) => [key, String(sizes[key] ?? '').slice(0, 200)] as const)
+        .filter(([, value]) => Boolean(value.trim())),
+    );
+    if (Object.keys(entered).length) doorSizes[floor] = entered;
+  }
+  const wallRaw =
+    source.walls && typeof source.walls === 'object'
+      ? (source.walls as Record<string, unknown>)
+      : {};
+  const walls: NonNullable<BoqCounts['walls']> = {};
+  for (const floor of Object.keys(floors)) {
+    const rawWalls = Array.isArray(wallRaw[floor])
+      ? (wallRaw[floor] as unknown[])
+      : [];
+    const parsed = rawWalls
+      .slice(0, 50)
+      .flatMap((input, index): WallMeasure[] => {
+        if (!input || typeof input !== 'object') return [];
+        const entry = input as Record<string, unknown>;
+        const count = validCount(entry.count, 0, 200);
+        const lengthFeet = feet(entry.lengthFeet);
+        const heightFeet = feet(entry.heightFeet);
+        const thicknessIn = num(entry.thicknessIn, 9, 3, 14);
+        if (!(count > 0 && lengthFeet > 0 && heightFeet > 0)) return [];
+        return [
+          {
+            id: String(entry.id ?? index).slice(0, 80),
+            name: String(entry.name ?? 'Wall ' + (index + 1)).slice(0, 80),
+            location: entry.location === 'internal' ? 'internal' : 'external',
+            count,
+            lengthFeet,
+            heightFeet,
+            thicknessIn,
+          },
+        ];
+      });
+    if (parsed.length) walls[floor] = parsed;
+  }
   return {
     floors,
     ...(Object.keys(windowSizes).length ? { windowSizes } : {}),
+    ...(Object.keys(doorSizes).length ? { doorSizes } : {}),
+    ...(Object.keys(walls).length ? { walls } : {}),
     ...(Object.keys(finishes).length ? { finishes } : {}),
     entranceGates: validCount(source.entranceGates, estimated.entranceGates),
     compoundWallFeet: validCount(
@@ -2247,6 +2418,58 @@ export function generateQuotationBoq(
         }
       }
       mergeSteel(tally);
+      if (splitBeamSlab) {
+        drafts.push({
+          origin: 'quotation-structure',
+          draft: {
+            name: 'Foundation: excavation from footing sizes (estimated)',
+            section: 'Foundation',
+            kind: 'quote-excavation',
+            unit: 'm³',
+            inputs: { footings, depthFeet: s.foundationDepthFeet },
+            outputs: [
+              {
+                name: 'Excavation volume',
+                material: 'excavation',
+                quantity: round(excavation, 2),
+                unit: 'm³',
+                source:
+                  'Footing-pit estimate (replace with measured length, width and depth)',
+              },
+            ],
+          },
+        });
+        drafts.push({
+          origin: 'quotation-structure',
+          draft: {
+            name: 'Foundation: PCC beds from footing sizes (estimated)',
+            section: 'Foundation',
+            kind: 'quote-pcc',
+            unit: 'm³',
+            inputs: { footings, thicknessIn: s.pccThicknessIn },
+            outputs: [
+              {
+                name: 'PCC volume (reference only)',
+                quantity: round(pcc, 3),
+                unit: 'm³',
+                rate: 0,
+              },
+              {
+                name: 'Cement (PCC)',
+                material: 'cement',
+                quantity: round(pcc * s.pccCementBagsPerM3, 1),
+                unit: 'bag',
+              },
+              sandOutput(pcc * s.pccSandM3PerM3, s, 'Sand (PCC)'),
+              aggregateOutput(
+                pcc * s.pccAggregateM3PerM3,
+                s,
+                'Aggregate (PCC)',
+              ),
+            ],
+          },
+        });
+      }
       drafts.push({
         origin: 'quotation-structure',
         draft: {
@@ -2264,27 +2487,31 @@ export function generateQuotationBoq(
             depthFeet: s.foundationDepthFeet,
           },
           outputs: [
-            {
-              name: 'Earthwork excavation',
-              material: 'excavation',
-              quantity: round(excavation, 2),
-              unit: 'm³',
-              source: `${footings} pits · 1 ft working space each side`,
-            },
-            {
-              name: 'PCC 1:4:8 bed',
-              quantity: round(pcc, 3),
-              unit: 'm³',
-            },
-            {
-              name: 'Cement',
-              material: 'cement',
-              quantity: round(pcc * 3.4, 1),
-              unit: 'bag',
-              source: 'PCC 1:4:8 · 3.4 bags/m³',
-            },
-            sandOutput(pcc * 0.47, s),
-            aggregateOutput(pcc * 0.94, s, '40 mm aggregate'),
+            ...(!splitBeamSlab
+              ? [
+                  {
+                    name: 'Earthwork excavation',
+                    material: 'excavation',
+                    quantity: round(excavation, 2),
+                    unit: 'm³',
+                    source: `${footings} pits · 1 ft working space each side`,
+                  },
+                  {
+                    name: 'PCC 1:4:8 bed',
+                    quantity: round(pcc, 3),
+                    unit: 'm³',
+                  },
+                  {
+                    name: 'Cement',
+                    material: 'cement',
+                    quantity: round(pcc * 3.4, 1),
+                    unit: 'bag',
+                    source: 'PCC 1:4:8 · 3.4 bags/m³',
+                  },
+                  sandOutput(pcc * 0.47, s),
+                  aggregateOutput(pcc * 0.94, s, '40 mm aggregate'),
+                ]
+              : []),
             ...concreteOutputs(footingConcrete, 'Footing', s),
             ...steelOutputs(tally, stock),
           ],
@@ -2831,21 +3058,234 @@ export function generateQuotationBoq(
     for (const floor of floors) {
       const perimeter = 2 * (floor.lengthFeet + floor.widthFeet);
       const wallHeight = Math.max(0, floor.heightFeet - s.beamDepthIn / 12);
-      // Parking / stilt portions have few walls.
       const parkingShare =
         (floor.parkingSqft ?? 0) / Math.max(1, floor.areaSqft);
       const wallShare =
         1 - parkingShare + (parkingShare * s.parkingWallPercent) / 100;
       const solid = (1 - s.openingsPercent / 100) * wallShare;
-      const externalArea = perimeter * wallHeight * solid;
-      const internalArea = perimeter * s.internalWallRatio * wallHeight * solid;
-      const volume =
-        (externalArea * (s.externalWallIn / 12) +
-          internalArea * (s.internalWallIn / 12)) *
-        CUM_PER_CFT;
+      const drawnWalls = counts.walls?.[floor.name] ?? [];
+      const measured = drawnWalls.length > 0;
+      const fc = counts.floors[floor.name]!;
+      const floorDoorSizes = counts.doorSizes?.[floor.name];
+      // A schedule is authoritative; do not apply the general openings % on
+      // top of door/window size deductions.
+      const openingArea = (
+        key:
+          | 'mainDoors'
+          | 'internalDoors'
+          | 'bathroomDoors'
+          | 'poojaDoors'
+          | 'ventilators'
+          | 'rollingShutters',
+        typicalWidth: number,
+        typicalHeight: number,
+      ) => {
+        const entered = parseOpenings(floorDoorSizes?.[key]);
+        const n = fc[key];
+        if (entered.length) {
+          const enteredCount = entered.reduce((sum, row) => sum + row.count, 0);
+          if (enteredCount !== n)
+            warnings.push(
+              `${floor.name}: ${key} size schedule lists ${enteredCount} openings but count is ${n}; verify the drawing.`,
+            );
+          return entered.reduce(
+            (sum, row) => sum + row.count * row.widthFeet * row.heightFeet,
+            0,
+          );
+        }
+        if (n > 0 && measured)
+          warnings.push(
+            `${floor.name}: ${key} sizes not entered; ${typicalWidth}×${typicalHeight} ft assumed for masonry deduction.`,
+          );
+        return n * typicalWidth * typicalHeight;
+      };
+      const windowOpenings = parseOpenings(counts.windowSizes?.[floor.name]);
+      const scheduledWindowCount = windowOpenings.reduce(
+        (sum, row) => sum + row.count,
+        0,
+      );
+      if (
+        measured &&
+        windowOpenings.length &&
+        scheduledWindowCount !== fc.windows
+      )
+        warnings.push(
+          `${floor.name}: window schedule lists ${scheduledWindowCount} windows; count is ${fc.windows}.`,
+        );
+      if (measured && !windowOpenings.length && fc.windows > 0)
+        warnings.push(
+          `${floor.name}: window sizes not entered; ${s.windowSqft} sq ft/window assumed for masonry deduction.`,
+        );
+      const externalOpenings =
+        openingArea('mainDoors', 3.5, 7) +
+        openingArea('ventilators', 2, 1.5) +
+        openingArea('rollingShutters', 8, 8) +
+        (windowOpenings.length
+          ? windowOpenings.reduce(
+              (sum, row) => sum + row.count * row.widthFeet * row.heightFeet,
+              0,
+            )
+          : fc.windows * s.windowSqft);
+      const internalOpenings =
+        openingArea('internalDoors', 3, 7) +
+        openingArea('bathroomDoors', 2.5, 7) +
+        openingArea('poojaDoors', 2.5, 7);
+      const grossExt = drawnWalls
+        .filter((row) => row.location === 'external')
+        .reduce(
+          (sum, row) => sum + row.count * row.lengthFeet * row.heightFeet,
+          0,
+        );
+      const grossInt = drawnWalls
+        .filter((row) => row.location === 'internal')
+        .reduce(
+          (sum, row) => sum + row.count * row.lengthFeet * row.heightFeet,
+          0,
+        );
+      if (measured && externalOpenings > grossExt)
+        warnings.push(
+          `${floor.name}: external openings exceed drawn external wall area.`,
+        );
+      if (measured && internalOpenings > grossInt)
+        warnings.push(
+          `${floor.name}: internal openings exceed drawn internal wall area.`,
+        );
+      const netExternal = Math.max(0, grossExt - externalOpenings);
+      const netInternal = Math.max(0, grossInt - internalOpenings);
+      const externalArea = measured
+        ? netExternal
+        : perimeter * wallHeight * solid;
+      const internalArea = measured
+        ? netInternal
+        : perimeter * s.internalWallRatio * wallHeight * solid;
       const internalPlaster = externalArea + 2 * internalArea;
       const externalPlaster = externalArea * 1.1;
       wallsByFloor.set(floor.name, { internalPlaster, externalPlaster });
+      const measuredWallOutputs: GeneratedOutput[] = [];
+      let volume = 0;
+      if (measured || splitBeamSlab) {
+        const rows = measured
+          ? drawnWalls
+          : [
+              {
+                id: 'estimate-external',
+                name: 'External wall estimate',
+                location: 'external' as const,
+                count: 1,
+                lengthFeet: externalArea,
+                heightFeet: 1,
+                thicknessIn: s.externalWallIn,
+              },
+              {
+                id: 'estimate-internal',
+                name: 'Internal wall estimate',
+                location: 'internal' as const,
+                count: 1,
+                lengthFeet: internalArea,
+                heightFeet: 1,
+                thicknessIn: s.internalWallIn,
+              },
+            ];
+        const waste = 1 + s.materialWastagePercent / 100;
+        let bricks = 0;
+        let cementBrickwork = 0;
+        let sandBrickwork = 0;
+        for (const row of rows) {
+          const gross = row.count * row.lengthFeet * row.heightFeet;
+          const ratio = !measured
+            ? 1
+            : row.location === 'external'
+              ? grossExt > 0
+                ? netExternal / grossExt
+                : 0
+              : grossInt > 0
+                ? netInternal / grossInt
+                : 0;
+          const netArea = gross * ratio;
+          if (!(netArea > 0)) continue;
+          const thick = row.thicknessIn >= 6 ? '9' : '4';
+          const rules =
+            thick === '9'
+              ? {
+                  bricks: s.masonryBricksPer100Sqft9,
+                  cement: s.masonryCementBagsPer100Sqft9,
+                  sand: s.masonrySandM3Per100Sqft9,
+                }
+              : {
+                  bricks: s.masonryBricksPer100Sqft4,
+                  cement: s.masonryCementBagsPer100Sqft4,
+                  sand: s.masonrySandM3Per100Sqft4,
+                };
+          bricks += (netArea * rules.bricks) / 100;
+          cementBrickwork += (netArea * rules.cement) / 100;
+          sandBrickwork += (netArea * rules.sand) / 100;
+          volume += netArea * (row.thicknessIn / 12) * CUM_PER_CFT;
+          measuredWallOutputs.push(
+            wallOutput(
+              `${row.name} (${row.location})`,
+              row.thicknessIn,
+              netArea,
+              s,
+            ),
+          );
+        }
+        measuredWallOutputs.push(
+          {
+            name: 'Bricks',
+            material: 'bricks',
+            quantity: ceil(bricks * waste),
+            unit: 'nos',
+            source: 'Net measured wall area × configured bricks per 100 sq ft',
+          },
+          {
+            name: 'Cement (brickwork)',
+            material: 'cement_masonry',
+            quantity: round(cementBrickwork * waste, 1),
+            unit: 'bag',
+            source: 'Net measured wall area × configured bags per 100 sq ft',
+          },
+          sandOutput(sandBrickwork * waste, s, 'Sand (brickwork)'),
+          {
+            name: 'Cement (plaster)',
+            material: 'cement_masonry',
+            quantity: round(
+              (internalPlaster * 0.0058 + externalPlaster * 0.0136) * waste,
+              1,
+            ),
+            unit: 'bag',
+          },
+          sandOutput(
+            (internalPlaster * 0.0012 + externalPlaster * 0.0019) * waste,
+            s,
+            'Sand (plaster)',
+          ),
+          ...(internalPlaster > 0
+            ? [
+                {
+                  name: 'Internal plaster',
+                  ...(s.labourItemized ? { material: 'plaster_labour' } : {}),
+                  quantity: round(internalPlaster, 0),
+                  unit: 'sqft',
+                },
+              ]
+            : []),
+          ...(externalPlaster > 0
+            ? [
+                {
+                  name: 'External plaster',
+                  ...(s.labourItemized ? { material: 'plaster_labour' } : {}),
+                  quantity: round(externalPlaster, 0),
+                  unit: 'sqft',
+                },
+              ]
+            : []),
+        );
+      } else {
+        volume =
+          (externalArea * (s.externalWallIn / 12) +
+            internalArea * (s.internalWallIn / 12)) *
+          CUM_PER_CFT;
+      }
       drafts.push({
         origin: 'quotation-structure',
         draft: {
@@ -2854,16 +3294,40 @@ export function generateQuotationBoq(
           kind: 'quote-masonry',
           unit: 'sqft',
           inputs: {
-            externalWallFeet: round(perimeter, 1),
-            internalWallFeet: round(perimeter * s.internalWallRatio, 1),
+            externalWallFeet: measured
+              ? round(grossExt, 1)
+              : round(perimeter, 1),
+            internalWallFeet: measured
+              ? round(grossInt, 1)
+              : round(perimeter * s.internalWallRatio, 1),
             wallHeightFeet: round(wallHeight, 2),
-            openings: `${s.openingsPercent}%`,
+            openings: measured
+              ? `${round(externalOpenings + internalOpenings, 1)} sqft from openings schedule`
+              : `${s.openingsPercent}%`,
           },
-          outputs: [
-            wallOutput('external wall', s.externalWallIn, externalArea, s),
-            wallOutput('internal wall', s.internalWallIn, internalArea, s),
-            ...brickworkOutputs(volume, internalPlaster, externalPlaster, s),
-          ],
+          outputs:
+            measured || splitBeamSlab
+              ? measuredWallOutputs
+              : [
+                  wallOutput(
+                    'external wall',
+                    s.externalWallIn,
+                    externalArea,
+                    s,
+                  ),
+                  wallOutput(
+                    'internal wall',
+                    s.internalWallIn,
+                    internalArea,
+                    s,
+                  ),
+                  ...brickworkOutputs(
+                    volume,
+                    internalPlaster,
+                    externalPlaster,
+                    s,
+                  ),
+                ],
         },
       });
     }

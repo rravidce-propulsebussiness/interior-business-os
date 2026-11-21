@@ -57,6 +57,30 @@ const generatorSchema = z.object({
     entranceGates: z.number().int().nonnegative(),
     compoundWallFeet: z.number().int().nonnegative(),
     windowSizes: z.record(z.string().max(90), z.string().max(200)).optional(),
+    doorSizes: z
+      .record(
+        z.string().max(90),
+        z.record(z.string().max(40), z.string().max(200)),
+      )
+      .optional(),
+    walls: z
+      .record(
+        z.string().max(90),
+        z
+          .array(
+            z.object({
+              id: z.string().max(80),
+              name: z.string().max(80),
+              location: z.enum(['external', 'internal']),
+              count: z.number().int().min(1).max(200),
+              lengthFeet: z.number().finite().positive().max(500),
+              heightFeet: z.number().finite().positive().max(500),
+              thicknessIn: z.number().finite().min(3).max(14),
+            }),
+          )
+          .max(50),
+      )
+      .optional(),
     finishes: z
       .record(
         z.string().max(90),
