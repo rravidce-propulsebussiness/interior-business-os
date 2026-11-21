@@ -1,0 +1,39 @@
+name: BOQ stage formatter temporary
+on:
+  push:
+    branches: [feat/boq-stage-cards-20261121]
+    paths: [.github/workflows/boq-stage-formatter.yml]
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/boq-stage-cards-20261121
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Prettier on changed BOQ files
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.css \
+            apps/business-app/src/app/dashboard/execution/boq-workspace.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-actions.ts \
+            apps/business-app/src/app/dashboard/execution/layout.tsx \
+            packages/core/src/construction-boq.ts
+          git diff --check
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps/business-app/src/app/dashboard/execution packages/core/src/construction-boq.ts
+            git commit -m "style(boq): format stage-builder implementation"
+            git push origin HEAD:feat/boq-stage-cards-20261121
+          fi
