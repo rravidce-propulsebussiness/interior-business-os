@@ -492,7 +492,6 @@ export function BoqWorkspace({
         ? `${activeProject.customerName ? activeProject.customerName + ' · ' : ''}${activeProject.name}`
         : undefined,
       quotation: quotes.find((quote) => quote.id === quoteId)?.label,
-      status: 'Saved',
       rows: exportRows,
       includeCost: canViewCost,
       quotedValue: canViewCost ? quotedValue : undefined,
