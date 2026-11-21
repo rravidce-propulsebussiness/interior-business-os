@@ -2,6 +2,8 @@ import { createElement, type ComponentProps } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { BoqStageBuilder } from './boq-stage-builder';
+import { BoqFootingEditor } from './boq-footing-editor';
+import { newFootingType } from '@business-os/core/construction-boq';
 import type {
   BoqCounts,
   BoqFloor,
@@ -82,5 +84,34 @@ describe('stage-wise miscellaneous BOQ UI', () => {
     expect(html).toContain('Miscellaneous');
     expect(html).toContain('1 item');
     expect(html).toContain('₹600');
+  });
+});
+
+describe('independent Footings editor', () => {
+  it('offers six foundation types, one/two steel meshes and optional pedestal without column fields', () => {
+    const html = renderToStaticMarkup(createElement(BoqFootingEditor, {
+      footings: [{
+        ...newFootingType(0),
+        count: 4,
+        columnRefs: 'C1, C2',
+        lengthFeet: 5,
+        widthFeet: 5,
+      }],
+      columnLabels: ['C1', 'C2'],
+      onChange: noop,
+    }));
+    expect(html).toContain('Foundation configuration');
+    expect(html).toContain('Isolated — single-column');
+    expect(html).toContain('Combined — two or more columns');
+    expect(html).toContain('Strap — two pads');
+    expect(html).toContain('Raft / mat');
+    expect(html).toContain('Strip / continuous');
+    expect(html).toContain('Pile cap');
+    expect(html).toContain('Single mesh — bottom layer');
+    expect(html).toContain('Double mesh — bottom + top');
+    expect(html).toContain('Include RCC pedestal');
+    expect(html).toContain('Supported column IDs');
+    expect(html).not.toContain('Column width');
+    expect(html).not.toContain('Main bars (e.g.');
   });
 });
