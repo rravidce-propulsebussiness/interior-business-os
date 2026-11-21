@@ -113,7 +113,8 @@ const generatorSchema = z.object({
     .nullable()
     .optional(),
   measuredOnly: z.boolean().optional(),
-  repeatFrom: z.record(z.string().max(90), z.string().max(90))
+  repeatFrom: z
+    .record(z.string().max(90), z.string().max(90))
     .refine((value) => Object.keys(value).length <= 20)
     .optional(),
   warnings: z.array(z.string().max(500)).max(50).default([]),

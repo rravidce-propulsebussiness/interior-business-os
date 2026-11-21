@@ -1810,7 +1810,13 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     )
       settings[key] = parsed;
   }
-  if (!columns.length && !beams.length && !Object.keys(settings).length && !Number(value.plinthRunFeet)) return null;
+  if (
+    !columns.length &&
+    !beams.length &&
+    !Object.keys(settings).length &&
+    !Number(value.plinthRunFeet)
+  )
+    return null;
   return {
     columns,
     beams,
