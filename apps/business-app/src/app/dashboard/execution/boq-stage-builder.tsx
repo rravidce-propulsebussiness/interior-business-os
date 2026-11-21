@@ -484,7 +484,7 @@ export function BoqStageBuilder(props: Props) {
   const setColumns = (columns: DesignColumnType[]) =>
     props.onDesignChange({ ...drawing, columns });
   const setFootings = (footings: StructuralDesign['footings']) =>
-    props.onDesignChange({ ...drawing, footings });
+    props.onDesignChange({ ...drawing, footings, legacyFootings: false });
   const setBeams = (beams: DesignBeamType[]) =>
     props.onDesignChange({ ...drawing, beams });
   const setSetting = (key: DesignSettingKey, value: number) =>
