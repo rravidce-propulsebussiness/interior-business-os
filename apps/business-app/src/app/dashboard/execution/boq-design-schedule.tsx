@@ -39,6 +39,7 @@ const newBeam = (index: number, floors: number): DesignBeamType => ({
   runFeet: Array.from({ length: floors }, () => 0),
 });
 export const emptyDesign = (floors: number): StructuralDesign => ({
+  footings: [],
   columns: [newColumn(0)],
   beams: [newBeam(0, floors)],
   plinthRunFeet: 0,
