@@ -33,6 +33,7 @@ export type StageBoqLine = {
   name: string;
   section: string;
   kind: string;
+  unit?: string;
   origin?: string;
   inputs: Record<string, string | number | boolean>;
   outputs: StageBoqOutput[];
