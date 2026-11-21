@@ -170,6 +170,7 @@ export function BoqWorkspace({
   canEdit,
   canCreate,
   canViewCost,
+  initialMode = 'view',
 }: {
   documents: Document[];
   projects: Project[];
@@ -183,18 +184,24 @@ export function BoqWorkspace({
   canEdit: boolean;
   canCreate: boolean;
   canViewCost: boolean;
+  initialMode?: 'view' | 'edit' | 'new';
 }) {
+  const [screen, setScreen] = useState<'view' | 'edit' | 'new'>(
+    initialMode === 'new' ? 'new' : initialMode === 'edit' && canEdit ? 'edit' : 'view',
+  );
   // Coming back to the BOQ page opens the BOQ being worked on: the one
   // asked for, else the project's, else the most recent one.
   const initialDocument =
-    documents.find((document) => document.id === initialOpenId) ??
-    (initialProjectId
-      ? documents.find((document) => document.project_id === initialProjectId)
-      : (documents.find(
-          (document) =>
-            projects.length === 1 && document.project_id === projects[0]!.id,
-        ) ?? documents[0])) ??
-    null;
+    initialMode === 'new'
+      ? null
+      : (documents.find((document) => document.id === initialOpenId) ??
+          (initialProjectId
+            ? documents.find((document) => document.project_id === initialProjectId)
+            : (documents.find(
+                (document) =>
+                  projects.length === 1 && document.project_id === projects[0]!.id,
+              ) ?? documents[0])) ??
+          null);
   const [active, setActive] = useState<Document | null>(initialDocument);
   const [title, setTitle] = useState(
     initialDocument?.title ?? 'Construction BOQ',
@@ -235,7 +242,7 @@ export function BoqWorkspace({
   const [genDesign, setGenDesign] = useState<StructuralDesign | null>(
     normalizeDesign(initialDocument?.document?.generator?.design),
   );
-  const [selectedTemplate, setSelectedTemplate] = useState('column');
+  const [selectedTemplate, setSelectedTemplate] = useState('manual');
   const [newName, setNewName] = useState('');
   // Takeoff inputs are always metric; `typed` keeps what the person typed
   // in feet / inches so conversion never fights the cursor.
@@ -266,7 +273,7 @@ export function BoqWorkspace({
   };
   const [inputs, setInputs] = useState<BoqInputs>(() =>
     Object.fromEntries(
-      (inputDefinitions.column ?? []).map((item) => [item.key, item.value]),
+      (inputDefinitions.manual ?? []).map((item) => [item.key, item.value]),
     ),
   );
   const [selectedQuoteLines, setSelectedQuoteLines] = useState<string[]>([]);
@@ -565,30 +572,12 @@ export function BoqWorkspace({
     setMessage('');
   }
   function startNew() {
-    if (!newProjects.length) {
-      setMessage(
-        'No new BOQ projects. Save a quotation for a project that does not already have a BOQ.',
-      );
-      return;
-    }
-    setActive(null);
-    const project = newProjects.find((item) => item.id === defaultProjectId);
-    setTitle(
-      project ? `${project.name} · Construction BOQ` : 'Construction BOQ',
-    );
-    setProjectId(defaultProjectId);
-    setQuoteId(quoteForProject(defaultProjectId));
-    setLines([]);
-    setSelections({});
-    setGenerator(null);
-    setGenFloors([]);
-    setGenCounts(null);
-    setGenDesign(null);
-    setOverrides({});
-    setMessage('');
+    router.push('/dashboard/execution/boq/new');
   }
   function openDocument(document: Document) {
     setActive(document);
+    setScreen('view');
+    router.replace(`/dashboard/execution/boq?open=${encodeURIComponent(document.id)}`);
     setTitle(document.title);
     setProjectId(document.project_id || '');
     setQuoteId(document.quotation_revision_id || '');
@@ -790,6 +779,10 @@ export function BoqWorkspace({
     );
   }
   function addLine() {
+    if (schedule && selectedTemplate !== 'manual') {
+      setMessage('Quotation-generated BOQs already measure the structure and finishes. Use manual entries only for extra work.');
+      return;
+    }
     const template = BOQ_TEMPLATES.find(
       (item) => item.kind === selectedTemplate,
     );
@@ -853,6 +846,12 @@ export function BoqWorkspace({
     setSelectedQuoteLines([]);
   }
   function save() {
+    if (schedule && lines.some((line) =>
+      !line.origin && ['excavation', 'footing', 'pedestal', 'column', 'plinth_beam',
+        'beam', 'slab', 'wall', 'surface'].includes(line.kind))) {
+      setMessage('Remove overlapping manually measured structural or finishing items before saving. The quotation already generates these quantities.');
+      return;
+    }
     if (
       !active &&
       (!newProjects.some((project) => project.id === projectId) ||
@@ -897,6 +896,8 @@ export function BoqWorkspace({
         },
         updated_at: new Date().toISOString(),
       });
+      setScreen('view');
+      router.replace(`/dashboard/execution/boq?open=${encodeURIComponent(result.id || active?.id || '')}`);
       router.refresh();
     });
   }
@@ -907,7 +908,11 @@ export function BoqWorkspace({
       setMessage(
         result.ok ? 'BOQ removed.' : result.message || 'Could not remove BOQ.',
       );
-      if (result.ok) setActive(null);
+      if (result.ok) {
+        setActive(null);
+        setScreen('view');
+        router.replace('/dashboard/execution/boq');
+      }
       router.refresh();
     });
   }
@@ -1736,7 +1741,7 @@ export function BoqWorkspace({
           <section className="boq-add-work">
             <div className="boq-section-title">
               <div>
-                <h3>Add measured work</h3>
+                <h3>{schedule ? 'Add extra work' : 'Add measured work'}</h3>
                 <p>
                   Choose a takeoff and enter the dimensions. Calculated
                   quantities update as you type.
@@ -1744,7 +1749,7 @@ export function BoqWorkspace({
               </div>
             </div>
             <div className="boq-template-row">
-              {BOQ_TEMPLATES.map((template) => (
+              {(schedule ? BOQ_TEMPLATES.filter((template) => template.kind === 'manual') : BOQ_TEMPLATES).map((template) => (
                 <button
                   key={template.kind}
                   type="button"
