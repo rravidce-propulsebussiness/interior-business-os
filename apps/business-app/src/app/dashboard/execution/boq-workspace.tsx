@@ -650,6 +650,12 @@ export function BoqWorkspace({
       )
         return measuredColumns;
       if (measuredOnly && ['quote-excavation', 'quote-pcc'].includes(line.kind)) return false;
+      // No provisional brick counts in measured BOQs: walls are quantified
+      // only after lengths, heights, thickness and openings are entered.
+      if (
+        measuredOnly && line.kind === 'quote-masonry' &&
+        !countsForGeneration.walls?.[line.section]?.length
+      ) return false;
       if (line.kind === 'quote-plinth-beam')
         return Boolean(measuredDesign?.plinthRunFeet);
       if (line.kind === 'quote-beams') return measuredBeams;
@@ -923,6 +929,22 @@ export function BoqWorkspace({
     setSelectedQuoteLines([]);
   }
   function save() {
+    // Older saved BOQs retain their estimated foundation line. Do not add
+    // a new measured volume on top of an older excavation/PCC estimate.
+    const overlap = lines.find((line) => {
+      if (line.kind !== 'measured-geometry') return false;
+      const category = String(line.inputs.stageCategory);
+      const related = category === 'excavation'
+        ? ['quote-foundation', 'quote-excavation']
+        : category === 'pcc' ? ['quote-foundation', 'quote-pcc'] : [];
+      return related.length > 0 && lines.some((generated) =>
+        generated.origin && generated.section === line.section &&
+        related.includes(generated.kind));
+    });
+    if (overlap) {
+      setMessage(`Review ${overlap.name}: old quotation-generated foundation quantities also exist. Remove or reconcile the duplicate line before saving.`);
+      return;
+    }
     // When a measured manual stage is later supplied by the drawing engine,
     // require an explicit review instead of adding two competing quantities.
     const generatedForStage: Record<string, string[]> = {
