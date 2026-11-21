@@ -1,10 +1,8 @@
 /**
- * Which quotation a project's BOQ is built from. Pure and testable.
- *
- * Leads → customer → quotation → project: a BOQ belongs to a real project
- * (not a sales-prospect quote container) and uses that project's Final
- * quotation. Without a Final selection, the most recently created active
- * quotation of the project is used. Cancelled quotations are never used.
+ * The database chooses the effective BOQ quotation for each project:
+ * newest saved non-cancelled quotation by default, or a manually selected
+ * Final quotation belonging to that project. Do not silently fall back here
+ * if the tenant-scoped database lookup fails.
  */
 export type ProjectQuoteCandidate = {
   quotationId: string;
@@ -20,24 +18,20 @@ export type ProjectQuoteCandidate = {
 
 export function chooseProjectQuote(
   projectId: string,
-  customerId: string | null,
   candidates: readonly ProjectQuoteCandidate[],
-  finalQuotationByCustomer: Readonly<Record<string, string>>,
+  effectiveQuotationByProject: Readonly<Record<string, string>>,
 ): { quote: ProjectQuoteCandidate; isFinal: boolean } | null {
-  const usable = candidates.filter(
+  const effectiveId = effectiveQuotationByProject[projectId];
+  if (!effectiveId) return null;
+  const selected = candidates.find(
     (quote) =>
       quote.projectId === projectId &&
+      quote.quotationId === effectiveId &&
       quote.revisionId &&
       quote.status !== 'cancelled' &&
-      quote.revisionStatus !== 'cancelled',
+      ['draft', 'issued'].includes(quote.revisionStatus),
   );
-  const finalId = customerId ? finalQuotationByCustomer[customerId] : undefined;
-  const final = usable.find((quote) => quote.quotationId === finalId);
-  if (final) return { quote: final, isFinal: true };
-  const latest = [...usable].sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt),
-  )[0];
-  return latest ? { quote: latest, isFinal: false } : null;
+  return selected ? { quote: selected, isFinal: true } : null;
 }
 
 /** e.g. "Ravi · Premium estimate · Q-2026-000006 v2 · Final". */
