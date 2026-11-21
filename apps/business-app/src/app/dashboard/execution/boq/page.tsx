@@ -236,8 +236,14 @@ export default async function ManualBoqPage({
       schedule,
     };
   });
+  const visibleProjects = projects.map((project) => ({
+    ...project,
+    customerName: project.customer_id
+      ? (customerNames.get(project.customer_id) ?? null)
+      : null,
+  }));
   const newProjects = projectsReadyForNewBoq(
-    projects,
+    visibleProjects,
     quotes,
     (documentsResult.data || []) as { project_id: string | null }[],
   );
@@ -252,12 +258,7 @@ export default async function ManualBoqPage({
   return (
     <BoqWorkspace
       documents={documentsResult.data || []}
-      projects={projects.map((project) => ({
-        ...project,
-        customerName: project.customer_id
-          ? (customerNames.get(project.customer_id) ?? null)
-          : null,
-      }))}
+      projects={visibleProjects}
       quotes={quotes}
       newProjects={newProjects}
       rates={rates}
