@@ -72,6 +72,7 @@ type Props = {
   onAdvanced: () => void;
   canViewCost: boolean;
   busy: boolean;
+  canSave: boolean;
   message?: string;
   newDocument: boolean;
 };
@@ -1237,7 +1238,7 @@ export function BoqStageBuilder(props: Props) {
         <button
           type="button"
           className="boq-stage-save"
-          disabled={props.busy}
+          disabled={props.busy || !props.canSave}
           onClick={props.onSave}
         >
           ▣ {props.busy ? 'Saving…' : 'Save BOQ'}
