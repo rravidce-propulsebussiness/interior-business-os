@@ -2122,3 +2122,68 @@
 .boq-design-table td select[aria-label$='rises to'] {
   min-width: 110px;
 }
+
+/* Download / print next to Save: the status text stays on the left. */
+.boq-savebar {
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+.boq-savebar > span {
+  margin-right: auto;
+}
+.boq-order-list tr.boq-head-row td {
+  padding-top: 10px;
+  font-weight: 700;
+  color: #45383a;
+  background: #fbf7f6;
+}
+.boq-order-list td:last-child {
+  color: #8a7f81;
+  font-size: 10px;
+}
+
+/* Print / Save as PDF: only the BOQ, with every floor open. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .manual-boq .boq-editor,
+  .manual-boq .boq-editor * {
+    visibility: visible;
+  }
+  .manual-boq .boq-editor {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    background: #fff;
+  }
+  .manual-boq
+    .boq-editor
+    :is(
+      .boq-import,
+      .boq-add-work,
+      .boq-takeoff,
+      .boq-savebar,
+      .boq-delete,
+      .boq-brand-picks,
+      button
+    ) {
+    display: none !important;
+  }
+  .manual-boq .boq-editor :is(input, select) {
+    border: 0;
+    background: transparent;
+    appearance: none;
+  }
+  .manual-boq .boq-editor table {
+    page-break-inside: auto;
+  }
+  .manual-boq .boq-editor tr,
+  .manual-boq .boq-floor-cost summary {
+    page-break-inside: avoid;
+  }
+}

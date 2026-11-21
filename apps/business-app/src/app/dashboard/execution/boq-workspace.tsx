@@ -44,6 +44,12 @@ import {
 } from '@business-os/core/construction-boq';
 import { BoqDesignSchedule } from './boq-design-schedule';
 import { BoqFloorInputs } from './boq-floor-inputs';
+import {
+  boqCsv,
+  boqFileName,
+  materialsToOrder,
+  type BoqExportRow,
+} from './boq-export';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 
 type Generator = {
@@ -439,6 +445,25 @@ export function BoqWorkspace({
     });
     floorBreakdown.set(row.section, stage);
   }
+  // Every quantity with its stage and cost head, for the order list and
+  // the download.
+  const exportRows: BoqExportRow[] = allOutputs.map((row) => {
+    const material = materialForOutput(row);
+    return {
+      stage: row.section,
+      item: row.lineName,
+      name: row.name,
+      quantity: row.quantity,
+      unit: row.unit,
+      rate: canViewCost ? row.rate : 0,
+      head: costHead(
+        material ? rateGroupKey(material, diameterOf(row)) : undefined,
+      ),
+      order: row.order,
+      weightKg: row.weightKg,
+    };
+  });
+  const orderList = materialsToOrder(exportRows);
   const [showTakeoff, setShowTakeoff] = useState(false);
   const floorArea = new Map(
     (generator?.floors ?? []).map((floor) => [floor.name, floor.areaSqft]),
@@ -455,6 +480,40 @@ export function BoqWorkspace({
       : lines.reduce((sum, line) => sum + (line.quotedPrice ?? 0), 0);
   const margin = quotedValue > 0 ? quotedValue - materialCost : 0;
 
+  function downloadCsv() {
+    const csv = boqCsv({
+      title: title.trim() || 'Construction BOQ',
+      project: activeProject
+        ? `${activeProject.customerName ? activeProject.customerName + ' · ' : ''}${activeProject.name}`
+        : undefined,
+      quotation: quotes.find((quote) => quote.id === quoteId)?.label,
+      status: status === 'final' ? 'Final' : 'Draft',
+      rows: exportRows,
+      includeCost: canViewCost,
+      quotedValue: canViewCost ? quotedValue : undefined,
+      builtUpSqft: builtUpSqft || undefined,
+      generatedOn: new Date().toLocaleDateString('en-IN'),
+    });
+    // The byte-order mark makes Excel read ₹, × and other symbols.
+    const blob = new Blob(['\ufeff' + csv], {
+      type: 'text/csv;charset=utf-8',
+    });
+    const url = URL.createObjectURL(blob);
+    const link = window.document.createElement('a');
+    link.href = url;
+    link.download = boqFileName(title);
+    window.document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function printBoq() {
+    // Open every floor so the printout / PDF has the full breakdown.
+    window.document
+      .querySelectorAll<HTMLDetailsElement>('.boq-floor-cost')
+      .forEach((element) => (element.open = true));
+    window.print();
+  }
   function selectProject(id: string) {
     setProjectId(id);
     setQuoteId(quoteForProject(id));
@@ -1870,6 +1929,53 @@ export function BoqWorkspace({
               )}
             </section>
           )}
+          {orderList.length > 0 && (
+            <section className="boq-materials boq-order-list">
+              <div className="boq-steel-summary">
+                <h3>Materials &amp; work to order, whole project</h3>
+                <p className="boq-steel-note">
+                  Every stage added up: what to buy for the full building, and
+                  which stages need it.
+                </p>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Material / work</th>
+                      <th>Quantity</th>
+                      {canViewCost && <th>Amount</th>}
+                      <th>Stages</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {orderList.map((line, index) => (
+                      <Fragment key={`${line.name}::${line.unit}`}>
+                        {(index === 0 ||
+                          orderList[index - 1]!.head !== line.head) && (
+                          <tr className="boq-head-row">
+                            <td colSpan={canViewCost ? 4 : 3}>{line.head}</td>
+                          </tr>
+                        )}
+                        <tr>
+                          <td>{line.name}</td>
+                          <td>
+                            {line.quantity.toLocaleString('en-IN', {
+                              maximumFractionDigits: 2,
+                            })}{' '}
+                            {line.unit}
+                            {line.weightKg > 0 && line.unit !== 'kg'
+                              ? ` · ${tonnes(line.weightKg)} t`
+                              : ''}
+                          </td>
+                          {canViewCost && <td>{money(line.amount)}</td>}
+                          <td>{line.stages.join(', ')}</td>
+                        </tr>
+                      </Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          )}
           <section className="boq-summary">
             <div>
               <span>Material + labour cost estimate</span>
@@ -1893,6 +1999,26 @@ export function BoqWorkspace({
               {message ||
                 (active ? `Revision ${active.version}` : 'Unsaved BOQ')}
             </span>
+            {lines.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  className="erp-button"
+                  onClick={downloadCsv}
+                  title="Download the BOQ for Excel / Google Sheets"
+                >
+                  Download Excel (CSV)
+                </button>
+                <button
+                  type="button"
+                  className="erp-button"
+                  onClick={printBoq}
+                  title="Print the BOQ or save it as PDF"
+                >
+                  Print / PDF
+                </button>
+              </>
+            )}
             {(active ? canEdit : canCreate) && (
               <button
                 type="button"

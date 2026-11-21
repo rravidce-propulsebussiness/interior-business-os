@@ -225,5 +225,20 @@ JSW_ → Vizag, _Cement · UltraTech 53, Birla 43_ → UltraTech 53 for RCC and
 Birla 43 for masonry, _Bricks · Karimnagar_ → Karimnagar. A choice already
 made on the BOQ is kept.
 
+## Order list, download and print
+
+- **Materials & work to order, whole project:** below the floor-wise
+  estimate, every stage is added up into one purchase list grouped by head
+  (cement bags, sand and aggregate tonnes, steel rods per size with weight,
+  bricks, tiles, electrical and plumbing items …), with the amount and the
+  stages that need each item.
+- **Download Excel (CSV):** the full BOQ stage by stage (item, material,
+  quantity, unit, rate, amount and what to order), each stage's total, the
+  whole-project order list, the total cost, cost per sq ft, quotation value
+  and margin. It opens in Excel or Google Sheets. People without rate access
+  get quantities only.
+- **Print / PDF:** prints only the BOQ, with every floor opened; choose
+  _Save as PDF_ in the print dialog to share it.
+
 These are pre-design estimates. Final procurement follows the structural
 engineer's drawings and bar bending schedule.
