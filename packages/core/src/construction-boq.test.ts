@@ -951,7 +951,20 @@ describe('contractual specification limits and manually entered BOQ measures', (
         },
       ],
     };
-    const result = generateQuotationBoq({ details });
+    const initial = generateQuotationBoq({ details });
+    const result = generateQuotationBoq({
+      details,
+      counts: {
+        ...initial.counts,
+        floors: {
+          ...initial.counts.floors,
+          'First Floor': {
+            ...initial.counts.floors['First Floor']!,
+            mainDoors: 1,
+          },
+        },
+      },
+    });
     const main = (floor: string) =>
       result.lines
         .filter((line) => line.section === floor)
