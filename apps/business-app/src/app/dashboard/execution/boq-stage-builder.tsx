@@ -142,7 +142,7 @@ function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
     return /waterproof|membrane|coat|sealant/i.test(output.name) ? 'waterproofing' : 'parapet';
   }
   if (kind === 'quote-compound-wall') return 'compound';
-  if (kind === 'quote-binding-wire') return 'steel';
+  if (kind === 'quote-binding-wire') return line.section === 'Foundation' ? 'footings' : 'slab';
   if (/soil fill|backfill|earth fill/i.test(name)) return 'soil';
   if (/excavat/i.test(name)) return 'excavation';
   if (/footing/i.test(name)) return 'footings';
@@ -203,9 +203,17 @@ export function BoqStageBuilder(props: Props) {
   const priced = (output: StageBoqOutput) =>
     props.canViewCost ? output.quantity * props.rateFor(output) : 0;
   const unmeasured = (stage: string, key: string) => {
+    const enteredManual = props.lines.some((line) =>
+      line.section === stage && !line.origin && line.inputs.stageCategory === key);
+    if (enteredManual) return false;
     if (key === 'columns' || (stage === 'Foundation' && ['footings', 'excavation', 'pcc', 'plinth'].includes(key)))
       return !isMeasuredColumn(props.design);
     if (key === 'beams') return !isMeasuredBeam(props.design, Math.max(0, props.floors.findIndex((floor) => floor.name === stage)));
+    if (key === 'slab') return !Boolean(
+      props.design?.settings?.slabMainDia &&
+      props.design?.settings?.slabDistDia &&
+      props.design?.settings?.slabThicknessIn,
+    );
     return false;
   };
   const mapped: Entry[] = [];
@@ -218,7 +226,7 @@ export function BoqStageBuilder(props: Props) {
     mapped.filter((entry) => {
       const matchedStage = stageFor(entry.line, props.floors);
       const matchedCategory = categoryFor(entry.line, entry.output);
-      return matchedStage === stage && (category === matchedCategory || (category === 'extra' && matchedCategory === 'steel'));
+      return matchedStage === stage && category === matchedCategory;
     });
   const visibleCost = (stage: string, category: string) =>
     unmeasured(stage, category) ? 0 : entriesFor(stage, category).reduce((sum, entry) => sum + priced(entry.output), 0);
@@ -231,6 +239,7 @@ export function BoqStageBuilder(props: Props) {
     setExpanded((prior) => prior.includes(section) ? prior.filter((id) => id !== section) : [...prior, section]);
   const openEditor = (stage: string, category: string) => {
     if (preview) return;
+    if (props.repeatFrom[stage]) props.onCustomizeFloor(stage);
     setEditing((prior) => prior?.stage === stage && prior.category === category ? null : { stage, category });
   };
   const drawing = props.design ?? blankDesign();
@@ -431,6 +440,7 @@ export function BoqStageBuilder(props: Props) {
       const isFoundation = stage === 'Foundation';
       const isTop = stage === last && !isFoundation;
       const list = isFoundation ? foundation : isTop ? terrace : standard;
+      const visibleList = isFoundation ? list : [...list, { key: 'extra', label: 'Add Item', icon: '＋' }];
       const open = expanded.includes(stage);
       const inherited = Boolean(props.repeatFrom[stage]);
       const total = costForStage(stage, list);
@@ -459,18 +469,18 @@ export function BoqStageBuilder(props: Props) {
             <button type="button" onClick={() => props.onCustomizeFloor(stage)}>✎ Customize</button>
           </div>}
           {open && <div className={isFoundation ? 'boq-stage-items foundation' : 'boq-stage-items'}>
-            {list.map((category) => {
+            {visibleList.map((category) => {
               const entries = entriesFor(stage, category.key);
               const pending = unmeasured(stage, category.key);
               const amount = visibleCost(stage, category.key);
               const unit = entries.length === 1 ? entries[0]!.output.unit : '';
               const qty = entries.length === 1 ? number(entries[0]!.output.quantity) + ' ' + unit : entries.length ? entries.length + ' materials' : '';
-              const combined = category.key === 'beams' && entriesFor(stage, 'slab').some((entry) => entry.line.kind === 'quote-slab');
+              const combined = (category.key === 'beams' && entriesFor(stage, 'slab').some((entry) => entry.line.kind === 'quote-slab')) || (category.key === 'plaster' && entriesFor(stage, 'brickwork').some((entry) => entry.line.kind === 'quote-masonry'));
               return <div className="boq-stage-tile" key={category.key}>
                 <span className="boq-stage-tile-icon" aria-hidden="true">{category.icon}</span>
                 <div className="boq-stage-tile-body"><strong>{category.label}</strong>
                   {pending ? <small className="pending">Not entered yet</small>
-                    : !entries.length && combined ? <small>Included with slab</small>
+                    : !entries.length && combined ? <small>Included with {category.key === 'beams' ? 'slab' : 'brickwork'}</small>
                     : !entries.length ? <small>Not measured</small>
                     : <small>{qty || 'Measured'}{props.canViewCost ? ' · ' + money(amount) : ''}</small>}
                 </div>
@@ -480,7 +490,7 @@ export function BoqStageBuilder(props: Props) {
               </div>;
             })}
             {entriesFor(stage, 'extra').length > 0 && <div className="boq-stage-extra-note">Other measured work: {money(visibleCost(stage, 'extra'))}</div>}
-            {editing?.stage === stage && renderEditPanel(stage, (list.find((item) => item.key === editing.category) ?? list[0])!)}
+            {editing?.stage === stage && renderEditPanel(stage, (visibleList.find((item) => item.key === editing.category) ?? visibleList[0])!)}
           </div>}
         </article>
       </Fragment>;
@@ -494,7 +504,7 @@ export function BoqStageBuilder(props: Props) {
     </div>
     {props.message && <p className="boq-notice" role="status">{props.message}</p>}
     <div className="boq-stage-actions">
-      <button type="button" className="boq-stage-outline" onClick={() => { setPreview(!preview); setEditing(null); }}>
+      <button type="button" className="boq-stage-outline" onClick={() => { if (!preview) setExpanded(sections); setPreview(!preview); setEditing(null); }}>
         ◉ {preview ? 'Back to Builder' : 'Preview BOQ'}
       </button>
       <button type="button" className="boq-stage-save" disabled={props.busy} onClick={props.onSave}>
