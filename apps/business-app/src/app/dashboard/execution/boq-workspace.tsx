@@ -767,9 +767,13 @@ export function BoqWorkspace({
       setOverrides(next);
       setGenerator((prior) => (prior ? { ...prior, overrides: next } : prior));
     }
+    // Inherited manual items stay linked until that floor is customized.
     setLines((prior) =>
       prior.map((line, i) =>
-        i === lineIndex
+        i === lineIndex ||
+        (target && !target.origin &&
+          line.inputs.repeatedFrom === target.section &&
+          line.inputs.sourceLineId === target.id)
           ? {
               ...line,
               outputs: line.outputs.map((output, j) =>
@@ -808,7 +812,10 @@ export function BoqWorkspace({
     }
     setLines((prior) =>
       prior.map((line, i) =>
-        i === lineIndex
+        i === lineIndex ||
+        (target && !target.origin &&
+          line.inputs.repeatedFrom === target.section &&
+          line.inputs.sourceLineId === target.id)
           ? {
               ...line,
               outputs: line.outputs.map((output, j) =>
@@ -1614,7 +1621,13 @@ export function BoqWorkspace({
             rateFor={priceOf}
             onAddManual={addStageManual}
             onRemoveManual={(index) =>
-              setLines((prior) => prior.filter((_, i) => i !== index))
+              setLines((prior) => {
+                const target = prior[index];
+                return prior.filter((line, i) =>
+                  i !== index &&
+                  !(target && !target.origin && line.inputs.repeatedFrom === target.section &&
+                    line.inputs.sourceLineId === target.id));
+              })
             }
             onSave={save}
             onPrint={printBoq}
