@@ -88,6 +88,7 @@ export const sftEstimateInputSchema = z
       .refine((x) => new Set(x).size === x.length),
     packageId: z.uuid().nullable().optional(),
     sections: z.array(sftSectionSchema).max(32).optional(),
+    slabThicknessIn: z.string().regex(/^(?:[3-9]|1[0-2])(?:\\.[0-9]{1,2})?$/).optional(),
   })
   .strict();
 
@@ -132,6 +133,7 @@ const detailSchema = z
     materials: z.array(sftMaterialSchema).max(20),
     package: sftPackageSchema.optional(),
     sections: z.array(sftSectionSchema).max(32).optional(),
+    slabThicknessIn: z.string().regex(/^(?:[3-9]|1[0-2])(?:\\.[0-9]{1,2})?$/).optional(),
   })
   .strict();
 
@@ -233,6 +235,7 @@ export function calculateSftEstimate(
     materials,
     ...(selectedPackage ? { package: selectedPackage } : {}),
     ...(input.sections ? { sections: input.sections } : {}),
+    ...(input.slabThicknessIn ? { slabThicknessIn: input.slabThicknessIn } : {}),
   });
 }
 
