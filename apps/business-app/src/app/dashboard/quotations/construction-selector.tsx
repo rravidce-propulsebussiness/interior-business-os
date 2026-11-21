@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import type { ConstructionRate } from '@business-os/database/construction-rates';
 import type { ConstructionPackage } from '@business-os/database/construction-packages';
 import { PremiumSftBuilder } from './premium-sft-builder';
+import {
+  initialConstructionPackageSelection,
+  SAVED_PACKAGE_OPTION,
+} from './construction-package-selection';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 import type { CustomBrandQuote } from '@business-os/core/custom-brand-quote';
 import { QuotationPdfControls } from './quotation-pdf-controls';
@@ -319,21 +323,26 @@ export function ConstructionSelector({
   canSharePdf?: boolean;
 }) {
   const activePackages = packages.filter((pkg) => pkg.status === 'active');
-  const previous = activePackages.find(
-    (pkg) =>
-      pkg.id === initialSchedule?.package?.id ||
-      pkg.code === initialSchedule?.package?.code,
-  );
-  const [selected, setSelected] = useState(
-    initialCustomQuote
-      ? 'custom'
-      : (previous?.id ??
-          (initialMode === 'custom' || initialPackageId === 'custom'
-            ? 'custom'
-            : (activePackages.find((pkg) => pkg.id === initialPackageId)?.id ??
-              (activePackages.length === 0 ? 'custom' : '')))),
+  const [selected, setSelected] = useState(() =>
+    initialConstructionPackageSelection(
+      activePackages,
+      initialSchedule,
+      Boolean(initialCustomQuote),
+      initialMode,
+      initialPackageId,
+    ),
   );
   const chosen = activePackages.find((pkg) => pkg.id === selected);
+  const savedPackageUnavailable = Boolean(
+    initialSchedule &&
+    !activePackages.some((pkg) =>
+      initialSchedule.package?.id
+        ? pkg.id === initialSchedule.package.id
+        : pkg.code === initialSchedule.package?.code,
+    ),
+  );
+  const editingSavedPackage =
+    selected === SAVED_PACKAGE_OPTION && savedPackageUnavailable;
   return (
     <div className="qs-build-workspace">
       <section className="qs-build-panel qs-build-package">
@@ -353,6 +362,13 @@ export function ConstructionSelector({
               onChange={(event) => setSelected(event.target.value)}
             >
               <option value="">Select a package</option>
+              {savedPackageUnavailable && initialSchedule && (
+                <option value={SAVED_PACKAGE_OPTION}>
+                  {initialSchedule.package
+                    ? 'Saved: ' + initialSchedule.package.name + ' (archived)'
+                    : 'Saved quotation (no current package)'}
+                </option>
+              )}
               {activePackages.map((pkg) => (
                 <option key={pkg.id} value={pkg.id}>
                   {pkg.name}
@@ -373,6 +389,13 @@ export function ConstructionSelector({
             {chosen.description || 'Company package specifications included.'}
           </p>
         )}
+        {editingSavedPackage && (
+          <p className="qs-build-package-desc" role="status">
+            This quotation keeps its original saved floor measurements, rates
+            and specifications. Its source package is no longer available;
+            select a current package only if you want to replace those defaults.
+          </p>
+        )}
       </section>
       {selected === 'custom' ? (
         <section className="qs-build-custom-wrap">
@@ -385,10 +408,10 @@ export function ConstructionSelector({
             initialQuote={initialCustomQuote ?? null}
           />
         </section>
-      ) : chosen ? (
+      ) : chosen || editingSavedPackage ? (
         <PremiumSftBuilder
           key={selected}
-          selectedPackageId={chosen.id}
+          selectedPackageId={chosen?.id ?? initialSchedule?.package?.id ?? ''}
           rates={rates}
           packages={packages}
           initialSchedule={initialSchedule}

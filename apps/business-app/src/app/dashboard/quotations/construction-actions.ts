@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import {
   calculateSftEstimate,
   encodeSftEstimate,
+  parseSftEstimate,
   sftEstimateInputSchema,
 } from '@business-os/core/sft-quotation';
 import { z } from 'zod';
@@ -406,6 +407,18 @@ export async function saveFloorwiseSftEstimate(
       new Set(options.map((r) => r.category)).size !== options.length
     )
       throw new DomainError('VALIDATION_FAILED');
+    const { data: existing, error } = await s.client
+      .from('quotation_items')
+      .select('id,description')
+      .eq('organization_id', s.org)
+      .eq('revision_id', rid)
+      .or(
+        'description.like.SFT_ESTIMATE_V1:%,description.like.SFT_ESTIMATE_V2:%,description.like.CUSTOM_BRAND_QUOTE_V1:%',
+      )
+      .limit(2);
+    if (error || !existing || existing.length > 1)
+      throw new DomainError('VALIDATION_FAILED');
+
     const allPackages = await createConstructionPackagesRepository(
       s.client,
     ).list(s.org);
@@ -415,7 +428,19 @@ export async function saveFloorwiseSftEstimate(
     const selectedPackage = activePackages.find(
       (p) => p.id === parsed.packageId,
     );
-    if (parsed.packageId && !selectedPackage)
+    // The original company package may have been deleted after this draft
+    // was saved. Keep its immutable metadata only when it came from this
+    // exact tenant-owned revision, not from user-supplied package details.
+    const originalPackage = existing[0]?.description
+      ? parseSftEstimate(existing[0].description)?.package
+      : undefined;
+    const archivedPackage =
+      parsed.packageId &&
+      !selectedPackage &&
+      originalPackage?.id === parsed.packageId
+        ? originalPackage
+        : undefined;
+    if (parsed.packageId && !selectedPackage && !archivedPackage)
       throw new DomainError('VALIDATION_FAILED');
 
     const calculated = calculateSftEstimate(
@@ -434,20 +459,9 @@ export async function saveFloorwiseSftEstimate(
             ratePerSqft: selectedPackage.ratePerSqft,
             themeColor: selectedPackage.themeColor,
           }
-        : undefined,
+        : archivedPackage,
     );
     const description = encodeSftEstimate(calculated);
-    const { data: existing, error } = await s.client
-      .from('quotation_items')
-      .select('id')
-      .eq('organization_id', s.org)
-      .eq('revision_id', rid)
-      .or(
-        'description.like.SFT_ESTIMATE_V1:%,description.like.SFT_ESTIMATE_V2:%,description.like.CUSTOM_BRAND_QUOTE_V1:%',
-      )
-      .limit(2);
-    if (error || !existing || existing.length > 1)
-      throw new DomainError('VALIDATION_FAILED');
     // These two document tables are private by design. Their SELECT grants
     // are not available to the normal authenticated client; querying them
     // here makes Save fail before committing a perfectly valid quotation.
@@ -458,9 +472,11 @@ export async function saveFloorwiseSftEstimate(
       area_id: null,
       sort_order: 0,
       optional: false,
-      name: selectedPackage
-        ? selectedPackage.name + ' — floor-wise construction'
-        : 'Construction — floor-wise SFT estimate',
+      name:
+        selectedPackage || archivedPackage
+          ? (selectedPackage?.name ?? archivedPackage?.name) +
+            ' — floor-wise construction'
+          : 'Construction — floor-wise SFT estimate',
       description,
       quantity: '1',
       unit: 'complete estimate',
@@ -474,7 +490,7 @@ export async function saveFloorwiseSftEstimate(
     const privilegedStorageConfigured = Boolean(
       process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
     );
-    if (privilegedStorageConfigured) {
+    if (privilegedStorageConfigured && !archivedPackage) {
       try {
         const user = await s.authorization.requireAuthenticatedUser();
         await snapshotConstructionPackagePdf(
@@ -493,12 +509,14 @@ export async function saveFloorwiseSftEstimate(
           organizationId: s.org,
         });
       }
-    } else {
+    } else if (!privilegedStorageConfigured) {
       // The line is saved; without server credentials this environment cannot
       // verify or copy optional private package PDFs. Do not silently claim
       // that a package annexure is attached.
       attachmentWarning = true;
     }
+    // For a historical, deleted package do not delete or replace an existing
+    // quotation PDF annexure. Any original revision snapshot stays intact.
     const { data: updatedRevision } = await s.client
       .from('quotation_revisions')
       .select('version')
