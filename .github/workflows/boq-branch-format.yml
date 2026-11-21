@@ -1,0 +1,38 @@
+name: BOQ branch formatter (temporary)
+on:
+  push:
+    branches:
+      - fix/boq-view-create-structural-dedup-20261121
+    paths:
+      - .github/workflows/boq-branch-format.yml
+permissions:
+  contents: write
+jobs:
+  format-boq:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/boq-view-create-structural-dedup-20261121
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format changed BOQ files only
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/dashboard/execution/boq-workspace.tsx \
+            apps/business-app/src/app/dashboard/execution/boq/page.tsx \
+            apps/business-app/src/app/dashboard/execution/boq/new/page.tsx
+          git diff --check
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add apps/business-app/src/app/dashboard/execution/boq-workspace.tsx apps/business-app/src/app/dashboard/execution/boq/page.tsx apps/business-app/src/app/dashboard/execution/boq/new/page.tsx
+            git commit -m "style(boq): format BOQ workspace and routes"
+            git push origin HEAD:fix/boq-view-create-structural-dedup-20261121
+          fi
