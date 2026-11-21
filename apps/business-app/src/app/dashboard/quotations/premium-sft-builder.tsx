@@ -212,8 +212,9 @@ export function PremiumSftBuilder({
   const activePackages = packages.filter((p) => p.status === 'active');
   const previous = activePackages.find(
     (p) =>
-      p.id === initialSchedule?.package?.id ||
-      p.code === initialSchedule?.package?.code,
+      initialSchedule?.package?.id
+        ? p.id === initialSchedule.package.id
+        : p.code === initialSchedule?.package?.code,
   );
   const selectedPackage =
     activePackages.find((p) => p.id === selectedPackageId) ?? previous;
