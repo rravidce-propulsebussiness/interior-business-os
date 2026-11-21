@@ -333,8 +333,16 @@ export function ConstructionSelector({
     ),
   );
   const chosen = activePackages.find((pkg) => pkg.id === selected);
+  const savedPackageUnavailable = Boolean(
+    initialSchedule &&
+      !activePackages.some(
+        (pkg) =>
+          pkg.id === initialSchedule.package?.id ||
+          pkg.code === initialSchedule.package?.code,
+      ),
+  );
   const editingSavedPackage =
-    selected === SAVED_PACKAGE_OPTION && Boolean(initialSchedule);
+    selected === SAVED_PACKAGE_OPTION && savedPackageUnavailable;
   return (
     <div className="qs-build-workspace">
       <section className="qs-build-panel qs-build-package">
@@ -354,7 +362,7 @@ export function ConstructionSelector({
               onChange={(event) => setSelected(event.target.value)}
             >
               <option value="">Select a package</option>
-              {initialSchedule && editingSavedPackage && (
+              {savedPackageUnavailable && initialSchedule && (
                 <option value={SAVED_PACKAGE_OPTION}>
                   {initialSchedule.package
                     ? 'Saved: ' + initialSchedule.package.name + ' (archived)'
