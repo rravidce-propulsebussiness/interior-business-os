@@ -572,6 +572,10 @@ export function BoqWorkspace({
     setMessage('');
   }
   function startNew() {
+    if (!newProjects.length) {
+      setMessage('Save a quotation for a project without a BOQ before creating a new one.');
+      return;
+    }
     router.push('/dashboard/execution/boq/new');
   }
   function openDocument(document: Document) {
@@ -1817,8 +1821,9 @@ export function BoqWorkspace({
               <div>
                 <h3>{schedule ? 'Add extra work' : 'Add measured work'}</h3>
                 <p>
-                  Choose a takeoff and enter the dimensions. Calculated
-                  quantities update as you type.
+                  {schedule
+                    ? 'Columns, footings, beams, slabs, masonry and finishes are already calculated from the structural drawing. Add only extra work not covered by the generated BOQ.'
+                    : 'Choose a takeoff and enter the dimensions. Calculated quantities update as you type.'}
                 </p>
               </div>
             </div>
