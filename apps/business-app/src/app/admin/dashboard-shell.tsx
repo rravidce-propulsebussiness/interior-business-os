@@ -102,7 +102,7 @@ const primary: { title: string; icon: IconName; href: string }[] = [
     href: '/admin/control/billing',
   },
   {
-    title: 'Quotations',
+    title: 'Master Packages',
     icon: 'quotation',
     href: '/admin/control/quotations',
   },
