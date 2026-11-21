@@ -50,7 +50,7 @@ type Props = {
   onCountsChange: (next: BoqCounts) => void;
   onFloorChange: (floors: BoqFloor[]) => void;
   repeatFrom: Record<string, string>;
-  onRepeatFloor: (floor: string, repeat: boolean) => void;
+  onRepeatFloors: (floors: string[], repeat: boolean) => void;
   onCustomizeFloor: (floor: string) => void;
   onUpdateQuantity: (lineIndex: number, outputIndex: number, quantity: number) => void;
   onUpdateRate: (lineIndex: number, outputIndex: number, rate: number) => void;
@@ -170,7 +170,8 @@ function stageFor(line: StageBoqLine, floors: BoqFloor[]) {
   if (line.section === 'Foundation' || /foundation/i.test(line.section)) return 'Foundation';
   if (/parapet|waterproof/i.test(line.name) && floors.length) return floors[floors.length - 1]!.name;
   if (line.kind === 'quote-compound-wall' && floors.length) return floors[0]!.name;
-  return line.section || (floors[0]?.name ?? 'General');
+  // Retain all unscoped quotation allowances in the project total.
+  return floors[0]?.name ?? 'Foundation';
 }
 
 function InputNumber({ label, value, onChange, unit, min = 0 }: {
@@ -439,7 +440,7 @@ export function BoqStageBuilder(props: Props) {
           <div className="boq-stage-repeat-title"><span>▱</span><div><strong>Repeat to floors</strong><small>Reuse the same BOQ setup for other floors</small></div></div>
           <div className="boq-stage-repeat-controls">
             <label><input type="checkbox" checked={repeatAll}
-              onChange={(event) => props.floors.slice(1).forEach((floor) => props.onRepeatFloor(floor.name, event.target.checked))} />
+              onChange={(event) => props.onRepeatFloors(props.floors.slice(1).map((floor) => floor.name), event.target.checked)} />
               Repeat same stage setup for other floors</label>
             <small>Customize any floor to keep its own measurements.</small>
           </div>
@@ -500,7 +501,7 @@ export function BoqStageBuilder(props: Props) {
       <button type="button" className="boq-stage-save" disabled={props.busy} onClick={props.onSave}>
         ▣ {props.busy ? 'Saving…' : 'Save BOQ'}
       </button>
-      <button type="button" className="boq-stage-outline" onClick={props.onPrint}>▤ Print / PDF</button>
+      <button type="button" className="boq-stage-outline" onClick={() => { setExpanded(sections); window.setTimeout(props.onPrint, 30); }}>▤ Print / PDF</button>
     </div>
     <button type="button" className="boq-stage-advanced" onClick={props.onAdvanced}>
       Detailed takeoff, materials, rates & room measurements
