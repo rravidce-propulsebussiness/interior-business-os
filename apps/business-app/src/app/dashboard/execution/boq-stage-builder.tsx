@@ -477,10 +477,10 @@ export function BoqStageBuilder(props: Props) {
                 {!preview && <button className="boq-stage-tile-edit" type="button"
                   aria-label={'Edit ' + category.label + ' on ' + stage}
                   onClick={() => openEditor(stage, category.key)}>✎</button>}
-                {editing?.stage === stage && editing.category === category.key && renderEditPanel(stage, category)}
               </div>;
             })}
             {entriesFor(stage, 'extra').length > 0 && <div className="boq-stage-extra-note">Other measured work: {money(visibleCost(stage, 'extra'))}</div>}
+            {editing?.stage === stage && renderEditPanel(stage, (list.find((item) => item.key === editing.category) ?? list[0])!)}
           </div>}
         </article>
       </Fragment>;
