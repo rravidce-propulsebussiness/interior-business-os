@@ -8,7 +8,10 @@ import type {
   DesignColumnType,
   DesignSettingKey,
   StructuralDesign,
+  StructuralSettings,
+  WallMeasure,
 } from '@business-os/core/construction-boq';
+import { measuredVolume, FEET_PER_METRE, type MeasuredDimensions, type MeasuredKind } from './boq-stage-measurements';
 
 export type StageBoqOutput = {
   name: string;
@@ -16,6 +19,7 @@ export type StageBoqOutput = {
   unit: string;
   material?: string;
   rate?: number;
+  quotedRate?: number;
   weightKg?: number;
   source?: string;
 };
@@ -48,6 +52,11 @@ type Props = {
   onDesignChange: (next: StructuralDesign) => void;
   counts: BoqCounts;
   onCountsChange: (next: BoqCounts) => void;
+  structuralSettings: StructuralSettings;
+  onAddGeometry: (
+    stage: string, kind: MeasuredKind, name: string, dimensions: MeasuredDimensions
+  ) => void;
+  onUpdateGeometry: (lineIndex: number, dimensions: MeasuredDimensions, name: string) => void;
   onFloorChange: (floors: BoqFloor[]) => void;
   repeatFrom: Record<string, string>;
   onRepeatFloors: (floors: string[], repeat: boolean) => void;
@@ -93,6 +102,8 @@ const standard: Category[] = [
   { key: 'slab', label: 'Slab', icon: '▱' },
   { key: 'staircase', label: 'Staircase', icon: '▰' },
   { key: 'brickwork', label: 'Brickwork', icon: '▦' },
+  { key: 'sajjas', label: 'Sajjas / Sunshades', icon: '▱' },
+  { key: 'shelves', label: 'RCC Shelves', icon: '▤' },
   { key: 'plaster', label: 'Plastering', icon: '◩' },
   { key: 'painting', label: 'Painting', icon: '▤' },
   { key: 'tiles', label: 'Tiles', icon: '▦' },
@@ -296,6 +307,15 @@ export function BoqStageBuilder(props: Props) {
   const [manualRate, setManualRate] = useState(0);
   const [manualName, setManualName] = useState('');
   const [manualUnit, setManualUnit] = useState('sqft');
+  const [dimensionUnit, setDimensionUnit] = useState<'ft' | 'm'>('ft');
+  const [dimensionDraft, setDimensionDraft] = useState<MeasuredDimensions>({
+    count: 1, lengthFeet: 0, widthFeet: 0, depthFeet: 0,
+  });
+  const [dimensionName, setDimensionName] = useState('');
+  const [wallDraft, setWallDraft] = useState<WallMeasure>({
+    id: 'new', name: '', location: 'external', count: 1,
+    lengthFeet: 0, heightFeet: 0, thicknessIn: 9,
+  });
   const last = props.floors[props.floors.length - 1]?.name ?? '';
   const sections = ['Foundation', ...props.floors.map((f) => f.name)];
   const priced = (output: StageBoqOutput) =>
@@ -386,6 +406,8 @@ export function BoqStageBuilder(props: Props) {
     if (preview) return;
     if (props.repeatFrom[stage]) props.onCustomizeFloor(stage);
     setManualName('');
+    setDimensionName('');
+    setDimensionDraft({ count: 1, lengthFeet: 0, widthFeet: 0, depthFeet: 0 });
     setManualQuantity(0);
     setManualRate(0);
     setEditing((prior) =>
@@ -395,6 +417,8 @@ export function BoqStageBuilder(props: Props) {
     );
   };
   const drawing = props.design ?? blankDesign();
+  const isGeometry = (key: string): key is MeasuredKind =>
+    ['excavation', 'soil', 'pcc', 'sajjas', 'shelves'].includes(key);
   const setColumns = (columns: DesignColumnType[]) =>
     props.onDesignChange({ ...drawing, columns });
   const setBeams = (beams: DesignBeamType[]) =>
@@ -432,6 +456,23 @@ export function BoqStageBuilder(props: Props) {
     )
       return null;
     const foundEntries = entriesFor(stage, category.key);
+    const dimensionRows = props.lines
+      .map((line, lineIndex) => ({ line, lineIndex }))
+      .filter(({line}) => line.section === stage && line.kind === 'measured-geometry' &&
+        line.inputs.stageCategory === category.key);
+    const volume = measuredVolume(dimensionDraft);
+    const displayFactor = dimensionUnit === 'm' ? 1 / FEET_PER_METRE : 1;
+    const geometryValue = (field: 'lengthFeet' | 'widthFeet' | 'depthFeet', value: number) =>
+      setDimensionDraft((prior) => ({
+        ...prior,
+        [field]: Number((value / displayFactor).toFixed(4)),
+      }));
+    const walls = props.counts.walls?.[stage] ?? [];
+    const updateWalls = (rows: WallMeasure[]) =>
+      props.onCountsChange({
+        ...props.counts,
+        walls: { ...props.counts.walls, [stage]: rows },
+      });
     const index = props.floors.findIndex((f) => f.name === stage);
     const floor = props.floors[index];
     const current = floor ? props.counts.floors[floor.name] : null;
