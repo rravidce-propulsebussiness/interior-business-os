@@ -87,9 +87,11 @@ function measuredQuantities(kind: string, input: BoqInputs): BoqOutput[] {
       },
     ];
     const steel = [
+      { diameter: 20, bars: number(input, 'main20') },
       { diameter: 16, bars: number(input, 'main16', 4) },
       { diameter: 12, bars: number(input, 'main12', 2) },
       { diameter: 10, bars: number(input, 'main10') },
+      { diameter: 8, bars: number(input, 'main8') },
     ];
     for (const bar of steel.filter((item) => item.bars > 0)) {
       const totalMetres = count * bar.bars * (height + 0.6);
@@ -143,9 +145,11 @@ function measuredQuantities(kind: string, input: BoqInputs): BoqOutput[] {
       },
     ];
     for (const bar of [
+      { diameter: 20, bars: number(input, 'main20') },
       { diameter: 16, bars: number(input, 'main16', 2) },
       { diameter: 12, bars: number(input, 'main12', 2) },
       { diameter: 10, bars: number(input, 'main10') },
+      { diameter: 8, bars: number(input, 'main8') },
     ].filter((item) => item.bars > 0)) {
       const metres = count * bar.bars * (length + 0.6);
       outputs.push({
@@ -420,9 +424,11 @@ export const inputDefinitions: Record<
     { key: 'length', label: 'Length (m)', value: '0.38' },
     { key: 'width', label: 'Width (m)', value: '0.38' },
     { key: 'height', label: 'Height (m)', value: '0.6' },
+    { key: 'main20', label: '20 mm bars / pedestal', value: '0' },
     { key: 'main16', label: '16 mm bars / pedestal', value: '4' },
     { key: 'main12', label: '12 mm bars / pedestal', value: '4' },
     { key: 'main10', label: '10 mm bars / pedestal', value: '0' },
+    { key: 'main8', label: '8 mm bars / pedestal', value: '0' },
     { key: 'ringDiameter', label: 'Ring diameter (mm)', value: '8' },
     { key: 'ringSpacing', label: 'Ring spacing (mm)', value: '150' },
     { key: 'cover', label: 'Concrete cover (m)', value: '0.04' },
@@ -433,9 +439,11 @@ export const inputDefinitions: Record<
     { key: 'length', label: 'Length (m)', value: '0.23' },
     { key: 'width', label: 'Width (m)', value: '0.23' },
     { key: 'height', label: 'Height (m)', value: '3' },
+    { key: 'main20', label: '20 mm bars / column', value: '0' },
     { key: 'main16', label: '16 mm bars / column', value: '4' },
     { key: 'main12', label: '12 mm bars / column', value: '2' },
     { key: 'main10', label: '10 mm bars / column', value: '0' },
+    { key: 'main8', label: '8 mm bars / column', value: '0' },
     { key: 'ringDiameter', label: 'Ring diameter (mm)', value: '6' },
     { key: 'ringSpacing', label: 'Ring spacing (mm)', value: '150' },
     { key: 'cover', label: 'Concrete cover (m)', value: '0.04' },
@@ -446,9 +454,11 @@ export const inputDefinitions: Record<
     { key: 'length', label: 'Beam length (m)', value: '4' },
     { key: 'width', label: 'Beam width (m)', value: '0.23' },
     { key: 'height', label: 'Beam depth (m)', value: '0.38' },
+    { key: 'main20', label: '20 mm bars / plinth_beam', value: '0' },
     { key: 'main16', label: '16 mm bars / beam', value: '0' },
     { key: 'main12', label: '12 mm bars / beam', value: '4' },
     { key: 'main10', label: '10 mm bars / beam', value: '0' },
+    { key: 'main8', label: '8 mm bars / plinth_beam', value: '0' },
     { key: 'ringDiameter', label: 'Stirrup diameter (mm)', value: '8' },
     { key: 'ringSpacing', label: 'Stirrup spacing (mm)', value: '150' },
     { key: 'cover', label: 'Concrete cover (m)', value: '0.04' },
@@ -459,9 +469,11 @@ export const inputDefinitions: Record<
     { key: 'length', label: 'Beam length (m)', value: '4' },
     { key: 'width', label: 'Beam width (m)', value: '0.23' },
     { key: 'height', label: 'Beam depth (m)', value: '0.45' },
+    { key: 'main20', label: '20 mm bars / beam', value: '0' },
     { key: 'main16', label: '16 mm bars / beam', value: '2' },
     { key: 'main12', label: '12 mm bars / beam', value: '2' },
     { key: 'main10', label: '10 mm bars / beam', value: '0' },
+    { key: 'main8', label: '8 mm bars / beam', value: '0' },
     { key: 'ringDiameter', label: 'Stirrup diameter (mm)', value: '8' },
     { key: 'ringSpacing', label: 'Stirrup spacing (mm)', value: '150' },
     { key: 'cover', label: 'Concrete cover (m)', value: '0.04' },
