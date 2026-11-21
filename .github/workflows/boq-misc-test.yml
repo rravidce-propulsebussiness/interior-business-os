@@ -1,0 +1,27 @@
+name: BOQ stage miscellaneous targeted tests (temporary)
+on:
+  push:
+    branches: [fix/boq-stage-miscellaneous-20261122]
+    paths: [.github/workflows/boq-misc-test.yml]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/boq-stage-miscellaneous-20261122
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Check BOQ stage code formatting
+        run: pnpm exec prettier --check apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx apps/business-app/src/app/dashboard/execution/boq-workspace.tsx apps/business-app/src/app/dashboard/execution/boq-stage-builder.css apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
+      - name: Run BOQ miscellaneous regression tests
+        run: pnpm exec vitest run apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
+      - name: Typecheck Business OS
+        run: pnpm --filter @business-os/business-app typecheck
