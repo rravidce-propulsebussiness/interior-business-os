@@ -278,7 +278,11 @@ function InputText({
 
 export function BoqStageBuilder(props: Props) {
   const [expanded, setExpanded] = useState<string[]>([
-    ...new Set(['Foundation', props.floors[0]?.name ?? '', props.floors.at(-1)?.name ?? '']),
+    ...new Set([
+      'Foundation',
+      props.floors[0]?.name ?? '',
+      props.floors.at(-1)?.name ?? '',
+    ]),
   ]);
   const [activeTab, setActiveTab] = useState('Foundation');
   const [editing, setEditing] = useState<{
@@ -333,11 +337,15 @@ export function BoqStageBuilder(props: Props) {
     mapped.filter((entry) => {
       const matchedStage = stageFor(entry.line, props.floors);
       const matchedCategory = categoryFor(entry.line, entry.output);
-      const supported = stage === 'Foundation'
-        ? foundation
-        : stage === props.floors.at(-1)?.name ? terrace : standard;
+      const supported =
+        stage === 'Foundation'
+          ? foundation
+          : stage === props.floors.at(-1)?.name
+            ? terrace
+            : standard;
       const bucket = supported.some((item) => item.key === matchedCategory)
-        ? matchedCategory : 'extra';
+        ? matchedCategory
+        : 'extra';
       return matchedStage === stage && category === bucket;
     });
   const visibleCost = (stage: string, category: string) =>
@@ -1141,10 +1149,7 @@ export function BoqStageBuilder(props: Props) {
                           {pending ? (
                             <small className="pending">Not entered yet</small>
                           ) : !entries.length && combined ? (
-                            <small>
-                              Included with{' '}
-                              slab
-                            </small>
+                            <small>Included with slab</small>
                           ) : !entries.length ? (
                             <small>Not measured</small>
                           ) : (

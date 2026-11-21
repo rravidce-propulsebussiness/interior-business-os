@@ -771,7 +771,8 @@ export function BoqWorkspace({
     setLines((prior) =>
       prior.map((line, i) =>
         i === lineIndex ||
-        (target && !target.origin &&
+        (target &&
+          !target.origin &&
           line.inputs.repeatedFrom === target.section &&
           line.inputs.sourceLineId === target.id)
           ? {
@@ -813,7 +814,8 @@ export function BoqWorkspace({
     setLines((prior) =>
       prior.map((line, i) =>
         i === lineIndex ||
-        (target && !target.origin &&
+        (target &&
+          !target.origin &&
           line.inputs.repeatedFrom === target.section &&
           line.inputs.sourceLineId === target.id)
           ? {
@@ -933,12 +935,14 @@ export function BoqWorkspace({
     };
     const duplicated = lines.find((manual) => {
       if (manual.origin || manual.kind !== 'manual') return false;
-      const kinds = generatedForStage[String(manual.inputs.stageCategory ?? '')];
+      const kinds =
+        generatedForStage[String(manual.inputs.stageCategory ?? '')];
       return kinds?.some((kind) =>
-        lines.some((generated) =>
-          Boolean(generated.origin) &&
-          generated.section === manual.section &&
-          generated.kind === kind,
+        lines.some(
+          (generated) =>
+            Boolean(generated.origin) &&
+            generated.section === manual.section &&
+            generated.kind === kind,
         ),
       );
     });
@@ -1657,10 +1661,16 @@ export function BoqWorkspace({
             onRemoveManual={(index) =>
               setLines((prior) => {
                 const target = prior[index];
-                return prior.filter((line, i) =>
-                  i !== index &&
-                  !(target && !target.origin && line.inputs.repeatedFrom === target.section &&
-                    line.inputs.sourceLineId === target.id));
+                return prior.filter(
+                  (line, i) =>
+                    i !== index &&
+                    !(
+                      target &&
+                      !target.origin &&
+                      line.inputs.repeatedFrom === target.section &&
+                      line.inputs.sourceLineId === target.id
+                    ),
+                );
               })
             }
             onSave={save}

@@ -481,10 +481,9 @@
 }
 .boq-stage-output {
   display: grid;
-  grid-template-columns: minmax(160px, 1fr) minmax(110px, 175px) minmax(
-      110px,
-      175px
-    ) auto;
+  grid-template-columns:
+    minmax(160px, 1fr) minmax(110px, 175px) minmax(110px, 175px)
+    auto;
   align-items: center;
   gap: 10px;
   padding: 10px;
