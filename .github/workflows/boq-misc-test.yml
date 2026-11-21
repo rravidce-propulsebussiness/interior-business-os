@@ -22,6 +22,6 @@ jobs:
       - name: Check BOQ stage code formatting
         run: pnpm exec prettier --check apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx apps/business-app/src/app/dashboard/execution/boq-workspace.tsx apps/business-app/src/app/dashboard/execution/boq-stage-builder.css apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
       - name: Run BOQ miscellaneous regression tests
-        run: pnpm exec vitest run apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
+        run: pnpm exec vitest run apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts apps/business-app/src/app/dashboard/execution/boq-calculations.test.ts apps/business-app/src/app/dashboard/execution/boq-pricing.test.ts apps/business-app/src/app/dashboard/execution/boq-project-quote.test.ts apps/business-app/src/app/dashboard/execution/boq-export.test.ts apps/business-app/src/app/dashboard/execution/boq-units.test.ts apps/business-app/src/app/dashboard/execution/boq-number-field.test.ts
       - name: Typecheck Business OS
         run: pnpm --filter @business-os/business-app typecheck
