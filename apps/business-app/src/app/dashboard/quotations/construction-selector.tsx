@@ -337,8 +337,9 @@ export function ConstructionSelector({
     initialSchedule &&
       !activePackages.some(
         (pkg) =>
-          pkg.id === initialSchedule.package?.id ||
-          pkg.code === initialSchedule.package?.code,
+          initialSchedule.package?.id
+            ? pkg.id === initialSchedule.package.id
+            : pkg.code === initialSchedule.package?.code,
       ),
   );
   const editingSavedPackage =
