@@ -2,7 +2,7 @@ name: BOQ stage miscellaneous targeted tests (temporary)
 on:
   push:
     branches: [fix/boq-stage-miscellaneous-20261122]
-    paths: [.github/workflows/boq-misc-test.yml]
+    paths: [.github/workflows/boq-misc-test.yml, vitest.config.ts]
 permissions:
   contents: read
 jobs:
