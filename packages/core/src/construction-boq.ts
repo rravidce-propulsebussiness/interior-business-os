@@ -28,6 +28,7 @@ import {
   padCount,
 } from './footing-takeoff';
 export type { DesignFootingType } from './footing-takeoff';
+export { FOOTING_TYPES, newFootingType } from './footing-takeoff';
 
 
 
