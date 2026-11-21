@@ -130,6 +130,7 @@ const generatorSchema = z.object({
   design: z
     .object({
       footings: z.array(z.record(z.string(), z.unknown())).max(40).optional(),
+      legacyFootings: z.boolean().optional(),
       columns: z.array(z.record(z.string(), z.unknown())).max(20),
       beams: z.array(z.record(z.string(), z.unknown())).max(20),
       plinthRunFeet: z.number().finite().nonnegative(),
