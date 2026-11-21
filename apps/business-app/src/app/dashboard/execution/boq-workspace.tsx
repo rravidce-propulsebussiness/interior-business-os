@@ -1335,6 +1335,39 @@ export function BoqWorkspace({
     );
   }
 
+  function updateMiscellaneous(
+    index: number,
+    changes: { name: string; quantity: number; unit: string; rate: number },
+  ) {
+    setLines((prior) => {
+      const original = prior[index];
+      if (!original || original.kind !== 'manual' || original.origin) return prior;
+      const name = changes.name.slice(0, 200);
+      const quantity = Number.isFinite(changes.quantity)
+        ? Math.max(0, changes.quantity)
+        : 0;
+      const rate = Number.isFinite(changes.rate) ? Math.max(0, changes.rate) : 0;
+      const unit = changes.unit.slice(0, 20) || 'nos';
+      return prior.map((line, i) => {
+        const followsSource =
+          line.inputs.repeatedFrom === original.section &&
+          line.inputs.sourceLineId === original.id;
+        if (i !== index && !followsSource) return line;
+        return {
+          ...line,
+          name,
+          unit,
+          inputs: { ...line.inputs, quantity },
+          outputs: line.outputs.map((output, outputIndex) =>
+            outputIndex === 0
+              ? { ...output, name, quantity, unit, rate }
+              : output,
+          ),
+        };
+      });
+    });
+  }
+
   const oldManualStructural =
     schedule && generator
       ? lines.filter(
@@ -1793,6 +1826,7 @@ export function BoqWorkspace({
             onUpdateRate={updateOutputRate}
             rateFor={priceOf}
             onAddManual={addStageManual}
+            onUpdateMiscellaneous={updateMiscellaneous}
             onRemoveManual={(index) =>
               setLines((prior) => {
                 const target = prior[index];
@@ -2505,7 +2539,8 @@ export function BoqWorkspace({
                   ))
                 )}
               </section>
-              <section className="boq-add-work">
+              {!schedule && (
+                <section className="boq-add-work">
                 <div className="boq-section-title">
                   <div>
                     <h3>{schedule ? 'Add extra work' : 'Add measured work'}</h3>
@@ -2706,7 +2741,8 @@ export function BoqWorkspace({
                     Add to BOQ
                   </button>
                 </div>
-              </section>
+                </section>
+              )}
               {(usedMaterials.size > 0 || steelSummary.size > 0) && (
                 <section className="boq-materials">
                   {canViewCost && (
