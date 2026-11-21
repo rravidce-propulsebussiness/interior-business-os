@@ -438,6 +438,25 @@ export const STRUCTURAL_FIELDS = [
     max: 8,
   },
   {
+    key: 'pccCementBagsPerM3',
+    label: 'PCC: cement bags per m³',
+    group: 'Foundation',
+    value: 3.4, min: 0, max: 20, step: 0.1,
+    help: 'Site-mixed PCC estimate. Adjust to the specified PCC mix, not ready-mix pricing.',
+  },
+  {
+    key: 'pccSandM3PerM3',
+    label: 'PCC: sand m³ per m³',
+    group: 'Foundation',
+    value: 0.47, min: 0, max: 3, step: 0.01,
+  },
+  {
+    key: 'pccAggregateM3PerM3',
+    label: 'PCC: aggregate m³ per m³',
+    group: 'Foundation',
+    value: 0.94, min: 0, max: 3, step: 0.01,
+  },
+  {
     key: 'plinthBeam',
     label: 'Plinth beams (1 = yes)',
     group: 'Foundation',
@@ -2364,6 +2383,41 @@ export function generateQuotationBoq(
         }
       }
       mergeSteel(tally);
+      if (splitBeamSlab) {
+        drafts.push({
+          origin: 'quotation-structure',
+          draft: {
+            name: 'Foundation: excavation from footing sizes (estimated)',
+            section: 'Foundation',
+            kind: 'quote-excavation',
+            unit: 'm³',
+            inputs: { footings, depthFeet: s.foundationDepthFeet },
+            outputs: [{
+              name: 'Excavation volume',
+              material: 'excavation',
+              quantity: round(excavation, 2),
+              unit: 'm³',
+              source: 'Footing-pit estimate (replace with measured length, width and depth)',
+            }],
+          },
+        });
+        drafts.push({
+          origin: 'quotation-structure',
+          draft: {
+            name: 'Foundation: PCC beds from footing sizes (estimated)',
+            section: 'Foundation',
+            kind: 'quote-pcc',
+            unit: 'm³',
+            inputs: { footings, thicknessIn: s.pccThicknessIn },
+            outputs: [
+              { name: 'PCC volume (reference only)', quantity: round(pcc, 3), unit: 'm³', rate: 0 },
+              { name: 'Cement (PCC)', material: 'cement', quantity: round(pcc * s.pccCementBagsPerM3, 1), unit: 'bag' },
+              sandOutput(pcc * s.pccSandM3PerM3, s, 'Sand (PCC)'),
+              aggregateOutput(pcc * s.pccAggregateM3PerM3, s, 'Aggregate (PCC)'),
+            ],
+          },
+        });
+      }
       drafts.push({
         origin: 'quotation-structure',
         draft: {
@@ -2381,19 +2435,17 @@ export function generateQuotationBoq(
             depthFeet: s.foundationDepthFeet,
           },
           outputs: [
-            {
+            ...(!splitBeamSlab ? [{
               name: 'Earthwork excavation',
               material: 'excavation',
               quantity: round(excavation, 2),
               unit: 'm³',
               source: `${footings} pits · 1 ft working space each side`,
-            },
-            {
+            }, {
               name: 'PCC 1:4:8 bed',
               quantity: round(pcc, 3),
               unit: 'm³',
-            },
-            {
+            }, {
               name: 'Cement',
               material: 'cement',
               quantity: round(pcc * 3.4, 1),
@@ -2401,7 +2453,7 @@ export function generateQuotationBoq(
               source: 'PCC 1:4:8 · 3.4 bags/m³',
             },
             sandOutput(pcc * 0.47, s),
-            aggregateOutput(pcc * 0.94, s, '40 mm aggregate'),
+            aggregateOutput(pcc * 0.94, s, '40 mm aggregate')] : []),
             ...concreteOutputs(footingConcrete, 'Footing', s),
             ...steelOutputs(tally, stock),
           ],
