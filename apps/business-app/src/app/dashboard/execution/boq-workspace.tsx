@@ -1095,11 +1095,7 @@ export function BoqWorkspace({
                   const ready = newProjects.some(
                     (item) => item.id === project.id,
                   );
-                  const state = saved
-                    ? 'saved'
-                    : ready
-                      ? 'new'
-                      : 'needs-final';
+                  const state = saved ? 'saved' : ready ? 'new' : 'needs-final';
                   return (
                     <option
                       key={project.id}
@@ -1113,12 +1109,10 @@ export function BoqWorkspace({
               </select>
               <small id="boq-project-availability">
                 All {projects.length} delivery projects are listed. Select a
-                saved BOQ to edit it; projects without a Final quotation must
-                be finalized in Quotations first.
+                saved BOQ to edit it; projects without a Final quotation must be
+                finalized in Quotations first.
               </small>
-              <Link href="/dashboard/projects">
-                View all projects
-              </Link>
+              <Link href="/dashboard/projects">View all projects</Link>
             </label>
             <div className="boq-quote-source">
               <span>Quotation</span>

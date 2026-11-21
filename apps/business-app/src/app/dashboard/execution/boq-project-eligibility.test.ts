@@ -23,7 +23,10 @@ describe('BOQ project labels', () => {
       ),
     ).toBe('Jashwanth · Jashwanth house — BOQ saved · open to edit');
     expect(
-      boqProjectOptionLabel({ name: 'Ramya', customerName: 'Ramya' }, 'needs-final'),
+      boqProjectOptionLabel(
+        { name: 'Ramya', customerName: 'Ramya' },
+        'needs-final',
+      ),
     ).toBe('Ramya — Select Final quotation first');
   });
 });

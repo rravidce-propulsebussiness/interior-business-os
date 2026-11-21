@@ -61,7 +61,10 @@ export async function openOrCreateWonLeadProject(
     // The existing quotation project is still reused by crm_convert.
     const projectName = lead.name.trim();
     if (!projectName) {
-      return { ok: false, message: 'Lead name is required to create a project.' };
+      return {
+        ok: false,
+        message: 'Lead name is required to create a project.',
+      };
     }
 
     // crm_convert selects the newest quotation-linked customer/project when
