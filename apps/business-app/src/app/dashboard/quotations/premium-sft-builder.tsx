@@ -298,7 +298,7 @@ export function PremiumSftBuilder({
             allowancePerSqft: '',
           }));
       return [
-        ...(configured.length < 18
+        ...(configured.length < 32
           ? [
               {
                 title: 'Package scope & inclusions',
@@ -307,7 +307,7 @@ export function PremiumSftBuilder({
             ]
           : []),
         ...configured,
-      ].slice(0, 18);
+      ].slice(0, 32);
     }
     return (
       initialSchedule?.sections
@@ -331,13 +331,18 @@ export function PremiumSftBuilder({
     });
   });
   const [drawer, setDrawer] = useState(false);
+  const [editingMaterialIndex, setEditingMaterialIndex] = useState<number | null>(
+    null,
+  );
   const [draftSections, setDraftSections] = useState<Material[]>([]);
-  const openMaterials = () => {
+  const openMaterials = (index: number | null = null) => {
     setDraftSections(sections.map((s) => ({ ...s })));
+    setEditingMaterialIndex(index);
     setDrawer(true);
   };
   const cancelMaterials = () => {
     setDraftSections([]);
+    setEditingMaterialIndex(null);
     setDrawer(false);
   };
   const [message, setMessage] = useState('');
@@ -414,7 +419,13 @@ export function PremiumSftBuilder({
   const savePayload = {
     rows,
     materialIds,
-    packageId: selectedPackage?.id ?? null,
+    // Reuse only the package identifier from this same saved quote when the
+    // source package was archived; the server verifies it against the snapshot.
+    packageId:
+      selectedPackage?.id ??
+      (initialSchedule?.package?.id === selectedPackageId
+        ? selectedPackageId
+        : null),
     ...(slabThicknessIn ? { slabThicknessIn } : {}),
     sections: sections.filter(
       (s) =>
@@ -593,6 +604,7 @@ export function PremiumSftBuilder({
       );
     setDrawer(false);
     setDraftSections([]);
+    setEditingMaterialIndex(null);
     touch();
   };
   const save = () => {
@@ -1042,24 +1054,25 @@ export function PremiumSftBuilder({
           <button
             type="button"
             className="qs-work-edit"
-            onClick={openMaterials}
+            onClick={() => openMaterials()}
           >
             ✎ Edit all materials
           </button>
         </div>
         <div className="qs-work-material-grid">
           {sections
+            .map((s, index) => ({ s, index }))
             .filter(
-              (s) =>
+              ({ s }) =>
                 s.title !== 'Package scope & inclusions' &&
                 s.title !== FLOOR_RATE_TITLE,
             )
-            .map((s, i) => (
+            .map(({ s, index }) => (
               <button
                 type="button"
-                key={s.title + ':' + i}
+                key={s.title + ':' + index}
                 className="qs-work-material"
-                onClick={openMaterials}
+                onClick={() => openMaterials(index)}
               >
                 <span className="qs-work-material-icon">▣</span>
                 <span>
@@ -1075,7 +1088,7 @@ export function PremiumSftBuilder({
           <button
             type="button"
             className="qs-work-material-add"
-            onClick={openMaterials}
+            onClick={() => openMaterials()}
           >
             ＋ Add / Edit more materials
           </button>
@@ -1167,7 +1180,13 @@ export function PremiumSftBuilder({
           >
             <div className="qs-work-drawer-head">
               <div>
-                <h3>Edit all material specifications</h3>
+                <h3>
+                  {editingMaterialIndex === null
+                    ? 'Edit all material specifications'
+                    : 'Edit ' +
+                      (draftSections[editingMaterialIndex]?.title ??
+                        'material specification')}
+                </h3>
                 <p>
                   Enter the specification, price ceiling and its unit (per door,
                   sq ft, running ft or bathroom). These limits flow into the BOQ
@@ -1184,8 +1203,18 @@ export function PremiumSftBuilder({
               </button>
             </div>
             <div className="qs-work-drawer-scroll">
-              {draftSections.map((s, i) => (
-                <details key={i} className="qs-work-spec-entry">
+              {draftSections
+                .map((s, i) => ({ s, i }))
+                .filter(
+                  ({ i }) =>
+                    editingMaterialIndex === null || editingMaterialIndex === i,
+                )
+                .map(({ s, i }) => (
+                  <details
+                    key={i}
+                    className="qs-work-spec-entry"
+                    open={editingMaterialIndex === i}
+                  >
                   <summary>
                     {s.title}
                     <span>⌄</span>
@@ -1354,8 +1383,8 @@ export function PremiumSftBuilder({
                     </label>
                   </div>
                 </details>
-              ))}
-              {draftSections.length < 32 && (
+                ))}
+              {editingMaterialIndex === null && draftSections.length < 32 && (
                 <button
                   type="button"
                   className="qs-work-add-material"
