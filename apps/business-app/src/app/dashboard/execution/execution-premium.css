@@ -2328,3 +2328,144 @@
 .boq-design-table td {
   vertical-align: top;
 }
+
+/* Saved BOQs open in a read-only, compact viewer; edits/new BOQs use full width. */
+.boq-layout-full {
+  grid-template-columns: minmax(0, 1fr);
+}
+.boq-view-title {
+  padding: 4px 7px;
+  margin: 8px 0 16px;
+  color: #48282a;
+  font-size: clamp(18px, 2vw, 23px);
+  overflow-wrap: anywhere;
+}
+.boq-view-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 4px 0 16px;
+}
+.boq-view-fields > div,
+.boq-view-steel-grid > div {
+  display: grid;
+  gap: 6px;
+  padding: 13px;
+  border: 1px solid #ecdfd9;
+  border-radius: 12px;
+  background: #fdfaf9;
+  min-width: 0;
+}
+.boq-view-fields span,
+.boq-view-steel-grid span {
+  font-size: 11px;
+  color: #857574;
+  overflow-wrap: anywhere;
+}
+.boq-view-fields strong,
+.boq-view-steel-grid strong {
+  color: #542e2d;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.boq-view-items,
+.boq-view-steel {
+  margin-top: 18px;
+}
+.boq-view-items h3,
+.boq-view-steel h3 {
+  color: #432426;
+  margin: 0 0 12px;
+}
+.boq-view-steel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+  gap: 10px;
+}
+.boq-view-items .boq-floor-cost {
+  margin: 8px 0;
+  border: 1px solid #e9dbd7;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.boq-view-items .boq-floor-cost summary {
+  padding: 13px 15px;
+  font-weight: 800;
+  color: #5c3433;
+  cursor: pointer;
+  background: #fdf9f7;
+}
+.boq-view-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+.boq-view-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 480px;
+  font-size: 12px;
+}
+.boq-view-table th,
+.boq-view-table td {
+  padding: 10px;
+  border-bottom: 1px solid #f0e9e6;
+  text-align: left;
+}
+.boq-view-table th {
+  color: #746361;
+  font-size: 11px;
+  white-space: nowrap;
+}
+.boq-view-table td:first-child {
+  min-width: 180px;
+}
+.boq-view-table td:not(:first-child) {
+  white-space: nowrap;
+  text-align: right;
+}
+.boq-view-group td {
+  background: #fdf5f1;
+  color: #6b3630;
+  font-weight: 800;
+  text-align: left !important;
+}
+.boq-view-warning {
+  padding: 12px;
+  border: 1px solid #e4c5a2;
+  background: #fffaf3;
+  color: #805324;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.boq-view-warnings {
+  padding: 12px 14px;
+  border: 1px solid #e9dbd7;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.boq-view-warnings summary {
+  cursor: pointer;
+  font-weight: 750;
+}
+.boq-view-empty {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 25px 10px;
+}
+.boq-view-empty h2,
+.boq-view-empty p {
+  margin: 0;
+}
+.boq-add-small {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+}
+@media (max-width: 640px) {
+  .boq-view-fields { grid-template-columns: 1fr; }
+  .boq-readonly .erp-titlebar > .erp-button { width: 100%; text-align: center; }
+  .boq-readonly .boq-register-item { width: 100%; margin: 3px 0; }
+  .boq-readonly .boq-savebar .erp-button { flex: 1 1 125px; }
+  .boq-edit-page .boq-savebar .erp-button { flex: 1 1 130px; }
+}
