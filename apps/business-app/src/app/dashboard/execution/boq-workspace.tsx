@@ -44,6 +44,7 @@ import {
   type StructuralDesign,
 } from '@business-os/core/construction-boq';
 import { BoqDesignSchedule } from './boq-design-schedule';
+import { BoqStageBuilder } from './boq-stage-builder';
 import { BoqFloorInputs } from './boq-floor-inputs';
 import { NumberField } from './boq-number-field';
 import {
@@ -64,6 +65,8 @@ type Generator = {
   /** Quantities / rates edited on generated lines, kept on regenerate. */
   overrides?: Record<string, { quantity?: number; rate?: number }>;
   warnings: string[];
+  measuredOnly?: boolean;
+  repeatFrom?: Record<string, string>;
 };
 type SavedLine = {
   id: string;
@@ -249,6 +252,10 @@ export function BoqWorkspace({
   const [genDesign, setGenDesign] = useState<StructuralDesign | null>(
     normalizeDesign(initialDocument?.document?.generator?.design),
   );
+  const [repeatFrom, setRepeatFrom] = useState<Record<string, string>>(
+    initialDocument?.document?.generator?.repeatFrom ?? {},
+  );
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('manual');
   const [newName, setNewName] = useState('');
   // Takeoff inputs are always metric; `typed` keeps what the person typed
@@ -575,6 +582,7 @@ export function BoqWorkspace({
     setGenFloors([]);
     setGenCounts(null);
     setGenDesign(null);
+    setRepeatFrom({});
     setOverrides({});
     setMessage('');
   }
@@ -602,6 +610,7 @@ export function BoqWorkspace({
     setGenFloors(document.document?.generator?.floors ?? []);
     setGenCounts(document.document?.generator?.counts ?? null);
     setGenDesign(normalizeDesign(document.document?.generator?.design));
+    setRepeatFrom(document.document?.generator?.repeatFrom ?? {});
     setOverrides(document.document?.generator?.overrides ?? {});
     setMessage('');
   }
@@ -615,8 +624,22 @@ export function BoqWorkspace({
       design: genDesign,
     });
     const kept = lines.filter((line) => !line.origin);
+    // A new BOQ must not invent column/footing/beam steel from company-grid
+    // assumptions. Legacy documents are preserved until intentionally edited.
+    const measuredOnly = !active || generator?.measuredOnly === true;
+    const measuredDesign = normalizeDesign(genDesign);
+    const measuredColumns = Boolean(measuredDesign?.columns.length);
+    const measuredBeams = Boolean(measuredDesign?.beams.length);
+    const sourceLines = result.lines.filter((line) => {
+      if (!measuredOnly) return true;
+      if (['quote-foundation', 'quote-columns', 'quote-pedestals', 'quote-plinth-beam'].includes(line.kind))
+        return measuredColumns;
+      if (line.kind === 'quote-slab') return measuredBeams;
+      if (line.kind === 'quote-binding-wire') return measuredColumns || measuredBeams;
+      return true;
+    });
     // Quantities and rates edited on the takeoff survive regeneration.
-    const generated = result.lines.map((line) => ({
+    const generated = sourceLines.map((line) => ({
       ...line,
       outputs: line.outputs.map((output) => {
         const edit = edits[overrideKey(line, output)];
@@ -649,6 +672,8 @@ export function BoqWorkspace({
       design: result.design,
       overrides: edits,
       warnings: result.warnings,
+      measuredOnly,
+      repeatFrom,
     });
     // A live update keeps what is being typed; a full generate takes the
     // normalized floors and counts back.
@@ -660,7 +685,7 @@ export function BoqWorkspace({
         `${activeProject?.name ?? 'Project'} · Construction BOQ`.slice(0, 200),
       );
     setMessage(
-      `${result.lines.length} items generated from the quotation${kept.length ? `; ${kept.length} manual items kept` : ''}. Review and save.`,
+      `${sourceLines.length} measured items generated from the quotation${kept.length ? `; ${kept.length} manual items kept` : ''}. Structural stages need drawing quantities before they appear.`,
     );
   }
   // A BOQ prepared from the quotation (floors, counts, drawing schedule) but
@@ -926,7 +951,7 @@ export function BoqWorkspace({
         document: {
           items: lines,
           selections,
-          ...(generator ? { generator } : {}),
+          ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
         },
         updated_at: new Date().toISOString(),
       });
