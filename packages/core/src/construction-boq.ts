@@ -1786,7 +1786,7 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
     const sizes = values as Record<string, unknown>;
     const entered = Object.fromEntries(
       doorSizeKeys
-        .map((key) => [key, String(sizes[key] ?? '').slice(0, 200)])
+        .map((key) => [key, String(sizes[key] ?? '').slice(0, 200)] as const)
         .filter(([, value]) => Boolean(value.trim())),
     );
     if (Object.keys(entered).length) doorSizes[floor] = entered;
