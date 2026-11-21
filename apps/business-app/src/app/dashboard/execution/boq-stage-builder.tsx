@@ -921,7 +921,11 @@ export function BoqStageBuilder(props: Props) {
                 <InputText
                   label="Item name"
                   value={manualName}
-                  placeholder={category.key === 'extra' ? 'e.g. Extra waterproofing' : category.label}
+                  placeholder={
+                    category.key === 'extra'
+                      ? 'e.g. Extra waterproofing'
+                      : category.label
+                  }
                   onChange={setManualName}
                 />
                 <InputNumber
@@ -955,7 +959,10 @@ export function BoqStageBuilder(props: Props) {
               <button
                 type="button"
                 className="boq-stage-outline"
-                disabled={manualQuantity <= 0 || (category.key === 'extra' && !manualName.trim())}
+                disabled={
+                  manualQuantity <= 0 ||
+                  (category.key === 'extra' && !manualName.trim())
+                }
                 onClick={() => {
                   props.onAddManual(
                     stage,
