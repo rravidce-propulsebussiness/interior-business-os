@@ -1855,7 +1855,20 @@ export function parseBars(text: string): { dia: number; count: number }[] {
     );
 }
 
-/** One column type of the drawing, with its footing. */
+import type { DesignFootingType } from './footing-takeoff';
+import {
+  FOOTING_TYPES,
+  newFootingType,
+  footingConcreteCft,
+  pedestalConcreteCft,
+  footingMeshPieces,
+  padCount,
+} from './footing-takeoff';
+export type { DesignFootingType } from './footing-takeoff';
+
+/** A column belongs to its own schedule. Legacy footing fields remain
+ * readable to migrate older saved BOQs without changing their estimates. */
+
 export type DesignColumnType = {
   label: string;
   count: number;
@@ -1885,6 +1898,7 @@ export type DesignBeamType = {
   runFeet: number[];
 };
 export type StructuralDesign = {
+  footings: DesignFootingType[];
   columns: DesignColumnType[];
   beams: DesignBeamType[];
   /** Plinth beam running feet (0 = from the column grid). */
@@ -1953,6 +1967,63 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
       footingBarSpacingIn: num(item?.footingBarSpacingIn, 6, 3, 12),
     }))
     .filter((item) => item.count > 0 && parseBars(item.bars).length > 0);
+  const hasFootingSchedule = Array.isArray(value.footings);
+  const footings = (
+    hasFootingSchedule ? (value.footings as Record<string, unknown>[])
+      : columns.map((column) => ({
+          label: 'F-' + column.label,
+          type: 'isolated',
+          count: column.count,
+          columnRefs: column.label,
+          lengthFeet: column.footingLengthFeet,
+          widthFeet: column.footingWidthFeet,
+          thicknessIn: column.footingThicknessIn,
+          bottomBarDia: column.footingBarDia,
+          bottomSpacingIn: column.footingBarSpacingIn,
+        }))
+  ).slice(0, 40).map((entry, index): DesignFootingType => {
+    const defaults = newFootingType(index);
+    const type = String(entry.type ?? defaults.type);
+    const geometry = String(entry.geometry ?? defaults.geometry);
+    const mesh = String(entry.mesh ?? defaults.mesh);
+    return {
+      ...defaults,
+      label: String(entry.label ?? defaults.label).slice(0, 40),
+      type: FOOTING_TYPES.includes(type as DesignFootingType['type'])
+        ? type as DesignFootingType['type'] : 'isolated',
+      count: Math.round(num(entry.count, 0, 0, 200)),
+      columnRefs: String(entry.columnRefs ?? '').slice(0, 160),
+      lengthFeet: num(entry.lengthFeet, 0, 0, 250),
+      widthFeet: num(entry.widthFeet, 0, 0, 250),
+      thicknessIn: num(entry.thicknessIn, 12, 0, 120),
+      padsPerGroup: Math.round(num(entry.padsPerGroup,
+        type === 'strap' ? 2 : 1, 1, 30)),
+      geometry: ['flat', 'stepped', 'sloped'].includes(geometry)
+        ? geometry as DesignFootingType['geometry'] : 'flat',
+      topLengthFeet: num(entry.topLengthFeet, 0, 0, 250),
+      topWidthFeet: num(entry.topWidthFeet, 0, 0, 250),
+      stepThicknessIn: num(entry.stepThicknessIn, 0, 0, 120),
+      edgeThicknessIn: num(entry.edgeThicknessIn, 0, 0, 120),
+      mesh: mesh === 'double' ? 'double' : 'single',
+      bottomBarDia: num(entry.bottomBarDia, 12, 6, 40),
+      bottomSpacingIn: num(entry.bottomSpacingIn, 6, 2, 24),
+      topBarDia: num(entry.topBarDia, 12, 6, 40),
+      topSpacingIn: num(entry.topSpacingIn, 6, 2, 24),
+      strapLengthFeet: num(entry.strapLengthFeet, 0, 0, 250),
+      strapWidthIn: num(entry.strapWidthIn, 0, 0, 96),
+      strapDepthIn: num(entry.strapDepthIn, 0, 0, 96),
+      pedestal: entry.pedestal === true,
+      pedestalsPerGroup: Math.round(num(entry.pedestalsPerGroup, 1, 0, 30)),
+      pedestalWidthIn: num(entry.pedestalWidthIn, 0, 0, 96),
+      pedestalDepthIn: num(entry.pedestalDepthIn, 0, 0, 96),
+      pedestalHeightFeet: num(entry.pedestalHeightFeet, 0, 0, 40),
+      pedestalTieDia: num(entry.pedestalTieDia, 8, 6, 16),
+      pedestalTieSpacingIn: num(entry.pedestalTieSpacingIn, 6, 2, 24),
+    };
+  }).filter((entry) =>
+    entry.count > 0 && entry.lengthFeet > 0 && entry.widthFeet > 0 &&
+    entry.thicknessIn > 0
+  );
   const beams = (Array.isArray(value.beams) ? value.beams : [])
     .slice(0, 20)
     .map((item: Record<string, unknown>, index): DesignBeamType => ({
@@ -1983,12 +2054,14 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
   }
   if (
     !columns.length &&
+    !footings.length &&
     !beams.length &&
     !Object.keys(settings).length &&
     !Number(value.plinthRunFeet)
   )
     return null;
   return {
+    footings,
     columns,
     beams,
     plinthRunFeet: num(value.plinthRunFeet, 0, 0, 5000),
