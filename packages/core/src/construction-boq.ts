@@ -126,6 +126,8 @@ export type FloorFinishes = {
   bathroomWidthFeet: number;
   /** Kitchen platform running length per kitchen (0 = default). */
   kitchenPlatformFeet: number;
+  /** Staircase / balcony handrail length entered from the drawing (running ft). */
+  railingFeet?: number;
 };
 
 export type BoqCounts = {
@@ -1505,6 +1507,7 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
       bathroomLengthFeet: feet(value.bathroomLengthFeet),
       bathroomWidthFeet: feet(value.bathroomWidthFeet),
       kitchenPlatformFeet: feet(value.kitchenPlatformFeet),
+      railingFeet: feet(value.railingFeet),
     };
   }
   return {
@@ -3155,6 +3158,21 @@ export function generateQuotationBoq(
       ],
       { builtUpSqft: floor.areaSqft, bathrooms: fc.bathrooms },
     );
+    // Railings are measured from the drawing, not inferred from the staircase
+    // area. An unstated contractual price limit remains unspecified.
+    finishLine(
+      'quote-railings',
+      'railings & metal works',
+      item(
+        'railings',
+        'SS railing',
+        fin?.railingFeet ?? 0,
+        'running_ft',
+        'railing_ss304',
+        'Measured staircase / balcony railing in running feet',
+      ),
+      { railingFeet: fin?.railingFeet ?? 0 },
+    );
     finishLine(
       'quote-kitchen',
       'kitchen',
@@ -3796,6 +3814,7 @@ export type AllowanceCategory =
   | 'kitchenWallTiles'
   | 'kitchenSink'
   | 'staircaseGranite'
+  | 'railings'
   | 'rollingShutters'
   | 'overheadTank'
   | 'sump';
@@ -3815,6 +3834,8 @@ export function allowanceCategories(
   if (/sump/.test(t)) return piece ? ['sump'] : [];
   if (/overhead|water tank|\btank\b/.test(t))
     return piece ? ['overheadTank'] : [];
+  if (/rail|handrail|balustrade/.test(t))
+    return unit === 'running_ft' ? ['railings'] : [];
   if (/stair/.test(t)) return unit === 'sqft' ? ['staircaseGranite'] : [];
   if (/sink/.test(t)) return piece ? ['kitchenSink'] : [];
   if (/kitchen/.test(t) && /til/.test(t))
