@@ -1041,13 +1041,14 @@ export function BoqWorkspace({
       <div className="erp-titlebar">
         <div>
           <p className="erp-eyebrow">Construction takeoff</p>
-          <h1>BOQ &amp; Estimating</h1>
+          <h1>{screen === 'new' ? 'Create new BOQ' : 'Edit BOQ'}</h1>
           <p>
             Measure work, calculate material quantities, and price labour and
             materials from your company rate list.
           </p>
         </div>
         <div className="erp-header-actions">
+          <Link href="/dashboard/execution/boq" className="erp-button">← Saved BOQs</Link>
           <div
             className="boq-unit-toggle"
             role="group"
@@ -1078,7 +1079,7 @@ export function BoqWorkspace({
               Configure rates
             </Link>
           )}
-          {canCreate && newProjects.length > 0 && (
+          {screen === 'edit' && canCreate && newProjects.length > 0 && (
             <button
               className="erp-button erp-button-primary"
               type="button"
@@ -1128,58 +1129,11 @@ export function BoqWorkspace({
           {message}
         </p>
       )}
-      <div className="boq-layout">
-        <aside className="boq-register">
-          <div className="boq-panel-heading">
-            <div>
-              <h2>Saved BOQs</h2>
-              <span>{plural(documents.length, 'document', 'documents')}</span>
-            </div>
-            {canCreate && newProjects.length > 0 && (
-              <button
-                type="button"
-                className="boq-add-small"
-                onClick={startNew}
-              >
-                ＋
-              </button>
-            )}
-          </div>
-          {documents.length ? (
-            documents.map((document) => (
-              <button
-                type="button"
-                key={document.id}
-                className={`boq-register-item ${active?.id === document.id ? 'active' : ''}`}
-                onClick={() => openDocument(document)}
-              >
-                <span className="boq-document-icon">B</span>
-                <span className="boq-register-copy">
-                  <strong>{document.title}</strong>
-                  <small>
-                    {projects.find(
-                      (project) => project.id === document.project_id,
-                    )?.name || 'No project linked'}{' '}
-                    · Saved · editable
-                  </small>
-                </span>
-                <span className="boq-register-arrow">›</span>
-              </button>
-            ))
-          ) : (
-            <p className="boq-empty">No saved BOQs yet.</p>
-          )}
-          {canCreate && newProjects.length === 0 && (
-            <p className="boq-empty">
-              To create a BOQ, save a quotation for a project that does not
-              already have one.
-            </p>
-          )}
-        </aside>
+      <div className="boq-layout boq-layout-full">
         <section className="boq-editor">
           <div className="boq-panel-heading">
             <div>
-              <h2>{active ? 'Edit BOQ' : 'New manual BOQ'}</h2>
+              <h2>{active ? 'Edit BOQ' : 'Create BOQ'}</h2>
               <span>
                 Keep dimensions, assumptions and linked quote in one place.
               </span>
@@ -1208,6 +1162,7 @@ export function BoqWorkspace({
               Project
               <select
                 value={projectId}
+                disabled={Boolean(active)}
                 onChange={(event) => selectProject(event.target.value)}
                 aria-describedby="boq-project-availability"
               >
@@ -2031,7 +1986,7 @@ export function BoqWorkspace({
                 <input
                   value={newName}
                   onChange={(event) => setNewName(event.target.value)}
-                  placeholder="e.g. Ground floor C1–C5 columns"
+                  placeholder={schedule ? "e.g. Extra labour or material" : "e.g. Ground floor C1–C5 columns"}
                 />
               </label>
               <button
