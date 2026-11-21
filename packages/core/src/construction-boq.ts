@@ -1899,6 +1899,8 @@ export type DesignBeamType = {
 };
 export type StructuralDesign = {
   footings: DesignFootingType[];
+  /** Older saved schedules carried footing geometry on C1/C2 rows. */
+  legacyFootings?: boolean;
   columns: DesignColumnType[];
   beams: DesignBeamType[];
   /** Plinth beam running feet (0 = from the column grid). */
@@ -1968,6 +1970,8 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     }))
     .filter((item) => item.count > 0 && parseBars(item.bars).length > 0);
   const hasFootingSchedule = Array.isArray(value.footings);
+  const legacyFootings = value.legacyFootings === true ||
+    (!hasFootingSchedule && columns.length > 0);
   const footingRows: Record<string, unknown>[] = hasFootingSchedule
     ? (value.footings as Record<string, unknown>[])
     : columns.map((column): Record<string, unknown> => ({
@@ -2071,6 +2075,7 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     return null;
   return {
     footings,
+    ...(legacyFootings ? { legacyFootings: true } : {}),
     columns,
     beams,
     plinthRunFeet: num(value.plinthRunFeet, 0, 0, 5000),
@@ -2464,7 +2469,7 @@ export function generateQuotationBoq(
     // Legacy estimates keep their original calculation and saved meaning.
     // In the stage-card editor, only independent F1/F2 footing entries are
     // authoritative; column C1 dimensions never create a footing implicitly.
-    if (!splitBeamSlab) {
+    if (!splitBeamSlab || design?.legacyFootings) {
       const footings = groundColumns;
       let excavation = 0;
       let pcc = 0;
@@ -2666,7 +2671,7 @@ export function generateQuotationBoq(
     }
 
     // --- New independent footing schedule --------------------------------
-    if (splitBeamSlab && design?.footings.length) {
+    if (splitBeamSlab && !design?.legacyFootings && design?.footings.length) {
       const columnsByLabel = new Set(
         (design.columns ?? []).map((col) => col.label.toLowerCase()),
       );
