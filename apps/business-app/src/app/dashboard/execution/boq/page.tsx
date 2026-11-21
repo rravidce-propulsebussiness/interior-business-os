@@ -85,21 +85,21 @@ export default async function ManualBoqPage({
           .in('id', customerIds)
           .limit(500)
       : Promise.resolve({ data: [], error: null }),
-    customerIds.length
+    projectIds.length
       ? (
           db.rpc.bind(db) as unknown as (
             name: string,
             args: Record<string, unknown>,
           ) => Promise<{ data: unknown; error: unknown }>
-        )('boq_final_quotation_choices', {
+        )('boq_effective_project_quotes', {
           p_org: s.org,
-          p_customer_ids: customerIds,
+          p_project_ids: projectIds,
         })
       : Promise.resolve({ data: {}, error: null }),
   ]);
-  if (quotationsResult.error || customersResult.error)
+  if (quotationsResult.error || customersResult.error || finalResult.error)
     throw new Error('Project quotations could not be loaded for the BOQ.');
-  const finalByCustomer =
+  const effectiveByProject =
     !finalResult.error &&
     finalResult.data &&
     typeof finalResult.data === 'object' &&
@@ -162,9 +162,8 @@ export default async function ManualBoqPage({
   const chosen = projects.flatMap((project) => {
     const pick = chooseProjectQuote(
       project.id,
-      project.customer_id,
       candidates,
-      finalByCustomer,
+      effectiveByProject,
     );
     return pick ? [{ project, ...pick }] : [];
   });
