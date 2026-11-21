@@ -274,9 +274,9 @@ function InputText({
 
 export function BoqStageBuilder(props: Props) {
   const [expanded, setExpanded] = useState<string[]>([
-    'Foundation',
-    props.floors[0]?.name ?? '',
+    ...new Set(['Foundation', props.floors[0]?.name ?? '', props.floors.at(-1)?.name ?? '']),
   ]);
+  const [activeTab, setActiveTab] = useState('Foundation');
   const [editing, setEditing] = useState<{
     stage: string;
     category: string;
@@ -329,7 +329,12 @@ export function BoqStageBuilder(props: Props) {
     mapped.filter((entry) => {
       const matchedStage = stageFor(entry.line, props.floors);
       const matchedCategory = categoryFor(entry.line, entry.output);
-      return matchedStage === stage && category === matchedCategory;
+      const supported = stage === 'Foundation'
+        ? foundation
+        : stage === props.floors.at(-1)?.name ? terrace : standard;
+      const bucket = supported.some((item) => item.key === matchedCategory)
+        ? matchedCategory : 'extra';
+      return matchedStage === stage && category === bucket;
     });
   const visibleCost = (stage: string, category: string) =>
     unmeasured(stage, category)
@@ -1001,8 +1006,9 @@ export function BoqStageBuilder(props: Props) {
           <button
             key={stage}
             type="button"
-            className={expanded.includes(stage) ? 'selected' : ''}
+            className={activeTab === stage ? 'selected' : ''}
             onClick={() => {
+              setActiveTab(stage);
               if (!expanded.includes(stage)) toggleSection(stage);
               document
                 .getElementById('boq-stage-' + sections.indexOf(stage))
