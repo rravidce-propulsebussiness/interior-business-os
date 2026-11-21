@@ -2872,7 +2872,7 @@ export function generateQuotationBoq(
   const interiorHasThreeCoats = packageSpecs.some(
     (spec) =>
       /interior.*paint/i.test(spec.title) &&
-      /(?:emulsion|paint)[^;]*\\b3\\s*coats\\b/i.test(spec.description),
+      /(?:emulsion|paint)[^;]*\b3\s*coats\b/i.test(spec.description),
   );
   const bathroomTilesToCeiling = packageSpecs.some(
     (spec) =>
