@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { projectsReadyForNewBoq } from './boq-project-eligibility';
+import {
+  boqProjectOptionLabel,
+  projectsReadyForNewBoq,
+} from './boq-project-eligibility';
 
 const projects = [
   { id: 'p1', name: 'First' },
@@ -7,6 +10,23 @@ const projects = [
   { id: 'p3', name: 'Third' },
   { id: 'p4', name: 'Fourth' },
 ];
+
+describe('BOQ project labels', () => {
+  it('shows all delivery projects and their next action, including ineligible ones', () => {
+    expect(
+      boqProjectOptionLabel({ name: 'Ramya', customerName: 'Ramya' }, 'new'),
+    ).toBe('Ramya — Ready for new BOQ');
+    expect(
+      boqProjectOptionLabel(
+        { name: 'Jashwanth house', customerName: 'Jashwanth' },
+        'saved',
+      ),
+    ).toBe('Jashwanth · Jashwanth house — BOQ saved · open to edit');
+    expect(
+      boqProjectOptionLabel({ name: 'Ramya', customerName: 'Ramya' }, 'needs-final'),
+    ).toBe('Ramya — Select Final quotation first');
+  });
+});
 
 describe('BOQ new-project eligibility', () => {
   it('shows only projects with an explicitly selected Final quote and no BOQ', () => {
