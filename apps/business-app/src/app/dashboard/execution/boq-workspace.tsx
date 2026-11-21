@@ -1341,12 +1341,15 @@ export function BoqWorkspace({
   ) {
     setLines((prior) => {
       const original = prior[index];
-      if (!original || original.kind !== 'manual' || original.origin) return prior;
+      if (!original || original.kind !== 'manual' || original.origin)
+        return prior;
       const name = changes.name.slice(0, 200);
       const quantity = Number.isFinite(changes.quantity)
         ? Math.max(0, changes.quantity)
         : 0;
-      const rate = Number.isFinite(changes.rate) ? Math.max(0, changes.rate) : 0;
+      const rate = Number.isFinite(changes.rate)
+        ? Math.max(0, changes.rate)
+        : 0;
       const unit = changes.unit.slice(0, 20) || 'nos';
       return prior.map((line, i) => {
         const followsSource =
@@ -2541,206 +2544,211 @@ export function BoqWorkspace({
               </section>
               {!schedule && (
                 <section className="boq-add-work">
-                <div className="boq-section-title">
-                  <div>
-                    <h3>{schedule ? 'Add extra work' : 'Add measured work'}</h3>
-                    <p>
-                      {schedule
-                        ? 'Columns, footings, beams, slabs, masonry and finishes are already calculated from the structural drawing. Add only extra work not covered by the generated BOQ.'
-                        : 'Choose a takeoff and enter the dimensions. Calculated quantities update as you type.'}
-                    </p>
+                  <div className="boq-section-title">
+                    <div>
+                      <h3>
+                        {schedule ? 'Add extra work' : 'Add measured work'}
+                      </h3>
+                      <p>
+                        {schedule
+                          ? 'Columns, footings, beams, slabs, masonry and finishes are already calculated from the structural drawing. Add only extra work not covered by the generated BOQ.'
+                          : 'Choose a takeoff and enter the dimensions. Calculated quantities update as you type.'}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="boq-template-row">
-                  {(schedule
-                    ? BOQ_TEMPLATES.filter(
-                        (template) => template.kind === 'manual',
+                  <div className="boq-template-row">
+                    {(schedule
+                      ? BOQ_TEMPLATES.filter(
+                          (template) => template.kind === 'manual',
+                        )
+                      : BOQ_TEMPLATES
+                    ).map((template) => (
+                      <button
+                        key={template.kind}
+                        type="button"
+                        className={
+                          selectedTemplate === template.kind ? 'selected' : ''
+                        }
+                        onClick={() => chooseTemplate(template.kind)}
+                      >
+                        <span>
+                          {template.kind === 'column'
+                            ? '▥'
+                            : template.kind === 'slab'
+                              ? '▤'
+                              : template.kind === 'wall'
+                                ? '▥'
+                                : template.kind === 'surface'
+                                  ? '▧'
+                                  : '＋'}
+                        </span>
+                        {template.label}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="boq-inputs">
+                    {(inputDefinitions[selectedTemplate] || [])
+                      .filter(
+                        (definition) =>
+                          selectedTemplate !== 'surface' ||
+                          (definition.key !== 'coats' &&
+                            definition.key !== 'waste'),
                       )
-                    : BOQ_TEMPLATES
-                  ).map((template) => (
-                    <button
-                      key={template.kind}
-                      type="button"
-                      className={
-                        selectedTemplate === template.kind ? 'selected' : ''
-                      }
-                      onClick={() => chooseTemplate(template.kind)}
-                    >
-                      <span>
-                        {template.kind === 'column'
-                          ? '▥'
-                          : template.kind === 'slab'
-                            ? '▤'
-                            : template.kind === 'wall'
-                              ? '▥'
-                              : template.kind === 'surface'
-                                ? '▧'
-                                : '＋'}
-                      </span>
-                      {template.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="boq-inputs">
-                  {(inputDefinitions[selectedTemplate] || [])
-                    .filter(
-                      (definition) =>
-                        selectedTemplate !== 'surface' ||
-                        (definition.key !== 'coats' &&
-                          definition.key !== 'waste'),
-                    )
-                    .map((definition) => (
-                      <label key={definition.key}>
-                        {unitLabel(
-                          definition.label,
-                          fieldKind(definition),
-                          unit,
-                        )}
-                        {definition.key === 'thickness' &&
-                        selectedTemplate === 'wall' ? (
-                          <select
-                            value={String(
-                              inputs[definition.key] ?? definition.value,
-                            )}
-                            onChange={(event) =>
-                              setInputs((prior) => ({
-                                ...prior,
-                                [definition.key]: event.target.value,
-                              }))
-                            }
-                          >
-                            <option value="4">4 inch</option>
-                            <option value="9">9 inch</option>
-                          </select>
-                        ) : (
-                          <input
-                            type={
-                              ['outputName', 'surfaceType', 'unit'].includes(
-                                definition.key,
-                              )
-                                ? 'text'
-                                : 'number'
-                            }
-                            min="0"
-                            step="any"
-                            value={
-                              typed[definition.key] ??
-                              toDisplay(
+                      .map((definition) => (
+                        <label key={definition.key}>
+                          {unitLabel(
+                            definition.label,
+                            fieldKind(definition),
+                            unit,
+                          )}
+                          {definition.key === 'thickness' &&
+                          selectedTemplate === 'wall' ? (
+                            <select
+                              value={String(
                                 inputs[definition.key] ?? definition.value,
-                                fieldKind(definition),
-                                unit,
-                              )
-                            }
-                            onChange={(event) => {
-                              const text = event.target.value;
-                              const kind = fieldKind(definition);
-                              if (kind && unit !== 'm')
-                                setTyped((prior) => ({
+                              )}
+                              onChange={(event) =>
+                                setInputs((prior) => ({
                                   ...prior,
-                                  [definition.key]: text,
+                                  [definition.key]: event.target.value,
+                                }))
+                              }
+                            >
+                              <option value="4">4 inch</option>
+                              <option value="9">9 inch</option>
+                            </select>
+                          ) : (
+                            <input
+                              type={
+                                ['outputName', 'surfaceType', 'unit'].includes(
+                                  definition.key,
+                                )
+                                  ? 'text'
+                                  : 'number'
+                              }
+                              min="0"
+                              step="any"
+                              value={
+                                typed[definition.key] ??
+                                toDisplay(
+                                  inputs[definition.key] ?? definition.value,
+                                  fieldKind(definition),
+                                  unit,
+                                )
+                              }
+                              onChange={(event) => {
+                                const text = event.target.value;
+                                const kind = fieldKind(definition);
+                                if (kind && unit !== 'm')
+                                  setTyped((prior) => ({
+                                    ...prior,
+                                    [definition.key]: text,
+                                  }));
+                                setInputs((prior) => ({
+                                  ...prior,
+                                  [definition.key]: toMetric(text, kind, unit),
                                 }));
+                              }}
+                            />
+                          )}
+                        </label>
+                      ))}
+                    {selectedTemplate === 'surface' && (
+                      <>
+                        <label>
+                          Surface finish
+                          <select
+                            value={String(inputs.surfaceType || '')}
+                            onChange={(event) => {
+                              const surfaceType = event.target.value;
                               setInputs((prior) => ({
                                 ...prior,
-                                [definition.key]: toMetric(text, kind, unit),
+                                surfaceType,
+                                coats:
+                                  surfaceType === 'Internal paint' ? '2' : '1',
+                                waste: surfaceType
+                                  .toLowerCase()
+                                  .includes('tile')
+                                  ? '5'
+                                  : '0',
                               }));
                             }}
-                          />
+                          >
+                            <option>Internal plaster</option>
+                            <option>External plaster</option>
+                            <option>Internal paint</option>
+                            <option>External paint</option>
+                            <option>Floor tile</option>
+                            <option>Wall tile</option>
+                          </select>
+                        </label>
+                        {String(inputs.surfaceType || '')
+                          .toLowerCase()
+                          .includes('paint') && (
+                          <label>
+                            Number of coats
+                            <input
+                              type="number"
+                              min="1"
+                              step="1"
+                              value={String(inputs.coats || '1')}
+                              onChange={(event) =>
+                                setInputs((prior) => ({
+                                  ...prior,
+                                  coats: event.target.value,
+                                }))
+                              }
+                            />
+                          </label>
                         )}
-                      </label>
-                    ))}
-                  {selectedTemplate === 'surface' && (
-                    <>
-                      <label>
-                        Surface finish
-                        <select
-                          value={String(inputs.surfaceType || '')}
-                          onChange={(event) => {
-                            const surfaceType = event.target.value;
-                            setInputs((prior) => ({
-                              ...prior,
-                              surfaceType,
-                              coats:
-                                surfaceType === 'Internal paint' ? '2' : '1',
-                              waste: surfaceType.toLowerCase().includes('tile')
-                                ? '5'
-                                : '0',
-                            }));
-                          }}
-                        >
-                          <option>Internal plaster</option>
-                          <option>External plaster</option>
-                          <option>Internal paint</option>
-                          <option>External paint</option>
-                          <option>Floor tile</option>
-                          <option>Wall tile</option>
-                        </select>
-                      </label>
-                      {String(inputs.surfaceType || '')
-                        .toLowerCase()
-                        .includes('paint') && (
                         <label>
-                          Number of coats
+                          Wastage (%)
                           <input
-                            type="number"
-                            min="1"
-                            step="1"
-                            value={String(inputs.coats || '1')}
+                            value={String(inputs.waste || '0')}
                             onChange={(event) =>
                               setInputs((prior) => ({
                                 ...prior,
-                                coats: event.target.value,
+                                waste: event.target.value,
                               }))
                             }
                           />
                         </label>
-                      )}
-                      <label>
-                        Wastage (%)
-                        <input
-                          value={String(inputs.waste || '0')}
-                          onChange={(event) =>
-                            setInputs((prior) => ({
-                              ...prior,
-                              waste: event.target.value,
-                            }))
-                          }
-                        />
-                      </label>
-                    </>
-                  )}
-                </div>
-                <div className="boq-preview">
-                  <strong>Calculated takeoff</strong>
-                  {calculateBoq(selectedTemplate, inputs).map((output) => (
-                    <span key={output.name}>
-                      {output.name}
-                      <b>
-                        {output.quantity.toLocaleString('en-IN')} {output.unit}
-                      </b>
-                    </span>
-                  ))}
-                </div>
-                <div className="boq-add-line">
-                  <label>
-                    Work description
-                    <input
-                      value={newName}
-                      onChange={(event) => setNewName(event.target.value)}
-                      placeholder={
-                        schedule
-                          ? 'e.g. Extra labour or material'
-                          : 'e.g. Ground floor C1–C5 columns'
-                      }
-                    />
-                  </label>
-                  <button
-                    type="button"
-                    className="erp-button erp-button-primary"
-                    onClick={addLine}
-                  >
-                    Add to BOQ
-                  </button>
-                </div>
+                      </>
+                    )}
+                  </div>
+                  <div className="boq-preview">
+                    <strong>Calculated takeoff</strong>
+                    {calculateBoq(selectedTemplate, inputs).map((output) => (
+                      <span key={output.name}>
+                        {output.name}
+                        <b>
+                          {output.quantity.toLocaleString('en-IN')}{' '}
+                          {output.unit}
+                        </b>
+                      </span>
+                    ))}
+                  </div>
+                  <div className="boq-add-line">
+                    <label>
+                      Work description
+                      <input
+                        value={newName}
+                        onChange={(event) => setNewName(event.target.value)}
+                        placeholder={
+                          schedule
+                            ? 'e.g. Extra labour or material'
+                            : 'e.g. Ground floor C1–C5 columns'
+                        }
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      className="erp-button erp-button-primary"
+                      onClick={addLine}
+                    >
+                      Add to BOQ
+                    </button>
+                  </div>
                 </section>
               )}
               {(usedMaterials.size > 0 || steelSummary.size > 0) && (

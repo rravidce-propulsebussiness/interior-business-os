@@ -2,7 +2,11 @@ import { createElement, type ComponentProps } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { BoqStageBuilder } from './boq-stage-builder';
-import type { BoqCounts, BoqFloor, StructuralSettings } from '@business-os/core/construction-boq';
+import type {
+  BoqCounts,
+  BoqFloor,
+  StructuralSettings,
+} from '@business-os/core/construction-boq';
 
 type StageProps = ComponentProps<typeof BoqStageBuilder>;
 const noop = () => {};
@@ -64,7 +68,12 @@ describe('stage-wise miscellaneous BOQ UI', () => {
             kind: 'manual',
             inputs: { quantity: 2, stageCategory: 'footings' },
             outputs: [
-              { name: 'Extra gravel delivery', quantity: 2, unit: 'lot', rate: 300 },
+              {
+                name: 'Extra gravel delivery',
+                quantity: 2,
+                unit: 'lot',
+                rate: 300,
+              },
             ],
           },
         ],

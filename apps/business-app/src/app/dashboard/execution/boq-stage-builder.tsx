@@ -326,7 +326,9 @@ export function BoqStageBuilder(props: Props) {
   const [manualRate, setManualRate] = useState(0);
   const [manualName, setManualName] = useState('');
   const [manualUnit, setManualUnit] = useState('sqft');
-  const [miscellaneousStage, setMiscellaneousStage] = useState<string | null>(null);
+  const [miscellaneousStage, setMiscellaneousStage] = useState<string | null>(
+    null,
+  );
   const [dimensionUnit, setDimensionUnit] = useState<'ft' | 'm'>('ft');
   const [dimensionDraft, setDimensionDraft] = useState<MeasuredDimensions>({
     count: 1,
@@ -1698,18 +1700,24 @@ export function BoqStageBuilder(props: Props) {
                           className="boq-stage-misc-trigger"
                           type="button"
                           aria-expanded={miscellaneousStage === stage}
-                          aria-controls={'boq-misc-' + stage.replace(/[^a-z0-9]/gi, '-')}
+                          aria-controls={
+                            'boq-misc-' + stage.replace(/[^a-z0-9]/gi, '-')
+                          }
                           onClick={() => toggleMiscellaneous(stage)}
                         >
                           <span className="boq-stage-misc-plus">＋</span>
                           <span className="boq-stage-misc-copy">
                             <strong>Miscellaneous</strong>
-                            <small>Extra materials, labour or work for {stage}</small>
+                            <small>
+                              Extra materials, labour or work for {stage}
+                            </small>
                           </span>
                           {miscellaneousRows.length > 0 && (
                             <span className="boq-stage-misc-count">
                               {miscellaneousRows.length}{' '}
-                              {miscellaneousRows.length === 1 ? 'item' : 'items'}
+                              {miscellaneousRows.length === 1
+                                ? 'item'
+                                : 'items'}
                               {props.canViewCost
                                 ? ' · ' + money(miscellaneousTotal)
                                 : ''}
@@ -1738,16 +1746,23 @@ export function BoqStageBuilder(props: Props) {
                                 name: line.name,
                                 quantity: output?.quantity ?? 0,
                                 unit: output?.unit || line.unit || 'nos',
-                                rate: output?.rate ?? (output ? props.rateFor(output) : 0),
+                                rate:
+                                  output?.rate ??
+                                  (output ? props.rateFor(output) : 0),
                               };
                               return (
-                                <div className="boq-stage-misc-item" key={line.id}>
+                                <div
+                                  className="boq-stage-misc-item"
+                                  key={line.id}
+                                >
                                   <div className="boq-stage-misc-item-head">
                                     <strong>{line.name}</strong>
                                     <button
                                       type="button"
                                       className="boq-stage-misc-remove"
-                                      onClick={() => props.onRemoveManual(lineIndex)}
+                                      onClick={() =>
+                                        props.onRemoveManual(lineIndex)
+                                      }
                                     >
                                       Remove
                                     </button>
@@ -1778,16 +1793,37 @@ export function BoqStageBuilder(props: Props) {
                                       <select
                                         value={details.unit}
                                         onChange={(event) =>
-                                          props.onUpdateMiscellaneous(lineIndex, {
-                                            ...details,
-                                            unit: event.target.value,
-                                          })
+                                          props.onUpdateMiscellaneous(
+                                            lineIndex,
+                                            {
+                                              ...details,
+                                              unit: event.target.value,
+                                            },
+                                          )
                                         }
                                       >
-                                        {[details.unit, 'sqft', 'cft', 'm³', 'rft', 'nos',
-                                          'bag', 'kg', 't', 'lot', 'day']
-                                          .filter((value, index, values) => values.indexOf(value) === index)
-                                          .map((value) => <option key={value} value={value}>{value}</option>)}
+                                        {[
+                                          details.unit,
+                                          'sqft',
+                                          'cft',
+                                          'm³',
+                                          'rft',
+                                          'nos',
+                                          'bag',
+                                          'kg',
+                                          't',
+                                          'lot',
+                                          'day',
+                                        ]
+                                          .filter(
+                                            (value, index, values) =>
+                                              values.indexOf(value) === index,
+                                          )
+                                          .map((value) => (
+                                            <option key={value} value={value}>
+                                              {value}
+                                            </option>
+                                          ))}
                                       </select>
                                     </label>
                                     {props.canViewCost && (
@@ -1795,10 +1831,13 @@ export function BoqStageBuilder(props: Props) {
                                         label="Unit rate (₹)"
                                         value={details.rate}
                                         onChange={(rate) =>
-                                          props.onUpdateMiscellaneous(lineIndex, {
-                                            ...details,
-                                            rate,
-                                          })
+                                          props.onUpdateMiscellaneous(
+                                            lineIndex,
+                                            {
+                                              ...details,
+                                              rate,
+                                            },
+                                          )
                                         }
                                       />
                                     )}
@@ -1824,11 +1863,25 @@ export function BoqStageBuilder(props: Props) {
                                   <span>Unit</span>
                                   <select
                                     value={manualUnit}
-                                    onChange={(event) => setManualUnit(event.target.value)}
+                                    onChange={(event) =>
+                                      setManualUnit(event.target.value)
+                                    }
                                   >
-                                    {['sqft', 'cft', 'm³', 'rft', 'nos', 'bag',
-                                      'kg', 't', 'lot', 'day'].map((unit) => (
-                                      <option key={unit} value={unit}>{unit}</option>
+                                    {[
+                                      'sqft',
+                                      'cft',
+                                      'm³',
+                                      'rft',
+                                      'nos',
+                                      'bag',
+                                      'kg',
+                                      't',
+                                      'lot',
+                                      'day',
+                                    ].map((unit) => (
+                                      <option key={unit} value={unit}>
+                                        {unit}
+                                      </option>
                                     ))}
                                   </select>
                                 </label>
@@ -1843,7 +1896,9 @@ export function BoqStageBuilder(props: Props) {
                               <button
                                 className="boq-stage-outline"
                                 type="button"
-                                disabled={!manualName.trim() || !(manualQuantity > 0)}
+                                disabled={
+                                  !manualName.trim() || !(manualQuantity > 0)
+                                }
                                 onClick={() => {
                                   props.onAddManual(
                                     stage,
