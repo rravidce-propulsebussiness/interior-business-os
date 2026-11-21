@@ -809,3 +809,63 @@
     visibility: visible !important;
   }
 }
+
+
+/* Dimension-based measured work and wall-group editor */
+.boq-stage-dimensions {
+  display: grid;
+  gap: 12px;
+}
+.boq-stage-dimensions .boq-stage-unit-switch {
+  max-width: 230px;
+}
+.boq-stage-dimensions > .boq-stage-subcard {
+  margin: 0;
+}
+.boq-stage-dimensions .boq-stage-subcard > .boq-stage-field {
+  margin-bottom: 11px;
+}
+.boq-stage-volume {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 10px 13px;
+  margin: 12px 0;
+  border: 1px solid #e9d5cb;
+  background: #fff7f1;
+  border-radius: 11px;
+  color: #734b3f;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.boq-stage-volume strong {
+  color: #7d342c;
+  font-size: 15px;
+}
+.boq-stage-limit {
+  display: inline-flex;
+  align-self: center;
+  font-size: 10px;
+  font-weight: 800;
+  color: #80563d;
+  padding: 7px 8px;
+  background: #fff2e7;
+  border: 1px solid #f2d9c5;
+  border-radius: 9px;
+}
+.boq-stage-dimensions .boq-stage-subcard .boq-stage-outline {
+  margin-top: 10px;
+}
+@media (max-width:640px) {
+  .boq-stage-dimensions .boq-stage-input-grid {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+  .boq-stage-dimensions .boq-stage-hint {
+    font-size: 11px;
+  }
+  .boq-stage-limit {
+    grid-column: 1/-1;
+  }
+}
