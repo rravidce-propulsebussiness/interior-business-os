@@ -1588,6 +1588,7 @@ export function BoqWorkspace({
             )}
           </div>
           <BoqStageBuilder
+            key={projectId || active?.id || 'new'}
             floors={floorsForGeneration}
             lines={lines}
             projectId={projectId}
@@ -1620,6 +1621,7 @@ export function BoqWorkspace({
             onAdvanced={() => setShowAdvanced((prior) => !prior)}
             canViewCost={canViewCost}
             busy={busy}
+            canSave={active ? canEdit : canCreate}
             message={message}
             newDocument={!active}
           />
