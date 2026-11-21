@@ -1362,6 +1362,13 @@ export function estimateCounts(
   details?: SftEstimateDetails,
 ): BoqCounts {
   const perFloor: Record<string, FloorCounts> = {};
+  // A rolling shutter priced in the quotation's package goes on the ground
+  // floor (shop / parking front); the count stays editable.
+  const quotedShutter = (details?.sections ?? []).some(
+    (section) =>
+      /rolling\s*shutter/i.test(section.title ?? '') &&
+      section.pricingTreatment !== 'excluded',
+  );
   floors.forEach((floor, index) => {
     const living = livingSqft(floor);
     const bathrooms =
@@ -1385,7 +1392,7 @@ export function estimateCounts(
       ventilators: bathrooms,
       bathrooms,
       kitchens,
-      rollingShutters: 0,
+      rollingShutters: index === 0 && quotedShutter ? 1 : 0,
       lightPoints:
         (living > 0 ? Math.ceil(living / 80) + bathrooms + kitchens : 0) +
         Math.ceil((floor.parkingSqft ?? 0) / 150),
