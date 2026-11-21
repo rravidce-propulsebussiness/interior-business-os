@@ -73,6 +73,8 @@ const generatorSchema = z.object({
           bathroomLengthFeet: z.number().finite().nonnegative(),
           bathroomWidthFeet: z.number().finite().nonnegative(),
           kitchenPlatformFeet: z.number().finite().nonnegative(),
+          bathroomSizes: z.string().max(300).optional(),
+          railingFeet: z.number().finite().nonnegative().optional(),
         }),
       )
       .optional(),
@@ -109,6 +111,10 @@ const generatorSchema = z.object({
       settings: z.record(z.string().max(40), z.number().finite()).optional(),
     })
     .nullable()
+    .optional(),
+  measuredOnly: z.boolean().optional(),
+  repeatFrom: z.record(z.string().max(90), z.string().max(90))
+    .refine((value) => Object.keys(value).length <= 20)
     .optional(),
   warnings: z.array(z.string().max(500)).max(50).default([]),
 });
