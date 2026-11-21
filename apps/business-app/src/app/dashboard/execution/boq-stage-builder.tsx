@@ -174,7 +174,10 @@ function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
   if (kind === 'quote-plinth-beam') return 'plinth';
   if (kind === 'quote-slab') return 'slab';
   if (kind === 'quote-staircase') return 'staircase';
-  if (kind === 'quote-masonry') return 'brickwork';
+  if (kind === 'quote-masonry')
+    return /^(?:Internal|External) plaster$/i.test(output.name)
+      ? 'plaster'
+      : 'brickwork';
   if (kind === 'quote-parapet') {
     return /waterproof|membrane|coat|sealant/i.test(output.name)
       ? 'waterproofing'
@@ -896,7 +899,8 @@ export function BoqStageBuilder(props: Props) {
           </>
         )}
         {(!designCategory ||
-          ['parapet', 'waterproofing'].includes(category.key)) && (
+          ['parapet', 'waterproofing'].includes(category.key) ||
+          !foundEntries.length) && (
           <>
             <div className="boq-stage-manual">
               <h4>Add a measured item</h4>
@@ -1120,14 +1124,10 @@ export function BoqStageBuilder(props: Props) {
                           ? entries.length + ' materials'
                           : '';
                     const combined =
-                      (category.key === 'beams' &&
-                        entriesFor(stage, 'slab').some(
-                          (entry) => entry.line.kind === 'quote-slab',
-                        )) ||
-                      (category.key === 'plaster' &&
-                        entriesFor(stage, 'brickwork').some(
-                          (entry) => entry.line.kind === 'quote-masonry',
-                        ));
+                      category.key === 'beams' &&
+                      entriesFor(stage, 'slab').some(
+                        (entry) => entry.line.kind === 'quote-slab',
+                      );
                     return (
                       <div className="boq-stage-tile" key={category.key}>
                         <span
@@ -1143,7 +1143,7 @@ export function BoqStageBuilder(props: Props) {
                           ) : !entries.length && combined ? (
                             <small>
                               Included with{' '}
-                              {category.key === 'beams' ? 'slab' : 'brickwork'}
+                              slab
                             </small>
                           ) : !entries.length ? (
                             <small>Not measured</small>
