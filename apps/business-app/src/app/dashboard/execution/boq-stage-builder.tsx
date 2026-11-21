@@ -65,6 +65,7 @@ type Props = {
     quantity: number,
     unit: string,
     rate: number,
+    itemName: string,
   ) => void;
   onRemoveManual: (lineIndex: number) => void;
   onSave: () => void;
@@ -292,6 +293,7 @@ export function BoqStageBuilder(props: Props) {
   const [preview, setPreview] = useState(false);
   const [manualQuantity, setManualQuantity] = useState(0);
   const [manualRate, setManualRate] = useState(0);
+  const [manualName, setManualName] = useState('');
   const [manualUnit, setManualUnit] = useState('sqft');
   const last = props.floors[props.floors.length - 1]?.name ?? '';
   const sections = ['Foundation', ...props.floors.map((f) => f.name)];
@@ -382,6 +384,9 @@ export function BoqStageBuilder(props: Props) {
   const openEditor = (stage: string, category: string) => {
     if (preview) return;
     if (props.repeatFrom[stage]) props.onCustomizeFloor(stage);
+    setManualName('');
+    setManualQuantity(0);
+    setManualRate(0);
     setEditing((prior) =>
       prior?.stage === stage && prior.category === category
         ? null
@@ -913,6 +918,12 @@ export function BoqStageBuilder(props: Props) {
             <div className="boq-stage-manual">
               <h4>Add a measured item</h4>
               <div className="boq-stage-input-grid">
+                <InputText
+                  label="Item name"
+                  value={manualName}
+                  placeholder={category.key === 'extra' ? 'e.g. Extra waterproofing' : category.label}
+                  onChange={setManualName}
+                />
                 <InputNumber
                   label="Quantity"
                   value={manualQuantity}
@@ -944,7 +955,7 @@ export function BoqStageBuilder(props: Props) {
               <button
                 type="button"
                 className="boq-stage-outline"
-                disabled={manualQuantity <= 0}
+                disabled={manualQuantity <= 0 || (category.key === 'extra' && !manualName.trim())}
                 onClick={() => {
                   props.onAddManual(
                     stage,
@@ -952,7 +963,9 @@ export function BoqStageBuilder(props: Props) {
                     manualQuantity,
                     manualUnit,
                     props.canViewCost ? manualRate : 0,
+                    manualName.trim(),
                   );
+                  setManualName('');
                   setManualQuantity(0);
                   setManualRate(0);
                 }}
