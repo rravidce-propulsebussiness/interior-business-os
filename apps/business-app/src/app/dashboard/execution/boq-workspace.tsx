@@ -630,12 +630,28 @@ export function BoqWorkspace({
     const measuredDesign = normalizeDesign(genDesign);
     const measuredColumns = Boolean(measuredDesign?.columns.length);
     const measuredBeams = Boolean(measuredDesign?.beams.length);
+    // A slab's bar diameters and spacing must come from the drawing, not
+    // automatically from a company rule without an entered measurement.
+    const measuredSlab = Boolean(
+      measuredDesign?.settings?.slabMainDia &&
+      measuredDesign?.settings?.slabDistDia &&
+      measuredDesign?.settings?.slabThicknessIn,
+    );
     const sourceLines = result.lines.filter((line) => {
       if (!measuredOnly) return true;
-      if (['quote-foundation', 'quote-columns', 'quote-pedestals', 'quote-plinth-beam'].includes(line.kind))
+      if (
+        ['quote-foundation', 'quote-columns', 'quote-pedestals', 'quote-plinth-beam'].includes(
+          line.kind,
+        )
+      )
         return measuredColumns;
-      if (line.kind === 'quote-slab') return measuredBeams;
-      if (line.kind === 'quote-binding-wire') return measuredColumns || measuredBeams;
+      if (line.kind === 'quote-slab') return measuredBeams && measuredSlab;
+      // Binding wire includes multiple structural stages in the legacy
+      // calculator; never count wire from still-unmeasured members.
+      if (line.kind === 'quote-binding-wire')
+        return line.section === 'Foundation'
+          ? measuredColumns
+          : measuredColumns && measuredBeams && measuredSlab;
       return true;
     });
     // Quantities and rates edited on the takeoff survive regeneration.
