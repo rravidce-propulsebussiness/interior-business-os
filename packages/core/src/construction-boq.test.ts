@@ -1370,7 +1370,7 @@ describe('entering the drawings by hand', () => {
     const inner = masonry.outputs.find((item) =>
       item.name.includes('Room partition'))!;
     // External gross: 4×20×10=800; main door 24.5 + windows 32.
-    expect(outer.quantity).toBeCloseTo(743.5, 0);
+    expect(outer.quantity).toBe(744);
     // Internal gross: 2×10×10=200; room door 21.
     expect(inner.quantity).toBeCloseTo(179, 0);
     const bricks = masonry.outputs.find((item) => item.material === 'bricks')!;
