@@ -1970,7 +1970,8 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     }))
     .filter((item) => item.count > 0 && parseBars(item.bars).length > 0);
   const hasFootingSchedule = Array.isArray(value.footings);
-  const legacyFootings = value.legacyFootings === true ||
+  const legacyFootings =
+    value.legacyFootings === true ||
     (!hasFootingSchedule && columns.length > 0);
   const footingRows: Record<string, unknown>[] = hasFootingSchedule
     ? (value.footings as Record<string, unknown>[])
