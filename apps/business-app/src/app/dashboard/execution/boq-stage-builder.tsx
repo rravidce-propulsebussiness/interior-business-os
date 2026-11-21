@@ -855,8 +855,8 @@ export function BoqStageBuilder(props: Props) {
             category.key,
           ) && (
             <p className="boq-stage-hint">
-              This floor&apos;s measured quantities are based on its area, room sizes
-              and quotation specifications. You can override individual
+              This floor&apos;s measured quantities are based on its area, room
+              sizes and quotation specifications. You can override individual
               quantities and costs below, or open Detailed takeoff for
               room-by-room dimensions.
             </p>

@@ -1275,11 +1275,13 @@ describe('entering the drawings by hand', () => {
       splitBeamSlab: true,
     });
     const concreteVolume = (items: typeof legacy.lines) =>
-      items.flatMap((item) => item.outputs)
+      items
+        .flatMap((item) => item.outputs)
         .filter((output) => output.unit === 'm³')
         .reduce((sum, output) => sum + output.quantity, 0);
     const rods = (items: typeof legacy.lines) =>
-      items.flatMap((item) => item.outputs)
+      items
+        .flatMap((item) => item.outputs)
         .filter((output) => output.unit === 'rod')
         .reduce((sum, output) => sum + output.quantity, 0);
 

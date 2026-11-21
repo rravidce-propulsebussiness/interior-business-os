@@ -630,7 +630,9 @@ export function BoqWorkspace({
     // assumptions. Legacy documents are preserved until intentionally edited.
     const measuredDesign = normalizeDesign(genDesign);
     const measuredColumns = Boolean(measuredDesign?.columns.length);
-    const measuredBeams = Boolean(measuredDesign?.beams.some((beam) => beam.runFeet.some((run) => run > 0)));
+    const measuredBeams = Boolean(
+      measuredDesign?.beams.some((beam) => beam.runFeet.some((run) => run > 0)),
+    );
     // A slab's bar diameters and spacing must come from the drawing, not
     // automatically from a company rule without an entered measurement.
     const measuredSlab = Boolean(
