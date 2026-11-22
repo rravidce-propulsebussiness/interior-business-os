@@ -1215,3 +1215,15 @@
     flex-basis: 100%;
   }
 }
+
+/* A work editor is its own screen, not an accordion within the full workspace. */
+.execution-workspace:has(.boq-work-focus) > .erp-crumbs,
+.manual-boq:has(.boq-work-focus) .boq-panel-heading,
+.manual-boq:has(.boq-work-focus) .boq-labour-tabs,
+.manual-boq:has(.boq-work-focus) .boq-metrics,
+.manual-boq:has(.boq-work-focus) .boq-advanced-content {
+  display: none;
+}
+.manual-boq:has(.boq-work-focus) .boq-editor {
+  padding-top: 0;
+}
