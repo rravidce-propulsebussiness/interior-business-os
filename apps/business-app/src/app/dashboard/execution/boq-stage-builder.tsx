@@ -19,8 +19,6 @@ import type {
   DesignColumnType,
   DesignSlabPanel,
   DesignStairType,
-  DesignSlabPanel,
-  DesignStairType,
   DesignSettingKey,
   StructuralDesign,
   StructuralSettings,
