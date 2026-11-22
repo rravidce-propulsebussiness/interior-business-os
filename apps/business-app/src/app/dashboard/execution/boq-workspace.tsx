@@ -168,6 +168,7 @@ const rateMoney = (value: number, currency = 'INR') => {
 const plural = (count: number, one: string, many: string) =>
   `${count} ${count === 1 ? one : many}`;
 
+const uid = () => crypto.randomUUID();
 /** Identifies a generated output across regenerations. */
 const overrideKey = (
   line: { section: string; kind: string },
