@@ -79,9 +79,6 @@ export function BoqLabourPanel({
       includedWorks: [], method: extraMethod, unit: 'm³', quantity: 0, quantitySource: 'manual',
       rate: 0, workers: 1, days: 1, outsideScope: false });
   }
-  function modifyExtra(index: number, values: Partial<LabourExtra>) {
-    change({ extras: config.extras.map((item, i) => i === index ? { ...item, ...values } : item) });
-  }
   const packageMethods: { id: LabourMethod; label: string; description: string }[] = [
     { id: 'composite', label: 'Composite / Custom Package', description: 'One agreed rate for selected civil works' },
     { id: 'itemwise', label: 'Item-wise Labour', description: 'Each measured trade × its labour rate' },
