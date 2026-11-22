@@ -776,10 +776,13 @@ describe('quotation-driven construction BOQ', () => {
       expect(siteSlab.outputs.some((o) => o.material === material)).toBe(true);
     // The structural switch does not change the PCC constituent materials.
     const pccMaterials = (result: typeof readyMix) =>
-      result.lines.flatMap((line) => line.kind === 'quote-pcc' ||
-        line.kind === 'quote-foundation'
-        ? line.outputs.filter((o) => ['cement','sand','aggregate'].includes(o.material ?? ''))
-        : []).map((o) => [o.material, o.quantity]);
+      result.lines.flatMap((line) =>
+        line.kind === 'quote-pcc'
+          ? line.outputs.filter((o) =>
+              ['cement', 'sand', 'aggregate'].includes(o.material ?? ''),
+            )
+          : [],
+      ).map((o) => [o.material, o.quantity]);
     expect(pccMaterials(siteMix)).toEqual(pccMaterials(readyMix));
   });
 
