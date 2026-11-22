@@ -404,9 +404,10 @@ export function BoqWorkspace({
     );
   };
   const priceOf = (output: SavedLine['outputs'][number]) =>
-    // A configured labour model replaces ALL old labour rates. Materials and
-    // concrete supply retain their existing source, price and quantities.
-    labour && isOldLabour(output)
+    // Reference-only concrete volume must never acquire a price from either
+    // the material rate card or an old manual rate edit.
+    (output.unit === 'm³' && output.name.endsWith(' · volume only')) ||
+    (labour && isOldLabour(output))
       ? 0
       : rateForOutput(output, initialRates, selections);
   const currentQuote = quotes.find((quote) => quote.id === quoteId);
@@ -871,6 +872,8 @@ export function BoqWorkspace({
           : output;
         // One RMC rate for all structural members; never apply it to manually
         // measured PCC, sajjas, shelves, brickwork or other non-RCC work.
+        if (output.unit === 'm³' && output.name.endsWith(' · volume only'))
+          return { ...measured, rate: 0 };
         return output.material === 'concrete_m20' && rmcRateOverride !== null
           ? { ...measured, rate: rmcRateOverride }
           : measured;
