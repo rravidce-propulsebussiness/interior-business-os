@@ -79,7 +79,7 @@ const BAR_COUNTS = Array.from({ length: 40 }, (_, i) => i + 1);
 export function parseEditableBars(value: string): { count: number; dia: number }[] {
   return String(value ?? '')
     .split(/[+,]/)
-    .map((part) => /^(\\d+)\\s*(?:no\\.?s?)?\\s*[-×x*#]\\s*(\\d+)$/i.exec(part.trim()))
+    .map((part) => /^(\d+)\s*(?:no\.?s?)?\s*[-×x*#]\s*(\d+)$/i.exec(part.trim()))
     .filter((match): match is RegExpExecArray => Boolean(match))
     .map((match) => ({ count: Number(match[1]), dia: Number(match[2]) }))
     .filter((row) =>
