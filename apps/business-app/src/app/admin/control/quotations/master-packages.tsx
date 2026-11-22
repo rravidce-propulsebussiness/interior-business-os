@@ -912,7 +912,7 @@ export function MasterPackageStudio({
                       <h3>BOQ &amp; inclusions</h3>
                       <p>
                         Master packages define inclusion defaults and
-                        allowances. The company's project BOQ calculates
+                        allowances. The company&apos;s project BOQ calculates
                         quantities from drawings and measurements.
                       </p>
                       {categories.map((s, i) => (
@@ -933,7 +933,7 @@ export function MasterPackageStudio({
                       <h3>Company payment stages</h3>
                       <p>
                         Payment percentages, stage work, checks and QC are
-                        controlled in each company's Payments &amp; Work
+                        controlled in each company&apos;s Payments &amp; Work
                         settings and imported into its quotations. Master
                         packages do not overwrite them.
                       </p>

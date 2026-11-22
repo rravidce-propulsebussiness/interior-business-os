@@ -103,6 +103,10 @@ type Props = {
   canSave: boolean;
   message?: string;
   newDocument: boolean;
+  /** Allocated contract labour for this stage, not a second per-item charge. */
+  labourStageCosts?: Record<string, number> | undefined;
+  projectTotalCost?: number | undefined;
+  isOldLabourOutput?: ((output: StageBoqOutput) => boolean) | undefined;
 };
 
 const foundation: Category[] = [
@@ -429,20 +433,23 @@ export function BoqStageBuilder(props: Props) {
       0,
     ) +
     visibleCost(stage, 'extra') +
-    visibleCost(stage, 'miscellaneous');
-  const projectCost = sections.reduce(
-    (sum, stage) =>
-      sum +
-      costForStage(
-        stage,
-        stage === 'Foundation'
-          ? foundation
-          : stage === last
-            ? terrace
-            : standard,
-      ),
-    0,
-  );
+    visibleCost(stage, 'miscellaneous') +
+    (props.labourStageCosts?.[stage] ?? 0);
+  const projectCost =
+    props.projectTotalCost ??
+    sections.reduce(
+      (sum, stage) =>
+        sum +
+        costForStage(
+          stage,
+          stage === 'Foundation'
+            ? foundation
+            : stage === last
+              ? terrace
+              : standard,
+        ),
+      0,
+    );
   const toggleSection = (section: string) =>
     setExpanded((prior) =>
       prior.includes(section)
@@ -1387,20 +1394,27 @@ export function BoqStageBuilder(props: Props) {
                           {money(entry.output.quotedRate)} / {entry.output.unit}
                         </small>
                       )}
-                      {props.canViewCost && (
-                        <InputNumber
-                          label="Rate"
-                          value={
-                            entry.output.rate ?? props.rateFor(entry.output)
-                          }
-                          onChange={(value) =>
-                            props.onUpdateRate(
-                              entry.lineIndex,
-                              entry.outputIndex,
-                              value,
-                            )
-                          }
-                        />
+                      {props.isOldLabourOutput?.(entry.output) ? (
+                        <small className="boq-stage-limit">
+                          Labour priced in the Labour Costing tab; no duplicate
+                          charge.
+                        </small>
+                      ) : (
+                        props.canViewCost && (
+                          <InputNumber
+                            label="Rate"
+                            value={
+                              entry.output.rate ?? props.rateFor(entry.output)
+                            }
+                            onChange={(value) =>
+                              props.onUpdateRate(
+                                entry.lineIndex,
+                                entry.outputIndex,
+                                value,
+                              )
+                            }
+                          />
+                        )
                       )}
                       {!entry.line.origin && (
                         <button
@@ -1579,6 +1593,14 @@ export function BoqStageBuilder(props: Props) {
                       : 'boq-stage-items'
                   }
                 >
+                  {props.canViewCost &&
+                    (props.labourStageCosts?.[stage] ?? 0) > 0 && (
+                      <div className="boq-stage-extra-note">
+                        Labour package allocation:{' '}
+                        {money(props.labourStageCosts?.[stage] ?? 0)} · charged
+                        once in the BOQ total.
+                      </div>
+                    )}
                   {visibleList.map((category) => {
                     const entries = entriesFor(stage, category.key);
                     const pending = unmeasured(stage, category.key);
