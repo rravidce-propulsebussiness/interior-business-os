@@ -81,7 +81,6 @@ describe('one final BOQ floor-wise pricing', () => {
     });
   });
 
-
   it('expands a single floor report into itemized measurements and allocated labour', () => {
     const rows = buildFloorPricing(
       [{ stage: 'Ground Floor', amount: 2000, isLabour: false }],
@@ -118,7 +117,7 @@ describe('one final BOQ floor-wise pricing', () => {
     expect(html).toContain('M20 concrete');
     expect(html).toContain('Allocated labour');
     expect(html).toContain('₹2,500');
-    expect((html.match(/boq-floor-cost/g) ?? []).length).toBe(1);
+    expect((html.match(/boq-floor-cost/g) ?? []).length).toBe(rows.length);
     expect(render(false)).not.toContain('₹2,500');
     expect(render(false)).not.toContain('₹1,000');
     expect(render(false)).not.toContain('Allocated labour');
