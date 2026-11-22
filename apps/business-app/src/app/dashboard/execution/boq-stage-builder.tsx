@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import Link from 'next/link';
+import type { Rate } from './boq-pricing';
 import {
   BoqFloorProjectSetup,
   BoqWizardProgress,
@@ -71,6 +72,7 @@ type Props = {
   counts: BoqCounts;
   onCountsChange: (next: BoqCounts) => void;
   structuralSettings: StructuralSettings;
+  materialRates?: readonly Rate[];
   structuralRmcEnabled: boolean;
   structuralRmcRate: number;
   onStructuralRmcToggle: (enabled: boolean) => void;
@@ -2040,10 +2042,32 @@ export function BoqStageBuilder(props: Props) {
               <p>Enter cement, steel by diameter, RMC, aggregate, sand, bricks, tiles, granite and all other material rates once.</p>
             </div>
           </div>
-          <p>Rates are managed in the existing company rate library. Changing a saved rate recalculates the current BOQ; it does not add another item or another estimate.</p>
-          <Link className="boq-guided-primary" href="/dashboard/execution/boq/pricing">
-            Open Material Rate Library →
-          </Link>
+          {props.canViewCost && (
+            <div className="boq-guided-rate-scroll">
+              <table className="boq-guided-rate-table">
+                <thead><tr><th>Material / supplier</th><th>Unit</th><th>Current rate</th></tr></thead>
+                <tbody>
+                  {(props.materialRates ?? [])
+                    .filter((rate) => rate.category === 'material' && (
+                      !rate.variant || rate.isDefault
+                    ))
+                    .slice(0, 20)
+                    .map((rate) => (
+                      <tr key={rate.key}>
+                        <td>{rate.label}{rate.variant ? ' · ' + rate.variant : ''}</td>
+                        <td>{rate.unit}</td>
+                        <td>{rate.rate > 0 ? money(rate.rate) : 'Not set'}</td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <p>Rates are shared by the same BOQ quantity lines. Editing one rate recalculates cost;
+            it does not create another measurement or estimate.</p>
+          {props.canViewCost && <Link className="boq-guided-primary" href="/dashboard/execution/boq/pricing">
+            Edit Material Rate Library →
+          </Link>}
         </section>
       )}
       {guidedStep === 13 && (
