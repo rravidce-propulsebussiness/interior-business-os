@@ -918,14 +918,6 @@ export function BoqWorkspace({
       autoFailedFingerprint.current = null;
       return;
     }
-    const measurementError = validateBoqMeasurements(autoSaveContent.items, Boolean(schedule));
-    if (measurementError) {
-      autoFailedFingerprint.current = autoSaveFingerprint;
-      lastFailedRetry.current = retryAutoSave;
-      setAutoSaveError(measurementError);
-      setAutoSaveState('error');
-      return;
-    }
     if (autoSaveFingerprint === autoSavedFingerprint.current) return;
     // Wait for the 350 ms quotation/drawing regeneration to complete first.
     if (liveKey !== lastLiveKey || calculating) return;
@@ -938,6 +930,14 @@ export function BoqWorkspace({
       return;
     const timer = window.setTimeout(() => {
       if (autoSaving.current) return;
+      const measurementError = validateBoqMeasurements(autoSaveContent.items, Boolean(schedule));
+      if (measurementError) {
+        autoFailedFingerprint.current = autoSaveFingerprint;
+        lastFailedRetry.current = retryAutoSave;
+        setAutoSaveError(measurementError);
+        setAutoSaveState('error');
+        return;
+      }
       const version = autoSaveVersion.current ?? active.version;
       autoSaving.current = true;
       setAutoSaveState('saving');
