@@ -1281,6 +1281,7 @@ export function BoqWorkspace({
         !quoteForProject(projectId))
     ) {
       setMessage('Choose a new project with a saved quotation.');
+      setCreateError('Choose a project with a Final quotation.');
       return;
     }
     if (!title.trim()) {
