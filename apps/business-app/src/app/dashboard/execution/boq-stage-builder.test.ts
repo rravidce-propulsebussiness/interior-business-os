@@ -34,6 +34,7 @@ const base: StageProps = {
   onRepeatFloors: noop,
   onCustomizeFloor: noop,
   onUpdateQuantity: noop,
+  onResetQuantity: noop,
   onUpdateRate: noop,
   rateFor: (output) => output.rate ?? 0,
   onAddManual: noop,
