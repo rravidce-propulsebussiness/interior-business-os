@@ -5,6 +5,43 @@ on:
 permissions:
   contents: read
 jobs:
+  format-boq-once:
+    name: Format BOQ two-step feature (temporary)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/boq-two-step-create-20261122'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format only BOQ feature files
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/dashboard/execution/boq-create-step.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-create-step.css \
+            apps/business-app/src/app/dashboard/execution/boq-create-step.test.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-workspace.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-labour-panel.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-save-validation.ts \
+            apps/business-app/src/app/dashboard/execution/boq-save-validation.test.ts \
+            apps/business-app/src/app/dashboard/execution/layout.tsx
+      - name: Commit formatting only on this branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/dashboard/execution/
+          if ! git diff --cached --quiet; then
+            git commit -m "style(boq): format two-step flow and autosave"
+            git push origin HEAD:feat/boq-two-step-create-20261122
+          fi
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 30
