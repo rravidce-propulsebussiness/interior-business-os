@@ -2006,6 +2006,7 @@ export function BoqWorkspace({
               counts={countsForGeneration}
               onCountsChange={updateStageCounts}
               structuralSettings={concreteSettings}
+              materialRates={initialRates}
               structuralRmcEnabled={rmcEnabled}
               structuralRmcRate={rmcRatePerM3}
               onStructuralRmcToggle={setRmcEnabled}
