@@ -365,7 +365,11 @@ function InputText({
 
 export function BoqStageBuilder(props: Props) {
   const [foundationGroup, setFoundationGroup] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState('Foundation');
+  const [activeTab, setActiveTab] = useState(
+    (props.initialStep ?? 2) >= 7 && (props.initialStep ?? 2) <= 11
+      ? (props.floors[0]?.name ?? 'Foundation')
+      : 'Foundation',
+  );
   const [guidedStep, setGuidedStep] = useState(props.initialStep ?? 2);
   const [focused, setFocused] = useState<{
     stage: string;
