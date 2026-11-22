@@ -704,7 +704,9 @@ describe('quotation-driven construction BOQ', () => {
     const result = generateQuotationBoq({ details: quote() });
     const outputs = result.lines.flatMap((line) => line.outputs);
     // Informational volume references may carry an explicit zero rate.
-    expect(outputs.some((output) => output.rate !== undefined && output.rate !== 0)).toBe(false);
+    expect(
+      outputs.some((output) => output.rate !== undefined && output.rate !== 0),
+    ).toBe(false);
     expect(outputs.find((output) => output.name === 'Main door')).toMatchObject(
       { material: 'door_main', quotedRate: 25000 },
     );
