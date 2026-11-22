@@ -1563,11 +1563,15 @@ export function BoqWorkspace({
                   </div>
                 </div>
                 <div className="boq-metrics boq-editor-legacy-metrics">
+                  <div><span>Material Cost</span><strong>
+                    {canViewCost ? money(materialOnlyCost) : 'Restricted'}
+                  </strong></div>
+                  <div><span>Labour Cost</span><strong>
+                    {canViewCost ? money(labourCost) : 'Restricted'}
+                  </strong></div>
                   <div>
                     <span>Estimated material + labour</span>
-                    <strong>
-                      {canViewCost ? money(materialCost) : 'Restricted'}
-                    </strong>
+                    <strong>{canViewCost ? money(materialCost) : 'Restricted'}</strong>
                   </div>
                   <div>
                     <span>Quotation value</span>
@@ -1584,6 +1588,33 @@ export function BoqWorkspace({
                     <strong>{lines.length}</strong>
                   </div>
                 </div>
+                {labour && canViewCost && (
+                  <section className="boq-labour-saved">
+                    <h3>Labour Costing Summary</h3>
+                    <div className="boq-labour-saved-grid">
+                      <div><small>Default method</small><strong>
+                        {labour.method === 'composite'
+                          ? labour.packageName + ' · ' + money(labour.rate) + '/sft'
+                          : labour.method === 'itemwise' ? 'Item-wise measured work' : 'Daily wage estimate'}
+                      </strong></div>
+                      <div><small>Default labour</small><strong>{money(labourEstimate.base)}</strong></div>
+                      <div><small>Separate labour</small><strong>{money(labourEstimate.extras)}</strong></div>
+                      <div><small>Total estimated labour</small><strong>{money(labourCost)}</strong></div>
+                    </div>
+                    {labour.method === 'composite' && <p>
+                      Covered: {labour.coveredWorks.map(labourWorkName).join(', ') || 'none'}.
+                      These works are included once in the composite rate.
+                    </p>}
+                    {!!labour.extras.length && <div className="boq-labour-saved-extras">
+                      {labour.extras.map((extra) => <div key={extra.id}>
+                        <span>{extra.name} · {extra.stage}</span>
+                        <strong>{money(extra.method === 'daily'
+                          ? extra.workers * extra.days * extra.rate
+                          : labourExtraQuantity(extra, measuredLabour) * extra.rate)}</strong>
+                      </div>)}
+                    </div>}
+                  </section>
+                )}
                 {oldManualStructural.length > 0 && (
                   <p role="alert" className="boq-view-warning">
                     {oldManualStructural.length} older manual structural /
@@ -1799,19 +1830,15 @@ export function BoqWorkspace({
         </div>
       </div>
       <div className="boq-metrics">
+        <div><span>Materials</span><strong>
+          {canViewCost ? money(materialOnlyCost) : 'Restricted'}
+        </strong></div>
+        <div><span>Labour</span><strong>
+          {canViewCost ? money(labourCost) : 'Restricted'}
+        </strong></div>
         <div>
-          <span>BOQs</span>
-          <strong>{documents.length}</strong>
-        </div>
-        <div>
-          <span>Material + labour estimate</span>
-          <strong>
-            {!canViewCost
-              ? 'Restricted'
-              : calculating
-                ? 'Calculating…'
-                : money(materialCost)}
-          </strong>
+          <span>Total BOQ Estimate</span>
+          <strong>{!canViewCost ? 'Restricted' : calculating ? 'Calculating…' : money(materialCost)}</strong>
         </div>
         <div>
           <span>Quotation value (customer price)</span>
@@ -1883,7 +1910,7 @@ export function BoqWorkspace({
             lines={lines}
             materialCost={materialOnlyCost}
             existingLabourCost={legacyLabourCost}
-            canEdit={active ? canEdit : canCreate}
+            canEdit={(active ? canEdit : canCreate) && canViewCost}
             canViewCost={canViewCost}
             busy={busy}
             onSave={save}
@@ -1944,6 +1971,7 @@ export function BoqWorkspace({
             newDocument={!active}
             labourStageCosts={labour ? labourEstimate.byStage : undefined}
             projectTotalCost={labour ? materialCost : undefined}
+            isOldLabourOutput={labour ? isOldLabour : undefined}
           />
           </div>
           {showAdvanced && (
