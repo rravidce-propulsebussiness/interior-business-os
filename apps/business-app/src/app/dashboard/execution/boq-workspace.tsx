@@ -47,6 +47,7 @@ import { BoqDesignSchedule } from './boq-design-schedule';
 import { BoqStageBuilder } from './boq-stage-builder';
 import { BoqRegisterLanding } from './boq-register-landing';
 import { BoqCreateStep } from './boq-create-step';
+import { validateBoqMeasurements } from './boq-save-validation';
 import { BoqLabourPanel } from './boq-labour-panel';
 import {
   DEFAULT_LABOUR,
@@ -917,6 +918,14 @@ export function BoqWorkspace({
       autoFailedFingerprint.current = null;
       return;
     }
+    const measurementError = validateBoqMeasurements(autoSaveContent.items, Boolean(schedule));
+    if (measurementError) {
+      autoFailedFingerprint.current = autoSaveFingerprint;
+      lastFailedRetry.current = retryAutoSave;
+      setAutoSaveError(measurementError);
+      setAutoSaveState('error');
+      return;
+    }
     if (autoSaveFingerprint === autoSavedFingerprint.current) return;
     // Wait for the 350 ms quotation/drawing regeneration to complete first.
     if (liveKey !== lastLiveKey || calculating) return;
@@ -1008,6 +1017,7 @@ export function BoqWorkspace({
     liveKey,
     lastLiveKey,
     calculating,
+    schedule,
     retryAutoSave,
     autoSaveCycle,
   ]);
@@ -1189,90 +1199,10 @@ export function BoqWorkspace({
     setSelectedQuoteLines([]);
   }
   function save() {
-    // Older saved BOQs retain their estimated foundation line. Do not add
-    // a new measured volume on top of an older excavation/PCC estimate.
-    const overlap = lines.find((line) => {
-      if (line.kind !== 'measured-geometry') return false;
-      const category = String(line.inputs.stageCategory);
-      const related =
-        category === 'excavation'
-          ? ['quote-foundation', 'quote-excavation']
-          : category === 'pcc'
-            ? ['quote-foundation', 'quote-pcc']
-            : [];
-      return (
-        related.length > 0 &&
-        lines.some(
-          (generated) =>
-            generated.origin &&
-            generated.section === line.section &&
-            related.includes(generated.kind),
-        )
-      );
-    });
-    if (overlap) {
-      setMessage(
-        `Review ${overlap.name}: old quotation-generated foundation quantities also exist. Remove or reconcile the duplicate line before saving.`,
-      );
-      return;
-    }
-    // When a measured manual stage is later supplied by the drawing engine,
-    // require an explicit review instead of adding two competing quantities.
-    const generatedForStage: Record<string, string[]> = {
-      excavation: ['quote-foundation'],
-      pcc: ['quote-foundation'],
-      footings: ['quote-foundation', 'quote-footings', 'quote-pedestals'],
-      columns: ['quote-columns'],
-      plinth: ['quote-plinth-beam'],
-      beams: ['quote-beams', 'quote-slab'],
-      slab: ['quote-slab'],
-      staircase: ['quote-staircase'],
-      brickwork: ['quote-masonry'],
-      plaster: ['quote-masonry'],
-      compound: ['quote-compound-wall'],
-      parapet: ['quote-parapet'],
-      waterproofing: ['quote-parapet'],
-    };
-    const duplicated = lines.find((manual) => {
-      if (manual.origin || manual.kind !== 'manual') return false;
-      const kinds =
-        generatedForStage[String(manual.inputs.stageCategory ?? '')];
-      return kinds?.some((kind) =>
-        lines.some(
-          (generated) =>
-            Boolean(generated.origin) &&
-            generated.section === manual.section &&
-            generated.kind === kind,
-        ),
-      );
-    });
-    if (duplicated) {
-      setMessage(
-        `Review ${duplicated.name} in ${duplicated.section}: both a manual measurement and a drawing-generated measurement exist. Remove one before saving to avoid duplicate quantities.`,
-      );
-      return;
-    }
-    if (
-      schedule &&
-      lines.some(
-        (line) =>
-          !line.origin &&
-          [
-            'excavation',
-            'footing',
-            'pedestal',
-            'column',
-            'plinth_beam',
-            'beam',
-            'slab',
-            'wall',
-            'surface',
-          ].includes(line.kind),
-      )
-    ) {
-      setMessage(
-        'Remove overlapping manually measured structural or finishing items before saving. The quotation already generates these quantities.',
-      );
+    const measurementError = validateBoqMeasurements(lines, Boolean(schedule));
+    if (measurementError) {
+      setMessage(measurementError);
+      setCreateError(measurementError);
       return;
     }
     if (
