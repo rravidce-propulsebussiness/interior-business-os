@@ -13,6 +13,29 @@ export type MeasuredSteelSet = {
   /** Actual single bar cut length; beyond the stock length requires BBS review. */
   cutLengthFeet: number;
 };
+/** Safely recover saved per-item rod schedules; invalid rows never become steel. */
+export function readMeasuredSteelSets(raw: unknown): MeasuredSteelSet[] {
+  let decoded: unknown = raw;
+  if (typeof raw === 'string') {
+    try { decoded = JSON.parse(raw) as unknown; }
+    catch { return []; }
+  }
+  if (!Array.isArray(decoded)) return [];
+  return decoded.slice(0, 16).filter((item) =>
+    item && typeof item === 'object',
+  ).map((item) => {
+    const value = item as Record<string, unknown>;
+    const number = (field: string) => {
+      const parsed = Number(value[field]);
+      return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+    };
+    return {
+      dia: number('dia'),
+      count: Math.round(number('count')),
+      cutLengthFeet: number('cutLengthFeet'),
+    };
+  });
+}
 export type MeasuredDimensions = {
   count: number;
   lengthFeet: number;
@@ -74,16 +97,7 @@ export function correctSavedSmallConcrete(
     widthFeet: Number(line.inputs.widthFeet),
     depthFeet: Number(line.inputs.depthFeet),
   };
-  const savedSteel = line.inputs.steelSetsJson;
-  if (typeof savedSteel === 'string') {
-    try {
-      const values = JSON.parse(savedSteel) as unknown;
-      if (Array.isArray(values)) {
-        dims.steelSets = values.filter((row) => row && typeof row === 'object')
-          .slice(0, 16) as MeasuredSteelSet[];
-      }
-    } catch { /* Older/corrupt steel notes are never assumed. */ }
-  }
+  dims.steelSets = readMeasuredSteelSets(line.inputs.steelSetsJson);
   const next = measuredOutputs(category, dims, settings);
   if (!next.length) return null;
   const savedShuttering = line.outputs.find(
