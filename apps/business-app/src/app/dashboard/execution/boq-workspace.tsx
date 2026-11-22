@@ -2049,6 +2049,7 @@ export function BoqWorkspace({
               }
               onSave={save}
               onDetailedBoq={openDetailedBoq}
+              onOpenLabour={() => setCostingTab('labour')}
               canOpenDetailed={Boolean(active)}
               canViewCost={canViewCost}
               busy={busy}
