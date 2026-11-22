@@ -104,9 +104,9 @@ type Props = {
   message?: string;
   newDocument: boolean;
   /** Allocated contract labour for this stage, not a second per-item charge. */
-  labourStageCosts?: Record<string, number>;
-  projectTotalCost?: number;
-  isOldLabourOutput?: (output: StageBoqOutput) => boolean;
+  labourStageCosts?: Record<string, number> | undefined;
+  projectTotalCost?: number | undefined;
+  isOldLabourOutput?: ((output: StageBoqOutput) => boolean) | undefined;
 };
 
 const foundation: Category[] = [
