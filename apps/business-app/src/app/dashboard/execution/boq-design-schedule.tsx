@@ -76,14 +76,19 @@ const BAR_COUNTS = Array.from({ length: 40 }, (_, i) => i + 1);
 
 /** Preserve incomplete "0-0" drawing-entry rows in the editor and autosave.
  * The quantity engine's parseBars() still rejects them until both selected. */
-export function parseEditableBars(value: string): { count: number; dia: number }[] {
+export function parseEditableBars(
+  value: string,
+): { count: number; dia: number }[] {
   return String(value ?? '')
     .split(/[+,]/)
-    .map((part) => /^(\d+)\s*(?:no\.?s?)?\s*[-×x*#]\s*(\d+)$/i.exec(part.trim()))
+    .map((part) =>
+      /^(\d+)\s*(?:no\.?s?)?\s*[-×x*#]\s*(\d+)$/i.exec(part.trim()),
+    )
     .filter((match): match is RegExpExecArray => Boolean(match))
     .map((match) => ({ count: Number(match[1]), dia: Number(match[2]) }))
-    .filter((row) =>
-      row.count >= 0 && row.count <= 40 && row.dia >= 0 && row.dia <= 40,
+    .filter(
+      (row) =>
+        row.count >= 0 && row.count <= 40 && row.dia >= 0 && row.dia <= 40,
     );
 }
 

@@ -11,9 +11,7 @@ export function beamTotalRunAfterCountChange(
   oldCount: number,
   newCount: number,
 ): number {
-  if (!(Number.isFinite(totalRunFeet) && totalRunFeet > 0))
-    return 0;
-  if (!(oldCount > 0 && newCount > 0))
-    return totalRunFeet;
+  if (!(Number.isFinite(totalRunFeet) && totalRunFeet > 0)) return 0;
+  if (!(oldCount > 0 && newCount > 0)) return totalRunFeet;
   return (totalRunFeet / oldCount) * newCount;
 }

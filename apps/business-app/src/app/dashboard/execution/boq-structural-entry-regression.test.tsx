@@ -13,9 +13,7 @@ describe('drawing-first structural reinforcement', () => {
       { count: 0, dia: 16 },
       { count: 2, dia: 12 },
     ]);
-    expect(parseBars('0-0+4-0+0-16+2-12')).toEqual([
-      { count: 2, dia: 12 },
-    ]);
+    expect(parseBars('0-0+4-0+0-16+2-12')).toEqual([{ count: 2, dia: 12 }]);
   });
 
   it('supports historical drawing separators and multiple bar diameters', () => {
@@ -28,11 +26,13 @@ describe('drawing-first structural reinforcement', () => {
   });
 
   it('renders blank count and diameter options rather than 2 × 12 mm defaults', () => {
-    const html = renderToStaticMarkup(createElement(BarsPicker, {
-      label: 'C1 reinforcement',
-      value: '0-0+4-16',
-      onChange: () => {},
-    }));
+    const html = renderToStaticMarkup(
+      createElement(BarsPicker, {
+        label: 'C1 reinforcement',
+        value: '0-0+4-16',
+        onChange: () => {},
+      }),
+    );
     expect(html).toContain('Select count');
     expect(html).toContain('Select diameter');
     expect(html).toContain('C1 reinforcement set 1 bar diameter');
@@ -42,10 +42,29 @@ describe('drawing-first structural reinforcement', () => {
 
   it('keeps unfinished reinforcement in saved structural drawing while generating no corresponding steel', () => {
     const normalized = normalizeDesign({
-      columns: [{ label: 'C1', count: 4, floors: 1, widthIn: 9,
-        depthIn: 12, bars: '0-0+4-0', tieDia: 8, tieSpacingIn: 6 }],
-      beams: [{ label: 'B1', widthIn: 9, depthIn: 15,
-        runFeet: [40], bars: '0-0', stirrupDia: 8, stirrupSpacingIn: 6 }],
+      columns: [
+        {
+          label: 'C1',
+          count: 4,
+          floors: 1,
+          widthIn: 9,
+          depthIn: 12,
+          bars: '0-0+4-0',
+          tieDia: 8,
+          tieSpacingIn: 6,
+        },
+      ],
+      beams: [
+        {
+          label: 'B1',
+          widthIn: 9,
+          depthIn: 15,
+          runFeet: [40],
+          bars: '0-0',
+          stirrupDia: 8,
+          stirrupSpacingIn: 6,
+        },
+      ],
       footings: [],
       plinthRunFeet: 0,
     });
