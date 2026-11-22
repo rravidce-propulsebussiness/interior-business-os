@@ -5,6 +5,7 @@ import { z } from 'zod';
 import type { SupabaseClient } from '@business-os/database';
 import { executionServices } from './service';
 import { normalizeStructuralSettings } from '@business-os/core/construction-boq';
+import { LABOUR_WORKS } from './boq-labour';
 
 const lineSchema = z.object({
   id: z.string().uuid(),
@@ -145,6 +146,59 @@ const generatorSchema = z.object({
     .optional(),
   warnings: z.array(z.string().max(500)).max(50).default([]),
 });
+const labourWorkSchema = z.string().refine(
+  (work) => LABOUR_WORKS.some((candidate) => candidate.id === work),
+  'Unknown BOQ labour work',
+);
+const nonnegative = z.number().finite().nonnegative();
+const labourExtraSchema = z.object({
+  id: z.string().min(1).max(90),
+  name: z.string().trim().min(1).max(120),
+  stage: z.string().min(1).max(100),
+  work: labourWorkSchema,
+  method: z.enum(['itemwise', 'daily']),
+  unit: z.string().min(1).max(20),
+  quantity: nonnegative,
+  quantitySource: z.enum(['manual', 'boq']),
+  rate: nonnegative,
+  workers: nonnegative,
+  days: nonnegative,
+  outsideScope: z.boolean(),
+});
+const labourSchema = z.object({
+  version: z.literal(1),
+  method: z.enum(['composite', 'itemwise', 'daily']),
+  packageName: z.string().trim().min(1).max(100),
+  rate: nonnegative,
+  areaOverrideSqft: nonnegative.nullable(),
+  coveredWorks: z.array(labourWorkSchema).max(25),
+  itemRates: z.record(z.string(), nonnegative),
+  dailyRates: z.array(z.object({
+    id: z.string().min(1).max(90),
+    name: z.string().trim().min(1).max(90),
+    workers: nonnegative,
+    days: nonnegative,
+    rate: nonnegative,
+  })).max(30),
+  extras: z.array(labourExtraSchema).max(200),
+}).superRefine((value, context) => {
+  if (value.method === 'composite' && value.coveredWorks.length === 0)
+    context.addIssue({ code: 'custom', path: ['coveredWorks'], message: 'Select covered works.' });
+  if (new Set(value.coveredWorks).size !== value.coveredWorks.length)
+    context.addIssue({ code: 'custom', path: ['coveredWorks'], message: 'Duplicate covered works.' });
+  const ids = new Set<string>();
+  for (const [index, extra] of value.extras.entries()) {
+    if (ids.has(extra.id))
+      context.addIssue({ code: 'custom', path: ['extras', index], message: 'Duplicate labour item.' });
+    ids.add(extra.id);
+    if (value.method === 'composite' && value.coveredWorks.includes(extra.work) && !extra.outsideScope)
+      context.addIssue({ code: 'custom', path: ['extras', index],
+        message: 'Covered labour must be explicitly identified as outside the agreed scope.' });
+    if (extra.outsideScope && extra.quantitySource === 'boq' && extra.method === 'itemwise')
+      context.addIssue({ code: 'custom', path: ['extras', index],
+        message: 'Extra scope requires a separately entered quantity.' });
+  }
+});
 const saveSchema = z.object({
   id: z.string().uuid().optional(),
   version: z.number().int().positive().optional(),
@@ -156,6 +210,7 @@ const saveSchema = z.object({
     .regex(/^[A-Z]{3}$/)
     .default('INR'),
   items: z.array(lineSchema).max(500),
+  labour: labourSchema.optional(),
   /** Chosen brand / source per material group, e.g. bricks → Karimnagar. */
   selections: z.record(z.string().max(40), z.string().max(80)).default({}),
   generator: generatorSchema.optional(),
@@ -193,6 +248,7 @@ export async function saveManualBoq(input: unknown) {
     const document = {
       items: value.items,
       selections: value.selections,
+      ...(value.labour ? { labour: value.labour } : {}),
       ...(value.generator ? { generator: value.generator } : {}),
     };
     let reply: DbReply;
