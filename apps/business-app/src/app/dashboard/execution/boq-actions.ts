@@ -308,6 +308,9 @@ export async function saveManualBoq(input: unknown) {
     const s = await executionServices(
       value.id ? 'estimate.edit' : 'estimate.create',
     );
+    const canChangeLabour = s.allowed('estimate.view_cost');
+    if (value.labour && !canChangeLabour)
+      return { ok: false, message: 'Labour rates require cost-view permission.' };
     const client = s.client as unknown as SupabaseClient;
     const document = {
       items: value.items,
@@ -320,7 +323,7 @@ export async function saveManualBoq(input: unknown) {
       // A saved BOQ's project and quotation remain fixed on edit.
       const original = await client
         .from('construction_boq_documents')
-        .select('project_id,quotation_revision_id')
+        .select('project_id,quotation_revision_id,document')
         .eq('organization_id', s.org)
         .eq('id', value.id)
         .maybeSingle();
@@ -336,12 +339,19 @@ export async function saveManualBoq(input: unknown) {
           message:
             'The saved project and quotation cannot be changed. Edit the existing BOQ.',
         };
+      // A measurement-only editor must not erase an existing costing setup.
+      const oldContent = original.data.document as
+        | { labour?: unknown }
+        | null;
+      const updatedDocument = canChangeLabour
+        ? document
+        : { ...document, ...(oldContent?.labour ? { labour: oldContent.labour } : {}) };
       const result = await client
         .from('construction_boq_documents')
         .update({
           title: value.title,
           currency: value.currency,
-          document,
+          document: updatedDocument,
           version: (value.version ?? 1) + 1,
         })
         .eq('organization_id', s.org)
