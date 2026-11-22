@@ -735,15 +735,14 @@ describe('quotation-driven construction BOQ', () => {
       },
     });
     const plinth = result.lines.find(
-      (line) => line.section === 'Foundation' && line.kind === 'quote-plinth-beam',
+      (line) =>
+        line.section === 'Foundation' && line.kind === 'quote-plinth-beam',
     )!;
     expect(plinth).toBeDefined();
     expect(plinth.inputs.beamRunFeet).toBe(52);
     expect(String(plinth.inputs.beam)).toContain('PB1 9×12 in');
     expect(String(plinth.inputs.beam)).toContain('PB2 12×15 in');
-    const concrete = plinth.outputs.find(
-      (output) => output.unit === 'm³',
-    )!;
+    const concrete = plinth.outputs.find((output) => output.unit === 'm³')!;
     // 2×15ft of 9in×12in + 22ft of 12in×15in = 50 cft of concrete.
     expect(concrete.quantity).toBeCloseTo(50 * 0.028316846592, 2);
     for (const diameter of [8, 10, 12, 16, 20]) {

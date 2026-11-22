@@ -495,17 +495,14 @@ export function BoqStageBuilder(props: Props) {
     if (key === 'footings') return !isMeasuredFooting(props.design);
     if (key === 'columns') return !isMeasuredColumn(props.design);
     if (key === 'plinth')
-      return !(
-        props.design?.plinthBeams?.length
-          ? props.design.plinthBeams.some(
-              (beam) =>
-                beam.count > 0 &&
-                beam.lengthFeet > 0 &&
-                parseBars(beam.bars).length > 0,
-            )
-          : props.design?.plinthRunFeet &&
-            props.design.plinthRunFeet > 0
-      );
+      return !(props.design?.plinthBeams?.length
+        ? props.design.plinthBeams.some(
+            (beam) =>
+              beam.count > 0 &&
+              beam.lengthFeet > 0 &&
+              parseBars(beam.bars).length > 0,
+          )
+        : props.design?.plinthRunFeet && props.design.plinthRunFeet > 0);
     if (key === 'beams')
       return !isMeasuredBeam(
         props.design,
@@ -733,22 +730,38 @@ export function BoqStageBuilder(props: Props) {
           i === index ? { ...beam, ...patch } : beam,
         ),
       );
-    const plinthRows: DesignPlinthBeamType[] =
-      drawing.plinthBeams?.length
-        ? drawing.plinthBeams
-        : drawing.plinthRunFeet > 0
-          ? [{
+    const plinthRows: DesignPlinthBeamType[] = drawing.plinthBeams?.length
+      ? drawing.plinthBeams
+      : drawing.plinthRunFeet > 0
+        ? [
+            {
               label: 'PB1',
               count: 1,
               lengthFeet: drawing.plinthRunFeet,
-              widthIn: drawing.settings?.plinthBeamWidthIn ?? props.structuralSettings.plinthBeamWidthIn ?? 9,
-              depthIn: drawing.settings?.plinthBeamDepthIn ?? props.structuralSettings.plinthBeamDepthIn ?? 12,
+              widthIn:
+                drawing.settings?.plinthBeamWidthIn ??
+                props.structuralSettings.plinthBeamWidthIn ??
+                9,
+              depthIn:
+                drawing.settings?.plinthBeamDepthIn ??
+                props.structuralSettings.plinthBeamDepthIn ??
+                12,
               bars: `${drawing.settings?.plinthBeamBarCount ?? props.structuralSettings.plinthBeamBarCount ?? 6}-${drawing.settings?.plinthBeamBarDia ?? props.structuralSettings.plinthBeamBarDia ?? 12}`,
-              stirrupDia: drawing.settings?.plinthBeamStirrupDia ?? props.structuralSettings.plinthBeamStirrupDia ?? 8,
-              stirrupSpacingIn: drawing.settings?.plinthBeamStirrupSpacingIn ?? props.structuralSettings.plinthBeamStirrupSpacingIn ?? 6,
-            }]
-          : [];
-    const updatePlinth = (rowIndex: number, patch: Partial<DesignPlinthBeamType>) =>
+              stirrupDia:
+                drawing.settings?.plinthBeamStirrupDia ??
+                props.structuralSettings.plinthBeamStirrupDia ??
+                8,
+              stirrupSpacingIn:
+                drawing.settings?.plinthBeamStirrupSpacingIn ??
+                props.structuralSettings.plinthBeamStirrupSpacingIn ??
+                6,
+            },
+          ]
+        : [];
+    const updatePlinth = (
+      rowIndex: number,
+      patch: Partial<DesignPlinthBeamType>,
+    ) =>
       setPlinthBeams(
         plinthRows.map((row, i) =>
           i === rowIndex ? { ...row, ...patch } : row,
@@ -1420,8 +1433,8 @@ export function BoqStageBuilder(props: Props) {
                   />
                 </div>
                 <small className="boq-plinth-run">
-                  {number(beam.count * beam.lengthFeet)} rft total ·
-                  Concrete and each steel diameter calculated once
+                  {number(beam.count * beam.lengthFeet)} rft total · Concrete
+                  and each steel diameter calculated once
                 </small>
               </section>
             ))}
@@ -1435,11 +1448,23 @@ export function BoqStageBuilder(props: Props) {
                     label: `PB${plinthRows.length + 1}`,
                     count: 1,
                     lengthFeet: 0,
-                    widthIn: drawing.settings?.plinthBeamWidthIn ?? props.structuralSettings.plinthBeamWidthIn ?? 9,
-                    depthIn: drawing.settings?.plinthBeamDepthIn ?? props.structuralSettings.plinthBeamDepthIn ?? 12,
+                    widthIn:
+                      drawing.settings?.plinthBeamWidthIn ??
+                      props.structuralSettings.plinthBeamWidthIn ??
+                      9,
+                    depthIn:
+                      drawing.settings?.plinthBeamDepthIn ??
+                      props.structuralSettings.plinthBeamDepthIn ??
+                      12,
                     bars: '4-16+2-12',
-                    stirrupDia: drawing.settings?.plinthBeamStirrupDia ?? props.structuralSettings.plinthBeamStirrupDia ?? 8,
-                    stirrupSpacingIn: drawing.settings?.plinthBeamStirrupSpacingIn ?? props.structuralSettings.plinthBeamStirrupSpacingIn ?? 6,
+                    stirrupDia:
+                      drawing.settings?.plinthBeamStirrupDia ??
+                      props.structuralSettings.plinthBeamStirrupDia ??
+                      8,
+                    stirrupSpacingIn:
+                      drawing.settings?.plinthBeamStirrupSpacingIn ??
+                      props.structuralSettings.plinthBeamStirrupSpacingIn ??
+                      6,
                   },
                 ])
               }
@@ -2007,11 +2032,15 @@ export function BoqStageBuilder(props: Props) {
         Boolean(props.floors.at(-1)?.penthouseSqft)) ||
       (category.key === 'footings' && isMeasuredFooting(props.design)) ||
       (category.key === 'columns' && isMeasuredColumn(props.design)) ||
-      (category.key === 'plinth' && Boolean(
-        props.design?.plinthBeams?.some(
-          (beam) => beam.count > 0 && beam.lengthFeet > 0 && parseBars(beam.bars).length > 0,
-        ) || props.design?.plinthRunFeet,
-      ));
+      (category.key === 'plinth' &&
+        Boolean(
+          props.design?.plinthBeams?.some(
+            (beam) =>
+              beam.count > 0 &&
+              beam.lengthFeet > 0 &&
+              parseBars(beam.bars).length > 0,
+          ) || props.design?.plinthRunFeet,
+        ));
     const pending = unmeasured(stage, category.key);
     const combined =
       category.key === 'beams' &&

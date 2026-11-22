@@ -2115,7 +2115,9 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
         .map((run: unknown) => num(run, 0, 0, 5000)),
     }))
     .filter((item) => parseBars(item.bars).length > 0);
-  const plinthBeams = (Array.isArray(value.plinthBeams) ? value.plinthBeams : [])
+  const plinthBeams = (
+    Array.isArray(value.plinthBeams) ? value.plinthBeams : []
+  )
     .slice(0, 40)
     .map((item: Record<string, unknown>, index): DesignPlinthBeamType => ({
       label: String(item?.label ?? `PB${index + 1}`).slice(0, 40),
@@ -3129,25 +3131,25 @@ export function generateQuotationBoq(
                 segments: [{ runs: type.count, span: type.lengthFeet }],
               }))
           : [
-            {
-              label: 'Plinth beam',
-              widthIn: s.plinthBeamWidthIn,
-              depthIn: s.plinthBeamDepthIn,
-              bars: [
-                {
-                  dia: s.plinthBeamBarDia,
-                  count: s.plinthBeamBarCount,
-                  label: 'main',
-                },
-              ],
-              stirrupDia: s.plinthBeamStirrupDia || s.beamStirrupDia,
-              stirrupSpacingIn:
-                s.plinthBeamStirrupSpacingIn || s.beamStirrupSpacingIn,
-              segments: design?.plinthRunFeet
-                ? runSegments(design.plinthRunFeet)
-                : gridSegments,
-            },
-          ]
+              {
+                label: 'Plinth beam',
+                widthIn: s.plinthBeamWidthIn,
+                depthIn: s.plinthBeamDepthIn,
+                bars: [
+                  {
+                    dia: s.plinthBeamBarDia,
+                    count: s.plinthBeamBarCount,
+                    label: 'main',
+                  },
+                ],
+                stirrupDia: s.plinthBeamStirrupDia || s.beamStirrupDia,
+                stirrupSpacingIn:
+                  s.plinthBeamStirrupSpacingIn || s.beamStirrupSpacingIn,
+                segments: design?.plinthRunFeet
+                  ? runSegments(design.plinthRunFeet)
+                  : gridSegments,
+              },
+            ]
         : design?.beams.length
           ? design.beams.map((type) => ({
               label: type.label,

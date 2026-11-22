@@ -1228,7 +1228,6 @@
   padding-top: 0;
 }
 
-
 /* Structural beam schedules share the same multi-diameter rod picker. */
 .boq-plinth-schedule {
   display: grid;
