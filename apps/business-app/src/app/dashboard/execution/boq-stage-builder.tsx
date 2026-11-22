@@ -1364,6 +1364,12 @@ export function BoqStageBuilder(props: Props) {
         )}
         {category.key === 'plinth' && (
           <div className="boq-plinth-schedule">
+            {drawing.plinthRunFeet > 0 && !drawing.plinthBeams?.length && (
+              <p className="boq-stage-hint">
+                Existing total run imported as PB1. Confirm each beam length
+                and count from the drawing before editing.
+              </p>
+            )}
             {plinthRows.map((beam, bi) => (
               <section className="boq-stage-subcard" key={bi}>
                 <div className="boq-stage-subhead">
