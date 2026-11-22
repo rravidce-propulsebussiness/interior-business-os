@@ -44,3 +44,5 @@ jobs:
         run: pnpm exec vitest run packages/core/src/construction-boq.test.ts apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
       - name: Typecheck Business OS
         run: pnpm --filter @business-os/business-app typecheck
+
+# Rerun after concrete wastage assertion was corrected.
