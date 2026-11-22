@@ -12,7 +12,6 @@ import {
 import { useRouter } from 'next/navigation';
 import { type BoqInputs } from './boq-calculations';
 import { removeManualBoq, saveManualBoq } from './boq-actions';
-import { boqProjectOptionLabel } from './boq-project-eligibility';
 import { type LengthUnit } from './boq-units';
 import {
   diameterOf,
@@ -404,8 +403,7 @@ export function BoqWorkspace({
         });
       }
     }
-  const tonnes = (kg: number) =>
-    (kg / 1000).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+  const diameters = [...steelSummary.keys()].sort((a, b) => a - b);
   const activeProject = projects.find((project) => project.id === projectId);
   const allOutputs = lines.flatMap((line) =>
     line.outputs.map((output) => ({
