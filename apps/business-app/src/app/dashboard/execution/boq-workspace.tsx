@@ -1984,6 +1984,26 @@ export function BoqWorkspace({
               autoSaveLabel={active ? autoSaveLabel : undefined}
             />
           )}
+          {costingTab === 'labour' && (
+            <nav className="boq-guided-footer" aria-label="Labour costing navigation">
+              <button
+                className="boq-guided-back"
+                type="button"
+                onClick={() => setCostingTab('builder')}
+              >
+                ← Back to Measurements
+              </button>
+              <span>Labour is included once in the same project BOQ.</span>
+              <button
+                className="boq-guided-primary"
+                type="button"
+                onClick={openDetailedBoq}
+                disabled={!active}
+              >
+                Final Detailed BOQ →
+              </button>
+            </nav>
+          )}
           <div
             style={{ display: costingTab === 'builder' ? undefined : 'none' }}
           >
