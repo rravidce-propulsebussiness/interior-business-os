@@ -26,6 +26,8 @@ export type LabourExtra = {
   name: string;
   stage: string;
   work: LabourWorkId;
+  /** Multiple trades can share one rate and one selected measurement basis. */
+  includedWorks?: LabourWorkId[];
   method: LabourExtraMethod;
   unit: string;
   /** Captured quantity, or updated automatically from the matching measured BOQ work. */
@@ -191,9 +193,18 @@ export function measuredLabourQuantity(
       normalizeUnit(row.unit) === normalizeUnit(unit))
     .reduce((sum, row) => sum + row.quantity, 0));
 }
+export function extraCoveredWorks(extra: LabourExtra): LabourWorkId[] {
+  return [...new Set([extra.work, ...(extra.includedWorks ?? [])])];
+}
 export function isExtraAllowed(config: LabourConfig, extra: LabourExtra): boolean {
-  if (config.method !== 'composite') return true;
-  return !config.coveredWorks.includes(extra.work) || extra.outsideScope;
+  const covered = extraCoveredWorks(extra);
+  if (config.method === 'composite')
+    return extra.outsideScope || !covered.some((work) => config.coveredWorks.includes(work));
+  // Item-wise default already prices measured work: a second rate on it is
+  // only valid for an explicitly additional quantity outside the base scope.
+  if (config.method === 'itemwise' && !extra.outsideScope)
+    return extra.quantitySource !== 'boq' && extra.work === 'other';
+  return true;
 }
 export function labourExtraQuantity(extra: LabourExtra, measured: readonly LabourMeasure[]) {
   return extra.method === 'itemwise' && extra.quantitySource === 'boq' && !extra.outsideScope
