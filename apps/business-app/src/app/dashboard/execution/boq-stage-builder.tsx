@@ -84,6 +84,7 @@ type Props = {
     outputIndex: number,
     quantity: number,
   ) => void;
+  onResetQuantity: (lineIndex: number, outputIndex: number) => void;
   onUpdateRate: (lineIndex: number, outputIndex: number, rate: number) => void;
   rateFor: (output: StageBoqOutput) => number;
   onAddManual: (
@@ -1777,16 +1778,13 @@ export function BoqStageBuilder(props: Props) {
                         ].includes(category.key) && (
                           <button
                             type="button"
-                            disabled={entry.output.quantity === 0}
                             onClick={() =>
-                              props.onUpdateQuantity(
-                                entry.lineIndex,
-                                entry.outputIndex,
-                                0,
-                              )
+                              entry.output.quantity === 0
+                                ? props.onResetQuantity(entry.lineIndex, entry.outputIndex)
+                                : props.onUpdateQuantity(entry.lineIndex, entry.outputIndex, 0)
                             }
                           >
-                            Remove from floor
+                            {entry.output.quantity === 0 ? 'Restore calculated quantity' : 'Remove from floor'}
                           </button>
                         )
                       )}
