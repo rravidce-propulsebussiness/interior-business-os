@@ -673,7 +673,11 @@ export function BoqStageBuilder(props: Props) {
           <button
             type="button"
             className="boq-stage-close"
-            onClick={() => setEditing(null)}
+            onClick={() => {
+              setEditing(null);
+              setFocused(null);
+              syncFocusUrl(null);
+            }}
             aria-label="Close editor"
           >
             ×
@@ -1622,12 +1626,14 @@ export function BoqStageBuilder(props: Props) {
                           />
                         )
                       )}
-                      {!entry.line.origin && (
-                        <button
-                          type="button"
-                          onClick={() => props.onRemoveManual(entry.lineIndex)}
-                        >
-                          Remove
+                      {!entry.line.origin ? (
+                        <button type="button" onClick={() =>
+                          props.onRemoveManual(entry.lineIndex)
+                        }>Remove</button>
+                      ) : ['tiles','painting','plumbing','electrical','staircase','plaster','waterproofing','doors'].includes(category.key) && (
+                        <button type="button" disabled={entry.output.quantity === 0}
+                          onClick={() => props.onUpdateQuantity(entry.lineIndex, entry.outputIndex, 0)}>
+                          Remove from floor
                         </button>
                       )}
                     </div>
@@ -1635,9 +1641,67 @@ export function BoqStageBuilder(props: Props) {
               </div>
             </>
           )}
+        {['tiles','painting','plumbing','electrical','staircase','plaster','waterproofing','doors'].includes(category.key) && (
+          <div className="boq-stage-subcard">
+            <h4>＋ Add additional {category.label} work</h4>
+            <p className="boq-stage-hint">Add independent work only if it is not already
+              covered by the measured quotation items above.</p>
+            <div className="boq-stage-input-grid">
+              <InputText label="Work name" value={manualName} onChange={setManualName}
+                placeholder="Extra area, fittings or a second section" />
+              <InputNumber label="Quantity" value={manualQuantity} onChange={setManualQuantity}/>
+              <label className="boq-stage-field"><span>Unit</span>
+                <select value={manualUnit} onChange={(event) => setManualUnit(event.target.value)}>
+                  {['sqft','rft','nos','cft','m³','lot','kg','day'].map((unit) =>
+                    <option key={unit} value={unit}>{unit}</option>)}
+                </select>
+              </label>
+              {props.canViewCost && <InputNumber label="Rate (₹)"
+                value={manualRate} onChange={setManualRate}/>}
+            </div>
+            <button className="boq-stage-outline" type="button"
+              disabled={!manualName.trim() || !(manualQuantity > 0)}
+              onClick={() => {
+                props.onAddManual(stage, category.key, manualQuantity, manualUnit,
+                  props.canViewCost ? manualRate : 0, manualName.trim());
+                setManualName(''); setManualQuantity(0); setManualRate(0);
+              }}>
+              ＋ Add work
+            </button>
+          </div>
+        )}
       </div>
     );
   };
+
+  if (focused) {
+    const sectionCategories = focused.stage === 'Foundation' ? foundation
+      : focused.stage === last ? terrace : standard;
+    const activeWork = sectionCategories.find((item) => item.key === focused.category);
+    return (
+      <section className="boq-work-focus" aria-label="Focused BOQ work editor">
+        <button type="button" className="boq-focus-back"
+          onClick={() => {
+            setEditing(null);
+            setFocused(null);
+            setActiveTab(focused.stage);
+            syncFocusUrl(null);
+          }}>
+          ← {focused.stage} work list
+        </button>
+        <header className="boq-focus-heading">
+          <span>{activeWork?.icon || '▤'}</span>
+          <div>
+            <small>{focused.stage}</small>
+            <h2>{activeWork?.label || focused.category}</h2>
+          </div>
+          {props.autoSaveLabel && <small className="boq-autosave-status">{props.autoSaveLabel}</small>}
+        </header>
+        {activeWork ? renderEditPanel(focused.stage, activeWork) :
+          <p>Select a valid work category.</p>}
+      </section>
+    );
+  }
 
   return (
     <section className="boq-stages" aria-label="Stage-wise BOQ builder">
@@ -1696,16 +1760,16 @@ export function BoqStageBuilder(props: Props) {
             onClick={() => {
               setActiveTab(stage);
               if (!expanded.includes(stage)) toggleSection(stage);
-              document
-                .getElementById('boq-stage-' + sections.indexOf(stage))
-                ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              setExpanded((prior) =>
+                prior.includes(stage) ? prior : [...prior, stage]);
             }}
           >
             {stage}
           </button>
         ))}
       </div>
-      {sections.map((stage, stageIndex) => {
+      {sections.filter((stage) => stage === activeTab).map((stage) => {
+        const stageIndex = sections.indexOf(stage);
         const isFoundation = stage === 'Foundation';
         const isTop = stage === last && !isFoundation;
         const list = isFoundation ? foundation : isTop ? terrace : standard;
@@ -1740,7 +1804,7 @@ export function BoqStageBuilder(props: Props) {
                       checked={repeatAll}
                       onChange={(event) =>
                         props.onRepeatFloors(
-                          props.floors.slice(1).map((floor) => floor.name),
+                          standardFloors.map((floor) => floor.name),
                           event.target.checked,
                         )
                       }
@@ -1748,8 +1812,17 @@ export function BoqStageBuilder(props: Props) {
                     Repeat same stage setup for other floors
                   </label>
                   <small>
-                    Customize any floor to keep its own measurements.
+                    Full floors can repeat; penthouse areas are excluded from bulk repetition.
                   </small>
+                  <div className="boq-stage-repeat-targets">
+                    {props.floors.slice(1).map((floor) => (
+                      <label key={floor.name}>
+                        <input type="checkbox" checked={Boolean(props.repeatFrom[floor.name])}
+                          onChange={(event) => props.onRepeatFloors([floor.name], event.target.checked)}/>
+                        {floor.name}{isPenthouse(floor) ? ' (penthouse — custom by default)' : ''}
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
