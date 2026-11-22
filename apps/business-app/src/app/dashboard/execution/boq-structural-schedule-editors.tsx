@@ -473,3 +473,53 @@ export function BoqStaircaseScheduleEditor({
     </div>
   );
 }
+
+
+/** Optional measured reinforcement in non-RMC sajjas and RCC shelves. */
+export function BoqSmallRccSteelEditor({
+  rows,
+  onChange,
+}: {
+  rows: readonly import('./boq-stage-measurements').MeasuredSteelSet[];
+  onChange: (
+    rows: import('./boq-stage-measurements').MeasuredSteelSet[],
+  ) => void;
+}) {
+  const update = (index: number, patch: Partial<import('./boq-stage-measurements').MeasuredSteelSet>) =>
+    onChange(rows.map((row, i) => i === index ? { ...row, ...patch } : row));
+  return (
+    <section className="boq-structural-schedule boq-small-rcc-steel">
+      <strong className="boq-structural-rebar-heading">
+        Optional reinforcement from drawing
+      </strong>
+      {rows.map((row, i) => (
+        <div className="boq-structural-rebar-row" key={i}>
+          <label>Diameter
+            <select value={row.dia}
+              onChange={(event) => update(i, { dia: Number(event.target.value) })}>
+              <option value={0}>Select</option>
+              {DIAMETERS.map((dia) => (
+                <option key={dia} value={dia}>{dia} mm</option>
+              ))}
+            </select>
+          </label>
+          <QuantityField label="Bars per item" value={row.count}
+            onChange={(count) => update(i, { count: Math.round(count) })}/>
+          <QuantityField label="Cut length" unit="ft" value={row.cutLengthFeet}
+            onChange={(cutLengthFeet) => update(i, { cutLengthFeet })}/>
+          <button type="button" aria-label={'Remove small RCC rod row ' + (i+1)}
+            onClick={() => onChange(rows.filter((_, j) => j !== i))}>×</button>
+        </div>
+      ))}
+      <button type="button" className="boq-stage-outline"
+        disabled={rows.length >= 16}
+        onClick={() => onChange([...rows, { dia: 0, count: 0, cutLengthFeet: 0 }])}>
+        + Add rod size
+      </button>
+      <small className="boq-structural-note">
+        Enter only approved bar counts and cut lengths (up to the configured stock bar length).
+        Steel is separate from site-mixed cement, sand and aggregate.
+      </small>
+    </section>
+  );
+}
