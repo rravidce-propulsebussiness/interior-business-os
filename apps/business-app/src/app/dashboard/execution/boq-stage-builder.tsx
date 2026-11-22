@@ -18,6 +18,7 @@ import {
   type MeasuredKind,
 } from './boq-stage-measurements';
 import { BoqFootingEditor } from './boq-footing-editor';
+import { copyExteriorWallsToFullFloors, isPenthouseFloor } from './boq-floor-scopes';
 
 export type StageBoqOutput = {
   name: string;
@@ -371,8 +372,7 @@ export function BoqStageBuilder(props: Props) {
     thicknessIn: 9,
   });
   const last = props.floors[props.floors.length - 1]?.name ?? '';
-  const isPenthouse = (floor: BoqFloor) => /penthouse/i.test(floor.name) ||
-    Boolean((floor.penthouseSqft ?? 0) > 0);
+  const isPenthouse = isPenthouseFloor;
   const standardFloors = props.floors.slice(1).filter((floor) => !isPenthouse(floor));
   const syncFocusUrl = (next: {stage: string; category: string} | null) => {
     const url = new URL(window.location.href);
@@ -860,6 +860,23 @@ export function BoqStageBuilder(props: Props) {
               once, instead of using an estimated opening percentage. Brick,
               cement and sand quantities follow the editable 100 sqft rules in
               BOQ Rates.
+            </p>
+            {walls.some((wall) => wall.location === 'external') &&
+              props.floors.some((floor) => floor.name !== stage &&
+                !isPenthouseFloor(floor)) && (
+              <button type="button" className="boq-stage-outline"
+                onClick={() => props.onCountsChange({
+                  ...props.counts,
+                  walls: copyExteriorWallsToFullFloors(
+                    props.floors, props.counts.walls, stage,
+                  ),
+                })}>
+                Copy measured external walls to other full floors
+              </button>
+            )}
+            <p className="boq-stage-hint">
+              Copies external walls only where that floor has no external
+              measurements. Penthouse and previously measured floors remain unchanged.
             </p>
             {walls.map((wall, wallIndex) => {
               const updateWall = (patch: Partial<WallMeasure>) =>
