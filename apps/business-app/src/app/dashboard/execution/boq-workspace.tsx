@@ -45,6 +45,14 @@ import {
 } from '@business-os/core/construction-boq';
 import { BoqDesignSchedule } from './boq-design-schedule';
 import { BoqStageBuilder } from './boq-stage-builder';
+import { BoqLabourPanel } from './boq-labour-panel';
+import {
+  DEFAULT_LABOUR,
+  LEGACY_CIVIL_LABOUR_MATERIALS,
+  evaluateLabour,
+  labourMeasurements,
+  type LabourConfig,
+} from './boq-labour';
 import {
   measuredOutputs,
   type MeasuredDimensions,
@@ -111,6 +119,7 @@ type Document = {
     items?: SavedLine[];
     selections?: Record<string, string>;
     generator?: Generator;
+    labour?: LabourConfig;
   };
   updated_at: string;
 };
@@ -242,6 +251,11 @@ export function BoqWorkspace({
   const [selections, setSelections] = useState<Record<string, string>>(
     initialDocument?.document?.selections ?? {},
   );
+  // Older saved BOQs keep their old rates until labour costing is enabled.
+  const [labour, setLabour] = useState<LabourConfig | null>(
+    initialDocument ? (initialDocument.document?.labour ?? null) : { ...DEFAULT_LABOUR },
+  );
+  const [costingTab, setCostingTab] = useState<'builder' | 'labour'>('builder');
   const [generator, setGenerator] = useState<Generator | null>(
     initialDocument?.document?.generator ?? null,
   );
@@ -303,8 +317,20 @@ export function BoqWorkspace({
     () => normalizeStructuralSettings(structural),
     [structural],
   );
+  const labourGroups = new Set(
+    initialRates.filter((rate) => rate.category === 'labour')
+      .map((rate) => rate.material).filter((value): value is string => Boolean(value)),
+  );
+  const isOldLabour = (output: SavedLine['outputs'][number]) => {
+    const group = materialForOutput(output);
+    return Boolean(group && (labourGroups.has(group) || LEGACY_CIVIL_LABOUR_MATERIALS.has(group)));
+  };
   const priceOf = (output: SavedLine['outputs'][number]) =>
-    rateForOutput(output, initialRates, selections);
+    // A configured labour model replaces ALL old labour rates. Materials and
+    // concrete supply retain their existing source, price and quantities.
+    labour && isOldLabour(output)
+      ? 0
+      : rateForOutput(output, initialRates, selections);
   const currentQuote = quotes.find((quote) => quote.id === quoteId);
   const schedule = currentQuote?.schedule ?? null;
   const scheduleFloors = useMemo(
@@ -435,10 +461,18 @@ export function BoqWorkspace({
       section: prior?.section || row.section,
     });
   }
-  const materialCost = [...grouped.values()].reduce(
-    (sum, item) => sum + item.amount,
+  const materialOnlyCost = allOutputs.reduce(
+    (sum, output) => sum + (isOldLabour(output) ? 0 : output.quantity * output.rate),
     0,
   );
+  const legacyLabourCost = labour ? 0 : allOutputs.reduce(
+    (sum, output) => sum + (isOldLabour(output) ? output.quantity * output.rate : 0),
+    0,
+  );
+  const measuredLabour = labourMeasurements(lines);
+  const labourEstimate = evaluateLabour(labour, floorsForGeneration, measuredLabour);
+  const labourCost = legacyLabourCost + labourEstimate.total;
+  const materialCost = materialOnlyCost + labourCost;
   // Floor-wise cost in simple heads: cement, sand, aggregate, steel and
   // bricks as quantity × rate; structural labour as rate × sq ft; finishes
   // and services as amounts.
@@ -582,6 +616,8 @@ export function BoqWorkspace({
     );
     setLines([]);
     setSelections({});
+    setLabour({ ...DEFAULT_LABOUR });
+    setCostingTab('builder');
     setGenerator(null);
     setSelectedQuoteLines([]);
     setGenFloors([]);
@@ -611,6 +647,8 @@ export function BoqWorkspace({
     setQuoteId(document.quotation_revision_id || '');
     setLines(document.document?.items || []);
     setSelections(document.document?.selections ?? {});
+    setLabour(document.document?.labour ?? null);
+    setCostingTab('builder');
     setGenerator(document.document?.generator ?? null);
     setGenFloors(document.document?.generator?.floors ?? []);
     setGenCounts(document.document?.generator?.counts ?? null);
@@ -1044,6 +1082,7 @@ export function BoqWorkspace({
         currency: 'INR',
         items: lines,
         selections,
+        ...(labour ? { labour } : {}),
         ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
       });
       if (!result.ok) {
@@ -1062,6 +1101,7 @@ export function BoqWorkspace({
         document: {
           items: lines,
           selections,
+          ...(labour ? { labour } : {}),
           ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
         },
         updated_at: new Date().toISOString(),
@@ -1800,6 +1840,38 @@ export function BoqWorkspace({
               </button>
             )}
           </div>
+          <div className="boq-labour-tabs" role="tablist" aria-label="BOQ costing view">
+            <button type="button" role="tab" aria-selected={costingTab === 'builder'}
+              className={costingTab === 'builder' ? 'active' : ''}
+              onClick={() => setCostingTab('builder')}>▤ BOQ Builder</button>
+            <button type="button" role="tab" aria-selected={costingTab === 'labour'}
+              className={costingTab === 'labour' ? 'active' : ''}
+              onClick={() => setCostingTab('labour')}>♧ Labour Costing</button>
+          </div>
+          {costingTab === 'labour' && !labour && <div className="boq-labour-enable">
+            <strong>Enable the new Labour Costing model?</strong>
+            <p>This saved BOQ uses the previous labour rate method. Enabling a
+              project-wide rate will replace its old labour charges, while
+              preserving all material quantities and material prices.</p>
+            <button type="button" className="erp-button erp-button-primary"
+              disabled={!(active ? canEdit : canCreate)}
+              onClick={() => setLabour({ ...DEFAULT_LABOUR })}>
+              Enable Composite Labour at ₹400/sft
+            </button>
+          </div>}
+          {costingTab === 'labour' && labour && <BoqLabourPanel
+            config={labour}
+            onChange={setLabour}
+            floors={floorsForGeneration}
+            lines={lines}
+            materialCost={materialOnlyCost}
+            existingLabourCost={legacyLabourCost}
+            canEdit={active ? canEdit : canCreate}
+            canViewCost={canViewCost}
+            busy={busy}
+            onSave={save}
+          />}
+          <div style={{ display: costingTab === 'builder' ? undefined : 'none' }}>
           <BoqStageBuilder
             key={projectId || active?.id || 'new'}
             floors={floorsForGeneration}
@@ -1853,7 +1925,10 @@ export function BoqWorkspace({
             canSave={active ? canEdit : canCreate}
             message={message}
             newDocument={!active}
+            labourStageCosts={labour ? labourEstimate.byStage : undefined}
+            projectTotalCost={labour ? materialCost : undefined}
           />
+          </div>
           {showAdvanced && (
             <div className="boq-advanced-content">
               <div className="boq-form-grid">
