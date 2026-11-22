@@ -2040,12 +2040,14 @@ export function BoqStageBuilder(props: Props) {
       (category.key === 'columns' && isMeasuredColumn(props.design)) ||
       (category.key === 'plinth' &&
         Boolean(
-          props.design?.plinthBeams?.some(
-            (beam) =>
-              beam.count > 0 &&
-              beam.lengthFeet > 0 &&
-              parseBars(beam.bars).length > 0,
-          ) || props.design?.plinthRunFeet,
+          props.design?.plinthBeams?.length
+            ? props.design.plinthBeams.some(
+                (beam) =>
+                  beam.count > 0 &&
+                  beam.lengthFeet > 0 &&
+                  parseBars(beam.bars).length > 0,
+              )
+            : props.design?.plinthRunFeet,
         ));
     const pending = unmeasured(stage, category.key);
     const combined =
