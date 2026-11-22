@@ -655,7 +655,16 @@ export function BoqWorkspace({
       )
         return false;
       if (line.kind === 'quote-plinth-beam')
-        return Boolean(measuredDesign?.plinthRunFeet);
+        return Boolean(
+          measuredDesign?.plinthBeams?.length
+            ? measuredDesign.plinthBeams.some(
+                (beam) =>
+                  beam.count > 0 &&
+                  beam.lengthFeet > 0 &&
+                  parseBars(beam.bars).length > 0,
+              )
+            : measuredDesign?.plinthRunFeet,
+        );
       if (line.kind === 'quote-beams') return measuredBeams;
       if (line.kind === 'quote-slab') return measuredSlab;
       // Binding wire includes multiple structural stages in the legacy
