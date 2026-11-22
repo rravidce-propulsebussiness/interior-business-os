@@ -1481,7 +1481,8 @@ export function BoqWorkspace({
     if (
       autoSaveState !== 'saved' ||
       autoSaving.current ||
-      autoSavedFingerprint.current !== autoSaveFingerprint
+      (autoSavedFingerprint.current !== null &&
+        autoSavedFingerprint.current !== autoSaveFingerprint)
     ) {
       setMessage('Your changes are still saving. Open Detailed BOQ after the saved status appears.');
       return;
@@ -2110,12 +2111,7 @@ export function BoqWorkspace({
               }
               onSave={save}
               onDetailedBoq={openDetailedBoq}
-              canOpenDetailed={Boolean(
-                active &&
-                  autoSaveState === 'saved' &&
-                  !autoSaving.current &&
-                  autoSavedFingerprint.current === autoSaveFingerprint,
-              )}
+              canOpenDetailed={Boolean(active)}
               canViewCost={canViewCost}
               busy={busy}
               canSave={active ? canEdit : canCreate}
