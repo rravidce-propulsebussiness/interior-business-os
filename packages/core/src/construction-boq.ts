@@ -1942,6 +1942,8 @@ export type DesignBeamType = {
   stirrupSpacingIn: number;
   /** Running feet per floor roof, in floor order. */
   runFeet: number[];
+  /** Number of equal-length members on each floor; total runFeet remains authoritative. */
+  countsByFloor?: number[];
 };
 /** Plinth beam type from the engineer's schedule (PB1, PB2, etc.). */
 export type DesignPlinthBeamType = {
@@ -1958,6 +1960,39 @@ export type DesignPlinthBeamType = {
   stirrupSpacingIn: number;
 };
 
+/** An independent slab panel; selected floor's panel schedule replaces its grid slab. */
+export type DesignSlabPanel = {
+  label: string;
+  floor: string;
+  count: number;
+  lengthFeet: number;
+  widthFeet: number;
+  thicknessIn: number;
+  reinforcement: {
+    layer: 'bottom' | 'top';
+    direction: 'length' | 'width';
+    dia: number;
+    spacingIn: number;
+  }[];
+};
+
+/** Separate staircase geometry/reinforcement for a particular floor. */
+export type DesignStairType = {
+  label: string;
+  floor: string;
+  count: number;
+  widthFeet: number;
+  riserIn: number;
+  treadIn: number;
+  waistIn: number;
+  landingFeet: number;
+  reinforcement: {
+    role: 'main' | 'distribution';
+    dia: number;
+    spacingIn: number;
+  }[];
+};
+
 export type StructuralDesign = {
   footings: DesignFootingType[];
   /** Older saved schedules carried footing geometry on C1/C2 rows. */
@@ -1966,6 +2001,10 @@ export type StructuralDesign = {
   beams: DesignBeamType[];
   /** Measured PB1/PB2 schedules, replacing the single legacy plinth run. */
   plinthBeams?: DesignPlinthBeamType[];
+  /** Optional floor-wise slab panel schedules. Never added to the legacy grid slab. */
+  slabPanels?: DesignSlabPanel[];
+  /** Optional floor-wise staircase types. Never added to the legacy staircase. */
+  staircases?: DesignStairType[];
   /** Legacy single plinth running feet; only used without plinthBeams. */
   plinthRunFeet: number;
   /** This drawing's slab, plinth beam, staircase and cover values. */
@@ -2082,6 +2121,18 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
         bottomSpacingIn: num(entry.bottomSpacingIn, 6, 2, 24),
         topBarDia: num(entry.topBarDia, 12, 6, 40),
         topSpacingIn: num(entry.topSpacingIn, 6, 2, 24),
+        ...(Array.isArray(entry.reinforcement)
+          ? {
+              reinforcement: (entry.reinforcement as Record<string, unknown>[])
+                .slice(0, 16)
+                .map((set) => ({
+                  layer: set.layer === 'top' ? 'top' as const : 'bottom' as const,
+                  direction: set.direction === 'width' ? 'width' as const : 'length' as const,
+                  dia: num(set.dia, 12, 6, 40),
+                  spacingIn: num(set.spacingIn, 6, 2, 24),
+                })),
+            }
+          : {}),
         strapLengthFeet: num(entry.strapLengthFeet, 0, 0, 250),
         strapWidthIn: num(entry.strapWidthIn, 0, 0, 96),
         strapDepthIn: num(entry.strapDepthIn, 0, 0, 96),
@@ -2113,6 +2164,10 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
       runFeet: (Array.isArray(item?.runFeet) ? item.runFeet : [])
         .slice(0, 20)
         .map((run: unknown) => num(run, 0, 0, 5000)),
+      ...(Array.isArray(item?.countsByFloor)
+        ? { countsByFloor: item.countsByFloor.slice(0, 20)
+            .map((count: unknown) => Math.round(num(count, 0, 0, 300))) }
+        : {}),
     }))
     .filter((item) => parseBars(item.bars).length > 0);
   const plinthBeams = (
@@ -2128,6 +2183,47 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
       bars: String(item?.bars ?? '').slice(0, 180),
       stirrupDia: num(item?.stirrupDia, 8, 6, 16),
       stirrupSpacingIn: num(item?.stirrupSpacingIn, 6, 2, 24),
+    }));
+  const normalizePanelRebar = (raw: unknown) =>
+    (Array.isArray(raw) ? raw : [])
+      .slice(0, 16)
+      .map((entry: Record<string, unknown>) => ({
+        layer: entry.layer === 'top' ? 'top' as const : 'bottom' as const,
+        direction: entry.direction === 'width' ? 'width' as const : 'length' as const,
+        dia: num(entry.dia, 0, 0, 40),
+        spacingIn: num(entry.spacingIn, 0, 0, 24),
+      }));
+  const slabPanels: DesignSlabPanel[] = (Array.isArray(value.slabPanels)
+    ? value.slabPanels : [])
+    .slice(0, 100)
+    .map((panel: Record<string, unknown>, index) => ({
+      label: String(panel.label ?? `S${index+1}`).slice(0, 40),
+      floor: String(panel.floor ?? '').slice(0, 80),
+      count: Math.round(num(panel.count, 1, 0, 200)),
+      lengthFeet: num(panel.lengthFeet, 0, 0, 500),
+      widthFeet: num(panel.widthFeet, 0, 0, 500),
+      thicknessIn: num(panel.thicknessIn, 5, 1, 24),
+      reinforcement: normalizePanelRebar(panel.reinforcement),
+    }));
+  const staircases: DesignStairType[] = (Array.isArray(value.staircases)
+    ? value.staircases : [])
+    .slice(0, 60)
+    .map((stair: Record<string, unknown>, index) => ({
+      label: String(stair.label ?? `ST${index+1}`).slice(0, 40),
+      floor: String(stair.floor ?? '').slice(0, 80),
+      count: Math.round(num(stair.count, 1, 0, 50)),
+      widthFeet: num(stair.widthFeet, 3.5, 0, 40),
+      riserIn: num(stair.riserIn, 6, 2, 12),
+      treadIn: num(stair.treadIn, 10, 4, 24),
+      waistIn: num(stair.waistIn, 6, 2, 18),
+      landingFeet: num(stair.landingFeet, 4, 0, 30),
+      reinforcement: (Array.isArray(stair.reinforcement)
+        ? stair.reinforcement : []).slice(0, 16)
+        .map((bar: Record<string, unknown>) => ({
+          role: bar.role === 'distribution' ? 'distribution' as const : 'main' as const,
+          dia: num(bar.dia, 0, 0, 40),
+          spacingIn: num(bar.spacingIn, 0, 0, 24),
+        })),
     }));
   const rawSettings =
     value.settings && typeof value.settings === 'object'
@@ -2148,6 +2244,8 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     !footings.length &&
     !beams.length &&
     !plinthBeams.length &&
+    !slabPanels.length &&
+    !staircases.length &&
     !Object.keys(settings).length &&
     !Number(value.plinthRunFeet)
   )
@@ -2158,6 +2256,8 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     columns,
     beams,
     ...(plinthBeams.length ? { plinthBeams } : {}),
+    ...(slabPanels.length ? { slabPanels } : {}),
+    ...(staircases.length ? { staircases } : {}),
     plinthRunFeet: num(value.plinthRunFeet, 0, 0, 5000),
     ...(Object.keys(settings).length ? { settings } : {}),
   };
