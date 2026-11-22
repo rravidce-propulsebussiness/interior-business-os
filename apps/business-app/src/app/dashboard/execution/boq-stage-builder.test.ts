@@ -70,6 +70,27 @@ describe('stage-wise miscellaneous BOQ UI', () => {
     // Only the selected stage is visible until the user chooses another floor.
   });
 
+  it('keeps column and plinth entries in the one structural schedule on screen six', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, {
+        ...base,
+        initialStep: 6,
+        floors: [
+          { name: 'Ground Floor' } as BoqFloor,
+          { name: 'First Floor' } as BoqFloor,
+        ],
+      }),
+    );
+    const stageTabs =
+      html.match(/aria-label="Jump to BOQ stage"[^>]*>([\\s\\S]*?)<\\/div>/)?.[1] ??
+      '';
+    expect(stageTabs).toContain('Foundation');
+    expect(stageTabs).not.toContain('Ground Floor');
+    expect(stageTabs).not.toContain('First Floor');
+    expect(html).toContain('Columns');
+    expect(html).toContain('Plinth Beam');
+  });
+
   it('displays older manual items in Miscellaneous without dropping their costs', () => {
     const html = renderToStaticMarkup(
       createElement(BoqStageBuilder, {
