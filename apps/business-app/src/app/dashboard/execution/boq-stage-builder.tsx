@@ -103,6 +103,9 @@ type Props = {
   canSave: boolean;
   message?: string;
   newDocument: boolean;
+  /** Allocated contract labour for this stage, not a second per-item charge. */
+  labourStageCosts?: Record<string, number>;
+  projectTotalCost?: number;
 };
 
 const foundation: Category[] = [
@@ -429,8 +432,9 @@ export function BoqStageBuilder(props: Props) {
       0,
     ) +
     visibleCost(stage, 'extra') +
-    visibleCost(stage, 'miscellaneous');
-  const projectCost = sections.reduce(
+    visibleCost(stage, 'miscellaneous') +
+    (props.labourStageCosts?.[stage] ?? 0);
+  const projectCost = props.projectTotalCost ?? sections.reduce(
     (sum, stage) =>
       sum +
       costForStage(
@@ -1579,6 +1583,11 @@ export function BoqStageBuilder(props: Props) {
                       : 'boq-stage-items'
                   }
                 >
+                  {props.canViewCost && (props.labourStageCosts?.[stage] ?? 0) > 0 && (
+                    <div className="boq-stage-extra-note">
+                      Labour package allocation: {money(props.labourStageCosts?.[stage] ?? 0)} · charged once in the BOQ total.
+                    </div>
+                  )}
                   {visibleList.map((category) => {
                     const entries = entriesFor(stage, category.key);
                     const pending = unmeasured(stage, category.key);
