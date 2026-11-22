@@ -526,15 +526,7 @@ export function BoqStageBuilder(props: Props) {
           (sum, entry) => sum + priced(entry.output),
           0,
         );
-  const costForStage = (stage: string, categories: Category[]) =>
-    categories.reduce(
-      (sum, category) => sum + visibleCost(stage, category.key),
-      0,
-    ) +
-    visibleCost(stage, 'extra') +
-    visibleCost(stage, 'miscellaneous') +
-    (props.labourStageCosts?.[stage] ?? 0);
-   const openEditor = (stage: string, category: string) => {
+  const openEditor = (stage: string, category: string) => {
     if (preview) return;
     setFocused({ stage, category });
     syncFocusUrl({ stage, category });
@@ -1844,6 +1836,44 @@ export function BoqStageBuilder(props: Props) {
     );
   };
 
+  const renderCategoryTile = (stage: string, category: Category) => {
+    const entries = entriesFor(stage, category.key);
+    const measured =
+      entries.length > 0 ||
+      (category.key === 'footings' && isMeasuredFooting(props.design)) ||
+      (category.key === 'columns' && isMeasuredColumn(props.design)) ||
+      (category.key === 'plinth' && Boolean(props.design?.plinthRunFeet));
+    const pending = unmeasured(stage, category.key);
+    const combined =
+      category.key === 'beams' &&
+      entriesFor(stage, 'slab').some(
+        (entry) => entry.line.kind === 'quote-slab',
+      );
+    return (
+      <div className="boq-stage-tile" key={category.key}>
+        <span className="boq-stage-tile-icon" aria-hidden="true">{category.icon}</span>
+        <div className="boq-stage-tile-body">
+          <strong>{category.label}</strong>
+          <small className={measured && !pending ? 'boq-stage-entered' : 'pending'}>
+            {combined && !measured
+              ? 'Included with slab'
+              : measured && !pending
+                ? 'Entered'
+                : 'Not entered'}
+          </small>
+        </div>
+        <button
+          type="button"
+          className="boq-stage-tile-edit"
+          aria-label={'View or edit ' + category.label + ' on ' + stage}
+          onClick={() => openEditor(stage, category.key)}
+        >
+          View
+        </button>
+      </div>
+    );
+  };
+
   if (focused) {
     const sectionCategories =
       focused.stage === 'Foundation'
@@ -2065,9 +2095,7 @@ export function BoqStageBuilder(props: Props) {
                 (item.key !== 'compound' ||
                   stage === props.floors[0]?.name),
             );
-            const open = true;
             const inherited = Boolean(props.repeatFrom[stage]);
-            const total = costForStage(stage, list);
             const miscellaneousRows = props.lines
               .map((line, lineIndex) => ({ line, lineIndex }))
               .filter(
@@ -2137,21 +2165,7 @@ export function BoqStageBuilder(props: Props) {
                   className="boq-stage-card"
                   id={'boq-stage-' + stageIndex}
                 >
-                  <div
-                    className={
-                      open ? 'boq-stage-card-head open' : 'boq-stage-card-head'
-                    }
-                  >
-                    <button
-                      type="button"
-                      onClick={() => toggleSection(stage)}
-                      aria-expanded={open}
-                    >
-                      <span className="boq-stage-card-symbol">
-                        {isFoundation ? '♜' : '▱'}
-                      </span>
-                      <strong>{stage}</strong>
-                      {inherited && (
+                  {inherited && (
                         <small className="boq-stage-inherited">
                           ↗ Repeated from {props.repeatFrom[stage]}
                         </small>
@@ -2176,73 +2190,64 @@ export function BoqStageBuilder(props: Props) {
                       </button>
                     </div>
                   )}
-                  {open && (
-                    <div
+                  <div
                       className={
                         isFoundation
                           ? 'boq-stage-items foundation'
                           : 'boq-stage-items'
                       }
                     >
-                      {visibleList.map((category) => {
-                        const entries = entriesFor(stage, category.key);
-                        const pending = unmeasured(stage, category.key);
-                        const amount = visibleCost(stage, category.key);
-                        const unit =
-                          entries.length === 1 ? entries[0]!.output.unit : '';
-                        const qty =
-                          entries.length === 1
-                            ? number(entries[0]!.output.quantity) + ' ' + unit
-                            : entries.length
-                              ? entries.length + ' materials'
-                              : '';
-                        const combined =
-                          category.key === 'beams' &&
-                          entriesFor(stage, 'slab').some(
-                            (entry) => entry.line.kind === 'quote-slab',
-                          );
-                        return (
-                          <div className="boq-stage-tile" key={category.key}>
-                            <span
-                              className="boq-stage-tile-icon"
-                              aria-hidden="true"
-                            >
-                              {category.icon}
-                            </span>
-                            <div className="boq-stage-tile-body">
-                              <strong>{category.label}</strong>
-                              {pending ? (
-                                <small className="pending">
-                                  Not entered yet
-                                </small>
-                              ) : !entries.length && combined ? (
-                                <small>Included with slab</small>
-                              ) : !entries.length ? (
-                                <small>Not measured</small>
-                              ) : (
-                                <small>
-                                  {qty || 'Measured'}
-                                  {props.canViewCost
-                                    ? ' · ' + money(amount)
-                                    : ''}
-                                </small>
-                              )}
-                            </div>
-                            {!preview && (
-                              <button
-                                className="boq-stage-tile-edit"
-                                type="button"
-                                aria-label={
-                                  'Edit ' + category.label + ' on ' + stage
-                                }
-                                onClick={() => openEditor(stage, category.key)}
-                              >
-                                ✎
-                              </button>
-                            )}
-                          </div>
-                        );
-                      })}
+                      {isTop && isPenthouse(props.floors.at(-1)!) && (
+                        <div className="boq-penthouse-scope">
+                          <strong>Penthouse</strong>
+                          {Boolean(props.floors.at(-1)?.penthouseSqft) && (
+                            <span>{number(props.floors.at(-1)!.penthouseSqft!)} sq ft</span>
+                          )}
+                        </div>
+                      )}
+                      {isFoundation ? (
+                        <div className="boq-foundation-groups">
+                          {FOUNDATION_GROUPS.map((group) => {
+                            const groupItems = visibleList.filter((category) =>
+                              group.categories.some((key) => key === category.key),
+                            );
+                            const isSelected = foundationGroup === group.key;
+                            const done = groupItems.filter(
+                              (category) =>
+                                entriesFor(stage, category.key).length > 0 ||
+                                (category.key === 'footings' && isMeasuredFooting(props.design)) ||
+                                (category.key === 'columns' && isMeasuredColumn(props.design)),
+                            ).length;
+                            return (
+                              <section className="boq-foundation-group" key={group.key}>
+                                <button
+                                  type="button"
+                                  className="boq-foundation-group-trigger"
+                                  aria-expanded={isSelected}
+                                  onClick={() =>
+                                    setFoundationGroup(isSelected ? null : group.key)
+                                  }
+                                >
+                                  <strong>{group.label}</strong>
+                                  <small>{done}/{groupItems.length} entered</small>
+                                  <span>{isSelected ? 'Close' : 'View'} ▾</span>
+                                </button>
+                                {isSelected && (
+                                  <div className="boq-foundation-group-items">
+                                    {groupItems.map((category) =>
+                                      renderCategoryTile(stage, category),
+                                    )}
+                                  </div>
+                                )}
+                              </section>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        visibleList.map((category) =>
+                          renderCategoryTile(stage, category),
+                        )
+                      )}
                       {editing?.stage === stage &&
                         renderEditPanel(
                           stage,
@@ -2520,7 +2525,6 @@ export function BoqStageBuilder(props: Props) {
                         )}
                       </div>
                     </div>
-                  )}
                 </article>
               </Fragment>
             );
