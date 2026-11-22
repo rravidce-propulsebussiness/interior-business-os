@@ -436,7 +436,7 @@ export function BoqStageBuilder(props: Props) {
   const measurementScreen = guidedStep >= 4 && guidedStep <= 11;
   // No second structural schedule: these screens only filter existing editors.
   const guidedSections =
-    selectedWizard.scope === 'foundation' && guidedStep <= 5
+    selectedWizard.scope === 'foundation'
       ? ['Foundation']
       : guidedStep >= 7 && guidedStep <= 11
         ? sections.filter((section) => section !== 'Foundation')
