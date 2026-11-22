@@ -54,6 +54,10 @@ import { BoqDesignSchedule } from './boq-design-schedule';
 import { BoqStageBuilder } from './boq-stage-builder';
 import { BoqRegisterLanding } from './boq-register-landing';
 import { BoqCreateStep } from './boq-create-step';
+import {
+  buildFloorPricing,
+  BoqFinalFloorPricing,
+} from './boq-final-floor-pricing';
 import { validateBoqMeasurements } from './boq-save-validation';
 import { BoqLabourPanel } from './boq-labour-panel';
 import {
@@ -668,7 +672,7 @@ export function BoqWorkspace({
   const floorArea = new Map(
     (generator?.floors ?? []).map((floor) => [floor.name, floor.areaSqft]),
   );
-  const builtUpSqft = (generator?.floors ?? []).reduce(
+  const builtUpSqft = floorsForGeneration.reduce(
     (sum, floor) => sum + floor.areaSqft,
     0,
   );
@@ -1702,6 +1706,16 @@ export function BoqWorkspace({
         )
       : [];
   const stages = [...new Set(lines.map((line) => line.section || 'Other'))];
+  const detailedFloorPricing = buildFloorPricing(
+    allOutputs.map((output) => ({
+      stage: output.section,
+      amount: output.quantity * output.rate,
+      isLabour: isOldLabour(output),
+    })),
+    labour ? labourEstimate.byStage : {},
+    floorsForGeneration,
+    stages,
+  );
   function openDetailedBoq() {
     if (!active) {
       setMessage('Save the BOQ before viewing the detailed estimate.');
@@ -1934,6 +1948,14 @@ export function BoqWorkspace({
                     </ul>
                   </details>
                 ) : null}
+                <BoqFinalFloorPricing
+                  rows={detailedFloorPricing}
+                  materialCost={materialOnlyCost}
+                  labourCost={labourCost}
+                  totalCost={materialCost}
+                  areaSqft={builtUpSqft}
+                  canViewCost={canViewCost}
+                />
                 {steelSummary.size > 0 && (
                   <section className="boq-view-steel">
                     <h3>Steel summary</h3>
