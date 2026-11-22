@@ -1,0 +1,247 @@
+/* Compact BOQ home. These styles apply only to the register, not the editor. */
+.execution-workspace:has(> .boq-register-landing) > .erp-crumbs {
+  display: none;
+}
+
+.execution-workspace .boq-register-landing {
+  width: 100%;
+  max-width: 1120px;
+  padding-top: clamp(24px, 4vw, 48px);
+}
+
+.boq-register-landing {
+  display: grid;
+  gap: clamp(30px, 4vw, 48px);
+  color: #4e1e26;
+}
+
+.boq-register-create,
+.execution-workspace a.boq-register-create,
+.execution-workspace button.boq-register-create {
+  display: flex;
+  min-height: 60px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border: 1px solid #aa4637;
+  border-radius: 16px;
+  background: linear-gradient(115deg, #912d2c 0%, #c65432 100%);
+  box-shadow: 0 12px 25px rgb(130 47 37 / 13%);
+  color: #fff;
+  text-align: center;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.boq-register-create:hover,
+.execution-workspace a.boq-register-create:hover {
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 14px 29px rgb(130 47 37 / 18%);
+}
+
+.boq-register-create:disabled {
+  opacity: 0.5;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.boq-register-list {
+  display: grid;
+  gap: 19px;
+  min-width: 0;
+}
+
+.boq-register-list h2 {
+  margin: 0;
+  color: #4b1722;
+  font-size: clamp(23px, 3vw, 30px);
+  line-height: 1.2;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+}
+
+.boq-register-cards {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 15px;
+}
+
+.boq-register-card {
+  display: flex;
+  gap: 18px;
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #f1e6e4;
+  border-radius: 19px;
+  background: #fffdfd;
+  box-shadow:
+    0 10px 24px rgb(98 28 29 / 8%),
+    0 2px 5px rgb(95 33 33 / 3%);
+}
+
+.boq-register-building {
+  display: grid;
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border-radius: 15px;
+  background: #f8eae6;
+  color: #833028;
+}
+
+.boq-register-building svg {
+  width: 31px;
+  height: 31px;
+}
+
+.boq-register-card-main {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  align-content: start;
+  gap: 8px;
+}
+
+.boq-register-card-main h3 {
+  overflow-wrap: anywhere;
+  margin: 0;
+  color: #481c22;
+  font-size: clamp(15px, 1.8vw, 20px);
+  line-height: 1.32;
+  font-weight: 800;
+}
+
+.boq-register-card-main p {
+  margin: 0;
+  color: #817b7a;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.boq-register-card-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.boq-register-card-actions button {
+  display: inline-flex;
+  min-height: 43px;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  border-radius: 13px;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.1;
+  cursor: pointer;
+}
+
+.boq-register-card-actions svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.boq-register-view {
+  border: 1px solid #d9a797;
+  background: #fffdfd;
+  color: #762b2a;
+}
+
+.boq-register-edit {
+  border: 1px solid #a3422e;
+  background: linear-gradient(115deg, #a23b32, #c45234);
+  color: #fff;
+}
+
+.boq-register-view:hover,
+.boq-register-edit:hover {
+  filter: brightness(0.96);
+}
+
+.boq-register-no-results {
+  padding: 22px;
+  border: 1px solid #f1e6e4;
+  border-radius: 15px;
+  background: #fff;
+  color: #736466;
+  font-size: 13px;
+}
+
+.boq-register-landing a:focus-visible,
+.boq-register-landing button:focus-visible {
+  outline: 3px solid #e09a71;
+  outline-offset: 3px;
+}
+
+.boq-view-back {
+  margin-bottom: 15px;
+}
+
+@media (max-width: 600px) {
+  .execution-workspace .boq-register-landing {
+    padding: 24px 16px 52px;
+  }
+
+  .boq-register-landing {
+    gap: 32px;
+  }
+
+  .boq-register-create,
+  .execution-workspace a.boq-register-create,
+  .execution-workspace button.boq-register-create {
+    min-height: 60px;
+    border-radius: 15px;
+    font-size: 17px;
+  }
+
+  .boq-register-card {
+    gap: 13px;
+    padding: 16px 14px;
+    border-radius: 17px;
+  }
+
+  .boq-register-building {
+    flex-basis: 47px;
+    width: 47px;
+    height: 47px;
+    border-radius: 12px;
+  }
+
+  .boq-register-building svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .boq-register-card-main h3 {
+    font-size: 15px;
+  }
+
+  .boq-register-card-main p {
+    font-size: 12px;
+  }
+
+  .boq-register-card-actions {
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .boq-register-card-actions button {
+    min-height: 43px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+}
