@@ -626,10 +626,18 @@ export function BoqWorkspace({
     // A new BOQ must not invent column/footing/beam steel from company-grid
     // assumptions. Legacy documents are preserved until intentionally edited.
     const measuredDesign = normalizeDesign(genDesign);
-    const measuredColumns = Boolean(measuredDesign?.columns.length);
+    const measuredColumns = Boolean(
+      measuredDesign?.columns.some(
+        (col) => col.count > 0 && parseBars(col.bars).length > 0,
+      ),
+    );
     const measuredFootings = Boolean(measuredDesign?.footings.length);
     const measuredBeams = Boolean(
-      measuredDesign?.beams.some((beam) => beam.runFeet.some((run) => run > 0)),
+      measuredDesign?.beams.some(
+        (beam) =>
+          parseBars(beam.bars).length > 0 &&
+          beam.runFeet.some((run) => run > 0),
+      ),
     );
     // A slab's bar diameters and spacing must come from the drawing, not
     // automatically from a company rule without an entered measurement.
@@ -667,7 +675,27 @@ export function BoqWorkspace({
             : measuredDesign?.plinthRunFeet,
         );
       if (line.kind === 'quote-beams') return measuredBeams;
-      if (line.kind === 'quote-slab') return measuredSlab;
+      if (line.kind === 'quote-slab') {
+        const panels = measuredDesign?.slabPanels?.filter(
+          (panel) => panel.floor === line.section,
+        );
+        if (panels?.length)
+          return panels.some((panel) =>
+            panel.count > 0 && panel.lengthFeet > 0 &&
+            panel.widthFeet > 0 && panel.thicknessIn > 0,
+          );
+        return measuredSlab;
+      }
+      if (line.kind === 'quote-staircase') {
+        const stairs = measuredDesign?.staircases?.filter(
+          (stair) => stair.floor === line.section,
+        );
+        if (stairs?.length)
+          return stairs.some((stair) =>
+            stair.count > 0 && stair.widthFeet > 0 &&
+            stair.riserIn > 0 && stair.treadIn > 0 && stair.waistIn > 0,
+          );
+      }
       // Binding wire includes multiple structural stages in the legacy
       // calculator; never count wire from still-unmeasured members.
       if (line.kind === 'quote-binding-wire')
