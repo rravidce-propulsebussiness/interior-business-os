@@ -34,6 +34,7 @@ const base: StageProps = {
   onRepeatFloors: noop,
   onCustomizeFloor: noop,
   onUpdateQuantity: noop,
+  onResetQuantity: noop,
   onUpdateRate: noop,
   rateFor: (output) => output.rate ?? 0,
   onAddManual: noop,
@@ -51,11 +52,14 @@ const base: StageProps = {
 describe('stage-wise miscellaneous BOQ UI', () => {
   it('shows one compact Miscellaneous action per expanded stage instead of repeated generic item forms', () => {
     const html = renderToStaticMarkup(createElement(BoqStageBuilder, base));
-    expect(html.match(/boq-stage-misc-trigger/g)).toHaveLength(2);
+    expect(html.match(/boq-stage-misc-trigger/g)).toHaveLength(1);
     expect(html).not.toContain('Add a measured item');
     expect(html).not.toContain('Add Item');
     expect(html).toContain('Extra materials, labour or work for Foundation');
-    expect(html).toContain('Extra materials, labour or work for Ground Floor');
+    expect(html).not.toContain(
+      'Extra materials, labour or work for Ground Floor',
+    );
+    // Only the selected stage is visible until the user chooses another floor.
   });
 
   it('displays older manual items in Miscellaneous without dropping their costs', () => {

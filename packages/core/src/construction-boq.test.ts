@@ -1622,3 +1622,117 @@ describe('entering the drawings by hand', () => {
     ).toBeUndefined();
   });
 });
+
+describe('floor-specific kitchens, finish exclusions and staircase measurements', () => {
+  it('prices two independently measured kitchens and permits no room flooring or stairs', () => {
+    const base = generateQuotationBoq({ details: quote() });
+    const groundCounts = base.counts.floors['Ground Floor']!;
+    const result = generateQuotationBoq({
+      details: quote(),
+      counts: {
+        floors: {
+          'Ground Floor': { ...groundCounts, kitchens: 2 },
+        },
+        finishes: {
+          'Ground Floor': {
+            rooms: [],
+            excludeRoomFlooring: true,
+            bathroomLengthFeet: 0,
+            bathroomWidthFeet: 0,
+            kitchenPlatformFeet: 0,
+            staircaseGraniteSqft: 0,
+            railingFeet: 35,
+            kitchenMeasurements: [
+              {
+                id: 'k1',
+                name: 'Kitchen A',
+                platformFeet: 3,
+                platformDepthFeet: 2,
+                wallTileFeet: 3,
+                wallTileHeightFeet: 2,
+              },
+              {
+                id: 'k2',
+                name: 'Kitchen B',
+                platformFeet: 5,
+                platformDepthFeet: 2.5,
+                wallTileFeet: 5,
+                wallTileHeightFeet: 3,
+              },
+            ],
+          },
+        },
+      },
+    });
+    const outputs = (kind: string) =>
+      result.lines
+        .filter((line) => line.kind === kind && line.section === 'Ground Floor')
+        .flatMap((line) => line.outputs);
+    const byMaterial = (kind: string, material: string) =>
+      outputs(kind).find((row) => row.material === material)?.quantity ?? 0;
+    expect(byMaterial('quote-kitchen', 'kitchen_platform')).toBeCloseTo(
+      (3 * 2 + 5 * 2.5) * (1 + result.settings.tileWastagePercent / 100),
+      1,
+    );
+    expect(byMaterial('quote-kitchen', 'kitchen_sink')).toBe(2);
+    expect(byMaterial('quote-kitchen', 'kitchen_wall_tiles')).toBeGreaterThan(
+      21,
+    );
+    expect(byMaterial('quote-flooring', 'floor_tiles')).toBe(0);
+    expect(byMaterial('quote-flooring', 'staircase_granite')).toBe(0);
+    expect(byMaterial('quote-railings', 'railing_ss304')).toBe(35);
+  });
+
+  it('removes all kitchen and sink quantities on a floor without a kitchen', () => {
+    const result = generateQuotationBoq({
+      details: quote(),
+      counts: {
+        floors: { 'Ground Floor': { kitchens: 0 } },
+        finishes: {
+          'Ground Floor': {
+            rooms: [],
+            kitchenMeasurements: [],
+            bathroomLengthFeet: 0,
+            bathroomWidthFeet: 0,
+            kitchenPlatformFeet: 0,
+          },
+        },
+      },
+    });
+    const outputs = result.lines
+      .filter((line) => line.section === 'Ground Floor')
+      .flatMap((line) => line.outputs);
+    expect(
+      outputs.some(
+        (row) => row.material === 'kitchen_platform' && row.quantity > 0,
+      ),
+    ).toBe(false);
+    expect(
+      outputs.some(
+        (row) => row.material === 'kitchen_sink' && row.quantity > 0,
+      ),
+    ).toBe(false);
+    expect(
+      result.counts.finishes?.['Ground Floor']?.kitchenMeasurements,
+    ).toEqual([]);
+  });
+
+  it('recognizes penthouse quotation area separately for repeat exclusions', () => {
+    const details = quote(
+      ['10', '10'],
+      [
+        {
+          kind: 'floor',
+          name: 'Terrace — Penthouse',
+          lengthFeet: '15',
+          widthFeet: '20',
+          heightFeet: '10',
+          ratePerSqft: '1850',
+        },
+      ],
+    );
+    expect(
+      floorsFromQuote(details).find((floor) => floor.name === 'Terrace'),
+    ).toMatchObject({ penthouseSqft: 300 });
+  });
+});

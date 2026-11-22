@@ -1095,6 +1095,20 @@ export function BoqWorkspace({
       ),
     );
   }
+  function resetOutputQuantity(lineIndex: number, outputIndex: number) {
+    const line = lines[lineIndex];
+    const output = line?.outputs[outputIndex];
+    if (!line?.origin || !output) return;
+    const key = overrideKey(line, output);
+    const existing = overrides[key];
+    if (!existing || existing.quantity === undefined) return;
+    const next = { ...overrides };
+    if (existing.rate !== undefined) next[key] = { rate: existing.rate };
+    else delete next[key];
+    setOverrides(next);
+    generateFromQuote(true, next);
+  }
+
   function updateOutputRate(
     lineIndex: number,
     outputIndex: number,
@@ -1329,6 +1343,16 @@ export function BoqWorkspace({
         following.finishes![target] = {
           ...following.finishes![from]!,
           rooms: following.finishes![from]!.rooms.map((room) => ({ ...room })),
+          ...(following.finishes![from]!.kitchenMeasurements
+            ? {
+                kitchenMeasurements: following.finishes![
+                  from
+                ]!.kitchenMeasurements!.map((kitchen) => ({
+                  ...kitchen,
+                  id: uid(),
+                })),
+              }
+            : {}),
         };
       }
       if (following.windowSizes?.[from] !== undefined)
@@ -1532,7 +1556,7 @@ export function BoqWorkspace({
       id: uid(),
       name: safeName,
       section: stage,
-      kind: 'manual',
+      kind: category === 'miscellaneous' ? 'manual' : 'custom-work',
       unit: measureUnit,
       inputs: { quantity, stageCategory: category },
       outputs: [{ name: safeName, quantity, unit: measureUnit, rate }],
@@ -1548,7 +1572,10 @@ export function BoqWorkspace({
       }));
     setLines((prior) => [...prior, item, ...copies]);
     setMessage(
-      label + ' added to ' + stage + '. Save BOQ to keep the measurement.',
+      label +
+        ' added to ' +
+        stage +
+        '. Automatic saving will keep the measurement.',
     );
   }
 
@@ -2189,6 +2216,7 @@ export function BoqWorkspace({
               onRepeatFloors={repeatStageFloors}
               onCustomizeFloor={customizeStageFloor}
               onUpdateQuantity={updateOutputQuantity}
+              onResetQuantity={resetOutputQuantity}
               onUpdateRate={updateOutputRate}
               rateFor={priceOf}
               onAddManual={addStageManual}
