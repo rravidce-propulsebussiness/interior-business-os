@@ -41,7 +41,7 @@ export type DesignFootingType = {
   topBarDia: number;
   topSpacingIn: number;
   /** Optional per-direction and per-layer steel schedule; replaces legacy mesh steel. */
-  reinforcement?: FootingRebarSet[];
+  reinforcement?: FootingRebarSet[] | undefined;
   /** Strap beam concrete is extra to the two pads, with no steel assumed. */
   strapLengthFeet: number;
   strapWidthIn: number;
