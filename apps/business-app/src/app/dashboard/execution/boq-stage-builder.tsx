@@ -451,7 +451,9 @@ export function BoqStageBuilder(props: Props) {
     syncFocusUrl(null);
     const stage = step <= 6
       ? 'Foundation'
-      : props.floors[0]?.name ?? 'Foundation';
+      : props.floors.some((floor) => floor.name === activeTab)
+        ? activeTab
+        : props.floors[0]?.name ?? 'Foundation';
     setActiveTab(stage);
     setExpanded((prior) => [...new Set([...prior, stage])]);
     if (step === 13) props.onOpenLabour?.();
