@@ -59,11 +59,7 @@ import {
   type MeasuredDimensions,
   type MeasuredKind,
 } from './boq-stage-measurements';
-import {
-  boqCsv,
-  boqFileName,
-  type BoqExportRow,
-} from './boq-export';
+import { boqCsv, boqFileName, type BoqExportRow } from './boq-export';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 
 type Generator = {
@@ -1484,7 +1480,9 @@ export function BoqWorkspace({
       (autoSavedFingerprint.current !== null &&
         autoSavedFingerprint.current !== autoSaveFingerprint)
     ) {
-      setMessage('Your changes are still saving. Open Detailed BOQ after the saved status appears.');
+      setMessage(
+        'Your changes are still saving. Open Detailed BOQ after the saved status appears.',
+      );
       return;
     }
     setMessage('');

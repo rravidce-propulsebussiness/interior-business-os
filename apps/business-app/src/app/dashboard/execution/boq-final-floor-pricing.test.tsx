@@ -24,7 +24,9 @@ describe('one final BOQ floor-wise pricing', () => {
       ['Foundation', 'Ground Floor', 'First Floor'],
     );
     expect(rows.map((r) => r.stage)).toEqual([
-      'Foundation', 'Ground Floor', 'First Floor',
+      'Foundation',
+      'Ground Floor',
+      'First Floor',
     ]);
     expect(rows.find((r) => r.stage === 'Ground Floor')).toMatchObject({
       areaSqft: 1000,
@@ -86,12 +88,17 @@ describe('one final BOQ floor-wise pricing', () => {
       floors,
       ['Ground Floor'],
     );
-    const render = (canViewCost: boolean) => renderToStaticMarkup(
-      createElement(BoqFinalFloorPricing, {
-        rows, materialCost: 1200, labourCost: 0, totalCost: 1200,
-        areaSqft: 1950, canViewCost,
-      }),
-    );
+    const render = (canViewCost: boolean) =>
+      renderToStaticMarkup(
+        createElement(BoqFinalFloorPricing, {
+          rows,
+          materialCost: 1200,
+          labourCost: 0,
+          totalCost: 1200,
+          areaSqft: 1950,
+          canViewCost,
+        }),
+      );
     expect(render(true)).toContain('Floor-wise BOQ pricing');
     expect(render(true)).toContain('Materials');
     expect(render(true)).toContain('Labour');

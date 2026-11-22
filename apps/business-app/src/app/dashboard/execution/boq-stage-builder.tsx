@@ -2511,9 +2511,7 @@ export function BoqStageBuilder(props: Props) {
             ▣ {props.busy ? 'Saving…' : 'Save BOQ'}
           </button>
         )}
-
       </div>
-
     </section>
   );
 }

@@ -21,8 +21,15 @@
   font-size: 12px;
   line-height: 1.5;
 }
-.boq-final-floor-scroll { max-width: 100%; overflow-x: auto; }
-.boq-final-floor-pricing table { border-collapse: collapse; width: 100%; min-width: 550px; }
+.boq-final-floor-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.boq-final-floor-pricing table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 550px;
+}
 .boq-final-floor-pricing :is(th, td) {
   padding: 12px 9px;
   text-align: right;
@@ -31,28 +38,51 @@
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-.boq-final-floor-pricing :is(th, td):first-child { text-align: left; }
-.boq-final-floor-pricing thead { background: #faf3ef; color: #6c3735; }
-.boq-final-floor-pricing tbody th { font-weight: 740; color: #51262b; }
-.boq-final-floor-pricing tbody td { color: #654d48; }
-.boq-final-floor-pricing tbody td strong { color: #74302c; }
+.boq-final-floor-pricing :is(th, td):first-child {
+  text-align: left;
+}
+.boq-final-floor-pricing thead {
+  background: #faf3ef;
+  color: #6c3735;
+}
+.boq-final-floor-pricing tbody th {
+  font-weight: 740;
+  color: #51262b;
+}
+.boq-final-floor-pricing tbody td {
+  color: #654d48;
+}
+.boq-final-floor-pricing tbody td strong {
+  color: #74302c;
+}
 .boq-final-floor-pricing tfoot {
   background: #f9eae3;
   color: #662d2c;
   font-weight: 850;
 }
-.boq-final-floor-pricing tfoot :is(th, td) { border-bottom: 0; }
-.boq-final-floor-detail-hint { font-size: 12px; }
+.boq-final-floor-pricing tfoot :is(th, td) {
+  border-bottom: 0;
+}
+.boq-final-floor-detail-hint {
+  font-size: 12px;
+}
 @media (max-width: 650px) {
-  .boq-final-floor-pricing { padding: 13px; gap: 10px; }
-  .boq-final-floor-scroll { overflow: visible; }
+  .boq-final-floor-pricing {
+    padding: 13px;
+    gap: 10px;
+  }
+  .boq-final-floor-scroll {
+    overflow: visible;
+  }
   .boq-final-floor-pricing table,
   .boq-final-floor-pricing :is(tbody, tfoot, tr, th, td) {
     display: block;
     min-width: 0;
     width: 100%;
   }
-  .boq-final-floor-pricing thead { display: none; }
+  .boq-final-floor-pricing thead {
+    display: none;
+  }
   .boq-final-floor-pricing tbody tr,
   .boq-final-floor-pricing tfoot tr {
     padding: 11px 13px;
@@ -61,7 +91,10 @@
     border-radius: 13px;
     background: #fffdfb;
   }
-  .boq-final-floor-pricing tfoot tr { background: #fbefe8; border-color: #e9cdbd; }
+  .boq-final-floor-pricing tfoot tr {
+    background: #fbefe8;
+    border-color: #e9cdbd;
+  }
   .boq-final-floor-pricing :is(th, td) {
     display: flex;
     justify-content: space-between;
@@ -85,5 +118,7 @@
     font-weight: 500;
     text-align: left;
   }
-  .boq-final-floor-pricing tr > :last-child { border-bottom: 0; }
+  .boq-final-floor-pricing tr > :last-child {
+    border-bottom: 0;
+  }
 }
