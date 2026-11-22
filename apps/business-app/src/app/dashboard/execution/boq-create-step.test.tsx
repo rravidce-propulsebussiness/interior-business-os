@@ -25,19 +25,23 @@ const render = (overrides: Partial<Props> = {}) =>
   );
 
 describe('BOQ two-step creation', () => {
-  it('displays only a project dropdown, a BOQ name, and Continue before editing', () => {
-    const html = render();
-    expect(html).toContain('Project');
-    expect(html).toContain('BOQ name');
+  it('shows premium project and final quotation entry without a second BOQ', () => {
+    const html = render({
+      quoteLabel: 'QT-0025 · Final Quotation',
+      floors: 4,
+      builtUpSqft: 4356,
+    });
+    expect(html).toContain('Create New BOQ');
+    expect(html).toContain('Project &amp; Quotation Details');
+    expect(html).toContain('QT-0025 · Final Quotation');
+    expect(html).toContain('4,356 sq ft');
     expect(html).toContain('Continue');
     expect(html).toContain('Ramya · Construction BOQ');
-    expect(html.match(/<select\b/g)).toHaveLength(1);
-    expect(html.match(/<input\b/g)).toHaveLength(1);
-    expect(html).not.toContain('BOQ Builder');
-    expect(html).not.toContain('Labour Costing');
-    expect(html).not.toContain('Foundation');
+    expect(html.match(/<select\\b/g)).toHaveLength(1);
+    expect(html.match(/<input\\b/g)).toHaveLength(1);
+    expect(html).toContain('One Project, One BOQ');
+    expect(html).toContain('Open an existing BOQ instead');
     expect(html).not.toContain('Save BOQ');
-    expect(html).not.toContain('BOQ & Estimating');
   });
   it('requires a selected project and a BOQ name', () => {
     const noProject = render({ projectId: '' });

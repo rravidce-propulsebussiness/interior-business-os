@@ -66,6 +66,58 @@
 .boq-final-floor-detail-hint {
   font-size: 12px;
 }
+
+/* Each floor has one total with its measured takeoff directly underneath. */
+.boq-final-floor-pricing .boq-final-details-row > td {
+  padding: 0 9px 13px;
+  text-align: left;
+  white-space: normal;
+}
+.boq-final-details-row details {
+  border: 1px solid #eee2dc;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+}
+.boq-final-details-row summary {
+  cursor: pointer;
+  color: #7b3a31;
+  font-weight: 700;
+  font-size: 12px;
+}
+.boq-final-line-list {
+  padding-top: 9px;
+}
+.boq-final-line {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(95px, 1fr));
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-top: 1px solid #f0e7e2;
+  font-size: 12px;
+  color: #5d4d46;
+}
+.boq-final-line-name {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.boq-final-line-name strong {
+  overflow-wrap: anywhere;
+}
+.boq-final-line-name small {
+  color: #8c7870;
+}
+.boq-final-line > :not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.boq-final-labour-line {
+  background: #fbf5f1;
+}
+
 @media (max-width: 650px) {
   .boq-final-floor-pricing {
     padding: 13px;
@@ -120,5 +172,27 @@
   }
   .boq-final-floor-pricing tr > :last-child {
     border-bottom: 0;
+  }
+
+  .boq-final-floor-pricing tbody tr.boq-final-main-row {
+    margin-bottom: 0;
+    border-radius: 13px 13px 0 0;
+  }
+  .boq-final-floor-pricing tbody tr.boq-final-details-row {
+    margin-top: -1px;
+    border-radius: 0 0 13px 13px;
+    padding-top: 0;
+  }
+  .boq-final-floor-pricing .boq-final-details-row > td {
+    display: block;
+    padding: 0;
+    border: 0;
+  }
+  .boq-final-line {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 5px 10px;
+  }
+  .boq-final-line > :not(:first-child) {
+    text-align: right;
   }
 }

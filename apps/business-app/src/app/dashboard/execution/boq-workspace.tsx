@@ -1,14 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  Fragment,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { type BoqInputs } from './boq-calculations';
 import { removeManualBoq, saveManualBoq } from './boq-actions';
@@ -148,19 +141,6 @@ const money = (value: number, currency = 'INR') =>
     currency,
     maximumFractionDigits: 0,
   }).format(value || 0);
-/** A unit rate: paise are shown when the rate has them (₹9.50/nos). */
-const rateMoney = (value: number, currency = 'INR') => {
-  const whole = Math.abs((value || 0) - Math.round(value || 0)) < 0.005;
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: whole ? 0 : 2,
-    maximumFractionDigits: whole ? 0 : 2,
-  }).format(value || 0);
-};
-const plural = (count: number, one: string, many: string) =>
-  `${count} ${count === 1 ? one : many}`;
-
 const upgradeOldSmallConcrete = (
   items: SavedLine[],
   settings: ReturnType<typeof normalizeStructuralSettings>,
@@ -1457,6 +1437,15 @@ export function BoqWorkspace({
         )
       : [];
   const stages = [...new Set(lines.map((line) => line.section || 'Other'))];
+  const detailedPricingLines = allOutputs.map((output, index) => ({
+    id: `${output.lineId}-${index}`,
+    stage: output.section || 'Other',
+    work: output.lineName,
+    name: output.name,
+    quantity: output.quantity,
+    unit: output.unit,
+    rate: output.rate,
+  }));
   const detailedFloorPricing = buildFloorPricing(
     allOutputs.map((output) => ({
       stage: output.section,
@@ -1504,6 +1493,9 @@ export function BoqWorkspace({
         projects={newProjects}
         projectId={projectId}
         title={title === 'Construction BOQ' ? '' : title}
+        quoteLabel={currentQuote?.label ?? ''}
+        floors={floorsForGeneration.length}
+        builtUpSqft={builtUpSqft}
         saving={busy}
         preparing={Boolean(
           quoteId && (calculating || (!generator && lines.length === 0)),
@@ -1704,6 +1696,8 @@ export function BoqWorkspace({
                 ) : null}
                 <BoqFinalFloorPricing
                   rows={detailedFloorPricing}
+                  lines={detailedPricingLines}
+                  labourAllocations={labour ? labourEstimate.byStage : {}}
                   materialCost={materialOnlyCost}
                   labourCost={labourCost}
                   totalCost={materialCost}
@@ -1734,74 +1728,6 @@ export function BoqWorkspace({
                     </div>
                   </section>
                 )}
-                <section className="boq-view-items">
-                  <h3>Detailed quantities and costs by stage</h3>
-                  {stages.map((stage) => {
-                    const items = lines.filter(
-                      (line) => (line.section || 'Other') === stage,
-                    );
-                    return (
-                      <details className="boq-floor-cost" key={stage}>
-                        <summary>
-                          {stage} · {plural(items.length, 'item', 'items')}
-                        </summary>
-                        <div className="boq-view-table-scroll">
-                          <table className="boq-view-table">
-                            <thead>
-                              <tr>
-                                <th>Item / material</th>
-                                <th>Quantity</th>
-                                <th>Unit</th>
-                                {canViewCost && (
-                                  <>
-                                    <th>Rate</th>
-                                    <th>Cost</th>
-                                  </>
-                                )}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {items.map((line) => (
-                                <Fragment key={line.id}>
-                                  <tr className="boq-view-group">
-                                    <td colSpan={canViewCost ? 5 : 3}>
-                                      {line.name}
-                                    </td>
-                                  </tr>
-                                  {line.outputs.map((output, i) => (
-                                    <tr key={`${line.id}-${i}`}>
-                                      <td>{output.name}</td>
-                                      <td>
-                                        {output.quantity.toLocaleString(
-                                          'en-IN',
-                                          { maximumFractionDigits: 3 },
-                                        )}
-                                      </td>
-                                      <td>{output.unit}</td>
-                                      {canViewCost && (
-                                        <>
-                                          <td>{rateMoney(priceOf(output))}</td>
-                                          <td>
-                                            {money(
-                                              output.quantity * priceOf(output),
-                                            )}
-                                          </td>
-                                        </>
-                                      )}
-                                    </tr>
-                                  ))}
-                                </Fragment>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </details>
-                    );
-                  })}
-                  {!stages.length && (
-                    <p className="boq-empty">No measured items saved.</p>
-                  )}
-                </section>
                 <div className="boq-savebar">
                   <button
                     type="button"
@@ -2052,6 +1978,29 @@ export function BoqWorkspace({
               autoSaveLabel={active ? autoSaveLabel : undefined}
             />
           )}
+          {costingTab === 'labour' && (
+            <nav
+              className="boq-guided-footer"
+              aria-label="Labour costing navigation"
+            >
+              <button
+                className="boq-guided-back"
+                type="button"
+                onClick={() => setCostingTab('builder')}
+              >
+                ← Back to Measurements
+              </button>
+              <span>Labour is included once in the same project BOQ.</span>
+              <button
+                className="boq-guided-primary"
+                type="button"
+                onClick={openDetailedBoq}
+                disabled={!active}
+              >
+                Final Detailed BOQ →
+              </button>
+            </nav>
+          )}
           <div
             style={{ display: costingTab === 'builder' ? undefined : 'none' }}
           >
@@ -2074,6 +2023,7 @@ export function BoqWorkspace({
               counts={countsForGeneration}
               onCountsChange={updateStageCounts}
               structuralSettings={concreteSettings}
+              materialRates={initialRates}
               structuralRmcEnabled={rmcEnabled}
               structuralRmcRate={rmcRatePerM3}
               onStructuralRmcToggle={setRmcEnabled}
@@ -2107,6 +2057,7 @@ export function BoqWorkspace({
               }
               onSave={save}
               onDetailedBoq={openDetailedBoq}
+              onOpenLabour={() => setCostingTab('labour')}
               canOpenDetailed={Boolean(active)}
               canViewCost={canViewCost}
               busy={busy}
