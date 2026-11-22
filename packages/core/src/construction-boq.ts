@@ -27,7 +27,7 @@ import {
   footingMeshPieces,
   padCount,
 } from './footing-takeoff';
-export type { DesignFootingType } from './footing-takeoff';
+export type { DesignFootingType, FootingRebarSet } from './footing-takeoff';
 export { FOOTING_TYPES, newFootingType } from './footing-takeoff';
 
 export type BoqOrigin =
