@@ -81,6 +81,49 @@ describe('one final BOQ floor-wise pricing', () => {
     });
   });
 
+
+  it('expands a single floor report into itemized measurements and allocated labour', () => {
+    const rows = buildFloorPricing(
+      [{ stage: 'Ground Floor', amount: 2000, isLabour: false }],
+      { 'Ground Floor': 500 },
+      floors,
+      ['Ground Floor'],
+    );
+    const render = (canViewCost: boolean) =>
+      renderToStaticMarkup(
+        createElement(BoqFinalFloorPricing, {
+          rows,
+          lines: [
+            {
+              id: 'col-1',
+              stage: 'Ground Floor',
+              work: 'C1 columns',
+              name: 'M20 concrete',
+              quantity: 2,
+              unit: 'm³',
+              rate: 1000,
+            },
+          ],
+          labourAllocations: { 'Ground Floor': 500 },
+          materialCost: 2000,
+          labourCost: 500,
+          totalCost: 2500,
+          areaSqft: 1950,
+          canViewCost,
+        }),
+      );
+    const html = render(true);
+    expect(html).toContain('View detailed quantities and rates');
+    expect(html).toContain('C1 columns');
+    expect(html).toContain('M20 concrete');
+    expect(html).toContain('Allocated labour');
+    expect(html).toContain('₹2,500');
+    expect((html.match(/boq-floor-cost/g) ?? []).length).toBe(1);
+    expect(render(false)).not.toContain('₹2,500');
+    expect(render(false)).not.toContain('₹1,000');
+    expect(render(false)).not.toContain('Allocated labour');
+  });
+
   it('renders final totals but hides costs from users without cost permissions', () => {
     const rows = buildFloorPricing(
       [{ stage: 'Ground Floor', amount: 1200, isLabour: false }],
