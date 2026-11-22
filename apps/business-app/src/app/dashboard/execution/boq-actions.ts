@@ -101,15 +101,25 @@ const generatorSchema = z.object({
           bathroomSizes: z.string().max(300).optional(),
           railingFeet: z.number().finite().nonnegative().optional(),
           excludeRoomFlooring: z.boolean().optional(),
-          staircaseGraniteSqft: z.number().finite().nonnegative().max(100000).optional(),
-          kitchenMeasurements: z.array(z.object({
-            id: z.string().max(80),
-            name: z.string().max(80),
-            platformFeet: z.number().finite().nonnegative().max(500),
-            platformDepthFeet: z.number().finite().nonnegative().max(500),
-            wallTileFeet: z.number().finite().nonnegative().max(500),
-            wallTileHeightFeet: z.number().finite().nonnegative().max(500),
-          })).max(30).optional(),
+          staircaseGraniteSqft: z
+            .number()
+            .finite()
+            .nonnegative()
+            .max(100000)
+            .optional(),
+          kitchenMeasurements: z
+            .array(
+              z.object({
+                id: z.string().max(80),
+                name: z.string().max(80),
+                platformFeet: z.number().finite().nonnegative().max(500),
+                platformDepthFeet: z.number().finite().nonnegative().max(500),
+                wallTileFeet: z.number().finite().nonnegative().max(500),
+                wallTileHeightFeet: z.number().finite().nonnegative().max(500),
+              }),
+            )
+            .max(30)
+            .optional(),
         }),
       )
       .optional(),

@@ -1780,11 +1780,20 @@ export function BoqStageBuilder(props: Props) {
                             type="button"
                             onClick={() =>
                               entry.output.quantity === 0
-                                ? props.onResetQuantity(entry.lineIndex, entry.outputIndex)
-                                : props.onUpdateQuantity(entry.lineIndex, entry.outputIndex, 0)
+                                ? props.onResetQuantity(
+                                    entry.lineIndex,
+                                    entry.outputIndex,
+                                  )
+                                : props.onUpdateQuantity(
+                                    entry.lineIndex,
+                                    entry.outputIndex,
+                                    0,
+                                  )
                             }
                           >
-                            {entry.output.quantity === 0 ? 'Restore calculated quantity' : 'Remove from floor'}
+                            {entry.output.quantity === 0
+                              ? 'Restore calculated quantity'
+                              : 'Remove from floor'}
                           </button>
                         )
                       )}
