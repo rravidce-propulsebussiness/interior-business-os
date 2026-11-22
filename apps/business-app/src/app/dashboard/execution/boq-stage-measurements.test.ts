@@ -51,7 +51,9 @@ describe('measured BOQ volume geometry', () => {
     };
     for (const kind of ['sajjas', 'shelves'] as const) {
       const outputs = measuredOutputs(kind, dimensions, settings);
-      expect(outputs.some((item) => item.material === 'concrete_m20')).toBe(false);
+      expect(outputs.some((item) => item.material === 'concrete_m20')).toBe(
+        false,
+      );
       expect(outputs[0]).toMatchObject({ unit: 'm³', rate: 0 });
       for (const material of ['cement', 'sand', 'aggregate', 'shuttering']) {
         expect(outputs.some((item) => item.material === material)).toBe(true);

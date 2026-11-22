@@ -25,8 +25,14 @@
   display: grid;
   place-items: center;
 }
-.boq-rmc-layers svg { width: 32px; height: 32px; }
-.boq-rmc-heading { flex: 1; min-width: 0; }
+.boq-rmc-layers svg {
+  width: 32px;
+  height: 32px;
+}
+.boq-rmc-heading {
+  flex: 1;
+  min-width: 0;
+}
 .boq-rmc-heading h3 {
   margin: 0 0 3px;
   font-size: clamp(15px, 2vw, 20px);
@@ -34,7 +40,11 @@
   line-height: 1.2;
   letter-spacing: -0.02em;
 }
-.boq-rmc-heading p { margin: 0; font-size: 12px; color: #7e645c; }
+.boq-rmc-heading p {
+  margin: 0;
+  font-size: 12px;
+  color: #7e645c;
+}
 .boq-rmc-toggle {
   width: 99px;
   min-height: 42px;
@@ -53,20 +63,26 @@
   cursor: pointer;
 }
 .boq-rmc-toggle i {
-  width: 30px; height: 30px;
-  display: block; flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  display: block;
+  flex: 0 0 30px;
   border-radius: 50%;
   background: #fff;
   box-shadow: 0 1px 3px #0002;
 }
-.boq-rmc-card[data-mode="site"] .boq-rmc-toggle {
+.boq-rmc-card[data-mode='site'] .boq-rmc-toggle {
   flex-direction: row-reverse;
   padding: 5px 13px 5px 6px;
   background: #a09d9b;
   border-color: #a09d9b;
 }
-.boq-rmc-toggle:disabled { opacity: .65; cursor: not-allowed; }
-.boq-rmc-toggle:focus-visible, .boq-rmc-rate input:focus-visible {
+.boq-rmc-toggle:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+.boq-rmc-toggle:focus-visible,
+.boq-rmc-rate input:focus-visible {
   outline: 3px solid #e8ab7d;
   outline-offset: 3px;
 }
@@ -81,10 +97,18 @@
   border: 1px solid #e2efdc;
   border-radius: 14px;
 }
-.boq-rmc-supply { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.boq-rmc-supply {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
 .boq-rmc-supply-symbol {
-  display: grid; place-items: center; flex: 0 0 40px;
-  width: 40px; height: 40px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
   color: #23853b;
   background: #def3d8;
   border-radius: 11px;
@@ -92,9 +116,17 @@
   line-height: 1;
 }
 .boq-rmc-supply strong {
-  display: block; color: #173e22; font-size: clamp(15px, 2.1vw, 19px); font-weight: 850;
+  display: block;
+  color: #173e22;
+  font-size: clamp(15px, 2.1vw, 19px);
+  font-weight: 850;
 }
-.boq-rmc-supply small { display: block; color: #52664f; font-size: 12px; margin-top: 3px; }
+.boq-rmc-supply small {
+  display: block;
+  color: #52664f;
+  font-size: 12px;
+  margin-top: 3px;
+}
 .boq-rmc-rate {
   display: flex;
   gap: 4px;
@@ -111,100 +143,239 @@
   min-width: 105px;
 }
 .boq-rmc-rate input {
-  flex: 1; width: 58px; min-width: 0;
-  padding: 0; margin: 0;
-  border: 0; outline-color: #36a748;
+  flex: 1;
+  width: 58px;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline-color: #36a748;
   background: transparent;
-  color: #21512c; font: inherit; text-align: right;
-  appearance: textfield; -moz-appearance: textfield;
+  color: #21512c;
+  font: inherit;
+  text-align: right;
+  appearance: textfield;
+  -moz-appearance: textfield;
 }
 .boq-rmc-rate input::-webkit-outer-spin-button,
-.boq-rmc-rate input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.boq-rmc-rate span:last-child { white-space: nowrap; font-size: 12px; }
+.boq-rmc-rate input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.boq-rmc-rate span:last-child {
+  white-space: nowrap;
+  font-size: 12px;
+}
 .boq-rmc-applied {
-  display: flex; gap: 9px; align-items: center;
-  background: #e8f8e1; border-radius: 12px;
-  padding: 10px 14px; color: #26682c; font-weight: 800; font-size: 13px;
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  background: #e8f8e1;
+  border-radius: 12px;
+  padding: 10px 14px;
+  color: #26682c;
+  font-weight: 800;
+  font-size: 13px;
 }
 .boq-rmc-applied > span {
-  width: 22px; height: 22px; border-radius: 50%;
-  display: grid; place-items: center;
-  color: #fff; background: #25943f; font-weight: 900;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: #25943f;
+  font-weight: 900;
 }
-.boq-rmc-tags { display: flex; gap: 7px; flex-wrap: wrap; padding: 2px 3px; }
+.boq-rmc-tags {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  padding: 2px 3px;
+}
 .boq-rmc-tags span {
-  display: inline-flex; gap: 6px; align-items: center;
-  background: #f0f7ea; border-radius: 12px;
-  color: #233a27; font-size: 12px; font-weight: 800;
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  background: #f0f7ea;
+  border-radius: 12px;
+  color: #233a27;
+  font-size: 12px;
+  font-weight: 800;
   padding: 8px 11px;
 }
-.boq-rmc-tags b { font-size: 15px; color: #2a9c3e; }
+.boq-rmc-tags b {
+  font-size: 15px;
+  color: #2a9c3e;
+}
 .boq-rmc-note {
-  margin: 0; padding: 11px 13px;
-  border-radius: 11px; background: #f0f9e8;
-  color: #345f37; font-size: 12px; line-height: 1.45;
+  margin: 0;
+  padding: 11px 13px;
+  border-radius: 11px;
+  background: #f0f9e8;
+  color: #345f37;
+  font-size: 12px;
+  line-height: 1.45;
 }
 .boq-rmc-site {
   background: #fff4e9;
   border-radius: 14px;
   padding: 14px 12px;
-  display: grid; gap: 13px;
+  display: grid;
+  gap: 13px;
 }
 .boq-rmc-site .boq-rmc-supply-symbol {
-  background: #fce4d0; color: #ad5c32;
+  background: #fce4d0;
+  color: #ad5c32;
 }
-.boq-rmc-site .boq-rmc-supply strong { color: #4a2622; }
-.boq-rmc-site .boq-rmc-supply small { color: #7b6255; }
+.boq-rmc-site .boq-rmc-supply strong {
+  color: #4a2622;
+}
+.boq-rmc-site .boq-rmc-supply small {
+  color: #7b6255;
+}
 .boq-rmc-recipe {
-  display: grid; background: #fff; border: 1px solid #eddbd0;
-  border-radius: 13px; overflow: hidden; box-shadow: 0 2px 5px #3c22180a;
+  display: grid;
+  background: #fff;
+  border: 1px solid #eddbd0;
+  border-radius: 13px;
+  overflow: hidden;
+  box-shadow: 0 2px 5px #3c22180a;
 }
 .boq-rmc-recipe > div {
-  display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  padding: 12px 13px; font-size: 13px; border-bottom: 1px solid #f1e5df;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 13px;
+  font-size: 13px;
+  border-bottom: 1px solid #f1e5df;
 }
-.boq-rmc-recipe > div:last-child { border-bottom: 0; }
-.boq-rmc-recipe strong { font-size: 13px; white-space: nowrap; }
+.boq-rmc-recipe > div:last-child {
+  border-bottom: 0;
+}
+.boq-rmc-recipe strong {
+  font-size: 13px;
+  white-space: nowrap;
+}
 .boq-rmc-site-note {
-  margin: 0; padding: 12px;
-  background: #fff0d9; border-radius: 12px;
-  color: #795638; font-size: 12px; line-height: 1.45;
+  margin: 0;
+  padding: 12px;
+  background: #fff0d9;
+  border-radius: 12px;
+  color: #795638;
+  font-size: 12px;
+  line-height: 1.45;
 }
 .boq-rmc-other {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 10px; min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
   padding: 12px 13px;
-  background: #fff9f5; border: 1px solid #efe1d8;
+  background: #fff9f5;
+  border: 1px solid #efe1d8;
   border-radius: 13px;
 }
-.boq-rmc-other strong { display: block; color: #51252a; font-size: 13px; }
-.boq-rmc-other small { display: block; font-size: 11px; color: #8a6a60; margin-top: 3px; }
+.boq-rmc-other strong {
+  display: block;
+  color: #51252a;
+  font-size: 13px;
+}
+.boq-rmc-other small {
+  display: block;
+  font-size: 11px;
+  color: #8a6a60;
+  margin-top: 3px;
+}
 .boq-rmc-autosave {
-  flex: 0 0 auto; color: #378047; font-size: 11px; font-weight: 700;
-  max-width: 125px; text-align: right;
+  flex: 0 0 auto;
+  color: #378047;
+  font-size: 11px;
+  font-weight: 700;
+  max-width: 125px;
+  text-align: right;
 }
 .boq-rmc-sr-only {
-  position: absolute; width: 1px; height: 1px;
-  padding: 0; margin: -1px; overflow: hidden;
-  clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 @media (max-width: 580px) {
-  .boq-rmc-card { gap: 9px; padding: 12px; border-radius: 17px; }
-  .boq-rmc-top { gap: 7px; }
-  .boq-rmc-layers { flex-basis: 32px; width: 32px; }
-  .boq-rmc-layers svg { width: 27px; height: 27px; }
-  .boq-rmc-heading h3 { font-size: 15px; }
-  .boq-rmc-heading p { font-size: 11px; }
-  .boq-rmc-toggle { width: 78px; min-height: 37px; padding: 4px 5px 4px 10px; }
-  .boq-rmc-toggle i { width: 27px; height: 27px; flex-basis: 27px; }
-  .boq-rmc-ready { padding: 11px; gap: 5px; }
-  .boq-rmc-supply { gap: 6px; }
-  .boq-rmc-supply-symbol { width: 30px; height: 34px; flex-basis: 30px; font-size: 23px; }
-  .boq-rmc-supply strong { font-size: 14px; }
-  .boq-rmc-supply small { font-size: 11px; }
-  .boq-rmc-rate { padding: 7px 6px; min-width: 100px; gap: 2px; }
-  .boq-rmc-rate input { width: 43px; font-size: 13px; }
-  .boq-rmc-rate span:last-child { font-size: 11px; }
-  .boq-rmc-other { align-items: start; }
-  .boq-rmc-other small { font-size: 10px; }
+  .boq-rmc-card {
+    gap: 9px;
+    padding: 12px;
+    border-radius: 17px;
+  }
+  .boq-rmc-top {
+    gap: 7px;
+  }
+  .boq-rmc-layers {
+    flex-basis: 32px;
+    width: 32px;
+  }
+  .boq-rmc-layers svg {
+    width: 27px;
+    height: 27px;
+  }
+  .boq-rmc-heading h3 {
+    font-size: 15px;
+  }
+  .boq-rmc-heading p {
+    font-size: 11px;
+  }
+  .boq-rmc-toggle {
+    width: 78px;
+    min-height: 37px;
+    padding: 4px 5px 4px 10px;
+  }
+  .boq-rmc-toggle i {
+    width: 27px;
+    height: 27px;
+    flex-basis: 27px;
+  }
+  .boq-rmc-ready {
+    padding: 11px;
+    gap: 5px;
+  }
+  .boq-rmc-supply {
+    gap: 6px;
+  }
+  .boq-rmc-supply-symbol {
+    width: 30px;
+    height: 34px;
+    flex-basis: 30px;
+    font-size: 23px;
+  }
+  .boq-rmc-supply strong {
+    font-size: 14px;
+  }
+  .boq-rmc-supply small {
+    font-size: 11px;
+  }
+  .boq-rmc-rate {
+    padding: 7px 6px;
+    min-width: 100px;
+    gap: 2px;
+  }
+  .boq-rmc-rate input {
+    width: 43px;
+    font-size: 13px;
+  }
+  .boq-rmc-rate span:last-child {
+    font-size: 11px;
+  }
+  .boq-rmc-other {
+    align-items: start;
+  }
+  .boq-rmc-other small {
+    font-size: 10px;
+  }
 }

@@ -2236,7 +2236,8 @@ const concreteOutputs = (
           quantity: round(volume, 3),
           unit: 'm³',
           rate: 0,
-          source: 'Reference volume only; site-mixed materials priced separately',
+          source:
+            'Reference volume only; site-mixed materials priced separately',
         },
         {
           name: 'Cement',
@@ -2246,7 +2247,11 @@ const concreteOutputs = (
           source: 'M20 nominal mix 1:1.5:3 · 8.06 bags/m³',
         },
         sandOutput(volume * M20_SITE_MIX_PER_M3.sandCubicMetres, s),
-        aggregateOutput(volume * M20_SITE_MIX_PER_M3.aggregateCubicMetres, s, '20 mm aggregate'),
+        aggregateOutput(
+          volume * M20_SITE_MIX_PER_M3.aggregateCubicMetres,
+          s,
+          '20 mm aggregate',
+        ),
       ];
 
 /**

@@ -278,8 +278,11 @@ export function BoqWorkspace({
   );
   const [costingTab, setCostingTab] = useState<'builder' | 'labour'>('builder');
   const [rmcEnabled, setRmcEnabled] = useState(() => {
-    const saved = initialDocument?.document?.generator?.settings?.readyMixConcrete;
-    return (saved ?? normalizeStructuralSettings(structural).readyMixConcrete) !== 0;
+    const saved =
+      initialDocument?.document?.generator?.settings?.readyMixConcrete;
+    return (
+      (saved ?? normalizeStructuralSettings(structural).readyMixConcrete) !== 0
+    );
   });
   const [rmcRateOverride, setRmcRateOverride] = useState<number | null>(
     initialDocument?.document?.generator?.rmcRatePerM3 ?? null,

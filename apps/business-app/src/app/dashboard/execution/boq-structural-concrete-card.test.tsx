@@ -31,7 +31,9 @@ describe('BOQ structural concrete costing switch', () => {
     expect(output).toContain('value="5000"');
     for (const work of ['Footings', 'Columns', 'Beams', 'Slabs', 'Staircase'])
       expect(output).toContain(work);
-    expect(output).toContain('Cement, sand and aggregate for structural RCC are included');
+    expect(output).toContain(
+      'Cement, sand and aggregate for structural RCC are included',
+    );
     expect(output).toContain('Saved automatically');
     expect(output.match(/role="switch"/g)).toHaveLength(1);
   });

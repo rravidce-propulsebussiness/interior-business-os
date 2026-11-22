@@ -137,7 +137,8 @@ export function measuredOutputs(
       name: kind === 'sajjas' ? 'Sand (sajjas)' : 'Sand (shelves)',
       material: 'sand',
       quantity: round(
-        volume.m3 * M20_SITE_MIX_PER_M3.sandCubicMetres *
+        volume.m3 *
+          M20_SITE_MIX_PER_M3.sandCubicMetres *
           settings.sandTonPerCum,
         2,
       ),
@@ -147,7 +148,8 @@ export function measuredOutputs(
       name: kind === 'sajjas' ? 'Aggregate (sajjas)' : 'Aggregate (shelves)',
       material: 'aggregate',
       quantity: round(
-        volume.m3 * M20_SITE_MIX_PER_M3.aggregateCubicMetres *
+        volume.m3 *
+          M20_SITE_MIX_PER_M3.aggregateCubicMetres *
           settings.aggregateTonPerCum,
         2,
       ),
