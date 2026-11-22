@@ -106,6 +106,7 @@ type Props = {
   /** Allocated contract labour for this stage, not a second per-item charge. */
   labourStageCosts?: Record<string, number>;
   projectTotalCost?: number;
+  isOldLabourOutput?: (output: StageBoqOutput) => boolean;
 };
 
 const foundation: Category[] = [
@@ -1391,19 +1392,17 @@ export function BoqStageBuilder(props: Props) {
                           {money(entry.output.quotedRate)} / {entry.output.unit}
                         </small>
                       )}
-                      {props.canViewCost && (
+                      {props.isOldLabourOutput?.(entry.output) ? (
+                        <small className="boq-stage-limit">
+                          Labour priced in the Labour Costing tab; no duplicate charge.
+                        </small>
+                      ) : props.canViewCost && (
                         <InputNumber
                           label="Rate"
-                          value={
-                            entry.output.rate ?? props.rateFor(entry.output)
-                          }
-                          onChange={(value) =>
-                            props.onUpdateRate(
-                              entry.lineIndex,
-                              entry.outputIndex,
-                              value,
-                            )
-                          }
+                          value={entry.output.rate ?? props.rateFor(entry.output)}
+                          onChange={(value) => props.onUpdateRate(
+                            entry.lineIndex, entry.outputIndex, value,
+                          )}
                         />
                       )}
                       {!entry.line.origin && (
