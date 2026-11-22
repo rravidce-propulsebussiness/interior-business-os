@@ -11,6 +11,7 @@ import './boq-final-floor-pricing.css';
 import './boq-create-step.css';
 import './boq-structural-concrete-card.css';
 import './boq-wizard-flow.css';
+import './boq-compact-fixes.css';
 
 /**
  * Execution pages used to render without the shared business shell.

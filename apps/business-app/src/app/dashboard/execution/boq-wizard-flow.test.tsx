@@ -6,32 +6,44 @@ import {
   BoqFloorProjectSetup,
   BoqWizardProgress,
   wizardStep,
+  nextBoqStep,
+  previousBoqStep,
 } from './boq-wizard-flow';
 
 describe('14 BOQ design screens over one saved document', () => {
-  it('has exactly thirteen follow-on screens after Create New BOQ', () => {
+  it('has one navigation row with Foundation consolidated into one stage', () => {
     expect(BOQ_WIZARD_STEPS.map((step) => step.number)).toEqual([
-      2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+      2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14,
     ]);
-    expect(wizardStep(4).categories).toEqual(['excavation', 'soil', 'pcc']);
-    expect(wizardStep(5).categories).toEqual(['footings']);
-    expect(wizardStep(6).categories).toEqual(['columns', 'plinth']);
-    expect(wizardStep(7).categories).toEqual(['beams', 'slab', 'staircase']);
-    expect(wizardStep(9).categories).toEqual(['doors']);
+    expect(wizardStep(4).categories).toEqual([
+      'excavation',
+      'soil',
+      'pcc',
+      'footings',
+      'columns',
+      'plinth',
+    ]);
+    expect(wizardStep(8).categories).toContain('compound');
+    expect(wizardStep(11).categories).toContain('penthouse');
+    expect(wizardStep(11).categories).not.toContain('compound');
     expect(wizardStep(14).scope).toBe('final');
+    expect(nextBoqStep(4)).toBe(7);
+    expect(previousBoqStep(7)).toBe(4);
   });
 
-  it('renders the same navigable sequence and a selected stage', () => {
+  it('renders only one navigable row, not a second milestones row', () => {
     const html = renderToStaticMarkup(
       createElement(BoqWizardProgress, {
-        active: 5,
+        active: 4,
         onChange: () => {},
       }),
     );
     expect(html).toContain('BOQ entry screens');
-    expect(html).toContain('Footings');
+    expect(html).toContain('Foundation');
     expect(html).toContain('Final BOQ');
     expect(html).toContain('aria-current="step"');
+    expect(html).not.toContain('boq-guided-milestones');
+    expect((html.match(/<nav /g) ?? []).length).toBe(1);
   });
 
   it('uses the quoted built-up area and flags assumed floor heights', () => {
