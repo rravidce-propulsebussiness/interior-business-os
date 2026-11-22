@@ -6,6 +6,9 @@ import type { Rate } from './boq-pricing';
 import {
   BoqFloorProjectSetup,
   BoqWizardProgress,
+  BOQ_WIZARD_STEPS,
+  nextBoqStep,
+  previousBoqStep,
   wizardStep,
 } from './boq-wizard-flow';
 import type {
@@ -160,6 +163,12 @@ const terrace: Category[] = [
   { key: 'parapet', label: 'Parapet Wall', icon: '▥' },
   { key: 'waterproofing', label: 'Waterproofing', icon: '♧' },
 ];
+const FOUNDATION_GROUPS = [
+  { key: 'preparation', label: 'Excavation & PCC', categories: ['excavation', 'soil', 'pcc'] },
+  { key: 'footings', label: 'Footings & Pedestals', categories: ['footings'] },
+  { key: 'columns', label: 'Columns & Plinth Beam', categories: ['columns', 'plinth'] },
+] as const;
+
 const money = (amount: number) =>
   new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -354,13 +363,7 @@ function InputText({
 }
 
 export function BoqStageBuilder(props: Props) {
-  const [expanded, setExpanded] = useState<string[]>([
-    ...new Set([
-      'Foundation',
-      props.floors[0]?.name ?? '',
-      props.floors.at(-1)?.name ?? '',
-    ]),
-  ]);
+  const [foundationGroup, setFoundationGroup] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('Foundation');
   const [guidedStep, setGuidedStep] = useState(props.initialStep ?? 2);
   const [focused, setFocused] = useState<{
@@ -434,6 +437,7 @@ export function BoqStageBuilder(props: Props) {
   const sections = ['Foundation', ...props.floors.map((f) => f.name)];
   const selectedWizard = wizardStep(guidedStep);
   const measurementScreen = guidedStep >= 4 && guidedStep <= 11;
+  const stepPosition = BOQ_WIZARD_STEPS.findIndex((step) => step.number === guidedStep) + 1;
   // No second structural schedule: these screens only filter existing editors.
   const guidedSections =
     selectedWizard.scope === 'foundation'
@@ -458,7 +462,7 @@ export function BoqStageBuilder(props: Props) {
           ? activeTab
           : (props.floors[0]?.name ?? 'Foundation');
     setActiveTab(stage);
-    setExpanded((prior) => [...new Set([...prior, stage])]);
+    setFoundationGroup(null);
     if (step === 13) props.onOpenLabour?.();
   };
   const priced = (output: StageBoqOutput) =>
@@ -530,13 +534,7 @@ export function BoqStageBuilder(props: Props) {
     visibleCost(stage, 'extra') +
     visibleCost(stage, 'miscellaneous') +
     (props.labourStageCosts?.[stage] ?? 0);
-  const toggleSection = (section: string) =>
-    setExpanded((prior) =>
-      prior.includes(section)
-        ? prior.filter((id) => id !== section)
-        : [...prior, section],
-    );
-  const openEditor = (stage: string, category: string) => {
+   const openEditor = (stage: string, category: string) => {
     if (preview) return;
     setFocused({ stage, category });
     syncFocusUrl({ stage, category });
@@ -1858,7 +1856,6 @@ export function BoqStageBuilder(props: Props) {
     );
     return (
       <section className="boq-work-focus" aria-label="Focused BOQ work editor">
-        <BoqWizardProgress active={guidedStep} onChange={goToWizard} />
         <button
           type="button"
           className="boq-focus-back"
@@ -1892,61 +1889,23 @@ export function BoqStageBuilder(props: Props) {
 
   return (
     <section className="boq-stages" aria-label="Stage-wise BOQ builder">
-      <div className="boq-stage-heading">
-        <div className="boq-stage-heading-title">
-          <span className="boq-stage-main-icon">▤</span>
-          <div>
-            <h2>Detailed BOQ Builder</h2>
-            <p>
-              One drawing entry · Auto-calculated materials & labour · One final
-              floor-wise report
-            </p>
-          </div>
+      <div className="boq-stage-compact-heading">
+        <div>
+          <h2>BOQ Builder</h2>
+          <small>{props.title || props.quoteLabel}</small>
         </div>
-        <label className="boq-stage-project">
-          <span>Project</span>
-          <select
-            value={props.projectId}
-            onChange={(event) => props.onProjectChange(event.target.value)}
-            disabled={!props.newDocument}
-          >
-            <option value="">Choose project</option>
-            {props.projects.map((p) => (
-              <option
-                key={p.id}
-                value={p.id}
-                disabled={!p.eligible && p.id !== props.projectId}
-              >
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-      <div className="boq-stage-document">
-        <label>
-          <span>BOQ name</span>
-          <input
-            value={props.title}
-            maxLength={200}
-            onChange={(event) => props.onTitleChange(event.target.value)}
-          />
-        </label>
-        <p>
-          {props.quoteLabel ||
-            'Choose a project with a saved final quotation to begin.'}
-        </p>
+        {props.autoSaveLabel && (
+          <span className="boq-autosave-status" role="status">
+            {props.autoSaveLabel}
+          </span>
+        )}
       </div>
       <BoqWizardProgress active={guidedStep} onChange={goToWizard} />
       <div className="boq-guided-screen-heading">
-        <span>{String(guidedStep).padStart(2, '0')} / 14</span>
+        <span>{String(stepPosition).padStart(2, '0')} / {BOQ_WIZARD_STEPS.length}</span>
         <div>
           <h3>{selectedWizard.title}</h3>
-          <p>{selectedWizard.description}</p>
         </div>
-        {props.autoSaveLabel && (
-          <small className="boq-autosave-status">{props.autoSaveLabel}</small>
-        )}
       </div>
       {guidedStep === 2 && (
         <BoqFloorProjectSetup
@@ -2080,13 +2039,14 @@ export function BoqStageBuilder(props: Props) {
               className={activeTab === stage ? 'selected' : ''}
               onClick={() => {
                 setActiveTab(stage);
-                if (!expanded.includes(stage)) toggleSection(stage);
-                setExpanded((prior) =>
-                  prior.includes(stage) ? prior : [...prior, stage],
-                );
+                setFoundationGroup(null);
               }}
             >
-              {stage}
+              {stage === last &&
+              props.floors.at(-1) &&
+              isPenthouse(props.floors.at(-1)!)
+                ? stage + ' · Penthouse'
+                : stage}
             </button>
           ))}
         </div>
@@ -2099,10 +2059,13 @@ export function BoqStageBuilder(props: Props) {
             const isFoundation = stage === 'Foundation';
             const isTop = stage === last && !isFoundation;
             const list = isFoundation ? foundation : isTop ? terrace : standard;
-            const visibleList = list.filter((item) =>
-              selectedWizard.categories.includes(item.key),
+            const visibleList = list.filter(
+              (item) =>
+                selectedWizard.categories.includes(item.key) &&
+                (item.key !== 'compound' ||
+                  stage === props.floors[0]?.name),
             );
-            const open = expanded.includes(stage);
+            const open = true;
             const inherited = Boolean(props.repeatFrom[stage]);
             const total = costForStage(stage, list);
             const miscellaneousRows = props.lines
@@ -2187,7 +2150,7 @@ export function BoqStageBuilder(props: Props) {
                       <span className="boq-stage-card-symbol">
                         {isFoundation ? '♜' : '▱'}
                       </span>
-                      <strong>{isTop ? stage + ' / Terrace' : stage}</strong>
+                      <strong>{stage}</strong>
                       {inherited && (
                         <small className="boq-stage-inherited">
                           ↗ Repeated from {props.repeatFrom[stage]}
@@ -2221,14 +2184,6 @@ export function BoqStageBuilder(props: Props) {
                           : 'boq-stage-items'
                       }
                     >
-                      {props.canViewCost &&
-                        (props.labourStageCosts?.[stage] ?? 0) > 0 && (
-                          <div className="boq-stage-extra-note">
-                            Labour package allocation:{' '}
-                            {money(props.labourStageCosts?.[stage] ?? 0)} ·
-                            charged once in the BOQ total.
-                          </div>
-                        )}
                       {visibleList.map((category) => {
                         const entries = entriesFor(stage, category.key);
                         const pending = unmeasured(stage, category.key);
@@ -2288,12 +2243,6 @@ export function BoqStageBuilder(props: Props) {
                           </div>
                         );
                       })}
-                      {entriesFor(stage, 'extra').length > 0 && (
-                        <div className="boq-stage-extra-note">
-                          Other measured work:{' '}
-                          {money(visibleCost(stage, 'extra'))}
-                        </div>
-                      )}
                       {editing?.stage === stage &&
                         renderEditPanel(
                           stage,
@@ -2342,7 +2291,7 @@ export function BoqStageBuilder(props: Props) {
                               <span className="boq-stage-misc-copy">
                                 <strong>Miscellaneous</strong>
                                 <small>
-                                  Extra materials, labour or work for {stage}
+                                  Optional items
                                 </small>
                               </span>
                               {miscellaneousRows.length > 0 && (
