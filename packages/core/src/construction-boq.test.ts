@@ -745,9 +745,7 @@ describe('quotation-driven construction BOQ', () => {
     const concrete = plinth.outputs.find((output) => output.unit === 'm³')!;
     // 2×15ft of 9in×12in + 22ft of 12in×15in = 50 cft of concrete.
     expect(concrete.quantity).toBeCloseTo(
-      50 *
-        0.028316846592 *
-        (1 + result.settings.materialWastagePercent / 100),
+      50 * 0.028316846592 * (1 + result.settings.materialWastagePercent / 100),
       2,
     );
     for (const diameter of [8, 10, 12, 16, 20]) {
