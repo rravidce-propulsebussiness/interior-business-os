@@ -481,29 +481,6 @@ export function BoqStageBuilder(props: Props) {
           (sum, entry) => sum + priced(entry.output),
           0,
         );
-  const costForStage = (stage: string, categories: Category[]) =>
-    categories.reduce(
-      (sum, category) => sum + visibleCost(stage, category.key),
-      0,
-    ) +
-    visibleCost(stage, 'extra') +
-    visibleCost(stage, 'miscellaneous') +
-    (props.labourStageCosts?.[stage] ?? 0);
-  const projectCost =
-    props.projectTotalCost ??
-    sections.reduce(
-      (sum, stage) =>
-        sum +
-        costForStage(
-          stage,
-          stage === 'Foundation'
-            ? foundation
-            : stage === last
-              ? terrace
-              : standard,
-        ),
-      0,
-    );
   const toggleSection = (section: string) =>
     setExpanded((prior) =>
       prior.includes(section)
