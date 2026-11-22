@@ -72,8 +72,21 @@ function NumberCell({
  * on, footings, column lifts and beams are quantified type by type instead of
  * from the company's column-grid rules.
  */
-const BAR_DIAMETERS = [8, 10, 12, 16, 20, 25, 32] as const;
+const BAR_DIAMETERS = [6, 8, 10, 12, 16, 20, 25, 28, 32, 40] as const;
 const BAR_COUNTS = Array.from({ length: 40 }, (_, i) => i + 1);
+
+/** Preserve incomplete "0-0" drawing-entry rows in the editor and autosave.
+ * The quantity engine's parseBars() still rejects them until both selected. */
+export function parseEditableBars(value: string): { count: number; dia: number }[] {
+  return String(value ?? '')
+    .split(/[+,]/)
+    .map((part) => /^(\\d+)\\s*(?:no\\.?s?)?\\s*[-×x*#]\\s*(\\d+)$/i.exec(part.trim()))
+    .filter((match): match is RegExpExecArray => Boolean(match))
+    .map((match) => ({ count: Number(match[1]), dia: Number(match[2]) }))
+    .filter((row) =>
+      row.count >= 0 && row.count <= 40 && row.dia >= 0 && row.dia <= 40,
+    );
+}
 
 /** Bars as on the drawing, picked as "4 nos × 16 mm" rows (no typing). */
 export function BarsPicker({
@@ -85,10 +98,9 @@ export function BarsPicker({
   value: string;
   onChange: (bars: string) => void;
 }) {
-  const sets = parseBars(value);
-  // Do not display unsaved default reinforcement as though it came from
-  // the structural drawing. New sets appear only after the user adds them.
-  const rows = sets;
+  // Incomplete user-added rows are retained during edits and autosave,
+  // without ever being included in takeoff quantities until complete.
+  const rows = parseEditableBars(value);
   const save = (next: { count: number; dia: number }[]) =>
     onChange(next.map((bar) => `${bar.count}-${bar.dia}`).join('+'));
   return (
@@ -108,6 +120,7 @@ export function BarsPicker({
               )
             }
           >
+            <option value={0}>Select count</option>
             {BAR_COUNTS.map((count) => (
               <option key={count} value={count}>
                 {count} nos
@@ -128,6 +141,7 @@ export function BarsPicker({
               )
             }
           >
+            <option value={0}>Select diameter</option>
             {BAR_DIAMETERS.map((dia) => (
               <option key={dia} value={dia}>
                 {dia} mm
@@ -151,7 +165,7 @@ export function BarsPicker({
           type="button"
           className="erp-button erp-button-quiet"
           aria-label={`Add ${label} reinforcement set`}
-          onClick={() => save([...rows, { count: 2, dia: 12 }])}
+          onClick={() => save([...rows, { count: 0, dia: 0 }])}
         >
           + Add rod size
         </button>
