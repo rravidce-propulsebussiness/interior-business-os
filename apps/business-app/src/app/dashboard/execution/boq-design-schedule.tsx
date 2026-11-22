@@ -39,12 +39,15 @@ const newBeam = (index: number, floors: number): DesignBeamType => ({
   stirrupSpacingIn: 6,
   runFeet: Array.from({ length: floors }, () => 0),
 });
-export const emptyDesign = (_floors: number): StructuralDesign => ({
-  footings: [],
-  columns: [],
-  beams: [],
-  plinthRunFeet: 0,
-});
+export const emptyDesign = (_floors: number): StructuralDesign => {
+  void _floors;
+  return {
+    footings: [],
+    columns: [],
+    beams: [],
+    plinthRunFeet: 0,
+  };
+};
 
 function NumberCell({
   value,
