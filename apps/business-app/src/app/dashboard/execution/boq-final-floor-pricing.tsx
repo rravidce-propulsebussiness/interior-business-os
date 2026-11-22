@@ -1,7 +1,20 @@
+import { Fragment } from 'react';
+
 export type FloorPricingItem = {
   stage: string;
   amount: number;
   isLabour: boolean;
+};
+
+/** A priced BOQ output. Details reuse the calculated takeoff; no second entry. */
+export type FloorPricingLine = {
+  id: string;
+  stage: string;
+  work: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  rate: number;
 };
 
 export type FloorPricingStage = {
@@ -84,6 +97,8 @@ export function BoqFinalFloorPricing({
   totalCost,
   areaSqft,
   canViewCost,
+  lines = [],
+  labourAllocations = {},
 }: {
   rows: FloorPricingStage[];
   materialCost: number;
@@ -91,6 +106,9 @@ export function BoqFinalFloorPricing({
   totalCost: number;
   areaSqft: number;
   canViewCost: boolean;
+  lines?: readonly FloorPricingLine[];
+  /** Labour not represented as material outputs is shown only once here. */
+  labourAllocations?: Readonly<Record<string, number>>;
 }) {
   return (
     <section
@@ -99,8 +117,8 @@ export function BoqFinalFloorPricing({
     >
       <h3 id="boq-final-floor-heading">Floor-wise BOQ pricing</h3>
       <p>
-        One project estimate. Materials and labour are shown separately; stage
-        totals include each cost only once.
+        One detailed BOQ with floor totals. Expand any stage to view its
+        calculated materials, quantities, rates and labour allocation.
       </p>
       <div className="boq-final-floor-scroll">
         <table>
@@ -119,26 +137,80 @@ export function BoqFinalFloorPricing({
             </tr>
           </thead>
           <tbody>
-            {rows.map((row) => (
-              <tr key={row.stage}>
-                <th scope="row">{row.stage}</th>
-                <td data-label="Built-up">
-                  {row.areaSqft ? quantity(row.areaSqft) + ' sq ft' : '—'}
-                </td>
-                {canViewCost && (
-                  <>
-                    <td data-label="Materials">{money(row.materialCost)}</td>
-                    <td data-label="Labour">{money(row.labourCost)}</td>
-                    <td data-label="Total cost">
-                      <strong>{money(row.totalCost)}</strong>
+            {rows.map((row) => {
+              const itemized = lines.filter((line) => line.stage === row.stage);
+              const allocatedLabour = labourAllocations[row.stage] ?? 0;
+              return (
+                <Fragment key={row.stage}>
+                  <tr className="boq-final-main-row">
+                    <th scope="row">{row.stage}</th>
+                    <td data-label="Built-up">
+                      {row.areaSqft ? quantity(row.areaSqft) + ' sq ft' : '—'}
                     </td>
-                    <td data-label="Cost / sq ft">
-                      {row.costPerSqft !== null ? money(row.costPerSqft) : '—'}
+                    {canViewCost && (
+                      <>
+                        <td data-label="Materials">{money(row.materialCost)}</td>
+                        <td data-label="Labour">{money(row.labourCost)}</td>
+                        <td data-label="Total cost">
+                          <strong>{money(row.totalCost)}</strong>
+                        </td>
+                        <td data-label="Cost / sq ft">
+                          {row.costPerSqft !== null
+                            ? money(row.costPerSqft)
+                            : '—'}
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                  <tr className="boq-final-details-row">
+                    <td colSpan={canViewCost ? 6 : 2}>
+                      <details className="boq-floor-cost">
+                        <summary>
+                          View detailed quantities{canViewCost ? ' and rates' : ''}
+                        </summary>
+                        <div className="boq-final-line-list">
+                          {itemized.map((item) => (
+                            <div className="boq-final-line" key={item.id}>
+                              <span className="boq-final-line-name">
+                                <strong>{item.name}</strong>
+                                <small>{item.work}</small>
+                              </span>
+                              <span>
+                                {quantity(item.quantity)} {item.unit}
+                              </span>
+                              {canViewCost && (
+                                <>
+                                  <span>{money(item.rate)} / {item.unit}</span>
+                                  <strong>
+                                    {money(item.quantity * item.rate)}
+                                  </strong>
+                                </>
+                              )}
+                            </div>
+                          ))}
+                          {canViewCost && allocatedLabour > 0 && (
+                            <div className="boq-final-line boq-final-labour-line">
+                              <span className="boq-final-line-name">
+                                <strong>Allocated labour</strong>
+                                <small>
+                                  Package, item-wise or separate labour
+                                </small>
+                              </span>
+                              <span>1 lot</span>
+                              <span>{money(allocatedLabour)}</span>
+                              <strong>{money(allocatedLabour)}</strong>
+                            </div>
+                          )}
+                          {!itemized.length && allocatedLabour <= 0 && (
+                            <p>No detailed measured items on this stage.</p>
+                          )}
+                        </div>
+                      </details>
                     </td>
-                  </>
-                )}
-              </tr>
-            ))}
+                  </tr>
+                </Fragment>
+              );
+            })}
           </tbody>
           <tfoot>
             <tr>
@@ -163,8 +235,8 @@ export function BoqFinalFloorPricing({
         </table>
       </div>
       <p className="boq-final-floor-detail-hint">
-        Open a stage in the detailed quantities section below to see each
-        material, quantity, rate and amount.
+        Floor totals and the detailed measurements are part of this single BOQ;
+        no second estimate is created.
       </p>
     </section>
   );
