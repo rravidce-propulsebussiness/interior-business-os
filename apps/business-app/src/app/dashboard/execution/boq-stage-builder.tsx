@@ -1456,7 +1456,7 @@ export function BoqStageBuilder(props: Props) {
                       drawing.settings?.plinthBeamDepthIn ??
                       props.structuralSettings.plinthBeamDepthIn ??
                       12,
-                    bars: '4-16+2-12',
+                    bars: '',
                     stirrupDia:
                       drawing.settings?.plinthBeamStirrupDia ??
                       props.structuralSettings.plinthBeamStirrupDia ??
