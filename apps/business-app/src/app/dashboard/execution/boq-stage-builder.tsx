@@ -17,6 +17,8 @@ import type {
   DesignBeamType,
   DesignPlinthBeamType,
   DesignColumnType,
+  DesignSlabPanel,
+  DesignStairType,
   DesignSettingKey,
   StructuralDesign,
   StructuralSettings,
@@ -27,8 +29,14 @@ import {
   FEET_PER_METRE,
   type MeasuredDimensions,
   type MeasuredKind,
+  readMeasuredSteelSets,
 } from './boq-stage-measurements';
 import { BoqFootingEditor } from './boq-footing-editor';
+import {
+  BoqSlabScheduleEditor,
+  BoqStaircaseScheduleEditor,
+  BoqSmallRccSteelEditor,
+} from './boq-structural-schedule-editors';
 import { BarsPicker } from './boq-design-schedule';
 import { parseBars } from '@business-os/core/construction-boq';
 import { BoqStructuralConcreteCard } from './boq-structural-concrete-card';
@@ -511,12 +519,27 @@ export function BoqStageBuilder(props: Props) {
           props.floors.findIndex((floor) => floor.name === stage),
         ),
       );
-    if (key === 'slab')
+    if (key === 'slab') {
+      const panels = props.design?.slabPanels?.filter((p) => p.floor === stage);
+      if (panels?.length)
+        return !panels.some(
+          (p) =>
+            p.count > 0 &&
+            p.lengthFeet > 0 &&
+            p.widthFeet > 0 &&
+            p.thicknessIn > 0,
+        );
       return !Boolean(
         props.design?.settings?.slabMainDia &&
         props.design?.settings?.slabDistDia &&
         props.design?.settings?.slabThicknessIn,
       );
+    }
+    if (key === 'staircase') {
+      const stairs = props.design?.staircases?.filter((p) => p.floor === stage);
+      if (stairs?.length)
+        return !stairs.some((p) => p.count > 0 && p.widthFeet > 0);
+    }
     return false;
   };
   const mapped: Entry[] = [];
@@ -586,6 +609,22 @@ export function BoqStageBuilder(props: Props) {
     props.onDesignChange({ ...drawing, footings, legacyFootings: false });
   const setBeams = (beams: DesignBeamType[]) =>
     props.onDesignChange({ ...drawing, beams });
+  const setSlabPanels = (floor: string, panels: DesignSlabPanel[]) =>
+    props.onDesignChange({
+      ...drawing,
+      slabPanels: [
+        ...(drawing.slabPanels ?? []).filter((panel) => panel.floor !== floor),
+        ...panels,
+      ],
+    });
+  const setStairs = (floor: string, staircases: DesignStairType[]) =>
+    props.onDesignChange({
+      ...drawing,
+      staircases: [
+        ...(drawing.staircases ?? []).filter((stair) => stair.floor !== floor),
+        ...staircases,
+      ],
+    });
   // A new plinth schedule supersedes the legacy single total; no doubling.
   const setPlinthBeams = (plinthBeams: DesignPlinthBeamType[]) =>
     props.onDesignChange({ ...drawing, plinthBeams, plinthRunFeet: 0 });
@@ -815,10 +854,17 @@ export function BoqStageBuilder(props: Props) {
                 lengthFeet: Number(line.inputs.lengthFeet) || 0,
                 widthFeet: Number(line.inputs.widthFeet) || 0,
                 depthFeet: Number(line.inputs.depthFeet) || 0,
+                ...(['sajjas', 'shelves'].includes(category.key)
+                  ? {
+                      steelSets: readMeasuredSteelSets(
+                        line.inputs.steelSetsJson,
+                      ),
+                    }
+                  : {}),
               };
               const measured = measuredVolume(dims);
               const changeDimension = (
-                field: keyof MeasuredDimensions,
+                field: 'count' | 'lengthFeet' | 'widthFeet' | 'depthFeet',
                 value: number,
               ) =>
                 props.onUpdateGeometry(
@@ -873,6 +919,18 @@ export function BoqStageBuilder(props: Props) {
                     <span>{number(measured.cft)} cft</span>
                     <strong>{number(measured.m3)} m³</strong>
                   </div>
+                  {['sajjas', 'shelves'].includes(category.key) && (
+                    <BoqSmallRccSteelEditor
+                      rows={dims.steelSets ?? []}
+                      onChange={(steelSets) =>
+                        props.onUpdateGeometry(
+                          lineIndex,
+                          { ...dims, steelSets },
+                          line.name,
+                        )
+                      }
+                    />
+                  )}
                 </div>
               );
             })}
@@ -927,11 +985,15 @@ export function BoqStageBuilder(props: Props) {
                 </small>
               )}
               {['sajjas', 'shelves'].includes(category.key) && (
-                <small className="boq-stage-hint">
-                  This measures concrete and estimates shuttering. Enter
-                  reinforcement separately from the structural drawing; no steel
-                  is invented.
-                </small>
+                <BoqSmallRccSteelEditor
+                  rows={dimensionDraft.steelSets ?? []}
+                  onChange={(steelSets) =>
+                    setDimensionDraft((previous) => ({
+                      ...previous,
+                      steelSets,
+                    }))
+                  }
+                />
               )}
               <button
                 type="button"
@@ -949,6 +1011,7 @@ export function BoqStageBuilder(props: Props) {
                     lengthFeet: 0,
                     widthFeet: 0,
                     depthFeet: 0,
+                    steelSets: [],
                   });
                   setDimensionName('');
                 }}
@@ -1238,12 +1301,14 @@ export function BoqStageBuilder(props: Props) {
                     value={col.depthIn}
                     onChange={(value) => updateCol(ci, { depthIn: value })}
                   />
-                  <InputText
-                    label="Main bars (e.g. 4-16+2-12)"
-                    value={col.bars}
-                    placeholder="4-16+2-12"
-                    onChange={(value) => updateCol(ci, { bars: value })}
-                  />
+                  <div className="boq-beam-rebar-groups">
+                    <strong>Main reinforcement (per column)</strong>
+                    <BarsPicker
+                      label={col.label + ' reinforcement'}
+                      value={col.bars}
+                      onChange={(bars) => updateCol(ci, { bars })}
+                    />
+                  </div>
                   <InputNumber
                     label="Ring diameter"
                     unit="mm"
@@ -1334,17 +1399,46 @@ export function BoqStageBuilder(props: Props) {
                     }
                   />
                   <InputNumber
-                    label="Run under this roof"
-                    unit="ft"
-                    value={beam.runFeet[index] ?? 0}
+                    label="Same beams on this floor (nos, 0 = legacy total run)"
+                    value={beam.countsByFloor?.[index] ?? 0}
                     onChange={(value) =>
                       updateBeam(bi, {
-                        runFeet: props.floors.map((_, i) =>
-                          i === index ? value : (beam.runFeet[i] ?? 0),
+                        countsByFloor: props.floors.map((_, i) =>
+                          i === index
+                            ? Math.round(value)
+                            : (beam.countsByFloor?.[i] ?? 0),
                         ),
                       })
                     }
                   />
+                  <InputNumber
+                    label={
+                      beam.countsByFloor?.[index]
+                        ? 'Each beam length'
+                        : 'Total beam running length'
+                    }
+                    unit="ft"
+                    value={
+                      beam.countsByFloor?.[index]
+                        ? (beam.runFeet[index] ?? 0) /
+                          beam.countsByFloor[index]!
+                        : (beam.runFeet[index] ?? 0)
+                    }
+                    onChange={(value) =>
+                      updateBeam(bi, {
+                        runFeet: props.floors.map((_, i) =>
+                          i === index
+                            ? value * (beam.countsByFloor?.[index] || 1)
+                            : (beam.runFeet[i] ?? 0),
+                        ),
+                      })
+                    }
+                  />
+                  {(beam.countsByFloor?.[index] ?? 0) > 0 && (
+                    <small className="boq-structural-inline-total">
+                      {number(beam.runFeet[index] ?? 0)} rft total
+                    </small>
+                  )}
                 </div>
               </div>
             ))}
@@ -1480,65 +1574,91 @@ export function BoqStageBuilder(props: Props) {
           </div>
         )}
         {category.key === 'slab' && (
-          <div className="boq-stage-input-grid">
-            {floor && (
-              <>
-                <InputNumber
-                  label="Length"
-                  unit="ft"
-                  value={floor.lengthFeet}
-                  onChange={(value) =>
-                    props.onFloorChange(
-                      props.floors.map((f, i) =>
-                        i === index ? { ...f, lengthFeet: value } : f,
-                      ),
-                    )
-                  }
-                />
-                <InputNumber
-                  label="Width"
-                  unit="ft"
-                  value={floor.widthFeet}
-                  onChange={(value) =>
-                    props.onFloorChange(
-                      props.floors.map((f, i) =>
-                        i === index ? { ...f, widthFeet: value } : f,
-                      ),
-                    )
-                  }
-                />
-                <InputNumber
-                  label="Floor height"
-                  unit="ft"
-                  value={floor.heightFeet}
-                  onChange={(value) =>
-                    props.onFloorChange(
-                      props.floors.map((f, i) =>
-                        i === index
-                          ? { ...f, heightFeet: value, heightAssumed: false }
-                          : f,
-                      ),
-                    )
-                  }
-                />
-              </>
+          <>
+            <BoqSlabScheduleEditor
+              floor={stage}
+              panels={(drawing.slabPanels ?? []).filter(
+                (panel) => panel.floor === stage,
+              )}
+              onChange={(panels) => setSlabPanels(stage, panels)}
+            />
+            {!drawing.slabPanels?.some((panel) => panel.floor === stage) && (
+              <div className="boq-stage-input-grid">
+                {floor && (
+                  <>
+                    <InputNumber
+                      label="Length"
+                      unit="ft"
+                      value={floor.lengthFeet}
+                      onChange={(value) =>
+                        props.onFloorChange(
+                          props.floors.map((f, i) =>
+                            i === index ? { ...f, lengthFeet: value } : f,
+                          ),
+                        )
+                      }
+                    />
+                    <InputNumber
+                      label="Width"
+                      unit="ft"
+                      value={floor.widthFeet}
+                      onChange={(value) =>
+                        props.onFloorChange(
+                          props.floors.map((f, i) =>
+                            i === index ? { ...f, widthFeet: value } : f,
+                          ),
+                        )
+                      }
+                    />
+                    <InputNumber
+                      label="Floor height"
+                      unit="ft"
+                      value={floor.heightFeet}
+                      onChange={(value) =>
+                        props.onFloorChange(
+                          props.floors.map((f, i) =>
+                            i === index
+                              ? {
+                                  ...f,
+                                  heightFeet: value,
+                                  heightAssumed: false,
+                                }
+                              : f,
+                          ),
+                        )
+                      }
+                    />
+                  </>
+                )}
+                {fieldFor('slabThicknessIn', 'Slab thickness', 5)}
+                {fieldFor('slabMainDia', 'Main bar diameter', 10, 'mm')}
+                {fieldFor('slabMainSpacingIn', 'Main bar spacing', 6)}
+                {fieldFor('slabDistDia', 'Distribution bar', 8, 'mm')}
+                {fieldFor('slabDistSpacingIn', 'Distribution spacing', 8)}
+              </div>
             )}
-            {fieldFor('slabThicknessIn', 'Slab thickness', 5)}
-            {fieldFor('slabMainDia', 'Main bar diameter', 10, 'mm')}
-            {fieldFor('slabMainSpacingIn', 'Main bar spacing', 6)}
-            {fieldFor('slabDistDia', 'Distribution bar', 8, 'mm')}
-            {fieldFor('slabDistSpacingIn', 'Distribution spacing', 8)}
-          </div>
+          </>
         )}
         {category.key === 'staircase' && (
-          <div className="boq-stage-input-grid">
-            {fieldFor('stairWidthFeet', 'Stair width', 3.5, 'ft')}
-            {fieldFor('stairRiserIn', 'Riser', 6)}
-            {fieldFor('stairTreadIn', 'Tread', 10)}
-            {fieldFor('stairWaistIn', 'Waist slab', 6)}
-            {fieldFor('stairMainDia', 'Main bar', 12, 'mm')}
-            {fieldFor('stairBarSpacingIn', 'Bar spacing', 6)}
-          </div>
+          <>
+            <BoqStaircaseScheduleEditor
+              floor={stage}
+              stairs={(drawing.staircases ?? []).filter(
+                (stair) => stair.floor === stage,
+              )}
+              onChange={(stairs) => setStairs(stage, stairs)}
+            />
+            {!drawing.staircases?.some((stair) => stair.floor === stage) && (
+              <div className="boq-stage-input-grid">
+                {fieldFor('stairWidthFeet', 'Stair width', 3.5, 'ft')}
+                {fieldFor('stairRiserIn', 'Riser', 6)}
+                {fieldFor('stairTreadIn', 'Tread', 10)}
+                {fieldFor('stairWaistIn', 'Waist slab', 6)}
+                {fieldFor('stairMainDia', 'Main bar', 12, 'mm')}
+                {fieldFor('stairBarSpacingIn', 'Bar spacing', 6)}
+              </div>
+            )}
+          </>
         )}
         {category.key === 'parapet' && (
           <p className="boq-stage-hint">

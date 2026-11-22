@@ -1,15 +1,52 @@
 import {
   M20_SITE_MIX_PER_M3,
+  cutPlan,
   type StructuralSettings,
 } from '@business-os/core/construction-boq';
 
 /** Dimension takeoffs use ft internally; m³ is the procurement/rate-card unit. */
 export type MeasuredKind = 'excavation' | 'soil' | 'pcc' | 'sajjas' | 'shelves';
+/** Explicit bar-bending takeoff for small RCC only, never a thumb-rule. */
+export type MeasuredSteelSet = {
+  dia: number;
+  count: number;
+  /** Actual single bar cut length; beyond the stock length requires BBS review. */
+  cutLengthFeet: number;
+};
+/** Safely recover saved per-item rod schedules; invalid rows never become steel. */
+export function readMeasuredSteelSets(raw: unknown): MeasuredSteelSet[] {
+  let decoded: unknown = raw;
+  if (typeof raw === 'string') {
+    try {
+      decoded = JSON.parse(raw) as unknown;
+    } catch {
+      return [];
+    }
+  }
+  if (!Array.isArray(decoded)) return [];
+  return decoded
+    .slice(0, 16)
+    .filter((item) => item && typeof item === 'object')
+    .map((item) => {
+      const value = item as Record<string, unknown>;
+      const number = (field: string) => {
+        const parsed = Number(value[field]);
+        return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+      };
+      return {
+        dia: number('dia'),
+        count: Math.round(number('count')),
+        cutLengthFeet: number('cutLengthFeet'),
+      };
+    });
+}
 export type MeasuredDimensions = {
   count: number;
   lengthFeet: number;
   widthFeet: number;
   depthFeet: number;
+  /** Optional per-item reinforcement rows. No rows means zero assumed steel. */
+  steelSets?: MeasuredSteelSet[];
 };
 export type MeasuredOutput = {
   name: string;
@@ -18,6 +55,9 @@ export type MeasuredOutput = {
   material?: string;
   rate?: number;
   source?: string;
+  diameter?: number;
+  rods?: number;
+  weightKg?: number;
 };
 const round = (n: number, digits = 3) => Number(n.toFixed(digits));
 export const CUBIC_METRES_PER_CFT = 0.028316846592;
@@ -61,6 +101,7 @@ export function correctSavedSmallConcrete(
     widthFeet: Number(line.inputs.widthFeet),
     depthFeet: Number(line.inputs.depthFeet),
   };
+  dims.steelSets = readMeasuredSteelSets(line.inputs.steelSetsJson);
   const next = measuredOutputs(category, dims, settings);
   if (!next.length) return null;
   const savedShuttering = line.outputs.find(
@@ -83,7 +124,7 @@ export function measuredOutputs(
     | 'pccAggregateM3PerM3'
     | 'sandTonPerCum'
     | 'aggregateTonPerCum'
-  >,
+  > & { stockBarFeet?: number },
 ): MeasuredOutput[] {
   const volume = measuredVolume(values);
   if (!(volume.m3 > 0)) return [];
@@ -200,5 +241,31 @@ export function measuredOutputs(
       unit: 'sqft',
       source: 'One underside + four sides; confirm with formwork drawings',
     },
+    ...(values.steelSets ?? []).flatMap((steel): MeasuredOutput[] => {
+      const stock = settings.stockBarFeet ?? 40;
+      if (!(
+        steel.count > 0 &&
+        steel.dia >= 6 &&
+        steel.dia <= 40 &&
+        steel.cutLengthFeet > 0 &&
+        steel.cutLengthFeet <= stock
+      ))
+        return [];
+      const pieceCount = Math.round(values.count) * Math.round(steel.count);
+      const plan = cutPlan(steel.cutLengthFeet, pieceCount, stock, 0);
+      const kg = plan.bars * stock * 0.3048 * (steel.dia ** 2 / 162);
+      return [
+        {
+          name: `${steel.dia} mm TMT (${kind === 'sajjas' ? 'sajjas' : 'shelves'})`,
+          material: 'steel',
+          quantity: plan.bars,
+          unit: 'rod',
+          diameter: steel.dia,
+          rods: plan.bars,
+          weightKg: round(kg, 2),
+          source: `${pieceCount} pieces × ${steel.cutLengthFeet} ft; ${stock} ft stock bars`,
+        },
+      ];
+    }),
   ];
 }

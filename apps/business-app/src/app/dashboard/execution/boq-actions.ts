@@ -6,6 +6,7 @@ import type { SupabaseClient } from '@business-os/database';
 import { executionServices } from './service';
 import { normalizeStructuralSettings } from '@business-os/core/construction-boq';
 import { LABOUR_WORKS } from './boq-labour';
+import { structuralDesignSchema } from './boq-structural-design-schema';
 
 const lineSchema = z.object({
   id: z.string().uuid(),
@@ -150,17 +151,7 @@ const generatorSchema = z.object({
     .refine((value) => Object.keys(value).length <= 500)
     .optional(),
   /** Column / beam / footing schedule from the structural drawing. */
-  design: z
-    .object({
-      footings: z.array(z.record(z.string(), z.unknown())).max(40).optional(),
-      legacyFootings: z.boolean().optional(),
-      columns: z.array(z.record(z.string(), z.unknown())).max(20),
-      beams: z.array(z.record(z.string(), z.unknown())).max(20),
-      plinthRunFeet: z.number().finite().nonnegative(),
-      settings: z.record(z.string().max(40), z.number().finite()).optional(),
-    })
-    .nullable()
-    .optional(),
+  design: structuralDesignSchema.nullable().optional(),
   measuredOnly: z.boolean().optional(),
   repeatFrom: z
     .record(z.string().max(90), z.string().max(90))

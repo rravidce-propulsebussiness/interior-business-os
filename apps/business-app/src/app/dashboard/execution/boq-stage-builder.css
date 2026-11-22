@@ -1284,3 +1284,90 @@
     flex-basis: 95px;
   }
 }
+
+/* Drawing-entry cards: independently measured slab panels, stairs and mesh bars. */
+.boq-structural-schedule {
+  display: grid;
+  gap: 11px;
+  min-width: 0;
+  grid-column: 1 / -1;
+}
+.boq-structural-schedule > .boq-stage-outline {
+  justify-self: start;
+}
+.boq-structural-rebar-heading {
+  color: #743a34;
+  font-size: 12px;
+  font-weight: 800;
+  margin: 13px 0 8px;
+}
+.boq-structural-rebar-row {
+  display: grid;
+  align-items: end;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eddfd8;
+}
+.boq-structural-rebar-row > label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: #735850;
+  font-size: 11px;
+  font-weight: 700;
+}
+.boq-structural-rebar-row > label select,
+.boq-structural-rebar-row > label input {
+  width: 100%;
+  min-width: 0;
+  min-height: 39px;
+  padding: 8px;
+  border-radius: 9px;
+  border: 1px solid #dfc9c1;
+  background: #fff;
+  color: #593432;
+  font-size: 12px;
+}
+.boq-structural-rebar-row > button {
+  width: 35px;
+  height: 39px;
+  border-radius: 9px;
+  border: 1px solid #e2cdc5;
+  background: #fff6f3;
+  color: #904039;
+  font-size: 18px;
+  cursor: pointer;
+}
+.boq-structural-warning {
+  color: #975a23;
+  font-size: 11px;
+}
+.boq-structural-note {
+  color: #6c605b;
+  background: #fdf5f0;
+  border-radius: 9px;
+  padding: 10px 12px;
+  font-size: 11px;
+}
+.boq-structural-inline-total {
+  align-self: center;
+  color: #6a3f39;
+  font-size: 12px;
+  font-weight: 700;
+}
+@media (max-width: 700px) {
+  .boq-structural-rebar-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) auto;
+  }
+  .boq-structural-rebar-row > label {
+    grid-column: span 1;
+  }
+  .boq-structural-rebar-row > button {
+    grid-column: -2 / -1;
+    align-self: end;
+  }
+  .boq-structural-schedule .boq-stage-subcard {
+    padding: 12px 10px;
+  }
+}

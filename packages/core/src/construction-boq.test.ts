@@ -1844,3 +1844,255 @@ describe('floor-specific kitchens, finish exclusions and staircase measurements'
     ).toMatchObject({ penthouseSqft: 300 });
   });
 });
+
+describe('independently scheduled structural members', () => {
+  const designBase = {
+    footings: [],
+    columns: [],
+    beams: [],
+    plinthRunFeet: 0,
+  };
+
+  it('keeps unsaved C/B/F types instead of deleting partially entered measurements', () => {
+    const design = normalizeDesign({
+      ...designBase,
+      footings: [{ ...newFootingType(0), label: 'F1', count: 0 }],
+      columns: [
+        {
+          label: 'C1',
+          count: 0,
+          floors: 0,
+          widthIn: 9,
+          depthIn: 12,
+          bars: '',
+          tieDia: 8,
+          tieSpacingIn: 6,
+        },
+      ],
+      beams: [
+        {
+          label: 'B1',
+          widthIn: 9,
+          depthIn: 15,
+          bars: '',
+          stirrupDia: 8,
+          stirrupSpacingIn: 6,
+          runFeet: [0, 0],
+          countsByFloor: [0, 0],
+        },
+      ],
+    });
+    expect(design?.footings).toHaveLength(1);
+    expect(design?.columns).toHaveLength(1);
+    expect(design?.beams).toHaveLength(1);
+  });
+
+  it('uses actual identical beam counts without changing total run or double-counting concrete', () => {
+    const beam = {
+      label: 'B1',
+      widthIn: 9,
+      depthIn: 15,
+      bars: '4-16+2-12',
+      stirrupDia: 8,
+      stirrupSpacingIn: 6,
+      runFeet: [60, 0],
+    };
+    const estimated = generateQuotationBoq({
+      details: quote(),
+      splitBeamSlab: true,
+      design: { ...designBase, beams: [beam] },
+    });
+    const measured = generateQuotationBoq({
+      details: quote(),
+      splitBeamSlab: true,
+      design: { ...designBase, beams: [{ ...beam, countsByFloor: [3, 0] }] },
+    });
+    const find = (lines: typeof estimated.lines) =>
+      lines.find(
+        (line) =>
+          line.section === 'Ground Floor' && line.kind === 'quote-beams',
+      )!;
+    expect(find(measured.lines).inputs.beamRunFeet).toBe(60);
+    const concrete = (line: ReturnType<typeof find>) =>
+      line.outputs.find((o) => o.material === 'concrete_m20')?.quantity;
+    expect(concrete(find(measured.lines))).toBe(
+      concrete(find(estimated.lines)),
+    );
+    const steel = find(measured.lines).outputs.filter((o) => o.unit === 'rod');
+    expect(steel.some((o) => o.diameter === 16)).toBe(true);
+    expect(steel.some((o) => o.diameter === 12)).toBe(true);
+    expect(measured.design?.beams[0]?.countsByFloor).toEqual([3, 0]);
+  });
+
+  it('replaces a floor-wide slab once with multiple panels and independent top/bottom rod layers', () => {
+    const design = {
+      ...designBase,
+      slabPanels: [
+        {
+          label: 'S1',
+          floor: 'Ground Floor',
+          count: 2,
+          lengthFeet: 10,
+          widthFeet: 10,
+          thicknessIn: 6,
+          reinforcement: [
+            { layer: 'bottom', direction: 'length', dia: 12, spacingIn: 6 },
+            { layer: 'bottom', direction: 'width', dia: 16, spacingIn: 8 },
+            { layer: 'top', direction: 'length', dia: 10, spacingIn: 6 },
+          ],
+        },
+        {
+          label: 'S2',
+          floor: 'Ground Floor',
+          count: 1,
+          lengthFeet: 20,
+          widthFeet: 10,
+          thicknessIn: 5,
+          reinforcement: [
+            { layer: 'bottom', direction: 'width', dia: 8, spacingIn: 6 },
+          ],
+        },
+      ],
+    };
+    const result = generateQuotationBoq({
+      details: quote(),
+      design,
+      splitBeamSlab: true,
+    });
+    const line = result.lines.find(
+      (row) => row.section === 'Ground Floor' && row.kind === 'quote-slab',
+    )!;
+    expect(line).toBeDefined();
+    expect(line.name).toContain('400 sqft');
+    const concrete = line.outputs.find((o) => o.material === 'concrete_m20')!;
+    const expectedCft = (2 * 10 * 10 * 6) / 12 + (20 * 10 * 5) / 12;
+    expect(concrete.quantity).toBeCloseTo(
+      expectedCft *
+        0.028316846592 *
+        (1 + result.settings.materialWastagePercent / 100),
+      1,
+    );
+    for (const dia of [8, 10, 12, 16])
+      expect(
+        line.outputs.some((o) => o.unit === 'rod' && o.diameter === dia),
+      ).toBe(true);
+    expect(
+      result.lines.filter(
+        (row) => row.section === 'Ground Floor' && row.kind === 'quote-slab',
+      ),
+    ).toHaveLength(1);
+    // First Floor has no panel overrides and keeps its previous calculation.
+    expect(
+      result.lines.some(
+        (row) => row.section === 'First Floor' && row.kind === 'quote-slab',
+      ),
+    ).toBe(true);
+  });
+
+  it('calculates two separate staircase types and never includes the fallback stair on that floor', () => {
+    const result = generateQuotationBoq({
+      details: quote(),
+      splitBeamSlab: true,
+      design: {
+        ...designBase,
+        staircases: [
+          {
+            label: 'ST1',
+            floor: 'Ground Floor',
+            count: 2,
+            widthFeet: 3,
+            riserIn: 6,
+            treadIn: 10,
+            waistIn: 5,
+            landingFeet: 3,
+            reinforcement: [
+              { role: 'main', dia: 16, spacingIn: 5 },
+              { role: 'distribution', dia: 8, spacingIn: 6 },
+            ],
+          },
+          {
+            label: 'ST2',
+            floor: 'Ground Floor',
+            count: 1,
+            widthFeet: 4,
+            riserIn: 7,
+            treadIn: 11,
+            waistIn: 6,
+            landingFeet: 4,
+            reinforcement: [{ role: 'main', dia: 12, spacingIn: 6 }],
+          },
+        ],
+      },
+    });
+    const stairs = result.lines.filter(
+      (line) =>
+        line.section === 'Ground Floor' && line.kind === 'quote-staircase',
+    );
+    expect(stairs).toHaveLength(2);
+    expect(stairs.map((line) => line.name).join(' ')).toContain('ST1');
+    expect(stairs.map((line) => line.name).join(' ')).toContain('ST2');
+    expect(
+      stairs
+        .flatMap((line) => line.outputs)
+        .some((o) => o.unit === 'rod' && o.diameter === 16),
+    ).toBe(true);
+    expect(
+      stairs
+        .flatMap((line) => line.outputs)
+        .some((o) => o.unit === 'rod' && o.diameter === 12),
+    ).toBe(true);
+  });
+
+  it('counts each footing mesh direction once and preserves independent concrete volume', () => {
+    const footing = {
+      ...newFootingType(0),
+      label: 'F1',
+      count: 2,
+      lengthFeet: 5,
+      widthFeet: 4,
+      thicknessIn: 12,
+      mesh: 'double' as const,
+    };
+    const legacy = generateQuotationBoq({
+      details: quote(),
+      splitBeamSlab: true,
+      design: { ...designBase, footings: [footing] },
+    });
+    const measured = generateQuotationBoq({
+      details: quote(),
+      splitBeamSlab: true,
+      design: {
+        ...designBase,
+        footings: [
+          {
+            ...footing,
+            reinforcement: [
+              { layer: 'bottom', direction: 'length', dia: 16, spacingIn: 6 },
+              { layer: 'bottom', direction: 'width', dia: 12, spacingIn: 6 },
+              { layer: 'top', direction: 'length', dia: 20, spacingIn: 8 },
+              { layer: 'top', direction: 'width', dia: 10, spacingIn: 8 },
+            ],
+          },
+        ],
+      },
+    });
+    const line = (result: typeof legacy) =>
+      result.lines.find((row) => row.kind === 'quote-footings')!;
+    const concrete = (result: typeof legacy) =>
+      line(result).outputs.find((o) => o.material === 'concrete_m20')?.quantity;
+    expect(concrete(measured)).toEqual(concrete(legacy));
+    for (const dia of [10, 12, 16, 20]) {
+      expect(
+        line(measured).outputs.some(
+          (o) => o.unit === 'rod' && o.diameter === dia,
+        ),
+      ).toBe(true);
+    }
+    const empty = generateQuotationBoq({
+      details: quote(),
+      splitBeamSlab: true,
+      design: { ...designBase, footings: [{ ...footing, reinforcement: [] }] },
+    });
+    expect(line(empty).outputs.filter((o) => o.unit === 'rod')).toHaveLength(0);
+  });
+});

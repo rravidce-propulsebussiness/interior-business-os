@@ -27,7 +27,7 @@ import {
   footingMeshPieces,
   padCount,
 } from './footing-takeoff';
-export type { DesignFootingType } from './footing-takeoff';
+export type { DesignFootingType, FootingRebarSet } from './footing-takeoff';
 export { FOOTING_TYPES, newFootingType } from './footing-takeoff';
 
 export type BoqOrigin =
@@ -1942,6 +1942,8 @@ export type DesignBeamType = {
   stirrupSpacingIn: number;
   /** Running feet per floor roof, in floor order. */
   runFeet: number[];
+  /** Number of equal-length members on each floor; total runFeet remains authoritative. */
+  countsByFloor?: number[];
 };
 /** Plinth beam type from the engineer's schedule (PB1, PB2, etc.). */
 export type DesignPlinthBeamType = {
@@ -1958,6 +1960,39 @@ export type DesignPlinthBeamType = {
   stirrupSpacingIn: number;
 };
 
+/** An independent slab panel; selected floor's panel schedule replaces its grid slab. */
+export type DesignSlabPanel = {
+  label: string;
+  floor: string;
+  count: number;
+  lengthFeet: number;
+  widthFeet: number;
+  thicknessIn: number;
+  reinforcement: {
+    layer: 'bottom' | 'top';
+    direction: 'length' | 'width';
+    dia: number;
+    spacingIn: number;
+  }[];
+};
+
+/** Separate staircase geometry/reinforcement for a particular floor. */
+export type DesignStairType = {
+  label: string;
+  floor: string;
+  count: number;
+  widthFeet: number;
+  riserIn: number;
+  treadIn: number;
+  waistIn: number;
+  landingFeet: number;
+  reinforcement: {
+    role: 'main' | 'distribution';
+    dia: number;
+    spacingIn: number;
+  }[];
+};
+
 export type StructuralDesign = {
   footings: DesignFootingType[];
   /** Older saved schedules carried footing geometry on C1/C2 rows. */
@@ -1966,6 +2001,10 @@ export type StructuralDesign = {
   beams: DesignBeamType[];
   /** Measured PB1/PB2 schedules, replacing the single legacy plinth run. */
   plinthBeams?: DesignPlinthBeamType[];
+  /** Optional floor-wise slab panel schedules. Never added to the legacy grid slab. */
+  slabPanels?: DesignSlabPanel[];
+  /** Optional floor-wise staircase types. Never added to the legacy staircase. */
+  staircases?: DesignStairType[];
   /** Legacy single plinth running feet; only used without plinthBeams. */
   plinthRunFeet: number;
   /** This drawing's slab, plinth beam, staircase and cover values. */
@@ -2030,8 +2069,7 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
       footingThicknessIn: num(item?.footingThicknessIn, 12, 6, 48),
       footingBarDia: num(item?.footingBarDia, 12, 8, 25),
       footingBarSpacingIn: num(item?.footingBarSpacingIn, 6, 3, 12),
-    }))
-    .filter((item) => item.count > 0 && parseBars(item.bars).length > 0);
+    })); // Preserve incomplete drawing rows for the next autosave.
   const hasFootingSchedule = Array.isArray(value.footings);
   const legacyFootings =
     value.legacyFootings === true ||
@@ -2082,6 +2120,24 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
         bottomSpacingIn: num(entry.bottomSpacingIn, 6, 2, 24),
         topBarDia: num(entry.topBarDia, 12, 6, 40),
         topSpacingIn: num(entry.topSpacingIn, 6, 2, 24),
+        ...(Array.isArray(entry.reinforcement)
+          ? {
+              reinforcement: (entry.reinforcement as Record<string, unknown>[])
+                .slice(0, 16)
+                .map((set) => ({
+                  layer:
+                    set.layer === 'top'
+                      ? ('top' as const)
+                      : ('bottom' as const),
+                  direction:
+                    set.direction === 'width'
+                      ? ('width' as const)
+                      : ('length' as const),
+                  dia: num(set.dia, 12, 6, 40),
+                  spacingIn: num(set.spacingIn, 6, 2, 24),
+                })),
+            }
+          : {}),
         strapLengthFeet: num(entry.strapLengthFeet, 0, 0, 250),
         strapWidthIn: num(entry.strapWidthIn, 0, 0, 96),
         strapDepthIn: num(entry.strapDepthIn, 0, 0, 96),
@@ -2093,14 +2149,7 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
         pedestalTieDia: num(entry.pedestalTieDia, 8, 6, 16),
         pedestalTieSpacingIn: num(entry.pedestalTieSpacingIn, 6, 2, 24),
       };
-    })
-    .filter(
-      (entry) =>
-        entry.count > 0 &&
-        entry.lengthFeet > 0 &&
-        entry.widthFeet > 0 &&
-        entry.thicknessIn > 0,
-    );
+    }); // Incomplete F1/F2 rows must not disappear during autosave.
   const beams = (Array.isArray(value.beams) ? value.beams : [])
     .slice(0, 20)
     .map((item: Record<string, unknown>, index): DesignBeamType => ({
@@ -2113,8 +2162,14 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
       runFeet: (Array.isArray(item?.runFeet) ? item.runFeet : [])
         .slice(0, 20)
         .map((run: unknown) => num(run, 0, 0, 5000)),
-    }))
-    .filter((item) => parseBars(item.bars).length > 0);
+      ...(Array.isArray(item?.countsByFloor)
+        ? {
+            countsByFloor: item.countsByFloor
+              .slice(0, 20)
+              .map((count: unknown) => Math.round(num(count, 0, 0, 300))),
+          }
+        : {}),
+    })); // Keep B1/B2 rows until steel sizes and dimensions are completed.
   const plinthBeams = (
     Array.isArray(value.plinthBeams) ? value.plinthBeams : []
   )
@@ -2128,6 +2183,58 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
       bars: String(item?.bars ?? '').slice(0, 180),
       stirrupDia: num(item?.stirrupDia, 8, 6, 16),
       stirrupSpacingIn: num(item?.stirrupSpacingIn, 6, 2, 24),
+    }));
+  const normalizePanelRebar = (raw: unknown) =>
+    (Array.isArray(raw) ? raw : [])
+      .slice(0, 16)
+      .map((entry: Record<string, unknown>) => ({
+        layer: entry.layer === 'top' ? ('top' as const) : ('bottom' as const),
+        direction:
+          entry.direction === 'width'
+            ? ('width' as const)
+            : ('length' as const),
+        dia: num(entry.dia, 0, 0, 40),
+        spacingIn: num(entry.spacingIn, 0, 0, 24),
+      }));
+  const slabPanels: DesignSlabPanel[] = (
+    Array.isArray(value.slabPanels) ? value.slabPanels : []
+  )
+    .slice(0, 100)
+    .map((panel: Record<string, unknown>, index) => ({
+      label: String(panel.label ?? `S${index + 1}`).slice(0, 40),
+      floor: String(panel.floor ?? '').slice(0, 80),
+      count: Math.round(num(panel.count, 1, 0, 200)),
+      lengthFeet: num(panel.lengthFeet, 0, 0, 500),
+      widthFeet: num(panel.widthFeet, 0, 0, 500),
+      thicknessIn: num(panel.thicknessIn, 5, 1, 24),
+      reinforcement: normalizePanelRebar(panel.reinforcement),
+    }));
+  const staircases: DesignStairType[] = (
+    Array.isArray(value.staircases) ? value.staircases : []
+  )
+    .slice(0, 60)
+    .map((stair: Record<string, unknown>, index) => ({
+      label: String(stair.label ?? `ST${index + 1}`).slice(0, 40),
+      floor: String(stair.floor ?? '').slice(0, 80),
+      count: Math.round(num(stair.count, 1, 0, 50)),
+      widthFeet: num(stair.widthFeet, 3.5, 0, 40),
+      riserIn: num(stair.riserIn, 6, 2, 12),
+      treadIn: num(stair.treadIn, 10, 4, 24),
+      waistIn: num(stair.waistIn, 6, 2, 18),
+      landingFeet: num(stair.landingFeet, 4, 0, 30),
+      reinforcement: (Array.isArray(stair.reinforcement)
+        ? stair.reinforcement
+        : []
+      )
+        .slice(0, 16)
+        .map((bar: Record<string, unknown>) => ({
+          role:
+            bar.role === 'distribution'
+              ? ('distribution' as const)
+              : ('main' as const),
+          dia: num(bar.dia, 0, 0, 40),
+          spacingIn: num(bar.spacingIn, 0, 0, 24),
+        })),
     }));
   const rawSettings =
     value.settings && typeof value.settings === 'object'
@@ -2148,6 +2255,8 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     !footings.length &&
     !beams.length &&
     !plinthBeams.length &&
+    !slabPanels.length &&
+    !staircases.length &&
     !Object.keys(settings).length &&
     !Number(value.plinthRunFeet)
   )
@@ -2158,6 +2267,8 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     columns,
     beams,
     ...(plinthBeams.length ? { plinthBeams } : {}),
+    ...(slabPanels.length ? { slabPanels } : {}),
+    ...(staircases.length ? { staircases } : {}),
     plinthRunFeet: num(value.plinthRunFeet, 0, 0, 5000),
     ...(Object.keys(settings).length ? { settings } : {}),
   };
@@ -2489,8 +2600,12 @@ export function generateQuotationBoq(
       };
       countAt: (floorIndex: number) => number;
     };
-    const columnTypes: ColumnType[] = design?.columns.length
-      ? design.columns.map((type) => ({
+    const enteredColumns =
+      design?.columns.filter(
+        (column) => column.count > 0 && parseBars(column.bars).length > 0,
+      ) ?? [];
+    const columnTypes: ColumnType[] = enteredColumns.length
+      ? enteredColumns.map((type) => ({
           label: type.label,
           widthIn: type.widthIn,
           depthIn: type.depthIn,
@@ -2800,7 +2915,29 @@ export function generateQuotationBoq(
         const concrete = footingConcreteCft(footing) * CUM_PER_CFT;
         if (!(concrete > 0)) continue;
         const tally: SteelTally = new Map();
-        for (const piece of footingMeshPieces(footing, footingCover)) {
+        // An explicit directional mesh replaces (never supplements) the
+        // legacy two-direction, single-diameter mesh for this footing type.
+        const meshPieces = Array.isArray(footing.reinforcement)
+          ? footing.reinforcement.flatMap((set) => {
+              if (!(set.dia > 0 && set.spacingIn > 0)) return [];
+              const length = Math.max(0, footing.lengthFeet - 2 * footingCover);
+              const width = Math.max(0, footing.widthFeet - 2 * footingCover);
+              const span = set.direction === 'length' ? length : width;
+              const across = set.direction === 'length' ? width : length;
+              if (!(span > 0 && across > 0)) return [];
+              return [
+                {
+                  diameter: set.dia,
+                  pieces:
+                    padCount(footing) *
+                    (Math.floor((across * 12) / set.spacingIn) + 1),
+                  lengthFeet: span,
+                  layer: set.layer,
+                },
+              ];
+            })
+          : footingMeshPieces(footing, footingCover);
+        for (const piece of meshPieces) {
           const plan = cutPlan(piece.lengthFeet, piece.pieces, stock, 0);
           addSteel(
             tally,
@@ -3151,20 +3288,33 @@ export function generateQuotationBoq(
               },
             ]
         : design?.beams.length
-          ? design.beams.map((type) => ({
-              label: type.label,
-              widthIn: type.widthIn,
-              depthIn: type.depthIn,
-              bars: parseBars(type.bars).map((bar) => ({
-                ...bar,
-                label: 'main',
-              })),
-              stirrupDia: type.stirrupDia,
-              stirrupSpacingIn: type.stirrupSpacingIn,
-              segments: runSegments(
-                type.runFeet[level.index] ?? type.runFeet.at(-1) ?? 0,
-              ),
-            }))
+          ? design.beams
+              .filter((type) => parseBars(type.bars).length > 0)
+              .map((type) => ({
+                label: type.label,
+                widthIn: type.widthIn,
+                depthIn: type.depthIn,
+                bars: parseBars(type.bars).map((bar) => ({
+                  ...bar,
+                  label: 'main',
+                })),
+                stirrupDia: type.stirrupDia,
+                stirrupSpacingIn: type.stirrupSpacingIn,
+                segments:
+                  type.countsByFloor?.[level.index] &&
+                  type.countsByFloor[level.index]! > 0
+                    ? [
+                        {
+                          runs: type.countsByFloor[level.index]!,
+                          span:
+                            (type.runFeet[level.index] ?? 0) /
+                            type.countsByFloor[level.index]!,
+                        },
+                      ]
+                    : runSegments(
+                        type.runFeet[level.index] ?? type.runFeet.at(-1) ?? 0,
+                      ),
+              }))
           : [
               {
                 label: 'Beams',
@@ -3259,42 +3409,101 @@ export function generateQuotationBoq(
         continue;
       const beamConcrete = concrete;
       const beamShuttering = shuttering;
+      let slabArea = level.floor.lengthFeet * level.floor.widthFeet;
+      let slabDrawing = `${s.slabThicknessIn} in · ${s.slabMainDia} mm @ ${s.slabMainSpacingIn} in / ${s.slabDistDia} mm @ ${s.slabDistSpacingIn} in`;
       if (level.slab) {
-        const area = level.floor.lengthFeet * level.floor.widthFeet;
-        concrete += area * slabT * CUM_PER_CFT;
-        shuttering += area;
-        for (const bar of [
-          {
-            dia: s.slabMainDia,
-            spacing: s.slabMainSpacingIn,
-            span: Math.min(level.floor.lengthFeet, level.floor.widthFeet),
-            across: Math.max(level.floor.lengthFeet, level.floor.widthFeet),
-            label: 'main',
-            extra: 1 + s.slabExtraTopPercent / 100,
-          },
-          {
-            dia: s.slabDistDia,
-            spacing: s.slabDistSpacingIn,
-            span: Math.max(level.floor.lengthFeet, level.floor.widthFeet),
-            across: Math.min(level.floor.lengthFeet, level.floor.widthFeet),
-            label: 'distribution',
-            extra: 1,
-          },
-        ].filter((item) => item.dia > 0)) {
-          const count = ceil(
-            ((Math.max(0, bar.across - 2 * slabCover) * 12) / bar.spacing + 1) *
-              bar.extra,
-          );
-          const lap = lapFeet(bar.dia, s.lapDiameters);
-          const piece = bar.span + 2 * Math.max(0.5, 0.5 * lap);
-          const plan = cutPlan(piece, count, stock, lap);
-          addSteel(
-            slabTally,
-            bar.dia,
-            plan.bars * stock * M_PER_FT,
-            plan.bars,
-            `${level.name} slab ${bar.label} ${count} pcs × ${ft(piece)}`,
-          );
+        const panels =
+          design?.slabPanels?.filter((panel) => panel.floor === level.stage) ??
+          [];
+        if (panels.length) {
+          slabArea = 0;
+          slabDrawing = panels
+            .map(
+              (panel) =>
+                `${panel.label} ${panel.count}×${panel.lengthFeet}×${panel.widthFeet} ft / ${panel.thicknessIn} in`,
+            )
+            .join(', ')
+            .slice(0, 240);
+          for (const panel of panels) {
+            if (!(
+              panel.count > 0 &&
+              panel.lengthFeet > 0 &&
+              panel.widthFeet > 0 &&
+              panel.thicknessIn > 0
+            ))
+              continue;
+            const area = panel.count * panel.lengthFeet * panel.widthFeet;
+            slabArea += area;
+            concrete += area * (panel.thicknessIn / 12) * CUM_PER_CFT;
+            shuttering += area;
+            if (!panel.reinforcement.length)
+              warnings.push(
+                `${level.stage} ${panel.label}: enter slab reinforcement from the drawing; no steel assumed.`,
+              );
+            for (const bar of panel.reinforcement) {
+              if (!(bar.dia > 0 && bar.spacingIn > 0)) continue;
+              const span =
+                bar.direction === 'length' ? panel.lengthFeet : panel.widthFeet;
+              const across =
+                bar.direction === 'length' ? panel.widthFeet : panel.lengthFeet;
+              const pieces =
+                panel.count *
+                (Math.floor(
+                  (Math.max(0, across - 2 * slabCover) * 12) / bar.spacingIn,
+                ) +
+                  1);
+              const lap = lapFeet(bar.dia, s.lapDiameters);
+              const piece =
+                Math.max(0, span - 2 * slabCover) +
+                2 * Math.max(0.5, 0.5 * lap);
+              const plan = cutPlan(piece, pieces, stock, lap);
+              addSteel(
+                slabTally,
+                bar.dia,
+                plan.bars * stock * M_PER_FT,
+                plan.bars,
+                `${level.stage} ${panel.label} ${bar.layer} ${bar.direction} ${pieces} pcs × ${ft(piece)}`,
+              );
+            }
+          }
+        } else {
+          const area = level.floor.lengthFeet * level.floor.widthFeet;
+          concrete += area * slabT * CUM_PER_CFT;
+          shuttering += area;
+          for (const bar of [
+            {
+              dia: s.slabMainDia,
+              spacing: s.slabMainSpacingIn,
+              span: Math.min(level.floor.lengthFeet, level.floor.widthFeet),
+              across: Math.max(level.floor.lengthFeet, level.floor.widthFeet),
+              label: 'main',
+              extra: 1 + s.slabExtraTopPercent / 100,
+            },
+            {
+              dia: s.slabDistDia,
+              spacing: s.slabDistSpacingIn,
+              span: Math.max(level.floor.lengthFeet, level.floor.widthFeet),
+              across: Math.min(level.floor.lengthFeet, level.floor.widthFeet),
+              label: 'distribution',
+              extra: 1,
+            },
+          ].filter((item) => item.dia > 0)) {
+            const count = ceil(
+              ((Math.max(0, bar.across - 2 * slabCover) * 12) / bar.spacing +
+                1) *
+                bar.extra,
+            );
+            const lap = lapFeet(bar.dia, s.lapDiameters);
+            const piece = bar.span + 2 * Math.max(0.5, 0.5 * lap);
+            const plan = cutPlan(piece, count, stock, lap);
+            addSteel(
+              slabTally,
+              bar.dia,
+              plan.bars * stock * M_PER_FT,
+              plan.bars,
+              `${level.name} slab ${bar.label} ${count} pcs × ${ft(piece)}`,
+            );
+          }
         }
       }
       if (splitBeamSlab && level.slab) {
@@ -3328,12 +3537,12 @@ export function generateQuotationBoq(
         drafts.push({
           origin: 'quotation-structure',
           draft: {
-            name: `${level.name}: slab (${round(level.floor.lengthFeet * level.floor.widthFeet, 0)} sqft)`,
+            name: `${level.name}: slab (${round(slabArea, 0)} sqft)`,
             section: level.stage,
             kind: 'quote-slab',
             unit: 'm³',
             inputs: {
-              slab: `${s.slabThicknessIn} in · ${s.slabMainDia} mm @ ${s.slabMainSpacingIn} in / ${s.slabDistDia} mm @ ${s.slabDistSpacingIn} in`,
+              slab: slabDrawing,
             },
             outputs: [
               ...concreteOutputs(concrete - beamConcrete, 'Slab', s),
@@ -3711,62 +3920,103 @@ export function generateQuotationBoq(
       });
     }
 
-    // --- Staircase from each floor to the next (and to the terrace) -------
-    if (s.stairsPerFloor > 0)
-      for (const floor of floors) {
-        const risers = ceil((floor.heightFeet * 12) / s.stairRiserIn);
+    // --- Staircases: per-floor drawing types or the legacy company rule ----
+    for (const floor of floors) {
+      const measuredStairs =
+        design?.staircases?.filter((stair) => stair.floor === floor.name) ?? [];
+      const staircaseTypes: DesignStairType[] = measuredStairs.length
+        ? measuredStairs
+        : s.stairsPerFloor > 0
+          ? [
+              {
+                label: 'Staircase',
+                floor: floor.name,
+                count: s.stairsPerFloor,
+                widthFeet: s.stairWidthFeet,
+                riserIn: s.stairRiserIn,
+                treadIn: s.stairTreadIn,
+                waistIn: s.stairWaistIn,
+                landingFeet: s.stairLandingFeet,
+                reinforcement: [
+                  {
+                    role: 'main',
+                    dia: s.stairMainDia,
+                    spacingIn: s.stairBarSpacingIn,
+                  },
+                  {
+                    role: 'distribution',
+                    dia: s.stairDistDia,
+                    spacingIn: s.stairBarSpacingIn,
+                  },
+                ],
+              },
+            ]
+          : [];
+      for (const stair of staircaseTypes) {
+        if (!(
+          stair.count > 0 &&
+          stair.widthFeet > 0 &&
+          stair.riserIn > 0 &&
+          stair.treadIn > 0 &&
+          stair.waistIn > 0
+        ))
+          continue;
+        const risers = ceil((floor.heightFeet * 12) / stair.riserIn);
         const flightRise = floor.heightFeet / 2;
-        const flightRun = ((risers / 2) * s.stairTreadIn) / 12;
+        const flightRun = ((risers / 2) * stair.treadIn) / 12;
         const flight = Math.hypot(flightRun, flightRise);
-        const w = s.stairWidthFeet;
-        const waist = s.stairWaistIn / 12;
-        const slabArea = 2 * flight * w + s.stairLandingFeet * w;
+        const slabArea =
+          2 * flight * stair.widthFeet + stair.landingFeet * stair.widthFeet;
         const steps =
-          risers * 0.5 * (s.stairTreadIn / 12) * (s.stairRiserIn / 12) * w;
+          risers *
+          0.5 *
+          (stair.treadIn / 12) *
+          (stair.riserIn / 12) *
+          stair.widthFeet;
         const volume =
-          s.stairsPerFloor * (slabArea * waist + steps) * CUM_PER_CFT;
+          stair.count * ((slabArea * stair.waistIn) / 12 + steps) * CUM_PER_CFT;
         const tally: SteelTally = new Map();
-        const spacing = s.stairBarSpacingIn / 12;
-        const main = s.stairsPerFloor * 2 * (Math.floor(w / spacing) + 1);
-        const mainLength = flight + s.stairLandingFeet / 2 + 1.5;
-        const mainPlan = cutPlan(
-          mainLength,
-          main,
-          stock,
-          lapFeet(s.stairMainDia, s.lapDiameters),
-        );
-        addSteel(
-          tally,
-          s.stairMainDia,
-          mainPlan.bars * stock * M_PER_FT,
-          mainPlan.bars,
-          `stair main ${main} pcs × ${ft(mainLength)}`,
-        );
-        const dist =
-          s.stairsPerFloor *
-          (2 * (Math.floor(flight / spacing) + 1) +
-            Math.floor(s.stairLandingFeet / spacing) +
-            1);
-        const distPlan = cutPlan(w, dist, stock, 0);
-        addSteel(
-          tally,
-          s.stairDistDia,
-          distPlan.bars * stock * M_PER_FT,
-          distPlan.bars,
-          `stair distribution ${dist} pcs × ${ft(w)}`,
-        );
+        if (!stair.reinforcement.length)
+          warnings.push(
+            `${floor.name} ${stair.label}: no staircase reinforcement entered; no steel inferred.`,
+          );
+        for (const bar of stair.reinforcement) {
+          if (!(bar.dia > 0 && bar.spacingIn > 0)) continue;
+          const spacing = bar.spacingIn / 12;
+          const isMain = bar.role === 'main';
+          const pieces = isMain
+            ? stair.count * 2 * (Math.floor(stair.widthFeet / spacing) + 1)
+            : stair.count *
+              (2 * (Math.floor(flight / spacing) + 1) +
+                Math.floor(stair.landingFeet / spacing) +
+                1);
+          const lap = isMain ? lapFeet(bar.dia, s.lapDiameters) : 0;
+          const length = isMain
+            ? flight + stair.landingFeet / 2 + 1.5
+            : stair.widthFeet;
+          const plan = cutPlan(length, pieces, stock, lap);
+          addSteel(
+            tally,
+            bar.dia,
+            plan.bars * stock * M_PER_FT,
+            plan.bars,
+            `${floor.name} ${stair.label} ${bar.role} ${pieces} pcs × ${ft(length)}`,
+          );
+        }
         mergeSteel(tally);
         drafts.push({
           origin: 'quotation-structure',
           draft: {
-            name: `${floor.name}: staircase (${s.stairsPerFloor} × ${risers} risers)`,
+            name: measuredStairs.length
+              ? `${floor.name}: ${stair.label} (${stair.count} × ${risers} risers)`
+              : `${floor.name}: staircase (${stair.count} × ${risers} risers)`,
             section: floor.name,
             kind: 'quote-staircase',
             unit: 'm³',
             inputs: {
               risers,
-              widthFeet: w,
-              waist: `${s.stairWaistIn} in`,
+              widthFeet: stair.widthFeet,
+              waist: `${stair.waistIn} in`,
             },
             outputs: [
               ...concreteOutputs(volume, 'Staircase', s),
@@ -3774,13 +4024,14 @@ export function generateQuotationBoq(
               {
                 name: 'Centering & shuttering',
                 ...(s.labourItemized ? { material: 'shuttering' } : {}),
-                quantity: round(s.stairsPerFloor * slabArea, 0),
+                quantity: round(stair.count * slabArea, 0),
                 unit: 'sqft',
               },
             ],
           },
         });
       }
+    }
     // Order structure stage by stage: Foundation, then each floor.
     const stageOrder = ['Foundation', ...floors.map((floor) => floor.name)];
     const rank = (section: string) => {
