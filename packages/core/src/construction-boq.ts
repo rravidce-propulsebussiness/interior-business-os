@@ -1943,13 +1943,30 @@ export type DesignBeamType = {
   /** Running feet per floor roof, in floor order. */
   runFeet: number[];
 };
+/** Plinth beam type from the engineer's schedule (PB1, PB2, etc.). */
+export type DesignPlinthBeamType = {
+  label: string;
+  /** Number of identical beam segments. */
+  count: number;
+  /** Length of each identical segment in running feet. */
+  lengthFeet: number;
+  widthIn: number;
+  depthIn: number;
+  /** Mixed main reinforcement e.g. "4-16+2-12+2-10". */
+  bars: string;
+  stirrupDia: number;
+  stirrupSpacingIn: number;
+};
+
 export type StructuralDesign = {
   footings: DesignFootingType[];
   /** Older saved schedules carried footing geometry on C1/C2 rows. */
   legacyFootings?: boolean;
   columns: DesignColumnType[];
   beams: DesignBeamType[];
-  /** Plinth beam running feet (0 = from the column grid). */
+  /** Measured PB1/PB2 schedules, replacing the single legacy plinth run. */
+  plinthBeams?: DesignPlinthBeamType[];
+  /** Legacy single plinth running feet; only used without plinthBeams. */
   plinthRunFeet: number;
   /** This drawing's slab, plinth beam, staircase and cover values. */
   settings?: Partial<Record<DesignSettingKey, number>>;
@@ -2098,6 +2115,18 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
         .map((run: unknown) => num(run, 0, 0, 5000)),
     }))
     .filter((item) => parseBars(item.bars).length > 0);
+  const plinthBeams = (Array.isArray(value.plinthBeams) ? value.plinthBeams : [])
+    .slice(0, 40)
+    .map((item: Record<string, unknown>, index): DesignPlinthBeamType => ({
+      label: String(item?.label ?? `PB${index + 1}`).slice(0, 40),
+      count: Math.round(num(item?.count, 1, 0, 200)),
+      lengthFeet: num(item?.lengthFeet, 0, 0, 5000),
+      widthIn: num(item?.widthIn, 9, 6, 36),
+      depthIn: num(item?.depthIn, 12, 6, 48),
+      bars: String(item?.bars ?? '').slice(0, 180),
+      stirrupDia: num(item?.stirrupDia, 8, 6, 16),
+      stirrupSpacingIn: num(item?.stirrupSpacingIn, 6, 2, 24),
+    }));
   const rawSettings =
     value.settings && typeof value.settings === 'object'
       ? (value.settings as Record<string, unknown>)
@@ -2116,6 +2145,7 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     !columns.length &&
     !footings.length &&
     !beams.length &&
+    !plinthBeams.length &&
     !Object.keys(settings).length &&
     !Number(value.plinthRunFeet)
   )
@@ -2125,6 +2155,7 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     ...(legacyFootings ? { legacyFootings: true } : {}),
     columns,
     beams,
+    ...(plinthBeams.length ? { plinthBeams } : {}),
     plinthRunFeet: num(value.plinthRunFeet, 0, 0, 5000),
     ...(Object.keys(settings).length ? { settings } : {}),
   };
@@ -3077,7 +3108,27 @@ export function generateQuotationBoq(
         { runs: s.extraBeamFeet > 0 ? 1 : 0, span: s.extraBeamFeet },
       ];
       const beamTypes: BeamAt[] = !level.slab
-        ? [
+        ? design?.plinthBeams?.length
+          ? design.plinthBeams
+              .filter(
+                (type) =>
+                  type.count > 0 &&
+                  type.lengthFeet > 0 &&
+                  parseBars(type.bars).length > 0,
+              )
+              .map((type) => ({
+                label: type.label,
+                widthIn: type.widthIn,
+                depthIn: type.depthIn,
+                bars: parseBars(type.bars).map((bar) => ({
+                  ...bar,
+                  label: 'main',
+                })),
+                stirrupDia: type.stirrupDia,
+                stirrupSpacingIn: type.stirrupSpacingIn,
+                segments: [{ runs: type.count, span: type.lengthFeet }],
+              }))
+          : [
             {
               label: 'Plinth beam',
               widthIn: s.plinthBeamWidthIn,
@@ -3200,6 +3251,10 @@ export function generateQuotationBoq(
         concrete += run * beamB * below * CUM_PER_CFT;
         shuttering += run * (beamB + 2 * below);
       }
+      // Incomplete new schedule rows must not resurrect the old, estimated
+      // plinth grid or generate a zero-length structural line.
+      if (!level.slab && design?.plinthBeams?.length && !(totalRun > 0))
+        continue;
       const beamConcrete = concrete;
       const beamShuttering = shuttering;
       if (level.slab) {
