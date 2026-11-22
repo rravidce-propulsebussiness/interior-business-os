@@ -2011,7 +2011,10 @@ export function BoqWorkspace({
               </button>
             </div>
           )}
-          {costingTab === 'labour' && labour && (
+          {costingTab === 'labour' && !canViewCost && (
+            <p className="boq-notice" role="status">Labour costing rates require cost-view permission.</p>
+          )}
+          {costingTab === 'labour' && labour && canViewCost && (
             <BoqLabourPanel
               config={labour}
               onChange={setLabour}
