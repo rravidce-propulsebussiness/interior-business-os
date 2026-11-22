@@ -160,6 +160,7 @@ const standard: Category[] = [
 ];
 const terrace: Category[] = [
   ...standard,
+  { key: 'penthouse', label: 'Penthouse / Headroom', icon: '⌂' },
   { key: 'parapet', label: 'Parapet Wall', icon: '▥' },
   { key: 'waterproofing', label: 'Waterproofing', icon: '♧' },
 ];
@@ -1695,6 +1696,33 @@ export function BoqStageBuilder(props: Props) {
             </p>
           </div>
         )}
+        {current && category.key === 'penthouse' && stage === last && (
+          <div className="boq-stage-subcard">
+            <h4>Penthouse / Headroom</h4>
+            <InputNumber
+              label="Built-up area included in this floor (sq ft)"
+              value={props.floors.at(-1)?.penthouseSqft ?? 0}
+              onChange={(value) =>
+                props.onFloorChange(
+                  props.floors.map((floor, index) =>
+                    index === props.floors.length - 1
+                      ? {
+                          ...floor,
+                          penthouseSqft: Math.min(
+                            Math.max(0, value),
+                            Math.max(0, floor.areaSqft),
+                          ),
+                        }
+                      : floor,
+                  ),
+                )
+              }
+            />
+            <p className="boq-stage-hint">
+              This is part of the quoted top-floor area, not a second floor or a duplicate cost.
+            </p>
+          </div>
+        )}
         {current && category.key === 'compound' && (
           <div className="boq-stage-input-grid">
             <InputNumber
@@ -1840,6 +1868,7 @@ export function BoqStageBuilder(props: Props) {
     const entries = entriesFor(stage, category.key);
     const measured =
       entries.length > 0 ||
+      (category.key === 'penthouse' && Boolean(props.floors.at(-1)?.penthouseSqft)) ||
       (category.key === 'footings' && isMeasuredFooting(props.design)) ||
       (category.key === 'columns' && isMeasuredColumn(props.design)) ||
       (category.key === 'plinth' && Boolean(props.design?.plinthRunFeet));
