@@ -22,6 +22,10 @@ describe('drawing-first structural reinforcement', () => {
       { count: 2, dia: 16 },
       { count: 2, dia: 12 },
     ]);
+    expect(parseEditableBars('4-16 top bars + 2-12 bottom bars')).toEqual([
+      { count: 4, dia: 16 },
+      { count: 2, dia: 12 },
+    ]);
     expect(parseEditableBars('41-20+2-50+bad')).toEqual([]);
   });
 
