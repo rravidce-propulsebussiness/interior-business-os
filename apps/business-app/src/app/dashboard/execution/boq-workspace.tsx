@@ -1095,6 +1095,20 @@ export function BoqWorkspace({
       ),
     );
   }
+  function resetOutputQuantity(lineIndex: number, outputIndex: number) {
+    const line = lines[lineIndex];
+    const output = line?.outputs[outputIndex];
+    if (!line?.origin || !output) return;
+    const key = overrideKey(line, output);
+    const existing = overrides[key];
+    if (!existing || existing.quantity === undefined) return;
+    const next = { ...overrides };
+    if (existing.rate !== undefined) next[key] = { rate: existing.rate };
+    else delete next[key];
+    setOverrides(next);
+    generateFromQuote(true, next);
+  }
+
   function updateOutputRate(
     lineIndex: number,
     outputIndex: number,
@@ -2202,6 +2216,7 @@ export function BoqWorkspace({
               onRepeatFloors={repeatStageFloors}
               onCustomizeFloor={customizeStageFloor}
               onUpdateQuantity={updateOutputQuantity}
+              onResetQuantity={resetOutputQuantity}
               onUpdateRate={updateOutputRate}
               rateFor={priceOf}
               onAddManual={addStageManual}
