@@ -26,8 +26,10 @@ describe('manual BOQ presentation', () => {
     expect(detail).toContain('legacyBoqDestination(entity)');
     expect(legacyRoutes).toContain("'/dashboard/execution/boq'");
     expect(legacyRoutes).toContain("'/dashboard/execution/boq/pricing'");
-    expect(read('./boq-workspace.tsx')).toContain('Use quotation prices');
-    expect(read('./boq-workspace.tsx')).toContain('Detailed takeoff');
+    expect(read('./boq-workspace.tsx')).toContain('BoqFinalFloorPricing');
+    expect(read('./boq-stage-builder.tsx')).toContain('◉ Detailed BOQ');
+    expect(read('./boq-workspace.tsx')).not.toContain('Cost estimate, floor by floor');
+    expect(read('./boq-workspace.tsx')).not.toContain('Use the structural drawing');
     expect(read('./boq-calculations.ts')).toContain("kind === 'column'");
     expect(read('./boq-calculations.ts')).toContain("kind === 'wall'");
   });
