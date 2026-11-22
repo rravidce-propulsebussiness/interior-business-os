@@ -2902,7 +2902,7 @@ export function generateQuotationBoq(
         const tally: SteelTally = new Map();
         // An explicit directional mesh replaces (never supplements) the
         // legacy two-direction, single-diameter mesh for this footing type.
-        const meshPieces = footing.reinforcement?.length
+        const meshPieces = Array.isArray(footing.reinforcement)
           ? footing.reinforcement.flatMap((set) => {
               if (!(set.dia > 0 && set.spacingIn > 0)) return [];
               const length = Math.max(0, footing.lengthFeet - 2 * footingCover);
