@@ -2012,7 +2012,9 @@ export function BoqWorkspace({
             </div>
           )}
           {costingTab === 'labour' && !canViewCost && (
-            <p className="boq-notice" role="status">Labour costing rates require cost-view permission.</p>
+            <p className="boq-notice" role="status">
+              Labour costing rates require cost-view permission.
+            </p>
           )}
           {costingTab === 'labour' && labour && canViewCost && (
             <BoqLabourPanel
