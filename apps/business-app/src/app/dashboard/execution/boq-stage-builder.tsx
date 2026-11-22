@@ -2106,7 +2106,7 @@ export function BoqStageBuilder(props: Props) {
           </button>
         </section>
       )}
-      {measurementScreen && (
+      {measurementScreen && selectedWizard.scope === 'floors' && (
         <div
           className="boq-stage-tabs"
           role="group"
