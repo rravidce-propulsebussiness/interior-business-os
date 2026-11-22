@@ -45,8 +45,8 @@ const base: StageProps = {
   onUpdateMiscellaneous: noop,
   onRemoveManual: noop,
   onSave: noop,
-  onPrint: noop,
-  onAdvanced: noop,
+  onDetailedBoq: noop,
+  canOpenDetailed: true,
   canViewCost: true,
   canSave: true,
   busy: false,
@@ -63,6 +63,9 @@ describe('stage-wise miscellaneous BOQ UI', () => {
     expect(html).not.toContain(
       'Extra materials, labour or work for Ground Floor',
     );
+    expect(html).toContain('Detailed BOQ');
+    expect(html).not.toContain('Project BOQ (Saved)');
+    expect(html).not.toContain('Preview BOQ');
     // Only the selected stage is visible until the user chooses another floor.
   });
 
