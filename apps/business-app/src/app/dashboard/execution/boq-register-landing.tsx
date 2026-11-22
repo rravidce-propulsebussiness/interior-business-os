@@ -29,8 +29,8 @@ export function BoqRegisterLanding({
   canCreate: boolean;
   canEdit: boolean;
   canStartNew: boolean;
-  onView: (document: SavedBoq) => void;
-  onEdit: (document: SavedBoq) => void;
+  onView: (id: string) => void;
+  onEdit: (id: string) => void;
 }) {
   const projectNames = new Map(projects.map((project) => [project.id, project.name]));
 
@@ -111,7 +111,7 @@ export function BoqRegisterLanding({
                         type="button"
                         className="boq-register-view"
                         aria-label={`View BOQ for ${name}`}
-                        onClick={() => onView(document)}
+                        onClick={() => onView(document.id)}
                       >
                         <svg
                           viewBox="0 0 24 24"
@@ -132,7 +132,7 @@ export function BoqRegisterLanding({
                           type="button"
                           className="boq-register-edit"
                           aria-label={`Edit BOQ for ${name}`}
-                          onClick={() => onEdit(document)}
+                          onClick={() => onEdit(document.id)}
                         >
                           <svg
                             viewBox="0 0 24 24"
