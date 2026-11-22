@@ -1,4 +1,7 @@
-import type { StructuralSettings } from '@business-os/core/construction-boq';
+import {
+  M20_SITE_MIX_PER_M3,
+  type StructuralSettings,
+} from '@business-os/core/construction-boq';
 
 /** Dimension takeoffs use ft internally; m³ is the procurement/rate-card unit. */
 export type MeasuredKind = 'excavation' | 'soil' | 'pcc' | 'sajjas' | 'shelves';
@@ -117,12 +120,38 @@ export function measuredOutputs(
     {
       name:
         kind === 'sajjas'
-          ? 'Sajja concrete (measured)'
-          : 'Shelf concrete (measured)',
-      material: 'concrete_m20',
+          ? 'Sajja concrete volume (reference only)'
+          : 'Shelf concrete volume (reference only)',
       quantity: volume.m3,
       unit: 'm³',
+      rate: 0,
       source,
+    },
+    {
+      name: kind === 'sajjas' ? 'Cement (sajjas)' : 'Cement (shelves)',
+      material: 'cement',
+      quantity: round(volume.m3 * M20_SITE_MIX_PER_M3.cementBags, 1),
+      unit: 'bag',
+    },
+    {
+      name: kind === 'sajjas' ? 'Sand (sajjas)' : 'Sand (shelves)',
+      material: 'sand',
+      quantity: round(
+        volume.m3 * M20_SITE_MIX_PER_M3.sandCubicMetres *
+          settings.sandTonPerCum,
+        2,
+      ),
+      unit: 't',
+    },
+    {
+      name: kind === 'sajjas' ? 'Aggregate (sajjas)' : 'Aggregate (shelves)',
+      material: 'aggregate',
+      quantity: round(
+        volume.m3 * M20_SITE_MIX_PER_M3.aggregateCubicMetres *
+          settings.aggregateTonPerCum,
+        2,
+      ),
+      unit: 't',
     },
     {
       name:
