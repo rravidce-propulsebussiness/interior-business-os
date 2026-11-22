@@ -775,9 +775,7 @@ export function BoqWorkspace({
     setTitle(document.title);
     setProjectId(document.project_id || '');
     setQuoteId(document.quotation_revision_id || '');
-    setLines(
-      upgradeOldSmallConcrete(document.document?.items || [], settings),
-    );
+    setLines(upgradeOldSmallConcrete(document.document?.items || [], settings));
     setSelections(document.document?.selections ?? {});
     setLabour(document.document?.labour ?? null);
     setCostingTab('builder');

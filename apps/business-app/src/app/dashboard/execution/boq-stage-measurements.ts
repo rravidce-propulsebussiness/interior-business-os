@@ -54,8 +54,7 @@ export function correctSavedSmallConcrete(
   if (line.kind !== 'measured-geometry') return null;
   const category = line.inputs.stageCategory;
   if (category !== 'sajjas' && category !== 'shelves') return null;
-  if (!line.outputs.some((row) => row.material === 'concrete_m20'))
-    return null;
+  if (!line.outputs.some((row) => row.material === 'concrete_m20')) return null;
   const dims: MeasuredDimensions = {
     count: Number(line.inputs.count),
     lengthFeet: Number(line.inputs.lengthFeet),
@@ -64,7 +63,9 @@ export function correctSavedSmallConcrete(
   };
   const next = measuredOutputs(category, dims, settings);
   if (!next.length) return null;
-  const savedShuttering = line.outputs.find((row) => row.material === 'shuttering');
+  const savedShuttering = line.outputs.find(
+    (row) => row.material === 'shuttering',
+  );
   return next.map((output) =>
     output.material === 'shuttering' && savedShuttering?.rate !== undefined
       ? { ...output, rate: savedShuttering.rate }
