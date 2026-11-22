@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Fragment, useEffect, useMemo, useState, useTransition } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BOQ_TEMPLATES,
@@ -46,6 +46,7 @@ import {
 import { BoqDesignSchedule } from './boq-design-schedule';
 import { BoqStageBuilder } from './boq-stage-builder';
 import { BoqRegisterLanding } from './boq-register-landing';
+import { BoqCreateStep } from './boq-create-step';
 import { BoqLabourPanel } from './boq-labour-panel';
 import {
   DEFAULT_LABOUR,
@@ -321,6 +322,20 @@ export function BoqWorkspace({
   );
   const [selectedQuoteLines, setSelectedQuoteLines] = useState<string[]>([]);
   const [message, setMessage] = useState('');
+  const [createError, setCreateError] = useState('');
+  const [autoSaveState, setAutoSaveState] = useState<
+    'saved' | 'saving' | 'error'
+  >('saved');
+  const [autoSaveError, setAutoSaveError] = useState('');
+  const [retryAutoSave, setRetryAutoSave] = useState(0);
+  const [autoSaveCycle, setAutoSaveCycle] = useState(0);
+  const autoSavedDocId = useRef<string | null>(null);
+  const autoSavedFingerprint = useRef<string | null>(null);
+  const autoFailedFingerprint = useRef<string | null>(null);
+  const lastFailedRetry = useRef(-1);
+  const latestFingerprint = useRef<string | null>(null);
+  const autoSaveVersion = useRef<number | null>(null);
+  const autoSaving = useRef(false);
   const [busy, startTransition] = useTransition();
   const router = useRouter();
   const settings = useMemo(
@@ -653,6 +668,8 @@ export function BoqWorkspace({
     window.print();
   }
   function selectProject(id: string) {
+    if (id === projectId) return;
+    setCreateError('');
     // Selecting another project opens its existing BOQ, never reassigns the
     // current saved document to a new project or creates a duplicate.
     const existing = documents.find((document) => document.project_id === id);
@@ -696,6 +713,8 @@ export function BoqWorkspace({
     router.push('/dashboard/execution/boq/new');
   }
   function openDocument(document: Document, mode: 'view' | 'edit' = 'view') {
+    setAutoSaveState('saved');
+    setAutoSaveError('');
     setActive(document);
     setScreen(mode);
     setShowSavedDetails(mode === 'view');
@@ -1130,8 +1149,14 @@ export function BoqWorkspace({
     }
     if (!title.trim()) {
       setMessage('Enter a BOQ name.');
+      setCreateError('Enter a BOQ name.');
       return;
     }
+    if (calculating || (quoteId && !generator && lines.length === 0)) {
+      setCreateError('The quotation quantities are still being prepared.');
+      return;
+    }
+    setCreateError('');
     startTransition(async () => {
       const result = await saveManualBoq({
         id: active?.id,
@@ -1147,6 +1172,7 @@ export function BoqWorkspace({
       });
       if (!result.ok) {
         setMessage(result.message || 'Could not save BOQ.');
+        setCreateError(result.message || 'Could not create BOQ.');
         return;
       }
       setMessage('BOQ saved.');
@@ -1166,10 +1192,12 @@ export function BoqWorkspace({
         },
         updated_at: new Date().toISOString(),
       });
-      setScreen('view');
-      setShowSavedDetails(true);
+      setScreen('edit');
+      setShowSavedDetails(false);
+      setAutoSaveState('saved');
+      setAutoSaveError('');
       router.replace(
-        `/dashboard/execution/boq?open=${encodeURIComponent(result.id || active?.id || '')}`,
+        `/dashboard/execution/boq?open=${encodeURIComponent(result.id || active?.id || '')}&mode=edit`,
       );
       router.refresh();
     });
@@ -1497,6 +1525,21 @@ export function BoqWorkspace({
     setScreen('edit');
     router.replace(
       `/dashboard/execution/boq?open=${encodeURIComponent(active.id)}&mode=edit`,
+    );
+  }
+  if (screen === 'new' && !active) {
+    return (
+      <BoqCreateStep
+        projects={newProjects}
+        projectId={projectId}
+        title={title === 'Construction BOQ' ? '' : title}
+        saving={busy}
+        preparing={Boolean(quoteId && (calculating || (!generator && lines.length === 0)))}
+        error={createError}
+        onProjectChange={selectProject}
+        onTitleChange={setTitle}
+        onContinue={save}
+      />
     );
   }
   if (screen === 'view' && !showSavedDetails) {
