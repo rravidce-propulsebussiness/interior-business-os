@@ -5,6 +5,7 @@ import {
   COVERED_BY_DEFAULT,
   LABOUR_WORKS,
   evaluateLabour,
+  extraCoveredWorks,
   isExtraAllowed,
   labourExtraQuantity,
   labourMeasurements,
@@ -49,7 +50,7 @@ export function BoqLabourPanel({
   const [extraMethod, setExtraMethod] = useState<'itemwise' | 'daily'>('itemwise');
   const [draft, setDraft] = useState<LabourExtra>({
     id: uid(), name: '', stage: floors[0]?.name ?? 'Foundation',
-    work: 'excavation', method: 'itemwise', unit: 'm³',
+    work: 'excavation', includedWorks: [], method: 'itemwise', unit: 'm³',
     quantity: 0, quantitySource: 'manual', rate: 0, workers: 1, days: 1,
     outsideScope: false,
   });
@@ -60,7 +61,11 @@ export function BoqLabourPanel({
   const missingRates = config.method === 'itemwise' &&
     measures.some((m) => !(config.itemRates[m.work] && config.itemRates[m.work]! > 0));
   const sourceQty = measuredLabourQuantity(measures, draft.work, draft.stage, draft.unit);
-  const allowDraft = isExtraAllowed(config, draft) && draft.name.trim().length > 0 &&
+  const overlapsExisting = draft.method === 'itemwise' && draft.quantitySource === 'boq' &&
+    config.extras.some((item) => item.method === 'itemwise' &&
+      item.quantitySource === 'boq' && item.stage === draft.stage &&
+      extraCoveredWorks(item).some((work) => extraCoveredWorks(draft).includes(work)));
+  const allowDraft = !overlapsExisting && isExtraAllowed(config, draft) && draft.name.trim().length > 0 &&
     draft.rate >= 0 && (
       draft.method === 'daily' ? draft.workers > 0 && draft.days > 0 :
       (draft.quantitySource === 'boq' && !draft.outsideScope ? sourceQty : draft.quantity) > 0
@@ -71,7 +76,7 @@ export function BoqLabourPanel({
     change({ extras: [...config.extras, item] });
     setFormOpen(false);
     setDraft({ id: uid(), name: '', stage: draft.stage, work: 'excavation',
-      method: extraMethod, unit: 'm³', quantity: 0, quantitySource: 'manual',
+      includedWorks: [], method: extraMethod, unit: 'm³', quantity: 0, quantitySource: 'manual',
       rate: 0, workers: 1, days: 1, outsideScope: false });
   }
   function modifyExtra(index: number, values: Partial<LabourExtra>) {
@@ -241,7 +246,7 @@ export function BoqLabourPanel({
               item.workers * item.days * item.rate : qty * item.rate;
             const valid = isExtraAllowed(config, item);
             return <div className="boq-labour-extra-row" key={item.id}>
-              <div><strong>{item.name}</strong><small>{item.stage} · {labourWorkName(item.work)} · {item.outsideScope ? 'Extra beyond package' : 'Excluded work'}</small>
+              <div><strong>{item.name}</strong><small>{item.stage} · {extraCoveredWorks(item).map(labourWorkName).join(' + ')} · {item.outsideScope ? 'Extra beyond package' : 'Excluded work'}</small>
                 <small>{item.method === 'daily' ? number(item.workers) + ' workers × ' + number(item.days) + ' days' :
                   number(qty) + ' ' + item.unit} × {money(item.rate)}</small></div>
               <strong>{valid ? money(amount) : 'Overlap'}</strong>
@@ -268,10 +273,24 @@ export function BoqLabourPanel({
                 </select></label>
               <label>Work category
                 <select value={draft.work} onChange={(e) => setDraftValues({
-                  work: e.target.value as LabourWorkId, quantitySource: 'manual', outsideScope: false,
+                  work: e.target.value as LabourWorkId, includedWorks: [], quantitySource: 'manual', outsideScope: false,
                 })}>
                   {workOptions.map((w) => <option value={w.value} key={w.value}>{w.label}</option>)}
                 </select></label>
+              <div className="boq-labour-combined">
+                <strong>Works covered by this one rate</strong>
+                <small>Select additional trades such as bar bending + shuttering, or brickwork + plastering + elevation. The rate is applied only once to the chosen quantity.</small>
+                <div>{LABOUR_WORKS.filter((w) => w.id !== 'other').map((work) =>
+                  <label key={work.id}>
+                    <input type="checkbox" checked={work.id === draft.work ||
+                      (draft.includedWorks ?? []).includes(work.id)}
+                      disabled={work.id === draft.work}
+                      onChange={(e) => setDraftValues({ includedWorks: e.target.checked
+                        ? [...(draft.includedWorks ?? []), work.id]
+                        : (draft.includedWorks ?? []).filter((id) => id !== work.id) })}/>
+                    {work.name}
+                  </label>)}</div>
+              </div>
               {draft.method === 'itemwise' ? <>
                 <label>Quantity basis
                   <select value={draft.quantitySource} onChange={(e) =>
@@ -304,6 +323,8 @@ export function BoqLabourPanel({
                   ...(e.target.checked ? { quantitySource: 'manual' as const } : {}) })}/>
                 Extra quantity outside the agreed package scope</label>
             </div>
+            {overlapsExisting && <p role="alert" className="boq-labour-alert">
+              This measured labour work is already included in another separate package for this stage.</p>}
             {!isExtraAllowed(config, draft) && <p role="alert" className="boq-labour-alert">
               This work is covered by the default package. Select a work not covered, or confirm extra scope and enter only its additional quantity.</p>}
             {draft.quantitySource === 'boq' && sourceQty === 0 && <p className="boq-labour-alert">
