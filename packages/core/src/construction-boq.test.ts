@@ -6,6 +6,7 @@ import {
   generateQuotationBoq,
   lapFeet,
   normalizeStructuralSettings,
+  normalizeDesign,
   parseBars,
   parseFeet,
   parseOpenings,
@@ -698,6 +699,90 @@ describe('quotation-driven construction BOQ', () => {
     expect(line('Foundation', 'quote-plinth-beam').inputs.beamRunFeet).toBe(
       200,
     );
+  });
+
+  it('quantifies multiple plinth beam types and up to four different main bar diameters without a second legacy run', () => {
+    const result = generateQuotationBoq({
+      details: quote(),
+      design: {
+        footings: [],
+        columns: [],
+        beams: [],
+        // This older length must be ignored after a PB1/PB2 schedule is supplied.
+        plinthRunFeet: 999,
+        plinthBeams: [
+          {
+            label: 'PB1',
+            count: 2,
+            lengthFeet: 15,
+            widthIn: 9,
+            depthIn: 12,
+            bars: '4-16+2-12',
+            stirrupDia: 8,
+            stirrupSpacingIn: 6,
+          },
+          {
+            label: 'PB2',
+            count: 1,
+            lengthFeet: 22,
+            widthIn: 12,
+            depthIn: 15,
+            bars: '2-20+4-16+2-10',
+            stirrupDia: 8,
+            stirrupSpacingIn: 4,
+          },
+        ],
+      },
+    });
+    const plinth = result.lines.find(
+      (line) =>
+        line.section === 'Foundation' && line.kind === 'quote-plinth-beam',
+    )!;
+    expect(plinth).toBeDefined();
+    expect(plinth.inputs.beamRunFeet).toBe(52);
+    expect(String(plinth.inputs.beam)).toContain('PB1 9×12 in');
+    expect(String(plinth.inputs.beam)).toContain('PB2 12×15 in');
+    const concrete = plinth.outputs.find((output) => output.unit === 'm³')!;
+    // 2×15ft of 9in×12in + 22ft of 12in×15in = 50 cft of concrete.
+    expect(concrete.quantity).toBeCloseTo(
+      50 * 0.028316846592 * (1 + result.settings.materialWastagePercent / 100),
+      2,
+    );
+    for (const diameter of [8, 10, 12, 16, 20]) {
+      expect(
+        plinth.outputs.find(
+          (output) => output.unit === 'rod' && output.diameter === diameter,
+        )?.quantity,
+      ).toBeGreaterThan(0);
+    }
+    expect(result.design?.plinthBeams).toHaveLength(2);
+  });
+
+  it('retains unfinished plinth rows on normalization and never charges the legacy grid twice', () => {
+    const complete = normalizeDesign({
+      footings: [],
+      columns: [],
+      beams: [],
+      plinthRunFeet: 120,
+      plinthBeams: [
+        {
+          label: 'PB1',
+          count: 3,
+          lengthFeet: 0,
+          widthIn: 9,
+          depthIn: 12,
+          bars: '4-16+2-12',
+          stirrupDia: 8,
+          stirrupSpacingIn: 6,
+        },
+      ],
+    });
+    expect(complete?.plinthBeams).toHaveLength(1);
+    expect(complete?.plinthBeams?.[0]?.lengthFeet).toBe(0);
+    const boq = generateQuotationBoq({ details: quote(), design: complete });
+    expect(
+      boq.lines.find((line) => line.kind === 'quote-plinth-beam'),
+    ).toBeUndefined();
   });
 
   it('carries the package rate from the quotation, never a fixed price', () => {

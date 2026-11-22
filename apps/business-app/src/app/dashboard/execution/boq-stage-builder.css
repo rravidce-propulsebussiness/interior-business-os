@@ -1227,3 +1227,60 @@
 .manual-boq:has(.boq-work-focus) .boq-editor {
   padding-top: 0;
 }
+
+/* Structural beam schedules share the same multi-diameter rod picker. */
+.boq-plinth-schedule {
+  display: grid;
+  gap: 12px;
+}
+.boq-plinth-schedule > .boq-stage-outline {
+  justify-self: start;
+}
+.boq-beam-rebar-groups {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 7px;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #e9d9cf;
+  background: #fffbf8;
+}
+.boq-beam-rebar-groups > strong {
+  font-size: 12px;
+  color: #653b37;
+}
+.boq-beam-rebar-groups .boq-bars-row {
+  flex-wrap: wrap;
+  white-space: normal;
+  gap: 7px;
+}
+.boq-beam-rebar-groups .boq-bars select {
+  min-width: 95px;
+  min-height: 39px;
+  flex: 1 1 96px;
+  padding: 7px 9px;
+  border: 1px solid #dec9c1;
+}
+.boq-beam-rebar-groups .boq-bars > button {
+  min-height: 36px;
+  border-radius: 9px;
+}
+.boq-plinth-run {
+  display: block;
+  margin-top: 12px;
+  font-size: 11px;
+  color: #806d64;
+}
+@media (max-width: 640px) {
+  .boq-plinth-schedule .boq-stage-input-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .boq-beam-rebar-groups {
+    padding: 10px;
+  }
+  .boq-beam-rebar-groups .boq-bars select {
+    min-width: 0;
+    flex-basis: 95px;
+  }
+}

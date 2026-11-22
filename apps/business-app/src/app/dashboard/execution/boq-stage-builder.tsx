@@ -15,6 +15,7 @@ import type {
   BoqCounts,
   BoqFloor,
   DesignBeamType,
+  DesignPlinthBeamType,
   DesignColumnType,
   DesignSettingKey,
   StructuralDesign,
@@ -28,6 +29,8 @@ import {
   type MeasuredKind,
 } from './boq-stage-measurements';
 import { BoqFootingEditor } from './boq-footing-editor';
+import { BarsPicker } from './boq-design-schedule';
+import { parseBars } from '@business-os/core/construction-boq';
 import { BoqStructuralConcreteCard } from './boq-structural-concrete-card';
 import {
   copyExteriorWallsToFullFloors,
@@ -492,7 +495,14 @@ export function BoqStageBuilder(props: Props) {
     if (key === 'footings') return !isMeasuredFooting(props.design);
     if (key === 'columns') return !isMeasuredColumn(props.design);
     if (key === 'plinth')
-      return !(props.design?.plinthRunFeet && props.design.plinthRunFeet > 0);
+      return !(props.design?.plinthBeams?.length
+        ? props.design.plinthBeams.some(
+            (beam) =>
+              beam.count > 0 &&
+              beam.lengthFeet > 0 &&
+              parseBars(beam.bars).length > 0,
+          )
+        : props.design?.plinthRunFeet && props.design.plinthRunFeet > 0);
     if (key === 'beams')
       return !isMeasuredBeam(
         props.design,
@@ -576,6 +586,9 @@ export function BoqStageBuilder(props: Props) {
     props.onDesignChange({ ...drawing, footings, legacyFootings: false });
   const setBeams = (beams: DesignBeamType[]) =>
     props.onDesignChange({ ...drawing, beams });
+  // A new plinth schedule supersedes the legacy single total; no doubling.
+  const setPlinthBeams = (plinthBeams: DesignPlinthBeamType[]) =>
+    props.onDesignChange({ ...drawing, plinthBeams, plinthRunFeet: 0 });
   const setSetting = (key: DesignSettingKey, value: number) =>
     props.onDesignChange({
       ...drawing,
@@ -715,6 +728,43 @@ export function BoqStageBuilder(props: Props) {
       setBeams(
         drawing.beams.map((beam, i) =>
           i === index ? { ...beam, ...patch } : beam,
+        ),
+      );
+    const plinthRows: DesignPlinthBeamType[] = drawing.plinthBeams?.length
+      ? drawing.plinthBeams
+      : drawing.plinthRunFeet > 0
+        ? [
+            {
+              label: 'PB1',
+              count: 1,
+              lengthFeet: drawing.plinthRunFeet,
+              widthIn:
+                drawing.settings?.plinthBeamWidthIn ??
+                props.structuralSettings.plinthBeamWidthIn ??
+                9,
+              depthIn:
+                drawing.settings?.plinthBeamDepthIn ??
+                props.structuralSettings.plinthBeamDepthIn ??
+                12,
+              bars: `${drawing.settings?.plinthBeamBarCount ?? props.structuralSettings.plinthBeamBarCount ?? 6}-${drawing.settings?.plinthBeamBarDia ?? props.structuralSettings.plinthBeamBarDia ?? 12}`,
+              stirrupDia:
+                drawing.settings?.plinthBeamStirrupDia ??
+                props.structuralSettings.plinthBeamStirrupDia ??
+                8,
+              stirrupSpacingIn:
+                drawing.settings?.plinthBeamStirrupSpacingIn ??
+                props.structuralSettings.plinthBeamStirrupSpacingIn ??
+                6,
+            },
+          ]
+        : [];
+    const updatePlinth = (
+      rowIndex: number,
+      patch: Partial<DesignPlinthBeamType>,
+    ) =>
+      setPlinthBeams(
+        plinthRows.map((row, i) =>
+          i === rowIndex ? { ...row, ...patch } : row,
         ),
       );
     const isColumns = category.key === 'columns';
@@ -1261,11 +1311,14 @@ export function BoqStageBuilder(props: Props) {
                     value={beam.depthIn}
                     onChange={(value) => updateBeam(bi, { depthIn: value })}
                   />
-                  <InputText
-                    label="Main bars (e.g. 2-16+2-12)"
-                    value={beam.bars}
-                    onChange={(value) => updateBeam(bi, { bars: value })}
-                  />
+                  <div className="boq-beam-rebar-groups">
+                    <strong>Main reinforcement (per beam)</strong>
+                    <BarsPicker
+                      label={beam.label + ' reinforcement'}
+                      value={beam.bars}
+                      onChange={(bars) => updateBeam(bi, { bars })}
+                    />
+                  </div>
                   <InputNumber
                     label="Stirrup diameter"
                     unit="mm"
@@ -1310,21 +1363,120 @@ export function BoqStageBuilder(props: Props) {
           </>
         )}
         {category.key === 'plinth' && (
-          <div className="boq-stage-input-grid">
-            <InputNumber
-              label="Plinth beam total running length"
-              unit="ft"
-              value={drawing.plinthRunFeet}
-              onChange={(value) =>
-                props.onDesignChange({ ...drawing, plinthRunFeet: value })
+          <div className="boq-plinth-schedule">
+            {drawing.plinthRunFeet > 0 && !drawing.plinthBeams?.length && (
+              <p className="boq-stage-hint">
+                Existing total run imported as PB1. Confirm each beam length and
+                count from the drawing before editing.
+              </p>
+            )}
+            {plinthRows.map((beam, bi) => (
+              <section className="boq-stage-subcard" key={bi}>
+                <div className="boq-stage-subhead">
+                  <strong>{beam.label || `PB${bi + 1}`}</strong>
+                  <button
+                    type="button"
+                    aria-label={`Remove plinth beam type ${bi + 1}`}
+                    onClick={() =>
+                      setPlinthBeams(plinthRows.filter((_, i) => i !== bi))
+                    }
+                  >
+                    Remove
+                  </button>
+                </div>
+                <div className="boq-stage-input-grid">
+                  <InputText
+                    label="Beam type"
+                    value={beam.label}
+                    onChange={(label) => updatePlinth(bi, { label })}
+                  />
+                  <InputNumber
+                    label="Identical beams (nos)"
+                    value={beam.count}
+                    onChange={(count) =>
+                      updatePlinth(bi, { count: Math.round(count) })
+                    }
+                  />
+                  <InputNumber
+                    label="Each beam length"
+                    unit="ft"
+                    value={beam.lengthFeet}
+                    onChange={(lengthFeet) => updatePlinth(bi, { lengthFeet })}
+                  />
+                  <InputNumber
+                    label="Beam width"
+                    unit="in"
+                    value={beam.widthIn}
+                    onChange={(widthIn) => updatePlinth(bi, { widthIn })}
+                  />
+                  <InputNumber
+                    label="Beam depth"
+                    unit="in"
+                    value={beam.depthIn}
+                    onChange={(depthIn) => updatePlinth(bi, { depthIn })}
+                  />
+                  <div className="boq-beam-rebar-groups">
+                    <strong>Main reinforcement (per beam)</strong>
+                    <BarsPicker
+                      label={`Plinth ${beam.label || `PB${bi + 1}`}`}
+                      value={beam.bars}
+                      onChange={(bars) => updatePlinth(bi, { bars })}
+                    />
+                  </div>
+                  <InputNumber
+                    label="Stirrup diameter"
+                    unit="mm"
+                    value={beam.stirrupDia}
+                    onChange={(stirrupDia) => updatePlinth(bi, { stirrupDia })}
+                  />
+                  <InputNumber
+                    label="Stirrup spacing"
+                    unit="in"
+                    value={beam.stirrupSpacingIn}
+                    onChange={(stirrupSpacingIn) =>
+                      updatePlinth(bi, { stirrupSpacingIn })
+                    }
+                  />
+                </div>
+                <small className="boq-plinth-run">
+                  {number(beam.count * beam.lengthFeet)} rft total · Concrete
+                  and each steel diameter calculated once
+                </small>
+              </section>
+            ))}
+            <button
+              type="button"
+              className="boq-stage-outline"
+              onClick={() =>
+                setPlinthBeams([
+                  ...plinthRows,
+                  {
+                    label: `PB${plinthRows.length + 1}`,
+                    count: 1,
+                    lengthFeet: 0,
+                    widthIn:
+                      drawing.settings?.plinthBeamWidthIn ??
+                      props.structuralSettings.plinthBeamWidthIn ??
+                      9,
+                    depthIn:
+                      drawing.settings?.plinthBeamDepthIn ??
+                      props.structuralSettings.plinthBeamDepthIn ??
+                      12,
+                    bars: '',
+                    stirrupDia:
+                      drawing.settings?.plinthBeamStirrupDia ??
+                      props.structuralSettings.plinthBeamStirrupDia ??
+                      8,
+                    stirrupSpacingIn:
+                      drawing.settings?.plinthBeamStirrupSpacingIn ??
+                      props.structuralSettings.plinthBeamStirrupSpacingIn ??
+                      6,
+                  },
+                ])
               }
-            />
-            {fieldFor('plinthBeamWidthIn', 'Plinth width', 9)}
-            {fieldFor('plinthBeamDepthIn', 'Plinth depth', 12)}
-            {fieldFor('plinthBeamBarCount', 'Main bars', 6, 'nos')}
-            {fieldFor('plinthBeamBarDia', 'Main bar diameter', 12, 'mm')}
-            {fieldFor('plinthBeamStirrupDia', 'Stirrup diameter', 8, 'mm')}
-            {fieldFor('plinthBeamStirrupSpacingIn', 'Stirrup spacing', 6)}
+            >
+              + Add plinth beam type
+            </button>
           </div>
         )}
         {category.key === 'slab' && (
@@ -1886,7 +2038,17 @@ export function BoqStageBuilder(props: Props) {
         Boolean(props.floors.at(-1)?.penthouseSqft)) ||
       (category.key === 'footings' && isMeasuredFooting(props.design)) ||
       (category.key === 'columns' && isMeasuredColumn(props.design)) ||
-      (category.key === 'plinth' && Boolean(props.design?.plinthRunFeet));
+      (category.key === 'plinth' &&
+        Boolean(
+          props.design?.plinthBeams?.length
+            ? props.design.plinthBeams.some(
+                (beam) =>
+                  beam.count > 0 &&
+                  beam.lengthFeet > 0 &&
+                  parseBars(beam.bars).length > 0,
+              )
+            : props.design?.plinthRunFeet,
+        ));
     const pending = unmeasured(stage, category.key);
     const combined =
       category.key === 'beams' &&

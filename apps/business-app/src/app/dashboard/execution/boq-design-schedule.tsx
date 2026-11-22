@@ -73,10 +73,10 @@ function NumberCell({
  * from the company's column-grid rules.
  */
 const BAR_DIAMETERS = [8, 10, 12, 16, 20, 25, 32] as const;
-const BAR_COUNTS = Array.from({ length: 20 }, (_, i) => i + 1);
+const BAR_COUNTS = Array.from({ length: 40 }, (_, i) => i + 1);
 
 /** Bars as on the drawing, picked as "4 nos × 16 mm" rows (no typing). */
-function BarsPicker({
+export function BarsPicker({
   label,
   value,
   onChange,
@@ -144,13 +144,14 @@ function BarsPicker({
           )}
         </span>
       ))}
-      {rows.length < 4 && (
+      {rows.length < 8 && (
         <button
           type="button"
           className="erp-button erp-button-quiet"
+          aria-label={`Add ${label} reinforcement set`}
           onClick={() => save([...rows, { count: 2, dia: 12 }])}
         >
-          + bars
+          + Add rod size
         </button>
       )}
     </div>
