@@ -106,8 +106,8 @@ type Props = {
     changes: { name: string; quantity: number; unit: string; rate: number },
   ) => void;
   onSave: () => void;
-  onPrint: () => void;
-  onAdvanced: () => void;
+  onDetailedBoq: () => void;
+  canOpenDetailed: boolean;
   canViewCost: boolean;
   busy: boolean;
   canSave: boolean;
@@ -359,7 +359,8 @@ export function BoqStageBuilder(props: Props) {
     stage: string;
     category: string;
   } | null>(null);
-  const [preview, setPreview] = useState(false);
+  // The full price report now lives in one final Detailed BOQ view.
+  const preview = false;
   const [manualQuantity, setManualQuantity] = useState(0);
   const [manualRate, setManualRate] = useState(0);
   const [manualName, setManualName] = useState('');
@@ -2477,37 +2478,6 @@ export function BoqStageBuilder(props: Props) {
             </Fragment>
           );
         })}
-      <div className="boq-stage-total">
-        <div>
-          <small>
-            Project BOQ {props.newDocument ? '(Estimated)' : '(Saved)'}
-          </small>
-          <strong>
-            {props.canViewCost ? money(projectCost) : 'Restricted'}
-          </strong>
-        </div>
-        <div className="boq-stage-total-breakdown">
-          {sections.map((stage) => (
-            <span key={stage}>
-              {stage}
-              <b>
-                {props.canViewCost
-                  ? money(
-                      costForStage(
-                        stage,
-                        stage === 'Foundation'
-                          ? foundation
-                          : stage === last
-                            ? terrace
-                            : standard,
-                      ),
-                    )
-                  : '—'}
-              </b>
-            </span>
-          ))}
-        </div>
-      </div>
       {props.message && (
         <p className="boq-notice" role="status">
           {props.message}
@@ -2517,13 +2487,15 @@ export function BoqStageBuilder(props: Props) {
         <button
           type="button"
           className="boq-stage-outline"
-          onClick={() => {
-            if (!preview) setExpanded(sections);
-            setPreview(!preview);
-            setEditing(null);
-          }}
+          onClick={props.onDetailedBoq}
+          disabled={!props.canOpenDetailed}
+          title={
+            props.canOpenDetailed
+              ? 'Open the detailed, floor-wise priced BOQ'
+              : 'Available when changes are saved automatically'
+          }
         >
-          ◉ {preview ? 'Back to Builder' : 'Preview BOQ'}
+          ◉ Detailed BOQ
         </button>
         {props.autoSaveLabel ? (
           <span className="boq-autosave-status" role="status">
@@ -2539,24 +2511,9 @@ export function BoqStageBuilder(props: Props) {
             ▣ {props.busy ? 'Saving…' : 'Save BOQ'}
           </button>
         )}
-        <button
-          type="button"
-          className="boq-stage-outline"
-          onClick={() => {
-            setExpanded(sections);
-            window.setTimeout(props.onPrint, 30);
-          }}
-        >
-          ▤ Print / PDF
-        </button>
+
       </div>
-      <button
-        type="button"
-        className="boq-stage-advanced"
-        onClick={props.onAdvanced}
-      >
-        Detailed takeoff, materials, rates & room measurements
-      </button>
+
     </section>
   );
 }
