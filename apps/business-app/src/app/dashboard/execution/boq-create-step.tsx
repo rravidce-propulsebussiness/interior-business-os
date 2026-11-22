@@ -57,7 +57,11 @@ export function BoqCreateStep({
           disabled={saving}
           required
         />
-        {error && <p className="boq-create-error" role="alert">{error}</p>}
+        {error && (
+          <p className="boq-create-error" role="alert">
+            {error}
+          </p>
+        )}
         <button
           className="boq-create-continue"
           type="submit"

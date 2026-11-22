@@ -1,7 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Fragment, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BOQ_TEMPLATES,
@@ -900,7 +907,17 @@ export function BoqWorkspace({
       ...(labour && canViewCost ? { labour } : {}),
       ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
     }),
-    [title, projectId, quoteId, lines, selections, labour, canViewCost, generator, repeatFrom],
+    [
+      title,
+      projectId,
+      quoteId,
+      lines,
+      selections,
+      labour,
+      canViewCost,
+      generator,
+      repeatFrom,
+    ],
   );
   const autoSaveFingerprint = JSON.stringify(autoSaveContent);
   useEffect(() => {
@@ -930,7 +947,10 @@ export function BoqWorkspace({
       return;
     const timer = window.setTimeout(() => {
       if (autoSaving.current) return;
-      const measurementError = validateBoqMeasurements(autoSaveContent.items, Boolean(schedule));
+      const measurementError = validateBoqMeasurements(
+        autoSaveContent.items,
+        Boolean(schedule),
+      );
       if (measurementError) {
         autoFailedFingerprint.current = autoSaveFingerprint;
         lastFailedRetry.current = retryAutoSave;
@@ -1601,7 +1621,9 @@ export function BoqWorkspace({
         projectId={projectId}
         title={title === 'Construction BOQ' ? '' : title}
         saving={busy}
-        preparing={Boolean(quoteId && (calculating || (!generator && lines.length === 0)))}
+        preparing={Boolean(
+          quoteId && (calculating || (!generator && lines.length === 0)),
+        )}
         error={createError}
         onProjectChange={selectProject}
         onTitleChange={setTitle}
@@ -2036,13 +2058,20 @@ export function BoqWorkspace({
         </p>
       )}
       {active && canEdit && (
-        <div className="boq-autosave-status" data-state={autoSaveState} role="status">
+        <div
+          className="boq-autosave-status"
+          data-state={autoSaveState}
+          role="status"
+        >
           {autoSaveLabel}
           {autoSaveState === 'error' && (
             <>
               <span>{autoSaveError}</span>
-              <button type="button" className="boq-autosave-retry"
-                onClick={() => setRetryAutoSave((previous) => previous + 1)}>
+              <button
+                type="button"
+                className="boq-autosave-retry"
+                onClick={() => setRetryAutoSave((previous) => previous + 1)}
+              >
                 Retry
               </button>
             </>

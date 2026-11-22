@@ -6,7 +6,10 @@ import { BoqCreateStep } from './boq-create-step';
 type Props = ComponentProps<typeof BoqCreateStep>;
 
 const defaults: Props = {
-  projects: [{ id: 'project-a', name: 'Ramya' }, { id: 'project-b', name: 'Jashwanth Kumar' }],
+  projects: [
+    { id: 'project-a', name: 'Ramya' },
+    { id: 'project-b', name: 'Jashwanth Kumar' },
+  ],
   projectId: 'project-a',
   title: 'Ramya · Construction BOQ',
   saving: false,
@@ -17,7 +20,9 @@ const defaults: Props = {
   onContinue: () => {},
 };
 const render = (overrides: Partial<Props> = {}) =>
-  renderToStaticMarkup(createElement(BoqCreateStep, { ...defaults, ...overrides }));
+  renderToStaticMarkup(
+    createElement(BoqCreateStep, { ...defaults, ...overrides }),
+  );
 
 describe('BOQ two-step creation', () => {
   it('displays only a project dropdown, a BOQ name, and Continue before editing', () => {

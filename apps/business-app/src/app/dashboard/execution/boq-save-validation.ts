@@ -28,8 +28,15 @@ const generatedForStage: Record<string, readonly string[]> = {
 };
 
 const legacyManualStructural = new Set([
-  'excavation', 'footing', 'pedestal', 'column', 'plinth_beam',
-  'beam', 'slab', 'wall', 'surface',
+  'excavation',
+  'footing',
+  'pedestal',
+  'column',
+  'plinth_beam',
+  'beam',
+  'slab',
+  'wall',
+  'surface',
 ]);
 
 export function validateBoqMeasurements(
@@ -39,37 +46,56 @@ export function validateBoqMeasurements(
   const overlap = lines.find((line) => {
     if (line.kind !== 'measured-geometry') return false;
     const category = String(line.inputs.stageCategory);
-    const related = category === 'excavation'
-      ? ['quote-foundation', 'quote-excavation']
-      : category === 'pcc'
-        ? ['quote-foundation', 'quote-pcc']
-        : [];
-    return related.length > 0 && lines.some(
-      (generated) => Boolean(generated.origin) &&
-        generated.section === line.section &&
-        related.includes(generated.kind),
+    const related =
+      category === 'excavation'
+        ? ['quote-foundation', 'quote-excavation']
+        : category === 'pcc'
+          ? ['quote-foundation', 'quote-pcc']
+          : [];
+    return (
+      related.length > 0 &&
+      lines.some(
+        (generated) =>
+          Boolean(generated.origin) &&
+          generated.section === line.section &&
+          related.includes(generated.kind),
+      )
     );
   });
   if (overlap) {
-    return 'Review ' + overlap.name + ': old quotation-generated foundation quantities also exist. Remove or reconcile the duplicate line before saving.';
+    return (
+      'Review ' +
+      overlap.name +
+      ': old quotation-generated foundation quantities also exist. Remove or reconcile the duplicate line before saving.'
+    );
   }
 
   const duplicated = lines.find((manual) => {
     if (manual.origin || manual.kind !== 'manual') return false;
     const kinds = generatedForStage[String(manual.inputs.stageCategory ?? '')];
-    return kinds?.some((kind) => lines.some((generated) =>
-      Boolean(generated.origin) &&
-      generated.section === manual.section &&
-      generated.kind === kind,
-    ));
+    return kinds?.some((kind) =>
+      lines.some(
+        (generated) =>
+          Boolean(generated.origin) &&
+          generated.section === manual.section &&
+          generated.kind === kind,
+      ),
+    );
   });
   if (duplicated) {
-    return 'Review ' + duplicated.name + ' in ' + duplicated.section + ': both a manual measurement and a drawing-generated measurement exist. Remove one before saving to avoid duplicate quantities.';
+    return (
+      'Review ' +
+      duplicated.name +
+      ' in ' +
+      duplicated.section +
+      ': both a manual measurement and a drawing-generated measurement exist. Remove one before saving to avoid duplicate quantities.'
+    );
   }
 
-  if (hasQuotationSchedule && lines.some(
-    (line) => !line.origin && legacyManualStructural.has(line.kind),
-  )) {
+  if (
+    hasQuotationSchedule &&
+    lines.some((line) => !line.origin && legacyManualStructural.has(line.kind))
+  ) {
     return 'Remove overlapping manually measured structural or finishing items before saving. The quotation already generates these quantities.';
   }
   return null;

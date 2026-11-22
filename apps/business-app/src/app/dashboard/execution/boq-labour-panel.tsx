@@ -925,22 +925,25 @@ export function BoqLabourPanel({
           <small>Total Labour Cost</small>
           <strong>{canViewCost ? money(labourTotal) : 'Restricted'}</strong>
         </div>
-        {canEdit && (autoSaveLabel ? (
-          <span className="boq-autosave-status" role="status">{autoSaveLabel}</span>
-        ) : (
-          <button
-            type="button"
-            className="boq-labour-primary"
-            disabled={
-              busy ||
-              result.invalidExtras.length > 0 ||
-              (config.method === 'composite' && !config.coveredWorks.length)
-            }
-            onClick={onSave}
-          >
-            {busy ? 'Saving…' : '▣ Save BOQ'}
-          </button>
-        ))}
+        {canEdit &&
+          (autoSaveLabel ? (
+            <span className="boq-autosave-status" role="status">
+              {autoSaveLabel}
+            </span>
+          ) : (
+            <button
+              type="button"
+              className="boq-labour-primary"
+              disabled={
+                busy ||
+                result.invalidExtras.length > 0 ||
+                (config.method === 'composite' && !config.coveredWorks.length)
+              }
+              onClick={onSave}
+            >
+              {busy ? 'Saving…' : '▣ Save BOQ'}
+            </button>
+          ))}
       </div>
       {result.invalidExtras.length > 0 && (
         <p role="alert" className="boq-labour-alert">
