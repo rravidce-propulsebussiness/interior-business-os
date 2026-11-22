@@ -45,6 +45,7 @@ import {
 } from '@business-os/core/construction-boq';
 import { BoqDesignSchedule } from './boq-design-schedule';
 import { BoqStageBuilder } from './boq-stage-builder';
+import { BoqRegisterLanding } from './boq-register-landing';
 import { BoqLabourPanel } from './boq-labour-panel';
 import {
   DEFAULT_LABOUR,
@@ -228,6 +229,9 @@ export function BoqWorkspace({
             ) ?? documents[0])) ??
         null);
   const [active, setActive] = useState<Document | null>(initialDocument);
+  const [showSavedDetails, setShowSavedDetails] = useState(Boolean(
+    initialOpenId || (initialProjectId && initialDocument?.project_id === initialProjectId),
+  ));
   const [title, setTitle] = useState(
     initialDocument?.title ?? 'Construction BOQ',
   );
@@ -688,11 +692,12 @@ export function BoqWorkspace({
     }
     router.push('/dashboard/execution/boq/new');
   }
-  function openDocument(document: Document) {
+  function openDocument(document: Document, mode: 'view' | 'edit' = 'view') {
     setActive(document);
-    setScreen('view');
+    setScreen(mode);
+    setShowSavedDetails(mode === 'view');
     router.replace(
-      `/dashboard/execution/boq?open=${encodeURIComponent(document.id)}`,
+      `/dashboard/execution/boq?open=${encodeURIComponent(document.id)}${mode === 'edit' ? '&mode=edit' : ''}`,
     );
     setTitle(document.title);
     setProjectId(document.project_id || '');
@@ -1159,6 +1164,7 @@ export function BoqWorkspace({
         updated_at: new Date().toISOString(),
       });
       setScreen('view');
+      setShowSavedDetails(true);
       router.replace(
         `/dashboard/execution/boq?open=${encodeURIComponent(result.id || active?.id || '')}`,
       );
@@ -1175,6 +1181,7 @@ export function BoqWorkspace({
       if (result.ok) {
         setActive(null);
         setScreen('view');
+        setShowSavedDetails(false);
         router.replace('/dashboard/execution/boq');
       }
       router.refresh();
@@ -1489,80 +1496,44 @@ export function BoqWorkspace({
       `/dashboard/execution/boq?open=${encodeURIComponent(active.id)}&mode=edit`,
     );
   }
+  if (screen === 'view' && !showSavedDetails) {
+    return (
+      <BoqRegisterLanding
+        documents={documents}
+        projects={projects}
+        canCreate={canCreate}
+        canEdit={canEdit}
+        canStartNew={newProjects.length > 0}
+        onView={(id) => {
+          const document = documents.find((item) => item.id === id);
+          if (document) openDocument(document, 'view');
+        }}
+        onEdit={(id) => {
+          const document = documents.find((item) => item.id === id);
+          if (document && canEdit) openDocument(document, 'edit');
+        }}
+      />
+    );
+  }
   if (screen === 'view') {
     return (
-      <main className="erp-page manual-boq boq-readonly">
-        <div className="erp-titlebar">
-          <div>
-            <p className="erp-eyebrow">Construction takeoff</p>
-            <h1>Saved BOQs</h1>
-            <p>
-              Review saved measurements, materials and costs. Edit only when
-              changes are needed.
-            </p>
-          </div>
-          {canCreate && newProjects.length > 0 && (
-            <Link
-              className="erp-button erp-button-primary"
-              href="/dashboard/execution/boq/new"
-            >
-              ＋ New BOQ
-            </Link>
-          )}
+      <main className="erp-page manual-boq boq-readonly boq-view-detail">
+        <div className="boq-view-back">
+          <button
+            type="button"
+            className="erp-button"
+            onClick={() => {
+              setShowSavedDetails(false);
+              router.replace('/dashboard/execution/boq');
+            }}
+          >
+            ← Completed BOQs
+          </button>
         </div>
         {message && (
-          <p className="boq-notice" role="status">
-            {message}
-          </p>
+          <p className="boq-notice" role="status">{message}</p>
         )}
-        <div className="boq-layout">
-          <aside className="boq-register">
-            <div className="boq-panel-heading">
-              <div>
-                <h2>Saved BOQs</h2>
-                <span>{plural(documents.length, 'document', 'documents')}</span>
-              </div>
-              {canCreate && newProjects.length > 0 && (
-                <Link
-                  className="boq-add-small"
-                  href="/dashboard/execution/boq/new"
-                  aria-label="Create new BOQ"
-                >
-                  ＋
-                </Link>
-              )}
-            </div>
-            {documents.length ? (
-              documents.map((document) => (
-                <button
-                  type="button"
-                  key={document.id}
-                  className={`boq-register-item ${active?.id === document.id ? 'active' : ''}`}
-                  onClick={() => openDocument(document)}
-                >
-                  <span className="boq-document-icon">B</span>
-                  <span className="boq-register-copy">
-                    <strong>{document.title}</strong>
-                    <small>
-                      {projects.find(
-                        (project) => project.id === document.project_id,
-                      )?.name || 'No project linked'}{' '}
-                      · View / Edit
-                    </small>
-                  </span>
-                  <span className="boq-register-arrow">›</span>
-                </button>
-              ))
-            ) : (
-              <p className="boq-empty">No saved BOQs yet.</p>
-            )}
-            {canCreate && newProjects.length === 0 && (
-              <p className="boq-empty">
-                New BOQs require a project with a saved quotation and no
-                existing BOQ.
-              </p>
-            )}
-          </aside>
+        <div className="boq-layout boq-layout-full">
           <section className="boq-editor">
             {active ? (
               <>
