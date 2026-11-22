@@ -51,6 +51,7 @@ const base: StageProps = {
   canSave: true,
   busy: false,
   newDocument: true,
+  initialStep: 4,
 };
 
 describe('stage-wise miscellaneous BOQ UI', () => {
