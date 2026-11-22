@@ -1368,7 +1368,11 @@ export function BoqWorkspace({
         /* No implied steel if a legacy note is malformed. */
       }
     }
-    const outputs = measuredOutputs(kind, { ...values, steelSets }, settings);
+    const outputs = measuredOutputs(
+      kind,
+      { ...values, ...(steelSets ? { steelSets } : {}) },
+      settings,
+    );
     const steelSetsJson = JSON.stringify(steelSets ?? []);
     setLines((prior) =>
       prior.map((line, i) =>
