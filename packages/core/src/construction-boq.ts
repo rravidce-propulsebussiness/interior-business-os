@@ -3982,12 +3982,11 @@ export function generateQuotationBoq(
     const kitchenGranite = kitchens === undefined
       ? fc.kitchens * platformFeet * s.kitchenPlatformDepthFeet
       : kitchens.reduce((sum, kitchen) => sum +
-          kitchen.platformFeet * (kitchen.platformDepthFeet || s.kitchenPlatformDepthFeet), 0);
+          kitchen.platformFeet * kitchen.platformDepthFeet, 0);
     const kitchenTiles = kitchens === undefined
       ? fc.kitchens * platformFeet * s.kitchenWallTileHeightFeet
       : kitchens.reduce((sum, kitchen) => sum +
-          (kitchen.wallTileFeet || kitchen.platformFeet) *
-          (kitchen.wallTileHeightFeet || s.kitchenWallTileHeightFeet), 0);
+          kitchen.wallTileFeet * kitchen.wallTileHeightFeet, 0);
     const tileWaste = 1 + s.tileWastagePercent / 100;
     /** Area to buy (with wastage) and the tiles / boxes to order. */
     const tileOrder = (
@@ -4182,13 +4181,13 @@ export function generateQuotationBoq(
             })()
           : []),
         // Bedding mortar: floors 40 mm 1:4, wall tiles 12 mm 1:3.
-        ...(floorTiles + bathFloor + stairGranite + parking + wallTiles > 0
+        ...(floorTiles + bathFloor + stairGranite + parking + wallTiles + kitchenGranite + kitchenTiles > 0
           ? [
               {
                 name: 'Cement (tile bedding)',
                 material: 'cement_masonry',
                 quantity: round(
-                  ((floorTiles + bathFloor + stairGranite + parking) * 0.028 +
+                  ((floorTiles + bathFloor + stairGranite + parking + kitchenGranite) * 0.028 +
                     (wallTiles + kitchenTiles) * 0.0104) *
                     (1 + s.materialWastagePercent / 100),
                   1,
@@ -4197,7 +4196,7 @@ export function generateQuotationBoq(
                 source: 'Floor bed 40 mm 1:4 · wall tile bed 12 mm 1:3',
               },
               sandOutput(
-                ((floorTiles + bathFloor + stairGranite + parking) * 0.00387 +
+                ((floorTiles + bathFloor + stairGranite + parking + kitchenGranite) * 0.00387 +
                   (wallTiles + kitchenTiles) * 0.00109) *
                   (1 + s.materialWastagePercent / 100),
                 s,
