@@ -17,6 +17,8 @@ import type {
   DesignBeamType,
   DesignPlinthBeamType,
   DesignColumnType,
+  DesignSlabPanel,
+  DesignStairType,
   DesignSettingKey,
   StructuralDesign,
   StructuralSettings,
@@ -1238,12 +1240,14 @@ export function BoqStageBuilder(props: Props) {
                     value={col.depthIn}
                     onChange={(value) => updateCol(ci, { depthIn: value })}
                   />
-                  <InputText
-                    label="Main bars (e.g. 4-16+2-12)"
-                    value={col.bars}
-                    placeholder="4-16+2-12"
-                    onChange={(value) => updateCol(ci, { bars: value })}
-                  />
+                  <div className="boq-beam-rebar-groups">
+                    <strong>Main reinforcement (per column)</strong>
+                    <BarsPicker
+                      label={col.label + ' reinforcement'}
+                      value={col.bars}
+                      onChange={(bars) => updateCol(ci, { bars })}
+                    />
+                  </div>
                   <InputNumber
                     label="Ring diameter"
                     unit="mm"
@@ -1334,17 +1338,40 @@ export function BoqStageBuilder(props: Props) {
                     }
                   />
                   <InputNumber
-                    label="Run under this roof"
-                    unit="ft"
-                    value={beam.runFeet[index] ?? 0}
+                    label="Same beams on this floor (nos, 0 = legacy total run)"
+                    value={beam.countsByFloor?.[index] ?? 0}
                     onChange={(value) =>
                       updateBeam(bi, {
-                        runFeet: props.floors.map((_, i) =>
-                          i === index ? value : (beam.runFeet[i] ?? 0),
+                        countsByFloor: props.floors.map((_, i) =>
+                          i === index ? Math.round(value) :
+                            (beam.countsByFloor?.[i] ?? 0),
                         ),
                       })
                     }
                   />
+                  <InputNumber
+                    label={beam.countsByFloor?.[index]
+                      ? 'Each beam length' : 'Total beam running length'}
+                    unit="ft"
+                    value={beam.countsByFloor?.[index]
+                      ? (beam.runFeet[index] ?? 0) /
+                        beam.countsByFloor[index]!
+                      : (beam.runFeet[index] ?? 0)}
+                    onChange={(value) =>
+                      updateBeam(bi, {
+                        runFeet: props.floors.map((_, i) =>
+                          i === index
+                            ? value * (beam.countsByFloor?.[index] || 1)
+                            : (beam.runFeet[i] ?? 0),
+                        ),
+                      })
+                    }
+                  />
+                  {(beam.countsByFloor?.[index] ?? 0) > 0 && (
+                    <small className="boq-structural-inline-total">
+                      {number(beam.runFeet[index] ?? 0)} rft total
+                    </small>
+                  )}
                 </div>
               </div>
             ))}
