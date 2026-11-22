@@ -82,7 +82,7 @@ describe('stage-wise miscellaneous BOQ UI', () => {
       }),
     );
     const stageTabs =
-      html.match(/aria-label="Jump to BOQ stage"[^>]*>([\\s\\S]*?)<\\/div>/)?.[1] ??
+      html.split('aria-label="Jump to BOQ stage"')[1]?.split('</div>')[0] ??
       '';
     expect(stageTabs).toContain('Foundation');
     expect(stageTabs).not.toContain('Ground Floor');
