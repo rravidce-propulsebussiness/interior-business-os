@@ -7,6 +7,7 @@ import './execution-premium.css';
 import './boq-stage-builder.css';
 import './boq-labour.css';
 import './boq-register-landing.css';
+import './boq-final-floor-pricing.css';
 import './boq-create-step.css';
 import './boq-structural-concrete-card.css';
 

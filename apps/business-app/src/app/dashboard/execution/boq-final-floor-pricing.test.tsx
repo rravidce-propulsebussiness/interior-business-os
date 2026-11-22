@@ -1,0 +1,110 @@
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { describe, expect, it } from 'vitest';
+import {
+  buildFloorPricing,
+  BoqFinalFloorPricing,
+} from './boq-final-floor-pricing';
+
+describe('one final BOQ floor-wise pricing', () => {
+  const floors = [
+    { name: 'Ground Floor', areaSqft: 1000 },
+    { name: 'First Floor', areaSqft: 950 },
+  ];
+
+  it('shows costs by floor without charging allocated composite labour twice', () => {
+    const rows = buildFloorPricing(
+      [
+        { stage: 'Foundation', amount: 10000, isLabour: false },
+        { stage: 'Ground Floor', amount: 20000, isLabour: false },
+        { stage: 'First Floor', amount: 25000, isLabour: false },
+      ],
+      { 'Ground Floor': 10000, 'First Floor': 9500 },
+      floors,
+      ['Foundation', 'Ground Floor', 'First Floor'],
+    );
+    expect(rows.map((r) => r.stage)).toEqual([
+      'Foundation',
+      'Ground Floor',
+      'First Floor',
+    ]);
+    expect(rows.find((r) => r.stage === 'Ground Floor')).toMatchObject({
+      areaSqft: 1000,
+      materialCost: 20000,
+      labourCost: 10000,
+      totalCost: 30000,
+      costPerSqft: 30,
+    });
+    expect(rows.find((r) => r.stage === 'First Floor')).toMatchObject({
+      areaSqft: 950,
+      materialCost: 25000,
+      labourCost: 9500,
+      totalCost: 34500,
+    });
+    expect(rows.find((r) => r.stage === 'Foundation')).toMatchObject({
+      areaSqft: null,
+      labourCost: 0,
+      totalCost: 10000,
+      costPerSqft: null,
+    });
+    expect(rows.reduce((total, r) => total + r.totalCost, 0)).toBe(74500);
+  });
+
+  it('counts legacy labour only once, separately from materials', () => {
+    const rows = buildFloorPricing(
+      [
+        { stage: 'Ground Floor', amount: 5000, isLabour: false },
+        { stage: 'Ground Floor', amount: 1500, isLabour: true },
+      ],
+      {},
+      floors,
+      ['Ground Floor'],
+    );
+    expect(rows[0]).toMatchObject({
+      materialCost: 5000,
+      labourCost: 1500,
+      totalCost: 6500,
+    });
+    expect(rows[1]).toMatchObject({
+      materialCost: 0,
+      labourCost: 0,
+    });
+  });
+
+  it('keeps general daily labour visible without fabricating a floor area', () => {
+    const rows = buildFloorPricing([], { General: 2400 }, floors, []);
+    expect(rows.find((r) => r.stage === 'General')).toMatchObject({
+      areaSqft: null,
+      materialCost: 0,
+      labourCost: 2400,
+      totalCost: 2400,
+    });
+  });
+
+  it('renders final totals but hides costs from users without cost permissions', () => {
+    const rows = buildFloorPricing(
+      [{ stage: 'Ground Floor', amount: 1200, isLabour: false }],
+      {},
+      floors,
+      ['Ground Floor'],
+    );
+    const render = (canViewCost: boolean) =>
+      renderToStaticMarkup(
+        createElement(BoqFinalFloorPricing, {
+          rows,
+          materialCost: 1200,
+          labourCost: 0,
+          totalCost: 1200,
+          areaSqft: 1950,
+          canViewCost,
+        }),
+      );
+    expect(render(true)).toContain('Floor-wise BOQ pricing');
+    expect(render(true)).toContain('Materials');
+    expect(render(true)).toContain('Labour');
+    expect(render(true)).toContain('Total project');
+    expect(render(true)).toContain('₹1,200');
+    expect(render(false)).toContain('Ground Floor');
+    expect(render(false)).not.toContain('₹1,200');
+  });
+});
