@@ -86,7 +86,9 @@ export function BarsPicker({
   onChange: (bars: string) => void;
 }) {
   const sets = parseBars(value);
-  const rows = sets.length ? sets : [{ count: 4, dia: 12 }];
+  // Do not display unsaved default reinforcement as though it came from
+  // the structural drawing. New sets appear only after the user adds them.
+  const rows = sets;
   const save = (next: { count: number; dia: number }[]) =>
     onChange(next.map((bar) => `${bar.count}-${bar.dia}`).join('+'));
   return (
