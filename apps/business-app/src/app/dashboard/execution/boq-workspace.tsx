@@ -51,6 +51,8 @@ import {
   LEGACY_CIVIL_LABOUR_MATERIALS,
   evaluateLabour,
   labourMeasurements,
+  labourExtraQuantity,
+  labourWorkName,
   type LabourConfig,
 } from './boq-labour';
 import {
@@ -165,9 +167,7 @@ const rateMoney = (value: number, currency = 'INR') => {
 };
 const plural = (count: number, one: string, many: string) =>
   `${count} ${count === 1 ? one : many}`;
-const keyFor = (name: string, unit: string, material?: string) =>
-  `${material ? material + '|' : ''}${name.trim().toLowerCase()}::${unit.trim().toLowerCase()}`;
-const uid = () => crypto.randomUUID();
+
 /** Identifies a generated output across regenerations. */
 const overrideKey = (
   line: { section: string; kind: string },
@@ -438,29 +438,7 @@ export function BoqWorkspace({
       section: line.section,
     })),
   );
-  const grouped = new Map<
-    string,
-    {
-      name: string;
-      unit: string;
-      quantity: number;
-      amount: number;
-      section: string;
-    }
-  >();
-  for (const row of allOutputs) {
-    const key = keyFor(row.name, row.unit, materialForOutput(row));
-    const prior = grouped.get(key);
-    const quantity = (prior?.quantity ?? 0) + row.quantity;
-    const amount = (prior?.amount ?? 0) + row.quantity * row.rate;
-    grouped.set(key, {
-      name: row.name,
-      unit: row.unit,
-      quantity,
-      amount,
-      section: prior?.section || row.section,
-    });
-  }
+
   const materialOnlyCost = allOutputs.reduce(
     (sum, output) => sum + (isOldLabour(output) ? 0 : output.quantity * output.rate),
     0,
@@ -526,7 +504,7 @@ export function BoqWorkspace({
   }
   // Every quantity with its stage and cost head, for the order list and
   // the download.
-  const exportRows: BoqExportRow[] = allOutputs.map((row) => {
+  const materialExportRows: BoqExportRow[] = allOutputs.map((row) => {
     const material = materialForOutput(row);
     return {
       stage: row.section,
@@ -535,14 +513,53 @@ export function BoqWorkspace({
       quantity: row.quantity,
       unit: row.unit,
       rate: canViewCost ? row.rate : 0,
-      head: costHead(
+      head: isOldLabour(row) ? 'Labour' : costHead(
         material ? rateGroupKey(material, diameterOf(row)) : undefined,
       ),
       order: row.order,
       weightKg: row.weightKg,
     };
   });
-  const orderList = materialsToOrder(exportRows, COST_HEADS);
+  const labourExportRows: BoqExportRow[] = !labour ? [] : [
+    ...(labour.method === 'composite'
+      ? [{
+          stage: 'Labour costing', item: labour.packageName,
+          name: labour.packageName + ' · composite labour',
+          quantity: labour.areaOverrideSqft ??
+            floorsForGeneration.reduce((sum, f) => sum + f.areaSqft, 0),
+          unit: 'sft', rate: labour.rate, head: 'Labour',
+        }]
+      : labour.method === 'itemwise'
+        ? measuredLabour.map((measured) => ({
+            stage: measured.stage, item: labourWorkName(measured.work),
+            name: labourWorkName(measured.work) + ' labour',
+            quantity: measured.quantity, unit: measured.unit,
+            rate: labour.itemRates[measured.work] ?? 0, head: 'Labour',
+          }))
+        : labour.dailyRates.map((worker) => ({
+            stage: 'Labour costing', item: worker.name,
+            name: worker.name + ' · daily estimate',
+            quantity: worker.workers * worker.days, unit: 'worker-day',
+            rate: worker.rate, head: 'Labour',
+          }))),
+    ...labour.extras.map((extra) => ({
+      stage: extra.stage, item: extra.name,
+      name: extra.name + (extra.outsideScope ? ' (extra beyond package)' : ''),
+      quantity: extra.method === 'daily'
+        ? extra.workers * extra.days
+        : labourExtraQuantity(extra, measuredLabour),
+      unit: extra.method === 'daily' ? 'worker-day' : extra.unit,
+      rate: extra.rate,
+      head: 'Labour',
+    })),
+  ];
+  const exportRows = [...materialExportRows, ...labourExportRows];
+  // Contract labour is part of the estimate, never a procurement/order item.
+  const orderList = materialsToOrder(
+    materialExportRows.filter((row) => row.head !== 'Labour'),
+    COST_HEADS,
+  );
+
   const [showTakeoff, setShowTakeoff] = useState(false);
   const floorArea = new Map(
     (generator?.floors ?? []).map((floor) => [floor.name, floor.areaSqft]),
