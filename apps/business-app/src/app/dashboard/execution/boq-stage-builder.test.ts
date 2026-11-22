@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { BoqStageBuilder } from './boq-stage-builder';
 import { BoqFootingEditor } from './boq-footing-editor';
+import { BarsPicker } from './boq-design-schedule';
 import { newFootingType } from '@business-os/core/construction-boq';
 import type {
   BoqCounts,
@@ -144,6 +145,25 @@ describe('compact BOQ entry stages', () => {
     expect(html).toContain('Miscellaneous');
     expect(html).toContain('1 item');
     expect(html).toContain('₹600');
+  });
+});
+
+describe('beam reinforcement entry', () => {
+  it('renders multiple diameter/count selections and Add rod size for one beam', () => {
+    const html = renderToStaticMarkup(
+      createElement(BarsPicker, {
+        label: 'Plinth PB1',
+        value: '4-16+2-12+2-10+2-20',
+        onChange: noop,
+      }),
+    );
+    for (const index of [1, 2, 3, 4]) {
+      expect(html).toContain(`Plinth PB1 set ${index} bar diameter`);
+    }
+    expect(html).toContain('Add Plinth PB1 reinforcement set');
+    expect(html).toContain('+ Add rod size');
+    expect(html).toContain('Remove Plinth PB1 set 3');
+    expect((html.match(/bar diameter/g) ?? []).length).toBe(4);
   });
 });
 
