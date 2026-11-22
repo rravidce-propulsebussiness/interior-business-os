@@ -29,7 +29,7 @@ type Props = {
   canViewCost: boolean;
   busy: boolean;
   onSave: () => void;
-  autoSaveLabel?: string;
+  autoSaveLabel?: string | undefined;
 };
 const money = (n: number) =>
   new Intl.NumberFormat('en-IN', {
