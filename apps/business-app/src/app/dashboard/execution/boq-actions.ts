@@ -48,6 +48,7 @@ const generatorSchema = z.object({
   revisionId: z.string().uuid(),
   generatedAt: z.string().max(40),
   settings: z.record(z.string(), z.number().finite()),
+  rmcRatePerM3: z.number().finite().nonnegative().max(10000000).optional(),
   counts: z.object({
     floors: z
       .record(
