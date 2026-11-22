@@ -3873,62 +3873,77 @@ export function generateQuotationBoq(
       });
     }
 
-    // --- Staircase from each floor to the next (and to the terrace) -------
-    if (s.stairsPerFloor > 0)
-      for (const floor of floors) {
-        const risers = ceil((floor.heightFeet * 12) / s.stairRiserIn);
+    // --- Staircases: per-floor drawing types or the legacy company rule ----
+    for (const floor of floors) {
+      const measuredStairs = design?.staircases?.filter(
+        (stair) => stair.floor === floor.name,
+      ) ?? [];
+      const staircaseTypes: DesignStairType[] = measuredStairs.length
+        ? measuredStairs
+        : s.stairsPerFloor > 0
+          ? [{
+              label: 'Staircase',
+              floor: floor.name,
+              count: s.stairsPerFloor,
+              widthFeet: s.stairWidthFeet,
+              riserIn: s.stairRiserIn,
+              treadIn: s.stairTreadIn,
+              waistIn: s.stairWaistIn,
+              landingFeet: s.stairLandingFeet,
+              reinforcement: [
+                { role: 'main', dia: s.stairMainDia, spacingIn: s.stairBarSpacingIn },
+                { role: 'distribution', dia: s.stairDistDia, spacingIn: s.stairBarSpacingIn },
+              ],
+            }]
+          : [];
+      for (const stair of staircaseTypes) {
+        if (!(stair.count > 0 && stair.widthFeet > 0 &&
+          stair.riserIn > 0 && stair.treadIn > 0 && stair.waistIn > 0)) continue;
+        const risers = ceil((floor.heightFeet * 12) / stair.riserIn);
         const flightRise = floor.heightFeet / 2;
-        const flightRun = ((risers / 2) * s.stairTreadIn) / 12;
+        const flightRun = ((risers / 2) * stair.treadIn) / 12;
         const flight = Math.hypot(flightRun, flightRise);
-        const w = s.stairWidthFeet;
-        const waist = s.stairWaistIn / 12;
-        const slabArea = 2 * flight * w + s.stairLandingFeet * w;
-        const steps =
-          risers * 0.5 * (s.stairTreadIn / 12) * (s.stairRiserIn / 12) * w;
-        const volume =
-          s.stairsPerFloor * (slabArea * waist + steps) * CUM_PER_CFT;
+        const slabArea = 2 * flight * stair.widthFeet +
+          stair.landingFeet * stair.widthFeet;
+        const steps = risers * 0.5 * (stair.treadIn / 12) *
+          (stair.riserIn / 12) * stair.widthFeet;
+        const volume = stair.count *
+          (slabArea * stair.waistIn / 12 + steps) * CUM_PER_CFT;
         const tally: SteelTally = new Map();
-        const spacing = s.stairBarSpacingIn / 12;
-        const main = s.stairsPerFloor * 2 * (Math.floor(w / spacing) + 1);
-        const mainLength = flight + s.stairLandingFeet / 2 + 1.5;
-        const mainPlan = cutPlan(
-          mainLength,
-          main,
-          stock,
-          lapFeet(s.stairMainDia, s.lapDiameters),
-        );
-        addSteel(
-          tally,
-          s.stairMainDia,
-          mainPlan.bars * stock * M_PER_FT,
-          mainPlan.bars,
-          `stair main ${main} pcs × ${ft(mainLength)}`,
-        );
-        const dist =
-          s.stairsPerFloor *
-          (2 * (Math.floor(flight / spacing) + 1) +
-            Math.floor(s.stairLandingFeet / spacing) +
-            1);
-        const distPlan = cutPlan(w, dist, stock, 0);
-        addSteel(
-          tally,
-          s.stairDistDia,
-          distPlan.bars * stock * M_PER_FT,
-          distPlan.bars,
-          `stair distribution ${dist} pcs × ${ft(w)}`,
-        );
+        if (!stair.reinforcement.length)
+          warnings.push(`${floor.name} ${stair.label}: no staircase reinforcement entered; no steel inferred.`);
+        for (const bar of stair.reinforcement) {
+          if (!(bar.dia > 0 && bar.spacingIn > 0)) continue;
+          const spacing = bar.spacingIn / 12;
+          const isMain = bar.role === 'main';
+          const pieces = isMain
+            ? stair.count * 2 * (Math.floor(stair.widthFeet / spacing) + 1)
+            : stair.count * (
+                2 * (Math.floor(flight / spacing) + 1) +
+                Math.floor(stair.landingFeet / spacing) + 1
+              );
+          const lap = isMain ? lapFeet(bar.dia, s.lapDiameters) : 0;
+          const length = isMain
+            ? flight + stair.landingFeet / 2 + 1.5
+            : stair.widthFeet;
+          const plan = cutPlan(length, pieces, stock, lap);
+          addSteel(tally, bar.dia,
+            plan.bars * stock * M_PER_FT, plan.bars,
+            `${floor.name} ${stair.label} ${bar.role} ${pieces} pcs × ${ft(length)}`);
+        }
         mergeSteel(tally);
         drafts.push({
           origin: 'quotation-structure',
           draft: {
-            name: `${floor.name}: staircase (${s.stairsPerFloor} × ${risers} risers)`,
+            name: measuredStairs.length
+              ? `${floor.name}: ${stair.label} (${stair.count} × ${risers} risers)`
+              : `${floor.name}: staircase (${stair.count} × ${risers} risers)`,
             section: floor.name,
             kind: 'quote-staircase',
             unit: 'm³',
             inputs: {
-              risers,
-              widthFeet: w,
-              waist: `${s.stairWaistIn} in`,
+              risers, widthFeet: stair.widthFeet,
+              waist: `${stair.waistIn} in`,
             },
             outputs: [
               ...concreteOutputs(volume, 'Staircase', s),
@@ -3936,13 +3951,14 @@ export function generateQuotationBoq(
               {
                 name: 'Centering & shuttering',
                 ...(s.labourItemized ? { material: 'shuttering' } : {}),
-                quantity: round(s.stairsPerFloor * slabArea, 0),
+                quantity: round(stair.count * slabArea, 0),
                 unit: 'sqft',
               },
             ],
           },
         });
       }
+    }
     // Order structure stage by stage: Foundation, then each floor.
     const stageOrder = ['Foundation', ...floors.map((floor) => floor.name)];
     const rank = (section: string) => {
