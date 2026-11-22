@@ -19,13 +19,6 @@ type Props = {
 const figure = (amount: number) =>
   amount.toLocaleString('en-IN', { maximumFractionDigits: 2 });
 
-const currency = (amount: number) =>
-  new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 2,
-  }).format(amount);
-
 export function BoqStructuralConcreteCard({
   enabled,
   ratePerM3,
