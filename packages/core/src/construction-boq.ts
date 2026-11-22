@@ -81,6 +81,8 @@ export type BoqFloor = {
   heightAssumed?: boolean;
   /** Part of the area quoted as parking / stilt (few walls, parking floor). */
   parkingSqft?: number;
+  /** Penthouse area from the quotation, if separately identified. */
+  penthouseSqft?: number;
 };
 
 /** One drawn wall segment; the measurement is repeated by count. */
@@ -140,6 +142,15 @@ export const FLOOR_COUNT_FIELDS = [
 
 /** A room measured for flooring (feet). */
 export type BoqRoom = { name: string; lengthFeet: number; widthFeet: number };
+/** Independent kitchens in one floor. Deleting one only removes its own quantities. */
+export type KitchenMeasure = {
+  id: string;
+  name: string;
+  platformFeet: number;
+  platformDepthFeet: number;
+  wallTileFeet: number;
+  wallTileHeightFeet: number;
+};
 /** Sizes entered per floor for tiles and the kitchen platform. */
 export type FloorFinishes = {
   rooms: BoqRoom[];
@@ -153,6 +164,12 @@ export type FloorFinishes = {
   bathroomSizes?: string;
   /** Kitchen platform running length per kitchen (0 = default). */
   kitchenPlatformFeet: number;
+  /** Present means exact kitchen units; an empty list means this floor has none. */
+  kitchenMeasurements?: KitchenMeasure[];
+  /** Use no floor tiles instead of the previous built-up area estimate. */
+  excludeRoomFlooring?: boolean;
+  /** Optional exact granite quantity, 0 means no staircase granite on this floor. */
+  staircaseGraniteSqft?: number;
   /** Staircase / balcony handrail length entered from the drawing (running ft). */
   railingFeet?: number;
 };
@@ -1549,6 +1566,7 @@ export function floorsFromQuote(
     {
       area: number;
       parking: number;
+      penthouse: number;
       rows: SftEstimateDetails['rows'];
       height: number;
     }
@@ -1559,12 +1577,15 @@ export function floorsFromQuote(
     const entry = levels.get(level) ?? {
       area: 0,
       parking: 0,
+      penthouse: 0,
       rows: [],
       height: 0,
     };
     entry.area += Number(row.areaSqft) || 0;
     if (/ — Parking$/.test(row.name))
       entry.parking += Number(row.areaSqft) || 0;
+    if (/(?:\bPenthouse\b|— Penthouse$)/i.test(row.name))
+      entry.penthouse += Number(row.areaSqft) || 0;
     entry.rows.push(row);
     const height = Number(row.heightFeet);
     if (Number.isFinite(height) && height > entry.height) entry.height = height;
@@ -1607,6 +1628,7 @@ export function floorsFromQuote(
       heightFeet: heightAssumed ? defaultHeightFeet : entry.height,
       ...(heightAssumed ? { heightAssumed: true } : {}),
       ...(entry.parking > 0 ? { parkingSqft: round(entry.parking) } : {}),
+      ...(entry.penthouse > 0 ? { penthouseSqft: round(entry.penthouse) } : {}),
     };
   });
 }
@@ -1767,8 +1789,24 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
         lengthFeet: feet(room?.lengthFeet),
         widthFeet: feet(room?.widthFeet),
       }));
+    const kitchenRows = Array.isArray(value.kitchenMeasurements)
+      ? (value.kitchenMeasurements as Record<string, unknown>[]).slice(0, 30)
+          .map((row, index): KitchenMeasure => ({
+            id: String(row.id ?? 'kitchen-' + index).slice(0, 80),
+            name: String(row.name ?? 'Kitchen ' + (index + 1)).slice(0, 80),
+            platformFeet: feet(row.platformFeet),
+            platformDepthFeet: feet(row.platformDepthFeet),
+            wallTileFeet: feet(row.wallTileFeet),
+            wallTileHeightFeet: feet(row.wallTileHeightFeet),
+          }))
+      : undefined;
     finishes[name] = {
       rooms,
+      ...(kitchenRows ? { kitchenMeasurements: kitchenRows } : {}),
+      ...(value.excludeRoomFlooring === true ? { excludeRoomFlooring: true } : {}),
+      ...(value.staircaseGraniteSqft !== undefined
+        ? { staircaseGraniteSqft: Math.max(0, num(value.staircaseGraniteSqft, 0, 0, 100000)) }
+        : {}),
       bathroomLengthFeet: feet(value.bathroomLengthFeet),
       bathroomWidthFeet: feet(value.bathroomWidthFeet),
       ...(String(value.bathroomSizes ?? '').trim()
@@ -3873,10 +3911,12 @@ export function generateQuotationBoq(
     const rooms = (fin?.rooms ?? []).filter(
       (room) => room.lengthFeet > 0 && room.widthFeet > 0,
     );
-    const roomArea = rooms.length
-      ? rooms.reduce((sum, room) => sum + room.lengthFeet * room.widthFeet, 0)
-      : (living * s.tileCoveragePercent) / 100;
-    const skirting = rooms.length
+    const roomArea = fin?.excludeRoomFlooring
+      ? 0
+      : rooms.length
+        ? rooms.reduce((sum, room) => sum + room.lengthFeet * room.widthFeet, 0)
+        : (living * s.tileCoveragePercent) / 100;
+    const skirting = !fin?.excludeRoomFlooring && rooms.length
       ? rooms.reduce(
           (sum, room) =>
             sum +
@@ -3937,10 +3977,17 @@ export function generateQuotationBoq(
         `${floor.name}: window sizes list ${windowCount} windows; the count says ${fc.windows}.`,
       );
     const platformFeet = fin?.kitchenPlatformFeet || s.kitchenPlatformFeet;
-    const kitchenGranite =
-      fc.kitchens * platformFeet * s.kitchenPlatformDepthFeet;
-    const kitchenTiles =
-      fc.kitchens * platformFeet * s.kitchenWallTileHeightFeet;
+    const kitchens = fin?.kitchenMeasurements;
+    const kitchenCount = kitchens === undefined ? fc.kitchens : kitchens.length;
+    const kitchenGranite = kitchens === undefined
+      ? fc.kitchens * platformFeet * s.kitchenPlatformDepthFeet
+      : kitchens.reduce((sum, kitchen) => sum +
+          kitchen.platformFeet * (kitchen.platformDepthFeet || s.kitchenPlatformDepthFeet), 0);
+    const kitchenTiles = kitchens === undefined
+      ? fc.kitchens * platformFeet * s.kitchenWallTileHeightFeet
+      : kitchens.reduce((sum, kitchen) => sum +
+          (kitchen.wallTileFeet || kitchen.platformFeet) *
+          (kitchen.wallTileHeightFeet || s.kitchenWallTileHeightFeet), 0);
     const tileWaste = 1 + s.tileWastagePercent / 100;
     /** Area to buy (with wastage) and the tiles / boxes to order. */
     const tileOrder = (
@@ -3960,10 +4007,10 @@ export function generateQuotationBoq(
     const exteriorPaint = walls.externalPlaster;
     // Staircase flooring: treads and risers of each flight plus the landing.
     const risers = ceil((floor.heightFeet * 12) / s.stairRiserIn);
-    const stairGranite =
-      s.stairsPerFloor *
+    const stairGranite = fin?.staircaseGraniteSqft ??
+      (s.stairsPerFloor *
       s.stairWidthFeet *
-      (risers * ((s.stairTreadIn + s.stairRiserIn) / 12) + s.stairLandingFeet);
+      (risers * ((s.stairTreadIn + s.stairRiserIn) / 12) + s.stairLandingFeet));
     const finishLine = (
       kind: string,
       title: string,
@@ -4200,7 +4247,9 @@ export function generateQuotationBoq(
           round(kitchenGranite * tileWaste, 1),
           'sqft',
           'kitchen_platform',
-          `${fc.kitchens} kitchens × ${platformFeet} ft × ${s.kitchenPlatformDepthFeet} ft`,
+          kitchens === undefined
+            ? `${fc.kitchens} kitchens × ${platformFeet} ft × ${s.kitchenPlatformDepthFeet} ft`
+            : kitchens.map((k) => `${k.name}: ${k.platformFeet}×${k.platformDepthFeet || s.kitchenPlatformDepthFeet} ft`).join('; '),
         ),
         ...tiled(
           'kitchenWallTiles',
@@ -4208,17 +4257,19 @@ export function generateQuotationBoq(
           kitchenTiles,
           'kitchen_wall_tiles',
           [s.wallTileLengthIn, s.wallTileWidthIn, s.wallTilesPerBox],
-          `${fc.kitchens} kitchens × ${platformFeet} ft × ${s.kitchenWallTileHeightFeet} ft`,
+          kitchens === undefined
+            ? `${fc.kitchens} kitchens × ${platformFeet} ft × ${s.kitchenWallTileHeightFeet} ft`
+            : kitchens.map((k) => `${k.name}: ${k.wallTileFeet || k.platformFeet}×${k.wallTileHeightFeet || s.kitchenWallTileHeightFeet} ft`).join('; '),
         ),
         ...item(
           'kitchenSink',
           'Kitchen sink',
-          fc.kitchens,
+          kitchenCount,
           'each',
           'kitchen_sink',
         ),
       ],
-      { kitchens: fc.kitchens },
+      { kitchens: kitchenCount },
     );
     finishLine(
       'quote-painting',
