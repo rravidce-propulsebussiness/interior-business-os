@@ -92,10 +92,9 @@
 }
 .boq-labour-fields {
   display: grid;
-  grid-template-columns: minmax(155px, 1.35fr) minmax(95px, 0.6fr) minmax(
-      155px,
-      1.2fr
-    ) minmax(95px, 0.7fr);
+  grid-template-columns:
+    minmax(155px, 1.35fr) minmax(95px, 0.6fr) minmax(155px, 1.2fr)
+    minmax(95px, 0.7fr);
   gap: 10px;
   align-items: end;
 }
@@ -516,10 +515,9 @@
 }
 .boq-labour-worker {
   display: grid;
-  grid-template-columns: minmax(120px, 1.2fr) repeat(
-      3,
-      minmax(70px, 0.55fr)
-    ) 24px;
+  grid-template-columns:
+    minmax(120px, 1.2fr) repeat(3, minmax(70px, 0.55fr))
+    24px;
   align-items: end;
   gap: 7px;
 }

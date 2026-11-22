@@ -310,7 +310,10 @@ export async function saveManualBoq(input: unknown) {
     );
     const canChangeLabour = s.allowed('estimate.view_cost');
     if (value.labour && !canChangeLabour)
-      return { ok: false, message: 'Labour rates require cost-view permission.' };
+      return {
+        ok: false,
+        message: 'Labour rates require cost-view permission.',
+      };
     const client = s.client as unknown as SupabaseClient;
     const document = {
       items: value.items,
@@ -340,12 +343,13 @@ export async function saveManualBoq(input: unknown) {
             'The saved project and quotation cannot be changed. Edit the existing BOQ.',
         };
       // A measurement-only editor must not erase an existing costing setup.
-      const oldContent = original.data.document as
-        | { labour?: unknown }
-        | null;
+      const oldContent = original.data.document as { labour?: unknown } | null;
       const updatedDocument = canChangeLabour
         ? document
-        : { ...document, ...(oldContent?.labour ? { labour: oldContent.labour } : {}) };
+        : {
+            ...document,
+            ...(oldContent?.labour ? { labour: oldContent.labour } : {}),
+          };
       const result = await client
         .from('construction_boq_documents')
         .update({
