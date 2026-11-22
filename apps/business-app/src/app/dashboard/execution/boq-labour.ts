@@ -164,8 +164,16 @@ export function labourMeasurements(
         (/shuttering|centering|formwork/.test(name) ||
           material === 'shuttering')
       ) {
-        push(line.section, category === 'sajjas' ? 'sajjas' :
-          category === 'shelves' ? 'shelves' : 'shuttering', qty, unit);
+        push(
+          line.section,
+          category === 'sajjas'
+            ? 'sajjas'
+            : category === 'shelves'
+              ? 'shelves'
+              : 'shuttering',
+          qty,
+          unit,
+        );
         continue;
       }
       if (
