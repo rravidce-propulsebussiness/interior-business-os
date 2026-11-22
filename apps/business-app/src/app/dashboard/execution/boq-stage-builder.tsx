@@ -1366,8 +1366,8 @@ export function BoqStageBuilder(props: Props) {
           <div className="boq-plinth-schedule">
             {drawing.plinthRunFeet > 0 && !drawing.plinthBeams?.length && (
               <p className="boq-stage-hint">
-                Existing total run imported as PB1. Confirm each beam length
-                and count from the drawing before editing.
+                Existing total run imported as PB1. Confirm each beam length and
+                count from the drawing before editing.
               </p>
             )}
             {plinthRows.map((beam, bi) => (
