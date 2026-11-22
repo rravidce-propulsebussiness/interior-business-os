@@ -2900,7 +2900,25 @@ export function generateQuotationBoq(
         const concrete = footingConcreteCft(footing) * CUM_PER_CFT;
         if (!(concrete > 0)) continue;
         const tally: SteelTally = new Map();
-        for (const piece of footingMeshPieces(footing, footingCover)) {
+        // An explicit directional mesh replaces (never supplements) the
+        // legacy two-direction, single-diameter mesh for this footing type.
+        const meshPieces = footing.reinforcement?.length
+          ? footing.reinforcement.flatMap((set) => {
+              if (!(set.dia > 0 && set.spacingIn > 0)) return [];
+              const length = Math.max(0, footing.lengthFeet - 2 * footingCover);
+              const width = Math.max(0, footing.widthFeet - 2 * footingCover);
+              const span = set.direction === 'length' ? length : width;
+              const across = set.direction === 'length' ? width : length;
+              if (!(span > 0 && across > 0)) return [];
+              return [{
+                diameter: set.dia,
+                pieces: padCount(footing) * (Math.floor(across * 12 / set.spacingIn) + 1),
+                lengthFeet: span,
+                layer: set.layer,
+              }];
+            })
+          : footingMeshPieces(footing, footingCover);
+        for (const piece of meshPieces) {
           const plan = cutPlan(piece.lengthFeet, piece.pieces, stock, 0);
           addSteel(
             tally,
@@ -3261,9 +3279,15 @@ export function generateQuotationBoq(
               })),
               stirrupDia: type.stirrupDia,
               stirrupSpacingIn: type.stirrupSpacingIn,
-              segments: runSegments(
-                type.runFeet[level.index] ?? type.runFeet.at(-1) ?? 0,
-              ),
+              segments: type.countsByFloor?.[level.index] &&
+                type.countsByFloor[level.index]! > 0
+                ? [{
+                    runs: type.countsByFloor[level.index]!,
+                    span: (type.runFeet[level.index] ?? 0) / type.countsByFloor[level.index]!,
+                  }]
+                : runSegments(
+                    type.runFeet[level.index] ?? type.runFeet.at(-1) ?? 0,
+                  ),
             }))
           : [
               {
@@ -3359,7 +3383,44 @@ export function generateQuotationBoq(
         continue;
       const beamConcrete = concrete;
       const beamShuttering = shuttering;
+      let slabArea = level.floor.lengthFeet * level.floor.widthFeet;
+      let slabDrawing = `${s.slabThicknessIn} in · ${s.slabMainDia} mm @ ${s.slabMainSpacingIn} in / ${s.slabDistDia} mm @ ${s.slabDistSpacingIn} in`;
       if (level.slab) {
+        const panels = design?.slabPanels?.filter(
+          (panel) => panel.floor === level.stage,
+        ) ?? [];
+        if (panels.length) {
+          slabArea = 0;
+          slabDrawing = panels
+            .map((panel) => `${panel.label} ${panel.count}×${panel.lengthFeet}×${panel.widthFeet} ft / ${panel.thicknessIn} in`)
+            .join(', ').slice(0, 240);
+          for (const panel of panels) {
+            if (!(panel.count > 0 && panel.lengthFeet > 0 &&
+              panel.widthFeet > 0 && panel.thicknessIn > 0)) continue;
+            const area = panel.count * panel.lengthFeet * panel.widthFeet;
+            slabArea += area;
+            concrete += area * (panel.thicknessIn / 12) * CUM_PER_CFT;
+            shuttering += area;
+            if (!panel.reinforcement.length)
+              warnings.push(`${level.stage} ${panel.label}: enter slab reinforcement from the drawing; no steel assumed.`);
+            for (const bar of panel.reinforcement) {
+              if (!(bar.dia > 0 && bar.spacingIn > 0)) continue;
+              const span = bar.direction === 'length'
+                ? panel.lengthFeet : panel.widthFeet;
+              const across = bar.direction === 'length'
+                ? panel.widthFeet : panel.lengthFeet;
+              const pieces = panel.count *
+                (Math.floor(Math.max(0, across - 2 * slabCover) * 12 / bar.spacingIn) + 1);
+              const lap = lapFeet(bar.dia, s.lapDiameters);
+              const piece = Math.max(0, span - 2 * slabCover) +
+                2 * Math.max(0.5, 0.5 * lap);
+              const plan = cutPlan(piece, pieces, stock, lap);
+              addSteel(slabTally, bar.dia,
+                plan.bars * stock * M_PER_FT, plan.bars,
+                `${level.stage} ${panel.label} ${bar.layer} ${bar.direction} ${pieces} pcs × ${ft(piece)}`);
+            }
+          }
+        } else {
         const area = level.floor.lengthFeet * level.floor.widthFeet;
         concrete += area * slabT * CUM_PER_CFT;
         shuttering += area;
@@ -3396,6 +3457,7 @@ export function generateQuotationBoq(
             `${level.name} slab ${bar.label} ${count} pcs × ${ft(piece)}`,
           );
         }
+        }
       }
       if (splitBeamSlab && level.slab) {
         // Each shared roof line used to include beam + slab concrete, steel
@@ -3428,12 +3490,12 @@ export function generateQuotationBoq(
         drafts.push({
           origin: 'quotation-structure',
           draft: {
-            name: `${level.name}: slab (${round(level.floor.lengthFeet * level.floor.widthFeet, 0)} sqft)`,
+            name: `${level.name}: slab (${round(slabArea, 0)} sqft)`,
             section: level.stage,
             kind: 'quote-slab',
             unit: 'm³',
             inputs: {
-              slab: `${s.slabThicknessIn} in · ${s.slabMainDia} mm @ ${s.slabMainSpacingIn} in / ${s.slabDistDia} mm @ ${s.slabDistSpacingIn} in`,
+              slab: slabDrawing,
             },
             outputs: [
               ...concreteOutputs(concrete - beamConcrete, 'Slab', s),
