@@ -1,0 +1,122 @@
+/* The fourteen supplied premium screens are a guided view over one BOQ. */
+.boq-guided-progress { display:grid;gap:10px;min-width:0; }
+.boq-guided-milestones {
+  display:grid;grid-template-columns:repeat(7,minmax(0,1fr));align-items:center;
+  gap:6px;padding:10px;border:1px solid #eadbd5;border-radius:14px;
+  background:linear-gradient(110deg,#fffdfc,#fff8f4);box-shadow:0 4px 15px #5728210a;
+}
+.boq-guided-milestones span {
+  padding:9px 6px;min-width:0;text-align:center;border-radius:10px;
+  color:#8c7574;font-size:11px;font-weight:750;overflow-wrap:anywhere;
+}
+.boq-guided-milestones .current {
+  color:#fff;background:linear-gradient(120deg,#9c4939,#64252d);
+  box-shadow:0 4px 11px #6e2b2c26;
+}
+.boq-guided-milestones .done {color:#875248;background:#f9eee8;}
+.boq-guided-step-scroll {
+  display:flex;gap:7px;min-width:0;overflow-x:auto;padding:1px 0 8px;
+  scrollbar-width:thin;scrollbar-color:#d2afa6 transparent;
+}
+.boq-guided-step-scroll button {
+  display:flex;align-items:center;gap:7px;flex:0 0 auto;
+  min-height:35px;padding:5px 11px;border:1px solid #eadbd5;
+  border-radius:9px;background:#fff;color:#775750;font-size:11px;
+  font-weight:800;white-space:nowrap;cursor:pointer;
+}
+.boq-guided-step-scroll button span {
+  display:grid;place-items:center;min-width:23px;height:23px;
+  border:1px solid #e0c6c0;border-radius:50%;font-variant-numeric:tabular-nums;
+}
+.boq-guided-step-scroll button.selected {
+  background:#823336;border-color:#823336;color:white;
+  box-shadow:0 3px 10px #6d2a3024;
+}
+.boq-guided-step-scroll button.selected span {border-color:#fff8;background:#ffffff22;}
+.boq-guided-screen-heading {
+  display:flex;align-items:center;gap:15px;padding:17px 19px;
+  border:1px solid #ecdbd4;border-radius:13px;background:#fffdfb;
+  box-shadow:0 4px 14px #5827200b;
+}
+.boq-guided-screen-heading>span {
+  flex:0 0 auto;color:#8f3e36;font-size:12px;font-weight:900;
+  border-radius:9px;padding:11px;background:#fcefe8;
+}
+.boq-guided-screen-heading>div {flex:1;min-width:0;}
+.boq-guided-screen-heading h3 {margin:0 0 5px;font-size:clamp(17px,2vw,22px);color:#56262b;}
+.boq-guided-screen-heading p {margin:0;color:#8f7771;font-size:12px;line-height:1.5;}
+.boq-guided-panel {
+  border:1px solid #eadbd4;border-radius:17px;background:#fff;overflow:hidden;
+  box-shadow:0 7px 21px #4f24200c;
+}
+.boq-guided-panel-head {
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:17px 20px;border-bottom:1px solid #f0e5df;
+  background:linear-gradient(105deg,#fffefd,#fff9f5);
+}
+.boq-guided-panel-head h3 {margin:0 0 5px;font-size:18px;font-weight:850;color:#5f272b;}
+.boq-guided-panel-head p {margin:0;color:#907776;font-size:12px;line-height:1.5;}
+.boq-guided-pill {padding:7px 10px;background:#fbeee7;border-radius:10px;
+  color:#8c4e42;border:1px solid #efd9cf;font-size:12px;font-weight:800;white-space:nowrap;}
+.boq-guided-floor-scroll {padding:17px 20px;max-width:100%;overflow-x:auto;}
+.boq-guided-floor-table {border-collapse:collapse;width:100%;min-width:680px;font-size:12px;}
+.boq-guided-floor-table :is(th,td) {padding:12px 10px;text-align:left;border-bottom:1px solid #efe4de;}
+.boq-guided-floor-table thead th {background:#faf1ec;color:#6a3d3a;font-size:11px;font-weight:800;}
+.boq-guided-floor-table tbody th {color:#5e3230;font-weight:800;}
+.boq-guided-floor-table input {
+  width:100%;max-width:120px;min-height:37px;padding:8px 10px;
+  border:1px solid #e5d4cb;border-radius:9px;color:#4e282c;background:#fff;
+  font:inherit;font-variant-numeric:tabular-nums;
+}
+.boq-guided-floor-table tfoot {background:#fdf0e8;color:#6c302c;font-weight:850;}
+.boq-guided-assumed {color:#b3671f;font-weight:800;}
+.boq-guided-measured {color:#348357;font-weight:800;}
+.boq-guided-warning {margin:0 20px 12px;padding:12px 14px;background:#fff8e8;
+  border:1px solid #eed7ae;border-radius:10px;color:#855b25;font-size:12px;line-height:1.5;}
+.boq-guided-hint {margin:0;padding:7px 20px 19px;font-size:12px;color:#806c66;line-height:1.6;}
+.boq-guided-center {padding-bottom:20px;}
+.boq-guided-center>p {margin:18px 20px;color:#796b66;line-height:1.6;font-size:13px;}
+.boq-guided-center>.boq-guided-primary {margin:4px 20px;max-width:max-content;}
+.boq-guided-primary,.boq-guided-back {
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:8px;min-height:40px;padding:10px 19px;border-radius:10px;
+  font:inherit;font-size:12px;font-weight:850;cursor:pointer;text-decoration:none;
+}
+.boq-guided-primary {background:linear-gradient(120deg,#aa513e,#70282e);
+  color:#fff;border:1px solid #7c2c2d;box-shadow:0 4px 10px #6d25271f;}
+.boq-guided-back {background:#fff;color:#7b403c;border:1px solid #d5b1a9;}
+.boq-guided-primary:disabled,.boq-guided-back:disabled {opacity:.5;cursor:not-allowed;}
+.boq-guided-footer {
+  display:flex;align-items:center;justify-content:space-between;gap:15px;
+  padding:14px 3px 0;border-top:1px solid #eadbd6;
+}
+.boq-guided-footer>span {color:#8e7574;font-size:11px;text-align:center;}
+/* Keep the existing stage cards and focused measurement editors on-brand. */
+.boq-stages .boq-stage-tile {border-radius:11px;border-color:#ecdfd8;}
+.boq-stages .boq-stage-tile:hover {box-shadow:0 3px 13px #713a2c14;}
+.boq-work-focus .boq-guided-progress {margin-bottom:15px;}
+.boq-work-focus .boq-focus-heading {border-radius:13px;border:1px solid #eddbd3;}
+@media(max-width:1100px) {
+  .boq-guided-milestones {grid-template-columns:repeat(4,minmax(0,1fr));}
+  .boq-guided-screen-heading {align-items:flex-start;flex-wrap:wrap;}
+}
+@media(max-width:660px) {
+  .boq-guided-milestones {display:flex;overflow-x:auto;padding:7px;}
+  .boq-guided-milestones span {min-width:104px;font-size:10px;white-space:normal;}
+  .boq-guided-step-scroll button {font-size:11px;min-height:38px;}
+  .boq-guided-screen-heading {gap:9px;padding:13px 12px;}
+  .boq-guided-screen-heading h3 {font-size:17px;}
+  .boq-guided-screen-heading .boq-autosave-status {width:100%;}
+  .boq-guided-panel-head {padding:15px;align-items:flex-start;flex-wrap:wrap;}
+  .boq-guided-floor-scroll {padding:12px;}
+  .boq-guided-hint {padding:5px 14px 15px;}
+  .boq-guided-warning {margin:0 12px 12px;}
+  .boq-guided-footer {position:sticky;bottom:0;z-index:2;background:#fffdfb;
+    padding:10px 3px;border-top:1px solid #eadbd5;}
+  .boq-guided-footer>span {display:none;}
+  .boq-guided-footer .boq-guided-primary,.boq-guided-footer .boq-guided-back {
+    padding:9px 12px;font-size:12px;}
+}
+@media print {
+  .boq-guided-progress,.boq-guided-screen-heading,.boq-guided-footer {display:none!important;}
+}
