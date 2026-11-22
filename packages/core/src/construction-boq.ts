@@ -2069,8 +2069,7 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
       footingThicknessIn: num(item?.footingThicknessIn, 12, 6, 48),
       footingBarDia: num(item?.footingBarDia, 12, 8, 25),
       footingBarSpacingIn: num(item?.footingBarSpacingIn, 6, 3, 12),
-    }))
-    .filter((item) => item.count > 0 && parseBars(item.bars).length > 0);
+    })); // Preserve incomplete drawing rows for the next autosave.
   const hasFootingSchedule = Array.isArray(value.footings);
   const legacyFootings =
     value.legacyFootings === true ||
@@ -2145,13 +2144,7 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
         pedestalTieSpacingIn: num(entry.pedestalTieSpacingIn, 6, 2, 24),
       };
     })
-    .filter(
-      (entry) =>
-        entry.count > 0 &&
-        entry.lengthFeet > 0 &&
-        entry.widthFeet > 0 &&
-        entry.thicknessIn > 0,
-    );
+; // Incomplete F1/F2 rows must not disappear during autosave.
   const beams = (Array.isArray(value.beams) ? value.beams : [])
     .slice(0, 20)
     .map((item: Record<string, unknown>, index): DesignBeamType => ({
@@ -2168,8 +2161,7 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
         ? { countsByFloor: item.countsByFloor.slice(0, 20)
             .map((count: unknown) => Math.round(num(count, 0, 0, 300))) }
         : {}),
-    }))
-    .filter((item) => parseBars(item.bars).length > 0);
+    })); // Keep B1/B2 rows until steel sizes and dimensions are completed.
   const plinthBeams = (
     Array.isArray(value.plinthBeams) ? value.plinthBeams : []
   )
@@ -2589,8 +2581,11 @@ export function generateQuotationBoq(
       };
       countAt: (floorIndex: number) => number;
     };
-    const columnTypes: ColumnType[] = design?.columns.length
-      ? design.columns.map((type) => ({
+    const enteredColumns = design?.columns.filter(
+      (column) => column.count > 0 && parseBars(column.bars).length > 0,
+    ) ?? [];
+    const columnTypes: ColumnType[] = enteredColumns.length
+      ? enteredColumns.map((type) => ({
           label: type.label,
           widthIn: type.widthIn,
           depthIn: type.depthIn,
@@ -3269,7 +3264,9 @@ export function generateQuotationBoq(
               },
             ]
         : design?.beams.length
-          ? design.beams.map((type) => ({
+          ? design.beams
+              .filter((type) => parseBars(type.bars).length > 0)
+              .map((type) => ({
               label: type.label,
               widthIn: type.widthIn,
               depthIn: type.depthIn,
