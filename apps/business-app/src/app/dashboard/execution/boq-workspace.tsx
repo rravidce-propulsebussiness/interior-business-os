@@ -680,9 +680,12 @@ export function BoqWorkspace({
           (panel) => panel.floor === line.section,
         );
         if (panels?.length)
-          return panels.some((panel) =>
-            panel.count > 0 && panel.lengthFeet > 0 &&
-            panel.widthFeet > 0 && panel.thicknessIn > 0,
+          return panels.some(
+            (panel) =>
+              panel.count > 0 &&
+              panel.lengthFeet > 0 &&
+              panel.widthFeet > 0 &&
+              panel.thicknessIn > 0,
           );
         return measuredSlab;
       }
@@ -691,9 +694,13 @@ export function BoqWorkspace({
           (stair) => stair.floor === line.section,
         );
         if (stairs?.length)
-          return stairs.some((stair) =>
-            stair.count > 0 && stair.widthFeet > 0 &&
-            stair.riserIn > 0 && stair.treadIn > 0 && stair.waistIn > 0,
+          return stairs.some(
+            (stair) =>
+              stair.count > 0 &&
+              stair.widthFeet > 0 &&
+              stair.riserIn > 0 &&
+              stair.treadIn > 0 &&
+              stair.waistIn > 0,
           );
       }
       // Binding wire includes multiple structural stages in the legacy
