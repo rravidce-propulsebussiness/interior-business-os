@@ -10,33 +10,18 @@ import {
   useTransition,
 } from 'react';
 import { useRouter } from 'next/navigation';
-import {
-  BOQ_TEMPLATES,
-  calculateBoq,
-  inputDefinitions,
-  type BoqInputs,
-} from './boq-calculations';
+import { type BoqInputs } from './boq-calculations';
 import { removeManualBoq, saveManualBoq } from './boq-actions';
 import { boqProjectOptionLabel } from './boq-project-eligibility';
+import { type LengthUnit } from './boq-units';
 import {
-  fieldKind,
-  toDisplay,
-  toMetric,
-  unitLabel,
-  type LengthUnit,
-} from './boq-units';
-import {
-  MATERIAL_GROUPS,
   diameterOf,
   materialForOutput,
   brandSelectionsFromQuote,
   rateForOutput,
   rateGroupKey,
   COST_HEADS,
-  QUANTITY_HEADS,
   costHead,
-  type CostHead,
-  variantsFor,
   type Rate,
 } from './boq-pricing';
 import {
@@ -50,7 +35,6 @@ import {
   type BoqFloor,
   type StructuralDesign,
 } from '@business-os/core/construction-boq';
-import { BoqDesignSchedule } from './boq-design-schedule';
 import { BoqStageBuilder } from './boq-stage-builder';
 import { BoqRegisterLanding } from './boq-register-landing';
 import { BoqCreateStep } from './boq-create-step';
@@ -75,12 +59,9 @@ import {
   type MeasuredDimensions,
   type MeasuredKind,
 } from './boq-stage-measurements';
-import { BoqFloorInputs } from './boq-floor-inputs';
-import { NumberField } from './boq-number-field';
 import {
   boqCsv,
   boqFileName,
-  materialsToOrder,
   type BoqExportRow,
 } from './boq-export';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
@@ -322,12 +303,7 @@ export function BoqWorkspace({
   const [repeatFrom, setRepeatFrom] = useState<Record<string, string>>(
     initialDocument?.document?.generator?.repeatFrom ?? {},
   );
-  const [selectedTemplate, setSelectedTemplate] = useState('manual');
-  const [newName, setNewName] = useState('');
-  // Takeoff inputs are always metric; `typed` keeps what the person typed
-  // in feet / inches so conversion never fights the cursor.
   const [unit, setUnitState] = useState<LengthUnit>(defaultUnit);
-  const [typed, setTyped] = useState<Record<string, string>>({});
   useEffect(() => {
     try {
       const saved = window.localStorage.getItem('boq-length-unit');
@@ -339,24 +315,12 @@ export function BoqWorkspace({
   }, []);
   function setUnit(next: LengthUnit) {
     setUnitState(next);
-    setTyped({});
     try {
       window.localStorage.setItem('boq-length-unit', next);
     } catch {
       // Storage unavailable: the choice lasts for this visit.
     }
   }
-  const defsFor = (kind: string) => inputDefinitions[kind] || [];
-  const kindOf = (templateKind: string, key: string) => {
-    const def = defsFor(templateKind).find((item) => item.key === key);
-    return def ? fieldKind(def) : null;
-  };
-  const [inputs, setInputs] = useState<BoqInputs>(() =>
-    Object.fromEntries(
-      (inputDefinitions.manual ?? []).map((item) => [item.key, item.value]),
-    ),
-  );
-  const [selectedQuoteLines, setSelectedQuoteLines] = useState<string[]>([]);
   const [message, setMessage] = useState('');
   const [createError, setCreateError] = useState('');
   const [autoSaveState, setAutoSaveState] = useState<
@@ -431,13 +395,6 @@ export function BoqWorkspace({
     genCounts,
     estimateCounts(floorsForGeneration, settings, schedule ?? undefined),
   );
-  const usedMaterials = new Set(
-    lines.flatMap((line) =>
-      line.outputs
-        .map((output) => materialForOutput(output))
-        .filter((value): value is string => Boolean(value)),
-    ),
-  );
   // Reinforcement is bought in rods; weight comes along for reference.
   const steelSummary = new Map<number, { kg: number; rods: number }>();
   for (const line of lines)
@@ -451,63 +408,6 @@ export function BoqWorkspace({
         });
       }
     }
-  // Steel order per stage (Foundation, Ground Floor, First Floor …), in BOQ
-  // order, so steel can be brought floor by floor.
-  const diameters = [...steelSummary.keys()].sort((a, b) => a - b);
-  const stageSteel = new Map<
-    string,
-    { kg: number; bars: Map<number, number> }
-  >();
-  for (const line of lines)
-    for (const output of line.outputs) {
-      const diameter = diameterOf(output);
-      if (diameter && output.unit === 'rod') {
-        const stage = stageSteel.get(line.section) ?? {
-          kg: 0,
-          bars: new Map<number, number>(),
-        };
-        stage.kg += output.weightKg ?? 0;
-        stage.bars.set(
-          diameter,
-          (stage.bars.get(diameter) ?? 0) + output.quantity,
-        );
-        stageSteel.set(line.section, stage);
-      }
-    }
-  // Brand / source choices: one Steel brand for every diameter.
-  const steelBrands = [
-    ...new Set(
-      initialRates
-        .filter((rate) => rate.material?.startsWith('steel_') && rate.variant)
-        .map((rate) => rate.variant!),
-    ),
-  ];
-  const brandPicks = [
-    ...(usedMaterials.has('steel')
-      ? [
-          {
-            key: 'steel',
-            label: 'Steel / TMT',
-            options: steelBrands.map((brand) => ({
-              key: 'steel::' + brand,
-              variant: brand,
-              text: brand,
-            })),
-          },
-        ]
-      : []),
-    ...MATERIAL_GROUPS.filter(
-      (group) => usedMaterials.has(group.key) && group.key !== 'steel',
-    ).map((group) => ({
-      key: group.key,
-      label: group.label,
-      options: variantsFor(initialRates, group.key).map((option) => ({
-        key: option.key,
-        variant: option.variant!,
-        text: `${option.variant} · ${rateMoney(option.rate)}/${option.unit}`,
-      })),
-    })),
-  ].filter((pick) => pick.options.length > 1 || pick.key === 'steel');
   const tonnes = (kg: number) =>
     (kg / 1000).toLocaleString('en-IN', { maximumFractionDigits: 2 });
   const activeProject = projects.find((project) => project.id === projectId);
@@ -541,57 +441,6 @@ export function BoqWorkspace({
   );
   const labourCost = legacyLabourCost + labourEstimate.total;
   const materialCost = materialOnlyCost + labourCost;
-  // Floor-wise cost in simple heads: cement, sand, aggregate, steel and
-  // bricks as quantity × rate; structural labour as rate × sq ft; finishes
-  // and services as amounts.
-  type HeadTotal = {
-    amount: number;
-    quantity: number;
-    unit: string;
-    mixed: boolean;
-    items: Map<string, { quantity: number; unit: string; amount: number }>;
-  };
-  const floorBreakdown = new Map<string, Map<CostHead, HeadTotal>>();
-  // What to order per floor (tiles and boxes, coils, pipes …).
-  const floorOrders = new Map<string, string[]>();
-  for (const row of allOutputs) {
-    if (!(row.quantity > 0)) continue;
-    if (row.order)
-      floorOrders.set(row.section, [
-        ...(floorOrders.get(row.section) ?? []),
-        `${row.name}: ${row.order}`,
-      ]);
-    const material = materialForOutput(row);
-    const head = costHead(
-      material ? rateGroupKey(material, diameterOf(row)) : undefined,
-    );
-    const isSteel = head === 'Steel';
-    const quantity = isSteel
-      ? (row.weightKg ?? (row.unit === 'kg' ? row.quantity : 0))
-      : row.quantity;
-    const unitOf = isSteel ? 'kg' : row.unit;
-    const stage =
-      floorBreakdown.get(row.section) ?? new Map<CostHead, HeadTotal>();
-    const prior = stage.get(head);
-    const items =
-      prior?.items ??
-      new Map<string, { quantity: number; unit: string; amount: number }>();
-    const itemKey = `${row.name}::${row.unit}`;
-    const item = items.get(itemKey);
-    items.set(itemKey, {
-      quantity: (item?.quantity ?? 0) + row.quantity,
-      unit: row.unit,
-      amount: (item?.amount ?? 0) + row.quantity * row.rate,
-    });
-    stage.set(head, {
-      amount: (prior?.amount ?? 0) + row.quantity * row.rate,
-      quantity: (prior?.quantity ?? 0) + quantity,
-      unit: prior?.unit ?? unitOf,
-      mixed: Boolean(prior && (prior.mixed || prior.unit !== unitOf)),
-      items,
-    });
-    floorBreakdown.set(row.section, stage);
-  }
   // Every quantity with its stage and cost head, for the order list and
   // the download.
   const materialExportRows: BoqExportRow[] = allOutputs.map((row) => {
@@ -663,15 +512,6 @@ export function BoqWorkspace({
         })),
       ];
   const exportRows = [...materialExportRows, ...labourExportRows];
-  // Contract labour is part of the estimate, never a procurement/order item.
-  const orderList = materialsToOrder(
-    materialExportRows.filter((row) => row.head !== 'Labour'),
-    COST_HEADS,
-  );
-
-  const floorArea = new Map(
-    (generator?.floors ?? []).map((floor) => [floor.name, floor.areaSqft]),
-  );
   const builtUpSqft = floorsForGeneration.reduce(
     (sum, floor) => sum + floor.areaSqft,
     0,
@@ -748,7 +588,6 @@ export function BoqWorkspace({
     setRmcEnabled(settings.readyMixConcrete !== 0);
     setRmcRateOverride(null);
     setGenerator(null);
-    setSelectedQuoteLines([]);
     setGenFloors([]);
     setGenCounts(null);
     setGenDesign(null);
@@ -1221,88 +1060,6 @@ export function BoqWorkspace({
           : line,
       ),
     );
-  }
-  function chooseTemplate(kind: string) {
-    setSelectedTemplate(kind);
-    const values = inputDefinitions[kind] || [];
-    setInputs(Object.fromEntries(values.map((item) => [item.key, item.value])));
-    setTyped({});
-    setNewName(
-      kind === 'surface'
-        ? 'Internal plaster'
-        : kind === 'manual'
-          ? ''
-          : BOQ_TEMPLATES.find((row) => row.kind === kind)?.label || '',
-    );
-  }
-  function addLine() {
-    if (schedule && selectedTemplate !== 'manual') {
-      setMessage(
-        'Quotation-generated BOQs already measure the structure and finishes. Use manual entries only for extra work.',
-      );
-      return;
-    }
-    const template = BOQ_TEMPLATES.find(
-      (item) => item.kind === selectedTemplate,
-    );
-    if (!template) return;
-    const generated = calculateBoq(selectedTemplate, inputs);
-    const itemName = newName.trim() || template.label;
-    setLines((prior) => [
-      ...prior,
-      {
-        id: uid(),
-        name: itemName,
-        section: template.section,
-        kind: selectedTemplate,
-        unit: generated[0]?.unit || 'each',
-        inputs: { ...inputs },
-        outputs: generated,
-        notes: '',
-      },
-    ]);
-    setNewName('');
-  }
-  function updateLine(index: number, update: Partial<SavedLine>) {
-    setLines((prior) =>
-      prior.map((line, i) => (i === index ? { ...line, ...update } : line)),
-    );
-  }
-  function importQuotedLines() {
-    if (!currentQuote) return;
-    const alreadyImported = new Set(
-      lines.map((line) => line.quoteLineId).filter(Boolean),
-    );
-    const selected = currentQuote.lines.filter(
-      (line) =>
-        selectedQuoteLines.includes(line.id) && !alreadyImported.has(line.id),
-    );
-    if (!selected.length)
-      setMessage('Those quote lines are already in this BOQ.');
-    setLines((prior) => [
-      ...prior,
-      ...selected.map((line) => ({
-        id: uid(),
-        name: line.name,
-        section: line.area || 'Quoted scope',
-        kind: 'quoted',
-        unit: line.unit || 'each',
-        inputs: { quantity: Number(line.quantity) || 0 },
-        outputs: [
-          {
-            name: line.name,
-            quantity: Number(line.quantity) || 0,
-            unit: line.unit || 'each',
-            rate: 0,
-            source: 'Quotation price is shown separately',
-          },
-        ],
-        quotedPrice: line.amount,
-        quoteLineId: line.id,
-        notes: line.description,
-      })),
-    ]);
-    setSelectedQuoteLines([]);
   }
   function save() {
     const measurementError = validateBoqMeasurements(lines, Boolean(schedule));
