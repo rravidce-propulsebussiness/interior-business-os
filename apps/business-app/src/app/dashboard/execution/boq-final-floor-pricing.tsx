@@ -1,5 +1,3 @@
-import type { ReactNode } from 'react';
-
 export type FloorPricingItem = {
   stage: string;
   amount: number;
@@ -72,7 +70,6 @@ const money = (amount: number) =>
   });
 const quantity = (amount: number) =>
   amount.toLocaleString('en-IN', { maximumFractionDigits: 2 });
-const display = (value: ReactNode) => <span>{value}</span>;
 
 export function BoqFinalFloorPricing({
   rows,
