@@ -1741,7 +1741,15 @@ export function BoqStageBuilder(props: Props) {
                           {money(entry.output.quotedRate)} / {entry.output.unit}
                         </small>
                       )}
-                      {props.isOldLabourOutput?.(entry.output) ? (
+                      {entry.line.origin &&
+                      entry.output.material === 'concrete_m20' ? (
+                        props.canViewCost && (
+                          <small className="boq-stage-limit">
+                            M20 RMC rate: {money(props.structuralRmcRate)} / m³
+                            · Change it once in Structural Concrete Costing.
+                          </small>
+                        )
+                      ) : props.isOldLabourOutput?.(entry.output) ? (
                         <small className="boq-stage-limit">
                           Labour priced in the Labour Costing tab; no duplicate
                           charge.
