@@ -16,7 +16,12 @@ describe('14 BOQ design screens over one saved document', () => {
       2, 3, 4, 7, 8, 9, 10, 11, 12, 13, 14,
     ]);
     expect(wizardStep(4).categories).toEqual([
-      'excavation', 'soil', 'pcc', 'footings', 'columns', 'plinth',
+      'excavation',
+      'soil',
+      'pcc',
+      'footings',
+      'columns',
+      'plinth',
     ]);
     expect(wizardStep(8).categories).toContain('compound');
     expect(wizardStep(11).categories).toContain('penthouse');
