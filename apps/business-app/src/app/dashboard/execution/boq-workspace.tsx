@@ -147,19 +147,6 @@ const money = (value: number, currency = 'INR') =>
     currency,
     maximumFractionDigits: 0,
   }).format(value || 0);
-/** A unit rate: paise are shown when the rate has them (₹9.50/nos). */
-const rateMoney = (value: number, currency = 'INR') => {
-  const whole = Math.abs((value || 0) - Math.round(value || 0)) < 0.005;
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: whole ? 0 : 2,
-    maximumFractionDigits: whole ? 0 : 2,
-  }).format(value || 0);
-};
-const plural = (count: number, one: string, many: string) =>
-  `${count} ${count === 1 ? one : many}`;
-
 const upgradeOldSmallConcrete = (
   items: SavedLine[],
   settings: ReturnType<typeof normalizeStructuralSettings>,
@@ -1512,7 +1499,7 @@ export function BoqWorkspace({
         projects={newProjects}
         projectId={projectId}
         title={title === 'Construction BOQ' ? '' : title}
-        quoteLabel={currentQuote?.label}
+        quoteLabel={currentQuote?.label ?? ''}
         floors={floorsForGeneration.length}
         builtUpSqft={builtUpSqft}
         saving={busy}
