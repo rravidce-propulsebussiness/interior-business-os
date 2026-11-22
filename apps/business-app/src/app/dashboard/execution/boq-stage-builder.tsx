@@ -2542,18 +2542,18 @@ export function BoqStageBuilder(props: Props) {
         <button
           type="button"
           className="boq-guided-back"
-          onClick={() => goToWizard(Math.max(2, guidedStep - 1))}
-          disabled={guidedStep === 2}
+          onClick={() => goToWizard(previousBoqStep(guidedStep))}
+          disabled={guidedStep === BOQ_WIZARD_STEPS[0]?.number}
         >
           ← Back
         </button>
-        <span>
-          {props.autoSaveLabel ?? 'Measurements update the same BOQ document'}
-        </span>
         <button
           type="button"
           className="boq-guided-primary"
-          onClick={() => goToWizard(Math.min(14, guidedStep + 1))}
+          onClick={() => {
+            if (!props.autoSaveLabel && props.canSave) props.onSave();
+            goToWizard(nextBoqStep(guidedStep));
+          }}
         >
           {guidedStep === 13
             ? 'Final Detailed BOQ'
@@ -2562,35 +2562,6 @@ export function BoqStageBuilder(props: Props) {
               : 'Save & Continue'}{' '}
           →
         </button>
-      </div>
-      <div className="boq-stage-actions">
-        <button
-          type="button"
-          className="boq-stage-outline"
-          onClick={props.onDetailedBoq}
-          disabled={!props.canOpenDetailed}
-          title={
-            props.canOpenDetailed
-              ? 'Open the detailed, floor-wise priced BOQ'
-              : 'Available when changes are saved automatically'
-          }
-        >
-          ◉ Detailed BOQ
-        </button>
-        {props.autoSaveLabel ? (
-          <span className="boq-autosave-status" role="status">
-            {props.autoSaveLabel}
-          </span>
-        ) : (
-          <button
-            type="button"
-            className="boq-stage-save"
-            disabled={props.busy || !props.canSave}
-            onClick={props.onSave}
-          >
-            ▣ {props.busy ? 'Saving…' : 'Save BOQ'}
-          </button>
-        )}
       </div>
     </section>
   );
