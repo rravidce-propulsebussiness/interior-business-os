@@ -1512,6 +1512,9 @@ export function BoqWorkspace({
         projects={newProjects}
         projectId={projectId}
         title={title === 'Construction BOQ' ? '' : title}
+        quoteLabel={currentQuote?.label}
+        floors={floorsForGeneration.length}
+        builtUpSqft={builtUpSqft}
         saving={busy}
         preparing={Boolean(
           quoteId && (calculating || (!generator && lines.length === 0)),
