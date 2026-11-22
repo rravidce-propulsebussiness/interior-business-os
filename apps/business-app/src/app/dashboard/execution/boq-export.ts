@@ -183,7 +183,7 @@ export function boqCsv(input: {
       'Stages',
     ]),
   );
-  for (const line of materialsToOrder(rows, input.headOrder))
+  for (const line of materialsToOrder(rows.filter((row) => row.head !== 'Labour'), input.headOrder))
     out.push(
       csvLine([
         line.head,
@@ -196,6 +196,12 @@ export function boqCsv(input: {
     );
   if (includeCost) {
     out.push('');
+    const material = rows.filter((row) => row.head !== 'Labour')
+      .reduce((sum, row) => sum + row.quantity * (row.rate || 0), 0);
+    const labour = rows.filter((row) => row.head === 'Labour')
+      .reduce((sum, row) => sum + row.quantity * (row.rate || 0), 0);
+    out.push(csvLine(['Material cost estimate', Math.round(material)]));
+    out.push(csvLine(['Labour cost estimate', Math.round(labour)]));
     out.push(csvLine(['Total cost estimate', Math.round(total)]));
     if (input.builtUpSqft)
       out.push(csvLine(['Cost per sq ft', round(total / input.builtUpSqft)]));
