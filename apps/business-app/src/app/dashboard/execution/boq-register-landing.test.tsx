@@ -24,7 +24,9 @@ const base: Props = {
 };
 
 const markup = (overrides: Partial<Props> = {}) =>
-  renderToStaticMarkup(createElement(BoqRegisterLanding, { ...base, ...overrides }));
+  renderToStaticMarkup(
+    createElement(BoqRegisterLanding, { ...base, ...overrides }),
+  );
 
 describe('BOQ register landing', () => {
   it('shows exactly the create action and actual completed BOQ cards', () => {

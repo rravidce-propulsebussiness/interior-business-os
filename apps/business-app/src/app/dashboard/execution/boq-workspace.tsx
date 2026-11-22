@@ -229,9 +229,12 @@ export function BoqWorkspace({
             ) ?? documents[0])) ??
         null);
   const [active, setActive] = useState<Document | null>(initialDocument);
-  const [showSavedDetails, setShowSavedDetails] = useState(Boolean(
-    initialOpenId || (initialProjectId && initialDocument?.project_id === initialProjectId),
-  ));
+  const [showSavedDetails, setShowSavedDetails] = useState(
+    Boolean(
+      initialOpenId ||
+      (initialProjectId && initialDocument?.project_id === initialProjectId),
+    ),
+  );
   const [title, setTitle] = useState(
     initialDocument?.title ?? 'Construction BOQ',
   );
@@ -1531,7 +1534,9 @@ export function BoqWorkspace({
           </button>
         </div>
         {message && (
-          <p className="boq-notice" role="status">{message}</p>
+          <p className="boq-notice" role="status">
+            {message}
+          </p>
         )}
         <div className="boq-layout boq-layout-full">
           <section className="boq-editor">

@@ -32,7 +32,9 @@ export function BoqRegisterLanding({
   onView: (id: string) => void;
   onEdit: (id: string) => void;
 }) {
-  const projectNames = new Map(projects.map((project) => [project.id, project.name]));
+  const projectNames = new Map(
+    projects.map((project) => [project.id, project.name]),
+  );
 
   return (
     <main className="erp-page manual-boq boq-register-landing">
@@ -83,8 +85,10 @@ export function BoqRegisterLanding({
         {documents.length ? (
           <div className="boq-register-cards">
             {documents.map((document) => {
-              const name = (document.project_id &&
-                projectNames.get(document.project_id)) || document.title;
+              const name =
+                (document.project_id &&
+                  projectNames.get(document.project_id)) ||
+                document.title;
               return (
                 <article className="boq-register-card" key={document.id}>
                   <span className="boq-register-building" aria-hidden="true">
@@ -104,7 +108,9 @@ export function BoqRegisterLanding({
                     <h3>{name}</h3>
                     <p>
                       Revision {document.version} · Updated{' '}
-                      {new Date(document.updated_at).toLocaleDateString('en-IN')}
+                      {new Date(document.updated_at).toLocaleDateString(
+                        'en-IN',
+                      )}
                     </p>
                     <div className="boq-register-card-actions">
                       <button
