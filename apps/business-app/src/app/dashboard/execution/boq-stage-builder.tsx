@@ -1842,7 +1842,6 @@ export function BoqStageBuilder(props: Props) {
               </div>
             </>
           )}
-
       </div>
     );
   };
