@@ -92,7 +92,7 @@ export const BOQ_WIZARD_STEPS: readonly BoqWizardStep[] = [
     short: 'Tiles & Services',
     description:
       'Measure finishing, electrical and plumbing for each floor; terrace has its own scope.',
-    categories: ['tiles', 'electrical', 'plumbing', 'parapet', 'waterproofing'],
+    categories: ['penthouse', 'tiles', 'electrical', 'plumbing', 'parapet', 'waterproofing'],
     scope: 'floors',
   },
   {
