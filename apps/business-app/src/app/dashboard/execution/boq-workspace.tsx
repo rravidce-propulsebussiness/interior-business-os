@@ -67,6 +67,7 @@ import {
 } from './boq-labour';
 import {
   measuredOutputs,
+  correctSavedSmallConcrete,
   type MeasuredDimensions,
   type MeasuredKind,
 } from './boq-stage-measurements';
@@ -180,6 +181,15 @@ const rateMoney = (value: number, currency = 'INR') => {
 const plural = (count: number, one: string, many: string) =>
   `${count} ${count === 1 ? one : many}`;
 
+const upgradeOldSmallConcrete = (
+  items: SavedLine[],
+  settings: ReturnType<typeof normalizeStructuralSettings>,
+): SavedLine[] =>
+  items.map((line) => {
+    const outputs = correctSavedSmallConcrete(line, settings);
+    return outputs ? { ...line, outputs } : line;
+  });
+
 const uid = () => crypto.randomUUID();
 /** Identifies a generated output across regenerations. */
 const overrideKey = (
@@ -264,8 +274,11 @@ export function BoqWorkspace({
       ? (initialDocument.quotation_revision_id ?? '')
       : quoteForProject(defaultProjectId),
   );
-  const [lines, setLines] = useState<SavedLine[]>(
-    initialDocument?.document?.items ?? [],
+  const [lines, setLines] = useState<SavedLine[]>(() =>
+    upgradeOldSmallConcrete(
+      initialDocument?.document?.items ?? [],
+      normalizeStructuralSettings(structural),
+    ),
   );
   const [selections, setSelections] = useState<Record<string, string>>(
     initialDocument?.document?.selections ?? {},
@@ -762,7 +775,9 @@ export function BoqWorkspace({
     setTitle(document.title);
     setProjectId(document.project_id || '');
     setQuoteId(document.quotation_revision_id || '');
-    setLines(document.document?.items || []);
+    setLines(
+      upgradeOldSmallConcrete(document.document?.items || [], settings),
+    );
     setSelections(document.document?.selections ?? {});
     setLabour(document.document?.labour ?? null);
     setCostingTab('builder');
@@ -790,7 +805,10 @@ export function BoqWorkspace({
       design: genDesign,
       splitBeamSlab: measuredOnly,
     });
-    const kept = lines.filter((line) => !line.origin);
+    const kept = upgradeOldSmallConcrete(
+      lines.filter((line) => !line.origin),
+      concreteSettings,
+    );
     // A new BOQ must not invent column/footing/beam steel from company-grid
     // assumptions. Legacy documents are preserved until intentionally edited.
     const measuredDesign = normalizeDesign(genDesign);
