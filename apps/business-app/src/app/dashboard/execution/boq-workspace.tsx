@@ -1327,7 +1327,16 @@ export function BoqWorkspace({
       section: stage,
       kind: 'measured-geometry',
       unit: 'm³',
-      inputs: { ...values, stageCategory: kind },
+      inputs: {
+        count: values.count,
+        lengthFeet: values.lengthFeet,
+        widthFeet: values.widthFeet,
+        depthFeet: values.depthFeet,
+        stageCategory: kind,
+        ...(['sajjas', 'shelves'].includes(kind) && values.steelSets?.length
+          ? { steelSetsJson: JSON.stringify(values.steelSets) }
+          : {}),
+      },
       outputs,
       notes: '',
     };
@@ -1350,7 +1359,15 @@ export function BoqWorkspace({
     const original = lines[index];
     if (!original || original.kind !== 'measured-geometry') return;
     const kind = original.inputs.stageCategory as MeasuredKind;
-    const outputs = measuredOutputs(kind, values, settings);
+    let steelSets = values.steelSets;
+    if (!steelSets && typeof original.inputs.steelSetsJson === 'string') {
+      try {
+        const saved = JSON.parse(original.inputs.steelSetsJson) as unknown;
+        if (Array.isArray(saved)) steelSets = saved.slice(0, 16);
+      } catch { /* No implied steel if a legacy note is malformed. */ }
+    }
+    const outputs = measuredOutputs(kind, { ...values, steelSets }, settings);
+    const steelSetsJson = JSON.stringify(steelSets ?? []);
     setLines((prior) =>
       prior.map((line, i) =>
         i === index ||
@@ -1359,8 +1376,26 @@ export function BoqWorkspace({
           ? {
               ...line,
               name: newName.trim().slice(0, 200) || original.name,
-              inputs: { ...line.inputs, ...values },
-              outputs,
+              inputs: {
+                ...line.inputs,
+                count: values.count,
+                lengthFeet: values.lengthFeet,
+                widthFeet: values.widthFeet,
+                depthFeet: values.depthFeet,
+                ...(['sajjas', 'shelves'].includes(kind)
+                  ? { steelSetsJson }
+                  : {}),
+              },
+              outputs: outputs.map((output) => {
+                const priorOutput = original.outputs.find((previous) =>
+                  previous.name === output.name &&
+                  previous.unit === output.unit &&
+                  previous.material === output.material &&
+                  previous.diameter === output.diameter);
+                return priorOutput?.rate !== undefined
+                  ? { ...output, rate: priorOutput.rate }
+                  : output;
+              }),
             }
           : line,
       ),
