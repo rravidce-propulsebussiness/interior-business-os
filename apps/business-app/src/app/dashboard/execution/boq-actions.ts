@@ -156,6 +156,7 @@ const labourExtraSchema = z.object({
   name: z.string().trim().min(1).max(120),
   stage: z.string().min(1).max(100),
   work: labourWorkSchema,
+  includedWorks: z.array(labourWorkSchema).max(25).optional(),
   method: z.enum(['itemwise', 'daily']),
   unit: z.string().min(1).max(20),
   quantity: nonnegative,
@@ -187,13 +188,27 @@ const labourSchema = z.object({
   if (new Set(value.coveredWorks).size !== value.coveredWorks.length)
     context.addIssue({ code: 'custom', path: ['coveredWorks'], message: 'Duplicate covered works.' });
   const ids = new Set<string>();
+  const autoCoverage = new Set<string>();
   for (const [index, extra] of value.extras.entries()) {
     if (ids.has(extra.id))
       context.addIssue({ code: 'custom', path: ['extras', index], message: 'Duplicate labour item.' });
     ids.add(extra.id);
-    if (value.method === 'composite' && value.coveredWorks.includes(extra.work) && !extra.outsideScope)
+    const covered = [...new Set([extra.work, ...(extra.includedWorks ?? [])])];
+    if (value.method === 'composite' && covered.some((work) => value.coveredWorks.includes(work)) && !extra.outsideScope)
       context.addIssue({ code: 'custom', path: ['extras', index],
         message: 'Covered labour must be explicitly identified as outside the agreed scope.' });
+    if (value.method === 'itemwise' && extra.quantitySource === 'boq' && !extra.outsideScope)
+      context.addIssue({ code: 'custom', path: ['extras', index],
+        message: 'Measured work is already charged by the item-wise default. Enter only a separately agreed extra quantity.' });
+    if (extra.method === 'itemwise' && extra.quantitySource === 'boq') {
+      for (const work of covered) {
+        const key = [extra.stage, work].join('|');
+        if (autoCoverage.has(key))
+          context.addIssue({ code: 'custom', path: ['extras', index],
+            message: 'Overlapping measured labour packages in the same stage.' });
+        autoCoverage.add(key);
+      }
+    }
     if (extra.outsideScope && extra.quantitySource === 'boq' && extra.method === 'itemwise')
       context.addIssue({ code: 'custom', path: ['extras', index],
         message: 'Extra scope requires a separately entered quantity.' });
