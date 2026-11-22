@@ -224,7 +224,11 @@ function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
   if (kind === 'quote-plinth-beam') return 'plinth';
   if (kind === 'quote-beams') return 'beams';
   if (kind === 'quote-slab') return 'slab';
-  if (kind === 'quote-staircase') return 'staircase';
+  if (kind === 'quote-staircase' || kind === 'quote-railings') return 'staircase';
+  if (kind === 'quote-flooring' && /staircase granite/i.test(output.name))
+    return 'staircase';
+  if (kind === 'quote-kitchen')
+    return /sink/i.test(output.name) ? 'plumbing' : 'tiles';
   if (kind === 'quote-masonry')
     return /^(?:Internal|External) plaster$|\(plaster\)/i.test(output.name)
       ? 'plaster'
@@ -336,6 +340,7 @@ export function BoqStageBuilder(props: Props) {
     ]),
   ]);
   const [activeTab, setActiveTab] = useState('Foundation');
+  const [focused, setFocused] = useState<{ stage: string; category: string } | null>(null);
   const [editing, setEditing] = useState<{
     stage: string;
     category: string;
@@ -366,6 +371,38 @@ export function BoqStageBuilder(props: Props) {
     thicknessIn: 9,
   });
   const last = props.floors[props.floors.length - 1]?.name ?? '';
+  const isPenthouse = (floor: BoqFloor) => /penthouse/i.test(floor.name) ||
+    Boolean((floor.penthouseSqft ?? 0) > 0);
+  const standardFloors = props.floors.slice(1).filter((floor) => !isPenthouse(floor));
+  const syncFocusUrl = (next: {stage: string; category: string} | null) => {
+    const url = new URL(window.location.href);
+    if (next) {
+      url.searchParams.set('stage', next.stage);
+      url.searchParams.set('work', next.category);
+    } else {
+      url.searchParams.delete('stage');
+      url.searchParams.delete('work');
+    }
+    window.history.pushState({}, '', url.pathname + url.search + url.hash);
+  };
+  useEffect(() => {
+    const sync = () => {
+      const url = new URL(window.location.href);
+      const stage = url.searchParams.get('stage');
+      const category = url.searchParams.get('work');
+      if (stage && category) {
+        setFocused({ stage, category });
+        setEditing({ stage, category });
+        setActiveTab(stage);
+      } else {
+        setFocused(null);
+        setEditing(null);
+      }
+    };
+    sync();
+    window.addEventListener('popstate', sync);
+    return () => window.removeEventListener('popstate', sync);
+  }, []);
   const sections = ['Foundation', ...props.floors.map((f) => f.name)];
   const priced = (output: StageBoqOutput) =>
     props.canViewCost ? output.quantity * props.rateFor(output) : 0;
@@ -459,6 +496,8 @@ export function BoqStageBuilder(props: Props) {
     );
   const openEditor = (stage: string, category: string) => {
     if (preview) return;
+    setFocused({ stage, category });
+    syncFocusUrl({ stage, category });
     if (props.repeatFrom[stage]) props.onCustomizeFloor(stage);
     setMiscellaneousStage(null);
     setManualName('');
@@ -466,11 +505,7 @@ export function BoqStageBuilder(props: Props) {
     setDimensionDraft({ count: 1, lengthFeet: 0, widthFeet: 0, depthFeet: 0 });
     setManualQuantity(0);
     setManualRate(0);
-    setEditing((prior) =>
-      prior?.stage === stage && prior.category === category
-        ? null
-        : { stage, category },
-    );
+    setEditing({ stage, category });
   };
   const toggleMiscellaneous = (stage: string) => {
     if (preview) return;
@@ -514,11 +549,9 @@ export function BoqStageBuilder(props: Props) {
       onChange={(value) => setSetting(key, value)}
     />
   );
-  const repeatedCount = props.floors
-    .slice(1)
-    .filter((f) => Boolean(props.repeatFrom[f.name])).length;
   const repeatAll =
-    props.floors.length > 1 && repeatedCount === props.floors.length - 1;
+    standardFloors.length > 0 &&
+    standardFloors.every((floor) => Boolean(props.repeatFrom[floor.name]));
 
   const renderEditPanel = (stage: string, category: Category) => {
     if (
@@ -555,6 +588,53 @@ export function BoqStageBuilder(props: Props) {
     const index = props.floors.findIndex((f) => f.name === stage);
     const floor = props.floors[index];
     const current = floor ? props.counts.floors[floor.name] : null;
+    const finishes = props.counts.finishes?.[stage];
+    const finishDefaults = props.structuralSettings;
+    const changeFinishes = (values: Record<string, unknown>) => {
+      if (!floor) return;
+      props.onCountsChange({
+        ...props.counts,
+        finishes: {
+          ...props.counts.finishes,
+          [stage]: {
+            rooms: [], bathroomLengthFeet: 0, bathroomWidthFeet: 0,
+            kitchenPlatformFeet: 0, railingFeet: 0,
+            ...finishes,
+            ...values,
+          },
+        },
+      });
+    };
+    const measuredKitchens = finishes?.kitchenMeasurements ??
+      Array.from({ length: current?.kitchens ?? 0 }, (_, i) => ({
+        id: 'kitchen-default-' + i,
+        name: 'Kitchen ' + (i + 1),
+        platformFeet: finishes?.kitchenPlatformFeet ||
+          finishDefaults.kitchenPlatformFeet || 10,
+        platformDepthFeet: finishDefaults.kitchenPlatformDepthFeet || 2,
+        wallTileFeet: finishes?.kitchenPlatformFeet ||
+          finishDefaults.kitchenPlatformFeet || 10,
+        wallTileHeightFeet: finishDefaults.kitchenWallTileHeightFeet || 2,
+      }));
+    const updateKitchens = (rows: typeof measuredKitchens) => {
+      if (!current) return;
+      props.onCountsChange({
+        ...props.counts,
+        floors: {
+          ...props.counts.floors,
+          [stage]: { ...current, kitchens: rows.length },
+        },
+        finishes: {
+          ...props.counts.finishes,
+          [stage]: {
+            rooms: [], bathroomLengthFeet: 0, bathroomWidthFeet: 0,
+            kitchenPlatformFeet: 0, railingFeet: 0,
+            ...finishes,
+            kitchenMeasurements: rows,
+          },
+        },
+      });
+    };
     const changeCount = (
       key: keyof NonNullable<typeof current>,
       value: number,
