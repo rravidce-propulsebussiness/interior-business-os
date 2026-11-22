@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import type {
   BoqCounts,
   BoqFloor,
@@ -1351,6 +1351,131 @@ export function BoqStageBuilder(props: Props) {
               ))}
             </div>
           )}
+        {current && category.key === 'tiles' && (
+          <div className="boq-stage-dimensions">
+            <h4>Flooring & kitchens on {stage}</h4>
+            <label className="boq-stage-scope-toggle">
+              <input type="checkbox"
+                checked={finishes?.excludeRoomFlooring === true}
+                onChange={(event) => changeFinishes({ excludeRoomFlooring: event.target.checked })} />
+              No room floor tiles on this floor
+            </label>
+            <p className="boq-stage-hint">
+              Kitchen granite and wall tiles are measured separately for each kitchen.
+              Removing a kitchen removes its quantities from this floor only.
+            </p>
+            {measuredKitchens.map((kitchen, kitchenIndex) => {
+              const update = (patch: Partial<typeof kitchen>) =>
+                updateKitchens(measuredKitchens.map((row, i) =>
+                  i === kitchenIndex ? { ...row, ...patch } : row));
+              return (
+                <div className="boq-stage-subcard" key={kitchen.id}>
+                  <div className="boq-stage-subhead">
+                    <strong>{kitchen.name || 'Kitchen ' + (kitchenIndex + 1)}</strong>
+                    <button type="button" onClick={() =>
+                      updateKitchens(measuredKitchens.filter((_, i) => i !== kitchenIndex))
+                    }>Remove kitchen</button>
+                  </div>
+                  <div className="boq-stage-input-grid">
+                    <InputText label="Kitchen reference" value={kitchen.name}
+                      onChange={(value) => update({ name: value })} />
+                    <InputNumber label="Platform length" unit="ft" value={kitchen.platformFeet}
+                      onChange={(value) => update({ platformFeet: value })} />
+                    <InputNumber label="Granite depth" unit="ft" value={kitchen.platformDepthFeet}
+                      onChange={(value) => update({ platformDepthFeet: value })} />
+                    <InputNumber label="Wall tile length" unit="ft" value={kitchen.wallTileFeet}
+                      onChange={(value) => update({ wallTileFeet: value })} />
+                    <InputNumber label="Wall tile height" unit="ft" value={kitchen.wallTileHeightFeet}
+                      onChange={(value) => update({ wallTileHeightFeet: value })} />
+                  </div>
+                </div>
+              );
+            })}
+            {measuredKitchens.length === 0 && (
+              <p className="boq-stage-hint">No kitchen on this floor.</p>
+            )}
+            <button type="button" className="boq-stage-outline" onClick={() =>
+              updateKitchens([
+                ...measuredKitchens,
+                {
+                  id: 'kitchen-' + Date.now().toString(36),
+                  name: 'Kitchen ' + (measuredKitchens.length + 1),
+                  platformFeet: finishDefaults.kitchenPlatformFeet || 10,
+                  platformDepthFeet: finishDefaults.kitchenPlatformDepthFeet || 2,
+                  wallTileFeet: finishDefaults.kitchenPlatformFeet || 10,
+                  wallTileHeightFeet: finishDefaults.kitchenWallTileHeightFeet || 2,
+                },
+              ])
+            }>＋ Add kitchen</button>
+            <p className="boq-stage-hint">
+              Room flooring can be set to zero above; bathroom tiles are controlled
+              by the bathroom count, and each extra kitchen has independent dimensions.
+            </p>
+          </div>
+        )}
+        {floor && category.key === 'staircase' && (
+          <div className="boq-stage-dimensions">
+            <h4>Staircase finishes on {stage}</h4>
+            <p className="boq-stage-hint">
+              Granite and railing are independent measurements. Enter 0 if absent.
+              Structural staircase concrete is estimated separately.
+            </p>
+            <div className="boq-stage-input-grid">
+              <InputNumber label="Staircase granite" unit="sqft"
+                value={finishes?.staircaseGraniteSqft ??
+                  ((finishDefaults.stairsPerFloor || 1) *
+                    (finishDefaults.stairWidthFeet || 3) *
+                    (Math.ceil((floor.heightFeet * 12) /
+                      (finishDefaults.stairRiserIn || 7)) *
+                      (((finishDefaults.stairTreadIn || 10) +
+                        (finishDefaults.stairRiserIn || 7)) / 12) +
+                      (finishDefaults.stairLandingFeet || 0)))}
+                onChange={(value) => changeFinishes({ staircaseGraniteSqft: value })} />
+              <InputNumber label="SS railing" unit="rft"
+                value={finishes?.railingFeet ?? 0}
+                onChange={(value) => changeFinishes({ railingFeet: value })} />
+            </div>
+          </div>
+        )}
+        {current && category.key === 'plumbing' && (
+          <div className="boq-stage-dimensions">
+            <h4>Plumbing scope for {stage}</h4>
+            <div className="boq-stage-input-grid">
+              <InputNumber label="Bathrooms" value={current.bathrooms}
+                onChange={(value) => changeCount('bathrooms', value)} />
+              <InputNumber label="Kitchens" value={current.kitchens}
+                onChange={(value) => {
+                  if (finishes?.kitchenMeasurements)
+                    updateKitchens(Array.from({ length: Math.round(value) }, (_, i) =>
+                      measuredKitchens[i] ?? {
+                        id: 'kitchen-' + Date.now().toString(36) + '-' + i,
+                        name: 'Kitchen ' + (i + 1),
+                        platformFeet: finishDefaults.kitchenPlatformFeet || 10,
+                        platformDepthFeet: finishDefaults.kitchenPlatformDepthFeet || 2,
+                        wallTileFeet: finishDefaults.kitchenPlatformFeet || 10,
+                        wallTileHeightFeet: finishDefaults.kitchenWallTileHeightFeet || 2,
+                      }));
+                  else changeCount('kitchens', value);
+                }} />
+            </div>
+            <p className="boq-stage-hint">Set an unused service to 0; add separately measured
+              plumbing work below if the quotation does not include it.</p>
+          </div>
+        )}
+        {current && category.key === 'electrical' && (
+          <div className="boq-stage-dimensions">
+            <h4>Electrical points on {stage}</h4>
+            <div className="boq-stage-input-grid">
+              {([
+                ['lightPoints','Light points'], ['fanPoints','Fan points'],
+                ['socketPoints','Sockets'], ['powerPoints','16A power points'],
+              ] as const).map(([key, label]) => (
+                <InputNumber key={key} label={label} value={current[key]}
+                  onChange={(value) => changeCount(key, value)} />
+              ))}
+            </div>
+          </div>
+        )}
         {current && category.key === 'doors' && (
           <div className="boq-stage-subcard">
             <h4>Door, window and ventilator sizes from drawing</h4>
