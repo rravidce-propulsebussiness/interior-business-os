@@ -17,24 +17,28 @@ export type MeasuredSteelSet = {
 export function readMeasuredSteelSets(raw: unknown): MeasuredSteelSet[] {
   let decoded: unknown = raw;
   if (typeof raw === 'string') {
-    try { decoded = JSON.parse(raw) as unknown; }
-    catch { return []; }
+    try {
+      decoded = JSON.parse(raw) as unknown;
+    } catch {
+      return [];
+    }
   }
   if (!Array.isArray(decoded)) return [];
-  return decoded.slice(0, 16).filter((item) =>
-    item && typeof item === 'object',
-  ).map((item) => {
-    const value = item as Record<string, unknown>;
-    const number = (field: string) => {
-      const parsed = Number(value[field]);
-      return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
-    };
-    return {
-      dia: number('dia'),
-      count: Math.round(number('count')),
-      cutLengthFeet: number('cutLengthFeet'),
-    };
-  });
+  return decoded
+    .slice(0, 16)
+    .filter((item) => item && typeof item === 'object')
+    .map((item) => {
+      const value = item as Record<string, unknown>;
+      const number = (field: string) => {
+        const parsed = Number(value[field]);
+        return Number.isFinite(parsed) ? Math.max(0, parsed) : 0;
+      };
+      return {
+        dia: number('dia'),
+        count: Math.round(number('count')),
+        cutLengthFeet: number('cutLengthFeet'),
+      };
+    });
 }
 export type MeasuredDimensions = {
   count: number;
@@ -237,23 +241,31 @@ export function measuredOutputs(
       unit: 'sqft',
       source: 'One underside + four sides; confirm with formwork drawings',
     },
-    ...((values.steelSets ?? []).flatMap((steel): MeasuredOutput[] => {
+    ...(values.steelSets ?? []).flatMap((steel): MeasuredOutput[] => {
       const stock = settings.stockBarFeet ?? 40;
-      if (!(steel.count > 0 && steel.dia >= 6 && steel.dia <= 40 &&
-        steel.cutLengthFeet > 0 && steel.cutLengthFeet <= stock)) return [];
+      if (!(
+        steel.count > 0 &&
+        steel.dia >= 6 &&
+        steel.dia <= 40 &&
+        steel.cutLengthFeet > 0 &&
+        steel.cutLengthFeet <= stock
+      ))
+        return [];
       const pieceCount = Math.round(values.count) * Math.round(steel.count);
       const plan = cutPlan(steel.cutLengthFeet, pieceCount, stock, 0);
       const kg = plan.bars * stock * 0.3048 * (steel.dia ** 2 / 162);
-      return [{
-        name: `${steel.dia} mm TMT (${kind === 'sajjas' ? 'sajjas' : 'shelves'})`,
-        material: 'steel',
-        quantity: plan.bars,
-        unit: 'rod',
-        diameter: steel.dia,
-        rods: plan.bars,
-        weightKg: round(kg, 2),
-        source: `${pieceCount} pieces × ${steel.cutLengthFeet} ft; ${stock} ft stock bars`,
-      }];
-    })),
+      return [
+        {
+          name: `${steel.dia} mm TMT (${kind === 'sajjas' ? 'sajjas' : 'shelves'})`,
+          material: 'steel',
+          quantity: plan.bars,
+          unit: 'rod',
+          diameter: steel.dia,
+          rods: plan.bars,
+          weightKg: round(kg, 2),
+          source: `${pieceCount} pieces × ${steel.cutLengthFeet} ft; ${stock} ft stock bars`,
+        },
+      ];
+    }),
   ];
 }
