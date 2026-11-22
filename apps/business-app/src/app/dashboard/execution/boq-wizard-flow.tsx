@@ -44,29 +44,10 @@ export const BOQ_WIZARD_STEPS: readonly BoqWizardStep[] = [
   },
   {
     number: 4,
-    title: 'Excavation, Soil Filling & PCC Bed',
-    short: 'Excavation & PCC',
-    description:
-      'Enter length, width, depth and count; calculate compacted and concrete volumes once.',
-    categories: ['excavation', 'soil', 'pcc'],
-    scope: 'foundation',
-  },
-  {
-    number: 5,
-    title: 'Footings & Pedestals',
-    short: 'Footings',
-    description:
-      'Enter F1/F2 schedules, mesh reinforcement and optional pedestals from the structural drawing.',
-    categories: ['footings'],
-    scope: 'foundation',
-  },
-  {
-    number: 6,
-    title: 'Columns & Plinth Beam',
-    short: 'Columns & Plinth',
-    description:
-      'Enter C1/C2 bar schedules and plinth beam details in their own cards.',
-    categories: ['columns', 'plinth'],
+    title: 'Foundation',
+    short: 'Foundation',
+    description: '',
+    categories: ['excavation', 'soil', 'pcc', 'footings', 'columns', 'plinth'],
     scope: 'foundation',
   },
   {
@@ -80,11 +61,11 @@ export const BOQ_WIZARD_STEPS: readonly BoqWizardStep[] = [
   },
   {
     number: 8,
-    title: 'Brickwork & Wall Measurements',
+    title: 'Brickwork & Compound Wall',
     short: 'Brickwork',
     description:
       'Measure 9-inch and 4/4.5-inch walls; deduct openings from the same floor.',
-    categories: ['brickwork'],
+    categories: ['brickwork', 'compound'],
     scope: 'floors',
   },
   {
@@ -111,14 +92,7 @@ export const BOQ_WIZARD_STEPS: readonly BoqWizardStep[] = [
     short: 'Tiles & Services',
     description:
       'Measure finishing, electrical and plumbing for each floor; terrace has its own scope.',
-    categories: [
-      'tiles',
-      'electrical',
-      'plumbing',
-      'compound',
-      'parapet',
-      'waterproofing',
-    ],
+    categories: ['tiles', 'electrical', 'plumbing', 'parapet', 'waterproofing'],
     scope: 'floors',
   },
   {
@@ -154,6 +128,18 @@ export const wizardStep = (number: number) =>
   BOQ_WIZARD_STEPS.find((step) => step.number === number) ??
   BOQ_WIZARD_STEPS[0]!;
 
+export const nextBoqStep = (current: number): number => {
+  const index = BOQ_WIZARD_STEPS.findIndex((step) => step.number === current);
+  return BOQ_WIZARD_STEPS[
+    Math.min(index < 0 ? 0 : index + 1, BOQ_WIZARD_STEPS.length - 1)
+  ]!.number;
+};
+
+export const previousBoqStep = (current: number): number => {
+  const index = BOQ_WIZARD_STEPS.findIndex((step) => step.number === current);
+  return BOQ_WIZARD_STEPS[Math.max(0, index - 1)]!.number;
+};
+
 export function BoqWizardProgress({
   active,
   onChange,
@@ -162,45 +148,20 @@ export function BoqWizardProgress({
   onChange: (step: number) => void;
 }) {
   return (
-    <div className="boq-guided-progress">
-      <div className="boq-guided-milestones" aria-label="BOQ progress">
-        <span className="done">✓ Project & Quotation</span>
-        <span className={active === 2 ? 'current' : active > 2 ? 'done' : ''}>
-          2 · Floor Setup
-        </span>
-        <span className={active === 3 ? 'current' : active > 3 ? 'done' : ''}>
-          3 · Concrete Method
-        </span>
-        <span
-          className={
-            active >= 4 && active <= 11 ? 'current' : active > 11 ? 'done' : ''
-          }
+    <nav className="boq-guided-step-scroll" aria-label="BOQ entry screens">
+      {BOQ_WIZARD_STEPS.map((step, index) => (
+        <button
+          key={step.number}
+          type="button"
+          className={active === step.number ? 'selected' : ''}
+          aria-current={active === step.number ? 'step' : undefined}
+          onClick={() => onChange(step.number)}
         >
-          4 · Measurements
-        </span>
-        <span className={active === 12 ? 'current' : active > 12 ? 'done' : ''}>
-          5 · Rates
-        </span>
-        <span className={active === 13 ? 'current' : active > 13 ? 'done' : ''}>
-          6 · Labour
-        </span>
-        <span className={active === 14 ? 'current' : ''}>7 · Final BOQ</span>
-      </div>
-      <nav className="boq-guided-step-scroll" aria-label="BOQ entry screens">
-        {BOQ_WIZARD_STEPS.map((step) => (
-          <button
-            key={step.number}
-            type="button"
-            className={active === step.number ? 'selected' : ''}
-            aria-current={active === step.number ? 'step' : undefined}
-            onClick={() => onChange(step.number)}
-          >
-            <span>{step.number}</span>
-            {step.short}
-          </button>
-        ))}
-      </nav>
-    </div>
+          <span>{index + 1}</span>
+          {step.short}
+        </button>
+      ))}
+    </nav>
   );
 }
 
@@ -238,10 +199,6 @@ export function BoqFloorProjectSetup({
       <div className="boq-guided-panel-head">
         <div>
           <h3>Floor and Project Setup</h3>
-          <p>
-            Dimensions from the quotation and drawing. Floor heights are
-            editable here only once.
-          </p>
         </div>
         <span className="boq-guided-pill">{floors.length} floors</span>
       </div>
@@ -315,11 +272,6 @@ export function BoqFloorProjectSetup({
           assumed values are preserved until edited.
         </p>
       )}
-      <p className="boq-guided-hint">
-        Built-up area remains sourced from the quotation. Structural dimensions
-        can differ from the quoted area; changing a length or width updates the
-        generated structural takeoff. No second BOQ or price line is created.
-      </p>
     </section>
   );
 }
