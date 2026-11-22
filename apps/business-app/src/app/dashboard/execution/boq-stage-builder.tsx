@@ -1,6 +1,12 @@
 'use client';
 
 import { Fragment, useEffect, useState } from 'react';
+import Link from 'next/link';
+import {
+  BoqFloorProjectSetup,
+  BoqWizardProgress,
+  wizardStep,
+} from './boq-wizard-flow';
 import type {
   BoqCounts,
   BoqFloor,
@@ -107,6 +113,9 @@ type Props = {
   ) => void;
   onSave: () => void;
   onDetailedBoq: () => void;
+  onOpenLabour?: () => void;
+  /** Used by render tests and deep-link recovery; new BOQs open floor setup. */
+  initialStep?: number;
   canOpenDetailed: boolean;
   canViewCost: boolean;
   busy: boolean;
@@ -351,6 +360,7 @@ export function BoqStageBuilder(props: Props) {
     ]),
   ]);
   const [activeTab, setActiveTab] = useState('Foundation');
+  const [guidedStep, setGuidedStep] = useState(props.initialStep ?? 2);
   const [focused, setFocused] = useState<{
     stage: string;
     category: string;
@@ -420,6 +430,32 @@ export function BoqStageBuilder(props: Props) {
     return () => window.removeEventListener('popstate', sync);
   }, []);
   const sections = ['Foundation', ...props.floors.map((f) => f.name)];
+  const selectedWizard = wizardStep(guidedStep);
+  const measurementScreen = guidedStep >= 4 && guidedStep <= 11;
+  // No second structural schedule: these screens only filter existing editors.
+  const guidedSections =
+    selectedWizard.scope === 'foundation' && guidedStep <= 5
+      ? ['Foundation']
+      : guidedStep >= 7 && guidedStep <= 11
+        ? sections.filter((section) => section !== 'Foundation')
+        : sections;
+  const goToWizard = (step: number) => {
+    if (step === 14) {
+      props.onDetailedBoq();
+      return;
+    }
+    setGuidedStep(step);
+    setEditing(null);
+    setFocused(null);
+    setMiscellaneousStage(null);
+    syncFocusUrl(null);
+    const stage = step <= 6
+      ? 'Foundation'
+      : props.floors[0]?.name ?? 'Foundation';
+    setActiveTab(stage);
+    setExpanded((prior) => [...new Set([...prior, stage])]);
+    if (step === 13) props.onOpenLabour?.();
+  };
   const priced = (output: StageBoqOutput) =>
     props.canViewCost ? output.quantity * props.rateFor(output) : 0;
   const unmeasured = (stage: string, key: string) => {
@@ -1890,6 +1926,7 @@ export function BoqStageBuilder(props: Props) {
     );
     return (
       <section className="boq-work-focus" aria-label="Focused BOQ work editor">
+        <BoqWizardProgress active={guidedStep} onChange={goToWizard} />
         <button
           type="button"
           className="boq-focus-back"
@@ -1927,8 +1964,8 @@ export function BoqStageBuilder(props: Props) {
         <div className="boq-stage-heading-title">
           <span className="boq-stage-main-icon">▤</span>
           <div>
-            <h2>BOQ Builder</h2>
-            <p>Stage-wise quantity and cost setup</p>
+            <h2>Detailed BOQ Builder</h2>
+            <p>One drawing entry · Auto-calculated materials & labour · One final floor-wise report</p>
           </div>
         </div>
         <label className="boq-stage-project">
@@ -1965,7 +2002,25 @@ export function BoqStageBuilder(props: Props) {
             'Choose a project with a saved final quotation to begin.'}
         </p>
       </div>
-      <BoqStructuralConcreteCard
+      <BoqWizardProgress active={guidedStep} onChange={goToWizard} />
+      <div className="boq-guided-screen-heading">
+        <span>{String(guidedStep).padStart(2, '0')} / 14</span>
+        <div>
+          <h3>{selectedWizard.title}</h3>
+          <p>{selectedWizard.description}</p>
+        </div>
+        {props.autoSaveLabel && (
+          <small className="boq-autosave-status">{props.autoSaveLabel}</small>
+        )}
+      </div>
+      {guidedStep === 2 && (
+        <BoqFloorProjectSetup
+          floors={props.floors}
+          onChange={props.onFloorChange}
+          canEdit={props.canSave}
+        />
+      )}
+      {guidedStep === 3 && <BoqStructuralConcreteCard
         enabled={props.structuralRmcEnabled}
         ratePerM3={props.structuralRmcRate}
         onToggle={props.onStructuralRmcToggle}
@@ -1974,13 +2029,55 @@ export function BoqStageBuilder(props: Props) {
         canEdit={props.canSave}
         canViewCost={props.canViewCost}
         autoSaveLabel={props.autoSaveLabel}
-      />
-      <div
+      />}
+      {guidedStep === 12 && (
+        <section className="boq-guided-panel boq-guided-center">
+          <div className="boq-guided-panel-head">
+            <div>
+              <h3>Material Rate Card</h3>
+              <p>Enter cement, steel by diameter, RMC, aggregate, sand, bricks, tiles, granite and all other material rates once.</p>
+            </div>
+          </div>
+          <p>Rates are managed in the existing company rate library. Changing a saved rate recalculates the current BOQ; it does not add another item or another estimate.</p>
+          <Link className="boq-guided-primary" href="/dashboard/execution/boq/pricing">
+            Open Material Rate Library →
+          </Link>
+        </section>
+      )}
+      {guidedStep === 13 && (
+        <section className="boq-guided-panel boq-guided-center">
+          <div className="boq-guided-panel-head">
+            <div>
+              <h3>Labour Costing</h3>
+              <p>Choose one base method: composite per sq ft, item-wise, or daily labour. Extra work is charged only when outside the covered package.</p>
+            </div>
+          </div>
+          <button className="boq-guided-primary" type="button"
+            onClick={() => props.onOpenLabour?.()}>
+            Open Actual Labour Costing →
+          </button>
+        </section>
+      )}
+      {guidedStep === 14 && (
+        <section className="boq-guided-panel boq-guided-center">
+          <div className="boq-guided-panel-head">
+            <div>
+              <h3>One Final Detailed BOQ</h3>
+              <p>See every item, quantity, rate and amount under its floor, with one material and labour total.</p>
+            </div>
+          </div>
+          <button className="boq-guided-primary" type="button"
+            onClick={props.onDetailedBoq} disabled={!props.canOpenDetailed}>
+            View Final Detailed BOQ →
+          </button>
+        </section>
+      )}
+      {measurementScreen && <div
         className="boq-stage-tabs"
         role="group"
         aria-label="Jump to BOQ stage"
       >
-        {sections.map((stage) => (
+        {guidedSections.map((stage) => (
           <button
             key={stage}
             type="button"
@@ -1996,15 +2093,17 @@ export function BoqStageBuilder(props: Props) {
             {stage}
           </button>
         ))}
-      </div>
-      {sections
+      </div>}
+      {measurementScreen && guidedSections
         .filter((stage) => stage === activeTab)
         .map((stage) => {
           const stageIndex = sections.indexOf(stage);
           const isFoundation = stage === 'Foundation';
           const isTop = stage === last && !isFoundation;
           const list = isFoundation ? foundation : isTop ? terrace : standard;
-          const visibleList = list;
+          const visibleList = list.filter((item) =>
+            selectedWizard.categories.includes(item.key),
+          );
           const open = expanded.includes(stage);
           const inherited = Boolean(props.repeatFrom[stage]);
           const total = costForStage(stage, list);
@@ -2468,6 +2567,23 @@ export function BoqStageBuilder(props: Props) {
           {props.message}
         </p>
       )}
+      <div className="boq-guided-footer" role="navigation" aria-label="BOQ wizard navigation">
+        <button
+          type="button"
+          className="boq-guided-back"
+          onClick={() => goToWizard(Math.max(2, guidedStep - 1))}
+          disabled={guidedStep === 2}
+        >← Back</button>
+        <span>{props.autoSaveLabel ?? 'Measurements update the same BOQ document'}</span>
+        <button
+          type="button"
+          className="boq-guided-primary"
+          onClick={() => goToWizard(Math.min(14, guidedStep + 1))}
+        >
+          {guidedStep === 13 ? 'Final Detailed BOQ' :
+            guidedStep === 14 ? 'Open Final BOQ' : 'Save & Continue'} →
+        </button>
+      </div>
       <div className="boq-stage-actions">
         <button
           type="button"
