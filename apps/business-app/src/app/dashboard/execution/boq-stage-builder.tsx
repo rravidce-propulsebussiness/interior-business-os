@@ -29,11 +29,13 @@ import {
   FEET_PER_METRE,
   type MeasuredDimensions,
   type MeasuredKind,
+  readMeasuredSteelSets,
 } from './boq-stage-measurements';
 import { BoqFootingEditor } from './boq-footing-editor';
 import {
   BoqSlabScheduleEditor,
   BoqStaircaseScheduleEditor,
+  BoqSmallRccSteelEditor,
 } from './boq-structural-schedule-editors';
 import { BarsPicker } from './boq-design-schedule';
 import { parseBars } from '@business-os/core/construction-boq';
@@ -852,10 +854,13 @@ export function BoqStageBuilder(props: Props) {
                 lengthFeet: Number(line.inputs.lengthFeet) || 0,
                 widthFeet: Number(line.inputs.widthFeet) || 0,
                 depthFeet: Number(line.inputs.depthFeet) || 0,
+                ...(['sajjas', 'shelves'].includes(category.key)
+                  ? { steelSets: readMeasuredSteelSets(line.inputs.steelSetsJson) }
+                  : {}),
               };
               const measured = measuredVolume(dims);
               const changeDimension = (
-                field: keyof MeasuredDimensions,
+                field: 'count' | 'lengthFeet' | 'widthFeet' | 'depthFeet',
                 value: number,
               ) =>
                 props.onUpdateGeometry(
@@ -910,6 +915,14 @@ export function BoqStageBuilder(props: Props) {
                     <span>{number(measured.cft)} cft</span>
                     <strong>{number(measured.m3)} m³</strong>
                   </div>
+                  {['sajjas', 'shelves'].includes(category.key) && (
+                    <BoqSmallRccSteelEditor
+                      rows={dims.steelSets ?? []}
+                      onChange={(steelSets) => props.onUpdateGeometry(
+                        lineIndex, { ...dims, steelSets }, line.name,
+                      )}
+                    />
+                  )}
                 </div>
               );
             })}
@@ -964,11 +977,14 @@ export function BoqStageBuilder(props: Props) {
                 </small>
               )}
               {['sajjas', 'shelves'].includes(category.key) && (
-                <small className="boq-stage-hint">
-                  This measures concrete and estimates shuttering. Enter
-                  reinforcement separately from the structural drawing; no steel
-                  is invented.
-                </small>
+                <BoqSmallRccSteelEditor
+                  rows={dimensionDraft.steelSets ?? []}
+                  onChange={(steelSets) =>
+                    setDimensionDraft((previous) => ({
+                      ...previous, steelSets,
+                    }))
+                  }
+                />
               )}
               <button
                 type="button"
@@ -986,6 +1002,7 @@ export function BoqStageBuilder(props: Props) {
                     lengthFeet: 0,
                     widthFeet: 0,
                     depthFeet: 0,
+                    steelSets: [],
                   });
                   setDimensionName('');
                 }}
