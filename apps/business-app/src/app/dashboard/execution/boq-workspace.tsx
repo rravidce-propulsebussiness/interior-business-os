@@ -885,6 +885,141 @@ export function BoqWorkspace({
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Runs when the generation inputs change.
   }, [liveKey]);
+  // The Continue action creates the BOQ first. All subsequent edits are
+  // debounced and saved against that one stable document/revision. Never
+  // auto-create a second BOQ or save before the initial setup is confirmed.
+  const autoSaveContent = useMemo(
+    () => ({
+      title,
+      projectId: projectId || null,
+      quotationRevisionId: quoteId || null,
+      currency: 'INR',
+      items: lines,
+      selections,
+      ...(labour ? { labour } : {}),
+      ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
+    }),
+    [title, projectId, quoteId, lines, selections, labour, generator, repeatFrom],
+  );
+  const autoSaveFingerprint = JSON.stringify(autoSaveContent);
+  useEffect(() => {
+    latestFingerprint.current = autoSaveFingerprint;
+  }, [autoSaveFingerprint]);
+  useEffect(() => {
+    if (screen !== 'edit' || !active?.id || !canEdit) return;
+    const documentId = active.id;
+    // On first opening an existing BOQ, the current fields are the baseline.
+    // In particular, entering Edit must never increment its revision.
+    if (autoSavedDocId.current !== documentId) {
+      autoSavedDocId.current = documentId;
+      autoSaveVersion.current = active.version;
+      autoSavedFingerprint.current = autoSaveFingerprint;
+      autoFailedFingerprint.current = null;
+      return;
+    }
+    if (autoSaveFingerprint === autoSavedFingerprint.current) return;
+    // Wait for the 350 ms quotation/drawing regeneration to complete first.
+    if (liveKey !== lastLiveKey || calculating) return;
+    // A rejected save is not retried indefinitely. A new edit or explicit
+    // Retry will attempt saving again while preserving unsaved field values.
+    if (
+      autoFailedFingerprint.current === autoSaveFingerprint &&
+      lastFailedRetry.current === retryAutoSave
+    )
+      return;
+    const timer = window.setTimeout(() => {
+      if (autoSaving.current) return;
+      const version = autoSaveVersion.current ?? active.version;
+      autoSaving.current = true;
+      setAutoSaveState('saving');
+      void saveManualBoq({
+        id: documentId,
+        version,
+        ...autoSaveContent,
+      })
+        .then((result) => {
+          if (autoSavedDocId.current !== documentId) return;
+          if (!result.ok) {
+            autoFailedFingerprint.current = autoSaveFingerprint;
+            lastFailedRetry.current = retryAutoSave;
+            setAutoSaveError(result.message || 'Could not save the BOQ.');
+            setAutoSaveState('error');
+            return;
+          }
+          autoSavedFingerprint.current = autoSaveFingerprint;
+          autoFailedFingerprint.current = null;
+          autoSaveVersion.current = version + 1;
+          setAutoSaveError('');
+          setAutoSaveState(
+            latestFingerprint.current === autoSaveFingerprint
+              ? 'saved'
+              : 'saving',
+          );
+          setActive((previous) =>
+            previous?.id === documentId
+              ? {
+                  ...previous,
+                  title: autoSaveContent.title,
+                  version: version + 1,
+                  updated_at: new Date().toISOString(),
+                  document: {
+                    items: autoSaveContent.items,
+                    selections: autoSaveContent.selections,
+                    ...(autoSaveContent.labour
+                      ? { labour: autoSaveContent.labour }
+                      : {}),
+                    ...(autoSaveContent.generator
+                      ? { generator: autoSaveContent.generator }
+                      : {}),
+                  },
+                }
+              : previous,
+          );
+        })
+        .catch((error: unknown) => {
+          if (autoSavedDocId.current !== documentId) return;
+          autoFailedFingerprint.current = autoSaveFingerprint;
+          lastFailedRetry.current = retryAutoSave;
+          setAutoSaveError(
+            error instanceof Error ? error.message : 'Could not save the BOQ.',
+          );
+          setAutoSaveState('error');
+        })
+        .finally(() => {
+          autoSaving.current = false;
+          // Changes made while an earlier version was in-flight are queued
+          // for the next sequential save, avoiding version conflicts.
+          if (
+            latestFingerprint.current !== autoSavedFingerprint.current &&
+            latestFingerprint.current !== autoFailedFingerprint.current
+          )
+            setAutoSaveCycle((previous) => previous + 1);
+        });
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [
+    screen,
+    active?.id,
+    active?.version,
+    canEdit,
+    autoSaveContent,
+    autoSaveFingerprint,
+    liveKey,
+    lastLiveKey,
+    calculating,
+    retryAutoSave,
+    autoSaveCycle,
+  ]);
+  const autoSaveLabel =
+    autoSaveState === 'error'
+      ? 'Automatic save failed'
+      : autoSaveState === 'saving'
+        ? 'Saving automatically…'
+        : autoSavedFingerprint.current &&
+            autoSavedFingerprint.current !== autoSaveFingerprint
+          ? 'Unsaved changes…'
+          : 'Saved automatically';
+
   function updateOutputQuantity(
     lineIndex: number,
     outputIndex: number,
