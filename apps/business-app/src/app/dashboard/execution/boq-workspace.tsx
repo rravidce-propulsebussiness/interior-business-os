@@ -1364,7 +1364,9 @@ export function BoqWorkspace({
       try {
         const saved = JSON.parse(original.inputs.steelSetsJson) as unknown;
         if (Array.isArray(saved)) steelSets = saved.slice(0, 16);
-      } catch { /* No implied steel if a legacy note is malformed. */ }
+      } catch {
+        /* No implied steel if a legacy note is malformed. */
+      }
     }
     const outputs = measuredOutputs(kind, { ...values, steelSets }, settings);
     const steelSetsJson = JSON.stringify(steelSets ?? []);
@@ -1387,11 +1389,13 @@ export function BoqWorkspace({
                   : {}),
               },
               outputs: outputs.map((output) => {
-                const priorOutput = original.outputs.find((previous) =>
-                  previous.name === output.name &&
-                  previous.unit === output.unit &&
-                  previous.material === output.material &&
-                  previous.diameter === output.diameter);
+                const priorOutput = original.outputs.find(
+                  (previous) =>
+                    previous.name === output.name &&
+                    previous.unit === output.unit &&
+                    previous.material === output.material &&
+                    previous.diameter === output.diameter,
+                );
                 return priorOutput?.rate !== undefined
                   ? { ...output, rate: priorOutput.rate }
                   : output;

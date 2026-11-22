@@ -855,7 +855,11 @@ export function BoqStageBuilder(props: Props) {
                 widthFeet: Number(line.inputs.widthFeet) || 0,
                 depthFeet: Number(line.inputs.depthFeet) || 0,
                 ...(['sajjas', 'shelves'].includes(category.key)
-                  ? { steelSets: readMeasuredSteelSets(line.inputs.steelSetsJson) }
+                  ? {
+                      steelSets: readMeasuredSteelSets(
+                        line.inputs.steelSetsJson,
+                      ),
+                    }
                   : {}),
               };
               const measured = measuredVolume(dims);
@@ -918,9 +922,13 @@ export function BoqStageBuilder(props: Props) {
                   {['sajjas', 'shelves'].includes(category.key) && (
                     <BoqSmallRccSteelEditor
                       rows={dims.steelSets ?? []}
-                      onChange={(steelSets) => props.onUpdateGeometry(
-                        lineIndex, { ...dims, steelSets }, line.name,
-                      )}
+                      onChange={(steelSets) =>
+                        props.onUpdateGeometry(
+                          lineIndex,
+                          { ...dims, steelSets },
+                          line.name,
+                        )
+                      }
                     />
                   )}
                 </div>
@@ -981,7 +989,8 @@ export function BoqStageBuilder(props: Props) {
                   rows={dimensionDraft.steelSets ?? []}
                   onChange={(steelSets) =>
                     setDimensionDraft((previous) => ({
-                      ...previous, steelSets,
+                      ...previous,
+                      steelSets,
                     }))
                   }
                 />

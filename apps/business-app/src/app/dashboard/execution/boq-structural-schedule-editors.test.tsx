@@ -106,13 +106,15 @@ describe('single source structural drawing entry', () => {
     expect(html).toContain('Top');
   });
   it('can enter several steel diameters for one measured sajja or shelf', () => {
-    const html = renderToStaticMarkup(createElement(BoqSmallRccSteelEditor, {
-      rows: [
-        { dia: 12, count: 4, cutLengthFeet: 6 },
-        { dia: 8, count: 2, cutLengthFeet: 4 },
-      ],
-      onChange: noop,
-    }));
+    const html = renderToStaticMarkup(
+      createElement(BoqSmallRccSteelEditor, {
+        rows: [
+          { dia: 12, count: 4, cutLengthFeet: 6 },
+          { dia: 8, count: 2, cutLengthFeet: 4 },
+        ],
+        onChange: noop,
+      }),
+    );
     expect(html).toContain('Optional reinforcement from drawing');
     expect(html).toContain('Bars per item');
     expect(html).toContain('Cut length');
