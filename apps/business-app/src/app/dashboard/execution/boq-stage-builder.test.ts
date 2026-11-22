@@ -80,11 +80,8 @@ describe('compact BOQ entry stages', () => {
         ],
       }),
     );
-    const stageTabs =
-      html.split('aria-label="Jump to BOQ stage"')[1]?.split('</div>')[0] ?? '';
-    expect(stageTabs).toContain('Foundation');
-    expect(stageTabs).not.toContain('Ground Floor');
-    expect(stageTabs).not.toContain('First Floor');
+    expect(html).not.toContain('aria-label="Jump to BOQ stage"');
+    expect(html).toContain('Foundation');
     expect(html).toContain('Columns &amp; Plinth Beam');
   });
 
