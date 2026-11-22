@@ -4,6 +4,7 @@ import type {
   DesignSlabPanel,
   DesignStairType,
 } from '@business-os/core/construction-boq';
+import type { MeasuredSteelSet } from './boq-stage-measurements';
 
 const DIAMETERS = [6, 8, 10, 12, 16, 20, 25, 32, 40];
 
@@ -62,7 +63,7 @@ export function BoqSlabScheduleEditor({
     <div className="boq-structural-schedule">
       {panels.length === 0 && (
         <p className="boq-stage-hint">
-          The quotation's existing floor slab is retained. Add S1/S2 panels only
+          The existing quotation floor slab is retained. Add S1/S2 panels only
           when the structural drawing specifies separate slab dimensions or
           steel.
         </p>
@@ -479,14 +480,14 @@ export function BoqSmallRccSteelEditor({
   rows,
   onChange,
 }: {
-  rows: readonly import('./boq-stage-measurements').MeasuredSteelSet[];
+  rows: readonly MeasuredSteelSet[];
   onChange: (
-    rows: import('./boq-stage-measurements').MeasuredSteelSet[],
+    rows: MeasuredSteelSet[],
   ) => void;
 }) {
   const update = (
     index: number,
-    patch: Partial<import('./boq-stage-measurements').MeasuredSteelSet>,
+    patch: Partial<MeasuredSteelSet>,
   ) =>
     onChange(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
   return (
