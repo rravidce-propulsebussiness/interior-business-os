@@ -29,6 +29,7 @@ type Props = {
   canViewCost: boolean;
   busy: boolean;
   onSave: () => void;
+  autoSaveLabel?: string;
 };
 const money = (n: number) =>
   new Intl.NumberFormat('en-IN', {
@@ -53,6 +54,7 @@ export function BoqLabourPanel({
   canViewCost,
   busy,
   onSave,
+  autoSaveLabel,
 }: Props) {
   const measures = useMemo(() => labourMeasurements(lines), [lines]);
   const result = evaluateLabour(config, floors, measures);
@@ -923,7 +925,9 @@ export function BoqLabourPanel({
           <small>Total Labour Cost</small>
           <strong>{canViewCost ? money(labourTotal) : 'Restricted'}</strong>
         </div>
-        {canEdit && (
+        {canEdit && (autoSaveLabel ? (
+          <span className="boq-autosave-status" role="status">{autoSaveLabel}</span>
+        ) : (
           <button
             type="button"
             className="boq-labour-primary"
@@ -936,7 +940,7 @@ export function BoqLabourPanel({
           >
             {busy ? 'Saving…' : '▣ Save BOQ'}
           </button>
-        )}
+        ))}
       </div>
       {result.invalidExtras.length > 0 && (
         <p role="alert" className="boq-labour-alert">
