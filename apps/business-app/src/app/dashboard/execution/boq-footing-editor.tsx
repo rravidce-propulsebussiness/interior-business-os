@@ -4,6 +4,7 @@ import {
   FOOTING_TYPES,
   newFootingType,
   type DesignFootingType,
+  type FootingRebarSet,
 } from '@business-os/core/construction-boq';
 
 type Props = {
@@ -252,6 +253,7 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
             <div className="boq-footing-section-label">
               Footing reinforcement (as drawn)
             </div>
+            {!Array.isArray(f.reinforcement) && (
             <div className="boq-stage-input-grid">
               <label className="boq-stage-field">
                 <span>Reinforcement arrangement</span>
@@ -296,6 +298,102 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
                 </>
               )}
             </div>
+            )}
+            {Array.isArray(f.reinforcement) && (
+              <div className="boq-structural-schedule">
+                {f.reinforcement.map((bar, ri) => {
+                  const changeBar = (patchBar: Partial<FootingRebarSet>) =>
+                    patch({
+                      reinforcement: f.reinforcement!.map((row, i) =>
+                        i === ri ? { ...row, ...patchBar } : row,
+                      ),
+                    });
+                  return (
+                    <div className="boq-structural-rebar-row" key={ri}>
+                      <label>Layer
+                        <select value={bar.layer}
+                          onChange={(event) => changeBar({
+                            layer: event.target.value === 'top' ? 'top' : 'bottom',
+                          })}>
+                          <option value="bottom">Bottom</option>
+                          <option value="top">Top</option>
+                        </select>
+                      </label>
+                      <label>Direction
+                        <select value={bar.direction}
+                          onChange={(event) => changeBar({
+                            direction: event.target.value === 'width' ? 'width' : 'length',
+                          })}>
+                          <option value="length">Along length</option>
+                          <option value="width">Along width</option>
+                        </select>
+                      </label>
+                      <label>Diameter
+                        <select value={bar.dia}
+                          onChange={(event) => changeBar({ dia: Number(event.target.value) })}>
+                          <option value={0}>Select</option>
+                          {[6, 8, 10, 12, 16, 20, 25, 32, 40].map((dia) => (
+                            <option value={dia} key={dia}>{dia} mm</option>
+                          ))}
+                        </select>
+                      </label>
+                      <Numeric
+                        label="Spacing" unit="in" value={bar.spacingIn}
+                        onChange={(spacingIn) => changeBar({ spacingIn })}
+                      />
+                      <button
+                        type="button"
+                        aria-label={`Remove mesh rod row ${ri + 1}`}
+                        onClick={() => patch({
+                          reinforcement: f.reinforcement!.filter((_, i) => i !== ri),
+                        })}
+                      >×</button>
+                    </div>
+                  );
+                })}
+                <button
+                  type="button" className="boq-stage-outline"
+                  disabled={f.reinforcement.length >= 16}
+                  onClick={() => patch({
+                    reinforcement: [...f.reinforcement!,
+                      { layer: 'bottom', direction: 'length', dia: 0, spacingIn: 0 }],
+                  })}
+                >
+                  + Add mesh rod size
+                </button>
+                {!f.reinforcement.length && (
+                  <small className="boq-structural-warning">
+                    No mesh reinforcement assumed until rod sizes are entered.
+                  </small>
+                )}
+                <button
+                  type="button" className="boq-stage-outline"
+                  onClick={() => patch({ reinforcement: undefined })}
+                >
+                  Restore previous mesh method
+                </button>
+              </div>
+            )}
+            {!Array.isArray(f.reinforcement) && (
+              <button type="button" className="boq-stage-outline"
+                onClick={() => patch({
+                  reinforcement: [
+                    { layer: 'bottom', direction: 'length',
+                      dia: f.bottomBarDia, spacingIn: f.bottomSpacingIn },
+                    { layer: 'bottom', direction: 'width',
+                      dia: f.bottomBarDia, spacingIn: f.bottomSpacingIn },
+                    ...(f.mesh === 'double' ? [
+                      { layer: 'top' as const, direction: 'length' as const,
+                        dia: f.topBarDia, spacingIn: f.topSpacingIn },
+                      { layer: 'top' as const, direction: 'width' as const,
+                        dia: f.topBarDia, spacingIn: f.topSpacingIn },
+                    ] : []),
+                  ],
+                })}
+              >
+                Customize mesh steel by diameter and direction
+              </button>
+            )}
             <label className="boq-footing-pedestal-toggle">
               <input
                 type="checkbox"
