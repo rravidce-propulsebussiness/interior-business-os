@@ -101,7 +101,7 @@ type Props = {
   canViewCost: boolean;
   busy: boolean;
   canSave: boolean;
-  autoSaveLabel?: string;
+  autoSaveLabel?: string | undefined;
   message?: string;
   newDocument: boolean;
   /** Allocated contract labour for this stage, not a second per-item charge. */
