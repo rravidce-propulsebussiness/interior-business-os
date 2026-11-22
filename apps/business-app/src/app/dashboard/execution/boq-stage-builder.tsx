@@ -38,6 +38,7 @@ import {
   BoqSmallRccSteelEditor,
 } from './boq-structural-schedule-editors';
 import { BarsPicker } from './boq-design-schedule';
+import { beamTotalRunAfterCountChange } from './boq-beam-run-calculation';
 import { parseBars } from '@business-os/core/construction-boq';
 import { BoqStructuralConcreteCard } from './boq-structural-concrete-card';
 import {
@@ -1401,15 +1402,26 @@ export function BoqStageBuilder(props: Props) {
                   <InputNumber
                     label="Same beams on this floor (nos, 0 = legacy total run)"
                     value={beam.countsByFloor?.[index] ?? 0}
-                    onChange={(value) =>
+                    onChange={(value) => {
+                      const newCount = Math.max(0, Math.round(value));
+                      const oldCount = beam.countsByFloor?.[index] ?? 0;
                       updateBeam(bi, {
                         countsByFloor: props.floors.map((_, i) =>
                           i === index
-                            ? Math.round(value)
+                            ? newCount
                             : (beam.countsByFloor?.[i] ?? 0),
                         ),
-                      })
-                    }
+                        runFeet: props.floors.map((_, i) =>
+                          i === index
+                            ? beamTotalRunAfterCountChange(
+                                beam.runFeet[i] ?? 0,
+                                oldCount,
+                                newCount,
+                              )
+                            : (beam.runFeet[i] ?? 0),
+                        ),
+                      });
+                    }}
                   />
                   <InputNumber
                     label={
