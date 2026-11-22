@@ -22,9 +22,12 @@ describe('14 BOQ design screens over one saved document', () => {
   });
 
   it('renders the same navigable sequence and a selected stage', () => {
-    const html = renderToStaticMarkup(createElement(BoqWizardProgress, {
-      active: 5, onChange: () => {},
-    }));
+    const html = renderToStaticMarkup(
+      createElement(BoqWizardProgress, {
+        active: 5,
+        onChange: () => {},
+      }),
+    );
     expect(html).toContain('BOQ entry screens');
     expect(html).toContain('Footings');
     expect(html).toContain('Final BOQ');
@@ -32,20 +35,30 @@ describe('14 BOQ design screens over one saved document', () => {
   });
 
   it('uses the quoted built-up area and flags assumed floor heights', () => {
-    const html = renderToStaticMarkup(createElement(BoqFloorProjectSetup, {
-      floors: [
-        {
-          name: 'Ground Floor', areaSqft: 1000,
-          lengthFeet: 50, widthFeet: 20, heightFeet: 10, heightAssumed: true,
-        },
-        {
-          name: 'First Floor', areaSqft: 950,
-          lengthFeet: 50, widthFeet: 19, heightFeet: 11, heightAssumed: false,
-        },
-      ],
-      onChange: () => {},
-      canEdit: true,
-    }));
+    const html = renderToStaticMarkup(
+      createElement(BoqFloorProjectSetup, {
+        floors: [
+          {
+            name: 'Ground Floor',
+            areaSqft: 1000,
+            lengthFeet: 50,
+            widthFeet: 20,
+            heightFeet: 10,
+            heightAssumed: true,
+          },
+          {
+            name: 'First Floor',
+            areaSqft: 950,
+            lengthFeet: 50,
+            widthFeet: 19,
+            heightFeet: 11,
+            heightAssumed: false,
+          },
+        ],
+        onChange: () => {},
+        canEdit: true,
+      }),
+    );
     expect(html).toContain('Ground Floor');
     expect(html).toContain('First Floor');
     expect(html).toContain('1,950 sq ft');

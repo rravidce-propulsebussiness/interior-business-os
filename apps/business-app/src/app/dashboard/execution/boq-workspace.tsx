@@ -1,13 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from 'react';
+import { useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { type BoqInputs } from './boq-calculations';
 import { removeManualBoq, saveManualBoq } from './boq-actions';
@@ -1985,7 +1979,10 @@ export function BoqWorkspace({
             />
           )}
           {costingTab === 'labour' && (
-            <nav className="boq-guided-footer" aria-label="Labour costing navigation">
+            <nav
+              className="boq-guided-footer"
+              aria-label="Labour costing navigation"
+            >
               <button
                 className="boq-guided-back"
                 type="button"

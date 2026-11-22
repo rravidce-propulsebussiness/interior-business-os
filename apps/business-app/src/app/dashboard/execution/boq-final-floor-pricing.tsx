@@ -149,7 +149,9 @@ export function BoqFinalFloorPricing({
                     </td>
                     {canViewCost && (
                       <>
-                        <td data-label="Materials">{money(row.materialCost)}</td>
+                        <td data-label="Materials">
+                          {money(row.materialCost)}
+                        </td>
                         <td data-label="Labour">{money(row.labourCost)}</td>
                         <td data-label="Total cost">
                           <strong>{money(row.totalCost)}</strong>
@@ -166,7 +168,8 @@ export function BoqFinalFloorPricing({
                     <td colSpan={canViewCost ? 6 : 2}>
                       <details className="boq-floor-cost">
                         <summary>
-                          View detailed quantities{canViewCost ? ' and rates' : ''}
+                          View detailed quantities
+                          {canViewCost ? ' and rates' : ''}
                         </summary>
                         <div className="boq-final-line-list">
                           {itemized.map((item) => (
@@ -180,7 +183,9 @@ export function BoqFinalFloorPricing({
                               </span>
                               {canViewCost && (
                                 <>
-                                  <span>{money(item.rate)} / {item.unit}</span>
+                                  <span>
+                                    {money(item.rate)} / {item.unit}
+                                  </span>
                                   <strong>
                                     {money(item.quantity * item.rate)}
                                   </strong>
