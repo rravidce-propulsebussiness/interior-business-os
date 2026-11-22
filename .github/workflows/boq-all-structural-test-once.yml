@@ -53,3 +53,5 @@ jobs:
 # Reverify after TypeScript and UI import corrections.
 
 # Rerun with optional small RCC steel and expanded editor coverage.
+
+# Final check after strict optional property type fix.
