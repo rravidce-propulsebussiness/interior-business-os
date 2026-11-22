@@ -34,6 +34,8 @@ jobs:
             apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx \
             apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts \
             apps/business-app/src/app/dashboard/execution/boq-actions.ts \
+            apps/business-app/src/app/dashboard/execution/boq-export.ts \
+            apps/business-app/src/app/dashboard/execution/boq-export.test.ts \
             apps/business-app/src/app/dashboard/execution/layout.tsx
       - name: Commit formatted files
         run: |
