@@ -78,6 +78,56 @@ describe('materialsToOrder', () => {
     ).toEqual(['Steel', 'Room tiles', 'Cement']);
   });
 
+  it('keeps site-mix concrete reference volume out of procurement totals', () => {
+    const list = materialsToOrder([
+      {
+        stage: 'Ground Floor',
+        item: 'Slab',
+        name: 'Slab concrete (M20) · volume only',
+        quantity: 2,
+        unit: 'm³',
+        rate: 0,
+        head: 'Other',
+      },
+      {
+        stage: 'Ground Floor',
+        item: 'Slab',
+        name: 'Cement',
+        quantity: 16.1,
+        unit: 'bag',
+        rate: 360,
+        head: 'Cement',
+      },
+    ]);
+    expect(list.map((item) => item.name)).toEqual(['Cement']);
+    const csv = boqCsv({
+      title: 'Site-mix',
+      rows: [
+        {
+          stage: 'Ground Floor',
+          item: 'Slab',
+          name: 'Slab concrete (M20) · volume only',
+          quantity: 2,
+          unit: 'm³',
+          rate: 0,
+          head: 'Other',
+        },
+        {
+          stage: 'Ground Floor',
+          item: 'Slab',
+          name: 'Cement',
+          quantity: 16.1,
+          unit: 'bag',
+          rate: 360,
+          head: 'Cement',
+        },
+      ],
+      includeCost: true,
+    });
+    expect(csv).toContain('Slab concrete (M20) · volume only,2,m³,0,0');
+    expect(csv).toContain('Total cost estimate,5796');
+  });
+
   it('lists unpriced measured work last', () => {
     const list = materialsToOrder([
       {

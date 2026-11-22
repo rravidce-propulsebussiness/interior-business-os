@@ -703,7 +703,10 @@ describe('quotation-driven construction BOQ', () => {
   it('carries the package rate from the quotation, never a fixed price', () => {
     const result = generateQuotationBoq({ details: quote() });
     const outputs = result.lines.flatMap((line) => line.outputs);
-    expect(outputs.some((output) => output.rate !== undefined)).toBe(false);
+    // Informational volume references may carry an explicit zero rate.
+    expect(
+      outputs.some((output) => output.rate !== undefined && output.rate !== 0),
+    ).toBe(false);
     expect(outputs.find((output) => output.name === 'Main door')).toMatchObject(
       { material: 'door_main', quotedRate: 25000 },
     );
@@ -768,6 +771,26 @@ describe('quotation-driven construction BOQ', () => {
         .find((line) => line.kind === 'quote-slab')!
         .outputs.some((o) => o.material === 'cement'),
     ).toBe(true);
+    const siteSlab = siteMix.lines.find((line) => line.kind === 'quote-slab')!;
+    const volume = siteSlab.outputs.find((o) => o.unit === 'm³');
+    expect(volume).toMatchObject({ rate: 0 });
+    expect(siteSlab.outputs.some((o) => o.material === 'concrete_m20')).toBe(
+      false,
+    );
+    for (const material of ['cement', 'sand', 'aggregate'])
+      expect(siteSlab.outputs.some((o) => o.material === material)).toBe(true);
+    // The structural switch does not change the PCC constituent materials.
+    const pccMaterials = (result: typeof readyMix) =>
+      result.lines
+        .flatMap((line) =>
+          line.kind === 'quote-pcc'
+            ? line.outputs.filter((o) =>
+                ['cement', 'sand', 'aggregate'].includes(o.material ?? ''),
+              )
+            : [],
+        )
+        .map((o) => [o.material, o.quantity]);
+    expect(pccMaterials(siteMix)).toEqual(pccMaterials(readyMix));
   });
 
   it('tiles each room entered, with skirting, and says how many boxes to order', () => {

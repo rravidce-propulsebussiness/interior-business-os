@@ -2208,6 +2208,13 @@ const aggregateOutput = (
   source: `${round(cubicMetres, 3)} m³ × ${s.aggregateTonPerCum} t/m³`,
 });
 
+/** Existing M20 nominal site-mix takeoff recipe per m³ of structural concrete. */
+export const M20_SITE_MIX_PER_M3 = {
+  cementBags: 8.06,
+  sandCubicMetres: 0.42,
+  aggregateCubicMetres: 0.84,
+} as const;
+
 const concreteOutputs = (
   volume: number,
   label: string,
@@ -2225,19 +2232,26 @@ const concreteOutputs = (
       ]
     : [
         {
-          name: `${label} concrete (M20)`,
+          name: `${label} concrete (M20) · volume only`,
           quantity: round(volume, 3),
           unit: 'm³',
+          rate: 0,
+          source:
+            'Reference volume only; site-mixed materials priced separately',
         },
         {
           name: 'Cement',
           material: 'cement',
-          quantity: round(volume * 8.06, 1),
+          quantity: round(volume * M20_SITE_MIX_PER_M3.cementBags, 1),
           unit: 'bag',
           source: 'M20 nominal mix 1:1.5:3 · 8.06 bags/m³',
         },
-        sandOutput(volume * 0.42, s),
-        aggregateOutput(volume * 0.84, s, '20 mm aggregate'),
+        sandOutput(volume * M20_SITE_MIX_PER_M3.sandCubicMetres, s),
+        aggregateOutput(
+          volume * M20_SITE_MIX_PER_M3.aggregateCubicMetres,
+          s,
+          '20 mm aggregate',
+        ),
       ];
 
 /**
@@ -2639,9 +2653,10 @@ export function generateQuotationBoq(
                     source: `${footings} pits · 1 ft working space each side`,
                   },
                   {
-                    name: 'PCC 1:4:8 bed',
+                    name: 'PCC 1:4:8 bed (reference only)',
                     quantity: round(pcc, 3),
                     unit: 'm³',
+                    rate: 0,
                   },
                   {
                     name: 'Cement',

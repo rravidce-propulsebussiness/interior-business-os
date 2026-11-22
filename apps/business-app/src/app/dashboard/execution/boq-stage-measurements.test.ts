@@ -3,6 +3,7 @@ import { normalizeStructuralSettings } from '@business-os/core/construction-boq'
 import {
   FEET_PER_METRE,
   measuredOutputs,
+  correctSavedSmallConcrete,
   measuredVolume,
 } from './boq-stage-measurements';
 
@@ -42,7 +43,7 @@ describe('measured BOQ volume geometry', () => {
     );
   });
 
-  it('keeps sajja and shelf steel unspecified instead of fabricating reinforcement', () => {
+  it('keeps sajjas and shelves site-mixed with no ready-mix or fabricated steel', () => {
     const dimensions = {
       count: 2,
       lengthFeet: 3,
@@ -51,16 +52,94 @@ describe('measured BOQ volume geometry', () => {
     };
     for (const kind of ['sajjas', 'shelves'] as const) {
       const outputs = measuredOutputs(kind, dimensions, settings);
-      expect(
-        outputs.find((item) => item.material === 'concrete_m20'),
-      ).toBeTruthy();
-      expect(
-        outputs.find((item) => item.material === 'shuttering'),
-      ).toBeTruthy();
+      expect(outputs.some((item) => item.material === 'concrete_m20')).toBe(
+        false,
+      );
+      expect(outputs[0]).toMatchObject({ unit: 'm³', rate: 0 });
+      for (const material of ['cement', 'sand', 'aggregate', 'shuttering']) {
+        expect(outputs.some((item) => item.material === material)).toBe(true);
+      }
       expect(outputs.some((item) => item.material === 'steel')).toBe(false);
     }
     expect(
       measuredOutputs('sajjas', { ...dimensions, depthFeet: 0 }, settings),
     ).toEqual([]);
+  });
+});
+
+describe('legacy nonstructural ready-mix correction', () => {
+  it('preserves saved geometry and shuttering rate while replacing the old RMC supply', () => {
+    const previous = {
+      kind: 'measured-geometry',
+      inputs: {
+        stageCategory: 'sajjas',
+        count: 2,
+        lengthFeet: 3,
+        widthFeet: 2,
+        depthFeet: 0.5,
+      },
+      outputs: [
+        {
+          name: 'Sajja concrete (measured)',
+          material: 'concrete_m20',
+          quantity: 0.17,
+          unit: 'm³',
+          rate: 5000,
+        },
+        {
+          name: 'Sajja shuttering',
+          material: 'shuttering',
+          quantity: 24,
+          unit: 'sqft',
+          rate: 50,
+        },
+      ],
+    };
+    const corrected = correctSavedSmallConcrete(previous, settings);
+    expect(corrected?.some((row) => row.material === 'concrete_m20')).toBe(
+      false,
+    );
+    expect(
+      corrected?.find((row) => row.material === 'cement')?.quantity,
+    ).toBeGreaterThan(0);
+    expect(corrected?.find((row) => row.material === 'shuttering')?.rate).toBe(
+      50,
+    );
+    expect(corrected?.find((row) => row.unit === 'm³')).toMatchObject({
+      rate: 0,
+    });
+    expect(previous.outputs[0]?.rate).toBe(5000);
+  });
+
+  it('does not change structural, PCC or already site-mixed saved outputs', () => {
+    for (const stageCategory of ['columns', 'pcc', 'sajjas']) {
+      const outputs =
+        stageCategory === 'sajjas'
+          ? [{ name: 'Cement', material: 'cement', quantity: 3, unit: 'bag' }]
+          : [
+              {
+                name: 'M20 concrete',
+                material: 'concrete_m20',
+                quantity: 2,
+                unit: 'm³',
+              },
+            ];
+      expect(
+        correctSavedSmallConcrete(
+          {
+            kind: 'measured-geometry',
+            inputs: {
+              stageCategory,
+              count: 1,
+              lengthFeet: 3,
+              widthFeet: 2,
+              depthFeet: 0.5,
+            },
+            outputs,
+          },
+          settings,
+        ),
+      ).toBeNull();
+    }
   });
 });

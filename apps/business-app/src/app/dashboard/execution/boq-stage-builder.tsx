@@ -18,6 +18,7 @@ import {
   type MeasuredKind,
 } from './boq-stage-measurements';
 import { BoqFootingEditor } from './boq-footing-editor';
+import { BoqStructuralConcreteCard } from './boq-structural-concrete-card';
 import {
   copyExteriorWallsToFullFloors,
   isPenthouseFloor,
@@ -64,6 +65,10 @@ type Props = {
   counts: BoqCounts;
   onCountsChange: (next: BoqCounts) => void;
   structuralSettings: StructuralSettings;
+  structuralRmcEnabled: boolean;
+  structuralRmcRate: number;
+  onStructuralRmcToggle: (enabled: boolean) => void;
+  onStructuralRmcRateChange: (rate: number) => void;
   onAddGeometry: (
     stage: string,
     kind: MeasuredKind,
@@ -1736,7 +1741,15 @@ export function BoqStageBuilder(props: Props) {
                           {money(entry.output.quotedRate)} / {entry.output.unit}
                         </small>
                       )}
-                      {props.isOldLabourOutput?.(entry.output) ? (
+                      {entry.line.origin &&
+                      entry.output.material === 'concrete_m20' ? (
+                        props.canViewCost && (
+                          <small className="boq-stage-limit">
+                            M20 RMC rate: {money(props.structuralRmcRate)} / m³
+                            · Change it once in Structural Concrete Costing.
+                          </small>
+                        )
+                      ) : props.isOldLabourOutput?.(entry.output) ? (
                         <small className="boq-stage-limit">
                           Labour priced in the Labour Costing tab; no duplicate
                           charge.
@@ -1966,6 +1979,16 @@ export function BoqStageBuilder(props: Props) {
             'Choose a project with a saved final quotation to begin.'}
         </p>
       </div>
+      <BoqStructuralConcreteCard
+        enabled={props.structuralRmcEnabled}
+        ratePerM3={props.structuralRmcRate}
+        onToggle={props.onStructuralRmcToggle}
+        onRateChange={props.onStructuralRmcRateChange}
+        settings={props.structuralSettings}
+        canEdit={props.canSave}
+        canViewCost={props.canViewCost}
+        autoSaveLabel={props.autoSaveLabel}
+      />
       <div
         className="boq-stage-tabs"
         role="group"

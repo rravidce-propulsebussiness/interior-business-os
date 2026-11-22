@@ -54,6 +54,14 @@ export function materialsToOrder(
   const byKey = new Map<string, OrderLine>();
   for (const row of rows) {
     if (!(row.quantity > 0)) continue;
+    // Measured site-mix m³ is a takeoff reference, not concrete to purchase.
+    // Keep it in the BOQ detail while excluding it from material orders.
+    if (
+      row.rate === 0 &&
+      row.unit === 'm³' &&
+      /(?:reference only|volume only)/i.test(row.name)
+    )
+      continue;
     const key = `${row.name.trim().toLowerCase()}::${row.unit.trim().toLowerCase()}`;
     const prior = byKey.get(key);
     const line = prior ?? {
