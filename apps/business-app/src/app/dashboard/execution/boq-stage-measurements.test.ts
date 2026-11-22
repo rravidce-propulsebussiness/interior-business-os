@@ -5,6 +5,7 @@ import {
   measuredOutputs,
   correctSavedSmallConcrete,
   measuredVolume,
+  readMeasuredSteelSets,
 } from './boq-stage-measurements';
 
 const settings = normalizeStructuralSettings({});
@@ -41,6 +42,34 @@ describe('measured BOQ volume geometry', () => {
     expect(outputs.find((item) => item.material === 'aggregate')?.unit).toBe(
       't',
     );
+  });
+
+  it('adds explicit multiple rod sizes to a measured sajja without charging RMC twice', () => {
+    const outputs = measuredOutputs(
+      'sajjas',
+      {
+        count: 2, lengthFeet: 3, widthFeet: 2, depthFeet: 0.5,
+        steelSets: [
+          { dia: 12, count: 4, cutLengthFeet: 6 },
+          { dia: 8, count: 2, cutLengthFeet: 4 },
+        ],
+      },
+      settings,
+    );
+    expect(outputs.some((item) => item.material === 'concrete_m20')).toBe(false);
+    expect(outputs.find((item) => item.material === 'cement')).toBeTruthy();
+    const rods = outputs.filter((item) => item.material === 'steel');
+    expect(rods).toHaveLength(2);
+    expect(rods.map((row) => row.diameter)).toEqual([12, 8]);
+    expect(rods[0]?.unit).toBe('rod');
+    expect(rods.every((row) => (row.weightKg ?? 0) > 0)).toBe(true);
+    expect(readMeasuredSteelSets(JSON.stringify([
+      { dia: 16, count: 3, cutLengthFeet: 7 },
+    ]))).toEqual([{ dia: 16, count: 3, cutLengthFeet: 7 }]);
+    expect(readMeasuredSteelSets('{broken')).toEqual([]);
+    expect(measuredOutputs('shelves', {
+      count: 1, lengthFeet: 2, widthFeet: 1, depthFeet: 0.5,
+    }, settings).some((item) => item.material === 'steel')).toBe(false);
   });
 
   it('keeps sajjas and shelves site-mixed with no ready-mix or fabricated steel', () => {
