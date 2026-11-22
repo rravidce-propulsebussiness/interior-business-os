@@ -1329,6 +1329,11 @@ export function BoqWorkspace({
         following.finishes![target] = {
           ...following.finishes![from]!,
           rooms: following.finishes![from]!.rooms.map((room) => ({ ...room })),
+          ...(following.finishes![from]!.kitchenMeasurements
+            ? { kitchenMeasurements: following.finishes![from]!.kitchenMeasurements!.map((kitchen) => ({
+                ...kitchen, id: uid(),
+              })) }
+            : {}),
         };
       }
       if (following.windowSizes?.[from] !== undefined)
@@ -1532,7 +1537,7 @@ export function BoqWorkspace({
       id: uid(),
       name: safeName,
       section: stage,
-      kind: 'manual',
+      kind: category === 'miscellaneous' ? 'manual' : 'custom-work',
       unit: measureUnit,
       inputs: { quantity, stageCategory: category },
       outputs: [{ name: safeName, quantity, unit: measureUnit, rate }],
@@ -1548,7 +1553,7 @@ export function BoqWorkspace({
       }));
     setLines((prior) => [...prior, item, ...copies]);
     setMessage(
-      label + ' added to ' + stage + '. Save BOQ to keep the measurement.',
+      label + ' added to ' + stage + '. Automatic saving will keep the measurement.',
     );
   }
 
