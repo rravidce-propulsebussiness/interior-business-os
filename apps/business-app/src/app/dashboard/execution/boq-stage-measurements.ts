@@ -38,6 +38,40 @@ export function measuredVolume(values: MeasuredDimensions) {
  * Procurement lines intentionally exclude a second price for an informational
  * volume where site-mixed cement/sand/aggregate are already priced.
  */
+/**
+ * Older BOQs stored sajja/shelf concrete as ready-mix. Recalculate only those
+ * legacy outputs from their saved geometry; do not alter measured dimensions,
+ * intentionally entered shuttering rates, PCC or structural RCC lines.
+ */
+export function correctSavedSmallConcrete(
+  line: {
+    kind: string;
+    inputs: Record<string, string | number | boolean>;
+    outputs: MeasuredOutput[];
+  },
+  settings: Parameters<typeof measuredOutputs>[2],
+): MeasuredOutput[] | null {
+  if (line.kind !== 'measured-geometry') return null;
+  const category = line.inputs.stageCategory;
+  if (category !== 'sajjas' && category !== 'shelves') return null;
+  if (!line.outputs.some((row) => row.material === 'concrete_m20'))
+    return null;
+  const dims: MeasuredDimensions = {
+    count: Number(line.inputs.count),
+    lengthFeet: Number(line.inputs.lengthFeet),
+    widthFeet: Number(line.inputs.widthFeet),
+    depthFeet: Number(line.inputs.depthFeet),
+  };
+  const next = measuredOutputs(category, dims, settings);
+  if (!next.length) return null;
+  const savedShuttering = line.outputs.find((row) => row.material === 'shuttering');
+  return next.map((output) =>
+    output.material === 'shuttering' && savedShuttering?.rate !== undefined
+      ? { ...output, rate: savedShuttering.rate }
+      : output,
+  );
+}
+
 export function measuredOutputs(
   kind: MeasuredKind,
   values: MeasuredDimensions,
