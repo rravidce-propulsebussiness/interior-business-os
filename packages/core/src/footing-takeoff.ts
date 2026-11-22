@@ -11,6 +11,12 @@ export type FootingType = (typeof FOOTING_TYPES)[number];
 export type FootingGeometry = 'flat' | 'stepped' | 'sloped';
 export type FootingMesh = 'single' | 'double';
 
+export type FootingRebarSet = {
+  layer: 'bottom' | 'top';
+  direction: 'length' | 'width';
+  dia: number;
+  spacingIn: number;
+};
 export type DesignFootingType = {
   label: string;
   type: FootingType;
@@ -34,6 +40,8 @@ export type DesignFootingType = {
   bottomSpacingIn: number;
   topBarDia: number;
   topSpacingIn: number;
+  /** Optional per-direction and per-layer steel schedule; replaces legacy mesh steel. */
+  reinforcement?: FootingRebarSet[];
   /** Strap beam concrete is extra to the two pads, with no steel assumed. */
   strapLengthFeet: number;
   strapWidthIn: number;
