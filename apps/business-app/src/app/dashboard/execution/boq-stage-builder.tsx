@@ -19,6 +19,8 @@ import type {
   DesignColumnType,
   DesignSlabPanel,
   DesignStairType,
+  DesignSlabPanel,
+  DesignStairType,
   DesignSettingKey,
   StructuralDesign,
   StructuralSettings,
@@ -31,6 +33,10 @@ import {
   type MeasuredKind,
 } from './boq-stage-measurements';
 import { BoqFootingEditor } from './boq-footing-editor';
+import {
+  BoqSlabScheduleEditor,
+  BoqStaircaseScheduleEditor,
+} from './boq-structural-schedule-editors';
 import { BarsPicker } from './boq-design-schedule';
 import { parseBars } from '@business-os/core/construction-boq';
 import { BoqStructuralConcreteCard } from './boq-structural-concrete-card';
@@ -513,12 +519,22 @@ export function BoqStageBuilder(props: Props) {
           props.floors.findIndex((floor) => floor.name === stage),
         ),
       );
-    if (key === 'slab')
+    if (key === 'slab') {
+      const panels = props.design?.slabPanels?.filter((p) => p.floor === stage);
+      if (panels?.length)
+        return !panels.some((p) => p.count > 0 &&
+          p.lengthFeet > 0 && p.widthFeet > 0 && p.thicknessIn > 0);
       return !Boolean(
         props.design?.settings?.slabMainDia &&
         props.design?.settings?.slabDistDia &&
         props.design?.settings?.slabThicknessIn,
       );
+    }
+    if (key === 'staircase') {
+      const stairs = props.design?.staircases?.filter((p) => p.floor === stage);
+      if (stairs?.length)
+        return !stairs.some((p) => p.count > 0 && p.widthFeet > 0);
+    }
     return false;
   };
   const mapped: Entry[] = [];
@@ -588,6 +604,22 @@ export function BoqStageBuilder(props: Props) {
     props.onDesignChange({ ...drawing, footings, legacyFootings: false });
   const setBeams = (beams: DesignBeamType[]) =>
     props.onDesignChange({ ...drawing, beams });
+  const setSlabPanels = (floor: string, panels: DesignSlabPanel[]) =>
+    props.onDesignChange({
+      ...drawing,
+      slabPanels: [
+        ...(drawing.slabPanels ?? []).filter((panel) => panel.floor !== floor),
+        ...panels,
+      ],
+    });
+  const setStairs = (floor: string, staircases: DesignStairType[]) =>
+    props.onDesignChange({
+      ...drawing,
+      staircases: [
+        ...(drawing.staircases ?? []).filter((stair) => stair.floor !== floor),
+        ...staircases,
+      ],
+    });
   // A new plinth schedule supersedes the legacy single total; no doubling.
   const setPlinthBeams = (plinthBeams: DesignPlinthBeamType[]) =>
     props.onDesignChange({ ...drawing, plinthBeams, plinthRunFeet: 0 });
@@ -1507,6 +1539,13 @@ export function BoqStageBuilder(props: Props) {
           </div>
         )}
         {category.key === 'slab' && (
+          <>
+            <BoqSlabScheduleEditor
+              floor={stage}
+              panels={(drawing.slabPanels ?? []).filter((panel) => panel.floor === stage)}
+              onChange={(panels) => setSlabPanels(stage, panels)}
+            />
+            {!drawing.slabPanels?.some((panel) => panel.floor === stage) && (
           <div className="boq-stage-input-grid">
             {floor && (
               <>
@@ -1556,8 +1595,17 @@ export function BoqStageBuilder(props: Props) {
             {fieldFor('slabDistDia', 'Distribution bar', 8, 'mm')}
             {fieldFor('slabDistSpacingIn', 'Distribution spacing', 8)}
           </div>
+            )}
+          </>
         )}
         {category.key === 'staircase' && (
+          <>
+            <BoqStaircaseScheduleEditor
+              floor={stage}
+              stairs={(drawing.staircases ?? []).filter((stair) => stair.floor === stage)}
+              onChange={(stairs) => setStairs(stage, stairs)}
+            />
+            {!drawing.staircases?.some((stair) => stair.floor === stage) && (
           <div className="boq-stage-input-grid">
             {fieldFor('stairWidthFeet', 'Stair width', 3.5, 'ft')}
             {fieldFor('stairRiserIn', 'Riser', 6)}
@@ -1566,6 +1614,8 @@ export function BoqStageBuilder(props: Props) {
             {fieldFor('stairMainDia', 'Main bar', 12, 'mm')}
             {fieldFor('stairBarSpacingIn', 'Bar spacing', 6)}
           </div>
+            )}
+          </>
         )}
         {category.key === 'parapet' && (
           <p className="boq-stage-hint">
