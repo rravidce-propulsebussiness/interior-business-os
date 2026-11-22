@@ -1102,6 +1102,12 @@ export function BoqWorkspace({
   ) {
     const target = lines[lineIndex];
     const output = target?.outputs[outputIndex];
+    if (target?.origin && output?.material === 'concrete_m20') {
+      // A structural RCC member never has its own independent M20 rate.
+      // Editing its rate through the detailed view updates the BOQ-wide price.
+      setRmcRateOverride(Number.isFinite(rate) ? Math.max(0, rate) : 0);
+      return;
+    }
     if (target?.origin && output) {
       const key = overrideKey(target, output);
       const next = {
