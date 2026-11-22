@@ -80,12 +80,22 @@ export type LabourMeasure = {
 };
 
 export const COVERED_BY_DEFAULT: LabourWorkId[] = [
-  'bar-bending', 'shuttering', 'concreting', 'brickwork',
-  'plastering', 'parapet', 'compound', 'elevation',
+  'bar-bending',
+  'shuttering',
+  'concreting',
+  'brickwork',
+  'plastering',
+  'parapet',
+  'compound',
+  'elevation',
 ];
 export const LEGACY_CIVIL_LABOUR_MATERIALS = new Set([
-  'labour_civil', 'labour_rcc', 'labour_brickwork_9',
-  'labour_brickwork_4', 'plaster_labour', 'shuttering',
+  'labour_civil',
+  'labour_rcc',
+  'labour_brickwork_9',
+  'labour_brickwork_4',
+  'plaster_labour',
+  'shuttering',
 ]);
 export const DEFAULT_LABOUR: LabourConfig = {
   version: 1,
@@ -101,9 +111,13 @@ export const DEFAULT_LABOUR: LabourConfig = {
   ],
   extras: [],
 };
-const finite = (n: number) => Number.isFinite(n) && n > 0 ? n : 0;
+const finite = (n: number) => (Number.isFinite(n) && n > 0 ? n : 0);
 const normalizeUnit = (unit: string) =>
-  unit.toLowerCase().replace(/sq\.?\s*ft|sqft|sft/g, 'sft').replace(/cubic metres?|cum|m³/g, 'm³').trim();
+  unit
+    .toLowerCase()
+    .replace(/sq\.?\s*ft|sqft|sft/g, 'sft')
+    .replace(/cubic metres?|cum|m³/g, 'm³')
+    .trim();
 const cap = (v: number) => Math.round(v * 100) / 100;
 
 export function labourWorkName(work: LabourWorkId): string {
@@ -111,14 +125,23 @@ export function labourWorkName(work: LabourWorkId): string {
 }
 
 /** Stage-wise takeoff measurements are informational even if covered by one contract. */
-export function labourMeasurements(lines: readonly LabourLine[]): LabourMeasure[] {
+export function labourMeasurements(
+  lines: readonly LabourLine[],
+): LabourMeasure[] {
   const rows = new Map<string, LabourMeasure>();
-  const push = (stage: string, work: LabourWorkId, quantity: number, unit: string) => {
+  const push = (
+    stage: string,
+    work: LabourWorkId,
+    quantity: number,
+    unit: string,
+  ) => {
     if (!(finite(quantity) > 0)) return;
     const key = [stage, work, normalizeUnit(unit)].join('|');
     const previous = rows.get(key);
     rows.set(key, {
-      stage, work, unit: normalizeUnit(unit),
+      stage,
+      work,
+      unit: normalizeUnit(unit),
       quantity: cap((previous?.quantity ?? 0) + quantity),
     });
   };
@@ -136,16 +159,28 @@ export function labourMeasurements(lines: readonly LabourLine[]): LabourMeasure[
         push(line.section, 'bar-bending', output.weightKg ?? 0, 'kg');
         continue;
       }
-      if (unit === 'sft' && (/shuttering|centering|formwork/.test(name) || material === 'shuttering')) {
+      if (
+        unit === 'sft' &&
+        (/shuttering|centering|formwork/.test(name) ||
+          material === 'shuttering')
+      ) {
         push(line.section, 'shuttering', qty, unit);
         continue;
       }
-      if (unit === 'm³' && (/concrete volume|concrete \(/.test(name) || material === 'concrete_m20')) {
+      if (
+        unit === 'm³' &&
+        (/concrete volume|concrete \(/.test(name) ||
+          material === 'concrete_m20')
+      ) {
         push(line.section, 'concreting', qty, unit);
         continue;
       }
       if (material === 'labour_civil' || material === 'labour_rcc') continue;
-      if (kind === 'quote-compound-wall' && unit === 'sft' && /wall/.test(name)) {
+      if (
+        kind === 'quote-compound-wall' &&
+        unit === 'sft' &&
+        /wall/.test(name)
+      ) {
         push(line.section, 'compound', qty, unit);
         continue;
       }
@@ -153,29 +188,49 @@ export function labourMeasurements(lines: readonly LabourLine[]): LabourMeasure[
         push(line.section, 'parapet', qty, unit);
         continue;
       }
-      if (unit === 'sft' && (/plaster/.test(name) || material === 'plaster_labour')) {
+      if (
+        unit === 'sft' &&
+        (/plaster/.test(name) || material === 'plaster_labour')
+      ) {
         push(line.section, 'plastering', qty, unit);
         continue;
       }
-      if (unit === 'sft' && ((kind === 'quote-masonry' && /wall|brickwork/.test(name)) ||
-          material === 'labour_brickwork_9' || material === 'labour_brickwork_4')) {
+      if (
+        unit === 'sft' &&
+        ((kind === 'quote-masonry' && /wall|brickwork/.test(name)) ||
+          material === 'labour_brickwork_9' ||
+          material === 'labour_brickwork_4')
+      ) {
         push(line.section, 'brickwork', qty, unit);
         continue;
       }
-      if ((material === 'excavation' || /excavation \(measured\)/.test(name)) && unit === 'm³')
+      if (
+        (material === 'excavation' || /excavation \(measured\)/.test(name)) &&
+        unit === 'm³'
+      )
         push(line.section, 'excavation', qty, unit);
-      if ((kind === 'quote-pcc' || category === 'pcc') && /volume/.test(name) && unit === 'm³')
+      if (
+        (kind === 'quote-pcc' || category === 'pcc') &&
+        /volume/.test(name) &&
+        unit === 'm³'
+      )
         push(line.section, 'pcc', qty, unit);
       if (category === 'sajjas' && /shuttering/.test(name) && unit === 'sft')
         push(line.section, 'sajjas', qty, unit);
       if (category === 'shelves' && /shuttering/.test(name) && unit === 'sft')
         push(line.section, 'shelves', qty, unit);
-      if (/elevation/.test(line.name.toLowerCase() + ' ' + name) && unit === 'sft')
+      if (
+        /elevation/.test(line.name.toLowerCase() + ' ' + name) &&
+        unit === 'sft'
+      )
         push(line.section, 'elevation', qty, unit);
       if (material === 'labour_tiling') push(line.section, 'tiling', qty, unit);
-      if (material === 'labour_painting') push(line.section, 'painting', qty, unit);
-      if (material === 'labour_electrical') push(line.section, 'electrical', qty, unit);
-      if (material === 'labour_plumbing') push(line.section, 'plumbing', qty, unit);
+      if (material === 'labour_painting')
+        push(line.section, 'painting', qty, unit);
+      if (material === 'labour_electrical')
+        push(line.section, 'electrical', qty, unit);
+      if (material === 'labour_plumbing')
+        push(line.section, 'plumbing', qty, unit);
     }
   }
   return [...rows.values()];
@@ -188,26 +243,43 @@ export function measuredLabourQuantity(
   stage: string,
   unit: string,
 ): number {
-  return cap(measurements
-    .filter((row) => row.stage === stage && row.work === work &&
-      normalizeUnit(row.unit) === normalizeUnit(unit))
-    .reduce((sum, row) => sum + row.quantity, 0));
+  return cap(
+    measurements
+      .filter(
+        (row) =>
+          row.stage === stage &&
+          row.work === work &&
+          normalizeUnit(row.unit) === normalizeUnit(unit),
+      )
+      .reduce((sum, row) => sum + row.quantity, 0),
+  );
 }
 export function extraCoveredWorks(extra: LabourExtra): LabourWorkId[] {
   return [...new Set([extra.work, ...(extra.includedWorks ?? [])])];
 }
-export function isExtraAllowed(config: LabourConfig, extra: LabourExtra): boolean {
+export function isExtraAllowed(
+  config: LabourConfig,
+  extra: LabourExtra,
+): boolean {
   const covered = extraCoveredWorks(extra);
   if (config.method === 'composite')
-    return extra.outsideScope || !covered.some((work) => config.coveredWorks.includes(work));
+    return (
+      extra.outsideScope ||
+      !covered.some((work) => config.coveredWorks.includes(work))
+    );
   // Item-wise default already prices measured work: a second rate on it is
   // only valid for an explicitly additional quantity outside the base scope.
   if (config.method === 'itemwise' && !extra.outsideScope)
     return extra.quantitySource !== 'boq' && extra.work === 'other';
   return true;
 }
-export function labourExtraQuantity(extra: LabourExtra, measured: readonly LabourMeasure[]) {
-  return extra.method === 'itemwise' && extra.quantitySource === 'boq' && !extra.outsideScope
+export function labourExtraQuantity(
+  extra: LabourExtra,
+  measured: readonly LabourMeasure[],
+) {
+  return extra.method === 'itemwise' &&
+    extra.quantitySource === 'boq' &&
+    !extra.outsideScope
     ? measuredLabourQuantity(measured, extra.work, extra.stage, extra.unit)
     : finite(extra.quantity);
 }
@@ -218,27 +290,46 @@ export function evaluateLabour(
   measurements: readonly LabourMeasure[],
 ) {
   const byStage: Record<string, number> = {};
-  if (!config) return { base: 0, extras: 0, total: 0, byStage, invalidExtras: [] as string[] };
-  const builtUpArea = floors.reduce((sum, floor) => sum + finite(floor.areaSqft), 0);
-  const area = config.areaOverrideSqft === null ? builtUpArea : finite(config.areaOverrideSqft);
+  if (!config)
+    return {
+      base: 0,
+      extras: 0,
+      total: 0,
+      byStage,
+      invalidExtras: [] as string[],
+    };
+  const builtUpArea = floors.reduce(
+    (sum, floor) => sum + finite(floor.areaSqft),
+    0,
+  );
+  const area =
+    config.areaOverrideSqft === null
+      ? builtUpArea
+      : finite(config.areaOverrideSqft);
   let base = 0;
   if (config.method === 'composite') {
     base = area * finite(config.rate);
     // Allocation for display only: this is NOT another charge per stage.
     const weight = builtUpArea > 0 ? area / builtUpArea : 0;
     for (const floor of floors)
-      byStage[floor.name] = (byStage[floor.name] ?? 0) +
+      byStage[floor.name] =
+        (byStage[floor.name] ?? 0) +
         finite(floor.areaSqft) * weight * finite(config.rate);
     if (builtUpArea === 0 && base > 0) byStage.General = base;
   } else if (config.method === 'itemwise') {
     for (const measured of measurements) {
-      const amount = finite(measured.quantity) * finite(config.itemRates[measured.work] ?? 0);
+      const amount =
+        finite(measured.quantity) *
+        finite(config.itemRates[measured.work] ?? 0);
       base += amount;
       byStage[measured.stage] = (byStage[measured.stage] ?? 0) + amount;
     }
   } else {
-    base = config.dailyRates.reduce((sum, row) =>
-      sum + finite(row.workers) * finite(row.days) * finite(row.rate), 0);
+    base = config.dailyRates.reduce(
+      (sum, row) =>
+        sum + finite(row.workers) * finite(row.days) * finite(row.rate),
+      0,
+    );
     byStage.General = base;
   }
   const invalidExtras: string[] = [];
@@ -248,13 +339,21 @@ export function evaluateLabour(
       invalidExtras.push(item.id);
       continue;
     }
-    const amount = item.method === 'daily'
-      ? finite(item.workers) * finite(item.days) * finite(item.rate)
-      : labourExtraQuantity(item, measurements) * finite(item.rate);
+    const amount =
+      item.method === 'daily'
+        ? finite(item.workers) * finite(item.days) * finite(item.rate)
+        : labourExtraQuantity(item, measurements) * finite(item.rate);
     extras += amount;
-    byStage[item.stage || 'General'] = (byStage[item.stage || 'General'] ?? 0) + amount;
+    byStage[item.stage || 'General'] =
+      (byStage[item.stage || 'General'] ?? 0) + amount;
   }
-  return { base: cap(base), extras: cap(extras), total: cap(base + extras),
-    byStage: Object.fromEntries(Object.entries(byStage).map(([key, value]) => [key, cap(value)])),
-    invalidExtras };
+  return {
+    base: cap(base),
+    extras: cap(extras),
+    total: cap(base + extras),
+    byStage: Object.fromEntries(
+      Object.entries(byStage).map(([key, value]) => [key, cap(value)]),
+    ),
+    invalidExtras,
+  };
 }

@@ -254,7 +254,9 @@ export function BoqWorkspace({
   );
   // Older saved BOQs keep their old rates until labour costing is enabled.
   const [labour, setLabour] = useState<LabourConfig | null>(
-    initialDocument ? (initialDocument.document?.labour ?? null) : { ...DEFAULT_LABOUR },
+    initialDocument
+      ? (initialDocument.document?.labour ?? null)
+      : { ...DEFAULT_LABOUR },
   );
   const [costingTab, setCostingTab] = useState<'builder' | 'labour'>('builder');
   const [generator, setGenerator] = useState<Generator | null>(
@@ -319,12 +321,17 @@ export function BoqWorkspace({
     [structural],
   );
   const labourGroups = new Set(
-    initialRates.filter((rate) => rate.category === 'labour')
-      .map((rate) => rate.material).filter((value): value is string => Boolean(value)),
+    initialRates
+      .filter((rate) => rate.category === 'labour')
+      .map((rate) => rate.material)
+      .filter((value): value is string => Boolean(value)),
   );
   const isOldLabour = (output: SavedLine['outputs'][number]) => {
     const group = materialForOutput(output);
-    return Boolean(group && (labourGroups.has(group) || LEGACY_CIVIL_LABOUR_MATERIALS.has(group)));
+    return Boolean(
+      group &&
+      (labourGroups.has(group) || LEGACY_CIVIL_LABOUR_MATERIALS.has(group)),
+    );
   };
   const priceOf = (output: SavedLine['outputs'][number]) =>
     // A configured labour model replaces ALL old labour rates. Materials and
@@ -441,15 +448,23 @@ export function BoqWorkspace({
   );
 
   const materialOnlyCost = allOutputs.reduce(
-    (sum, output) => sum + (isOldLabour(output) ? 0 : output.quantity * output.rate),
+    (sum, output) =>
+      sum + (isOldLabour(output) ? 0 : output.quantity * output.rate),
     0,
   );
-  const legacyLabourCost = labour ? 0 : allOutputs.reduce(
-    (sum, output) => sum + (isOldLabour(output) ? output.quantity * output.rate : 0),
-    0,
-  );
+  const legacyLabourCost = labour
+    ? 0
+    : allOutputs.reduce(
+        (sum, output) =>
+          sum + (isOldLabour(output) ? output.quantity * output.rate : 0),
+        0,
+      );
   const measuredLabour = labourMeasurements(lines);
-  const labourEstimate = evaluateLabour(labour, floorsForGeneration, measuredLabour);
+  const labourEstimate = evaluateLabour(
+    labour,
+    floorsForGeneration,
+    measuredLabour,
+  );
   const labourCost = legacyLabourCost + labourEstimate.total;
   const materialCost = materialOnlyCost + labourCost;
   // Floor-wise cost in simple heads: cement, sand, aggregate, steel and
@@ -514,46 +529,65 @@ export function BoqWorkspace({
       quantity: row.quantity,
       unit: row.unit,
       rate: canViewCost ? row.rate : 0,
-      head: isOldLabour(row) ? 'Labour' : costHead(
-        material ? rateGroupKey(material, diameterOf(row)) : undefined,
-      ),
+      head: isOldLabour(row)
+        ? 'Labour'
+        : costHead(
+            material ? rateGroupKey(material, diameterOf(row)) : undefined,
+          ),
       order: row.order,
       weightKg: row.weightKg,
     };
   });
-  const labourExportRows: BoqExportRow[] = !labour ? [] : [
-    ...(labour.method === 'composite'
-      ? [{
-          stage: 'Labour costing', item: labour.packageName,
-          name: labour.packageName + ' · composite labour',
-          quantity: labour.areaOverrideSqft ??
-            floorsForGeneration.reduce((sum, f) => sum + f.areaSqft, 0),
-          unit: 'sft', rate: labour.rate, head: 'Labour',
-        }]
-      : labour.method === 'itemwise'
-        ? measuredLabour.map((measured) => ({
-            stage: measured.stage, item: labourWorkName(measured.work),
-            name: labourWorkName(measured.work) + ' labour',
-            quantity: measured.quantity, unit: measured.unit,
-            rate: labour.itemRates[measured.work] ?? 0, head: 'Labour',
-          }))
-        : labour.dailyRates.map((worker) => ({
-            stage: 'Labour costing', item: worker.name,
-            name: worker.name + ' · daily estimate',
-            quantity: worker.workers * worker.days, unit: 'worker-day',
-            rate: worker.rate, head: 'Labour',
-          }))),
-    ...labour.extras.map((extra) => ({
-      stage: extra.stage, item: extra.name,
-      name: extra.name + (extra.outsideScope ? ' (extra beyond package)' : ''),
-      quantity: extra.method === 'daily'
-        ? extra.workers * extra.days
-        : labourExtraQuantity(extra, measuredLabour),
-      unit: extra.method === 'daily' ? 'worker-day' : extra.unit,
-      rate: extra.rate,
-      head: 'Labour',
-    })),
-  ];
+  const labourExportRows: BoqExportRow[] = !labour
+    ? []
+    : [
+        ...(labour.method === 'composite'
+          ? [
+              {
+                stage: 'Labour costing',
+                item: labour.packageName,
+                name: labour.packageName + ' · composite labour',
+                quantity:
+                  labour.areaOverrideSqft ??
+                  floorsForGeneration.reduce((sum, f) => sum + f.areaSqft, 0),
+                unit: 'sft',
+                rate: labour.rate,
+                head: 'Labour',
+              },
+            ]
+          : labour.method === 'itemwise'
+            ? measuredLabour.map((measured) => ({
+                stage: measured.stage,
+                item: labourWorkName(measured.work),
+                name: labourWorkName(measured.work) + ' labour',
+                quantity: measured.quantity,
+                unit: measured.unit,
+                rate: labour.itemRates[measured.work] ?? 0,
+                head: 'Labour',
+              }))
+            : labour.dailyRates.map((worker) => ({
+                stage: 'Labour costing',
+                item: worker.name,
+                name: worker.name + ' · daily estimate',
+                quantity: worker.workers * worker.days,
+                unit: 'worker-day',
+                rate: worker.rate,
+                head: 'Labour',
+              }))),
+        ...labour.extras.map((extra) => ({
+          stage: extra.stage,
+          item: extra.name,
+          name:
+            extra.name + (extra.outsideScope ? ' (extra beyond package)' : ''),
+          quantity:
+            extra.method === 'daily'
+              ? extra.workers * extra.days
+              : labourExtraQuantity(extra, measuredLabour),
+          unit: extra.method === 'daily' ? 'worker-day' : extra.unit,
+          rate: extra.rate,
+          head: 'Labour',
+        })),
+      ];
   const exportRows = [...materialExportRows, ...labourExportRows];
   // Contract labour is part of the estimate, never a procurement/order item.
   const orderList = materialsToOrder(
@@ -1564,15 +1598,23 @@ export function BoqWorkspace({
                   </div>
                 </div>
                 <div className="boq-metrics boq-editor-legacy-metrics">
-                  <div><span>Material Cost</span><strong>
-                    {canViewCost ? money(materialOnlyCost) : 'Restricted'}
-                  </strong></div>
-                  <div><span>Labour Cost</span><strong>
-                    {canViewCost ? money(labourCost) : 'Restricted'}
-                  </strong></div>
+                  <div>
+                    <span>Material Cost</span>
+                    <strong>
+                      {canViewCost ? money(materialOnlyCost) : 'Restricted'}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Labour Cost</span>
+                    <strong>
+                      {canViewCost ? money(labourCost) : 'Restricted'}
+                    </strong>
+                  </div>
                   <div>
                     <span>Estimated material + labour</span>
-                    <strong>{canViewCost ? money(materialCost) : 'Restricted'}</strong>
+                    <strong>
+                      {canViewCost ? money(materialCost) : 'Restricted'}
+                    </strong>
                   </div>
                   <div>
                     <span>Quotation value</span>
@@ -1593,27 +1635,59 @@ export function BoqWorkspace({
                   <section className="boq-labour-saved">
                     <h3>Labour Costing Summary</h3>
                     <div className="boq-labour-saved-grid">
-                      <div><small>Default method</small><strong>
-                        {labour.method === 'composite'
-                          ? labour.packageName + ' · ' + money(labour.rate) + '/sft'
-                          : labour.method === 'itemwise' ? 'Item-wise measured work' : 'Daily wage estimate'}
-                      </strong></div>
-                      <div><small>Default labour</small><strong>{money(labourEstimate.base)}</strong></div>
-                      <div><small>Separate labour</small><strong>{money(labourEstimate.extras)}</strong></div>
-                      <div><small>Total estimated labour</small><strong>{money(labourCost)}</strong></div>
+                      <div>
+                        <small>Default method</small>
+                        <strong>
+                          {labour.method === 'composite'
+                            ? labour.packageName +
+                              ' · ' +
+                              money(labour.rate) +
+                              '/sft'
+                            : labour.method === 'itemwise'
+                              ? 'Item-wise measured work'
+                              : 'Daily wage estimate'}
+                        </strong>
+                      </div>
+                      <div>
+                        <small>Default labour</small>
+                        <strong>{money(labourEstimate.base)}</strong>
+                      </div>
+                      <div>
+                        <small>Separate labour</small>
+                        <strong>{money(labourEstimate.extras)}</strong>
+                      </div>
+                      <div>
+                        <small>Total estimated labour</small>
+                        <strong>{money(labourCost)}</strong>
+                      </div>
                     </div>
-                    {labour.method === 'composite' && <p>
-                      Covered: {labour.coveredWorks.map(labourWorkName).join(', ') || 'none'}.
-                      These works are included once in the composite rate.
-                    </p>}
-                    {!!labour.extras.length && <div className="boq-labour-saved-extras">
-                      {labour.extras.map((extra) => <div key={extra.id}>
-                        <span>{extra.name} · {extra.stage}</span>
-                        <strong>{money(extra.method === 'daily'
-                          ? extra.workers * extra.days * extra.rate
-                          : labourExtraQuantity(extra, measuredLabour) * extra.rate)}</strong>
-                      </div>)}
-                    </div>}
+                    {labour.method === 'composite' && (
+                      <p>
+                        Covered:{' '}
+                        {labour.coveredWorks.map(labourWorkName).join(', ') ||
+                          'none'}
+                        . These works are included once in the composite rate.
+                      </p>
+                    )}
+                    {!!labour.extras.length && (
+                      <div className="boq-labour-saved-extras">
+                        {labour.extras.map((extra) => (
+                          <div key={extra.id}>
+                            <span>
+                              {extra.name} · {extra.stage}
+                            </span>
+                            <strong>
+                              {money(
+                                extra.method === 'daily'
+                                  ? extra.workers * extra.days * extra.rate
+                                  : labourExtraQuantity(extra, measuredLabour) *
+                                      extra.rate,
+                              )}
+                            </strong>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </section>
                 )}
                 {oldManualStructural.length > 0 && (
@@ -1831,15 +1905,25 @@ export function BoqWorkspace({
         </div>
       </div>
       <div className="boq-metrics">
-        <div><span>Materials</span><strong>
-          {canViewCost ? money(materialOnlyCost) : 'Restricted'}
-        </strong></div>
-        <div><span>Labour</span><strong>
-          {canViewCost ? money(labourCost) : 'Restricted'}
-        </strong></div>
+        <div>
+          <span>Materials</span>
+          <strong>
+            {canViewCost ? money(materialOnlyCost) : 'Restricted'}
+          </strong>
+        </div>
+        <div>
+          <span>Labour</span>
+          <strong>{canViewCost ? money(labourCost) : 'Restricted'}</strong>
+        </div>
         <div>
           <span>Total BOQ Estimate</span>
-          <strong>{!canViewCost ? 'Restricted' : calculating ? 'Calculating…' : money(materialCost)}</strong>
+          <strong>
+            {!canViewCost
+              ? 'Restricted'
+              : calculating
+                ? 'Calculating…'
+                : money(materialCost)}
+          </strong>
         </div>
         <div>
           <span>Quotation value (customer price)</span>
@@ -1885,95 +1969,122 @@ export function BoqWorkspace({
               </button>
             )}
           </div>
-          <div className="boq-labour-tabs" role="tablist" aria-label="BOQ costing view">
-            <button type="button" role="tab" aria-selected={costingTab === 'builder'}
+          <div
+            className="boq-labour-tabs"
+            role="tablist"
+            aria-label="BOQ costing view"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={costingTab === 'builder'}
               className={costingTab === 'builder' ? 'active' : ''}
-              onClick={() => setCostingTab('builder')}>▤ BOQ Builder</button>
-            <button type="button" role="tab" aria-selected={costingTab === 'labour'}
-              className={costingTab === 'labour' ? 'active' : ''}
-              onClick={() => setCostingTab('labour')}>♧ Labour Costing</button>
-          </div>
-          {costingTab === 'labour' && !labour && <div className="boq-labour-enable">
-            <strong>Enable the new Labour Costing model?</strong>
-            <p>This saved BOQ uses the previous labour rate method. Enabling a
-              project-wide rate will replace its old labour charges, while
-              preserving all material quantities and material prices.</p>
-            <button type="button" className="erp-button erp-button-primary"
-              disabled={!(active ? canEdit : canCreate)}
-              onClick={() => setLabour({ ...DEFAULT_LABOUR })}>
-              Enable Composite Labour at ₹400/sft
+              onClick={() => setCostingTab('builder')}
+            >
+              ▤ BOQ Builder
             </button>
-          </div>}
-          {costingTab === 'labour' && labour && <BoqLabourPanel
-            config={labour}
-            onChange={setLabour}
-            floors={floorsForGeneration}
-            lines={lines}
-            materialCost={materialOnlyCost}
-            existingLabourCost={legacyLabourCost}
-            canEdit={(active ? canEdit : canCreate) && canViewCost}
-            canViewCost={canViewCost}
-            busy={busy}
-            onSave={save}
-          />}
-          <div style={{ display: costingTab === 'builder' ? undefined : 'none' }}>
-          <BoqStageBuilder
-            key={projectId || active?.id || 'new'}
-            floors={floorsForGeneration}
-            lines={lines}
-            projectId={projectId}
-            projects={projects.map((project) => ({
-              id: project.id,
-              name: project.name,
-              eligible: newProjects.some((item) => item.id === project.id),
-            }))}
-            onProjectChange={selectProject}
-            title={title}
-            onTitleChange={setTitle}
-            quoteLabel={currentQuote?.label ?? ''}
-            design={genDesign}
-            onDesignChange={setGenDesign}
-            counts={countsForGeneration}
-            onCountsChange={updateStageCounts}
-            structuralSettings={settings}
-            onAddGeometry={addStageGeometry}
-            onUpdateGeometry={updateStageGeometry}
-            onFloorChange={setGenFloors}
-            repeatFrom={repeatFrom}
-            onRepeatFloors={repeatStageFloors}
-            onCustomizeFloor={customizeStageFloor}
-            onUpdateQuantity={updateOutputQuantity}
-            onUpdateRate={updateOutputRate}
-            rateFor={priceOf}
-            onAddManual={addStageManual}
-            onUpdateMiscellaneous={updateMiscellaneous}
-            onRemoveManual={(index) =>
-              setLines((prior) => {
-                const target = prior[index];
-                return prior.filter(
-                  (line, i) =>
-                    i !== index &&
-                    !(
-                      target &&
-                      !target.origin &&
-                      line.inputs.repeatedFrom === target.section &&
-                      line.inputs.sourceLineId === target.id
-                    ),
-                );
-              })
-            }
-            onSave={save}
-            onPrint={printBoq}
-            onAdvanced={() => setShowAdvanced((prior) => !prior)}
-            canViewCost={canViewCost}
-            busy={busy}
-            canSave={active ? canEdit : canCreate}
-            message={message}
-            newDocument={!active}
-            labourStageCosts={labour ? labourEstimate.byStage : undefined}
-            projectTotalCost={labour ? materialCost : undefined}
-            isOldLabourOutput={labour ? isOldLabour : undefined}
-          />
+            <button
+              type="button"
+              role="tab"
+              aria-selected={costingTab === 'labour'}
+              className={costingTab === 'labour' ? 'active' : ''}
+              onClick={() => setCostingTab('labour')}
+            >
+              ♧ Labour Costing
+            </button>
+          </div>
+          {costingTab === 'labour' && !labour && (
+            <div className="boq-labour-enable">
+              <strong>Enable the new Labour Costing model?</strong>
+              <p>
+                This saved BOQ uses the previous labour rate method. Enabling a
+                project-wide rate will replace its old labour charges, while
+                preserving all material quantities and material prices.
+              </p>
+              <button
+                type="button"
+                className="erp-button erp-button-primary"
+                disabled={!(active ? canEdit : canCreate)}
+                onClick={() => setLabour({ ...DEFAULT_LABOUR })}
+              >
+                Enable Composite Labour at ₹400/sft
+              </button>
+            </div>
+          )}
+          {costingTab === 'labour' && labour && (
+            <BoqLabourPanel
+              config={labour}
+              onChange={setLabour}
+              floors={floorsForGeneration}
+              lines={lines}
+              materialCost={materialOnlyCost}
+              existingLabourCost={legacyLabourCost}
+              canEdit={(active ? canEdit : canCreate) && canViewCost}
+              canViewCost={canViewCost}
+              busy={busy}
+              onSave={save}
+            />
+          )}
+          <div
+            style={{ display: costingTab === 'builder' ? undefined : 'none' }}
+          >
+            <BoqStageBuilder
+              key={projectId || active?.id || 'new'}
+              floors={floorsForGeneration}
+              lines={lines}
+              projectId={projectId}
+              projects={projects.map((project) => ({
+                id: project.id,
+                name: project.name,
+                eligible: newProjects.some((item) => item.id === project.id),
+              }))}
+              onProjectChange={selectProject}
+              title={title}
+              onTitleChange={setTitle}
+              quoteLabel={currentQuote?.label ?? ''}
+              design={genDesign}
+              onDesignChange={setGenDesign}
+              counts={countsForGeneration}
+              onCountsChange={updateStageCounts}
+              structuralSettings={settings}
+              onAddGeometry={addStageGeometry}
+              onUpdateGeometry={updateStageGeometry}
+              onFloorChange={setGenFloors}
+              repeatFrom={repeatFrom}
+              onRepeatFloors={repeatStageFloors}
+              onCustomizeFloor={customizeStageFloor}
+              onUpdateQuantity={updateOutputQuantity}
+              onUpdateRate={updateOutputRate}
+              rateFor={priceOf}
+              onAddManual={addStageManual}
+              onUpdateMiscellaneous={updateMiscellaneous}
+              onRemoveManual={(index) =>
+                setLines((prior) => {
+                  const target = prior[index];
+                  return prior.filter(
+                    (line, i) =>
+                      i !== index &&
+                      !(
+                        target &&
+                        !target.origin &&
+                        line.inputs.repeatedFrom === target.section &&
+                        line.inputs.sourceLineId === target.id
+                      ),
+                  );
+                })
+              }
+              onSave={save}
+              onPrint={printBoq}
+              onAdvanced={() => setShowAdvanced((prior) => !prior)}
+              canViewCost={canViewCost}
+              busy={busy}
+              canSave={active ? canEdit : canCreate}
+              message={message}
+              newDocument={!active}
+              labourStageCosts={labour ? labourEstimate.byStage : undefined}
+              projectTotalCost={labour ? materialCost : undefined}
+              isOldLabourOutput={labour ? isOldLabour : undefined}
+            />
           </div>
           {showAdvanced && (
             <div className="boq-advanced-content">
