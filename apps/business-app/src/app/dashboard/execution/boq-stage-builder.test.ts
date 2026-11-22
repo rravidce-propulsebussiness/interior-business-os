@@ -55,7 +55,9 @@ describe('stage-wise miscellaneous BOQ UI', () => {
     expect(html).not.toContain('Add a measured item');
     expect(html).not.toContain('Add Item');
     expect(html).toContain('Extra materials, labour or work for Foundation');
-    expect(html).not.toContain('Extra materials, labour or work for Ground Floor');
+    expect(html).not.toContain(
+      'Extra materials, labour or work for Ground Floor',
+    );
     // Only the selected stage is visible until the user chooses another floor.
   });
 

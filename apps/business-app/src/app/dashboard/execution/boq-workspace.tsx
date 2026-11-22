@@ -1330,9 +1330,14 @@ export function BoqWorkspace({
           ...following.finishes![from]!,
           rooms: following.finishes![from]!.rooms.map((room) => ({ ...room })),
           ...(following.finishes![from]!.kitchenMeasurements
-            ? { kitchenMeasurements: following.finishes![from]!.kitchenMeasurements!.map((kitchen) => ({
-                ...kitchen, id: uid(),
-              })) }
+            ? {
+                kitchenMeasurements: following.finishes![
+                  from
+                ]!.kitchenMeasurements!.map((kitchen) => ({
+                  ...kitchen,
+                  id: uid(),
+                })),
+              }
             : {}),
         };
       }
@@ -1553,7 +1558,10 @@ export function BoqWorkspace({
       }));
     setLines((prior) => [...prior, item, ...copies]);
     setMessage(
-      label + ' added to ' + stage + '. Automatic saving will keep the measurement.',
+      label +
+        ' added to ' +
+        stage +
+        '. Automatic saving will keep the measurement.',
     );
   }
 

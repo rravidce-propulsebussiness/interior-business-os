@@ -1192,7 +1192,7 @@
   font-size: 13px;
   font-weight: 700;
 }
-.boq-stage-scope-toggle input[type="checkbox"] {
+.boq-stage-scope-toggle input[type='checkbox'] {
   width: 17px;
   height: 17px;
   accent-color: #8c372e;
@@ -1200,7 +1200,7 @@
 .boq-work-focus .boq-stage-subcard {
   max-width: 100%;
 }
-@media(max-width: 680px) {
+@media (max-width: 680px) {
   .boq-work-focus {
     padding-inline: 0;
   }

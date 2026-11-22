@@ -1790,7 +1790,8 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
         widthFeet: feet(room?.widthFeet),
       }));
     const kitchenRows = Array.isArray(value.kitchenMeasurements)
-      ? (value.kitchenMeasurements as Record<string, unknown>[]).slice(0, 30)
+      ? (value.kitchenMeasurements as Record<string, unknown>[])
+          .slice(0, 30)
           .map((row, index): KitchenMeasure => ({
             id: String(row.id ?? 'kitchen-' + index).slice(0, 80),
             name: String(row.name ?? 'Kitchen ' + (index + 1)).slice(0, 80),
@@ -1803,9 +1804,16 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
     finishes[name] = {
       rooms,
       ...(kitchenRows ? { kitchenMeasurements: kitchenRows } : {}),
-      ...(value.excludeRoomFlooring === true ? { excludeRoomFlooring: true } : {}),
+      ...(value.excludeRoomFlooring === true
+        ? { excludeRoomFlooring: true }
+        : {}),
       ...(value.staircaseGraniteSqft !== undefined
-        ? { staircaseGraniteSqft: Math.max(0, num(value.staircaseGraniteSqft, 0, 0, 100000)) }
+        ? {
+            staircaseGraniteSqft: Math.max(
+              0,
+              num(value.staircaseGraniteSqft, 0, 0, 100000),
+            ),
+          }
         : {}),
       bathroomLengthFeet: feet(value.bathroomLengthFeet),
       bathroomWidthFeet: feet(value.bathroomWidthFeet),
@@ -3916,14 +3924,17 @@ export function generateQuotationBoq(
       : rooms.length
         ? rooms.reduce((sum, room) => sum + room.lengthFeet * room.widthFeet, 0)
         : (living * s.tileCoveragePercent) / 100;
-    const skirting = !fin?.excludeRoomFlooring && rooms.length
-      ? rooms.reduce(
-          (sum, room) =>
-            sum +
-            2 * (room.lengthFeet + room.widthFeet) * (s.skirtingHeightIn / 12),
-          0,
-        )
-      : 0;
+    const skirting =
+      !fin?.excludeRoomFlooring && rooms.length
+        ? rooms.reduce(
+            (sum, room) =>
+              sum +
+              2 *
+                (room.lengthFeet + room.widthFeet) *
+                (s.skirtingHeightIn / 12),
+            0,
+          )
+        : 0;
     const floorTiles = roomArea + skirting;
     const bathL = fin?.bathroomLengthFeet || s.bathroomLengthFeet;
     const bathW = fin?.bathroomWidthFeet || s.bathroomWidthFeet;
@@ -3979,14 +3990,22 @@ export function generateQuotationBoq(
     const platformFeet = fin?.kitchenPlatformFeet || s.kitchenPlatformFeet;
     const kitchens = fin?.kitchenMeasurements;
     const kitchenCount = kitchens === undefined ? fc.kitchens : kitchens.length;
-    const kitchenGranite = kitchens === undefined
-      ? fc.kitchens * platformFeet * s.kitchenPlatformDepthFeet
-      : kitchens.reduce((sum, kitchen) => sum +
-          kitchen.platformFeet * kitchen.platformDepthFeet, 0);
-    const kitchenTiles = kitchens === undefined
-      ? fc.kitchens * platformFeet * s.kitchenWallTileHeightFeet
-      : kitchens.reduce((sum, kitchen) => sum +
-          kitchen.wallTileFeet * kitchen.wallTileHeightFeet, 0);
+    const kitchenGranite =
+      kitchens === undefined
+        ? fc.kitchens * platformFeet * s.kitchenPlatformDepthFeet
+        : kitchens.reduce(
+            (sum, kitchen) =>
+              sum + kitchen.platformFeet * kitchen.platformDepthFeet,
+            0,
+          );
+    const kitchenTiles =
+      kitchens === undefined
+        ? fc.kitchens * platformFeet * s.kitchenWallTileHeightFeet
+        : kitchens.reduce(
+            (sum, kitchen) =>
+              sum + kitchen.wallTileFeet * kitchen.wallTileHeightFeet,
+            0,
+          );
     const tileWaste = 1 + s.tileWastagePercent / 100;
     /** Area to buy (with wastage) and the tiles / boxes to order. */
     const tileOrder = (
@@ -4006,10 +4025,12 @@ export function generateQuotationBoq(
     const exteriorPaint = walls.externalPlaster;
     // Staircase flooring: treads and risers of each flight plus the landing.
     const risers = ceil((floor.heightFeet * 12) / s.stairRiserIn);
-    const stairGranite = fin?.staircaseGraniteSqft ??
-      (s.stairsPerFloor *
-      s.stairWidthFeet *
-      (risers * ((s.stairTreadIn + s.stairRiserIn) / 12) + s.stairLandingFeet));
+    const stairGranite =
+      fin?.staircaseGraniteSqft ??
+      s.stairsPerFloor *
+        s.stairWidthFeet *
+        (risers * ((s.stairTreadIn + s.stairRiserIn) / 12) +
+          s.stairLandingFeet);
     const finishLine = (
       kind: string,
       title: string,
@@ -4181,13 +4202,25 @@ export function generateQuotationBoq(
             })()
           : []),
         // Bedding mortar: floors 40 mm 1:4, wall tiles 12 mm 1:3.
-        ...(floorTiles + bathFloor + stairGranite + parking + wallTiles + kitchenGranite + kitchenTiles > 0
+        ...(floorTiles +
+          bathFloor +
+          stairGranite +
+          parking +
+          wallTiles +
+          kitchenGranite +
+          kitchenTiles >
+        0
           ? [
               {
                 name: 'Cement (tile bedding)',
                 material: 'cement_masonry',
                 quantity: round(
-                  ((floorTiles + bathFloor + stairGranite + parking + kitchenGranite) * 0.028 +
+                  ((floorTiles +
+                    bathFloor +
+                    stairGranite +
+                    parking +
+                    kitchenGranite) *
+                    0.028 +
                     (wallTiles + kitchenTiles) * 0.0104) *
                     (1 + s.materialWastagePercent / 100),
                   1,
@@ -4196,7 +4229,12 @@ export function generateQuotationBoq(
                 source: 'Floor bed 40 mm 1:4 · wall tile bed 12 mm 1:3',
               },
               sandOutput(
-                ((floorTiles + bathFloor + stairGranite + parking + kitchenGranite) * 0.00387 +
+                ((floorTiles +
+                  bathFloor +
+                  stairGranite +
+                  parking +
+                  kitchenGranite) *
+                  0.00387 +
                   (wallTiles + kitchenTiles) * 0.00109) *
                   (1 + s.materialWastagePercent / 100),
                 s,
@@ -4248,7 +4286,12 @@ export function generateQuotationBoq(
           'kitchen_platform',
           kitchens === undefined
             ? `${fc.kitchens} kitchens × ${platformFeet} ft × ${s.kitchenPlatformDepthFeet} ft`
-            : kitchens.map((k) => `${k.name}: ${k.platformFeet}×${k.platformDepthFeet || s.kitchenPlatformDepthFeet} ft`).join('; '),
+            : kitchens
+                .map(
+                  (k) =>
+                    `${k.name}: ${k.platformFeet}×${k.platformDepthFeet || s.kitchenPlatformDepthFeet} ft`,
+                )
+                .join('; '),
         ),
         ...tiled(
           'kitchenWallTiles',
@@ -4258,7 +4301,12 @@ export function generateQuotationBoq(
           [s.wallTileLengthIn, s.wallTileWidthIn, s.wallTilesPerBox],
           kitchens === undefined
             ? `${fc.kitchens} kitchens × ${platformFeet} ft × ${s.kitchenWallTileHeightFeet} ft`
-            : kitchens.map((k) => `${k.name}: ${k.wallTileFeet || k.platformFeet}×${k.wallTileHeightFeet || s.kitchenWallTileHeightFeet} ft`).join('; '),
+            : kitchens
+                .map(
+                  (k) =>
+                    `${k.name}: ${k.wallTileFeet || k.platformFeet}×${k.wallTileHeightFeet || s.kitchenWallTileHeightFeet} ft`,
+                )
+                .join('; '),
         ),
         ...item(
           'kitchenSink',
