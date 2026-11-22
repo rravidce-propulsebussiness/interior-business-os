@@ -42,7 +42,7 @@ describe('measured BOQ volume geometry', () => {
     );
   });
 
-  it('keeps sajja and shelf steel unspecified instead of fabricating reinforcement', () => {
+  it('keeps sajjas and shelves site-mixed with no ready-mix or fabricated steel', () => {
     const dimensions = {
       count: 2,
       lengthFeet: 3,
@@ -51,12 +51,11 @@ describe('measured BOQ volume geometry', () => {
     };
     for (const kind of ['sajjas', 'shelves'] as const) {
       const outputs = measuredOutputs(kind, dimensions, settings);
-      expect(
-        outputs.find((item) => item.material === 'concrete_m20'),
-      ).toBeTruthy();
-      expect(
-        outputs.find((item) => item.material === 'shuttering'),
-      ).toBeTruthy();
+      expect(outputs.some((item) => item.material === 'concrete_m20')).toBe(false);
+      expect(outputs[0]).toMatchObject({ unit: 'm³', rate: 0 });
+      for (const material of ['cement', 'sand', 'aggregate', 'shuttering']) {
+        expect(outputs.some((item) => item.material === material)).toBe(true);
+      }
       expect(outputs.some((item) => item.material === 'steel')).toBe(false);
     }
     expect(
