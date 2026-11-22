@@ -1989,7 +1989,7 @@ export function BoqStageBuilder(props: Props) {
           >
             ▣ {props.busy ? 'Saving…' : 'Save BOQ'}
           </button>
-        )
+        )}
         <button
           type="button"
           className="boq-stage-outline"
