@@ -481,14 +481,9 @@ export function BoqSmallRccSteelEditor({
   onChange,
 }: {
   rows: readonly MeasuredSteelSet[];
-  onChange: (
-    rows: MeasuredSteelSet[],
-  ) => void;
+  onChange: (rows: MeasuredSteelSet[]) => void;
 }) {
-  const update = (
-    index: number,
-    patch: Partial<MeasuredSteelSet>,
-  ) =>
+  const update = (index: number, patch: Partial<MeasuredSteelSet>) =>
     onChange(rows.map((row, i) => (i === index ? { ...row, ...patch } : row)));
   return (
     <section className="boq-structural-schedule boq-small-rcc-steel">
