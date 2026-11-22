@@ -2166,17 +2166,6 @@ export function BoqStageBuilder(props: Props) {
                   id={'boq-stage-' + stageIndex}
                 >
                   {inherited && (
-                        <small className="boq-stage-inherited">
-                          ↗ Repeated from {props.repeatFrom[stage]}
-                        </small>
-                      )}
-                      {props.canViewCost && <b>{money(total)}</b>}
-                      <span className="boq-stage-chevron">
-                        {open ? '⌃' : '⌄'}
-                      </span>
-                    </button>
-                  </div>
-                  {inherited && (
                     <div className="boq-stage-customize">
                       <span>
                         Repeated quantities follow {props.repeatFrom[stage]}{' '}
