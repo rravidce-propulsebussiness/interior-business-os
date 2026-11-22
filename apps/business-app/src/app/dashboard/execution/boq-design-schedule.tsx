@@ -4,7 +4,6 @@ import { useState } from 'react';
 
 import {
   DESIGN_SETTING_KEYS,
-  parseBars,
   STRUCTURAL_FIELDS,
   type DesignSettingKey,
   type BoqFloor,
