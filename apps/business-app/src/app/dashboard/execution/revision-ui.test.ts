@@ -27,7 +27,8 @@ describe('manual BOQ presentation', () => {
     expect(legacyRoutes).toContain("'/dashboard/execution/boq'");
     expect(legacyRoutes).toContain("'/dashboard/execution/boq/pricing'");
     expect(read('./boq-workspace.tsx')).toContain('BoqFinalFloorPricing');
-    expect(read('./boq-stage-builder.tsx')).toContain('◉ Detailed BOQ');
+    expect(read('./boq-stage-builder.tsx')).toContain('nextBoqStep');
+    expect(read('./boq-wizard-flow.tsx')).toContain('Final BOQ');
     expect(read('./boq-workspace.tsx')).not.toContain(
       'Cost estimate, floor by floor',
     );
