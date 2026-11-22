@@ -1100,3 +1100,118 @@
     font-size: 10px;
   }
 }
+
+/* Work-specific, mobile-first editing surface. Only the selected stage/work
+   editor is visible rather than expanding every trade under the overview. */
+.boq-work-focus {
+  display: grid;
+  gap: 15px;
+  min-width: 0;
+  padding: 8px 0 22px;
+}
+.boq-focus-back {
+  justify-self: start;
+  border: 1px solid #dfb8a9;
+  background: #fff;
+  color: #84362d;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  padding: 10px 14px;
+  cursor: pointer;
+}
+.boq-focus-heading {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  flex-wrap: wrap;
+  min-width: 0;
+  border: 1px solid #ead6cb;
+  border-radius: 16px;
+  padding: 16px;
+  background: linear-gradient(125deg, #fffaf6, #fff);
+}
+.boq-focus-heading > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #f8e8df;
+  font-size: 25px;
+  color: #913a2c;
+}
+.boq-focus-heading > div {
+  flex: 1;
+  min-width: 160px;
+}
+.boq-focus-heading h2 {
+  margin: 2px 0 0;
+  color: #502027;
+  font-size: clamp(18px, 2.7vw, 25px);
+}
+.boq-focus-heading small {
+  font-size: 12px;
+  color: #805e56;
+}
+.boq-work-focus > .boq-stage-edit {
+  border: 1px solid #ead5ca;
+  border-radius: 16px;
+  padding: clamp(12px, 2.5vw, 22px);
+  background: #fff;
+  min-width: 0;
+  width: 100%;
+}
+.boq-work-focus .boq-stage-edit-head {
+  padding-top: 0;
+}
+.boq-stage-repeat-targets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  margin-top: 9px;
+}
+.boq-stage-repeat-targets label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #6b4c44;
+  font-size: 12px;
+}
+.boq-stage-scope-toggle {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid #ecd5c7;
+  border-radius: 10px;
+  background: #fff6ef;
+  color: #713b31;
+  font-size: 13px;
+  font-weight: 700;
+}
+.boq-stage-scope-toggle input[type="checkbox"] {
+  width: 17px;
+  height: 17px;
+  accent-color: #8c372e;
+}
+.boq-work-focus .boq-stage-subcard {
+  max-width: 100%;
+}
+@media(max-width: 680px) {
+  .boq-work-focus {
+    padding-inline: 0;
+  }
+  .boq-focus-heading {
+    padding: 12px;
+    gap: 10px;
+  }
+  .boq-work-focus > .boq-stage-edit {
+    border-radius: 13px;
+  }
+  .boq-focus-heading .boq-autosave-status {
+    flex-basis: 100%;
+  }
+}
