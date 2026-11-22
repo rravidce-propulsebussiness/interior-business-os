@@ -54,27 +54,26 @@ const base: StageProps = {
   initialStep: 4,
 };
 
-describe('stage-wise miscellaneous BOQ UI', () => {
-  it('shows one compact Miscellaneous action per expanded stage instead of repeated generic item forms', () => {
+describe('compact BOQ entry stages', () => {
+  it('shows three collapsed Foundation cards with Columns & Plinth visible', () => {
     const html = renderToStaticMarkup(createElement(BoqStageBuilder, base));
-    expect(html.match(/boq-stage-misc-trigger/g)).toHaveLength(1);
-    expect(html).not.toContain('Add a measured item');
-    expect(html).not.toContain('Add Item');
-    expect(html).toContain('Extra materials, labour or work for Foundation');
-    expect(html).not.toContain(
-      'Extra materials, labour or work for Ground Floor',
-    );
-    expect(html).toContain('Detailed BOQ');
-    expect(html).not.toContain('Project BOQ (Saved)');
-    expect(html).not.toContain('Preview BOQ');
-    // Only the selected stage is visible until the user chooses another floor.
+    expect((html.match(/boq-foundation-group-trigger/g) ?? []).length).toBe(3);
+    expect(html).toContain('Excavation &amp; PCC');
+    expect(html).toContain('Footings &amp; Pedestals');
+    expect(html).toContain('Columns &amp; Plinth Beam');
+    expect(html).not.toContain('View or edit Excavation on Foundation');
+    expect(html).not.toContain('boq-stage-card-head');
+    expect(html).not.toContain('Labour package allocation');
+    expect(html).not.toContain('Other measured work');
+    expect(html).toContain('Optional items');
+    expect((html.match(/boq-stage-misc-trigger/g) ?? []).length).toBe(1);
   });
 
-  it('keeps column and plinth entries in the one structural schedule on screen six', () => {
+  it('keeps the one Foundation stage instead of duplicating columns per floor', () => {
     const html = renderToStaticMarkup(
       createElement(BoqStageBuilder, {
         ...base,
-        initialStep: 6,
+        initialStep: 4,
         floors: [
           { name: 'Ground Floor' } as BoqFloor,
           { name: 'First Floor' } as BoqFloor,
@@ -87,8 +86,40 @@ describe('stage-wise miscellaneous BOQ UI', () => {
     expect(stageTabs).toContain('Foundation');
     expect(stageTabs).not.toContain('Ground Floor');
     expect(stageTabs).not.toContain('First Floor');
-    expect(html).toContain('Columns');
-    expect(html).toContain('Plinth Beam');
+    expect(html).toContain('Columns &amp; Plinth Beam');
+  });
+
+  it('shows Compound Wall on Ground Floor brickwork only', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, { ...base, initialStep: 8 }),
+    );
+    expect(html).toContain('Brickwork');
+    expect(html).toContain('Compound Wall');
+    expect(html).toContain('View or edit Compound Wall on Ground Floor');
+  });
+
+  it('provides Penthouse / Headroom on the top-floor services screen', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, {
+        ...base,
+        initialStep: 11,
+        floors: [
+          {
+            name: 'Terrace',
+            areaSqft: 400,
+            lengthFeet: 20,
+            widthFeet: 20,
+            heightFeet: 10,
+            penthouseSqft: 90,
+          },
+        ],
+      }),
+    );
+    expect(html).toContain('Penthouse / Headroom');
+    expect(html).toContain('90 sq ft');
+    expect(html).toContain('View or edit Penthouse / Headroom');
+    expect(html).toContain('Parapet Wall');
+    expect(html).toContain('Waterproofing');
   });
 
   it('displays older manual items in Miscellaneous without dropping their costs', () => {
