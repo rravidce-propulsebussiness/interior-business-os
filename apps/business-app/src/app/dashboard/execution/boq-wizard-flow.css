@@ -120,3 +120,13 @@
 @media print {
   .boq-guided-progress,.boq-guided-screen-heading,.boq-guided-footer {display:none!important;}
 }
+
+
+.boq-guided-rate-scroll {max-height:390px;margin:17px 20px 0;overflow:auto;
+  border:1px solid #ebded8;border-radius:11px;}
+.boq-guided-rate-table {width:100%;border-collapse:collapse;min-width:440px;}
+.boq-guided-rate-table :is(th,td) {padding:11px 14px;text-align:left;
+  border-bottom:1px solid #efe5df;font-size:12px;}
+.boq-guided-rate-table th {color:#69423f;background:#fbf0eb;font-weight:850;}
+.boq-guided-rate-table td {color:#634642;}
+.boq-guided-rate-table td:last-child {text-align:right;color:#7e3532;font-weight:800;}
