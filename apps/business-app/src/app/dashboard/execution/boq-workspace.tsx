@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import {
-  Fragment,
   useEffect,
   useMemo,
   useRef,
@@ -1457,6 +1456,15 @@ export function BoqWorkspace({
         )
       : [];
   const stages = [...new Set(lines.map((line) => line.section || 'Other'))];
+  const detailedPricingLines = allOutputs.map((output, index) => ({
+    id: `${output.lineId}-${index}`,
+    stage: output.section || 'Other',
+    work: output.lineName,
+    name: output.name,
+    quantity: output.quantity,
+    unit: output.unit,
+    rate: output.rate,
+  }));
   const detailedFloorPricing = buildFloorPricing(
     allOutputs.map((output) => ({
       stage: output.section,
@@ -1704,6 +1712,8 @@ export function BoqWorkspace({
                 ) : null}
                 <BoqFinalFloorPricing
                   rows={detailedFloorPricing}
+                  lines={detailedPricingLines}
+                  labourAllocations={labour ? labourEstimate.byStage : {}}
                   materialCost={materialOnlyCost}
                   labourCost={labourCost}
                   totalCost={materialCost}
@@ -1734,74 +1744,6 @@ export function BoqWorkspace({
                     </div>
                   </section>
                 )}
-                <section className="boq-view-items">
-                  <h3>Detailed quantities and costs by stage</h3>
-                  {stages.map((stage) => {
-                    const items = lines.filter(
-                      (line) => (line.section || 'Other') === stage,
-                    );
-                    return (
-                      <details className="boq-floor-cost" key={stage}>
-                        <summary>
-                          {stage} · {plural(items.length, 'item', 'items')}
-                        </summary>
-                        <div className="boq-view-table-scroll">
-                          <table className="boq-view-table">
-                            <thead>
-                              <tr>
-                                <th>Item / material</th>
-                                <th>Quantity</th>
-                                <th>Unit</th>
-                                {canViewCost && (
-                                  <>
-                                    <th>Rate</th>
-                                    <th>Cost</th>
-                                  </>
-                                )}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {items.map((line) => (
-                                <Fragment key={line.id}>
-                                  <tr className="boq-view-group">
-                                    <td colSpan={canViewCost ? 5 : 3}>
-                                      {line.name}
-                                    </td>
-                                  </tr>
-                                  {line.outputs.map((output, i) => (
-                                    <tr key={`${line.id}-${i}`}>
-                                      <td>{output.name}</td>
-                                      <td>
-                                        {output.quantity.toLocaleString(
-                                          'en-IN',
-                                          { maximumFractionDigits: 3 },
-                                        )}
-                                      </td>
-                                      <td>{output.unit}</td>
-                                      {canViewCost && (
-                                        <>
-                                          <td>{rateMoney(priceOf(output))}</td>
-                                          <td>
-                                            {money(
-                                              output.quantity * priceOf(output),
-                                            )}
-                                          </td>
-                                        </>
-                                      )}
-                                    </tr>
-                                  ))}
-                                </Fragment>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </details>
-                    );
-                  })}
-                  {!stages.length && (
-                    <p className="boq-empty">No measured items saved.</p>
-                  )}
-                </section>
                 <div className="boq-savebar">
                   <button
                     type="button"
