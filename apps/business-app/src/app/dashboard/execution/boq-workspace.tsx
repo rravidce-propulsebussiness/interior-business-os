@@ -23,6 +23,7 @@ import {
   generateQuotationBoq,
   normalizeStructuralSettings,
   normalizeDesign,
+  parseBars,
   type BoqCounts,
   type BoqFloor,
   type StructuralDesign,
