@@ -7,13 +7,14 @@ permissions:
 jobs:
   format-boq-once:
     name: Format BOQ two-step feature (temporary)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feat/boq-two-step-create-20261122'
+    if: github.event_name == 'pull_request' && github.head_ref == 'feat/boq-two-step-create-20261122'
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: feat/boq-two-step-create-20261122
           persist-credentials: true
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
