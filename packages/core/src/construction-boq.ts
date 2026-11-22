@@ -2648,9 +2648,10 @@ export function generateQuotationBoq(
                     source: `${footings} pits · 1 ft working space each side`,
                   },
                   {
-                    name: 'PCC 1:4:8 bed',
+                    name: 'PCC 1:4:8 bed (reference only)',
                     quantity: round(pcc, 3),
                     unit: 'm³',
+                    rate: 0,
                   },
                   {
                     name: 'Cement',
