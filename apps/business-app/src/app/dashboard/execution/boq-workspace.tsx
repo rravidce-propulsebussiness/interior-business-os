@@ -1,7 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Fragment, useEffect, useMemo, useState, useTransition } from 'react';
+import {
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import {
   BOQ_TEMPLATES,
@@ -46,6 +53,8 @@ import {
 import { BoqDesignSchedule } from './boq-design-schedule';
 import { BoqStageBuilder } from './boq-stage-builder';
 import { BoqRegisterLanding } from './boq-register-landing';
+import { BoqCreateStep } from './boq-create-step';
+import { validateBoqMeasurements } from './boq-save-validation';
 import { BoqLabourPanel } from './boq-labour-panel';
 import {
   DEFAULT_LABOUR,
@@ -321,6 +330,20 @@ export function BoqWorkspace({
   );
   const [selectedQuoteLines, setSelectedQuoteLines] = useState<string[]>([]);
   const [message, setMessage] = useState('');
+  const [createError, setCreateError] = useState('');
+  const [autoSaveState, setAutoSaveState] = useState<
+    'saved' | 'saving' | 'error'
+  >('saved');
+  const [autoSaveError, setAutoSaveError] = useState('');
+  const [retryAutoSave, setRetryAutoSave] = useState(0);
+  const [autoSaveCycle, setAutoSaveCycle] = useState(0);
+  const autoSavedDocId = useRef<string | null>(null);
+  const autoSavedFingerprint = useRef<string | null>(null);
+  const autoFailedFingerprint = useRef<string | null>(null);
+  const lastFailedRetry = useRef(-1);
+  const latestFingerprint = useRef<string | null>(null);
+  const autoSaveVersion = useRef<number | null>(null);
+  const autoSaving = useRef(false);
   const [busy, startTransition] = useTransition();
   const router = useRouter();
   const settings = useMemo(
@@ -653,6 +676,8 @@ export function BoqWorkspace({
     window.print();
   }
   function selectProject(id: string) {
+    if (id === projectId) return;
+    setCreateError('');
     // Selecting another project opens its existing BOQ, never reassigns the
     // current saved document to a new project or creates a duplicate.
     const existing = documents.find((document) => document.project_id === id);
@@ -696,6 +721,8 @@ export function BoqWorkspace({
     router.push('/dashboard/execution/boq/new');
   }
   function openDocument(document: Document, mode: 'view' | 'edit' = 'view') {
+    setAutoSaveState('saved');
+    setAutoSaveError('');
     setActive(document);
     setScreen(mode);
     setShowSavedDetails(mode === 'view');
@@ -866,6 +893,164 @@ export function BoqWorkspace({
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Runs when the generation inputs change.
   }, [liveKey]);
+  // The Continue action creates the BOQ first. All subsequent edits are
+  // debounced and saved against that one stable document/revision. Never
+  // auto-create a second BOQ or save before the initial setup is confirmed.
+  const autoSaveContent = useMemo(
+    () => ({
+      title,
+      projectId: projectId || null,
+      quotationRevisionId: quoteId || null,
+      currency: 'INR',
+      items: lines,
+      selections,
+      ...(labour && canViewCost ? { labour } : {}),
+      ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
+    }),
+    [
+      title,
+      projectId,
+      quoteId,
+      lines,
+      selections,
+      labour,
+      canViewCost,
+      generator,
+      repeatFrom,
+    ],
+  );
+  const autoSaveFingerprint = JSON.stringify(autoSaveContent);
+  useEffect(() => {
+    latestFingerprint.current = autoSaveFingerprint;
+  }, [autoSaveFingerprint]);
+  useEffect(() => {
+    if (screen !== 'edit' || !active?.id || !canEdit) return;
+    const documentId = active.id;
+    // On first opening an existing BOQ, the current fields are the baseline.
+    // In particular, entering Edit must never increment its revision.
+    if (autoSavedDocId.current !== documentId) {
+      autoSavedDocId.current = documentId;
+      autoSaveVersion.current = active.version;
+      autoSavedFingerprint.current = autoSaveFingerprint;
+      autoFailedFingerprint.current = null;
+      return;
+    }
+    if (autoSaveFingerprint === autoSavedFingerprint.current) return;
+    // Wait for the 350 ms quotation/drawing regeneration to complete first.
+    if (liveKey !== lastLiveKey || calculating) return;
+    // A rejected save is not retried indefinitely. A new edit or explicit
+    // Retry will attempt saving again while preserving unsaved field values.
+    if (
+      autoFailedFingerprint.current === autoSaveFingerprint &&
+      lastFailedRetry.current === retryAutoSave
+    )
+      return;
+    const timer = window.setTimeout(() => {
+      if (autoSaving.current) return;
+      const measurementError = validateBoqMeasurements(
+        autoSaveContent.items,
+        Boolean(schedule),
+      );
+      if (measurementError) {
+        autoFailedFingerprint.current = autoSaveFingerprint;
+        lastFailedRetry.current = retryAutoSave;
+        setAutoSaveError(measurementError);
+        setAutoSaveState('error');
+        return;
+      }
+      const version = autoSaveVersion.current ?? active.version;
+      autoSaving.current = true;
+      setAutoSaveState('saving');
+      void saveManualBoq({
+        id: documentId,
+        version,
+        ...autoSaveContent,
+      })
+        .then((result) => {
+          if (autoSavedDocId.current !== documentId) return;
+          if (!result.ok) {
+            autoFailedFingerprint.current = autoSaveFingerprint;
+            lastFailedRetry.current = retryAutoSave;
+            setAutoSaveError(result.message || 'Could not save the BOQ.');
+            setAutoSaveState('error');
+            return;
+          }
+          autoSavedFingerprint.current = autoSaveFingerprint;
+          autoFailedFingerprint.current = null;
+          autoSaveVersion.current = version + 1;
+          setAutoSaveError('');
+          setAutoSaveState(
+            latestFingerprint.current === autoSaveFingerprint
+              ? 'saved'
+              : 'saving',
+          );
+          setActive((previous) =>
+            previous?.id === documentId
+              ? {
+                  ...previous,
+                  title: autoSaveContent.title,
+                  version: version + 1,
+                  updated_at: new Date().toISOString(),
+                  document: {
+                    ...previous.document,
+                    items: autoSaveContent.items,
+                    selections: autoSaveContent.selections,
+                    ...(autoSaveContent.labour
+                      ? { labour: autoSaveContent.labour }
+                      : {}),
+                    ...(autoSaveContent.generator
+                      ? { generator: autoSaveContent.generator }
+                      : {}),
+                  },
+                }
+              : previous,
+          );
+        })
+        .catch((error: unknown) => {
+          if (autoSavedDocId.current !== documentId) return;
+          autoFailedFingerprint.current = autoSaveFingerprint;
+          lastFailedRetry.current = retryAutoSave;
+          setAutoSaveError(
+            error instanceof Error ? error.message : 'Could not save the BOQ.',
+          );
+          setAutoSaveState('error');
+        })
+        .finally(() => {
+          autoSaving.current = false;
+          // Changes made while an earlier version was in-flight are queued
+          // for the next sequential save, avoiding version conflicts.
+          if (
+            latestFingerprint.current !== autoSavedFingerprint.current &&
+            latestFingerprint.current !== autoFailedFingerprint.current
+          )
+            setAutoSaveCycle((previous) => previous + 1);
+        });
+    }, 650);
+    return () => window.clearTimeout(timer);
+  }, [
+    screen,
+    active?.id,
+    active?.version,
+    canEdit,
+    autoSaveContent,
+    autoSaveFingerprint,
+    liveKey,
+    lastLiveKey,
+    calculating,
+    schedule,
+    retryAutoSave,
+    autoSaveCycle,
+  ]);
+  const autoSaveLabel =
+    autoSaveState === 'error'
+      ? 'Automatic save failed'
+      : autoSaveState === 'saving'
+        ? 'Saving automatically…'
+        : autoSavedFingerprint.current &&
+            autoSavedFingerprint.current !== autoSaveFingerprint
+          ? 'Unsaved changes…'
+          : 'Saved automatically';
+
   function updateOutputQuantity(
     lineIndex: number,
     outputIndex: number,
@@ -1034,90 +1219,10 @@ export function BoqWorkspace({
     setSelectedQuoteLines([]);
   }
   function save() {
-    // Older saved BOQs retain their estimated foundation line. Do not add
-    // a new measured volume on top of an older excavation/PCC estimate.
-    const overlap = lines.find((line) => {
-      if (line.kind !== 'measured-geometry') return false;
-      const category = String(line.inputs.stageCategory);
-      const related =
-        category === 'excavation'
-          ? ['quote-foundation', 'quote-excavation']
-          : category === 'pcc'
-            ? ['quote-foundation', 'quote-pcc']
-            : [];
-      return (
-        related.length > 0 &&
-        lines.some(
-          (generated) =>
-            generated.origin &&
-            generated.section === line.section &&
-            related.includes(generated.kind),
-        )
-      );
-    });
-    if (overlap) {
-      setMessage(
-        `Review ${overlap.name}: old quotation-generated foundation quantities also exist. Remove or reconcile the duplicate line before saving.`,
-      );
-      return;
-    }
-    // When a measured manual stage is later supplied by the drawing engine,
-    // require an explicit review instead of adding two competing quantities.
-    const generatedForStage: Record<string, string[]> = {
-      excavation: ['quote-foundation'],
-      pcc: ['quote-foundation'],
-      footings: ['quote-foundation', 'quote-footings', 'quote-pedestals'],
-      columns: ['quote-columns'],
-      plinth: ['quote-plinth-beam'],
-      beams: ['quote-beams', 'quote-slab'],
-      slab: ['quote-slab'],
-      staircase: ['quote-staircase'],
-      brickwork: ['quote-masonry'],
-      plaster: ['quote-masonry'],
-      compound: ['quote-compound-wall'],
-      parapet: ['quote-parapet'],
-      waterproofing: ['quote-parapet'],
-    };
-    const duplicated = lines.find((manual) => {
-      if (manual.origin || manual.kind !== 'manual') return false;
-      const kinds =
-        generatedForStage[String(manual.inputs.stageCategory ?? '')];
-      return kinds?.some((kind) =>
-        lines.some(
-          (generated) =>
-            Boolean(generated.origin) &&
-            generated.section === manual.section &&
-            generated.kind === kind,
-        ),
-      );
-    });
-    if (duplicated) {
-      setMessage(
-        `Review ${duplicated.name} in ${duplicated.section}: both a manual measurement and a drawing-generated measurement exist. Remove one before saving to avoid duplicate quantities.`,
-      );
-      return;
-    }
-    if (
-      schedule &&
-      lines.some(
-        (line) =>
-          !line.origin &&
-          [
-            'excavation',
-            'footing',
-            'pedestal',
-            'column',
-            'plinth_beam',
-            'beam',
-            'slab',
-            'wall',
-            'surface',
-          ].includes(line.kind),
-      )
-    ) {
-      setMessage(
-        'Remove overlapping manually measured structural or finishing items before saving. The quotation already generates these quantities.',
-      );
+    const measurementError = validateBoqMeasurements(lines, Boolean(schedule));
+    if (measurementError) {
+      setMessage(measurementError);
+      setCreateError(measurementError);
       return;
     }
     if (
@@ -1126,12 +1231,19 @@ export function BoqWorkspace({
         !quoteForProject(projectId))
     ) {
       setMessage('Choose a new project with a saved quotation.');
+      setCreateError('Choose a project with a Final quotation.');
       return;
     }
     if (!title.trim()) {
       setMessage('Enter a BOQ name.');
+      setCreateError('Enter a BOQ name.');
       return;
     }
+    if (calculating || (quoteId && !generator && lines.length === 0)) {
+      setCreateError('The quotation quantities are still being prepared.');
+      return;
+    }
+    setCreateError('');
     startTransition(async () => {
       const result = await saveManualBoq({
         id: active?.id,
@@ -1142,11 +1254,12 @@ export function BoqWorkspace({
         currency: 'INR',
         items: lines,
         selections,
-        ...(labour ? { labour } : {}),
+        ...(labour && canViewCost ? { labour } : {}),
         ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
       });
       if (!result.ok) {
         setMessage(result.message || 'Could not save BOQ.');
+        setCreateError(result.message || 'Could not create BOQ.');
         return;
       }
       setMessage('BOQ saved.');
@@ -1161,15 +1274,17 @@ export function BoqWorkspace({
         document: {
           items: lines,
           selections,
-          ...(labour ? { labour } : {}),
+          ...(labour && canViewCost ? { labour } : {}),
           ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
         },
         updated_at: new Date().toISOString(),
       });
-      setScreen('view');
-      setShowSavedDetails(true);
+      setScreen('edit');
+      setShowSavedDetails(false);
+      setAutoSaveState('saved');
+      setAutoSaveError('');
       router.replace(
-        `/dashboard/execution/boq?open=${encodeURIComponent(result.id || active?.id || '')}`,
+        `/dashboard/execution/boq?open=${encodeURIComponent(result.id || active?.id || '')}&mode=edit`,
       );
       router.refresh();
     });
@@ -1497,6 +1612,23 @@ export function BoqWorkspace({
     setScreen('edit');
     router.replace(
       `/dashboard/execution/boq?open=${encodeURIComponent(active.id)}&mode=edit`,
+    );
+  }
+  if (screen === 'new' && !active) {
+    return (
+      <BoqCreateStep
+        projects={newProjects}
+        projectId={projectId}
+        title={title === 'Construction BOQ' ? '' : title}
+        saving={busy}
+        preparing={Boolean(
+          quoteId && (calculating || (!generator && lines.length === 0)),
+        )}
+        error={createError}
+        onProjectChange={selectProject}
+        onTitleChange={setTitle}
+        onContinue={save}
+      />
     );
   }
   if (screen === 'view' && !showSavedDetails) {
@@ -1925,6 +2057,27 @@ export function BoqWorkspace({
           {message}
         </p>
       )}
+      {active && canEdit && (
+        <div
+          className="boq-autosave-status"
+          data-state={autoSaveState}
+          role="status"
+        >
+          {autoSaveLabel}
+          {autoSaveState === 'error' && (
+            <>
+              <span>{autoSaveError}</span>
+              <button
+                type="button"
+                className="boq-autosave-retry"
+                onClick={() => setRetryAutoSave((previous) => previous + 1)}
+              >
+                Retry
+              </button>
+            </>
+          )}
+        </div>
+      )}
       <div className="boq-layout boq-layout-full">
         <section className="boq-editor">
           <div className="boq-panel-heading">
@@ -2004,6 +2157,7 @@ export function BoqWorkspace({
               canViewCost={canViewCost}
               busy={busy}
               onSave={save}
+              autoSaveLabel={active ? autoSaveLabel : undefined}
             />
           )}
           <div
@@ -2060,6 +2214,7 @@ export function BoqWorkspace({
               canViewCost={canViewCost}
               busy={busy}
               canSave={active ? canEdit : canCreate}
+              autoSaveLabel={active ? autoSaveLabel : undefined}
               message={message}
               newDocument={!active}
               labourStageCosts={labour ? labourEstimate.byStage : undefined}
@@ -3156,15 +3311,10 @@ export function BoqWorkspace({
                     </button>
                   </>
                 )}
-                {(active ? canEdit : canCreate) && (
-                  <button
-                    type="button"
-                    className="erp-button erp-button-primary"
-                    onClick={save}
-                    disabled={busy}
-                  >
-                    {busy ? 'Saving…' : 'Save BOQ'}
-                  </button>
+                {active && canEdit && (
+                  <span className="boq-autosave-status" role="status">
+                    {autoSaveLabel}
+                  </span>
                 )}
               </div>
             </div>

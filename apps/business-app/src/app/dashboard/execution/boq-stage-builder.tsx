@@ -101,6 +101,7 @@ type Props = {
   canViewCost: boolean;
   busy: boolean;
   canSave: boolean;
+  autoSaveLabel?: string | undefined;
   message?: string;
   newDocument: boolean;
   /** Allocated contract labour for this stage, not a second per-item charge. */
@@ -1975,14 +1976,20 @@ export function BoqStageBuilder(props: Props) {
         >
           ◉ {preview ? 'Back to Builder' : 'Preview BOQ'}
         </button>
-        <button
-          type="button"
-          className="boq-stage-save"
-          disabled={props.busy || !props.canSave}
-          onClick={props.onSave}
-        >
-          ▣ {props.busy ? 'Saving…' : 'Save BOQ'}
-        </button>
+        {props.autoSaveLabel ? (
+          <span className="boq-autosave-status" role="status">
+            {props.autoSaveLabel}
+          </span>
+        ) : (
+          <button
+            type="button"
+            className="boq-stage-save"
+            disabled={props.busy || !props.canSave}
+            onClick={props.onSave}
+          >
+            ▣ {props.busy ? 'Saving…' : 'Save BOQ'}
+          </button>
+        )}
         <button
           type="button"
           className="boq-stage-outline"
