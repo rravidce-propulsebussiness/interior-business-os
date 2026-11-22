@@ -896,10 +896,10 @@ export function BoqWorkspace({
       currency: 'INR',
       items: lines,
       selections,
-      ...(labour ? { labour } : {}),
+      ...(labour && canViewCost ? { labour } : {}),
       ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
     }),
-    [title, projectId, quoteId, lines, selections, labour, generator, repeatFrom],
+    [title, projectId, quoteId, lines, selections, labour, canViewCost, generator, repeatFrom],
   );
   const autoSaveFingerprint = JSON.stringify(autoSaveContent);
   useEffect(() => {
@@ -963,6 +963,7 @@ export function BoqWorkspace({
                   version: version + 1,
                   updated_at: new Date().toISOString(),
                   document: {
+                    ...previous.document,
                     items: autoSaveContent.items,
                     selections: autoSaveContent.selections,
                     ...(autoSaveContent.labour
@@ -1302,7 +1303,7 @@ export function BoqWorkspace({
         currency: 'INR',
         items: lines,
         selections,
-        ...(labour ? { labour } : {}),
+        ...(labour && canViewCost ? { labour } : {}),
         ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
       });
       if (!result.ok) {
@@ -1322,7 +1323,7 @@ export function BoqWorkspace({
         document: {
           items: lines,
           selections,
-          ...(labour ? { labour } : {}),
+          ...(labour && canViewCost ? { labour } : {}),
           ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
         },
         updated_at: new Date().toISOString(),
@@ -2103,6 +2104,20 @@ export function BoqWorkspace({
           {message}
         </p>
       )}
+      {active && canEdit && (
+        <div className="boq-autosave-status" data-state={autoSaveState} role="status">
+          {autoSaveLabel}
+          {autoSaveState === 'error' && (
+            <>
+              <span>{autoSaveError}</span>
+              <button type="button" className="boq-autosave-retry"
+                onClick={() => setRetryAutoSave((previous) => previous + 1)}>
+                Retry
+              </button>
+            </>
+          )}
+        </div>
+      )}
       <div className="boq-layout boq-layout-full">
         <section className="boq-editor">
           <div className="boq-panel-heading">
@@ -2182,6 +2197,7 @@ export function BoqWorkspace({
               canViewCost={canViewCost}
               busy={busy}
               onSave={save}
+              autoSaveLabel={active ? autoSaveLabel : undefined}
             />
           )}
           <div
@@ -2238,6 +2254,7 @@ export function BoqWorkspace({
               canViewCost={canViewCost}
               busy={busy}
               canSave={active ? canEdit : canCreate}
+              autoSaveLabel={active ? autoSaveLabel : undefined}
               message={message}
               newDocument={!active}
               labourStageCosts={labour ? labourEstimate.byStage : undefined}
@@ -3334,15 +3351,10 @@ export function BoqWorkspace({
                     </button>
                   </>
                 )}
-                {(active ? canEdit : canCreate) && (
-                  <button
-                    type="button"
-                    className="erp-button erp-button-primary"
-                    onClick={save}
-                    disabled={busy}
-                  >
-                    {busy ? 'Saving…' : 'Save BOQ'}
-                  </button>
+                {active && canEdit && (
+                  <span className="boq-autosave-status" role="status">
+                    {autoSaveLabel}
+                  </span>
                 )}
               </div>
             </div>
