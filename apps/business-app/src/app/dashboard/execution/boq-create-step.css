@@ -1,0 +1,135 @@
+/* New BOQ: project and name only, before measurement editing is unlocked. */
+.execution-workspace:has(> .boq-create-step) > .erp-crumbs {
+  display: none;
+}
+
+.execution-workspace .boq-create-step {
+  width: 100%;
+  max-width: 720px;
+  padding-top: clamp(20px, 5vw, 44px);
+}
+
+.boq-create-card {
+  display: grid;
+  gap: 11px;
+  padding: clamp(20px, 4vw, 32px);
+  border: 1px solid #ecdbd5;
+  border-radius: 20px;
+  background: #fffdfc;
+  box-shadow: 0 12px 30px rgb(95 33 33 / 6%);
+}
+
+.boq-create-card label {
+  color: #64332d;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.boq-create-card select,
+.boq-create-card input {
+  width: 100%;
+  min-width: 0;
+  min-height: 54px;
+  margin-bottom: 12px;
+  padding: 12px 15px;
+  border: 1px solid #e5d7d1;
+  border-radius: 14px;
+  background: #fff;
+  color: #51252b;
+  font: inherit;
+  font-size: 15px;
+}
+
+.boq-create-card :is(input, select):focus-visible,
+.boq-create-card button:focus-visible {
+  outline: 3px solid #df946f;
+  outline-offset: 2px;
+}
+
+.boq-create-continue {
+  display: flex;
+  width: 100%;
+  min-height: 55px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 6px;
+  border: 1px solid #ac4734;
+  border-radius: 14px;
+  background: linear-gradient(115deg, #903029, #c45b36);
+  box-shadow: 0 9px 18px rgb(95 33 33 / 13%);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.boq-create-continue:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.boq-create-error {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #f0c5bb;
+  border-radius: 10px;
+  background: #fff2ef;
+  color: #9c372d;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.boq-autosave-status {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #e1d4cf;
+  border-radius: 9px;
+  background: #fcf9f6;
+  color: #765d52;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.boq-autosave-status[data-state='saved'] {
+  border-color: #d4e6d4;
+  background: #f0f9f0;
+  color: #38683b;
+}
+
+.boq-autosave-status[data-state='error'] {
+  border-color: #edb7a8;
+  background: #fff2ee;
+  color: #9b3728;
+}
+
+.boq-autosave-retry {
+  margin-left: 7px;
+  border: 1px solid #c66a54;
+  border-radius: 7px;
+  padding: 5px 8px;
+  background: white;
+  color: #8d2e24;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.boq-stage-actions .boq-autosave-status {
+  margin: 4px;
+}
+
+@media (max-width: 600px) {
+  .execution-workspace .boq-create-step {
+    padding: 18px 15px 40px;
+  }
+
+  .boq-create-card {
+    border-radius: 17px;
+    padding: 19px 15px;
+  }
+}
