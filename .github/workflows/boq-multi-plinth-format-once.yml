@@ -1,0 +1,42 @@
+name: Format multi-plinth BOQ branch once (temporary)
+on:
+  push:
+    branches:
+      - fix/boq-multi-plinth-beam-rod-sets-20261122
+    paths:
+      - .github/workflows/boq-multi-plinth-format-once.yml
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/boq-multi-plinth-beam-rod-sets-20261122
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format new plinth beam schedule files
+        run: |
+          pnpm exec prettier --write \
+            packages/core/src/construction-boq.ts \
+            packages/core/src/construction-boq.test.ts \
+            apps/business-app/src/app/dashboard/execution/boq-design-schedule.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.css \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts \
+            apps/business-app/src/app/dashboard/execution/boq-workspace.tsx
+      - name: Commit formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add packages/core/src/construction-boq.ts packages/core/src/construction-boq.test.ts apps/business-app/src/app/dashboard/execution/boq-design-schedule.tsx apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx apps/business-app/src/app/dashboard/execution/boq-stage-builder.css apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts apps/business-app/src/app/dashboard/execution/boq-workspace.tsx
+          if ! git diff --cached --quiet; then
+            git commit -m "style(boq): format multi-plinth reinforcement changes"
+            git push origin HEAD:refs/heads/fix/boq-multi-plinth-beam-rod-sets-20261122
+          fi
