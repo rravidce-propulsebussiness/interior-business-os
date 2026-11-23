@@ -155,9 +155,7 @@ export function BoqFinalFloorPricing({
                 <>
                   <th scope="col">Materials</th>
                   <th scope="col">Labour</th>
-                  {hasSiteOverheads && (
-                    <th scope="col">Project expenses</th>
-                  )}
+                  {hasSiteOverheads && <th scope="col">Project expenses</th>}
                   <th scope="col">Total cost</th>
                   <th scope="col">Cost / sq ft</th>
                 </>
