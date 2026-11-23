@@ -5,7 +5,11 @@ import {
   type ConstructionWorkflowTemplate,
   type ConstructionStageInstance,
 } from './construction-workflow';
-import { parseSftEstimate, type SftEstimateDetails } from './sft-quotation';
+import {
+  parseSftEstimate,
+  quotedStructuralFloors,
+  type SftEstimateDetails,
+} from './sft-quotation';
 import { milestoneConstructionStages } from './construction-payment-schedule';
 
 export interface QuotedConstructionPlan {
@@ -48,14 +52,15 @@ export function constructionPlanFromQuotedDescriptions(
     throw new Error('The approved quote has multiple floor-wise schedules');
   const quotedScope = parsed[0]!;
   const floorRows = quotedScope.rows.filter((row) => row.kind !== 'additional');
-  const floors: ConstructionFloor[] = floorRows.map((row) => ({
-    code: namedFloorCode(row.name),
-    name: row.name,
-  }));
+  const floors: ConstructionFloor[] = quotedStructuralFloors(floorRows).map(
+    (name) => ({ code: namedFloorCode(name), name }),
+  );
   if (
     floors.length < 1 ||
     floors.some((floor) => !/^[A-Z][A-Z0-9_]*$/.test(floor.code)) ||
-    new Set(floors.map((floor) => floor.code)).size !== floors.length
+    new Set(floors.map((floor) => floor.code)).size !== floors.length ||
+    // Zones of one level collapse; identically named rows are still invalid.
+    new Set(floorRows.map((row) => row.name)).size !== floorRows.length
   ) {
     throw new Error('Quote has duplicate or invalid floor names');
   }

@@ -3,7 +3,10 @@ import { quotationDocument } from '../../document';
 import Link from 'next/link';
 import { commercialServices } from '../../../commercial/service';
 import { documentHeaderSchema } from '@business-os/core/quotation-document';
-import { parseSftEstimate } from '@business-os/core/sft-quotation';
+import {
+  parseSftEstimate,
+  quotedStructuralFloors,
+} from '@business-os/core/sft-quotation';
 import { parseCustomBrandQuote } from '@business-os/core/custom-brand-quote';
 import { lineSnapshotSchema } from '@business-os/quotation-engine';
 import { createConstructionRatesRepository } from '@business-os/database/construction-rates';
@@ -265,9 +268,7 @@ export default async function QuotationStudio({
             industry={industryKey}
             companyDefaults={companyPayments.error ? [] : companyPayments.data}
             floorNames={
-              existingSft?.rows
-                .filter((row) => row.kind !== 'additional')
-                .map((row) => row.name) ?? []
+              existingSft ? quotedStructuralFloors(existingSft.rows) : []
             }
             total={total}
             currency={revision.currency}
