@@ -132,7 +132,7 @@ describe('compact BOQ entry stages', () => {
         ],
       }),
     );
-    expect(html).toContain('View or edit Doors &amp; Windows on Ground Floor'.replace('&amp;', '&'));
+    expect(html).toContain('View or edit Doors &amp; Windows on Ground Floor');
     expect(html).not.toContain('View or edit Sajjas / Sunshades');
     expect(isDerivedQuantityReadOnly('quote-window-sajjas', 'Cement (window sunshades)')).toBe(true);
     expect(isDerivedQuantityReadOnly('quote-window-sajjas', '8 mm TMT')).toBe(true);
