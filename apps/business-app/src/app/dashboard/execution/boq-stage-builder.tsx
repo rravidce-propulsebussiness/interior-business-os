@@ -344,6 +344,30 @@ function stageFor(line: StageBoqLine, floors: BoqFloor[]) {
   return floors[0]?.name ?? 'Foundation';
 }
 
+/** Values shown in the slab editor until the drawing's own are entered. */
+export const SLAB_FIELD_DEFAULTS = {
+  slabThicknessIn: 5,
+  slabMainDia: 10,
+  slabMainSpacingIn: 6,
+  slabDistDia: 8,
+  slabDistSpacingIn: 8,
+} as const;
+
+/** A slab counts as measured only when its whole bar schedule is stored, so
+ * editing one slab field records the values shown for all of them. */
+export function withSlabSchedule(
+  settings: Partial<Record<DesignSettingKey, number>> | undefined,
+  key?: DesignSettingKey,
+  value?: number,
+): Partial<Record<DesignSettingKey, number>> {
+  const next: Partial<Record<DesignSettingKey, number>> = { ...settings };
+  if (key === undefined || key in SLAB_FIELD_DEFAULTS)
+    for (const [name, fallback] of Object.entries(SLAB_FIELD_DEFAULTS))
+      next[name as DesignSettingKey] ??= fallback;
+  if (key !== undefined && value !== undefined) next[key] = value;
+  return next;
+}
+
 export function InputNumber({
   label,
   value,
@@ -647,8 +671,12 @@ export function BoqStageBuilder(props: Props) {
   const setSetting = (key: DesignSettingKey, value: number) =>
     props.onDesignChange({
       ...drawing,
-      settings: { ...drawing.settings, [key]: value },
+      settings: withSlabSchedule(drawing.settings, key, value),
     });
+  const shownSlabSettings = () => withSlabSchedule(drawing.settings);
+  const slabConfirmed = Object.keys(SLAB_FIELD_DEFAULTS).every(
+    (name) => drawing.settings?.[name as DesignSettingKey] !== undefined,
+  );
   const fieldFor = (
     key: DesignSettingKey,
     label: string,
@@ -1665,11 +1693,50 @@ export function BoqStageBuilder(props: Props) {
                     />
                   </>
                 )}
-                {fieldFor('slabThicknessIn', 'Slab thickness', 5)}
-                {fieldFor('slabMainDia', 'Main bar diameter', 10, 'mm')}
-                {fieldFor('slabMainSpacingIn', 'Main bar spacing', 6)}
-                {fieldFor('slabDistDia', 'Distribution bar', 8, 'mm')}
-                {fieldFor('slabDistSpacingIn', 'Distribution spacing', 8)}
+                {fieldFor(
+                  'slabThicknessIn',
+                  'Slab thickness',
+                  SLAB_FIELD_DEFAULTS.slabThicknessIn,
+                )}
+                {fieldFor(
+                  'slabMainDia',
+                  'Main bar diameter',
+                  SLAB_FIELD_DEFAULTS.slabMainDia,
+                  'mm',
+                )}
+                {fieldFor(
+                  'slabMainSpacingIn',
+                  'Main bar spacing',
+                  SLAB_FIELD_DEFAULTS.slabMainSpacingIn,
+                )}
+                {fieldFor(
+                  'slabDistDia',
+                  'Distribution bar',
+                  SLAB_FIELD_DEFAULTS.slabDistDia,
+                  'mm',
+                )}
+                {fieldFor(
+                  'slabDistSpacingIn',
+                  'Distribution spacing',
+                  SLAB_FIELD_DEFAULTS.slabDistSpacingIn,
+                )}
+                {!slabConfirmed && (
+                  <button
+                    type="button"
+                    className="boq-stage-outline"
+                    onClick={() =>
+                      props.onDesignChange({
+                        ...drawing,
+                        settings: {
+                          ...drawing.settings,
+                          ...shownSlabSettings(),
+                        },
+                      })
+                    }
+                  >
+                    Confirm slab details
+                  </button>
+                )}
               </div>
             )}
           </>
