@@ -5,6 +5,7 @@ import {
   BoqStageBuilder,
   InputNumber,
   isDerivedQuantityReadOnly,
+  withSlabSchedule,
 } from './boq-stage-builder';
 import { BoqFootingEditor } from './boq-footing-editor';
 import { BarsPicker } from './boq-design-schedule';
@@ -229,7 +230,7 @@ describe('beam reinforcement entry', () => {
     for (const index of [1, 2, 3, 4]) {
       expect(html).toContain(`Plinth PB1 set ${index} bar diameter`);
     }
-    expect(html).toContain('Add Plinth PB1 reinforcement set');
+    expect(html).toContain('Add rod size to Plinth PB1');
     expect(html).toContain('+ Add rod size');
     expect(html).toContain('Remove Plinth PB1 set 3');
     expect((html.match(/bar diameter/g) ?? []).length).toBe(4);
@@ -300,5 +301,29 @@ describe('BOQ measurement boxes read drawing sizes', () => {
     );
     expect(html).not.toContain('type="number"');
     expect(html).toContain('(ft)');
+  });
+});
+
+describe('slab schedule entry', () => {
+  it('stores the whole slab bar schedule when one slab field changes', () => {
+    expect(withSlabSchedule({}, 'slabDistSpacingIn', 6)).toEqual({
+      slabThicknessIn: 5,
+      slabMainDia: 10,
+      slabMainSpacingIn: 6,
+      slabDistDia: 8,
+      slabDistSpacingIn: 6,
+    });
+  });
+
+  it('confirms drawing values equal to the defaults and keeps entered ones', () => {
+    expect(withSlabSchedule({ slabMainDia: 12 })).toMatchObject({
+      slabMainDia: 12,
+      slabThicknessIn: 5,
+      slabDistSpacingIn: 8,
+    });
+  });
+
+  it('leaves the slab alone when another setting changes', () => {
+    expect(withSlabSchedule({}, 'coverMm', 40)).toEqual({ coverMm: 40 });
   });
 });

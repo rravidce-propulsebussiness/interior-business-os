@@ -172,7 +172,7 @@ export function BarsPicker({
         <button
           type="button"
           className="erp-button erp-button-quiet"
-          aria-label={`Add ${label} reinforcement set`}
+          aria-label={`Add rod size to ${label}`}
           onClick={() => save([...rows, { count: 0, dia: 0 }])}
         >
           + Add rod size
