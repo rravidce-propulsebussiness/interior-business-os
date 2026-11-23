@@ -129,10 +129,6 @@ export function MaterialMarketplaceOrder({
         >
           {pending ? 'Sending…' : 'Send order request to seller'}
         </button>
-        <p className="pv2-hint">
-          The supplier may accept or reject. This does not issue an invoice,
-          collect payment or confirm delivery.
-        </p>
         {!!result.message && (
           <p
             role="status"

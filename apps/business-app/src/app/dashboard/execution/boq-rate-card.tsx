@@ -188,10 +188,6 @@ export function BoqRateCard({
         <div>
           <p className="erp-eyebrow">Company defaults</p>
           <h1>BOQ rates</h1>
-          <p>
-            Set company material and labour rates once. BOQ cost summaries use
-            the rates for each measured quantity.
-          </p>
         </div>
         <div className="erp-header-actions">
           <Link className="erp-button" href="/dashboard/execution/boq">
@@ -213,10 +209,6 @@ export function BoqRateCard({
         <span className="boq-rate-icon">₹</span>
         <div>
           <strong>Rates are company configurable</strong>
-          <p>
-            These are blank until you enter your actual purchase or labour cost.
-            Imported quotation prices remain as a separate quoted value.
-          </p>
         </div>
       </div>
       {message && (
@@ -228,10 +220,6 @@ export function BoqRateCard({
         <div className="boq-panel-heading">
           <div>
             <h2>Measurement units</h2>
-            <span>
-              Default units for typing takeoff dimensions. Each person can
-              switch on the BOQ page; quantities and rates are unchanged.
-            </span>
           </div>
           <div
             className="boq-unit-toggle"
@@ -359,10 +347,6 @@ export function BoqRateCard({
         <div className="boq-panel-heading">
           <div>
             <h2>Structural rules for quotation BOQs</h2>
-            <span>
-              Used when a BOQ is generated from a quotation. Steel is cut from
-              stock bars lift by lift; laps are added at every floor.
-            </span>
           </div>
         </div>
         <div className="boq-settings-groups">
@@ -480,12 +464,6 @@ export function BoqRateCard({
       </section>
       <div className="boq-rate-note">
         <strong>Quantity assumptions</strong>
-        <span>
-          Concrete mix, wall thickness, brick consumption, finish wastage, tile
-          adhesive and rod length are shown with each takeoff. Review project
-          drawings and supplier specifications before final procurement
-          quantities.
-        </span>
       </div>
       {canEdit && (
         <div className="boq-savebar">

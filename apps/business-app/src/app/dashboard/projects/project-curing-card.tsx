@@ -231,11 +231,6 @@ export function CuringPlanForm({
       <input type="hidden" name="ends_on" value={recurringEnd} />
       <input type="hidden" name="round_times" value="07:00,12:00,17:00" />
       <input type="hidden" name="grace_minutes" value="60" />
-      <p className="pf-help pf-span">
-        This routine repeats every day with morning, afternoon and evening
-        rounds. Dates and times are set automatically; each round still needs a
-        site record and photo.
-      </p>
       <button className="pf-btn pf-btn-primary" disabled={pending}>
         {pending ? 'Saving…' : 'Start daily curing routine'}
       </button>

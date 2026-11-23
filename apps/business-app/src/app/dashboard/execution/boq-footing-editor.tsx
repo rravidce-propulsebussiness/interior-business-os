@@ -59,12 +59,6 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
     );
   return (
     <div className="boq-footing-editor">
-      <p className="boq-stage-hint">
-        Footing IDs (F1, F2…) are independent of the column schedule (C1, C2…).
-        Choose the foundation configuration and enter its dimensions and
-        reinforcement from the approved structural drawing. Single/double mesh
-        describes steel layers, not a raft foundation.
-      </p>
       {footings.map((f, fi) => {
         const patch = (entry: Partial<DesignFootingType>) => change(fi, entry);
         const padUnits = f.type === 'strap' ? Math.max(2, f.padsPerGroup) : 1;
@@ -215,11 +209,6 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
             )}
             {f.type === 'strap' && (
               <>
-                <p className="boq-stage-hint">
-                  Strap beam concrete is measured separately. Main bars and
-                  stirrups must come from the structural engineer’s drawing; the
-                  BOQ will not invent those steel quantities.
-                </p>
                 <div className="boq-stage-input-grid">
                   <Numeric
                     label="Connecting beam length"
@@ -241,13 +230,6 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
                   />
                 </div>
               </>
-            )}
-            {f.type === 'pile_cap' && (
-              <p className="boq-stage-hint">
-                This measures only the pile cap. Piles, drilling, pile steel,
-                and soil-specific foundation requirements need separate
-                engineered takeoffs.
-              </p>
             )}
             <div className="boq-footing-section-label">
               Footing reinforcement (as drawn)
@@ -509,11 +491,6 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
                 />
               </div>
             )}
-            <p className="boq-footing-helper">
-              Concrete and mesh steel are calculated from these footing
-              measurements. Pedestal rings are separate; column longitudinal
-              bars are counted only in the Columns section.
-            </p>
           </div>
         );
       })}

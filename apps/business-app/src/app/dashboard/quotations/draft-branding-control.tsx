@@ -28,11 +28,6 @@ export function DraftBrandingControl({
           <h2 className="mt-1 text-lg font-extrabold text-slate-950">
             Your logo, address &amp; contact details
           </h2>
-          <p className="mt-2 max-w-xl text-xs leading-5 text-slate-600">
-            Each company has its own saved branding. Upload your logo and edit
-            the company name, phone, email and full business address in branding
-            settings.
-          </p>
         </div>
         <Link
           className="rounded-xl border border-orange-300 bg-white px-4 py-2 text-xs font-extrabold text-orange-700"
@@ -43,11 +38,6 @@ export function DraftBrandingControl({
       </div>
       {editable ? (
         <>
-          <p className="mt-3 text-xs leading-5 text-slate-600">
-            After saving company settings, click below to update this draft
-            quotation’s letterhead and PDF. Prices, client details and line
-            items are not changed.
-          </p>
           <button
             type="button"
             disabled={busy}
@@ -66,13 +56,7 @@ export function DraftBrandingControl({
             {busy ? 'Updating branding…' : 'Apply Saved Branding to This Draft'}
           </button>
         </>
-      ) : (
-        <p className="mt-3 text-xs text-slate-600">
-          Issued revisions keep the originally shared company branding. Changes
-          in settings apply to newly created quotations, not to already issued
-          PDFs.
-        </p>
-      )}
+      ) : null}
       {feedback && (
         <p role="status" className="mt-3 text-xs font-semibold text-slate-800">
           {feedback}

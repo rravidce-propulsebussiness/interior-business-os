@@ -19,15 +19,11 @@ describe('single project milestones and drawing progress', () => {
     expectSource(forms).toContain(
       'existing WhatsApp / offline share reference',
     );
-    expectSource(forms).toContain('does not record homeowner approval');
     expectSource(forms).toContain(
       "['architectural_plan','3d_design','structural_design','interior_layout','electrical_plan','plumbing_plan']",
     );
     expectSource(journey).toContain(
       "'structural_design',\n    'electrical_plan',\n    'plumbing_plan'",
-    );
-    expectSource(journey).toContain(
-      'Each current revision needs technical review',
     );
     const drawingAction = read('./project-design-actions.ts');
     expectSource(drawingAction).not.toContain("'project_preflight_read'");
@@ -41,9 +37,6 @@ describe('single project milestones and drawing progress', () => {
     expectSource(projection).toContain("'40–70 days'");
     expectSource(projection).toContain("'20–30 days'");
     expectSource(flow).toContain('Reference: ' + "' + payment.durationHint");
-    expectSource(flow).toContain(
-      'No payment schedule or quotation is changed here',
-    );
   });
 
   it('gates structural and MEP submissions on the preceding owner-approved plan', () => {
@@ -126,9 +119,6 @@ describe('single project milestones and drawing progress', () => {
     expectSource(workflow).toContain("'plumbing_plan'");
     expectSource(workflow).toContain('<DesignDecisionForm');
     expectSource(workflow).toContain('Release approved plans for site marking');
-    expectSource(workflow).toContain(
-      'enter the meeting, call, or message reference',
-    );
     expectSource(timeline).toContain('action="mark_complete"');
     expectSource(timeline).toContain('!DESIGN_STAGE_CODES.includes(code)');
     const completion = read(

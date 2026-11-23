@@ -537,10 +537,6 @@ export function MilestoneWorkflowBuilder({
           <summary>
             Advanced · Change underlying construction stage mapping
           </summary>
-          <p>
-            Optional. Work areas are suggested automatically from the item name
-            and payment stage. Reassign a work area here only when needed.
-          </p>
           <small>
             Currently linked:{' '}
             {codes.length
@@ -591,11 +587,6 @@ export function MilestoneWorkflowBuilder({
             Existing construction work, materials, checks &amp; reports (
             {catalog.length})
           </summary>
-          <p>
-            These are the original standard items or saved quotation items, not
-            deleted data. Search or tap Add to place any item into the sequence
-            without retyping.
-          </p>
           <input
             type="search"
             aria-label="Search existing construction items"
@@ -782,12 +773,6 @@ export function MilestoneWorkflowBuilder({
             <option value="payment">Payment / Next stage</option>
           </select>
         </label>
-        {kind === 'payment' ? (
-          <p>
-            Add the next priced payment stage without removing existing stages
-            or amounts.
-          </p>
-        ) : null}
         {kind === 'qc' ? (
           <label>
             QC reviews this earlier site check

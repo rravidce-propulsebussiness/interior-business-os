@@ -53,12 +53,6 @@ export function ProjectStagePaymentLinker({
   return (
     <details className="pv2-stage-secondary">
       <summary>Link agreed payment milestone to this final stage</summary>
-      <p className="pv2-hint">
-        For older quotations without stage links, choose the milestone that
-        becomes payable when this stage passes independent quality
-        certification. This reuses the signed quotation schedule and never marks
-        money as received.
-      </p>
       <form action={submit} className="pv2-stage-associate-form">
         <label>
           Quotation payment milestone

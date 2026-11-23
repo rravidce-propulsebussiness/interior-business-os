@@ -29,11 +29,6 @@ export function MaterialOrderingAccess({
   return (
     <details className="pv2-material-order-access">
       <summary>Who can order materials?</summary>
-      <p className="pv2-hint">
-        The business owner can always order. Grant a specific site engineer or
-        procurement employee permission for this project only. Approval stays a
-        separate action.
-      </p>
       <form action={submit} className="pv2-form">
         <label>
           Project team member
@@ -74,10 +69,6 @@ export function MaterialOrderingAccess({
           </p>
         )}
       </form>
-      <p className="pv2-hint">
-        Marketplace orders additionally require company purchase permission;
-        this setting never grants company-wide purchasing.
-      </p>
     </details>
   );
 }
@@ -123,6 +114,32 @@ function DeliveryCommandForm({
           />
         </label>
       )}
+      {action === 'place_outside_order' && (
+        <label>
+          Order amount (₹)
+          <input
+            name="order_amount"
+            type="number"
+            min="0"
+            step="0.01"
+            max="100000000"
+            placeholder="Optional"
+          />
+        </label>
+      )}
+      {action === 'confirm_received' && (
+        <label>
+          Quantity received
+          <input
+            name="received_quantity"
+            type="number"
+            min="0.001"
+            step="0.001"
+            max="100000000"
+            placeholder="Leave blank if all arrived"
+          />
+        </label>
+      )}
       {delivery && (
         <>
           <label>
@@ -161,11 +178,6 @@ function DeliveryCommandForm({
               ? 'Save delivery estimate'
               : 'Confirm materials received'}
       </button>
-      {action === 'confirm_received' && (
-        <p className="pv2-hint">
-          Confirm only after the materials have physically arrived at the site.
-        </p>
-      )}
       {result.message && (
         <p
           role="status"
@@ -230,10 +242,6 @@ export function MaterialDeliveryActions({
           action="confirm_received"
         />
       )}
-      <p className="pv2-hint">
-        Order placed ≠ delivered. Clients see confirmed status and recorded
-        estimates, not supplier pricing.
-      </p>
     </details>
   );
 }

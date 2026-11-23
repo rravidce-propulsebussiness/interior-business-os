@@ -54,6 +54,15 @@ export async function saveMaterialOrderPermission(
     };
   }
 }
+/** Blank stays null; a number must be finite and not negative. */
+function optionalNumber(value: FormDataEntryValue | null): number | null {
+  const text = String(value ?? '').trim();
+  if (!text) return null;
+  const number = Number(text);
+  if (!Number.isFinite(number) || number < 0)
+    throw new Error('Enter a valid amount or quantity.');
+  return number;
+}
 export async function saveMaterialDelivery(
   projectId: string,
   form: FormData,
@@ -92,6 +101,24 @@ export async function saveMaterialDelivery(
       } as never,
     );
     if (error) throw new Error(error.message);
+    const amount = optionalNumber(form.get('order_amount'));
+    const received = optionalNumber(form.get('received_quantity'));
+    if (
+      (action === 'place_outside_order' && amount !== null) ||
+      (action === 'confirm_received' && received !== null)
+    ) {
+      const details = await client.rpc(
+        'project_material_details_set' as never,
+        {
+          p_org: org,
+          p_project: projectId,
+          p_material: id,
+          p_order_amount: action === 'place_outside_order' ? amount : null,
+          p_received_quantity: action === 'confirm_received' ? received : null,
+        } as never,
+      );
+      if (details.error) throw new Error(details.error.message);
+    }
     refresh(projectId);
     return {
       saved: true,

@@ -129,11 +129,6 @@ export function QuotationAttachments({
       <div className="qs-heading" style={{ marginBottom: 12 }}>
         <div>
           <h2>PDF specifications &amp; annexures</h2>
-          <p className="qs-muted">
-            Upload brochures, floor plans, material schedules and other PDF
-            specifications. Uploaded PDFs are appended to the final downloadable
-            quotation, in order.
-          </p>
         </div>
         <span className="qs-selected-pill">{files.length} / 6 files</span>
       </div>
@@ -165,12 +160,6 @@ export function QuotationAttachments({
       )}
       <div className="qs-attachment-list" style={{ marginTop: 12 }}>
         {loading && <p className="qs-muted">Loading uploaded PDFs…</p>}
-        {!loading && !files.length && (
-          <div className="qs-info-box">
-            No PDF annexures uploaded. Your generated quotation still contains
-            its own pricing, specifications and company branding.
-          </div>
-        )}
         {files.map((file, index) => (
           <div
             key={file.id}

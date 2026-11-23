@@ -141,28 +141,11 @@ export function StageActivationControl({
             : ' · Ready to submit for formal QC.'}
         </p>
       )}
-      {status === 'in_progress' && (
-        <p className="pv2-hint">
-          Work can proceed alongside other eligible floors. Finish each
-          checklist item and required test before submitting this stage for
-          independent QC.
-        </p>
-      )}
       {status === 'ready_for_qc' && (
         <div className="pv2-stage-qc-clarity" role="status">
           <strong>
             Site checks passed: {checksPassed}/{checksTotal}
           </strong>
-          <p>
-            Field work is submitted. An assigned company QC inspector now visits
-            the site and records Pass or Fail for each item. Only failed items
-            require correction.
-          </p>
-          <p>
-            Other stages can start when their own prerequisites are clear.
-            Formal stage certification and structural hold points remain
-            protected.
-          </p>
         </div>
       )}
       {message && (

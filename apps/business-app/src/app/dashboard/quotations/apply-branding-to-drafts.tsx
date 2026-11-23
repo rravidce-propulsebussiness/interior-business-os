@@ -22,12 +22,6 @@ export function ApplyBrandingToDrafts({ drafts }: { drafts: BrandingDraft[] }) {
       <summary className="cursor-pointer text-sm font-extrabold text-slate-900">
         Update branding on an existing saved quotation
       </summary>
-      <p className="mt-3 max-w-2xl text-xs leading-6 text-slate-600">
-        Save the company branding above first, then apply it to a draft
-        quotation. Only its company letterhead and PDF appearance change;
-        client, materials, pricing and payment schedule stay intact. Already
-        issued PDFs cannot be changed.
-      </p>
       {drafts.length ? (
         <div className="mt-4 flex flex-wrap items-end gap-3">
           <label className="grid min-w-52 flex-1 gap-2 text-xs font-bold text-slate-700">

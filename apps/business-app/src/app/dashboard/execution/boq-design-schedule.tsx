@@ -283,11 +283,6 @@ export function BoqDesignSchedule({
         />
         <span>
           <strong>Use the structural drawing</strong>
-          <small>
-            Enter footing F1/F2 and column C1/C2 schedules separately from the
-            engineer&apos;s drawing. Steel is quantified from the entered
-            measurements, not inferred from the column grid.
-          </small>
         </span>
       </label>
       {design && (
@@ -595,12 +590,6 @@ export function BoqDesignSchedule({
                       </label>
                     );
                   })}
-                  {group === 'Staircase' && (
-                    <small className="boq-design-note">
-                      Stair beam (waist-slab support): add it above as a beam
-                      type with its running feet per floor.
-                    </small>
-                  )}
                   {group === 'Covers (mm)' && (
                     <small className="boq-design-note">
                       Blank = the concrete cover.

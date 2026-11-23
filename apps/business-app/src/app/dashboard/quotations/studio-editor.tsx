@@ -213,10 +213,6 @@ export function QuotationStudioEditor({
             <div className="qs-info-box" style={{ marginTop: 10 }}>
               <strong>{header.branding.name || industryName}</strong> ·{' '}
               {quoteNumber}
-              <span style={{ display: 'block', color: '#5a6985' }}>
-                Company details, saved prices and source specifications are
-                reflected in the preview.
-              </span>
             </div>
           </aside>
         )}

@@ -14,6 +14,7 @@ import { ProjectFlow } from './project-flow-view';
 import { flowRole } from './project-flow';
 import { ProjectClientAccess } from './project-client-access';
 import { ProjectRemovalControl } from './project-removal-control';
+import { displayProjectCode, displayReference } from './project-display';
 import { projectTimelineStages } from './project-visible-stages';
 import { MasterForm } from '../commercial/master-form';
 import { activeOrganization } from '@business-os/auth/server';
@@ -145,18 +146,17 @@ function Status({ value }: { value: string }) {
 }
 function Title({
   title,
-  detail,
   action,
 }: {
   title: string;
-  detail: string;
+  /** Kept for callers; explanatory subtitles are no longer shown. */
+  detail?: string;
   action?: React.ReactNode;
 }) {
   return (
     <header className="pv2-section-header">
       <div>
         <h2>{title}</h2>
-        <p>{detail}</p>
       </div>
       {action}
     </header>
@@ -164,18 +164,17 @@ function Title({
 }
 function Blank({
   title,
-  detail,
   action,
 }: {
   title: string;
-  detail: string;
+  /** Kept for callers; explanatory subtitles are no longer shown. */
+  detail?: string;
   action?: React.ReactNode;
 }) {
   return (
     <div className="pv2-blank">
       <OwnerIcon name="projects" size={28} />
       <h3>{title}</h3>
-      <p>{detail}</p>
       {action}
     </div>
   );
@@ -335,7 +334,7 @@ function ProjectHeader({
           <div className="pv2-project-meta">
             <span>
               <OwnerIcon name="quotations" size={13} />
-              {p.code || 'Project'}
+              {displayProjectCode(p.code) || 'Project'}
             </span>
             <span>
               <OwnerIcon name="projects" size={13} />
@@ -509,10 +508,6 @@ function Documents({ d }: { d: WorkspaceData }) {
         <>
           <section className="pv2-section-intro">
             <h2>Quotation & Agreement</h2>
-            <p>
-              Approved quotation and signed-contract archive. Continue tasks in
-              the project milestones.
-            </p>
           </section>
           <section className="pv2-panel pv2-quote-links">
             <Title
@@ -552,13 +547,6 @@ function Documents({ d }: { d: WorkspaceData }) {
                         }
                       />
                     </div>
-                    {q.status === 'draft' && (
-                      <p className="pv2-muted">
-                        Saved and editable. Sharing/finalizing this quotation
-                        locks the agreed version before preparing an agreement;
-                        no separate client approval is needed.
-                      </p>
-                    )}
                   </div>
                 ))}
               </div>
@@ -624,20 +612,7 @@ function Documents({ d }: { d: WorkspaceData }) {
                     The unsigned agreement references a different quotation.
                     Confirm the agreed version before signing.
                   </p>
-                ) : (
-                  <p className="pv2-muted">
-                    The project scope and payment groups come from this saved
-                    quotation. The owner can record its offline signed copy or
-                    choose to proceed without a separate upload.
-                  </p>
-                )}
-                {signedRecorded && (
-                  <p className="pv2-muted">
-                    The signed agreement fixes the agreed quotation for this
-                    project. New alternatives stay in quotation history; changed
-                    signed scope requires a formal change order.
-                  </p>
-                )}
+                ) : null}
                 {ownerQuoteChoice && (
                   <p className="pv2-muted">
                     The owner recorded that the homeowner approved the Final
@@ -763,9 +738,7 @@ function Payments({ d }: { d: WorkspaceData }) {
                 <td>
                   <strong>{m.label}</strong>
                 </td>
-                <td>
-                  {m.currency} {m.amount}
-                </td>
+                <td>{formatMoney(Number(m.amount))}</td>
                 <td>{m.contract_number}</td>
                 <td>
                   <NextLink
@@ -930,6 +903,20 @@ function Procurement({ d }: { d: WorkspaceData }) {
                     <small>
                       Supplier / order: {stringValue(m.vendor_reference)}
                     </small>
+                  )}
+                  {Boolean(stringValue(m.order_amount)) && (
+                    <small>
+                      Order amount: {formatMoney(Number(m.order_amount))}
+                    </small>
+                  )}
+                  {Boolean(stringValue(m.received_quantity)) && (
+                    <small>
+                      Received: {stringValue(m.received_quantity)}{' '}
+                      {stringValue(m.unit)}
+                    </small>
+                  )}
+                  {Boolean(stringValue(m.decision_note)) && (
+                    <small>Reason: {stringValue(m.decision_note)}</small>
                   )}
                 </div>
                 <Status value={stringValue(m.status)} />
@@ -1233,7 +1220,7 @@ function Designs({ d }: { d: WorkspaceData }) {
                   <strong>{pretty(x.kind)}</strong>
                 </td>
                 <td>Rev {stringValue(x.revision)}</td>
-                <td>{stringValue(x.reference)}</td>
+                <td>{displayReference(stringValue(x.reference))}</td>
                 <td>
                   <Status value={stringValue(x.status)} />
                 </td>
@@ -1263,10 +1250,6 @@ function Designs({ d }: { d: WorkspaceData }) {
             ))}
           </div>
         )}
-        <p className="pv2-muted">
-          Drawing uploads and approvals are handled in the project&apos;s design
-          milestone.
-        </p>
       </section>
     </div>
   );
@@ -1353,10 +1336,6 @@ function Team({ d }: { d: WorkspaceData }) {
           />
         )}
       </section>
-      <p className="pv2-muted">
-        Use “Share with client” in the project header to invite or revoke access
-        for this exact project.
-      </p>
     </div>
   );
 }

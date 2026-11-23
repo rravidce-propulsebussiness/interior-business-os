@@ -198,10 +198,6 @@ export function BoqLabourPanel({
                 <strong>
                   {packageMethods.find((m) => m.id === config.method)?.label}
                 </strong>
-                <small>
-                  Applies once to the whole BOQ; only excluded works get
-                  separate labour.
-                </small>
               </div>
               <span className="boq-labour-selected">Selected</span>
             </div>
@@ -331,11 +327,6 @@ export function BoqLabourPanel({
             )}
             {config.method === 'itemwise' && (
               <div className="boq-labour-item-rates">
-                <p>
-                  Measured quantities come from each saved BOQ work item. Enter
-                  an agreed labour rate for each trade; unpriced work is flagged
-                  below.
-                </p>
                 {LABOUR_WORKS.filter(
                   (w) =>
                     w.id !== 'other' && measures.some((m) => m.work === w.id),
@@ -492,10 +483,6 @@ export function BoqLabourPanel({
               </span>
             </button>
           ))}
-          <p className="boq-labour-note">
-            Switching methods never deletes previously entered rates or labour
-            items.
-          </p>
         </section>
         <section className="boq-labour-box boq-labour-coverage">
           <div className="boq-labour-heading">
@@ -569,18 +556,10 @@ export function BoqLabourPanel({
               </tbody>
             </table>
           </div>
-          <p className="boq-labour-note">
-            Package cost is charged once using the agreed area; stage rows are
-            not individually added again.
-          </p>
         </section>
         <section className="boq-labour-box boq-labour-extras">
           <div className="boq-labour-heading">
             <strong>⊕ Add Separate Labour</strong>
-            <small>
-              Only for work excluded from the default method or clearly
-              additional to its agreed scope.
-            </small>
           </div>
           {config.extras.map((item, index) => {
             const qty = labourExtraQuantity(item, measures);
@@ -704,11 +683,6 @@ export function BoqLabourPanel({
                 </label>
                 <div className="boq-labour-combined">
                   <strong>Works covered by this one rate</strong>
-                  <small>
-                    Select additional trades such as bar bending + shuttering,
-                    or brickwork + plastering + elevation. The rate is applied
-                    only once to the chosen quantity.
-                  </small>
                   <div>
                     {LABOUR_WORKS.filter((w) => w.id !== 'other').map(
                       (work) => (

@@ -47,10 +47,6 @@ export function ProjectSiteSurvey({
           }
         />
       </label>
-      <p>
-        Record actual observations. Attach supporting photos under Project
-        Documents if needed.
-      </p>
       <button className="pv2-next-primary" type="submit" disabled={pending}>
         {pending
           ? 'Saving…'
@@ -103,11 +99,6 @@ export function ProjectAdvanceAction({
           <span>%</span>
         </span>
       </label>
-      <p>
-        Issues one proforma payment request for this signed agreement. It does
-        not record a receipt or issue a GST tax invoice. Check the agreed
-        percentage before issuing.
-      </p>
       <button className="pv2-next-primary" disabled={pending} type="submit">
         {pending ? 'Preparing…' : 'Issue advance proforma'}
       </button>

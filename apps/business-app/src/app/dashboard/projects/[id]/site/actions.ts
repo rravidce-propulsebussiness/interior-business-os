@@ -63,11 +63,15 @@ export async function saveProjectSite(
     if (!allowedActions.has(operation))
       throw new Error('Unknown project action');
     const { client, org } = await context(project);
+    const input = fromForm(form);
+    // The approval reason is stored beside the existing decision.
+    const decisionNote = String(input.decision_note ?? '').trim();
+    delete input.decision_note;
     const { error } = await client.rpc('project_site_command', {
       p_organization_id: org,
       p_project_id: project,
       p_action: operation,
-      p_input: fromForm(form),
+      p_input: input,
     });
     if (error)
       throw new Error(
@@ -75,6 +79,18 @@ export async function saveProjectSite(
           ? 'This project role does not allow that action'
           : error.message.slice(0, 220),
       );
+    if (operation === 'material_update' && decisionNote) {
+      const note = await client.rpc(
+        'project_material_details_set' as never,
+        {
+          p_org: org,
+          p_project: project,
+          p_material: String(input.id ?? ''),
+          p_decision_note: decisionNote,
+        } as never,
+      );
+      if (note.error) throw new Error(note.error.message.slice(0, 220));
+    }
     revalidatePath(pathFor(project));
     return { saved: true, message: 'Project record saved.' };
   } catch (error) {

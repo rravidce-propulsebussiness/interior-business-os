@@ -48,7 +48,6 @@ export function ProjectDesignPaymentAndAgreement({
       <header>
         <div>
           <strong>Payment & agreement</strong>
-          <p>Use the accepted quotation and its existing payment schedule.</p>
         </div>
         <span
           className={
@@ -193,11 +192,6 @@ export function ProjectDesignPlansWorkflow({ data }: { data: WorkspaceData }) {
       <div className="pmt-design-plans-intro">
         <div>
           <strong>Plans</strong>
-          <p>
-            Floor plan → structural drawings → electrical and plumbing / MEP
-            plans. Each current revision needs technical review and an owner
-            decision.
-          </p>
         </div>
         <span>
           {allApproved
@@ -296,10 +290,6 @@ export function ProjectDesignPlansWorkflow({ data }: { data: WorkspaceData }) {
                 !row.clientApprovedAt &&
                 canManage && (
                   <div className="pmt-design-owner-decision">
-                    <p>
-                      Record the owner’s decision. For an offline decision,
-                      enter the meeting, call, or message reference.
-                    </p>
                     <DesignDecisionForm
                       projectId={data.project.id}
                       designId={row.id}

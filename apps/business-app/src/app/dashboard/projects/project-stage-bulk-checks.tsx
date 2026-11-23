@@ -72,11 +72,6 @@ export function BulkStageChecks({
         <span>{outstanding.length} pending</span>
       </summary>
       <form className="pv2-bulk-form" action={submit}>
-        <p className="pv2-hint">
-          Select only inspections you have actually verified. Each selected
-          check needs a relevant photo. This does not certify the construction
-          stage.
-        </p>
         <button
           type="button"
           className="pv2-bulk-toggle"

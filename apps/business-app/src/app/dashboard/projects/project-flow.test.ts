@@ -350,7 +350,6 @@ describe('single project flow model', () => {
       '../../../../../../packages/database/supabase/migrations/20261113230000_owner_homeowner_direct_cash_supplier_payment.sql',
     );
     const actions = read('./[id]/site/stage-checklist-actions.ts');
-    const forms = read('./project-v2-forms.tsx');
     const view = read('./project-v2-view.tsx');
     expect(migration).toContain(
       'private.project_material_can_order(p_org, p_project)',
@@ -364,15 +363,11 @@ describe('single project flow model', () => {
     expect(actions).toMatch(
       /client\.rpc\(\s*['"]project_material_homeowner_cash_paid['"]/,
     );
-    expect(forms).toContain('Cash settlement only.');
     expect(view).toContain('Homeowner paid supplier directly · cash');
     expect(view).toContain('d.materialAccess.canOrder');
     expect(migration).not.toMatch(
       /public\.(payments|receipts|invoices|payment_requests)/,
     );
     expect(migration).not.toContain('payment_record');
-    expect(forms).toMatch(
-      /it does not add a company receipt,\s*invoice,\s*or company cash\s*expense/i,
-    );
   });
 });

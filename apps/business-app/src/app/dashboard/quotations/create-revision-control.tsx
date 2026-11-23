@@ -21,11 +21,6 @@ export function CreateRevisionControl({
       aria-label="Edit previously shared quotation"
     >
       <h2>Need to change a saved quotation?</h2>
-      <p className="qs-muted">
-        Edit individual material brands, specifications, quantities or prices in
-        a new revision. The version already shared with the customer remains
-        unchanged.
-      </p>
       <button
         type="button"
         className="qs-btn primary mt-3"

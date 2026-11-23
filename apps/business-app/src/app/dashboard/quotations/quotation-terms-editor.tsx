@@ -180,10 +180,6 @@ export function QuotationTermsEditor({
         <div>
           <span className="qs-terms-eyebrow">02 · Quotation conditions</span>
           <h2>Terms &amp; Inclusions</h2>
-          <p>
-            Only conditions for this quotation. Company branding and standard
-            PDF appearance stay in quotation settings.
-          </p>
         </div>
         <span className="qs-terms-saved">Quote-specific</span>
       </header>
@@ -268,11 +264,6 @@ export function QuotationTermsEditor({
           Agreement clauses <span aria-hidden="true">⌄</span>
         </summary>
         <div className="qs-terms-advanced-content">
-          <p className="qs-terms-help">
-            Optional clauses are saved with this quote and appear only in its
-            linked Agreement PDF. The payment schedule remains the same grouped
-            schedule saved in the Payment Schedule tab.
-          </p>
           {textField(
             'work-programme',
             'Work programme & completion',

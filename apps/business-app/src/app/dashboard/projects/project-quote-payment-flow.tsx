@@ -98,12 +98,6 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
               {payments.length} agreed payment stages
             </span>
           </h2>
-          <p>
-            Each existing quotation payment remains one stage. Its payment
-            marker, work and checks appear in the saved order; recorded site
-            progress updates execution status. No payment schedule or quotation
-            is changed here. No extra payment or invoice is created here.
-          </p>
         </div>
       </header>
       <ol className="pq-payment-list">
@@ -244,16 +238,7 @@ export function ProjectQuotePaymentFlow({ d }: { d: WorkspaceData }) {
                       schedule.
                     </p>
                   )}
-                  <p className="pq-note">
-                    Reference durations are planning guides based on the
-                    uploaded agreement schedule. Actual dates and progress come
-                    from site updates; the quoted payment group is unchanged.
-                  </p>
                   <div className="pq-payment-footer">
-                    <small>
-                      Work certification is separate from an invoice, payment
-                      request or receipt.
-                    </small>
                     {d.permissions.finance && (
                       <Link
                         href={

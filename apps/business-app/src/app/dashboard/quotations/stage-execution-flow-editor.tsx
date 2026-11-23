@@ -308,15 +308,7 @@ export function StageExecutionFlowEditor({
     >
       <div className="qs-stage-flow-heading">
         <strong>Execution order</strong>
-        <small>
-          Work → site check / test → company QC → payment → next work, as needed
-        </small>
       </div>
-      <p className="qs-stage-flow-info">
-        Arrange each site step. Payment uses an existing quotation milestone and
-        remains recorded in Finance. Site checks and company QC remain
-        separately evidenced.
-      </p>
       <ol className="qs-stage-flow-list">
         {steps.map((step, i) => {
           const name = labelOf(step);

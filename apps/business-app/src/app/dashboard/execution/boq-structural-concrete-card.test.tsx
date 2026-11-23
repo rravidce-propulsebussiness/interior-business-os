@@ -45,7 +45,6 @@ describe('BOQ structural concrete costing switch', () => {
     expect(output).toContain('8.06 bags/m³');
     expect(output).toContain('Sand');
     expect(output).toContain('Aggregate');
-    expect(output).toContain('no RMC charge');
     expect(output).not.toContain('aria-label="RMC M20 rate per cubic metre"');
   });
 

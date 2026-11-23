@@ -225,10 +225,6 @@ export function QuotationStudioStart({
             <>
               <div className="qs-no-leads-callout" role="status">
                 <strong>No CRM leads yet? Prepare a quote now.</strong>
-                <span>
-                  Enter the client details below and choose a service. This
-                  creates a quotation-only prospect, not a CRM lead or project.
-                </span>
                 <Link href="/dashboard/crm/leads">Add a lead instead</Link>
               </div>
               <label className="qs-clean-field qs-source-picker">
@@ -293,11 +289,6 @@ export function QuotationStudioStart({
                 Classify the lead
               </Link>{' '}
               to prepare its quote.
-            </p>
-          ) : !existingCustomer && leads.length > 0 ? (
-            <p className="qs-source-guidance">
-              Client and quotation details fill automatically from the selected
-              lead.
             </p>
           ) : null}
         </div>

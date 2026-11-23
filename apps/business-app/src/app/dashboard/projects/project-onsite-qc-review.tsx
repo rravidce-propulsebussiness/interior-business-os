@@ -347,19 +347,6 @@ export function StageOnsiteQcReview(props: Props) {
             <strong>Quality Inspector</strong>.
           </p>
         )}
-        {isOwner && (stageReady || earlyReady) && (
-          <p className="pv2-qc-help">
-            Owner QC is enabled without assigning another employee. Visit the
-            site and record your inspection photo and verification notes.
-            Self-reviewed checks are identified in the audit history.
-          </p>
-        )}
-        {!canReview && (stageReady || earlyReady) && (
-          <p className="pv2-qc-help">
-            The assigned company QC inspector must visit the site to record Pass
-            or Fail for each item.
-          </p>
-        )}
         {!stageReady && !earlyReady && (
           <p className="pv2-qc-help">
             {failed
@@ -400,12 +387,6 @@ export function StageOnsiteQcReview(props: Props) {
             />
           );
         })}
-        <p className="pv2-hint">
-          QC Pass/Fail is recorded per item with photo, inspection date and
-          reviewer identity. A failed item needs site correction and
-          re-inspection. Formal stage certification and any structural hold
-          points remain protected.
-        </p>
       </div>
     </details>
   );

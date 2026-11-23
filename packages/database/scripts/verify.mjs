@@ -57,6 +57,7 @@ assertionFile('project-delivery');
 assertionFile('project-manager');
 assertionFile('project-agreement');
 assertionFile('project-advance-waiver');
+assertionFile('owner-admin-all-rounder');
 assertionFile('construction-project-workflows');
 assertionFile('construction-stage-record-links');
 assertionFile('quote-project-timeline');

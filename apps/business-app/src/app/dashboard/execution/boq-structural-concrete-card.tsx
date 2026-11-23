@@ -159,10 +159,6 @@ export function BoqStructuralConcreteCard({
               </strong>
             </div>
           </div>
-          <p className="boq-rmc-site-note">
-            Priced from cement, sand and aggregate rates. Concrete volume is
-            reference only — no RMC charge.
-          </p>
         </div>
       )}
 

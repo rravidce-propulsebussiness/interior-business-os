@@ -232,11 +232,6 @@ export function QuotationPackagesManager({
           <h2 className="mt-2 text-xl font-extrabold text-slate-950">
             Interior &amp; additional industry packages
           </h2>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
-            Create packages for interiors and new industries with a base rate,
-            scope, brands and validity. Issued PDF snapshots are never
-            rewritten.
-          </p>
         </div>
         {canManage && industries.length > 0 && (
           <button

@@ -535,10 +535,6 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
               Construction project · quotation plan
             </span>
             <h1>Project milestones</h1>
-            <p>
-              Estimated dates are calculated from project creation. Execution
-              begins after the project agreement is confirmed.
-            </p>
           </div>
           <div className="pmt-progress">
             <strong>{d.quotePlan?.floors.length ?? 0} floors</strong>
@@ -573,10 +569,6 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
           <div className="pmt-timeline-head">
             <div>
               <h2>Quotation-based timeline</h2>
-              <p>
-                Scope and floors come from the accepted quotation. Dates are
-                estimates until the project schedule is confirmed.
-              </p>
             </div>
             <span>{quoteStages.length} milestones</span>
           </div>
@@ -1162,7 +1154,6 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         <div>
           <span className="pmt-kicker">One project · one live timeline</span>
           <h1>Project milestones</h1>
-          <p>Work, site checks, QC, curing and dates in one project flow.</p>
         </div>
         <div className="pmt-progress">
           <strong>{progress}%</strong>
@@ -1264,10 +1255,6 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
               {delayedItems.length === 1 ? 'item is' : 'items are'} behind the
               original baseline
             </strong>
-            <small>
-              Baseline dates stay fixed from project creation, so rescheduling
-              will not hide a delay.
-            </small>
           </div>
           <span className="pmt-delay-count">{delayedItems.length} delayed</span>
         </section>
@@ -1277,10 +1264,6 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         <div className="pmt-section-title">
           <div>
             <h2>Daily curing</h2>
-            <p>
-              Three regular rounds each day. Record the round and attach site
-              evidence.
-            </p>
           </div>
           <span>Morning · Afternoon · Evening</span>
         </div>
@@ -1338,11 +1321,6 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         <div className="pmt-timeline-head">
           <div>
             <h2>All stages</h2>
-            <p>
-              Baseline dates are fixed from the project creation date. You can
-              adjust the current plan without changing the baseline; early and
-              late work is labelled against it.
-            </p>
           </div>
           <div className="pmt-board-controls">
             <span>{timelineCards.length} stages</span>

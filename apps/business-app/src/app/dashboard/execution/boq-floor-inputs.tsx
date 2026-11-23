@@ -274,12 +274,6 @@ export function BoqFloorInputs({
 
       <div className="boq-rooms">
         <h4>Rooms to tile (floor tiles + skirting)</h4>
-        <p>
-          Enter each room&apos;s size as written on the plan (11&apos;3&quot; or
-          11.25) to order the exact number of tiles. Floors without rooms use an
-          estimate from the built-up area. Bathrooms, kitchen platform,
-          staircase and parking are measured above.
-        </p>
         {floors.map((floor) => {
           const finishes = finishesOf(floor.name);
           const area = finishes.rooms.reduce(

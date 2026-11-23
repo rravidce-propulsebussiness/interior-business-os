@@ -421,10 +421,6 @@ export function PackageLibrary({
             {compareOpen && (
               <div className="qpl-compare-dialog">
                 <h2>Compare Packages</h2>
-                <p>
-                  Choose any two company packages to compare their prices and
-                  inclusions.
-                </p>
                 <div className="qpl-compare-selects">
                   {[0, 1].map((slot) => (
                     <label key={slot}>

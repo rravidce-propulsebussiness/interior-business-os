@@ -141,10 +141,6 @@ export function BoqFinalFloorPricing({
       aria-labelledby="boq-final-floor-heading"
     >
       <h3 id="boq-final-floor-heading">Floor-wise BOQ pricing</h3>
-      <p>
-        One detailed BOQ with floor totals. Expand any stage to view its
-        calculated materials, quantities, rates and labour allocation.
-      </p>
       <div className="boq-final-floor-scroll">
         <table>
           <thead>
@@ -273,10 +269,6 @@ export function BoqFinalFloorPricing({
           </tfoot>
         </table>
       </div>
-      <p className="boq-final-floor-detail-hint">
-        Floor totals and the detailed measurements are part of this single BOQ;
-        no second estimate is created.
-      </p>
     </section>
   );
 }

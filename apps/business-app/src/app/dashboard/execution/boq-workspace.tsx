@@ -1786,11 +1786,6 @@ export function BoqWorkspace({
           ? ' · Estimate provisional'
           : ' · Scope checked'}
       </summary>
-      <p>
-        Check work that is not covered by the automatic structural and finishing
-        quantities. Add a measured cost line, confirm it is already priced
-        elsewhere, or explicitly exclude it. A zero rate never counts as priced.
-      </p>
       <div className="boq-scope-review-items">
         {scopeSummary.items.map((item) => (
           <div className="boq-scope-review-item" key={item.code}>
@@ -2131,10 +2126,6 @@ export function BoqWorkspace({
         <div>
           <p className="erp-eyebrow">Construction takeoff</p>
           <h1>{screen === 'new' ? 'Create new BOQ' : 'Edit BOQ'}</h1>
-          <p>
-            Measure work, calculate material quantities, and price labour and
-            materials from your company rate list.
-          </p>
         </div>
         <div className="erp-header-actions">
           <Link href="/dashboard/execution/boq" className="erp-button">

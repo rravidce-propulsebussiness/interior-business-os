@@ -39,11 +39,6 @@ export function ProjectQuotationLinker({
   return (
     <details className="pv2-secondary-more pv2-link-existing-quote">
       <summary>Link an existing customer quotation</summary>
-      <p className="pv2-muted">
-        Choose the quotation for this project. Linking reuses the saved
-        quotation and its existing grouped payment schedule; it does not issue
-        the quote, send it, or record customer approval or payment.
-      </p>
       <ul>
         {quotes.map((quote) => (
           <li key={quote.id}>

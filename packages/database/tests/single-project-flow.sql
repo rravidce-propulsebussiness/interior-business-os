@@ -627,8 +627,15 @@ begin
  perform pg_temp.as_user('11111111-1111-4111-8111-111111111111');
  perform public.project_site_command(pg_temp.org(),pg_temp.project(),'material_update',
    jsonb_build_object('id',binding,'status','approved','source','outside','vendor_reference',''));
+ perform pg_temp.expect_fail(format('select public.project_material_details_set(%L,%L,%L,1850)',
+   pg_temp.org(),pg_temp.project(),binding),'23514','order amount before ordering rejected');
  perform public.project_material_delivery_command(pg_temp.org(),pg_temp.project(),binding,
    'place_outside_order','TEST ONLY — local DB supplier order',tomorrow,'anytime');
+ perform public.project_material_details_set(pg_temp.org(),pg_temp.project(),binding,1850);
+ if not exists(select 1 from jsonb_array_elements(
+     public.project_material_access_read(pg_temp.org(),pg_temp.project())->'delivery') x
+   where x->>'id'=binding::text and (x->>'order_amount')::numeric=1850) then
+   raise exception 'FAIL: outside order amount not recorded';end if;
  select count(*) into payments_before from public.payments
   where organization_id=pg_temp.org() and project_id=pg_temp.project();
  result=public.project_material_homeowner_cash_paid(pg_temp.org(),pg_temp.project(),binding,

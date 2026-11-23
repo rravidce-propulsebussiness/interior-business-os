@@ -262,7 +262,9 @@ export function PremiumSftBuilder({
         ratePerSqft:
           changedPackage && (item.kind ?? 'floor') === 'floor'
             ? floorZone(item.name) === 'parking'
-              ? floorRateDefaults.parking || packageRate
+              ? // A separately agreed parking rate survives a package change
+                // unless the new package defines its own parking rate.
+                floorRateDefaults.parking || item.ratePerSqft || packageRate
               : packageRate
             : item.ratePerSqft,
       })),
@@ -349,6 +351,8 @@ export function PremiumSftBuilder({
   const [message, setMessage] = useState('');
   const [saved, setSaved] = useState(Boolean(initialSchedule));
   const [dirty, setDirty] = useState(false);
+  // Switching package is an unsaved change even before any row is edited.
+  const unsaved = dirty || changedPackage;
   const [savedVersion, setSavedVersion] = useState(version);
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
@@ -830,16 +834,7 @@ export function PremiumSftBuilder({
               }}
             />
           </label>
-          <small>
-            Used for concrete and steel takeoff in the BOQ. Floor-to-floor
-            heights are entered in the rows below and are not billable areas.
-          </small>
         </div>
-        <p className="qs-work-copy-hint">
-          Upper floors follow the floor below unless customized. Choosing Make
-          penthouse replaces that level&apos;s normal floor, preserving its area
-          and price once.
-        </p>
         <div
           className="qs-work-table-scroll"
           role="region"
@@ -1112,7 +1107,7 @@ export function PremiumSftBuilder({
           revisionId={revisionId}
           version={version}
           quoteNumber={quoteNumber}
-          dirty={dirty}
+          dirty={unsaved}
           canShare={canSharePdf}
         />
       </section>
@@ -1134,14 +1129,14 @@ export function PremiumSftBuilder({
           data-studio-save="quote"
           type="button"
           className={
-            'qs-work-summary-save' + (saved && !dirty ? ' is-saved' : '')
+            'qs-work-summary-save' + (saved && !unsaved ? ' is-saved' : '')
           }
           onClick={save}
-          disabled={pending || (saved && !dirty)}
+          disabled={pending || (saved && !unsaved)}
         >
           {pending
             ? 'Saving…'
-            : saved && !dirty
+            : saved && !unsaved
               ? '✓ Saved'
               : '▣ Save quotation →'}
         </button>
@@ -1179,12 +1174,6 @@ export function PremiumSftBuilder({
                       (draftSections[editingMaterialIndex]?.title ??
                         'material specification')}
                 </h3>
-                <p>
-                  Enter the specification, price ceiling and its unit (per door,
-                  sq ft, running ft or bathroom). These limits flow into the BOQ
-                  as quoted allowances. Changes affect this quotation only; the
-                  master package remains untouched.
-                </p>
               </div>
               <button
                 type="button"
@@ -1398,11 +1387,6 @@ export function PremiumSftBuilder({
                   ＋ Add another material / specification
                 </button>
               )}
-              <p className="qs-work-drawer-hint">
-                These are specification inclusions. A brand change does not
-                silently alter the package rate. Use the work table to add
-                separately priced items.
-              </p>
             </div>
             <div className="qs-work-drawer-actions">
               <button type="button" onClick={cancelMaterials}>
