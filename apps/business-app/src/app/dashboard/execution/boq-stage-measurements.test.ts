@@ -5,6 +5,7 @@ import {
   measuredOutputs,
   correctSavedSmallConcrete,
   measuredVolume,
+  standardShelfTakeoff,
   readMeasuredSteelSets,
 } from './boq-stage-measurements';
 
@@ -86,6 +87,61 @@ describe('measured BOQ volume geometry', () => {
         settings,
       ).some((item) => item.material === 'steel'),
     ).toBe(false);
+  });
+
+  it('estimates complete built-in cement shelf partitions from width and height alone', () => {
+    const estimate = standardShelfTakeoff(6, 8, 1);
+    expect(estimate).not.toBeNull();
+    expect(estimate?.horizontalPanels).toBe(5);
+    expect(estimate?.verticalPanels).toBe(3);
+    expect(estimate?.volumeM3).toBeGreaterThan(0);
+    const outputs = measuredOutputs(
+      'shelves',
+      {
+        count: 1,
+        lengthFeet: 6,
+        widthFeet: 8,
+        depthFeet: 0,
+        shelfStandard: true,
+      },
+      settings,
+    );
+    expect(outputs.some((output) => output.material === 'concrete_m20')).toBe(
+      false,
+    );
+    expect(
+      outputs.find((output) => output.name === 'Cement (shelves)')?.quantity,
+    ).toBeGreaterThan(0);
+    expect(
+      outputs.find((output) => output.name === 'Sand (shelves)')?.quantity,
+    ).toBeGreaterThan(0);
+    expect(
+      outputs.find((output) => output.material === 'aggregate')?.quantity,
+    ).toBeGreaterThan(0);
+    expect(
+      outputs.find((output) => output.material === 'shuttering')?.quantity,
+    ).toBeGreaterThan(0);
+    expect(outputs.find((output) => output.material === 'steel')).toMatchObject(
+      {
+        diameter: 8,
+        unit: 'rod',
+      },
+    );
+    expect(
+      measuredOutputs(
+        'shelves',
+        {
+          count: 1,
+          lengthFeet: 6,
+          widthFeet: 0,
+          depthFeet: 0,
+          shelfStandard: true,
+        },
+        settings,
+      ),
+    ).toEqual([]);
+    const bigger = standardShelfTakeoff(6, 10, 1);
+    expect(bigger!.volumeM3).toBeGreaterThan(estimate!.volumeM3);
   });
 
   it('keeps sajjas and shelves site-mixed with no ready-mix or fabricated steel', () => {

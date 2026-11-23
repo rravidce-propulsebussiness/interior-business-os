@@ -2383,6 +2383,102 @@ export const M20_SITE_MIX_PER_M3 = {
   aggregateCubicMetres: 0.84,
 } as const;
 
+/** Window sunshades are derived from the actual window width schedule.
+ * Dimensions and reinforcement below are preliminary BOQ allowances only;
+ * site-specific chajja geometry and bar bending require structural approval.
+ */
+export const WINDOW_SUNSHADE_ASSUMPTIONS = {
+  projectionFeet: 2,
+  overhangEachSideFeet: 0.5,
+  slabThicknessIn: 4,
+  estimatedSteelKgPerM3: 80,
+  steelDiameterMm: 8,
+} as const;
+
+export function windowSunshadeTakeoff(
+  openings: readonly { count: number; widthFeet: number; heightFeet: number }[],
+  s: StructuralSettings,
+): { windowCount: number; outputs: GeneratedOutput[] } {
+  const rules = WINDOW_SUNSHADE_ASSUMPTIONS;
+  let volumeCft = 0;
+  let shutteringSqft = 0;
+  let windowCount = 0;
+  for (const opening of openings) {
+    if (
+      !Number.isFinite(opening.count) ||
+      !Number.isFinite(opening.widthFeet) ||
+      !(opening.count > 0 && opening.widthFeet > 0)
+    )
+      continue;
+    const spanFeet = opening.widthFeet + 2 * rules.overhangEachSideFeet;
+    const thickFeet = rules.slabThicknessIn / 12;
+    windowCount += opening.count;
+    volumeCft += opening.count * spanFeet * rules.projectionFeet * thickFeet;
+    shutteringSqft +=
+      opening.count *
+      (spanFeet * rules.projectionFeet +
+        (spanFeet + 2 * rules.projectionFeet) * thickFeet);
+  }
+  if (!windowCount || !volumeCft) return { windowCount: 0, outputs: [] };
+  const volumeM3 = volumeCft * CUM_PER_CFT;
+  const supplyVolume = volumeM3 * (1 + s.materialWastagePercent / 100);
+  const stock = s.stockBarFeet;
+  const weightPerRodKg = stock * M_PER_FT * (rules.steelDiameterMm ** 2 / 162);
+  const rods = ceil(
+    (supplyVolume * rules.estimatedSteelKgPerM3) / weightPerRodKg,
+  );
+  const source =
+    `${windowCount} measured windows; each span = window width + ${2 * rules.overhangEachSideFeet} ft; ` +
+    `${rules.projectionFeet} ft projection, ${rules.slabThicknessIn} in slab; ` +
+    `${s.materialWastagePercent}% wastage; confirm structural drawings`;
+  return {
+    windowCount,
+    outputs: [
+      {
+        name: 'Window sunshade concrete volume (reference only)',
+        quantity: round(volumeM3, 3),
+        unit: 'm³',
+        rate: 0,
+        source,
+      },
+      {
+        name: 'Cement (window sunshades)',
+        material: 'cement',
+        quantity: round(supplyVolume * M20_SITE_MIX_PER_M3.cementBags, 1),
+        unit: 'bag',
+        source,
+      },
+      sandOutput(
+        supplyVolume * M20_SITE_MIX_PER_M3.sandCubicMetres,
+        s,
+        'Sand (window sunshades)',
+      ),
+      aggregateOutput(
+        supplyVolume * M20_SITE_MIX_PER_M3.aggregateCubicMetres,
+        s,
+        'Aggregate (window sunshades)',
+      ),
+      {
+        name: 'Sunshade shuttering (estimated)',
+        material: 'shuttering',
+        quantity: round(shutteringSqft, 2),
+        unit: 'sqft',
+        source: 'Underside and exposed edges; confirm at site',
+      },
+      {
+        name: `${rules.steelDiameterMm} mm TMT (window sunshades, provisional)`,
+        material: 'steel',
+        quantity: rods,
+        unit: 'rod',
+        diameter: rules.steelDiameterMm,
+        rods,
+        weightKg: round(rods * weightPerRodKg, 2),
+        source: `${rules.estimatedSteelKgPerM3} kg/m³ provisional; ${stock} ft stock rods; replace with approved BBS`,
+      },
+    ],
+  };
+}
+
 const concreteOutputs = (
   volume: number,
   label: string,
@@ -4552,6 +4648,27 @@ export function generateQuotationBoq(
       ],
       { ...fc },
     );
+    // Window chajjas need no second user-entered dimensions. Each opening
+    // width from the drawing produces one shade, with standard projection,
+    // provisional reinforcement and site-mix material takeoff.
+    const sunshades = windowSunshadeTakeoff(openings, s);
+    if (sunshades.windowCount > 0)
+      finishLine(
+        'quote-window-sajjas',
+        'window sunshades (from measured windows)',
+        sunshades.outputs,
+        {
+          windowCount: sunshades.windowCount,
+          projectionFeet: WINDOW_SUNSHADE_ASSUMPTIONS.projectionFeet,
+          overhangFeet: WINDOW_SUNSHADE_ASSUMPTIONS.overhangEachSideFeet,
+          thicknessIn: WINDOW_SUNSHADE_ASSUMPTIONS.slabThicknessIn,
+        },
+      );
+    else if (fc.windows > 0)
+      warnings.push(
+        `${floor.name}: window sunshade quantities require window width sizes; no guessed sunshade volumes were added.`,
+      );
+
     const tiled = (
       category: AllowanceCategory,
       name: string,

@@ -1,7 +1,10 @@
 import { createElement, type ComponentProps } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { BoqStageBuilder } from './boq-stage-builder';
+import {
+  BoqStageBuilder,
+  isDerivedQuantityReadOnly,
+} from './boq-stage-builder';
 import { BoqFootingEditor } from './boq-footing-editor';
 import { BarsPicker } from './boq-design-schedule';
 import { newFootingType } from '@business-os/core/construction-boq';
@@ -103,6 +106,61 @@ describe('compact BOQ entry stages', () => {
     expect(html).toContain('Brickwork');
     expect(html).toContain('Compound Wall');
     expect(html).toContain('View or edit Compound Wall on Ground Floor');
+  });
+
+  it('keeps generated window sunshade costs under Windows without quantity removal', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, {
+        ...base,
+        initialStep: 9,
+        lines: [
+          {
+            id: 'shade-from-window',
+            name: 'Ground Floor: window sunshades (from measured windows)',
+            kind: 'quote-window-sajjas',
+            section: 'Ground Floor',
+            unit: 'each',
+            origin: 'quotation-structure',
+            inputs: { windowCount: 2 },
+            outputs: [
+              {
+                name: 'Cement (window sunshades)',
+                material: 'cement',
+                quantity: 3,
+                unit: 'bag',
+                rate: 390,
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    expect(html).toContain('View or edit Doors &amp; Windows on Ground Floor');
+    expect(html).not.toContain('View or edit Sajjas / Sunshades');
+    expect(
+      isDerivedQuantityReadOnly(
+        'quote-window-sajjas',
+        'Cement (window sunshades)',
+      ),
+    ).toBe(true);
+    expect(isDerivedQuantityReadOnly('quote-window-sajjas', '8 mm TMT')).toBe(
+      true,
+    );
+    expect(isDerivedQuantityReadOnly('quote-masonry', 'Cement (plaster)')).toBe(
+      true,
+    );
+    expect(isDerivedQuantityReadOnly('quote-doors-windows', 'Windows')).toBe(
+      false,
+    );
+  });
+
+  it('keeps one compact cement shelving entry without a second manual sunshade screen', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, { ...base, initialStep: 10 }),
+    );
+    expect(html).toContain('RCC Shelves');
+    expect(html).toContain('View or edit RCC Shelves on Ground Floor');
+    expect(html).not.toContain('View or edit Sajjas / Sunshades');
   });
 
   it('provides Penthouse / Headroom on the top-floor services screen', () => {
