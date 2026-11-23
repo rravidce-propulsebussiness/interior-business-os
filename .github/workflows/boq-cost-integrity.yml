@@ -35,6 +35,7 @@ jobs:
           apps/business-app/src/app/dashboard/execution/boq-pricing.test.ts
           apps/business-app/src/app/dashboard/execution/boq-labour.test.ts
           apps/business-app/src/app/dashboard/execution/boq-project-costs.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-scope-coverage.test.ts
           apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.test.tsx
           apps/business-app/src/app/dashboard/execution/boq-stage-measurements.test.ts
           packages/core/src/construction-boq.test.ts
@@ -47,6 +48,8 @@ jobs:
           apps/business-app/src/app/dashboard/execution/boq-labour.test.ts
           apps/business-app/src/app/dashboard/execution/boq-project-costs.ts
           apps/business-app/src/app/dashboard/execution/boq-project-costs.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-scope-coverage.ts
+          apps/business-app/src/app/dashboard/execution/boq-scope-coverage.test.ts
           apps/business-app/src/app/dashboard/execution/boq-actions.ts
           apps/business-app/src/app/dashboard/execution/boq-workspace.tsx
           apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.tsx
