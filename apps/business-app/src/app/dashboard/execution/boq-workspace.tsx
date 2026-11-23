@@ -63,6 +63,11 @@ import {
   type BoqProjectCosts,
 } from './boq-project-costs';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
+import {
+  BOQ_SCOPE_WORKS,
+  summarizeBoqScope,
+  type BoqScopeReviews,
+} from './boq-scope-coverage';
 
 type Generator = {
   revisionId: string;
@@ -119,6 +124,7 @@ type Document = {
     generator?: Generator;
     labour?: LabourConfig;
     projectCosts?: BoqProjectCosts;
+    scopeReviews?: BoqScopeReviews;
   };
   updated_at: string;
 };
@@ -262,6 +268,9 @@ export function BoqWorkspace({
   );
   const [projectCosts, setProjectCosts] = useState<BoqProjectCosts>(
     normalizeBoqProjectCosts(initialDocument?.document?.projectCosts),
+  );
+  const [scopeReviews, setScopeReviews] = useState<BoqScopeReviews>(
+    initialDocument?.document?.scopeReviews ?? {},
   );
   const [costingTab, setCostingTab] = useState<'builder' | 'labour'>('builder');
   const [rmcEnabled, setRmcEnabled] = useState(() => {
@@ -425,6 +434,7 @@ export function BoqWorkspace({
       sum + (isLabourOutput(output) ? output.quantity * output.rate : 0),
     0,
   );
+  const scopeSummary = summarizeBoqScope(lines, scopeReviews);
   const unpricedOutputs = allOutputs.filter(
     (output) => !isOldLabour(output) && isBoqCostUnpriced(output, priceOf),
   );
@@ -605,6 +615,7 @@ export function BoqWorkspace({
     setSelections({});
     setLabour({ ...DEFAULT_LABOUR });
     setProjectCosts({ ...DEFAULT_BOQ_PROJECT_COSTS });
+    setScopeReviews({});
     setCostingTab('builder');
     setRmcEnabled(settings.readyMixConcrete !== 0);
     setRmcRateOverride(null);
@@ -641,6 +652,7 @@ export function BoqWorkspace({
     setSelections(document.document?.selections ?? {});
     setLabour(document.document?.labour ?? null);
     setProjectCosts(normalizeBoqProjectCosts(document.document?.projectCosts));
+    setScopeReviews(document.document?.scopeReviews ?? {});
     setCostingTab('builder');
     setRmcEnabled(
       (document.document?.generator?.settings?.readyMixConcrete ??
@@ -878,6 +890,7 @@ export function BoqWorkspace({
       selections,
       ...(labour && canViewCost ? { labour } : {}),
       ...(canViewCost ? { projectCosts } : {}),
+      scopeReviews,
       ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
     }),
     [
@@ -888,6 +901,7 @@ export function BoqWorkspace({
       selections,
       labour,
       projectCosts,
+      scopeReviews,
       canViewCost,
       generator,
       repeatFrom,
@@ -975,6 +989,7 @@ export function BoqWorkspace({
                     ...(autoSaveContent.projectCosts
                       ? { projectCosts: autoSaveContent.projectCosts }
                       : {}),
+                    scopeReviews: autoSaveContent.scopeReviews,
                     ...(autoSaveContent.generator
                       ? { generator: autoSaveContent.generator }
                       : {}),
@@ -1170,6 +1185,7 @@ export function BoqWorkspace({
         selections,
         ...(labour && canViewCost ? { labour } : {}),
         ...(canViewCost ? { projectCosts } : {}),
+        scopeReviews,
         ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
       });
       if (!result.ok) {
@@ -1191,6 +1207,7 @@ export function BoqWorkspace({
           selections,
           ...(labour && canViewCost ? { labour } : {}),
           ...(canViewCost ? { projectCosts } : {}),
+          scopeReviews,
           ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
         },
         updated_at: new Date().toISOString(),
