@@ -328,3 +328,81 @@
   padding: 10px 0 1px;
   font-size: 13px;
 }
+
+/* Required work is reviewed once per BOQ, not on duplicate per-floor cards. */
+.boq-scope-review {
+  margin: 13px 0;
+  padding: 13px 16px;
+  border: 1px solid #e7d7d0;
+  border-radius: 14px;
+  background: #fffdfb;
+  color: #52312e;
+}
+.boq-scope-review summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 750;
+}
+.boq-scope-review > p {
+  margin: 10px 0;
+  color: #725a52;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.boq-scope-review-items {
+  display: grid;
+  gap: 0;
+  margin: 11px 0;
+  border: 1px solid #eee3de;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.boq-scope-review-item {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(150px, 230px) auto;
+  gap: 11px;
+  align-items: center;
+  padding: 11px 12px;
+  background: #fff;
+  border-bottom: 1px solid #eee8e4;
+}
+.boq-scope-review-item:last-child {
+  border-bottom: 0;
+}
+.boq-scope-review-name {
+  display: grid;
+  gap: 3px;
+}
+.boq-scope-review-name strong {
+  font-size: 12px;
+}
+.boq-scope-review-name small,
+.boq-scope-review-status {
+  color: #795e55;
+  font-size: 11px;
+}
+.boq-scope-review-item select {
+  min-width: 0;
+  padding: 8px 10px;
+  border-radius: 9px;
+  border: 1px solid #dfd1ca;
+  color: #503934;
+  background: #fff;
+  font-size: 12px;
+}
+.boq-scope-review-item button {
+  white-space: nowrap;
+}
+.boq-scope-review .boq-scope-review-warning {
+  color: #9c402f;
+  font-weight: 650;
+}
+@media (max-width: 700px) {
+  .boq-scope-review-item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .boq-scope-review-item button {
+    width: fit-content;
+  }
+}
