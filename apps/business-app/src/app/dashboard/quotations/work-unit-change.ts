@@ -22,7 +22,12 @@ const counted = (unit: WorkUnit | undefined) =>
 export function workUnitChange(
   row: UnitDimensions,
   unit: WorkUnit,
-): Pick<UnitDimensions, 'unit' | 'lengthFeet' | 'widthFeet' | 'quantity'> {
+): {
+  unit: WorkUnit;
+  lengthFeet: string;
+  widthFeet: string;
+  quantity: string | undefined;
+} {
   const wasCounted = counted(row.unit);
   const areaOrVolume = unit === 'sqft' || unit === 'cubic_ft';
   if (counted(unit))
