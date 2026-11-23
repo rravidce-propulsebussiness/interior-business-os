@@ -1,3 +1,4 @@
+import { QUOTATION_TERMS_MAX_LENGTH } from '@business-os/core/commercial';
 /** Human-readable terms sections persist in the existing quotation terms field.
  * Stage payment markers stay untouched for the payment schedule/PDF.
  * Legacy free text is preserved under "Additional terms" rather than lost. */
@@ -65,6 +66,13 @@ export function splitQuotationTerms(terms: string): QuotationTermsSections {
   return sections;
 }
 
+export class QuotationTermsTooLongError extends Error {
+  constructor() {
+    super('Quotation terms and payment schedule are too long to save.');
+    this.name = 'QuotationTermsTooLongError';
+  }
+}
+
 export function joinQuotationTerms(
   parts: Pick<
     QuotationTermsSections,
@@ -84,7 +92,7 @@ export function joinQuotationTerms(
   );
   if (parts.paymentPlan.trim()) result.push(parts.paymentPlan.trim());
   const text = result.join('\n\n');
-  if (text.length > 10000)
-    throw new Error('Terms exceed the 10,000-character limit.');
+  if (text.length > QUOTATION_TERMS_MAX_LENGTH)
+    throw new QuotationTermsTooLongError();
   return text;
 }

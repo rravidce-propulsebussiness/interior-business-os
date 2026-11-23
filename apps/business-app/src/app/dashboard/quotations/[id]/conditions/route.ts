@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PAYMENT_PERCENT_PATTERN } from '../../payment-percent';
 import { revalidatePath } from 'next/cache';
 import { commercialServices } from '../../../commercial/service';
 import { DomainError, idSchema, safeFailure } from '@business-os/shared';
@@ -26,6 +27,7 @@ import {
 import {
   joinQuotationTerms,
   splitQuotationTerms,
+  QuotationTermsTooLongError,
 } from '../../quotation-terms-format';
 
 export const runtime = 'nodejs';
@@ -62,7 +64,7 @@ const payload = z.discriminatedUnion('kind', [
           z
             .object({
               name: z.string().trim().min(2).max(100),
-              percent: z.string().regex(/^\d+(?:\.\d{1,2})?$/),
+              percent: z.string().regex(PAYMENT_PERCENT_PATTERN),
               stageCodes: z
                 .array(
                   z
@@ -459,6 +461,8 @@ export async function POST(
       200,
     );
   } catch (error) {
+    if (error instanceof QuotationTermsTooLongError)
+      return reply({ message: error.message, reference: ref }, 422);
     const failure = safeFailure(error);
     console.error('quotation.conditions.failed', {
       reference: ref,

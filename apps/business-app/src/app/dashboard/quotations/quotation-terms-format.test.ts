@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  QuotationTermsTooLongError,
   joinQuotationTerms,
   splitQuotationTerms,
 } from './quotation-terms-format';
@@ -60,13 +61,13 @@ describe('premium quotation terms sections', () => {
   it('rejects oversized strings before sending the edit_revision command', () => {
     expect(() =>
       joinQuotationTerms({
-        inclusions: 'a'.repeat(11000),
+        inclusions: 'a'.repeat(300001),
         exclusions: '',
         warranty: '',
         additional: '',
         paymentPlan: '',
       }),
-    ).toThrow(/10,000/);
+    ).toThrow(QuotationTermsTooLongError);
   });
 });
 
@@ -85,4 +86,22 @@ it('retains legacy introductory text, identifies warranty, and preserves stage m
   expect(again.paymentPlan).toContain('RCC|60.00');
   expect(again.warranty).toBe('Structure for ten years');
   expect(again.exclusions).toBe('External electrical works');
+});
+
+describe('quotation terms capacity for construction payment programmes', () => {
+  it('keeps agreement clauses with a large saved construction programme', () => {
+    const programme =
+      '[QUOTATION_CONSTRUCTION_PROGRAM]\n' +
+      JSON.stringify({ stages: 'x'.repeat(60000) }) +
+      '\n[/QUOTATION_CONSTRUCTION_PROGRAM]';
+    const text = joinQuotationTerms({
+      inclusions: 'Lift complimentary',
+      exclusions: 'Interior wood work',
+      warranty: '10-year structural',
+      additional: 'Payments to company account only',
+      paymentPlan: programme,
+    });
+    expect(text.length).toBeGreaterThan(10000);
+    expect(text).toContain('[/QUOTATION_CONSTRUCTION_PROGRAM]');
+  });
 });
