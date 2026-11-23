@@ -79,11 +79,11 @@ export const BOQ_WIZARD_STEPS: readonly BoqWizardStep[] = [
   },
   {
     number: 10,
-    title: 'Sajjas, Shelves, Plaster & Painting',
+    title: 'Cement Shelves, Plaster & Painting',
     short: 'Finishing Works',
     description:
-      'Measure small RCC works separately from structural RMC, and enter plastering and painting.',
-    categories: ['sajjas', 'shelves', 'plaster', 'painting'],
+      'Measure cement shelving from its width and height; window sunshades calculate automatically under Doors & Windows.',
+    categories: ['shelves', 'plaster', 'painting'],
     scope: 'floors',
   },
   {
