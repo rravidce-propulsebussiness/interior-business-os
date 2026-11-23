@@ -149,10 +149,6 @@ export function RccSubstageGroups({
       <div className="pv2-rcc-substage-heading">
         <div>
           <h4>{title}</h4>
-          <p>
-            Open a work area to plan dates, arrange materials, and record
-            completion.
-          </p>
         </div>
         <span>
           {completed}/{activities.length} complete

@@ -142,12 +142,6 @@ export function SftEstimateBuilder({
         <h3 className="mt-2 text-xl font-extrabold text-slate-950">
           Floor / work description × area × rate
         </h3>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          Enter different rates for parking, commercial floors, penthouse or
-          other work. Each amount is calculated separately, like your
-          construction estimate. Selected brands and specifications appear below
-          pricing without additional charges.
-        </p>
       </div>
       {packages.some((x) => x.status === 'active') && (
         <label className="grid max-w-xl gap-2 text-xs font-bold text-slate-700">
@@ -166,10 +160,6 @@ export function SftEstimateBuilder({
                 </option>
               ))}
           </select>
-          <span className="font-normal text-slate-500">
-            Applying a preset fills the rate column. You may then change any
-            individual floor rate.
-          </span>
         </label>
       )}
       <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
@@ -310,10 +300,6 @@ export function SftEstimateBuilder({
         <h3 className="text-sm font-extrabold text-slate-950">
           Material &amp; brand specifications
         </h3>
-        <p className="mt-1 text-xs leading-5 text-slate-600">
-          These are the specified inclusions in this SFT estimate, not extra
-          rates.
-        </p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {categories.map((category) => (
             <label
@@ -376,10 +362,6 @@ export function SftEstimateBuilder({
           <p className="mt-1 text-2xl font-extrabold">
             {quote ? rupees(Number(quote.total)) : 'Complete the work rows'}
           </p>
-          <p className="mt-1 text-xs text-slate-300">
-            Save this table as one itemized quotation estimate, without double
-            counting.
-          </p>
         </div>
         <button
           type="button"
@@ -400,12 +382,6 @@ export function SftEstimateBuilder({
           {message}
         </p>
       )}
-      <p className="text-xs leading-5 text-slate-500">
-        Invoice billing and customized item pricing are separate. To apply a
-        quotation-level discount, use the revision discount control. The source
-        PDF&apos;s summary and work table must agree on floor areas before the
-        quote is issued.
-      </p>
     </div>
   );
 }

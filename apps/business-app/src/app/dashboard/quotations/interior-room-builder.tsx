@@ -101,10 +101,6 @@ export function InteriorRoomBuilder({
       <div className="qs-heading" style={{ marginBottom: 12 }}>
         <div>
           <h2>Room-wise Interior BOQ</h2>
-          <p className="qs-muted">
-            Choose a saved package or Custom Quote to edit individual works,
-            brands, dimensions and rates.
-          </p>
         </div>
         <span className="qs-selected-pill">L × B × ₹ / SFT</span>
       </div>
@@ -114,10 +110,6 @@ export function InteriorRoomBuilder({
             <strong className="text-sm font-extrabold text-slate-950">
               Select Quotation Package
             </strong>
-            <p className="mt-1 text-xs text-slate-600">
-              Saved packages include their rate and specifications. Select
-              Custom Quote for individual works.
-            </p>
           </div>
         </div>
         <div className="grid gap-3 sm:grid-cols-2">

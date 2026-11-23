@@ -38,7 +38,7 @@ export function ProjectRemovalControl({
 
   return (
     <details className="pv2-header-drawer">
-      <summary className="pv2-button pv2-outline">Remove demo project</summary>
+      <summary className="pv2-button pv2-outline">Delete project</summary>
       <div className="pv2-header-drawer-body">
         <p>
           Temporary demo cleanup. Linked quotation history is preserved when

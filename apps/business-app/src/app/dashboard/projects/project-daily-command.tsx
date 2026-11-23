@@ -356,20 +356,6 @@ export function ProjectDailyCommand({
           </span>
         </summary>
         <div className="daily-section-body">
-          {d.site?.canManage && (
-            <p className="daily-role-note">
-              <strong>Full project access:</strong> one owner or manager can
-              handle daily progress, material requests and approvals. Add
-              project roles when your team grows.
-            </p>
-          )}
-          {!d.site?.canManage && d.site?.role && (
-            <p className="daily-role-note">
-              Your <strong>{pretty(d.site.role)}</strong> access shows the
-              actions assigned to your role. Material approvals and orders stay
-              with authorized managers or procurement staff.
-            </p>
-          )}
           {active.length ? (
             active.map((stage, i) => (
               <StageDayCard
@@ -419,10 +405,6 @@ export function ProjectDailyCommand({
                   Progress
                 </summary>
                 <div className="daily-action-form">
-                  <p className="daily-help">
-                    Record today&apos;s work and tomorrow&apos;s plan together
-                    in the existing site report.
-                  </p>
                   <SiteReportForm id={d.project.id} />
                 </div>
               </details>
@@ -443,11 +425,6 @@ export function ProjectDailyCommand({
                   <OwnerIcon name="purchases" size={17} /> Request Materials
                 </summary>
                 <div className="daily-action-form">
-                  <p className="daily-help">
-                    Add what the next work needs. Requests remain linked to the
-                    active stage when available; approval is required before an
-                    order is placed.
-                  </p>
                   <MaterialRequestForm
                     id={d.project.id}
                     {...(materialStage ? { stageId: materialStage.id } : {})}
@@ -522,18 +499,7 @@ export function ProjectDailyCommand({
           ) : (
             <div className="daily-empty">
               <strong>No plan recorded for tomorrow</strong>
-              <p>
-                Use Today&apos;s Progress above to record the next day&apos;s
-                activities, workers and required checks. Work is not
-                automatically marked complete.
-              </p>
             </div>
-          )}
-          {tomorrowPlan && (
-            <p className="daily-help">
-              Plan comes from today&apos;s daily work report. Update it through
-              the same report workflow to avoid duplicate plans.
-            </p>
           )}
         </div>
       </details>
@@ -601,10 +567,6 @@ export function ProjectDailyCommand({
                     {stage.inspectionTopics.length} required site checks
                     recorded
                   </small>
-                  <small>
-                    An assigned company QC inspector visits the site and reviews
-                    each item. Failed items require correction.
-                  </small>
                 </span>
               </div>
             );
@@ -623,10 +585,6 @@ export function ProjectDailyCommand({
               </span>
               <span>
                 <strong>{stageLabel(nextReadyStage)} is ready to start</strong>
-                <small>
-                  Its start prerequisites are clear. QC certification of other
-                  stages remains separate.
-                </small>
               </span>
               <b>Open stage →</b>
             </Link>

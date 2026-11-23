@@ -297,12 +297,6 @@ export default async function QuotationStudio({
       {revision.status === 'issued' && (
         <section className="qs-card" style={{ marginTop: 18 }}>
           <h2>Next: agreement and advance</h2>
-          <p className="qs-muted">
-            Open the Won lead&apos;s project to prepare an agreement from the
-            finalized quotation. Upload the signed agreement there; separate
-            online quotation approval is not required. Its saved payment
-            schedule carries forward into the project.
-          </p>
           <ContractHandoff revisionId={revision.id} />
           {!project.is_sales_prospect ? (
             <Link
@@ -315,12 +309,7 @@ export default async function QuotationStudio({
             >
               Open agreement &amp; project stages →
             </Link>
-          ) : (
-            <p className="qs-warning" role="status">
-              This is still a sales quotation. No execution project appears in
-              Projects until the lead is confirmed Won and converted.
-            </p>
-          )}
+          ) : null}
         </section>
       )}
     </QuotationStudioFrame>

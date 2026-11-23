@@ -38,7 +38,7 @@ export function ProjectForm({
   projectId: string;
   operation: string;
   label: string;
-  children: ReactNode;
+  children?: ReactNode;
   media?: boolean;
 }) {
   const router = useRouter();
@@ -203,11 +203,6 @@ export function SkipAgreementUpload({
   const [uploadedFilename, setUploadedFilename] = useState('');
   return (
     <div className="pv2-offline-agreement">
-      <p className="pv2-hint">
-        Record the homeowner’s offline approval here. Attach a scanned copy of
-        the paper agreement if you have one; a digital signature is not
-        required.
-      </p>
       <label className="pv2-offline-agreement-ack">
         <input
           type="checkbox"
@@ -374,11 +369,6 @@ export function AssignRole({
           </select>
         </label>
       </div>
-      <p className="pv2-form-hint">
-        A project role replaces the person&apos;s company-wide project access on
-        this project. Assigning yourself a restricted role such as quality
-        inspector removes your own management rights here.
-      </p>
       <button className="pv2-button pv2-primary" disabled={pending}>
         Assign to project
       </button>
@@ -495,12 +485,6 @@ export function ProjectDrawingForm({
           placeholder="Floor, requested layout and revision details"
         />
       </label>
-      <p className="pv2-hint">
-        If the plan was already shared in WhatsApp or offline, record the
-        date/message/file reference here instead of uploading it again. This
-        records submission for technical review; it does not record homeowner
-        approval.
-      </p>
       <button
         className="pv2-button pv2-primary"
         type="submit"
@@ -541,10 +525,6 @@ export function ProjectLifecycle({
     return (
       <section className="pv2-panel pv2-lifecycle">
         <h2>Enable project design workspace</h2>
-        <p>
-          This project already exists from its approved quotation. Enable its
-          drawing and site registers without creating a second project.
-        </p>
         <InitializeSite id={id} />
       </section>
     );
@@ -582,11 +562,6 @@ export function ProjectLifecycle({
                   ? 'Floor Plan Under Review'
                   : 'Floor Plan & Design Revisions'}
             </h2>
-            <p>
-              Progress in order: floor plan and homeowner changes → structural
-              design → 3D elevation → electrical and plumbing / MEP plans →
-              final homeowner confirmation.
-            </p>
           </div>
         </div>
         {!agreementCleared ? (
@@ -666,20 +641,9 @@ export function ProjectLifecycle({
                       placeholder="Date and recorded approval of latest plans"
                     />
                   </label>
-                  <p className="pv2-hint">
-                    A manager-recorded approval is not an authenticated digital
-                    signature.
-                  </p>
                 </ProjectForm>
               </details>
-            ) : (
-              <p className="pv2-hint">
-                Final homeowner confirmation becomes available after required
-                plans pass technical review. Record a reference for plans
-                already shared externally; design stages must still be reviewed
-                before site execution.
-              </p>
-            )}
+            ) : null}
           </>
         )}
       </section>
@@ -756,11 +720,6 @@ export function SignedAgreementUploadForm({
           placeholder="Who signed, signing date, and how the signed copy was received"
         />
       </label>
-      <p className="pv2-hint">
-        Choose one PDF option only. Select an existing file only if it contains
-        the actual signatures. A PDF by itself is not evidence of signing until
-        you save these details. Maximum upload size 8 MB.
-      </p>
       <button
         type="submit"
         className="pv2-button pv2-primary"
@@ -803,6 +762,7 @@ export function SiteReportForm({ id }: { id: string }) {
             type="date"
             name="report_date"
             required
+            max={indiaToday}
             defaultValue={indiaToday}
           />
         </label>
@@ -1121,10 +1081,6 @@ export function MaterialUpdateForm({
             <option value="rejected">Reject request</option>
           </select>
         </label>
-        <p className="pv2-hint">
-          Approval permits an authorized employee to place an order. No order or
-          client delivery estimate is created yet.
-        </p>
       </ProjectForm>
     </details>
   );
@@ -1151,11 +1107,6 @@ export function DirectSupplierCashPaymentForm({
       <summary>Record homeowner cash paid directly to supplier</summary>
       <form action={submit} className="pv2-form">
         <input type="hidden" name="material_id" value={materialId} />
-        <p className="pv2-hint">
-          Cash settlement only. This records the homeowner paying the supplier
-          directly; it does not add a company receipt, invoice, or company cash
-          expense.
-        </p>
         <label>
           Supplier name
           <input name="supplier" required minLength={2} maxLength={200} />
@@ -1298,9 +1249,6 @@ export function SiteMediaForm({
           placeholder="Description of photo or file"
         />
       </label>
-      <p className="pv2-hint">
-        Private file · maximum 8 MB · access limited by project permissions
-      </p>
     </ProjectForm>
   );
 }
@@ -1340,11 +1288,7 @@ export function InitializeSite({ id }: { id: string }) {
       projectId={id}
       operation="initialize"
       label="Initialize project delivery"
-    >
-      <p className="pv2-hint">
-        Creates the existing project delivery state, not a duplicate project.
-      </p>
-    </ProjectForm>
+    ></ProjectForm>
   );
 }
 

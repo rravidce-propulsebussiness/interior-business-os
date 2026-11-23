@@ -228,10 +228,6 @@ export function MaterialRequestSheet({
           {pending ? 'Sending…' : 'Send request'}
         </button>
       </div>
-      <p className="pf-help">
-        Goes to the owner/procurement for approval. No purchase order, stock or
-        payment is created.
-      </p>
       {message && (
         <p role="status" className={'pf-msg ' + (message.ok ? 'ok' : 'bad')}>
           {message.text}

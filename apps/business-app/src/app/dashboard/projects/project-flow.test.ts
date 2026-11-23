@@ -364,15 +364,11 @@ describe('single project flow model', () => {
     expect(actions).toMatch(
       /client\.rpc\(\s*['"]project_material_homeowner_cash_paid['"]/,
     );
-    expect(forms).toContain('Cash settlement only.');
     expect(view).toContain('Homeowner paid supplier directly · cash');
     expect(view).toContain('d.materialAccess.canOrder');
     expect(migration).not.toMatch(
       /public\.(payments|receipts|invoices|payment_requests)/,
     );
     expect(migration).not.toContain('payment_record');
-    expect(forms).toMatch(
-      /it does not add a company receipt,\s*invoice,\s*or company cash\s*expense/i,
-    );
   });
 });

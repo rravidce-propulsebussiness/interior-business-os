@@ -289,10 +289,6 @@ export function CustomPackageManager({
         </span>
         <div className="cpm-heading-copy">
           <h2>Custom Package Management</h2>
-          <p>
-            Set material consumption and brand options with unit prices. These
-            company rates are used in Custom Quotes.
-          </p>
         </div>
         <div className="cpm-heading-actions">
           <Link
@@ -344,10 +340,6 @@ export function CustomPackageManager({
           <header className="cpm-workspace-heading">
             <div>
               <h3>{currentGroup.label}</h3>
-              <p>
-                Choose a brand and edit its quantity per built-up SFT. Saved
-                prices are used for the custom rate.
-              </p>
             </div>
             {canManage && (
               <button
@@ -603,10 +595,6 @@ export function CustomPackageManager({
                     ? 'Edit Brand & Unit Price'
                     : 'Add Material / Brand'}
                 </h3>
-                <p>
-                  Set the exact company material unit price and consumption. Any
-                  issued quotations retain their previous saved price snapshot.
-                </p>
                 <RateForm
                   key={
                     (editor.rate?.id ?? editor.category) +
@@ -626,11 +614,6 @@ export function CustomPackageManager({
             {brandsFor && (
               <>
                 <h3>{brandsFor} · Manage brands</h3>
-                <p>
-                  Each material can have several brands and unit prices. Choose
-                  a preferred brand in the table; the customer can change it in
-                  their quote.
-                </p>
                 <div className="cpm-brand-management">
                   {rates
                     .filter((r) => r.category === brandsFor)

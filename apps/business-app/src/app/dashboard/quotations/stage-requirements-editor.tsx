@@ -320,11 +320,6 @@ export function StageRequirementsEditor({
       />
       <details className="qs-stage-requirements-library">
         <summary>Manage included work, materials, checks & reports</summary>
-        <p className="qs-stage-requirements-hint">
-          Choose or rename the available items here. Arrange their execution
-          order above. Site test and QC evidence is recorded against the
-          corresponding check rather than as a second approval.
-        </p>
         {fields.map((section) => (
           <Section
             key={section.key}
@@ -356,13 +351,6 @@ export function StageRequirementsEditor({
           )}
         </div>
       )}
-      <p className="qs-stage-requirements-foot">
-        Changes to work, materials, checks and reports are saved with the
-        payment schedule. These project requirements become construction work,
-        material planning and QC guidance after the accepted quotation is
-        converted. Changes to scope or cost require a quotation revision.
-        Mandatory structural approvals cannot be removed.
-      </p>
     </div>
   );
 }

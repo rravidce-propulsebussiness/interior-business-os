@@ -41,10 +41,6 @@ export function BoqCreateStep({
         <div>
           <p className="boq-create-eyebrow">BOQ &amp; Estimating / New BOQ</p>
           <h1>Create New BOQ</h1>
-          <p>
-            Link one project and its final quotation. All measurements and
-            floor-wise costs belong to this BOQ.
-          </p>
         </div>
       </header>
       <nav className="boq-create-progress" aria-label="BOQ creation process">
@@ -197,11 +193,6 @@ export function BoqCreateStep({
             </Link>
           </div>
         </aside>
-      </div>
-      <div className="boq-create-note">
-        Measurements and price inputs are saved against one project BOQ.
-        Structural quantities are not re-entered in another estimate or priced
-        twice.
       </div>
     </main>
   );

@@ -52,10 +52,6 @@ export function NewProjectForCustomer({
           aria-label="Create project"
         >
           <h2>Select a customer</h2>
-          <p className="pv2-muted">
-            Review the customer’s saved details and quotations. A delivery
-            project starts from the customer’s accepted quotation and agreement.
-          </p>
           {customers.length ? (
             <>
               <label className="pv2-project-customer-select">

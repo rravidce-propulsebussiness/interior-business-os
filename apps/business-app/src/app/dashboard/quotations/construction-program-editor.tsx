@@ -340,10 +340,6 @@ export function ConstructionProgramEditor({
     return (
       <section className="qs-card qs-construction-program">
         <h2>Payments &amp; Work</h2>
-        <p>
-          Save the quotation floor schedule first. Payment items and target
-          dates will then repeat per quoted floor.
-        </p>
       </section>
     );
 
@@ -363,10 +359,6 @@ export function ConstructionProgramEditor({
         <strong>
           Synced from Company Settings · Work sequence is read only
         </strong>
-        <span>
-          Work, checks, QC guides and stage durations are managed in Settings.
-          Payment amounts can be set for this quotation.
-        </span>
       </div>
       {feedback && (
         <p role="status" className="qs-program-feedback">

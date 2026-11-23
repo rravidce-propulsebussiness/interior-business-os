@@ -1040,13 +1040,6 @@ export function BoqStageBuilder(props: Props) {
                   reinforcement with the structural engineer.
                 </p>
               )}
-              {category.key === 'pcc' && (
-                <small className="boq-stage-hint">
-                  PCC cement, sand and aggregate are calculated using the
-                  editable mix quantities in BOQ Rates. Concrete volume is
-                  informational and is not also charged as ready-mix.
-                </small>
-              )}
               {['sajjas', 'shelves'].includes(category.key) &&
                 !isStandardShelves && (
                   <BoqSmallRccSteelEditor
@@ -1090,14 +1083,6 @@ export function BoqStageBuilder(props: Props) {
         )}
         {category.key === 'brickwork' && floor && (
           <div className="boq-stage-dimensions">
-            <p className="boq-stage-hint">
-              Measure each wall type from the drawing. Enter external 9 inch and
-              internal 4/4.5 inch walls separately, including same-wall count.
-              Door and window areas from the Doors & Windows card are deducted
-              once, instead of using an estimated opening percentage. Brick,
-              cement and sand quantities follow the editable 100 sqft rules in
-              BOQ Rates.
-            </p>
             {walls.some((wall) => wall.location === 'external') &&
               props.floors.some(
                 (floor) => floor.name !== stage && !isPenthouseFloor(floor),
@@ -1119,11 +1104,6 @@ export function BoqStageBuilder(props: Props) {
                   Copy measured external walls to other full floors
                 </button>
               )}
-            <p className="boq-stage-hint">
-              Copies external walls only where that floor has no external
-              measurements. Penthouse and previously measured floors remain
-              unchanged.
-            </p>
             {walls.map((wall, wallIndex) => {
               const updateWall = (patch: Partial<WallMeasure>) =>
                 updateWalls(
@@ -1300,13 +1280,6 @@ export function BoqStageBuilder(props: Props) {
                 + Add measured wall
               </button>
             </div>
-            {walls.length > 0 && (
-              <p className="boq-stage-hint">
-                Wall deduction and quantities recalculate when opening sizes
-                change. For incomplete opening schedules, typical sizes are
-                assumed and flagged in the drawing warnings.
-              </p>
-            )}
           </div>
         )}
         {isFootings && (
@@ -1318,11 +1291,6 @@ export function BoqStageBuilder(props: Props) {
         )}
         {isColumns && (
           <>
-            <p className="boq-stage-hint">
-              Enter C1, C2 and other column types separately from F1/F2
-              footings. Main bars and rings are calculated here; footing
-              reinforcement and pedestals belong only in the Footings editor.
-            </p>
             {drawing.columns.map((col, ci) => (
               <div className="boq-stage-subcard" key={ci}>
                 <div className="boq-stage-subhead">
@@ -1407,11 +1375,6 @@ export function BoqStageBuilder(props: Props) {
         )}
         {isBeams && (
           <>
-            <p className="boq-stage-hint">
-              Record each beam type and its running length under this floor’s
-              roof. The engine calculates concrete and stirrups together with
-              the slab; costs are not counted twice.
-            </p>
             {drawing.beams.map((beam, bi) => (
               <div className="boq-stage-subcard" key={bi}>
                 <div className="boq-stage-subhead">
@@ -1536,12 +1499,6 @@ export function BoqStageBuilder(props: Props) {
         )}
         {category.key === 'plinth' && (
           <div className="boq-plinth-schedule">
-            {drawing.plinthRunFeet > 0 && !drawing.plinthBeams?.length && (
-              <p className="boq-stage-hint">
-                Existing total run imported as PB1. Confirm each beam length and
-                count from the drawing before editing.
-              </p>
-            )}
             {plinthRows.map((beam, bi) => (
               <section className="boq-stage-subcard" key={bi}>
                 <div className="boq-stage-subhead">
@@ -1738,19 +1695,6 @@ export function BoqStageBuilder(props: Props) {
             )}
           </>
         )}
-        {category.key === 'parapet' && (
-          <p className="boq-stage-hint">
-            Parapet quantities use the terrace footprint and the company
-            rate-card height. Adjust its measured quantity or rate below; the
-            saved override remains in the BOQ.
-          </p>
-        )}
-        {category.key === 'waterproofing' && (
-          <p className="boq-stage-hint">
-            Enter waterproofing square footage separately from parapet masonry,
-            to avoid double charging.
-          </p>
-        )}
         {current &&
           (category.key === 'doors' ||
             category.key === 'electrical' ||
@@ -1806,11 +1750,6 @@ export function BoqStageBuilder(props: Props) {
                 }
               />
             </div>
-            <p className="boq-stage-hint">
-              Applies cutting and breakage only to the tiles and granite ordered
-              for this floor. Cement and sand bedding are calculated separately
-              from tile area.
-            </p>
             <label className="boq-stage-scope-toggle">
               <input
                 type="checkbox"
@@ -1821,11 +1760,6 @@ export function BoqStageBuilder(props: Props) {
               />
               No room floor tiles on this floor
             </label>
-            <p className="boq-stage-hint">
-              Kitchen granite and wall tiles are measured separately for each
-              kitchen. Removing a kitchen removes its quantities from this floor
-              only.
-            </p>
             {measuredKitchens.map((kitchen, kitchenIndex) => {
               const update = (patch: Partial<typeof kitchen>) =>
                 updateKitchens(
@@ -1910,20 +1844,11 @@ export function BoqStageBuilder(props: Props) {
             >
               ＋ Add kitchen
             </button>
-            <p className="boq-stage-hint">
-              Room flooring can be set to zero above; bathroom tiles are
-              controlled by the bathroom count, and each extra kitchen has
-              independent dimensions.
-            </p>
           </div>
         )}
         {floor && category.key === 'staircase' && (
           <div className="boq-stage-dimensions">
             <h4>Staircase finishes on {stage}</h4>
-            <p className="boq-stage-hint">
-              Granite and railing are independent measurements. Enter 0 if
-              absent. Structural staircase concrete is estimated separately.
-            </p>
             <div className="boq-stage-input-grid">
               <InputNumber
                 label="Staircase granite"
@@ -1957,12 +1882,6 @@ export function BoqStageBuilder(props: Props) {
         {current && category.key === 'plaster' && (
           <div className="boq-stage-dimensions">
             <h4>Plastering from measured walls — {stage}</h4>
-            <p className="boq-stage-hint">
-              Enter wall length, height, thickness, and openings once in
-              Brickwork. Internal and external plaster face areas, cement and
-              sand then calculate automatically. One coat is 12 mm internal / 20
-              mm external; two coats add a 6 mm finishing coat.
-            </p>
             <div className="boq-stage-input-grid">
               <label className="boq-stage-field">
                 <span>Internal plaster coats</span>
@@ -2037,10 +1956,6 @@ export function BoqStageBuilder(props: Props) {
                 }}
               />
             </div>
-            <p className="boq-stage-hint">
-              Set an unused service to 0; add separately measured plumbing work
-              below if the quotation does not include it.
-            </p>
           </div>
         )}
         {current && category.key === 'electrical' && (
@@ -2068,14 +1983,6 @@ export function BoqStageBuilder(props: Props) {
         {current && category.key === 'doors' && (
           <div className="boq-stage-subcard">
             <h4>Door, window and ventilator sizes from drawing</h4>
-            <p className="boq-stage-hint">
-              Enter number × width × height in feet, for example 2×3×7. Each
-              measured window also produces one automatic RCC sunshade with a
-              standard 2 ft projection and 6 in overhang at each side. Cement,
-              sand, aggregate, estimated 8 mm steel and formwork are included
-              once. Confirm sizes and reinforcement from the drawing. Window
-              area is also deducted from the external brickwork.
-            </p>
             <div className="boq-stage-input-grid">
               {(
                 [
@@ -2121,11 +2028,6 @@ export function BoqStageBuilder(props: Props) {
                 }
               />
             </div>
-            <p className="boq-stage-hint">
-              If the drawing lists different sizes, enter each group separated
-              by a comma. Counts and size schedules should agree. Any missing
-              dimensions are labelled as assumed in the BOQ drawing warnings.
-            </p>
           </div>
         )}
         {current && category.key === 'penthouse' && stage === last && (
@@ -2150,10 +2052,6 @@ export function BoqStageBuilder(props: Props) {
                 )
               }
             />
-            <p className="boq-stage-hint">
-              This is part of the quoted top-floor area, not a second floor or a
-              duplicate cost.
-            </p>
           </div>
         )}
         {current && category.key === 'compound' && (
@@ -2171,16 +2069,6 @@ export function BoqStageBuilder(props: Props) {
             />
           </div>
         )}
-        {current &&
-          ['tiles', 'painting', 'plaster', 'brickwork'].includes(
-            category.key,
-          ) && (
-            <p className="boq-stage-hint">
-              Quantities use the wall, room and opening sizes entered in the
-              BOQ. Plaster cement and sand are automatically measured from
-              brickwork and selected coat counts; tiles use the wastage above.
-            </p>
-          )}
         {foundEntries.some(
           (entry) => entry.line.kind !== 'measured-geometry',
         ) &&
@@ -2453,10 +2341,6 @@ export function BoqStageBuilder(props: Props) {
           <div className="boq-guided-panel-head">
             <div>
               <h3>Material Rate Card</h3>
-              <p>
-                Enter cement, steel by diameter, RMC, aggregate, sand, bricks,
-                tiles, granite and all other material rates once.
-              </p>
             </div>
           </div>
           {props.canViewCost && (
@@ -2491,11 +2375,6 @@ export function BoqStageBuilder(props: Props) {
               </table>
             </div>
           )}
-          <p>
-            Rates are shared by the same BOQ quantity lines. Editing one rate
-            recalculates cost; it does not create another measurement or
-            estimate.
-          </p>
           {props.canViewCost && (
             <Link
               className="boq-guided-primary"
@@ -2511,11 +2390,6 @@ export function BoqStageBuilder(props: Props) {
           <div className="boq-guided-panel-head">
             <div>
               <h3>Labour Costing</h3>
-              <p>
-                Choose one base method: composite per sq ft, item-wise, or daily
-                labour. Extra work is charged only when outside the covered
-                package.
-              </p>
             </div>
           </div>
           <button
@@ -2532,10 +2406,6 @@ export function BoqStageBuilder(props: Props) {
           <div className="boq-guided-panel-head">
             <div>
               <h3>One Final Detailed BOQ</h3>
-              <p>
-                See every item, quantity, rate and amount under its floor, with
-                one material and labour total.
-              </p>
             </div>
           </div>
           <button
@@ -2625,10 +2495,6 @@ export function BoqStageBuilder(props: Props) {
                           />
                           Repeat same stage setup for other floors
                         </label>
-                        <small>
-                          Full floors can repeat; penthouse areas are excluded
-                          from bulk repetition.
-                        </small>
                         <div className="boq-stage-repeat-targets">
                           {props.floors.slice(1).map((floor) => (
                             <label key={floor.name}>
@@ -2814,11 +2680,6 @@ export function BoqStageBuilder(props: Props) {
                             >
                               <div className="boq-stage-misc-heading">
                                 <h4>Miscellaneous — {stage}</h4>
-                                <p>
-                                  Add only work not included in the measured
-                                  stages or quotation. Each item contributes to
-                                  this stage&apos;s BOQ total.
-                                </p>
                               </div>
                               {miscellaneousRows.map(({ line, lineIndex }) => {
                                 const output = line.outputs[0];

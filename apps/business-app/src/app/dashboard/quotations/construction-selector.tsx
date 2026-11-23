@@ -132,10 +132,6 @@ function CustomizedQuote({
         <div>
           <span className="qs-custom-eyebrow">CALCULATED PACKAGE</span>
           <h3>Custom Quote · Choose customer brands</h3>
-          <p>
-            Pick one brand per material category. Each cost per SFT comes from
-            the company’s saved purchase-unit price × consumption per SFT.
-          </p>
         </div>
         <div className="qs-custom-area">
           <label htmlFor="qs-custom-area">
@@ -238,10 +234,6 @@ function CustomizedQuote({
           </strong>
           <span>× {Number(area || 0).toLocaleString('en-IN')} SFT</span>
           <h3>{eligible ? money(estimatedTotal) : 'Select area and brands'}</h3>
-          <small>
-            Only selected categories are included; add labour, overhead and
-            other costs as priced categories if they belong in this quote.
-          </small>
         </div>
         <div className="qs-custom-actions">
           <button
@@ -279,10 +271,6 @@ function CustomizedQuote({
           <div className="qs-work-heading-icon">▤</div>
           <div>
             <h3>Premium Quotation PDF</h3>
-            <p>
-              Saved brand choices and prices are included in the same View,
-              Download and WhatsApp PDF.
-            </p>
           </div>
         </div>
         <QuotationPdfControls

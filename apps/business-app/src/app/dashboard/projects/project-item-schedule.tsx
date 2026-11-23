@@ -209,10 +209,6 @@ export function ProjectItemSchedule({
               placeholder="Sequence, assignee, or expected site access"
             />
           </label>
-          <p className="pv2-hint">
-            Overlapping and same-day plans are allowed. This does not start
-            work, approve QC or mark payment received.
-          </p>
           <button
             type="submit"
             className="pv2-button pv2-primary"

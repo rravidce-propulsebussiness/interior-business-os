@@ -106,7 +106,5 @@ describe('delivery project creation starts from a customer quotation', () => {
     expectSource(linkAction).not.toContain(
       "from('quotation_revisions').update",
     );
-    expectSource(linker).toContain('does not issue');
-    expectSource(linker).toContain('record customer approval or payment.');
   });
 });

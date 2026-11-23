@@ -321,12 +321,6 @@ export function StageChecklistItem({
                 </a>
               </p>
             )}
-            {kind === 'check' && (
-              <p className="pv2-hint">
-                Use a clear photo showing this specific check. Reusing a photo
-                does not approve the check automatically.
-              </p>
-            )}
             <label>
               Update notes (optional)
               <textarea

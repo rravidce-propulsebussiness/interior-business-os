@@ -61,13 +61,6 @@ export function BoqSlabScheduleEditor({
   );
   return (
     <div className="boq-structural-schedule">
-      {panels.length === 0 && (
-        <p className="boq-stage-hint">
-          The existing quotation floor slab is retained. Add S1/S2 panels only
-          when the structural drawing specifies separate slab dimensions or
-          steel.
-        </p>
-      )}
       {panels.map((panel, i) => {
         const updateSteel = (reinforcement: DesignSlabPanel['reinforcement']) =>
           change(i, { reinforcement });
@@ -301,12 +294,6 @@ export function BoqStaircaseScheduleEditor({
     );
   return (
     <div className="boq-structural-schedule">
-      {stairs.length === 0 && (
-        <p className="boq-stage-hint">
-          Existing stair rules are retained. Add ST1/ST2 to measure distinct
-          flights, widths and reinforcement layouts for this floor.
-        </p>
-      )}
       {stairs.map((stair, i) => {
         const updateSteel = (reinforcement: DesignStairType['reinforcement']) =>
           change(i, { reinforcement });
@@ -538,11 +525,6 @@ export function BoqSmallRccSteelEditor({
       >
         + Add rod size
       </button>
-      <small className="boq-structural-note">
-        Enter only approved bar counts and cut lengths (up to the configured
-        stock bar length). Steel is separate from site-mixed cement, sand and
-        aggregate.
-      </small>
     </section>
   );
 }
