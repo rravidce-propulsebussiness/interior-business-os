@@ -1,4 +1,5 @@
 name: BOQ cost integrity
+# Includes window-derived sunshade and two-dimension shelving regression checks.
 
 on:
   push:
