@@ -105,6 +105,15 @@ describe('compact BOQ entry stages', () => {
     expect(html).toContain('View or edit Compound Wall on Ground Floor');
   });
 
+  it('keeps one compact cement shelving entry without a second manual sunshade screen', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, { ...base, initialStep: 10 }),
+    );
+    expect(html).toContain('RCC Shelves');
+    expect(html).toContain('View or edit RCC Shelves on Ground Floor');
+    expect(html).not.toContain('View or edit Sajjas / Sunshades');
+  });
+
   it('provides Penthouse / Headroom on the top-floor services screen', () => {
     const html = renderToStaticMarkup(
       createElement(BoqStageBuilder, {
