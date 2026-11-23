@@ -4,6 +4,7 @@ export type FloorPricingItem = {
   stage: string;
   amount: number;
   isLabour: boolean;
+  isOverhead?: boolean;
 };
 
 /** A priced BOQ output. Details reuse the calculated takeoff; no second entry. */
@@ -22,6 +23,7 @@ export type FloorPricingStage = {
   areaSqft: number | null;
   materialCost: number;
   labourCost: number;
+  overheadCost: number;
   totalCost: number;
   costPerSqft: number | null;
 };
@@ -40,15 +42,28 @@ export function buildFloorPricing(
   floors: readonly { name: string; areaSqft: number }[],
   stageOrder: readonly string[],
 ): FloorPricingStage[] {
-  const byStage = new Map<string, { materials: number; labour: number }>();
-  const add = (stage: string, amount: number, isLabour: boolean) => {
-    const previous = byStage.get(stage) ?? { materials: 0, labour: 0 };
-    if (isLabour) previous.labour += safeCost(amount);
+  const byStage = new Map<
+    string,
+    { materials: number; labour: number; overhead: number }
+  >();
+  const add = (
+    stage: string,
+    amount: number,
+    isLabour: boolean,
+    isOverhead = false,
+  ) => {
+    const previous = byStage.get(stage) ?? {
+      materials: 0,
+      labour: 0,
+      overhead: 0,
+    };
+    if (isOverhead) previous.overhead += safeCost(amount);
+    else if (isLabour) previous.labour += safeCost(amount);
     else previous.materials += safeCost(amount);
     byStage.set(stage, previous);
   };
   for (const item of items)
-    add(item.stage || 'Other', item.amount, item.isLabour);
+    add(item.stage || 'Other', item.amount, item.isLabour, item.isOverhead);
   for (const [stage, amount] of Object.entries(allocatedLabour))
     add(stage || 'General', amount, true);
 
@@ -66,16 +81,18 @@ export function buildFloorPricing(
   return ordered
     .filter((stage) => byStage.has(stage) || areaByFloor.has(stage))
     .map((stage) => {
-      const cost = byStage.get(stage) ?? { materials: 0, labour: 0 };
+      const cost = byStage.get(stage) ?? { materials: 0, labour: 0, overhead: 0 };
       const area = areaByFloor.get(stage);
       const materialCost = cents(cost.materials);
       const labourCost = cents(cost.labour);
-      const totalCost = cents(materialCost + labourCost);
+      const overheadCost = cents(cost.overhead);
+      const totalCost = cents(materialCost + labourCost + overheadCost);
       return {
         stage,
         areaSqft: area && area > 0 ? area : null,
         materialCost,
         labourCost,
+        overheadCost,
         totalCost,
         costPerSqft: area && area > 0 ? totalCost / area : null,
       };
@@ -94,6 +111,7 @@ export function BoqFinalFloorPricing({
   rows,
   materialCost,
   labourCost,
+  overheadCost = 0,
   totalCost,
   areaSqft,
   canViewCost,
@@ -103,6 +121,7 @@ export function BoqFinalFloorPricing({
   rows: FloorPricingStage[];
   materialCost: number;
   labourCost: number;
+  overheadCost?: number;
   totalCost: number;
   areaSqft: number;
   canViewCost: boolean;
@@ -130,6 +149,7 @@ export function BoqFinalFloorPricing({
                 <>
                   <th scope="col">Materials</th>
                   <th scope="col">Labour</th>
+                  <th scope="col">Project expenses</th>
                   <th scope="col">Total cost</th>
                   <th scope="col">Cost / sq ft</th>
                 </>
@@ -153,6 +173,9 @@ export function BoqFinalFloorPricing({
                           {money(row.materialCost)}
                         </td>
                         <td data-label="Labour">{money(row.labourCost)}</td>
+                        <td data-label="Project expenses">
+                          {money(row.overheadCost)}
+                        </td>
                         <td data-label="Total cost">
                           <strong>{money(row.totalCost)}</strong>
                         </td>
@@ -165,7 +188,7 @@ export function BoqFinalFloorPricing({
                     )}
                   </tr>
                   <tr className="boq-final-details-row">
-                    <td colSpan={canViewCost ? 6 : 2}>
+                    <td colSpan={canViewCost ? 7 : 2}>
                       <details className="boq-floor-cost">
                         <summary>
                           View detailed quantities
@@ -227,6 +250,7 @@ export function BoqFinalFloorPricing({
                 <>
                   <td data-label="Materials">{money(materialCost)}</td>
                   <td data-label="Labour">{money(labourCost)}</td>
+                  <td data-label="Project expenses">{money(overheadCost)}</td>
                   <td data-label="Total cost">
                     <strong>{money(totalCost)}</strong>
                   </td>
