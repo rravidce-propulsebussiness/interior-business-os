@@ -128,33 +128,72 @@ export function cloudflarePdfRequest(
   };
 }
 
+// Browser Run REST quotas are small on the Workers Free plan (one quick
+// action every 10 seconds). A studio page can request the quotation and the
+// agreement PDF together, so the second call used to fail instantly with a
+// 429 that surfaced as a generic "generation failed". Serialize calls from
+// this process and wait for the provider's Retry-After before giving up.
+const CLOUDFLARE_RATE_LIMIT_RETRIES = 2;
+const CLOUDFLARE_MAX_RETRY_WAIT_MS = 12_000;
+let cloudflareQueue: Promise<unknown> = Promise.resolve();
+
+function cloudflareRetryDelayMs(response: Response) {
+  const seconds = Number(response.headers.get('retry-after'));
+  return Number.isFinite(seconds) && seconds > 0
+    ? Math.min(seconds * 1000, CLOUDFLARE_MAX_RETRY_WAIT_MS)
+    : CLOUDFLARE_MAX_RETRY_WAIT_MS;
+}
+
+async function cloudflarePdfAttempts(
+  request: ReturnType<typeof cloudflarePdfRequest>,
+  body: string,
+) {
+  for (let attempt = 0; ; attempt++) {
+    let response: Response;
+    try {
+      response = await fetch(request.url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${request.token}`,
+          'Content-Type': 'application/json',
+        },
+        body,
+        signal: AbortSignal.timeout(RENDER_TIMEOUT_MS),
+        redirect: 'error',
+      });
+    } catch {
+      throw new PdfServiceError('PDF_RENDER_FAILED');
+    }
+    if (response.status === 429) {
+      await response.body?.cancel().catch(() => undefined);
+      if (attempt >= CLOUDFLARE_RATE_LIMIT_RETRIES)
+        throw new PdfServiceError('PDF_RENDERER_BUSY');
+      await new Promise((resolve) =>
+        setTimeout(resolve, cloudflareRetryDelayMs(response)),
+      );
+      continue;
+    }
+    // Do not return a provider error body; it could contain private input.
+    if (
+      !response.ok ||
+      !response.headers.get('content-type')?.includes('application/pdf')
+    )
+      throw new PdfServiceError('PDF_RENDER_FAILED');
+    return Buffer.from(await response.arrayBuffer());
+  }
+}
+
 async function cloudflarePdf(html: string, options: PdfOptions) {
   const request = cloudflarePdfRequest(html, options);
   const body = JSON.stringify(request.body);
   if (Buffer.byteLength(body, 'utf8') > MAX_CLOUDFLARE_REQUEST_BYTES)
     throw new PdfServiceError('PDF_REQUEST_TOO_LARGE');
-  let response: Response;
-  try {
-    response = await fetch(request.url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${request.token}`,
-        'Content-Type': 'application/json',
-      },
-      body,
-      signal: AbortSignal.timeout(RENDER_TIMEOUT_MS),
-      redirect: 'error',
-    });
-  } catch {
-    throw new PdfServiceError('PDF_RENDER_FAILED');
-  }
-  // Do not return a provider error body; it could contain private input.
-  if (
-    !response.ok ||
-    !response.headers.get('content-type')?.includes('application/pdf')
-  )
-    throw new PdfServiceError('PDF_RENDER_FAILED');
-  return Buffer.from(await response.arrayBuffer());
+  const run = cloudflareQueue.then(
+    () => cloudflarePdfAttempts(request, body),
+    () => cloudflarePdfAttempts(request, body),
+  );
+  cloudflareQueue = run.catch(() => undefined);
+  return run;
 }
 
 async function applyMetadata(bytes: Uint8Array, options: PdfOptions) {
