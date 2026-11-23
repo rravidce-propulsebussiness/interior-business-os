@@ -7,6 +7,7 @@ import { executionServices } from './service';
 import { normalizeStructuralSettings } from '@business-os/core/construction-boq';
 import { LABOUR_WORKS } from './boq-labour';
 import { structuralDesignSchema } from './boq-structural-design-schema';
+import { BOQ_SCOPE_WORKS } from './boq-scope-coverage';
 
 const lineSchema = z.object({
   id: z.string().uuid(),
@@ -299,6 +300,14 @@ const saveSchema = z.object({
   items: z.array(lineSchema).max(500),
   labour: labourSchema.optional(),
   projectCosts: projectCostsSchema.optional(),
+  scopeReviews: z
+    .record(z.string().max(80), z.enum(['covered', 'excluded']))
+    .refine((reviews) =>
+      Object.keys(reviews).every((key) =>
+        BOQ_SCOPE_WORKS.some((item) => item.code === key),
+      ),
+    )
+    .optional(),
   /** Chosen brand / source per material group, e.g. bricks → Karimnagar. */
   selections: z.record(z.string().max(40), z.string().max(80)).default({}),
   generator: generatorSchema.optional(),
@@ -344,6 +353,7 @@ export async function saveManualBoq(input: unknown) {
       selections: value.selections,
       ...(value.labour ? { labour: value.labour } : {}),
       ...(value.projectCosts ? { projectCosts: value.projectCosts } : {}),
+      ...(value.scopeReviews ? { scopeReviews: value.scopeReviews } : {}),
       ...(value.generator ? { generator: value.generator } : {}),
     };
     let reply: DbReply;
