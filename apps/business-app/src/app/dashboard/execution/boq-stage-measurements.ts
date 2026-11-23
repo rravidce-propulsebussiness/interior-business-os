@@ -47,6 +47,8 @@ export type MeasuredDimensions = {
   depthFeet: number;
   /** Optional per-item reinforcement rows. No rows means zero assumed steel. */
   steelSets?: MeasuredSteelSet[];
+  /** Built-in cabinet: front width = lengthFeet, height = widthFeet. */
+  shelfStandard?: boolean;
 };
 export type MeasuredOutput = {
   name: string;
@@ -72,6 +74,79 @@ export function measuredVolume(values: MeasuredDimensions) {
     ? Math.round(count) * lengthFeet * widthFeet * depthFeet
     : 0;
   return { cft: round(cft, 3), m3: round(cft * CUBIC_METRES_PER_CFT) };
+}
+
+/** Budgetary assumptions for in-wall RCC/cement shelving, as photographed.
+ * Only the cabinet frontage is entered. Depth/spacing/thickness are standard
+ * takeoff assumptions, not structural specifications or a bar-bending schedule.
+ */
+export const STANDARD_SHELF_ASSUMPTIONS = {
+  depthFeet: 1.5,
+  panelThicknessIn: 2,
+  verticalBayWidthFeet: 3,
+  horizontalSpacingFeet: 2,
+  estimatedSteelKgPerM3: 45,
+  rodDiaMm: 8,
+  materialWastagePercent: 5,
+} as const;
+
+export function standardShelfTakeoff(
+  widthFeet: number,
+  heightFeet: number,
+  count: number,
+) {
+  if (
+    ![widthFeet, heightFeet, count].every(Number.isFinite) ||
+    widthFeet <= 0 ||
+    heightFeet <= 0 ||
+    count <= 0 ||
+    widthFeet > 50 ||
+    heightFeet > 30 ||
+    count > 100
+  )
+    return null;
+  const copies = Math.round(count);
+  if (!copies) return null;
+  const rules = STANDARD_SHELF_ASSUMPTIONS;
+  // The outside cheeks and central partitions are included; horizontal
+  // panels include a base/top and intermediate shelves at standard spacing.
+  const horizontalPanels = Math.max(
+    2,
+    Math.ceil(heightFeet / rules.horizontalSpacingFeet) + 1,
+  );
+  const verticalPanels = Math.max(
+    2,
+    Math.ceil(widthFeet / rules.verticalBayWidthFeet) + 1,
+  );
+  const thicknessFeet = rules.panelThicknessIn / 12;
+  const grossCft =
+    (horizontalPanels * widthFeet + verticalPanels * heightFeet) *
+    rules.depthFeet *
+    thicknessFeet;
+  const intersectionsCft =
+    horizontalPanels *
+    verticalPanels *
+    rules.depthFeet *
+    thicknessFeet *
+    thicknessFeet;
+  const concreteCft = Math.max(0, grossCft - intersectionsCft) * copies;
+  const withWastageM3 =
+    concreteCft *
+    CUBIC_METRES_PER_CFT *
+    (1 + rules.materialWastagePercent / 100);
+  const shutteringSqft =
+    (horizontalPanels * widthFeet * rules.depthFeet +
+      2 * verticalPanels * heightFeet * rules.depthFeet) *
+    copies;
+  return {
+    horizontalPanels,
+    verticalPanels,
+    volumeCft: round(concreteCft),
+    volumeM3: round(concreteCft * CUBIC_METRES_PER_CFT),
+    concreteWithWastageM3: withWastageM3,
+    shutteringSqft: round(shutteringSqft, 2),
+    copies,
+  };
 }
 
 /**
@@ -100,6 +175,7 @@ export function correctSavedSmallConcrete(
     lengthFeet: Number(line.inputs.lengthFeet),
     widthFeet: Number(line.inputs.widthFeet),
     depthFeet: Number(line.inputs.depthFeet),
+    shelfStandard: line.inputs.shelfStandard === true,
   };
   dims.steelSets = readMeasuredSteelSets(line.inputs.steelSetsJson);
   const next = measuredOutputs(category, dims, settings);
@@ -126,6 +202,83 @@ export function measuredOutputs(
     | 'aggregateTonPerCum'
   > & { stockBarFeet?: number },
 ): MeasuredOutput[] {
+  if (kind === 'shelves' && values.shelfStandard) {
+    const takeoff = standardShelfTakeoff(
+      values.lengthFeet,
+      values.widthFeet,
+      values.count,
+    );
+    if (!takeoff) return [];
+    const standard = STANDARD_SHELF_ASSUMPTIONS;
+    const source =
+      `${takeoff.copies} × ${values.lengthFeet} ft wide × ${values.widthFeet} ft high; ` +
+      `${takeoff.horizontalPanels} horizontal + ${takeoff.verticalPanels} vertical panels; ` +
+      `${standard.depthFeet} ft depth, ${standard.panelThicknessIn} in panels; ` +
+      `${standard.materialWastagePercent}% material wastage; verify on site`;
+    const purchasedM3 = takeoff.concreteWithWastageM3;
+    const stock = settings.stockBarFeet ?? 40;
+    const rodWeightKg =
+      stock * 0.3048 * (standard.rodDiaMm ** 2 / 162);
+    const estimatedKg =
+      purchasedM3 * standard.estimatedSteelKgPerM3;
+    const rods = Math.ceil(estimatedKg / rodWeightKg);
+    return [
+      {
+        name: 'Shelf concrete volume (reference only)',
+        quantity: takeoff.volumeM3,
+        unit: 'm³',
+        rate: 0,
+        source,
+      },
+      {
+        name: 'Cement (shelves)',
+        material: 'cement',
+        quantity: round(purchasedM3 * M20_SITE_MIX_PER_M3.cementBags, 1),
+        unit: 'bag',
+        source,
+      },
+      {
+        name: 'Sand (shelves)',
+        material: 'sand',
+        quantity: round(
+          purchasedM3 *
+          M20_SITE_MIX_PER_M3.sandCubicMetres *
+          settings.sandTonPerCum,
+          2,
+        ),
+        unit: 't',
+      },
+      {
+        name: 'Aggregate (shelves)',
+        material: 'aggregate',
+        quantity: round(
+          purchasedM3 *
+          M20_SITE_MIX_PER_M3.aggregateCubicMetres *
+          settings.aggregateTonPerCum,
+          2,
+        ),
+        unit: 't',
+      },
+      {
+        name: 'Shelf shuttering (estimated)',
+        material: 'shuttering',
+        quantity: takeoff.shutteringSqft,
+        unit: 'sqft',
+        source: 'Horizontal soffits and both vertical partition faces; provisional',
+      },
+      {
+        name: `${standard.rodDiaMm} mm TMT (shelves, provisional)`,
+        material: 'steel',
+        quantity: rods,
+        unit: 'rod',
+        diameter: standard.rodDiaMm,
+        rods,
+        weightKg: round(rods * rodWeightKg, 2),
+        source:
+          `Provisional ${standard.estimatedSteelKgPerM3} kg/m³, ${stock} ft stock; replace with approved BBS`,
+      },
+    ];
+  }
   const volume = measuredVolume(values);
   if (!(volume.m3 > 0)) return [];
   const source = `${values.count} × ${values.lengthFeet} × ${values.widthFeet} × ${values.depthFeet} ft = ${volume.cft} cft`;
