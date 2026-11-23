@@ -172,6 +172,11 @@ export type FloorFinishes = {
   staircaseGraniteSqft?: number;
   /** Staircase / balcony handrail length entered from the drawing (running ft). */
   railingFeet?: number;
+  /** One or two coats, measured against the same net wall-face area. */
+  internalPlasterCoats?: 1 | 2;
+  externalPlasterCoats?: 1 | 2;
+  /** Floor-specific cutting/breakage allowance for tiles and granite. */
+  tileWastagePercent?: number;
 };
 
 export type BoqCounts = {
@@ -1822,6 +1827,15 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
         : {}),
       kitchenPlatformFeet: feet(value.kitchenPlatformFeet),
       railingFeet: feet(value.railingFeet),
+      ...(value.internalPlasterCoats !== undefined
+        ? { internalPlasterCoats: Number(value.internalPlasterCoats) === 2 ? 2 as const : 1 as const }
+        : {}),
+      ...(value.externalPlasterCoats !== undefined
+        ? { externalPlasterCoats: Number(value.externalPlasterCoats) === 2 ? 2 as const : 1 as const }
+        : {}),
+      ...(value.tileWastagePercent !== undefined
+        ? { tileWastagePercent: num(value.tileWastagePercent, 0, 0, 30) }
+        : {}),
     };
   }
   const doorSizesRaw =
@@ -2399,6 +2413,36 @@ const concreteOutputs = (
       ];
 
 /**
+ * Cement and sand takeoff from net plaster faces, not from the building
+ * footprint. The second coat is a separate 6 mm finishing pass: internal
+ * first coat 12 mm (1:6), external first coat 20 mm (1:4). Rates are project
+ * assumptions until site-approved mix designs are provided.
+ */
+export function plasterMaterialTakeoff(
+  internalAreaSqft: number,
+  externalAreaSqft: number,
+  internalCoats: 1 | 2 = 1,
+  externalCoats: 1 | 2 = 1,
+  wastePercent = 0,
+) {
+  const internal = Math.max(0, internalAreaSqft);
+  const external = Math.max(0, externalAreaSqft);
+  // The 6 mm second coat is 50% of the internal 12 mm coat or
+  // 30% of the external 20 mm coat, not a second full-thickness pass.
+  const insideFactor = internalCoats === 2 ? 1.5 : 1;
+  const outsideFactor = externalCoats === 2 ? 1.3 : 1;
+  const waste = 1 + Math.max(0, wastePercent) / 100;
+  return {
+    cementBags:
+      (internal * 0.0058 * insideFactor +
+        external * 0.0136 * outsideFactor) * waste,
+    sandM3:
+      (internal * 0.0012 * insideFactor +
+        external * 0.0019 * outsideFactor) * waste,
+  };
+}
+
+/**
  * Bricks, mortar and plaster materials for a wall volume (m³) and plastered
  * faces (sq ft). Internal plaster 12 mm 1:6, external 20 mm 1:4.
  */
@@ -2407,8 +2451,14 @@ const brickworkOutputs = (
   internalPlaster: number,
   externalPlaster: number,
   s: StructuralSettings,
+  internalCoats: 1 | 2 = 1,
+  externalCoats: 1 | 2 = 1,
 ): GeneratedOutput[] => {
   const waste = 1 + s.materialWastagePercent / 100;
+  const plaster = plasterMaterialTakeoff(
+    internalPlaster, externalPlaster, internalCoats, externalCoats,
+    s.materialWastagePercent,
+  );
   return [
     {
       name: 'Bricks',
@@ -2421,17 +2471,15 @@ const brickworkOutputs = (
       name: 'Cement (brickwork & plaster)',
       material: 'cement_masonry',
       quantity: round(
-        (volume * 1.5 + internalPlaster * 0.0058 + externalPlaster * 0.0136) *
-          waste,
+        volume * 1.5 * waste + plaster.cementBags,
         1,
       ),
       unit: 'bag',
       source:
-        'Mortar 1:6 · 12 mm internal plaster 1:6 · 20 mm external plaster 1:4',
+        'Mortar 1:6 · plaster 12 mm internal/20 mm external first coat; optional 6 mm second coat',
     },
     sandOutput(
-      (volume * 0.32 + internalPlaster * 0.0012 + externalPlaster * 0.0019) *
-        waste,
+      volume * 0.32 * waste + plaster.sandM3,
       s,
     ),
     ...(internalPlaster > 0
@@ -2453,6 +2501,24 @@ const brickworkOutputs = (
             unit: 'sqft',
           },
         ]
+      : []),
+    ...(s.labourItemized && internalCoats === 2 && internalPlaster > 0
+      ? [{
+          name: 'Internal plaster second coat',
+          material: 'plaster_labour',
+          quantity: round(internalPlaster, 0),
+          unit: 'sqft',
+          source: 'Second 6 mm coat; confirm separate labour rate',
+        }]
+      : []),
+    ...(s.labourItemized && externalCoats === 2 && externalPlaster > 0
+      ? [{
+          name: 'External plaster second coat',
+          material: 'plaster_labour',
+          quantity: round(externalPlaster, 0),
+          unit: 'sqft',
+          source: 'Second 6 mm coat; confirm separate labour rate',
+        }]
       : []),
   ];
 };
@@ -3704,8 +3770,19 @@ export function generateQuotationBoq(
         ? netInternal
         : perimeter * s.internalWallRatio * wallHeight * solid;
       const internalPlaster = externalArea + 2 * internalArea;
-      const externalPlaster = externalArea * 1.1;
+      const externalPlaster = externalArea * (measured ? 1 : 1.1);
       wallsByFloor.set(floor.name, { internalPlaster, externalPlaster });
+      const internalCoats: 1 | 2 =
+        counts.finishes?.[floor.name]?.internalPlasterCoats === 2 ? 2 : 1;
+      const externalCoats: 1 | 2 =
+        counts.finishes?.[floor.name]?.externalPlasterCoats === 2 ? 2 : 1;
+      const plaster = plasterMaterialTakeoff(
+        internalPlaster,
+        externalPlaster,
+        internalCoats,
+        externalCoats,
+        s.materialWastagePercent,
+      );
       const measuredWallOutputs: GeneratedOutput[] = [];
       let volume = 0;
       if (measured || splitBeamSlab) {
@@ -3794,16 +3871,16 @@ export function generateQuotationBoq(
             name: 'Cement (plaster)',
             material: 'cement_masonry',
             quantity: round(
-              (internalPlaster * 0.0058 + externalPlaster * 0.0136) * waste,
+              plaster.cementBags,
               1,
             ),
             unit: 'bag',
+            source: `${internalCoats} internal / ${externalCoats} external coat(s) from measured wall faces + ${s.materialWastagePercent}% waste`,
           },
-          sandOutput(
-            (internalPlaster * 0.0012 + externalPlaster * 0.0019) * waste,
-            s,
-            'Sand (plaster)',
-          ),
+          {
+            ...sandOutput(plaster.sandM3, s, 'Sand (plaster)'),
+            source: `${internalCoats} internal / ${externalCoats} external coat(s) from measured wall faces + ${s.materialWastagePercent}% waste`,
+          },
           ...(internalPlaster > 0
             ? [
                 {
@@ -3823,6 +3900,24 @@ export function generateQuotationBoq(
                   unit: 'sqft',
                 },
               ]
+            : []),
+          ...(s.labourItemized && internalCoats === 2 && internalPlaster > 0
+            ? [{
+                name: 'Internal plaster second coat',
+                material: 'plaster_labour',
+                quantity: round(internalPlaster, 0),
+                unit: 'sqft',
+                source: 'Second 6 mm coat; confirm separate labour rate',
+              }]
+            : []),
+          ...(s.labourItemized && externalCoats === 2 && externalPlaster > 0
+            ? [{
+                name: 'External plaster second coat',
+                material: 'plaster_labour',
+                quantity: round(externalPlaster, 0),
+                unit: 'sqft',
+                source: 'Second 6 mm coat; confirm separate labour rate',
+              }]
             : []),
         );
       } else {
@@ -3871,6 +3966,8 @@ export function generateQuotationBoq(
                     internalPlaster,
                     externalPlaster,
                     s,
+                    internalCoats,
+                    externalCoats,
                   ),
                 ],
         },
@@ -4329,7 +4426,8 @@ export function generateQuotationBoq(
               sum + kitchen.wallTileFeet * kitchen.wallTileHeightFeet,
             0,
           );
-    const tileWaste = 1 + s.tileWastagePercent / 100;
+    const tileWastePercent = fin?.tileWastagePercent ?? s.tileWastagePercent;
+    const tileWaste = 1 + tileWastePercent / 100;
     /** Area to buy (with wastage) and the tiles / boxes to order. */
     const tileOrder = (
       area: number,
