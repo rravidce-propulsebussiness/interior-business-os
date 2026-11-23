@@ -11,6 +11,7 @@ import {
   parseFeet,
   parseOpenings,
   parseSizes,
+  plasterMaterialTakeoff,
 } from './construction-boq';
 import { calculateSftEstimate } from './sft-quotation';
 import {
@@ -1538,6 +1539,91 @@ describe('entering the drawings by hand', () => {
     expect(
       changed.outputs.find((item) => item.material === 'bricks')!.quantity,
     ).toBeLessThan(bricks.quantity);
+  });
+
+  it('calculates single and double coat plaster material from wall-face area', () => {
+    const single = plasterMaterialTakeoff(1000, 500, 1, 1, 5);
+    const double = plasterMaterialTakeoff(1000, 500, 2, 2, 5);
+    expect(single.cementBags).toBeCloseTo(
+      (1000 * 0.0058 + 500 * 0.0136) * 1.05,
+      6,
+    );
+    expect(double.cementBags).toBeGreaterThan(single.cementBags);
+    expect(double.sandM3).toBeGreaterThan(single.sandM3);
+    expect(plasterMaterialTakeoff(0, 0, 2, 2, 5).cementBags).toBe(0);
+  });
+
+  it('generates measured plaster cement and sand directly from wall sizes and coat counts', () => {
+    const walls = [
+      {
+        id: 'outer',
+        name: 'Outside',
+        location: 'external' as const,
+        count: 4,
+        lengthFeet: 30,
+        heightFeet: 10,
+        thicknessIn: 9,
+      },
+      {
+        id: 'inner',
+        name: 'Inside',
+        location: 'internal' as const,
+        count: 3,
+        lengthFeet: 20,
+        heightFeet: 10,
+        thicknessIn: 4.5,
+      },
+    ];
+    const counts = {
+      floors: { 'Ground Floor': {
+        mainDoors: 0, internalDoors: 0, bathroomDoors: 0, poojaDoors: 0,
+        windows: 0, ventilators: 0, bathrooms: 0, kitchens: 0,
+        rollingShutters: 0, lightPoints: 0, fanPoints: 0,
+        socketPoints: 0, powerPoints: 0,
+      } },
+      walls: { 'Ground Floor': walls },
+      finishes: { 'Ground Floor': {
+        rooms: [], bathroomLengthFeet: 0, bathroomWidthFeet: 0,
+        kitchenPlatformFeet: 0, internalPlasterCoats: 2 as const,
+        externalPlasterCoats: 1 as const,
+        tileWastagePercent: 12,
+      } },
+      entranceGates: 0, compoundWallFeet: 0,
+    };
+    const result = generateQuotationBoq({
+      details: quote(),
+      counts,
+      splitBeamSlab: true,
+    });
+    const masonry = result.lines.find(
+      (line) => line.section === 'Ground Floor' && line.kind === 'quote-masonry',
+    )!;
+    const cement = masonry.outputs.find((o) => o.name === 'Cement (plaster)')!;
+    const sand = masonry.outputs.find((o) => o.name === 'Sand (plaster)')!;
+    // External 1,200 sqft, both faces of 600 sqft internal, no openings.
+    const expected = plasterMaterialTakeoff(2400, 1200, 2, 1, 5);
+    expect(cement.quantity).toBeCloseTo(expected.cementBags, 1);
+    expect(sand.quantity).toBeGreaterThan(0);
+    expect(
+      masonry.outputs.find((o) => o.name === 'Internal plaster second coat')
+        ?.quantity,
+    ).toBe(2400);
+    const single = generateQuotationBoq({
+      details: quote(),
+      counts: {
+        ...counts,
+        finishes: {
+          'Ground Floor': { ...counts.finishes['Ground Floor'], internalPlasterCoats: 1 as const },
+        },
+      },
+      splitBeamSlab: true,
+    }).lines.find((line) =>
+      line.section === 'Ground Floor' && line.kind === 'quote-masonry',
+    )!;
+    expect(single.outputs.find((o) => o.name === 'Cement (plaster)')!.quantity)
+      .toBeLessThan(cement.quantity);
+    expect(single.outputs.some((o) => o.name === 'Internal plaster second coat'))
+      .toBe(false);
   });
 
   it('measures independent F1 footing schedule without inventing columns', () => {
