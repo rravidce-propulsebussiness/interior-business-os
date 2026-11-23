@@ -63,6 +63,7 @@ import {
   type BoqProjectCosts,
 } from './boq-project-costs';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
+import { isAutoPlasterQuantity } from './boq-plaster-guards';
 import {
   BOQ_SCOPE_WORKS,
   summarizeBoqScope,
@@ -777,15 +778,16 @@ export function BoqWorkspace({
       ...line,
       outputs: line.outputs.map((output) => {
         const edit = edits[overrideKey(line, output)];
+        const lockedPlaster = isAutoPlasterQuantity(line.kind, output.name);
         const measured = edit
           ? {
               ...output,
-              ...(edit.quantity !== undefined
+              ...(edit.quantity !== undefined && !lockedPlaster
                 ? { quantity: edit.quantity }
                 : {}),
               ...(edit.rate !== undefined ? { rate: edit.rate } : {}),
               source:
-                `Edited on the BOQ${output.source ? ` · ${output.source}` : ''}`.slice(
+                `${lockedPlaster ? 'Auto-measured from walls' : 'Edited on the BOQ'}${output.source ? ` · ${output.source}` : ''}`.slice(
                   0,
                   300,
                 ),
@@ -1052,6 +1054,8 @@ export function BoqWorkspace({
   ) {
     const target = lines[lineIndex];
     const output = target?.outputs[outputIndex];
+    if (target?.origin && output &&
+        isAutoPlasterQuantity(target.kind, output.name)) return;
     if (target?.origin && output) {
       const key = overrideKey(target, output);
       const next = {
@@ -1092,7 +1096,8 @@ export function BoqWorkspace({
   function resetOutputQuantity(lineIndex: number, outputIndex: number) {
     const line = lines[lineIndex];
     const output = line?.outputs[outputIndex];
-    if (!line?.origin || !output) return;
+    if (!line?.origin || !output ||
+        isAutoPlasterQuantity(line.kind, output.name)) return;
     const key = overrideKey(line, output);
     const existing = overrides[key];
     if (!existing || existing.quantity === undefined) return;
