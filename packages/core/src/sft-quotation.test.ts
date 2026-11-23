@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  quotedStructuralFloors,
   calculateSftEstimate,
   editableSftRows,
   sftEstimateInputSchema,
@@ -380,5 +381,28 @@ describe('reopening a saved construction quote does not block Save', () => {
     expect(
       calculateSftEstimate({ rows: editable, materialIds: [] }).total,
     ).toBe(original.total);
+  });
+});
+
+describe('quoted structural floors', () => {
+  it('groups parking zones with their level and keeps penthouse labels', () => {
+    expect(
+      quotedStructuralFloors([
+        { kind: 'floor', name: 'Ground Floor' },
+        { kind: 'floor', name: 'Ground Floor — Parking' },
+        { kind: 'floor', name: 'First Floor' },
+        { kind: 'floor', name: 'Fourth Floor — Penthouse' },
+        { kind: 'additional', name: 'Borewell' },
+      ]),
+    ).toEqual(['Ground Floor', 'First Floor', 'Fourth Floor — Penthouse']);
+  });
+
+  it('keeps an all-parking stilt level as one structural floor', () => {
+    expect(
+      quotedStructuralFloors([
+        { kind: 'floor', name: 'Ground Floor — Parking' },
+        { kind: 'floor', name: 'First Floor' },
+      ]),
+    ).toEqual(['Ground Floor', 'First Floor']);
   });
 });

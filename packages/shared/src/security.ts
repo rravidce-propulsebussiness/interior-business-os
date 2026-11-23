@@ -30,3 +30,10 @@ export function adminContentSecurityPolicy(
     "frame-ancestors 'none'",
   ].join('; ');
 }
+
+// Authenticated workspace HTML is private and must reach the browser exactly
+// as React rendered it. `no-transform` stops edge proxies (Cloudflare Email
+// Address Obfuscation, minification) from rewriting the markup, which would
+// otherwise hide customer email addresses behind a CSP-blocked decoder script
+// and break React hydration with a text mismatch (error #418).
+export const PRIVATE_NO_STORE_CACHE_CONTROL = 'private, no-store, no-transform';

@@ -272,3 +272,29 @@ export function parseSftEstimate(
     return null;
   }
 }
+
+const QUOTED_ZONE_SUFFIX = /\s+—\s+(Parking|Penthouse)$/;
+
+/**
+ * Structural levels built from a floor-wise quotation, in quoted order.
+ *
+ * Parking is a separately priced *zone* of a level, not another slab: a
+ * "Ground Floor" plus "Ground Floor — Parking" quote is one ground-floor
+ * column/slab cycle. A penthouse replaces its level and keeps its label.
+ */
+export function quotedStructuralFloors(
+  rows: readonly { kind?: string | undefined; name: string }[],
+): string[] {
+  const levels: string[] = [];
+  const penthouses = new Set<string>();
+  for (const row of rows) {
+    if ((row.kind ?? 'floor') === 'additional') continue;
+    const zone = QUOTED_ZONE_SUFFIX.exec(row.name);
+    const level = zone ? row.name.slice(0, zone.index) : row.name;
+    if (!levels.includes(level)) levels.push(level);
+    if (zone?.[1] === 'Penthouse') penthouses.add(level);
+  }
+  return levels.map((level) =>
+    penthouses.has(level) ? level + ' — Penthouse' : level,
+  );
+}

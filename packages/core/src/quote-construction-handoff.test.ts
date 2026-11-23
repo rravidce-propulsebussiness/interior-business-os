@@ -30,6 +30,31 @@ function acceptedDescription(
 }
 
 describe('approved quotation to construction-stage snapshot', () => {
+  it('treats a parking zone as part of its level, not an extra RCC cycle', () => {
+    const plan = constructionPlanFromQuotedDescriptions([
+      acceptedDescription([
+        { name: 'Ground Floor', kind: 'floor' as const },
+        { name: 'Ground Floor — Parking', kind: 'floor' as const },
+        { name: 'First Floor', kind: 'floor' as const },
+        { name: 'Second Floor — Penthouse', kind: 'floor' as const },
+        { name: 'Borewell', kind: 'additional' as const },
+      ]),
+    ]);
+    expect(plan?.floors.map((floor) => floor.name)).toEqual([
+      'Ground Floor',
+      'First Floor',
+      'Second Floor — Penthouse',
+    ]);
+    expect(
+      plan?.stages.filter((stage) => stage.templateCode === 'RCC'),
+    ).toHaveLength(3);
+    const scope = plan?.stages.find(
+      (stage) => stage.templateCode === 'QUOTED_SCOPE',
+    );
+    // The separately priced parking area is still part of the quoted scope.
+    expect(scope?.activities.join(' ')).toContain('Ground Floor — Parking');
+  });
+
   it('uses only accepted floor rows, retaining the additional work and quoted specifications', () => {
     const plan = constructionPlanFromQuotedDescriptions([
       'ordinary quotation line',

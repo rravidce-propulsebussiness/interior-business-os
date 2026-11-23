@@ -231,3 +231,86 @@ test('package PDF preview is a valid multi-page A4 document without Chromium', a
   });
   expect(pdf.getTitle()).toContain('Royal Construction');
 });
+
+async function cloudflareSamplePdf() {
+  const doc = await PDFDocument.create();
+  doc.addPage([300, 200]);
+  return Uint8Array.from(await doc.save()).buffer;
+}
+
+function stubCloudflareRenderer() {
+  vi.stubEnv('PDF_RENDERER', 'cloudflare-rest');
+  vi.stubEnv('CF_BROWSER_ACCOUNT_ID', 'b'.repeat(32));
+  vi.stubEnv('CF_BROWSER_API_TOKEN', 'staging-token');
+}
+
+const rateLimited = () =>
+  new Response('rate limited', {
+    status: 429,
+    headers: { 'retry-after': '10' },
+  });
+
+test('Cloudflare rate limits are waited out instead of failing the PDF', async () => {
+  stubCloudflareRenderer();
+  const pdf = await cloudflareSamplePdf();
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce(rateLimited())
+    .mockResolvedValueOnce(
+      new Response(pdf, { headers: { 'content-type': 'application/pdf' } }),
+    );
+  vi.stubGlobal('fetch', fetchMock);
+  vi.useFakeTimers({ toFake: ['setTimeout'] });
+  try {
+    const rendered = renderPdf('<html><body>Agreement</body></html>');
+    await vi.advanceTimersByTimeAsync(10_000);
+    const bytes = await rendered;
+    expect(bytes.toString('ascii', 0, 5)).toBe('%PDF-');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test('persistent Cloudflare rate limiting reports a retryable busy engine', async () => {
+  stubCloudflareRenderer();
+  const fetchMock = vi.fn(async () => rateLimited());
+  vi.stubGlobal('fetch', fetchMock);
+  vi.useFakeTimers({ toFake: ['setTimeout'] });
+  try {
+    const rendered = renderPdf('<html><body>Quote</body></html>');
+    const outcome = expect(rendered).rejects.toMatchObject({
+      code: 'PDF_RENDERER_BUSY',
+      status: 503,
+    });
+    await vi.advanceTimersByTimeAsync(30_000);
+    await outcome;
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
+test('concurrent Cloudflare PDFs are sent one at a time', async () => {
+  stubCloudflareRenderer();
+  const pdf = await cloudflareSamplePdf();
+  let inFlight = 0;
+  let maxInFlight = 0;
+  const fetchMock = vi.fn(async () => {
+    inFlight++;
+    maxInFlight = Math.max(maxInFlight, inFlight);
+    await Promise.resolve();
+    inFlight--;
+    return new Response(pdf.slice(0), {
+      headers: { 'content-type': 'application/pdf' },
+    });
+  });
+  vi.stubGlobal('fetch', fetchMock);
+  const [quote, agreement] = await Promise.all([
+    renderPdf('<html><body>Quote</body></html>'),
+    renderPdf('<html><body>Agreement</body></html>'),
+  ]);
+  expect(quote.toString('ascii', 0, 5)).toBe('%PDF-');
+  expect(agreement.toString('ascii', 0, 5)).toBe('%PDF-');
+  expect(maxInFlight).toBe(1);
+});
