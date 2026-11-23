@@ -1575,20 +1575,37 @@ describe('entering the drawings by hand', () => {
       },
     ];
     const counts = {
-      floors: { 'Ground Floor': {
-        mainDoors: 0, internalDoors: 0, bathroomDoors: 0, poojaDoors: 0,
-        windows: 0, ventilators: 0, bathrooms: 0, kitchens: 0,
-        rollingShutters: 0, lightPoints: 0, fanPoints: 0,
-        socketPoints: 0, powerPoints: 0,
-      } },
+      floors: {
+        'Ground Floor': {
+          mainDoors: 0,
+          internalDoors: 0,
+          bathroomDoors: 0,
+          poojaDoors: 0,
+          windows: 0,
+          ventilators: 0,
+          bathrooms: 0,
+          kitchens: 0,
+          rollingShutters: 0,
+          lightPoints: 0,
+          fanPoints: 0,
+          socketPoints: 0,
+          powerPoints: 0,
+        },
+      },
       walls: { 'Ground Floor': walls },
-      finishes: { 'Ground Floor': {
-        rooms: [], bathroomLengthFeet: 0, bathroomWidthFeet: 0,
-        kitchenPlatformFeet: 0, internalPlasterCoats: 2 as const,
-        externalPlasterCoats: 1 as const,
-        tileWastagePercent: 12,
-      } },
-      entranceGates: 0, compoundWallFeet: 0,
+      finishes: {
+        'Ground Floor': {
+          rooms: [],
+          bathroomLengthFeet: 0,
+          bathroomWidthFeet: 0,
+          kitchenPlatformFeet: 0,
+          internalPlasterCoats: 2 as const,
+          externalPlasterCoats: 1 as const,
+          tileWastagePercent: 12,
+        },
+      },
+      entranceGates: 0,
+      compoundWallFeet: 0,
     };
     const result = generateQuotationBoq({
       details: quote(),
@@ -1597,13 +1614,18 @@ describe('entering the drawings by hand', () => {
       settings: { ...DEFAULT_STRUCTURAL_SETTINGS, labourItemized: 1 },
     });
     const masonry = result.lines.find(
-      (line) => line.section === 'Ground Floor' && line.kind === 'quote-masonry',
+      (line) =>
+        line.section === 'Ground Floor' && line.kind === 'quote-masonry',
     )!;
     const cement = masonry.outputs.find((o) => o.name === 'Cement (plaster)')!;
     const sand = masonry.outputs.find((o) => o.name === 'Sand (plaster)')!;
     // External 1,200 sqft, both faces of 600 sqft internal, no openings.
     const expected = plasterMaterialTakeoff(
-      2400, 1200, 2, 1, DEFAULT_STRUCTURAL_SETTINGS.materialWastagePercent,
+      2400,
+      1200,
+      2,
+      1,
+      DEFAULT_STRUCTURAL_SETTINGS.materialWastagePercent,
     );
     expect(cement.quantity).toBeCloseTo(expected.cementBags, 1);
     expect(sand.quantity).toBeGreaterThan(0);
@@ -1616,18 +1638,24 @@ describe('entering the drawings by hand', () => {
       counts: {
         ...counts,
         finishes: {
-          'Ground Floor': { ...counts.finishes['Ground Floor'], internalPlasterCoats: 1 as const },
+          'Ground Floor': {
+            ...counts.finishes['Ground Floor'],
+            internalPlasterCoats: 1 as const,
+          },
         },
       },
       splitBeamSlab: true,
       settings: { ...DEFAULT_STRUCTURAL_SETTINGS, labourItemized: 1 },
-    }).lines.find((line) =>
-      line.section === 'Ground Floor' && line.kind === 'quote-masonry',
+    }).lines.find(
+      (line) =>
+        line.section === 'Ground Floor' && line.kind === 'quote-masonry',
     )!;
-    expect(single.outputs.find((o) => o.name === 'Cement (plaster)')!.quantity)
-      .toBeLessThan(cement.quantity);
-    expect(single.outputs.some((o) => o.name === 'Internal plaster second coat'))
-      .toBe(false);
+    expect(
+      single.outputs.find((o) => o.name === 'Cement (plaster)')!.quantity,
+    ).toBeLessThan(cement.quantity);
+    expect(
+      single.outputs.some((o) => o.name === 'Internal plaster second coat'),
+    ).toBe(false);
   });
 
   it('measures independent F1 footing schedule without inventing columns', () => {

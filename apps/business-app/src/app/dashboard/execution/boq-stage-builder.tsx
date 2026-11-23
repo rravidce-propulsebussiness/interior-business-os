@@ -283,7 +283,9 @@ function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
   if (kind === 'quote-kitchen')
     return /sink/i.test(output.name) ? 'plumbing' : 'tiles';
   if (kind === 'quote-masonry')
-    return /^(?:Internal|External) plaster(?:\s|$)|\(plaster\)/i.test(output.name)
+    return /^(?:Internal|External) plaster(?:\s|$)|\(plaster\)/i.test(
+      output.name,
+    )
       ? 'plaster'
       : 'brickwork';
   if (kind === 'quote-parapet') {
@@ -1742,9 +1744,9 @@ export function BoqStageBuilder(props: Props) {
               />
             </div>
             <p className="boq-stage-hint">
-              Applies cutting and breakage only to the tiles and granite
-              ordered for this floor. Cement and sand bedding are calculated
-              separately from tile area.
+              Applies cutting and breakage only to the tiles and granite ordered
+              for this floor. Cement and sand bedding are calculated separately
+              from tile area.
             </p>
             <label className="boq-stage-scope-toggle">
               <input
@@ -1895,8 +1897,8 @@ export function BoqStageBuilder(props: Props) {
             <p className="boq-stage-hint">
               Enter wall length, height, thickness, and openings once in
               Brickwork. Internal and external plaster face areas, cement and
-              sand then calculate automatically. One coat is 12 mm internal /
-              20 mm external; two coats add a 6 mm finishing coat.
+              sand then calculate automatically. One coat is 12 mm internal / 20
+              mm external; two coats add a 6 mm finishing coat.
             </p>
             <div className="boq-stage-input-grid">
               <label className="boq-stage-field">
@@ -1905,8 +1907,7 @@ export function BoqStageBuilder(props: Props) {
                   value={finishes?.internalPlasterCoats ?? 1}
                   onChange={(event) =>
                     changeFinishes({
-                      internalPlasterCoats:
-                        event.target.value === '2' ? 2 : 1,
+                      internalPlasterCoats: event.target.value === '2' ? 2 : 1,
                     })
                   }
                 >
@@ -1920,8 +1921,7 @@ export function BoqStageBuilder(props: Props) {
                   value={finishes?.externalPlasterCoats ?? 1}
                   onChange={(event) =>
                     changeFinishes({
-                      externalPlasterCoats:
-                        event.target.value === '2' ? 2 : 1,
+                      externalPlasterCoats: event.target.value === '2' ? 2 : 1,
                     })
                   }
                 >

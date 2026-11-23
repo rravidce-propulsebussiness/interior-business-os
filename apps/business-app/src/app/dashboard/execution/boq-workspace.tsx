@@ -1058,8 +1058,12 @@ export function BoqWorkspace({
   ) {
     const target = lines[lineIndex];
     const output = target?.outputs[outputIndex];
-    if (target?.origin && output &&
-        isAutoPlasterQuantity(target.kind, output.name)) return;
+    if (
+      target?.origin &&
+      output &&
+      isAutoPlasterQuantity(target.kind, output.name)
+    )
+      return;
     if (target?.origin && output) {
       const key = overrideKey(target, output);
       const next = {
@@ -1100,8 +1104,12 @@ export function BoqWorkspace({
   function resetOutputQuantity(lineIndex: number, outputIndex: number) {
     const line = lines[lineIndex];
     const output = line?.outputs[outputIndex];
-    if (!line?.origin || !output ||
-        isAutoPlasterQuantity(line.kind, output.name)) return;
+    if (
+      !line?.origin ||
+      !output ||
+      isAutoPlasterQuantity(line.kind, output.name)
+    )
+      return;
     const key = overrideKey(line, output);
     const existing = overrides[key];
     if (!existing || existing.quantity === undefined) return;

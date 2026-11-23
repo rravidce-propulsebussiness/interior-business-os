@@ -1828,10 +1828,20 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts): BoqCounts {
       kitchenPlatformFeet: feet(value.kitchenPlatformFeet),
       railingFeet: feet(value.railingFeet),
       ...(value.internalPlasterCoats !== undefined
-        ? { internalPlasterCoats: Number(value.internalPlasterCoats) === 2 ? 2 as const : 1 as const }
+        ? {
+            internalPlasterCoats:
+              Number(value.internalPlasterCoats) === 2
+                ? (2 as const)
+                : (1 as const),
+          }
         : {}),
       ...(value.externalPlasterCoats !== undefined
-        ? { externalPlasterCoats: Number(value.externalPlasterCoats) === 2 ? 2 as const : 1 as const }
+        ? {
+            externalPlasterCoats:
+              Number(value.externalPlasterCoats) === 2
+                ? (2 as const)
+                : (1 as const),
+          }
         : {}),
       ...(value.tileWastagePercent !== undefined
         ? { tileWastagePercent: num(value.tileWastagePercent, 0, 0, 30) }
@@ -2434,11 +2444,11 @@ export function plasterMaterialTakeoff(
   const waste = 1 + Math.max(0, wastePercent) / 100;
   return {
     cementBags:
-      (internal * 0.0058 * insideFactor +
-        external * 0.0136 * outsideFactor) * waste,
+      (internal * 0.0058 * insideFactor + external * 0.0136 * outsideFactor) *
+      waste,
     sandM3:
-      (internal * 0.0012 * insideFactor +
-        external * 0.0019 * outsideFactor) * waste,
+      (internal * 0.0012 * insideFactor + external * 0.0019 * outsideFactor) *
+      waste,
   };
 }
 
@@ -2456,7 +2466,10 @@ const brickworkOutputs = (
 ): GeneratedOutput[] => {
   const waste = 1 + s.materialWastagePercent / 100;
   const plaster = plasterMaterialTakeoff(
-    internalPlaster, externalPlaster, internalCoats, externalCoats,
+    internalPlaster,
+    externalPlaster,
+    internalCoats,
+    externalCoats,
     s.materialWastagePercent,
   );
   return [
@@ -2470,18 +2483,12 @@ const brickworkOutputs = (
     {
       name: 'Cement (brickwork & plaster)',
       material: 'cement_masonry',
-      quantity: round(
-        volume * 1.5 * waste + plaster.cementBags,
-        1,
-      ),
+      quantity: round(volume * 1.5 * waste + plaster.cementBags, 1),
       unit: 'bag',
       source:
         'Mortar 1:6 · plaster 12 mm internal/20 mm external first coat; optional 6 mm second coat',
     },
-    sandOutput(
-      volume * 0.32 * waste + plaster.sandM3,
-      s,
-    ),
+    sandOutput(volume * 0.32 * waste + plaster.sandM3, s),
     ...(internalPlaster > 0
       ? [
           {
@@ -2503,22 +2510,26 @@ const brickworkOutputs = (
         ]
       : []),
     ...(s.labourItemized && internalCoats === 2 && internalPlaster > 0
-      ? [{
-          name: 'Internal plaster second coat',
-          material: 'plaster_labour',
-          quantity: round(internalPlaster, 0),
-          unit: 'sqft',
-          source: 'Second 6 mm coat; confirm separate labour rate',
-        }]
+      ? [
+          {
+            name: 'Internal plaster second coat',
+            material: 'plaster_labour',
+            quantity: round(internalPlaster, 0),
+            unit: 'sqft',
+            source: 'Second 6 mm coat; confirm separate labour rate',
+          },
+        ]
       : []),
     ...(s.labourItemized && externalCoats === 2 && externalPlaster > 0
-      ? [{
-          name: 'External plaster second coat',
-          material: 'plaster_labour',
-          quantity: round(externalPlaster, 0),
-          unit: 'sqft',
-          source: 'Second 6 mm coat; confirm separate labour rate',
-        }]
+      ? [
+          {
+            name: 'External plaster second coat',
+            material: 'plaster_labour',
+            quantity: round(externalPlaster, 0),
+            unit: 'sqft',
+            source: 'Second 6 mm coat; confirm separate labour rate',
+          },
+        ]
       : []),
   ];
 };
@@ -3870,10 +3881,7 @@ export function generateQuotationBoq(
           {
             name: 'Cement (plaster)',
             material: 'cement_masonry',
-            quantity: round(
-              plaster.cementBags,
-              1,
-            ),
+            quantity: round(plaster.cementBags, 1),
             unit: 'bag',
             source: `${internalCoats} internal / ${externalCoats} external coat(s) from measured wall faces + ${s.materialWastagePercent}% waste`,
           },
@@ -3902,22 +3910,26 @@ export function generateQuotationBoq(
               ]
             : []),
           ...(s.labourItemized && internalCoats === 2 && internalPlaster > 0
-            ? [{
-                name: 'Internal plaster second coat',
-                material: 'plaster_labour',
-                quantity: round(internalPlaster, 0),
-                unit: 'sqft',
-                source: 'Second 6 mm coat; confirm separate labour rate',
-              }]
+            ? [
+                {
+                  name: 'Internal plaster second coat',
+                  material: 'plaster_labour',
+                  quantity: round(internalPlaster, 0),
+                  unit: 'sqft',
+                  source: 'Second 6 mm coat; confirm separate labour rate',
+                },
+              ]
             : []),
           ...(s.labourItemized && externalCoats === 2 && externalPlaster > 0
-            ? [{
-                name: 'External plaster second coat',
-                material: 'plaster_labour',
-                quantity: round(externalPlaster, 0),
-                unit: 'sqft',
-                source: 'Second 6 mm coat; confirm separate labour rate',
-              }]
+            ? [
+                {
+                  name: 'External plaster second coat',
+                  material: 'plaster_labour',
+                  quantity: round(externalPlaster, 0),
+                  unit: 'sqft',
+                  source: 'Second 6 mm coat; confirm separate labour rate',
+                },
+              ]
             : []),
         );
       } else {

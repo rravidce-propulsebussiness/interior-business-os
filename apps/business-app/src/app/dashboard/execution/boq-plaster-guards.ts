@@ -6,9 +6,10 @@ export function isAutoPlasterQuantity(
   kind: string,
   outputName: string,
 ): boolean {
-  return kind === 'quote-masonry' &&
-    (outputName === 'Cement (plaster)' ||
-      outputName === 'Sand (plaster)');
+  return (
+    kind === 'quote-masonry' &&
+    (outputName === 'Cement (plaster)' || outputName === 'Sand (plaster)')
+  );
 }
 
 type PlasterOutput = { name: string; unit: string };
@@ -35,8 +36,7 @@ export function clearDerivedPlasterQuantityOverrides(
       const existing = overrides[key];
       if (!existing || existing.quantity === undefined) continue;
       next ??= { ...overrides };
-      if (existing.rate !== undefined)
-        next[key] = { rate: existing.rate };
+      if (existing.rate !== undefined) next[key] = { rate: existing.rate };
       else delete next[key];
     }
   }
