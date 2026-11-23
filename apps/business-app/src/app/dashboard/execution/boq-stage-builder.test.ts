@@ -86,6 +86,16 @@ describe('compact BOQ entry stages', () => {
     expect(html).toContain('Columns &amp; Plinth Beam');
   });
 
+  it('shows Columns in the floor-wise RCC stage, not only Foundation', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, { ...base, initialStep: 7 }),
+    );
+    expect(html).toContain('Columns, Beams, Slab');
+    expect(html).toContain('View or edit Columns on Ground Floor');
+    expect(html).toContain('View or edit Beams on Ground Floor');
+    expect(html).toContain('View or edit Slab on Ground Floor');
+  });
+
   it('shows Compound Wall on Ground Floor brickwork only', () => {
     const html = renderToStaticMarkup(
       createElement(BoqStageBuilder, { ...base, initialStep: 8 }),

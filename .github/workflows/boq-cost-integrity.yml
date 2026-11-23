@@ -54,6 +54,22 @@ jobs:
           apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.tsx
           apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.test.tsx
           apps/business-app/src/app/dashboard/execution/boq-compact-fixes.css
+          apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx
+          apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-wizard-flow.tsx
+          apps/business-app/src/app/dashboard/execution/boq-wizard-flow.test.tsx
+          apps/business-app/src/app/dashboard/execution/boq-plaster-guards.ts
+          apps/business-app/src/app/dashboard/execution/boq-plaster-guards.test.ts
+          packages/core/src/construction-boq.ts
+          packages/core/src/construction-boq.test.ts
           vitest.config.ts
+      - name: BOQ React and calculation lint
+        run: >-
+          pnpm exec eslint
+          apps/business-app/src/app/dashboard/execution/boq-workspace.tsx
+          apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx
+          apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.tsx
+          packages/core/src/construction-boq.ts
+          --max-warnings=0
       - name: BOQ TypeScript integrity
         run: pnpm --filter ./apps/business-app typecheck
