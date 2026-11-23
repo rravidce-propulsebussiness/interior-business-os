@@ -56,9 +56,7 @@ import {
 } from './boq-stage-measurements';
 import { boqCsv, boqFileName, type BoqExportRow } from './boq-export';
 import {
-  BOQ_PROJECT_COST_FIELDS,
   DEFAULT_BOQ_PROJECT_COSTS,
-  calculateBoqProjectCosts,
   normalizeBoqProjectCosts,
   type BoqProjectCosts,
 } from './boq-project-costs';
@@ -446,12 +444,10 @@ export function BoqWorkspace({
     measuredLabour,
   );
   const labourCost = legacyLabourCost + labourEstimate.total;
-  const projectCostBreakdown = calculateBoqProjectCosts(
-    materialOnlyCost,
-    labourCost,
-    projectCosts,
-  );
-  const materialCost = projectCostBreakdown.total;
+  // The BOQ is material quantities + their landed rates + labour.
+  // Historical project-wide expense fields remain archived on saved documents
+  // but no longer inflate the measured construction BOQ.
+  const materialCost = materialOnlyCost + labourCost;
   // Every quantity with its stage and cost head, for the order list and
   // the download.
   const materialExportRows: BoqExportRow[] = allOutputs.map((row) => {
@@ -522,27 +518,7 @@ export function BoqWorkspace({
           head: 'Labour',
         })),
       ];
-  const projectCostLines = [
-    ...BOQ_PROJECT_COST_FIELDS.map((field) => ({
-      name: field.label,
-      rate: projectCosts[field.key],
-    })),
-    { name: 'Project contingency', rate: projectCostBreakdown.contingency },
-    { name: 'Applicable taxes not already included', rate: projectCosts.taxes },
-  ].filter((row) => row.rate > 0);
-  const exportRows = [
-    ...materialExportRows,
-    ...labourExportRows,
-    ...projectCostLines.map((row): BoqExportRow => ({
-      stage: 'Project-wide costs',
-      item: row.name,
-      name: row.name,
-      quantity: 1,
-      unit: 'LS',
-      rate: canViewCost ? row.rate : 0,
-      head: 'Other',
-    })),
-  ];
+  const exportRows = [...materialExportRows, ...labourExportRows];
   const builtUpSqft = floorsForGeneration.reduce(
     (sum, floor) => sum + floor.areaSqft,
     0,
@@ -1647,41 +1623,21 @@ export function BoqWorkspace({
         )
       : [];
   const stages = [...new Set(lines.map((line) => line.section || 'Other'))];
-  const detailedPricingLines = [
-    ...allOutputs.map((output, index) => ({
-      id: `${output.lineId}-${index}`,
-      stage: output.section || 'Other',
-      work: output.lineName,
-      name: output.name,
-      quantity: output.quantity,
-      unit: output.unit,
-      rate: output.rate,
-    })),
-    ...projectCostLines.map((row, index) => ({
-      id: `project-wide-${index}`,
-      stage: 'Project-wide costs',
-      work: 'Indirect project expenses',
-      name: row.name,
-      quantity: 1,
-      unit: 'LS',
-      rate: row.rate,
-    })),
-  ];
+  const detailedPricingLines = allOutputs.map((output, index) => ({
+    id: `${output.lineId}-${index}`,
+    stage: output.section || 'Other',
+    work: output.lineName,
+    name: output.name,
+    quantity: output.quantity,
+    unit: output.unit,
+    rate: output.rate,
+  }));
   const detailedFloorPricing = buildFloorPricing(
-    allOutputs
-      .map((output) => ({
-        stage: output.section,
-        amount: output.quantity * output.rate,
-        isLabour: isLabourOutput(output),
-      }))
-      .concat(
-        projectCostLines.map((row) => ({
-          stage: 'Project-wide costs',
-          amount: row.rate,
-          isLabour: false,
-          isOverhead: true,
-        })),
-      ),
+    allOutputs.map((output) => ({
+      stage: output.section,
+      amount: output.quantity * output.rate,
+      isLabour: isLabourOutput(output),
+    })),
     labour ? labourEstimate.byStage : {},
     floorsForGeneration,
     stages,
@@ -1917,14 +1873,7 @@ export function BoqWorkspace({
                       {canViewCost ? money(materialCost) : 'Restricted'}
                     </strong>
                   </div>
-                  <div>
-                    <span>Site overhead, contingency and taxes</span>
-                    <strong>
-                      {canViewCost
-                        ? money(projectCostBreakdown.projectWideCost)
-                        : 'Restricted'}
-                    </strong>
-                  </div>
+
                   <div>
                     <span>Quotation value</span>
                     <strong>{money(quotedValue)}</strong>
@@ -2038,7 +1987,7 @@ export function BoqWorkspace({
                   labourAllocations={labour ? labourEstimate.byStage : {}}
                   materialCost={materialOnlyCost}
                   labourCost={labourCost}
-                  overheadCost={projectCostBreakdown.projectWideCost}
+                  overheadCost={0}
                   totalCost={materialCost}
                   areaSqft={builtUpSqft}
                   canViewCost={canViewCost}
@@ -2194,14 +2143,7 @@ export function BoqWorkspace({
                 : money(materialCost)}
           </strong>
         </div>
-        <div>
-          <span>Site overhead, contingency and taxes</span>
-          <strong>
-            {canViewCost
-              ? money(projectCostBreakdown.projectWideCost)
-              : 'Restricted'}
-          </strong>
-        </div>
+
         <div>
           <span>Quotation value (customer price)</span>
           <strong>{money(quotedValue)}</strong>
@@ -2239,78 +2181,6 @@ export function BoqWorkspace({
         </p>
       )}
       {scopePanel}
-      {canViewCost && (
-        <details className="boq-project-costs">
-          <summary>
-            Project-wide costs and contingency —{' '}
-            {money(projectCostBreakdown.projectWideCost)}
-          </summary>
-          <p>
-            Enter site-wide costs only once, not again under individual floors.
-            Keep tax amounts separate from supplier rates that already include
-            tax. Leave a field at zero only when not applicable.
-          </p>
-          <div className="boq-project-costs-fields">
-            {BOQ_PROJECT_COST_FIELDS.map((field) => (
-              <label key={field.key}>
-                <span>{field.label} (₹)</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="100000000"
-                  step="0.01"
-                  value={projectCosts[field.key]}
-                  disabled={!(active ? canEdit : canCreate)}
-                  onChange={(event) =>
-                    setProjectCosts((previous) => ({
-                      ...previous,
-                      [field.key]: Math.max(0, Number(event.target.value) || 0),
-                    }))
-                  }
-                />
-              </label>
-            ))}
-            <label>
-              <span>Contingency (%)</span>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={projectCosts.contingencyPercent}
-                disabled={!(active ? canEdit : canCreate)}
-                onChange={(event) =>
-                  setProjectCosts((previous) => ({
-                    ...previous,
-                    contingencyPercent: Math.min(
-                      100,
-                      Math.max(0, Number(event.target.value) || 0),
-                    ),
-                  }))
-                }
-              />
-            </label>
-            <label>
-              <span>Applicable taxes not already included (₹)</span>
-              <input
-                type="number"
-                min="0"
-                max="100000000"
-                step="0.01"
-                value={projectCosts.taxes}
-                disabled={!(active ? canEdit : canCreate)}
-                onChange={(event) =>
-                  setProjectCosts((previous) => ({
-                    ...previous,
-                    taxes: Math.max(0, Number(event.target.value) || 0),
-                  }))
-                }
-              />
-            </label>
-          </div>
-          <strong>Total project estimate: {money(materialCost)}</strong>
-        </details>
-      )}
       {active && canEdit && (
         <div
           className="boq-autosave-status"
