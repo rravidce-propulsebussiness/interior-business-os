@@ -2413,20 +2413,17 @@ export function windowSunshadeTakeoff(
     const spanFeet = opening.widthFeet + 2 * rules.overhangEachSideFeet;
     const thickFeet = rules.slabThicknessIn / 12;
     windowCount += opening.count;
-    volumeCft +=
-      opening.count * spanFeet * rules.projectionFeet * thickFeet;
+    volumeCft += opening.count * spanFeet * rules.projectionFeet * thickFeet;
     shutteringSqft +=
       opening.count *
       (spanFeet * rules.projectionFeet +
         (spanFeet + 2 * rules.projectionFeet) * thickFeet);
   }
-  if (!windowCount || !volumeCft)
-    return { windowCount: 0, outputs: [] };
+  if (!windowCount || !volumeCft) return { windowCount: 0, outputs: [] };
   const volumeM3 = volumeCft * CUM_PER_CFT;
   const supplyVolume = volumeM3 * (1 + s.materialWastagePercent / 100);
   const stock = s.stockBarFeet;
-  const weightPerRodKg =
-    stock * M_PER_FT * (rules.steelDiameterMm ** 2 / 162);
+  const weightPerRodKg = stock * M_PER_FT * (rules.steelDiameterMm ** 2 / 162);
   const rods = ceil(
     (supplyVolume * rules.estimatedSteelKgPerM3) / weightPerRodKg,
   );
@@ -2476,8 +2473,7 @@ export function windowSunshadeTakeoff(
         diameter: rules.steelDiameterMm,
         rods,
         weightKg: round(rods * weightPerRodKg, 2),
-        source:
-          `${rules.estimatedSteelKgPerM3} kg/m³ provisional; ${stock} ft stock rods; replace with approved BBS`,
+        source: `${rules.estimatedSteelKgPerM3} kg/m³ provisional; ${stock} ft stock rods; replace with approved BBS`,
       },
     ],
   };

@@ -1666,17 +1666,38 @@ describe('entering the drawings by hand', () => {
       },
       splitBeamSlab: true,
     });
-    const shades = result.lines.filter((line) => line.kind === 'quote-window-sajjas');
+    const shades = result.lines.filter(
+      (line) => line.kind === 'quote-window-sajjas',
+    );
     expect(shades).toHaveLength(1);
     expect(shades[0]?.section).toBe('Ground Floor');
     expect(shades[0]?.inputs.windowCount).toBe(3);
-    expect(shades[0]?.outputs.some((output) => output.material === 'concrete_m20')).toBe(false);
-    expect(shades[0]?.outputs.find((output) => output.name === 'Cement (window sunshades)')?.quantity).toBeGreaterThan(0);
-    expect(shades[0]?.outputs.find((output) => output.material === 'steel')?.diameter).toBe(8);
-    expect(shades[0]?.outputs.find((output) => output.material === 'shuttering')?.quantity).toBeGreaterThan(0);
-    expect(shades[0]?.outputs.find((output) => output.unit === 'm³')?.rate).toBe(0);
-    const withoutSizes = generateQuotationBoq({ details: quote(), splitBeamSlab: true });
-    expect(withoutSizes.lines.some((line) => line.kind === 'quote-window-sajjas')).toBe(false);
+    expect(
+      shades[0]?.outputs.some((output) => output.material === 'concrete_m20'),
+    ).toBe(false);
+    expect(
+      shades[0]?.outputs.find(
+        (output) => output.name === 'Cement (window sunshades)',
+      )?.quantity,
+    ).toBeGreaterThan(0);
+    expect(
+      shades[0]?.outputs.find((output) => output.material === 'steel')
+        ?.diameter,
+    ).toBe(8);
+    expect(
+      shades[0]?.outputs.find((output) => output.material === 'shuttering')
+        ?.quantity,
+    ).toBeGreaterThan(0);
+    expect(
+      shades[0]?.outputs.find((output) => output.unit === 'm³')?.rate,
+    ).toBe(0);
+    const withoutSizes = generateQuotationBoq({
+      details: quote(),
+      splitBeamSlab: true,
+    });
+    expect(
+      withoutSizes.lines.some((line) => line.kind === 'quote-window-sajjas'),
+    ).toBe(false);
     expect(withoutSizes.warnings.join(' ')).toContain('sunshade');
   });
 

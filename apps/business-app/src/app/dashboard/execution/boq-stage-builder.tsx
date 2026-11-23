@@ -927,49 +927,46 @@ export function BoqStageBuilder(props: Props) {
                       value={dims.count}
                       onChange={(v) => changeDimension('count', v)}
                     />
-                    {(
-                      standardSavedShelf
-                        ? (['lengthFeet', 'widthFeet'] as const)
-                        : (['lengthFeet', 'widthFeet', 'depthFeet'] as const)
+                    {(standardSavedShelf
+                      ? (['lengthFeet', 'widthFeet'] as const)
+                      : (['lengthFeet', 'widthFeet', 'depthFeet'] as const)
                     ).map((field) => (
-                        <InputNumber
-                          key={field}
-                          label={
-                            standardSavedShelf
-                              ? field === 'lengthFeet'
-                                ? 'Cabinet overall width'
-                                : 'Cabinet overall height'
-                              : {
-                                  lengthFeet: 'Length',
-                                  widthFeet: 'Width',
-                                  depthFeet: 'Depth / thickness',
-                                }[field]
-                          }
-                          unit={dimensionUnit}
-                          value={Number(
-                            (dims[field] * displayFactor).toFixed(3),
-                          )}
-                          onChange={(v) => changeDimension(field, v)}
-                        />
-                      ),
-                    )}
+                      <InputNumber
+                        key={field}
+                        label={
+                          standardSavedShelf
+                            ? field === 'lengthFeet'
+                              ? 'Cabinet overall width'
+                              : 'Cabinet overall height'
+                            : {
+                                lengthFeet: 'Length',
+                                widthFeet: 'Width',
+                                depthFeet: 'Depth / thickness',
+                              }[field]
+                        }
+                        unit={dimensionUnit}
+                        value={Number((dims[field] * displayFactor).toFixed(3))}
+                        onChange={(v) => changeDimension(field, v)}
+                      />
+                    ))}
                   </div>
                   <div className="boq-stage-volume">
                     <span>{number(measured.cft)} cft</span>
                     <strong>{number(measured.m3)} m³</strong>
                   </div>
-                  {['sajjas', 'shelves'].includes(category.key) && !standardSavedShelf && (
-                    <BoqSmallRccSteelEditor
-                      rows={dims.steelSets ?? []}
-                      onChange={(steelSets) =>
-                        props.onUpdateGeometry(
-                          lineIndex,
-                          { ...dims, steelSets },
-                          line.name,
-                        )
-                      }
-                    />
-                  )}
+                  {['sajjas', 'shelves'].includes(category.key) &&
+                    !standardSavedShelf && (
+                      <BoqSmallRccSteelEditor
+                        rows={dims.steelSets ?? []}
+                        onChange={(steelSets) =>
+                          props.onUpdateGeometry(
+                            lineIndex,
+                            { ...dims, steelSets },
+                            line.name,
+                          )
+                        }
+                      />
+                    )}
                 </div>
               );
             })}
@@ -992,32 +989,30 @@ export function BoqStageBuilder(props: Props) {
                     }))
                   }
                 />
-                {(
-                  isStandardShelves
-                    ? (['lengthFeet', 'widthFeet'] as const)
-                    : (['lengthFeet', 'widthFeet', 'depthFeet'] as const)
+                {(isStandardShelves
+                  ? (['lengthFeet', 'widthFeet'] as const)
+                  : (['lengthFeet', 'widthFeet', 'depthFeet'] as const)
                 ).map((field) => (
-                    <InputNumber
-                      key={field}
-                      label={
-                        isStandardShelves
-                          ? field === 'lengthFeet'
-                            ? 'Cabinet overall width'
-                            : 'Cabinet overall height'
-                          : {
-                              lengthFeet: 'Length',
-                              widthFeet: 'Width',
-                              depthFeet: 'Depth / thickness',
-                            }[field]
-                      }
-                      unit={dimensionUnit}
-                      value={Number(
-                        (dimensionDraft[field] * displayFactor).toFixed(3),
-                      )}
-                      onChange={(v) => geometryValue(field, v)}
-                    />
-                  ),
-                )}
+                  <InputNumber
+                    key={field}
+                    label={
+                      isStandardShelves
+                        ? field === 'lengthFeet'
+                          ? 'Cabinet overall width'
+                          : 'Cabinet overall height'
+                        : {
+                            lengthFeet: 'Length',
+                            widthFeet: 'Width',
+                            depthFeet: 'Depth / thickness',
+                          }[field]
+                    }
+                    unit={dimensionUnit}
+                    value={Number(
+                      (dimensionDraft[field] * displayFactor).toFixed(3),
+                    )}
+                    onChange={(v) => geometryValue(field, v)}
+                  />
+                ))}
               </div>
               <div className="boq-stage-volume">
                 <span>{number(volume.cft)} cft</span>
@@ -1026,14 +1021,14 @@ export function BoqStageBuilder(props: Props) {
               {isStandardShelves && (
                 <p className="boq-stage-hint">
                   Standard allowance: {STANDARD_SHELF_ASSUMPTIONS.depthFeet} ft
-                  depth, {STANDARD_SHELF_ASSUMPTIONS.panelThicknessIn} in
-                  cement panels, one shelf every{' '}
+                  depth, {STANDARD_SHELF_ASSUMPTIONS.panelThicknessIn} in cement
+                  panels, one shelf every{' '}
                   {STANDARD_SHELF_ASSUMPTIONS.horizontalSpacingFeet} ft and a
                   vertical bay every{' '}
-                  {STANDARD_SHELF_ASSUMPTIONS.verticalBayWidthFeet} ft.
-                  Cement, sand, aggregate, formwork and provisional 8 mm
-                  reinforcement are calculated automatically. Verify thickness
-                  and reinforcement with the structural engineer.
+                  {STANDARD_SHELF_ASSUMPTIONS.verticalBayWidthFeet} ft. Cement,
+                  sand, aggregate, formwork and provisional 8 mm reinforcement
+                  are calculated automatically. Verify thickness and
+                  reinforcement with the structural engineer.
                 </p>
               )}
               {category.key === 'pcc' && (
@@ -1043,17 +1038,18 @@ export function BoqStageBuilder(props: Props) {
                   informational and is not also charged as ready-mix.
                 </small>
               )}
-              {['sajjas', 'shelves'].includes(category.key) && !isStandardShelves && (
-                <BoqSmallRccSteelEditor
-                  rows={dimensionDraft.steelSets ?? []}
-                  onChange={(steelSets) =>
-                    setDimensionDraft((previous) => ({
-                      ...previous,
-                      steelSets,
-                    }))
-                  }
-                />
-              )}
+              {['sajjas', 'shelves'].includes(category.key) &&
+                !isStandardShelves && (
+                  <BoqSmallRccSteelEditor
+                    rows={dimensionDraft.steelSets ?? []}
+                    onChange={(steelSets) =>
+                      setDimensionDraft((previous) => ({
+                        ...previous,
+                        steelSets,
+                      }))
+                    }
+                  />
+                )}
               <button
                 type="button"
                 className="boq-stage-outline"
@@ -2064,12 +2060,12 @@ export function BoqStageBuilder(props: Props) {
           <div className="boq-stage-subcard">
             <h4>Door, window and ventilator sizes from drawing</h4>
             <p className="boq-stage-hint">
-              Enter number × width × height in feet, for example 2×3×7.
-              Each measured window also produces one automatic RCC sunshade
-              with a standard 2 ft projection and 6 in overhang at each side.
-              Cement, sand, aggregate, estimated 8 mm steel and formwork are
-              included once. Confirm sizes and reinforcement from the drawing.
-              Window area is also deducted from the external brickwork.
+              Enter number × width × height in feet, for example 2×3×7. Each
+              measured window also produces one automatic RCC sunshade with a
+              standard 2 ft projection and 6 in overhang at each side. Cement,
+              sand, aggregate, estimated 8 mm steel and formwork are included
+              once. Confirm sizes and reinforcement from the drawing. Window
+              area is also deducted from the external brickwork.
             </p>
             <div className="boq-stage-input-grid">
               {(

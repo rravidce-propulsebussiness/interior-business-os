@@ -217,10 +217,8 @@ export function measuredOutputs(
       `${standard.materialWastagePercent}% material wastage; verify on site`;
     const purchasedM3 = takeoff.concreteWithWastageM3;
     const stock = settings.stockBarFeet ?? 40;
-    const rodWeightKg =
-      stock * 0.3048 * (standard.rodDiaMm ** 2 / 162);
-    const estimatedKg =
-      purchasedM3 * standard.estimatedSteelKgPerM3;
+    const rodWeightKg = stock * 0.3048 * (standard.rodDiaMm ** 2 / 162);
+    const estimatedKg = purchasedM3 * standard.estimatedSteelKgPerM3;
     const rods = Math.ceil(estimatedKg / rodWeightKg);
     return [
       {
@@ -242,8 +240,8 @@ export function measuredOutputs(
         material: 'sand',
         quantity: round(
           purchasedM3 *
-          M20_SITE_MIX_PER_M3.sandCubicMetres *
-          settings.sandTonPerCum,
+            M20_SITE_MIX_PER_M3.sandCubicMetres *
+            settings.sandTonPerCum,
           2,
         ),
         unit: 't',
@@ -253,8 +251,8 @@ export function measuredOutputs(
         material: 'aggregate',
         quantity: round(
           purchasedM3 *
-          M20_SITE_MIX_PER_M3.aggregateCubicMetres *
-          settings.aggregateTonPerCum,
+            M20_SITE_MIX_PER_M3.aggregateCubicMetres *
+            settings.aggregateTonPerCum,
           2,
         ),
         unit: 't',
@@ -264,7 +262,8 @@ export function measuredOutputs(
         material: 'shuttering',
         quantity: takeoff.shutteringSqft,
         unit: 'sqft',
-        source: 'Horizontal soffits and both vertical partition faces; provisional',
+        source:
+          'Horizontal soffits and both vertical partition faces; provisional',
       },
       {
         name: `${standard.rodDiaMm} mm TMT (shelves, provisional)`,
@@ -274,8 +273,7 @@ export function measuredOutputs(
         diameter: standard.rodDiaMm,
         rods,
         weightKg: round(rods * rodWeightKg, 2),
-        source:
-          `Provisional ${standard.estimatedSteelKgPerM3} kg/m³, ${stock} ft stock; replace with approved BBS`,
+        source: `Provisional ${standard.estimatedSteelKgPerM3} kg/m³, ${stock} ft stock; replace with approved BBS`,
       },
     ];
   }
