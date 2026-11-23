@@ -904,6 +904,20 @@ function Procurement({ d }: { d: WorkspaceData }) {
                       Supplier / order: {stringValue(m.vendor_reference)}
                     </small>
                   )}
+                  {Boolean(stringValue(m.order_amount)) && (
+                    <small>
+                      Order amount: {formatMoney(Number(m.order_amount))}
+                    </small>
+                  )}
+                  {Boolean(stringValue(m.received_quantity)) && (
+                    <small>
+                      Received: {stringValue(m.received_quantity)}{' '}
+                      {stringValue(m.unit)}
+                    </small>
+                  )}
+                  {Boolean(stringValue(m.decision_note)) && (
+                    <small>Reason: {stringValue(m.decision_note)}</small>
+                  )}
                 </div>
                 <Status value={stringValue(m.status)} />
                 <MaterialSupplierCashSettlement d={d} material={m} />

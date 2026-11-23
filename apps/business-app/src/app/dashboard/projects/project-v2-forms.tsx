@@ -1081,6 +1081,10 @@ export function MaterialUpdateForm({
             <option value="rejected">Reject request</option>
           </select>
         </label>
+        <label>
+          Reason
+          <input name="decision_note" maxLength={1000} placeholder="Optional" />
+        </label>
       </ProjectForm>
     </details>
   );

@@ -114,6 +114,32 @@ function DeliveryCommandForm({
           />
         </label>
       )}
+      {action === 'place_outside_order' && (
+        <label>
+          Order amount (₹)
+          <input
+            name="order_amount"
+            type="number"
+            min="0"
+            step="0.01"
+            max="100000000"
+            placeholder="Optional"
+          />
+        </label>
+      )}
+      {action === 'confirm_received' && (
+        <label>
+          Quantity received
+          <input
+            name="received_quantity"
+            type="number"
+            min="0.001"
+            step="0.001"
+            max="100000000"
+            placeholder="Leave blank if all arrived"
+          />
+        </label>
+      )}
       {delivery && (
         <>
           <label>
