@@ -881,10 +881,9 @@ export function rateForOutput(
  * Reference takeoffs (e.g. concrete volume when ingredients are costed)
  * and unpriced observational dimensions are not purchase costs.
  */
-export function isBoqCostUnpriced(
-  output: PricedOutput & { quantity: number; kind?: string },
-  resolveCost: (output: PricedOutput & { quantity: number; kind?: string }) => number,
-): boolean {
+export function isBoqCostUnpriced<
+  T extends PricedOutput & { quantity: number; kind?: string },
+>(output: T, resolveCost: (output: T) => number): boolean {
   if (!(output.quantity > 0)) return false;
   if (/reference only|volume only/i.test(output.name)) return false;
   const costBearing =
@@ -892,7 +891,8 @@ export function isBoqCostUnpriced(
     output.quotedRate !== undefined ||
     output.rate !== undefined ||
     output.kind === 'manual' ||
-    output.kind === 'quote-additional';
+    output.kind === 'quote-additional' ||
+    /^(ls|lumpsum|lot)$/i.test(output.unit);
   return costBearing && !(resolveCost(output) > 0);
 }
 
