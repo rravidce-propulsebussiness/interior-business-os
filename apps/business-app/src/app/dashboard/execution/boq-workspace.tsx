@@ -584,7 +584,9 @@ export function BoqWorkspace({
   function printBoq() {
     // Open every floor so the printout / PDF has the full breakdown.
     window.document
-      .querySelectorAll<HTMLDetailsElement>('.boq-floor-cost, .boq-scope-review')
+      .querySelectorAll<HTMLDetailsElement>(
+        '.boq-floor-cost, .boq-scope-review',
+      )
       .forEach((element) => (element.open = true));
     window.print();
   }
@@ -1754,7 +1756,8 @@ export function BoqWorkspace({
   const scopePanel = (
     <details className="boq-scope-review">
       <summary>
-        Required construction work — {scopeReviewed}/{scopeSummary.total} reviewed
+        Required construction work — {scopeReviewed}/{scopeSummary.total}{' '}
+        reviewed
         {scopeSummary.pending + scopeSummary.unpriced > 0
           ? ' · Estimate provisional'
           : ' · Scope checked'}
@@ -1801,7 +1804,9 @@ export function BoqWorkspace({
                 }}
               >
                 <option value="pending">Needs review</option>
-                <option value="covered">Already included in other BOQ work</option>
+                <option value="covered">
+                  Already included in other BOQ work
+                </option>
                 <option value="excluded">Not required / excluded</option>
               </select>
             )}
@@ -1898,7 +1903,11 @@ export function BoqWorkspace({
                     </strong>
                   </div>
                   <div>
-                    <span>{scopeSummary.complete && !unpricedOutputs.length ? 'Total project cost estimate' : 'Provisional project estimate'}</span>
+                    <span>
+                      {scopeSummary.complete && !unpricedOutputs.length
+                        ? 'Total project cost estimate'
+                        : 'Provisional project estimate'}
+                    </span>
                     <strong>
                       {canViewCost ? money(materialCost) : 'Restricted'}
                     </strong>
@@ -2167,7 +2176,11 @@ export function BoqWorkspace({
           <strong>{canViewCost ? money(labourCost) : 'Restricted'}</strong>
         </div>
         <div>
-          <span>{scopeSummary.complete && !unpricedOutputs.length ? 'Total Project Cost' : 'Provisional Project Cost'}</span>
+          <span>
+            {scopeSummary.complete && !unpricedOutputs.length
+              ? 'Total Project Cost'
+              : 'Provisional Project Cost'}
+          </span>
           <strong>
             {!canViewCost
               ? 'Restricted'

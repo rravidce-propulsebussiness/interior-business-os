@@ -106,11 +106,7 @@ export type BoqScopeWork = (typeof BOQ_SCOPE_WORKS)[number];
 export type BoqScopeReview = 'covered' | 'excluded';
 export type BoqScopeReviews = Record<string, BoqScopeReview>;
 export type BoqScopeStatus =
-  | 'pending'
-  | 'priced'
-  | 'unpriced'
-  | 'covered'
-  | 'excluded';
+  'pending' | 'priced' | 'unpriced' | 'covered' | 'excluded';
 
 export type BoqScopeLine = {
   inputs?: Readonly<Record<string, unknown>>;

@@ -5,11 +5,7 @@ import {
   type BoqScopeReview,
 } from './boq-scope-coverage';
 
-const rows = (
-  code: string,
-  quantity: number,
-  rate: number,
-) => [
+const rows = (code: string, quantity: number, rate: number) => [
   {
     inputs: { scopeCode: code },
     outputs: [{ quantity, rate }],
@@ -47,8 +43,7 @@ describe('BOQ required work scope completeness', () => {
 
   it('requires an explicit decision when a work is in other contract scope', () => {
     const reviews: Record<string, BoqScopeReview> = {};
-    for (const work of BOQ_SCOPE_WORKS)
-      reviews[work.code] = 'excluded';
+    for (const work of BOQ_SCOPE_WORKS) reviews[work.code] = 'excluded';
     reviews[BOQ_SCOPE_WORKS[0]!.code] = 'covered';
     const summary = summarizeBoqScope([], reviews);
     expect(summary.pending).toBe(0);
@@ -60,7 +55,9 @@ describe('BOQ required work scope completeness', () => {
 
   it('does not let a stale covered decision conceal a newly unpriced measurement', () => {
     const first = BOQ_SCOPE_WORKS[0]!.code;
-    const summary = summarizeBoqScope(rows(first, 1, 0), { [first]: 'covered' });
+    const summary = summarizeBoqScope(rows(first, 1, 0), {
+      [first]: 'covered',
+    });
     expect(summary.unpriced).toBe(1);
     expect(summary.complete).toBe(false);
   });
