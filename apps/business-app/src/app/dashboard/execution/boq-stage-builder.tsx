@@ -283,7 +283,7 @@ function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
   if (kind === 'quote-kitchen')
     return /sink/i.test(output.name) ? 'plumbing' : 'tiles';
   if (kind === 'quote-masonry')
-    return /^(?:Internal|External) plaster$|\(plaster\)/i.test(output.name)
+    return /^(?:Internal|External) plaster(?:\s|$)|\(plaster\)/i.test(output.name)
       ? 'plaster'
       : 'brickwork';
   if (kind === 'quote-parapet') {
