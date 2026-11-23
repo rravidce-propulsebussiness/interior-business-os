@@ -584,7 +584,7 @@ export function BoqWorkspace({
   function printBoq() {
     // Open every floor so the printout / PDF has the full breakdown.
     window.document
-      .querySelectorAll<HTMLDetailsElement>('.boq-floor-cost')
+      .querySelectorAll<HTMLDetailsElement>('.boq-floor-cost, .boq-scope-review')
       .forEach((element) => (element.open = true));
     window.print();
   }
@@ -1898,7 +1898,7 @@ export function BoqWorkspace({
                     </strong>
                   </div>
                   <div>
-                    <span>Total project cost estimate</span>
+                    <span>{scopeSummary.complete && !unpricedOutputs.length ? 'Total project cost estimate' : 'Provisional project estimate'}</span>
                     <strong>
                       {canViewCost ? money(materialCost) : 'Restricted'}
                     </strong>
@@ -1938,6 +1938,7 @@ export function BoqWorkspace({
                     use this subtotal as the final project cost.
                   </p>
                 )}
+                {scopePanel}
                 {labour && canViewCost && (
                   <section className="boq-labour-saved">
                     <h3>Labour Costing Summary</h3>
@@ -2166,7 +2167,7 @@ export function BoqWorkspace({
           <strong>{canViewCost ? money(labourCost) : 'Restricted'}</strong>
         </div>
         <div>
-          <span>Total Project Cost</span>
+          <span>{scopeSummary.complete && !unpricedOutputs.length ? 'Total Project Cost' : 'Provisional Project Cost'}</span>
           <strong>
             {!canViewCost
               ? 'Restricted'
@@ -2219,6 +2220,7 @@ export function BoqWorkspace({
           {message}
         </p>
       )}
+      {scopePanel}
       {canViewCost && (
         <details className="boq-project-costs">
           <summary>
