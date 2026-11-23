@@ -52,11 +52,11 @@ export const BOQ_WIZARD_STEPS: readonly BoqWizardStep[] = [
   },
   {
     number: 7,
-    title: 'Beams, Slab & Staircase',
-    short: 'Beams & Slab',
+    title: 'Columns, Beams, Slab & Staircase',
+    short: 'RCC Structure',
     description:
-      'Measure beams, slab reinforcement and staircases for the selected floor.',
-    categories: ['beams', 'slab', 'staircase'],
+      'Measure column types, beams, slab reinforcement and staircases by floor.',
+    categories: ['columns', 'beams', 'slab', 'staircase'],
     scope: 'floors',
   },
   {
