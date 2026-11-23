@@ -134,10 +134,18 @@ describe('compact BOQ entry stages', () => {
     );
     expect(html).toContain('View or edit Doors &amp; Windows on Ground Floor');
     expect(html).not.toContain('View or edit Sajjas / Sunshades');
-    expect(isDerivedQuantityReadOnly('quote-window-sajjas', 'Cement (window sunshades)')).toBe(true);
-    expect(isDerivedQuantityReadOnly('quote-window-sajjas', '8 mm TMT')).toBe(true);
-    expect(isDerivedQuantityReadOnly('quote-masonry', 'Cement (plaster)')).toBe(true);
-    expect(isDerivedQuantityReadOnly('quote-doors-windows', 'Windows')).toBe(false);
+    expect(
+      isDerivedQuantityReadOnly('quote-window-sajjas', 'Cement (window sunshades)'),
+    ).toBe(true);
+    expect(
+      isDerivedQuantityReadOnly('quote-window-sajjas', '8 mm TMT'),
+    ).toBe(true);
+    expect(
+      isDerivedQuantityReadOnly('quote-masonry', 'Cement (plaster)'),
+    ).toBe(true);
+    expect(
+      isDerivedQuantityReadOnly('quote-doors-windows', 'Windows'),
+    ).toBe(false);
   });
 
   it('keeps one compact cement shelving entry without a second manual sunshade screen', () => {
