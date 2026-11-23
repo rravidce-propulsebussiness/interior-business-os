@@ -41,6 +41,13 @@ describe('BOQ required work scope completeness', () => {
     expect(summary.complete).toBe(false);
   });
 
+  it('keeps an unmeasured placeholder unresolved even if a rate was entered', () => {
+    const first = BOQ_SCOPE_WORKS[0]!.code;
+    const summary = summarizeBoqScope(rows(first, 0, 1500), {});
+    expect(summary.items[0]?.status).toBe('unpriced');
+    expect(summary.complete).toBe(false);
+  });
+
   it('requires an explicit decision when a work is in other contract scope', () => {
     const reviews: Record<string, BoqScopeReview> = {};
     for (const work of BOQ_SCOPE_WORKS) reviews[work.code] = 'excluded';
