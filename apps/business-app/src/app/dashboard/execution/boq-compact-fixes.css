@@ -275,3 +275,56 @@
     display: none !important;
   }
 }
+
+/* One project-wide indirect-cost panel, outside the floor measurement cards. */
+.boq-project-costs {
+  margin: 13px 0;
+  border: 1px solid #e7d7d0;
+  border-radius: 14px;
+  padding: 13px 16px;
+  background: #fffdfb;
+  color: #52312e;
+}
+.boq-project-costs summary {
+  cursor: pointer;
+  font-weight: 750;
+  font-size: 14px;
+}
+.boq-project-costs > p {
+  margin: 11px 0;
+  max-width: 850px;
+  color: #796761;
+  font-size: 12px;
+}
+.boq-project-costs-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(188px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+.boq-project-costs-fields label {
+  display: grid;
+  gap: 5px;
+  color: #674d48;
+  font-size: 12px;
+}
+.boq-project-costs-fields input {
+  width: 100%;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid #dacac4;
+  border-radius: 9px;
+  background: #fff;
+  color: #3e2624;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.boq-project-costs-fields input:focus {
+  outline: 2px solid #ae6756;
+  outline-offset: 1px;
+}
+.boq-project-costs > strong {
+  display: block;
+  padding: 10px 0 1px;
+  font-size: 13px;
+}
