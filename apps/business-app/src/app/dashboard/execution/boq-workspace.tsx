@@ -11,6 +11,7 @@ import {
   materialForOutput,
   brandSelectionsFromQuote,
   rateForOutput,
+  isBoqCostUnpriced,
   rateGroupKey,
   COST_HEADS,
   costHead,
@@ -40,6 +41,7 @@ import { BoqLabourPanel } from './boq-labour-panel';
 import {
   DEFAULT_LABOUR,
   LEGACY_CIVIL_LABOUR_MATERIALS,
+  isEmbeddedLabourCovered,
   evaluateLabour,
   labourMeasurements,
   labourExtraQuantity,
@@ -339,13 +341,15 @@ export function BoqWorkspace({
       .map((rate) => rate.material)
       .filter((value): value is string => Boolean(value)),
   );
-  const isOldLabour = (output: SavedLine['outputs'][number]) => {
+  const isLabourOutput = (output: SavedLine['outputs'][number]) => {
     const group = materialForOutput(output);
     return Boolean(
       group &&
-      (labourGroups.has(group) || LEGACY_CIVIL_LABOUR_MATERIALS.has(group)),
+        (labourGroups.has(group) || LEGACY_CIVIL_LABOUR_MATERIALS.has(group)),
     );
   };
+  const isOldLabour = (output: SavedLine['outputs'][number]) =>
+    isEmbeddedLabourCovered(materialForOutput(output), labour);
   const priceOf = (output: SavedLine['outputs'][number]) =>
     // Reference-only concrete volume must never acquire a price from either
     // the material rate card or an old manual rate edit.
@@ -391,6 +395,7 @@ export function BoqWorkspace({
       ...output,
       lineId: line.id,
       lineName: line.name,
+      kind: line.kind,
       rate: priceOf(output),
       section: line.section,
     })),
@@ -398,16 +403,21 @@ export function BoqWorkspace({
 
   const materialOnlyCost = allOutputs.reduce(
     (sum, output) =>
-      sum + (isOldLabour(output) ? 0 : output.quantity * output.rate),
+      sum + (isLabourOutput(output) ? 0 : output.quantity * output.rate),
     0,
   );
-  const legacyLabourCost = labour
-    ? 0
-    : allOutputs.reduce(
-        (sum, output) =>
-          sum + (isOldLabour(output) ? output.quantity * output.rate : 0),
-        0,
-      );
+  // Embedded trade labour remains payable unless the selected labour method
+  // explicitly replaces it. Previously all trades were suppressed on any
+  // new composite labour BOQ, understating the full construction cost.
+  const legacyLabourCost = allOutputs.reduce(
+    (sum, output) =>
+      sum + (isLabourOutput(output) ? output.quantity * output.rate : 0),
+    0,
+  );
+  const unpricedOutputs = allOutputs.filter(
+    (output) =>
+      !isOldLabour(output) && isBoqCostUnpriced(output, priceOf),
+  );
   const measuredLabour = labourMeasurements(lines);
   const labourEstimate = evaluateLabour(
     labour,
@@ -427,7 +437,7 @@ export function BoqWorkspace({
       quantity: row.quantity,
       unit: row.unit,
       rate: canViewCost ? row.rate : 0,
-      head: isOldLabour(row)
+      head: isLabourOutput(row)
         ? 'Labour'
         : costHead(
             material ? rateGroupKey(material, diameterOf(row)) : undefined,
@@ -1538,7 +1548,7 @@ export function BoqWorkspace({
     allOutputs.map((output) => ({
       stage: output.section,
       amount: output.quantity * output.rate,
-      isLabour: isOldLabour(output),
+      isLabour: isLabourOutput(output),
     })),
     labour ? labourEstimate.byStage : {},
     floorsForGeneration,
@@ -1703,6 +1713,18 @@ export function BoqWorkspace({
                     <strong>{lines.length}</strong>
                   </div>
                 </div>
+                {canViewCost && unpricedOutputs.length > 0 && (
+                  <p className="boq-notice" role="status">
+                    Estimate incomplete: {unpricedOutputs.length} cost items
+                    have no priced supplier/trade rate. Review{' '}
+                    {unpricedOutputs
+                      .slice(0, 4)
+                      .map((item) => item.name)
+                      .join(', ')}
+                    {unpricedOutputs.length > 4 ? ' and others' : ''}.
+                    Do not use this subtotal as the final project cost.
+                  </p>
+                )}
                 {labour && canViewCost && (
                   <section className="boq-labour-saved">
                     <h3>Labour Costing Summary</h3>
@@ -1958,6 +1980,18 @@ export function BoqWorkspace({
           <strong>{lines.length}</strong>
         </div>
       </div>
+      {canViewCost && unpricedOutputs.length > 0 && (
+        <p className="boq-notice" role="status">
+          Estimate incomplete: {unpricedOutputs.length} cost items lack
+          supplier/trade rates. Review{' '}
+          {unpricedOutputs
+            .slice(0, 4)
+            .map((item) => item.name)
+            .join(', ')}
+          {unpricedOutputs.length > 4 ? ' and others' : ''}.
+          This total excludes unpriced costs.
+        </p>
+      )}
       {message && (
         <p className="boq-notice" role="status">
           {message}
