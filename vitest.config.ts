@@ -59,6 +59,11 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/projects/project-quote-milestone-projection.test.ts',
       'apps/business-app/src/app/dashboard/execution/revision-cost.test.ts',
       'apps/business-app/src/app/dashboard/execution/revision-ui.test.ts',
+      // All BOQ suites must execute, including floor-wise, labour and
+      // cost-completeness regressions. Explicit filenames previously skipped
+      // new test files silently even when passed to "vitest run".
+      'apps/business-app/src/app/dashboard/execution/boq-*.test.ts',
+      'apps/business-app/src/app/dashboard/execution/boq-*.test.tsx',
       'apps/business-app/src/app/dashboard/execution/boq-calculations.test.ts',
       'apps/business-app/src/app/dashboard/execution/boq-pricing.test.ts',
       'apps/business-app/src/app/dashboard/execution/boq-units.test.ts',
