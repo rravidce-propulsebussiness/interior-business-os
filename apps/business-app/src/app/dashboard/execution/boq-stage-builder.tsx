@@ -259,6 +259,14 @@ const isMeasuredBeam = (design: StructuralDesign | null, floorIndex: number) =>
 const manualCategory = (line: StageBoqLine) =>
   String(line.inputs.stageCategory || '').toLowerCase();
 
+/** Generated quantities come from window or wall schedules; only rate can
+ * be overridden. Removing a cost material without changing the source
+ * dimensions would silently understate the estimate.
+ */
+export function isDerivedQuantityReadOnly(kind: string, name: string) {
+  return kind === 'quote-window-sajjas' || isAutoPlasterQuantity(kind, name);
+}
+
 function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
   const kind = line.kind.toLowerCase();
   const name = (line.name + ' ' + output.name).toLowerCase();
@@ -2191,11 +2199,10 @@ export function BoqStageBuilder(props: Props) {
                         {entry.output.name}
                         <small>{entry.line.name}</small>
                       </span>
-                      {(entry.line.kind === 'quote-window-sajjas' ||
-                        isAutoPlasterQuantity(
-                          entry.line.kind,
-                          entry.output.name,
-                        )) ? (
+                      {isDerivedQuantityReadOnly(
+                        entry.line.kind,
+                        entry.output.name,
+                      ) ? (
                         <div className="boq-stage-field">
                           <span>Calculated quantity ({entry.output.unit})</span>
                           <strong>{number(entry.output.quantity)}</strong>
@@ -2258,8 +2265,7 @@ export function BoqStageBuilder(props: Props) {
                           Remove
                         </button>
                       ) : (
-                        entry.line.kind !== 'quote-window-sajjas' &&
-                        !isAutoPlasterQuantity(
+                        !isDerivedQuantityReadOnly(
                           entry.line.kind,
                           entry.output.name,
                         ) &&
