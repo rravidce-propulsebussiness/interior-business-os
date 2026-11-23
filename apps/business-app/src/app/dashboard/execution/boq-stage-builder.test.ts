@@ -1,7 +1,7 @@
 import { createElement, type ComponentProps } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { BoqStageBuilder } from './boq-stage-builder';
+import { BoqStageBuilder, isDerivedQuantityReadOnly } from './boq-stage-builder';
 import { BoqFootingEditor } from './boq-footing-editor';
 import { BarsPicker } from './boq-design-schedule';
 import { newFootingType } from '@business-os/core/construction-boq';
@@ -132,10 +132,12 @@ describe('compact BOQ entry stages', () => {
         ],
       }),
     );
-    expect(html).toContain('Cement (window sunshades)');
-    expect(html).toContain('Calculated quantity (bag)');
-    expect(html).not.toContain('Restore calculated quantity');
-    expect(html).not.toContain('Remove from floor');
+    expect(html).toContain('View or edit Doors &amp; Windows on Ground Floor'.replace('&amp;', '&'));
+    expect(html).not.toContain('View or edit Sajjas / Sunshades');
+    expect(isDerivedQuantityReadOnly('quote-window-sajjas', 'Cement (window sunshades)')).toBe(true);
+    expect(isDerivedQuantityReadOnly('quote-window-sajjas', '8 mm TMT')).toBe(true);
+    expect(isDerivedQuantityReadOnly('quote-masonry', 'Cement (plaster)')).toBe(true);
+    expect(isDerivedQuantityReadOnly('quote-doors-windows', 'Windows')).toBe(false);
   });
 
   it('keeps one compact cement shelving entry without a second manual sunshade screen', () => {
