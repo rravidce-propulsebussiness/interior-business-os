@@ -1,5 +1,6 @@
 'use client';
 
+import { NumberField } from './boq-number-field';
 import {
   FOOTING_TYPES,
   newFootingType,
@@ -20,7 +21,6 @@ const labels: Record<DesignFootingType['type'], string> = {
   strip: 'Strip / continuous footing',
   pile_cap: 'Pile cap — cap only, excludes piles',
 };
-const number = (n: number) => (Number.isFinite(n) ? n : 0);
 function Numeric({
   label,
   value,
@@ -40,15 +40,14 @@ function Numeric({
         {label}
         {unit ? ` (${unit})` : ''}
       </span>
-      <input
-        type="number"
-        inputMode="decimal"
-        min={min}
-        step="any"
+      {/* Feet boxes read drawing sizes such as 5'0" (a number box would
+          read 5'0" as 50). */}
+      <NumberField
+        label={label + (unit ? ' (' + unit + ')' : '')}
         value={value}
-        onChange={(e) =>
-          onChange(Math.max(min, number(Number(e.target.value))))
-        }
+        min={min}
+        feet={unit === 'ft'}
+        onChange={onChange}
       />
     </label>
   );

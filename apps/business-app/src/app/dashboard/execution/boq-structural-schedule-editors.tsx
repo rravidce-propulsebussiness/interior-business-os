@@ -1,5 +1,6 @@
 'use client';
 
+import { NumberField } from './boq-number-field';
 import type {
   DesignSlabPanel,
   DesignStairType,
@@ -25,15 +26,14 @@ function QuantityField({
         {label}
         {unit ? ' (' + unit + ')' : ''}
       </span>
-      <input
-        type="number"
-        min="0"
-        step="any"
-        inputMode="decimal"
+      {/* Feet boxes read drawing sizes such as 5'0" (a number box would
+          read 5'0" as 50). */}
+      <NumberField
+        label={label + (unit ? ' (' + unit + ')' : '')}
         value={value}
-        onChange={(event) =>
-          onChange(Math.max(0, Number(event.target.value) || 0))
-        }
+        min={0}
+        feet={unit === 'ft'}
+        onChange={onChange}
       />
     </label>
   );
