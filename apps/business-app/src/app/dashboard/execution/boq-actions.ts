@@ -103,6 +103,9 @@ const generatorSchema = z.object({
           kitchenPlatformFeet: z.number().finite().nonnegative(),
           bathroomSizes: z.string().max(300).optional(),
           railingFeet: z.number().finite().nonnegative().optional(),
+          internalPlasterCoats: z.union([z.literal(1), z.literal(2)]).optional(),
+          externalPlasterCoats: z.union([z.literal(1), z.literal(2)]).optional(),
+          tileWastagePercent: z.number().finite().min(0).max(30).optional(),
           excludeRoomFlooring: z.boolean().optional(),
           staircaseGraniteSqft: z
             .number()
