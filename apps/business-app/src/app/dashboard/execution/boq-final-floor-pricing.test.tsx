@@ -103,7 +103,9 @@ describe('one final BOQ floor-wise pricing', () => {
       overheadCost: 0,
       totalCost: 130000,
     });
-    expect(rows.find((row) => row.stage === 'Project-wide costs')).toMatchObject({
+    expect(
+      rows.find((row) => row.stage === 'Project-wide costs'),
+    ).toMatchObject({
       materialCost: 0,
       labourCost: 0,
       overheadCost: 12000,

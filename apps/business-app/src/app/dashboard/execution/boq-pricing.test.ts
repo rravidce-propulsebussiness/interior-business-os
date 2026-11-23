@@ -208,19 +208,39 @@ describe('BOQ default prices and quoted brands', () => {
     const price = (output: Parameters<typeof rateForOutput>[0]) =>
       rateForOutput(output, []);
     expect(
-      isBoqCostUnpriced({ name: 'Building permission', unit: 'LS', quantity: 1 }, price),
+      isBoqCostUnpriced(
+        { name: 'Building permission', unit: 'LS', quantity: 1 },
+        price,
+      ),
     ).toBe(true);
     expect(
-      isBoqCostUnpriced({ name: 'Quoted extra', unit: 'LS', quantity: 1, quotedRate: 10000 }, price),
+      isBoqCostUnpriced(
+        { name: 'Quoted extra', unit: 'LS', quantity: 1, quotedRate: 10000 },
+        price,
+      ),
     ).toBe(true);
     expect(
-      isBoqCostUnpriced({ name: 'PCC concrete volume (reference only)', unit: 'm³', quantity: 3, rate: 0 }, price),
+      isBoqCostUnpriced(
+        {
+          name: 'PCC concrete volume (reference only)',
+          unit: 'm³',
+          quantity: 3,
+          rate: 0,
+        },
+        price,
+      ),
     ).toBe(false);
     expect(
-      isBoqCostUnpriced({ name: 'Zero scope', unit: 'each', quantity: 0 }, price),
+      isBoqCostUnpriced(
+        { name: 'Zero scope', unit: 'each', quantity: 0 },
+        price,
+      ),
     ).toBe(false);
     expect(
-      isBoqCostUnpriced({ name: 'Paid item', unit: 'each', quantity: 1, rate: 123 }, price),
+      isBoqCostUnpriced(
+        { name: 'Paid item', unit: 'each', quantity: 1, rate: 123 },
+        price,
+      ),
     ).toBe(false);
   });
 

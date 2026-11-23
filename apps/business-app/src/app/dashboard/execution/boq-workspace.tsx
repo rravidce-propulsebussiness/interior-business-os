@@ -356,7 +356,7 @@ export function BoqWorkspace({
     const group = materialForOutput(output);
     return Boolean(
       group &&
-        (labourGroups.has(group) || LEGACY_CIVIL_LABOUR_MATERIALS.has(group)),
+      (labourGroups.has(group) || LEGACY_CIVIL_LABOUR_MATERIALS.has(group)),
     );
   };
   const isOldLabour = (output: SavedLine['outputs'][number]) =>
@@ -426,8 +426,7 @@ export function BoqWorkspace({
     0,
   );
   const unpricedOutputs = allOutputs.filter(
-    (output) =>
-      !isOldLabour(output) && isBoqCostUnpriced(output, priceOf),
+    (output) => !isOldLabour(output) && isBoqCostUnpriced(output, priceOf),
   );
   const measuredLabour = labourMeasurements(lines);
   const labourEstimate = evaluateLabour(
@@ -1601,18 +1600,20 @@ export function BoqWorkspace({
     })),
   ];
   const detailedFloorPricing = buildFloorPricing(
-    allOutputs.map((output) => ({
-      stage: output.section,
-      amount: output.quantity * output.rate,
-      isLabour: isLabourOutput(output),
-    })).concat(
-      projectCostLines.map((row) => ({
-        stage: 'Project-wide costs',
-        amount: row.rate,
-        isLabour: false,
-        isOverhead: true,
-      })),
-    ),
+    allOutputs
+      .map((output) => ({
+        stage: output.section,
+        amount: output.quantity * output.rate,
+        isLabour: isLabourOutput(output),
+      }))
+      .concat(
+        projectCostLines.map((row) => ({
+          stage: 'Project-wide costs',
+          amount: row.rate,
+          isLabour: false,
+          isOverhead: true,
+        })),
+      ),
     labour ? labourEstimate.byStage : {},
     floorsForGeneration,
     stages,
@@ -1792,8 +1793,8 @@ export function BoqWorkspace({
                       .slice(0, 4)
                       .map((item) => item.name)
                       .join(', ')}
-                    {unpricedOutputs.length > 4 ? ' and others' : ''}.
-                    Do not use this subtotal as the final project cost.
+                    {unpricedOutputs.length > 4 ? ' and others' : ''}. Do not
+                    use this subtotal as the final project cost.
                   </p>
                 )}
                 {labour && canViewCost && (
@@ -2068,8 +2069,8 @@ export function BoqWorkspace({
             .slice(0, 4)
             .map((item) => item.name)
             .join(', ')}
-          {unpricedOutputs.length > 4 ? ' and others' : ''}.
-          This total excludes unpriced costs.
+          {unpricedOutputs.length > 4 ? ' and others' : ''}. This total excludes
+          unpriced costs.
         </p>
       )}
       {message && (

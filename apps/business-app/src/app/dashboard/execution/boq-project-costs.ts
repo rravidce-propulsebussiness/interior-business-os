@@ -11,8 +11,7 @@ export const BOQ_PROJECT_COST_FIELDS = [
   { key: 'miscellaneous', label: 'Other project-wide expenses' },
 ] as const;
 
-export type BoqProjectCostKey =
-  (typeof BOQ_PROJECT_COST_FIELDS)[number]['key'];
+export type BoqProjectCostKey = (typeof BOQ_PROJECT_COST_FIELDS)[number]['key'];
 export type BoqProjectCosts = Record<BoqProjectCostKey, number> & {
   contingencyPercent: number;
   taxes: number;
@@ -37,7 +36,10 @@ export function normalizeBoqProjectCosts(
     const input = raw?.[key];
     normalized[key] =
       typeof input === 'number' && Number.isFinite(input)
-        ? Math.min(Math.max(0, input), key === 'contingencyPercent' ? 100 : 100000000)
+        ? Math.min(
+            Math.max(0, input),
+            key === 'contingencyPercent' ? 100 : 100000000,
+          )
         : 0;
   }
   return normalized;

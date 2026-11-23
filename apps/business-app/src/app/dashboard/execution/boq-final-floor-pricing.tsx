@@ -81,7 +81,11 @@ export function buildFloorPricing(
   return ordered
     .filter((stage) => byStage.has(stage) || areaByFloor.has(stage))
     .map((stage) => {
-      const cost = byStage.get(stage) ?? { materials: 0, labour: 0, overhead: 0 };
+      const cost = byStage.get(stage) ?? {
+        materials: 0,
+        labour: 0,
+        overhead: 0,
+      };
       const area = areaByFloor.get(stage);
       const materialCost = cents(cost.materials);
       const labourCost = cents(cost.labour);

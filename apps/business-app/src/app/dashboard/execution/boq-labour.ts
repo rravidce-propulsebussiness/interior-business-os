@@ -124,8 +124,7 @@ export function isEmbeddedLabourCovered(
   };
   const work = works[material];
   if (!work) return false;
-  if (config.method === 'itemwise')
-    return (config.itemRates[work] ?? 0) > 0;
+  if (config.method === 'itemwise') return (config.itemRates[work] ?? 0) > 0;
   return config.coveredWorks.includes(work);
 }
 

@@ -210,5 +210,4 @@ describe('BOQ labour costing', () => {
     expect(isEmbeddedLabourCovered('labour_plumbing', config)).toBe(false);
     expect(isEmbeddedLabourCovered('labour_painting', null)).toBe(false);
   });
-
 });
