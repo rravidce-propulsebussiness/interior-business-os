@@ -840,10 +840,9 @@ export function selectedVariant(
 }
 
 /**
- * Unit rate for a BOQ output: a rate typed on the BOQ wins; then the
- * package rate from the quotation (windows ₹450 / sq ft, tiles ₹60, doors
- * ₹7,000 …); then the BOQ's brand / source for its material group; then a
- * plain rate line with the same name and unit.
+ * Estimated purchase/trade cost rate, never the customer's selling allowance.
+ * Explicit BOQ rate wins, followed by the selected material/trade rate card.
+ * quotedRate is deliberately ignored here; it is for contract comparison only.
  */
 export function rateForOutput(
   output: PricedOutput,
@@ -852,8 +851,6 @@ export function rateForOutput(
 ): number {
   if (output.rate !== undefined && Number.isFinite(output.rate))
     return output.rate;
-  if (output.quotedRate !== undefined && Number.isFinite(output.quotedRate))
-    return output.quotedRate;
   const material = materialForOutput(output);
   if (material) {
     // Steel: one brand choice per BOQ, priced per rod for each diameter.
@@ -877,6 +874,26 @@ export function rateForOutput(
         rate.unit.toLowerCase() === output.unit.toLowerCase(),
     )?.rate ?? 0
   );
+}
+
+/**
+ * An unpriced line has a positive quantity but no identified cost rate.
+ * Reference takeoffs (e.g. concrete volume when ingredients are costed)
+ * and unpriced observational dimensions are not purchase costs.
+ */
+export function isBoqCostUnpriced<
+  T extends PricedOutput & { quantity: number; kind?: string },
+>(output: T, resolveCost: (output: T) => number): boolean {
+  if (!(output.quantity > 0)) return false;
+  if (/reference only|volume only/i.test(output.name)) return false;
+  const costBearing =
+    Boolean(output.material) ||
+    output.quotedRate !== undefined ||
+    output.rate !== undefined ||
+    output.kind === 'manual' ||
+    output.kind === 'quote-additional' ||
+    /^(ls|lumpsum|lot)$/i.test(output.unit);
+  return costBearing && !(resolveCost(output) > 0);
 }
 
 type QuoteSection = {

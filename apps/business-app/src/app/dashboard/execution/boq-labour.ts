@@ -97,6 +97,37 @@ export const LEGACY_CIVIL_LABOUR_MATERIALS = new Set([
   'plaster_labour',
   'shuttering',
 ]);
+/**
+ * Resolve only the embedded labour cost already included in a separately
+ * configured BOQ labour contract or measured trade rate.
+ *
+ * Do not suppress electrical, plumbing, painting, tiling, door fixing,
+ * excavation or soil filling merely because a civil labour contract exists.
+ */
+export function isEmbeddedLabourCovered(
+  material: string | undefined,
+  config: LabourConfig | null,
+): boolean {
+  if (!config || !material) return false;
+  // These legacy floor-wide rows represent the whole civil labour package.
+  if (material === 'labour_civil' || material === 'labour_rcc') return true;
+  const works: Partial<Record<string, LabourWorkId>> = {
+    labour_brickwork_9: 'brickwork',
+    labour_brickwork_4: 'brickwork',
+    plaster_labour: 'plastering',
+    shuttering: 'shuttering',
+    labour_tiling: 'tiling',
+    labour_painting: 'painting',
+    labour_electrical: 'electrical',
+    labour_plumbing: 'plumbing',
+    excavation: 'excavation',
+  };
+  const work = works[material];
+  if (!work) return false;
+  if (config.method === 'itemwise') return (config.itemRates[work] ?? 0) > 0;
+  return config.coveredWorks.includes(work);
+}
+
 export const DEFAULT_LABOUR: LabourConfig = {
   version: 1,
   method: 'composite',

@@ -1,0 +1,56 @@
+name: BOQ cost integrity
+
+on:
+  push:
+    paths:
+      - 'apps/business-app/src/app/dashboard/execution/boq-*.ts'
+      - 'apps/business-app/src/app/dashboard/execution/boq-*.tsx'
+      - 'apps/business-app/src/app/dashboard/execution/boq-*.css'
+      - '.github/workflows/boq-cost-integrity.yml'
+  pull_request:
+    paths:
+      - 'apps/business-app/src/app/dashboard/execution/boq-*.ts'
+      - 'apps/business-app/src/app/dashboard/execution/boq-*.tsx'
+      - 'apps/business-app/src/app/dashboard/execution/boq-*.css'
+      - '.github/workflows/boq-cost-integrity.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-boq:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: BOQ pricing, labour and floor-wise reconciliation
+        run: >-
+          pnpm exec vitest run
+          apps/business-app/src/app/dashboard/execution/boq-pricing.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-labour.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-project-costs.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.test.tsx
+          apps/business-app/src/app/dashboard/execution/boq-stage-measurements.test.ts
+          packages/core/src/construction-boq.test.ts
+      - name: BOQ formatting
+        run: >-
+          pnpm exec prettier --check
+          apps/business-app/src/app/dashboard/execution/boq-pricing.ts
+          apps/business-app/src/app/dashboard/execution/boq-pricing.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-labour.ts
+          apps/business-app/src/app/dashboard/execution/boq-labour.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-project-costs.ts
+          apps/business-app/src/app/dashboard/execution/boq-project-costs.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-actions.ts
+          apps/business-app/src/app/dashboard/execution/boq-workspace.tsx
+          apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.tsx
+          apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.test.tsx
+          apps/business-app/src/app/dashboard/execution/boq-compact-fixes.css
+      - name: BOQ TypeScript integrity
+        run: pnpm --filter ./apps/business-app typecheck

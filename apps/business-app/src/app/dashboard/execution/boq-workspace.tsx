@@ -11,6 +11,7 @@ import {
   materialForOutput,
   brandSelectionsFromQuote,
   rateForOutput,
+  isBoqCostUnpriced,
   rateGroupKey,
   COST_HEADS,
   costHead,
@@ -40,6 +41,7 @@ import { BoqLabourPanel } from './boq-labour-panel';
 import {
   DEFAULT_LABOUR,
   LEGACY_CIVIL_LABOUR_MATERIALS,
+  isEmbeddedLabourCovered,
   evaluateLabour,
   labourMeasurements,
   labourExtraQuantity,
@@ -53,6 +55,13 @@ import {
   type MeasuredKind,
 } from './boq-stage-measurements';
 import { boqCsv, boqFileName, type BoqExportRow } from './boq-export';
+import {
+  BOQ_PROJECT_COST_FIELDS,
+  DEFAULT_BOQ_PROJECT_COSTS,
+  calculateBoqProjectCosts,
+  normalizeBoqProjectCosts,
+  type BoqProjectCosts,
+} from './boq-project-costs';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 
 type Generator = {
@@ -109,6 +118,7 @@ type Document = {
     selections?: Record<string, string>;
     generator?: Generator;
     labour?: LabourConfig;
+    projectCosts?: BoqProjectCosts;
   };
   updated_at: string;
 };
@@ -250,6 +260,9 @@ export function BoqWorkspace({
       ? (initialDocument.document?.labour ?? null)
       : { ...DEFAULT_LABOUR },
   );
+  const [projectCosts, setProjectCosts] = useState<BoqProjectCosts>(
+    normalizeBoqProjectCosts(initialDocument?.document?.projectCosts),
+  );
   const [costingTab, setCostingTab] = useState<'builder' | 'labour'>('builder');
   const [rmcEnabled, setRmcEnabled] = useState(() => {
     const saved =
@@ -339,13 +352,15 @@ export function BoqWorkspace({
       .map((rate) => rate.material)
       .filter((value): value is string => Boolean(value)),
   );
-  const isOldLabour = (output: SavedLine['outputs'][number]) => {
+  const isLabourOutput = (output: SavedLine['outputs'][number]) => {
     const group = materialForOutput(output);
     return Boolean(
       group &&
       (labourGroups.has(group) || LEGACY_CIVIL_LABOUR_MATERIALS.has(group)),
     );
   };
+  const isOldLabour = (output: SavedLine['outputs'][number]) =>
+    isEmbeddedLabourCovered(materialForOutput(output), labour);
   const priceOf = (output: SavedLine['outputs'][number]) =>
     // Reference-only concrete volume must never acquire a price from either
     // the material rate card or an old manual rate edit.
@@ -391,6 +406,7 @@ export function BoqWorkspace({
       ...output,
       lineId: line.id,
       lineName: line.name,
+      kind: line.kind,
       rate: priceOf(output),
       section: line.section,
     })),
@@ -398,16 +414,20 @@ export function BoqWorkspace({
 
   const materialOnlyCost = allOutputs.reduce(
     (sum, output) =>
-      sum + (isOldLabour(output) ? 0 : output.quantity * output.rate),
+      sum + (isLabourOutput(output) ? 0 : output.quantity * output.rate),
     0,
   );
-  const legacyLabourCost = labour
-    ? 0
-    : allOutputs.reduce(
-        (sum, output) =>
-          sum + (isOldLabour(output) ? output.quantity * output.rate : 0),
-        0,
-      );
+  // Embedded trade labour remains payable unless the selected labour method
+  // explicitly replaces it. Previously all trades were suppressed on any
+  // new composite labour BOQ, understating the full construction cost.
+  const legacyLabourCost = allOutputs.reduce(
+    (sum, output) =>
+      sum + (isLabourOutput(output) ? output.quantity * output.rate : 0),
+    0,
+  );
+  const unpricedOutputs = allOutputs.filter(
+    (output) => !isOldLabour(output) && isBoqCostUnpriced(output, priceOf),
+  );
   const measuredLabour = labourMeasurements(lines);
   const labourEstimate = evaluateLabour(
     labour,
@@ -415,7 +435,12 @@ export function BoqWorkspace({
     measuredLabour,
   );
   const labourCost = legacyLabourCost + labourEstimate.total;
-  const materialCost = materialOnlyCost + labourCost;
+  const projectCostBreakdown = calculateBoqProjectCosts(
+    materialOnlyCost,
+    labourCost,
+    projectCosts,
+  );
+  const materialCost = projectCostBreakdown.total;
   // Every quantity with its stage and cost head, for the order list and
   // the download.
   const materialExportRows: BoqExportRow[] = allOutputs.map((row) => {
@@ -427,7 +452,7 @@ export function BoqWorkspace({
       quantity: row.quantity,
       unit: row.unit,
       rate: canViewCost ? row.rate : 0,
-      head: isOldLabour(row)
+      head: isLabourOutput(row)
         ? 'Labour'
         : costHead(
             material ? rateGroupKey(material, diameterOf(row)) : undefined,
@@ -486,7 +511,27 @@ export function BoqWorkspace({
           head: 'Labour',
         })),
       ];
-  const exportRows = [...materialExportRows, ...labourExportRows];
+  const projectCostLines = [
+    ...BOQ_PROJECT_COST_FIELDS.map((field) => ({
+      name: field.label,
+      rate: projectCosts[field.key],
+    })),
+    { name: 'Project contingency', rate: projectCostBreakdown.contingency },
+    { name: 'Applicable taxes not already included', rate: projectCosts.taxes },
+  ].filter((row) => row.rate > 0);
+  const exportRows = [
+    ...materialExportRows,
+    ...labourExportRows,
+    ...projectCostLines.map((row): BoqExportRow => ({
+      stage: 'Project-wide costs',
+      item: row.name,
+      name: row.name,
+      quantity: 1,
+      unit: 'LS',
+      rate: canViewCost ? row.rate : 0,
+      head: 'Other',
+    })),
+  ];
   const builtUpSqft = floorsForGeneration.reduce(
     (sum, floor) => sum + floor.areaSqft,
     0,
@@ -559,6 +604,7 @@ export function BoqWorkspace({
     setLines([]);
     setSelections({});
     setLabour({ ...DEFAULT_LABOUR });
+    setProjectCosts({ ...DEFAULT_BOQ_PROJECT_COSTS });
     setCostingTab('builder');
     setRmcEnabled(settings.readyMixConcrete !== 0);
     setRmcRateOverride(null);
@@ -594,6 +640,7 @@ export function BoqWorkspace({
     setLines(upgradeOldSmallConcrete(document.document?.items || [], settings));
     setSelections(document.document?.selections ?? {});
     setLabour(document.document?.labour ?? null);
+    setProjectCosts(normalizeBoqProjectCosts(document.document?.projectCosts));
     setCostingTab('builder');
     setRmcEnabled(
       (document.document?.generator?.settings?.readyMixConcrete ??
@@ -830,6 +877,7 @@ export function BoqWorkspace({
       items: lines,
       selections,
       ...(labour && canViewCost ? { labour } : {}),
+      ...(canViewCost ? { projectCosts } : {}),
       ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
     }),
     [
@@ -839,6 +887,7 @@ export function BoqWorkspace({
       lines,
       selections,
       labour,
+      projectCosts,
       canViewCost,
       generator,
       repeatFrom,
@@ -922,6 +971,9 @@ export function BoqWorkspace({
                     selections: autoSaveContent.selections,
                     ...(autoSaveContent.labour
                       ? { labour: autoSaveContent.labour }
+                      : {}),
+                    ...(autoSaveContent.projectCosts
+                      ? { projectCosts: autoSaveContent.projectCosts }
                       : {}),
                     ...(autoSaveContent.generator
                       ? { generator: autoSaveContent.generator }
@@ -1117,6 +1169,7 @@ export function BoqWorkspace({
         items: lines,
         selections,
         ...(labour && canViewCost ? { labour } : {}),
+        ...(canViewCost ? { projectCosts } : {}),
         ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
       });
       if (!result.ok) {
@@ -1137,6 +1190,7 @@ export function BoqWorkspace({
           items: lines,
           selections,
           ...(labour && canViewCost ? { labour } : {}),
+          ...(canViewCost ? { projectCosts } : {}),
           ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
         },
         updated_at: new Date().toISOString(),
@@ -1525,21 +1579,41 @@ export function BoqWorkspace({
         )
       : [];
   const stages = [...new Set(lines.map((line) => line.section || 'Other'))];
-  const detailedPricingLines = allOutputs.map((output, index) => ({
-    id: `${output.lineId}-${index}`,
-    stage: output.section || 'Other',
-    work: output.lineName,
-    name: output.name,
-    quantity: output.quantity,
-    unit: output.unit,
-    rate: output.rate,
-  }));
-  const detailedFloorPricing = buildFloorPricing(
-    allOutputs.map((output) => ({
-      stage: output.section,
-      amount: output.quantity * output.rate,
-      isLabour: isOldLabour(output),
+  const detailedPricingLines = [
+    ...allOutputs.map((output, index) => ({
+      id: `${output.lineId}-${index}`,
+      stage: output.section || 'Other',
+      work: output.lineName,
+      name: output.name,
+      quantity: output.quantity,
+      unit: output.unit,
+      rate: output.rate,
     })),
+    ...projectCostLines.map((row, index) => ({
+      id: `project-wide-${index}`,
+      stage: 'Project-wide costs',
+      work: 'Indirect project expenses',
+      name: row.name,
+      quantity: 1,
+      unit: 'LS',
+      rate: row.rate,
+    })),
+  ];
+  const detailedFloorPricing = buildFloorPricing(
+    allOutputs
+      .map((output) => ({
+        stage: output.section,
+        amount: output.quantity * output.rate,
+        isLabour: isLabourOutput(output),
+      }))
+      .concat(
+        projectCostLines.map((row) => ({
+          stage: 'Project-wide costs',
+          amount: row.rate,
+          isLabour: false,
+          isOverhead: true,
+        })),
+      ),
     labour ? labourEstimate.byStage : {},
     floorsForGeneration,
     stages,
@@ -1683,9 +1757,17 @@ export function BoqWorkspace({
                     </strong>
                   </div>
                   <div>
-                    <span>Estimated material + labour</span>
+                    <span>Total project cost estimate</span>
                     <strong>
                       {canViewCost ? money(materialCost) : 'Restricted'}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Site overhead, contingency and taxes</span>
+                    <strong>
+                      {canViewCost
+                        ? money(projectCostBreakdown.projectWideCost)
+                        : 'Restricted'}
                     </strong>
                   </div>
                   <div>
@@ -1703,6 +1785,18 @@ export function BoqWorkspace({
                     <strong>{lines.length}</strong>
                   </div>
                 </div>
+                {canViewCost && unpricedOutputs.length > 0 && (
+                  <p className="boq-notice" role="status">
+                    Estimate incomplete: {unpricedOutputs.length} cost items
+                    have no priced supplier/trade rate. Review{' '}
+                    {unpricedOutputs
+                      .slice(0, 4)
+                      .map((item) => item.name)
+                      .join(', ')}
+                    {unpricedOutputs.length > 4 ? ' and others' : ''}. Do not
+                    use this subtotal as the final project cost.
+                  </p>
+                )}
                 {labour && canViewCost && (
                   <section className="boq-labour-saved">
                     <h3>Labour Costing Summary</h3>
@@ -1788,6 +1882,7 @@ export function BoqWorkspace({
                   labourAllocations={labour ? labourEstimate.byStage : {}}
                   materialCost={materialOnlyCost}
                   labourCost={labourCost}
+                  overheadCost={projectCostBreakdown.projectWideCost}
                   totalCost={materialCost}
                   areaSqft={builtUpSqft}
                   canViewCost={canViewCost}
@@ -1930,13 +2025,21 @@ export function BoqWorkspace({
           <strong>{canViewCost ? money(labourCost) : 'Restricted'}</strong>
         </div>
         <div>
-          <span>Total BOQ Estimate</span>
+          <span>Total Project Cost</span>
           <strong>
             {!canViewCost
               ? 'Restricted'
               : calculating
                 ? 'Calculating…'
                 : money(materialCost)}
+          </strong>
+        </div>
+        <div>
+          <span>Site overhead, contingency and taxes</span>
+          <strong>
+            {canViewCost
+              ? money(projectCostBreakdown.projectWideCost)
+              : 'Restricted'}
           </strong>
         </div>
         <div>
@@ -1958,10 +2061,94 @@ export function BoqWorkspace({
           <strong>{lines.length}</strong>
         </div>
       </div>
+      {canViewCost && unpricedOutputs.length > 0 && (
+        <p className="boq-notice" role="status">
+          Estimate incomplete: {unpricedOutputs.length} cost items lack
+          supplier/trade rates. Review{' '}
+          {unpricedOutputs
+            .slice(0, 4)
+            .map((item) => item.name)
+            .join(', ')}
+          {unpricedOutputs.length > 4 ? ' and others' : ''}. This total excludes
+          unpriced costs.
+        </p>
+      )}
       {message && (
         <p className="boq-notice" role="status">
           {message}
         </p>
+      )}
+      {canViewCost && (
+        <details className="boq-project-costs">
+          <summary>
+            Project-wide costs and contingency —{' '}
+            {money(projectCostBreakdown.projectWideCost)}
+          </summary>
+          <p>
+            Enter site-wide costs only once, not again under individual floors.
+            Keep tax amounts separate from supplier rates that already include
+            tax. Leave a field at zero only when not applicable.
+          </p>
+          <div className="boq-project-costs-fields">
+            {BOQ_PROJECT_COST_FIELDS.map((field) => (
+              <label key={field.key}>
+                <span>{field.label} (₹)</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="100000000"
+                  step="0.01"
+                  value={projectCosts[field.key]}
+                  disabled={!(active ? canEdit : canCreate)}
+                  onChange={(event) =>
+                    setProjectCosts((previous) => ({
+                      ...previous,
+                      [field.key]: Math.max(0, Number(event.target.value) || 0),
+                    }))
+                  }
+                />
+              </label>
+            ))}
+            <label>
+              <span>Contingency (%)</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={projectCosts.contingencyPercent}
+                disabled={!(active ? canEdit : canCreate)}
+                onChange={(event) =>
+                  setProjectCosts((previous) => ({
+                    ...previous,
+                    contingencyPercent: Math.min(
+                      100,
+                      Math.max(0, Number(event.target.value) || 0),
+                    ),
+                  }))
+                }
+              />
+            </label>
+            <label>
+              <span>Applicable taxes not already included (₹)</span>
+              <input
+                type="number"
+                min="0"
+                max="100000000"
+                step="0.01"
+                value={projectCosts.taxes}
+                disabled={!(active ? canEdit : canCreate)}
+                onChange={(event) =>
+                  setProjectCosts((previous) => ({
+                    ...previous,
+                    taxes: Math.max(0, Number(event.target.value) || 0),
+                  }))
+                }
+              />
+            </label>
+          </div>
+          <strong>Total project estimate: {money(materialCost)}</strong>
+        </details>
       )}
       {active && canEdit && (
         <div

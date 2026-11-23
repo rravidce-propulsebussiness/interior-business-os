@@ -5,6 +5,7 @@ import {
   effectiveRates,
   MATERIAL_GROUPS,
   rateForOutput,
+  isBoqCostUnpriced,
   starterRate,
   type Rate,
 } from './boq-pricing';
@@ -182,21 +183,65 @@ describe('BOQ default prices and quoted brands', () => {
     ).toBe(9.5);
   });
 
-  it('prices package items at the rate in the quotation', () => {
-    // Windows: the standard package's ₹450 / sq ft, not the rate card.
+  it('uses internal supplier rates instead of customer quotation allowances', () => {
     expect(
       rateForOutput(
-        { name: 'Windows', unit: 'sqft', material: 'window', quotedRate: 450 },
+        { name: 'Windows', unit: 'sqft', material: 'window', quotedRate: 1200 },
         effectiveRates([]),
       ),
     ).toBe(450);
-    // A rate typed on the BOQ still wins.
     expect(
       rateForOutput(
-        { name: 'Windows', unit: 'sqft', quotedRate: 450, rate: 400 },
+        { name: 'Windows', unit: 'sqft', quotedRate: 1200, rate: 400 },
         [],
       ),
     ).toBe(400);
+    expect(
+      rateForOutput(
+        { name: 'Custom extra', unit: 'LS', quotedRate: 25000 },
+        [],
+      ),
+    ).toBe(0);
+  });
+
+  it('flags missing prices without treating reference volumes or zero quantities as costs', () => {
+    const price = (output: Parameters<typeof rateForOutput>[0]) =>
+      rateForOutput(output, []);
+    expect(
+      isBoqCostUnpriced(
+        { name: 'Building permission', unit: 'LS', quantity: 1 },
+        price,
+      ),
+    ).toBe(true);
+    expect(
+      isBoqCostUnpriced(
+        { name: 'Quoted extra', unit: 'LS', quantity: 1, quotedRate: 10000 },
+        price,
+      ),
+    ).toBe(true);
+    expect(
+      isBoqCostUnpriced(
+        {
+          name: 'PCC concrete volume (reference only)',
+          unit: 'm³',
+          quantity: 3,
+          rate: 0,
+        },
+        price,
+      ),
+    ).toBe(false);
+    expect(
+      isBoqCostUnpriced(
+        { name: 'Zero scope', unit: 'each', quantity: 0 },
+        price,
+      ),
+    ).toBe(false);
+    expect(
+      isBoqCostUnpriced(
+        { name: 'Paid item', unit: 'each', quantity: 1, rate: 123 },
+        price,
+      ),
+    ).toBe(false);
   });
 
   it('defaults M20 at ₹5,000 / m³ and structural labour at ₹400 / sq ft', () => {
