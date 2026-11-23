@@ -3,6 +3,7 @@
 import { Fragment, useEffect, useState } from 'react';
 import Link from 'next/link';
 import type { Rate } from './boq-pricing';
+import { isAutoPlasterQuantity } from './boq-plaster-guards';
 import {
   BoqFloorProjectSetup,
   BoqWizardProgress,
@@ -1725,6 +1726,26 @@ export function BoqStageBuilder(props: Props) {
         {current && category.key === 'tiles' && (
           <div className="boq-stage-dimensions">
             <h4>Flooring & kitchens on {stage}</h4>
+            <div className="boq-stage-input-grid">
+              <InputNumber
+                label="Tile & granite wastage"
+                unit="%"
+                value={
+                  finishes?.tileWastagePercent ??
+                  finishDefaults.tileWastagePercent
+                }
+                onChange={(value) =>
+                  changeFinishes({
+                    tileWastagePercent: Math.max(0, Math.min(30, value)),
+                  })
+                }
+              />
+            </div>
+            <p className="boq-stage-hint">
+              Applies cutting and breakage only to the tiles and granite
+              ordered for this floor. Cement and sand bedding are calculated
+              separately from tile area.
+            </p>
             <label className="boq-stage-scope-toggle">
               <input
                 type="checkbox"
@@ -1866,6 +1887,55 @@ export function BoqStageBuilder(props: Props) {
                 onChange={(value) => changeFinishes({ railingFeet: value })}
               />
             </div>
+          </div>
+        )}
+        {current && category.key === 'plaster' && (
+          <div className="boq-stage-dimensions">
+            <h4>Plastering from measured walls — {stage}</h4>
+            <p className="boq-stage-hint">
+              Enter wall length, height, thickness, and openings once in
+              Brickwork. Internal and external plaster face areas, cement and
+              sand then calculate automatically. One coat is 12 mm internal /
+              20 mm external; two coats add a 6 mm finishing coat.
+            </p>
+            <div className="boq-stage-input-grid">
+              <label className="boq-stage-field">
+                <span>Internal plaster coats</span>
+                <select
+                  value={finishes?.internalPlasterCoats ?? 1}
+                  onChange={(event) =>
+                    changeFinishes({
+                      internalPlasterCoats:
+                        event.target.value === '2' ? 2 : 1,
+                    })
+                  }
+                >
+                  <option value={1}>Single coat</option>
+                  <option value={2}>Double coat</option>
+                </select>
+              </label>
+              <label className="boq-stage-field">
+                <span>External plaster coats</span>
+                <select
+                  value={finishes?.externalPlasterCoats ?? 1}
+                  onChange={(event) =>
+                    changeFinishes({
+                      externalPlasterCoats:
+                        event.target.value === '2' ? 2 : 1,
+                    })
+                  }
+                >
+                  <option value={1}>Single coat</option>
+                  <option value={2}>Double coat</option>
+                </select>
+              </label>
+            </div>
+            {!props.counts.walls?.[stage]?.length && (
+              <p className="boq-guided-warning" role="status">
+                Enter wall measurements under Brickwork first. Plaster
+                quantities cannot be finalized without the wall sizes.
+              </p>
+            )}
           </div>
         )}
         {current && category.key === 'plumbing' && (
@@ -2041,10 +2111,9 @@ export function BoqStageBuilder(props: Props) {
             category.key,
           ) && (
             <p className="boq-stage-hint">
-              This floor&apos;s measured quantities are based on its area, room
-              sizes and quotation specifications. You can override individual
-              quantities and costs below, or open Detailed takeoff for
-              room-by-room dimensions.
+              Quantities use the wall, room and opening sizes entered in the
+              BOQ. Plaster cement and sand are automatically measured from
+              brickwork and selected coat counts; tiles use the wastage above.
             </p>
           )}
         {foundEntries.some(
@@ -2066,18 +2135,28 @@ export function BoqStageBuilder(props: Props) {
                         {entry.output.name}
                         <small>{entry.line.name}</small>
                       </span>
-                      <InputNumber
-                        label="Quantity"
-                        value={entry.output.quantity}
-                        unit={entry.output.unit}
-                        onChange={(value) =>
-                          props.onUpdateQuantity(
-                            entry.lineIndex,
-                            entry.outputIndex,
-                            value,
-                          )
-                        }
-                      />
+                      {isAutoPlasterQuantity(
+                        entry.line.kind,
+                        entry.output.name,
+                      ) ? (
+                        <div className="boq-stage-field">
+                          <span>Calculated quantity ({entry.output.unit})</span>
+                          <strong>{number(entry.output.quantity)}</strong>
+                        </div>
+                      ) : (
+                        <InputNumber
+                          label="Quantity"
+                          value={entry.output.quantity}
+                          unit={entry.output.unit}
+                          onChange={(value) =>
+                            props.onUpdateQuantity(
+                              entry.lineIndex,
+                              entry.outputIndex,
+                              value,
+                            )
+                          }
+                        />
+                      )}
                       {entry.output.quotedRate !== undefined && (
                         <small className="boq-stage-limit">
                           Quotation package limit:
@@ -2122,6 +2201,10 @@ export function BoqStageBuilder(props: Props) {
                           Remove
                         </button>
                       ) : (
+                        !isAutoPlasterQuantity(
+                          entry.line.kind,
+                          entry.output.name,
+                        ) &&
                         [
                           'tiles',
                           'painting',
