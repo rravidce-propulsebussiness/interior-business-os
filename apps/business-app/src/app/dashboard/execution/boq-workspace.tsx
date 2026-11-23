@@ -1541,6 +1541,50 @@ export function BoqWorkspace({
     );
   }
 
+  function addRequiredScopeItem(code: string) {
+    if (!(active ? canEdit : canCreate)) return;
+    const work = BOQ_SCOPE_WORKS.find((item) => item.code === code);
+    if (!work || lines.some((line) => line.inputs.scopeCode === code)) return;
+    const floor =
+      work.stage === 'top'
+        ? floorsForGeneration.at(-1)
+        : floorsForGeneration[0];
+    const stage = work.stage === 'foundation' ? 'Foundation' : floor?.name;
+    if (!stage) return;
+    // The row begins UNPRICED, not with an invented quantity or supplier rate.
+    // It appears in the single stage Miscellaneous editor for accurate entry.
+    const item: SavedLine = {
+      id: uid(),
+      name: work.name,
+      section: stage,
+      kind: 'manual',
+      unit: work.unit,
+      inputs: {
+        stageCategory: 'miscellaneous',
+        scopeCode: work.code,
+        quantity: 0,
+      },
+      outputs: [
+        {
+          name: work.name,
+          quantity: 0,
+          unit: work.unit,
+          rate: 0,
+        },
+      ],
+      notes: 'Required scope: measure quantity and confirm the unit cost.',
+    };
+    setScopeReviews((previous) => {
+      const next = { ...previous };
+      delete next[code];
+      return next;
+    });
+    setLines((previous) => [...previous, item]);
+    setMessage(
+      `${work.name} added to ${stage} Miscellaneous. Enter its measured quantity and unit rate.`,
+    );
+  }
+
   function updateMiscellaneous(
     index: number,
     changes: { name: string; quantity: number; unit: string; rate: number },
