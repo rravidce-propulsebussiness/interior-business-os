@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useState } from 'react';
 import Link from 'next/link';
+import { NumberField } from './boq-number-field';
 import type { Rate } from './boq-pricing';
 import { isAutoPlasterQuantity } from './boq-plaster-guards';
 import {
@@ -343,7 +344,7 @@ function stageFor(line: StageBoqLine, floors: BoqFloor[]) {
   return floors[0]?.name ?? 'Foundation';
 }
 
-function InputNumber({
+export function InputNumber({
   label,
   value,
   onChange,
@@ -362,14 +363,14 @@ function InputNumber({
         {label}
         {unit ? ' (' + unit + ')' : ''}
       </span>
-      <input
-        type="number"
-        min={min}
-        step="any"
+      {/* Feet boxes read drawing sizes (5'4" = 5.33 ft). A number box
+          silently turned 5'4" into 54 and the excavation into 899 m³. */}
+      <NumberField
+        label={label + (unit ? ' (' + unit + ')' : '')}
         value={value}
-        onChange={(event) =>
-          onChange(Math.max(min, Number(event.target.value) || 0))
-        }
+        min={min}
+        feet={unit === 'ft'}
+        onChange={onChange}
       />
     </label>
   );

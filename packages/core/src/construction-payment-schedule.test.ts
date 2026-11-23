@@ -41,6 +41,27 @@ describe('reusable construction stage mapping', () => {
         ?.activities.join(' '),
     ).toMatch(/electrical conduit and plumbing provision/i);
   });
+  it('fits final fixtures and snagging after tiles, doors and painting', () => {
+    const floors = [{ code: 'FIRST', name: 'First' }];
+    const stages = expandConstructionStages(
+      {
+        industry: 'construction' as const,
+        version: '1.1.0',
+        stages: milestoneConstructionStages(),
+      },
+      floors,
+    );
+    const finals = stages.find(
+      (s) => s.instanceCode === 'PLUMBING_PAINT/FIRST',
+    )!;
+    expect(finals.dependsOn).toContain('DOORS/FIRST');
+    expect(finals.dependsOn).not.toContain('INTERNAL_PLASTER/FIRST');
+    const order = milestoneConstructionStages().map((s) => s.code);
+    expect(order.indexOf('PLUMBING_PAINT')).toBeGreaterThan(
+      order.indexOf('DOORS'),
+    );
+    expect(order.indexOf('DOORS')).toBeGreaterThan(order.indexOf('TILES'));
+  });
   it('adds suggested QC tests, materials and report lists but no artificial results or material quantities', () => {
     const foundation = guidanceForConstructionStage('FOUNDATION');
     expect(foundation.checks.join(' ')).toMatch(/concrete|footing/i);

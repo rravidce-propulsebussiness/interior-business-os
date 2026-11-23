@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import {
   BoqStageBuilder,
+  InputNumber,
   isDerivedQuantityReadOnly,
 } from './boq-stage-builder';
 import { BoqFootingEditor } from './boq-footing-editor';
@@ -265,5 +266,39 @@ describe('independent Footings editor', () => {
     expect(html).toContain('Supported column IDs');
     expect(html).not.toContain('Column width');
     expect(html).not.toContain('Main bars (e.g.');
+  });
+});
+
+describe('BOQ measurement boxes read drawing sizes', () => {
+  const render = (unit: string) =>
+    renderToStaticMarkup(
+      createElement(InputNumber, {
+        label: 'Depth / thickness',
+        value: 5.33,
+        unit,
+        onChange: () => {},
+      }),
+    );
+  it('uses a feet-aware text box for feet, never a number box', () => {
+    // A type="number" box turned 5'4" into 54 ft (899 m³ of excavation).
+    const html = render('ft');
+    expect(html).not.toContain('type="number"');
+    expect(html).toContain('inputMode="text"');
+    expect(html).toContain('aria-label="Depth / thickness (ft)"');
+  });
+  it('keeps decimal entry for inches, millimetres and metres', () => {
+    for (const unit of ['in', 'mm', 'm'])
+      expect(render(unit)).toContain('inputMode="decimal"');
+  });
+  it('footing sizes are typed as on the drawing too', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqFootingEditor, {
+        footings: [{ ...newFootingType(0), lengthFeet: 5, widthFeet: 5 }],
+        columnLabels: ['C1'],
+        onChange: () => {},
+      }),
+    );
+    expect(html).not.toContain('type="number"');
+    expect(html).toContain('(ft)');
   });
 });

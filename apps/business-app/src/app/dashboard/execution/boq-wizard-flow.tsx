@@ -1,6 +1,7 @@
 'use client';
 
 import type { BoqFloor } from '@business-os/core/construction-boq';
+import { NumberField } from './boq-number-field';
 
 export type BoqWizardStep = {
   number: number;
@@ -184,9 +185,8 @@ export function BoqFloorProjectSetup({
   const change = (
     index: number,
     property: 'lengthFeet' | 'widthFeet' | 'heightFeet',
-    rawValue: string,
+    value: number,
   ) => {
-    const value = Number(rawValue);
     if (!Number.isFinite(value) || value < 0) return;
     onChange(
       floors.map((floor, i) =>
@@ -228,17 +228,18 @@ export function BoqFloorProjectSetup({
                 {(['lengthFeet', 'widthFeet', 'heightFeet'] as const).map(
                   (key) => (
                     <td key={key}>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        disabled={!canEdit}
-                        aria-label={floor.name + ' ' + key}
-                        value={floor[key]}
-                        onChange={(event) =>
-                          change(index, key, event.target.value)
-                        }
-                      />
+                      {/* Drawing sizes such as 60'6" are read as feet; a
+                          number box would silently turn them into 606. */}
+                      {canEdit ? (
+                        <NumberField
+                          feet
+                          label={floor.name + ' ' + key}
+                          value={floor[key]}
+                          onChange={(value) => change(index, key, value)}
+                        />
+                      ) : (
+                        <span>{floor[key]}</span>
+                      )}
                     </td>
                   ),
                 )}

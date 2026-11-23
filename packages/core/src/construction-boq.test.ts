@@ -17,6 +17,7 @@ import { calculateSftEstimate } from './sft-quotation';
 import {
   footingConcreteCft,
   footingMeshPieces,
+  barsAcross,
   newFootingType,
 } from './footing-takeoff';
 
@@ -2255,5 +2256,36 @@ describe('independently scheduled structural members', () => {
       design: { ...designBase, footings: [{ ...footing, reinforcement: [] }] },
     });
     expect(line(empty).outputs.filter((o) => o.unit === 'rod')).toHaveLength(0);
+  });
+});
+
+describe('footing mesh as drawn (E2E sheet 7: F1 5 x 5 x 12", 12 mm @ 6" c/c)', () => {
+  const cover = 25 / 304.8;
+  const f1 = {
+    ...newFootingType(0),
+    count: 12,
+    lengthFeet: 5,
+    widthFeet: 5,
+    thicknessIn: 12,
+    bottomBarDia: 12,
+    bottomSpacingIn: 6,
+  };
+  it('never spaces bars wider than drawn and keeps the bent-up legs', () => {
+    const pieces = footingMeshPieces(f1, cover);
+    expect(pieces).toHaveLength(2);
+    for (const piece of pieces) {
+      // 5 ft less 2 x 25 mm cover = 4.84 ft at 6" → 10 spaces → 11 bars.
+      expect(piece.pieces).toBe(12 * 11);
+      // 4.84 ft straight + two legs of (1 ft − 2 x cover).
+      expect(piece.lengthFeet).toBeCloseTo(
+        5 - 2 * cover + 2 * (1 - 2 * cover),
+        3,
+      );
+    }
+  });
+  it('counts bars by rounding spaces up', () => {
+    expect(barsAcross(4.836, 0.5)).toBe(11);
+    expect(barsAcross(5, 0.5)).toBe(11);
+    expect(barsAcross(0, 0.5)).toBe(0);
   });
 });

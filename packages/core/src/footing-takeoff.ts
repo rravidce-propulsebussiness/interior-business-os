@@ -143,6 +143,16 @@ export type FootingMeshPiece = {
   layer: 'bottom' | 'top';
 };
 /** Two perpendicular reinforcement directions, per explicitly selected mesh layer. */
+/**
+ * Bars in a mesh across `acrossFeet` at `spacingFeet` centres: the spaces are
+ * rounded UP so the drawn spacing is never exceeded (a 5 ft footing less
+ * cover at 6" c/c needs 11 bars, not 10 at 6.45" c/c).
+ */
+export function barsAcross(acrossFeet: number, spacingFeet: number): number {
+  if (!(acrossFeet > 0 && spacingFeet > 0)) return 0;
+  return Math.ceil(acrossFeet / spacingFeet - 1e-9) + 1;
+}
+
 export function footingMeshPieces(
   f: DesignFootingType,
   coverFeet: number,
@@ -164,10 +174,16 @@ export function footingMeshPieces(
       [usableWidth, usableLength],
     ] as const) {
       if (!(span > 0 && across > 0)) continue;
+      // Bottom bars are bent up at both ends inside the cover, as drawn on
+      // footing sections (and as the quotation-structure takeoff counts).
+      const bendUp =
+        layer === 'bottom'
+          ? Math.max(0, f.thicknessIn / 12 - 2 * coverFeet)
+          : 0;
       pieces.push({
         diameter: dia,
-        pieces: n * (Math.floor(across / spacing) + 1),
-        lengthFeet: span,
+        pieces: n * barsAcross(across, spacing),
+        lengthFeet: span + 2 * bendUp,
         layer,
       });
     }

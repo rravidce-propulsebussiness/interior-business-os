@@ -25,6 +25,7 @@ import {
   footingConcreteCft,
   pedestalConcreteCft,
   footingMeshPieces,
+  barsAcross,
   padCount,
 } from './footing-takeoff';
 export type { DesignFootingType, FootingRebarSet } from './footing-takeoff';
@@ -2881,8 +2882,10 @@ export function generateQuotationBoq(
           [f.lengthFeet, f.widthFeet],
           [f.widthFeet, f.lengthFeet],
         ] as const) {
-          const barsPerFooting =
-            Math.floor(Math.max(0, across - 2 * footingCover) / spacing) + 1;
+          const barsPerFooting = barsAcross(
+            Math.max(0, across - 2 * footingCover),
+            spacing,
+          );
           const piece = Math.max(0, span - 2 * footingCover) + 2 * bendUp;
           const plan = cutPlan(piece, barsPerFooting * n, stock, 0);
           addSteel(
@@ -3098,13 +3101,16 @@ export function generateQuotationBoq(
               const span = set.direction === 'length' ? length : width;
               const across = set.direction === 'length' ? width : length;
               if (!(span > 0 && across > 0)) return [];
+              const bendUp =
+                set.layer === 'bottom'
+                  ? Math.max(0, footing.thicknessIn / 12 - 2 * footingCover)
+                  : 0;
               return [
                 {
                   diameter: set.dia,
                   pieces:
-                    padCount(footing) *
-                    (Math.floor((across * 12) / set.spacingIn) + 1),
-                  lengthFeet: span,
+                    padCount(footing) * barsAcross(across, set.spacingIn / 12),
+                  lengthFeet: span + 2 * bendUp,
                   layer: set.layer,
                 },
               ];

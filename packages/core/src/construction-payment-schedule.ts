@@ -302,17 +302,6 @@ export function milestoneConstructionStages(): ConstructionStageTemplate[] {
       true,
     ),
     extraStage(
-      'PLUMBING_PAINT',
-      'Plumbing, final wiring & finishing',
-      ['INTERNAL_PLASTER'],
-      [
-        'Final plumbing fixtures, pressure and drainage checks',
-        'Final electrical connections and safety verification by qualified personnel',
-        'Final finishing, snag correction and completion checks',
-      ],
-      true,
-    ),
-    extraStage(
       'TILES',
       'Tiles selection & installation',
       ['INTERNAL_PLASTER'],
@@ -332,6 +321,19 @@ export function milestoneConstructionStages(): ConstructionStageTemplate[] {
         'Painting, approved colour and finish coats',
         'Electrical wiring, fittings and function checks',
         'Door operation, alignment and finish inspection',
+      ],
+      true,
+    ),
+    extraStage(
+      'PLUMBING_PAINT',
+      'Plumbing, final wiring & finishing',
+      // Final fixtures, connections and snagging follow tiling, doors and
+      // painting; DOORS already depends on TILES.
+      ['DOORS'],
+      [
+        'Final plumbing fixtures, pressure and drainage checks',
+        'Final electrical connections and safety verification by qualified personnel',
+        'Final finishing, snag correction and completion checks',
       ],
       true,
     ),
