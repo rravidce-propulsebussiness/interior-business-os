@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
+import { formatPaymentPercent } from './payment-percent';
 import { useRouter } from 'next/navigation';
 import {
   companyConstructionStages,
@@ -316,7 +317,7 @@ export function ConstructionProgramEditor({
               },
               stages: funded.map((row, index) => ({
                 name: row.name,
-                percent: percentages[index]!.toFixed(8),
+                percent: formatPaymentPercent(percentages[index]!),
                 stageCodes: row.stageCodes,
               })),
               // Leave saved QC/work overrides intact; the user edits them separately.

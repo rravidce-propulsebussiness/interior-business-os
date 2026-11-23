@@ -1,4 +1,9 @@
 import { z } from 'zod';
+
+// Revision terms carry the agreement clauses plus machine-readable payment
+// plan, stage links and the construction programme (up to 100,000 chars).
+// Keep in step with public.commit_quotation (migration 20261123130000).
+export const QUOTATION_TERMS_MAX_LENGTH = 300000;
 export const quotationCommandSchema = z.discriminatedUnion('action', [
   z
     .object({
@@ -39,7 +44,7 @@ export const quotationCommandSchema = z.discriminatedUnion('action', [
       action: z.literal('edit_revision'),
       revision_id: z.uuid(),
       version: z.number().int().positive(),
-      terms: z.string().max(300000),
+      terms: z.string().max(QUOTATION_TERMS_MAX_LENGTH),
       customer_notes: z.string().max(10000),
       internal_notes: z.string().max(10000),
       valid_until: z.iso.date(),
