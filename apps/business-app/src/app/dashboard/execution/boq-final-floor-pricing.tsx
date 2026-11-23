@@ -133,6 +133,8 @@ export function BoqFinalFloorPricing({
   /** Labour not represented as material outputs is shown only once here. */
   labourAllocations?: Readonly<Record<string, number>>;
 }) {
+  const hasSiteOverheads =
+    overheadCost > 0 || rows.some((row) => row.overheadCost > 0);
   return (
     <section
       className="boq-final-floor-pricing"
@@ -153,7 +155,9 @@ export function BoqFinalFloorPricing({
                 <>
                   <th scope="col">Materials</th>
                   <th scope="col">Labour</th>
-                  <th scope="col">Project expenses</th>
+                  {hasSiteOverheads && (
+                    <th scope="col">Project expenses</th>
+                  )}
                   <th scope="col">Total cost</th>
                   <th scope="col">Cost / sq ft</th>
                 </>
@@ -177,9 +181,11 @@ export function BoqFinalFloorPricing({
                           {money(row.materialCost)}
                         </td>
                         <td data-label="Labour">{money(row.labourCost)}</td>
-                        <td data-label="Project expenses">
-                          {money(row.overheadCost)}
-                        </td>
+                        {hasSiteOverheads && (
+                          <td data-label="Project expenses">
+                            {money(row.overheadCost)}
+                          </td>
+                        )}
                         <td data-label="Total cost">
                           <strong>{money(row.totalCost)}</strong>
                         </td>
@@ -192,7 +198,7 @@ export function BoqFinalFloorPricing({
                     )}
                   </tr>
                   <tr className="boq-final-details-row">
-                    <td colSpan={canViewCost ? 7 : 2}>
+                    <td colSpan={canViewCost ? (hasSiteOverheads ? 7 : 6) : 2}>
                       <details className="boq-floor-cost">
                         <summary>
                           View detailed quantities
@@ -254,7 +260,9 @@ export function BoqFinalFloorPricing({
                 <>
                   <td data-label="Materials">{money(materialCost)}</td>
                   <td data-label="Labour">{money(labourCost)}</td>
-                  <td data-label="Project expenses">{money(overheadCost)}</td>
+                  {hasSiteOverheads && (
+                    <td data-label="Project expenses">{money(overheadCost)}</td>
+                  )}
                   <td data-label="Total cost">
                     <strong>{money(totalCost)}</strong>
                   </td>
