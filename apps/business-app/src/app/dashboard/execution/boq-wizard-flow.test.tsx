@@ -30,6 +30,8 @@ describe('14 BOQ design screens over one saved document', () => {
       'staircase',
     ]);
     expect(wizardStep(7).title).toContain('Columns');
+    expect(wizardStep(10).categories).not.toContain('sajjas');
+    expect(wizardStep(10).categories).toContain('shelves');
     expect(wizardStep(8).categories).toContain('compound');
     expect(wizardStep(11).categories).toContain('penthouse');
     expect(wizardStep(11).categories).not.toContain('compound');
