@@ -1,4 +1,5 @@
 import 'server-only';
+import { activeProjectRoles } from './project-roles';
 import { notFound } from 'next/navigation';
 import { canAccess } from '@business-os/auth';
 import { commercialServices } from '../commercial/service';
@@ -317,6 +318,8 @@ export type WorkspaceData = {
     media: SiteRow[];
     designs: SiteRow[];
     team: SiteRow[];
+    /** Active internal project roles (QC inspector, structural engineer, ...). */
+    projectRoles: SiteRow[];
     gate: SiteRow[];
     memberOptions: { id: string; label: string }[];
   };
@@ -892,6 +895,7 @@ export async function projectWorkspace(
         media: rows(rawSite.media),
         designs: rows(rawSite.designs),
         team: rows(rawSite.team),
+        projectRoles: activeProjectRoles(rawStages),
         gate: rows(rawSite.gate),
         memberOptions: Array.isArray(rawSite.member_options)
           ? rawSite.member_options.filter(
@@ -1865,6 +1869,9 @@ async function assignedProjectWorkspace(id: string): Promise<WorkspaceData> {
     media: rows(raw.media),
     designs: rows(raw.designs),
     team: rows(raw.team),
+    projectRoles: activeProjectRoles(
+      stagesResult.error ? null : stagesResult.data,
+    ),
     gate: rows(raw.gate),
     memberOptions: Array.isArray(raw.member_options)
       ? raw.member_options.filter((v): v is { id: string; label: string } => {

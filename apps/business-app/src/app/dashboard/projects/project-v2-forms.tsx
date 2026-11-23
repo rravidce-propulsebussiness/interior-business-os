@@ -15,6 +15,7 @@ import {
 import {
   syncConstructionFromProjectAgreement,
   assignConstructionRole,
+  deactivateConstructionRole,
 } from './[id]/site/construction-actions';
 import {
   createAgreementException,
@@ -373,10 +374,51 @@ export function AssignRole({
           </select>
         </label>
       </div>
+      <p className="pv2-form-hint">
+        A project role replaces the person&apos;s company-wide project access on
+        this project. Assigning yourself a restricted role such as quality
+        inspector removes your own management rights here.
+      </p>
       <button className="pv2-button pv2-primary" disabled={pending}>
         Assign to project
       </button>
       {state.message && (
+        <p role="status" className="pv2-form-feedback">
+          {state.message}
+        </p>
+      )}
+    </form>
+  );
+}
+
+/** Deactivates one project role assignment; the history row is retained. */
+export function RemoveProjectRole({
+  projectId,
+  id,
+  version,
+  label,
+}: {
+  projectId: string;
+  id: string;
+  version: number;
+  label: string;
+}) {
+  const router = useRouter();
+  const [state, submit, pending] = useActionState(async (): Promise<Result> => {
+    const r = await deactivateConstructionRole(projectId, id, version);
+    if (r.saved) router.refresh();
+    return r;
+  }, initial);
+  return (
+    <form action={submit}>
+      <button
+        className="pv2-button"
+        disabled={pending}
+        aria-label={'Remove ' + label}
+      >
+        Remove
+      </button>
+      {state.message && !state.saved && (
         <p role="status" className="pv2-form-feedback">
           {state.message}
         </p>
