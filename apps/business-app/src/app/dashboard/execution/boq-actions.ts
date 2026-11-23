@@ -276,6 +276,16 @@ const labourSchema = z
         });
     }
   });
+const projectCostsSchema = z.object({
+  siteSetup: nonnegative.max(100000000),
+  utilities: nonnegative.max(100000000),
+  logistics: nonnegative.max(100000000),
+  equipment: nonnegative.max(100000000),
+  siteStaff: nonnegative.max(100000000),
+  miscellaneous: nonnegative.max(100000000),
+  contingencyPercent: nonnegative.max(100),
+  taxes: nonnegative.max(100000000),
+});
 const saveSchema = z.object({
   id: z.string().uuid().optional(),
   version: z.number().int().positive().optional(),
@@ -288,6 +298,7 @@ const saveSchema = z.object({
     .default('INR'),
   items: z.array(lineSchema).max(500),
   labour: labourSchema.optional(),
+  projectCosts: projectCostsSchema.optional(),
   /** Chosen brand / source per material group, e.g. bricks → Karimnagar. */
   selections: z.record(z.string().max(40), z.string().max(80)).default({}),
   generator: generatorSchema.optional(),
@@ -322,16 +333,17 @@ export async function saveManualBoq(input: unknown) {
       value.id ? 'estimate.edit' : 'estimate.create',
     );
     const canChangeLabour = s.allowed('estimate.view_cost');
-    if (value.labour && !canChangeLabour)
+    if ((value.labour || value.projectCosts) && !canChangeLabour)
       return {
         ok: false,
-        message: 'Labour rates require cost-view permission.',
+        message: 'BOQ cost rates require cost-view permission.',
       };
     const client = s.client as unknown as SupabaseClient;
     const document = {
       items: value.items,
       selections: value.selections,
       ...(value.labour ? { labour: value.labour } : {}),
+      ...(value.projectCosts ? { projectCosts: value.projectCosts } : {}),
       ...(value.generator ? { generator: value.generator } : {}),
     };
     let reply: DbReply;
@@ -356,12 +368,18 @@ export async function saveManualBoq(input: unknown) {
             'The saved project and quotation cannot be changed. Edit the existing BOQ.',
         };
       // A measurement-only editor must not erase an existing costing setup.
-      const oldContent = original.data.document as { labour?: unknown } | null;
+      const oldContent = original.data.document as {
+        labour?: unknown;
+        projectCosts?: unknown;
+      } | null;
       const updatedDocument = canChangeLabour
         ? document
         : {
             ...document,
             ...(oldContent?.labour ? { labour: oldContent.labour } : {}),
+            ...(oldContent?.projectCosts
+              ? { projectCosts: oldContent.projectCosts }
+              : {}),
           };
       const result = await client
         .from('construction_boq_documents')
