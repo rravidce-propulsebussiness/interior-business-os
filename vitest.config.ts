@@ -35,6 +35,7 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/quotations/quotation-terms-format.test.ts',
       'apps/business-app/src/app/dashboard/quotations/construction-floor-inheritance.test.ts',
       'apps/business-app/src/app/dashboard/quotations/penthouse-floor-selection.test.ts',
+      'apps/business-app/src/app/dashboard/quotations/work-unit-change.test.ts',
       'apps/business-app/src/app/dashboard/quotations/pdf-renderer.test.ts',
       'apps/business-app/src/app/dashboard/pricing/construction/floor-rate-rules.test.ts',
       'apps/business-app/src/workspace-paths.test.ts',

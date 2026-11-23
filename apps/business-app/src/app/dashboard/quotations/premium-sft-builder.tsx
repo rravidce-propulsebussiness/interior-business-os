@@ -25,6 +25,7 @@ import {
   selectPenthouseFloor,
   selectNormalFloor,
 } from './penthouse-floor-selection';
+import { workUnitChange } from './work-unit-change';
 
 type Unit =
   'sqft' | 'wall_sqft' | 'running_ft' | 'cubic_ft' | 'piece' | 'lumpsum';
@@ -893,19 +894,10 @@ export function PremiumSftBuilder({
                           aria-label={'Unit for ' + r.name}
                           value={u}
                           onChange={(e) =>
-                            updateRow(i, {
-                              unit: e.target.value as Unit,
-                              widthFeet:
-                                e.target.value === 'sqft' ||
-                                e.target.value === 'cubic_ft'
-                                  ? ''
-                                  : '1',
-                              quantity:
-                                e.target.value === 'piece' ||
-                                e.target.value === 'lumpsum'
-                                  ? '1'
-                                  : undefined,
-                            })
+                            updateRow(
+                              i,
+                              workUnitChange(r, e.target.value as Unit),
+                            )
                           }
                         >
                           <option value="sqft">SFT</option>
