@@ -1610,6 +1610,7 @@ export function BoqWorkspace({
         stage: 'Project-wide costs',
         amount: row.rate,
         isLabour: false,
+        isOverhead: true,
       })),
     ),
     labour ? labourEstimate.byStage : {},
@@ -1880,6 +1881,7 @@ export function BoqWorkspace({
                   labourAllocations={labour ? labourEstimate.byStage : {}}
                   materialCost={materialOnlyCost}
                   labourCost={labourCost}
+                  overheadCost={projectCostBreakdown.projectWideCost}
                   totalCost={materialCost}
                   areaSqft={builtUpSqft}
                   canViewCost={canViewCost}
