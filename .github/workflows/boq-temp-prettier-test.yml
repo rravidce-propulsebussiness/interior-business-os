@@ -1,0 +1,36 @@
+name: Temporary BOQ test formatter
+on:
+  push:
+    branches:
+      - fix/boq-window-sunshades-standard-shelves-20261123
+    paths:
+      - '.github/workflows/boq-temp-prettier-test.yml'
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format quantity guard regression
+        run: |
+          pnpm exec prettier --write \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx \
+            apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
+      - name: Commit formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
+          if ! git diff --cached --quiet; then
+            git commit -m "style(boq): format derived sunshade quantity guards"
+            git push origin HEAD:fix/boq-window-sunshades-standard-shelves-20261123
+          fi
