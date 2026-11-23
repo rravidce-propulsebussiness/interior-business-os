@@ -17,7 +17,6 @@ describe('delivery project creation starts from a customer quotation', () => {
   );
   const projectView = file('./project-v2-view.tsx');
   const linkAction = file('./project-quotation-link-action.ts');
-  const linker = file('./project-quotation-linker.tsx');
   const workspace = file('./project-v2-data.ts');
 
   it('continues an existing customer quote or starts a quote for that customer', () => {

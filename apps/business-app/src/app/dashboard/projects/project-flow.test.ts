@@ -350,7 +350,6 @@ describe('single project flow model', () => {
       '../../../../../../packages/database/supabase/migrations/20261113230000_owner_homeowner_direct_cash_supplier_payment.sql',
     );
     const actions = read('./[id]/site/stage-checklist-actions.ts');
-    const forms = read('./project-v2-forms.tsx');
     const view = read('./project-v2-view.tsx');
     expect(migration).toContain(
       'private.project_material_can_order(p_org, p_project)',
