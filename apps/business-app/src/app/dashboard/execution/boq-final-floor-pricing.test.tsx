@@ -175,6 +175,7 @@ describe('one final BOQ floor-wise pricing', () => {
         }),
       );
     expect(render(true)).toContain('Floor-wise BOQ pricing');
+    expect(render(true)).not.toContain('Project expenses');
     expect(render(true)).toContain('Materials');
     expect(render(true)).toContain('Labour');
     expect(render(true)).toContain('Total project');
