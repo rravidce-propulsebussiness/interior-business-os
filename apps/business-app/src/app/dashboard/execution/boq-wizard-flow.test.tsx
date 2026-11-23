@@ -9,6 +9,7 @@ import {
   nextBoqStep,
   previousBoqStep,
 } from './boq-wizard-flow';
+import { readNumber } from './boq-number-field';
 
 describe('14 BOQ design screens over one saved document', () => {
   it('has one navigation row with Foundation consolidated into one stage', () => {
@@ -85,5 +86,29 @@ describe('14 BOQ design screens over one saved document', () => {
     expect(html).toContain('1,950 sq ft');
     expect(html).toContain('Assumed — verify');
     expect(html).toContain('Entered');
+  });
+
+  it('reads floor sizes as written on the drawing instead of as plain numbers', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqFloorProjectSetup, {
+        floors: [
+          {
+            name: 'Ground Floor',
+            areaSqft: 1452,
+            lengthFeet: 60.5,
+            widthFeet: 24,
+            heightFeet: 11,
+            heightAssumed: false,
+          },
+        ],
+        onChange: () => {},
+        canEdit: true,
+      }),
+    );
+    // A type="number" box turns 60'6" into 606 without any warning.
+    expect(html).not.toContain('type="number"');
+    expect(html).toContain('aria-label="Ground Floor lengthFeet"');
+    expect(readNumber(`60'6"`, true)).toBe(60.5);
+    expect(readNumber(`24'`, true)).toBe(24);
   });
 });
