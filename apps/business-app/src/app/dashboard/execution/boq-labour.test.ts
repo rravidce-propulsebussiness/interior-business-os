@@ -4,6 +4,7 @@ import {
   LEGACY_CIVIL_LABOUR_MATERIALS,
   evaluateLabour,
   isExtraAllowed,
+  isEmbeddedLabourCovered,
   labourMeasurements,
   measuredLabourQuantity,
   type LabourConfig,
@@ -184,4 +185,30 @@ describe('BOQ labour costing', () => {
       0,
     );
   });
+  it('keeps separate trades and excavation outside the default civil contract', () => {
+    const config = clone();
+    expect(isEmbeddedLabourCovered('labour_civil', config)).toBe(true);
+    expect(isEmbeddedLabourCovered('shuttering', config)).toBe(true);
+    expect(isEmbeddedLabourCovered('plaster_labour', config)).toBe(true);
+    expect(isEmbeddedLabourCovered('labour_tiling', config)).toBe(false);
+    expect(isEmbeddedLabourCovered('labour_painting', config)).toBe(false);
+    expect(isEmbeddedLabourCovered('labour_electrical', config)).toBe(false);
+    expect(isEmbeddedLabourCovered('labour_plumbing', config)).toBe(false);
+    expect(isEmbeddedLabourCovered('labour_door_fixing', config)).toBe(false);
+    expect(isEmbeddedLabourCovered('excavation', config)).toBe(false);
+    expect(isEmbeddedLabourCovered('soil_filling', config)).toBe(false);
+  });
+
+  it('replaces a separate trade only when its labour is expressly covered', () => {
+    const config = clone();
+    config.coveredWorks.push('tiling');
+    expect(isEmbeddedLabourCovered('labour_tiling', config)).toBe(true);
+    config.method = 'itemwise';
+    config.itemRates = { painting: 25 };
+    expect(isEmbeddedLabourCovered('labour_tiling', config)).toBe(false);
+    expect(isEmbeddedLabourCovered('labour_painting', config)).toBe(true);
+    expect(isEmbeddedLabourCovered('labour_plumbing', config)).toBe(false);
+    expect(isEmbeddedLabourCovered('labour_painting', null)).toBe(false);
+  });
+
 });
