@@ -47,7 +47,16 @@ function PdfActions({
     // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     setPdf(null);
     setLoadedVersion(null);
-    if (dirty) return;
+    // Prefetch only where the browser can share files (phones), so a tap on
+    // Share keeps its user activation. Desktop opens the PDF links on demand
+    // instead of rendering two PDFs on every studio visit.
+    if (
+      dirty ||
+      !canShare ||
+      typeof navigator === 'undefined' ||
+      typeof navigator.canShare !== 'function'
+    )
+      return;
     const controller = new AbortController();
     void loadPdf(controller.signal)
       .then((file) => {
@@ -60,7 +69,7 @@ function PdfActions({
         /* The user can retry from any button. */
       });
     return () => controller.abort();
-  }, [loadPdf, version, dirty]);
+  }, [loadPdf, version, dirty, canShare]);
 
   const share = () => {
     setMessage('');

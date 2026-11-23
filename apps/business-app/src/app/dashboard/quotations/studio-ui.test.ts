@@ -143,10 +143,11 @@ describe('minimal quotation studio navigation', () => {
 
   it('keeps the saved state visible until the quotation is edited again', () => {
     expect(sft).toContain('useState(Boolean(initialSchedule))');
-    expect(sft).toContain('disabled={pending||(saved&&!dirty)}');
-    expect(sft).toContain("saved&&!dirty?'✓ Saved':'▣ Save quotation →'");
+    expect(sft).toContain('const unsaved = dirty || changedPackage;');
+    expect(sft).toContain('disabled={pending||(saved&&!unsaved)}');
+    expect(sft).toContain("saved&&!unsaved?'✓ Saved':'▣ Save quotation →'");
     expect(sft).toContain(
-      "className={'qs-work-summary-save'+(saved&&!dirty?' is-saved':'')}",
+      "className={'qs-work-summary-save'+(saved&&!unsaved?' is-saved':'')}",
     );
     expect(sft).toContain(
       "const touch=()=>{setSaved(false);setDirty(true);setMessage('');}",
@@ -783,7 +784,7 @@ describe('save resiliency and floor auto-inheritance', () => {
   const action = file('./construction-actions.ts');
 
   it('accepts Save taps and reports invalid row fields rather than disabling the button', () => {
-    expect(builder).toContain('disabled={pending||(saved&&!dirty)}');
+    expect(builder).toContain('disabled={pending||(saved&&!unsaved)}');
     expect(builder).toContain('if(validationMessage)');
     expect(builder).toContain('setMessage(validationMessage)');
     expect(builder).toContain('setSavedVersion(data.version??savedVersion+1)');
