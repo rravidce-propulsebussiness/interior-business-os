@@ -1,0 +1,31 @@
+name: One-time final BOQ report formatter
+on:
+  push:
+    branches:
+      - fix/boq-plaster-coats-wastage-columns-20261123
+permissions:
+  contents: write
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Format final BOQ floor report only
+        run: |
+          pnpm exec prettier --write apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.tsx apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.test.tsx
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.tsx apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.test.tsx
+          if ! git diff --cached --quiet; then
+            git commit -m "style(boq): format final floor report"
+            git push origin HEAD:fix/boq-plaster-coats-wastage-columns-20261123
+          fi
