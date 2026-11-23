@@ -857,7 +857,10 @@ export function BoqWorkspace({
             output.quantity === 0,
         ),
     );
-    if (needsRepair) generateFromQuote(true);
+    if (needsRepair) {
+      const timer = window.setTimeout(() => generateFromQuote(true), 0);
+      return () => window.clearTimeout(timer);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- One-time recovery per saved document.
   }, [active?.id, generator?.revisionId, schedule]);
   // Changing a count, size, room or the drawing schedule updates a
