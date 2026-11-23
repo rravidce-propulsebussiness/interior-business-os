@@ -1594,6 +1594,7 @@ describe('entering the drawings by hand', () => {
       details: quote(),
       counts,
       splitBeamSlab: true,
+      settings: { ...DEFAULT_STRUCTURAL_SETTINGS, labourItemized: 1 },
     });
     const masonry = result.lines.find(
       (line) => line.section === 'Ground Floor' && line.kind === 'quote-masonry',
@@ -1601,7 +1602,9 @@ describe('entering the drawings by hand', () => {
     const cement = masonry.outputs.find((o) => o.name === 'Cement (plaster)')!;
     const sand = masonry.outputs.find((o) => o.name === 'Sand (plaster)')!;
     // External 1,200 sqft, both faces of 600 sqft internal, no openings.
-    const expected = plasterMaterialTakeoff(2400, 1200, 2, 1, 5);
+    const expected = plasterMaterialTakeoff(
+      2400, 1200, 2, 1, DEFAULT_STRUCTURAL_SETTINGS.materialWastagePercent,
+    );
     expect(cement.quantity).toBeCloseTo(expected.cementBags, 1);
     expect(sand.quantity).toBeGreaterThan(0);
     expect(
@@ -1617,6 +1620,7 @@ describe('entering the drawings by hand', () => {
         },
       },
       splitBeamSlab: true,
+      settings: { ...DEFAULT_STRUCTURAL_SETTINGS, labourItemized: 1 },
     }).lines.find((line) =>
       line.section === 'Ground Floor' && line.kind === 'quote-masonry',
     )!;
