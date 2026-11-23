@@ -688,6 +688,15 @@ export function BoqWorkspace({
       measuredDesign?.settings?.slabThicknessIn,
     );
     const sourceLines = result.lines.filter((line) => {
+      // An older BOQ may already contain a manually measured chajja on this
+      // floor. Preserve it and do not additionally bill auto window shades.
+      if (line.kind === 'quote-window-sajjas')
+        return !kept.some(
+          (saved) =>
+            saved.section === line.section &&
+            saved.kind === 'measured-geometry' &&
+            saved.inputs.stageCategory === 'sajjas',
+        );
       if (!measuredOnly) return true;
       if (line.kind === 'quote-footings' || line.kind === 'quote-pedestals')
         return measuredFootings;
@@ -1432,6 +1441,9 @@ export function BoqWorkspace({
         widthFeet: values.widthFeet,
         depthFeet: values.depthFeet,
         stageCategory: kind,
+        ...(kind === 'shelves' && values.shelfStandard
+          ? { shelfStandard: true }
+          : {}),
         ...(['sajjas', 'shelves'].includes(kind) && values.steelSets?.length
           ? { steelSetsJson: JSON.stringify(values.steelSets) }
           : {}),
@@ -1469,7 +1481,13 @@ export function BoqWorkspace({
     }
     const outputs = measuredOutputs(
       kind,
-      { ...values, ...(steelSets ? { steelSets } : {}) },
+      {
+        ...values,
+        ...(kind === 'shelves'
+          ? { shelfStandard: original.inputs.shelfStandard === true }
+          : {}),
+        ...(steelSets ? { steelSets } : {}),
+      },
       settings,
     );
     const steelSetsJson = JSON.stringify(steelSets ?? []);
