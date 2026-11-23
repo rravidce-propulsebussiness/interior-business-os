@@ -1580,21 +1580,38 @@ export function BoqWorkspace({
         )
       : [];
   const stages = [...new Set(lines.map((line) => line.section || 'Other'))];
-  const detailedPricingLines = allOutputs.map((output, index) => ({
-    id: `${output.lineId}-${index}`,
-    stage: output.section || 'Other',
-    work: output.lineName,
-    name: output.name,
-    quantity: output.quantity,
-    unit: output.unit,
-    rate: output.rate,
-  }));
+  const detailedPricingLines = [
+    ...allOutputs.map((output, index) => ({
+      id: `${output.lineId}-${index}`,
+      stage: output.section || 'Other',
+      work: output.lineName,
+      name: output.name,
+      quantity: output.quantity,
+      unit: output.unit,
+      rate: output.rate,
+    })),
+    ...projectCostLines.map((row, index) => ({
+      id: `project-wide-${index}`,
+      stage: 'Project-wide costs',
+      work: 'Indirect project expenses',
+      name: row.name,
+      quantity: 1,
+      unit: 'LS',
+      rate: row.rate,
+    })),
+  ];
   const detailedFloorPricing = buildFloorPricing(
     allOutputs.map((output) => ({
       stage: output.section,
       amount: output.quantity * output.rate,
       isLabour: isLabourOutput(output),
-    })),
+    })).concat(
+      projectCostLines.map((row) => ({
+        stage: 'Project-wide costs',
+        amount: row.rate,
+        isLabour: false,
+      })),
+    ),
     labour ? labourEstimate.byStage : {},
     floorsForGeneration,
     stages,
@@ -1738,9 +1755,17 @@ export function BoqWorkspace({
                     </strong>
                   </div>
                   <div>
-                    <span>Estimated material + labour</span>
+                    <span>Total project cost estimate</span>
                     <strong>
                       {canViewCost ? money(materialCost) : 'Restricted'}
+                    </strong>
+                  </div>
+                  <div>
+                    <span>Site overhead, contingency and taxes</span>
+                    <strong>
+                      {canViewCost
+                        ? money(projectCostBreakdown.projectWideCost)
+                        : 'Restricted'}
                     </strong>
                   </div>
                   <div>
@@ -1997,13 +2022,21 @@ export function BoqWorkspace({
           <strong>{canViewCost ? money(labourCost) : 'Restricted'}</strong>
         </div>
         <div>
-          <span>Total BOQ Estimate</span>
+          <span>Total Project Cost</span>
           <strong>
             {!canViewCost
               ? 'Restricted'
               : calculating
                 ? 'Calculating…'
                 : money(materialCost)}
+          </strong>
+        </div>
+        <div>
+          <span>Site overhead, contingency and taxes</span>
+          <strong>
+            {canViewCost
+              ? money(projectCostBreakdown.projectWideCost)
+              : 'Restricted'}
           </strong>
         </div>
         <div>
