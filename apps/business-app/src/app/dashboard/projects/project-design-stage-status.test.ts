@@ -83,6 +83,21 @@ describe('Design stage milestone status', () => {
     ).toBe('in_progress');
   });
 
+  it('keeps finished in-progress Site Prep open until the owner closes it', () => {
+    const input = {
+      code: 'SITE_PREP',
+      storedStatus: 'in_progress',
+      agreementAuthorized: true,
+      design: approvedDesign,
+      allWorkComplete: true,
+      allChecksComplete: true,
+    };
+    expect(designSubstageDisplayStatus(input)).toBe('in_progress');
+    expect(
+      designSubstageDisplayStatus({ ...input, storedStatus: 'completed' }),
+    ).toBe('completed');
+  });
+
   it('preserves a blocked or on-hold sub-stage', () => {
     expect(
       designSubstageDisplayStatus({

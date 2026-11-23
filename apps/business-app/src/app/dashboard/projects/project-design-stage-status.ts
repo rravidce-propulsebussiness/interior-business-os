@@ -59,7 +59,17 @@ export function designSubstageDisplayStatus(input: {
 
   if (code === 'SITE_PREP') {
     if (storedStatus === 'completed') return 'completed';
-    if (input.allWorkComplete && input.allChecksComplete) return 'completed';
+    // Legacy QC-queue rows already release dependent work once every item is
+    // done. An in-progress stage still needs the owner or site engineer to
+    // close it, so keep it actionable and "Mark site preparation complete"
+    // stays visible.
+    if (
+      storedStatus === 'ready_for_qc' &&
+      input.allWorkComplete &&
+      input.allChecksComplete
+    ) {
+      return 'completed';
+    }
     // Stage 1 has no QC step. Convert its legacy QC queue status to an
     // actionable in-progress state until the owner closes the site work.
     if (storedStatus === 'ready_for_qc') return 'in_progress';

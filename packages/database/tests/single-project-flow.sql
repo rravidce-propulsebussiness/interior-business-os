@@ -471,6 +471,23 @@ begin
    raise exception 'FAIL: completed site checks without QC block Foundation: %',pg_temp.blockers('FOUNDATION');
  end if;
 end$site_prep_release$;
+-- Owner-closed site preparation (site_preparation_complete_command) is stored
+-- as completed and must release Foundation too. The status is restored
+-- afterwards so the rest of the scenario keeps the QC-queue path.
+reset role;
+update private.construction_stage_execution set status='completed'
+ where organization_id=pg_temp.org() and project_id=pg_temp.project() and stage_id=pg_temp.stage('SITE_PREP');
+do $site_prep_completed_release$
+begin
+ if pg_temp.blockers('FOUNDATION')<>'[]' then
+   raise exception 'FAIL: owner-completed site preparation still blocks Foundation: %',pg_temp.blockers('FOUNDATION');
+ end if;
+ raise notice 'PASS 5b: owner-completed site preparation releases Foundation';
+end$site_prep_completed_release$;
+update private.construction_stage_execution set status='ready_for_qc'
+ where organization_id=pg_temp.org() and project_id=pg_temp.project() and stage_id=pg_temp.stage('SITE_PREP');
+set local role authenticated;
+select pg_temp.as_user('22222222-2222-4222-8222-222222222222');
 select public.construction_stage_execution_command(pg_temp.org(),pg_temp.project(),pg_temp.stage('FOUNDATION'),'start','');
 select set_config('test.footing_photo',pg_temp.photo('site','Footing reinforcement and cover blocks')::text,true);
 select pg_temp.work('FOUNDATION',0,'start');
