@@ -105,6 +105,39 @@ describe('compact BOQ entry stages', () => {
     expect(html).toContain('View or edit Compound Wall on Ground Floor');
   });
 
+  it('keeps generated window sunshade costs under Windows without quantity removal', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, {
+        ...base,
+        initialStep: 9,
+        lines: [
+          {
+            id: 'shade-from-window',
+            name: 'Ground Floor: window sunshades (from measured windows)',
+            kind: 'quote-window-sajjas',
+            section: 'Ground Floor',
+            unit: 'each',
+            origin: 'quotation-structure',
+            inputs: { windowCount: 2 },
+            outputs: [
+              {
+                name: 'Cement (window sunshades)',
+                material: 'cement',
+                quantity: 3,
+                unit: 'bag',
+                rate: 390,
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    expect(html).toContain('Cement (window sunshades)');
+    expect(html).toContain('Calculated quantity (bag)');
+    expect(html).not.toContain('Restore calculated quantity');
+    expect(html).not.toContain('Remove from floor');
+  });
+
   it('keeps one compact cement shelving entry without a second manual sunshade screen', () => {
     const html = renderToStaticMarkup(
       createElement(BoqStageBuilder, { ...base, initialStep: 10 }),
