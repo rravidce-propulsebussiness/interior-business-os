@@ -1749,6 +1749,86 @@ export function BoqWorkspace({
       />
     );
   }
+  const scopeReviewed =
+    scopeSummary.priced + scopeSummary.covered + scopeSummary.excluded;
+  const scopePanel = (
+    <details className="boq-scope-review">
+      <summary>
+        Required construction work — {scopeReviewed}/{scopeSummary.total} reviewed
+        {scopeSummary.pending + scopeSummary.unpriced > 0
+          ? ' · Estimate provisional'
+          : ' · Scope checked'}
+      </summary>
+      <p>
+        Check work that is not covered by the automatic structural and finishing
+        quantities. Add a measured cost line, confirm it is already priced
+        elsewhere, or explicitly exclude it. A zero rate never counts as priced.
+      </p>
+      <div className="boq-scope-review-items">
+        {scopeSummary.items.map((item) => (
+          <div className="boq-scope-review-item" key={item.code}>
+            <span className="boq-scope-review-name">
+              <strong>{item.name}</strong>
+              <small>
+                {item.stage === 'foundation'
+                  ? 'Foundation'
+                  : item.stage === 'top'
+                    ? 'Terrace / top floor'
+                    : 'Ground / site work'}{' '}
+                · {item.unit}
+              </small>
+            </span>
+            {item.status === 'priced' || item.status === 'unpriced' ? (
+              <span className="boq-scope-review-status">
+                {item.status === 'priced'
+                  ? 'Measured and priced'
+                  : 'Enter quantity and rate in Miscellaneous'}
+              </span>
+            ) : (
+              <select
+                aria-label={`Scope decision for ${item.name}`}
+                value={scopeReviews[item.code] ?? 'pending'}
+                disabled={screen !== 'edit' || !canEdit}
+                onChange={(event) => {
+                  const choice = event.target.value;
+                  setScopeReviews((previous) => {
+                    const next = { ...previous };
+                    if (choice === 'covered' || choice === 'excluded')
+                      next[item.code] = choice;
+                    else delete next[item.code];
+                    return next;
+                  });
+                }}
+              >
+                <option value="pending">Needs review</option>
+                <option value="covered">Already included in other BOQ work</option>
+                <option value="excluded">Not required / excluded</option>
+              </select>
+            )}
+            {screen === 'edit' &&
+              canEdit &&
+              item.status !== 'priced' &&
+              item.status !== 'unpriced' && (
+                <button
+                  type="button"
+                  className="boq-stage-outline"
+                  onClick={() => addRequiredScopeItem(item.code)}
+                >
+                  Add measured cost
+                </button>
+              )}
+          </div>
+        ))}
+      </div>
+      {scopeSummary.pending + scopeSummary.unpriced > 0 && (
+        <p className="boq-scope-review-warning">
+          {scopeSummary.pending} work items not reviewed;{' '}
+          {scopeSummary.unpriced} added work items still unpriced. Treat the
+          project total as provisional until these are resolved.
+        </p>
+      )}
+    </details>
+  );
   if (screen === 'view') {
     return (
       <main className="erp-page manual-boq boq-readonly boq-view-detail">
