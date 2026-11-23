@@ -36,6 +36,7 @@ import {
   ReviewCheck,
   GateForm,
   AssignRole,
+  RemoveProjectRole,
   ProjectContractActivation,
 } from './project-v2-forms';
 import '../owner-dashboard.css';
@@ -1272,6 +1273,7 @@ function Designs({ d }: { d: WorkspaceData }) {
 }
 function Team({ d }: { d: WorkspaceData }) {
   const people = d.site?.team ?? [],
+    projectRoles = d.site?.projectRoles ?? [],
     users = d.site?.memberOptions ?? [];
   return (
     <div className="pv2-content">
@@ -1283,6 +1285,36 @@ function Team({ d }: { d: WorkspaceData }) {
             <NextLink href="/dashboard/company/team" label="Company Team" />
           }
         />
+        {projectRoles.length > 0 && (
+          <div className="pv2-team-list" aria-label="Project role assignments">
+            {projectRoles.map((row) => {
+              const name =
+                users.find((x) => x.id === row.user_id)?.label ||
+                'Assigned project member';
+              return (
+                <div className="pv2-person" key={row.id}>
+                  <span className="pv2-person-avatar">
+                    {pretty(String(row.role ?? '')).slice(0, 1) || 'T'}
+                  </span>
+                  <div>
+                    <strong>{name}</strong>
+                    <small>{pretty(String(row.role ?? ''))}</small>
+                  </div>
+                  {d.site?.canManage ? (
+                    <RemoveProjectRole
+                      projectId={d.project.id}
+                      id={row.id}
+                      version={Number(row.version ?? 1)}
+                      label={name + ' as ' + pretty(String(row.role ?? ''))}
+                    />
+                  ) : (
+                    <Status value="active" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
         {people.length ? (
           <div className="pv2-team-list">
             {people.map((row) => (
@@ -1301,7 +1333,7 @@ function Team({ d }: { d: WorkspaceData }) {
               </div>
             ))}
           </div>
-        ) : (
+        ) : projectRoles.length ? null : (
           <Blank
             title="No project assignments"
             detail="Invite existing company staff to this project without copying employee profiles."

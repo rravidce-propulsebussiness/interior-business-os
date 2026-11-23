@@ -5594,3 +5594,8 @@
     justify-content: center;
   }
 }
+.pv2-form-hint {
+  margin: 0;
+  font-size: 11px;
+  color: #596c84;
+}
