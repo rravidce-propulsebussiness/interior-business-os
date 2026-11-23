@@ -2075,6 +2075,78 @@ export function BoqWorkspace({
           {message}
         </p>
       )}
+      {canViewCost && (
+        <details className="boq-project-costs">
+          <summary>
+            Project-wide costs and contingency —{' '}
+            {money(projectCostBreakdown.projectWideCost)}
+          </summary>
+          <p>
+            Enter site-wide costs only once, not again under individual floors.
+            Keep tax amounts separate from supplier rates that already include
+            tax. Leave a field at zero only when not applicable.
+          </p>
+          <div className="boq-project-costs-fields">
+            {BOQ_PROJECT_COST_FIELDS.map((field) => (
+              <label key={field.key}>
+                <span>{field.label} (₹)</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="100000000"
+                  step="0.01"
+                  value={projectCosts[field.key]}
+                  disabled={!(active ? canEdit : canCreate)}
+                  onChange={(event) =>
+                    setProjectCosts((previous) => ({
+                      ...previous,
+                      [field.key]: Math.max(0, Number(event.target.value) || 0),
+                    }))
+                  }
+                />
+              </label>
+            ))}
+            <label>
+              <span>Contingency (%)</span>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={projectCosts.contingencyPercent}
+                disabled={!(active ? canEdit : canCreate)}
+                onChange={(event) =>
+                  setProjectCosts((previous) => ({
+                    ...previous,
+                    contingencyPercent: Math.min(
+                      100,
+                      Math.max(0, Number(event.target.value) || 0),
+                    ),
+                  }))
+                }
+              />
+            </label>
+            <label>
+              <span>Applicable taxes not already included (₹)</span>
+              <input
+                type="number"
+                min="0"
+                max="100000000"
+                step="0.01"
+                value={projectCosts.taxes}
+                disabled={!(active ? canEdit : canCreate)}
+                onChange={(event) =>
+                  setProjectCosts((previous) => ({
+                    ...previous,
+                    taxes: Math.max(0, Number(event.target.value) || 0),
+                  }))
+                }
+              />
+            </label>
+          </div>
+          <strong>Total project estimate: {money(materialCost)}</strong>
+        </details>
+      )}
       {active && canEdit && (
         <div
           className="boq-autosave-status"
