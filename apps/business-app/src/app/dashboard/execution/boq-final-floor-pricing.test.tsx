@@ -81,6 +81,37 @@ describe('one final BOQ floor-wise pricing', () => {
     });
   });
 
+  it('keeps project-wide expenses separate from materials and labour', () => {
+    const rows = buildFloorPricing(
+      [
+        { stage: 'Ground Floor', amount: 100000, isLabour: false },
+        { stage: 'Ground Floor', amount: 30000, isLabour: true },
+        {
+          stage: 'Project-wide costs',
+          amount: 12000,
+          isLabour: false,
+          isOverhead: true,
+        },
+      ],
+      {},
+      floors,
+      ['Ground Floor', 'Project-wide costs'],
+    );
+    expect(rows.find((row) => row.stage === 'Ground Floor')).toMatchObject({
+      materialCost: 100000,
+      labourCost: 30000,
+      overheadCost: 0,
+      totalCost: 130000,
+    });
+    expect(rows.find((row) => row.stage === 'Project-wide costs')).toMatchObject({
+      materialCost: 0,
+      labourCost: 0,
+      overheadCost: 12000,
+      totalCost: 12000,
+    });
+    expect(rows.reduce((total, row) => total + row.totalCost, 0)).toBe(142000);
+  });
+
   it('expands a single floor report into itemized measurements and allocated labour', () => {
     const rows = buildFloorPricing(
       [{ stage: 'Ground Floor', amount: 2000, isLabour: false }],
