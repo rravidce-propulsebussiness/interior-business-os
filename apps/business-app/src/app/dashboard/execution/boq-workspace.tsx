@@ -63,6 +63,11 @@ import {
   type BoqProjectCosts,
 } from './boq-project-costs';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
+import {
+  BOQ_SCOPE_WORKS,
+  summarizeBoqScope,
+  type BoqScopeReviews,
+} from './boq-scope-coverage';
 
 type Generator = {
   revisionId: string;
@@ -119,6 +124,7 @@ type Document = {
     generator?: Generator;
     labour?: LabourConfig;
     projectCosts?: BoqProjectCosts;
+    scopeReviews?: BoqScopeReviews;
   };
   updated_at: string;
 };
@@ -262,6 +268,9 @@ export function BoqWorkspace({
   );
   const [projectCosts, setProjectCosts] = useState<BoqProjectCosts>(
     normalizeBoqProjectCosts(initialDocument?.document?.projectCosts),
+  );
+  const [scopeReviews, setScopeReviews] = useState<BoqScopeReviews>(
+    initialDocument?.document?.scopeReviews ?? {},
   );
   const [costingTab, setCostingTab] = useState<'builder' | 'labour'>('builder');
   const [rmcEnabled, setRmcEnabled] = useState(() => {
@@ -425,6 +434,7 @@ export function BoqWorkspace({
       sum + (isLabourOutput(output) ? output.quantity * output.rate : 0),
     0,
   );
+  const scopeSummary = summarizeBoqScope(lines, scopeReviews);
   const unpricedOutputs = allOutputs.filter(
     (output) => !isOldLabour(output) && isBoqCostUnpriced(output, priceOf),
   );
@@ -574,7 +584,9 @@ export function BoqWorkspace({
   function printBoq() {
     // Open every floor so the printout / PDF has the full breakdown.
     window.document
-      .querySelectorAll<HTMLDetailsElement>('.boq-floor-cost')
+      .querySelectorAll<HTMLDetailsElement>(
+        '.boq-floor-cost, .boq-scope-review',
+      )
       .forEach((element) => (element.open = true));
     window.print();
   }
@@ -605,6 +617,7 @@ export function BoqWorkspace({
     setSelections({});
     setLabour({ ...DEFAULT_LABOUR });
     setProjectCosts({ ...DEFAULT_BOQ_PROJECT_COSTS });
+    setScopeReviews({});
     setCostingTab('builder');
     setRmcEnabled(settings.readyMixConcrete !== 0);
     setRmcRateOverride(null);
@@ -641,6 +654,7 @@ export function BoqWorkspace({
     setSelections(document.document?.selections ?? {});
     setLabour(document.document?.labour ?? null);
     setProjectCosts(normalizeBoqProjectCosts(document.document?.projectCosts));
+    setScopeReviews(document.document?.scopeReviews ?? {});
     setCostingTab('builder');
     setRmcEnabled(
       (document.document?.generator?.settings?.readyMixConcrete ??
@@ -878,6 +892,7 @@ export function BoqWorkspace({
       selections,
       ...(labour && canViewCost ? { labour } : {}),
       ...(canViewCost ? { projectCosts } : {}),
+      scopeReviews,
       ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
     }),
     [
@@ -888,6 +903,7 @@ export function BoqWorkspace({
       selections,
       labour,
       projectCosts,
+      scopeReviews,
       canViewCost,
       generator,
       repeatFrom,
@@ -975,6 +991,7 @@ export function BoqWorkspace({
                     ...(autoSaveContent.projectCosts
                       ? { projectCosts: autoSaveContent.projectCosts }
                       : {}),
+                    scopeReviews: autoSaveContent.scopeReviews,
                     ...(autoSaveContent.generator
                       ? { generator: autoSaveContent.generator }
                       : {}),
@@ -1170,6 +1187,7 @@ export function BoqWorkspace({
         selections,
         ...(labour && canViewCost ? { labour } : {}),
         ...(canViewCost ? { projectCosts } : {}),
+        scopeReviews,
         ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
       });
       if (!result.ok) {
@@ -1191,6 +1209,7 @@ export function BoqWorkspace({
           selections,
           ...(labour && canViewCost ? { labour } : {}),
           ...(canViewCost ? { projectCosts } : {}),
+          scopeReviews,
           ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
         },
         updated_at: new Date().toISOString(),
@@ -1524,6 +1543,50 @@ export function BoqWorkspace({
     );
   }
 
+  function addRequiredScopeItem(code: string) {
+    if (!(active ? canEdit : canCreate)) return;
+    const work = BOQ_SCOPE_WORKS.find((item) => item.code === code);
+    if (!work || lines.some((line) => line.inputs.scopeCode === code)) return;
+    const floor =
+      work.stage === 'top'
+        ? floorsForGeneration.at(-1)
+        : floorsForGeneration[0];
+    const stage = work.stage === 'foundation' ? 'Foundation' : floor?.name;
+    if (!stage) return;
+    // The row begins UNPRICED, not with an invented quantity or supplier rate.
+    // It appears in the single stage Miscellaneous editor for accurate entry.
+    const item: SavedLine = {
+      id: uid(),
+      name: work.name,
+      section: stage,
+      kind: 'manual',
+      unit: work.unit,
+      inputs: {
+        stageCategory: 'miscellaneous',
+        scopeCode: work.code,
+        quantity: 0,
+      },
+      outputs: [
+        {
+          name: work.name,
+          quantity: 0,
+          unit: work.unit,
+          rate: 0,
+        },
+      ],
+      notes: 'Required scope: measure quantity and confirm the unit cost.',
+    };
+    setScopeReviews((previous) => {
+      const next = { ...previous };
+      delete next[code];
+      return next;
+    });
+    setLines((previous) => [...previous, item]);
+    setMessage(
+      `${work.name} added to ${stage} Miscellaneous. Enter its measured quantity and unit rate.`,
+    );
+  }
+
   function updateMiscellaneous(
     index: number,
     changes: { name: string; quantity: number; unit: string; rate: number },
@@ -1688,6 +1751,89 @@ export function BoqWorkspace({
       />
     );
   }
+  const scopeReviewed =
+    scopeSummary.priced + scopeSummary.covered + scopeSummary.excluded;
+  const scopePanel = (
+    <details className="boq-scope-review">
+      <summary>
+        Required construction work — {scopeReviewed}/{scopeSummary.total}{' '}
+        reviewed
+        {scopeSummary.pending + scopeSummary.unpriced > 0
+          ? ' · Estimate provisional'
+          : ' · Scope checked'}
+      </summary>
+      <p>
+        Check work that is not covered by the automatic structural and finishing
+        quantities. Add a measured cost line, confirm it is already priced
+        elsewhere, or explicitly exclude it. A zero rate never counts as priced.
+      </p>
+      <div className="boq-scope-review-items">
+        {scopeSummary.items.map((item) => (
+          <div className="boq-scope-review-item" key={item.code}>
+            <span className="boq-scope-review-name">
+              <strong>{item.name}</strong>
+              <small>
+                {item.stage === 'foundation'
+                  ? 'Foundation'
+                  : item.stage === 'top'
+                    ? 'Terrace / top floor'
+                    : 'Ground / site work'}{' '}
+                · {item.unit}
+              </small>
+            </span>
+            {item.status === 'priced' || item.status === 'unpriced' ? (
+              <span className="boq-scope-review-status">
+                {item.status === 'priced'
+                  ? 'Measured and priced'
+                  : 'Enter quantity and rate in Miscellaneous'}
+              </span>
+            ) : (
+              <select
+                aria-label={`Scope decision for ${item.name}`}
+                value={scopeReviews[item.code] ?? 'pending'}
+                disabled={screen !== 'edit' || !canEdit}
+                onChange={(event) => {
+                  const choice = event.target.value;
+                  setScopeReviews((previous) => {
+                    const next = { ...previous };
+                    if (choice === 'covered' || choice === 'excluded')
+                      next[item.code] = choice;
+                    else delete next[item.code];
+                    return next;
+                  });
+                }}
+              >
+                <option value="pending">Needs review</option>
+                <option value="covered">
+                  Already included in other BOQ work
+                </option>
+                <option value="excluded">Not required / excluded</option>
+              </select>
+            )}
+            {screen === 'edit' &&
+              canEdit &&
+              item.status !== 'priced' &&
+              item.status !== 'unpriced' && (
+                <button
+                  type="button"
+                  className="boq-stage-outline"
+                  onClick={() => addRequiredScopeItem(item.code)}
+                >
+                  Add measured cost
+                </button>
+              )}
+          </div>
+        ))}
+      </div>
+      {scopeSummary.pending + scopeSummary.unpriced > 0 && (
+        <p className="boq-scope-review-warning">
+          {scopeSummary.pending} work items not reviewed;{' '}
+          {scopeSummary.unpriced} added work items still unpriced. Treat the
+          project total as provisional until these are resolved.
+        </p>
+      )}
+    </details>
+  );
   if (screen === 'view') {
     return (
       <main className="erp-page manual-boq boq-readonly boq-view-detail">
@@ -1757,7 +1903,11 @@ export function BoqWorkspace({
                     </strong>
                   </div>
                   <div>
-                    <span>Total project cost estimate</span>
+                    <span>
+                      {scopeSummary.complete && !unpricedOutputs.length
+                        ? 'Total project cost estimate'
+                        : 'Provisional project estimate'}
+                    </span>
                     <strong>
                       {canViewCost ? money(materialCost) : 'Restricted'}
                     </strong>
@@ -1797,6 +1947,7 @@ export function BoqWorkspace({
                     use this subtotal as the final project cost.
                   </p>
                 )}
+                {scopePanel}
                 {labour && canViewCost && (
                   <section className="boq-labour-saved">
                     <h3>Labour Costing Summary</h3>
@@ -2025,7 +2176,11 @@ export function BoqWorkspace({
           <strong>{canViewCost ? money(labourCost) : 'Restricted'}</strong>
         </div>
         <div>
-          <span>Total Project Cost</span>
+          <span>
+            {scopeSummary.complete && !unpricedOutputs.length
+              ? 'Total Project Cost'
+              : 'Provisional Project Cost'}
+          </span>
           <strong>
             {!canViewCost
               ? 'Restricted'
@@ -2078,6 +2233,7 @@ export function BoqWorkspace({
           {message}
         </p>
       )}
+      {scopePanel}
       {canViewCost && (
         <details className="boq-project-costs">
           <summary>

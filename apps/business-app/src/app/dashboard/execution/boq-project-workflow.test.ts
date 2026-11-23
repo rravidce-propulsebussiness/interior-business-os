@@ -7,6 +7,7 @@ const source = (relative: string) =>
 describe('BOQ project selection and save invariants', () => {
   const page = source('./boq/page.tsx');
   const editor = source('./boq-workspace.tsx');
+  const createStep = source('./boq-create-step.tsx');
   const save = source('./boq-actions.ts');
   const auto = source('./boq-quotation.ts');
   const migration = source(
@@ -33,13 +34,17 @@ describe('BOQ project selection and save invariants', () => {
     expect(defaultFinalMigration).toContain('public.quotation_items');
   });
 
-  it('keeps saved BOQs for editing but removes them from the new-project list', () => {
-    expect(editor).toContain('projects.map((project) => {');
-    expect(editor).toContain('disabled={!saved && !ready}');
+  it('keeps saved BOQs editable while the create step lists only eligible projects', () => {
+    expect(createStep).toContain('projects.map((project) => (');
+    expect(createStep).toContain('disabled={!ready || saving || preparing}');
+    expect(editor).toContain('<BoqRegisterLanding');
     expect(editor).toContain('openDocument(existing)');
     expect(editor).toContain('setActive(null)');
     expect(editor).toContain('if (!newProjects.length)');
-    expect(editor).toContain('onClick={() => openDocument(document)}');
+    expect(editor).toContain("if (document) openDocument(document, 'view');");
+    expect(editor).toContain(
+      "if (document && canEdit) openDocument(document, 'edit');",
+    );
     expect(editor).not.toContain('Document status');
     expect(editor).not.toContain('setStatus(');
   });

@@ -7,12 +7,14 @@ on:
       - 'apps/business-app/src/app/dashboard/execution/boq-*.tsx'
       - 'apps/business-app/src/app/dashboard/execution/boq-*.css'
       - '.github/workflows/boq-cost-integrity.yml'
+      - 'vitest.config.ts'
   pull_request:
     paths:
       - 'apps/business-app/src/app/dashboard/execution/boq-*.ts'
       - 'apps/business-app/src/app/dashboard/execution/boq-*.tsx'
       - 'apps/business-app/src/app/dashboard/execution/boq-*.css'
       - '.github/workflows/boq-cost-integrity.yml'
+      - 'vitest.config.ts'
 
 permissions:
   contents: read
@@ -29,28 +31,29 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: BOQ pricing, labour and floor-wise reconciliation
+      - name: Run every BOQ cost, takeoff, editor and workflow suite
         run: >-
           pnpm exec vitest run
-          apps/business-app/src/app/dashboard/execution/boq-pricing.test.ts
-          apps/business-app/src/app/dashboard/execution/boq-labour.test.ts
-          apps/business-app/src/app/dashboard/execution/boq-project-costs.test.ts
-          apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.test.tsx
-          apps/business-app/src/app/dashboard/execution/boq-stage-measurements.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-
           packages/core/src/construction-boq.test.ts
       - name: BOQ formatting
         run: >-
           pnpm exec prettier --check
           apps/business-app/src/app/dashboard/execution/boq-pricing.ts
           apps/business-app/src/app/dashboard/execution/boq-pricing.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-create-step.test.tsx
+          apps/business-app/src/app/dashboard/execution/boq-project-workflow.test.ts
           apps/business-app/src/app/dashboard/execution/boq-labour.ts
           apps/business-app/src/app/dashboard/execution/boq-labour.test.ts
           apps/business-app/src/app/dashboard/execution/boq-project-costs.ts
           apps/business-app/src/app/dashboard/execution/boq-project-costs.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-scope-coverage.ts
+          apps/business-app/src/app/dashboard/execution/boq-scope-coverage.test.ts
           apps/business-app/src/app/dashboard/execution/boq-actions.ts
           apps/business-app/src/app/dashboard/execution/boq-workspace.tsx
           apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.tsx
           apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.test.tsx
           apps/business-app/src/app/dashboard/execution/boq-compact-fixes.css
+          vitest.config.ts
       - name: BOQ TypeScript integrity
         run: pnpm --filter ./apps/business-app typecheck

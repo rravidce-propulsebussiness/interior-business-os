@@ -37,8 +37,8 @@ describe('BOQ two-step creation', () => {
     expect(html).toContain('4,356 sq ft');
     expect(html).toContain('Continue');
     expect(html).toContain('Ramya · Construction BOQ');
-    expect(html.match(/<select\\b/g)).toHaveLength(1);
-    expect(html.match(/<input\\b/g)).toHaveLength(1);
+    expect(html.match(/<select\b/g)).toHaveLength(1);
+    expect(html.match(/<input\b/g)).toHaveLength(1);
     expect(html).toContain('One Project, One BOQ');
     expect(html).toContain('Open an existing BOQ instead');
     expect(html).not.toContain('Save BOQ');
