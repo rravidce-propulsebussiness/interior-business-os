@@ -846,7 +846,7 @@ export function BoqWorkspace({
   useEffect(() => {
     if (!active?.id || !generator || !schedule) return;
     if (refreshedPlasterDocument.current === active.id) return;
-    refreshedPlasterDocument.current = active.id;
+    const documentId = active.id;
     const needsRepair = lines.some(
       (line) =>
         line.kind === 'quote-masonry' &&
@@ -858,9 +858,15 @@ export function BoqWorkspace({
         ),
     );
     if (needsRepair) {
-      const timer = window.setTimeout(() => generateFromQuote(true), 0);
+      const timer = window.setTimeout(() => {
+        if (refreshedPlasterDocument.current !== documentId) {
+          refreshedPlasterDocument.current = documentId;
+          generateFromQuote(true);
+        }
+      }, 0);
       return () => window.clearTimeout(timer);
     }
+    refreshedPlasterDocument.current = documentId;
     // eslint-disable-next-line react-hooks/exhaustive-deps -- One-time recovery per saved document.
   }, [active?.id, generator?.revisionId, schedule]);
   // Changing a count, size, room or the drawing schedule updates a
