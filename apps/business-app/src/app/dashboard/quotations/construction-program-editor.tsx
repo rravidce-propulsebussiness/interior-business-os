@@ -12,7 +12,7 @@ import {
 } from '@business-os/core/company-construction-defaults';
 import { savedQuotationConstructionProgram } from '@business-os/core/quotation-construction-program';
 import { savedStagePaymentPlan } from '@business-os/core/quotation-payment-plan';
-import { quotedConstructionFloorCode } from '@business-os/core/construction-floor-code';
+import { paymentStageCodes } from './payment-stage-links';
 
 type Props = {
   industry: string;
@@ -26,20 +26,6 @@ type Props = {
   boqPaymentAmounts?: Record<string, number>;
 };
 
-const codeMap: Record<string, (floor: string) => string[]> = {
-  preconstruction: () => ['PRECONSTRUCTION'],
-  design: () => ['DESIGN'],
-  foundation: () => ['SITE_PREP', 'FOUNDATION', 'PLINTH'],
-  slabs: (floor) => ['RCC/' + quotedConstructionFloorCode(floor)],
-  brickwork: (floor) => ['MASONRY/' + quotedConstructionFloorCode(floor)],
-  'electrical-plumbing': (floor) => [
-    'INTERNAL_PLASTER/' + quotedConstructionFloorCode(floor),
-    'EXTERNAL_PLASTER/' + quotedConstructionFloorCode(floor),
-    'PLUMBING_PAINT/' + quotedConstructionFloorCode(floor),
-  ],
-  tiles: (floor) => ['TILES/' + quotedConstructionFloorCode(floor)],
-  painting: (floor) => ['DOORS/' + quotedConstructionFloorCode(floor)],
-};
 const paymentName: Record<string, string> = {
   preconstruction: 'Price freeze payment',
   design: 'Design payment',
@@ -127,7 +113,12 @@ function paymentAllocations(
             floorIndex,
             item,
             amount: Math.max(0, Number(values[key] || 0)),
-            stageCodes: (codeMap[stage.id] ?? (() => []))(floorName),
+            stageCodes: paymentStageCodes(
+              stage.id,
+              floorName,
+              floorNames,
+              stages.map((row) => row.id),
+            ),
           };
         }),
     ),
