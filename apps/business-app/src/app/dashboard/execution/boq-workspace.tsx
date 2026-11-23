@@ -55,6 +55,13 @@ import {
   type MeasuredKind,
 } from './boq-stage-measurements';
 import { boqCsv, boqFileName, type BoqExportRow } from './boq-export';
+import {
+  BOQ_PROJECT_COST_FIELDS,
+  DEFAULT_BOQ_PROJECT_COSTS,
+  calculateBoqProjectCosts,
+  normalizeBoqProjectCosts,
+  type BoqProjectCosts,
+} from './boq-project-costs';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
 
 type Generator = {
@@ -111,6 +118,7 @@ type Document = {
     selections?: Record<string, string>;
     generator?: Generator;
     labour?: LabourConfig;
+    projectCosts?: BoqProjectCosts;
   };
   updated_at: string;
 };
@@ -251,6 +259,9 @@ export function BoqWorkspace({
     initialDocument
       ? (initialDocument.document?.labour ?? null)
       : { ...DEFAULT_LABOUR },
+  );
+  const [projectCosts, setProjectCosts] = useState<BoqProjectCosts>(
+    normalizeBoqProjectCosts(initialDocument?.document?.projectCosts),
   );
   const [costingTab, setCostingTab] = useState<'builder' | 'labour'>('builder');
   const [rmcEnabled, setRmcEnabled] = useState(() => {
@@ -425,7 +436,12 @@ export function BoqWorkspace({
     measuredLabour,
   );
   const labourCost = legacyLabourCost + labourEstimate.total;
-  const materialCost = materialOnlyCost + labourCost;
+  const projectCostBreakdown = calculateBoqProjectCosts(
+    materialOnlyCost,
+    labourCost,
+    projectCosts,
+  );
+  const materialCost = projectCostBreakdown.total;
   // Every quantity with its stage and cost head, for the order list and
   // the download.
   const materialExportRows: BoqExportRow[] = allOutputs.map((row) => {
@@ -496,7 +512,27 @@ export function BoqWorkspace({
           head: 'Labour',
         })),
       ];
-  const exportRows = [...materialExportRows, ...labourExportRows];
+  const projectCostLines = [
+    ...BOQ_PROJECT_COST_FIELDS.map((field) => ({
+      name: field.label,
+      rate: projectCosts[field.key],
+    })),
+    { name: 'Project contingency', rate: projectCostBreakdown.contingency },
+    { name: 'Applicable taxes not already included', rate: projectCosts.taxes },
+  ].filter((row) => row.rate > 0);
+  const exportRows = [
+    ...materialExportRows,
+    ...labourExportRows,
+    ...projectCostLines.map((row): BoqExportRow => ({
+      stage: 'Project-wide costs',
+      item: row.name,
+      name: row.name,
+      quantity: 1,
+      unit: 'LS',
+      rate: canViewCost ? row.rate : 0,
+      head: 'Other',
+    })),
+  ];
   const builtUpSqft = floorsForGeneration.reduce(
     (sum, floor) => sum + floor.areaSqft,
     0,
@@ -569,6 +605,7 @@ export function BoqWorkspace({
     setLines([]);
     setSelections({});
     setLabour({ ...DEFAULT_LABOUR });
+    setProjectCosts({ ...DEFAULT_BOQ_PROJECT_COSTS });
     setCostingTab('builder');
     setRmcEnabled(settings.readyMixConcrete !== 0);
     setRmcRateOverride(null);
@@ -604,6 +641,7 @@ export function BoqWorkspace({
     setLines(upgradeOldSmallConcrete(document.document?.items || [], settings));
     setSelections(document.document?.selections ?? {});
     setLabour(document.document?.labour ?? null);
+    setProjectCosts(normalizeBoqProjectCosts(document.document?.projectCosts));
     setCostingTab('builder');
     setRmcEnabled(
       (document.document?.generator?.settings?.readyMixConcrete ??
@@ -840,6 +878,7 @@ export function BoqWorkspace({
       items: lines,
       selections,
       ...(labour && canViewCost ? { labour } : {}),
+      ...(canViewCost ? { projectCosts } : {}),
       ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
     }),
     [
@@ -849,6 +888,7 @@ export function BoqWorkspace({
       lines,
       selections,
       labour,
+      projectCosts,
       canViewCost,
       generator,
       repeatFrom,
@@ -932,6 +972,9 @@ export function BoqWorkspace({
                     selections: autoSaveContent.selections,
                     ...(autoSaveContent.labour
                       ? { labour: autoSaveContent.labour }
+                      : {}),
+                    ...(autoSaveContent.projectCosts
+                      ? { projectCosts: autoSaveContent.projectCosts }
                       : {}),
                     ...(autoSaveContent.generator
                       ? { generator: autoSaveContent.generator }
@@ -1127,6 +1170,7 @@ export function BoqWorkspace({
         items: lines,
         selections,
         ...(labour && canViewCost ? { labour } : {}),
+        ...(canViewCost ? { projectCosts } : {}),
         ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
       });
       if (!result.ok) {
@@ -1147,6 +1191,7 @@ export function BoqWorkspace({
           items: lines,
           selections,
           ...(labour && canViewCost ? { labour } : {}),
+          ...(canViewCost ? { projectCosts } : {}),
           ...(generator ? { generator: { ...generator, repeatFrom } } : {}),
         },
         updated_at: new Date().toISOString(),
