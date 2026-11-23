@@ -370,6 +370,9 @@ export type WorkspaceData = {
     contractNumber: string;
     status: string;
     authorized: boolean;
+    advanceRequired: boolean;
+    advanceReceived: boolean;
+    advanceWaived: boolean;
     canAuthorizeException: boolean;
     revisionId: string | null;
     clearanceType: string | null;
@@ -1638,6 +1641,9 @@ export async function projectWorkspace(
             contractNumber: stringValue(agreement.contract_number),
             status: stringValue(agreement.contract_status),
             authorized: agreement.execution_authorized === true,
+            advanceRequired: agreement.advance_required === true,
+            advanceReceived: agreement.advance_received === true,
+            advanceWaived: agreement.advance_waived === true,
             canAuthorizeException: agreement.can_authorize_exception === true,
             clearanceType: stringValue(agreement.clearance_type) || null,
             revisionId:

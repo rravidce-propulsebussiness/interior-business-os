@@ -387,3 +387,54 @@ export async function saveSignedAgreement(
     return messageFor(error);
   }
 }
+
+/** Company owner lets site work proceed before the design advance is
+ * recorded (cash received offline, client paying later). No receipt is
+ * created: the payment milestone stays pending in Finance. */
+export async function waiveProjectAdvance(
+  projectId: string,
+  form: FormData,
+): Promise<Result> {
+  try {
+    id.parse(projectId);
+    const choice = z
+      .enum(['cash_offline', 'pay_later', 'other'])
+      .parse(form.get('choice'));
+    const note = z
+      .string()
+      .trim()
+      .max(900)
+      .parse(String(form.get('note') ?? ''));
+    const label = {
+      cash_offline: 'Advance received in cash / offline',
+      pay_later: 'Client will pay the advance later',
+      other: 'Owner decision',
+    }[choice];
+    const reason = (note ? label + ': ' + note : label).slice(0, 1000);
+    if (reason.length < 10)
+      throw new Error('Add a short note explaining the owner decision.');
+    const services = await serverServices();
+    await services.authorization.requireAuthenticatedUser();
+    const org = await activeOrganization();
+    if (!org) throw new Error('Choose an active company');
+    const { error } = await services.client.rpc('project_advance_waive', {
+      p_organization_id: org.organizationId,
+      p_project_id: projectId,
+      p_reason: reason,
+    });
+    if (error) throw new Error(error.message.slice(0, 220));
+    for (const path of [
+      '/dashboard/projects/' + projectId,
+      '/dashboard/projects/' + projectId + '/payments',
+      '/dashboard/projects/' + projectId + '/milestones',
+    ])
+      revalidatePath(path);
+    return {
+      saved: true,
+      message:
+        'Owner decision recorded. Site work can start; the advance stays pending in Finance.',
+    };
+  } catch (error) {
+    return messageFor(error);
+  }
+}

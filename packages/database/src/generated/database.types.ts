@@ -13078,6 +13078,14 @@ export interface Database {
         Args: { p_org: string; p_project: string };
         Returns: Json;
       };
+      project_advance_waive: {
+        Args: {
+          p_organization_id: string;
+          p_project_id: string;
+          p_reason: string;
+        };
+        Returns: Json;
+      };
       project_agreement_command: {
         Args: {
           p_organization_id: string;

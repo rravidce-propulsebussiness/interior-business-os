@@ -19,6 +19,7 @@ import {
 import {
   createAgreementException,
   saveSignedAgreement,
+  waiveProjectAdvance,
 } from './[id]/site/agreement-actions';
 import { prepareAgreementFromProjectQuote } from './project-agreement-actions';
 import { financeCommand } from '../finance/actions';
@@ -1302,5 +1303,84 @@ export function InitializeSite({ id }: { id: string }) {
         Creates the existing project delivery state, not a duplicate project.
       </p>
     </ProjectForm>
+  );
+}
+
+/** Owner-only: proceed before the design advance is recorded. */
+export function OwnerAdvanceWaiver({ projectId }: { projectId: string }) {
+  const router = useRouter();
+  const [state, action, pending] = useActionState(
+    async (_prev: Result, form: FormData): Promise<Result> => {
+      const result = await waiveProjectAdvance(projectId, form);
+      if (result.saved) router.refresh();
+      return result;
+    },
+    initial,
+  );
+  return (
+    <form action={action} className="pv2-form pv2-advance-waiver">
+      <p className="pv2-hint">
+        The design advance is not recorded yet. As owner you can let site work
+        start now; the payment stays pending in Finance and no receipt is
+        created.
+      </p>
+      <div className="pv2-form-fields">
+        <label>
+          Owner decision
+          <select name="choice" defaultValue="cash_offline" required>
+            <option value="cash_offline">
+              Advance received in cash / offline
+            </option>
+            <option value="pay_later">Client will pay the advance later</option>
+            <option value="other">Other owner decision</option>
+          </select>
+        </label>
+        <label>
+          Note <small>(optional for the first two choices)</small>
+          <textarea
+            name="note"
+            maxLength={900}
+            placeholder="Receipt number, expected date or reason"
+          />
+        </label>
+      </div>
+      <button
+        className="pv2-button pv2-primary"
+        type="submit"
+        disabled={pending || state.saved}
+      >
+        {pending
+          ? 'Recording…'
+          : state.saved
+            ? 'Owner decision recorded'
+            : 'Proceed without advance payment'}
+      </button>
+      {state.message && (
+        <p
+          role="status"
+          className={'pv2-form-feedback ' + (state.saved ? 'good' : 'bad')}
+        >
+          {state.message}
+        </p>
+      )}
+    </form>
+  );
+}
+
+/** Moves a cleared project from approved plans into site execution. */
+export function StartSiteExecution({ projectId }: { projectId: string }) {
+  return (
+    <div className="pv2-ready-to-execute">
+      <ProjectForm
+        projectId={projectId}
+        operation="execution_start"
+        label="Start site execution"
+      >
+        <p className="pv2-hint">
+          Plans are released and the agreement is cleared. Start physical work
+          when the site and safety team are ready.
+        </p>
+      </ProjectForm>
+    </div>
   );
 }

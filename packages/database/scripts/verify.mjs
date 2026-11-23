@@ -56,6 +56,7 @@ assertionFile('client-portal-active-project');
 assertionFile('project-delivery');
 assertionFile('project-manager');
 assertionFile('project-agreement');
+assertionFile('project-advance-waiver');
 assertionFile('construction-project-workflows');
 assertionFile('construction-stage-record-links');
 assertionFile('quote-project-timeline');
