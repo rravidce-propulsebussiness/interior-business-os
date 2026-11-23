@@ -8,6 +8,8 @@ on:
       - 'apps/business-app/src/app/dashboard/execution/boq-*.css'
       - '.github/workflows/boq-cost-integrity.yml'
       - 'vitest.config.ts'
+      - 'packages/core/src/construction-boq.ts'
+      - 'packages/core/src/construction-boq.test.ts'
   pull_request:
     paths:
       - 'apps/business-app/src/app/dashboard/execution/boq-*.ts'
@@ -15,6 +17,8 @@ on:
       - 'apps/business-app/src/app/dashboard/execution/boq-*.css'
       - '.github/workflows/boq-cost-integrity.yml'
       - 'vitest.config.ts'
+      - 'packages/core/src/construction-boq.ts'
+      - 'packages/core/src/construction-boq.test.ts'
 
 permissions:
   contents: read
@@ -54,6 +58,8 @@ jobs:
           apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.tsx
           apps/business-app/src/app/dashboard/execution/boq-final-floor-pricing.test.tsx
           apps/business-app/src/app/dashboard/execution/boq-compact-fixes.css
+          apps/business-app/src/app/dashboard/execution/boq-stage-measurements.ts
+          apps/business-app/src/app/dashboard/execution/boq-stage-measurements.test.ts
           apps/business-app/src/app/dashboard/execution/boq-stage-builder.tsx
           apps/business-app/src/app/dashboard/execution/boq-stage-builder.test.ts
           apps/business-app/src/app/dashboard/execution/boq-wizard-flow.tsx
