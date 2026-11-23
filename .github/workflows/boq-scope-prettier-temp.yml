@@ -1,0 +1,46 @@
+name: Temporary BOQ scope formatter
+on:
+  push:
+    paths:
+      - '.github/workflows/boq-scope-prettier-temp.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  format:
+    if: github.ref == 'refs/heads/fix/boq-scope-coverage-20261123'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Apply canonical formatting
+        run: >-
+          pnpm exec prettier --write
+          apps/business-app/src/app/dashboard/execution/boq-scope-coverage.ts
+          apps/business-app/src/app/dashboard/execution/boq-scope-coverage.test.ts
+          apps/business-app/src/app/dashboard/execution/boq-workspace.tsx
+          apps/business-app/src/app/dashboard/execution/boq-actions.ts
+          apps/business-app/src/app/dashboard/execution/boq-compact-fixes.css
+          .github/workflows/boq-cost-integrity.yml
+      - name: Commit formatting
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/business-app/src/app/dashboard/execution/boq-scope-coverage.ts
+          git add apps/business-app/src/app/dashboard/execution/boq-scope-coverage.test.ts
+          git add apps/business-app/src/app/dashboard/execution/boq-workspace.tsx
+          git add apps/business-app/src/app/dashboard/execution/boq-actions.ts
+          git add apps/business-app/src/app/dashboard/execution/boq-compact-fixes.css
+          git add .github/workflows/boq-cost-integrity.yml
+          if ! git diff --cached --quiet; then
+            git commit -m "style(boq): format required-scope completeness work"
+            git push origin HEAD:fix/boq-scope-coverage-20261123
+          fi
