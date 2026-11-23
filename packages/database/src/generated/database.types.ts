@@ -13175,6 +13175,17 @@ export interface Database {
         };
         Returns: Json;
       };
+      project_material_details_set: {
+        Args: {
+          p_org: string;
+          p_project: string;
+          p_material: string;
+          p_order_amount?: number;
+          p_received_quantity?: number;
+          p_decision_note?: string;
+        };
+        Returns: Json;
+      };
       project_material_homeowner_cash_paid: {
         Args: {
           p_org: string;
