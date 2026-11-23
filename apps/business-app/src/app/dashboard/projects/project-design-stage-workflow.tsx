@@ -1,10 +1,12 @@
 import { formatMoney, pretty, type WorkspaceData } from './project-v2-data';
 import {
+  OwnerAdvanceWaiver,
   PrepareAgreement,
   ProjectContractActivation,
   ProjectDrawingForm,
   ProjectForm,
   SkipAgreementUpload,
+  StartSiteExecution,
 } from './project-v2-forms';
 import { DesignDecisionForm } from './project-flow-controls';
 import { areRequiredDesignPlansApproved } from './project-design-stage-status';
@@ -28,6 +30,15 @@ export function ProjectDesignPaymentAndAgreement({
   const ownerApprovalRecorded = agreement?.clearanceType === 'owner_exception';
   const activationNeeded =
     ownerApprovalRecorded && agreement?.status === 'pending';
+  // An active contract still needs the design advance, unless the owner
+  // records that work may proceed without it.
+  const advanceDecisionNeeded =
+    Boolean(agreement) &&
+    agreement?.status === 'active' &&
+    !agreement.authorized &&
+    agreement.advanceRequired &&
+    !agreement.advanceReceived &&
+    !agreement.advanceWaived;
 
   return (
     <section
@@ -57,10 +68,16 @@ export function ProjectDesignPaymentAndAgreement({
       </header>
 
       {agreement?.authorized ? (
-        <p className="pmt-design-note">
-          The agreement is authorized. Drawing submissions follow the project’s
-          existing advance policy.
-        </p>
+        <>
+          <p className="pmt-design-note">
+            {agreement.advanceWaived && !agreement.advanceReceived
+              ? 'The agreement is authorized. The owner allowed work to proceed before the design advance; the payment stays pending in Finance.'
+              : 'The agreement is authorized. Drawing submissions follow the project’s existing advance policy.'}
+          </p>
+          {data.site?.stage === 'client_approved' && hasOwnerAccess && (
+            <StartSiteExecution projectId={data.project.id} />
+          )}
+        </>
       ) : ownerApprovalRecorded && agreement ? (
         <>
           <p className="pmt-design-note">
@@ -86,6 +103,16 @@ export function ProjectDesignPaymentAndAgreement({
                 this project.
               </p>
             )}
+          {advanceDecisionNeeded &&
+            (agreement.canAuthorizeException ? (
+              <OwnerAdvanceWaiver projectId={data.project.id} />
+            ) : (
+              <p className="pmt-design-note">
+                Waiting for the design advance, or for the owner to record that
+                work may proceed without it (cash received offline, client
+                paying later).
+              </p>
+            ))}
         </>
       ) : agreement?.canAuthorizeException && hasOwnerAccess ? (
         <SkipAgreementUpload
