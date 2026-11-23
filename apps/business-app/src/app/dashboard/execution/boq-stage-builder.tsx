@@ -2191,10 +2191,11 @@ export function BoqStageBuilder(props: Props) {
                         {entry.output.name}
                         <small>{entry.line.name}</small>
                       </span>
-                      {isAutoPlasterQuantity(
-                        entry.line.kind,
-                        entry.output.name,
-                      ) ? (
+                      {(entry.line.kind === 'quote-window-sajjas' ||
+                        isAutoPlasterQuantity(
+                          entry.line.kind,
+                          entry.output.name,
+                        )) ? (
                         <div className="boq-stage-field">
                           <span>Calculated quantity ({entry.output.unit})</span>
                           <strong>{number(entry.output.quantity)}</strong>
@@ -2257,6 +2258,7 @@ export function BoqStageBuilder(props: Props) {
                           Remove
                         </button>
                       ) : (
+                        entry.line.kind !== 'quote-window-sajjas' &&
                         !isAutoPlasterQuantity(
                           entry.line.kind,
                           entry.output.name,
