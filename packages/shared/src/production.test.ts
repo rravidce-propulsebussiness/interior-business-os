@@ -5,7 +5,10 @@ import {
   operationalLog,
 } from './runtime';
 import { createReadiness, liveness } from './health';
-import { adminContentSecurityPolicy } from './security';
+import {
+  adminContentSecurityPolicy,
+  PRIVATE_NO_STORE_CACHE_CONTROL,
+} from './security';
 
 const environment = {
   APP_ENV: 'staging',
@@ -168,4 +171,17 @@ it('logs allowlisted structured metadata and suppresses debug by default', () =>
   } finally {
     sink.mockRestore();
   }
+});
+
+it('private workspace HTML forbids edge rewriting such as Cloudflare email obfuscation', async () => {
+  const { readFile } = await import('node:fs/promises');
+  expect(PRIVATE_NO_STORE_CACHE_CONTROL).toBe(
+    'private, no-store, no-transform',
+  );
+  const proxy = await readFile(
+    new URL('../../database/src/proxy.ts', import.meta.url),
+    'utf8',
+  );
+  expect(proxy).not.toContain("'Cache-Control', 'private, no-store'");
+  expect(proxy.match(/PRIVATE_NO_STORE_CACHE_CONTROL\)/g)).toHaveLength(2);
 });

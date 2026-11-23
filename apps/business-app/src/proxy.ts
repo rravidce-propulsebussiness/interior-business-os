@@ -8,6 +8,7 @@ import {
   verifiedEdgeHostname,
 } from './public-website-edge';
 import { publicAuthOrigin } from '@business-os/auth/origin';
+import { PRIVATE_NO_STORE_CACHE_CONTROL } from '@business-os/shared/security';
 import { NextResponse, type NextRequest } from 'next/server';
 import {
   requestErrorName,
@@ -111,7 +112,7 @@ export async function proxy(request: NextRequest) {
     const response = NextResponse.rewrite(target, {
       request: { headers: request.headers },
     });
-    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('Cache-Control', PRIVATE_NO_STORE_CACHE_CONTROL);
     response.headers.set(
       'Content-Security-Policy',
       "default-src 'self'; script-src 'self' 'unsafe-inline'; " +
