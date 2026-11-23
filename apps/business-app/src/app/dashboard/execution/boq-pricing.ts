@@ -883,7 +883,7 @@ export function rateForOutput(
  */
 export function isBoqCostUnpriced(
   output: PricedOutput & { quantity: number; kind?: string },
-  resolveCost: (output: PricedOutput) => number,
+  resolveCost: (output: PricedOutput & { quantity: number; kind?: string }) => number,
 ): boolean {
   if (!(output.quantity > 0)) return false;
   if (/reference only|volume only/i.test(output.name)) return false;
