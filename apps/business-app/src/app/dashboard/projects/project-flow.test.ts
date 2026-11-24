@@ -285,7 +285,7 @@ describe('single project flow model', () => {
   it('prompts for site measurements without inventing values', () => {
     expect(
       measurementPrompts('Excavation to founding level').map((m) => m.label),
-    ).toEqual(['Depth', 'Width', 'Founding level']);
+    ).toEqual(['Length', 'Depth', 'Width', 'Founding level']);
     expect(measurementPrompts('PCC below footings')[0]?.label).toBe(
       'PCC thickness',
     );
