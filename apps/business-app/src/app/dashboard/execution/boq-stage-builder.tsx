@@ -43,7 +43,10 @@ import {
 } from './boq-structural-schedule-editors';
 import { BarsPicker } from './boq-design-schedule';
 import { beamTotalRunAfterCountChange } from './boq-beam-run-calculation';
-import { parseBars } from '@business-os/core/construction-boq';
+import {
+  MEASURED_SERVICE_FIELDS,
+  parseBars,
+} from '@business-os/core/construction-boq';
 import { BoqStructuralConcreteCard } from './boq-structural-concrete-card';
 import {
   copyExteriorWallsToFullFloors,
@@ -89,6 +92,7 @@ type Props = {
   design: StructuralDesign | null;
   onDesignChange: (next: StructuralDesign) => void;
   counts: BoqCounts;
+  legacyCountsNeedReview?: boolean;
   onCountsChange: (next: BoqCounts) => void;
   structuralSettings: StructuralSettings;
   materialRates?: readonly Rate[];
@@ -765,16 +769,10 @@ export function BoqStageBuilder(props: Props) {
       Array.from({ length: current?.kitchens ?? 0 }, (_, i) => ({
         id: 'kitchen-default-' + i,
         name: 'Kitchen ' + (i + 1),
-        platformFeet:
-          finishes?.kitchenPlatformFeet ||
-          finishDefaults.kitchenPlatformFeet ||
-          10,
-        platformDepthFeet: finishDefaults.kitchenPlatformDepthFeet || 2,
-        wallTileFeet:
-          finishes?.kitchenPlatformFeet ||
-          finishDefaults.kitchenPlatformFeet ||
-          10,
-        wallTileHeightFeet: finishDefaults.kitchenWallTileHeightFeet || 2,
+        platformFeet: 0,
+        platformDepthFeet: 0,
+        wallTileFeet: 0,
+        wallTileHeightFeet: 0,
       }));
     const updateKitchens = (rows: typeof measuredKitchens) => {
       if (!current) return;
@@ -868,7 +866,7 @@ export function BoqStageBuilder(props: Props) {
         <div className="boq-stage-edit-head">
           <div>
             <strong>Edit {category.label}</strong>
-            <small>{stage} · changes update the BOQ quantities</small>
+            <small>{stage}</small>
           </div>
           <button
             type="button"
@@ -883,13 +881,23 @@ export function BoqStageBuilder(props: Props) {
             ×
           </button>
         </div>
+        {floor &&
+          props.legacyCountsNeedReview &&
+          !finishes?.countsConfirmed &&
+          ['doors', 'electrical', 'plumbing', 'tiles'].includes(
+            category.key,
+          ) && (
+            <label className="boq-stage-scope-toggle">
+              <input
+                type="checkbox"
+                checked={false}
+                onChange={() => changeFinishes({ countsConfirmed: true })}
+              />
+              Confirm existing floor counts against drawings
+            </label>
+          )}
         {isGeometry(category.key) && (
           <div className="boq-stage-dimensions">
-            <p className="boq-stage-hint">
-              {isStandardShelves
-                ? 'Enter only the overall front width and height of the cement shelf cabinet and the number of identical units. Standard horizontal shelves, side cheeks and middle partitions determine the material takeoff; confirm site dimensions before purchase.'
-                : 'Enter the measured count, length, width and depth. Volume is calculated in cubic feet and cubic metres; no dimension is assumed from floor area.'}
-            </p>
             <label className="boq-stage-field boq-stage-unit-switch">
               <span>Input dimension unit</span>
               <select
@@ -1762,47 +1770,64 @@ export function BoqStageBuilder(props: Props) {
             )}
           </>
         )}
-        {current &&
-          (category.key === 'doors' ||
-            category.key === 'electrical' ||
-            category.key === 'plumbing') && (
-            <div className="boq-stage-input-grid">
-              {(category.key === 'doors'
-                ? [
-                    ['mainDoors', 'Main doors'],
-                    ['internalDoors', 'Internal doors'],
-                    ['bathroomDoors', 'Bathroom doors'],
-                    ['poojaDoors', 'Pooja doors'],
-                    ['windows', 'Windows'],
-                    ['ventilators', 'Ventilators'],
-                  ]
-                : category.key === 'electrical'
-                  ? [
-                      ['lightPoints', 'Lights'],
-                      ['fanPoints', 'Fans'],
-                      ['socketPoints', '6A sockets'],
-                      ['powerPoints', '16A power points'],
-                    ]
-                  : [
-                      ['bathrooms', 'Bathrooms'],
-                      ['kitchens', 'Kitchens'],
-                    ]
-              ).map(([key, label]) => (
-                <InputNumber
-                  key={key}
-                  label={label ?? ''}
-                  value={current[key as keyof typeof current]}
-                  onChange={(value) =>
-                    changeCount(key as keyof typeof current, value)
-                  }
-                />
-              ))}
-            </div>
-          )}
+        {current && category.key === 'doors' && (
+          <div className="boq-stage-input-grid">
+            {(
+              [
+                ['mainDoors', 'Main doors'],
+                ['internalDoors', 'Internal doors'],
+                ['bathroomDoors', 'Bathroom doors'],
+                ['poojaDoors', 'Pooja doors'],
+                ['windows', 'Windows'],
+                ['ventilators', 'Ventilators'],
+                ['rollingShutters', 'Rolling shutters'],
+              ] as const
+            ).map(([key, label]) => (
+              <InputNumber
+                key={key}
+                label={label ?? ''}
+                value={current[key as keyof typeof current]}
+                onChange={(value) =>
+                  changeCount(key as keyof typeof current, value)
+                }
+              />
+            ))}
+          </div>
+        )}
         {current && category.key === 'tiles' && (
           <div className="boq-stage-dimensions">
-            <h4>Flooring & kitchens on {stage}</h4>
+            <h4>Flooring & kitchens</h4>
             <div className="boq-stage-input-grid">
+              <InputNumber
+                label="Room flooring area"
+                unit="sqft"
+                value={finishes?.roomFlooringSqft ?? 0}
+                onChange={(value) =>
+                  changeFinishes({ roomFlooringSqft: value, rooms: [] })
+                }
+              />
+              <InputNumber
+                label="Parking flooring area"
+                unit="sqft"
+                value={finishes?.parkingFlooringSqft ?? 0}
+                onChange={(value) =>
+                  changeFinishes({ parkingFlooringSqft: value })
+                }
+              />
+              <InputText
+                label="Bathroom sizes (L × W, ft)"
+                value={finishes?.bathroomSizes ?? ''}
+                placeholder="7×5, 6×4"
+                onChange={(value) => changeFinishes({ bathroomSizes: value })}
+              />
+              <InputNumber
+                label="Bathroom wall tile height"
+                unit="ft"
+                value={finishes?.bathroomTileHeightFeet ?? 0}
+                onChange={(value) =>
+                  changeFinishes({ bathroomTileHeightFeet: value })
+                }
+              />
               <InputNumber
                 label="Tile & granite wastage"
                 unit="%"
@@ -1887,9 +1912,6 @@ export function BoqStageBuilder(props: Props) {
                 </div>
               );
             })}
-            {measuredKitchens.length === 0 && (
-              <p className="boq-stage-hint">No kitchen on this floor.</p>
-            )}
             <button
               type="button"
               className="boq-stage-outline"
@@ -1899,12 +1921,10 @@ export function BoqStageBuilder(props: Props) {
                   {
                     id: 'kitchen-' + Date.now().toString(36),
                     name: 'Kitchen ' + (measuredKitchens.length + 1),
-                    platformFeet: finishDefaults.kitchenPlatformFeet || 10,
-                    platformDepthFeet:
-                      finishDefaults.kitchenPlatformDepthFeet || 2,
-                    wallTileFeet: finishDefaults.kitchenPlatformFeet || 10,
-                    wallTileHeightFeet:
-                      finishDefaults.kitchenWallTileHeightFeet || 2,
+                    platformFeet: 0,
+                    platformDepthFeet: 0,
+                    wallTileFeet: 0,
+                    wallTileHeightFeet: 0,
                   },
                 ])
               }
@@ -1920,19 +1940,7 @@ export function BoqStageBuilder(props: Props) {
               <InputNumber
                 label="Staircase granite"
                 unit="sqft"
-                value={
-                  finishes?.staircaseGraniteSqft ??
-                  (finishDefaults.stairsPerFloor || 1) *
-                    (finishDefaults.stairWidthFeet || 3) *
-                    (Math.ceil(
-                      (floor.heightFeet * 12) /
-                        (finishDefaults.stairRiserIn || 7),
-                    ) *
-                      (((finishDefaults.stairTreadIn || 10) +
-                        (finishDefaults.stairRiserIn || 7)) /
-                        12) +
-                      (finishDefaults.stairLandingFeet || 0))
-                }
+                value={finishes?.staircaseGraniteSqft ?? 0}
                 onChange={(value) =>
                   changeFinishes({ staircaseGraniteSqft: value })
                 }
@@ -1944,6 +1952,16 @@ export function BoqStageBuilder(props: Props) {
                 onChange={(value) => changeFinishes({ railingFeet: value })}
               />
             </div>
+          </div>
+        )}
+        {current && category.key === 'painting' && (
+          <div className="boq-stage-input-grid">
+            <InputNumber
+              label="Ceiling painting area"
+              unit="sqft"
+              value={finishes?.ceilingPaintSqft ?? 0}
+              onChange={(value) => changeFinishes({ ceilingPaintSqft: value })}
+            />
           </div>
         )}
         {current && category.key === 'plaster' && (
@@ -1981,8 +1999,7 @@ export function BoqStageBuilder(props: Props) {
             </div>
             {!props.counts.walls?.[stage]?.length && (
               <p className="boq-guided-warning" role="status">
-                Enter wall measurements under Brickwork first. Plaster
-                quantities cannot be finalized without the wall sizes.
+                Wall measurements pending.
               </p>
             )}
           </div>
@@ -2008,14 +2025,10 @@ export function BoqStageBuilder(props: Props) {
                           measuredKitchens[i] ?? {
                             id: 'kitchen-' + Date.now().toString(36) + '-' + i,
                             name: 'Kitchen ' + (i + 1),
-                            platformFeet:
-                              finishDefaults.kitchenPlatformFeet || 10,
-                            platformDepthFeet:
-                              finishDefaults.kitchenPlatformDepthFeet || 2,
-                            wallTileFeet:
-                              finishDefaults.kitchenPlatformFeet || 10,
-                            wallTileHeightFeet:
-                              finishDefaults.kitchenWallTileHeightFeet || 2,
+                            platformFeet: 0,
+                            platformDepthFeet: 0,
+                            wallTileFeet: 0,
+                            wallTileHeightFeet: 0,
                           },
                       ),
                     );
@@ -2047,6 +2060,36 @@ export function BoqStageBuilder(props: Props) {
             </div>
           </div>
         )}
+        {current &&
+          (category.key === 'electrical' || category.key === 'plumbing') && (
+            <div className="boq-stage-dimensions">
+              <h4>Measured materials</h4>
+              <div className="boq-stage-input-grid">
+                {MEASURED_SERVICE_FIELDS.filter(
+                  (field) => field.group === category.key,
+                ).map((field) => (
+                  <InputNumber
+                    key={field.material}
+                    label={field.name}
+                    unit={field.inputUnit}
+                    value={finishes?.serviceMeasurements?.[field.material] ?? 0}
+                    onChange={(value) =>
+                      changeFinishes({
+                        serviceMeasurements: {
+                          ...finishes?.serviceMeasurements,
+                          [field.material]:
+                            field.inputUnit === 'nos' ||
+                            field.inputUnit === 'lot'
+                              ? Math.round(value)
+                              : value,
+                        },
+                      })
+                    }
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         {current && category.key === 'doors' && (
           <div className="boq-stage-subcard">
             <h4>Door, window and ventilator sizes from drawing</h4>

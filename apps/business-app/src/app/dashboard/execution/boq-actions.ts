@@ -102,6 +102,24 @@ const generatorSchema = z.object({
           bathroomWidthFeet: z.number().finite().nonnegative(),
           kitchenPlatformFeet: z.number().finite().nonnegative(),
           bathroomSizes: z.string().max(300).optional(),
+          roomFlooringSqft: z.number().finite().min(0).max(100000).optional(),
+          ceilingPaintSqft: z.number().finite().min(0).max(100000).optional(),
+          parkingFlooringSqft: z
+            .number()
+            .finite()
+            .min(0)
+            .max(100000)
+            .optional(),
+          bathroomTileHeightFeet: z
+            .number()
+            .finite()
+            .min(0)
+            .max(100000)
+            .optional(),
+          countsConfirmed: z.boolean().optional(),
+          serviceMeasurements: z
+            .record(z.string().max(40), z.number().finite().min(0).max(1000000))
+            .optional(),
           railingFeet: z.number().finite().nonnegative().optional(),
           internalPlasterCoats: z
             .union([z.literal(1), z.literal(2)])
@@ -161,6 +179,7 @@ const generatorSchema = z.object({
   /** Column / beam / footing schedule from the structural drawing. */
   design: structuralDesignSchema.nullable().optional(),
   measuredOnly: z.boolean().optional(),
+  legacyCountsNeedReview: z.boolean().optional(),
   engineVersion: z.number().int().nonnegative().max(1000).optional(),
   repeatFrom: z
     .record(z.string().max(90), z.string().max(90))

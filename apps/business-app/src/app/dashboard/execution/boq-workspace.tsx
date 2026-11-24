@@ -21,7 +21,7 @@ import {
   type Rate,
 } from './boq-pricing';
 import {
-  estimateCounts,
+  measuredCounts,
   normalizeCounts,
   floorsFromQuote,
   generateQuotationBoq,
@@ -89,13 +89,14 @@ type Generator = {
   overrides?: Record<string, { quantity?: number; rate?: number }>;
   warnings: string[];
   measuredOnly?: boolean;
+  legacyCountsNeedReview?: boolean;
   repeatFrom?: Record<string, string>;
   /** Generator version that produced the lines (see BOQ_ENGINE_VERSION). */
   engineVersion?: number;
 };
 /** Bump when the quotation generator adds or reprices generated lines, so
  * saved BOQs regenerate once on edit (manual items and edits are kept). */
-const BOQ_ENGINE_VERSION = 2;
+const BOQ_ENGINE_VERSION = 3;
 type SavedLine = {
   id: string;
   name: string;
@@ -415,7 +416,8 @@ export function BoqWorkspace({
   // different shape; anything missing is estimated again).
   const countsForGeneration = normalizeCounts(
     genCounts,
-    estimateCounts(floorsForGeneration, settings, schedule ?? undefined),
+    measuredCounts(floorsForGeneration),
+    true,
   );
   // Reinforcement is bought in rods; weight comes along for reference.
   const steelSummary = new Map<number, { kg: number; rods: number }>();
@@ -692,6 +694,12 @@ export function BoqWorkspace({
   function generateFromQuote(live = false, edits = overrides) {
     if (!schedule || !quoteId) return;
     const measuredOnly = !active || generator?.measuredOnly === true;
+    const legacyCountsNeedReview = Boolean(
+      generator?.legacyCountsNeedReview ||
+      (active &&
+        generator &&
+        (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION),
+    );
     const result = generateQuotationBoq({
       details: schedule,
       settings: concreteSettings,
@@ -699,6 +707,8 @@ export function BoqWorkspace({
       counts: countsForGeneration,
       design: genDesign,
       splitBeamSlab: measuredOnly,
+      measuredFinishes: true,
+      requireConfirmedCounts: legacyCountsNeedReview,
     });
     const kept = upgradeOldSmallConcrete(
       lines.filter((line) => !line.origin),
@@ -857,6 +867,7 @@ export function BoqWorkspace({
       overrides: cleanEdits,
       warnings: result.warnings,
       measuredOnly,
+      legacyCountsNeedReview,
       repeatFrom,
       engineVersion: BOQ_ENGINE_VERSION,
     });
@@ -869,9 +880,7 @@ export function BoqWorkspace({
       setTitle(
         `${activeProject?.name ?? 'Project'} · Construction BOQ`.slice(0, 200),
       );
-    setMessage(
-      `${sourceLines.length} measured items generated from the quotation${kept.length ? `; ${kept.length} manual items kept` : ''}. Structural stages need drawing quantities before they appear.`,
-    );
+    setMessage('BOQ updated');
   }
   // A BOQ prepared from the quotation (floors, counts, drawing schedule) but
   // not generated yet is generated as soon as its quotation is available.
@@ -946,10 +955,12 @@ export function BoqWorkspace({
   useEffect(() => {
     if (!active?.id || !generator || !schedule || !canEdit) return;
     if (screen !== 'edit' || upgradedDocument.current === active.id) return;
-    upgradedDocument.current = active.id;
     if ((generator.engineVersion ?? 1) >= BOQ_ENGINE_VERSION) return;
     if (generator.revisionId !== quoteId) return;
-    const timer = window.setTimeout(() => generateFromQuote(true), 0);
+    const timer = window.setTimeout(() => {
+      upgradedDocument.current = active.id;
+      generateFromQuote(true);
+    }, 0);
     return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- One-time upgrade per saved document.
   }, [active?.id, generator?.revisionId, schedule, screen, canEdit]);
@@ -1930,9 +1941,7 @@ export function BoqWorkspace({
       </div>
       {scopeSummary.pending + scopeSummary.unpriced > 0 && (
         <p className="boq-scope-review-warning">
-          {scopeSummary.pending} work items not reviewed;{' '}
-          {scopeSummary.unpriced} added work items still unpriced. Treat the
-          project total as provisional until these are resolved.
+          {scopeSummary.pending} pending · {scopeSummary.unpriced} unpriced
         </p>
       )}
     </details>
@@ -2007,7 +2016,12 @@ export function BoqWorkspace({
                   </div>
                   <div>
                     <span>
-                      {scopeSummary.complete && !unpricedOutputs.length
+                      {scopeSummary.complete &&
+                      !unpricedOutputs.length &&
+                      (generator?.engineVersion ?? 0) >= BOQ_ENGINE_VERSION &&
+                      !generator?.warnings.some((warning) =>
+                        warning.includes('Measurement pending'),
+                      )
                         ? 'Total project cost estimate'
                         : 'Provisional project estimate'}
                     </span>
@@ -2125,7 +2139,7 @@ export function BoqWorkspace({
                 {generator?.warnings?.length ? (
                   <details className="boq-view-warnings">
                     <summary>
-                      Drawing assumptions ({generator.warnings.length})
+                      Measurement review ({generator.warnings.length})
                     </summary>
                     <ul>
                       {generator.warnings.map((warning) => (
@@ -2334,7 +2348,12 @@ export function BoqWorkspace({
         </div>
         <div>
           <span>
-            {scopeSummary.complete && !unpricedOutputs.length
+            {scopeSummary.complete &&
+            !unpricedOutputs.length &&
+            (generator?.engineVersion ?? 0) >= BOQ_ENGINE_VERSION &&
+            !generator?.warnings.some((warning) =>
+              warning.includes('Measurement pending'),
+            )
               ? 'Total Project Cost'
               : 'Provisional Project Cost'}
           </span>
@@ -2410,9 +2429,7 @@ export function BoqWorkspace({
           <div className="boq-panel-heading">
             <div>
               <h2>{active ? 'Edit BOQ' : 'Create BOQ'}</h2>
-              <span>
-                Keep dimensions, assumptions and linked quote in one place.
-              </span>
+              <span>Measured BOQ</span>
             </div>
             {active && canEdit && (
               <button
@@ -2531,6 +2548,12 @@ export function BoqWorkspace({
               design={genDesign}
               onDesignChange={setGenDesign}
               counts={countsForGeneration}
+              legacyCountsNeedReview={Boolean(
+                generator?.legacyCountsNeedReview ||
+                (active &&
+                  generator &&
+                  (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION),
+              )}
               onCountsChange={updateStageCounts}
               structuralSettings={concreteSettings}
               materialRates={initialRates}
