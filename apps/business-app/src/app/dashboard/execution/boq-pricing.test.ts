@@ -6,9 +6,11 @@ import {
   MATERIAL_GROUPS,
   rateForOutput,
   isBoqCostUnpriced,
+  materialForOutput,
   starterRate,
   type Rate,
 } from './boq-pricing';
+import { DEFAULT_LABOUR, isEmbeddedLabourCovered } from './boq-labour';
 
 const rates: Rate[] = [
   {
@@ -265,5 +267,31 @@ describe('BOQ default prices and quoted brands', () => {
     expect(costHead('wire_15')).toBe('Electrical');
     expect(costHead('wall_tiles')).toBe('Bathroom tiles');
     expect(costHead('steel_16')).toBe('Steel');
+  });
+});
+
+describe('shuttering covered by composite labour', () => {
+  it('recognises generated centering & shuttering lines', () => {
+    for (const name of [
+      'Centering & shuttering',
+      'Beam centering & shuttering',
+      'Slab centering & shuttering',
+    ])
+      expect(materialForOutput({ name, unit: 'sqft' })).toBe('shuttering');
+  });
+
+  it('is not unpriced when the composite labour covers shuttering', () => {
+    const output = {
+      name: 'Slab centering & shuttering',
+      unit: 'sqft',
+      quantity: 1300,
+      rate: 0,
+    };
+    expect(
+      isEmbeddedLabourCovered(materialForOutput(output), {
+        ...DEFAULT_LABOUR,
+        coveredWorks: ['shuttering'],
+      }),
+    ).toBe(true);
   });
 });
