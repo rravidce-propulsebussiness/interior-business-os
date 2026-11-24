@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { costSummaryByHead } from './boq-cost-summary';
 import {
@@ -90,5 +91,17 @@ describe('material-wise BOQ cost', () => {
     ).toBe('soil_filling');
     expect(costHead('moorum_filling')).toBe('Excavation');
     expect(costHead('railing')).toBe('Site & services');
+  });
+
+  it('saved BOQs regenerate once when the generator adds new lines', () => {
+    const read = (path: string) =>
+      readFileSync(new URL(path, import.meta.url), 'utf8');
+    const workspace = read('./boq-workspace.tsx');
+    expect(workspace).toContain('const BOQ_ENGINE_VERSION = 2;');
+    expect(workspace).toContain('engineVersion: BOQ_ENGINE_VERSION,');
+    expect(workspace).toContain(
+      '(generator.engineVersion ?? 1) >= BOQ_ENGINE_VERSION',
+    );
+    expect(read('./boq-actions.ts')).toContain('engineVersion: z');
   });
 });

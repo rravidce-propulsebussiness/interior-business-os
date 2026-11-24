@@ -161,6 +161,7 @@ const generatorSchema = z.object({
   /** Column / beam / footing schedule from the structural drawing. */
   design: structuralDesignSchema.nullable().optional(),
   measuredOnly: z.boolean().optional(),
+  engineVersion: z.number().int().nonnegative().max(1000).optional(),
   repeatFrom: z
     .record(z.string().max(90), z.string().max(90))
     .refine((value) => Object.keys(value).length <= 20)
