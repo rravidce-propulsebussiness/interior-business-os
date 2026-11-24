@@ -13283,6 +13283,10 @@ export interface Database {
         Args: { p_org: string; p_project: string; p_items: Json };
         Returns: Json;
       };
+      project_site_media_discard: {
+        Args: { p_org: string; p_project: string; p_media: string };
+        Returns: Json;
+      };
       project_site_media_get: {
         Args: { p_organization_id: string; p_project_id: string; p_id: string };
         Returns: Json;

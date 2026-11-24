@@ -127,6 +127,7 @@ function Status({ value }: { value: string }) {
                 'received',
                 'completed',
                 'signed',
+                'handed_over',
               ].includes(value)
             ? 'good'
             : [
@@ -353,7 +354,13 @@ function ProjectHeader({
             </span>
           </div>
         </div>
-        <Status value={p.status} />
+        <Status
+          value={
+            p.status === 'active' && data.site?.stage === 'handover'
+              ? 'handed_over'
+              : p.status
+          }
+        />
       </div>
       {displayedProgress !== null && (
         <div className="pv2-header-progress">

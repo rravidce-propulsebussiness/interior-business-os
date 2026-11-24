@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { activeOrganization, serverServices } from '@business-os/auth/server';
-import { uploadProjectSiteMedia } from './actions';
+import { discardProjectSiteMedia, uploadProjectSiteMedia } from './actions';
 
 type Result = { saved: boolean; message: string };
 const uuid = z.uuid();
@@ -16,6 +16,7 @@ export async function recordOnsiteStageQcItem(
   index: number,
   form: FormData,
 ): Promise<Result> {
+  let uploadedPhoto = '';
   try {
     uuid.parse(projectId);
     uuid.parse(stageId);
@@ -44,6 +45,7 @@ export async function recordOnsiteStageQcItem(
       if (!uploaded.saved || !uploaded.mediaId)
         throw new Error(uploaded.message || 'Inspection photo upload failed.');
       photoId = uploaded.mediaId;
+      uploadedPhoto = uploaded.mediaId;
     }
     if (!photoId)
       throw new Error('QC Pass and Fail both require project photo evidence.');
@@ -75,6 +77,7 @@ export async function recordOnsiteStageQcItem(
           : 'QC passed for this item. Other QC items and final stage certification stay independent.',
     };
   } catch (error) {
+    if (uploadedPhoto) await discardProjectSiteMedia(projectId, uploadedPhoto);
     return {
       saved: false,
       message:
