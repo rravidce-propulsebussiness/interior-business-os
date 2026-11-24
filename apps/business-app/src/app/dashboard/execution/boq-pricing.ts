@@ -150,6 +150,17 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
     },
   ),
   group(
+    'scaffolding',
+    'Scaffolding (external plaster)',
+    'sqft',
+    'Structure materials',
+    ['MS frame hire'],
+    {
+      defaultRate: 10,
+      note: 'Estimate per sq ft of external plaster face; confirm with the scaffolding supplier.',
+    },
+  ),
+  group(
     'concrete_m20',
     'M20 concrete (ready-mix)',
     'm³',
@@ -911,6 +922,9 @@ type QuoteSection = {
   brand?: string | undefined;
   grade?: string | undefined;
   description?: string | undefined;
+  unit?: string | undefined;
+  pricingTreatment?: string | undefined;
+  allowanceValue?: string | number | undefined;
 };
 /** Which rate groups a quote specification line can name a brand for. */
 const QUOTE_BRAND_TARGETS: readonly {
@@ -921,12 +935,10 @@ const QUOTE_BRAND_TARGETS: readonly {
   { test: /cement/, groups: ['cement', 'cement_masonry'] },
   { test: /brick|block/, groups: ['bricks'] },
   { test: /sand/, groups: ['sand'] },
+  { test: /wir|cable/, groups: ['wire_15', 'wire_25', 'wire_40', 'wire_60'] },
+  { test: /conduit/, groups: ['conduit'] },
   {
-    test: /electric|wir|cable/,
-    groups: ['wire_15', 'wire_25', 'wire_40', 'wire_60', 'conduit'],
-  },
-  {
-    test: /electric|switch/,
+    test: /switch|socket/,
     groups: [
       'switch_6a',
       'switch_16a',
@@ -949,6 +961,124 @@ const QUOTE_BRAND_TARGETS: readonly {
     ],
   },
 ];
+/** Quotation purchase allowances (price ceilings) and the rate group each sets. */
+const QUOTE_ALLOWANCE_TARGETS: readonly { test: RegExp; group: string }[] = [
+  { test: /kitchen wall tile/, group: 'kitchen_wall_tiles' },
+  { test: /kitchen sink/, group: 'kitchen_sink' },
+  { test: /kitchen (granite|platform)/, group: 'kitchen_platform' },
+  { test: /bathroom floor tile/, group: 'bath_floor_tiles' },
+  { test: /wall tile/, group: 'wall_tiles' },
+  { test: /stair\w* granite|granite.*stair/, group: 'staircase_granite' },
+  { test: /parking/, group: 'parking_flooring' },
+  { test: /floor\w* tile|room tile/, group: 'floor_tiles' },
+  { test: /main door/, group: 'door_main' },
+  { test: /pooja door/, group: 'door_pooja' },
+  { test: /bathroom door|toilet door/, group: 'door_bathroom' },
+  { test: /internal door|bedroom door|room door/, group: 'door_internal' },
+  { test: /window/, group: 'window' },
+  { test: /sanitary|cp fitting/, group: 'sanitary_cp' },
+  { test: /rolling shutter/, group: 'rolling_shutter' },
+  { test: /\bgate\b/, group: 'gate' },
+  { test: /overhead (water )?tank/, group: 'overhead_tank' },
+];
+/** Rate-option name for a material priced at the quotation's allowance. */
+export const QUOTED_ALLOWANCE = 'Quotation allowance';
+/** Selections entry recording which quotation revision already priced the BOQ. */
+export const QUOTE_SELECTIONS_KEY = '__quote';
+const ALLOWANCE_UNITS: Readonly<Record<string, readonly string[]>> = {
+  sqft: ['sqft'],
+  door: ['door'],
+  piece: ['each', 'nos'],
+  bathroom: ['bathroom'],
+  running_ft: ['rft'],
+};
+const groupsFor = (rates: readonly Rate[], groupKey: string) =>
+  groupKey === 'steel'
+    ? [
+        ...new Set(
+          rates
+            .map((rate) => rate.material)
+            .filter((key): key is string => Boolean(key?.startsWith('steel_'))),
+        ),
+      ]
+    : [groupKey];
+const cleanBrand = (value: string) =>
+  value
+    .replace(/\bor (an )?equivalent\b.*$/i, '')
+    .replace(/[\s.;,/-]+$/, '')
+    .trim()
+    .slice(0, 60);
+
+/**
+ * Rate options the quotation adds to the rate card: its purchase allowances
+ * ("Room flooring tiles ₹60/sq ft") as the material rate, and brands it names
+ * that the rate card does not list yet (priced like the group's first option
+ * until the company saves a supplier price).
+ */
+export function quotedRateVariants(
+  sections: readonly QuoteSection[] | undefined,
+  rates: readonly Rate[],
+): Rate[] {
+  const added = new Map<string, Rate>();
+  const unitOf = (groupKey: string) =>
+    MATERIAL_GROUPS.find((item) => item.key === groupKey)?.unit;
+  for (const section of sections ?? []) {
+    const title = (section.title ?? '').toLowerCase();
+    const value = Number(section.allowanceValue);
+    if (
+      section.pricingTreatment === 'allowance' &&
+      Number.isFinite(value) &&
+      value > 0
+    ) {
+      const target = QUOTE_ALLOWANCE_TARGETS.find((item) =>
+        item.test.test(title),
+      );
+      const unit = target && unitOf(target.group);
+      if (
+        target &&
+        unit &&
+        (ALLOWANCE_UNITS[section.unit ?? '']?.includes(unit) ||
+          section.unit === unit) &&
+        !added.has(target.group)
+      )
+        added.set(target.group, {
+          key: variantKey(target.group, QUOTED_ALLOWANCE),
+          label: QUOTED_ALLOWANCE,
+          unit,
+          rate: value,
+          category: 'material',
+          material: target.group,
+          variant: QUOTED_ALLOWANCE,
+        });
+      continue;
+    }
+    const brand = cleanBrand(section.brand ?? '');
+    if (!brand) continue;
+    const target = QUOTE_BRAND_TARGETS.find((item) => item.test.test(title));
+    if (!target) continue;
+    for (const groupKey of target.groups)
+      for (const key of groupsFor(rates, groupKey)) {
+        const options = rates.filter((rate) => rate.material === key);
+        const named = options.some((rate) =>
+          variantNames(rate.variant ?? '').some((name) =>
+            name.full
+              ? brand.toLowerCase().includes(name.text)
+              : brand.toLowerCase() === name.text,
+          ),
+        );
+        if (named || !options.length || added.has(key)) continue;
+        added.set(key, {
+          ...options[0]!,
+          key: variantKey(key, brand),
+          label: brand,
+          variant: brand,
+          isDefault: false,
+        });
+      }
+  }
+  return [...added.values()];
+}
+
 const BRAND_ALIASES: Readonly<Record<string, readonly string[]>> = {
   'vizag (rinl)': ['vizag', 'visakha', 'rinl'],
   'robo / m-sand': ['robo', 'm-sand', 'm sand', 'msand', 'manufactured sand'],
@@ -993,6 +1123,27 @@ export function brandSelectionsFromQuote(
       if (!target.test.test(title) && !/scope|inclusion/.test(title)) continue;
       for (const groupKey of target.groups) {
         if (picks[groupKey]) continue;
+        // A quoted allowance is the price the quotation fixed for this item.
+        if (
+          rates.some(
+            (rate) =>
+              rate.material === groupKey && rate.variant === QUOTED_ALLOWANCE,
+          )
+        ) {
+          picks[groupKey] = QUOTED_ALLOWANCE;
+          continue;
+        }
+        // "UltraTech 53 RCC; Birla Shakti 43 brickwork": masonry cement is
+        // the brand named in the 43-grade part.
+        const graded =
+          groupKey === 'cement_masonry' || groupKey === 'cement'
+            ? text
+                .split(/[;,]/)
+                .find((part) =>
+                  part.includes(groupKey === 'cement' ? '53' : '43'),
+                )
+            : undefined;
+        const searchText = graded ?? text;
         const variants = [
           ...new Set(
             rates
@@ -1010,7 +1161,7 @@ export function brandSelectionsFromQuote(
         let best: { variant: string; score: number } | undefined;
         for (const variant of variants) {
           for (const name of variantNames(variant)) {
-            const at = text.search(
+            const at = searchText.search(
               new RegExp(
                 `(^|[^a-z])${name.text.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}`,
               ),
@@ -1024,6 +1175,9 @@ export function brandSelectionsFromQuote(
       }
     }
   }
+  for (const rate of rates)
+    if (rate.material && rate.variant === QUOTED_ALLOWANCE)
+      picks[rate.material] ??= QUOTED_ALLOWANCE;
   return picks;
 }
 
@@ -1078,6 +1232,7 @@ export const COST_HEADS = [
   'Parking tiles',
   'Tile & granite laying',
   'Painting',
+  'Scaffolding',
   'Electrical',
   'Plumbing',
   'Sanitary & CP fittings',
@@ -1145,6 +1300,7 @@ const HEAD_BY_GROUP: Readonly<Record<string, CostHead>> = {
   excavation: 'Excavation',
   sump: 'Water storage',
   overhead_tank: 'Water storage',
+  scaffolding: 'Scaffolding',
   design_fees: 'Design & approvals',
   soil_test: 'Design & approvals',
   building_permission: 'Design & approvals',

@@ -5599,3 +5599,51 @@
   font-size: 11px;
   color: #596c84;
 }
+.pv2-material-budget h2 {
+  margin: 0 0 12px;
+  font-size: 17px;
+}
+.pv2-material-budget-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.pv2-material-budget-stats > div {
+  display: grid;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid #ead9d1;
+  border-radius: 10px;
+}
+.pv2-material-budget-stats small {
+  color: #7a6560;
+}
+.pv2-material-budget .over {
+  color: #b42318;
+}
+.pv2-material-budget-note {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #7a6560;
+}
+.pv2-material-budget-table {
+  width: 100%;
+  overflow-x: auto;
+}
+.pv2-material-budget-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.pv2-material-budget-table th,
+.pv2-material-budget-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #ead9d1;
+  text-align: right;
+  white-space: nowrap;
+}
+.pv2-material-budget-table th:first-child,
+.pv2-material-budget-table td:first-child {
+  text-align: left;
+}

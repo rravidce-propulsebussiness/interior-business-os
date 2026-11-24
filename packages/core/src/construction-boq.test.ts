@@ -429,6 +429,12 @@ describe('quotation-driven construction BOQ', () => {
     expect(
       wall?.outputs.find((output) => output.name === 'External plaster'),
     ).toMatchObject({ quantity: 1680, material: 'plaster_labour' });
+    // External plaster needs frame scaffolding over the same face area.
+    expect(
+      wall?.outputs.find(
+        (output) => output.name === 'Scaffolding (external plaster)',
+      ),
+    ).toMatchObject({ quantity: 1680, material: 'scaffolding', unit: 'sqft' });
     // Not repeated as an unpriced additional work.
     expect(
       result.lines.some((line) => line.section === 'Additional quoted works'),

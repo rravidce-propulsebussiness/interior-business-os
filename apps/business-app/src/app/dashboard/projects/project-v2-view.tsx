@@ -41,6 +41,7 @@ import {
   ProjectContractActivation,
 } from './project-v2-forms';
 import '../owner-dashboard.css';
+import { ProjectMaterialBudgetPanel } from './project-material-budget-panel';
 import './project-v2.css';
 import './project-daily-command.css';
 import './project-stage-review-actions.css';
@@ -885,6 +886,7 @@ function Procurement({ d }: { d: WorkspaceData }) {
     materials = site?.materials ?? [];
   return (
     <div className="pv2-content">
+      <ProjectMaterialBudgetPanel d={d} />
       <section className="pv2-panel">
         <Title
           title="Procurement & Materials"
@@ -918,10 +920,21 @@ function Procurement({ d }: { d: WorkspaceData }) {
                       Supplier / order: {stringValue(m.vendor_reference)}
                     </small>
                   )}
-                  {Boolean(stringValue(m.order_amount)) && (
+                  {Boolean(stringValue(m.marketplace_total)) ? (
                     <small>
-                      Order amount: {formatMoney(Number(m.order_amount))}
+                      Marketplace order:{' '}
+                      {formatMoney(Number(m.marketplace_total))} ·{' '}
+                      {pretty(stringValue(m.marketplace_status))}
                     </small>
+                  ) : (
+                    Boolean(stringValue(m.order_amount)) && (
+                      <small>
+                        {stringValue(m.source) === 'outside'
+                          ? 'Outside order'
+                          : 'Order amount'}
+                        : {formatMoney(Number(m.order_amount))}
+                      </small>
+                    )
                   )}
                   {Boolean(stringValue(m.received_quantity)) && (
                     <small>

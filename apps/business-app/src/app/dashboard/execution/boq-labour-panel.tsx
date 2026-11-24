@@ -25,6 +25,8 @@ type Props = {
   lines: LabourLine[];
   materialCost: number;
   existingLabourCost: number;
+  /** Trade labour priced in the BOQ outside the package, per trade. */
+  tradeLabour?: readonly { head: string; amount: number }[];
   canEdit: boolean;
   canViewCost: boolean;
   busy: boolean;
@@ -50,6 +52,7 @@ export function BoqLabourPanel({
   lines,
   materialCost,
   existingLabourCost,
+  tradeLabour = [],
   canEdit,
   canViewCost,
   busy,
@@ -540,7 +543,7 @@ export function BoqLabourPanel({
                           ? 'Included'
                           : config.method === 'itemwise'
                             ? money(amount)
-                            : 'Add separately'}
+                            : 'BOQ trade rate'}
                       </td>
                     </tr>
                   );
@@ -875,7 +878,7 @@ export function BoqLabourPanel({
             </button>
           )}
           <div className="boq-labour-extras-total">
-            <small>Separate Labour Total</small>
+            <small>Added labour items</small>
             <strong>{canViewCost ? money(result.extras) : 'Restricted'}</strong>
           </div>
         </section>
@@ -887,12 +890,21 @@ export function BoqLabourPanel({
         </div>
         <span>＋</span>
         <div>
-          <small>Separate labour</small>
+          <small>Trades not in package</small>
           <strong>
             {canViewCost
               ? money(result.extras + existingLabourCost)
               : 'Restricted'}
           </strong>
+          {canViewCost && tradeLabour.length > 0 && (
+            <ul className="boq-labour-trades">
+              {tradeLabour.map((row) => (
+                <li key={row.head}>
+                  {row.head} <b>{money(row.amount)}</b>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <span>＝</span>
         <div className="total">

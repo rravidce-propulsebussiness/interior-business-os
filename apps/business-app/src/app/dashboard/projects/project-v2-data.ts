@@ -1,4 +1,5 @@
 import 'server-only';
+import type { MaterialBudgetRow } from './project-material-budget';
 import { activeProjectRoles } from './project-roles';
 import { notFound } from 'next/navigation';
 import { canAccess } from '@business-os/auth';
@@ -358,6 +359,8 @@ export type WorkspaceData = {
   }[];
   purchaseOrders:
     { id: string; number: string; status: string; date: string }[] | null;
+  /** Material-wise cost from the project's BOQ (cost viewers only). */
+  materialBudget: MaterialBudgetRow[] | null;
   tasks: {
     id: string;
     title: string;
@@ -679,6 +682,46 @@ export async function projectIndex() {
     progress: progress.get(p.id) ?? null,
   }));
   return { s, list, org, user };
+}
+/** Latest saved BOQ material-wise cost for this project, if any. */
+async function projectMaterialBudget(
+  client: { from: (table: string) => unknown },
+  org: string,
+  projectId: string,
+  canViewCost: boolean,
+): Promise<MaterialBudgetRow[] | null> {
+  if (!canViewCost) return null;
+  type Query = {
+    select: (columns: string) => Query;
+    eq: (column: string, value: string) => Query;
+    order: (column: string, options: { ascending: boolean }) => Query;
+    limit: (count: number) => Promise<{ data: unknown; error: unknown }>;
+  };
+  const { data, error } = await (
+    client.from('construction_boq_documents') as Query
+  )
+    .select('summary:document->costSummary')
+    .eq('organization_id', org)
+    .eq('project_id', projectId)
+    .order('updated_at', { ascending: false })
+    .limit(1);
+  if (error || !Array.isArray(data)) return null;
+  const summary = obj(data[0]).summary;
+  if (!Array.isArray(summary)) return null;
+  return summary.flatMap((raw) => {
+    const row = obj(raw);
+    const amount = Number(row.amount);
+    return typeof row.head === 'string' && Number.isFinite(amount)
+      ? [
+          {
+            head: row.head,
+            amount,
+            quantity: typeof row.quantity === 'number' ? row.quantity : null,
+            unit: typeof row.unit === 'string' ? row.unit : null,
+          },
+        ]
+      : [];
+  });
 }
 export async function projectWorkspace(
   id: string,
@@ -1630,6 +1673,12 @@ export async function projectWorkspace(
     ),
     transactions: trans,
     purchaseOrders: po,
+    materialBudget: await projectMaterialBudget(
+      s.client,
+      s.org,
+      id,
+      has('estimate.view_cost'),
+    ),
     tasks: tasks.map((t) => ({
       id: t.id,
       title: t.title,
@@ -1947,6 +1996,7 @@ async function assignedProjectWorkspace(id: string): Promise<WorkspaceData> {
     linkableQuotations: [],
     transactions: null,
     purchaseOrders: null,
+    materialBudget: null,
     tasks: (tasks ?? []).map((t) => ({
       id: t.id,
       title: t.title,
