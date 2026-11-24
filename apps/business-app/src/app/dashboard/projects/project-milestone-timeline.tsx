@@ -76,6 +76,8 @@ const durationByCode: Record<string, number> = {
 };
 const isComplete = (status: string) =>
   ['completed', 'passed', 'certified', 'skipped'].includes(status);
+const isStageFinished = (status: string) =>
+  isComplete(status) || status === 'qc_passed';
 const itemPlanKey = (stageId: string, kind: string, index: number) =>
   stageId + ':' + kind + ':' + index;
 const DESIGN_STAGE_CODES = ['PRECONSTRUCTION', 'DESIGN', 'SITE_PREP'];
@@ -176,7 +178,14 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   const tomorrow = dayKey(new Date(Date.now() + 86400000));
   const photos = (site?.media ?? [])
     .filter((row) => stringValue(row.mime).startsWith('image/'))
-    .map((row) => ({ id: row.id, filename: stringValue(row.filename) }));
+    // Many photos share a camera filename; show what and when instead.
+    .map((row) => ({
+      id: row.id,
+      filename:
+        (stringValue(row.caption) || stringValue(row.filename)) +
+        ' · ' +
+        shortDate(row.created_at),
+    }));
   const people = new Map(
     (site?.memberOptions ?? []).map((person) => [person.id, person.label]),
   );
@@ -491,27 +500,6 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
   const progress = items.length
     ? Math.round((workDone * 100) / items.length)
     : 0;
-  const current = stages.find((stage) => {
-    const status =
-      d.stageExecution.find((row) => row.stageId === stage.id)?.status ??
-      stage.status;
-    return !isComplete(status);
-  });
-  const currentIndex = current
-    ? timelineCards.findIndex((card) =>
-        card.stages.some((stage) => stage.id === current.id),
-      )
-    : -1;
-  const firstStageIndex =
-    todayStageIndex >= 0
-      ? todayStageIndex
-      : currentIndex >= 0
-        ? currentIndex
-        : 0;
-  const nextStage =
-    currentIndex >= 0
-      ? timelineCards[currentIndex + 1]?.stages.at(0)
-      : undefined;
   if (!stages.length) {
     const quote = d.quotations[0];
     const canPrepare = Boolean(
@@ -706,6 +694,26 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
     );
   const stageStatusLabel = (stage: Stage) =>
     pretty(stageDisplayStatusFor(stage));
+  // The current stage is the first one not finished on site: completed,
+  // QC-passed and derived design sub-stages all count as finished.
+  const current = stages.find(
+    (stage) => !isStageFinished(stageDisplayStatusFor(stage)),
+  );
+  const currentIndex = current
+    ? timelineCards.findIndex((card) =>
+        card.stages.some((stage) => stage.id === current.id),
+      )
+    : -1;
+  const firstStageIndex =
+    todayStageIndex >= 0
+      ? todayStageIndex
+      : currentIndex >= 0
+        ? currentIndex
+        : 0;
+  const nextStage =
+    currentIndex >= 0
+      ? timelineCards[currentIndex + 1]?.stages.at(0)
+      : undefined;
   const renderStageContent = (stage: Stage) => {
     const code = stage.template_code.split('/')[0] ?? '';
     const stageItems = stageItemsFor(stage);
