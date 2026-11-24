@@ -2512,3 +2512,14 @@
   color: #432426;
   border-bottom: 0;
 }
+@media (max-width: 600px) {
+  .boq-material-summary th,
+  .boq-material-summary td {
+    padding: 7px 6px;
+    font-size: 12px;
+  }
+  .boq-material-summary th:nth-child(4),
+  .boq-material-summary td:nth-child(4) {
+    display: none;
+  }
+}
