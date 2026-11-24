@@ -80,6 +80,7 @@ export function ProjectMaterialBudgetPanel({ d }: { d: WorkspaceData }) {
               <th>BOQ</th>
               <th>Marketplace</th>
               <th>Outside</th>
+              <th className="pv2-mobile-only">Ordered</th>
               <th>Balance</th>
             </tr>
           </thead>
@@ -99,6 +100,9 @@ export function ProjectMaterialBudgetPanel({ d }: { d: WorkspaceData }) {
                 <td>{row.boqAmount ? formatMoney(row.boqAmount) : '—'}</td>
                 <td>{row.marketplace ? formatMoney(row.marketplace) : '—'}</td>
                 <td>{row.outside ? formatMoney(row.outside) : '—'}</td>
+                <td className="pv2-mobile-only">
+                  {row.ordered ? formatMoney(row.ordered) : '—'}
+                </td>
                 <td className={row.boqAmount && row.balance < 0 ? 'over' : ''}>
                   {row.boqAmount ? formatMoney(row.balance) : '—'}
                 </td>

@@ -5647,6 +5647,9 @@
 .pv2-material-budget-table td:first-child {
   text-align: left;
 }
+.pv2-material-budget-table .pv2-mobile-only {
+  display: none;
+}
 @media (max-width: 600px) {
   .pv2-material-budget-table th,
   .pv2-material-budget-table td {
@@ -5654,7 +5657,17 @@
     font-size: 12px;
   }
   .pv2-material-budget-table th:nth-child(2),
-  .pv2-material-budget-table td:nth-child(2) {
+  .pv2-material-budget-table td:nth-child(2),
+  .pv2-material-budget-table th:nth-child(4),
+  .pv2-material-budget-table td:nth-child(4),
+  .pv2-material-budget-table th:nth-child(5),
+  .pv2-material-budget-table td:nth-child(5) {
     display: none;
+  }
+  .pv2-material-budget-table td:first-child {
+    white-space: normal;
+  }
+  .pv2-material-budget-table .pv2-mobile-only {
+    display: table-cell;
   }
 }
