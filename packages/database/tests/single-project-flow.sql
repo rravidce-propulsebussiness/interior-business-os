@@ -822,5 +822,24 @@ select pg_temp.expect_fail($$select pg_temp.work('F1_MASONRY',0,'reopen')$$,'425
 select pg_temp.as_user('11111111-1111-4111-8111-111111111111');
 select pg_temp.expect_fail(format('select public.project_work_item_command(%L,%L,%L,0,''start'',''{}'')',
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',pg_temp.project(),pg_temp.stage('F1_MASONRY')),'42501','cross-tenant command denied');
+-- 12. Handover follows the construction stages, not operations tasks.
+reset role;
+do $handover_ready$
+begin
+ if private.construction_handover_ready(pg_temp.org(),pg_temp.project()) then
+   raise exception 'FAIL: handover ready while construction stages are unfinished';end if;
+ update private.construction_stage_execution set status='completed'
+  where organization_id=pg_temp.org() and project_id=pg_temp.project();
+ insert into private.construction_stage_execution(organization_id,project_id,stage_id,status,started_by,updated_by)
+ select s.organization_id,s.project_id,s.id,'completed','11111111-1111-4111-8111-111111111111','11111111-1111-4111-8111-111111111111' from private.construction_project_stages s
+  where s.organization_id=pg_temp.org() and s.project_id=pg_temp.project()
+    and not exists(select 1 from private.construction_stage_execution e where e.stage_id=s.id)
+ on conflict do nothing;
+ delete from private.construction_stage_qc_item_reviews
+  where organization_id=pg_temp.org() and project_id=pg_temp.project() and decision='failed';
+ if not private.construction_handover_ready(pg_temp.org(),pg_temp.project()) then
+   raise exception 'FAIL: finished construction stages do not open handover';end if;
+ raise notice 'PASS 12: handover opens only when every construction stage is finished';
+end$handover_ready$;
 do $done$ begin raise notice 'PASS: single project flow acceptance scenario complete'; end$done$;
 rollback;
