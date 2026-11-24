@@ -12,6 +12,7 @@ import {
   brandSelectionsFromQuote,
   quotedRateVariants,
   QUOTE_SELECTIONS_KEY,
+  quoteSyncMarker,
   rateForOutput,
   isBoqCostUnpriced,
   rateGroupKey,
@@ -829,9 +830,13 @@ export function BoqWorkspace({
     // Brands named in the quotation's specifications, unless already chosen.
     const quoted = brandSelectionsFromQuote(schedule.sections, initialRates);
     setSelections((prior) =>
-      prior[QUOTE_SELECTIONS_KEY] === quoteId
+      prior[QUOTE_SELECTIONS_KEY] === quoteSyncMarker(quoteId)
         ? { ...quoted, ...prior }
-        : { ...prior, ...quoted, [QUOTE_SELECTIONS_KEY]: quoteId },
+        : {
+            ...prior,
+            ...quoted,
+            [QUOTE_SELECTIONS_KEY]: quoteSyncMarker(quoteId),
+          },
     );
     setGenerator({
       revisionId: quoteId,
@@ -887,13 +892,13 @@ export function BoqWorkspace({
   // revision; a later change on the rate card is kept.
   useEffect(() => {
     if (!canEdit || !quoteId || !quoteSections?.length) return;
-    if (selections[QUOTE_SELECTIONS_KEY] === quoteId) return;
+    if (selections[QUOTE_SELECTIONS_KEY] === quoteSyncMarker(quoteId)) return;
     const quoted = brandSelectionsFromQuote(quoteSections, initialRates);
     // eslint-disable-next-line react-hooks/set-state-in-effect -- One-time sync of quotation brands per revision.
     setSelections((prior) => ({
       ...prior,
       ...quoted,
-      [QUOTE_SELECTIONS_KEY]: quoteId,
+      [QUOTE_SELECTIONS_KEY]: quoteSyncMarker(quoteId),
     }));
   }, [canEdit, quoteId, quoteSections, initialRates, selections]);
   // Correct older saved BOQs where the previous "Remove from floor"

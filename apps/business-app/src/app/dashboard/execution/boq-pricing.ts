@@ -45,6 +45,10 @@ const STEEL_PER_KG: Readonly<Record<string, number>> = {
   'Vizag (RINL)': 68,
   JSW: 72,
   'Local ISI': 60,
+  // Brands named in the company's construction packages (estimates).
+  'TATA Tiscon 550': 74,
+  'JAIRAJ 550': 66,
+  'SHREE 550': 63,
 };
 /** Weight of one 12 m (40 ft) bar: d² / 162 kg per metre. */
 const kgPerRod = (diameter: number) => ((diameter * diameter) / 162) * 12;
@@ -75,7 +79,7 @@ const group = (
  * sink, shutter, gate); labour from Hyderabad rate guides. Items marked
  * "estimate" have no reliable public price; confirm with suppliers.
  */
-export const MATERIAL_GROUPS: readonly GroupDef[] = [
+const BASE_GROUPS: readonly GroupDef[] = [
   ...STEEL_DIAMETERS.map((diameter) =>
     group(
       `steel_${diameter}`,
@@ -782,6 +786,62 @@ export const MATERIAL_GROUPS: readonly GroupDef[] = [
   ),
 ];
 
+/**
+ * Built-in prices for the other brands the company's construction packages
+ * name (Standard, Premium, Luxury, Royal), so a BOQ prices the quoted brand.
+ * Estimates relative to the listed brands; the company rate card overrides.
+ */
+const PACKAGE_BRAND_RATES: Readonly<
+  Record<string, Readonly<Record<string, number>>>
+> = {
+  cement: { 'Nagarjuna 53': 350 },
+  cement_masonry: { 'Priya 43': 310, 'Bangur 43': 335, 'UltraTech 53': 390 },
+  wire_15: { 'Havells FR': 2000 },
+  wire_25: { 'Havells FR': 3150 },
+  wire_40: { 'Havells FR': 5050 },
+  wire_60: { 'Havells FR': 120 },
+  conduit: { Polycab: 95 },
+  switch_6a: { 'Anchor Penta': 35, 'Gold Medal': 60, 'Gold Medal Air': 90 },
+  switch_16a: { 'Anchor Penta': 80, 'Gold Medal': 130, 'Gold Medal Air': 180 },
+  socket_6a: { 'Anchor Penta': 60, 'Gold Medal': 100, 'Gold Medal Air': 140 },
+  socket_16a: { 'Anchor Penta': 130, 'Gold Medal': 200, 'Gold Medal Air': 260 },
+  fan_regulator: {
+    'Anchor Penta': 250,
+    'Gold Medal': 450,
+    'Gold Medal Air': 600,
+  },
+  switch_board: {
+    'Anchor Penta': 160,
+    'Gold Medal': 280,
+    'Gold Medal Air': 350,
+  },
+  cpvc_half: { Astral: 245 },
+  cpvc_fittings: { Astral: 28 },
+  cpvc_riser: { Astral: 660 },
+  swr_110: { Astral: 740, Ashirvad: 720 },
+  swr_75: { Astral: 510, Ashirvad: 500 },
+  swr_fittings: { Astral: 130, Ashirvad: 125 },
+  rainwater_pipe: { Astral: 580, Ashirvad: 570 },
+  paint_interior: {
+    'Asian Premium Emulsion': 18,
+    'Asian Royale': 26,
+    'Asian Royale (3 coats)': 32,
+  },
+  paint_exterior: { 'Asian Apex': 22, 'Asian Apex Ultima': 28 },
+};
+export const MATERIAL_GROUPS: readonly GroupDef[] = BASE_GROUPS.map((item) => {
+  const extra = PACKAGE_BRAND_RATES[item.key];
+  if (!extra) return item;
+  const base = Object.fromEntries(
+    item.starters.map((variant) => [variant, starterRate(item, variant)]),
+  );
+  return {
+    ...item,
+    starters: [...item.starters, ...Object.keys(extra)],
+    starterRates: { ...base, ...extra },
+  };
+});
+
 /** Default rate of a starter variant. */
 export function starterRate(group: GroupDef, variant: string) {
   return group.starterRates?.[variant] ?? group.defaultRate ?? 0;
@@ -936,6 +996,8 @@ const QUOTE_BRAND_TARGETS: readonly {
   { test: /brick|block/, groups: ['bricks'] },
   { test: /sand/, groups: ['sand'] },
   { test: /wir|cable/, groups: ['wire_15', 'wire_25', 'wire_40', 'wire_60'] },
+  { test: /interior paint/, groups: ['paint_interior'] },
+  { test: /exterior paint/, groups: ['paint_exterior'] },
   { test: /conduit/, groups: ['conduit'] },
   {
     test: /switch|socket/,
@@ -985,6 +1047,8 @@ const QUOTE_ALLOWANCE_TARGETS: readonly { test: RegExp; group: string }[] = [
 export const QUOTED_ALLOWANCE = 'Quotation allowance';
 /** Selections entry recording which quotation revision already priced the BOQ. */
 export const QUOTE_SELECTIONS_KEY = '__quote';
+/** Marker value: bump to re-apply quotation brands once to saved BOQs. */
+export const quoteSyncMarker = (revisionId: string) => revisionId + '#2';
 const ALLOWANCE_UNITS: Readonly<Record<string, readonly string[]>> = {
   sqft: ['sqft'],
   door: ['door'],
@@ -1058,6 +1122,9 @@ export function quotedRateVariants(
     if (!target) continue;
     for (const groupKey of target.groups)
       for (const key of groupsFor(rates, groupKey)) {
+        // The brand field names the RCC cement; masonry cement is read from
+        // its 43-grade text by the brand picker instead.
+        if (key === 'cement_masonry') continue;
         const options = rates.filter((rate) => rate.material === key);
         const named = options.some((rate) =>
           variantNames(rate.variant ?? '').some((name) =>
@@ -1081,6 +1148,27 @@ export function quotedRateVariants(
 
 const BRAND_ALIASES: Readonly<Record<string, readonly string[]>> = {
   'vizag (rinl)': ['vizag', 'visakha', 'rinl'],
+  'tata tiscon 550': ['tata 550', 'tata tiscon', 'tata'],
+  'jairaj 550': ['jairaj'],
+  'shree 550': ['shree'],
+  ashirvad: ['ashirwad'],
+  'havells fr': ['havells'],
+  'birla 43': ['birla shakti 43', 'birla shakti'],
+  'asian putty + tractor emulsion': ['tractor emulsion', 'tractor'],
+  'asian premium emulsion': ['premium emulsion'],
+  'asian royale': ['royale emulsion', 'royale'],
+  'asian royale (3 coats)': [
+    'royal emulsion 3 coats',
+    'royale emulsion 3 coats',
+    'royal emulsion',
+  ],
+  'asian primer + ace emulsion': [
+    'ace exterior emulsion',
+    'ace emulsion',
+    'ace exterior',
+  ],
+  'asian apex': ['apex exterior', 'apex'],
+  'asian apex ultima': ['apex ultima'],
   'robo / m-sand': ['robo', 'm-sand', 'm sand', 'msand', 'manufactured sand'],
   'river sand': ['river'],
   'local isi': ['local'],
@@ -1158,7 +1246,8 @@ export function brandSelectionsFromQuote(
         ];
         // A full variant name ("Birla 43") beats a brand word ("Birla");
         // otherwise the brand named first wins.
-        let best: { variant: string; score: number } | undefined;
+        let best:
+          { variant: string; score: number; length: number } | undefined;
         for (const variant of variants) {
           for (const name of variantNames(variant)) {
             const at = searchText.search(
@@ -1167,8 +1256,14 @@ export function brandSelectionsFromQuote(
               ),
             );
             const score = (name.full ? 0 : 10_000) + at;
-            if (at >= 0 && (!best || score < best.score))
-              best = { variant, score };
+            // At the same position the longer name wins ("Gold Medal Air").
+            if (
+              at >= 0 &&
+              (!best ||
+                score < best.score ||
+                (score === best.score && name.text.length > best.length))
+            )
+              best = { variant, score, length: name.text.length };
           }
         }
         if (best) picks[groupKey] = best.variant;
