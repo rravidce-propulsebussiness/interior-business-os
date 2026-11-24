@@ -2295,3 +2295,125 @@ describe('footing mesh as drawn (E2E sheet 7: F1 5 x 5 x 12", 12 mm @ 6" c/c)', 
     expect(barsAcross(0, 0.5)).toBe(0);
   });
 });
+
+describe('costs every house needs', () => {
+  const blankFloor = {
+    mainDoors: 0,
+    internalDoors: 0,
+    bathroomDoors: 0,
+    poojaDoors: 0,
+    windows: 0,
+    ventilators: 0,
+    bathrooms: 0,
+    kitchens: 0,
+    rollingShutters: 0,
+    lightPoints: 0,
+    fanPoints: 0,
+    socketPoints: 0,
+    powerPoints: 0,
+  };
+
+  it('adds anti-termite, site water & power, pump, earthing and stair railing', () => {
+    const result = generateQuotationBoq({ details: quote() });
+    const services = result.lines.find(
+      (line) => line.kind === 'quote-site-services',
+    );
+    expect(services?.section).toBe('External works');
+    const by = (material: string) =>
+      services?.outputs.find((output) => output.material === material);
+    expect(by('anti_termite')).toMatchObject({ quantity: 1200, unit: 'sqft' });
+    expect(by('site_utilities')).toMatchObject({
+      quantity: 2400,
+      unit: 'sqft',
+    });
+    expect(by('earthing')).toMatchObject({ quantity: 2 });
+    expect(by('railing')).toMatchObject({ quantity: 48, unit: 'rft' });
+  });
+
+  it('prices quoted borewell and lift rows, and only quoted approvals', () => {
+    const details = quote(
+      ['10', '10'],
+      [
+        {
+          kind: 'additional',
+          name: 'Borewell',
+          lengthFeet: '1',
+          widthFeet: '1',
+          unit: 'lumpsum',
+          ratePerSqft: '150000',
+        },
+        {
+          kind: 'additional',
+          name: 'Lift',
+          lengthFeet: '1',
+          widthFeet: '1',
+          unit: 'lumpsum',
+          ratePerSqft: '900000',
+        },
+      ],
+    );
+    const result = generateQuotationBoq({ details });
+    const extra = result.lines.filter(
+      (line) => line.kind === 'quote-additional',
+    );
+    expect(
+      extra.flatMap((line) => line.outputs.map((o) => o.material)),
+    ).toEqual(expect.arrayContaining(['borewell', 'lift']));
+    const design = result.lines.find((line) => line.kind === 'quote-design');
+    expect(
+      design?.outputs.some((o) => o.material === 'building_permission'),
+    ).toBe(false);
+    const withApprovals = generateQuotationBoq({
+      details: {
+        ...details,
+        sections: [
+          {
+            title: 'Approvals',
+            description: 'GHMC building permission included',
+          },
+        ],
+      },
+    });
+    expect(
+      withApprovals.lines
+        .find((line) => line.kind === 'quote-design')
+        ?.outputs.some((o) => o.material === 'building_permission'),
+    ).toBe(true);
+  });
+
+  it('estimates internal walls when only outer walls were drawn', () => {
+    const outerOnly = [
+      {
+        id: 'outer',
+        name: 'Outside',
+        location: 'external' as const,
+        count: 4,
+        lengthFeet: 30,
+        heightFeet: 10,
+        thicknessIn: 9,
+      },
+    ];
+    const result = generateQuotationBoq({
+      details: quote(),
+      counts: {
+        floors: { 'Ground Floor': { ...blankFloor, internalDoors: 3 } },
+        walls: { 'Ground Floor': outerOnly },
+        entranceGates: 0,
+        compoundWallFeet: 0,
+      },
+      splitBeamSlab: true,
+    });
+    const masonry = result.lines.find(
+      (line) =>
+        line.section === 'Ground Floor' && line.kind === 'quote-masonry',
+    )!;
+    expect(
+      masonry.outputs.some((o) =>
+        o.name.includes('Internal wall estimate (internal)'),
+      ),
+    ).toBe(true);
+    expect(
+      result.warnings.some((w) => w.includes('no internal walls drawn')),
+    ).toBe(true);
+  });
+});

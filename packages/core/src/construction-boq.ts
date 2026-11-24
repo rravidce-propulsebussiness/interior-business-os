@@ -2549,6 +2549,24 @@ export function plasterMaterialTakeoff(
   };
 }
 
+/** Cost group of a quoted additional work, when it is a known item. */
+export const additionalWorkMaterial = (name: string): string | undefined =>
+  /bore\s?well/i.test(name)
+    ? 'borewell'
+    : /\b(lift|elevator)\b/i.test(name)
+      ? 'lift'
+      : undefined;
+
+/** Building permission is a company cost only when the quotation covers it. */
+const quotesApprovals = (
+  sections: readonly { title: string; description: string }[] | undefined,
+) =>
+  (sections ?? []).some((section) =>
+    /permission|approval|sanction|ghmc|hmda|municipal/i.test(
+      section.title + ' ' + section.description,
+    ),
+  );
+
 /** Frame (MS) scaffolding hire for the external plaster face area. */
 const scaffoldingOutput = (externalPlaster: number): GeneratedOutput => ({
   name: 'Scaffolding (external plaster)',
@@ -3880,7 +3898,14 @@ export function generateQuotationBoq(
         warnings.push(
           `${floor.name}: external openings exceed drawn external wall area.`,
         );
-      if (measured && internalOpenings > grossInt)
+      // Outer walls drawn but no internal walls: the rooms still need
+      // partitions, so estimate them as on an unmeasured floor.
+      const internalEstimated = measured && grossInt === 0;
+      if (internalEstimated)
+        warnings.push(
+          `${floor.name}: no internal walls drawn; internal walls estimated at ${round(s.internalWallRatio * 100, 0)}% of the perimeter. Add them from the drawing.`,
+        );
+      else if (measured && internalOpenings > grossInt)
         warnings.push(
           `${floor.name}: internal openings exceed drawn internal wall area.`,
         );
@@ -3889,9 +3914,10 @@ export function generateQuotationBoq(
       const externalArea = measured
         ? netExternal
         : perimeter * wallHeight * solid;
-      const internalArea = measured
-        ? netInternal
-        : perimeter * s.internalWallRatio * wallHeight * solid;
+      const internalArea =
+        measured && !internalEstimated
+          ? netInternal
+          : perimeter * s.internalWallRatio * wallHeight * solid;
       const internalPlaster = externalArea + 2 * internalArea;
       const externalPlaster = externalArea * (measured ? 1 : 1.1);
       wallsByFloor.set(floor.name, { internalPlaster, externalPlaster });
@@ -3910,7 +3936,22 @@ export function generateQuotationBoq(
       let volume = 0;
       if (measured || splitBeamSlab) {
         const rows = measured
-          ? drawnWalls
+          ? [
+              ...drawnWalls,
+              ...(internalEstimated
+                ? [
+                    {
+                      id: 'estimate-internal',
+                      name: 'Internal wall estimate',
+                      location: 'internal' as const,
+                      count: 1,
+                      lengthFeet: internalArea,
+                      heightFeet: 1,
+                      thicknessIn: s.internalWallIn,
+                    },
+                  ]
+                : []),
+            ]
           : [
               {
                 id: 'estimate-external',
@@ -3937,15 +3978,16 @@ export function generateQuotationBoq(
         let sandBrickwork = 0;
         for (const row of rows) {
           const gross = row.count * row.lengthFeet * row.heightFeet;
-          const ratio = !measured
-            ? 1
-            : row.location === 'external'
-              ? grossExt > 0
-                ? netExternal / grossExt
-                : 0
-              : grossInt > 0
-                ? netInternal / grossInt
-                : 0;
+          const ratio =
+            !measured || row.id === 'estimate-internal'
+              ? 1
+              : row.location === 'external'
+                ? grossExt > 0
+                  ? netExternal / grossExt
+                  : 0
+                : grossInt > 0
+                  ? netInternal / grossInt
+                  : 0;
           const netArea = gross * ratio;
           if (!(netArea > 0)) continue;
           const thick = row.thicknessIn >= 6 ? '9' : '4';
@@ -5291,6 +5333,67 @@ export function generateQuotationBoq(
       },
     });
 
+  // --- Site & services every house needs ---------------------------------
+  {
+    const groundSqft = floors[0]?.areaSqft ?? 0;
+    // One stair flight pair per floor, about 24 running ft of railing.
+    const railingFeet = floors.length * 24;
+    const services: GeneratedOutput[] = [
+      ...(groundSqft > 0
+        ? [
+            {
+              name: 'Anti-termite treatment (pre-construction)',
+              material: 'anti_termite',
+              quantity: round(groundSqft, 0),
+              unit: 'sqft',
+              source: 'Ground-floor plinth area',
+            },
+          ]
+        : []),
+      {
+        name: 'Construction water & power',
+        material: 'site_utilities',
+        quantity: round(builtUp, 0),
+        unit: 'sqft',
+        source: 'Temporary supply, tanker water and curing for the build',
+      },
+      ...(s.overheadTankLitres > 0
+        ? [
+            {
+              name: 'Water pump (sump to overhead tank)',
+              material: 'water_pump',
+              quantity: 1,
+              unit: 'each',
+            },
+          ]
+        : []),
+      {
+        name: 'Earthing pits',
+        material: 'earthing',
+        quantity: 2,
+        unit: 'each',
+      },
+      {
+        name: 'Staircase railing (SS)',
+        material: 'railing',
+        quantity: railingFeet,
+        unit: 'rft',
+        source: `${floors.length} floors × 24 running ft; replace with the drawing length`,
+      },
+    ];
+    drafts.push({
+      origin: 'quotation-structure',
+      draft: {
+        name: 'Site & services',
+        section: 'External works',
+        kind: 'quote-site-services',
+        unit: 'each',
+        inputs: { builtUpSqft: round(builtUp, 0), floors: floors.length },
+        outputs: services,
+      },
+    });
+  }
+
   // Package allowances that don't map to a counted item stay building-level.
   for (const { section, allowance, unit, extra } of unmatched) {
     const { quantity, basis } = otherAllowanceQuantity(
@@ -5342,6 +5445,9 @@ export function generateQuotationBoq(
         outputs: [
           {
             name: row.name,
+            ...((material) => (material ? { material } : {}))(
+              additionalWorkMaterial(row.name),
+            ),
             quantity: Number(row.areaSqft) || 0,
             unit: unitLabel(unit),
             source: 'Quoted item: enter its cost or break it down',
@@ -5375,12 +5481,16 @@ export function generateQuotationBoq(
             quantity: 1,
             unit: 'LS',
           },
-          {
-            name: 'Building permission & approvals',
-            material: 'building_permission',
-            quantity: 1,
-            unit: 'LS',
-          },
+          ...(quotesApprovals(input.details.sections)
+            ? [
+                {
+                  name: 'Building permission & approvals',
+                  material: 'building_permission',
+                  quantity: 1,
+                  unit: 'LS',
+                },
+              ]
+            : []),
         ],
       },
     });

@@ -420,3 +420,20 @@ export function measuredOutputs(
     }),
   ];
 }
+
+/** Bought moorum/gravel filling is a supplied material; backfill with the
+ * excavated soil is placement labour only. Decided from the work's name. */
+export function fillingOutput<T extends { material?: string | undefined }>(
+  lineName: string,
+  output: T,
+): T {
+  if (
+    output.material !== 'soil_filling' &&
+    output.material !== 'moorum_filling'
+  )
+    return output;
+  const supplied = /moorum|murrum|morrum|gravel|red soil|supplied/i.test(
+    lineName,
+  );
+  return { ...output, material: supplied ? 'moorum_filling' : 'soil_filling' };
+}
