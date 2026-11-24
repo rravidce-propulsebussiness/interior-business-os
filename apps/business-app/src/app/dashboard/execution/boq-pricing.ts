@@ -812,6 +812,12 @@ export function materialForOutput(output: PricedOutput): string | undefined {
   // composite civil labour package covers it.
   if (unit === 'sqft' && /centering\s*&\s*shuttering/.test(name))
     return 'shuttering';
+  if (unit === 'sqft' && /^(internal|external) plaster\b/.test(name))
+    return 'plaster_labour';
+  // Measured wall area lines are named "<thickness> in <wall>".
+  const wall = /^(\d+(?:\.\d+)?) in\b/.exec(name);
+  if (unit === 'sqft' && wall)
+    return Number(wall[1]) >= 6 ? 'labour_brickwork_9' : 'labour_brickwork_4';
   return undefined;
 }
 
