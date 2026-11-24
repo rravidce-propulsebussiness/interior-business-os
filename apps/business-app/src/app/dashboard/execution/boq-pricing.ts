@@ -808,6 +808,10 @@ export function materialForOutput(output: PricedOutput): string | undefined {
   if (unit === 't' && name.includes('aggregate')) return 'aggregate';
   if ((unit === 'nos' || unit === 'each') && name === 'bricks') return 'bricks';
   if (unit === 'rod' && diameterOf(output)) return 'steel';
+  // Generated without a material key when labour is not itemised; the
+  // composite civil labour package covers it.
+  if (unit === 'sqft' && /centering\s*&\s*shuttering/.test(name))
+    return 'shuttering';
   return undefined;
 }
 

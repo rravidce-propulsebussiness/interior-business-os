@@ -296,6 +296,8 @@ export function measurementPrompts(title: string): MeasurementPrompt[] {
     [
       /excavat|trench|pit/,
       [
+        // The site check asks for length as well as width and depth.
+        { label: 'Length', unit: 'mm' },
         { label: 'Depth', unit: 'mm' },
         { label: 'Width', unit: 'mm' },
         { label: 'Founding level', unit: 'm' },
