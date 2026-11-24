@@ -2481,3 +2481,34 @@
     flex: 1 1 130px;
   }
 }
+.boq-material-summary {
+  margin-top: 18px;
+}
+.boq-material-summary h3 {
+  color: #432426;
+  margin: 0 0 12px;
+}
+.boq-material-summary .scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+.boq-material-summary table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.boq-material-summary th,
+.boq-material-summary td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #ead9d1;
+  text-align: right;
+  white-space: nowrap;
+}
+.boq-material-summary th:first-child,
+.boq-material-summary td:first-child {
+  text-align: left;
+}
+.boq-material-summary tfoot th {
+  color: #432426;
+  border-bottom: 0;
+}

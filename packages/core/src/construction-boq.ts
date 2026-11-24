@@ -2549,6 +2549,15 @@ export function plasterMaterialTakeoff(
   };
 }
 
+/** Frame (MS) scaffolding hire for the external plaster face area. */
+const scaffoldingOutput = (externalPlaster: number): GeneratedOutput => ({
+  name: 'Scaffolding (external plaster)',
+  material: 'scaffolding',
+  quantity: round(externalPlaster, 0),
+  unit: 'sqft',
+  source: 'MS frame scaffolding hire for the external plaster face area',
+});
+
 /**
  * Bricks, mortar and plaster materials for a wall volume (m³) and plastered
  * faces (sq ft). Internal plaster 12 mm 1:6, external 20 mm 1:4.
@@ -2604,6 +2613,7 @@ const brickworkOutputs = (
             quantity: round(externalPlaster, 0),
             unit: 'sqft',
           },
+          scaffoldingOutput(externalPlaster),
         ]
       : []),
     ...(s.labourItemized && internalCoats === 2 && internalPlaster > 0
@@ -4009,6 +4019,7 @@ export function generateQuotationBoq(
                   quantity: round(externalPlaster, 0),
                   unit: 'sqft',
                 },
+                scaffoldingOutput(externalPlaster),
               ]
             : []),
           ...(s.labourItemized && internalCoats === 2 && internalPlaster > 0

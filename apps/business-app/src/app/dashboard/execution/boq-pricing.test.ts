@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   brandSelectionsFromQuote,
+  quotedRateVariants,
+  QUOTED_ALLOWANCE,
   costHead,
   effectiveRates,
   MATERIAL_GROUPS,
@@ -322,5 +324,146 @@ describe('wall and plaster labour covered by composite labour', () => {
     expect(materialForOutput({ name: 'Floor tiles', unit: 'sqft' })).toBe(
       undefined,
     );
+  });
+
+  describe('quotation brands and allowances price the BOQ', () => {
+    // Sections as written on the live Premium quotation.
+    const sections = [
+      {
+        title: 'Steel / TMT',
+        brand: 'JAIRAJ 550 TMT or equivalent',
+        description: 'Reinforcement; JAIRAJ 550 TMT or equivalent.',
+      },
+      {
+        title: 'Cement',
+        brand: 'UltraTech',
+        description: 'UltraTech 53 RCC; Birla Shakti 43 brickwork/plaster',
+      },
+      {
+        title: 'Electrical wiring',
+        brand: 'Havells',
+        description: 'Havells fireproof wire',
+      },
+      {
+        title: 'Switches & sockets',
+        brand: 'Anchor Penta',
+        description: 'Anchor Penta',
+      },
+      {
+        title: 'Electrical conduits',
+        brand: 'Sudhakar',
+        description: 'Sudhakar pipes',
+      },
+      {
+        title: 'Room flooring tiles',
+        description: 'Tile ceiling',
+        unit: 'sqft',
+        pricingTreatment: 'allowance',
+        allowanceValue: '60',
+      },
+      {
+        title: 'Main door',
+        description: 'Teak',
+        unit: 'door',
+        pricingTreatment: 'allowance',
+        allowanceValue: '30000',
+      },
+      {
+        title: 'Kitchen wall tiles',
+        description: 'Backsplash',
+        unit: 'sqft',
+        pricingTreatment: 'allowance',
+        allowanceValue: '50',
+      },
+      {
+        title: 'Bathroom sanitary & CP fittings',
+        description: 'Hindware',
+        unit: 'bathroom',
+        pricingTreatment: 'allowance',
+        allowanceValue: '30000',
+      },
+      {
+        title: 'Kitchen sink',
+        description: 'SS',
+        unit: 'piece',
+        pricingTreatment: 'allowance',
+        allowanceValue: '3000',
+      },
+    ];
+    const base = effectiveRates([]);
+    const rates = [...base, ...quotedRateVariants(sections, base)];
+    const picks = brandSelectionsFromQuote(sections, rates);
+
+    it('uses the quoted purchase allowance as the material rate', () => {
+      expect(picks.floor_tiles).toBe(QUOTED_ALLOWANCE);
+      expect(
+        rateForOutput(
+          { name: 'Floor tiles', unit: 'sqft', material: 'floor_tiles' },
+          rates,
+          picks,
+        ),
+      ).toBe(60);
+      expect(
+        rateForOutput(
+          { name: 'Main door', unit: 'door', material: 'door_main' },
+          rates,
+          picks,
+        ),
+      ).toBe(30000);
+      expect(
+        rateForOutput(
+          {
+            name: 'Kitchen wall tiles',
+            unit: 'sqft',
+            material: 'kitchen_wall_tiles',
+          },
+          rates,
+          picks,
+        ),
+      ).toBe(50);
+      expect(
+        rateForOutput(
+          { name: 'Sanitary', unit: 'bathroom', material: 'sanitary_cp' },
+          rates,
+          picks,
+        ),
+      ).toBe(30000);
+      expect(
+        rateForOutput(
+          { name: 'Sink', unit: 'each', material: 'kitchen_sink' },
+          rates,
+          picks,
+        ),
+      ).toBe(3000);
+    });
+
+    it('adds brands the rate card does not list and selects them', () => {
+      expect(picks.steel).toBe('JAIRAJ 550 TMT');
+      expect(picks.wire_15).toBe('Havells');
+      expect(picks.switch_6a).toBe('Anchor Penta');
+      expect(picks.conduit).toBe('Sudhakar');
+      expect(
+        rates.filter(
+          (rate) => rate.variant === 'Sudhakar' && rate.material === 'conduit',
+        ),
+      ).toHaveLength(1);
+      expect(
+        rates.some(
+          (rate) => rate.variant === 'Havells' && rate.material === 'switch_6a',
+        ),
+      ).toBe(false);
+      expect(
+        rateForOutput(
+          { name: '16 mm main bars', unit: 'rod', diameter: 16 },
+          rates,
+          picks,
+        ),
+      ).toBeGreaterThan(0);
+    });
+
+    it('reads RCC and masonry cement from their graded parts', () => {
+      expect(picks.cement).toBe('UltraTech 53');
+      expect(picks.cement_masonry).toBe('Birla 43');
+    });
   });
 });

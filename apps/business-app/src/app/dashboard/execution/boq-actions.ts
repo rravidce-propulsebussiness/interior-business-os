@@ -318,6 +318,18 @@ const saveSchema = z.object({
   /** Chosen brand / source per material group, e.g. bricks → Karimnagar. */
   selections: z.record(z.string().max(40), z.string().max(80)).default({}),
   generator: generatorSchema.optional(),
+  /** Material-wise cost (steel, cement …) for project procurement tracking. */
+  costSummary: z
+    .array(
+      z.object({
+        head: z.string().trim().min(1).max(60),
+        quantity: z.number().finite().nonnegative().nullable(),
+        unit: z.string().max(10).nullable(),
+        amount: z.number().finite().nonnegative().max(10_000_000_000),
+      }),
+    )
+    .max(40)
+    .optional(),
 });
 const ratesSchema = z.object({
   items: z
@@ -362,6 +374,9 @@ export async function saveManualBoq(input: unknown) {
       ...(value.projectCosts ? { projectCosts: value.projectCosts } : {}),
       ...(value.scopeReviews ? { scopeReviews: value.scopeReviews } : {}),
       ...(value.generator ? { generator: value.generator } : {}),
+      ...(value.costSummary && canChangeLabour
+        ? { costSummary: value.costSummary }
+        : {}),
     };
     let reply: DbReply;
     if (value.id) {

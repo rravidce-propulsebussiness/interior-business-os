@@ -61,6 +61,7 @@ assertionFile('owner-admin-all-rounder');
 assertionFile('project-media-storage-budget');
 assertionFile('stage-guidance-flow-and-guides');
 assertionFile('project-site-media-discard');
+assertionFile('project-material-marketplace-total');
 assertionFile('construction-project-workflows');
 assertionFile('construction-stage-record-links');
 assertionFile('quote-project-timeline');
