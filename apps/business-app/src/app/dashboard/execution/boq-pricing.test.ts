@@ -438,8 +438,8 @@ describe('wall and plaster labour covered by composite labour', () => {
     });
 
     it('adds brands the rate card does not list and selects them', () => {
-      expect(picks.steel).toBe('JAIRAJ 550 TMT');
-      expect(picks.wire_15).toBe('Havells');
+      expect(picks.steel).toBe('JAIRAJ 550');
+      expect(picks.wire_15).toBe('Havells FR');
       expect(picks.switch_6a).toBe('Anchor Penta');
       expect(picks.conduit).toBe('Sudhakar');
       expect(
@@ -464,6 +464,224 @@ describe('wall and plaster labour covered by composite labour', () => {
     it('reads RCC and masonry cement from their graded parts', () => {
       expect(picks.cement).toBe('UltraTech 53');
       expect(picks.cement_masonry).toBe('Birla 43');
+    });
+  });
+
+  describe('each construction package prices its own brands', () => {
+    // Brand lines as written in the company's four live packages.
+    const pkg = (b: {
+      steel: string;
+      cement: string;
+      wire: string;
+      switches: string;
+      conduit: string;
+      plumbing: string;
+      interior: string;
+      exterior: string;
+      tiles: string;
+      parking: string;
+    }) => [
+      { title: 'Steel / TMT', brand: b.steel, description: '' },
+      { title: 'Cement', brand: b.cement.split(' ')[0], description: b.cement },
+      {
+        title: 'Electrical wiring',
+        brand: b.wire,
+        description: b.wire + ' fireproof wire',
+      },
+      {
+        title: 'Switches & sockets',
+        brand: b.switches,
+        description: b.switches,
+      },
+      {
+        title: 'Electrical conduits',
+        brand: b.conduit,
+        description: b.conduit + ' pipes',
+      },
+      {
+        title: 'Plumbing pipes & waterproofing',
+        brand: b.plumbing,
+        description: b.plumbing + ' CPVC/PVC',
+      },
+      { title: 'Interior painting', brand: '', description: b.interior },
+      { title: 'Exterior painting', brand: '', description: b.exterior },
+      {
+        title: 'Room flooring tiles',
+        description: 'Tiles',
+        unit: 'sqft',
+        pricingTreatment: 'allowance',
+        allowanceValue: b.tiles,
+      },
+      {
+        title: 'Parking area tiles',
+        description: 'Anti-skid',
+        unit: 'sqft',
+        pricingTreatment: 'allowance',
+        allowanceValue: b.parking,
+      },
+    ];
+    const priced = (sections: ReturnType<typeof pkg>) => {
+      const base = effectiveRates([]);
+      const added = quotedRateVariants(sections, base);
+      const rates = [...base, ...added];
+      return { added, rates, picks: brandSelectionsFromQuote(sections, rates) };
+    };
+    const cases = [
+      {
+        name: 'Standard',
+        sections: pkg({
+          steel: 'SHREE 550 TMT or equivalent',
+          cement: 'Nagarjuna 53 RCC; Priya 43 for masonry/internal works',
+          wire: 'Finolex',
+          switches: 'MARU Basic',
+          conduit: 'Sudhakar',
+          plumbing: 'Prince',
+          interior:
+            'Asian putty 2; Asian Tractor Emulsion 2 coats; primer 1 coat',
+          exterior:
+            'Putty/texture elevation 2; Asian primer 1; ACE exterior emulsion 2 coats',
+          tiles: '45',
+          parking: '45',
+        }),
+        expect: {
+          steel: 'SHREE 550',
+          cement: 'Nagarjuna 53',
+          cement_masonry: 'Priya 43',
+          wire_15: 'Finolex FR',
+          switch_6a: 'Maru',
+          conduit: 'Sudhakar',
+          cpvc_half: 'Prince',
+          swr_110: 'Prince',
+          paint_interior: 'Asian putty + Tractor emulsion',
+          paint_exterior: 'Asian primer + Ace emulsion',
+        },
+        tiles: 45,
+      },
+      {
+        name: 'Premium',
+        sections: pkg({
+          steel: 'JAIRAJ 550 TMT or equivalent',
+          cement: 'UltraTech 53 RCC; Birla Shakti 43 brickwork/plaster',
+          wire: 'Havells',
+          switches: 'Anchor Penta',
+          conduit: 'Sudhakar',
+          plumbing: 'Astral',
+          interior:
+            'Birla putty 2; Asian Premium Emulsion 2 coats; primer 1 coat',
+          exterior:
+            'Putty/texture elevation 2; Asian primer 1; ACE exterior emulsion 2 coats',
+          tiles: '60',
+          parking: '50',
+        }),
+        expect: {
+          steel: 'JAIRAJ 550',
+          cement: 'UltraTech 53',
+          cement_masonry: 'Birla 43',
+          wire_15: 'Havells FR',
+          switch_6a: 'Anchor Penta',
+          cpvc_half: 'Astral',
+          swr_110: 'Astral',
+          paint_interior: 'Asian Premium Emulsion',
+          paint_exterior: 'Asian primer + Ace emulsion',
+        },
+        tiles: 60,
+      },
+      {
+        name: 'Luxury',
+        sections: pkg({
+          steel: 'Vizag TMT',
+          cement: 'UltraTech 53 RCC; Bangur 43 brickwork/internal works',
+          wire: 'Polycab',
+          switches: 'Gold Medal',
+          conduit: 'Sudhakar',
+          plumbing: 'Ashirwad',
+          interior:
+            'Birla putty 2; Asian Royale Emulsion 2 coats; primer 1 coat',
+          exterior:
+            'Putty/texture elevation 2; Asian primer 1; APEX exterior emulsion 2 coats',
+          tiles: '70',
+          parking: '60',
+        }),
+        expect: {
+          steel: 'Vizag (RINL)',
+          cement_masonry: 'Bangur 43',
+          wire_15: 'Polycab FR',
+          switch_6a: 'Gold Medal',
+          cpvc_half: 'Ashirvad',
+          swr_110: 'Ashirvad',
+          paint_interior: 'Asian Royale',
+          paint_exterior: 'Asian Apex',
+        },
+        tiles: 70,
+      },
+      {
+        name: 'Royal',
+        sections: pkg({
+          steel: 'TATA 550 TMT',
+          cement: 'UltraTech 53 for complete construction',
+          wire: 'Polycab',
+          switches: 'Gold Medal Air',
+          conduit: 'Polycab',
+          plumbing: 'Ashirwad',
+          interior: 'Birla putty 2; Royal Emulsion 3 coats; primer 1 coat',
+          exterior:
+            'Putty/texture elevation + 3 sides 2; Asian primer 1; APEX Ultima weatherproof paint',
+          tiles: '85',
+          parking: '70',
+        }),
+        expect: {
+          steel: 'TATA Tiscon 550',
+          cement: 'UltraTech 53',
+          cement_masonry: 'UltraTech 53',
+          conduit: 'Polycab',
+          switch_6a: 'Gold Medal Air',
+          paint_interior: 'Asian Royale (3 coats)',
+          paint_exterior: 'Asian Apex Ultima',
+        },
+        tiles: 85,
+      },
+    ];
+    for (const item of cases)
+      it(item.name + ' package', () => {
+        const { added, rates, picks } = priced(item.sections);
+        expect(picks).toMatchObject(item.expect);
+        // Every quoted brand has a built-in price: only allowances are added.
+        expect(added.every((rate) => rate.variant === QUOTED_ALLOWANCE)).toBe(
+          true,
+        );
+        expect(
+          rateForOutput(
+            { name: 'Floor tiles', unit: 'sqft', material: 'floor_tiles' },
+            rates,
+            picks,
+          ),
+        ).toBe(item.tiles);
+        expect(
+          rateForOutput(
+            { name: '12 mm bars', unit: 'rod', diameter: 12 },
+            rates,
+            picks,
+          ),
+        ).toBeGreaterThan(0);
+      });
+
+    it('prices each brand from the built-in list', () => {
+      const rates = effectiveRates([]);
+      const rod = (brand: string) =>
+        rateForOutput(
+          { name: '16 mm bars', unit: 'rod', diameter: 16 },
+          rates,
+          { steel: brand },
+        );
+      expect(rod('TATA Tiscon 550')).toBeGreaterThan(rod('JSW'));
+      expect(rod('SHREE 550')).toBeLessThan(rod('Vizag (RINL)'));
+      expect(
+        rateForOutput(
+          { name: 'Paint', unit: 'sqft', material: 'paint_interior' },
+          rates,
+          { paint_interior: 'Asian Royale' },
+        ),
+      ).toBe(26);
     });
   });
 });
