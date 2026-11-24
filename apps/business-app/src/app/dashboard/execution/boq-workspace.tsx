@@ -2537,6 +2537,7 @@ export function BoqWorkspace({
               design={genDesign}
               onDesignChange={setGenDesign}
               counts={countsForGeneration}
+              legacyCountsNeedReview={Boolean(generator?.legacyCountsNeedReview || (active && generator && (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION))}
               onCountsChange={updateStageCounts}
               structuralSettings={concreteSettings}
               materialRates={initialRates}
