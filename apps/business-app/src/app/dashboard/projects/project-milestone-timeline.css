@@ -1414,3 +1414,13 @@
 .pmt-item-guide a:hover {
   text-decoration: underline;
 }
+.pmt-handover {
+  margin: 12px 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid #f0d6c8;
+  background: #fff8f4;
+}
+.pmt-handover p {
+  margin: 0;
+}

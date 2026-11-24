@@ -120,6 +120,9 @@ describe('single project milestones and drawing progress', () => {
     expectSource(workflow).toContain('<DesignDecisionForm');
     expectSource(workflow).toContain('Release approved plans for site marking');
     expectSource(timeline).toContain('action="mark_complete"');
+    // A finished project can be handed over from the timeline.
+    expectSource(timeline).toContain('operation="handover"');
+    expectSource(timeline).toContain('label="Complete handover"');
     expectSource(timeline).toContain('!DESIGN_STAGE_CODES.includes(code)');
     const completion = read(
       '../../../../../../packages/database/supabase/migrations/20261114193000_site_prep_completion_without_qc.sql',

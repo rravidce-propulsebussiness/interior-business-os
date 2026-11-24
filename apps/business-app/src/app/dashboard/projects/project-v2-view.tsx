@@ -295,7 +295,14 @@ function ProjectHeader({
   // The header reflects the exact physical work/checklist in the project, not
   // an unrelated task counter or a paid milestone. No stage/QC is auto-passed.
   const realWork = forecastWork(
-    projectTimelineStages(data.stages),
+    // Agreement and plan sub-stages complete through their own workflows,
+    // not recorded work items, so they are not counted here.
+    projectTimelineStages(data.stages).filter(
+      (stage) =>
+        !['PRECONSTRUCTION', 'DESIGN'].includes(
+          stage.template_code.split('/')[0] ?? '',
+        ),
+    ),
     [],
     data.stageProgress.work,
     '',
