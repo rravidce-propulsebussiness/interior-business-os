@@ -721,9 +721,6 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
 
     return (
       <div className="pmt-stage-body">
-        {stage.explanation && (
-          <p className="pmt-explanation">{stage.explanation}</p>
-        )}
         {code === 'PRECONSTRUCTION' && (
           <ProjectDesignPaymentAndAgreement data={d} />
         )}
