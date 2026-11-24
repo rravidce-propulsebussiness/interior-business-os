@@ -23,7 +23,7 @@ import {
 } from './project-design-stage-workflow';
 import { designSubstageDisplayStatus } from './project-design-stage-status';
 import { displayStageQcStatus } from './project-stage-qc-status';
-import { PrepareAgreement } from './project-v2-forms';
+import { PrepareAgreement, ProjectForm } from './project-v2-forms';
 import {
   CuringRounds,
   CuringPlanForm,
@@ -709,7 +709,8 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       ? todayStageIndex
       : currentIndex >= 0
         ? currentIndex
-        : 0;
+        : // Every stage finished: open the last one (handover).
+          Math.max(0, timelineCards.length - 1);
   const nextStage =
     currentIndex >= 0
       ? timelineCards[currentIndex + 1]?.stages.at(0)
@@ -1215,6 +1216,22 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
           </small>
         </article>
       </section>
+
+      {!current && stages.length > 0 && d.site?.canManage && (
+        <section className="pmt-handover" aria-label="Project handover">
+          {d.site.stage === 'handover' ? (
+            <p role="status">
+              <strong>Project handed over</strong>
+            </p>
+          ) : (
+            <ProjectForm
+              projectId={d.project.id}
+              operation="handover"
+              label="Complete handover"
+            />
+          )}
+        </section>
+      )}
 
       <section className="pmt-days">
         <article>
