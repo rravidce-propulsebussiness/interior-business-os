@@ -297,15 +297,26 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
       start = addDays(prior('SITE_PREP', stage)?.finish ?? startDate, 1);
     else if (code === 'PLINTH')
       start = addDays(prior('FOUNDATION', stage)?.finish ?? startDate, 1);
-    else if (code === 'RCC')
+    else if (code === 'RCC') {
+      // A floor's columns and slab rest on the slab below: start after it.
+      const below = floorIndex(stage)
+        ? stages.find(
+            (row) =>
+              row.template_code.split('/')[0] === 'RCC' &&
+              row.floor_code === floorCodes[floorIndex(stage) - 1],
+          )
+        : undefined;
       start = addDays(
-        prior('PLINTH', stage)?.finish ?? startDate,
-        1 + floorIndex(stage) * 12,
+        (below && estimated.get(below.id)?.finish) ??
+          prior('PLINTH', stage)?.finish ??
+          startDate,
+        1,
       );
-    else if (code === 'MASONRY')
+    } else if (code === 'MASONRY')
       start = addDays(prior('RCC', stage)?.finish ?? startDate, 1);
     else if (code === 'INTERNAL_PLASTER')
-      start = addDays(prior('MASONRY', stage)?.start ?? startDate, 30);
+      // Plaster only after that floor's brickwork (with its curing) is done.
+      start = addDays(prior('MASONRY', stage)?.finish ?? startDate, 1);
     else if (code === 'EXTERNAL_PLASTER')
       start = addDays(prior('INTERNAL_PLASTER', stage)?.start ?? startDate, 10);
     else if (code === 'TILES')
@@ -711,6 +722,7 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         ? currentIndex
         : // Every stage finished: open the last one (handover).
           Math.max(0, timelineCards.length - 1);
+  const handedOver = d.site?.stage === 'handover';
   const nextStage =
     currentIndex >= 0
       ? timelineCards[currentIndex + 1]?.stages.at(0)
@@ -1188,7 +1200,9 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
           <small>
             {current
               ? 'Stage ' + milestoneNumber(current, floorCodes)
-              : 'Ready for handover'}
+              : handedOver
+                ? 'Handed over'
+                : 'Ready for handover'}
           </small>
         </article>
         <article>
@@ -1205,14 +1219,18 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
               ? delayedItems.length + ' delayed'
               : nextStage
                 ? stageLabel(nextStage)
-                : 'Project handover'}
+                : handedOver
+                  ? 'Project handed over'
+                  : 'Project handover'}
           </strong>
           <small>
             {delayedItems.length
               ? 'Original dates remain fixed'
               : nextStage
                 ? 'Stage ' + milestoneNumber(nextStage, floorCodes)
-                : 'Final review pending'}
+                : handedOver
+                  ? 'Complete'
+                  : 'Final review pending'}
           </small>
         </article>
       </section>
@@ -1282,62 +1300,61 @@ export function ProjectMilestoneTimeline({ d }: { d: WorkspaceData }) {
         </section>
       )}
 
-      <section className="pmt-curing">
-        <div className="pmt-section-title">
-          <div>
-            <h2>Daily curing</h2>
+      {(rounds.length > 0 || (current && executing)) && (
+        <section className="pmt-curing">
+          <div className="pmt-section-title">
+            <div>
+              <h2>Daily curing</h2>
+            </div>
+            <span>Morning · Afternoon · Evening</span>
           </div>
-          <span>Morning · Afternoon · Evening</span>
-        </div>
-        {rounds.length ? (
-          <CuringRounds
-            projectId={d.project.id}
-            rounds={rounds}
-            canRecord={d.flow.curing?.canRecord ?? false}
-          />
-        ) : (
-          <div className="pmt-curing-empty">
-            <p>
-              No daily curing rounds are active yet. Set up the routine once for
-              a concrete stage.
-            </p>
-            {d.flow.curing?.canPlan && executing && (
-              <details>
-                <summary>Set up daily curing rounds</summary>
-                <CuringPlanForm
-                  projectId={d.project.id}
-                  today={today}
-                  stages={stages
-                    .filter(
-                      (stage) =>
-                        ![
-                          'PRECONSTRUCTION',
-                          'DESIGN',
-                          'SITE_SURVEY',
-                          'DESIGN_APPROVAL',
-                          'QUOTED_SCOPE',
-                        ].includes(stage.template_code),
-                    )
-                    .map((stage) => ({
-                      id: stage.id,
-                      label: stageLabel(stage),
-                    }))}
-                />
-              </details>
-            )}
-            {!d.flow.curing?.canPlan && (
-              <div className="pmt-round-slots">
-                {roundSlots.map((slot) => (
-                  <span key={slot}>
-                    {slot}
-                    <small>Awaiting routine setup</small>
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </section>
+          {rounds.length ? (
+            <CuringRounds
+              projectId={d.project.id}
+              rounds={rounds}
+              canRecord={d.flow.curing?.canRecord ?? false}
+            />
+          ) : (
+            <div className="pmt-curing-empty">
+              <p>No curing rounds active.</p>
+              {d.flow.curing?.canPlan && executing && (
+                <details>
+                  <summary>Set up daily curing rounds</summary>
+                  <CuringPlanForm
+                    projectId={d.project.id}
+                    today={today}
+                    stages={stages
+                      .filter(
+                        (stage) =>
+                          ![
+                            'PRECONSTRUCTION',
+                            'DESIGN',
+                            'SITE_SURVEY',
+                            'DESIGN_APPROVAL',
+                            'QUOTED_SCOPE',
+                          ].includes(stage.template_code),
+                      )
+                      .map((stage) => ({
+                        id: stage.id,
+                        label: stageLabel(stage),
+                      }))}
+                  />
+                </details>
+              )}
+              {!d.flow.curing?.canPlan && (
+                <div className="pmt-round-slots">
+                  {roundSlots.map((slot) => (
+                    <span key={slot}>
+                      {slot}
+                      <small>Awaiting routine setup</small>
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       <section className="pmt-timeline" id="project-timeline">
         <div className="pmt-timeline-head">

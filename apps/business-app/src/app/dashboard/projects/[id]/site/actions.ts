@@ -152,6 +152,27 @@ export async function saveProjectManagerUpdate(
   }
 }
 
+/** Remove a photo this user just uploaded when the step it was evidence for
+ * was refused. The database only discards fresh, unreferenced own uploads. */
+export async function discardProjectSiteMedia(
+  project: string,
+  mediaId: string,
+): Promise<void> {
+  try {
+    uuid.parse(mediaId);
+    const { client, org } = await context(project);
+    const { data, error } = await client.rpc(
+      'project_site_media_discard' as never,
+      { p_org: org, p_project: project, p_media: mediaId } as never,
+    );
+    if (error) return;
+    const key = String((data as { r2_key?: string } | null)?.r2_key ?? '');
+    if (key) await r2MediaDelete(key).catch(() => undefined);
+  } catch {
+    // Cleanup is best effort; the refusal message is what the user needs.
+  }
+}
+
 export async function uploadProjectSiteMedia(
   project: string,
   form: FormData,

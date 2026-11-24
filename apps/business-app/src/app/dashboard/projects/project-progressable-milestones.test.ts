@@ -104,4 +104,25 @@ describe('progressable quotation-linked milestones', () => {
     expectSource(timeline).toContain('Today');
     expectSource(timeline).toContain('Tomorrow');
   });
+
+  it('baseline never starts plaster or an upper slab before the work below it', () => {
+    expectSource(timeline).toContain(
+      "start = addDays(prior('MASONRY', stage)?.finish ?? startDate, 1);",
+    );
+    expectSource(timeline).not.toContain("prior('MASONRY', stage)?.start");
+    expectSource(timeline).not.toContain('floorIndex(stage) * 12');
+    expectSource(timeline).toContain(
+      '(below && estimated.get(below.id)?.finish)',
+    );
+  });
+
+  it('a handed-over project reads as complete, and refused QC drops its new photo', () => {
+    expectSource(timeline).toContain(
+      "const handedOver = d.site?.stage === 'handover';",
+    );
+    expectSource(timeline).toContain("? 'Project handed over'");
+    expectSource(onsiteQcAction).toContain(
+      'if (uploadedPhoto) await discardProjectSiteMedia(projectId, uploadedPhoto);',
+    );
+  });
 });

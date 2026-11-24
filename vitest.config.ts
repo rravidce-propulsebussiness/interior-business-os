@@ -20,6 +20,7 @@ export default defineConfig({
       'apps/business-app/src/app/dashboard/projects/project-offline-agreement.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-advance-waiver.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-milestone-plan.test.ts',
+      'apps/business-app/src/app/dashboard/projects/project-milestone-stage-carousel.test.ts',
       'apps/business-app/src/app/dashboard/website/cloudflare-domains.test.ts',
       'apps/business-app/src/app/dashboard/website/editor-entry.test.ts',
       'apps/business-app/src/app/dashboard/website/github-static-import-paths.test.ts',

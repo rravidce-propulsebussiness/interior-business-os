@@ -3,6 +3,36 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReactNode, UIEvent } from 'react';
 
+/** Scroll position that brings a card to the viewport start. Card offsets are
+ * measured from the offset parent, so subtract the first card's offset. */
+export function cardScrollLeft(viewport: HTMLElement, index: number): number {
+  const first = viewport.children.item(0) as HTMLElement | null;
+  const card = viewport.children.item(index) as HTMLElement | null;
+  if (!first || !card) return 0;
+  return card.offsetLeft - first.offsetLeft;
+}
+
+/** The card nearest the current scroll position. At the scroll end the last
+ * card is selected even when it cannot reach the viewport start. */
+export function nearestCardIndex(viewport: HTMLElement): number {
+  const count = viewport.children.length;
+  if (!count) return 0;
+  const maxScroll = viewport.scrollWidth - viewport.clientWidth;
+  if (maxScroll > 0 && viewport.scrollLeft >= maxScroll - 2) return count - 1;
+  let best = 0;
+  let bestDistance = Infinity;
+  for (let index = 0; index < count; index++) {
+    const distance = Math.abs(
+      cardScrollLeft(viewport, index) - viewport.scrollLeft,
+    );
+    if (distance < bestDistance) {
+      best = index;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
 export function ProjectMilestoneStageCarousel({
   children,
   currentIndex,
@@ -33,7 +63,7 @@ export function ProjectMilestoneStageCarousel({
       const viewport = viewportRef.current;
       const card = viewport?.children.item(next) as HTMLElement | null;
       if (!viewport || !card) return;
-      viewport.scrollTo({ left: card.offsetLeft, behavior });
+      viewport.scrollTo({ left: cardScrollLeft(viewport, next), behavior });
       setSelectedStage(viewport, next);
       setSelectedIndex(next);
     },
@@ -47,13 +77,7 @@ export function ProjectMilestoneStageCarousel({
   const onScroll = (event: UIEvent<HTMLDivElement>) => {
     const viewport = event.currentTarget;
     if (!viewport.clientWidth) return;
-    const next = Math.max(
-      0,
-      Math.min(
-        lastIndex,
-        Math.round(viewport.scrollLeft / viewport.clientWidth),
-      ),
-    );
+    const next = nearestCardIndex(viewport);
     setSelectedStage(viewport, next);
     setSelectedIndex((selected) => (selected === next ? selected : next));
   };
