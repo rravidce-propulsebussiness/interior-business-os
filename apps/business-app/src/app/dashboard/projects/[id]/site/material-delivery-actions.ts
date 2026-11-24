@@ -137,3 +137,33 @@ export async function saveMaterialDelivery(
     };
   }
 }
+
+/** Record or correct what an outside order cost, after ordering or receipt. */
+export async function saveMaterialOrderAmount(
+  projectId: string,
+  form: FormData,
+): Promise<Result> {
+  try {
+    const id = uuid.parse(form.get('material_id'));
+    const amount = optionalNumber(form.get('order_amount'));
+    if (amount === null) throw new Error('Enter the order amount.');
+    const { client, org } = await context(projectId);
+    const { error } = await client.rpc(
+      'project_material_details_set' as never,
+      {
+        p_org: org,
+        p_project: projectId,
+        p_material: id,
+        p_order_amount: amount,
+      } as never,
+    );
+    if (error) throw new Error(error.message);
+    refresh(projectId);
+    return { saved: true, message: 'Order amount saved.' };
+  } catch (e) {
+    return {
+      saved: false,
+      message: e instanceof Error ? e.message : 'Cannot save the order amount.',
+    };
+  }
+}

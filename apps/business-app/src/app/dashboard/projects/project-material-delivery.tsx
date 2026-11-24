@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import {
   saveMaterialOrderPermission,
   saveMaterialDelivery,
+  saveMaterialOrderAmount,
 } from './[id]/site/material-delivery-actions';
 
 type Result = { saved: boolean; message: string };
@@ -242,6 +243,62 @@ export function MaterialDeliveryActions({
           action="confirm_received"
         />
       )}
+    </details>
+  );
+}
+
+/** Order amount for an outside order that was placed or received without one. */
+export function MaterialOrderAmountForm({
+  projectId,
+  materialId,
+  amount,
+}: {
+  projectId: string;
+  materialId: string;
+  amount: string;
+}) {
+  const router = useRouter();
+  const [state, submit, pending] = useActionState(
+    async (_p: Result, form: FormData) => {
+      const r = await saveMaterialOrderAmount(projectId, form);
+      if (r.saved) router.refresh();
+      return r;
+    },
+    initial,
+  );
+  return (
+    <details className="pv2-edit-drawer">
+      <summary>{amount ? 'Edit order amount' : 'Add order amount'}</summary>
+      <form className="pv2-form" action={submit}>
+        <input type="hidden" name="material_id" value={materialId} />
+        <label>
+          Order amount (₹)
+          <input
+            name="order_amount"
+            type="number"
+            min="0"
+            step="0.01"
+            max="100000000"
+            required
+            defaultValue={amount}
+          />
+        </label>
+        <button
+          className="pv2-button pv2-primary"
+          type="submit"
+          disabled={pending}
+        >
+          {pending ? 'Saving…' : 'Save amount'}
+        </button>
+        {state.message && (
+          <p
+            role="status"
+            className={'pv2-form-feedback ' + (state.saved ? 'good' : 'bad')}
+          >
+            {state.message}
+          </p>
+        )}
+      </form>
     </details>
   );
 }
