@@ -7,6 +7,7 @@ import { canAccess } from '@business-os/auth';
 import {
   MaterialOrderingAccess,
   MaterialDeliveryActions,
+  MaterialOrderAmountForm,
 } from './project-material-delivery';
 import { forecastWork } from './project-work-forecast';
 import { ProjectQuotationLinker } from './project-quotation-linker';
@@ -961,6 +962,19 @@ function Procurement({ d }: { d: WorkspaceData }) {
                           : '')}
                   </small>
                 )}
+                {['ordered', 'received'].includes(stringValue(m.status)) &&
+                  !stringValue(m.marketplace_total) &&
+                  (d.materialAccess.canOrder ||
+                    site?.canManage === true ||
+                    ['manager', 'site_engineer', 'procurement'].includes(
+                      site?.role ?? '',
+                    )) && (
+                    <MaterialOrderAmountForm
+                      projectId={d.project.id}
+                      materialId={m.id}
+                      amount={stringValue(m.order_amount)}
+                    />
+                  )}
                 <MaterialDeliveryActions
                   projectId={d.project.id}
                   material={{

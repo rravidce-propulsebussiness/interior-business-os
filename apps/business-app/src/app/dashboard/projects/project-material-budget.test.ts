@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import {
   materialHeadForRequest,
@@ -85,5 +86,17 @@ describe('material spend against the BOQ', () => {
       boqAmount: 0,
       outside: 5000,
     });
+  });
+
+  it('an outside order placed or received earlier can still get its amount', () => {
+    const read = (path: string) =>
+      readFileSync(new URL(path, import.meta.url), 'utf8');
+    expect(read('./project-v2-view.tsx')).toContain('<MaterialOrderAmountForm');
+    expect(read('./project-material-delivery.tsx')).toContain(
+      'export function MaterialOrderAmountForm',
+    );
+    expect(read('./[id]/site/material-delivery-actions.ts')).toContain(
+      'export async function saveMaterialOrderAmount',
+    );
   });
 });
