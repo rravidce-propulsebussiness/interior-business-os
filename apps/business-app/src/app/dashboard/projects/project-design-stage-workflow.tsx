@@ -241,7 +241,9 @@ export function ProjectDesignPlansWorkflow({ data }: { data: WorkspaceData }) {
                           : row.status === 'approved'
                             ? 'Awaiting owner approval'
                             : pretty(row.status))
-                      : 'Waiting for previous plan approval'}
+                      : index === 0 || previousReady
+                        ? 'Not submitted yet'
+                        : 'Waiting for previous plan approval'}
                   </small>
                 </div>
               </div>
