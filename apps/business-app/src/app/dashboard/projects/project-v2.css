@@ -5647,3 +5647,14 @@
 .pv2-material-budget-table td:first-child {
   text-align: left;
 }
+@media (max-width: 600px) {
+  .pv2-material-budget-table th,
+  .pv2-material-budget-table td {
+    padding: 7px 6px;
+    font-size: 12px;
+  }
+  .pv2-material-budget-table th:nth-child(2),
+  .pv2-material-budget-table td:nth-child(2) {
+    display: none;
+  }
+}
