@@ -698,7 +698,10 @@ const BASE_GROUPS: readonly GroupDef[] = [
     'sqft',
     'Labour',
     ['Contract'],
-    { defaultRate: 70 },
+    {
+      defaultRate: 45,
+      note: 'Laying with adhesive/mortar and grouting. Estimate.',
+    },
   ),
   group('labour_painting', 'Painting labour', 'sqft', 'Labour', ['Contract'], {
     defaultRate: 15,
@@ -736,18 +739,92 @@ const BASE_GROUPS: readonly GroupDef[] = [
   ),
   group(
     'soil_filling',
-    'Soil filling + compaction',
+    'Backfill with excavated soil + compaction',
     'm³',
     'Labour',
-    ['Site filling'],
+    ['Excavated soil backfill'],
     {
-      defaultRate: 0,
-      note: 'Enter the actual supply and placement rate per compacted m³. Defaults to zero until quoted.',
+      defaultRate: 150,
+      note: 'Placement and compaction of the dug-out soil. Estimate.',
+    },
+  ),
+  group(
+    'moorum_filling',
+    'Moorum filling (supplied, compacted)',
+    'm³',
+    'Structure materials',
+    ['Moorum'],
+    {
+      defaultRate: 750,
+      note: 'Supply, spread and compact. Estimate; confirm with the supplier.',
     },
   ),
   group('excavation', 'Excavation', 'm³', 'Labour', ['JCB'], {
     defaultRate: 150,
     note: 'Estimate.',
+  }),
+  group(
+    'anti_termite',
+    'Anti-termite treatment',
+    'sqft',
+    'Site & services',
+    ['Standard'],
+    {
+      defaultRate: 8,
+      note: 'Pre-construction soil treatment of the plinth area. Estimate.',
+    },
+  ),
+  group(
+    'site_utilities',
+    'Construction water & power',
+    'sqft',
+    'Site & services',
+    ['Standard'],
+    {
+      defaultRate: 15,
+      note: 'Temporary supply, tanker water and curing for the whole build. Estimate.',
+    },
+  ),
+  group(
+    'water_pump',
+    'Water pump (sump to tank)',
+    'each',
+    'Site & services',
+    ['1 HP monoblock'],
+    {
+      defaultRate: 15000,
+      note: 'Estimate.',
+    },
+  ),
+  group(
+    'earthing',
+    'Earthing pit',
+    'each',
+    'Site & services',
+    ['Copper-bonded rod'],
+    {
+      defaultRate: 7500,
+      note: 'Estimate.',
+    },
+  ),
+  group('railing', 'Staircase railing', 'rft', 'Site & services', ['SS 304'], {
+    defaultRate: 1100,
+    note: 'Per running ft, fixed. Estimate.',
+  }),
+  group(
+    'borewell',
+    'Borewell',
+    'LS',
+    'Site & services',
+    ['Drilled + casing + pump'],
+    {
+      defaultRate: 150000,
+      note: 'About 600 ft drilling with casing and submersible pump. Estimate.',
+    },
+  ),
+  group('lift', 'Lift', 'each', 'Site & services', ['4-stop MRL passenger'], {
+    defaultRate: 950000,
+    note: 'Supply and installation. Estimate; confirm with the lift vendor.',
   }),
   group(
     'design_fees',
@@ -767,6 +844,11 @@ const BASE_GROUPS: readonly GroupDef[] = [
     'Building permission & approvals',
     'LS',
     'Design & handover',
+    ['Standard'],
+    {
+      defaultRate: 150000,
+      note: 'Municipal fees and approval charges when the quotation includes approvals. Estimate.',
+    },
   ),
   group(
     'handover_cleaning',
@@ -783,6 +865,8 @@ const BASE_GROUPS: readonly GroupDef[] = [
     'Testing & snag rectification',
     'LS',
     'Design & handover',
+    ['Standard'],
+    { defaultRate: 25000, note: 'Testing and snag rectification. Estimate.' },
   ),
 ];
 
@@ -855,6 +939,7 @@ export const GROUP_SECTIONS = [
   'Electrical',
   'Plumbing & sanitary',
   'Services',
+  'Site & services',
   'Labour',
   'Design & handover',
 ] as const;
@@ -879,6 +964,9 @@ export function materialForOutput(output: PricedOutput): string | undefined {
   if (unit === 't' && name.includes('aggregate')) return 'aggregate';
   if ((unit === 'nos' || unit === 'each') && name === 'bricks') return 'bricks';
   if (unit === 'rod' && diameterOf(output)) return 'steel';
+  // Quoted additional works saved before they carried a material key.
+  if (/^bore\s?well\b/.test(name)) return 'borewell';
+  if (/^(lift|elevator)\b/.test(name)) return 'lift';
   // Generated without a material key when labour is not itemised; the
   // composite civil labour package covers it.
   if (unit === 'sqft' && /centering\s*&\s*shuttering/.test(name))
@@ -1328,6 +1416,7 @@ export const COST_HEADS = [
   'Tile & granite laying',
   'Painting',
   'Scaffolding',
+  'Site & services',
   'Electrical',
   'Plumbing',
   'Sanitary & CP fittings',
@@ -1396,6 +1485,14 @@ const HEAD_BY_GROUP: Readonly<Record<string, CostHead>> = {
   sump: 'Water storage',
   overhead_tank: 'Water storage',
   scaffolding: 'Scaffolding',
+  moorum_filling: 'Excavation',
+  anti_termite: 'Site & services',
+  site_utilities: 'Site & services',
+  water_pump: 'Site & services',
+  earthing: 'Site & services',
+  railing: 'Site & services',
+  borewell: 'Site & services',
+  lift: 'Site & services',
   design_fees: 'Design & approvals',
   soil_test: 'Design & approvals',
   building_permission: 'Design & approvals',

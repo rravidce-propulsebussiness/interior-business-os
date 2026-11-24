@@ -54,6 +54,7 @@ import {
 import {
   measuredOutputs,
   correctSavedSmallConcrete,
+  fillingOutput,
   type MeasuredDimensions,
   type MeasuredKind,
 } from './boq-stage-measurements';
@@ -169,8 +170,10 @@ const upgradeOldSmallConcrete = (
   settings: ReturnType<typeof normalizeStructuralSettings>,
 ): SavedLine[] =>
   items.map((line) => {
-    const outputs = correctSavedSmallConcrete(line, settings);
-    return outputs ? { ...line, outputs } : line;
+    const outputs = (
+      correctSavedSmallConcrete(line, settings) ?? line.outputs
+    ).map((output) => fillingOutput(line.name, output));
+    return { ...line, outputs };
   });
 
 const uid = () => crypto.randomUUID();
@@ -1468,7 +1471,9 @@ export function BoqWorkspace({
     name: string,
     values: MeasuredDimensions,
   ) {
-    const outputs = measuredOutputs(kind, values, settings);
+    const outputs = measuredOutputs(kind, values, settings).map((output) =>
+      fillingOutput(name, output),
+    );
     if (!outputs.length) {
       setMessage(
         'Enter a positive count, length, width and depth for measured work.',
@@ -1565,18 +1570,22 @@ export function BoqWorkspace({
                   ? { steelSetsJson }
                   : {}),
               },
-              outputs: outputs.map((output) => {
-                const priorOutput = original.outputs.find(
-                  (previous) =>
-                    previous.name === output.name &&
-                    previous.unit === output.unit &&
-                    previous.material === output.material &&
-                    previous.diameter === output.diameter,
-                );
-                return priorOutput?.rate !== undefined
-                  ? { ...output, rate: priorOutput.rate }
-                  : output;
-              }),
+              outputs: outputs
+                .map((output) =>
+                  fillingOutput(newName.trim() || original.name, output),
+                )
+                .map((output) => {
+                  const priorOutput = original.outputs.find(
+                    (previous) =>
+                      previous.name === output.name &&
+                      previous.unit === output.unit &&
+                      previous.material === output.material &&
+                      previous.diameter === output.diameter,
+                  );
+                  return priorOutput?.rate !== undefined
+                    ? { ...output, rate: priorOutput.rate }
+                    : output;
+                }),
             }
           : line,
       ),

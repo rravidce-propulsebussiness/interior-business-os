@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { costSummaryByHead } from './boq-cost-summary';
-import { costHead, effectiveRates, rateForOutput } from './boq-pricing';
+import {
+  costHead,
+  effectiveRates,
+  isBoqCostUnpriced,
+  rateForOutput,
+} from './boq-pricing';
+import { fillingOutput } from './boq-stage-measurements';
 
 describe('material-wise BOQ cost', () => {
   it('totals each material with its purchase quantity, steel in kg', () => {
@@ -49,5 +55,40 @@ describe('material-wise BOQ cost', () => {
         effectiveRates([]),
       ),
     ).toBe(10);
+  });
+
+  it('prices every cost a house BOQ generates', () => {
+    const rates = effectiveRates([]);
+    const price = (output: Parameters<typeof rateForOutput>[0]) =>
+      rateForOutput(output, rates);
+    for (const [name, unit, material] of [
+      ['Anti-termite treatment', 'sqft', 'anti_termite'],
+      ['Construction water & power', 'sqft', 'site_utilities'],
+      ['Water pump', 'each', 'water_pump'],
+      ['Earthing pits', 'each', 'earthing'],
+      ['Staircase railing (SS)', 'rft', 'railing'],
+      ['Building permission & approvals', 'LS', 'building_permission'],
+      ['Testing & snag rectification', 'LS', 'handover_snags'],
+      ['Soil filling (measured)', 'm³', 'soil_filling'],
+      ['Soil filling (measured)', 'm³', 'moorum_filling'],
+    ] as const)
+      expect(
+        isBoqCostUnpriced({ name, unit, material, quantity: 1 }, price),
+      ).toBe(false);
+    // Saved BOQs: quoted borewell and lift rows without a material key.
+    expect(price({ name: 'Borewell', unit: 'LS' })).toBe(150000);
+    expect(price({ name: 'Lift', unit: 'each' })).toBe(950000);
+  });
+
+  it('prices bought moorum as material and backfill as labour', () => {
+    const soil = { name: 'Soil filling (measured)', material: 'soil_filling' };
+    expect(
+      fillingOutput('Moorum filling inside plinth (2 ft)', soil).material,
+    ).toBe('moorum_filling');
+    expect(
+      fillingOutput('Backfill footing pits F1 above footing', soil).material,
+    ).toBe('soil_filling');
+    expect(costHead('moorum_filling')).toBe('Excavation');
+    expect(costHead('railing')).toBe('Site & services');
   });
 });
