@@ -5478,3 +5478,12 @@
     grid-template-columns: 1fr;
   }
 }
+.qs-program-works {
+  margin-top: 8px;
+}
+.qs-program-works > summary {
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+}

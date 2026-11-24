@@ -229,7 +229,6 @@ export function ConstructionProgramEditor({
   const [feedback, setFeedback] = useState('');
   const [expandedStages, setExpandedStages] = useState<string[]>([
     'preconstruction',
-    'slabs',
   ]);
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -496,63 +495,6 @@ export function ConstructionProgramEditor({
                             {showDate(floor.start)} – {showDate(floor.end)}
                           </span>
                         </header>
-                        <div className="qs-program-work-table">
-                          <div className="qs-program-work-head">
-                            <span>#</span>
-                            <span>Work item</span>
-                            <span>Planned dates</span>
-                            <span>Days</span>
-                            <span>Check / QC</span>
-                            <span>Guide</span>
-                          </div>
-                          {floor.items
-                            .filter((item) => item.kind !== 'payment')
-                            .map((item, itemIndex) => (
-                              <div
-                                className="qs-program-work-row"
-                                key={item.id}
-                              >
-                                <span className="qs-program-work-index">
-                                  {itemIndex + 1}
-                                </span>
-                                <span className="qs-program-work-name">
-                                  <strong>{item.title}</strong>
-                                  <small>{item.kind}</small>
-                                  {item.guideText && <p>{item.guideText}</p>}
-                                </span>
-                                <span>
-                                  {showDate(item.start)} – {showDate(item.end)}
-                                </span>
-                                <span>{item.days} days</span>
-                                <span>
-                                  {item.kind === 'check' ||
-                                  item.kind === 'test' ? (
-                                    <b className="qs-program-check-chip">
-                                      ✓ Check
-                                    </b>
-                                  ) : null}
-                                  {item.kind === 'qc' ? (
-                                    <b className="qs-program-qc-chip">QC</b>
-                                  ) : null}
-                                </span>
-                                <span>
-                                  {item.guideVideoUrl ? (
-                                    <a
-                                      href={item.guideVideoUrl}
-                                      target="_blank"
-                                      rel="noreferrer"
-                                    >
-                                      Watch guide ↗
-                                    </a>
-                                  ) : item.guideText ? (
-                                    'Guide included'
-                                  ) : (
-                                    '—'
-                                  )}
-                                </span>
-                              </div>
-                            ))}
-                        </div>
                         {floorPayments.map(({ item, amount }) => {
                           const key = paymentItemKey(
                             stage.id,
@@ -594,6 +536,74 @@ export function ConstructionProgramEditor({
                             </div>
                           );
                         })}
+                        <details className="qs-program-works">
+                          <summary>
+                            Work items (
+                            {
+                              floor.items.filter(
+                                (item) => item.kind !== 'payment',
+                              ).length
+                            }
+                            )
+                          </summary>
+                          <div className="qs-program-work-table">
+                            <div className="qs-program-work-head">
+                              <span>#</span>
+                              <span>Work item</span>
+                              <span>Planned dates</span>
+                              <span>Days</span>
+                              <span>Check / QC</span>
+                              <span>Guide</span>
+                            </div>
+                            {floor.items
+                              .filter((item) => item.kind !== 'payment')
+                              .map((item, itemIndex) => (
+                                <div
+                                  className="qs-program-work-row"
+                                  key={item.id}
+                                >
+                                  <span className="qs-program-work-index">
+                                    {itemIndex + 1}
+                                  </span>
+                                  <span className="qs-program-work-name">
+                                    <strong>{item.title}</strong>
+                                    <small>{item.kind}</small>
+                                  </span>
+                                  <span>
+                                    {showDate(item.start)} –{' '}
+                                    {showDate(item.end)}
+                                  </span>
+                                  <span>{item.days} days</span>
+                                  <span>
+                                    {item.kind === 'check' ||
+                                    item.kind === 'test' ? (
+                                      <b className="qs-program-check-chip">
+                                        ✓ Check
+                                      </b>
+                                    ) : null}
+                                    {item.kind === 'qc' ? (
+                                      <b className="qs-program-qc-chip">QC</b>
+                                    ) : null}
+                                  </span>
+                                  <span>
+                                    {item.guideVideoUrl ? (
+                                      <a
+                                        href={item.guideVideoUrl}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                      >
+                                        Watch guide ↗
+                                      </a>
+                                    ) : item.guideText ? (
+                                      'Guide included'
+                                    ) : (
+                                      '—'
+                                    )}
+                                  </span>
+                                </div>
+                              ))}
+                          </div>
+                        </details>
                       </section>
                     );
                   })}
