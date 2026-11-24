@@ -295,3 +295,32 @@ describe('shuttering covered by composite labour', () => {
     ).toBe(true);
   });
 });
+
+describe('wall and plaster labour covered by composite labour', () => {
+  it('recognises measured wall and plaster lines', () => {
+    expect(
+      materialForOutput({
+        name: '9 in W1 external 9in (external)',
+        unit: 'sqft',
+      }),
+    ).toBe('labour_brickwork_9');
+    expect(
+      materialForOutput({
+        name: '4.5 in W2 internal 4.5in (internal)',
+        unit: 'sqft',
+      }),
+    ).toBe('labour_brickwork_4');
+    expect(materialForOutput({ name: 'Internal plaster', unit: 'sqft' })).toBe(
+      'plaster_labour',
+    );
+    expect(materialForOutput({ name: 'External plaster', unit: 'sqft' })).toBe(
+      'plaster_labour',
+    );
+  });
+
+  it('leaves unrelated sqft lines alone', () => {
+    expect(materialForOutput({ name: 'Floor tiles', unit: 'sqft' })).toBe(
+      undefined,
+    );
+  });
+});
