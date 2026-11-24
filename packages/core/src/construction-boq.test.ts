@@ -2420,16 +2420,41 @@ describe('costs every house needs', () => {
 
 describe('measured detailed BOQ finishes', () => {
   it('does not create guessed finish or service quantities', () => {
-    const boq = generateQuotationBoq({ details: quote(), measuredFinishes: true });
+    const boq = generateQuotationBoq({
+      details: quote(),
+      measuredFinishes: true,
+    });
     const outputs = boq.lines.flatMap((line) => line.outputs);
-    for (const material of ['floor_tiles', 'wall_tiles', 'window', 'paint_interior', 'paint_exterior', 'labour_tiling', 'labour_painting', 'labour_plumbing', 'labour_electrical', 'cpvc_half', 'wire_15', 'staircase_granite']) {
-      expect(outputs.some((output) => output.material === material && output.quantity > 0)).toBe(false);
+    for (const material of [
+      'floor_tiles',
+      'wall_tiles',
+      'window',
+      'paint_interior',
+      'paint_exterior',
+      'labour_tiling',
+      'labour_painting',
+      'labour_plumbing',
+      'labour_electrical',
+      'cpvc_half',
+      'wire_15',
+      'staircase_granite',
+    ]) {
+      expect(
+        outputs.some(
+          (output) => output.material === material && output.quantity > 0,
+        ),
+      ).toBe(false);
     }
-    expect(boq.warnings.some((warning) => warning.includes('Measurement pending'))).toBe(true);
+    expect(
+      boq.warnings.some((warning) => warning.includes('Measurement pending')),
+    ).toBe(true);
   });
 
   it('converts entered pipe and wire lengths to purchase units without inventing other items', () => {
-    const base = generateQuotationBoq({ details: quote(), measuredFinishes: true });
+    const base = generateQuotationBoq({
+      details: quote(),
+      measuredFinishes: true,
+    });
     const floor = base.floors[0]!.name;
     const boq = generateQuotationBoq({
       details: quote(),
@@ -2450,11 +2475,21 @@ describe('measured detailed BOQ finishes', () => {
         },
       },
     });
-    const outputs = boq.lines.filter((line) => line.section === floor).flatMap((line) => line.outputs);
-    expect(outputs.find((output) => output.material === 'wire_15')?.quantity).toBe(2);
-    expect(outputs.find((output) => output.material === 'cpvc_half')?.quantity).toBe(3);
-    expect(outputs.find((output) => output.material === 'labour_tiling')?.quantity).toBe(100);
-    expect(outputs.find((output) => output.material === 'paint_interior')?.quantity).toBe(80);
+    const outputs = boq.lines
+      .filter((line) => line.section === floor)
+      .flatMap((line) => line.outputs);
+    expect(
+      outputs.find((output) => output.material === 'wire_15')?.quantity,
+    ).toBe(2);
+    expect(
+      outputs.find((output) => output.material === 'cpvc_half')?.quantity,
+    ).toBe(3);
+    expect(
+      outputs.find((output) => output.material === 'labour_tiling')?.quantity,
+    ).toBe(100);
+    expect(
+      outputs.find((output) => output.material === 'paint_interior')?.quantity,
+    ).toBe(80);
     expect(outputs.some((output) => output.material === 'wire_25')).toBe(false);
   });
 
@@ -2466,7 +2501,22 @@ describe('measured detailed BOQ finishes', () => {
       requireConfirmedCounts: true,
       counts: old.counts,
     });
-    expect(boq.lines.flatMap((line) => line.outputs).some((output) => ['labour_plumbing', 'labour_electrical', 'labour_door_fixing'].includes(output.material ?? '') && output.quantity > 0)).toBe(false);
-    expect(boq.warnings.some((warning) => warning.includes('existing door, fixture and point counts'))).toBe(true);
+    expect(
+      boq.lines
+        .flatMap((line) => line.outputs)
+        .some(
+          (output) =>
+            [
+              'labour_plumbing',
+              'labour_electrical',
+              'labour_door_fixing',
+            ].includes(output.material ?? '') && output.quantity > 0,
+        ),
+    ).toBe(false);
+    expect(
+      boq.warnings.some((warning) =>
+        warning.includes('existing door, fixture and point counts'),
+      ),
+    ).toBe(true);
   });
 });

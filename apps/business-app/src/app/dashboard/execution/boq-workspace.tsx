@@ -694,7 +694,12 @@ export function BoqWorkspace({
   function generateFromQuote(live = false, edits = overrides) {
     if (!schedule || !quoteId) return;
     const measuredOnly = !active || generator?.measuredOnly === true;
-    const legacyCountsNeedReview = Boolean(generator?.legacyCountsNeedReview || (active && generator && (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION));
+    const legacyCountsNeedReview = Boolean(
+      generator?.legacyCountsNeedReview ||
+      (active &&
+        generator &&
+        (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION),
+    );
     const result = generateQuotationBoq({
       details: schedule,
       settings: concreteSettings,
@@ -875,9 +880,7 @@ export function BoqWorkspace({
       setTitle(
         `${activeProject?.name ?? 'Project'} · Construction BOQ`.slice(0, 200),
       );
-    setMessage(
-      'BOQ updated',
-    );
+    setMessage('BOQ updated');
   }
   // A BOQ prepared from the quotation (floors, counts, drawing schedule) but
   // not generated yet is generated as soon as its quotation is available.
@@ -2013,7 +2016,12 @@ export function BoqWorkspace({
                   </div>
                   <div>
                     <span>
-                      {scopeSummary.complete && !unpricedOutputs.length && (generator?.engineVersion ?? 0) >= BOQ_ENGINE_VERSION && !generator?.warnings.some((warning) => warning.includes('Measurement pending'))
+                      {scopeSummary.complete &&
+                      !unpricedOutputs.length &&
+                      (generator?.engineVersion ?? 0) >= BOQ_ENGINE_VERSION &&
+                      !generator?.warnings.some((warning) =>
+                        warning.includes('Measurement pending'),
+                      )
                         ? 'Total project cost estimate'
                         : 'Provisional project estimate'}
                     </span>
@@ -2340,7 +2348,12 @@ export function BoqWorkspace({
         </div>
         <div>
           <span>
-            {scopeSummary.complete && !unpricedOutputs.length && (generator?.engineVersion ?? 0) >= BOQ_ENGINE_VERSION && !generator?.warnings.some((warning) => warning.includes('Measurement pending'))
+            {scopeSummary.complete &&
+            !unpricedOutputs.length &&
+            (generator?.engineVersion ?? 0) >= BOQ_ENGINE_VERSION &&
+            !generator?.warnings.some((warning) =>
+              warning.includes('Measurement pending'),
+            )
               ? 'Total Project Cost'
               : 'Provisional Project Cost'}
           </span>
@@ -2416,9 +2429,7 @@ export function BoqWorkspace({
           <div className="boq-panel-heading">
             <div>
               <h2>{active ? 'Edit BOQ' : 'Create BOQ'}</h2>
-              <span>
-                Measured BOQ
-              </span>
+              <span>Measured BOQ</span>
             </div>
             {active && canEdit && (
               <button
@@ -2537,7 +2548,12 @@ export function BoqWorkspace({
               design={genDesign}
               onDesignChange={setGenDesign}
               counts={countsForGeneration}
-              legacyCountsNeedReview={Boolean(generator?.legacyCountsNeedReview || (active && generator && (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION))}
+              legacyCountsNeedReview={Boolean(
+                generator?.legacyCountsNeedReview ||
+                (active &&
+                  generator &&
+                  (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION),
+              )}
               onCountsChange={updateStageCounts}
               structuralSettings={concreteSettings}
               materialRates={initialRates}

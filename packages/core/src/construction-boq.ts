@@ -153,29 +153,190 @@ export type KitchenMeasure = {
   wallTileHeightFeet: number;
 };
 export const MEASURED_SERVICE_FIELDS = [
-  { group: 'electrical', material: 'wire_15', name: 'Wire 1.5 sq mm', unit: 'coil', inputUnit: 'm', pack: 90 },
-  { group: 'electrical', material: 'wire_25', name: 'Wire 2.5 sq mm', unit: 'coil', inputUnit: 'm', pack: 90 },
-  { group: 'electrical', material: 'wire_40', name: 'Wire 4 sq mm', unit: 'coil', inputUnit: 'm', pack: 90 },
-  { group: 'electrical', material: 'wire_60', name: 'Feeder cable 6 sq mm', unit: 'm', inputUnit: 'm', pack: 1 },
-  { group: 'electrical', material: 'conduit', name: 'PVC conduit 25 mm', unit: 'pipe', inputUnit: 'm', pack: 3 },
-  { group: 'electrical', material: 'switch_6a', name: 'Switches 6 A', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'electrical', material: 'switch_16a', name: 'Switches 16 A', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'electrical', material: 'socket_6a', name: 'Sockets 6 A', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'electrical', material: 'socket_16a', name: 'Sockets 16 A', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'electrical', material: 'fan_regulator', name: 'Fan regulators', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'electrical', material: 'switch_board', name: 'Switch boards', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'electrical', material: 'db_box', name: 'Distribution boards', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'electrical', material: 'mcb', name: 'MCBs', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'plumbing', material: 'cpvc_half', name: 'CPVC ½ in pipe', unit: 'pipe', inputUnit: 'm', pack: 3 },
-  { group: 'plumbing', material: 'cpvc_riser', name: 'CPVC 1 in pipe', unit: 'pipe', inputUnit: 'm', pack: 3 },
-  { group: 'plumbing', material: 'cpvc_fittings', name: 'CPVC fittings', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'plumbing', material: 'concealed_valve', name: 'Concealed stop valves', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'plumbing', material: 'swr_110', name: 'SWR 110 mm pipe', unit: 'pipe', inputUnit: 'm', pack: 3 },
-  { group: 'plumbing', material: 'swr_75', name: 'SWR 75 mm pipe', unit: 'pipe', inputUnit: 'm', pack: 3 },
-  { group: 'plumbing', material: 'rainwater_pipe', name: 'Rainwater 110 mm pipe', unit: 'pipe', inputUnit: 'm', pack: 3 },
-  { group: 'plumbing', material: 'floor_trap', name: 'Floor traps', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'plumbing', material: 'swr_fittings', name: 'SWR fittings', unit: 'nos', inputUnit: 'nos', pack: 1 },
-  { group: 'plumbing', material: 'plumbing_sundries', name: 'Plumbing sundries', unit: 'floor', inputUnit: 'lot', pack: 1 },
+  {
+    group: 'electrical',
+    material: 'wire_15',
+    name: 'Wire 1.5 sq mm',
+    unit: 'coil',
+    inputUnit: 'm',
+    pack: 90,
+  },
+  {
+    group: 'electrical',
+    material: 'wire_25',
+    name: 'Wire 2.5 sq mm',
+    unit: 'coil',
+    inputUnit: 'm',
+    pack: 90,
+  },
+  {
+    group: 'electrical',
+    material: 'wire_40',
+    name: 'Wire 4 sq mm',
+    unit: 'coil',
+    inputUnit: 'm',
+    pack: 90,
+  },
+  {
+    group: 'electrical',
+    material: 'wire_60',
+    name: 'Feeder cable 6 sq mm',
+    unit: 'm',
+    inputUnit: 'm',
+    pack: 1,
+  },
+  {
+    group: 'electrical',
+    material: 'conduit',
+    name: 'PVC conduit 25 mm',
+    unit: 'pipe',
+    inputUnit: 'm',
+    pack: 3,
+  },
+  {
+    group: 'electrical',
+    material: 'switch_6a',
+    name: 'Switches 6 A',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'electrical',
+    material: 'switch_16a',
+    name: 'Switches 16 A',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'electrical',
+    material: 'socket_6a',
+    name: 'Sockets 6 A',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'electrical',
+    material: 'socket_16a',
+    name: 'Sockets 16 A',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'electrical',
+    material: 'fan_regulator',
+    name: 'Fan regulators',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'electrical',
+    material: 'switch_board',
+    name: 'Switch boards',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'electrical',
+    material: 'db_box',
+    name: 'Distribution boards',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'electrical',
+    material: 'mcb',
+    name: 'MCBs',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'plumbing',
+    material: 'cpvc_half',
+    name: 'CPVC ½ in pipe',
+    unit: 'pipe',
+    inputUnit: 'm',
+    pack: 3,
+  },
+  {
+    group: 'plumbing',
+    material: 'cpvc_riser',
+    name: 'CPVC 1 in pipe',
+    unit: 'pipe',
+    inputUnit: 'm',
+    pack: 3,
+  },
+  {
+    group: 'plumbing',
+    material: 'cpvc_fittings',
+    name: 'CPVC fittings',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'plumbing',
+    material: 'concealed_valve',
+    name: 'Concealed stop valves',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'plumbing',
+    material: 'swr_110',
+    name: 'SWR 110 mm pipe',
+    unit: 'pipe',
+    inputUnit: 'm',
+    pack: 3,
+  },
+  {
+    group: 'plumbing',
+    material: 'swr_75',
+    name: 'SWR 75 mm pipe',
+    unit: 'pipe',
+    inputUnit: 'm',
+    pack: 3,
+  },
+  {
+    group: 'plumbing',
+    material: 'rainwater_pipe',
+    name: 'Rainwater 110 mm pipe',
+    unit: 'pipe',
+    inputUnit: 'm',
+    pack: 3,
+  },
+  {
+    group: 'plumbing',
+    material: 'floor_trap',
+    name: 'Floor traps',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'plumbing',
+    material: 'swr_fittings',
+    name: 'SWR fittings',
+    unit: 'nos',
+    inputUnit: 'nos',
+    pack: 1,
+  },
+  {
+    group: 'plumbing',
+    material: 'plumbing_sundries',
+    name: 'Plumbing sundries',
+    unit: 'floor',
+    inputUnit: 'lot',
+    pack: 1,
+  },
 ] as const;
 
 /** Sizes entered per floor for tiles and the kitchen platform. */
@@ -1726,10 +1887,14 @@ export function estimateCounts(
 /** Empty measured counts, never derived from floor area. */
 export function measuredCounts(floors: readonly BoqFloor[]): BoqCounts {
   return {
-    floors: Object.fromEntries(floors.map((floor) => [
-      floor.name,
-      Object.fromEntries(FLOOR_COUNT_FIELDS.map(([key]) => [key, 0])) as FloorCounts,
-    ])),
+    floors: Object.fromEntries(
+      floors.map((floor) => [
+        floor.name,
+        Object.fromEntries(
+          FLOOR_COUNT_FIELDS.map(([key]) => [key, 0]),
+        ) as FloorCounts,
+      ]),
+    ),
     entranceGates: 0,
     compoundWallFeet: 0,
   };
@@ -1768,7 +1933,11 @@ export function quotedCompoundWall(
 }
 
 /** Merge edited counts over the estimates; anything missing or invalid falls back. */
-export function normalizeCounts(raw: unknown, estimated: BoqCounts, measured = false): BoqCounts {
+export function normalizeCounts(
+  raw: unknown,
+  estimated: BoqCounts,
+  measured = false,
+): BoqCounts {
   const source =
     raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
   const floorsRaw =
@@ -1854,16 +2023,33 @@ export function normalizeCounts(raw: unknown, estimated: BoqCounts, measured = f
     finishes[name] = {
       rooms,
       ...Object.fromEntries(
-        ['roomFlooringSqft', 'ceilingPaintSqft', 'parkingFlooringSqft', 'bathroomTileHeightFeet']
+        [
+          'roomFlooringSqft',
+          'ceilingPaintSqft',
+          'parkingFlooringSqft',
+          'bathroomTileHeightFeet',
+        ]
           .filter((key) => value[key] !== undefined)
           .map((key) => [key, num(value[key], 0, 0, 100000)]),
       ),
       ...(value.countsConfirmed === true ? { countsConfirmed: true } : {}),
-      ...(value.serviceMeasurements && typeof value.serviceMeasurements === 'object'
-        ? { serviceMeasurements: Object.fromEntries(MEASURED_SERVICE_FIELDS.map((field) => [
-            field.material,
-            num((value.serviceMeasurements as Record<string, unknown>)[field.material], 0, 0, 1000000),
-          ])) }
+      ...(value.serviceMeasurements &&
+      typeof value.serviceMeasurements === 'object'
+        ? {
+            serviceMeasurements: Object.fromEntries(
+              MEASURED_SERVICE_FIELDS.map((field) => [
+                field.material,
+                num(
+                  (value.serviceMeasurements as Record<string, unknown>)[
+                    field.material
+                  ],
+                  0,
+                  0,
+                  1000000,
+                ),
+              ]),
+            ),
+          }
         : {}),
       ...(kitchenRows ? { kitchenMeasurements: kitchenRows } : {}),
       ...(value.excludeRoomFlooring === true
@@ -2818,7 +3004,9 @@ export function generateQuotationBoq(
     strict,
   );
   const floorCounts = (floor: BoqFloor): FloorCounts =>
-    strict && input.requireConfirmedCounts && !counts.finishes?.[floor.name]?.countsConfirmed
+    strict &&
+    input.requireConfirmedCounts &&
+    !counts.finishes?.[floor.name]?.countsConfirmed
       ? measuredCounts([floor]).floors[floor.name]!
       : counts.floors[floor.name]!;
   const warnings: string[] = [];
@@ -3911,7 +4099,9 @@ export function generateQuotationBoq(
         }
         if (n > 0 && measured)
           warnings.push(
-            strict ? `${floor.name}: Measurement pending — ${key} sizes.` : `${floor.name}: ${key} sizes not entered; ${typicalWidth}×${typicalHeight} ft assumed for masonry deduction.`,
+            strict
+              ? `${floor.name}: Measurement pending — ${key} sizes.`
+              : `${floor.name}: ${key} sizes not entered; ${typicalWidth}×${typicalHeight} ft assumed for masonry deduction.`,
           );
         return strict ? 0 : n * typicalWidth * typicalHeight;
       };
@@ -3930,7 +4120,9 @@ export function generateQuotationBoq(
         );
       if (measured && !windowOpenings.length && fc.windows > 0)
         warnings.push(
-          strict ? `${floor.name}: Measurement pending — window sizes.` : `${floor.name}: window sizes not entered; ${s.windowSqft} sq ft/window assumed for masonry deduction.`,
+          strict
+            ? `${floor.name}: Measurement pending — window sizes.`
+            : `${floor.name}: window sizes not entered; ${s.windowSqft} sq ft/window assumed for masonry deduction.`,
         );
       const externalOpenings =
         openingArea('mainDoors', 3.5, 7) +
@@ -3941,7 +4133,9 @@ export function generateQuotationBoq(
               (sum, row) => sum + row.count * row.widthFeet * row.heightFeet,
               0,
             )
-          : strict ? 0 : fc.windows * s.windowSqft);
+          : strict
+            ? 0
+            : fc.windows * s.windowSqft);
       const internalOpenings =
         openingArea('internalDoors', 3, 7) +
         openingArea('bathroomDoors', 2.5, 7) +
@@ -3975,9 +4169,8 @@ export function generateQuotationBoq(
         );
       const netExternal = Math.max(0, grossExt - externalOpenings);
       const netInternal = Math.max(0, grossInt - internalOpenings);
-      const externalArea = measured || strict
-        ? netExternal
-        : perimeter * wallHeight * solid;
+      const externalArea =
+        measured || strict ? netExternal : perimeter * wallHeight * solid;
       const internalArea =
         strict || (measured && !internalEstimated)
           ? netInternal
@@ -4554,7 +4747,9 @@ export function generateQuotationBoq(
             sum + opening.count * opening.widthFeet * opening.heightFeet,
           0,
         )
-      : strict ? 0 : fc.windows * s.windowSqft;
+      : strict
+        ? 0
+        : fc.windows * s.windowSqft;
     const windowBasis = openings.length
       ? openings
           .map(
@@ -4564,7 +4759,9 @@ export function generateQuotationBoq(
           .join(' + ')
       : `${fc.windows} windows × ${s.windowSqft} sq ft`;
     const living = livingSqft(floor);
-    const parking = strict ? (counts.finishes?.[floor.name]?.parkingFlooringSqft ?? 0) : (floor.parkingSqft ?? 0);
+    const parking = strict
+      ? (counts.finishes?.[floor.name]?.parkingFlooringSqft ?? 0)
+      : (floor.parkingSqft ?? 0);
     // --- Tiles from the rooms / sizes entered, else estimates ---------
     const fin = counts.finishes?.[floor.name];
     const rooms = (fin?.rooms ?? []).filter(
@@ -4574,7 +4771,9 @@ export function generateQuotationBoq(
       ? 0
       : rooms.length
         ? rooms.reduce((sum, room) => sum + room.lengthFeet * room.widthFeet, 0)
-        : strict ? (fin?.roomFlooringSqft ?? 0) : (living * s.tileCoveragePercent) / 100;
+        : strict
+          ? (fin?.roomFlooringSqft ?? 0)
+          : (living * s.tileCoveragePercent) / 100;
     const skirting =
       !fin?.excludeRoomFlooring && rooms.length
         ? rooms.reduce(
@@ -4587,11 +4786,16 @@ export function generateQuotationBoq(
           )
         : 0;
     const floorTiles = roomArea + skirting;
-    const bathL = fin?.bathroomLengthFeet || (strict ? 0 : s.bathroomLengthFeet);
+    const bathL =
+      fin?.bathroomLengthFeet || (strict ? 0 : s.bathroomLengthFeet);
     const bathW = fin?.bathroomWidthFeet || (strict ? 0 : s.bathroomWidthFeet);
-    const tileHeight = strict ? (fin?.bathroomTileHeightFeet ?? 0) : s.wallTileHeightFeet;
+    const tileHeight = strict
+      ? (fin?.bathroomTileHeightFeet ?? 0)
+      : s.wallTileHeightFeet;
     // Each bathroom as drawn; any not listed use the typical size above.
-    const listedBaths = strict ? parseSizes(fin?.bathroomSizes) : parseSizes(fin?.bathroomSizes).slice(0, fc.bathrooms);
+    const listedBaths = strict
+      ? parseSizes(fin?.bathroomSizes)
+      : parseSizes(fin?.bathroomSizes).slice(0, fc.bathrooms);
     const baths = [
       ...listedBaths,
       ...Array.from(
@@ -4612,18 +4816,29 @@ export function generateQuotationBoq(
       0,
     );
     // Walls up to the tile height, less one 2.5 × 7 ft door per bathroom.
-    const wallTiles = Math.max(0, baths.reduce(
-      (sum, bath) =>
-        sum +
-        Math.max(
-          0,
-          2 * (bath.lengthFeet + bath.widthFeet) * tileHeight -
-            (strict ? 0 : 2.5 * Math.min(7, tileHeight)),
-        ),
+    const wallTiles = Math.max(
       0,
-    ) - (strict ? parseOpenings(counts.doorSizes?.[floor.name]?.bathroomDoors).reduce(
-      (sum, opening) => sum + opening.count * opening.widthFeet * Math.min(opening.heightFeet, tileHeight), 0,
-    ) : 0));
+      baths.reduce(
+        (sum, bath) =>
+          sum +
+          Math.max(
+            0,
+            2 * (bath.lengthFeet + bath.widthFeet) * tileHeight -
+              (strict ? 0 : 2.5 * Math.min(7, tileHeight)),
+          ),
+        0,
+      ) -
+        (strict
+          ? parseOpenings(counts.doorSizes?.[floor.name]?.bathroomDoors).reduce(
+              (sum, opening) =>
+                sum +
+                opening.count *
+                  opening.widthFeet *
+                  Math.min(opening.heightFeet, tileHeight),
+              0,
+            )
+          : 0),
+    );
     const bathWaterproofing = baths.reduce(
       (sum, bath) =>
         sum +
@@ -4646,7 +4861,9 @@ export function generateQuotationBoq(
     const kitchenCount = kitchens === undefined ? fc.kitchens : kitchens.length;
     const kitchenGranite =
       kitchens === undefined
-        ? strict ? 0 : fc.kitchens * platformFeet * s.kitchenPlatformDepthFeet
+        ? strict
+          ? 0
+          : fc.kitchens * platformFeet * s.kitchenPlatformDepthFeet
         : kitchens.reduce(
             (sum, kitchen) =>
               sum + kitchen.platformFeet * kitchen.platformDepthFeet,
@@ -4654,7 +4871,9 @@ export function generateQuotationBoq(
           );
     const kitchenTiles =
       kitchens === undefined
-        ? strict ? 0 : fc.kitchens * platformFeet * s.kitchenWallTileHeightFeet
+        ? strict
+          ? 0
+          : fc.kitchens * platformFeet * s.kitchenWallTileHeightFeet
         : kitchens.reduce(
             (sum, kitchen) =>
               sum + kitchen.wallTileFeet * kitchen.wallTileHeightFeet,
@@ -4676,30 +4895,69 @@ export function generateQuotationBoq(
         order: `${tiles} tiles of ${round(lengthIn / 12, 2)}×${round(widthIn / 12, 2)} ft · ${ceil(tiles / perBox)} boxes of ${perBox}`,
       };
     };
-    const interiorPaint = walls.internalPlaster + (strict ? (fin?.ceilingPaintSqft ?? 0) : floor.areaSqft);
+    const interiorPaint =
+      walls.internalPlaster +
+      (strict ? (fin?.ceilingPaintSqft ?? 0) : floor.areaSqft);
     const exteriorPaint = walls.externalPlaster;
     // Staircase flooring: treads and risers of each flight plus the landing.
     const risers = ceil((floor.heightFeet * 12) / s.stairRiserIn);
     const stairGranite =
       fin?.staircaseGraniteSqft ??
-      (strict ? 0 : s.stairsPerFloor *
-        s.stairWidthFeet *
-        (risers * ((s.stairTreadIn + s.stairRiserIn) / 12) +
-          s.stairLandingFeet));
+      (strict
+        ? 0
+        : s.stairsPerFloor *
+          s.stairWidthFeet *
+          (risers * ((s.stairTreadIn + s.stairRiserIn) / 12) +
+            s.stairLandingFeet));
     if (strict) {
-      const pending = (work: string) => warnings.push(`${floor.name}: Measurement pending — ${work}.`);
-      if (input.requireConfirmedCounts && !fin?.countsConfirmed) pending('existing door, fixture and point counts');
-      if (!fin?.excludeRoomFlooring && !rooms.length && fin?.roomFlooringSqft === undefined) pending('flooring');
-      if (fc.bathrooms > listedBaths.length || (listedBaths.length > 0 && !tileHeight)) pending('bathroom tile dimensions');
-      if (fc.kitchens > 0 && (!kitchens || kitchens.length < fc.kitchens || kitchens.some((k) => !k.platformFeet || !k.platformDepthFeet || !k.wallTileFeet || !k.wallTileHeightFeet))) pending('kitchen dimensions');
+      const pending = (work: string) =>
+        warnings.push(`${floor.name}: Measurement pending — ${work}.`);
+      if (input.requireConfirmedCounts && !fin?.countsConfirmed)
+        pending('existing door, fixture and point counts');
+      if (
+        !fin?.excludeRoomFlooring &&
+        !rooms.length &&
+        fin?.roomFlooringSqft === undefined
+      )
+        pending('flooring');
+      if (
+        fc.bathrooms > listedBaths.length ||
+        (listedBaths.length > 0 && !tileHeight)
+      )
+        pending('bathroom tile dimensions');
+      if (
+        fc.kitchens > 0 &&
+        (!kitchens ||
+          kitchens.length < fc.kitchens ||
+          kitchens.some(
+            (k) =>
+              !k.platformFeet ||
+              !k.platformDepthFeet ||
+              !k.wallTileFeet ||
+              !k.wallTileHeightFeet,
+          ))
+      )
+        pending('kitchen dimensions');
       if (fin?.staircaseGraniteSqft === undefined) pending('staircase granite');
-      if ((floor.parkingSqft ?? 0) > 0 && fin?.parkingFlooringSqft === undefined) pending('parking flooring');
-      if (fin?.ceilingPaintSqft === undefined || !counts.walls?.[floor.name]?.length) pending('painting');
+      if (
+        (floor.parkingSqft ?? 0) > 0 &&
+        fin?.parkingFlooringSqft === undefined
+      )
+        pending('parking flooring');
+      if (
+        fin?.ceilingPaintSqft === undefined ||
+        !counts.walls?.[floor.name]?.length
+      )
+        pending('painting');
       if (!hasMeasuredServices('electrical')) pending('electrical materials');
       if (!hasMeasuredServices('plumbing')) pending('plumbing materials');
     }
     function hasMeasuredServices(group: 'electrical' | 'plumbing') {
-      return MEASURED_SERVICE_FIELDS.some((field) => field.group === group && (fin?.serviceMeasurements?.[field.material] ?? 0) > 0);
+      return MEASURED_SERVICE_FIELDS.some(
+        (field) =>
+          field.group === group &&
+          (fin?.serviceMeasurements?.[field.material] ?? 0) > 0,
+      );
     }
     const finishLine = (
       kind: string,
@@ -4866,7 +5124,9 @@ export function generateQuotationBoq(
           round(stairGranite * tileWaste, 1),
           'sqft',
           'staircase_granite',
-          strict ? 'Measured area' : `${risers} steps × ${s.stairWidthFeet} ft + landing`,
+          strict
+            ? 'Measured area'
+            : `${risers} steps × ${s.stairWidthFeet} ft + landing`,
         ),
         ...(parking > 0
           ? (() => {
@@ -5056,124 +5316,130 @@ export function generateQuotationBoq(
     const feederMetres = allPoints
       ? round(units * (floorIndex * floor.heightFeet * M_PER_FT + 15) * 3, 0)
       : 0;
-    const serviceOutputs = (group: 'electrical' | 'plumbing'): GeneratedOutput[] =>
-      MEASURED_SERVICE_FIELDS.filter((field) => field.group === group).flatMap((field) => {
-        const entered = fin?.serviceMeasurements?.[field.material] ?? 0;
-        if (!(entered > 0)) return [];
-        return [{
-          name: field.name,
-          material: field.material,
-          unit: field.unit,
-          quantity: field.pack > 1 ? ceil(entered / field.pack) : entered,
-          source: `${entered} ${field.inputUnit} measured`,
-        }];
-      });
+    const serviceOutputs = (
+      group: 'electrical' | 'plumbing',
+    ): GeneratedOutput[] =>
+      MEASURED_SERVICE_FIELDS.filter((field) => field.group === group).flatMap(
+        (field) => {
+          const entered = fin?.serviceMeasurements?.[field.material] ?? 0;
+          if (!(entered > 0)) return [];
+          return [
+            {
+              name: field.name,
+              material: field.material,
+              unit: field.unit,
+              quantity: field.pack > 1 ? ceil(entered / field.pack) : entered,
+              source: `${entered} ${field.inputUnit} measured`,
+            },
+          ];
+        },
+      );
     const electricalOutputs: GeneratedOutput[] = strict
       ? serviceOutputs('electrical')
       : allowances.has('electrical')
-      ? item(
-          'electrical',
-          'Electrical points (wiring, switches)',
-          allPoints,
-          'point',
-          'electrical_point',
-        )
-      : allPoints > 0
-        ? [
-            {
-              name: 'Wire 1.5 sq mm (lights, fans)',
-              material: 'wire_15',
-              quantity: coil((lights + fans) * s.wireMetresPerPoint),
-              unit: 'coil',
-              source: `${lights + fans} points × ${s.wireMetresPerPoint} m · 90 m coils`,
-            },
-            {
-              name: 'Wire 2.5 sq mm (6 A sockets)',
-              material: 'wire_25',
-              quantity: coil(sockets * s.wireMetresPerPoint),
-              unit: 'coil',
-              source: `${sockets} sockets × ${s.wireMetresPerPoint} m · 90 m coils`,
-            },
-            {
-              name: 'Wire 4 sq mm (16 A power points)',
-              material: 'wire_40',
-              quantity: coil(power * s.powerWireMetresPerPoint),
-              unit: 'coil',
-              source: `${power} power points × ${s.powerWireMetresPerPoint} m · 90 m coils`,
-            },
-            {
-              name: 'Feeder cable 6 sq mm (meter to floor DB)',
-              material: 'wire_60',
-              quantity: feederMetres,
-              unit: 'm',
-              source: `${units} DB × (${round(floorIndex * floor.heightFeet * M_PER_FT, 1)} m rise + 15 m) × 3 cores`,
-            },
-            {
-              name: 'PVC conduit 25 mm (3 m)',
-              material: 'conduit',
-              quantity: ceil((allPoints * s.conduitMetresPerPoint) / 3),
-              unit: 'pipe',
-              source: `${allPoints} points × ${s.conduitMetresPerPoint} m`,
-            },
-            {
-              name: 'Switches 6 A',
-              material: 'switch_6a',
-              quantity: lights + fans + sockets,
-              unit: 'nos',
-            },
-            {
-              name: 'Switches 16 A',
-              material: 'switch_16a',
-              quantity: power,
-              unit: 'nos',
-            },
-            {
-              name: 'Sockets 6 A',
-              material: 'socket_6a',
-              quantity: sockets,
-              unit: 'nos',
-            },
-            {
-              name: 'Sockets 16 A',
-              material: 'socket_16a',
-              quantity: power,
-              unit: 'nos',
-            },
-            {
-              name: 'Fan regulators',
-              material: 'fan_regulator',
-              quantity: fans,
-              unit: 'nos',
-            },
-            {
-              name: 'Switch boards (box + plate)',
-              material: 'switch_board',
-              quantity:
-                ceil((lights + fans + sockets) / s.pointsPerSwitchBoard) +
-                power,
-              unit: 'nos',
-            },
-            {
-              name: 'Distribution board (8-way)',
-              material: 'db_box',
-              quantity: units,
-              unit: 'nos',
-            },
-            {
-              name: 'MCBs',
-              material: 'mcb',
-              quantity:
-                units *
-                  (ceil((lights + fans) / units / s.pointsPerCircuit) +
-                    ceil(sockets / units / 6) +
-                    1) +
-                power,
-              unit: 'nos',
-              source:
-                'Light / fan and socket circuits + incomer, one per power point',
-            },
-          ].filter((output) => output.quantity > 0)
-        : [];
+        ? item(
+            'electrical',
+            'Electrical points (wiring, switches)',
+            allPoints,
+            'point',
+            'electrical_point',
+          )
+        : allPoints > 0
+          ? [
+              {
+                name: 'Wire 1.5 sq mm (lights, fans)',
+                material: 'wire_15',
+                quantity: coil((lights + fans) * s.wireMetresPerPoint),
+                unit: 'coil',
+                source: `${lights + fans} points × ${s.wireMetresPerPoint} m · 90 m coils`,
+              },
+              {
+                name: 'Wire 2.5 sq mm (6 A sockets)',
+                material: 'wire_25',
+                quantity: coil(sockets * s.wireMetresPerPoint),
+                unit: 'coil',
+                source: `${sockets} sockets × ${s.wireMetresPerPoint} m · 90 m coils`,
+              },
+              {
+                name: 'Wire 4 sq mm (16 A power points)',
+                material: 'wire_40',
+                quantity: coil(power * s.powerWireMetresPerPoint),
+                unit: 'coil',
+                source: `${power} power points × ${s.powerWireMetresPerPoint} m · 90 m coils`,
+              },
+              {
+                name: 'Feeder cable 6 sq mm (meter to floor DB)',
+                material: 'wire_60',
+                quantity: feederMetres,
+                unit: 'm',
+                source: `${units} DB × (${round(floorIndex * floor.heightFeet * M_PER_FT, 1)} m rise + 15 m) × 3 cores`,
+              },
+              {
+                name: 'PVC conduit 25 mm (3 m)',
+                material: 'conduit',
+                quantity: ceil((allPoints * s.conduitMetresPerPoint) / 3),
+                unit: 'pipe',
+                source: `${allPoints} points × ${s.conduitMetresPerPoint} m`,
+              },
+              {
+                name: 'Switches 6 A',
+                material: 'switch_6a',
+                quantity: lights + fans + sockets,
+                unit: 'nos',
+              },
+              {
+                name: 'Switches 16 A',
+                material: 'switch_16a',
+                quantity: power,
+                unit: 'nos',
+              },
+              {
+                name: 'Sockets 6 A',
+                material: 'socket_6a',
+                quantity: sockets,
+                unit: 'nos',
+              },
+              {
+                name: 'Sockets 16 A',
+                material: 'socket_16a',
+                quantity: power,
+                unit: 'nos',
+              },
+              {
+                name: 'Fan regulators',
+                material: 'fan_regulator',
+                quantity: fans,
+                unit: 'nos',
+              },
+              {
+                name: 'Switch boards (box + plate)',
+                material: 'switch_board',
+                quantity:
+                  ceil((lights + fans + sockets) / s.pointsPerSwitchBoard) +
+                  power,
+                unit: 'nos',
+              },
+              {
+                name: 'Distribution board (8-way)',
+                material: 'db_box',
+                quantity: units,
+                unit: 'nos',
+              },
+              {
+                name: 'MCBs',
+                material: 'mcb',
+                quantity:
+                  units *
+                    (ceil((lights + fans) / units / s.pointsPerCircuit) +
+                      ceil(sockets / units / 6) +
+                      1) +
+                  power,
+                unit: 'nos',
+                source:
+                  'Light / fan and socket circuits + incomer, one per power point',
+              },
+            ].filter((output) => output.quantity > 0)
+          : [];
     // --- Plumbing: water points → CPVC lines; soil, waste and rainwater
     // lines in SWR / PVC. Sanitary ware and CP fittings are the quote's
     // allowance; these pipes are not.
@@ -5183,12 +5449,31 @@ export function generateQuotationBoq(
     const heightM = floor.heightFeet * M_PER_FT;
     const pipes = (metres: number) => ceil(metres / 3);
     const stacks = fc.bathrooms ? ceil(fc.bathrooms / s.bathroomsPerStack) : 0;
-    const plumbingOutputs: GeneratedOutput[] =
-      strict ? [
-        ...serviceOutputs('plumbing'),
-        ...(bathWaterproofing > 0 ? [{ name: 'Bathroom waterproofing', material: 'bathroom_waterproofing', quantity: round(bathWaterproofing, 0), unit: 'sqft' }] : []),
-        ...(fc.bathrooms > 0 ? [{ name: 'Plumbing labour', material: 'labour_plumbing', quantity: fc.bathrooms, unit: 'bathroom' }] : []),
-      ] : fc.bathrooms + fc.kitchens > 0
+    const plumbingOutputs: GeneratedOutput[] = strict
+      ? [
+          ...serviceOutputs('plumbing'),
+          ...(bathWaterproofing > 0
+            ? [
+                {
+                  name: 'Bathroom waterproofing',
+                  material: 'bathroom_waterproofing',
+                  quantity: round(bathWaterproofing, 0),
+                  unit: 'sqft',
+                },
+              ]
+            : []),
+          ...(fc.bathrooms > 0
+            ? [
+                {
+                  name: 'Plumbing labour',
+                  material: 'labour_plumbing',
+                  quantity: fc.bathrooms,
+                  unit: 'bathroom',
+                },
+              ]
+            : []),
+        ]
+      : fc.bathrooms + fc.kitchens > 0
         ? [
             ...item(
               'plumbing',
