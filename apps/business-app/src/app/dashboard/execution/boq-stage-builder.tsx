@@ -2,7 +2,7 @@
 
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
-import { BoqEditorUnits, BoqRemove, editorUnit, useBoqEditorUnit } from './boq-compact-editor';
+import { BoqAdvanced, BoqEditorUnits, BoqRemove, editorUnit, useBoqEditorUnit } from './boq-compact-editor';
 import { NumberField } from './boq-number-field';
 import type { Rate } from './boq-pricing';
 import { isAutoPlasterQuantity } from './boq-plaster-guards';
@@ -1259,76 +1259,6 @@ export function BoqStageBuilder(props: Props) {
                   Copy measured external walls to other full floors
                 </button>
               )}
-            {walls.map((wall, wallIndex) => {
-              const updateWall = (patch: Partial<WallMeasure>) =>
-                updateWalls(
-                  walls.map((row, i) =>
-                    i === wallIndex ? { ...row, ...patch } : row,
-                  ),
-                );
-              return (
-                <div className="boq-stage-subcard" key={wall.id}>
-                  <div className="boq-stage-subhead">
-                    <strong>{wall.name || 'Wall ' + (wallIndex + 1)}</strong>
-                    <BoqRemove label={"Remove " + wall.name} onClick={() => updateWalls(walls.filter((_, i) => i !== wallIndex))} />
-                  </div>
-                  <div className="boq-stage-input-grid">
-                    <InputText
-                      label="Wall reference"
-                      value={wall.name}
-                      onChange={(v) => updateWall({ name: v })}
-                    />
-                    <label className="boq-stage-field">
-                      <span>Wall location</span>
-                      <select
-                        value={wall.location}
-                        onChange={(e) =>
-                          updateWall({
-                            location:
-                              e.target.value === 'internal'
-                                ? 'internal'
-                                : 'external',
-                          })
-                        }
-                      >
-                        <option value="external">External</option>
-                        <option value="internal">Internal</option>
-                      </select>
-                    </label>
-                    <InputNumber
-                      label="Same walls (nos)"
-                      value={wall.count}
-                      onChange={(v) => updateWall({ count: Math.round(v) })}
-                    />
-                    <InputNumber
-                      label="Length"
-                      unit="ft"
-                      value={wall.lengthFeet}
-                      onChange={(v) => updateWall({ lengthFeet: v })}
-                    />
-                    <InputNumber
-                      label="Height"
-                      unit="ft"
-                      value={wall.heightFeet}
-                      onChange={(v) => updateWall({ heightFeet: v })}
-                    />
-                    <InputNumber
-                      label="Thickness"
-                      unit="in"
-                      value={wall.thicknessIn}
-                      onChange={(v) => updateWall({ thicknessIn: v })}
-                    />
-                  </div>
-                  <div className="boq-stage-volume">
-                    <span>Gross wall area</span>
-                    <strong>
-                      {number(wall.count * wall.lengthFeet * wall.heightFeet * editorUnit('sqft', dimensionUnit).factor)}{' '}
-                      {editorUnit('sqft', dimensionUnit).unit}
-                    </strong>
-                  </div>
-                </div>
-              );
-            })}
             <div className="boq-stage-subcard">
               <div className="boq-stage-subhead"><strong>New wall</strong><button
                 className="boq-volume-add"
@@ -1428,6 +1358,25 @@ export function BoqStageBuilder(props: Props) {
               </div>
               
             </div>
+            <div className="boq-volume-scroll">
+              <table className="boq-volume-table boq-wall-table" aria-label="Measured walls">
+                <thead><tr><th>Wall</th><th>Location</th><th>Count</th><th>Length ({dimensionUnit})</th><th>Height ({dimensionUnit})</th><th>Thickness (in)</th><th>Gross area ({editorUnit('sqft',dimensionUnit).unit})</th><th>Action</th></tr></thead>
+                <tbody>{walls.map((wall, wallIndex) => {
+                  const update = (patch: Partial<WallMeasure>) => updateWalls(walls.map((row,i) => i === wallIndex ? {...row,...patch} : row));
+                  const factor = editorUnit('ft',dimensionUnit).factor;
+                  return <tr key={wall.id}>
+                    <td><input aria-label={'Wall ' + (wallIndex + 1) + ' reference'} value={wall.name} onChange={(event) => update({name:event.target.value})} /></td>
+                    <td><select aria-label={wall.name + ' location'} value={wall.location} onChange={(event) => update({location:event.target.value === 'internal' ? 'internal' : 'external'})}><option value="external">External</option><option value="internal">Internal</option></select></td>
+                    <td><NumberField label={wall.name + ' count'} value={wall.count} integer onChange={(count) => update({count})}/></td>
+                    <td><NumberField key={'length'+dimensionUnit} label={wall.name + ' length'} value={Number((wall.lengthFeet*factor).toFixed(6))} feet={dimensionUnit==='ft'} onChange={(value) => update({lengthFeet:value/factor})}/></td>
+                    <td><NumberField key={'height'+dimensionUnit} label={wall.name + ' height'} value={Number((wall.heightFeet*factor).toFixed(6))} feet={dimensionUnit==='ft'} onChange={(value) => update({heightFeet:value/factor})}/></td>
+                    <td><NumberField label={wall.name + ' thickness'} value={wall.thicknessIn} onChange={(thicknessIn) => update({thicknessIn})}/></td>
+                    <td><strong className="boq-volume-qty">{number(wall.count*wall.lengthFeet*wall.heightFeet*editorUnit('sqft',dimensionUnit).factor)}</strong></td>
+                    <td><BoqRemove label={'Remove '+wall.name} onClick={() => updateWalls(walls.filter((_,i) => i!==wallIndex))}/></td>
+                  </tr>;
+                })}{!walls.length && <tr><td colSpan={8} className="boq-volume-empty">No measured walls</td></tr>}</tbody>
+              </table>
+            </div>
           </div>
         )}
         {isFootings && (
@@ -1489,14 +1438,13 @@ export function BoqStageBuilder(props: Props) {
                     value={col.depthIn}
                     onChange={(value) => updateCol(ci, { depthIn: value })}
                   />
-                  <div className="boq-beam-rebar-groups">
+                  <div className="boq-beam-rebar-groups"><BoqAdvanced label="Main reinforcement">
                     <strong>Main reinforcement (per column)</strong>
                     <BarsPicker
                       label={col.label + ' reinforcement'}
                       value={col.bars}
                       onChange={(bars) => updateCol(ci, { bars })}
-                    />
-                  </div>
+                    /></BoqAdvanced></div>
                   <InputNumber
                     label="Ring diameter"
                     unit="mm"
@@ -1553,14 +1501,13 @@ export function BoqStageBuilder(props: Props) {
                     value={beam.depthIn}
                     onChange={(value) => updateBeam(bi, { depthIn: value })}
                   />
-                  <div className="boq-beam-rebar-groups">
+                  <div className="boq-beam-rebar-groups"><BoqAdvanced label="Main reinforcement">
                     <strong>Main reinforcement (per beam)</strong>
                     <BarsPicker
                       label={beam.label + ' reinforcement'}
                       value={beam.bars}
                       onChange={(bars) => updateBeam(bi, { bars })}
-                    />
-                  </div>
+                    /></BoqAdvanced></div>
                   <InputNumber
                     label="Stirrup diameter"
                     unit="mm"
@@ -1705,14 +1652,13 @@ export function BoqStageBuilder(props: Props) {
                     value={beam.depthIn}
                     onChange={(depthIn) => updatePlinth(bi, { depthIn })}
                   />
-                  <div className="boq-beam-rebar-groups">
+                  <div className="boq-beam-rebar-groups"><BoqAdvanced label="Main reinforcement">
                     <strong>Main reinforcement (per beam)</strong>
                     <BarsPicker
                       label={`Plinth ${beam.label || `PB${bi + 1}`}`}
                       value={beam.bars}
                       onChange={(bars) => updatePlinth(bi, { bars })}
-                    />
-                  </div>
+                    /></BoqAdvanced></div>
                   <InputNumber
                     label="Stirrup diameter"
                     unit="mm"
