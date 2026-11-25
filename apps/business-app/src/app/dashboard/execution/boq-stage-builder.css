@@ -1904,3 +1904,114 @@
     transition: none !important;
   }
 }
+
+/* The floor setup is a compact, single-screen worksheet. */
+.execution-workspace:has(.boq-premium-wizard) > .erp-crumbs {
+  display: none;
+}
+.boq-premium-wizard {
+  gap: 12px;
+  padding-top: 0;
+}
+.boq-premium-wizard .boq-premium-heading {
+  margin: 0;
+  padding: 0;
+}
+.boq-premium-wizard .boq-premium-title {
+  gap: 9px;
+}
+.boq-premium-wizard .boq-stage-main-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+}
+.boq-premium-wizard .boq-premium-title h2 {
+  font-size: clamp(21px, 2vw, 27px);
+}
+.boq-premium-wizard .boq-premium-stage-head {
+  padding: 0 0 12px;
+}
+.boq-premium-wizard .boq-premium-entry,
+.boq-premium-wizard .boq-premium-preview {
+  padding: 12px;
+}
+.boq-premium-wizard .boq-premium-preview {
+  position: sticky;
+  top: 100px;
+  max-height: none;
+  overflow: visible;
+}
+.boq-premium-wizard .boq-guided-floor-scroll {
+  min-width: 0;
+  overflow: visible;
+  padding: 0;
+}
+.boq-premium-wizard .boq-guided-floor-table {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 0;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.boq-premium-wizard .boq-guided-floor-table :is(th, td) {
+  min-width: 0;
+  padding: 9px 5px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+.boq-premium-wizard .boq-guided-floor-table th:first-child {
+  width: 20%;
+}
+.boq-premium-wizard .boq-guided-floor-table thead th:nth-child(5) {
+  width: 20%;
+}
+.boq-premium-wizard .boq-guided-floor-table thead th:last-child {
+  width: 15%;
+}
+.boq-premium-wizard .boq-guided-floor-table :is(input, label) {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.boq-premium-wizard .boq-guided-floor-table input {
+  min-height: 34px;
+  height: 34px;
+  border-radius: 8px;
+  padding: 5px 6px;
+  font-size: 12px;
+}
+.boq-premium-wizard .boq-premium-preview-banner {
+  min-height: 58px;
+  padding: 10px;
+}
+.boq-premium-wizard .boq-premium-preview-banner h3 {
+  font-size: 15px;
+}
+.boq-premium-wizard .boq-premium-preview {
+  gap: 8px;
+}
+.boq-premium-wizard .boq-premium-breakdown > div,
+.boq-premium-wizard .boq-premium-cost-list > div {
+  padding-block: 7px;
+}
+.boq-premium-wizard .boq-premium-review-button {
+  min-height: 36px;
+  padding: 7px 10px;
+}
+@media (max-width: 1050px) {
+  .boq-premium-wizard .boq-premium-preview {
+    position: static;
+  }
+}
+@media (max-width: 600px) {
+  .boq-premium-wizard .boq-guided-floor-table :is(th, td) {
+    font-size: 10px;
+    padding: 6px 2px;
+  }
+  .boq-premium-wizard .boq-guided-floor-table input {
+    padding: 4px 2px;
+    font-size: 11px;
+  }
+}
