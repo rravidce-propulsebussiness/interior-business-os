@@ -1,5 +1,6 @@
 'use client';
 
+import { BoqRemove, editorUnit, useBoqEditorUnit } from './boq-compact-editor';
 import { NumberField } from './boq-number-field';
 import type {
   DesignSlabPanel,
@@ -20,20 +21,23 @@ function QuantityField({
   value: number;
   onChange: (value: number) => void;
 }) {
+  const selected = useBoqEditorUnit();
+  const display = editorUnit(unit, selected);
   return (
     <label className="boq-stage-field">
       <span>
         {label}
-        {unit ? ' (' + unit + ')' : ''}
+        {display.unit ? ' (' + display.unit + ')' : ''}
       </span>
       {/* Feet boxes read drawing sizes such as 5'0" (a number box would
           read 5'0" as 50). */}
       <NumberField
+        key={display.unit}
         label={label + (unit ? ' (' + unit + ')' : '')}
-        value={value}
+        value={Number((value * display.factor).toFixed(6))}
         min={0}
-        feet={unit === 'ft'}
-        onChange={onChange}
+        feet={display.unit === 'ft'}
+        onChange={(n) => onChange(n / display.factor)}
       />
     </label>
   );
@@ -55,12 +59,36 @@ export function BoqSlabScheduleEditor({
     onChange(
       panels.map((panel, i) => (i === index ? { ...panel, ...patch } : panel)),
     );
+  const selectedUnit = useBoqEditorUnit();
+  const areaDisplay = editorUnit('sqft', selectedUnit);
+  const volumeDisplay = editorUnit('m³', selectedUnit);
   const total = panels.reduce(
     (sum, panel) => sum + panel.count * panel.lengthFeet * panel.widthFeet,
     0,
   );
   return (
-    <div className="boq-structural-schedule">
+    <div className="boq-structural-schedule boq-compact-schedule">
+      <div className="boq-compact-actions"><button
+        type="button"
+        className="boq-volume-add"
+        disabled={panels.length >= 40}
+        onClick={() =>
+          onChange([
+            ...panels,
+            {
+              label: 'S' + (panels.length + 1),
+              floor,
+              count: 1,
+              lengthFeet: 0,
+              widthFeet: 0,
+              thicknessIn: 5,
+              reinforcement: [],
+            },
+          ])
+        }
+      >
+        + Add slab panel type
+      </button></div>
       {panels.map((panel, i) => {
         const updateSteel = (reinforcement: DesignSlabPanel['reinforcement']) =>
           change(i, { reinforcement });
@@ -68,12 +96,7 @@ export function BoqSlabScheduleEditor({
           <section className="boq-stage-subcard" key={i}>
             <div className="boq-stage-subhead">
               <strong>{panel.label || 'Slab ' + (i + 1)}</strong>
-              <button
-                type="button"
-                onClick={() => onChange(panels.filter((_, j) => i !== j))}
-              >
-                Remove
-              </button>
+              <BoqRemove label={`Remove slab panel type ${i + 1}`} onClick={() => onChange(panels.filter((_, j) => i !== j))} />
             </div>
             <div className="boq-stage-input-grid">
               <label className="boq-stage-field">
@@ -231,7 +254,7 @@ export function BoqSlabScheduleEditor({
             )}
             <div className="boq-stage-volume">
               <span>
-                {close(panel.count * panel.lengthFeet * panel.widthFeet)} sq ft
+                {close(panel.count * panel.lengthFeet * panel.widthFeet * areaDisplay.factor)} {areaDisplay.unit}
               </span>
               <strong>
                 {close(
@@ -250,31 +273,10 @@ export function BoqSlabScheduleEditor({
       })}
       {panels.length > 0 && (
         <small className="boq-structural-note">
-          {close(total)} sq ft of slab panels on {floor}. These replace the
-          floor-wide slab estimate; panels must not overlap.
+          {close(total * areaDisplay.factor)} {areaDisplay.unit} · {floor} · Non-overlapping panels
         </small>
       )}
-      <button
-        type="button"
-        className="boq-stage-outline"
-        disabled={panels.length >= 40}
-        onClick={() =>
-          onChange([
-            ...panels,
-            {
-              label: 'S' + (panels.length + 1),
-              floor,
-              count: 1,
-              lengthFeet: 0,
-              widthFeet: 0,
-              thicknessIn: 5,
-              reinforcement: [],
-            },
-          ])
-        }
-      >
-        + Add slab panel type
-      </button>
+      
     </div>
   );
 }
@@ -293,7 +295,30 @@ export function BoqStaircaseScheduleEditor({
       stairs.map((stair, j) => (i === j ? { ...stair, ...patch } : stair)),
     );
   return (
-    <div className="boq-structural-schedule">
+    <div className="boq-structural-schedule boq-compact-schedule">
+      <div className="boq-compact-actions"><button
+        type="button"
+        className="boq-volume-add"
+        disabled={stairs.length >= 30}
+        onClick={() =>
+          onChange([
+            ...stairs,
+            {
+              label: 'ST' + (stairs.length + 1),
+              floor,
+              count: 1,
+              widthFeet: 0,
+              riserIn: 6,
+              treadIn: 10,
+              waistIn: 6,
+              landingFeet: 0,
+              reinforcement: [],
+            },
+          ])
+        }
+      >
+        + Add staircase type
+      </button></div>
       {stairs.map((stair, i) => {
         const updateSteel = (reinforcement: DesignStairType['reinforcement']) =>
           change(i, { reinforcement });
@@ -301,12 +326,7 @@ export function BoqStaircaseScheduleEditor({
           <section className="boq-stage-subcard" key={i}>
             <div className="boq-stage-subhead">
               <strong>{stair.label || 'Stair ' + (i + 1)}</strong>
-              <button
-                type="button"
-                onClick={() => onChange(stairs.filter((_, j) => i !== j))}
-              >
-                Remove
-              </button>
+              <BoqRemove label={`Remove staircase type ${i + 1}`} onClick={() => onChange(stairs.filter((_, j) => i !== j))} />
             </div>
             <div className="boq-stage-input-grid">
               <label className="boq-stage-field">
@@ -435,29 +455,7 @@ export function BoqStaircaseScheduleEditor({
           </section>
         );
       })}
-      <button
-        type="button"
-        className="boq-stage-outline"
-        disabled={stairs.length >= 30}
-        onClick={() =>
-          onChange([
-            ...stairs,
-            {
-              label: 'ST' + (stairs.length + 1),
-              floor,
-              count: 1,
-              widthFeet: 0,
-              riserIn: 6,
-              treadIn: 10,
-              waistIn: 6,
-              landingFeet: 0,
-              reinforcement: [],
-            },
-          ])
-        }
-      >
-        + Add staircase type
-      </button>
+      
     </div>
   );
 }
