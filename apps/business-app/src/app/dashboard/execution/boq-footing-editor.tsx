@@ -64,14 +64,21 @@ function Numeric({
     </label>
   );
 }
-export function BoqFootingEditor({ footings, columnLabels, onChange, unitControl }: Props) {
+export function BoqFootingEditor({
+  footings,
+  columnLabels,
+  onChange,
+  unitControl,
+}: Props) {
   const change = (index: number, patch: Partial<DesignFootingType>) =>
     onChange(
       footings.map((row, i) => (i === index ? { ...row, ...patch } : row)),
     );
   return (
     <div className="boq-footing-editor boq-compact-schedule">
-      <div className={unitControl ? 'boq-volume-toolbar' : 'boq-compact-actions'}>
+      <div
+        className={unitControl ? 'boq-volume-toolbar' : 'boq-compact-actions'}
+      >
         {unitControl}
         <button
           className="boq-volume-add"

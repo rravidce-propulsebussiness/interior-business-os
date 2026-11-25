@@ -77,7 +77,9 @@ export function BoqSlabScheduleEditor({
   );
   return (
     <div className="boq-structural-schedule boq-compact-schedule">
-      <div className={unitControl ? 'boq-volume-toolbar' : 'boq-compact-actions'}>
+      <div
+        className={unitControl ? 'boq-volume-toolbar' : 'boq-compact-actions'}
+      >
         {unitControl}
         <button
           type="button"
@@ -319,7 +321,9 @@ export function BoqStaircaseScheduleEditor({
     );
   return (
     <div className="boq-structural-schedule boq-compact-schedule">
-      <div className={unitControl ? 'boq-volume-toolbar' : 'boq-compact-actions'}>
+      <div
+        className={unitControl ? 'boq-volume-toolbar' : 'boq-compact-actions'}
+      >
         {unitControl}
         <button
           type="button"

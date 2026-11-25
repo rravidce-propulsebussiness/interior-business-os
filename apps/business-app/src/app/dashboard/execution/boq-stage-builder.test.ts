@@ -450,7 +450,9 @@ describe('expanded volume worksheet', () => {
     expect(table(metric)).not.toContain('Quantity (CFT)');
     expect((table(ft).match(/boq-volume-add/g) ?? []).length).toBe(1);
     expect(table(ft)).not.toContain('Input dimension unit');
-    const toolbar = table(ft).match(/<div class="boq-volume-toolbar">[\s\S]*?<\/div>/)?.[0] ?? '';
+    const toolbar =
+      table(ft).match(/<div class="boq-volume-toolbar">[\s\S]*?<\/div>/)?.[0] ??
+      '';
     expect(toolbar).toContain('aria-label="Dimension unit"');
     expect(toolbar).toContain('boq-volume-add');
     expect(table(ft)).toContain('Remove F1-F12');
@@ -517,9 +519,22 @@ describe('shared compact work editors', () => {
       expect(html).not.toContain('Input dimension unit');
       expect(html).toContain('aria-label="Dimension unit"');
       expect((html.match(/aria-label="Dimension unit"/g) ?? []).length).toBe(1);
-      const toolbar = html.match(/<div class="boq-volume-toolbar">[\s\S]*?<\/div>/)?.[0] ?? '';
+      const toolbar =
+        html.match(/<div class="boq-volume-toolbar">[\s\S]*?<\/div>/)?.[0] ??
+        '';
       expect(toolbar).toContain('aria-label="Dimension unit"');
-      if (['footings', 'columns', 'plinth', 'beams', 'slab', 'staircase', 'brickwork', 'tiles'].includes(category)) {
+      if (
+        [
+          'footings',
+          'columns',
+          'plinth',
+          'beams',
+          'slab',
+          'staircase',
+          'brickwork',
+          'tiles',
+        ].includes(category)
+      ) {
         expect(toolbar).toContain('boq-volume-add');
       }
       expect(html).toContain('aria-label="' + title + ' calculated costs"');

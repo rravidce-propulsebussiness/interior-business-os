@@ -939,13 +939,18 @@ export function BoqStageBuilder(props: Props) {
         className="boq-editor-unit"
         aria-label="Dimension unit"
         value={dimensionUnit}
-        onChange={(event) => setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')}
+        onChange={(event) =>
+          setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')
+        }
       >
         <option value="ft">Feet (ft)</option>
         <option value="m">Metres (m)</option>
       </select>
     );
-    const hasScheduleToolbar = isFootings || isColumns || isBeams ||
+    const hasScheduleToolbar =
+      isFootings ||
+      isColumns ||
+      isBeams ||
       ['plinth', 'slab', 'staircase'].includes(category.key) ||
       (category.key === 'brickwork' && !!floor) ||
       (category.key === 'tiles' && !!current);
@@ -956,9 +961,7 @@ export function BoqStageBuilder(props: Props) {
           key={stage + ':' + category.key}
         >
           {!isGeometry(category.key) && !hasScheduleToolbar && (
-            <div className="boq-volume-toolbar">
-              {unitControl}
-            </div>
+            <div className="boq-volume-toolbar">{unitControl}</div>
           )}
           <div className="boq-stage-edit-head">
             <div>
@@ -1261,39 +1264,38 @@ export function BoqStageBuilder(props: Props) {
               <div className="boq-volume-toolbar">
                 {unitControl}
                 <button
-                    className="boq-volume-add"
-                    type="button"
-                    disabled={
-                      !(
-                        wallDraft.lengthFeet > 0 &&
-                        wallDraft.heightFeet > 0 &&
-                        wallDraft.count > 0
-                      )
-                    }
-                    onClick={() => {
-                      updateWalls([
-                        ...walls,
-                        {
-                          ...wallDraft,
-                          id: 'wall-' + Date.now().toString(36),
-                          name:
-                            wallDraft.name.trim() ||
-                            'Wall ' + (walls.length + 1),
-                        },
-                      ]);
-                      setWallDraft({
-                        id: 'new',
-                        name: '',
-                        location: 'external',
-                        count: 1,
-                        lengthFeet: 0,
-                        heightFeet: 0,
-                        thicknessIn: 9,
-                      });
-                    }}
-                  >
-                    + Add Item
-                  </button>
+                  className="boq-volume-add"
+                  type="button"
+                  disabled={
+                    !(
+                      wallDraft.lengthFeet > 0 &&
+                      wallDraft.heightFeet > 0 &&
+                      wallDraft.count > 0
+                    )
+                  }
+                  onClick={() => {
+                    updateWalls([
+                      ...walls,
+                      {
+                        ...wallDraft,
+                        id: 'wall-' + Date.now().toString(36),
+                        name:
+                          wallDraft.name.trim() || 'Wall ' + (walls.length + 1),
+                      },
+                    ]);
+                    setWallDraft({
+                      id: 'new',
+                      name: '',
+                      location: 'external',
+                      count: 1,
+                      lengthFeet: 0,
+                      heightFeet: 0,
+                      thicknessIn: 9,
+                    });
+                  }}
+                >
+                  + Add Item
+                </button>
               </div>
               {walls.some((wall) => wall.location === 'external') &&
                 props.floors.some(
@@ -1317,7 +1319,9 @@ export function BoqStageBuilder(props: Props) {
                   </button>
                 )}
               <div className="boq-stage-subcard">
-                <div className="boq-stage-subhead"><strong>New wall</strong></div>
+                <div className="boq-stage-subhead">
+                  <strong>New wall</strong>
+                </div>
                 <div className="boq-stage-input-grid">
                   <InputText
                     label="Wall reference"
@@ -1520,7 +1524,7 @@ export function BoqStageBuilder(props: Props) {
           )}
           {isFootings && (
             <BoqFootingEditor
-                unitControl={unitControl}
+              unitControl={unitControl}
               footings={drawing.footings ?? []}
               columnLabels={drawing.columns.map((col) => col.label)}
               onChange={setFootings}
