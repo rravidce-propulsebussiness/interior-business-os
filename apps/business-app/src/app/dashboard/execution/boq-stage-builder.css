@@ -2027,10 +2027,10 @@
 .boq-volume-toolbar {
   display: flex;
   justify-content: space-between;
-  align-items: end;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding: 4px 0;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  padding: 0;
 }
 .boq-volume-toolbar .boq-stage-unit-switch {
   display: flex;
@@ -2407,5 +2407,41 @@
   }
   .boq-compact-editor .boq-stage-subhead {
     margin: -7px -7px 7px;
+  }
+}
+
+/* Every expanded work section uses one aligned, compact action row. */
+.boq-volume-toolbar > .boq-editor-unit,
+.boq-volume-toolbar > .boq-volume-add {
+  box-sizing: border-box;
+  height: 36px;
+  min-height: 36px;
+  margin: 0;
+  border-radius: 9px;
+  font-size: 12px;
+  line-height: 1;
+}
+.boq-volume-toolbar > .boq-editor-unit {
+  width: 125px;
+  min-width: 0;
+  flex: 0 1 125px;
+  padding: 0 9px;
+  border: 1px solid #e5cbc4;
+  color: #65242b;
+  font-weight: 700;
+  background: #fffdfb;
+}
+.boq-volume-toolbar > .boq-volume-add {
+  flex: 0 0 auto;
+  padding: 0 12px;
+  margin-left: auto;
+}
+@media (max-width: 400px) {
+  .boq-volume-toolbar {
+    gap: 6px;
+  }
+  .boq-volume-toolbar > .boq-volume-add {
+    padding-inline: 8px;
+    font-size: 11px;
   }
 }
