@@ -70,9 +70,7 @@ import {
   clearDerivedPlasterQuantityOverrides,
   isAutoPlasterQuantity,
 } from './boq-plaster-guards';
-import {
-  type BoqScopeReviews,
-} from './boq-scope-coverage';
+import { type BoqScopeReviews } from './boq-scope-coverage';
 
 type Generator = {
   revisionId: string;
@@ -1890,7 +1888,7 @@ export function BoqWorkspace({
                   </div>
                   <div>
                     <span>
-                      {                      !unpricedOutputs.length &&
+                      {!unpricedOutputs.length &&
                       (generator?.engineVersion ?? 0) >= BOQ_ENGINE_VERSION &&
                       !generator?.warnings.some((warning) =>
                         warning.includes('Measurement pending'),
@@ -1930,7 +1928,7 @@ export function BoqWorkspace({
                     use this subtotal as the final project cost.
                   </p>
                 )}
-                
+
                 {labour && canViewCost && (
                   <section className="boq-labour-saved">
                     <h3>Labour Costing Summary</h3>
@@ -2221,7 +2219,7 @@ export function BoqWorkspace({
         </div>
         <div>
           <span>
-            {            !unpricedOutputs.length &&
+            {!unpricedOutputs.length &&
             (generator?.engineVersion ?? 0) >= BOQ_ENGINE_VERSION &&
             !generator?.warnings.some((warning) =>
               warning.includes('Measurement pending'),
@@ -2274,7 +2272,7 @@ export function BoqWorkspace({
           {message}
         </p>
       )}
-      
+
       {active && canEdit && autoSaveState === 'error' && (
         <div
           className="boq-autosave-status"
@@ -2314,84 +2312,114 @@ export function BoqWorkspace({
               </button>
             )}
           </div>
-            <BoqStageBuilder
-              key={projectId || active?.id || 'new'}
-              floors={floorsForGeneration}
-              lines={lines}
-              projectId={projectId}
-              projects={projects.map((project) => ({
-                id: project.id,
-                name: project.name,
-                eligible: newProjects.some((item) => item.id === project.id),
-              }))}
-              onProjectChange={selectProject}
-              title={title}
-              onTitleChange={setTitle}
-              quoteLabel={currentQuote?.label ?? ''}
-              design={genDesign}
-              onDesignChange={setGenDesign}
-              counts={countsForGeneration}
-              legacyCountsNeedReview={Boolean(
-                generator?.legacyCountsNeedReview ||
-                (active &&
-                  generator &&
-                  (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION),
-              )}
-              onCountsChange={updateStageCounts}
-              structuralSettings={concreteSettings}
-              materialRates={initialRates}
-              structuralRmcEnabled={rmcEnabled}
-              structuralRmcRate={rmcRatePerM3}
-              onStructuralRmcToggle={setRmcEnabled}
-              onStructuralRmcRateChange={setRmcRateOverride}
-              onAddGeometry={addStageGeometry}
-              onUpdateGeometry={updateStageGeometry}
-              onFloorChange={setGenFloors}
-              repeatFrom={repeatFrom}
-              onRepeatFloors={repeatStageFloors}
-              onCustomizeFloor={customizeStageFloor}
-              onUpdateQuantity={updateOutputQuantity}
-              onResetQuantity={resetOutputQuantity}
-              onUpdateRate={updateOutputRate}
-              rateFor={priceOf}
-              onAddManual={addStageManual}
-              onUpdateMiscellaneous={updateMiscellaneous}
-              onRemoveManual={(index) =>
-                setLines((prior) => {
-                  const target = prior[index];
-                  return prior.filter(
-                    (line, i) =>
-                      i !== index &&
-                      !(
-                        target &&
-                        !target.origin &&
-                        line.inputs.repeatedFrom === target.section &&
-                        line.inputs.sourceLineId === target.id
-                      ),
-                  );
-                })
-              }
-              onSave={save}
-              onDetailedBoq={openDetailedBoq}
-              labourContent={!canViewCost ? <p className="boq-notice">Cost access required.</p> : labour ? (
-                <BoqLabourPanel config={labour} onChange={setLabour} floors={floorsForGeneration} lines={lines} materialCost={materialOnlyCost} existingLabourCost={legacyLabourCost} tradeLabour={tradeLabourSummary} canEdit={(active ? canEdit : canCreate) && canViewCost} canViewCost={canViewCost} busy={busy} onSave={save} autoSaveLabel={active ? autoSaveLabel : undefined} />
-              ) : <div className="boq-labour-enable"><button type="button" className="erp-button erp-button-primary" disabled={!(active ? canEdit : canCreate)} onClick={() => setLabour({ ...DEFAULT_LABOUR })}>Enable Composite Labour at ₹400/sft</button></div>}
-              isLabourOutput={isLabourOutput}
-              isUnpricedOutput={(output) => !isOldLabour(output) && isBoqCostUnpriced(output, priceOf)}
-              projectLabourCost={labourCost}
-              projectMaterialCost={materialOnlyCost}
-              calculating={calculating}
-              canOpenDetailed={Boolean(active)}
-              canViewCost={canViewCost}
-              busy={busy}
-              canSave={active ? canEdit : canCreate}
-              autoSaveLabel={active ? autoSaveLabel : undefined}
-              message={message}
-              newDocument={!active}
-              labourStageCosts={labour ? labourEstimate.byStage : undefined}
-              projectTotalCost={labour ? materialCost : undefined}
-              isOldLabourOutput={labour ? isOldLabour : undefined}
-            />
+          <BoqStageBuilder
+            key={projectId || active?.id || 'new'}
+            floors={floorsForGeneration}
+            lines={lines}
+            projectId={projectId}
+            projects={projects.map((project) => ({
+              id: project.id,
+              name: project.name,
+              eligible: newProjects.some((item) => item.id === project.id),
+            }))}
+            onProjectChange={selectProject}
+            title={title}
+            onTitleChange={setTitle}
+            quoteLabel={currentQuote?.label ?? ''}
+            design={genDesign}
+            onDesignChange={setGenDesign}
+            counts={countsForGeneration}
+            legacyCountsNeedReview={Boolean(
+              generator?.legacyCountsNeedReview ||
+              (active &&
+                generator &&
+                (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION),
+            )}
+            onCountsChange={updateStageCounts}
+            structuralSettings={concreteSettings}
+            materialRates={initialRates}
+            structuralRmcEnabled={rmcEnabled}
+            structuralRmcRate={rmcRatePerM3}
+            onStructuralRmcToggle={setRmcEnabled}
+            onStructuralRmcRateChange={setRmcRateOverride}
+            onAddGeometry={addStageGeometry}
+            onUpdateGeometry={updateStageGeometry}
+            onFloorChange={setGenFloors}
+            repeatFrom={repeatFrom}
+            onRepeatFloors={repeatStageFloors}
+            onCustomizeFloor={customizeStageFloor}
+            onUpdateQuantity={updateOutputQuantity}
+            onResetQuantity={resetOutputQuantity}
+            onUpdateRate={updateOutputRate}
+            rateFor={priceOf}
+            onAddManual={addStageManual}
+            onUpdateMiscellaneous={updateMiscellaneous}
+            onRemoveManual={(index) =>
+              setLines((prior) => {
+                const target = prior[index];
+                return prior.filter(
+                  (line, i) =>
+                    i !== index &&
+                    !(
+                      target &&
+                      !target.origin &&
+                      line.inputs.repeatedFrom === target.section &&
+                      line.inputs.sourceLineId === target.id
+                    ),
+                );
+              })
+            }
+            onSave={save}
+            onDetailedBoq={openDetailedBoq}
+            labourContent={
+              !canViewCost ? (
+                <p className="boq-notice">Cost access required.</p>
+              ) : labour ? (
+                <BoqLabourPanel
+                  config={labour}
+                  onChange={setLabour}
+                  floors={floorsForGeneration}
+                  lines={lines}
+                  materialCost={materialOnlyCost}
+                  existingLabourCost={legacyLabourCost}
+                  tradeLabour={tradeLabourSummary}
+                  canEdit={(active ? canEdit : canCreate) && canViewCost}
+                  canViewCost={canViewCost}
+                  busy={busy}
+                  onSave={save}
+                  autoSaveLabel={active ? autoSaveLabel : undefined}
+                />
+              ) : (
+                <div className="boq-labour-enable">
+                  <button
+                    type="button"
+                    className="erp-button erp-button-primary"
+                    disabled={!(active ? canEdit : canCreate)}
+                    onClick={() => setLabour({ ...DEFAULT_LABOUR })}
+                  >
+                    Enable Composite Labour at ₹400/sft
+                  </button>
+                </div>
+              )
+            }
+            isLabourOutput={isLabourOutput}
+            isUnpricedOutput={(output) =>
+              !isOldLabour(output) && isBoqCostUnpriced(output, priceOf)
+            }
+            projectLabourCost={labourCost}
+            projectMaterialCost={materialOnlyCost}
+            calculating={calculating}
+            canOpenDetailed={Boolean(active)}
+            canViewCost={canViewCost}
+            busy={busy}
+            canSave={active ? canEdit : canCreate}
+            autoSaveLabel={active ? autoSaveLabel : undefined}
+            message={message}
+            newDocument={!active}
+            labourStageCosts={labour ? labourEstimate.byStage : undefined}
+            projectTotalCost={labour ? materialCost : undefined}
+            isOldLabourOutput={labour ? isOldLabour : undefined}
+          />
         </section>
       </div>
     </main>

@@ -1404,7 +1404,7 @@
   color: #591e25;
   font-size: clamp(23px, 2.2vw, 31px);
   font-weight: 850;
-  letter-spacing: -.035em;
+  letter-spacing: -0.035em;
 }
 .boq-premium-title small {
   color: #70504b;
@@ -1434,12 +1434,12 @@
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, #76262f, #bb5a40 80%, #f7aa69);
-  transition: width .36s cubic-bezier(.22,.61,.36,1);
+  transition: width 0.36s cubic-bezier(0.22, 0.61, 0.36, 1);
   box-shadow: 1px 0 10px #eb9258;
 }
 .boq-premium-wizard .boq-guided-step-scroll {
   display: grid;
-  grid-template-columns: repeat(11,minmax(78px,1fr));
+  grid-template-columns: repeat(11, minmax(78px, 1fr));
   gap: 9px;
   padding: 3px 2px 12px;
   overflow-x: auto;
@@ -1455,14 +1455,17 @@
   min-width: 0;
   border: 1px solid #ead6d0;
   border-radius: 15px;
-  background: linear-gradient(145deg,#fffdfb,#fcf4f0);
+  background: linear-gradient(145deg, #fffdfb, #fcf4f0);
   color: #582d2d;
   white-space: normal;
   text-align: center;
   padding: 7px 4px;
   font-size: 11px;
   line-height: 1.22;
-  transition: background .2s, transform .2s, box-shadow .2s;
+  transition:
+    background 0.2s,
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 .boq-premium-wizard .boq-guided-step-scroll > button > span {
   display: inline-flex;
@@ -1483,8 +1486,10 @@
 .boq-premium-wizard .boq-guided-step-scroll > button.selected {
   color: white;
   border-color: #b95c48;
-  background: linear-gradient(145deg,#ad4a46,#76252f);
-  box-shadow: 0 6px 14px #c3624350, inset 0 -2px 0 #ffbc89;
+  background: linear-gradient(145deg, #ad4a46, #76252f);
+  box-shadow:
+    0 6px 14px #c3624350,
+    inset 0 -2px 0 #ffbc89;
 }
 .boq-premium-wizard .boq-guided-step-scroll > button.selected > span {
   color: #fff;
@@ -1507,12 +1512,12 @@
   min-width: 0;
   border: 1px solid #ebd9d2;
   border-radius: 18px;
-  background: linear-gradient(150deg,#fffefd,#fff9f5);
+  background: linear-gradient(150deg, #fffefd, #fff9f5);
   box-shadow: 0 8px 26px #713b3010;
   padding: 14px;
 }
 .boq-premium-entry {
-  animation: boq-stage-in .24s ease-out;
+  animation: boq-stage-in 0.24s ease-out;
 }
 .boq-premium-stage-head {
   justify-content: space-between;
@@ -1521,7 +1526,7 @@
 }
 .boq-premium-stage-head h3 {
   margin: 0;
-  font-size: clamp(18px,1.6vw,24px);
+  font-size: clamp(18px, 1.6vw, 24px);
   font-weight: 850;
   color: #65242b;
 }
@@ -1536,7 +1541,7 @@
 .boq-premium-entry .boq-stage-items,
 .boq-premium-entry .boq-stage-items.foundation {
   display: grid;
-  grid-template-columns: minmax(0,1fr);
+  grid-template-columns: minmax(0, 1fr);
   gap: 9px;
   padding: 0;
 }
@@ -1553,7 +1558,7 @@
   border: 0;
   border-radius: 0;
   gap: 9px;
-  background: linear-gradient(90deg,#f9e5db,#fff6f0);
+  background: linear-gradient(90deg, #f9e5db, #fff6f0);
 }
 .boq-premium-work .boq-stage-tile-body {
   display: flex;
@@ -1592,7 +1597,7 @@
   border: 0;
   border-radius: 0;
   min-width: 0;
-  animation: boq-stage-in .2s ease-out;
+  animation: boq-stage-in 0.2s ease-out;
 }
 .boq-premium-work .boq-stage-edit-head {
   display: none;
@@ -1621,8 +1626,8 @@
   font-size: 10px;
   font-weight: 750;
 }
-.boq-premium-work-table td:nth-child(n+2),
-.boq-premium-work-table th:nth-child(n+2) {
+.boq-premium-work-table td:nth-child(n + 2),
+.boq-premium-work-table th:nth-child(n + 2) {
   text-align: right;
   white-space: nowrap;
 }
@@ -1655,7 +1660,7 @@
   font-size: 13px;
 }
 .boq-premium-entry .boq-guided-primary {
-  background: linear-gradient(135deg,#b65b41,#782630);
+  background: linear-gradient(135deg, #b65b41, #782630);
   box-shadow: 0 3px 10px #802b3025;
 }
 .boq-premium-preview {
@@ -1678,7 +1683,7 @@
   padding: 13px;
   border-radius: 11px;
   color: white;
-  background: linear-gradient(110deg,#77242f,#a74e43 58%,#e8a679);
+  background: linear-gradient(110deg, #77242f, #a74e43 58%, #e8a679);
 }
 .boq-premium-preview-banner > span {
   display: grid;
@@ -1706,7 +1711,7 @@
   width: 50%;
   right: 0;
   bottom: 0;
-  opacity: .38;
+  opacity: 0.38;
   color: #63222d;
 }
 .boq-premium-review-status {
@@ -1783,7 +1788,7 @@
   border: 0;
   border-radius: 9px;
   padding: 12px 9px;
-  background: linear-gradient(90deg,#f9e0d9,#f8e9e2);
+  background: linear-gradient(90deg, #f9e0d9, #f8e9e2);
 }
 .boq-premium-total dt,
 .boq-premium-total dd {
@@ -1818,7 +1823,9 @@
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
-  transition: background .2s, box-shadow .2s;
+  transition:
+    background 0.2s,
+    box-shadow 0.2s;
 }
 .boq-premium-review-button:hover {
   background: #f8e8e0;
@@ -1827,7 +1834,7 @@
 .boq-premium-details {
   display: grid;
   gap: 5px;
-  animation: boq-stage-in .2s ease-out;
+  animation: boq-stage-in 0.2s ease-out;
 }
 .boq-premium-check-row {
   display: flex;
@@ -1848,20 +1855,26 @@
   color: #86726a;
 }
 @keyframes boq-stage-in {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @media (max-width: 1190px) {
   .boq-premium-wizard .boq-guided-step-scroll {
-    grid-template-columns: repeat(11,minmax(82px,1fr));
+    grid-template-columns: repeat(11, minmax(82px, 1fr));
   }
   .boq-premium-layout {
-    grid-template-columns: minmax(0,1.5fr) minmax(270px,1fr);
+    grid-template-columns: minmax(0, 1.5fr) minmax(270px, 1fr);
   }
 }
 @media (max-width: 950px) {
   .boq-premium-layout {
-    grid-template-columns: minmax(0,1fr);
+    grid-template-columns: minmax(0, 1fr);
   }
   .boq-premium-preview {
     position: static;
@@ -1869,13 +1882,24 @@
   }
 }
 @media (max-width: 560px) {
-  .boq-premium-progress { flex-basis: 100%; }
-  .boq-premium-entry, .boq-premium-preview { padding: 10px; }
-  .boq-premium-work .boq-stage-tile-icon { display: none; }
-  .boq-premium-work-cost { font-size: 11px; }
+  .boq-premium-progress {
+    flex-basis: 100%;
+  }
+  .boq-premium-entry,
+  .boq-premium-preview {
+    padding: 10px;
+  }
+  .boq-premium-work .boq-stage-tile-icon {
+    display: none;
+  }
+  .boq-premium-work-cost {
+    font-size: 11px;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .boq-premium-wizard *, .boq-premium-wizard *::before, .boq-premium-wizard *::after {
+  .boq-premium-wizard *,
+  .boq-premium-wizard *::before,
+  .boq-premium-wizard *::after {
     animation: none !important;
     transition: none !important;
   }

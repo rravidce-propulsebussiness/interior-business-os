@@ -163,11 +163,22 @@ export function BoqWizardProgress({
         <button
           key={step.number}
           type="button"
-          className={active === step.number ? 'selected' : reviewed.includes(step.number) ? 'reviewed' : ''}
+          className={
+            active === step.number
+              ? 'selected'
+              : reviewed.includes(step.number)
+                ? 'reviewed'
+                : ''
+          }
           aria-current={active === step.number ? 'step' : undefined}
           onClick={() => onChange(step.number)}
         >
-          <span>{reviewed.includes(step.number) && active !== step.number ? '✓ ' : ''}{index + 1}</span>
+          <span>
+            {reviewed.includes(step.number) && active !== step.number
+              ? '✓ '
+              : ''}
+            {index + 1}
+          </span>
           <strong>{step.short}</strong>
         </button>
       ))}

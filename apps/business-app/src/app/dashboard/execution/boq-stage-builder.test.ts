@@ -78,20 +78,42 @@ describe('compact BOQ entry stages', () => {
   });
 
   it('previews only entered amounts with separate material and labour totals', () => {
-    const html = renderToStaticMarkup(createElement(BoqStageBuilder, {
-      ...base,
-      lines: [{
-        id: 'foundation-test',
-        name: 'Measured excavation',
-        section: 'Foundation',
-        kind: 'measured-geometry',
-        inputs: { stageCategory: 'excavation', count: 1, lengthFeet: 10, widthFeet: 8, depthFeet: 2 },
-        outputs: [
-          { name: 'Excavation labour', material: 'labour_excavation', quantity: 2, unit: 'm³', rate: 300 },
-          { name: 'Measured material', material: 'sand', quantity: 3, unit: 'm³', rate: 100 },
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, {
+        ...base,
+        lines: [
+          {
+            id: 'foundation-test',
+            name: 'Measured excavation',
+            section: 'Foundation',
+            kind: 'measured-geometry',
+            inputs: {
+              stageCategory: 'excavation',
+              count: 1,
+              lengthFeet: 10,
+              widthFeet: 8,
+              depthFeet: 2,
+            },
+            outputs: [
+              {
+                name: 'Excavation labour',
+                material: 'labour_excavation',
+                quantity: 2,
+                unit: 'm³',
+                rate: 300,
+              },
+              {
+                name: 'Measured material',
+                material: 'sand',
+                quantity: 3,
+                unit: 'm³',
+                rate: 100,
+              },
+            ],
+          },
         ],
-      }],
-    }));
+      }),
+    );
     expect(html).toContain('₹600');
     expect(html).toContain('₹300');
     expect(html).toContain('₹900');
