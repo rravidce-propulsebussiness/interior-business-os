@@ -7,6 +7,7 @@ import {
   isDerivedQuantityReadOnly,
   withSlabSchedule,
 } from './boq-stage-builder';
+import { editorUnit } from './boq-compact-editor';
 import { BoqFootingEditor } from './boq-footing-editor';
 import { BarsPicker } from './boq-design-schedule';
 import { newFootingType } from '@business-os/core/construction-boq';
@@ -458,5 +459,43 @@ describe('expanded volume worksheet', () => {
     const html = renderUnit('ft', false);
     expect(html).not.toContain('Rate / CFT');
     expect(html).not.toContain('₹7,646');
+  });
+});
+
+describe('shared compact work editors', () => {
+  it('converts area and volume presentation without changing the amount', () => {
+    for (const [source, selected, expected] of [
+      ['m³', 'ft', 'CFT'], ['sqft', 'm', 'm²'], ['ft', 'm', 'm'],
+      ['kg', 'm', 'kg'],
+    ] as const) {
+      const display = editorUnit(source, selected);
+      expect(display.unit).toBe(expected);
+      expect(10 * display.factor * (150 / display.factor)).toBeCloseTo(1500);
+    }
+  });
+  it.each([
+    [4, 'Foundation', 'footings', 'Footings'],
+    [4, 'Foundation', 'columns', 'Columns'],
+    [4, 'Foundation', 'plinth', 'Plinth Beam'],
+    [7, 'Ground Floor', 'beams', 'Beams'],
+    [7, 'Ground Floor', 'slab', 'Slab'],
+    [7, 'Ground Floor', 'staircase', 'Staircase'],
+    [8, 'Ground Floor', 'brickwork', 'Brickwork'],
+    [8, 'Ground Floor', 'compound', 'Compound Wall'],
+    [9, 'Ground Floor', 'doors', 'Doors &amp; Windows'],
+    [10, 'Ground Floor', 'plaster', 'Plastering'],
+    [10, 'Ground Floor', 'painting', 'Painting'],
+    [11, 'Ground Floor', 'tiles', 'Tiles'],
+    [11, 'Ground Floor', 'electrical', 'Electrical'],
+    [11, 'Ground Floor', 'plumbing', 'Plumbing'],
+  ] as const)('renders compact cost review for stage %s %s %s', (step, stage, category, title) => {
+    const html = renderToStaticMarkup(createElement(BoqStageBuilder, {
+      ...base, initialStep: step, initialEditor: {stage, category},
+      floors: [{name:'Ground Floor', areaSqft:1000,lengthFeet:40,widthFeet:25,heightFeet:11}],
+    }));
+    expect(html).toContain('boq-compact-editor');
+    expect(html).toContain('Input dimension unit');
+    expect(html).toContain('aria-label="' + title + ' calculated costs"');
+    expect(html).toContain('Total ' + title);
   });
 });
