@@ -1526,12 +1526,8 @@ export function BoqWorkspace({
     const outputs = measuredOutputs(kind, values, settings).map((output) =>
       fillingOutput(name, output),
     );
-    if (!outputs.length) {
-      setMessage(
-        'Enter a positive count, length, width and depth for measured work.',
-      );
-      return;
-    }
+    // A newly added row is a draft measurement. Keep its empty outputs until
+    // its dimensions are complete; the same row is then calculated on edit.
     const item: SavedLine = {
       id: uid(),
       name:
@@ -1573,7 +1569,7 @@ export function BoqWorkspace({
         inputs: { ...item.inputs, repeatedFrom: source, sourceLineId: item.id },
       }));
     setLines((prior) => [...prior, item, ...children]);
-    setMessage(`${item.name} measured and added. Save BOQ to keep it.`);
+    setMessage('');
   }
   function updateStageGeometry(
     index: number,
