@@ -97,7 +97,7 @@ describe('material-wise BOQ cost', () => {
     const read = (path: string) =>
       readFileSync(new URL(path, import.meta.url), 'utf8');
     const workspace = read('./boq-workspace.tsx');
-    expect(workspace).toContain('const BOQ_ENGINE_VERSION = 3;');
+    expect(workspace).toContain('const BOQ_ENGINE_VERSION = 4;');
     expect(workspace).toContain('engineVersion: BOQ_ENGINE_VERSION,');
     expect(workspace).toContain(
       '(generator.engineVersion ?? 1) >= BOQ_ENGINE_VERSION',
