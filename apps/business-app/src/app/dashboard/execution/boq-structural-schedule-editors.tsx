@@ -33,7 +33,7 @@ function QuantityField({
           read 5'0" as 50). */}
       <NumberField
         key={display.unit}
-        label={label + (unit ? ' (' + unit + ')' : '')}
+        label={label + (display.unit ? ' (' + display.unit + ')' : '')}
         value={Number((value * display.factor).toFixed(6))}
         min={0}
         feet={display.unit === 'ft'}
@@ -263,9 +263,9 @@ export function BoqSlabScheduleEditor({
                     panel.widthFeet *
                     panel.thicknessIn) /
                     12) *
-                    0.028316846592,
+                    0.028316846592 * volumeDisplay.factor,
                 )}{' '}
-                m³
+                {volumeDisplay.unit}
               </strong>
             </div>
           </section>
