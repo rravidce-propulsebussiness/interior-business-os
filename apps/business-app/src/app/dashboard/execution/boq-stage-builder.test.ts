@@ -401,17 +401,45 @@ describe('slab schedule entry', () => {
 
 describe('expanded volume worksheet', () => {
   const line = {
-    id: 'excavation-one', name: 'F1-F12', section: 'Foundation', kind: 'measured-geometry',
-    inputs: { stageCategory: 'excavation', count: 12, lengthFeet: 5, widthFeet: 5, depthFeet: 6 },
-    outputs: [{ name: 'Excavation (measured)', material: 'excavation', quantity: 50.97, unit: 'm³', rate: 150 }],
+    id: 'excavation-one',
+    name: 'F1-F12',
+    section: 'Foundation',
+    kind: 'measured-geometry',
+    inputs: {
+      stageCategory: 'excavation',
+      count: 12,
+      lengthFeet: 5,
+      widthFeet: 5,
+      depthFeet: 6,
+    },
+    outputs: [
+      {
+        name: 'Excavation (measured)',
+        material: 'excavation',
+        quantity: 50.97,
+        unit: 'm³',
+        rate: 150,
+      },
+    ],
   };
-  const renderUnit = (unit: 'ft' | 'm', canViewCost = true) => renderToStaticMarkup(createElement(BoqStageBuilder, {
-    ...base, initialEditor: { stage: 'Foundation', category: 'excavation' }, initialDimensionUnit: unit, lines: [line], canViewCost,
-  }));
+  const renderUnit = (unit: 'ft' | 'm', canViewCost = true) =>
+    renderToStaticMarkup(
+      createElement(BoqStageBuilder, {
+        ...base,
+        initialEditor: { stage: 'Foundation', category: 'excavation' },
+        initialDimensionUnit: unit,
+        lines: [line],
+        canViewCost,
+      }),
+    );
   it('renders only one add button and the selected quantity/rate unit', () => {
     const ft = renderUnit('ft');
     const metric = renderUnit('m');
-    const table = (html: string) => html.slice(html.indexOf('boq-volume-editor'), html.indexOf('boq-volume-total') + 600);
+    const table = (html: string) =>
+      html.slice(
+        html.indexOf('boq-volume-editor'),
+        html.indexOf('boq-volume-total') + 600,
+      );
     expect(table(ft)).toContain('Quantity (CFT)');
     expect(table(ft)).toContain('Rate / CFT');
     expect(table(ft)).toContain('4.2475');
