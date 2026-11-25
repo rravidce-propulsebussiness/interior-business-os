@@ -398,3 +398,65 @@ describe('slab schedule entry', () => {
     expect(withSlabSchedule({}, 'coverMm', 40)).toEqual({ coverMm: 40 });
   });
 });
+
+describe('expanded volume worksheet', () => {
+  const line = {
+    id: 'excavation-one',
+    name: 'F1-F12',
+    section: 'Foundation',
+    kind: 'measured-geometry',
+    inputs: {
+      stageCategory: 'excavation',
+      count: 12,
+      lengthFeet: 5,
+      widthFeet: 5,
+      depthFeet: 6,
+    },
+    outputs: [
+      {
+        name: 'Excavation (measured)',
+        material: 'excavation',
+        quantity: 50.97,
+        unit: 'm³',
+        rate: 150,
+      },
+    ],
+  };
+  const renderUnit = (unit: 'ft' | 'm', canViewCost = true) =>
+    renderToStaticMarkup(
+      createElement(BoqStageBuilder, {
+        ...base,
+        initialEditor: { stage: 'Foundation', category: 'excavation' },
+        initialDimensionUnit: unit,
+        lines: [line],
+        canViewCost,
+      }),
+    );
+  it('renders only one add button and the selected quantity/rate unit', () => {
+    const ft = renderUnit('ft');
+    const metric = renderUnit('m');
+    const table = (html: string) =>
+      html.slice(
+        html.indexOf('boq-volume-editor'),
+        html.indexOf('boq-volume-total') + 600,
+      );
+    expect(table(ft)).toContain('Quantity (CFT)');
+    expect(table(ft)).toContain('Rate / CFT');
+    expect(table(ft)).toContain('4.2475');
+    expect(table(ft)).not.toContain('Quantity (m³)');
+    expect(table(metric)).toContain('Quantity (m³)');
+    expect(table(metric)).toContain('Rate / m³');
+    expect(table(metric)).not.toContain('Quantity (CFT)');
+    expect((table(ft).match(/boq-volume-add/g) ?? []).length).toBe(1);
+    expect(table(ft)).toContain('Remove F1-F12');
+    expect(table(ft)).toContain('1,800');
+    expect(table(metric)).toContain('50.97');
+    expect(table(ft)).toContain('₹7,646');
+    expect(table(metric)).toContain('₹7,646');
+  });
+  it('keeps costs hidden without cost permission', () => {
+    const html = renderUnit('ft', false);
+    expect(html).not.toContain('Rate / CFT');
+    expect(html).not.toContain('₹7,646');
+  });
+});

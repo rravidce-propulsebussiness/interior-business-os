@@ -29,7 +29,7 @@ import type {
 import {
   measuredVolume,
   standardShelfTakeoff,
-  STANDARD_SHELF_ASSUMPTIONS,
+  displayMeasuredVolume,
   FEET_PER_METRE,
   type MeasuredDimensions,
   type MeasuredKind,
@@ -146,6 +146,8 @@ type Props = {
   calculating?: boolean;
   /** Used by render tests and deep-link recovery; new BOQs open floor setup. */
   initialStep?: number;
+  initialEditor?: { stage: string; category: string };
+  initialDimensionUnit?: 'ft' | 'm';
   canOpenDetailed: boolean;
   canViewCost: boolean;
   busy: boolean;
@@ -429,7 +431,7 @@ export function BoqStageBuilder(props: Props) {
   const [editing, setEditing] = useState<{
     stage: string;
     category: string;
-  } | null>(null);
+  } | null>(props.initialEditor ?? null);
   // The full price report now lives in one final Detailed BOQ view.
   const preview = false;
   const [manualQuantity, setManualQuantity] = useState(0);
@@ -439,14 +441,9 @@ export function BoqStageBuilder(props: Props) {
   const [miscellaneousStage, setMiscellaneousStage] = useState<string | null>(
     null,
   );
-  const [dimensionUnit, setDimensionUnit] = useState<'ft' | 'm'>('ft');
-  const [dimensionDraft, setDimensionDraft] = useState<MeasuredDimensions>({
-    count: 1,
-    lengthFeet: 0,
-    widthFeet: 0,
-    depthFeet: 0,
-  });
-  const [dimensionName, setDimensionName] = useState('');
+  const [dimensionUnit, setDimensionUnit] = useState<'ft' | 'm'>(
+    props.initialDimensionUnit ?? 'ft',
+  );
   const [wallDraft, setWallDraft] = useState<WallMeasure>({
     id: 'new',
     name: '',
@@ -544,6 +541,14 @@ export function BoqStageBuilder(props: Props) {
   const priced = (output: StageBoqOutput) =>
     props.canViewCost ? output.quantity * props.rateFor(output) : 0;
   const unmeasured = (stage: string, key: string) => {
+    const incompleteGeometry = props.lines.some(
+      (line) =>
+        line.section === stage &&
+        line.kind === 'measured-geometry' &&
+        line.inputs.stageCategory === key &&
+        !line.outputs.some((output) => output.quantity > 0),
+    );
+    if (incompleteGeometry) return true;
     const enteredManual = props.lines.some(
       (line) =>
         line.section === stage &&
@@ -633,8 +638,6 @@ export function BoqStageBuilder(props: Props) {
     if (props.repeatFrom[stage]) props.onCustomizeFloor(stage);
     setMiscellaneousStage(null);
     setManualName('');
-    setDimensionName('');
-    setDimensionDraft({ count: 1, lengthFeet: 0, widthFeet: 0, depthFeet: 0 });
     setManualQuantity(0);
     setManualRate(0);
     setEditing({ stage, category });
@@ -725,25 +728,76 @@ export function BoqStageBuilder(props: Props) {
           line.inputs.stageCategory === category.key,
       );
     const isStandardShelves = category.key === 'shelves';
-    const shelfPreview = isStandardShelves
-      ? standardShelfTakeoff(
-          dimensionDraft.lengthFeet,
-          dimensionDraft.widthFeet,
-          dimensionDraft.count,
-        )
-      : null;
-    const volume = isStandardShelves
-      ? { cft: shelfPreview?.volumeCft ?? 0, m3: shelfPreview?.volumeM3 ?? 0 }
-      : measuredVolume(dimensionDraft);
     const displayFactor = dimensionUnit === 'm' ? 1 / FEET_PER_METRE : 1;
-    const geometryValue = (
-      field: 'lengthFeet' | 'widthFeet' | 'depthFeet',
-      value: number,
-    ) =>
-      setDimensionDraft((prior) => ({
-        ...prior,
-        [field]: Number((value / displayFactor).toFixed(4)),
-      }));
+    const geometryRows = dimensionRows.map(({ line, lineIndex }) => {
+      const dims: MeasuredDimensions = {
+        count: Number(line.inputs.count) || 0,
+        lengthFeet: Number(line.inputs.lengthFeet) || 0,
+        widthFeet: Number(line.inputs.widthFeet) || 0,
+        depthFeet: Number(line.inputs.depthFeet) || 0,
+        shelfStandard: line.inputs.shelfStandard === true,
+        steelSets: readMeasuredSteelSets(line.inputs.steelSetsJson),
+      };
+      const shelf =
+        isStandardShelves && dims.shelfStandard
+          ? standardShelfTakeoff(dims.lengthFeet, dims.widthFeet, dims.count)
+          : null;
+      const volume =
+        isStandardShelves && dims.shelfStandard
+          ? { cft: shelf?.volumeCft ?? 0, m3: shelf?.volumeM3 ?? 0 }
+          : measuredVolume(dims);
+      const amount = line.outputs.reduce(
+        (sum, output) => sum + priced(output),
+        0,
+      );
+      const direct = category.key === 'excavation' || category.key === 'soil';
+      const baseOutput = direct
+        ? line.outputs.find((output) => output.unit === 'm³')
+        : undefined;
+      const baseRate =
+        direct && props.canViewCost
+          ? props.rateFor(
+              baseOutput ?? {
+                name: category.label,
+                material:
+                  category.key === 'excavation'
+                    ? 'excavation'
+                    : /moorum|murrum|morrum|gravel|red soil|supplied/i.test(
+                          line.name,
+                        )
+                      ? 'moorum_filling'
+                      : 'soil_filling',
+                quantity: 0,
+                unit: 'm³',
+              },
+            )
+          : undefined;
+      const display = displayMeasuredVolume(
+        volume,
+        amount,
+        dimensionUnit,
+        baseRate,
+      );
+      return { line, lineIndex, dims, volume, display };
+    });
+    const quantityUnit = dimensionUnit === 'ft' ? 'CFT' : 'm³';
+    const totalGeometryQuantity = geometryRows.reduce(
+      (sum, row) => sum + row.display.quantity,
+      0,
+    );
+    const totalGeometryCost = geometryRows.reduce(
+      (sum, row) => sum + row.display.amount,
+      0,
+    );
+    const showDepth =
+      !isStandardShelves || geometryRows.some((row) => !row.dims.shelfStandard);
+    const displayRate = (rate: number) =>
+      rate.toLocaleString('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: dimensionUnit === 'ft' ? 4 : 2,
+      });
     const walls = props.counts.walls?.[stage] ?? [];
     const updateWalls = (rows: WallMeasure[]) =>
       props.onCountsChange({
@@ -905,223 +959,265 @@ export function BoqStageBuilder(props: Props) {
             </label>
           )}
         {isGeometry(category.key) && (
-          <div className="boq-stage-dimensions">
-            <label className="boq-stage-field boq-stage-unit-switch">
-              <span>Input dimension unit</span>
-              <select
-                value={dimensionUnit}
-                onChange={(event) =>
-                  setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')
-                }
-              >
-                <option value="ft">Feet (ft)</option>
-                <option value="m">Metres (m)</option>
-              </select>
-            </label>
-            {dimensionRows.map(({ line, lineIndex }) => {
-              const dims: MeasuredDimensions = {
-                count: Number(line.inputs.count) || 0,
-                lengthFeet: Number(line.inputs.lengthFeet) || 0,
-                widthFeet: Number(line.inputs.widthFeet) || 0,
-                depthFeet: Number(line.inputs.depthFeet) || 0,
-                shelfStandard: line.inputs.shelfStandard === true,
-                ...(['sajjas', 'shelves'].includes(category.key)
-                  ? {
-                      steelSets: readMeasuredSteelSets(
-                        line.inputs.steelSetsJson,
-                      ),
-                    }
-                  : {}),
-              };
-              const standardSavedShelf =
-                category.key === 'shelves' && dims.shelfStandard;
-              const savedShelf = standardSavedShelf
-                ? standardShelfTakeoff(
-                    dims.lengthFeet,
-                    dims.widthFeet,
-                    dims.count,
-                  )
-                : null;
-              const measured = standardSavedShelf
-                ? {
-                    cft: savedShelf?.volumeCft ?? 0,
-                    m3: savedShelf?.volumeM3 ?? 0,
+          <div className="boq-stage-dimensions boq-volume-editor">
+            <div className="boq-volume-toolbar">
+              <label className="boq-stage-field boq-stage-unit-switch">
+                <span>Input dimension unit</span>
+                <select
+                  value={dimensionUnit}
+                  onChange={(event) =>
+                    setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')
                   }
-                : measuredVolume(dims);
-              const changeDimension = (
-                field: 'count' | 'lengthFeet' | 'widthFeet' | 'depthFeet',
-                value: number,
-              ) =>
-                props.onUpdateGeometry(
-                  lineIndex,
-                  {
-                    ...dims,
-                    [field]:
-                      field === 'count'
-                        ? Math.round(value)
-                        : Number((value / displayFactor).toFixed(4)),
-                  },
-                  line.name,
-                );
-              return (
-                <div className="boq-stage-subcard" key={line.id}>
-                  <div className="boq-stage-subhead">
-                    <strong>{line.name}</strong>
-                    <button
-                      type="button"
-                      onClick={() => props.onRemoveManual(lineIndex)}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  <div className="boq-stage-input-grid">
-                    <InputNumber
-                      label="Same items"
-                      value={dims.count}
-                      onChange={(v) => changeDimension('count', v)}
-                    />
-                    {(standardSavedShelf
-                      ? (['lengthFeet', 'widthFeet'] as const)
-                      : (['lengthFeet', 'widthFeet', 'depthFeet'] as const)
-                    ).map((field) => (
-                      <InputNumber
-                        key={field}
-                        label={
-                          standardSavedShelf
-                            ? field === 'lengthFeet'
-                              ? 'Cabinet overall width'
-                              : 'Cabinet overall height'
-                            : {
-                                lengthFeet: 'Length',
-                                widthFeet: 'Width',
-                                depthFeet: 'Depth / thickness',
-                              }[field]
-                        }
-                        unit={dimensionUnit}
-                        value={Number((dims[field] * displayFactor).toFixed(3))}
-                        onChange={(v) => changeDimension(field, v)}
-                      />
-                    ))}
-                  </div>
-                  <div className="boq-stage-volume">
-                    <span>{number(measured.cft)} cft</span>
-                    <strong>{number(measured.m3)} m³</strong>
-                  </div>
-                  {['sajjas', 'shelves'].includes(category.key) &&
-                    !standardSavedShelf && (
-                      <BoqSmallRccSteelEditor
-                        rows={dims.steelSets ?? []}
-                        onChange={(steelSets) =>
-                          props.onUpdateGeometry(
-                            lineIndex,
-                            { ...dims, steelSets },
-                            line.name,
-                          )
-                        }
-                      />
-                    )}
-                </div>
-              );
-            })}
-            <div className="boq-stage-subcard">
-              <h4>+ Measure {category.label}</h4>
-              <InputText
-                label="Item name"
-                value={dimensionName}
-                placeholder={category.label}
-                onChange={setDimensionName}
-              />
-              <div className="boq-stage-input-grid">
-                <InputNumber
-                  label="Same items (nos)"
-                  value={dimensionDraft.count}
-                  onChange={(value) =>
-                    setDimensionDraft((prior) => ({
-                      ...prior,
-                      count: Math.round(value),
-                    }))
-                  }
-                />
-                {(isStandardShelves
-                  ? (['lengthFeet', 'widthFeet'] as const)
-                  : (['lengthFeet', 'widthFeet', 'depthFeet'] as const)
-                ).map((field) => (
-                  <InputNumber
-                    key={field}
-                    label={
-                      isStandardShelves
-                        ? field === 'lengthFeet'
-                          ? 'Cabinet overall width'
-                          : 'Cabinet overall height'
-                        : {
-                            lengthFeet: 'Length',
-                            widthFeet: 'Width',
-                            depthFeet: 'Depth / thickness',
-                          }[field]
-                    }
-                    unit={dimensionUnit}
-                    value={Number(
-                      (dimensionDraft[field] * displayFactor).toFixed(3),
-                    )}
-                    onChange={(v) => geometryValue(field, v)}
-                  />
-                ))}
-              </div>
-              <div className="boq-stage-volume">
-                <span>{number(volume.cft)} cft</span>
-                <strong>{number(volume.m3)} m³</strong>
-              </div>
-              {isStandardShelves && (
-                <p className="boq-stage-hint">
-                  Standard allowance: {STANDARD_SHELF_ASSUMPTIONS.depthFeet} ft
-                  depth, {STANDARD_SHELF_ASSUMPTIONS.panelThicknessIn} in cement
-                  panels, one shelf every{' '}
-                  {STANDARD_SHELF_ASSUMPTIONS.horizontalSpacingFeet} ft and a
-                  vertical bay every{' '}
-                  {STANDARD_SHELF_ASSUMPTIONS.verticalBayWidthFeet} ft. Cement,
-                  sand, aggregate, formwork and provisional 8 mm reinforcement
-                  are calculated automatically. Verify thickness and
-                  reinforcement with the structural engineer.
-                </p>
-              )}
-              {['sajjas', 'shelves'].includes(category.key) &&
-                !isStandardShelves && (
-                  <BoqSmallRccSteelEditor
-                    rows={dimensionDraft.steelSets ?? []}
-                    onChange={(steelSets) =>
-                      setDimensionDraft((previous) => ({
-                        ...previous,
-                        steelSets,
-                      }))
-                    }
-                  />
-                )}
+                >
+                  <option value="ft">Feet (ft)</option>
+                  <option value="m">Metres (m)</option>
+                </select>
+              </label>
               <button
                 type="button"
-                className="boq-stage-outline"
-                disabled={volume.m3 <= 0}
-                onClick={() => {
+                className="boq-volume-add"
+                disabled={props.busy || props.lines.length >= 500}
+                onClick={() =>
                   props.onAddGeometry(
                     stage,
                     category.key as MeasuredKind,
-                    dimensionName.trim() || category.label,
+                    category.label + ' ' + (dimensionRows.length + 1),
                     {
-                      ...dimensionDraft,
+                      count: 1,
+                      lengthFeet: 0,
+                      widthFeet: 0,
+                      depthFeet: 0,
                       ...(isStandardShelves ? { shelfStandard: true } : {}),
                     },
-                  );
-                  setDimensionDraft({
-                    count: 1,
-                    lengthFeet: 0,
-                    widthFeet: 0,
-                    depthFeet: 0,
-                    steelSets: [],
-                  });
-                  setDimensionName('');
-                }}
+                  )
+                }
               >
-                + Add measured {category.label}
+                + Add Item
               </button>
+            </div>
+            <div className="boq-volume-scroll">
+              <table
+                className="boq-volume-table"
+                aria-label={category.label + ' measured items'}
+              >
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Description / Location</th>
+                    <th>Count</th>
+                    <th>
+                      {isStandardShelves ? 'Width' : 'Length'} ({dimensionUnit})
+                    </th>
+                    <th>
+                      {isStandardShelves ? 'Height' : 'Width'} ({dimensionUnit})
+                    </th>
+                    {showDepth && <th>Depth ({dimensionUnit})</th>}
+                    <th>Quantity ({quantityUnit})</th>
+                    {props.canViewCost && (
+                      <>
+                        <th>
+                          {category.key === 'excavation' ||
+                          category.key === 'soil'
+                            ? 'Rate'
+                            : 'Effective rate'}{' '}
+                          / {quantityUnit}
+                        </th>
+                        <th>Amount</th>
+                      </>
+                    )}
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {geometryRows.map(
+                    ({ line, lineIndex, dims, volume, display }, rowIndex) => {
+                      const change = (
+                        field:
+                          'count' | 'lengthFeet' | 'widthFeet' | 'depthFeet',
+                        value: number,
+                      ) =>
+                        props.onUpdateGeometry(
+                          lineIndex,
+                          {
+                            ...dims,
+                            [field]:
+                              field === 'count'
+                                ? Math.round(value)
+                                : value / displayFactor,
+                          },
+                          line.name,
+                        );
+                      const dimension = (
+                        field: 'lengthFeet' | 'widthFeet' | 'depthFeet',
+                      ) => (
+                        <NumberField
+                          key={field + dimensionUnit}
+                          label={
+                            line.name + ' ' + field + ' (' + dimensionUnit + ')'
+                          }
+                          feet={dimensionUnit === 'ft'}
+                          value={Number(
+                            (dims[field] * displayFactor).toFixed(6),
+                          )}
+                          onChange={(value) => change(field, value)}
+                          blankZero
+                        />
+                      );
+                      return (
+                        <Fragment key={line.id}>
+                          <tr>
+                            <td>{rowIndex + 1}</td>
+                            <td>
+                              <input
+                                aria-label={
+                                  category.label +
+                                  ' item ' +
+                                  (rowIndex + 1) +
+                                  ' description'
+                                }
+                                value={line.name}
+                                maxLength={200}
+                                onChange={(event) =>
+                                  props.onUpdateGeometry(
+                                    lineIndex,
+                                    dims,
+                                    event.target.value,
+                                  )
+                                }
+                              />
+                            </td>
+                            <td>
+                              <NumberField
+                                label={line.name + ' count'}
+                                integer
+                                value={dims.count}
+                                onChange={(value) => change('count', value)}
+                              />
+                            </td>
+                            <td>{dimension('lengthFeet')}</td>
+                            <td>{dimension('widthFeet')}</td>
+                            {showDepth && (
+                              <td>
+                                {isStandardShelves && dims.shelfStandard
+                                  ? '—'
+                                  : dimension('depthFeet')}
+                              </td>
+                            )}
+                            <td>
+                              <strong className="boq-volume-qty">
+                                {number(display.quantity)}
+                              </strong>
+                            </td>
+                            {props.canViewCost && (
+                              <>
+                                <td className="boq-volume-rate">
+                                  {displayRate(display.rate)}
+                                </td>
+                                <td>
+                                  <strong className="boq-volume-amount">
+                                    {money(display.amount)}
+                                  </strong>
+                                </td>
+                              </>
+                            )}
+                            <td>
+                              <button
+                                type="button"
+                                className="boq-volume-remove"
+                                aria-label={'Remove ' + line.name}
+                                title={'Remove ' + line.name}
+                                onClick={() => props.onRemoveManual(lineIndex)}
+                              >
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  width="16"
+                                  height="16"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="1.8"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  aria-hidden="true"
+                                >
+                                  <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+                                </svg>
+                              </button>
+                            </td>
+                          </tr>
+                          {volume.m3 > 0 &&
+                            category.key !== 'excavation' &&
+                            category.key !== 'soil' && (
+                              <tr className="boq-volume-detail">
+                                <td
+                                  colSpan={
+                                    showDepth
+                                      ? props.canViewCost
+                                        ? 10
+                                        : 8
+                                      : props.canViewCost
+                                        ? 9
+                                        : 7
+                                  }
+                                >
+                                  <details>
+                                    <summary>Materials & labour</summary>
+                                    <div className="boq-volume-materials">
+                                      {line.outputs
+                                        .filter((output) => output.material)
+                                        .map((output, index) => (
+                                          <div key={index}>
+                                            <span>{output.name}</span>
+                                            <span>
+                                              {number(output.quantity)}{' '}
+                                              {output.unit}
+                                            </span>
+                                            {props.canViewCost && (
+                                              <strong>
+                                                {money(priced(output))}
+                                              </strong>
+                                            )}
+                                          </div>
+                                        ))}
+                                    </div>
+                                  </details>
+                                  {['sajjas', 'shelves'].includes(
+                                    category.key,
+                                  ) &&
+                                    !dims.shelfStandard && (
+                                      <BoqSmallRccSteelEditor
+                                        rows={dims.steelSets ?? []}
+                                        onChange={(steelSets) =>
+                                          props.onUpdateGeometry(
+                                            lineIndex,
+                                            { ...dims, steelSets },
+                                            line.name,
+                                          )
+                                        }
+                                      />
+                                    )}
+                                </td>
+                              </tr>
+                            )}
+                        </Fragment>
+                      );
+                    },
+                  )}
+                  {!geometryRows.length && (
+                    <tr>
+                      <td colSpan={99} className="boq-volume-empty">
+                        No measured items
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="boq-volume-total">
+              <strong>Total {category.label}</strong>
+              <span>
+                {number(totalGeometryQuantity)} {quantityUnit}
+              </span>
+              {props.canViewCost && <b>{money(totalGeometryCost)}</b>}
             </div>
           </div>
         )}
@@ -2371,7 +2467,7 @@ export function BoqStageBuilder(props: Props) {
           onClick={() => openEditor(stage, category.key)}
         >
           {editing?.stage === stage && editing.category === category.key
-            ? 'Close'
+            ? 'Collapse'
             : measured
               ? 'View / Edit'
               : '+ Add Item'}

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { normalizeStructuralSettings } from '@business-os/core/construction-boq';
 import {
   FEET_PER_METRE,
+  displayMeasuredVolume,
   measuredOutputs,
   correctSavedSmallConcrete,
   measuredVolume,
@@ -242,5 +243,44 @@ describe('legacy nonstructural ready-mix correction', () => {
         ),
       ).toBeNull();
     }
+  });
+});
+
+describe('unit-aware volume and rate display', () => {
+  it('switches quantity and rate together without changing cost or stored dimensions', () => {
+    const dimensions = { count: 12, lengthFeet: 5, widthFeet: 5, depthFeet: 6 };
+    const volume = measuredVolume(dimensions);
+    const baseRate = 150;
+    const amount = volume.m3 * baseRate;
+    const imperial = displayMeasuredVolume(volume, amount, 'ft', baseRate);
+    const metric = displayMeasuredVolume(volume, amount, 'm', baseRate);
+    expect(imperial.quantityUnit).toBe('CFT');
+    expect(imperial.quantity).toBe(1800);
+    expect(imperial.rate).toBeCloseTo(4.2475269888, 8);
+    expect(metric.quantityUnit).toBe('m³');
+    expect(metric.quantity).toBeCloseTo(50.97, 2);
+    expect(metric.rate).toBe(150);
+    expect(imperial.amount).toBe(metric.amount);
+    expect(imperial.quantity * imperial.rate).toBeCloseTo(amount, 0);
+    expect(dimensions).toEqual({
+      count: 12,
+      lengthFeet: 5,
+      widthFeet: 5,
+      depthFeet: 6,
+    });
+  });
+  it('shows effective site-mix pricing without a second concrete cost', () => {
+    const volume = measuredVolume({
+      count: 1,
+      lengthFeet: 10,
+      widthFeet: 10,
+      depthFeet: 1,
+    });
+    const metric = displayMeasuredVolume(volume, 1200, 'm');
+    const imperial = displayMeasuredVolume(volume, 1200, 'ft');
+    expect(metric.rate).toBeCloseTo(1200 / volume.m3, 6);
+    expect(metric.amount).toBe(1200);
+    expect(imperial.amount).toBe(1200);
+    expect(displayMeasuredVolume({ cft: 0, m3: 0 }, 0, 'ft').rate).toBe(0);
   });
 });
