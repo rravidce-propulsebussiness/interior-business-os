@@ -12,6 +12,7 @@ import { createConstructionRatesRepository } from '@business-os/database/constru
 import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
 import { DomainError, idSchema, safeFailure } from '@business-os/shared';
 import { commercialServices } from '../commercial/service';
+import { applyPackageFloorHeight, readPackageFloorHeight } from '../pricing/construction/floor-rate-rules';
 import { snapshotConstructionPackagePdf } from '../pricing/construction/package-pdf-snapshot';
 import { encodeCustomBrandQuote } from '@business-os/core/custom-brand-quote';
 
@@ -444,7 +445,7 @@ export async function saveFloorwiseSftEstimate(
       throw new DomainError('VALIDATION_FAILED');
 
     const calculated = calculateSftEstimate(
-      parsed,
+      { ...parsed, rows: applyPackageFloorHeight(parsed.rows, readPackageFloorHeight(selectedPackage?.specSections ?? [])) },
       options.map((o) => ({
         category: o.category,
         name: o.name,
