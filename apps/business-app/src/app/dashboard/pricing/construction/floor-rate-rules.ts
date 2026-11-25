@@ -40,26 +40,43 @@ export function readFloorRateDefaults(
   }
 }
 
+/** Default floor-to-floor height, stored alongside existing package metadata. */
+export function readPackageFloorHeight(sections: readonly SpecLike[]): string {
+  const spec = sections.find((section) => section.title === FLOOR_RATE_TITLE);
+  try {
+    const value = JSON.parse(spec?.description ?? '{}')?.heightFeet;
+    return typeof value === 'string' && valid(value) && Number(value) <= 9999.99
+      ? value
+      : '';
+  } catch {
+    return '';
+  }
+}
+
 export function writeFloorRateDefaults<T extends SpecLike>(
   source: readonly T[],
   rates: FloorRateDefaults,
   maximum = 18,
+  heightFeet = readPackageFloorHeight(source),
 ): T[] {
+  if (!valid(heightFeet) || Number(heightFeet) > 9999.99)
+    throw new Error('Enter a valid positive floor-to-floor height in feet.');
   if (!valid(rates.parking) || !valid(rates.penthouse))
     throw new Error(
       'Enter valid positive parking and penthouse rates per SFT.',
     );
   const rows = source.filter((s) => s.title !== FLOOR_RATE_TITLE);
-  if (!rates.parking && !rates.penthouse) return [...rows];
+  if (!rates.parking && !rates.penthouse && !heightFeet) return [...rows];
   if (rows.length >= maximum)
     throw new Error(
-      'Package is full. Remove one specification to add separate parking/penthouse rates.',
+      'Package is full. Remove one specification to add floor defaults.',
     );
   const metadata = {
     title: FLOOR_RATE_TITLE,
     description: JSON.stringify({
       parking: rates.parking,
       penthouse: rates.penthouse,
+      ...(heightFeet ? { heightFeet } : {}),
     }),
     brand: '',
     grade: '',

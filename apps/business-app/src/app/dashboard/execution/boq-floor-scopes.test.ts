@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { copyExteriorWallsToFullFloors } from './boq-floor-scopes';
+import {
+  copyExteriorWallsToFullFloors,
+  syncAssumedFloorHeights,
+} from './boq-floor-scopes';
 import type { BoqFloor, WallMeasure } from '@business-os/core/construction-boq';
 
 const floors: BoqFloor[] = [
@@ -84,5 +87,29 @@ describe('external wall repetition', () => {
     expect(copyExteriorWallsToFullFloors(floors, existing, 'Terrace')).toBe(
       existing,
     );
+  });
+});
+
+describe('quotation floor height synchronization', () => {
+  it('uses confirmed linked quotation heights only for assumed saved BOQ floors', () => {
+    const saved = [
+      { ...floors[0]!, heightFeet: 10, heightAssumed: true },
+      { ...floors[1]!, heightFeet: 12, heightAssumed: false },
+      { ...floors[2]!, heightFeet: 10, heightAssumed: true },
+    ];
+    const quoted = [
+      { ...floors[0]!, heightFeet: 11.5 },
+      { ...floors[1]!, heightFeet: 11 },
+      { ...floors[2]!, heightFeet: 10, heightAssumed: true },
+    ];
+    const synced = syncAssumedFloorHeights(saved, quoted);
+    expect(synced[0]).toEqual({
+      ...saved[0],
+      heightFeet: 11.5,
+      heightAssumed: false,
+    });
+    expect(synced[1]).toBe(saved[1]);
+    expect(synced[2]).toBe(saved[2]);
+    expect(syncAssumedFloorHeights(synced, quoted)).toBe(synced);
   });
 });

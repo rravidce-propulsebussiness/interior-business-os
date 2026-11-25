@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   FLOOR_RATE_TITLE,
   readFloorRateDefaults,
+  readPackageFloorHeight,
   writeFloorRateDefaults,
 } from './floor-rate-rules';
 
@@ -79,5 +80,43 @@ describe('company floor pricing defaults', () => {
         32,
       ),
     ).toThrow(/full/);
+  });
+});
+
+describe('package floor height', () => {
+  it('persists a height even without separate parking rates and retains it during rate edits', () => {
+    const saved = writeFloorRateDefaults(
+      [steel],
+      { parking: '', penthouse: '' },
+      32,
+      '11',
+    );
+    expect(readPackageFloorHeight(saved)).toBe('11');
+    expect(readFloorRateDefaults(saved)).toEqual({
+      parking: '',
+      penthouse: '',
+    });
+    const updated = writeFloorRateDefaults(
+      saved,
+      { parking: '800', penthouse: '' },
+      32,
+    );
+    expect(readPackageFloorHeight(updated)).toBe('11');
+    expect(
+      readPackageFloorHeight(
+        writeFloorRateDefaults(updated, { parking: '', penthouse: '' }, 32, ''),
+      ),
+    ).toBe('');
+  });
+  it('rejects an invalid height and never assumes one for old packages', () => {
+    expect(readPackageFloorHeight([steel])).toBe('');
+    expect(() =>
+      writeFloorRateDefaults(
+        [steel],
+        { parking: '', penthouse: '' },
+        32,
+        '-10',
+      ),
+    ).toThrow(/height/);
   });
 });

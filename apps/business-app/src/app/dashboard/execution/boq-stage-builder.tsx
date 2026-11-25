@@ -2459,7 +2459,10 @@ export function BoqStageBuilder(props: Props) {
     missingRates.length +
     (guidedStep === 2
       ? props.floors.filter(
-          (floor) => floor.heightAssumed || !(floor.areaSqft > 0),
+          (floor) =>
+            floor.heightAssumed ||
+            !(floor.heightFeet > 0) ||
+            !(floor.areaSqft > 0),
         ).length
       : 0);
   const breakdown = new Map<string, number>();
@@ -2502,7 +2505,7 @@ export function BoqStageBuilder(props: Props) {
             : 'No outstanding checks for this stage'}
         <span aria-hidden="true">›</span>
       </button>
-      {props.canViewCost && (
+      {props.canViewCost && guidedStep !== 2 && guidedStep !== 3 && (
         <>
           <h4>Cost Summary</h4>
           <dl className="boq-premium-cost-list">
@@ -2613,9 +2616,27 @@ export function BoqStageBuilder(props: Props) {
                   <strong>{money(priced(output))}</strong>
                 </div>
               ))}
-          {!previewEntries.length && !pendingGroups.length && (
-            <small>No stage items to review.</small>
-          )}
+          {guidedStep === 2 &&
+            props.floors
+              .filter(
+                (floor) =>
+                  floor.heightAssumed ||
+                  !(floor.heightFeet > 0) ||
+                  !(floor.areaSqft > 0),
+              )
+              .map((floor) => (
+                <div key={floor.name} className="boq-premium-check-row">
+                  <span>{floor.name}</span>
+                  <strong>
+                    {floor.heightAssumed || !(floor.heightFeet > 0)
+                      ? 'Height to verify'
+                      : 'Area to verify'}
+                  </strong>
+                </div>
+              ))}
+          {guidedStep !== 2 &&
+            !previewEntries.length &&
+            !pendingGroups.length && <small>No stage items to review.</small>}
         </div>
       )}
     </aside>
@@ -2633,7 +2654,6 @@ export function BoqStageBuilder(props: Props) {
           </span>
           <div>
             <h2>BOQ Builder</h2>
-            <small>Construction ERP</small>
           </div>
         </div>
         <div className="boq-premium-progress">
@@ -2674,11 +2694,12 @@ export function BoqStageBuilder(props: Props) {
             <h3>
               {stepPosition}. {selectedWizard.short}
             </h3>
-            {props.autoSaveLabel && (
-              <span className="boq-autosave-status" role="status">
-                {props.autoSaveLabel}
-              </span>
-            )}
+            {props.autoSaveLabel &&
+              props.autoSaveLabel !== 'Saved automatically' && (
+                <span className="boq-autosave-status" role="status">
+                  {props.autoSaveLabel}
+                </span>
+              )}
           </header>
           {guidedStep === 2 && (
             <BoqFloorProjectSetup
@@ -2696,7 +2717,11 @@ export function BoqStageBuilder(props: Props) {
               settings={props.structuralSettings}
               canEdit={props.canSave}
               canViewCost={props.canViewCost}
-              autoSaveLabel={props.autoSaveLabel}
+              autoSaveLabel={
+                props.autoSaveLabel === 'Saved automatically'
+                  ? undefined
+                  : props.autoSaveLabel
+              }
             />
           )}
           {guidedStep === 12 && (

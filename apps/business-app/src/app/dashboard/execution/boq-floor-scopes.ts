@@ -35,3 +35,21 @@ export function copyExteriorWallsToFullFloors(
   }
   return copy;
 }
+
+/** Adopt only confirmed quotation heights where the saved BOQ still has an assumption.
+ * Manual BOQ measurements and all other saved dimensions remain untouched. */
+export function syncAssumedFloorHeights(
+  saved: BoqFloor[],
+  quoted: readonly BoqFloor[],
+): BoqFloor[] {
+  let changed = false;
+  const floors = saved.map((floor) => {
+    if (!floor.heightAssumed && floor.heightFeet > 0) return floor;
+    const source = quoted.find((row) => row.name === floor.name);
+    if (!source || source.heightAssumed || !(source.heightFeet > 0))
+      return floor;
+    changed = true;
+    return { ...floor, heightFeet: source.heightFeet, heightAssumed: false };
+  });
+  return changed ? floors : saved;
+}

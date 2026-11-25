@@ -13,6 +13,7 @@ import { QuotationPdfControls } from './quotation-pdf-controls';
 import {
   FLOOR_RATE_TITLE,
   readFloorRateDefaults,
+  readPackageFloorHeight,
 } from '../pricing/construction/floor-rate-rules';
 import {
   propagateFloorChanges,
@@ -225,6 +226,9 @@ export function PremiumSftBuilder({
   const floorRateDefaults = readFloorRateDefaults(
     selectedPackage?.specSections ?? [],
   );
+  const packageFloorHeight = readPackageFloorHeight(
+    selectedPackage?.specSections ?? [],
+  );
   const activeRates = rates.filter((r) => r.status === 'active');
   const [rows, setRows] = useState<Work[]>(() => {
     const initial = initialSchedule
@@ -237,6 +241,7 @@ export function PremiumSftBuilder({
           : 1;
       return Array.from({ length: count }, (_, level) => ({
         ...floor(floorLabel(level), packageRate),
+        heightFeet: packageFloorHeight,
         inheritFromPrevious: level > 0,
       }));
     }
@@ -251,7 +256,9 @@ export function PremiumSftBuilder({
             : item.name,
         kind: item.kind ?? 'floor',
         unit: item.unit ?? 'sqft',
-        heightFeet: item.heightFeet ?? '',
+        heightFeet:
+          item.heightFeet ||
+          ((item.kind ?? 'floor') === 'floor' ? packageFloorHeight : ''),
         quantity: item.quantity ?? '',
         inheritFromPrevious:
           (item.kind ?? 'floor') === 'floor' &&
@@ -470,6 +477,12 @@ export function PremiumSftBuilder({
         ' before saving the quotation.'
       );
     }
+    const missingHeight = floors.find((row) => !(Number(row.heightFeet) > 0));
+    if (missingHeight)
+      return (
+        missingHeight.name +
+        ': Set the floor height in the selected package or enter it in the work table.'
+      );
     if (stale.length)
       return 'A previously selected material is unavailable. Update it before saving.';
     if (activePackages.length && !selectedPackage)
@@ -526,7 +539,7 @@ export function PremiumSftBuilder({
         heightFeet:
           construction?.heightFeet ||
           previous.find((r) => r.heightFeet)?.heightFeet ||
-          '',
+          packageFloorHeight,
         inheritFromPrevious: level > 0,
       });
     }
@@ -558,7 +571,13 @@ export function PremiumSftBuilder({
               floorLevel(r.name) === level &&
               floorZone(r.name) === 'construction',
           )?.ratePerSqft || packageRate;
-    const item = { ...floor(floorZoneName(level, zone), defaultRate) };
+    const sameLevel = floors.find(
+      (row) => floorLevel(row.name) === level && Number(row.heightFeet) > 0,
+    );
+    const item = {
+      ...floor(floorZoneName(level, zone), defaultRate),
+      heightFeet: sameLevel?.heightFeet || packageFloorHeight,
+    };
     const where = rows.reduce(
       (index, r, i) =>
         r.kind === 'floor' && floorLevel(r.name) === level ? i : index,
@@ -929,7 +948,7 @@ export function PremiumSftBuilder({
                             !used
                               ? '—'
                               : field === 'heightFeet' && r.kind === 'floor'
-                                ? '10'
+                                ? 'Enter height'
                                 : '0'
                           }
                           value={used ? (r[field] ?? '') : ''}
