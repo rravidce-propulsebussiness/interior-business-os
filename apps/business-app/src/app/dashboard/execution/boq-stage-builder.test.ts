@@ -61,18 +61,64 @@ const base: StageProps = {
 };
 
 describe('compact BOQ entry stages', () => {
-  it('shows three collapsed Foundation cards with Columns & Plinth visible', () => {
+  it('shows one Foundation page with every work editor and live preview', () => {
     const html = renderToStaticMarkup(createElement(BoqStageBuilder, base));
-    expect((html.match(/boq-foundation-group-trigger/g) ?? []).length).toBe(3);
-    expect(html).toContain('Excavation &amp; PCC');
-    expect(html).toContain('Footings &amp; Pedestals');
-    expect(html).toContain('Columns &amp; Plinth Beam');
-    expect(html).not.toContain('View or edit Excavation on Foundation');
-    expect(html).not.toContain('boq-stage-card-head');
-    expect(html).not.toContain('Labour package allocation');
-    expect(html).not.toContain('Other measured work');
-    expect(html).toContain('Optional items');
+    expect(html).toContain('Step 3 of 11');
+    expect(html).toContain('View or edit Excavation on Foundation');
+    expect(html).toContain('View or edit Footings on Foundation');
+    expect(html).toContain('View or edit Columns on Foundation');
+    expect(html).toContain('View or edit Plinth Beam on Foundation');
+    expect(html).toContain('aria-label="Stage Preview"');
+    expect(html).toContain('Total Stage Cost');
+    expect(html).toContain('Review Details');
+    expect(html).toContain('Save &amp; Next');
+    expect(html).not.toContain('Required construction work');
+    expect(html).not.toContain('Test BOQ');
     expect((html.match(/boq-stage-misc-trigger/g) ?? []).length).toBe(1);
+  });
+
+  it('previews only entered amounts with separate material and labour totals', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, {
+        ...base,
+        lines: [
+          {
+            id: 'foundation-test',
+            name: 'Measured excavation',
+            section: 'Foundation',
+            kind: 'measured-geometry',
+            inputs: {
+              stageCategory: 'excavation',
+              count: 1,
+              lengthFeet: 10,
+              widthFeet: 8,
+              depthFeet: 2,
+            },
+            outputs: [
+              {
+                name: 'Excavation labour',
+                material: 'labour_excavation',
+                quantity: 2,
+                unit: 'm³',
+                rate: 300,
+              },
+              {
+                name: 'Measured material',
+                material: 'sand',
+                quantity: 3,
+                unit: 'm³',
+                rate: 100,
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    expect(html).toContain('₹600');
+    expect(html).toContain('₹300');
+    expect(html).toContain('₹900');
+    expect(html).toContain('items need review');
+    expect(html).toContain('Item Description');
   });
 
   it('keeps the one Foundation stage instead of duplicating columns per floor', () => {
@@ -88,14 +134,14 @@ describe('compact BOQ entry stages', () => {
     );
     expect(html).not.toContain('aria-label="Jump to BOQ stage"');
     expect(html).toContain('Foundation');
-    expect(html).toContain('Columns &amp; Plinth Beam');
+    expect(html).toContain('View or edit Plinth Beam on Foundation');
   });
 
   it('shows Columns in the floor-wise RCC stage, not only Foundation', () => {
     const html = renderToStaticMarkup(
       createElement(BoqStageBuilder, { ...base, initialStep: 7 }),
     );
-    expect(html).toContain('Columns, Beams, Slab');
+    expect(html).toContain('4. RCC Structure');
     expect(html).toContain('View or edit Columns on Ground Floor');
     expect(html).toContain('View or edit Beams on Ground Floor');
     expect(html).toContain('View or edit Slab on Ground Floor');
