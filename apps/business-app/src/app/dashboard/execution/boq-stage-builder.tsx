@@ -146,6 +146,8 @@ type Props = {
   calculating?: boolean;
   /** Used by render tests and deep-link recovery; new BOQs open floor setup. */
   initialStep?: number;
+  initialEditor?: { stage: string; category: string };
+  initialDimensionUnit?: 'ft' | 'm';
   canOpenDetailed: boolean;
   canViewCost: boolean;
   busy: boolean;
@@ -429,7 +431,7 @@ export function BoqStageBuilder(props: Props) {
   const [editing, setEditing] = useState<{
     stage: string;
     category: string;
-  } | null>(null);
+  } | null>(props.initialEditor ?? null);
   // The full price report now lives in one final Detailed BOQ view.
   const preview = false;
   const [manualQuantity, setManualQuantity] = useState(0);
@@ -439,7 +441,7 @@ export function BoqStageBuilder(props: Props) {
   const [miscellaneousStage, setMiscellaneousStage] = useState<string | null>(
     null,
   );
-  const [dimensionUnit, setDimensionUnit] = useState<'ft' | 'm'>('ft');
+  const [dimensionUnit, setDimensionUnit] = useState<'ft' | 'm'>(props.initialDimensionUnit ?? 'ft');
   const [wallDraft, setWallDraft] = useState<WallMeasure>({
     id: 'new',
     name: '',
@@ -537,6 +539,12 @@ export function BoqStageBuilder(props: Props) {
   const priced = (output: StageBoqOutput) =>
     props.canViewCost ? output.quantity * props.rateFor(output) : 0;
   const unmeasured = (stage: string, key: string) => {
+    const incompleteGeometry = props.lines.some((line) =>
+      line.section === stage && line.kind === 'measured-geometry' &&
+      line.inputs.stageCategory === key &&
+      !line.outputs.some(output => output.quantity > 0),
+    );
+    if (incompleteGeometry) return true;
     const enteredManual = props.lines.some(
       (line) =>
         line.section === stage &&
@@ -957,7 +965,7 @@ export function BoqStageBuilder(props: Props) {
                         <td><button type="button" className="boq-volume-remove" aria-label={'Remove ' + line.name} title={'Remove ' + line.name} onClick={() => props.onRemoveManual(lineIndex)}><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" /></svg></button></td>
                       </tr>
                       {volume.m3 > 0 && category.key !== 'excavation' && category.key !== 'soil' && (
-                        <tr className="boq-volume-detail"><td colSpan={99}>
+                        <tr className="boq-volume-detail"><td colSpan={showDepth ? (props.canViewCost ? 10 : 8) : (props.canViewCost ? 9 : 7)}>
                           <details><summary>Materials & labour</summary><div className="boq-volume-materials">{line.outputs.filter(output => output.material).map((output, index) => <div key={index}><span>{output.name}</span><span>{number(output.quantity)} {output.unit}</span>{props.canViewCost && <strong>{money(priced(output))}</strong>}</div>)}</div></details>
                           {['sajjas','shelves'].includes(category.key) && !dims.shelfStandard && <BoqSmallRccSteelEditor rows={dims.steelSets ?? []} onChange={(steelSets) => props.onUpdateGeometry(lineIndex, { ...dims, steelSets }, line.name)} />}
                         </td></tr>
