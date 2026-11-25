@@ -1,6 +1,6 @@
 'use client';
 
-import { BoqRemove, editorUnit, useBoqEditorUnit } from './boq-compact-editor';
+import { BoqAdvanced, BoqRemove, editorUnit, useBoqEditorUnit } from './boq-compact-editor';
 import { NumberField } from './boq-number-field';
 import type {
   DesignSlabPanel,
@@ -131,9 +131,7 @@ export function BoqSlabScheduleEditor({
                 onChange={(thicknessIn) => change(i, { thicknessIn })}
               />
             </div>
-            <div className="boq-structural-rebar-heading">
-              Reinforcement layers from drawing
-            </div>
+            <BoqAdvanced label="Reinforcement layers from drawing">
             {panel.reinforcement.map((bar, j) => (
               <div className="boq-structural-rebar-row" key={j}>
                 <label>
@@ -252,6 +250,7 @@ export function BoqSlabScheduleEditor({
                 No rods entered — steel is not assumed.
               </small>
             )}
+            </BoqAdvanced>
             <div className="boq-stage-volume">
               <span>
                 {close(panel.count * panel.lengthFeet * panel.widthFeet * areaDisplay.factor)} {areaDisplay.unit}
