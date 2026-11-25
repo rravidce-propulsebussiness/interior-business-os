@@ -1439,7 +1439,6 @@ export function BoqStageBuilder(props: Props) {
                     onChange={(value) => updateCol(ci, { depthIn: value })}
                   />
                   <div className="boq-beam-rebar-groups"><BoqAdvanced label="Main reinforcement">
-                    <strong>Main reinforcement (per column)</strong>
                     <BarsPicker
                       label={col.label + ' reinforcement'}
                       value={col.bars}
@@ -1502,7 +1501,6 @@ export function BoqStageBuilder(props: Props) {
                     onChange={(value) => updateBeam(bi, { depthIn: value })}
                   />
                   <div className="boq-beam-rebar-groups"><BoqAdvanced label="Main reinforcement">
-                    <strong>Main reinforcement (per beam)</strong>
                     <BarsPicker
                       label={beam.label + ' reinforcement'}
                       value={beam.bars}
@@ -1653,7 +1651,6 @@ export function BoqStageBuilder(props: Props) {
                     onChange={(depthIn) => updatePlinth(bi, { depthIn })}
                   />
                   <div className="boq-beam-rebar-groups"><BoqAdvanced label="Main reinforcement">
-                    <strong>Main reinforcement (per beam)</strong>
                     <BarsPicker
                       label={`Plinth ${beam.label || `PB${bi + 1}`}`}
                       value={beam.bars}
@@ -2220,7 +2217,7 @@ export function BoqStageBuilder(props: Props) {
                     const view = editorUnit(entry.output.unit, dimensionUnit);
                     const derived = isColumns || isBeams || isDerivedQuantityReadOnly(entry.line.kind, entry.output.name);
                     const rate = props.rateFor(entry.output) / view.factor;
-                    const fixedRate = derived || (entry.line.origin && entry.output.material === 'concrete_m20') || props.isOldLabourOutput?.(entry.output);
+                    const fixedRate = isColumns || isBeams || (entry.line.origin && entry.output.material === 'concrete_m20') || props.isOldLabourOutput?.(entry.output);
                     const canExclude = !derived && ['tiles','painting','plumbing','electrical','staircase','plaster','waterproofing','doors'].includes(category.key);
                     return <tr key={entry.line.id + ':' + entry.outputIndex}>
                       <td>{entry.output.name}<small>{entry.line.name}</small></td>
