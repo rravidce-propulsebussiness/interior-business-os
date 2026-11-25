@@ -90,14 +90,22 @@ export function writeFloorRateDefaults<T extends SpecLike>(
 
 /** Fill only missing floor heights from a configured package. Never touch
  * additional work measurements, existing quote dimensions, rates or totals. */
-export function applyPackageFloorHeight<T extends { kind?: 'floor' | 'additional' | undefined; heightFeet?: string | undefined }>(
-  rows: T[],
-  heightFeet: string,
-): T[] {
-  if (!valid(heightFeet) || !(Number(heightFeet) > 0) || Number(heightFeet) > 9999.99) return rows;
+export function applyPackageFloorHeight<
+  T extends {
+    kind?: 'floor' | 'additional' | undefined;
+    heightFeet?: string | undefined;
+  },
+>(rows: T[], heightFeet: string): T[] {
+  if (
+    !valid(heightFeet) ||
+    !(Number(heightFeet) > 0) ||
+    Number(heightFeet) > 9999.99
+  )
+    return rows;
   let changed = false;
   const result = rows.map((row) => {
-    if ((row.kind ?? 'floor') !== 'floor' || Number(row.heightFeet) > 0) return row;
+    if ((row.kind ?? 'floor') !== 'floor' || Number(row.heightFeet) > 0)
+      return row;
     changed = true;
     return { ...row, heightFeet };
   });
@@ -109,11 +117,20 @@ export function applyPackageFloorHeight<T extends { kind?: 'floor' | 'additional
  * Do not silently switch to another package or invent a height. */
 export function linkedPackageFloorHeight(
   snapshot: { id?: string | undefined; code: string; name: string } | undefined,
-  packages: readonly { id: string; code: string; name: string; specSections: readonly SpecLike[] }[],
+  packages: readonly {
+    id: string;
+    code: string;
+    name: string;
+    specSections: readonly SpecLike[];
+  }[],
 ): string {
   if (!snapshot) return '';
-  const matches = packages.filter((pkg) => snapshot.id
-    ? pkg.id === snapshot.id
-    : pkg.code === snapshot.code && pkg.name === snapshot.name);
-  return matches.length === 1 ? readPackageFloorHeight(matches[0]!.specSections) : '';
+  const matches = packages.filter((pkg) =>
+    snapshot.id
+      ? pkg.id === snapshot.id
+      : pkg.code === snapshot.code && pkg.name === snapshot.name,
+  );
+  return matches.length === 1
+    ? readPackageFloorHeight(matches[0]!.specSections)
+    : '';
 }
