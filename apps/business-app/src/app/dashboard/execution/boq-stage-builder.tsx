@@ -103,6 +103,8 @@ type Props = {
   onCountsChange: (next: BoqCounts) => void;
   structuralSettings: StructuralSettings;
   materialRates?: readonly Rate[];
+  cementSelections?: Readonly<Record<string, string>>;
+  onCementSelectionChange?: (key: string, value: string) => void;
   structuralRmcEnabled: boolean;
   structuralRmcRate: number;
   onStructuralRmcToggle: (enabled: boolean) => void;
@@ -3014,6 +3016,9 @@ export function BoqStageBuilder(props: Props) {
               onToggle={props.onStructuralRmcToggle}
               onRateChange={props.onStructuralRmcRateChange}
               settings={props.structuralSettings}
+              cementRates={props.materialRates ?? []}
+              {...(props.cementSelections ? { cementSelections: props.cementSelections } : {})}
+              {...(props.onCementSelectionChange ? { onCementSelectionChange: props.onCementSelectionChange } : {})}
               canEdit={props.canSave}
               canViewCost={props.canViewCost}
               autoSaveLabel={
