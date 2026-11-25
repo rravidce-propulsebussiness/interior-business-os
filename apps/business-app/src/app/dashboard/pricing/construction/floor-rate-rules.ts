@@ -53,11 +53,14 @@ const validHeight = (value: string) =>
 export function readSpecificationFloorHeight(
   sections: readonly SpecLike[],
 ): string {
-  const values = sections.filter(isHeightSpec).flatMap((section) =>
-    Array.from(section.description.matchAll(floorHeightPattern()), (match) =>
-      match[1] ?? '',
-    ).filter(validHeight),
-  );
+  const values = sections
+    .filter(isHeightSpec)
+    .flatMap((section) =>
+      Array.from(
+        section.description.matchAll(floorHeightPattern()),
+        (match) => match[1] ?? '',
+      ).filter(validHeight),
+    );
   const unique = new Set(values.map(Number));
   return unique.size === 1 ? String([...unique][0]) : '';
 }
@@ -86,11 +89,19 @@ export function writeFloorRateDefaults<T extends SpecLike>(
     throw new Error(
       'Enter valid positive parking and penthouse rates per SFT.',
     );
-  const rows = source.filter((s) => s.title !== FLOOR_RATE_TITLE).map((section) =>
-    heightFeet && isHeightSpec(section)
-      ? { ...section, description: section.description.replace(floorHeightPattern(), (match, value: string) => match.replace(value, heightFeet)) }
-      : section,
-  );
+  const rows = source
+    .filter((s) => s.title !== FLOOR_RATE_TITLE)
+    .map((section) =>
+      heightFeet && isHeightSpec(section)
+        ? {
+            ...section,
+            description: section.description.replace(
+              floorHeightPattern(),
+              (match, value: string) => match.replace(value, heightFeet),
+            ),
+          }
+        : section,
+    );
   if (!rates.parking && !rates.penthouse && !heightFeet) return [...rows];
   if (rows.length >= maximum)
     throw new Error(

@@ -227,7 +227,8 @@ export function PremiumSftBuilder({
     selectedPackage?.specSections ?? [],
   );
   const packageFloorHeight =
-    (!changedPackage && readPackageFloorHeight(initialSchedule?.sections ?? [])) ||
+    (!changedPackage &&
+      readPackageFloorHeight(initialSchedule?.sections ?? [])) ||
     readPackageFloorHeight(selectedPackage?.specSections ?? []);
   const activeRates = rates.filter((r) => r.status === 'active');
   const [rows, setRows] = useState<Work[]>(() => {
