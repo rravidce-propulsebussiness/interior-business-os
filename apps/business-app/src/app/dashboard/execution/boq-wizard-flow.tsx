@@ -200,14 +200,14 @@ export function BoqFloorProjectSetup({
     property: 'lengthFeet' | 'widthFeet' | 'heightFeet',
     value: number,
   ) => {
-    if (!Number.isFinite(value) || value < 0) return;
+    if (!Number.isFinite(value) || value <= 0) return;
     onChange(
       floors.map((floor, i) =>
         i === index
           ? {
               ...floor,
               [property]: value,
-              ...(property === 'heightFeet' ? { heightAssumed: false } : {}),
+              ...(property === 'heightFeet' ? { heightAssumed: !(value > 0) } : {}),
             }
           : floor,
       ),
@@ -216,12 +216,6 @@ export function BoqFloorProjectSetup({
   const total = floors.reduce((sum, floor) => sum + (floor.areaSqft || 0), 0);
   return (
     <section className="boq-guided-panel" aria-label="Floor and project setup">
-      <div className="boq-guided-panel-head">
-        <div>
-          <h3>Floor and Project Setup</h3>
-        </div>
-        <span className="boq-guided-pill">{floors.length} floors</span>
-      </div>
       <div className="boq-guided-floor-scroll">
         <table className="boq-guided-floor-table">
           <thead>
@@ -286,13 +280,7 @@ export function BoqFloorProjectSetup({
           </tfoot>
         </table>
       </div>
-      {floors.some((floor) => floor.heightAssumed) && (
-        <p className="boq-guided-warning" role="status">
-          Some floor heights were not entered in the quotation. Confirm their
-          heights here from the drawing before finalizing the BOQ. Existing
-          assumed values are preserved until edited.
-        </p>
-      )}
+
     </section>
   );
 }
