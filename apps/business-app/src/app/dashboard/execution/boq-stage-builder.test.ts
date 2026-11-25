@@ -10,7 +10,7 @@ import {
 import { editorUnit } from './boq-compact-editor';
 import { BoqFootingEditor } from './boq-footing-editor';
 import { BarsPicker } from './boq-design-schedule';
-import { newFootingType } from '@business-os/core/construction-boq';
+import { measuredCounts, newFootingType } from '@business-os/core/construction-boq';
 import type {
   BoqCounts,
   BoqFloor,
@@ -504,6 +504,7 @@ describe('shared compact work editors', () => {
           ...base,
           initialStep: step,
           initialEditor: { stage, category },
+          counts: measuredCounts(base.floors),
           floors: [
             {
               name: 'Ground Floor',
