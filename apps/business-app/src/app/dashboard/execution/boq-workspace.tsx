@@ -32,6 +32,7 @@ import {
   type BoqFloor,
   type StructuralDesign,
 } from '@business-os/core/construction-boq';
+import { withMeasuredBindingWire } from './boq-binding-wire';
 import { BoqStageBuilder } from './boq-stage-builder';
 import { syncAssumedFloorHeights } from './boq-floor-scopes';
 import { BoqRegisterLanding } from './boq-register-landing';
@@ -93,7 +94,7 @@ type Generator = {
 };
 /** Bump when the quotation generator adds or reprices generated lines, so
  * saved BOQs regenerate once on edit (manual items and edits are kept). */
-const BOQ_ENGINE_VERSION = 3;
+const BOQ_ENGINE_VERSION = 4;
 type SavedLine = {
   id: string;
   name: string;
@@ -827,10 +828,7 @@ export function BoqWorkspace({
       }
       // Binding wire includes multiple structural stages in the legacy
       // calculator; never count wire from still-unmeasured members.
-      if (line.kind === 'quote-binding-wire')
-        return line.section === 'Foundation'
-          ? measuredFootings && measuredColumns
-          : measuredColumns && measuredBeams && measuredSlab;
+      if (line.kind === 'quote-binding-wire') return false;
       return true;
     });
     // Recomputed plaster materials may not keep stale quantity edits; all
@@ -866,7 +864,10 @@ export function BoqWorkspace({
           : measured;
       }),
     }));
-    setLines([...generated, ...kept]);
+    setLines([
+      ...generated.map(line => measuredOnly ? {...line, outputs: withMeasuredBindingWire(line.outputs, 8, concreteSettings.stockBarFeet)} : line),
+      ...kept.map(line => ({...line, outputs: withMeasuredBindingWire(line.outputs, 8, concreteSettings.stockBarFeet)})),
+    ]);
     // Brands named in the quotation's specifications, unless already chosen.
     const quoted = brandSelectionsFromQuote(schedule.sections, initialRates);
     setSelections((prior) =>
