@@ -189,7 +189,9 @@ export function PremiumPackageEditor({
   const [rate, setRate] = useState(item?.ratePerSqft ?? '');
   const originalFloorRates = readFloorRateDefaults(item?.specSections ?? []);
   const [parkingRate, setParkingRate] = useState(originalFloorRates.parking);
-  const [floorHeight, setFloorHeight] = useState(readPackageFloorHeight(item?.specSections ?? []));
+  const [floorHeight, setFloorHeight] = useState(
+    readPackageFloorHeight(item?.specSections ?? []),
+  );
   const [floorRateError, setFloorRateError] = useState('');
   const [description, setDescription] = useState(item?.description ?? '');
   const [status, setStatus] = useState(item?.status ?? 'active');
@@ -439,11 +441,31 @@ export function PremiumPackageEditor({
               />
             </label>
           </div>
-          <section className="mt-4 rounded-2xl border border-orange-200 bg-orange-50/60 p-4" aria-label="Floor Height Specification">
-            <h3 className="text-sm font-extrabold text-[#172845]">Floor Height Specification</h3>
+          <section
+            className="mt-4 rounded-2xl border border-orange-200 bg-orange-50/60 p-4"
+            aria-label="Floor Height Specification"
+          >
+            <h3 className="text-sm font-extrabold text-[#172845]">
+              Floor Height Specification
+            </h3>
             <div className="mt-3 grid gap-3 sm:grid-cols-2">
-              <label className={label}>Default floor-to-floor height (ft)
-                <input className={field} type="number" inputMode="decimal" min="0.01" max="9999.99" step="0.01" value={floorHeight} placeholder="Enter height" aria-label="Default floor-to-floor height" onChange={(event) => { setFloorHeight(event.target.value); setFloorRateError(''); }} />
+              <label className={label}>
+                Default floor-to-floor height (ft)
+                <input
+                  className={field}
+                  type="number"
+                  inputMode="decimal"
+                  min="0.01"
+                  max="9999.99"
+                  step="0.01"
+                  value={floorHeight}
+                  placeholder="Enter height"
+                  aria-label="Default floor-to-floor height"
+                  onChange={(event) => {
+                    setFloorHeight(event.target.value);
+                    setFloorRateError('');
+                  }}
+                />
               </label>
             </div>
           </section>

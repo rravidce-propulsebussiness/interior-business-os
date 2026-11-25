@@ -85,15 +85,38 @@ describe('company floor pricing defaults', () => {
 
 describe('package floor height', () => {
   it('persists a height even without separate parking rates and retains it during rate edits', () => {
-    const saved = writeFloorRateDefaults([steel], { parking: '', penthouse: '' }, 32, '11');
+    const saved = writeFloorRateDefaults(
+      [steel],
+      { parking: '', penthouse: '' },
+      32,
+      '11',
+    );
     expect(readPackageFloorHeight(saved)).toBe('11');
-    expect(readFloorRateDefaults(saved)).toEqual({ parking: '', penthouse: '' });
-    const updated = writeFloorRateDefaults(saved, { parking: '800', penthouse: '' }, 32);
+    expect(readFloorRateDefaults(saved)).toEqual({
+      parking: '',
+      penthouse: '',
+    });
+    const updated = writeFloorRateDefaults(
+      saved,
+      { parking: '800', penthouse: '' },
+      32,
+    );
     expect(readPackageFloorHeight(updated)).toBe('11');
-    expect(readPackageFloorHeight(writeFloorRateDefaults(updated, { parking: '', penthouse: '' }, 32, ''))).toBe('');
+    expect(
+      readPackageFloorHeight(
+        writeFloorRateDefaults(updated, { parking: '', penthouse: '' }, 32, ''),
+      ),
+    ).toBe('');
   });
   it('rejects an invalid height and never assumes one for old packages', () => {
     expect(readPackageFloorHeight([steel])).toBe('');
-    expect(() => writeFloorRateDefaults([steel], { parking: '', penthouse: '' }, 32, '-10')).toThrow(/height/);
+    expect(() =>
+      writeFloorRateDefaults(
+        [steel],
+        { parking: '', penthouse: '' },
+        32,
+        '-10',
+      ),
+    ).toThrow(/height/);
   });
 });

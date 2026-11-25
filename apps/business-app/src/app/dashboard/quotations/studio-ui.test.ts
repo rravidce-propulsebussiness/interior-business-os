@@ -785,7 +785,9 @@ describe('save resiliency and floor auto-inheritance', () => {
   it('inherits package floor height into saved quotation rows', () => {
     const pkg = file('../pricing/construction/premium-package-editor.tsx');
     expect(pkg).toContain('Default floor-to-floor height');
-    expect(builder).toContain('readPackageFloorHeight(selectedPackage?.specSections');
+    expect(builder).toContain(
+      'readPackageFloorHeight(selectedPackage?.specSections',
+    );
     expect(builder).toContain('heightFeet:packageFloorHeight');
     expect(builder).toContain('input:savePayload');
     expect(builder).not.toContain('aria-label="Floor Height Specifications"');

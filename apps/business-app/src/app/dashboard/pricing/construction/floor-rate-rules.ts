@@ -45,7 +45,9 @@ export function readPackageFloorHeight(sections: readonly SpecLike[]): string {
   const spec = sections.find((section) => section.title === FLOOR_RATE_TITLE);
   try {
     const value = JSON.parse(spec?.description ?? '{}')?.heightFeet;
-    return typeof value === 'string' && valid(value) && Number(value) <= 9999.99 ? value : '';
+    return typeof value === 'string' && valid(value) && Number(value) <= 9999.99
+      ? value
+      : '';
   } catch {
     return '';
   }
