@@ -722,7 +722,7 @@ export function BoqWorkspace({
       generator?.legacyCountsNeedReview ||
       (active &&
         generator &&
-        (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION),
+        (generator.engineVersion ?? 1) < 3),
     );
     const result = generateQuotationBoq({
       details: schedule,
@@ -1525,9 +1525,7 @@ export function BoqWorkspace({
     name: string,
     values: MeasuredDimensions,
   ) {
-    const outputs = measuredOutputs(kind, values, settings).map((output) =>
-      fillingOutput(name, output),
-    );
+    const outputs = withMeasuredBindingWire(measuredOutputs(kind, values, settings).map((output) => fillingOutput(name, output)), 8, settings.stockBarFeet);
     // A newly added row is a draft measurement. Keep its empty outputs until
     // its dimensions are complete; the same row is then calculated on edit.
     const item: SavedLine = {
@@ -1590,7 +1588,7 @@ export function BoqWorkspace({
         /* No implied steel if a legacy note is malformed. */
       }
     }
-    const outputs = measuredOutputs(
+    const outputs = withMeasuredBindingWire(measuredOutputs(
       kind,
       {
         ...values,
@@ -1600,7 +1598,7 @@ export function BoqWorkspace({
         ...(steelSets ? { steelSets } : {}),
       },
       settings,
-    );
+    ), 8, settings.stockBarFeet);
     const steelSetsJson = JSON.stringify(steelSets ?? []);
     setLines((prior) =>
       prior.map((line, i) =>
@@ -2361,7 +2359,7 @@ export function BoqWorkspace({
               generator?.legacyCountsNeedReview ||
               (active &&
                 generator &&
-                (generator.engineVersion ?? 1) < BOQ_ENGINE_VERSION),
+                (generator.engineVersion ?? 1) < 3),
             )}
             onCountsChange={updateStageCounts}
             structuralSettings={concreteSettings}
