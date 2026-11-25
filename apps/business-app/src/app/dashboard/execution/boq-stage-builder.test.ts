@@ -10,7 +10,10 @@ import {
 import { editorUnit } from './boq-compact-editor';
 import { BoqFootingEditor } from './boq-footing-editor';
 import { BarsPicker } from './boq-design-schedule';
-import { measuredCounts, newFootingType } from '@business-os/core/construction-boq';
+import {
+  measuredCounts,
+  newFootingType,
+} from '@business-os/core/construction-boq';
 import type {
   BoqCounts,
   BoqFloor,
