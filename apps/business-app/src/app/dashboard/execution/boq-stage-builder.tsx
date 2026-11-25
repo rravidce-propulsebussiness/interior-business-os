@@ -2,6 +2,7 @@
 
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
+import { BoqEditorUnits, BoqRemove, editorUnit, useBoqEditorUnit } from './boq-compact-editor';
 import { NumberField } from './boq-number-field';
 import type { Rate } from './boq-pricing';
 import { isAutoPlasterQuantity } from './boq-plaster-guards';
@@ -378,20 +379,23 @@ export function InputNumber({
   unit?: string;
   min?: number;
 }) {
+  const selected = useBoqEditorUnit();
+  const display = editorUnit(unit, selected);
   return (
     <label className="boq-stage-field">
       <span>
         {label}
-        {unit ? ' (' + unit + ')' : ''}
+        {display.unit ? ' (' + display.unit + ')' : ''}
       </span>
       {/* Feet boxes read drawing sizes (5'4" = 5.33 ft). A number box
           silently turned 5'4" into 54 and the excavation into 899 m³. */}
       <NumberField
-        label={label + (unit ? ' (' + unit + ')' : '')}
-        value={value}
+        key={display.unit}
+        label={label + (display.unit ? ' (' + display.unit + ')' : '')}
+        value={Number((value * display.factor).toFixed(6))}
         min={min}
-        feet={unit === 'ft'}
-        onChange={onChange}
+        feet={display.unit === 'ft'}
+        onChange={(n) => onChange(n / display.factor)}
       />
     </label>
   );
@@ -925,7 +929,18 @@ export function BoqStageBuilder(props: Props) {
     const isFootings = category.key === 'footings';
     const isBeams = category.key === 'beams';
     return (
-      <div className="boq-stage-edit" key={stage + ':' + category.key}>
+      <BoqEditorUnits unit={dimensionUnit}>
+      <div className="boq-stage-edit boq-compact-editor" key={stage + ':' + category.key}>
+        {!isGeometry(category.key) && (
+          <div className="boq-volume-toolbar">
+            <label className="boq-stage-field boq-stage-unit-switch">
+              <span>Input dimension unit</span>
+              <select value={dimensionUnit} onChange={(event) => setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')}>
+                <option value="ft">Feet (ft)</option><option value="m">Metres (m)</option>
+              </select>
+            </label>
+          </div>
+        )}
         <div className="boq-stage-edit-head">
           <div>
             <strong>Edit {category.label}</strong>
@@ -1255,14 +1270,7 @@ export function BoqStageBuilder(props: Props) {
                 <div className="boq-stage-subcard" key={wall.id}>
                   <div className="boq-stage-subhead">
                     <strong>{wall.name || 'Wall ' + (wallIndex + 1)}</strong>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateWalls(walls.filter((_, i) => i !== wallIndex))
-                      }
-                    >
-                      Remove
-                    </button>
+                    <BoqRemove label={"Remove " + wall.name} onClick={() => updateWalls(walls.filter((_, i) => i !== wallIndex))} />
                   </div>
                   <div className="boq-stage-input-grid">
                     <InputText
@@ -1314,15 +1322,47 @@ export function BoqStageBuilder(props: Props) {
                   <div className="boq-stage-volume">
                     <span>Gross wall area</span>
                     <strong>
-                      {number(wall.count * wall.lengthFeet * wall.heightFeet)}{' '}
-                      sqft
+                      {number(wall.count * wall.lengthFeet * wall.heightFeet * editorUnit('sqft', dimensionUnit).factor)}{' '}
+                      {editorUnit('sqft', dimensionUnit).unit}
                     </strong>
                   </div>
                 </div>
               );
             })}
             <div className="boq-stage-subcard">
-              <h4>+ Add wall type</h4>
+              <div className="boq-stage-subhead"><strong>New wall</strong><button
+                className="boq-volume-add"
+                type="button"
+                disabled={
+                  !(
+                    wallDraft.lengthFeet > 0 &&
+                    wallDraft.heightFeet > 0 &&
+                    wallDraft.count > 0
+                  )
+                }
+                onClick={() => {
+                  updateWalls([
+                    ...walls,
+                    {
+                      ...wallDraft,
+                      id: 'wall-' + Date.now().toString(36),
+                      name:
+                        wallDraft.name.trim() || 'Wall ' + (walls.length + 1),
+                    },
+                  ]);
+                  setWallDraft({
+                    id: 'new',
+                    name: '',
+                    location: 'external',
+                    count: 1,
+                    lengthFeet: 0,
+                    heightFeet: 0,
+                    thicknessIn: 9,
+                  });
+                }}
+              >
+                + Add Item
+              </button></div>
               <div className="boq-stage-input-grid">
                 <InputText
                   label="Wall reference"
@@ -1386,39 +1426,7 @@ export function BoqStageBuilder(props: Props) {
                   }
                 />
               </div>
-              <button
-                className="boq-stage-outline"
-                type="button"
-                disabled={
-                  !(
-                    wallDraft.lengthFeet > 0 &&
-                    wallDraft.heightFeet > 0 &&
-                    wallDraft.count > 0
-                  )
-                }
-                onClick={() => {
-                  updateWalls([
-                    ...walls,
-                    {
-                      ...wallDraft,
-                      id: 'wall-' + Date.now().toString(36),
-                      name:
-                        wallDraft.name.trim() || 'Wall ' + (walls.length + 1),
-                    },
-                  ]);
-                  setWallDraft({
-                    id: 'new',
-                    name: '',
-                    location: 'external',
-                    count: 1,
-                    lengthFeet: 0,
-                    heightFeet: 0,
-                    thicknessIn: 9,
-                  });
-                }}
-              >
-                + Add measured wall
-              </button>
+              
             </div>
           </div>
         )}
@@ -1431,18 +1439,23 @@ export function BoqStageBuilder(props: Props) {
         )}
         {isColumns && (
           <>
+            <div className="boq-compact-actions"><button
+              type="button"
+              className="boq-volume-add"
+              onClick={() =>
+                setColumns([
+                  ...drawing.columns,
+                  newColumn(drawing.columns.length),
+                ])
+              }
+            >
+              + Add column type
+            </button></div>
             {drawing.columns.map((col, ci) => (
               <div className="boq-stage-subcard" key={ci}>
                 <div className="boq-stage-subhead">
                   <strong>{col.label || 'Column ' + (ci + 1)}</strong>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setColumns(drawing.columns.filter((_, i) => i !== ci))
-                    }
-                  >
-                    Remove
-                  </button>
+                  <BoqRemove label={`Remove column type ${ci + 1}`} onClick={() => setColumns(drawing.columns.filter((_, i) => i !== ci))} />
                 </div>
                 <div className="boq-stage-input-grid">
                   <InputText
@@ -1499,34 +1512,28 @@ export function BoqStageBuilder(props: Props) {
                 </div>
               </div>
             ))}
-            <button
-              type="button"
-              className="boq-stage-outline"
-              onClick={() =>
-                setColumns([
-                  ...drawing.columns,
-                  newColumn(drawing.columns.length),
-                ])
-              }
-            >
-              + Add column type
-            </button>
+            
           </>
         )}
         {isBeams && (
           <>
+            <div className="boq-compact-actions"><button
+              type="button"
+              className="boq-volume-add"
+              onClick={() =>
+                setBeams([
+                  ...drawing.beams,
+                  newBeam(drawing.beams.length, props.floors.length),
+                ])
+              }
+            >
+              + Add beam type
+            </button></div>
             {drawing.beams.map((beam, bi) => (
               <div className="boq-stage-subcard" key={bi}>
                 <div className="boq-stage-subhead">
                   <strong>{beam.label}</strong>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setBeams(drawing.beams.filter((_, i) => i !== bi))
-                    }
-                  >
-                    Remove
-                  </button>
+                  <BoqRemove label={`Remove beam type ${bi + 1}`} onClick={() => setBeams(drawing.beams.filter((_, i) => i !== bi))} />
                 </div>
                 <div className="boq-stage-input-grid">
                   <InputText
@@ -1617,41 +1624,55 @@ export function BoqStageBuilder(props: Props) {
                   />
                   {(beam.countsByFloor?.[index] ?? 0) > 0 && (
                     <small className="boq-structural-inline-total">
-                      {number(beam.runFeet[index] ?? 0)} rft total
+                      {number((beam.runFeet[index] ?? 0) * editorUnit('rft', dimensionUnit).factor)} {editorUnit('rft', dimensionUnit).unit} total
                     </small>
                   )}
                 </div>
               </div>
             ))}
-            <button
-              type="button"
-              className="boq-stage-outline"
-              onClick={() =>
-                setBeams([
-                  ...drawing.beams,
-                  newBeam(drawing.beams.length, props.floors.length),
-                ])
-              }
-            >
-              + Add beam type
-            </button>
+            
           </>
         )}
         {category.key === 'plinth' && (
           <div className="boq-plinth-schedule">
+            <div className="boq-compact-actions"><button
+              type="button"
+              className="boq-volume-add"
+              onClick={() =>
+                setPlinthBeams([
+                  ...plinthRows,
+                  {
+                    label: `PB${plinthRows.length + 1}`,
+                    count: 1,
+                    lengthFeet: 0,
+                    widthIn:
+                      drawing.settings?.plinthBeamWidthIn ??
+                      props.structuralSettings.plinthBeamWidthIn ??
+                      9,
+                    depthIn:
+                      drawing.settings?.plinthBeamDepthIn ??
+                      props.structuralSettings.plinthBeamDepthIn ??
+                      12,
+                    bars: '',
+                    stirrupDia:
+                      drawing.settings?.plinthBeamStirrupDia ??
+                      props.structuralSettings.plinthBeamStirrupDia ??
+                      8,
+                    stirrupSpacingIn:
+                      drawing.settings?.plinthBeamStirrupSpacingIn ??
+                      props.structuralSettings.plinthBeamStirrupSpacingIn ??
+                      6,
+                  },
+                ])
+              }
+            >
+              + Add plinth beam type
+            </button></div>
             {plinthRows.map((beam, bi) => (
               <section className="boq-stage-subcard" key={bi}>
                 <div className="boq-stage-subhead">
                   <strong>{beam.label || `PB${bi + 1}`}</strong>
-                  <button
-                    type="button"
-                    aria-label={`Remove plinth beam type ${bi + 1}`}
-                    onClick={() =>
-                      setPlinthBeams(plinthRows.filter((_, i) => i !== bi))
-                    }
-                  >
-                    Remove
-                  </button>
+                  <BoqRemove label={`Remove plinth beam type ${bi + 1}`} onClick={() => setPlinthBeams(plinthRows.filter((_, i) => i !== bi))} />
                 </div>
                 <div className="boq-stage-input-grid">
                   <InputText
@@ -1708,44 +1729,11 @@ export function BoqStageBuilder(props: Props) {
                   />
                 </div>
                 <small className="boq-plinth-run">
-                  {number(beam.count * beam.lengthFeet)} rft total · Concrete
-                  and each steel diameter calculated once
+                  {number(beam.count * beam.lengthFeet * editorUnit('rft', dimensionUnit).factor)} {editorUnit('rft', dimensionUnit).unit} total
                 </small>
               </section>
             ))}
-            <button
-              type="button"
-              className="boq-stage-outline"
-              onClick={() =>
-                setPlinthBeams([
-                  ...plinthRows,
-                  {
-                    label: `PB${plinthRows.length + 1}`,
-                    count: 1,
-                    lengthFeet: 0,
-                    widthIn:
-                      drawing.settings?.plinthBeamWidthIn ??
-                      props.structuralSettings.plinthBeamWidthIn ??
-                      9,
-                    depthIn:
-                      drawing.settings?.plinthBeamDepthIn ??
-                      props.structuralSettings.plinthBeamDepthIn ??
-                      12,
-                    bars: '',
-                    stirrupDia:
-                      drawing.settings?.plinthBeamStirrupDia ??
-                      props.structuralSettings.plinthBeamStirrupDia ??
-                      8,
-                    stirrupSpacingIn:
-                      drawing.settings?.plinthBeamStirrupSpacingIn ??
-                      props.structuralSettings.plinthBeamStirrupSpacingIn ??
-                      6,
-                  },
-                ])
-              }
-            >
-              + Add plinth beam type
-            </button>
+            
           </div>
         )}
         {category.key === 'slab' && (
@@ -1901,6 +1889,25 @@ export function BoqStageBuilder(props: Props) {
         {current && category.key === 'tiles' && (
           <div className="boq-stage-dimensions">
             <h4>Flooring & kitchens</h4>
+            <div className="boq-compact-actions"><button
+              type="button"
+              className="boq-volume-add"
+              onClick={() =>
+                updateKitchens([
+                  ...measuredKitchens,
+                  {
+                    id: 'kitchen-' + Date.now().toString(36),
+                    name: 'Kitchen ' + (measuredKitchens.length + 1),
+                    platformFeet: 0,
+                    platformDepthFeet: 0,
+                    wallTileFeet: 0,
+                    wallTileHeightFeet: 0,
+                  },
+                ])
+              }
+            >
+              ＋ Add kitchen
+            </button></div>
             <div className="boq-stage-input-grid">
               <InputNumber
                 label="Room flooring area"
@@ -1969,16 +1976,7 @@ export function BoqStageBuilder(props: Props) {
                     <strong>
                       {kitchen.name || 'Kitchen ' + (kitchenIndex + 1)}
                     </strong>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateKitchens(
-                          measuredKitchens.filter((_, i) => i !== kitchenIndex),
-                        )
-                      }
-                    >
-                      Remove kitchen
-                    </button>
+                    <BoqRemove label={"Remove " + kitchen.name} onClick={() => updateKitchens(measuredKitchens.filter((_, i) => i !== kitchenIndex))} />
                   </div>
                   <div className="boq-stage-input-grid">
                     <InputText
@@ -2016,25 +2014,7 @@ export function BoqStageBuilder(props: Props) {
                 </div>
               );
             })}
-            <button
-              type="button"
-              className="boq-stage-outline"
-              onClick={() =>
-                updateKitchens([
-                  ...measuredKitchens,
-                  {
-                    id: 'kitchen-' + Date.now().toString(36),
-                    name: 'Kitchen ' + (measuredKitchens.length + 1),
-                    platformFeet: 0,
-                    platformDepthFeet: 0,
-                    wallTileFeet: 0,
-                    wallTileHeightFeet: 0,
-                  },
-                ])
-              }
-            >
-              ＋ Add kitchen
-            </button>
+            
           </div>
         )}
         {floor && category.key === 'staircase' && (
@@ -2283,130 +2263,36 @@ export function BoqStageBuilder(props: Props) {
             />
           </div>
         )}
-        {foundEntries.some(
-          (entry) => entry.line.kind !== 'measured-geometry',
-        ) &&
-          !isColumns &&
-          !isBeams && (
-            <>
-              <h4>Calculated materials & labour</h4>
-              <div className="boq-stage-output-rows">
-                {foundEntries
-                  .filter((entry) => entry.line.kind !== 'measured-geometry')
-                  .map((entry) => (
-                    <div
-                      className="boq-stage-output"
-                      key={entry.line.id + '-' + entry.outputIndex}
-                    >
-                      <span>
-                        {entry.output.name}
-                        <small>{entry.line.name}</small>
-                      </span>
-                      {isDerivedQuantityReadOnly(
-                        entry.line.kind,
-                        entry.output.name,
-                      ) ? (
-                        <div className="boq-stage-field">
-                          <span>Calculated quantity ({entry.output.unit})</span>
-                          <strong>{number(entry.output.quantity)}</strong>
-                        </div>
-                      ) : (
-                        <InputNumber
-                          label="Quantity"
-                          value={entry.output.quantity}
-                          unit={entry.output.unit}
-                          onChange={(value) =>
-                            props.onUpdateQuantity(
-                              entry.lineIndex,
-                              entry.outputIndex,
-                              value,
-                            )
-                          }
-                        />
-                      )}
-                      {entry.output.quotedRate !== undefined && (
-                        <small className="boq-stage-limit">
-                          Quote limit:
-                          {money(entry.output.quotedRate)} / {entry.output.unit}
-                        </small>
-                      )}
-                      {entry.line.origin &&
-                      entry.output.material === 'concrete_m20' ? (
-                        props.canViewCost && (
-                          <small className="boq-stage-limit">
-                            M20 RMC rate: {money(props.structuralRmcRate)} / m³
-                          </small>
-                        )
-                      ) : props.isOldLabourOutput?.(entry.output) ? (
-                        <small className="boq-stage-limit">
-                          Included in labour package
-                        </small>
-                      ) : (
-                        props.canViewCost && (
-                          <InputNumber
-                            label="Rate"
-                            value={
-                              entry.output.rate ?? props.rateFor(entry.output)
-                            }
-                            onChange={(value) =>
-                              props.onUpdateRate(
-                                entry.lineIndex,
-                                entry.outputIndex,
-                                value,
-                              )
-                            }
-                          />
-                        )
-                      )}
-                      {!entry.line.origin ? (
-                        <button
-                          type="button"
-                          onClick={() => props.onRemoveManual(entry.lineIndex)}
-                        >
-                          Remove
-                        </button>
-                      ) : (
-                        !isDerivedQuantityReadOnly(
-                          entry.line.kind,
-                          entry.output.name,
-                        ) &&
-                        [
-                          'tiles',
-                          'painting',
-                          'plumbing',
-                          'electrical',
-                          'staircase',
-                          'plaster',
-                          'waterproofing',
-                          'doors',
-                        ].includes(category.key) && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              entry.output.quantity === 0
-                                ? props.onResetQuantity(
-                                    entry.lineIndex,
-                                    entry.outputIndex,
-                                  )
-                                : props.onUpdateQuantity(
-                                    entry.lineIndex,
-                                    entry.outputIndex,
-                                    0,
-                                  )
-                            }
-                          >
-                            {entry.output.quantity === 0
-                              ? 'Restore calculated quantity'
-                              : 'Remove from floor'}
-                          </button>
-                        )
-                      )}
-                    </div>
-                  ))}
-              </div>
-            </>
-          )}
+        {!isGeometry(category.key) && (
+          <div className="boq-compact-results">
+            <h4>Materials & labour</h4>
+            <div className="boq-volume-scroll">
+              <table className="boq-volume-table boq-cost-table" aria-label={category.label + ' calculated costs'}>
+                <thead><tr><th>Item</th><th>Quantity</th><th>Unit</th>{props.canViewCost && <><th>Rate</th><th>Amount</th></>}<th>Action</th></tr></thead>
+                <tbody>
+                  {foundEntries.map((entry) => {
+                    const view = editorUnit(entry.output.unit, dimensionUnit);
+                    const derived = isColumns || isBeams || isDerivedQuantityReadOnly(entry.line.kind, entry.output.name);
+                    const rate = props.rateFor(entry.output) / view.factor;
+                    const fixedRate = derived || (entry.line.origin && entry.output.material === 'concrete_m20') || props.isOldLabourOutput?.(entry.output);
+                    const canExclude = !derived && ['tiles','painting','plumbing','electrical','staircase','plaster','waterproofing','doors'].includes(category.key);
+                    return <tr key={entry.line.id + ':' + entry.outputIndex}>
+                      <td>{entry.output.name}<small>{entry.line.name}</small></td>
+                      <td>{derived ? <strong className="boq-volume-qty">{number(entry.output.quantity * view.factor)}</strong> : <NumberField key={view.unit} label={entry.output.name + ' quantity'} value={Number((entry.output.quantity * view.factor).toFixed(6))} onChange={(value) => props.onUpdateQuantity(entry.lineIndex, entry.outputIndex, value / view.factor)} />}</td>
+                      <td>{view.unit}</td>
+                      {props.canViewCost && <><td>{fixedRate ? <span className="boq-volume-rate">{rate.toLocaleString('en-IN', {maximumFractionDigits: 4})}</span> : <NumberField key={view.unit} label={entry.output.name + ' rate'} value={Number(rate.toFixed(6))} onChange={(value) => props.onUpdateRate(entry.lineIndex, entry.outputIndex, value * view.factor)} />}{entry.output.quotedRate !== undefined && <small>Limit {number(entry.output.quotedRate / view.factor)}</small>}</td><td><strong className="boq-volume-amount">{money(priced(entry.output))}</strong></td></>}
+                      <td>{!entry.line.origin && entry.outputIndex === 0 ? <BoqRemove label={'Remove ' + entry.line.name} onClick={() => props.onRemoveManual(entry.lineIndex)} /> : entry.line.origin && canExclude ? entry.output.quantity === 0 ? <button type="button" className="boq-stage-outline" onClick={() => props.onResetQuantity(entry.lineIndex, entry.outputIndex)}>Restore</button> : <BoqRemove label={'Remove ' + entry.output.name + ' from floor'} onClick={() => props.onUpdateQuantity(entry.lineIndex, entry.outputIndex, 0)} /> : '—'}</td>
+                    </tr>;
+                  })}
+                  {!foundEntries.length && <tr><td colSpan={props.canViewCost ? 6 : 4} className="boq-volume-empty">No measured items</td></tr>}
+                </tbody>
+              </table>
+            </div>
+            {props.canViewCost && <div className="boq-volume-total"><strong>Total {category.label}</strong><b>{money(visibleCost(stage, category.key))}</b></div>}
+          </div>
+        )}
       </div>
+      </BoqEditorUnits>
     );
   };
 
