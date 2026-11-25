@@ -2,6 +2,11 @@ import { effectiveRates, type Rate } from '../boq-pricing';
 import { executionServices } from '../service';
 import type { SupabaseClient } from '@business-os/database';
 import { BoqWorkspace } from '../boq-workspace';
+import { createConstructionPackagesRepository } from '@business-os/database/construction-packages';
+import {
+  applyPackageFloorHeight,
+  linkedPackageFloorHeight,
+} from '../../pricing/construction/floor-rate-rules';
 import { projectsReadyForNewBoq } from '../boq-project-eligibility';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
 import type { SftEstimateDetails } from '@business-os/core/sft-quotation';
@@ -266,9 +271,33 @@ export default async function ManualBoqPage({
     });
     linesByRevision.set(line.revision_id, list);
   }
+  // Legacy quotes saved before the package-height feature have no height in
+  // their snapshots. Resolve the linked tenant package only when necessary.
+  const requiresPackageHeight = [...scheduleByRevision.values()].some(
+    (schedule) =>
+      schedule.package &&
+      schedule.rows.some(
+        (row) =>
+          (row.kind ?? 'floor') === 'floor' && !(Number(row.heightFeet) > 0),
+      ),
+  );
+  const packages = requiresPackageHeight
+    ? await createConstructionPackagesRepository(s.client)
+        .list(s.org)
+        .catch(() => [])
+    : [];
   const quotes = quoteSources.map(
     ({ project, quote, isFinal, savedSource }) => {
-      const schedule = scheduleByRevision.get(quote.revisionId!) ?? null;
+      const savedSchedule = scheduleByRevision.get(quote.revisionId!) ?? null;
+      const schedule = savedSchedule
+        ? {
+            ...savedSchedule,
+            rows: applyPackageFloorHeight(
+              savedSchedule.rows,
+              linkedPackageFloorHeight(savedSchedule.package, packages),
+            ),
+          }
+        : null;
       return {
         id: quote.revisionId!,
         projectId: project.id,

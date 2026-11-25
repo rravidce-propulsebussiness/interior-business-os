@@ -3,6 +3,13 @@ import {
   copyExteriorWallsToFullFloors,
   syncAssumedFloorHeights,
 } from './boq-floor-scopes';
+import { floorsFromQuote } from '@business-os/core/construction-boq';
+import { calculateSftEstimate } from '@business-os/core/sft-quotation';
+import {
+  applyPackageFloorHeight,
+  linkedPackageFloorHeight,
+  writeFloorRateDefaults,
+} from '../pricing/construction/floor-rate-rules';
 import type { BoqFloor, WallMeasure } from '@business-os/core/construction-boq';
 
 const floors: BoqFloor[] = [
@@ -111,5 +118,52 @@ describe('quotation floor height synchronization', () => {
     expect(synced[1]).toBe(saved[1]);
     expect(synced[2]).toBe(saved[2]);
     expect(syncAssumedFloorHeights(synced, quoted)).toBe(synced);
+  });
+});
+
+describe('legacy package → quotation → saved BOQ', () => {
+  it('replaces assumed heights using the exact configured package and preserves measured heights', () => {
+    const rows = ['Ground Floor', 'First Floor', 'Second Floor'].map(
+      (name, index) => ({
+        name,
+        kind: 'floor' as const,
+        lengthFeet: '40',
+        widthFeet: '25',
+        ratePerSqft: '2000',
+        heightFeet: index === 0 ? '11' : '',
+      }),
+    );
+    const snapshot = {
+      id: '11111111-1111-4111-8111-111111111111',
+      name: 'Premium',
+      code: 'PREMIUM',
+      description: '',
+      ratePerSqft: '2000',
+    };
+    const legacy = calculateSftEstimate(
+      { rows, materialIds: [] },
+      [],
+      snapshot,
+    );
+    const pkg = {
+      ...snapshot,
+      specSections: writeFloorRateDefaults(
+        [{ title: 'Steel', description: 'TMT' }],
+        { parking: '', penthouse: '' },
+        32,
+        '11.5',
+      ),
+    };
+    const height = linkedPackageFloorHeight(legacy.package, [pkg]);
+    const recovered = {
+      ...legacy,
+      rows: applyPackageFloorHeight(legacy.rows, height),
+    };
+    const saved = floorsFromQuote(legacy);
+    const synced = syncAssumedFloorHeights(saved, floorsFromQuote(recovered));
+    expect(synced.map((floor) => floor.heightFeet)).toEqual([11, 11.5, 11.5]);
+    expect(synced.every((floor) => !floor.heightAssumed)).toBe(true);
+    expect(synced[0]).toBe(saved[0]);
+    expect(recovered.total).toBe(legacy.total);
   });
 });

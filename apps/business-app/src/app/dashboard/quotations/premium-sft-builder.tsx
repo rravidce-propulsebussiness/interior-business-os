@@ -357,7 +357,17 @@ export function PremiumSftBuilder({
   };
   const [message, setMessage] = useState('');
   const [saved, setSaved] = useState(Boolean(initialSchedule));
-  const [dirty, setDirty] = useState(false);
+  // An older quote with newly populated package heights must be savable
+  // without forcing the user to make an unrelated edit.
+  const [dirty, setDirty] = useState(() =>
+    Boolean(
+      packageFloorHeight &&
+      initialSchedule?.rows.some(
+        (row) =>
+          (row.kind ?? 'floor') === 'floor' && !(Number(row.heightFeet) > 0),
+      ),
+    ),
+  );
   // Switching package is an unsaved change even before any row is edited.
   const unsaved = dirty || changedPackage;
   const [savedVersion, setSavedVersion] = useState(version);

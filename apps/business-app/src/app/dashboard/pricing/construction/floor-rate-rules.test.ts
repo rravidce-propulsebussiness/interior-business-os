@@ -3,6 +3,8 @@ import {
   FLOOR_RATE_TITLE,
   readFloorRateDefaults,
   readPackageFloorHeight,
+  applyPackageFloorHeight,
+  linkedPackageFloorHeight,
   writeFloorRateDefaults,
 } from './floor-rate-rules';
 
@@ -118,5 +120,64 @@ describe('package floor height', () => {
         '-10',
       ),
     ).toThrow(/height/);
+  });
+});
+
+describe('legacy quotation package height recovery', () => {
+  it('resolves the original package and fills missing floor heights only', () => {
+    const specSections = writeFloorRateDefaults(
+      [steel],
+      { parking: '', penthouse: '' },
+      32,
+      '11',
+    );
+    const packages = [
+      { id: 'a', code: 'PREMIUM', name: 'Premium', specSections },
+      { id: 'b', code: 'BASIC', name: 'Basic', specSections: [] },
+    ];
+    const height = linkedPackageFloorHeight(
+      { id: 'a', code: 'PREMIUM', name: 'Premium' },
+      packages,
+    );
+    const rows: {
+      kind?: 'floor' | 'additional';
+      name: string;
+      heightFeet: string;
+      areaSqft: string;
+    }[] = [
+      {
+        kind: 'floor',
+        name: 'Ground Floor',
+        heightFeet: '12',
+        areaSqft: '1000',
+      },
+      { kind: 'floor', name: 'First Floor', heightFeet: '', areaSqft: '1000' },
+      { name: 'Second Floor', heightFeet: '', areaSqft: '1000' },
+      {
+        kind: 'additional',
+        name: 'Compound wall',
+        heightFeet: '',
+        areaSqft: '100',
+      },
+    ];
+    const result = applyPackageFloorHeight(rows, height);
+    expect(result.map((row) => row.heightFeet)).toEqual(['12', '11', '11', '']);
+    expect(result[0]).toBe(rows[0]);
+    expect(result[3]).toBe(rows[3]);
+    expect(result.map((row) => row.areaSqft)).toEqual(
+      rows.map((row) => row.areaSqft),
+    );
+    expect(applyPackageFloorHeight(result, '10')).toBe(result);
+    expect(
+      linkedPackageFloorHeight(
+        { id: 'missing', code: 'PREMIUM', name: 'Premium' },
+        packages,
+      ),
+    ).toBe('');
+    expect(linkedPackageFloorHeight(undefined, packages)).toBe('');
+    expect(
+      linkedPackageFloorHeight({ code: 'PREMIUM', name: 'Premium' }, packages),
+    ).toBe('11');
+    expect(applyPackageFloorHeight(rows, '')).toBe(rows);
   });
 });
