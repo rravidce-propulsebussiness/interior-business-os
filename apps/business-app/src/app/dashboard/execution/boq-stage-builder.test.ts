@@ -465,7 +465,9 @@ describe('expanded volume worksheet', () => {
 describe('shared compact work editors', () => {
   it('converts area and volume presentation without changing the amount', () => {
     for (const [source, selected, expected] of [
-      ['m³', 'ft', 'CFT'], ['sqft', 'm', 'm²'], ['ft', 'm', 'm'],
+      ['m³', 'ft', 'CFT'],
+      ['sqft', 'm', 'm²'],
+      ['ft', 'm', 'm'],
       ['kg', 'm', 'kg'],
     ] as const) {
       const display = editorUnit(source, selected);
@@ -488,14 +490,29 @@ describe('shared compact work editors', () => {
     [11, 'Ground Floor', 'tiles', 'Tiles'],
     [11, 'Ground Floor', 'electrical', 'Electrical'],
     [11, 'Ground Floor', 'plumbing', 'Plumbing'],
-  ] as const)('renders compact cost review for stage %s %s %s', (step, stage, category, title) => {
-    const html = renderToStaticMarkup(createElement(BoqStageBuilder, {
-      ...base, initialStep: step, initialEditor: {stage, category},
-      floors: [{name:'Ground Floor', areaSqft:1000,lengthFeet:40,widthFeet:25,heightFeet:11}],
-    }));
-    expect(html).toContain('boq-compact-editor');
-    expect(html).toContain('Input dimension unit');
-    expect(html).toContain('aria-label="' + title + ' calculated costs"');
-    expect(html).toContain('Total ' + title);
-  });
+  ] as const)(
+    'renders compact cost review for stage %s %s %s',
+    (step, stage, category, title) => {
+      const html = renderToStaticMarkup(
+        createElement(BoqStageBuilder, {
+          ...base,
+          initialStep: step,
+          initialEditor: { stage, category },
+          floors: [
+            {
+              name: 'Ground Floor',
+              areaSqft: 1000,
+              lengthFeet: 40,
+              widthFeet: 25,
+              heightFeet: 11,
+            },
+          ],
+        }),
+      );
+      expect(html).toContain('boq-compact-editor');
+      expect(html).toContain('Input dimension unit');
+      expect(html).toContain('aria-label="' + title + ' calculated costs"');
+      expect(html).toContain('Total ' + title);
+    },
+  );
 });
