@@ -38,6 +38,9 @@ export type DesignFootingType = {
   mesh: FootingMesh;
   bottomBarDia: number;
   bottomSpacingIn: number;
+  /** Drawing-specified extra cutting length per end; zero means straight. Missing retains the legacy estimate. */
+  bottomBendIn?: number | undefined;
+  topBendIn?: number | undefined;
   topBarDia: number;
   topSpacingIn: number;
   /** Optional per-direction and per-layer steel schedule; replaces legacy mesh steel. */
@@ -153,6 +156,11 @@ export function barsAcross(acrossFeet: number, spacingFeet: number): number {
   return Math.ceil(acrossFeet / spacingFeet - 1e-9) + 1;
 }
 
+export function footingBendFeet(f: DesignFootingType, layer: 'bottom' | 'top', coverFeet: number): number {
+  const entered = layer === 'bottom' ? f.bottomBendIn : f.topBendIn;
+  return entered !== undefined ? safe(entered) / 12 : layer === 'bottom' ? Math.max(0, f.thicknessIn / 12 - 2 * coverFeet) : 0;
+}
+
 export function footingMeshPieces(
   f: DesignFootingType,
   coverFeet: number,
@@ -176,10 +184,7 @@ export function footingMeshPieces(
       if (!(span > 0 && across > 0)) continue;
       // Bottom bars are bent up at both ends inside the cover, as drawn on
       // footing sections (and as the quotation-structure takeoff counts).
-      const bendUp =
-        layer === 'bottom'
-          ? Math.max(0, f.thicknessIn / 12 - 2 * coverFeet)
-          : 0;
+      const bendUp = footingBendFeet(f, layer, coverFeet);
       pieces.push({
         diameter: dia,
         pieces: n * barsAcross(across, spacing),
