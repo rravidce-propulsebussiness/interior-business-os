@@ -2228,3 +2228,45 @@
     transition: none;
   }
 }
+
+/* Shared compact expanded editor across structural and finishing schedules. */
+.boq-premium-work .boq-compact-editor { display: grid; gap: 10px; }
+.boq-compact-editor .boq-stage-dimensions,
+.boq-compact-editor .boq-footing-editor,
+.boq-compact-editor .boq-structural-schedule,
+.boq-compact-editor .boq-plinth-schedule { display: grid; gap: 8px; min-width: 0; }
+.boq-compact-editor .boq-stage-subcard { margin: 0; padding: 9px; border: 1px solid #ead6ce; border-radius: 10px; background: #fffdfb; min-width: 0; }
+.boq-compact-editor .boq-stage-subhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -9px -9px 8px; padding: 7px 9px; border-radius: 9px 9px 0 0; background: #f6e8e0; min-height: 35px; font-size: 12px; color: #682a2e; }
+.boq-compact-editor .boq-stage-subhead .boq-volume-remove { padding: 0; width: 30px; height: 30px; flex: none; }
+.boq-compact-actions { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin: 0; }
+.boq-compact-editor .boq-stage-input-grid { grid-template-columns: repeat(auto-fit,minmax(120px,1fr)); gap: 7px 9px; margin: 0 0 6px; align-items: end; }
+.boq-compact-editor .boq-stage-field { display: flex; flex-direction: column; gap: 3px; margin: 0; min-width: 0; }
+.boq-compact-editor .boq-stage-field > span:first-child { font-size: 11px; line-height: 1.3; color: #76534e; }
+.boq-compact-editor .boq-stage-field :is(input,select),
+.boq-compact-editor .boq-num input { min-height: 34px; height: 34px; min-width: 0; max-width: 100%; border-radius: 8px; font-size: 12px; padding: 5px 7px; box-sizing: border-box; }
+.boq-compact-editor .boq-stage-field select { text-overflow: ellipsis; }
+.boq-compact-editor .boq-stage-outline { min-height: 32px; padding: 6px 9px; border-radius: 8px; font-size: 11px; }
+.boq-compact-editor :is(h4,.boq-structural-rebar-heading) { margin: 8px 0 5px; font-size: 12px; }
+.boq-compact-editor .boq-stage-volume { min-height: 0; padding: 7px 9px; border-radius: 8px; font-size: 12px; }
+.boq-compact-editor .boq-stage-volume strong { font-size: 13px; }
+.boq-compact-editor .boq-beam-rebar-groups { grid-column: 1 / -1; padding: 6px; margin: 0; border-radius: 8px; }
+.boq-compact-editor .boq-structural-rebar-row { gap: 5px; margin-block: 4px; }
+.boq-compact-editor .boq-structural-rebar-row :is(input,select) { min-height: 32px; padding: 4px 5px; font-size: 11px; border-radius: 7px; }
+.boq-compact-editor .boq-volume-toolbar .boq-stage-unit-switch { flex-direction: row; align-items: center; }
+.boq-compact-editor .boq-volume-toolbar .boq-stage-unit-switch select { width: 125px; }
+.boq-compact-results { display: grid; gap: 7px; min-width: 0; }
+.boq-cost-table { min-width: 460px; }
+.boq-cost-table th:first-child { width: 38%; text-align: left; padding-left: 8px; }
+.boq-cost-table th:nth-child(2) { width: 17%; text-align: center; }
+.boq-cost-table th:nth-child(3) { width: 52px; }
+.boq-cost-table td:first-child { text-align: left; padding-left: 8px; overflow-wrap: anywhere; }
+.boq-cost-table td:nth-child(2) { text-align: center; }
+.boq-cost-table td small { display: block; font-size: 10px; color: #85665e; }
+.boq-compact-advanced { border: 1px solid #ead6ce; border-radius: 8px; padding: 7px; margin-block: 6px; }
+.boq-compact-advanced > summary { font-weight: 750; color: #78332f; font-size: 12px; cursor: pointer; }
+.boq-compact-advanced > div { margin-top: 8px; }
+@media (max-width: 600px) {
+  .boq-compact-editor .boq-stage-input-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .boq-compact-editor .boq-stage-subcard { padding: 7px; }
+  .boq-compact-editor .boq-stage-subhead { margin: -7px -7px 7px; }
+}
