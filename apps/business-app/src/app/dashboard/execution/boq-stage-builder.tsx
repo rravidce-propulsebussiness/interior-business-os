@@ -606,9 +606,7 @@ export function BoqStageBuilder(props: Props) {
       return matchedStage === stage && category === bucket;
     });
   const visibleCost = (stage: string, category: string) =>
-    unmeasured(stage, category)
-      ? 0
-      : entriesFor(stage, category).reduce(
+    entriesFor(stage, category).reduce(
           (sum, entry) => sum + priced(entry.output),
           0,
         );
@@ -2304,7 +2302,7 @@ export function BoqStageBuilder(props: Props) {
   const renderCategoryTile = (stage: string, category: Category) => {
     const entries = entriesFor(stage, category.key);
     const measured =
-      entries.length > 0 ||
+      entries.some(({output}) => output.quantity > 0) ||
       (category.key === 'penthouse' &&
         Boolean(props.floors.at(-1)?.penthouseSqft)) ||
       (category.key === 'footings' && isMeasuredFooting(props.design)) ||
@@ -2351,7 +2349,7 @@ export function BoqStageBuilder(props: Props) {
           aria-label={'View or edit ' + category.label + ' on ' + stage}
           onClick={() => openEditor(stage, category.key)}
         >
-          {editing?.stage === stage && editing.category === category.key ? 'Close' : 'View / Edit'}
+          {editing?.stage === stage && editing.category === category.key ? 'Close' : measured ? 'View / Edit' : '+ Add Item'}
         </button>
       </div>
     );
@@ -2378,7 +2376,7 @@ export function BoqStageBuilder(props: Props) {
       })).filter((group) => group.entries.length)
     : [];
   const groups = [...previewGroups, ...extraGroups];
-  const previewEntries = groups.flatMap((group) => group.entries);
+  const previewEntries = guidedStep >= 12 ? mapped : groups.flatMap((group) => group.entries);
   const isLabour = (output: StageBoqOutput) => props.isLabourOutput?.(output) ?? /^labour_|^plaster_labour$/.test(output.material ?? '');
   const previewMaterial = guidedStep >= 12 ? (props.projectMaterialCost ?? 0) : previewEntries.reduce((sum, {output}) => sum + (isLabour(output) ? 0 : priced(output)), 0);
   const previewLabour = guidedStep >= 12 ? (props.projectLabourCost ?? 0) : previewEntries.reduce((sum, {output}) => sum + (isLabour(output) ? priced(output) : 0), 0);
@@ -2634,7 +2632,19 @@ export function BoqStageBuilder(props: Props) {
                     {visibleList.map((category) => (
                       <div className="boq-premium-work" key={category.key}>
                         {renderCategoryTile(stage, category)}
-                        {renderEditPanel(stage, category)}
+                        {editing?.stage === stage && editing.category === category.key ? renderEditPanel(stage, category) : (
+                          <div className="boq-premium-table-wrap">
+                            {entriesFor(stage, category.key).some(({ output }) => output.quantity > 0) ? (
+                              <table className="boq-premium-work-table" aria-label={category.label + ' measurements'}>
+                                <thead><tr><th>Item Description</th><th>Quantity</th><th>Unit</th>{props.canViewCost && <><th>Rate (₹)</th><th>Amount (₹)</th></>}</tr></thead>
+                                <tbody>{entriesFor(stage, category.key).filter(({output}) => output.quantity > 0).slice(0, 4).map(({line, output, outputIndex}) => (
+                                  <tr key={line.id + ':' + outputIndex}><td>{output.name}{line.kind === 'measured-geometry' && <small className="boq-premium-dimensions">{number(Number(line.inputs.count ?? 1))} × {number(Number(line.inputs.lengthFeet ?? 0))} × {number(Number(line.inputs.widthFeet ?? 0))} × {number(Number(line.inputs.depthFeet ?? 0))} ft</small>}</td><td>{number(output.quantity)}</td><td>{output.unit}</td>{props.canViewCost && <><td>{money(props.rateFor(output))}</td><td>{money(priced(output))}</td></>}</tr>
+                                ))}</tbody>
+                              </table>
+                            ) : <div className="boq-premium-empty">No measured items</div>}
+                            {entriesFor(stage, category.key).filter(({output}) => output.quantity > 0).length > 4 && <button type="button" className="boq-premium-more" onClick={() => openEditor(stage, category.key)}>View all {entriesFor(stage, category.key).filter(({output}) => output.quantity > 0).length} items</button>}
+                          </div>
+                        )}
                       </div>
                     ))}
                     <div className="boq-stage-miscellaneous">
@@ -2917,10 +2927,10 @@ export function BoqStageBuilder(props: Props) {
         <button
           type="button"
           className="boq-guided-primary"
-          disabled={props.busy || props.calculating}
+          disabled={props.busy || props.calculating || props.autoSaveLabel === 'Automatic save failed'}
           onClick={() => {
             if (!props.autoSaveLabel && props.canSave) props.onSave();
-            setReviewedSteps((old) => old.includes(guidedStep) ? old : [...old, guidedStep]);
+            if (!pendingCount) setReviewedSteps((old) => old.includes(guidedStep) ? old : [...old, guidedStep]);
             goToWizard(nextBoqStep(guidedStep));
           }}
         >
