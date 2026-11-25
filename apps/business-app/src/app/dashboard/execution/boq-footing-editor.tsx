@@ -1,5 +1,6 @@
 'use client';
 
+import { BoqRemove, editorUnit, useBoqEditorUnit } from './boq-compact-editor';
 import { NumberField } from './boq-number-field';
 import {
   FOOTING_TYPES,
@@ -34,20 +35,23 @@ function Numeric({
   unit?: string;
   min?: number;
 }) {
+  const selected = useBoqEditorUnit();
+  const display = editorUnit(unit, selected);
   return (
     <label className="boq-stage-field">
       <span>
         {label}
-        {unit ? ` (${unit})` : ''}
+        {display.unit ? ` (${display.unit})` : ''}
       </span>
       {/* Feet boxes read drawing sizes such as 5'0" (a number box would
           read 5'0" as 50). */}
       <NumberField
-        label={label + (unit ? ' (' + unit + ')' : '')}
-        value={value}
+        key={display.unit}
+        label={label + (display.unit ? ' (' + display.unit + ')' : '')}
+        value={Number((value * display.factor).toFixed(6))}
         min={min}
-        feet={unit === 'ft'}
-        onChange={onChange}
+        feet={display.unit === 'ft'}
+        onChange={(n) => onChange(n / display.factor)}
       />
     </label>
   );
@@ -58,7 +62,14 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
       footings.map((row, i) => (i === index ? { ...row, ...patch } : row)),
     );
   return (
-    <div className="boq-footing-editor">
+    <div className="boq-footing-editor boq-compact-schedule">
+      <div className="boq-compact-actions">      <button
+        className="boq-volume-add"
+        type="button"
+        onClick={() => onChange([...footings, newFootingType(footings.length)])}
+      >
+        + Add footing type
+      </button></div>
       {footings.map((f, fi) => {
         const patch = (entry: Partial<DesignFootingType>) => change(fi, entry);
         const padUnits = f.type === 'strap' ? Math.max(2, f.padsPerGroup) : 1;
@@ -66,12 +77,7 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
           <div className="boq-stage-subcard boq-footing-type" key={fi}>
             <div className="boq-stage-subhead">
               <strong>{f.label || `Footing ${fi + 1}`}</strong>
-              <button
-                type="button"
-                onClick={() => onChange(footings.filter((_, i) => i !== fi))}
-              >
-                Remove
-              </button>
+              <BoqRemove label={`Remove footing ${fi + 1}`} onClick={() => onChange(footings.filter((_, i) => i !== fi))} />
             </div>
             <div className="boq-stage-input-grid">
               <label className="boq-stage-field">
@@ -115,9 +121,7 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
             </div>
             {columnLabels.length > 0 && (
               <p className="boq-footing-helper">
-                Columns available: {columnLabels.join(', ')}. References link
-                the records for review only; they do not automatically change
-                footing quantities.
+                Columns: {columnLabels.join(', ')}.
               </p>
             )}
             <div className="boq-stage-input-grid">
@@ -494,13 +498,7 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
           </div>
         );
       })}
-      <button
-        className="boq-stage-outline"
-        type="button"
-        onClick={() => onChange([...footings, newFootingType(footings.length)])}
-      >
-        + Add footing type
-      </button>
+
     </div>
   );
 }
