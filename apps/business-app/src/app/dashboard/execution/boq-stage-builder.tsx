@@ -393,7 +393,7 @@ export function InputNumber({
         key={display.unit}
         label={label + (display.unit ? ' (' + display.unit + ')' : '')}
         value={Number((value * display.factor).toFixed(6))}
-        min={min}
+        min={min * display.factor}
         feet={display.unit === 'ft'}
         onChange={(n) => onChange(n / display.factor)}
       />
