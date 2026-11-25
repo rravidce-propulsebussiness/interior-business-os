@@ -3398,14 +3398,22 @@ export function generateQuotationBoq(
               ];
             })
           : footingMeshPieces(footing, footingCover);
+        // Pool identical cuts across directions/layers of this footing type.
+        // Separate ceilings otherwise buy an unnecessary rod for each direction.
+        const cuts = new Map<string, (typeof meshPieces)[number]>();
         for (const piece of meshPieces) {
+          const key = piece.diameter + ':' + piece.lengthFeet.toFixed(8);
+          const previous = cuts.get(key);
+          cuts.set(key, previous ? { ...previous, pieces: previous.pieces + piece.pieces } : { ...piece });
+        }
+        for (const piece of cuts.values()) {
           const plan = cutPlan(piece.lengthFeet, piece.pieces, stock, 0);
           addSteel(
             tally,
             piece.diameter,
             plan.bars * stock * M_PER_FT,
             plan.bars,
-            `${footing.label} ${piece.layer} mesh ${piece.pieces} pcs × ${ft(piece.lengthFeet)}`,
+            `${footing.label} mesh ${piece.pieces} pcs × ${ft(piece.lengthFeet)} (${plan.piecesPerBar} cuts/rod)`,
           );
         }
         mergeSteel(tally);
