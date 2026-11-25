@@ -470,6 +470,9 @@ export function PremiumSftBuilder({
         ' before saving the quotation.'
       );
     }
+    const missingHeight = floors.find((row) => !(Number(row.heightFeet) > 0));
+    if (missingHeight)
+      return missingHeight.name + ': Enter the floor-to-floor height in Floor Height Specifications.';
     if (stale.length)
       return 'A previously selected material is unavailable. Update it before saving.';
     if (activePackages.length && !selectedPackage)
@@ -558,7 +561,8 @@ export function PremiumSftBuilder({
               floorLevel(r.name) === level &&
               floorZone(r.name) === 'construction',
           )?.ratePerSqft || packageRate;
-    const item = { ...floor(floorZoneName(level, zone), defaultRate) };
+    const sameLevel = floors.find((row) => floorLevel(row.name) === level && Number(row.heightFeet) > 0);
+    const item = { ...floor(floorZoneName(level, zone), defaultRate), heightFeet: sameLevel?.heightFeet ?? '' };
     const where = rows.reduce(
       (index, r, i) =>
         r.kind === 'floor' && floorLevel(r.name) === level ? i : index,
@@ -816,6 +820,22 @@ export function PremiumSftBuilder({
             </div>
           ))}
         </div>
+        <section className="qs-work-card" aria-label="Floor Height Specifications">
+          <div className="qs-work-heading">
+            <div><h3>Floor Height Specifications</h3></div>
+          </div>
+          <div className="qs-work-material-grid">
+            {rows.map((row, index) => row.kind === 'floor' && (
+              <label className="qs-work-add" key={row.name}>
+                <span>{row.name} (ft)</span>
+                <input type="number" inputMode="decimal" min="0.01" max="9999.99" step="0.01"
+                  aria-label={row.name + ' floor-to-floor height (ft)'}
+                  placeholder="Enter height" value={row.heightFeet ?? ''}
+                  onChange={(event) => updateRow(index, { heightFeet: event.target.value })} />
+              </label>
+            ))}
+          </div>
+        </section>
         <div className="qs-work-add">
           <label>
             RCC slab thickness (inches, from structural drawing)
@@ -920,7 +940,8 @@ export function PremiumSftBuilder({
                           max="9999.99"
                           step="0.01"
                           disabled={!used}
-                          title={
+                          readOnly={field === 'heightFeet' && r.kind === 'floor'}
+                           title={
                             field === 'heightFeet' && r.kind === 'floor'
                               ? 'Floor-to-floor (slab) height for the BOQ. Not billed.'
                               : undefined
@@ -929,7 +950,7 @@ export function PremiumSftBuilder({
                             !used
                               ? '—'
                               : field === 'heightFeet' && r.kind === 'floor'
-                                ? '10'
+                                ? 'Enter height'
                                 : '0'
                           }
                           value={used ? (r[field] ?? '') : ''}
