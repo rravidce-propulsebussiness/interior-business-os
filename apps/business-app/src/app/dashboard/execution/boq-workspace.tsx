@@ -11,6 +11,7 @@ import {
   materialForOutput,
   brandSelectionsFromQuote,
   quotedRateVariants,
+  projectCementRates,
   QUOTE_SELECTIONS_KEY,
   quoteSyncMarker,
   rateForOutput,
@@ -318,8 +319,8 @@ export function BoqWorkspace({
   const quoteSections = quotes.find((quote) => quote.id === quoteId)?.schedule
     ?.sections;
   const initialRates = useMemo(
-    () => [...savedRates, ...quotedRateVariants(quoteSections, savedRates)],
-    [savedRates, quoteSections],
+    () => [...savedRates, ...quotedRateVariants(quoteSections, savedRates), ...projectCementRates(selections)],
+    [savedRates, quoteSections, selections],
   );
   const [unit, setUnitState] = useState<LengthUnit>(defaultUnit);
   useEffect(() => {
@@ -2365,6 +2366,8 @@ export function BoqWorkspace({
             onCountsChange={updateStageCounts}
             structuralSettings={concreteSettings}
             materialRates={initialRates}
+            cementSelections={selections}
+            onCementSelectionChange={(key, value) => { if (canEdit && canViewCost) setSelections(prior => ({...prior, [key]: value})); }}
             structuralRmcEnabled={rmcEnabled}
             structuralRmcRate={rmcRatePerM3}
             onStructuralRmcToggle={setRmcEnabled}
