@@ -13,6 +13,7 @@ import { QuotationPdfControls } from './quotation-pdf-controls';
 import {
   FLOOR_RATE_TITLE,
   readFloorRateDefaults,
+  readPackageFloorHeight,
 } from '../pricing/construction/floor-rate-rules';
 import {
   propagateFloorChanges,
@@ -225,6 +226,7 @@ export function PremiumSftBuilder({
   const floorRateDefaults = readFloorRateDefaults(
     selectedPackage?.specSections ?? [],
   );
+  const packageFloorHeight = readPackageFloorHeight(selectedPackage?.specSections ?? []);
   const activeRates = rates.filter((r) => r.status === 'active');
   const [rows, setRows] = useState<Work[]>(() => {
     const initial = initialSchedule
@@ -237,6 +239,7 @@ export function PremiumSftBuilder({
           : 1;
       return Array.from({ length: count }, (_, level) => ({
         ...floor(floorLabel(level), packageRate),
+        heightFeet: packageFloorHeight,
         inheritFromPrevious: level > 0,
       }));
     }
@@ -251,7 +254,7 @@ export function PremiumSftBuilder({
             : item.name,
         kind: item.kind ?? 'floor',
         unit: item.unit ?? 'sqft',
-        heightFeet: item.heightFeet ?? '',
+        heightFeet: item.heightFeet || ((item.kind ?? 'floor') === 'floor' ? packageFloorHeight : ''),
         quantity: item.quantity ?? '',
         inheritFromPrevious:
           (item.kind ?? 'floor') === 'floor' &&
@@ -474,7 +477,7 @@ export function PremiumSftBuilder({
     if (missingHeight)
       return (
         missingHeight.name +
-        ': Enter the floor-to-floor height in Floor Height Specifications.'
+        ': Set the floor height in the selected package or enter it in the work table.'
       );
     if (stale.length)
       return 'A previously selected material is unavailable. Update it before saving.';
@@ -532,7 +535,7 @@ export function PremiumSftBuilder({
         heightFeet:
           construction?.heightFeet ||
           previous.find((r) => r.heightFeet)?.heightFeet ||
-          '',
+          packageFloorHeight,
         inheritFromPrevious: level > 0,
       });
     }
@@ -569,7 +572,7 @@ export function PremiumSftBuilder({
     );
     const item = {
       ...floor(floorZoneName(level, zone), defaultRate),
-      heightFeet: sameLevel?.heightFeet ?? '',
+      heightFeet: sameLevel?.heightFeet || packageFloorHeight,
     };
     const where = rows.reduce(
       (index, r, i) =>
@@ -828,39 +831,6 @@ export function PremiumSftBuilder({
             </div>
           ))}
         </div>
-        <section
-          className="qs-work-card"
-          aria-label="Floor Height Specifications"
-        >
-          <div className="qs-work-heading">
-            <div>
-              <h3>Floor Height Specifications</h3>
-            </div>
-          </div>
-          <div className="qs-work-material-grid">
-            {rows.map(
-              (row, index) =>
-                row.kind === 'floor' && (
-                  <label className="qs-work-add" key={row.name}>
-                    <span>{row.name} (ft)</span>
-                    <input
-                      type="number"
-                      inputMode="decimal"
-                      min="0.01"
-                      max="9999.99"
-                      step="0.01"
-                      aria-label={row.name + ' floor-to-floor height (ft)'}
-                      placeholder="Enter height"
-                      value={row.heightFeet ?? ''}
-                      onChange={(event) =>
-                        updateRow(index, { heightFeet: event.target.value })
-                      }
-                    />
-                  </label>
-                ),
-            )}
-          </div>
-        </section>
         <div className="qs-work-add">
           <label>
             RCC slab thickness (inches, from structural drawing)
@@ -965,9 +935,6 @@ export function PremiumSftBuilder({
                           max="9999.99"
                           step="0.01"
                           disabled={!used}
-                          readOnly={
-                            field === 'heightFeet' && r.kind === 'floor'
-                          }
                           title={
                             field === 'heightFeet' && r.kind === 'floor'
                               ? 'Floor-to-floor (slab) height for the BOQ. Not billed.'
