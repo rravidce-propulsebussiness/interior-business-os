@@ -2,11 +2,11 @@ type SteelOutput = {
   name: string;
   quantity: number;
   unit: string;
-  material?: string | undefined;
-  weightKg?: number | undefined;
-  rods?: number | undefined;
-  diameter?: number | undefined;
-  source?: string | undefined;
+  material?: string;
+  weightKg?: number;
+  rods?: number;
+  diameter?: number;
+  source?: string;
 };
 
 export const MEASURED_BINDING_SOURCE = 'Binding wire from measured steel';
