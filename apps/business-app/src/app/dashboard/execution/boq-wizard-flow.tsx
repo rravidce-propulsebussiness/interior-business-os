@@ -207,7 +207,9 @@ export function BoqFloorProjectSetup({
           ? {
               ...floor,
               [property]: value,
-              ...(property === 'heightFeet' ? { heightAssumed: !(value > 0) } : {}),
+              ...(property === 'heightFeet'
+                ? { heightAssumed: !(value > 0) }
+                : {}),
             }
           : floor,
       ),
@@ -280,7 +282,6 @@ export function BoqFloorProjectSetup({
           </tfoot>
         </table>
       </div>
-
     </section>
   );
 }

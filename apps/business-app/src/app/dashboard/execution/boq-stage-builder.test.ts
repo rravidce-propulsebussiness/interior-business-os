@@ -62,18 +62,22 @@ const base: StageProps = {
 
 describe('compact BOQ entry stages', () => {
   it('shows only floor setup measurements without redundant save or cost labels', () => {
-    const html = renderToStaticMarkup(createElement(BoqStageBuilder, {
-      ...base,
-      initialStep: 2,
-      autoSaveLabel: 'Saved automatically',
-      floors: [{
-        name: 'Ground Floor',
-        areaSqft: 1000,
-        lengthFeet: 25,
-        widthFeet: 40,
-        heightFeet: 11,
-      }],
-    }));
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, {
+        ...base,
+        initialStep: 2,
+        autoSaveLabel: 'Saved automatically',
+        floors: [
+          {
+            name: 'Ground Floor',
+            areaSqft: 1000,
+            lengthFeet: 25,
+            widthFeet: 40,
+            heightFeet: 11,
+          },
+        ],
+      }),
+    );
     expect(html).toContain('Ground Floor');
     expect(html).toContain('Height (ft)');
     expect(html).not.toContain('Saved automatically');

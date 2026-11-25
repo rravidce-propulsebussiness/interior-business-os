@@ -46,7 +46,8 @@ export function syncAssumedFloorHeights(
   const floors = saved.map((floor) => {
     if (!floor.heightAssumed && floor.heightFeet > 0) return floor;
     const source = quoted.find((row) => row.name === floor.name);
-    if (!source || source.heightAssumed || !(source.heightFeet > 0)) return floor;
+    if (!source || source.heightAssumed || !(source.heightFeet > 0))
+      return floor;
     changed = true;
     return { ...floor, heightFeet: source.heightFeet, heightAssumed: false };
   });

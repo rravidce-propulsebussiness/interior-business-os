@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { copyExteriorWallsToFullFloors, syncAssumedFloorHeights } from './boq-floor-scopes';
+import {
+  copyExteriorWallsToFullFloors,
+  syncAssumedFloorHeights,
+} from './boq-floor-scopes';
 import type { BoqFloor, WallMeasure } from '@business-os/core/construction-boq';
 
 const floors: BoqFloor[] = [
@@ -100,7 +103,11 @@ describe('quotation floor height synchronization', () => {
       { ...floors[2]!, heightFeet: 10, heightAssumed: true },
     ];
     const synced = syncAssumedFloorHeights(saved, quoted);
-    expect(synced[0]).toEqual({ ...saved[0], heightFeet: 11.5, heightAssumed: false });
+    expect(synced[0]).toEqual({
+      ...saved[0],
+      heightFeet: 11.5,
+      heightAssumed: false,
+    });
     expect(synced[1]).toBe(saved[1]);
     expect(synced[2]).toBe(saved[2]);
     expect(syncAssumedFloorHeights(synced, quoted)).toBe(synced);

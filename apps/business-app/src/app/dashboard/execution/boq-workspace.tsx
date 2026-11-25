@@ -409,15 +409,34 @@ export function BoqWorkspace({
   // reset whenever the quotation changes.
   const floorsForGeneration = genFloors.length ? genFloors : scheduleFloors;
   useEffect(() => {
-    if (screen !== 'edit' || !canEdit || !genFloors.length || !scheduleFloors.length) return;
+    if (
+      screen !== 'edit' ||
+      !canEdit ||
+      !genFloors.length ||
+      !scheduleFloors.length
+    )
+      return;
     if (generator?.revisionId !== quoteId) return;
     const next = syncAssumedFloorHeights(genFloors, scheduleFloors);
     if (next === genFloors) return;
     // Defer until the editor is mounted; the existing live calculation effect
     // regenerates quantities and persists the corrected quotation heights.
-    const timer = window.setTimeout(() => setGenFloors((previous) => syncAssumedFloorHeights(previous, scheduleFloors)), 0);
+    const timer = window.setTimeout(
+      () =>
+        setGenFloors((previous) =>
+          syncAssumedFloorHeights(previous, scheduleFloors),
+        ),
+      0,
+    );
     return () => window.clearTimeout(timer);
-  }, [screen, canEdit, genFloors, scheduleFloors, generator?.revisionId, quoteId]);
+  }, [
+    screen,
+    canEdit,
+    genFloors,
+    scheduleFloors,
+    generator?.revisionId,
+    quoteId,
+  ]);
   // Saved or edited counts merged over the estimates (older BOQs saved a
   // different shape; anything missing is estimated again).
   const countsForGeneration = normalizeCounts(
@@ -2398,7 +2417,11 @@ export function BoqWorkspace({
                   canViewCost={canViewCost}
                   busy={busy}
                   onSave={save}
-                  autoSaveLabel={active && autoSaveLabel !== 'Saved automatically' ? autoSaveLabel : undefined}
+                  autoSaveLabel={
+                    active && autoSaveLabel !== 'Saved automatically'
+                      ? autoSaveLabel
+                      : undefined
+                  }
                 />
               ) : (
                 <div className="boq-labour-enable">
