@@ -123,9 +123,10 @@ describe('legacy package → quotation → saved BOQ', () => {
       name, kind: 'floor' as const, lengthFeet: '40', widthFeet: '25',
       ratePerSqft: '2000', heightFeet: index === 0 ? '11' : '',
     }));
-    const legacy = calculateSftEstimate({ rows, materialIds: [] }, []);
-    const pkg = { id: 'a', name: 'Premium', code: 'PREMIUM', specSections: writeFloorRateDefaults([], { parking: '', penthouse: '' }, 32, '11.5') };
-    const height = linkedPackageFloorHeight(pkg, [pkg]);
+    const snapshot = { id: '11111111-1111-4111-8111-111111111111', name: 'Premium', code: 'PREMIUM', description: '', ratePerSqft: '2000' };
+    const legacy = calculateSftEstimate({ rows, materialIds: [] }, [], snapshot);
+    const pkg = { ...snapshot, specSections: writeFloorRateDefaults([{ title: 'Steel', description: 'TMT' }], { parking: '', penthouse: '' }, 32, '11.5') };
+    const height = linkedPackageFloorHeight(legacy.package, [pkg]);
     const recovered = { ...legacy, rows: applyPackageFloorHeight(legacy.rows, height) };
     const saved = floorsFromQuote(legacy);
     const synced = syncAssumedFloorHeights(saved, floorsFromQuote(recovered));
