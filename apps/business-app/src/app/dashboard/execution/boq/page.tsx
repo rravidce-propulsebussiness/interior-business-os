@@ -6,6 +6,7 @@ import { createConstructionPackagesRepository } from '@business-os/database/cons
 import {
   applyPackageFloorHeight,
   linkedPackageFloorHeight,
+  readPackageFloorHeight,
 } from '../../pricing/construction/floor-rate-rules';
 import { projectsReadyForNewBoq } from '../boq-project-eligibility';
 import { parseSftEstimate } from '@business-os/core/sft-quotation';
@@ -276,6 +277,7 @@ export default async function ManualBoqPage({
   const requiresPackageHeight = [...scheduleByRevision.values()].some(
     (schedule) =>
       schedule.package &&
+      !readPackageFloorHeight(schedule.sections ?? []) &&
       schedule.rows.some(
         (row) =>
           (row.kind ?? 'floor') === 'floor' && !(Number(row.heightFeet) > 0),
@@ -294,7 +296,8 @@ export default async function ManualBoqPage({
             ...savedSchedule,
             rows: applyPackageFloorHeight(
               savedSchedule.rows,
-              linkedPackageFloorHeight(savedSchedule.package, packages),
+              readPackageFloorHeight(savedSchedule.sections ?? []) ||
+                linkedPackageFloorHeight(savedSchedule.package, packages),
             ),
           }
         : null;
