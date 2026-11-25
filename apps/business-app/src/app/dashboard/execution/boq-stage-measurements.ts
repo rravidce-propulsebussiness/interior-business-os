@@ -437,3 +437,21 @@ export function fillingOutput<T extends { material?: string | undefined }>(
   );
   return { ...output, material: supplied ? 'moorum_filling' : 'soil_filling' };
 }
+
+/** Presentation only: keep procurement quantities/rates in their saved units.
+ * Site-mix rates are effective costs, not an additional concrete charge. */
+export function displayMeasuredVolume(
+  volume: { cft: number; m3: number },
+  amount: number,
+  unit: 'ft' | 'm',
+  baseRatePerM3?: number,
+) {
+  const quantity = unit === 'ft' ? volume.cft : volume.m3;
+  const ratePerM3 = baseRatePerM3 ?? (volume.m3 > 0 ? amount / volume.m3 : 0);
+  return {
+    quantity,
+    quantityUnit: unit === 'ft' ? 'CFT' : 'm³',
+    rate: unit === 'ft' ? ratePerM3 * CUBIC_METRES_PER_CFT : ratePerM3,
+    amount,
+  };
+}
