@@ -2281,6 +2281,7 @@ export type StructuralDesign = {
 
 /** Structural rules a drawing can set for its own project. */
 export const DESIGN_SETTING_KEYS = [
+  'stockBarFeet',
   'slabThicknessIn',
   'slabMainDia',
   'slabMainSpacingIn',
@@ -2386,8 +2387,12 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
         mesh: mesh === 'double' ? 'double' : 'single',
         bottomBarDia: num(entry.bottomBarDia, 12, 6, 40),
         bottomSpacingIn: num(entry.bottomSpacingIn, 6, 2, 24),
-        ...(entry.bottomBendIn !== undefined ? { bottomBendIn: num(entry.bottomBendIn, 0, 0, 120) } : {}),
-        ...(entry.topBendIn !== undefined ? { topBendIn: num(entry.topBendIn, 0, 0, 120) } : {}),
+        ...(entry.bottomBendIn !== undefined
+          ? { bottomBendIn: num(entry.bottomBendIn, 0, 0, 120) }
+          : {}),
+        ...(entry.topBendIn !== undefined
+          ? { topBendIn: num(entry.topBendIn, 0, 0, 120) }
+          : {}),
         topBarDia: num(entry.topBarDia, 12, 6, 40),
         topSpacingIn: num(entry.topSpacingIn, 6, 2, 24),
         ...(Array.isArray(entry.reinforcement)
@@ -3376,8 +3381,14 @@ export function generateQuotationBoq(
         const tally: SteelTally = new Map();
         // An explicit directional mesh replaces (never supplements) the
         // legacy two-direction, single-diameter mesh for this footing type.
-        if (footing.bottomBendIn === undefined && (footing.bottomBarDia > 0 || footing.reinforcement?.some(set => set.layer === 'bottom')))
-          warnings.push(`${footing.label}: bottom bar bend length uses the legacy full-depth estimate. Confirm straight bars or actual cutting length from the approved BBS.`);
+        if (
+          footing.bottomBendIn === undefined &&
+          (footing.bottomBarDia > 0 ||
+            footing.reinforcement?.some((set) => set.layer === 'bottom'))
+        )
+          warnings.push(
+            `${footing.label}: bottom bar bend length uses the legacy full-depth estimate. Confirm straight bars or actual cutting length from the approved BBS.`,
+          );
         const meshPieces = Array.isArray(footing.reinforcement)
           ? footing.reinforcement.flatMap((set) => {
               if (!(set.dia > 0 && set.spacingIn > 0)) return [];
@@ -3404,7 +3415,12 @@ export function generateQuotationBoq(
         for (const piece of meshPieces) {
           const key = piece.diameter + ':' + piece.lengthFeet.toFixed(8);
           const previous = cuts.get(key);
-          cuts.set(key, previous ? { ...previous, pieces: previous.pieces + piece.pieces } : { ...piece });
+          cuts.set(
+            key,
+            previous
+              ? { ...previous, pieces: previous.pieces + piece.pieces }
+              : { ...piece },
+          );
         }
         for (const piece of cuts.values()) {
           const plan = cutPlan(piece.lengthFeet, piece.pieces, stock, 0);

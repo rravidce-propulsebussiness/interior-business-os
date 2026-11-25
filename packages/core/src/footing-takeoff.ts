@@ -156,9 +156,17 @@ export function barsAcross(acrossFeet: number, spacingFeet: number): number {
   return Math.ceil(acrossFeet / spacingFeet - 1e-9) + 1;
 }
 
-export function footingBendFeet(f: DesignFootingType, layer: 'bottom' | 'top', coverFeet: number): number {
+export function footingBendFeet(
+  f: DesignFootingType,
+  layer: 'bottom' | 'top',
+  coverFeet: number,
+): number {
   const entered = layer === 'bottom' ? f.bottomBendIn : f.topBendIn;
-  return entered !== undefined ? safe(entered) / 12 : layer === 'bottom' ? Math.max(0, f.thicknessIn / 12 - 2 * coverFeet) : 0;
+  return entered !== undefined
+    ? safe(entered) / 12
+    : layer === 'bottom'
+      ? Math.max(0, f.thicknessIn / 12 - 2 * coverFeet)
+      : 0;
 }
 
 export function footingMeshPieces(

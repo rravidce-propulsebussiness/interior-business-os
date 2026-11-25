@@ -181,32 +181,92 @@ export function BoqStructuralConcreteCard({
       {onCementSelectionChange && (
         <div className="boq-rmc-other">
           <strong>Cement grade &amp; purchase specification</strong>
-          <small>Grades and brands from the selected quotation and rate card. Confirm the approved mix separately.</small>
+          <small>
+            Grades and brands from the selected quotation and rate card. Confirm
+            the approved mix separately.
+          </small>
           <div className="boq-stage-input-grid">
             {(['cement', 'cement_masonry'] as const).map((use: CementUse) => {
-              const variants = variantsFor(cementRates, use).filter(rate => rate.variant !== CUSTOM_CEMENT_VARIANT);
-              const selected = selectedVariant(cementRates, use, cementSelections);
-              const value = cementSelections[use] === CUSTOM_CEMENT_VARIANT ? CUSTOM_CEMENT_VARIANT : selected?.variant ?? '';
+              const variants = variantsFor(cementRates, use).filter(
+                (rate) => rate.variant !== CUSTOM_CEMENT_VARIANT,
+              );
+              const selected = selectedVariant(
+                cementRates,
+                use,
+                cementSelections,
+              );
+              const value =
+                cementSelections[use] === CUSTOM_CEMENT_VARIANT
+                  ? CUSTOM_CEMENT_VARIANT
+                  : (selected?.variant ?? '');
               return (
                 <div key={use} className="boq-stage-field">
                   <label>
-                    <span>{use === 'cement' ? 'RCC / concrete cement' : 'Brickwork & plaster cement'}</span>
-                    <select value={value} onChange={event => onCementSelectionChange(use, event.target.value)} disabled={!editable}>
+                    <span>
+                      {use === 'cement'
+                        ? 'RCC / concrete cement'
+                        : 'Brickwork & plaster cement'}
+                    </span>
+                    <select
+                      value={value}
+                      onChange={(event) =>
+                        onCementSelectionChange(use, event.target.value)
+                      }
+                      disabled={!editable}
+                    >
                       {!value && <option value="">Select cement</option>}
-                      {variants.map(rate => <option key={rate.key} value={rate.variant}>{rate.label}{canViewCost ? ' · ₹' + figure(rate.rate) + '/bag' : ''}</option>)}
-                      <option value={CUSTOM_CEMENT_VARIANT}>Custom brand / grade</option>
+                      {variants.map((rate) => (
+                        <option key={rate.key} value={rate.variant}>
+                          {rate.label}
+                          {canViewCost
+                            ? ' · ₹' + figure(rate.rate) + '/bag'
+                            : ''}
+                        </option>
+                      ))}
+                      <option value={CUSTOM_CEMENT_VARIANT}>
+                        Custom brand / grade
+                      </option>
                     </select>
                   </label>
                   {value === CUSTOM_CEMENT_VARIANT && (
                     <>
                       <label>
                         <span>Custom cement brand and grade</span>
-                        <input value={cementSelections[customCementNameKey(use)] ?? ''} maxLength={100} placeholder="e.g. OPC 53 / PPC" onChange={event => onCementSelectionChange(customCementNameKey(use), event.target.value)} disabled={!editable} />
+                        <input
+                          value={
+                            cementSelections[customCementNameKey(use)] ?? ''
+                          }
+                          maxLength={100}
+                          placeholder="e.g. OPC 53 / PPC"
+                          onChange={(event) =>
+                            onCementSelectionChange(
+                              customCementNameKey(use),
+                              event.target.value,
+                            )
+                          }
+                          disabled={!editable}
+                        />
                       </label>
-                      {canViewCost && <label>
-                        <span>Custom purchase rate (₹/bag)</span>
-                        <input type="number" min={0} step="any" value={cementSelections[customCementRateKey(use)] ?? ''} onChange={event => onCementSelectionChange(customCementRateKey(use), event.target.value)} disabled={!editable} />
-                      </label>}
+                      {canViewCost && (
+                        <label>
+                          <span>Custom purchase rate (₹/bag)</span>
+                          <input
+                            type="number"
+                            min={0}
+                            step="any"
+                            value={
+                              cementSelections[customCementRateKey(use)] ?? ''
+                            }
+                            onChange={(event) =>
+                              onCementSelectionChange(
+                                customCementRateKey(use),
+                                event.target.value,
+                              )
+                            }
+                            disabled={!editable}
+                          />
+                        </label>
+                      )}
                     </>
                   )}
                 </div>

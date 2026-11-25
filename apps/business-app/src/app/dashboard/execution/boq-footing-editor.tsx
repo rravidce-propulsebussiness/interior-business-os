@@ -18,6 +18,10 @@ import {
 
 type Props = {
   unitControl?: ReactNode;
+  coverMm?: number;
+  stockFeet?: number;
+  onCoverChange?: (value: number) => void;
+  onStockChange?: (value: number) => void;
   footings: DesignFootingType[];
   columnLabels: string[];
   onChange: (footings: DesignFootingType[]) => void;
@@ -36,12 +40,14 @@ function Numeric({
   onChange,
   unit,
   min = 0,
+  max,
 }: {
   label: string;
   value: number;
   onChange: (n: number) => void;
   unit?: string;
   min?: number;
+  max?: number;
 }) {
   const selected = useBoqEditorUnit();
   const display = editorUnit(unit, selected);
@@ -58,6 +64,7 @@ function Numeric({
         label={label + (display.unit ? ' (' + display.unit + ')' : '')}
         value={Number((value * display.factor).toFixed(6))}
         min={min * display.factor}
+        max={max === undefined ? undefined : max * display.factor}
         feet={display.unit === 'ft'}
         onChange={(n) => onChange(n / display.factor)}
       />
@@ -69,6 +76,10 @@ export function BoqFootingEditor({
   columnLabels,
   onChange,
   unitControl,
+  coverMm,
+  stockFeet,
+  onCoverChange,
+  onStockChange,
 }: Props) {
   const change = (index: number, patch: Partial<DesignFootingType>) =>
     onChange(
@@ -90,6 +101,26 @@ export function BoqFootingEditor({
           + Add footing type
         </button>
       </div>
+      {onCoverChange && onStockChange && (
+        <div className="boq-stage-input-grid">
+          <Numeric
+            label="Footing concrete cover"
+            unit="mm"
+            value={coverMm ?? 50}
+            min={50}
+            max={75}
+            onChange={onCoverChange}
+          />
+          <Numeric
+            label="Stock rod length (project)"
+            unit="ft"
+            value={stockFeet ?? 40}
+            min={20}
+            max={60}
+            onChange={onStockChange}
+          />
+        </div>
+      )}
       {footings.map((f, fi) => {
         const patch = (entry: Partial<DesignFootingType>) => change(fi, entry);
         const padUnits = f.type === 'strap' ? Math.max(2, f.padsPerGroup) : 1;
@@ -262,14 +293,49 @@ export function BoqFootingEditor({
               <div className="boq-stage-input-grid">
                 <label className="boq-stage-field">
                   <span>Bottom bar shape</span>
-                  <select value={f.bottomBendIn === undefined ? 'legacy' : f.bottomBendIn === 0 ? 'straight' : 'bent'} onChange={(e) => patch({ bottomBendIn: e.target.value === 'legacy' ? undefined : e.target.value === 'straight' ? 0 : (f.bottomBendIn || 6) })}>
-                    <option value="legacy">Full-depth bend (verify drawing)</option>
+                  <select
+                    value={
+                      f.bottomBendIn === undefined
+                        ? 'legacy'
+                        : f.bottomBendIn === 0
+                          ? 'straight'
+                          : 'bent'
+                    }
+                    onChange={(e) =>
+                      patch({
+                        bottomBendIn:
+                          e.target.value === 'legacy'
+                            ? undefined
+                            : e.target.value === 'straight'
+                              ? 0
+                              : f.bottomBendIn || 12,
+                      })
+                    }
+                  >
+                    <option value="legacy">
+                      Full-depth bend (verify drawing)
+                    </option>
                     <option value="straight">Straight bars</option>
                     <option value="bent">Custom bend length</option>
                   </select>
                 </label>
-                {f.bottomBendIn !== undefined && f.bottomBendIn > 0 && <Numeric label="Bottom bend per end" unit="in" value={f.bottomBendIn} onChange={(bottomBendIn) => patch({ bottomBendIn })} />}
-                {(f.mesh === 'double' || f.reinforcement?.some(set => set.layer === 'top')) && <Numeric label="Top bend per end" unit="in" value={f.topBendIn ?? 0} onChange={(topBendIn) => patch({ topBendIn })} />}
+                {f.bottomBendIn !== undefined && f.bottomBendIn > 0 && (
+                  <Numeric
+                    label="Bottom bend per end"
+                    unit="in"
+                    value={f.bottomBendIn}
+                    onChange={(bottomBendIn) => patch({ bottomBendIn })}
+                  />
+                )}
+                {(f.mesh === 'double' ||
+                  f.reinforcement?.some((set) => set.layer === 'top')) && (
+                  <Numeric
+                    label="Top bend per end"
+                    unit="in"
+                    value={f.topBendIn ?? 0}
+                    onChange={(topBendIn) => patch({ topBendIn })}
+                  />
+                )}
               </div>
               {!Array.isArray(f.reinforcement) && (
                 <div className="boq-stage-input-grid">

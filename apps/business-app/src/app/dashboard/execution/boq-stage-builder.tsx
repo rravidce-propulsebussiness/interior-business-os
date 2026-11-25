@@ -271,7 +271,12 @@ const manualCategory = (line: StageBoqLine) =>
  * dimensions would silently understate the estimate.
  */
 export function isDerivedQuantityReadOnly(kind: string, name: string) {
-  return kind === 'quote-window-sajjas' || isAutoPlasterQuantity(kind, name);
+  return (
+    kind === 'quote-window-sajjas' ||
+    isAutoPlasterQuantity(kind, name) ||
+    name === 'Binding wire' ||
+    (kind === 'quote-footings' && /\bTMT\b/.test(name))
+  );
 }
 
 function categoryFor(line: StageBoqLine, output: StageBoqOutput): string {
@@ -1400,7 +1405,9 @@ export function BoqStageBuilder(props: Props) {
                       <th>Count</th>
                       <th>Length ({dimensionUnit})</th>
                       <th>Height ({dimensionUnit})</th>
-                      <th>Thickness (in)</th>
+                      <th>
+                        Thickness ({editorUnit('in', dimensionUnit).unit})
+                      </th>
                       <th>
                         Gross area ({editorUnit('sqft', dimensionUnit).unit})
                       </th>
@@ -1482,10 +1489,25 @@ export function BoqStageBuilder(props: Props) {
                           </td>
                           <td>
                             <NumberField
-                              label={wall.name + ' thickness'}
-                              value={wall.thicknessIn}
-                              onChange={(thicknessIn) =>
-                                update({ thicknessIn })
+                              key={'thickness' + dimensionUnit}
+                              label={
+                                wall.name +
+                                ' thickness (' +
+                                editorUnit('in', dimensionUnit).unit +
+                                ')'
+                              }
+                              value={Number(
+                                (
+                                  wall.thicknessIn *
+                                  editorUnit('in', dimensionUnit).factor
+                                ).toFixed(6),
+                              )}
+                              onChange={(value) =>
+                                update({
+                                  thicknessIn:
+                                    value /
+                                    editorUnit('in', dimensionUnit).factor,
+                                })
                               }
                             />
                           </td>
@@ -1528,6 +1550,18 @@ export function BoqStageBuilder(props: Props) {
             <BoqFootingEditor
               unitControl={unitControl}
               footings={drawing.footings ?? []}
+              coverMm={
+                drawing.settings?.coverFootingMm ||
+                drawing.settings?.coverMm ||
+                props.structuralSettings.coverFootingMm ||
+                props.structuralSettings.coverMm
+              }
+              stockFeet={
+                drawing.settings?.stockBarFeet ??
+                props.structuralSettings.stockBarFeet
+              }
+              onCoverChange={(value) => setSetting('coverFootingMm', value)}
+              onStockChange={(value) => setSetting('stockBarFeet', value)}
               columnLabels={drawing.columns.map((col) => col.label)}
               onChange={setFootings}
             />
@@ -2479,6 +2513,11 @@ export function BoqStageBuilder(props: Props) {
                           <td>
                             {entry.output.name}
                             <small>{entry.line.name}</small>
+                            {entry.line.kind === 'quote-footings' &&
+                              entry.output.material === 'steel' &&
+                              entry.output.source && (
+                                <small>{entry.output.source}</small>
+                              )}
                           </td>
                           <td>
                             {derived ? (
@@ -3017,8 +3056,12 @@ export function BoqStageBuilder(props: Props) {
               onRateChange={props.onStructuralRmcRateChange}
               settings={props.structuralSettings}
               cementRates={props.materialRates ?? []}
-              {...(props.cementSelections ? { cementSelections: props.cementSelections } : {})}
-              {...(props.onCementSelectionChange ? { onCementSelectionChange: props.onCementSelectionChange } : {})}
+              {...(props.cementSelections
+                ? { cementSelections: props.cementSelections }
+                : {})}
+              {...(props.onCementSelectionChange
+                ? { onCementSelectionChange: props.onCementSelectionChange }
+                : {})}
               canEdit={props.canSave}
               canViewCost={props.canViewCost}
               autoSaveLabel={

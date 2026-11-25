@@ -1402,20 +1402,24 @@ export const CUSTOM_CEMENT_VARIANT = '__custom_cement';
 export const customCementNameKey = (use: CementUse) => '__cement_name_' + use;
 export const customCementRateKey = (use: CementUse) => '__cement_rate_' + use;
 
-export function projectCementRates(selections: Readonly<Record<string, string>>): Rate[] {
-  return (['cement', 'cement_masonry'] as const).flatMap(use => {
+export function projectCementRates(
+  selections: Readonly<Record<string, string>>,
+): Rate[] {
+  return (['cement', 'cement_masonry'] as const).flatMap((use) => {
     const name = selections[customCementNameKey(use)]?.trim().slice(0, 100);
     const rate = Number(selections[customCementRateKey(use)]);
     if (selections[use] !== CUSTOM_CEMENT_VARIANT) return [];
-    return [{
-      key: use + ':' + CUSTOM_CEMENT_VARIANT,
-      label: name || 'Custom cement — enter grade',
-      unit: 'bag',
-      rate: Number.isFinite(rate) && rate > 0 ? rate : 0,
-      category: 'material' as const,
-      material: use,
-      variant: CUSTOM_CEMENT_VARIANT,
-    }];
+    return [
+      {
+        key: use + ':' + CUSTOM_CEMENT_VARIANT,
+        label: name || 'Custom cement — enter grade',
+        unit: 'bag',
+        rate: Number.isFinite(rate) && rate > 0 ? rate : 0,
+        category: 'material' as const,
+        material: use,
+        variant: CUSTOM_CEMENT_VARIANT,
+      },
+    ];
   });
 }
 

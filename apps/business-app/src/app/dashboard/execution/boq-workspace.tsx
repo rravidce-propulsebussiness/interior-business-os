@@ -319,7 +319,11 @@ export function BoqWorkspace({
   const quoteSections = quotes.find((quote) => quote.id === quoteId)?.schedule
     ?.sections;
   const initialRates = useMemo(
-    () => [...savedRates, ...quotedRateVariants(quoteSections, savedRates), ...projectCementRates(selections)],
+    () => [
+      ...savedRates,
+      ...quotedRateVariants(quoteSections, savedRates),
+      ...projectCementRates(selections),
+    ],
     [savedRates, quoteSections, selections],
   );
   const [unit, setUnitState] = useState<LengthUnit>(defaultUnit);
@@ -720,9 +724,7 @@ export function BoqWorkspace({
     const measuredOnly = !active || generator?.measuredOnly === true;
     const legacyCountsNeedReview = Boolean(
       generator?.legacyCountsNeedReview ||
-      (active &&
-        generator &&
-        (generator.engineVersion ?? 1) < 3),
+      (active && generator && (generator.engineVersion ?? 1) < 3),
     );
     const result = generateQuotationBoq({
       details: schedule,
@@ -842,10 +844,12 @@ export function BoqWorkspace({
       outputs: line.outputs.map((output) => {
         const edit = cleanEdits[overrideKey(line, output)];
         const lockedPlaster = isAutoPlasterQuantity(line.kind, output.name);
+        const lockedSteel =
+          line.kind === 'quote-footings' && output.material === 'steel';
         const measured = edit
           ? {
               ...output,
-              ...(edit.quantity !== undefined && !lockedPlaster
+              ...(edit.quantity !== undefined && !lockedPlaster && !lockedSteel
                 ? { quantity: edit.quantity }
                 : {}),
               ...(edit.rate !== undefined ? { rate: edit.rate } : {}),
@@ -866,8 +870,26 @@ export function BoqWorkspace({
       }),
     }));
     setLines([
-      ...generated.map(line => measuredOnly ? {...line, outputs: withMeasuredBindingWire(line.outputs, 8, concreteSettings.stockBarFeet)} : line),
-      ...kept.map(line => ({...line, outputs: withMeasuredBindingWire(line.outputs, 8, concreteSettings.stockBarFeet)})),
+      ...generated.map((line) =>
+        measuredOnly
+          ? {
+              ...line,
+              outputs: withMeasuredBindingWire(
+                line.outputs,
+                8,
+                result.settings.stockBarFeet,
+              ),
+            }
+          : line,
+      ),
+      ...kept.map((line) => ({
+        ...line,
+        outputs: withMeasuredBindingWire(
+          line.outputs,
+          8,
+          concreteSettings.stockBarFeet,
+        ),
+      })),
     ]);
     // Brands named in the quotation's specifications, unless already chosen.
     const quoted = brandSelectionsFromQuote(schedule.sections, initialRates);
@@ -1189,9 +1211,11 @@ export function BoqWorkspace({
     const target = lines[lineIndex];
     const output = target?.outputs[outputIndex];
     if (
-      target?.origin &&
       output &&
-      isAutoPlasterQuantity(target.kind, output.name)
+      (output.name === 'Binding wire' ||
+        (target?.origin &&
+          (isAutoPlasterQuantity(target.kind, output.name) ||
+            (target.kind === 'quote-footings' && output.material === 'steel'))))
     )
       return;
     if (target?.origin && output) {
@@ -1525,7 +1549,13 @@ export function BoqWorkspace({
     name: string,
     values: MeasuredDimensions,
   ) {
-    const outputs = withMeasuredBindingWire(measuredOutputs(kind, values, settings).map((output) => fillingOutput(name, output)), 8, settings.stockBarFeet);
+    const outputs = withMeasuredBindingWire(
+      measuredOutputs(kind, values, settings).map((output) =>
+        fillingOutput(name, output),
+      ),
+      8,
+      settings.stockBarFeet,
+    );
     // A newly added row is a draft measurement. Keep its empty outputs until
     // its dimensions are complete; the same row is then calculated on edit.
     const item: SavedLine = {
@@ -1588,17 +1618,21 @@ export function BoqWorkspace({
         /* No implied steel if a legacy note is malformed. */
       }
     }
-    const outputs = withMeasuredBindingWire(measuredOutputs(
-      kind,
-      {
-        ...values,
-        ...(kind === 'shelves'
-          ? { shelfStandard: original.inputs.shelfStandard === true }
-          : {}),
-        ...(steelSets ? { steelSets } : {}),
-      },
-      settings,
-    ), 8, settings.stockBarFeet);
+    const outputs = withMeasuredBindingWire(
+      measuredOutputs(
+        kind,
+        {
+          ...values,
+          ...(kind === 'shelves'
+            ? { shelfStandard: original.inputs.shelfStandard === true }
+            : {}),
+          ...(steelSets ? { steelSets } : {}),
+        },
+        settings,
+      ),
+      8,
+      settings.stockBarFeet,
+    );
     const steelSetsJson = JSON.stringify(steelSets ?? []);
     setLines((prior) =>
       prior.map((line, i) =>
@@ -2357,15 +2391,16 @@ export function BoqWorkspace({
             counts={countsForGeneration}
             legacyCountsNeedReview={Boolean(
               generator?.legacyCountsNeedReview ||
-              (active &&
-                generator &&
-                (generator.engineVersion ?? 1) < 3),
+              (active && generator && (generator.engineVersion ?? 1) < 3),
             )}
             onCountsChange={updateStageCounts}
             structuralSettings={concreteSettings}
             materialRates={initialRates}
             cementSelections={selections}
-            onCementSelectionChange={(key, value) => { if (canEdit && canViewCost) setSelections(prior => ({...prior, [key]: value})); }}
+            onCementSelectionChange={(key, value) => {
+              if (canEdit && canViewCost)
+                setSelections((prior) => ({ ...prior, [key]: value }));
+            }}
             structuralRmcEnabled={rmcEnabled}
             structuralRmcRate={rmcRatePerM3}
             onStructuralRmcToggle={setRmcEnabled}
