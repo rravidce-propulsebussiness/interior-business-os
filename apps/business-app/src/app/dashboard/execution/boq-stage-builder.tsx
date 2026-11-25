@@ -2,6 +2,13 @@
 
 import { Fragment, useEffect, useState, type ReactNode } from 'react';
 import Link from 'next/link';
+import {
+  BoqAdvanced,
+  BoqEditorUnits,
+  BoqRemove,
+  editorUnit,
+  useBoqEditorUnit,
+} from './boq-compact-editor';
 import { NumberField } from './boq-number-field';
 import type { Rate } from './boq-pricing';
 import { isAutoPlasterQuantity } from './boq-plaster-guards';
@@ -378,20 +385,23 @@ export function InputNumber({
   unit?: string;
   min?: number;
 }) {
+  const selected = useBoqEditorUnit();
+  const display = editorUnit(unit, selected);
   return (
     <label className="boq-stage-field">
       <span>
         {label}
-        {unit ? ' (' + unit + ')' : ''}
+        {display.unit ? ' (' + display.unit + ')' : ''}
       </span>
       {/* Feet boxes read drawing sizes (5'4" = 5.33 ft). A number box
           silently turned 5'4" into 54 and the excavation into 899 m³. */}
       <NumberField
-        label={label + (unit ? ' (' + unit + ')' : '')}
-        value={value}
-        min={min}
-        feet={unit === 'ft'}
-        onChange={onChange}
+        key={display.unit}
+        label={label + (display.unit ? ' (' + display.unit + ')' : '')}
+        value={Number((value * display.factor).toFixed(6))}
+        min={min * display.factor}
+        feet={display.unit === 'ft'}
+        onChange={(n) => onChange(n / display.factor)}
       />
     </label>
   );
@@ -925,41 +935,12 @@ export function BoqStageBuilder(props: Props) {
     const isFootings = category.key === 'footings';
     const isBeams = category.key === 'beams';
     return (
-      <div className="boq-stage-edit" key={stage + ':' + category.key}>
-        <div className="boq-stage-edit-head">
-          <div>
-            <strong>Edit {category.label}</strong>
-            <small>{stage}</small>
-          </div>
-          <button
-            type="button"
-            className="boq-stage-close"
-            onClick={() => {
-              setEditing(null);
-              syncFocusUrl(null);
-            }}
-            aria-label="Close editor"
-          >
-            ×
-          </button>
-        </div>
-        {floor &&
-          props.legacyCountsNeedReview &&
-          !finishes?.countsConfirmed &&
-          ['doors', 'electrical', 'plumbing', 'tiles'].includes(
-            category.key,
-          ) && (
-            <label className="boq-stage-scope-toggle">
-              <input
-                type="checkbox"
-                checked={false}
-                onChange={() => changeFinishes({ countsConfirmed: true })}
-              />
-              Confirm existing floor counts against drawings
-            </label>
-          )}
-        {isGeometry(category.key) && (
-          <div className="boq-stage-dimensions boq-volume-editor">
+      <BoqEditorUnits unit={dimensionUnit}>
+        <div
+          className="boq-stage-edit boq-compact-editor"
+          key={stage + ':' + category.key}
+        >
+          {!isGeometry(category.key) && (
             <div className="boq-volume-toolbar">
               <label className="boq-stage-field boq-stage-unit-switch">
                 <span>Input dimension unit</span>
@@ -973,1403 +954,1509 @@ export function BoqStageBuilder(props: Props) {
                   <option value="m">Metres (m)</option>
                 </select>
               </label>
-              <button
-                type="button"
-                className="boq-volume-add"
-                disabled={props.busy || props.lines.length >= 500}
-                onClick={() =>
-                  props.onAddGeometry(
-                    stage,
-                    category.key as MeasuredKind,
-                    category.label + ' ' + (dimensionRows.length + 1),
-                    {
-                      count: 1,
-                      lengthFeet: 0,
-                      widthFeet: 0,
-                      depthFeet: 0,
-                      ...(isStandardShelves ? { shelfStandard: true } : {}),
-                    },
-                  )
-                }
-              >
-                + Add Item
-              </button>
             </div>
-            <div className="boq-volume-scroll">
-              <table
-                className="boq-volume-table"
-                aria-label={category.label + ' measured items'}
-              >
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Description / Location</th>
-                    <th>Count</th>
-                    <th>
-                      {isStandardShelves ? 'Width' : 'Length'} ({dimensionUnit})
-                    </th>
-                    <th>
-                      {isStandardShelves ? 'Height' : 'Width'} ({dimensionUnit})
-                    </th>
-                    {showDepth && <th>Depth ({dimensionUnit})</th>}
-                    <th>Quantity ({quantityUnit})</th>
-                    {props.canViewCost && (
-                      <>
-                        <th>
-                          {category.key === 'excavation' ||
-                          category.key === 'soil'
-                            ? 'Rate'
-                            : 'Effective rate'}{' '}
-                          / {quantityUnit}
-                        </th>
-                        <th>Amount</th>
-                      </>
-                    )}
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {geometryRows.map(
-                    ({ line, lineIndex, dims, volume, display }, rowIndex) => {
-                      const change = (
-                        field:
-                          'count' | 'lengthFeet' | 'widthFeet' | 'depthFeet',
-                        value: number,
-                      ) =>
-                        props.onUpdateGeometry(
-                          lineIndex,
-                          {
-                            ...dims,
-                            [field]:
-                              field === 'count'
-                                ? Math.round(value)
-                                : value / displayFactor,
-                          },
-                          line.name,
-                        );
-                      const dimension = (
-                        field: 'lengthFeet' | 'widthFeet' | 'depthFeet',
-                      ) => (
-                        <NumberField
-                          key={field + dimensionUnit}
-                          label={
-                            line.name + ' ' + field + ' (' + dimensionUnit + ')'
-                          }
-                          feet={dimensionUnit === 'ft'}
-                          value={Number(
-                            (dims[field] * displayFactor).toFixed(6),
-                          )}
-                          onChange={(value) => change(field, value)}
-                          blankZero
-                        />
-                      );
-                      return (
-                        <Fragment key={line.id}>
-                          <tr>
-                            <td>{rowIndex + 1}</td>
-                            <td>
-                              <input
-                                aria-label={
-                                  category.label +
-                                  ' item ' +
-                                  (rowIndex + 1) +
-                                  ' description'
-                                }
-                                value={line.name}
-                                maxLength={200}
-                                onChange={(event) =>
-                                  props.onUpdateGeometry(
-                                    lineIndex,
-                                    dims,
-                                    event.target.value,
-                                  )
-                                }
-                              />
-                            </td>
-                            <td>
-                              <NumberField
-                                label={line.name + ' count'}
-                                integer
-                                value={dims.count}
-                                onChange={(value) => change('count', value)}
-                              />
-                            </td>
-                            <td>{dimension('lengthFeet')}</td>
-                            <td>{dimension('widthFeet')}</td>
-                            {showDepth && (
-                              <td>
-                                {isStandardShelves && dims.shelfStandard
-                                  ? '—'
-                                  : dimension('depthFeet')}
-                              </td>
-                            )}
-                            <td>
-                              <strong className="boq-volume-qty">
-                                {number(display.quantity)}
-                              </strong>
-                            </td>
-                            {props.canViewCost && (
-                              <>
-                                <td className="boq-volume-rate">
-                                  {displayRate(display.rate)}
-                                </td>
-                                <td>
-                                  <strong className="boq-volume-amount">
-                                    {money(display.amount)}
-                                  </strong>
-                                </td>
-                              </>
-                            )}
-                            <td>
-                              <button
-                                type="button"
-                                className="boq-volume-remove"
-                                aria-label={'Remove ' + line.name}
-                                title={'Remove ' + line.name}
-                                onClick={() => props.onRemoveManual(lineIndex)}
-                              >
-                                <svg
-                                  viewBox="0 0 24 24"
-                                  width="16"
-                                  height="16"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="1.8"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  aria-hidden="true"
-                                >
-                                  <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
-                                </svg>
-                              </button>
-                            </td>
-                          </tr>
-                          {volume.m3 > 0 &&
-                            category.key !== 'excavation' &&
-                            category.key !== 'soil' && (
-                              <tr className="boq-volume-detail">
-                                <td
-                                  colSpan={
-                                    showDepth
-                                      ? props.canViewCost
-                                        ? 10
-                                        : 8
-                                      : props.canViewCost
-                                        ? 9
-                                        : 7
-                                  }
-                                >
-                                  <details>
-                                    <summary>Materials & labour</summary>
-                                    <div className="boq-volume-materials">
-                                      {line.outputs
-                                        .filter((output) => output.material)
-                                        .map((output, index) => (
-                                          <div key={index}>
-                                            <span>{output.name}</span>
-                                            <span>
-                                              {number(output.quantity)}{' '}
-                                              {output.unit}
-                                            </span>
-                                            {props.canViewCost && (
-                                              <strong>
-                                                {money(priced(output))}
-                                              </strong>
-                                            )}
-                                          </div>
-                                        ))}
-                                    </div>
-                                  </details>
-                                  {['sajjas', 'shelves'].includes(
-                                    category.key,
-                                  ) &&
-                                    !dims.shelfStandard && (
-                                      <BoqSmallRccSteelEditor
-                                        rows={dims.steelSets ?? []}
-                                        onChange={(steelSets) =>
-                                          props.onUpdateGeometry(
-                                            lineIndex,
-                                            { ...dims, steelSets },
-                                            line.name,
-                                          )
-                                        }
-                                      />
-                                    )}
-                                </td>
-                              </tr>
-                            )}
-                        </Fragment>
-                      );
-                    },
-                  )}
-                  {!geometryRows.length && (
-                    <tr>
-                      <td colSpan={99} className="boq-volume-empty">
-                        No measured items
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+          )}
+          <div className="boq-stage-edit-head">
+            <div>
+              <strong>Edit {category.label}</strong>
+              <small>{stage}</small>
             </div>
-            <div className="boq-volume-total">
-              <strong>Total {category.label}</strong>
-              <span>
-                {number(totalGeometryQuantity)} {quantityUnit}
-              </span>
-              {props.canViewCost && <b>{money(totalGeometryCost)}</b>}
-            </div>
+            <button
+              type="button"
+              className="boq-stage-close"
+              onClick={() => {
+                setEditing(null);
+                syncFocusUrl(null);
+              }}
+              aria-label="Close editor"
+            >
+              ×
+            </button>
           </div>
-        )}
-        {category.key === 'brickwork' && floor && (
-          <div className="boq-stage-dimensions">
-            {walls.some((wall) => wall.location === 'external') &&
-              props.floors.some(
-                (floor) => floor.name !== stage && !isPenthouseFloor(floor),
-              ) && (
-                <button
-                  type="button"
-                  className="boq-stage-outline"
-                  onClick={() =>
-                    props.onCountsChange({
-                      ...props.counts,
-                      walls: copyExteriorWallsToFullFloors(
-                        props.floors,
-                        props.counts.walls,
-                        stage,
-                      ),
-                    })
-                  }
-                >
-                  Copy measured external walls to other full floors
-                </button>
-              )}
-            {walls.map((wall, wallIndex) => {
-              const updateWall = (patch: Partial<WallMeasure>) =>
-                updateWalls(
-                  walls.map((row, i) =>
-                    i === wallIndex ? { ...row, ...patch } : row,
-                  ),
-                );
-              return (
-                <div className="boq-stage-subcard" key={wall.id}>
-                  <div className="boq-stage-subhead">
-                    <strong>{wall.name || 'Wall ' + (wallIndex + 1)}</strong>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateWalls(walls.filter((_, i) => i !== wallIndex))
-                      }
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  <div className="boq-stage-input-grid">
-                    <InputText
-                      label="Wall reference"
-                      value={wall.name}
-                      onChange={(v) => updateWall({ name: v })}
-                    />
-                    <label className="boq-stage-field">
-                      <span>Wall location</span>
-                      <select
-                        value={wall.location}
-                        onChange={(e) =>
-                          updateWall({
-                            location:
-                              e.target.value === 'internal'
-                                ? 'internal'
-                                : 'external',
-                          })
-                        }
-                      >
-                        <option value="external">External</option>
-                        <option value="internal">Internal</option>
-                      </select>
-                    </label>
-                    <InputNumber
-                      label="Same walls (nos)"
-                      value={wall.count}
-                      onChange={(v) => updateWall({ count: Math.round(v) })}
-                    />
-                    <InputNumber
-                      label="Length"
-                      unit="ft"
-                      value={wall.lengthFeet}
-                      onChange={(v) => updateWall({ lengthFeet: v })}
-                    />
-                    <InputNumber
-                      label="Height"
-                      unit="ft"
-                      value={wall.heightFeet}
-                      onChange={(v) => updateWall({ heightFeet: v })}
-                    />
-                    <InputNumber
-                      label="Thickness"
-                      unit="in"
-                      value={wall.thicknessIn}
-                      onChange={(v) => updateWall({ thicknessIn: v })}
-                    />
-                  </div>
-                  <div className="boq-stage-volume">
-                    <span>Gross wall area</span>
-                    <strong>
-                      {number(wall.count * wall.lengthFeet * wall.heightFeet)}{' '}
-                      sqft
-                    </strong>
-                  </div>
-                </div>
-              );
-            })}
-            <div className="boq-stage-subcard">
-              <h4>+ Add wall type</h4>
-              <div className="boq-stage-input-grid">
-                <InputText
-                  label="Wall reference"
-                  value={wallDraft.name}
-                  placeholder="W1, internal room 2"
-                  onChange={(v) =>
-                    setWallDraft((prior) => ({ ...prior, name: v }))
-                  }
+          {floor &&
+            props.legacyCountsNeedReview &&
+            !finishes?.countsConfirmed &&
+            ['doors', 'electrical', 'plumbing', 'tiles'].includes(
+              category.key,
+            ) && (
+              <label className="boq-stage-scope-toggle">
+                <input
+                  type="checkbox"
+                  checked={false}
+                  onChange={() => changeFinishes({ countsConfirmed: true })}
                 />
-                <label className="boq-stage-field">
-                  <span>Wall location</span>
+                Confirm existing floor counts against drawings
+              </label>
+            )}
+          {isGeometry(category.key) && (
+            <div className="boq-stage-dimensions boq-volume-editor">
+              <div className="boq-volume-toolbar">
+                <label className="boq-stage-field boq-stage-unit-switch">
+                  <span>Input dimension unit</span>
                   <select
-                    value={wallDraft.location}
-                    onChange={(e) =>
-                      setWallDraft((prior) => ({
-                        ...prior,
-                        location:
-                          e.target.value === 'internal'
-                            ? 'internal'
-                            : 'external',
-                        thicknessIn: e.target.value === 'internal' ? 4.5 : 9,
-                      }))
+                    value={dimensionUnit}
+                    onChange={(event) =>
+                      setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')
                     }
                   >
-                    <option value="external">External</option>
-                    <option value="internal">Internal</option>
+                    <option value="ft">Feet (ft)</option>
+                    <option value="m">Metres (m)</option>
                   </select>
                 </label>
-                <InputNumber
-                  label="Same walls (nos)"
-                  value={wallDraft.count}
-                  onChange={(v) =>
-                    setWallDraft((prior) => ({
-                      ...prior,
-                      count: Math.round(v),
-                    }))
+                <button
+                  type="button"
+                  className="boq-volume-add"
+                  disabled={props.busy || props.lines.length >= 500}
+                  onClick={() =>
+                    props.onAddGeometry(
+                      stage,
+                      category.key as MeasuredKind,
+                      category.label + ' ' + (dimensionRows.length + 1),
+                      {
+                        count: 1,
+                        lengthFeet: 0,
+                        widthFeet: 0,
+                        depthFeet: 0,
+                        ...(isStandardShelves ? { shelfStandard: true } : {}),
+                      },
+                    )
                   }
-                />
-                <InputNumber
-                  label="Length"
-                  unit="ft"
-                  value={wallDraft.lengthFeet}
-                  onChange={(v) =>
-                    setWallDraft((prior) => ({ ...prior, lengthFeet: v }))
-                  }
-                />
-                <InputNumber
-                  label="Height"
-                  unit="ft"
-                  value={wallDraft.heightFeet}
-                  onChange={(v) =>
-                    setWallDraft((prior) => ({ ...prior, heightFeet: v }))
-                  }
-                />
-                <InputNumber
-                  label="Thickness"
-                  unit="in"
-                  value={wallDraft.thicknessIn}
-                  onChange={(v) =>
-                    setWallDraft((prior) => ({ ...prior, thicknessIn: v }))
-                  }
-                />
+                >
+                  + Add Item
+                </button>
               </div>
-              <button
-                className="boq-stage-outline"
-                type="button"
-                disabled={
-                  !(
-                    wallDraft.lengthFeet > 0 &&
-                    wallDraft.heightFeet > 0 &&
-                    wallDraft.count > 0
-                  )
-                }
-                onClick={() => {
-                  updateWalls([
-                    ...walls,
-                    {
-                      ...wallDraft,
-                      id: 'wall-' + Date.now().toString(36),
-                      name:
-                        wallDraft.name.trim() || 'Wall ' + (walls.length + 1),
-                    },
-                  ]);
-                  setWallDraft({
-                    id: 'new',
-                    name: '',
-                    location: 'external',
-                    count: 1,
-                    lengthFeet: 0,
-                    heightFeet: 0,
-                    thicknessIn: 9,
-                  });
-                }}
-              >
-                + Add measured wall
-              </button>
+              <div className="boq-volume-scroll">
+                <table
+                  className="boq-volume-table"
+                  aria-label={category.label + ' measured items'}
+                >
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Description / Location</th>
+                      <th>Count</th>
+                      <th>
+                        {isStandardShelves ? 'Width' : 'Length'} (
+                        {dimensionUnit})
+                      </th>
+                      <th>
+                        {isStandardShelves ? 'Height' : 'Width'} (
+                        {dimensionUnit})
+                      </th>
+                      {showDepth && <th>Depth ({dimensionUnit})</th>}
+                      <th>Quantity ({quantityUnit})</th>
+                      {props.canViewCost && (
+                        <>
+                          <th>
+                            {category.key === 'excavation' ||
+                            category.key === 'soil'
+                              ? 'Rate'
+                              : 'Effective rate'}{' '}
+                            / {quantityUnit}
+                          </th>
+                          <th>Amount</th>
+                        </>
+                      )}
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {geometryRows.map(
+                      (
+                        { line, lineIndex, dims, volume, display },
+                        rowIndex,
+                      ) => {
+                        const change = (
+                          field:
+                            'count' | 'lengthFeet' | 'widthFeet' | 'depthFeet',
+                          value: number,
+                        ) =>
+                          props.onUpdateGeometry(
+                            lineIndex,
+                            {
+                              ...dims,
+                              [field]:
+                                field === 'count'
+                                  ? Math.round(value)
+                                  : value / displayFactor,
+                            },
+                            line.name,
+                          );
+                        const dimension = (
+                          field: 'lengthFeet' | 'widthFeet' | 'depthFeet',
+                        ) => (
+                          <NumberField
+                            key={field + dimensionUnit}
+                            label={
+                              line.name +
+                              ' ' +
+                              field +
+                              ' (' +
+                              dimensionUnit +
+                              ')'
+                            }
+                            feet={dimensionUnit === 'ft'}
+                            value={Number(
+                              (dims[field] * displayFactor).toFixed(6),
+                            )}
+                            onChange={(value) => change(field, value)}
+                            blankZero
+                          />
+                        );
+                        return (
+                          <Fragment key={line.id}>
+                            <tr>
+                              <td>{rowIndex + 1}</td>
+                              <td>
+                                <input
+                                  aria-label={
+                                    category.label +
+                                    ' item ' +
+                                    (rowIndex + 1) +
+                                    ' description'
+                                  }
+                                  value={line.name}
+                                  maxLength={200}
+                                  onChange={(event) =>
+                                    props.onUpdateGeometry(
+                                      lineIndex,
+                                      dims,
+                                      event.target.value,
+                                    )
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <NumberField
+                                  label={line.name + ' count'}
+                                  integer
+                                  value={dims.count}
+                                  onChange={(value) => change('count', value)}
+                                />
+                              </td>
+                              <td>{dimension('lengthFeet')}</td>
+                              <td>{dimension('widthFeet')}</td>
+                              {showDepth && (
+                                <td>
+                                  {isStandardShelves && dims.shelfStandard
+                                    ? '—'
+                                    : dimension('depthFeet')}
+                                </td>
+                              )}
+                              <td>
+                                <strong className="boq-volume-qty">
+                                  {number(display.quantity)}
+                                </strong>
+                              </td>
+                              {props.canViewCost && (
+                                <>
+                                  <td className="boq-volume-rate">
+                                    {displayRate(display.rate)}
+                                  </td>
+                                  <td>
+                                    <strong className="boq-volume-amount">
+                                      {money(display.amount)}
+                                    </strong>
+                                  </td>
+                                </>
+                              )}
+                              <td>
+                                <button
+                                  type="button"
+                                  className="boq-volume-remove"
+                                  aria-label={'Remove ' + line.name}
+                                  title={'Remove ' + line.name}
+                                  onClick={() =>
+                                    props.onRemoveManual(lineIndex)
+                                  }
+                                >
+                                  <svg
+                                    viewBox="0 0 24 24"
+                                    width="16"
+                                    height="16"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="1.8"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    aria-hidden="true"
+                                  >
+                                    <path d="M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7M14 10v7" />
+                                  </svg>
+                                </button>
+                              </td>
+                            </tr>
+                            {volume.m3 > 0 &&
+                              category.key !== 'excavation' &&
+                              category.key !== 'soil' && (
+                                <tr className="boq-volume-detail">
+                                  <td
+                                    colSpan={
+                                      showDepth
+                                        ? props.canViewCost
+                                          ? 10
+                                          : 8
+                                        : props.canViewCost
+                                          ? 9
+                                          : 7
+                                    }
+                                  >
+                                    <details>
+                                      <summary>Materials & labour</summary>
+                                      <div className="boq-volume-materials">
+                                        {line.outputs
+                                          .filter((output) => output.material)
+                                          .map((output, index) => (
+                                            <div key={index}>
+                                              <span>{output.name}</span>
+                                              <span>
+                                                {number(output.quantity)}{' '}
+                                                {output.unit}
+                                              </span>
+                                              {props.canViewCost && (
+                                                <strong>
+                                                  {money(priced(output))}
+                                                </strong>
+                                              )}
+                                            </div>
+                                          ))}
+                                      </div>
+                                    </details>
+                                    {['sajjas', 'shelves'].includes(
+                                      category.key,
+                                    ) &&
+                                      !dims.shelfStandard && (
+                                        <BoqSmallRccSteelEditor
+                                          rows={dims.steelSets ?? []}
+                                          onChange={(steelSets) =>
+                                            props.onUpdateGeometry(
+                                              lineIndex,
+                                              { ...dims, steelSets },
+                                              line.name,
+                                            )
+                                          }
+                                        />
+                                      )}
+                                  </td>
+                                </tr>
+                              )}
+                          </Fragment>
+                        );
+                      },
+                    )}
+                    {!geometryRows.length && (
+                      <tr>
+                        <td colSpan={99} className="boq-volume-empty">
+                          No measured items
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <div className="boq-volume-total">
+                <strong>Total {category.label}</strong>
+                <span>
+                  {number(totalGeometryQuantity)} {quantityUnit}
+                </span>
+                {props.canViewCost && <b>{money(totalGeometryCost)}</b>}
+              </div>
             </div>
-          </div>
-        )}
-        {isFootings && (
-          <BoqFootingEditor
-            footings={drawing.footings ?? []}
-            columnLabels={drawing.columns.map((col) => col.label)}
-            onChange={setFootings}
-          />
-        )}
-        {isColumns && (
-          <>
-            {drawing.columns.map((col, ci) => (
-              <div className="boq-stage-subcard" key={ci}>
-                <div className="boq-stage-subhead">
-                  <strong>{col.label || 'Column ' + (ci + 1)}</strong>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setColumns(drawing.columns.filter((_, i) => i !== ci))
-                    }
-                  >
-                    Remove
-                  </button>
-                </div>
-                <div className="boq-stage-input-grid">
-                  <InputText
-                    label="Type"
-                    value={col.label}
-                    onChange={(value) => updateCol(ci, { label: value })}
-                  />
-                  <InputNumber
-                    label="Same columns (nos)"
-                    value={col.count}
-                    onChange={(value) =>
-                      updateCol(ci, { count: Math.round(value) })
-                    }
-                  />
-                  <InputNumber
-                    label="Rises to floor (0 = all)"
-                    value={col.floors}
-                    onChange={(value) =>
-                      updateCol(ci, { floors: Math.round(value) })
-                    }
-                  />
-                  <InputNumber
-                    label="Column width"
-                    unit="in"
-                    value={col.widthIn}
-                    onChange={(value) => updateCol(ci, { widthIn: value })}
-                  />
-                  <InputNumber
-                    label="Column depth"
-                    unit="in"
-                    value={col.depthIn}
-                    onChange={(value) => updateCol(ci, { depthIn: value })}
-                  />
-                  <div className="boq-beam-rebar-groups">
-                    <strong>Main reinforcement (per column)</strong>
-                    <BarsPicker
-                      label={col.label + ' reinforcement'}
-                      value={col.bars}
-                      onChange={(bars) => updateCol(ci, { bars })}
-                    />
-                  </div>
-                  <InputNumber
-                    label="Ring diameter"
-                    unit="mm"
-                    value={col.tieDia}
-                    onChange={(value) => updateCol(ci, { tieDia: value })}
-                  />
-                  <InputNumber
-                    label="Ring spacing"
-                    unit="in"
-                    value={col.tieSpacingIn}
-                    onChange={(value) => updateCol(ci, { tieSpacingIn: value })}
-                  />
-                </div>
-              </div>
-            ))}
-            <button
-              type="button"
-              className="boq-stage-outline"
-              onClick={() =>
-                setColumns([
-                  ...drawing.columns,
-                  newColumn(drawing.columns.length),
-                ])
-              }
-            >
-              + Add column type
-            </button>
-          </>
-        )}
-        {isBeams && (
-          <>
-            {drawing.beams.map((beam, bi) => (
-              <div className="boq-stage-subcard" key={bi}>
-                <div className="boq-stage-subhead">
-                  <strong>{beam.label}</strong>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setBeams(drawing.beams.filter((_, i) => i !== bi))
-                    }
-                  >
-                    Remove
-                  </button>
-                </div>
-                <div className="boq-stage-input-grid">
-                  <InputText
-                    label="Beam type"
-                    value={beam.label}
-                    onChange={(value) => updateBeam(bi, { label: value })}
-                  />
-                  <InputNumber
-                    label="Width"
-                    unit="in"
-                    value={beam.widthIn}
-                    onChange={(value) => updateBeam(bi, { widthIn: value })}
-                  />
-                  <InputNumber
-                    label="Depth"
-                    unit="in"
-                    value={beam.depthIn}
-                    onChange={(value) => updateBeam(bi, { depthIn: value })}
-                  />
-                  <div className="boq-beam-rebar-groups">
-                    <strong>Main reinforcement (per beam)</strong>
-                    <BarsPicker
-                      label={beam.label + ' reinforcement'}
-                      value={beam.bars}
-                      onChange={(bars) => updateBeam(bi, { bars })}
-                    />
-                  </div>
-                  <InputNumber
-                    label="Stirrup diameter"
-                    unit="mm"
-                    value={beam.stirrupDia}
-                    onChange={(value) => updateBeam(bi, { stirrupDia: value })}
-                  />
-                  <InputNumber
-                    label="Stirrup spacing"
-                    unit="in"
-                    value={beam.stirrupSpacingIn}
-                    onChange={(value) =>
-                      updateBeam(bi, { stirrupSpacingIn: value })
-                    }
-                  />
-                  <InputNumber
-                    label="Same beams on this floor (nos, 0 = legacy total run)"
-                    value={beam.countsByFloor?.[index] ?? 0}
-                    onChange={(value) => {
-                      const newCount = Math.max(0, Math.round(value));
-                      const oldCount = beam.countsByFloor?.[index] ?? 0;
-                      updateBeam(bi, {
-                        countsByFloor: props.floors.map((_, i) =>
-                          i === index
-                            ? newCount
-                            : (beam.countsByFloor?.[i] ?? 0),
-                        ),
-                        runFeet: props.floors.map((_, i) =>
-                          i === index
-                            ? beamTotalRunAfterCountChange(
-                                beam.runFeet[i] ?? 0,
-                                oldCount,
-                                newCount,
-                              )
-                            : (beam.runFeet[i] ?? 0),
-                        ),
-                      });
-                    }}
-                  />
-                  <InputNumber
-                    label={
-                      beam.countsByFloor?.[index]
-                        ? 'Each beam length'
-                        : 'Total beam running length'
-                    }
-                    unit="ft"
-                    value={
-                      beam.countsByFloor?.[index]
-                        ? (beam.runFeet[index] ?? 0) /
-                          beam.countsByFloor[index]!
-                        : (beam.runFeet[index] ?? 0)
-                    }
-                    onChange={(value) =>
-                      updateBeam(bi, {
-                        runFeet: props.floors.map((_, i) =>
-                          i === index
-                            ? value * (beam.countsByFloor?.[index] || 1)
-                            : (beam.runFeet[i] ?? 0),
-                        ),
-                      })
-                    }
-                  />
-                  {(beam.countsByFloor?.[index] ?? 0) > 0 && (
-                    <small className="boq-structural-inline-total">
-                      {number(beam.runFeet[index] ?? 0)} rft total
-                    </small>
-                  )}
-                </div>
-              </div>
-            ))}
-            <button
-              type="button"
-              className="boq-stage-outline"
-              onClick={() =>
-                setBeams([
-                  ...drawing.beams,
-                  newBeam(drawing.beams.length, props.floors.length),
-                ])
-              }
-            >
-              + Add beam type
-            </button>
-          </>
-        )}
-        {category.key === 'plinth' && (
-          <div className="boq-plinth-schedule">
-            {plinthRows.map((beam, bi) => (
-              <section className="boq-stage-subcard" key={bi}>
-                <div className="boq-stage-subhead">
-                  <strong>{beam.label || `PB${bi + 1}`}</strong>
-                  <button
-                    type="button"
-                    aria-label={`Remove plinth beam type ${bi + 1}`}
-                    onClick={() =>
-                      setPlinthBeams(plinthRows.filter((_, i) => i !== bi))
-                    }
-                  >
-                    Remove
-                  </button>
-                </div>
-                <div className="boq-stage-input-grid">
-                  <InputText
-                    label="Beam type"
-                    value={beam.label}
-                    onChange={(label) => updatePlinth(bi, { label })}
-                  />
-                  <InputNumber
-                    label="Identical beams (nos)"
-                    value={beam.count}
-                    onChange={(count) =>
-                      updatePlinth(bi, { count: Math.round(count) })
-                    }
-                  />
-                  <InputNumber
-                    label="Each beam length"
-                    unit="ft"
-                    value={beam.lengthFeet}
-                    onChange={(lengthFeet) => updatePlinth(bi, { lengthFeet })}
-                  />
-                  <InputNumber
-                    label="Beam width"
-                    unit="in"
-                    value={beam.widthIn}
-                    onChange={(widthIn) => updatePlinth(bi, { widthIn })}
-                  />
-                  <InputNumber
-                    label="Beam depth"
-                    unit="in"
-                    value={beam.depthIn}
-                    onChange={(depthIn) => updatePlinth(bi, { depthIn })}
-                  />
-                  <div className="boq-beam-rebar-groups">
-                    <strong>Main reinforcement (per beam)</strong>
-                    <BarsPicker
-                      label={`Plinth ${beam.label || `PB${bi + 1}`}`}
-                      value={beam.bars}
-                      onChange={(bars) => updatePlinth(bi, { bars })}
-                    />
-                  </div>
-                  <InputNumber
-                    label="Stirrup diameter"
-                    unit="mm"
-                    value={beam.stirrupDia}
-                    onChange={(stirrupDia) => updatePlinth(bi, { stirrupDia })}
-                  />
-                  <InputNumber
-                    label="Stirrup spacing"
-                    unit="in"
-                    value={beam.stirrupSpacingIn}
-                    onChange={(stirrupSpacingIn) =>
-                      updatePlinth(bi, { stirrupSpacingIn })
-                    }
-                  />
-                </div>
-                <small className="boq-plinth-run">
-                  {number(beam.count * beam.lengthFeet)} rft total · Concrete
-                  and each steel diameter calculated once
-                </small>
-              </section>
-            ))}
-            <button
-              type="button"
-              className="boq-stage-outline"
-              onClick={() =>
-                setPlinthBeams([
-                  ...plinthRows,
-                  {
-                    label: `PB${plinthRows.length + 1}`,
-                    count: 1,
-                    lengthFeet: 0,
-                    widthIn:
-                      drawing.settings?.plinthBeamWidthIn ??
-                      props.structuralSettings.plinthBeamWidthIn ??
-                      9,
-                    depthIn:
-                      drawing.settings?.plinthBeamDepthIn ??
-                      props.structuralSettings.plinthBeamDepthIn ??
-                      12,
-                    bars: '',
-                    stirrupDia:
-                      drawing.settings?.plinthBeamStirrupDia ??
-                      props.structuralSettings.plinthBeamStirrupDia ??
-                      8,
-                    stirrupSpacingIn:
-                      drawing.settings?.plinthBeamStirrupSpacingIn ??
-                      props.structuralSettings.plinthBeamStirrupSpacingIn ??
-                      6,
-                  },
-                ])
-              }
-            >
-              + Add plinth beam type
-            </button>
-          </div>
-        )}
-        {category.key === 'slab' && (
-          <>
-            <BoqSlabScheduleEditor
-              floor={stage}
-              panels={(drawing.slabPanels ?? []).filter(
-                (panel) => panel.floor === stage,
-              )}
-              onChange={(panels) => setSlabPanels(stage, panels)}
-            />
-            {!drawing.slabPanels?.some((panel) => panel.floor === stage) && (
-              <div className="boq-stage-input-grid">
-                {floor && (
-                  <>
-                    <InputNumber
-                      label="Length"
-                      unit="ft"
-                      value={floor.lengthFeet}
-                      onChange={(value) =>
-                        props.onFloorChange(
-                          props.floors.map((f, i) =>
-                            i === index ? { ...f, lengthFeet: value } : f,
-                          ),
-                        )
-                      }
-                    />
-                    <InputNumber
-                      label="Width"
-                      unit="ft"
-                      value={floor.widthFeet}
-                      onChange={(value) =>
-                        props.onFloorChange(
-                          props.floors.map((f, i) =>
-                            i === index ? { ...f, widthFeet: value } : f,
-                          ),
-                        )
-                      }
-                    />
-                    <InputNumber
-                      label="Floor height"
-                      unit="ft"
-                      value={floor.heightFeet}
-                      onChange={(value) =>
-                        props.onFloorChange(
-                          props.floors.map((f, i) =>
-                            i === index
-                              ? {
-                                  ...f,
-                                  heightFeet: value,
-                                  heightAssumed: false,
-                                }
-                              : f,
-                          ),
-                        )
-                      }
-                    />
-                  </>
-                )}
-                {fieldFor(
-                  'slabThicknessIn',
-                  'Slab thickness',
-                  SLAB_FIELD_DEFAULTS.slabThicknessIn,
-                )}
-                {fieldFor(
-                  'slabMainDia',
-                  'Main bar diameter',
-                  SLAB_FIELD_DEFAULTS.slabMainDia,
-                  'mm',
-                )}
-                {fieldFor(
-                  'slabMainSpacingIn',
-                  'Main bar spacing',
-                  SLAB_FIELD_DEFAULTS.slabMainSpacingIn,
-                )}
-                {fieldFor(
-                  'slabDistDia',
-                  'Distribution bar',
-                  SLAB_FIELD_DEFAULTS.slabDistDia,
-                  'mm',
-                )}
-                {fieldFor(
-                  'slabDistSpacingIn',
-                  'Distribution spacing',
-                  SLAB_FIELD_DEFAULTS.slabDistSpacingIn,
-                )}
-                {!slabConfirmed && (
+          )}
+          {category.key === 'brickwork' && floor && (
+            <div className="boq-stage-dimensions">
+              {walls.some((wall) => wall.location === 'external') &&
+                props.floors.some(
+                  (floor) => floor.name !== stage && !isPenthouseFloor(floor),
+                ) && (
                   <button
                     type="button"
                     className="boq-stage-outline"
                     onClick={() =>
-                      props.onDesignChange({
-                        ...drawing,
-                        settings: {
-                          ...drawing.settings,
-                          ...shownSlabSettings(),
-                        },
+                      props.onCountsChange({
+                        ...props.counts,
+                        walls: copyExteriorWallsToFullFloors(
+                          props.floors,
+                          props.counts.walls,
+                          stage,
+                        ),
                       })
                     }
                   >
-                    Confirm slab details
+                    Copy measured external walls to other full floors
                   </button>
                 )}
-              </div>
-            )}
-          </>
-        )}
-        {category.key === 'staircase' && (
-          <>
-            <BoqStaircaseScheduleEditor
-              floor={stage}
-              stairs={(drawing.staircases ?? []).filter(
-                (stair) => stair.floor === stage,
-              )}
-              onChange={(stairs) => setStairs(stage, stairs)}
-            />
-            {!drawing.staircases?.some((stair) => stair.floor === stage) && (
-              <div className="boq-stage-input-grid">
-                {fieldFor('stairWidthFeet', 'Stair width', 3.5, 'ft')}
-                {fieldFor('stairRiserIn', 'Riser', 6)}
-                {fieldFor('stairTreadIn', 'Tread', 10)}
-                {fieldFor('stairWaistIn', 'Waist slab', 6)}
-                {fieldFor('stairMainDia', 'Main bar', 12, 'mm')}
-                {fieldFor('stairBarSpacingIn', 'Bar spacing', 6)}
-              </div>
-            )}
-          </>
-        )}
-        {current && category.key === 'doors' && (
-          <div className="boq-stage-input-grid">
-            {(
-              [
-                ['mainDoors', 'Main doors'],
-                ['internalDoors', 'Internal doors'],
-                ['bathroomDoors', 'Bathroom doors'],
-                ['poojaDoors', 'Pooja doors'],
-                ['windows', 'Windows'],
-                ['ventilators', 'Ventilators'],
-                ['rollingShutters', 'Rolling shutters'],
-              ] as const
-            ).map(([key, label]) => (
-              <InputNumber
-                key={key}
-                label={label ?? ''}
-                value={current[key as keyof typeof current]}
-                onChange={(value) =>
-                  changeCount(key as keyof typeof current, value)
-                }
-              />
-            ))}
-          </div>
-        )}
-        {current && category.key === 'tiles' && (
-          <div className="boq-stage-dimensions">
-            <h4>Flooring & kitchens</h4>
-            <div className="boq-stage-input-grid">
-              <InputNumber
-                label="Room flooring area"
-                unit="sqft"
-                value={finishes?.roomFlooringSqft ?? 0}
-                onChange={(value) =>
-                  changeFinishes({ roomFlooringSqft: value, rooms: [] })
-                }
-              />
-              <InputNumber
-                label="Parking flooring area"
-                unit="sqft"
-                value={finishes?.parkingFlooringSqft ?? 0}
-                onChange={(value) =>
-                  changeFinishes({ parkingFlooringSqft: value })
-                }
-              />
-              <InputText
-                label="Bathroom sizes (L × W, ft)"
-                value={finishes?.bathroomSizes ?? ''}
-                placeholder="7×5, 6×4"
-                onChange={(value) => changeFinishes({ bathroomSizes: value })}
-              />
-              <InputNumber
-                label="Bathroom wall tile height"
-                unit="ft"
-                value={finishes?.bathroomTileHeightFeet ?? 0}
-                onChange={(value) =>
-                  changeFinishes({ bathroomTileHeightFeet: value })
-                }
-              />
-              <InputNumber
-                label="Tile & granite wastage"
-                unit="%"
-                value={
-                  finishes?.tileWastagePercent ??
-                  finishDefaults.tileWastagePercent
-                }
-                onChange={(value) =>
-                  changeFinishes({
-                    tileWastagePercent: Math.max(0, Math.min(30, value)),
-                  })
-                }
-              />
-            </div>
-            <label className="boq-stage-scope-toggle">
-              <input
-                type="checkbox"
-                checked={finishes?.excludeRoomFlooring === true}
-                onChange={(event) =>
-                  changeFinishes({ excludeRoomFlooring: event.target.checked })
-                }
-              />
-              No room floor tiles on this floor
-            </label>
-            {measuredKitchens.map((kitchen, kitchenIndex) => {
-              const update = (patch: Partial<typeof kitchen>) =>
-                updateKitchens(
-                  measuredKitchens.map((row, i) =>
-                    i === kitchenIndex ? { ...row, ...patch } : row,
-                  ),
-                );
-              return (
-                <div className="boq-stage-subcard" key={kitchen.id}>
-                  <div className="boq-stage-subhead">
-                    <strong>
-                      {kitchen.name || 'Kitchen ' + (kitchenIndex + 1)}
-                    </strong>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        updateKitchens(
-                          measuredKitchens.filter((_, i) => i !== kitchenIndex),
-                        )
+              <div className="boq-stage-subcard">
+                <div className="boq-stage-subhead">
+                  <strong>New wall</strong>
+                  <button
+                    className="boq-volume-add"
+                    type="button"
+                    disabled={
+                      !(
+                        wallDraft.lengthFeet > 0 &&
+                        wallDraft.heightFeet > 0 &&
+                        wallDraft.count > 0
+                      )
+                    }
+                    onClick={() => {
+                      updateWalls([
+                        ...walls,
+                        {
+                          ...wallDraft,
+                          id: 'wall-' + Date.now().toString(36),
+                          name:
+                            wallDraft.name.trim() ||
+                            'Wall ' + (walls.length + 1),
+                        },
+                      ]);
+                      setWallDraft({
+                        id: 'new',
+                        name: '',
+                        location: 'external',
+                        count: 1,
+                        lengthFeet: 0,
+                        heightFeet: 0,
+                        thicknessIn: 9,
+                      });
+                    }}
+                  >
+                    + Add Item
+                  </button>
+                </div>
+                <div className="boq-stage-input-grid">
+                  <InputText
+                    label="Wall reference"
+                    value={wallDraft.name}
+                    placeholder="W1, internal room 2"
+                    onChange={(v) =>
+                      setWallDraft((prior) => ({ ...prior, name: v }))
+                    }
+                  />
+                  <label className="boq-stage-field">
+                    <span>Wall location</span>
+                    <select
+                      value={wallDraft.location}
+                      onChange={(e) =>
+                        setWallDraft((prior) => ({
+                          ...prior,
+                          location:
+                            e.target.value === 'internal'
+                              ? 'internal'
+                              : 'external',
+                          thicknessIn: e.target.value === 'internal' ? 4.5 : 9,
+                        }))
                       }
                     >
-                      Remove kitchen
-                    </button>
+                      <option value="external">External</option>
+                      <option value="internal">Internal</option>
+                    </select>
+                  </label>
+                  <InputNumber
+                    label="Same walls (nos)"
+                    value={wallDraft.count}
+                    onChange={(v) =>
+                      setWallDraft((prior) => ({
+                        ...prior,
+                        count: Math.round(v),
+                      }))
+                    }
+                  />
+                  <InputNumber
+                    label="Length"
+                    unit="ft"
+                    value={wallDraft.lengthFeet}
+                    onChange={(v) =>
+                      setWallDraft((prior) => ({ ...prior, lengthFeet: v }))
+                    }
+                  />
+                  <InputNumber
+                    label="Height"
+                    unit="ft"
+                    value={wallDraft.heightFeet}
+                    onChange={(v) =>
+                      setWallDraft((prior) => ({ ...prior, heightFeet: v }))
+                    }
+                  />
+                  <InputNumber
+                    label="Thickness"
+                    unit="in"
+                    value={wallDraft.thicknessIn}
+                    onChange={(v) =>
+                      setWallDraft((prior) => ({ ...prior, thicknessIn: v }))
+                    }
+                  />
+                </div>
+              </div>
+              <div className="boq-volume-scroll">
+                <table
+                  className="boq-volume-table boq-wall-table"
+                  aria-label="Measured walls"
+                >
+                  <thead>
+                    <tr>
+                      <th>Wall</th>
+                      <th>Location</th>
+                      <th>Count</th>
+                      <th>Length ({dimensionUnit})</th>
+                      <th>Height ({dimensionUnit})</th>
+                      <th>Thickness (in)</th>
+                      <th>
+                        Gross area ({editorUnit('sqft', dimensionUnit).unit})
+                      </th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {walls.map((wall, wallIndex) => {
+                      const update = (patch: Partial<WallMeasure>) =>
+                        updateWalls(
+                          walls.map((row, i) =>
+                            i === wallIndex ? { ...row, ...patch } : row,
+                          ),
+                        );
+                      const factor = editorUnit('ft', dimensionUnit).factor;
+                      return (
+                        <tr key={wall.id}>
+                          <td>
+                            <input
+                              aria-label={
+                                'Wall ' + (wallIndex + 1) + ' reference'
+                              }
+                              value={wall.name}
+                              onChange={(event) =>
+                                update({ name: event.target.value })
+                              }
+                            />
+                          </td>
+                          <td>
+                            <select
+                              aria-label={wall.name + ' location'}
+                              value={wall.location}
+                              onChange={(event) =>
+                                update({
+                                  location:
+                                    event.target.value === 'internal'
+                                      ? 'internal'
+                                      : 'external',
+                                })
+                              }
+                            >
+                              <option value="external">External</option>
+                              <option value="internal">Internal</option>
+                            </select>
+                          </td>
+                          <td>
+                            <NumberField
+                              label={wall.name + ' count'}
+                              value={wall.count}
+                              integer
+                              onChange={(count) => update({ count })}
+                            />
+                          </td>
+                          <td>
+                            <NumberField
+                              key={'length' + dimensionUnit}
+                              label={wall.name + ' length'}
+                              value={Number(
+                                (wall.lengthFeet * factor).toFixed(6),
+                              )}
+                              feet={dimensionUnit === 'ft'}
+                              onChange={(value) =>
+                                update({ lengthFeet: value / factor })
+                              }
+                            />
+                          </td>
+                          <td>
+                            <NumberField
+                              key={'height' + dimensionUnit}
+                              label={wall.name + ' height'}
+                              value={Number(
+                                (wall.heightFeet * factor).toFixed(6),
+                              )}
+                              feet={dimensionUnit === 'ft'}
+                              onChange={(value) =>
+                                update({ heightFeet: value / factor })
+                              }
+                            />
+                          </td>
+                          <td>
+                            <NumberField
+                              label={wall.name + ' thickness'}
+                              value={wall.thicknessIn}
+                              onChange={(thicknessIn) =>
+                                update({ thicknessIn })
+                              }
+                            />
+                          </td>
+                          <td>
+                            <strong className="boq-volume-qty">
+                              {number(
+                                wall.count *
+                                  wall.lengthFeet *
+                                  wall.heightFeet *
+                                  editorUnit('sqft', dimensionUnit).factor,
+                              )}
+                            </strong>
+                          </td>
+                          <td>
+                            <BoqRemove
+                              label={'Remove ' + wall.name}
+                              onClick={() =>
+                                updateWalls(
+                                  walls.filter((_, i) => i !== wallIndex),
+                                )
+                              }
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {!walls.length && (
+                      <tr>
+                        <td colSpan={8} className="boq-volume-empty">
+                          No measured walls
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          {isFootings && (
+            <BoqFootingEditor
+              footings={drawing.footings ?? []}
+              columnLabels={drawing.columns.map((col) => col.label)}
+              onChange={setFootings}
+            />
+          )}
+          {isColumns && (
+            <>
+              <div className="boq-compact-actions">
+                <button
+                  type="button"
+                  className="boq-volume-add"
+                  onClick={() =>
+                    setColumns([
+                      ...drawing.columns,
+                      newColumn(drawing.columns.length),
+                    ])
+                  }
+                >
+                  + Add column type
+                </button>
+              </div>
+              {drawing.columns.map((col, ci) => (
+                <div className="boq-stage-subcard" key={ci}>
+                  <div className="boq-stage-subhead">
+                    <strong>{col.label || 'Column ' + (ci + 1)}</strong>
+                    <BoqRemove
+                      label={`Remove column type ${ci + 1}`}
+                      onClick={() =>
+                        setColumns(drawing.columns.filter((_, i) => i !== ci))
+                      }
+                    />
                   </div>
                   <div className="boq-stage-input-grid">
                     <InputText
-                      label="Kitchen reference"
-                      value={kitchen.name}
-                      onChange={(value) => update({ name: value })}
+                      label="Type"
+                      value={col.label}
+                      onChange={(value) => updateCol(ci, { label: value })}
                     />
                     <InputNumber
-                      label="Platform length"
-                      unit="ft"
-                      value={kitchen.platformFeet}
-                      onChange={(value) => update({ platformFeet: value })}
-                    />
-                    <InputNumber
-                      label="Granite depth"
-                      unit="ft"
-                      value={kitchen.platformDepthFeet}
-                      onChange={(value) => update({ platformDepthFeet: value })}
-                    />
-                    <InputNumber
-                      label="Wall tile length"
-                      unit="ft"
-                      value={kitchen.wallTileFeet}
-                      onChange={(value) => update({ wallTileFeet: value })}
-                    />
-                    <InputNumber
-                      label="Wall tile height"
-                      unit="ft"
-                      value={kitchen.wallTileHeightFeet}
+                      label="Same columns (nos)"
+                      value={col.count}
                       onChange={(value) =>
-                        update({ wallTileHeightFeet: value })
+                        updateCol(ci, { count: Math.round(value) })
+                      }
+                    />
+                    <InputNumber
+                      label="Rises to floor (0 = all)"
+                      value={col.floors}
+                      onChange={(value) =>
+                        updateCol(ci, { floors: Math.round(value) })
+                      }
+                    />
+                    <InputNumber
+                      label="Column width"
+                      unit="in"
+                      value={col.widthIn}
+                      onChange={(value) => updateCol(ci, { widthIn: value })}
+                    />
+                    <InputNumber
+                      label="Column depth"
+                      unit="in"
+                      value={col.depthIn}
+                      onChange={(value) => updateCol(ci, { depthIn: value })}
+                    />
+                    <div className="boq-beam-rebar-groups">
+                      <BoqAdvanced label="Main reinforcement">
+                        <BarsPicker
+                          label={col.label + ' reinforcement'}
+                          value={col.bars}
+                          onChange={(bars) => updateCol(ci, { bars })}
+                        />
+                      </BoqAdvanced>
+                    </div>
+                    <InputNumber
+                      label="Ring diameter"
+                      unit="mm"
+                      value={col.tieDia}
+                      onChange={(value) => updateCol(ci, { tieDia: value })}
+                    />
+                    <InputNumber
+                      label="Ring spacing"
+                      unit="in"
+                      value={col.tieSpacingIn}
+                      onChange={(value) =>
+                        updateCol(ci, { tieSpacingIn: value })
                       }
                     />
                   </div>
                 </div>
-              );
-            })}
-            <button
-              type="button"
-              className="boq-stage-outline"
-              onClick={() =>
-                updateKitchens([
-                  ...measuredKitchens,
-                  {
-                    id: 'kitchen-' + Date.now().toString(36),
-                    name: 'Kitchen ' + (measuredKitchens.length + 1),
-                    platformFeet: 0,
-                    platformDepthFeet: 0,
-                    wallTileFeet: 0,
-                    wallTileHeightFeet: 0,
-                  },
-                ])
-              }
-            >
-              ＋ Add kitchen
-            </button>
-          </div>
-        )}
-        {floor && category.key === 'staircase' && (
-          <div className="boq-stage-dimensions">
-            <h4>Staircase finishes on {stage}</h4>
-            <div className="boq-stage-input-grid">
-              <InputNumber
-                label="Staircase granite"
-                unit="sqft"
-                value={finishes?.staircaseGraniteSqft ?? 0}
-                onChange={(value) =>
-                  changeFinishes({ staircaseGraniteSqft: value })
-                }
-              />
-              <InputNumber
-                label="SS railing"
-                unit="rft"
-                value={finishes?.railingFeet ?? 0}
-                onChange={(value) => changeFinishes({ railingFeet: value })}
-              />
-            </div>
-          </div>
-        )}
-        {current && category.key === 'painting' && (
-          <div className="boq-stage-input-grid">
-            <InputNumber
-              label="Ceiling painting area"
-              unit="sqft"
-              value={finishes?.ceilingPaintSqft ?? 0}
-              onChange={(value) => changeFinishes({ ceilingPaintSqft: value })}
-            />
-          </div>
-        )}
-        {current && category.key === 'plaster' && (
-          <div className="boq-stage-dimensions">
-            <h4>Plastering from measured walls — {stage}</h4>
-            <div className="boq-stage-input-grid">
-              <label className="boq-stage-field">
-                <span>Internal plaster coats</span>
-                <select
-                  value={finishes?.internalPlasterCoats ?? 1}
-                  onChange={(event) =>
-                    changeFinishes({
-                      internalPlasterCoats: event.target.value === '2' ? 2 : 1,
-                    })
+              ))}
+            </>
+          )}
+          {isBeams && (
+            <>
+              <div className="boq-compact-actions">
+                <button
+                  type="button"
+                  className="boq-volume-add"
+                  onClick={() =>
+                    setBeams([
+                      ...drawing.beams,
+                      newBeam(drawing.beams.length, props.floors.length),
+                    ])
                   }
                 >
-                  <option value={1}>Single coat</option>
-                  <option value={2}>Double coat</option>
-                </select>
-              </label>
-              <label className="boq-stage-field">
-                <span>External plaster coats</span>
-                <select
-                  value={finishes?.externalPlasterCoats ?? 1}
-                  onChange={(event) =>
-                    changeFinishes({
-                      externalPlasterCoats: event.target.value === '2' ? 2 : 1,
-                    })
+                  + Add beam type
+                </button>
+              </div>
+              {drawing.beams.map((beam, bi) => (
+                <div className="boq-stage-subcard" key={bi}>
+                  <div className="boq-stage-subhead">
+                    <strong>{beam.label}</strong>
+                    <BoqRemove
+                      label={`Remove beam type ${bi + 1}`}
+                      onClick={() =>
+                        setBeams(drawing.beams.filter((_, i) => i !== bi))
+                      }
+                    />
+                  </div>
+                  <div className="boq-stage-input-grid">
+                    <InputText
+                      label="Beam type"
+                      value={beam.label}
+                      onChange={(value) => updateBeam(bi, { label: value })}
+                    />
+                    <InputNumber
+                      label="Width"
+                      unit="in"
+                      value={beam.widthIn}
+                      onChange={(value) => updateBeam(bi, { widthIn: value })}
+                    />
+                    <InputNumber
+                      label="Depth"
+                      unit="in"
+                      value={beam.depthIn}
+                      onChange={(value) => updateBeam(bi, { depthIn: value })}
+                    />
+                    <div className="boq-beam-rebar-groups">
+                      <BoqAdvanced label="Main reinforcement">
+                        <BarsPicker
+                          label={beam.label + ' reinforcement'}
+                          value={beam.bars}
+                          onChange={(bars) => updateBeam(bi, { bars })}
+                        />
+                      </BoqAdvanced>
+                    </div>
+                    <InputNumber
+                      label="Stirrup diameter"
+                      unit="mm"
+                      value={beam.stirrupDia}
+                      onChange={(value) =>
+                        updateBeam(bi, { stirrupDia: value })
+                      }
+                    />
+                    <InputNumber
+                      label="Stirrup spacing"
+                      unit="in"
+                      value={beam.stirrupSpacingIn}
+                      onChange={(value) =>
+                        updateBeam(bi, { stirrupSpacingIn: value })
+                      }
+                    />
+                    <InputNumber
+                      label="Same beams on this floor (nos, 0 = legacy total run)"
+                      value={beam.countsByFloor?.[index] ?? 0}
+                      onChange={(value) => {
+                        const newCount = Math.max(0, Math.round(value));
+                        const oldCount = beam.countsByFloor?.[index] ?? 0;
+                        updateBeam(bi, {
+                          countsByFloor: props.floors.map((_, i) =>
+                            i === index
+                              ? newCount
+                              : (beam.countsByFloor?.[i] ?? 0),
+                          ),
+                          runFeet: props.floors.map((_, i) =>
+                            i === index
+                              ? beamTotalRunAfterCountChange(
+                                  beam.runFeet[i] ?? 0,
+                                  oldCount,
+                                  newCount,
+                                )
+                              : (beam.runFeet[i] ?? 0),
+                          ),
+                        });
+                      }}
+                    />
+                    <InputNumber
+                      label={
+                        beam.countsByFloor?.[index]
+                          ? 'Each beam length'
+                          : 'Total beam running length'
+                      }
+                      unit="ft"
+                      value={
+                        beam.countsByFloor?.[index]
+                          ? (beam.runFeet[index] ?? 0) /
+                            beam.countsByFloor[index]!
+                          : (beam.runFeet[index] ?? 0)
+                      }
+                      onChange={(value) =>
+                        updateBeam(bi, {
+                          runFeet: props.floors.map((_, i) =>
+                            i === index
+                              ? value * (beam.countsByFloor?.[index] || 1)
+                              : (beam.runFeet[i] ?? 0),
+                          ),
+                        })
+                      }
+                    />
+                    {(beam.countsByFloor?.[index] ?? 0) > 0 && (
+                      <small className="boq-structural-inline-total">
+                        {number(
+                          (beam.runFeet[index] ?? 0) *
+                            editorUnit('rft', dimensionUnit).factor,
+                        )}{' '}
+                        {editorUnit('rft', dimensionUnit).unit} total
+                      </small>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
+          {category.key === 'plinth' && (
+            <div className="boq-plinth-schedule">
+              <div className="boq-compact-actions">
+                <button
+                  type="button"
+                  className="boq-volume-add"
+                  onClick={() =>
+                    setPlinthBeams([
+                      ...plinthRows,
+                      {
+                        label: `PB${plinthRows.length + 1}`,
+                        count: 1,
+                        lengthFeet: 0,
+                        widthIn:
+                          drawing.settings?.plinthBeamWidthIn ??
+                          props.structuralSettings.plinthBeamWidthIn ??
+                          9,
+                        depthIn:
+                          drawing.settings?.plinthBeamDepthIn ??
+                          props.structuralSettings.plinthBeamDepthIn ??
+                          12,
+                        bars: '',
+                        stirrupDia:
+                          drawing.settings?.plinthBeamStirrupDia ??
+                          props.structuralSettings.plinthBeamStirrupDia ??
+                          8,
+                        stirrupSpacingIn:
+                          drawing.settings?.plinthBeamStirrupSpacingIn ??
+                          props.structuralSettings.plinthBeamStirrupSpacingIn ??
+                          6,
+                      },
+                    ])
                   }
                 >
-                  <option value={1}>Single coat</option>
-                  <option value={2}>Double coat</option>
-                </select>
-              </label>
+                  + Add plinth beam type
+                </button>
+              </div>
+              {plinthRows.map((beam, bi) => (
+                <section className="boq-stage-subcard" key={bi}>
+                  <div className="boq-stage-subhead">
+                    <strong>{beam.label || `PB${bi + 1}`}</strong>
+                    <BoqRemove
+                      label={`Remove plinth beam type ${bi + 1}`}
+                      onClick={() =>
+                        setPlinthBeams(plinthRows.filter((_, i) => i !== bi))
+                      }
+                    />
+                  </div>
+                  <div className="boq-stage-input-grid">
+                    <InputText
+                      label="Beam type"
+                      value={beam.label}
+                      onChange={(label) => updatePlinth(bi, { label })}
+                    />
+                    <InputNumber
+                      label="Identical beams (nos)"
+                      value={beam.count}
+                      onChange={(count) =>
+                        updatePlinth(bi, { count: Math.round(count) })
+                      }
+                    />
+                    <InputNumber
+                      label="Each beam length"
+                      unit="ft"
+                      value={beam.lengthFeet}
+                      onChange={(lengthFeet) =>
+                        updatePlinth(bi, { lengthFeet })
+                      }
+                    />
+                    <InputNumber
+                      label="Beam width"
+                      unit="in"
+                      value={beam.widthIn}
+                      onChange={(widthIn) => updatePlinth(bi, { widthIn })}
+                    />
+                    <InputNumber
+                      label="Beam depth"
+                      unit="in"
+                      value={beam.depthIn}
+                      onChange={(depthIn) => updatePlinth(bi, { depthIn })}
+                    />
+                    <div className="boq-beam-rebar-groups">
+                      <BoqAdvanced label="Main reinforcement">
+                        <BarsPicker
+                          label={`Plinth ${beam.label || `PB${bi + 1}`}`}
+                          value={beam.bars}
+                          onChange={(bars) => updatePlinth(bi, { bars })}
+                        />
+                      </BoqAdvanced>
+                    </div>
+                    <InputNumber
+                      label="Stirrup diameter"
+                      unit="mm"
+                      value={beam.stirrupDia}
+                      onChange={(stirrupDia) =>
+                        updatePlinth(bi, { stirrupDia })
+                      }
+                    />
+                    <InputNumber
+                      label="Stirrup spacing"
+                      unit="in"
+                      value={beam.stirrupSpacingIn}
+                      onChange={(stirrupSpacingIn) =>
+                        updatePlinth(bi, { stirrupSpacingIn })
+                      }
+                    />
+                  </div>
+                  <small className="boq-plinth-run">
+                    {number(
+                      beam.count *
+                        beam.lengthFeet *
+                        editorUnit('rft', dimensionUnit).factor,
+                    )}{' '}
+                    {editorUnit('rft', dimensionUnit).unit} total
+                  </small>
+                </section>
+              ))}
             </div>
-            {!props.counts.walls?.[stage]?.length && (
-              <p className="boq-guided-warning" role="status">
-                Wall measurements pending.
-              </p>
-            )}
-          </div>
-        )}
-        {current && category.key === 'plumbing' && (
-          <div className="boq-stage-dimensions">
-            <h4>Plumbing scope for {stage}</h4>
-            <div className="boq-stage-input-grid">
-              <InputNumber
-                label="Bathrooms"
-                value={current.bathrooms}
-                onChange={(value) => changeCount('bathrooms', value)}
+          )}
+          {category.key === 'slab' && (
+            <>
+              <BoqSlabScheduleEditor
+                floor={stage}
+                panels={(drawing.slabPanels ?? []).filter(
+                  (panel) => panel.floor === stage,
+                )}
+                onChange={(panels) => setSlabPanels(stage, panels)}
               />
-              <InputNumber
-                label="Kitchens"
-                value={current.kitchens}
-                onChange={(value) => {
-                  if (finishes?.kitchenMeasurements)
-                    updateKitchens(
-                      Array.from(
-                        { length: Math.round(value) },
-                        (_, i) =>
-                          measuredKitchens[i] ?? {
-                            id: 'kitchen-' + Date.now().toString(36) + '-' + i,
-                            name: 'Kitchen ' + (i + 1),
-                            platformFeet: 0,
-                            platformDepthFeet: 0,
-                            wallTileFeet: 0,
-                            wallTileHeightFeet: 0,
+              {!drawing.slabPanels?.some((panel) => panel.floor === stage) && (
+                <div className="boq-stage-input-grid">
+                  {floor && (
+                    <>
+                      <InputNumber
+                        label="Length"
+                        unit="ft"
+                        value={floor.lengthFeet}
+                        onChange={(value) =>
+                          props.onFloorChange(
+                            props.floors.map((f, i) =>
+                              i === index ? { ...f, lengthFeet: value } : f,
+                            ),
+                          )
+                        }
+                      />
+                      <InputNumber
+                        label="Width"
+                        unit="ft"
+                        value={floor.widthFeet}
+                        onChange={(value) =>
+                          props.onFloorChange(
+                            props.floors.map((f, i) =>
+                              i === index ? { ...f, widthFeet: value } : f,
+                            ),
+                          )
+                        }
+                      />
+                      <InputNumber
+                        label="Floor height"
+                        unit="ft"
+                        value={floor.heightFeet}
+                        onChange={(value) =>
+                          props.onFloorChange(
+                            props.floors.map((f, i) =>
+                              i === index
+                                ? {
+                                    ...f,
+                                    heightFeet: value,
+                                    heightAssumed: false,
+                                  }
+                                : f,
+                            ),
+                          )
+                        }
+                      />
+                    </>
+                  )}
+                  {fieldFor(
+                    'slabThicknessIn',
+                    'Slab thickness',
+                    SLAB_FIELD_DEFAULTS.slabThicknessIn,
+                  )}
+                  {fieldFor(
+                    'slabMainDia',
+                    'Main bar diameter',
+                    SLAB_FIELD_DEFAULTS.slabMainDia,
+                    'mm',
+                  )}
+                  {fieldFor(
+                    'slabMainSpacingIn',
+                    'Main bar spacing',
+                    SLAB_FIELD_DEFAULTS.slabMainSpacingIn,
+                  )}
+                  {fieldFor(
+                    'slabDistDia',
+                    'Distribution bar',
+                    SLAB_FIELD_DEFAULTS.slabDistDia,
+                    'mm',
+                  )}
+                  {fieldFor(
+                    'slabDistSpacingIn',
+                    'Distribution spacing',
+                    SLAB_FIELD_DEFAULTS.slabDistSpacingIn,
+                  )}
+                  {!slabConfirmed && (
+                    <button
+                      type="button"
+                      className="boq-stage-outline"
+                      onClick={() =>
+                        props.onDesignChange({
+                          ...drawing,
+                          settings: {
+                            ...drawing.settings,
+                            ...shownSlabSettings(),
                           },
-                      ),
-                    );
-                  else changeCount('kitchens', value);
-                }}
+                        })
+                      }
+                    >
+                      Confirm slab details
+                    </button>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+          {category.key === 'staircase' && (
+            <>
+              <BoqStaircaseScheduleEditor
+                floor={stage}
+                stairs={(drawing.staircases ?? []).filter(
+                  (stair) => stair.floor === stage,
+                )}
+                onChange={(stairs) => setStairs(stage, stairs)}
               />
-            </div>
-          </div>
-        )}
-        {current && category.key === 'electrical' && (
-          <div className="boq-stage-dimensions">
-            <h4>Electrical points on {stage}</h4>
+              {!drawing.staircases?.some((stair) => stair.floor === stage) && (
+                <div className="boq-stage-input-grid">
+                  {fieldFor('stairWidthFeet', 'Stair width', 3.5, 'ft')}
+                  {fieldFor('stairRiserIn', 'Riser', 6)}
+                  {fieldFor('stairTreadIn', 'Tread', 10)}
+                  {fieldFor('stairWaistIn', 'Waist slab', 6)}
+                  {fieldFor('stairMainDia', 'Main bar', 12, 'mm')}
+                  {fieldFor('stairBarSpacingIn', 'Bar spacing', 6)}
+                </div>
+              )}
+            </>
+          )}
+          {current && category.key === 'doors' && (
             <div className="boq-stage-input-grid">
               {(
                 [
-                  ['lightPoints', 'Light points'],
-                  ['fanPoints', 'Fan points'],
-                  ['socketPoints', 'Sockets'],
-                  ['powerPoints', '16A power points'],
+                  ['mainDoors', 'Main doors'],
+                  ['internalDoors', 'Internal doors'],
+                  ['bathroomDoors', 'Bathroom doors'],
+                  ['poojaDoors', 'Pooja doors'],
+                  ['windows', 'Windows'],
+                  ['ventilators', 'Ventilators'],
+                  ['rollingShutters', 'Rolling shutters'],
                 ] as const
               ).map(([key, label]) => (
                 <InputNumber
                   key={key}
-                  label={label}
-                  value={current[key]}
-                  onChange={(value) => changeCount(key, value)}
+                  label={label ?? ''}
+                  value={current[key as keyof typeof current]}
+                  onChange={(value) =>
+                    changeCount(key as keyof typeof current, value)
+                  }
                 />
               ))}
             </div>
-          </div>
-        )}
-        {current &&
-          (category.key === 'electrical' || category.key === 'plumbing') && (
+          )}
+          {current && category.key === 'tiles' && (
             <div className="boq-stage-dimensions">
-              <h4>Measured materials</h4>
+              <h4>Flooring & kitchens</h4>
+              <div className="boq-compact-actions">
+                <button
+                  type="button"
+                  className="boq-volume-add"
+                  onClick={() =>
+                    updateKitchens([
+                      ...measuredKitchens,
+                      {
+                        id: 'kitchen-' + Date.now().toString(36),
+                        name: 'Kitchen ' + (measuredKitchens.length + 1),
+                        platformFeet: 0,
+                        platformDepthFeet: 0,
+                        wallTileFeet: 0,
+                        wallTileHeightFeet: 0,
+                      },
+                    ])
+                  }
+                >
+                  ＋ Add kitchen
+                </button>
+              </div>
               <div className="boq-stage-input-grid">
-                {MEASURED_SERVICE_FIELDS.filter(
-                  (field) => field.group === category.key,
-                ).map((field) => (
-                  <InputNumber
-                    key={field.material}
-                    label={field.name}
-                    unit={field.inputUnit}
-                    value={finishes?.serviceMeasurements?.[field.material] ?? 0}
-                    onChange={(value) =>
+                <InputNumber
+                  label="Room flooring area"
+                  unit="sqft"
+                  value={finishes?.roomFlooringSqft ?? 0}
+                  onChange={(value) =>
+                    changeFinishes({ roomFlooringSqft: value, rooms: [] })
+                  }
+                />
+                <InputNumber
+                  label="Parking flooring area"
+                  unit="sqft"
+                  value={finishes?.parkingFlooringSqft ?? 0}
+                  onChange={(value) =>
+                    changeFinishes({ parkingFlooringSqft: value })
+                  }
+                />
+                <InputText
+                  label="Bathroom sizes (L × W, ft)"
+                  value={finishes?.bathroomSizes ?? ''}
+                  placeholder="7×5, 6×4"
+                  onChange={(value) => changeFinishes({ bathroomSizes: value })}
+                />
+                <InputNumber
+                  label="Bathroom wall tile height"
+                  unit="ft"
+                  value={finishes?.bathroomTileHeightFeet ?? 0}
+                  onChange={(value) =>
+                    changeFinishes({ bathroomTileHeightFeet: value })
+                  }
+                />
+                <InputNumber
+                  label="Tile & granite wastage"
+                  unit="%"
+                  value={
+                    finishes?.tileWastagePercent ??
+                    finishDefaults.tileWastagePercent
+                  }
+                  onChange={(value) =>
+                    changeFinishes({
+                      tileWastagePercent: Math.max(0, Math.min(30, value)),
+                    })
+                  }
+                />
+              </div>
+              <label className="boq-stage-scope-toggle">
+                <input
+                  type="checkbox"
+                  checked={finishes?.excludeRoomFlooring === true}
+                  onChange={(event) =>
+                    changeFinishes({
+                      excludeRoomFlooring: event.target.checked,
+                    })
+                  }
+                />
+                No room floor tiles on this floor
+              </label>
+              {measuredKitchens.map((kitchen, kitchenIndex) => {
+                const update = (patch: Partial<typeof kitchen>) =>
+                  updateKitchens(
+                    measuredKitchens.map((row, i) =>
+                      i === kitchenIndex ? { ...row, ...patch } : row,
+                    ),
+                  );
+                return (
+                  <div className="boq-stage-subcard" key={kitchen.id}>
+                    <div className="boq-stage-subhead">
+                      <strong>
+                        {kitchen.name || 'Kitchen ' + (kitchenIndex + 1)}
+                      </strong>
+                      <BoqRemove
+                        label={'Remove ' + kitchen.name}
+                        onClick={() =>
+                          updateKitchens(
+                            measuredKitchens.filter(
+                              (_, i) => i !== kitchenIndex,
+                            ),
+                          )
+                        }
+                      />
+                    </div>
+                    <div className="boq-stage-input-grid">
+                      <InputText
+                        label="Kitchen reference"
+                        value={kitchen.name}
+                        onChange={(value) => update({ name: value })}
+                      />
+                      <InputNumber
+                        label="Platform length"
+                        unit="ft"
+                        value={kitchen.platformFeet}
+                        onChange={(value) => update({ platformFeet: value })}
+                      />
+                      <InputNumber
+                        label="Granite depth"
+                        unit="ft"
+                        value={kitchen.platformDepthFeet}
+                        onChange={(value) =>
+                          update({ platformDepthFeet: value })
+                        }
+                      />
+                      <InputNumber
+                        label="Wall tile length"
+                        unit="ft"
+                        value={kitchen.wallTileFeet}
+                        onChange={(value) => update({ wallTileFeet: value })}
+                      />
+                      <InputNumber
+                        label="Wall tile height"
+                        unit="ft"
+                        value={kitchen.wallTileHeightFeet}
+                        onChange={(value) =>
+                          update({ wallTileHeightFeet: value })
+                        }
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+          {floor && category.key === 'staircase' && (
+            <div className="boq-stage-dimensions">
+              <h4>Staircase finishes on {stage}</h4>
+              <div className="boq-stage-input-grid">
+                <InputNumber
+                  label="Staircase granite"
+                  unit="sqft"
+                  value={finishes?.staircaseGraniteSqft ?? 0}
+                  onChange={(value) =>
+                    changeFinishes({ staircaseGraniteSqft: value })
+                  }
+                />
+                <InputNumber
+                  label="SS railing"
+                  unit="rft"
+                  value={finishes?.railingFeet ?? 0}
+                  onChange={(value) => changeFinishes({ railingFeet: value })}
+                />
+              </div>
+            </div>
+          )}
+          {current && category.key === 'painting' && (
+            <div className="boq-stage-input-grid">
+              <InputNumber
+                label="Ceiling painting area"
+                unit="sqft"
+                value={finishes?.ceilingPaintSqft ?? 0}
+                onChange={(value) =>
+                  changeFinishes({ ceilingPaintSqft: value })
+                }
+              />
+            </div>
+          )}
+          {current && category.key === 'plaster' && (
+            <div className="boq-stage-dimensions">
+              <h4>Plastering from measured walls — {stage}</h4>
+              <div className="boq-stage-input-grid">
+                <label className="boq-stage-field">
+                  <span>Internal plaster coats</span>
+                  <select
+                    value={finishes?.internalPlasterCoats ?? 1}
+                    onChange={(event) =>
                       changeFinishes({
-                        serviceMeasurements: {
-                          ...finishes?.serviceMeasurements,
-                          [field.material]:
-                            field.inputUnit === 'nos' ||
-                            field.inputUnit === 'lot'
-                              ? Math.round(value)
-                              : value,
-                        },
+                        internalPlasterCoats:
+                          event.target.value === '2' ? 2 : 1,
                       })
                     }
+                  >
+                    <option value={1}>Single coat</option>
+                    <option value={2}>Double coat</option>
+                  </select>
+                </label>
+                <label className="boq-stage-field">
+                  <span>External plaster coats</span>
+                  <select
+                    value={finishes?.externalPlasterCoats ?? 1}
+                    onChange={(event) =>
+                      changeFinishes({
+                        externalPlasterCoats:
+                          event.target.value === '2' ? 2 : 1,
+                      })
+                    }
+                  >
+                    <option value={1}>Single coat</option>
+                    <option value={2}>Double coat</option>
+                  </select>
+                </label>
+              </div>
+              {!props.counts.walls?.[stage]?.length && (
+                <p className="boq-guided-warning" role="status">
+                  Wall measurements pending.
+                </p>
+              )}
+            </div>
+          )}
+          {current && category.key === 'plumbing' && (
+            <div className="boq-stage-dimensions">
+              <h4>Plumbing scope for {stage}</h4>
+              <div className="boq-stage-input-grid">
+                <InputNumber
+                  label="Bathrooms"
+                  value={current.bathrooms}
+                  onChange={(value) => changeCount('bathrooms', value)}
+                />
+                <InputNumber
+                  label="Kitchens"
+                  value={current.kitchens}
+                  onChange={(value) => {
+                    if (finishes?.kitchenMeasurements)
+                      updateKitchens(
+                        Array.from(
+                          { length: Math.round(value) },
+                          (_, i) =>
+                            measuredKitchens[i] ?? {
+                              id:
+                                'kitchen-' + Date.now().toString(36) + '-' + i,
+                              name: 'Kitchen ' + (i + 1),
+                              platformFeet: 0,
+                              platformDepthFeet: 0,
+                              wallTileFeet: 0,
+                              wallTileHeightFeet: 0,
+                            },
+                        ),
+                      );
+                    else changeCount('kitchens', value);
+                  }}
+                />
+              </div>
+            </div>
+          )}
+          {current && category.key === 'electrical' && (
+            <div className="boq-stage-dimensions">
+              <h4>Electrical points on {stage}</h4>
+              <div className="boq-stage-input-grid">
+                {(
+                  [
+                    ['lightPoints', 'Light points'],
+                    ['fanPoints', 'Fan points'],
+                    ['socketPoints', 'Sockets'],
+                    ['powerPoints', '16A power points'],
+                  ] as const
+                ).map(([key, label]) => (
+                  <InputNumber
+                    key={key}
+                    label={label}
+                    value={current[key]}
+                    onChange={(value) => changeCount(key, value)}
                   />
                 ))}
               </div>
             </div>
           )}
-        {current && category.key === 'doors' && (
-          <div className="boq-stage-subcard">
-            <h4>Door, window and ventilator sizes from drawing</h4>
-            <div className="boq-stage-input-grid">
-              {(
-                [
-                  ['mainDoors', 'Main doors (external)'],
-                  ['internalDoors', 'Room doors (internal)'],
-                  ['bathroomDoors', 'Bathroom doors (internal)'],
-                  ['poojaDoors', 'Pooja doors (internal)'],
-                  ['ventilators', 'Ventilators (external)'],
-                  ['rollingShutters', 'Rolling shutters (external)'],
-                ] as const
-              ).map(([key, label]) => (
+          {current &&
+            (category.key === 'electrical' || category.key === 'plumbing') && (
+              <div className="boq-stage-dimensions">
+                <h4>Measured materials</h4>
+                <div className="boq-stage-input-grid">
+                  {MEASURED_SERVICE_FIELDS.filter(
+                    (field) => field.group === category.key,
+                  ).map((field) => (
+                    <InputNumber
+                      key={field.material}
+                      label={field.name}
+                      unit={field.inputUnit}
+                      value={
+                        finishes?.serviceMeasurements?.[field.material] ?? 0
+                      }
+                      onChange={(value) =>
+                        changeFinishes({
+                          serviceMeasurements: {
+                            ...finishes?.serviceMeasurements,
+                            [field.material]:
+                              field.inputUnit === 'nos' ||
+                              field.inputUnit === 'lot'
+                                ? Math.round(value)
+                                : value,
+                          },
+                        })
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          {current && category.key === 'doors' && (
+            <div className="boq-stage-subcard">
+              <h4>Door, window and ventilator sizes from drawing</h4>
+              <div className="boq-stage-input-grid">
+                {(
+                  [
+                    ['mainDoors', 'Main doors (external)'],
+                    ['internalDoors', 'Room doors (internal)'],
+                    ['bathroomDoors', 'Bathroom doors (internal)'],
+                    ['poojaDoors', 'Pooja doors (internal)'],
+                    ['ventilators', 'Ventilators (external)'],
+                    ['rollingShutters', 'Rolling shutters (external)'],
+                  ] as const
+                ).map(([key, label]) => (
+                  <InputText
+                    key={key}
+                    label={label}
+                    value={props.counts.doorSizes?.[stage]?.[key] ?? ''}
+                    placeholder="e.g. 2×3×7"
+                    onChange={(value) =>
+                      props.onCountsChange({
+                        ...props.counts,
+                        doorSizes: {
+                          ...props.counts.doorSizes,
+                          [stage]: {
+                            ...props.counts.doorSizes?.[stage],
+                            [key]: value,
+                          },
+                        },
+                      })
+                    }
+                  />
+                ))}
                 <InputText
-                  key={key}
-                  label={label}
-                  value={props.counts.doorSizes?.[stage]?.[key] ?? ''}
-                  placeholder="e.g. 2×3×7"
+                  label="Windows (nos × W × H, ft)"
+                  value={props.counts.windowSizes?.[stage] ?? ''}
+                  placeholder="e.g. 2×4×4, 3×4×5"
                   onChange={(value) =>
                     props.onCountsChange({
                       ...props.counts,
-                      doorSizes: {
-                        ...props.counts.doorSizes,
-                        [stage]: {
-                          ...props.counts.doorSizes?.[stage],
-                          [key]: value,
-                        },
+                      windowSizes: {
+                        ...props.counts.windowSizes,
+                        [stage]: value,
                       },
                     })
                   }
                 />
-              ))}
-              <InputText
-                label="Windows (nos × W × H, ft)"
-                value={props.counts.windowSizes?.[stage] ?? ''}
-                placeholder="e.g. 2×4×4, 3×4×5"
+              </div>
+            </div>
+          )}
+          {current && category.key === 'penthouse' && stage === last && (
+            <div className="boq-stage-subcard">
+              <h4>Penthouse / Headroom</h4>
+              <InputNumber
+                label="Built-up area included in this floor (sq ft)"
+                value={props.floors.at(-1)?.penthouseSqft ?? 0}
+                onChange={(value) =>
+                  props.onFloorChange(
+                    props.floors.map((floor, index) =>
+                      index === props.floors.length - 1
+                        ? {
+                            ...floor,
+                            penthouseSqft: Math.min(
+                              Math.max(0, value),
+                              Math.max(0, floor.areaSqft),
+                            ),
+                          }
+                        : floor,
+                    ),
+                  )
+                }
+              />
+            </div>
+          )}
+          {current && category.key === 'compound' && (
+            <div className="boq-stage-input-grid">
+              <InputNumber
+                label="Compound wall length"
+                unit="ft"
+                value={props.counts.compoundWallFeet}
                 onChange={(value) =>
                   props.onCountsChange({
                     ...props.counts,
-                    windowSizes: {
-                      ...props.counts.windowSizes,
-                      [stage]: value,
-                    },
+                    compoundWallFeet: value,
                   })
                 }
               />
             </div>
-          </div>
-        )}
-        {current && category.key === 'penthouse' && stage === last && (
-          <div className="boq-stage-subcard">
-            <h4>Penthouse / Headroom</h4>
-            <InputNumber
-              label="Built-up area included in this floor (sq ft)"
-              value={props.floors.at(-1)?.penthouseSqft ?? 0}
-              onChange={(value) =>
-                props.onFloorChange(
-                  props.floors.map((floor, index) =>
-                    index === props.floors.length - 1
-                      ? {
-                          ...floor,
-                          penthouseSqft: Math.min(
-                            Math.max(0, value),
-                            Math.max(0, floor.areaSqft),
-                          ),
-                        }
-                      : floor,
-                  ),
-                )
-              }
-            />
-          </div>
-        )}
-        {current && category.key === 'compound' && (
-          <div className="boq-stage-input-grid">
-            <InputNumber
-              label="Compound wall length"
-              unit="ft"
-              value={props.counts.compoundWallFeet}
-              onChange={(value) =>
-                props.onCountsChange({
-                  ...props.counts,
-                  compoundWallFeet: value,
-                })
-              }
-            />
-          </div>
-        )}
-        {foundEntries.some(
-          (entry) => entry.line.kind !== 'measured-geometry',
-        ) &&
-          !isColumns &&
-          !isBeams && (
-            <>
-              <h4>Calculated materials & labour</h4>
-              <div className="boq-stage-output-rows">
-                {foundEntries
-                  .filter((entry) => entry.line.kind !== 'measured-geometry')
-                  .map((entry) => (
-                    <div
-                      className="boq-stage-output"
-                      key={entry.line.id + '-' + entry.outputIndex}
-                    >
-                      <span>
-                        {entry.output.name}
-                        <small>{entry.line.name}</small>
-                      </span>
-                      {isDerivedQuantityReadOnly(
-                        entry.line.kind,
-                        entry.output.name,
-                      ) ? (
-                        <div className="boq-stage-field">
-                          <span>Calculated quantity ({entry.output.unit})</span>
-                          <strong>{number(entry.output.quantity)}</strong>
-                        </div>
-                      ) : (
-                        <InputNumber
-                          label="Quantity"
-                          value={entry.output.quantity}
-                          unit={entry.output.unit}
-                          onChange={(value) =>
-                            props.onUpdateQuantity(
-                              entry.lineIndex,
-                              entry.outputIndex,
-                              value,
-                            )
-                          }
-                        />
+          )}
+          {!isGeometry(category.key) && (
+            <div className="boq-compact-results">
+              <h4>Materials & labour</h4>
+              <div className="boq-volume-scroll">
+                <table
+                  className="boq-volume-table boq-cost-table"
+                  aria-label={category.label + ' calculated costs'}
+                >
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Quantity</th>
+                      <th>Unit</th>
+                      {props.canViewCost && (
+                        <>
+                          <th>Rate</th>
+                          <th>Amount</th>
+                        </>
                       )}
-                      {entry.output.quotedRate !== undefined && (
-                        <small className="boq-stage-limit">
-                          Quote limit:
-                          {money(entry.output.quotedRate)} / {entry.output.unit}
-                        </small>
-                      )}
-                      {entry.line.origin &&
-                      entry.output.material === 'concrete_m20' ? (
-                        props.canViewCost && (
-                          <small className="boq-stage-limit">
-                            M20 RMC rate: {money(props.structuralRmcRate)} / m³
-                          </small>
-                        )
-                      ) : props.isOldLabourOutput?.(entry.output) ? (
-                        <small className="boq-stage-limit">
-                          Included in labour package
-                        </small>
-                      ) : (
-                        props.canViewCost && (
-                          <InputNumber
-                            label="Rate"
-                            value={
-                              entry.output.rate ?? props.rateFor(entry.output)
-                            }
-                            onChange={(value) =>
-                              props.onUpdateRate(
-                                entry.lineIndex,
-                                entry.outputIndex,
-                                value,
-                              )
-                            }
-                          />
-                        )
-                      )}
-                      {!entry.line.origin ? (
-                        <button
-                          type="button"
-                          onClick={() => props.onRemoveManual(entry.lineIndex)}
-                        >
-                          Remove
-                        </button>
-                      ) : (
-                        !isDerivedQuantityReadOnly(
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {foundEntries.map((entry) => {
+                      const view = editorUnit(entry.output.unit, dimensionUnit);
+                      const derived =
+                        isColumns ||
+                        isBeams ||
+                        isDerivedQuantityReadOnly(
                           entry.line.kind,
                           entry.output.name,
-                        ) &&
+                        );
+                      const rate = props.rateFor(entry.output) / view.factor;
+                      const fixedRate =
+                        isColumns ||
+                        isBeams ||
+                        (entry.line.origin &&
+                          entry.output.material === 'concrete_m20') ||
+                        props.isOldLabourOutput?.(entry.output);
+                      const canExclude =
+                        !derived &&
                         [
                           'tiles',
                           'painting',
@@ -2379,34 +2466,145 @@ export function BoqStageBuilder(props: Props) {
                           'plaster',
                           'waterproofing',
                           'doors',
-                        ].includes(category.key) && (
-                          <button
-                            type="button"
-                            onClick={() =>
-                              entry.output.quantity === 0
-                                ? props.onResetQuantity(
+                        ].includes(category.key);
+                      return (
+                        <tr key={entry.line.id + ':' + entry.outputIndex}>
+                          <td>
+                            {entry.output.name}
+                            <small>{entry.line.name}</small>
+                          </td>
+                          <td>
+                            {derived ? (
+                              <strong className="boq-volume-qty">
+                                {number(entry.output.quantity * view.factor)}
+                              </strong>
+                            ) : (
+                              <NumberField
+                                key={view.unit}
+                                label={entry.output.name + ' quantity'}
+                                value={Number(
+                                  (entry.output.quantity * view.factor).toFixed(
+                                    6,
+                                  ),
+                                )}
+                                onChange={(value) =>
+                                  props.onUpdateQuantity(
                                     entry.lineIndex,
                                     entry.outputIndex,
+                                    value / view.factor,
                                   )
-                                : props.onUpdateQuantity(
-                                    entry.lineIndex,
-                                    entry.outputIndex,
-                                    0,
-                                  )
-                            }
-                          >
-                            {entry.output.quantity === 0
-                              ? 'Restore calculated quantity'
-                              : 'Remove from floor'}
-                          </button>
-                        )
-                      )}
-                    </div>
-                  ))}
+                                }
+                              />
+                            )}
+                          </td>
+                          <td>{view.unit}</td>
+                          {props.canViewCost && (
+                            <>
+                              <td>
+                                {fixedRate ? (
+                                  <span className="boq-volume-rate">
+                                    {rate.toLocaleString('en-IN', {
+                                      maximumFractionDigits: 4,
+                                    })}
+                                  </span>
+                                ) : (
+                                  <NumberField
+                                    key={view.unit}
+                                    label={entry.output.name + ' rate'}
+                                    value={Number(rate.toFixed(6))}
+                                    onChange={(value) =>
+                                      props.onUpdateRate(
+                                        entry.lineIndex,
+                                        entry.outputIndex,
+                                        value * view.factor,
+                                      )
+                                    }
+                                  />
+                                )}
+                                {entry.output.quotedRate !== undefined && (
+                                  <small>
+                                    Limit{' '}
+                                    {number(
+                                      entry.output.quotedRate / view.factor,
+                                    )}
+                                  </small>
+                                )}
+                              </td>
+                              <td>
+                                <strong className="boq-volume-amount">
+                                  {money(priced(entry.output))}
+                                </strong>
+                              </td>
+                            </>
+                          )}
+                          <td>
+                            {!entry.line.origin && entry.outputIndex === 0 ? (
+                              <BoqRemove
+                                label={'Remove ' + entry.line.name}
+                                onClick={() =>
+                                  props.onRemoveManual(entry.lineIndex)
+                                }
+                              />
+                            ) : entry.line.origin && canExclude ? (
+                              entry.output.quantity === 0 ? (
+                                <button
+                                  type="button"
+                                  className="boq-stage-outline"
+                                  onClick={() =>
+                                    props.onResetQuantity(
+                                      entry.lineIndex,
+                                      entry.outputIndex,
+                                    )
+                                  }
+                                >
+                                  Restore
+                                </button>
+                              ) : (
+                                <BoqRemove
+                                  label={
+                                    'Remove ' +
+                                    entry.output.name +
+                                    ' from floor'
+                                  }
+                                  onClick={() =>
+                                    props.onUpdateQuantity(
+                                      entry.lineIndex,
+                                      entry.outputIndex,
+                                      0,
+                                    )
+                                  }
+                                />
+                              )
+                            ) : (
+                              '—'
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    {!foundEntries.length && (
+                      <tr>
+                        <td
+                          colSpan={props.canViewCost ? 6 : 4}
+                          className="boq-volume-empty"
+                        >
+                          No measured items
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
-            </>
+              {props.canViewCost && (
+                <div className="boq-volume-total">
+                  <strong>Total {category.label}</strong>
+                  <b>{money(visibleCost(stage, category.key))}</b>
+                </div>
+              )}
+            </div>
           )}
-      </div>
+        </div>
+      </BoqEditorUnits>
     );
   };
 

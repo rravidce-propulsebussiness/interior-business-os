@@ -1,5 +1,11 @@
 'use client';
 
+import {
+  BoqAdvanced,
+  BoqRemove,
+  editorUnit,
+  useBoqEditorUnit,
+} from './boq-compact-editor';
 import { NumberField } from './boq-number-field';
 import type {
   DesignSlabPanel,
@@ -20,20 +26,23 @@ function QuantityField({
   value: number;
   onChange: (value: number) => void;
 }) {
+  const selected = useBoqEditorUnit();
+  const display = editorUnit(unit, selected);
   return (
     <label className="boq-stage-field">
       <span>
         {label}
-        {unit ? ' (' + unit + ')' : ''}
+        {display.unit ? ' (' + display.unit + ')' : ''}
       </span>
       {/* Feet boxes read drawing sizes such as 5'0" (a number box would
           read 5'0" as 50). */}
       <NumberField
-        label={label + (unit ? ' (' + unit + ')' : '')}
-        value={value}
+        key={display.unit}
+        label={label + (display.unit ? ' (' + display.unit + ')' : '')}
+        value={Number((value * display.factor).toFixed(6))}
         min={0}
-        feet={unit === 'ft'}
-        onChange={onChange}
+        feet={display.unit === 'ft'}
+        onChange={(n) => onChange(n / display.factor)}
       />
     </label>
   );
@@ -55,12 +64,38 @@ export function BoqSlabScheduleEditor({
     onChange(
       panels.map((panel, i) => (i === index ? { ...panel, ...patch } : panel)),
     );
+  const selectedUnit = useBoqEditorUnit();
+  const areaDisplay = editorUnit('sqft', selectedUnit);
+  const volumeDisplay = editorUnit('m³', selectedUnit);
   const total = panels.reduce(
     (sum, panel) => sum + panel.count * panel.lengthFeet * panel.widthFeet,
     0,
   );
   return (
-    <div className="boq-structural-schedule">
+    <div className="boq-structural-schedule boq-compact-schedule">
+      <div className="boq-compact-actions">
+        <button
+          type="button"
+          className="boq-volume-add"
+          disabled={panels.length >= 40}
+          onClick={() =>
+            onChange([
+              ...panels,
+              {
+                label: 'S' + (panels.length + 1),
+                floor,
+                count: 1,
+                lengthFeet: 0,
+                widthFeet: 0,
+                thicknessIn: 5,
+                reinforcement: [],
+              },
+            ])
+          }
+        >
+          + Add slab panel type
+        </button>
+      </div>
       {panels.map((panel, i) => {
         const updateSteel = (reinforcement: DesignSlabPanel['reinforcement']) =>
           change(i, { reinforcement });
@@ -68,12 +103,10 @@ export function BoqSlabScheduleEditor({
           <section className="boq-stage-subcard" key={i}>
             <div className="boq-stage-subhead">
               <strong>{panel.label || 'Slab ' + (i + 1)}</strong>
-              <button
-                type="button"
+              <BoqRemove
+                label={`Remove slab panel type ${i + 1}`}
                 onClick={() => onChange(panels.filter((_, j) => i !== j))}
-              >
-                Remove
-              </button>
+              />
             </div>
             <div className="boq-stage-input-grid">
               <label className="boq-stage-field">
@@ -108,130 +141,135 @@ export function BoqSlabScheduleEditor({
                 onChange={(thicknessIn) => change(i, { thicknessIn })}
               />
             </div>
-            <div className="boq-structural-rebar-heading">
-              Reinforcement layers from drawing
-            </div>
-            {panel.reinforcement.map((bar, j) => (
-              <div className="boq-structural-rebar-row" key={j}>
-                <label>
-                  Layer
-                  <select
-                    value={bar.layer}
-                    onChange={(event) =>
+            <BoqAdvanced label="Reinforcement layers from drawing">
+              {panel.reinforcement.map((bar, j) => (
+                <div className="boq-structural-rebar-row" key={j}>
+                  <label>
+                    Layer
+                    <select
+                      value={bar.layer}
+                      onChange={(event) =>
+                        updateSteel(
+                          panel.reinforcement.map((row, k) =>
+                            j === k
+                              ? {
+                                  ...row,
+                                  layer:
+                                    event.target.value === 'top'
+                                      ? 'top'
+                                      : 'bottom',
+                                }
+                              : row,
+                          ),
+                        )
+                      }
+                    >
+                      <option value="bottom">Bottom</option>
+                      <option value="top">Top</option>
+                    </select>
+                  </label>
+                  <label>
+                    Runs
+                    <select
+                      value={bar.direction}
+                      onChange={(event) =>
+                        updateSteel(
+                          panel.reinforcement.map((row, k) =>
+                            j === k
+                              ? {
+                                  ...row,
+                                  direction:
+                                    event.target.value === 'width'
+                                      ? 'width'
+                                      : 'length',
+                                }
+                              : row,
+                          ),
+                        )
+                      }
+                    >
+                      <option value="length">Along length</option>
+                      <option value="width">Along width</option>
+                    </select>
+                  </label>
+                  <label>
+                    Diameter (mm)
+                    <select
+                      value={bar.dia}
+                      onChange={(event) =>
+                        updateSteel(
+                          panel.reinforcement.map((row, k) =>
+                            j === k
+                              ? { ...row, dia: Number(event.target.value) }
+                              : row,
+                          ),
+                        )
+                      }
+                    >
+                      <option value="0">Select</option>
+                      {DIAMETERS.map((dia) => (
+                        <option key={dia} value={dia}>
+                          {dia} mm
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <QuantityField
+                    label="Spacing"
+                    unit="in"
+                    value={bar.spacingIn}
+                    onChange={(spacingIn) =>
                       updateSteel(
                         panel.reinforcement.map((row, k) =>
-                          j === k
-                            ? {
-                                ...row,
-                                layer:
-                                  event.target.value === 'top'
-                                    ? 'top'
-                                    : 'bottom',
-                              }
-                            : row,
+                          j === k ? { ...row, spacingIn } : row,
                         ),
                       )
                     }
-                  >
-                    <option value="bottom">Bottom</option>
-                    <option value="top">Top</option>
-                  </select>
-                </label>
-                <label>
-                  Runs
-                  <select
-                    value={bar.direction}
-                    onChange={(event) =>
-                      updateSteel(
-                        panel.reinforcement.map((row, k) =>
-                          j === k
-                            ? {
-                                ...row,
-                                direction:
-                                  event.target.value === 'width'
-                                    ? 'width'
-                                    : 'length',
-                              }
-                            : row,
-                        ),
-                      )
+                  />
+                  <button
+                    type="button"
+                    aria-label={'Remove slab reinforcement row ' + (j + 1)}
+                    onClick={() =>
+                      updateSteel(panel.reinforcement.filter((_, k) => j !== k))
                     }
                   >
-                    <option value="length">Along length</option>
-                    <option value="width">Along width</option>
-                  </select>
-                </label>
-                <label>
-                  Diameter (mm)
-                  <select
-                    value={bar.dia}
-                    onChange={(event) =>
-                      updateSteel(
-                        panel.reinforcement.map((row, k) =>
-                          j === k
-                            ? { ...row, dia: Number(event.target.value) }
-                            : row,
-                        ),
-                      )
-                    }
-                  >
-                    <option value="0">Select</option>
-                    {DIAMETERS.map((dia) => (
-                      <option key={dia} value={dia}>
-                        {dia} mm
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <QuantityField
-                  label="Spacing"
-                  unit="in"
-                  value={bar.spacingIn}
-                  onChange={(spacingIn) =>
-                    updateSteel(
-                      panel.reinforcement.map((row, k) =>
-                        j === k ? { ...row, spacingIn } : row,
-                      ),
-                    )
-                  }
-                />
-                <button
-                  type="button"
-                  aria-label={'Remove slab reinforcement row ' + (j + 1)}
-                  onClick={() =>
-                    updateSteel(panel.reinforcement.filter((_, k) => j !== k))
-                  }
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              className="boq-stage-outline"
-              disabled={panel.reinforcement.length >= 16}
-              onClick={() =>
-                updateSteel([
-                  ...panel.reinforcement,
-                  {
-                    layer: 'bottom',
-                    direction: 'length',
-                    dia: 0,
-                    spacingIn: 0,
-                  },
-                ])
-              }
-            >
-              + Add rod layer
-            </button>
-            {!panel.reinforcement.length && (
-              <small className="boq-structural-warning">
-                No rods entered — steel is not assumed.
-              </small>
-            )}
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="boq-stage-outline"
+                disabled={panel.reinforcement.length >= 16}
+                onClick={() =>
+                  updateSteel([
+                    ...panel.reinforcement,
+                    {
+                      layer: 'bottom',
+                      direction: 'length',
+                      dia: 0,
+                      spacingIn: 0,
+                    },
+                  ])
+                }
+              >
+                + Add rod layer
+              </button>
+              {!panel.reinforcement.length && (
+                <small className="boq-structural-warning">
+                  No rods entered — steel is not assumed.
+                </small>
+              )}
+            </BoqAdvanced>
             <div className="boq-stage-volume">
               <span>
-                {close(panel.count * panel.lengthFeet * panel.widthFeet)} sq ft
+                {close(
+                  panel.count *
+                    panel.lengthFeet *
+                    panel.widthFeet *
+                    areaDisplay.factor,
+                )}{' '}
+                {areaDisplay.unit}
               </span>
               <strong>
                 {close(
@@ -240,9 +278,10 @@ export function BoqSlabScheduleEditor({
                     panel.widthFeet *
                     panel.thicknessIn) /
                     12) *
-                    0.028316846592,
+                    0.028316846592 *
+                    volumeDisplay.factor,
                 )}{' '}
-                m³
+                {volumeDisplay.unit}
               </strong>
             </div>
           </section>
@@ -250,31 +289,10 @@ export function BoqSlabScheduleEditor({
       })}
       {panels.length > 0 && (
         <small className="boq-structural-note">
-          {close(total)} sq ft of slab panels on {floor}. These replace the
-          floor-wide slab estimate; panels must not overlap.
+          {close(total * areaDisplay.factor)} {areaDisplay.unit} · {floor} ·
+          Non-overlapping panels
         </small>
       )}
-      <button
-        type="button"
-        className="boq-stage-outline"
-        disabled={panels.length >= 40}
-        onClick={() =>
-          onChange([
-            ...panels,
-            {
-              label: 'S' + (panels.length + 1),
-              floor,
-              count: 1,
-              lengthFeet: 0,
-              widthFeet: 0,
-              thicknessIn: 5,
-              reinforcement: [],
-            },
-          ])
-        }
-      >
-        + Add slab panel type
-      </button>
     </div>
   );
 }
@@ -293,7 +311,32 @@ export function BoqStaircaseScheduleEditor({
       stairs.map((stair, j) => (i === j ? { ...stair, ...patch } : stair)),
     );
   return (
-    <div className="boq-structural-schedule">
+    <div className="boq-structural-schedule boq-compact-schedule">
+      <div className="boq-compact-actions">
+        <button
+          type="button"
+          className="boq-volume-add"
+          disabled={stairs.length >= 30}
+          onClick={() =>
+            onChange([
+              ...stairs,
+              {
+                label: 'ST' + (stairs.length + 1),
+                floor,
+                count: 1,
+                widthFeet: 0,
+                riserIn: 6,
+                treadIn: 10,
+                waistIn: 6,
+                landingFeet: 0,
+                reinforcement: [],
+              },
+            ])
+          }
+        >
+          + Add staircase type
+        </button>
+      </div>
       {stairs.map((stair, i) => {
         const updateSteel = (reinforcement: DesignStairType['reinforcement']) =>
           change(i, { reinforcement });
@@ -301,12 +344,10 @@ export function BoqStaircaseScheduleEditor({
           <section className="boq-stage-subcard" key={i}>
             <div className="boq-stage-subhead">
               <strong>{stair.label || 'Stair ' + (i + 1)}</strong>
-              <button
-                type="button"
+              <BoqRemove
+                label={`Remove staircase type ${i + 1}`}
                 onClick={() => onChange(stairs.filter((_, j) => i !== j))}
-              >
-                Remove
-              </button>
+              />
             </div>
             <div className="boq-stage-input-grid">
               <label className="boq-stage-field">
@@ -340,124 +381,100 @@ export function BoqStaircaseScheduleEditor({
                 />
               ))}
             </div>
-            <div className="boq-structural-rebar-heading">
-              Staircase reinforcement
-            </div>
-            {stair.reinforcement.map((bar, j) => (
-              <div className="boq-structural-rebar-row" key={j}>
-                <label>
-                  Bars
-                  <select
-                    value={bar.role}
-                    onChange={(event) =>
+            <BoqAdvanced label="Staircase reinforcement">
+              {stair.reinforcement.map((bar, j) => (
+                <div className="boq-structural-rebar-row" key={j}>
+                  <label>
+                    Bars
+                    <select
+                      value={bar.role}
+                      onChange={(event) =>
+                        updateSteel(
+                          stair.reinforcement.map((r, k) =>
+                            j === k
+                              ? {
+                                  ...r,
+                                  role:
+                                    event.target.value === 'distribution'
+                                      ? 'distribution'
+                                      : 'main',
+                                }
+                              : r,
+                          ),
+                        )
+                      }
+                    >
+                      <option value="main">Main</option>
+                      <option value="distribution">Distribution</option>
+                    </select>
+                  </label>
+                  <label>
+                    Diameter
+                    <select
+                      value={bar.dia}
+                      onChange={(event) =>
+                        updateSteel(
+                          stair.reinforcement.map((r, k) =>
+                            j === k
+                              ? { ...r, dia: Number(event.target.value) }
+                              : r,
+                          ),
+                        )
+                      }
+                    >
+                      <option value="0">Select</option>
+                      {DIAMETERS.map((dia) => (
+                        <option key={dia} value={dia}>
+                          {dia} mm
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <QuantityField
+                    label="Spacing"
+                    unit="in"
+                    value={bar.spacingIn}
+                    onChange={(spacingIn) =>
                       updateSteel(
                         stair.reinforcement.map((r, k) =>
-                          j === k
-                            ? {
-                                ...r,
-                                role:
-                                  event.target.value === 'distribution'
-                                    ? 'distribution'
-                                    : 'main',
-                              }
-                            : r,
+                          j === k ? { ...r, spacingIn } : r,
                         ),
                       )
                     }
-                  >
-                    <option value="main">Main</option>
-                    <option value="distribution">Distribution</option>
-                  </select>
-                </label>
-                <label>
-                  Diameter
-                  <select
-                    value={bar.dia}
-                    onChange={(event) =>
-                      updateSteel(
-                        stair.reinforcement.map((r, k) =>
-                          j === k
-                            ? { ...r, dia: Number(event.target.value) }
-                            : r,
-                        ),
-                      )
+                  />
+                  <button
+                    type="button"
+                    aria-label={'Remove stair rod row ' + (j + 1)}
+                    onClick={() =>
+                      updateSteel(stair.reinforcement.filter((_, k) => k !== j))
                     }
                   >
-                    <option value="0">Select</option>
-                    {DIAMETERS.map((dia) => (
-                      <option key={dia} value={dia}>
-                        {dia} mm
-                      </option>
-                    ))}
-                  </select>
-                </label>
-                <QuantityField
-                  label="Spacing"
-                  unit="in"
-                  value={bar.spacingIn}
-                  onChange={(spacingIn) =>
-                    updateSteel(
-                      stair.reinforcement.map((r, k) =>
-                        j === k ? { ...r, spacingIn } : r,
-                      ),
-                    )
-                  }
-                />
-                <button
-                  type="button"
-                  aria-label={'Remove stair rod row ' + (j + 1)}
-                  onClick={() =>
-                    updateSteel(stair.reinforcement.filter((_, k) => k !== j))
-                  }
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              className="boq-stage-outline"
-              disabled={stair.reinforcement.length >= 16}
-              onClick={() =>
-                updateSteel([
-                  ...stair.reinforcement,
-                  { role: 'main', dia: 0, spacingIn: 0 },
-                ])
-              }
-            >
-              + Add stair rod set
-            </button>
-            {!stair.reinforcement.length && (
-              <small className="boq-structural-warning">
-                No steel assumed until rod sizes and spacings are entered.
-              </small>
-            )}
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className="boq-stage-outline"
+                disabled={stair.reinforcement.length >= 16}
+                onClick={() =>
+                  updateSteel([
+                    ...stair.reinforcement,
+                    { role: 'main', dia: 0, spacingIn: 0 },
+                  ])
+                }
+              >
+                + Add stair rod set
+              </button>
+              {!stair.reinforcement.length && (
+                <small className="boq-structural-warning">
+                  No steel assumed until rod sizes and spacings are entered.
+                </small>
+              )}
+            </BoqAdvanced>
           </section>
         );
       })}
-      <button
-        type="button"
-        className="boq-stage-outline"
-        disabled={stairs.length >= 30}
-        onClick={() =>
-          onChange([
-            ...stairs,
-            {
-              label: 'ST' + (stairs.length + 1),
-              floor,
-              count: 1,
-              widthFeet: 0,
-              riserIn: 6,
-              treadIn: 10,
-              waistIn: 6,
-              landingFeet: 0,
-              reinforcement: [],
-            },
-          ])
-        }
-      >
-        + Add staircase type
-      </button>
     </div>
   );
 }
