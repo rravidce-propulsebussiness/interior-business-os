@@ -1,6 +1,6 @@
 'use client';
 
-import { BoqRemove, editorUnit, useBoqEditorUnit } from './boq-compact-editor';
+import { BoqAdvanced, BoqRemove, editorUnit, useBoqEditorUnit } from './boq-compact-editor';
 import { NumberField } from './boq-number-field';
 import {
   FOOTING_TYPES,
@@ -235,9 +235,7 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
                 </div>
               </>
             )}
-            <div className="boq-footing-section-label">
-              Footing reinforcement (as drawn)
-            </div>
+            <BoqAdvanced label="Footing reinforcement (as drawn)">
             {!Array.isArray(f.reinforcement) && (
               <div className="boq-stage-input-grid">
                 <label className="boq-stage-field">
@@ -441,6 +439,7 @@ export function BoqFootingEditor({ footings, columnLabels, onChange }: Props) {
                 Customize mesh steel by diameter and direction
               </button>
             )}
+            </BoqAdvanced>
             <label className="boq-footing-pedestal-toggle">
               <input
                 type="checkbox"
