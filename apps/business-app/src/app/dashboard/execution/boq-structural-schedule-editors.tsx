@@ -1,5 +1,7 @@
 'use client';
 
+import type { ReactNode } from 'react';
+
 import {
   BoqAdvanced,
   BoqRemove,
@@ -55,7 +57,9 @@ export function BoqSlabScheduleEditor({
   floor,
   panels,
   onChange,
+  unitControl,
 }: {
+  unitControl?: ReactNode;
   floor: string;
   panels: readonly DesignSlabPanel[];
   onChange: (panels: DesignSlabPanel[]) => void;
@@ -73,7 +77,10 @@ export function BoqSlabScheduleEditor({
   );
   return (
     <div className="boq-structural-schedule boq-compact-schedule">
-      <div className="boq-compact-actions">
+      <div
+        className={unitControl ? 'boq-volume-toolbar' : 'boq-compact-actions'}
+      >
+        {unitControl}
         <button
           type="button"
           className="boq-volume-add"
@@ -301,7 +308,9 @@ export function BoqStaircaseScheduleEditor({
   floor,
   stairs,
   onChange,
+  unitControl,
 }: {
+  unitControl?: ReactNode;
   floor: string;
   stairs: readonly DesignStairType[];
   onChange: (stairs: DesignStairType[]) => void;
@@ -312,7 +321,10 @@ export function BoqStaircaseScheduleEditor({
     );
   return (
     <div className="boq-structural-schedule boq-compact-schedule">
-      <div className="boq-compact-actions">
+      <div
+        className={unitControl ? 'boq-volume-toolbar' : 'boq-compact-actions'}
+      >
+        {unitControl}
         <button
           type="button"
           className="boq-volume-add"

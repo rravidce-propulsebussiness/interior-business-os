@@ -934,27 +934,34 @@ export function BoqStageBuilder(props: Props) {
     const isColumns = category.key === 'columns';
     const isFootings = category.key === 'footings';
     const isBeams = category.key === 'beams';
+    const unitControl = (
+      <select
+        className="boq-editor-unit"
+        aria-label="Dimension unit"
+        value={dimensionUnit}
+        onChange={(event) =>
+          setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')
+        }
+      >
+        <option value="ft">Feet (ft)</option>
+        <option value="m">Metres (m)</option>
+      </select>
+    );
+    const hasScheduleToolbar =
+      isFootings ||
+      isColumns ||
+      isBeams ||
+      ['plinth', 'slab', 'staircase'].includes(category.key) ||
+      (category.key === 'brickwork' && !!floor) ||
+      (category.key === 'tiles' && !!current);
     return (
       <BoqEditorUnits unit={dimensionUnit}>
         <div
           className="boq-stage-edit boq-compact-editor"
           key={stage + ':' + category.key}
         >
-          {!isGeometry(category.key) && (
-            <div className="boq-volume-toolbar">
-              <label className="boq-stage-field boq-stage-unit-switch">
-                <span>Input dimension unit</span>
-                <select
-                  value={dimensionUnit}
-                  onChange={(event) =>
-                    setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')
-                  }
-                >
-                  <option value="ft">Feet (ft)</option>
-                  <option value="m">Metres (m)</option>
-                </select>
-              </label>
-            </div>
+          {!isGeometry(category.key) && !hasScheduleToolbar && (
+            <div className="boq-volume-toolbar">{unitControl}</div>
           )}
           <div className="boq-stage-edit-head">
             <div>
@@ -991,18 +998,7 @@ export function BoqStageBuilder(props: Props) {
           {isGeometry(category.key) && (
             <div className="boq-stage-dimensions boq-volume-editor">
               <div className="boq-volume-toolbar">
-                <label className="boq-stage-field boq-stage-unit-switch">
-                  <span>Input dimension unit</span>
-                  <select
-                    value={dimensionUnit}
-                    onChange={(event) =>
-                      setDimensionUnit(event.target.value === 'm' ? 'm' : 'ft')
-                    }
-                  >
-                    <option value="ft">Feet (ft)</option>
-                    <option value="m">Metres (m)</option>
-                  </select>
-                </label>
+                {unitControl}
                 <button
                   type="button"
                   className="boq-volume-add"
@@ -1265,6 +1261,42 @@ export function BoqStageBuilder(props: Props) {
           )}
           {category.key === 'brickwork' && floor && (
             <div className="boq-stage-dimensions">
+              <div className="boq-volume-toolbar">
+                {unitControl}
+                <button
+                  className="boq-volume-add"
+                  type="button"
+                  disabled={
+                    !(
+                      wallDraft.lengthFeet > 0 &&
+                      wallDraft.heightFeet > 0 &&
+                      wallDraft.count > 0
+                    )
+                  }
+                  onClick={() => {
+                    updateWalls([
+                      ...walls,
+                      {
+                        ...wallDraft,
+                        id: 'wall-' + Date.now().toString(36),
+                        name:
+                          wallDraft.name.trim() || 'Wall ' + (walls.length + 1),
+                      },
+                    ]);
+                    setWallDraft({
+                      id: 'new',
+                      name: '',
+                      location: 'external',
+                      count: 1,
+                      lengthFeet: 0,
+                      heightFeet: 0,
+                      thicknessIn: 9,
+                    });
+                  }}
+                >
+                  + Add Item
+                </button>
+              </div>
               {walls.some((wall) => wall.location === 'external') &&
                 props.floors.some(
                   (floor) => floor.name !== stage && !isPenthouseFloor(floor),
@@ -1289,40 +1321,6 @@ export function BoqStageBuilder(props: Props) {
               <div className="boq-stage-subcard">
                 <div className="boq-stage-subhead">
                   <strong>New wall</strong>
-                  <button
-                    className="boq-volume-add"
-                    type="button"
-                    disabled={
-                      !(
-                        wallDraft.lengthFeet > 0 &&
-                        wallDraft.heightFeet > 0 &&
-                        wallDraft.count > 0
-                      )
-                    }
-                    onClick={() => {
-                      updateWalls([
-                        ...walls,
-                        {
-                          ...wallDraft,
-                          id: 'wall-' + Date.now().toString(36),
-                          name:
-                            wallDraft.name.trim() ||
-                            'Wall ' + (walls.length + 1),
-                        },
-                      ]);
-                      setWallDraft({
-                        id: 'new',
-                        name: '',
-                        location: 'external',
-                        count: 1,
-                        lengthFeet: 0,
-                        heightFeet: 0,
-                        thicknessIn: 9,
-                      });
-                    }}
-                  >
-                    + Add Item
-                  </button>
                 </div>
                 <div className="boq-stage-input-grid">
                   <InputText
@@ -1526,6 +1524,7 @@ export function BoqStageBuilder(props: Props) {
           )}
           {isFootings && (
             <BoqFootingEditor
+              unitControl={unitControl}
               footings={drawing.footings ?? []}
               columnLabels={drawing.columns.map((col) => col.label)}
               onChange={setFootings}
@@ -1533,7 +1532,8 @@ export function BoqStageBuilder(props: Props) {
           )}
           {isColumns && (
             <>
-              <div className="boq-compact-actions">
+              <div className="boq-volume-toolbar">
+                {unitControl}
                 <button
                   type="button"
                   className="boq-volume-add"
@@ -1620,7 +1620,8 @@ export function BoqStageBuilder(props: Props) {
           )}
           {isBeams && (
             <>
-              <div className="boq-compact-actions">
+              <div className="boq-volume-toolbar">
+                {unitControl}
                 <button
                   type="button"
                   className="boq-volume-add"
@@ -1751,7 +1752,8 @@ export function BoqStageBuilder(props: Props) {
           )}
           {category.key === 'plinth' && (
             <div className="boq-plinth-schedule">
-              <div className="boq-compact-actions">
+              <div className="boq-volume-toolbar">
+                {unitControl}
                 <button
                   type="button"
                   className="boq-volume-add"
@@ -1871,6 +1873,7 @@ export function BoqStageBuilder(props: Props) {
           {category.key === 'slab' && (
             <>
               <BoqSlabScheduleEditor
+                unitControl={unitControl}
                 floor={stage}
                 panels={(drawing.slabPanels ?? []).filter(
                   (panel) => panel.floor === stage,
@@ -1976,6 +1979,7 @@ export function BoqStageBuilder(props: Props) {
           {category.key === 'staircase' && (
             <>
               <BoqStaircaseScheduleEditor
+                unitControl={unitControl}
                 floor={stage}
                 stairs={(drawing.staircases ?? []).filter(
                   (stair) => stair.floor === stage,
@@ -2021,7 +2025,8 @@ export function BoqStageBuilder(props: Props) {
           {current && category.key === 'tiles' && (
             <div className="boq-stage-dimensions">
               <h4>Flooring & kitchens</h4>
-              <div className="boq-compact-actions">
+              <div className="boq-volume-toolbar">
+                {unitControl}
                 <button
                   type="button"
                   className="boq-volume-add"
