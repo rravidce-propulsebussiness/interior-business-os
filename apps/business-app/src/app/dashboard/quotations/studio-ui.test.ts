@@ -782,6 +782,14 @@ describe('split-floor construction area editing and resilient PDF routes', () =>
 describe('save resiliency and floor auto-inheritance', () => {
   const builder = file('./premium-sft-builder.tsx');
   const action = file('./construction-actions.ts');
+  it('captures explicit floor-to-floor heights in the saved quotation rows', () => {
+    expect(builder).toContain('Floor Height Specifications');
+    expect(builder).toContain('floor-to-floor height (ft)');
+    expect(builder).toContain('updateRow(index,{heightFeet:event.target.value})');
+    expect(builder).toContain('missingHeight');
+    expect(builder).toContain('input:savePayload');
+  });
+
 
   it('accepts Save taps and reports invalid row fields rather than disabling the button', () => {
     expect(builder).toContain('disabled={pending||(saved&&!unsaved)}');
