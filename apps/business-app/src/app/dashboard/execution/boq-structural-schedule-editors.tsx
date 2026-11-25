@@ -359,9 +359,7 @@ export function BoqStaircaseScheduleEditor({
                 />
               ))}
             </div>
-            <div className="boq-structural-rebar-heading">
-              Staircase reinforcement
-            </div>
+            <BoqAdvanced label="Staircase reinforcement">
             {stair.reinforcement.map((bar, j) => (
               <div className="boq-structural-rebar-row" key={j}>
                 <label>
@@ -451,6 +449,7 @@ export function BoqStaircaseScheduleEditor({
                 No steel assumed until rod sizes and spacings are entered.
               </small>
             )}
+          </BoqAdvanced>
           </section>
         );
       })}
