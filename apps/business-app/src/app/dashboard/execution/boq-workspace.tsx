@@ -71,8 +71,6 @@ import {
   isAutoPlasterQuantity,
 } from './boq-plaster-guards';
 import {
-  BOQ_SCOPE_WORKS,
-  summarizeBoqScope,
   type BoqScopeReviews,
 } from './boq-scope-coverage';
 
@@ -287,7 +285,6 @@ export function BoqWorkspace({
   const [scopeReviews, setScopeReviews] = useState<BoqScopeReviews>(
     initialDocument?.document?.scopeReviews ?? {},
   );
-  const [costingTab, setCostingTab] = useState<'builder' | 'labour'>('builder');
   const [rmcEnabled, setRmcEnabled] = useState(() => {
     const saved =
       initialDocument?.document?.generator?.settings?.readyMixConcrete;
@@ -458,7 +455,6 @@ export function BoqWorkspace({
       sum + (isLabourOutput(output) ? output.quantity * output.rate : 0),
     0,
   );
-  const scopeSummary = summarizeBoqScope(lines, scopeReviews);
   const unpricedOutputs = allOutputs.filter(
     (output) => !isOldLabour(output) && isBoqCostUnpriced(output, priceOf),
   );
@@ -640,7 +636,6 @@ export function BoqWorkspace({
     setLabour({ ...DEFAULT_LABOUR });
     setProjectCosts({ ...DEFAULT_BOQ_PROJECT_COSTS });
     setScopeReviews({});
-    setCostingTab('builder');
     setRmcEnabled(settings.readyMixConcrete !== 0);
     setRmcRateOverride(null);
     setGenerator(null);
@@ -677,7 +672,6 @@ export function BoqWorkspace({
     setLabour(document.document?.labour ?? null);
     setProjectCosts(normalizeBoqProjectCosts(document.document?.projectCosts));
     setScopeReviews(document.document?.scopeReviews ?? {});
-    setCostingTab('builder');
     setRmcEnabled(
       (document.document?.generator?.settings?.readyMixConcrete ??
         settings.readyMixConcrete) !== 0,
@@ -1682,50 +1676,6 @@ export function BoqWorkspace({
     );
   }
 
-  function addRequiredScopeItem(code: string) {
-    if (!(active ? canEdit : canCreate)) return;
-    const work = BOQ_SCOPE_WORKS.find((item) => item.code === code);
-    if (!work || lines.some((line) => line.inputs.scopeCode === code)) return;
-    const floor =
-      work.stage === 'top'
-        ? floorsForGeneration.at(-1)
-        : floorsForGeneration[0];
-    const stage = work.stage === 'foundation' ? 'Foundation' : floor?.name;
-    if (!stage) return;
-    // The row begins UNPRICED, not with an invented quantity or supplier rate.
-    // It appears in the single stage Miscellaneous editor for accurate entry.
-    const item: SavedLine = {
-      id: uid(),
-      name: work.name,
-      section: stage,
-      kind: 'manual',
-      unit: work.unit,
-      inputs: {
-        stageCategory: 'miscellaneous',
-        scopeCode: work.code,
-        quantity: 0,
-      },
-      outputs: [
-        {
-          name: work.name,
-          quantity: 0,
-          unit: work.unit,
-          rate: 0,
-        },
-      ],
-      notes: 'Required scope: measure quantity and confirm the unit cost.',
-    };
-    setScopeReviews((previous) => {
-      const next = { ...previous };
-      delete next[code];
-      return next;
-    });
-    setLines((previous) => [...previous, item]);
-    setMessage(
-      `${work.name} added to ${stage} Miscellaneous. Enter its measured quantity and unit rate.`,
-    );
-  }
-
   function updateMiscellaneous(
     index: number,
     changes: { name: string; quantity: number; unit: string; rate: number },
@@ -1870,82 +1820,6 @@ export function BoqWorkspace({
       />
     );
   }
-  const scopeReviewed =
-    scopeSummary.priced + scopeSummary.covered + scopeSummary.excluded;
-  const scopePanel = (
-    <details className="boq-scope-review">
-      <summary>
-        Required construction work — {scopeReviewed}/{scopeSummary.total}{' '}
-        reviewed
-        {scopeSummary.pending + scopeSummary.unpriced > 0
-          ? ' · Estimate provisional'
-          : ' · Scope checked'}
-      </summary>
-      <div className="boq-scope-review-items">
-        {scopeSummary.items.map((item) => (
-          <div className="boq-scope-review-item" key={item.code}>
-            <span className="boq-scope-review-name">
-              <strong>{item.name}</strong>
-              <small>
-                {item.stage === 'foundation'
-                  ? 'Foundation'
-                  : item.stage === 'top'
-                    ? 'Terrace / top floor'
-                    : 'Ground / site work'}{' '}
-                · {item.unit}
-              </small>
-            </span>
-            {item.status === 'priced' || item.status === 'unpriced' ? (
-              <span className="boq-scope-review-status">
-                {item.status === 'priced'
-                  ? 'Measured and priced'
-                  : 'Enter quantity and rate in Miscellaneous'}
-              </span>
-            ) : (
-              <select
-                aria-label={`Scope decision for ${item.name}`}
-                value={scopeReviews[item.code] ?? 'pending'}
-                disabled={screen !== 'edit' || !canEdit}
-                onChange={(event) => {
-                  const choice = event.target.value;
-                  setScopeReviews((previous) => {
-                    const next = { ...previous };
-                    if (choice === 'covered' || choice === 'excluded')
-                      next[item.code] = choice;
-                    else delete next[item.code];
-                    return next;
-                  });
-                }}
-              >
-                <option value="pending">Needs review</option>
-                <option value="covered">
-                  Already included in other BOQ work
-                </option>
-                <option value="excluded">Not required / excluded</option>
-              </select>
-            )}
-            {screen === 'edit' &&
-              canEdit &&
-              item.status !== 'priced' &&
-              item.status !== 'unpriced' && (
-                <button
-                  type="button"
-                  className="boq-stage-outline"
-                  onClick={() => addRequiredScopeItem(item.code)}
-                >
-                  Add measured cost
-                </button>
-              )}
-          </div>
-        ))}
-      </div>
-      {scopeSummary.pending + scopeSummary.unpriced > 0 && (
-        <p className="boq-scope-review-warning">
-          {scopeSummary.pending} pending · {scopeSummary.unpriced} unpriced
-        </p>
-      )}
-    </details>
-  );
   if (screen === 'view') {
     return (
       <main className="erp-page manual-boq boq-readonly boq-view-detail">
@@ -2016,8 +1890,7 @@ export function BoqWorkspace({
                   </div>
                   <div>
                     <span>
-                      {scopeSummary.complete &&
-                      !unpricedOutputs.length &&
+                      {                      !unpricedOutputs.length &&
                       (generator?.engineVersion ?? 0) >= BOQ_ENGINE_VERSION &&
                       !generator?.warnings.some((warning) =>
                         warning.includes('Measurement pending'),
@@ -2057,7 +1930,7 @@ export function BoqWorkspace({
                     use this subtotal as the final project cost.
                   </p>
                 )}
-                {scopePanel}
+                
                 {labour && canViewCost && (
                   <section className="boq-labour-saved">
                     <h3>Labour Costing Summary</h3>
@@ -2348,8 +2221,7 @@ export function BoqWorkspace({
         </div>
         <div>
           <span>
-            {scopeSummary.complete &&
-            !unpricedOutputs.length &&
+            {            !unpricedOutputs.length &&
             (generator?.engineVersion ?? 0) >= BOQ_ENGINE_VERSION &&
             !generator?.warnings.some((warning) =>
               warning.includes('Measurement pending'),
@@ -2402,8 +2274,8 @@ export function BoqWorkspace({
           {message}
         </p>
       )}
-      {scopePanel}
-      {active && canEdit && (
+      
+      {active && canEdit && autoSaveState === 'error' && (
         <div
           className="boq-autosave-status"
           data-state={autoSaveState}
@@ -2442,95 +2314,6 @@ export function BoqWorkspace({
               </button>
             )}
           </div>
-          <div
-            className="boq-labour-tabs"
-            role="tablist"
-            aria-label="BOQ costing view"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={costingTab === 'builder'}
-              className={costingTab === 'builder' ? 'active' : ''}
-              onClick={() => setCostingTab('builder')}
-            >
-              ▤ BOQ Builder
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={costingTab === 'labour'}
-              className={costingTab === 'labour' ? 'active' : ''}
-              onClick={() => setCostingTab('labour')}
-            >
-              ♧ Labour Costing
-            </button>
-          </div>
-          {costingTab === 'labour' && !labour && (
-            <div className="boq-labour-enable">
-              <strong>Enable the new Labour Costing model?</strong>
-              <p>
-                This saved BOQ uses the previous labour rate method. Enabling a
-                project-wide rate will replace its old labour charges, while
-                preserving all material quantities and material prices.
-              </p>
-              <button
-                type="button"
-                className="erp-button erp-button-primary"
-                disabled={!(active ? canEdit : canCreate)}
-                onClick={() => setLabour({ ...DEFAULT_LABOUR })}
-              >
-                Enable Composite Labour at ₹400/sft
-              </button>
-            </div>
-          )}
-          {costingTab === 'labour' && !canViewCost && (
-            <p className="boq-notice" role="status">
-              Labour costing rates require cost-view permission.
-            </p>
-          )}
-          {costingTab === 'labour' && labour && canViewCost && (
-            <BoqLabourPanel
-              config={labour}
-              onChange={setLabour}
-              floors={floorsForGeneration}
-              lines={lines}
-              materialCost={materialOnlyCost}
-              existingLabourCost={legacyLabourCost}
-              tradeLabour={tradeLabourSummary}
-              canEdit={(active ? canEdit : canCreate) && canViewCost}
-              canViewCost={canViewCost}
-              busy={busy}
-              onSave={save}
-              autoSaveLabel={active ? autoSaveLabel : undefined}
-            />
-          )}
-          {costingTab === 'labour' && (
-            <nav
-              className="boq-guided-footer"
-              aria-label="Labour costing navigation"
-            >
-              <button
-                className="boq-guided-back"
-                type="button"
-                onClick={() => setCostingTab('builder')}
-              >
-                ← Back to Measurements
-              </button>
-              <span>Labour is included once in the same project BOQ.</span>
-              <button
-                className="boq-guided-primary"
-                type="button"
-                onClick={openDetailedBoq}
-                disabled={!active}
-              >
-                Final Detailed BOQ →
-              </button>
-            </nav>
-          )}
-          <div
-            style={{ display: costingTab === 'builder' ? undefined : 'none' }}
-          >
             <BoqStageBuilder
               key={projectId || active?.id || 'new'}
               floors={floorsForGeneration}
@@ -2590,7 +2373,14 @@ export function BoqWorkspace({
               }
               onSave={save}
               onDetailedBoq={openDetailedBoq}
-              onOpenLabour={() => setCostingTab('labour')}
+              labourContent={!canViewCost ? <p className="boq-notice">Cost access required.</p> : labour ? (
+                <BoqLabourPanel config={labour} onChange={setLabour} floors={floorsForGeneration} lines={lines} materialCost={materialOnlyCost} existingLabourCost={legacyLabourCost} tradeLabour={tradeLabourSummary} canEdit={(active ? canEdit : canCreate) && canViewCost} canViewCost={canViewCost} busy={busy} onSave={save} autoSaveLabel={active ? autoSaveLabel : undefined} />
+              ) : <div className="boq-labour-enable"><button type="button" className="erp-button erp-button-primary" disabled={!(active ? canEdit : canCreate)} onClick={() => setLabour({ ...DEFAULT_LABOUR })}>Enable Composite Labour at ₹400/sft</button></div>}
+              isLabourOutput={isLabourOutput}
+              isUnpricedOutput={(output) => !isOldLabour(output) && isBoqCostUnpriced(output, priceOf)}
+              projectLabourCost={labourCost}
+              projectMaterialCost={materialOnlyCost}
+              calculating={calculating}
               canOpenDetailed={Boolean(active)}
               canViewCost={canViewCost}
               busy={busy}
@@ -2602,7 +2392,6 @@ export function BoqWorkspace({
               projectTotalCost={labour ? materialCost : undefined}
               isOldLabourOutput={labour ? isOldLabour : undefined}
             />
-          </div>
         </section>
       </div>
     </main>
