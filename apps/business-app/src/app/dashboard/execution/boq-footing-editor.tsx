@@ -259,6 +259,18 @@ export function BoqFootingEditor({
               </>
             )}
             <BoqAdvanced label="Footing reinforcement (as drawn)">
+              <div className="boq-stage-input-grid">
+                <label className="boq-stage-field">
+                  <span>Bottom bar shape</span>
+                  <select value={f.bottomBendIn === undefined ? 'legacy' : f.bottomBendIn === 0 ? 'straight' : 'bent'} onChange={(e) => patch({ bottomBendIn: e.target.value === 'legacy' ? undefined : e.target.value === 'straight' ? 0 : (f.bottomBendIn || 6) })}>
+                    <option value="legacy">Full-depth bend (verify drawing)</option>
+                    <option value="straight">Straight bars</option>
+                    <option value="bent">Custom bend length</option>
+                  </select>
+                </label>
+                {f.bottomBendIn !== undefined && f.bottomBendIn > 0 && <Numeric label="Bottom bend per end" unit="in" value={f.bottomBendIn} onChange={(bottomBendIn) => patch({ bottomBendIn })} />}
+                {(f.mesh === 'double' || f.reinforcement?.some(set => set.layer === 'top')) && <Numeric label="Top bend per end" unit="in" value={f.topBendIn ?? 0} onChange={(topBendIn) => patch({ topBendIn })} />}
+              </div>
               {!Array.isArray(f.reinforcement) && (
                 <div className="boq-stage-input-grid">
                   <label className="boq-stage-field">
