@@ -1,5 +1,7 @@
 'use client';
 
+import { STEEL_GRADES } from '@business-os/core/construction-boq';
+
 import { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -1241,7 +1243,9 @@ export function PremiumSftBuilder({
                         />
                       </label>
                       <label>
-                        Brand / manufacturer
+                        {/\b(steel|tmt|reinforcement)\b/i.test(s.title)
+                          ? 'Steel brand'
+                          : 'Brand / manufacturer'}
                         <input
                           maxLength={120}
                           value={s.brand ?? ''}
@@ -1271,14 +1275,28 @@ export function PremiumSftBuilder({
                         ))}
                       </datalist>
                       <label>
-                        Grade / model
+                        {/\b(steel|tmt|reinforcement)\b/i.test(s.title)
+                          ? 'Steel grade'
+                          : 'Grade / model'}
                         <input
                           maxLength={120}
                           value={s.grade ?? ''}
+                          list={
+                            /\b(steel|tmt|reinforcement)\b/i.test(s.title)
+                              ? 'quote-steel-grades-' + i
+                              : undefined
+                          }
                           onChange={(e) =>
                             updateMaterial(i, { grade: e.target.value })
                           }
                         />
+                        {/\b(steel|tmt|reinforcement)\b/i.test(s.title) && (
+                          <datalist id={'quote-steel-grades-' + i}>
+                            {STEEL_GRADES.map((grade) => (
+                              <option key={grade} value={grade} />
+                            ))}
+                          </datalist>
+                        )}
                       </label>
                       <label>
                         Pricing treatment

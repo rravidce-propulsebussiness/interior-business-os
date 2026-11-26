@@ -17,6 +17,16 @@
  *
  * Pure module: no database, browser or React dependencies.
  */
+import {
+  gradeForMember,
+  mixRecipe,
+  normalizeConcreteMix,
+  rmcMaterialKey,
+  usedConcreteGrades,
+  M20_SITE_MIX_PER_M3,
+  type ConcreteMix,
+} from './structural-concrete';
+export * from './structural-concrete';
 import { parseSftEstimate, type SftEstimateDetails } from './sft-quotation';
 import type { DesignFootingType } from './footing-takeoff';
 import {
@@ -2627,13 +2637,6 @@ const aggregateOutput = (
   source: `${round(cubicMetres, 3)} m³ × ${s.aggregateTonPerCum} t/m³`,
 });
 
-/** Existing M20 nominal site-mix takeoff recipe per m³ of structural concrete. */
-export const M20_SITE_MIX_PER_M3 = {
-  cementBags: 8.06,
-  sandCubicMetres: 0.42,
-  aggregateCubicMetres: 0.84,
-} as const;
-
 /** Window sunshades are derived from the actual window width schedule.
  * Dimensions and reinforcement below are preliminary BOQ allowances only;
  * site-specific chajja geometry and bar bending require structural approval.
@@ -2734,40 +2737,53 @@ const concreteOutputs = (
   volume: number,
   label: string,
   s: StructuralSettings,
-): GeneratedOutput[] =>
-  s.readyMixConcrete
-    ? [
-        {
-          name: `${label} concrete (M20 ready-mix)`,
-          material: 'concrete_m20',
-          quantity: round(volume * (1 + s.materialWastagePercent / 100), 2),
-          unit: 'm³',
-          source: `${round(volume, 2)} m³ + ${s.materialWastagePercent}% wastage`,
-        },
-      ]
-    : [
-        {
-          name: `${label} concrete (M20) · volume only`,
-          quantity: round(volume, 3),
-          unit: 'm³',
-          rate: 0,
-          source:
-            'Reference volume only; site-mixed materials priced separately',
-        },
-        {
-          name: 'Cement',
-          material: 'cement',
-          quantity: round(volume * M20_SITE_MIX_PER_M3.cementBags, 1),
-          unit: 'bag',
-          source: 'M20 nominal mix 1:1.5:3 · 8.06 bags/m³',
-        },
-        sandOutput(volume * M20_SITE_MIX_PER_M3.sandCubicMetres, s),
-        aggregateOutput(
-          volume * M20_SITE_MIX_PER_M3.aggregateCubicMetres,
-          s,
-          '20 mm aggregate',
-        ),
-      ];
+  mix: ConcreteMix,
+): GeneratedOutput[] => {
+  const grade = gradeForMember(mix, label);
+  if (s.readyMixConcrete)
+    return [
+      {
+        name: `${label} concrete (M${grade} ready-mix)`,
+        material: rmcMaterialKey(grade),
+        quantity: round(volume * (1 + s.materialWastagePercent / 100), 2),
+        unit: 'm³',
+        source: `${round(volume, 2)} m³ + ${s.materialWastagePercent}% wastage`,
+        ...(mix.rmcRates[grade] !== undefined
+          ? { rate: mix.rmcRates[grade] }
+          : {}),
+      },
+    ];
+  const recipe = mixRecipe(mix, grade);
+  if (!recipe)
+    return [
+      {
+        name: `${label} M${grade} mix design required`,
+        quantity: round(volume, 3),
+        unit: 'm³',
+        material: 'concrete_mix_pending',
+        source:
+          'Unpriced — enter the engineer-approved material recipe per m³.',
+      },
+    ];
+  return [
+    {
+      name: `${label} concrete (M${grade}) · volume only`,
+      quantity: round(volume, 3),
+      unit: 'm³',
+      rate: 0,
+      source: 'Reference volume only; site-mixed materials priced separately',
+    },
+    {
+      name: 'Cement',
+      material: 'cement',
+      quantity: round(volume * recipe.cementBags, 1),
+      unit: 'bag',
+      source: `M${grade} · ${recipe.confirmed ? 'confirmed recipe' : 'provisional mix estimate'} · ${recipe.cementBags} bags/m³`,
+    },
+    sandOutput(volume * recipe.sandCubicMetres, s),
+    aggregateOutput(volume * recipe.aggregateCubicMetres, s, '20 mm aggregate'),
+  ];
+};
 
 /**
  * Cement and sand takeoff from net plaster faces, not from the building
@@ -2971,6 +2987,7 @@ export type QuotationBoqResult = {
 export type QuotationBoqInput = {
   details: SftEstimateDetails;
   settings?: unknown;
+  concreteMix?: ConcreteMix;
   /** Edited floors (e.g. corrected heights); defaults come from the quote. */
   floors?: BoqFloor[];
   /** Edited counts per floor; missing values are estimated. */
@@ -2987,6 +3004,7 @@ export function generateQuotationBoq(
   input: QuotationBoqInput,
 ): QuotationBoqResult {
   const design = normalizeDesign(input.design);
+  const mix = normalizeConcreteMix(input.concreteMix);
   const splitBeamSlab = input.splitBeamSlab === true;
   const strict = input.measuredFinishes === true;
   // The drawing's own slab / staircase / cover values win over the company's.
@@ -3018,6 +3036,14 @@ export function generateQuotationBoq(
       ? measuredCounts([floor]).floors[floor.name]!
       : counts.floors[floor.name]!;
   const warnings: string[] = [];
+  if (!s.readyMixConcrete)
+    for (const grade of usedConcreteGrades(mix)) {
+      const recipe = mixRecipe(mix, grade);
+      if (!recipe?.confirmed)
+        warnings.push(
+          `M${grade} site mix: ${recipe ? 'provisional recipe — confirm mix design' : 'mix design missing — concrete materials unpriced'}.`,
+        );
+    }
   const drafts: { draft: LineDraft; origin: BoqOrigin }[] = [];
   const wallsByFloor = new Map<
     string,
@@ -3281,7 +3307,7 @@ export function generateQuotationBoq(
                   aggregateOutput(pcc * 0.94, s, '40 mm aggregate'),
                 ]
               : []),
-            ...concreteOutputs(footingConcrete, 'Footing', s),
+            ...concreteOutputs(footingConcrete, 'Footing', s, mix),
             ...steelOutputs(tally, stock),
           ],
         },
@@ -3328,7 +3354,7 @@ export function generateQuotationBoq(
             heightFeet: s.pedestalHeightFeet,
           },
           outputs: [
-            ...concreteOutputs(concrete, 'Pedestal', s),
+            ...concreteOutputs(concrete, 'Pedestal', s, mix),
             ...steelOutputs(tally, stock),
             {
               name: 'Centering & shuttering',
@@ -3452,7 +3478,7 @@ export function generateQuotationBoq(
               reinforcement: footing.mesh,
             },
             outputs: [
-              ...concreteOutputs(concrete, 'Footing', s),
+              ...concreteOutputs(concrete, 'Footing', s, mix),
               ...steelOutputs(tally, stock),
             ],
           },
@@ -3494,7 +3520,7 @@ export function generateQuotationBoq(
                 heightFeet: ht,
               },
               outputs: [
-                ...concreteOutputs(pedConcrete, 'Pedestal', s),
+                ...concreteOutputs(pedConcrete, 'Pedestal', s, mix),
                 ...steelOutputs(pedSteel, stock),
                 {
                   name: 'Pedestal formwork',
@@ -3658,7 +3684,7 @@ export function generateQuotationBoq(
               lap: `${s.lapDiameters}d`,
             },
             outputs: [
-              ...concreteOutputs(concrete, 'Column', s),
+              ...concreteOutputs(concrete, 'Column', s, mix),
               ...steelOutputs(tally, stock),
             ],
             notes: notes.join('\n').slice(0, 2000),
@@ -4007,7 +4033,7 @@ export function generateQuotationBoq(
               unit: 'm³',
               inputs: { beamRunFeet: round(totalRun, 1) },
               outputs: [
-                ...concreteOutputs(beamConcrete, 'Beam', s),
+                ...concreteOutputs(beamConcrete, 'Beam', s, mix),
                 ...steelOutputs(beamTally, stock),
                 {
                   name: 'Beam centering & shuttering',
@@ -4030,7 +4056,7 @@ export function generateQuotationBoq(
               slab: slabDrawing,
             },
             outputs: [
-              ...concreteOutputs(concrete - beamConcrete, 'Slab', s),
+              ...concreteOutputs(concrete - beamConcrete, 'Slab', s, mix),
               ...steelOutputs(slabTally, stock),
               {
                 name: 'Slab centering & shuttering',
@@ -4045,11 +4071,20 @@ export function generateQuotationBoq(
       }
       mergeSteel(tally);
       outputs.push(
-        ...concreteOutputs(
-          concrete,
-          level.slab ? 'Beam + slab' : 'Plinth beam',
-          s,
-        ),
+        ...(level.slab &&
+        gradeForMember(mix, 'Beam') !== gradeForMember(mix, 'Slab')
+          ? [
+              ...concreteOutputs(beamConcrete, 'Beam', s, mix),
+              ...concreteOutputs(concrete - beamConcrete, 'Slab', s, mix),
+            ]
+          : concreteOutputs(
+              concrete,
+              level.slab ? 'Beam + slab' : 'Plinth beam',
+              s,
+              level.slab
+                ? { ...mix, defaultGrade: gradeForMember(mix, 'Beam') }
+                : mix,
+            )),
         ...steelOutputs(tally, stock),
         {
           name: 'Centering & shuttering',
@@ -4566,7 +4601,7 @@ export function generateQuotationBoq(
               waist: `${stair.waistIn} in`,
             },
             outputs: [
-              ...concreteOutputs(volume, 'Staircase', s),
+              ...concreteOutputs(volume, 'Staircase', s, mix),
               ...steelOutputs(tally, stock),
               {
                 name: 'Centering & shuttering',

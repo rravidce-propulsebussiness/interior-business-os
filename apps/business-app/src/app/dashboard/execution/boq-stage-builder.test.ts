@@ -12,6 +12,7 @@ import { BoqFootingEditor } from './boq-footing-editor';
 import { BarsPicker } from './boq-design-schedule';
 import {
   measuredCounts,
+  normalizeConcreteMix,
   newFootingType,
 } from '@business-os/core/construction-boq';
 import type {
@@ -39,6 +40,10 @@ const base: StageProps = {
   structuralSettings: {} as StructuralSettings,
   structuralRmcEnabled: true,
   structuralRmcRate: 5000,
+  concreteMix: normalizeConcreteMix(null),
+  onConcreteMixChange: noop,
+  steelSpec: { brand: 'JSW', grade: 'Fe500D' },
+  rmcRateForGrade: () => 5000,
   onStructuralRmcToggle: noop,
   onStructuralRmcRateChange: noop,
   onAddGeometry: noop,

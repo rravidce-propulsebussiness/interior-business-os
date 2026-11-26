@@ -210,7 +210,8 @@ export function labourMeasurements(
       if (
         unit === 'm³' &&
         (/concrete volume|concrete \(/.test(name) ||
-          material === 'concrete_m20')
+          /^concrete_m(?:20|25|30|35|40|45|50|55|60)$/.test(material ?? '') ||
+          material === 'concrete_mix_pending')
       ) {
         push(line.section, 'concreting', qty, unit);
         continue;

@@ -1,13 +1,18 @@
 import { createElement, type ComponentProps } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
-import { normalizeStructuralSettings } from '@business-os/core/construction-boq';
+import {
+  normalizeConcreteMix,
+  normalizeStructuralSettings,
+} from '@business-os/core/construction-boq';
 import { BoqStructuralConcreteCard } from './boq-structural-concrete-card';
 
 type Props = ComponentProps<typeof BoqStructuralConcreteCard>;
 const base: Props = {
   enabled: true,
-  ratePerM3: 5000,
+  mix: normalizeConcreteMix(null),
+  onMixChange: () => {},
+  rateForGrade: (grade) => (grade === 20 ? 5000 : 0),
   onToggle: () => {},
   onRateChange: () => {},
   settings: normalizeStructuralSettings({}),
@@ -20,48 +25,49 @@ const html = (changes: Partial<Props> = {}) =>
     createElement(BoqStructuralConcreteCard, { ...base, ...changes }),
   );
 
-describe('BOQ structural concrete costing switch', () => {
-  it('shows one switch for all structural RCC and a single editable M20 RMC rate', () => {
+describe('BOQ structural concrete costing', () => {
+  it('shows the method and grade controls with an RMC rate', () => {
     const output = html();
     expect(output).toContain('Structural Concrete Costing');
-    expect(output).toContain('role="switch"');
-    expect(output).toContain('aria-checked="true"');
-    expect(output).toContain('Ready-Mix (RMC)');
-    expect(output).toContain('M20 Concrete');
+    expect(output).toContain('Structural concrete method');
+    expect(output).toContain('Ready-mix (RMC)');
+    expect(output).toContain('Default concrete mix grade');
+    expect(output).toContain('Member-specific grade overrides');
     expect(output).toContain('value="5000"');
-    for (const work of ['Footings', 'Columns', 'Beams', 'Slabs', 'Staircase'])
-      expect(output).toContain(work);
     expect(output).toContain(
       'Cement, sand and aggregate for structural RCC are included',
     );
+    expect(output).toContain(
+      'PCC, sajjas, shelves, brickwork and plaster remain separate.',
+    );
     expect(output).toContain('Saved automatically');
-    expect(output.match(/role="switch"/g)).toHaveLength(1);
   });
-
-  it('shows the existing M20 recipe when RMC is off, without an RMC rate input', () => {
+  it('shows provisional M20 quantities and no cement brand selection in site mix', () => {
     const output = html({ enabled: false });
-    expect(output).toContain('aria-checked="false"');
-    expect(output).toContain('Site-Mix Concrete');
+    expect(output).toContain('Site-mix material estimate');
     expect(output).toContain('8.06 bags/m³');
-    expect(output).toContain('Sand');
-    expect(output).toContain('Aggregate');
+    expect(output).toContain('0.67 t/m³');
+    expect(output).toContain('1.26 t/m³');
+    expect(output).toContain('Verify mix design');
+    expect(output).not.toContain('Cement grade &amp; purchase specification');
     expect(output).not.toContain('aria-label="RMC M20 rate per cubic metre"');
   });
-
-  it('never applies RMC to PCC, sajjas, shelves, brickwork or plaster', () => {
-    const enabled = html();
-    const disabled = html({ enabled: false });
-    for (const view of [enabled, disabled]) {
-      expect(view).toContain('Other work — unchanged');
-      expect(view).toContain('PCC · Sajjas · Shelves · Brickwork · Plaster');
-    }
+  it('renders overrides and leaves unconfigured M25 mix unpriced', () => {
+    const output = html({
+      enabled: false,
+      mix: normalizeConcreteMix({
+        defaultGrade: 20,
+        overrides: { Column: 25 },
+      }),
+    });
+    expect(output).toContain('Column concrete grade');
+    expect(output).toContain('M25 quantities remain unpriced');
+    expect(output).toContain('M20 site-mix quantities');
   });
-
   it('respects edit and cost permission, without disclosing the rate', () => {
     const noCost = html({ canViewCost: false });
     expect(noCost).not.toContain('value="5000"');
     expect(noCost).toContain('disabled=""');
-    const readOnly = html({ canEdit: false });
-    expect(readOnly).toContain('disabled=""');
+    expect(html({ canEdit: false })).toContain('disabled=""');
   });
 });

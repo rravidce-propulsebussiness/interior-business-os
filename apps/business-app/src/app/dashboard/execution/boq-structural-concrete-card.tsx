@@ -1,51 +1,163 @@
 'use client';
 
+import { useState } from 'react';
 import {
-  M20_SITE_MIX_PER_M3,
+  CONCRETE_GRADES,
+  CONCRETE_MEMBERS,
+  mixRecipe,
+  usedConcreteGrades,
+  type ConcreteGrade,
+  type ConcreteMix,
+  type ConcreteMember,
+  type MixRecipe,
   type StructuralSettings,
 } from '@business-os/core/construction-boq';
 
-import {
-  CUSTOM_CEMENT_VARIANT,
-  customCementNameKey,
-  customCementRateKey,
-  selectedVariant,
-  variantsFor,
-  type CementUse,
-  type Rate,
-} from './boq-pricing';
-
 type Props = {
-  cementRates?: readonly Rate[];
-  cementSelections?: Readonly<Record<string, string>>;
-  onCementSelectionChange?: (key: string, value: string) => void;
+  mix: ConcreteMix;
+  onMixChange: (mix: ConcreteMix) => void;
   enabled: boolean;
-  ratePerM3: number;
+  rateForGrade: (grade: ConcreteGrade) => number;
   onToggle: (enabled: boolean) => void;
-  onRateChange: (rate: number) => void;
+  onRateChange: (grade: ConcreteGrade, rate: number) => void;
   settings: StructuralSettings;
   canEdit: boolean;
   canViewCost: boolean;
   autoSaveLabel?: string | undefined;
 };
-
 const figure = (amount: number) =>
   amount.toLocaleString('en-IN', { maximumFractionDigits: 2 });
 
+function GradeOptions() {
+  return CONCRETE_GRADES.map((grade) => (
+    <option key={grade} value={grade}>
+      M{grade}
+    </option>
+  ));
+}
+
+function RecipeEditor({
+  grade,
+  recipe,
+  onSave,
+  disabled,
+}: {
+  grade: ConcreteGrade;
+  recipe: MixRecipe | undefined;
+  onSave: (recipe: MixRecipe) => void;
+  disabled: boolean;
+}) {
+  const [cement, setCement] = useState(String(recipe?.cementBags ?? ''));
+  const [sand, setSand] = useState(String(recipe?.sandCubicMetres ?? ''));
+  const [aggregate, setAggregate] = useState(
+    String(recipe?.aggregateCubicMetres ?? ''),
+  );
+  const [confirmed, setConfirmed] = useState(recipe?.confirmed ?? false);
+  const valid =
+    Number(cement) > 0 &&
+    Number(cement) <= 30 &&
+    Number(sand) > 0 &&
+    Number(sand) <= 3 &&
+    Number(aggregate) > 0 &&
+    Number(aggregate) <= 3;
+  return (
+    <div className="boq-rmc-recipe-editor">
+      <p>
+        Enter the material quantities per cubic metre of finished concrete from
+        the approved mix design.
+      </p>
+      <div className="boq-rmc-recipe-fields">
+        <label>
+          Cement (bags/m³)
+          <input
+            type="number"
+            min="0"
+            max="30"
+            step="any"
+            value={cement}
+            disabled={disabled}
+            onChange={(e) => {
+              setCement(e.target.value);
+              setConfirmed(false);
+            }}
+          />
+        </label>
+        <label>
+          Sand (m³/m³)
+          <input
+            type="number"
+            min="0"
+            max="3"
+            step="any"
+            value={sand}
+            disabled={disabled}
+            onChange={(e) => {
+              setSand(e.target.value);
+              setConfirmed(false);
+            }}
+          />
+        </label>
+        <label>
+          Aggregate (m³/m³)
+          <input
+            type="number"
+            min="0"
+            max="3"
+            step="any"
+            value={aggregate}
+            disabled={disabled}
+            onChange={(e) => {
+              setAggregate(e.target.value);
+              setConfirmed(false);
+            }}
+          />
+        </label>
+      </div>
+      <label className="boq-rmc-confirm">
+        <input
+          type="checkbox"
+          checked={confirmed}
+          disabled={disabled}
+          onChange={(e) => setConfirmed(e.target.checked)}
+        />{' '}
+        Confirmed against the engineer&apos;s approved mix design
+      </label>
+      <button
+        className="boq-rmc-outline"
+        type="button"
+        disabled={disabled || !valid}
+        onClick={() =>
+          onSave({
+            cementBags: Number(cement),
+            sandCubicMetres: Number(sand),
+            aggregateCubicMetres: Number(aggregate),
+            confirmed,
+          })
+        }
+      >
+        Save M{grade} recipe
+      </button>
+    </div>
+  );
+}
+
 export function BoqStructuralConcreteCard({
   enabled,
-  ratePerM3,
+  mix,
+  onMixChange,
+  rateForGrade,
   onToggle,
   onRateChange,
   settings,
   canEdit,
   canViewCost,
   autoSaveLabel,
-  cementRates = [],
-  cementSelections = {},
-  onCementSelectionChange,
 }: Props) {
   const editable = canEdit && canViewCost;
+  const members = Object.keys(mix.overrides) as ConcreteMember[];
+  const [expanded, setExpanded] = useState(members.length > 0);
+  const grades = usedConcreteGrades(mix);
+  const [editingGrade, setEditingGrade] = useState<ConcreteGrade | null>(null);
   return (
     <section
       className="boq-rmc-card"
@@ -69,223 +181,226 @@ export function BoqStructuralConcreteCard({
           <h3 id="boq-rmc-heading">Structural Concrete Costing</h3>
           <p>Applies to all structural RCC</p>
         </div>
-        <button
-          type="button"
-          className="boq-rmc-toggle"
-          role="switch"
-          aria-label="Structural Ready-Mix Concrete (RMC)"
-          aria-checked={enabled}
-          onClick={() => onToggle(!enabled)}
-          disabled={!editable}
+        <div
+          className="boq-rmc-segment"
+          role="group"
+          aria-label="Structural concrete method"
         >
-          <span>{enabled ? 'ON' : 'OFF'}</span>
-          <i aria-hidden="true" />
-        </button>
+          <button
+            type="button"
+            aria-pressed={!enabled}
+            onClick={() => onToggle(false)}
+            disabled={!editable}
+          >
+            Site mix
+          </button>
+          <button
+            type="button"
+            aria-pressed={enabled}
+            onClick={() => onToggle(true)}
+            disabled={!editable}
+          >
+            Ready-mix (RMC)
+          </button>
+        </div>
+      </div>
+
+      <label className="boq-rmc-grade-row">
+        <strong>Default concrete mix grade</strong>
+        <select
+          value={mix.defaultGrade}
+          aria-label="Default concrete mix grade"
+          disabled={!editable}
+          onChange={(event) =>
+            onMixChange({
+              ...mix,
+              defaultGrade: Number(event.target.value) as ConcreteGrade,
+            })
+          }
+        >
+          <GradeOptions />
+        </select>
+      </label>
+
+      <div className="boq-rmc-overrides">
+        <div className="boq-rmc-overrides-head">
+          <strong>Member-specific grade overrides</strong>
+          <button
+            type="button"
+            className="boq-rmc-outline"
+            aria-expanded={expanded}
+            onClick={() => setExpanded((old) => !old)}
+          >
+            {expanded ? 'Done' : '+ Add override'}
+          </button>
+        </div>
+        {(expanded || members.length > 0) && (
+          <div className="boq-rmc-overrides-grid">
+            {CONCRETE_MEMBERS.filter(
+              (member) => expanded || mix.overrides[member] !== undefined,
+            ).map((member) => (
+              <label key={member}>
+                {member}
+                <select
+                  aria-label={member + ' concrete grade'}
+                  value={mix.overrides[member] ?? ''}
+                  disabled={!editable || !expanded}
+                  onChange={(e) => {
+                    const overrides = { ...mix.overrides };
+                    if (e.target.value)
+                      overrides[member] = Number(
+                        e.target.value,
+                      ) as ConcreteGrade;
+                    else delete overrides[member];
+                    onMixChange({ ...mix, overrides });
+                  }}
+                >
+                  <option value="">Default (M{mix.defaultGrade})</option>
+                  <GradeOptions />
+                </select>
+              </label>
+            ))}
+          </div>
+        )}
       </div>
 
       {enabled ? (
-        <>
-          <div className="boq-rmc-ready">
-            <div className="boq-rmc-supply">
-              <span className="boq-rmc-supply-symbol" aria-hidden="true">
-                ▰
-              </span>
-              <span>
-                <strong>Ready-Mix (RMC)</strong>
-                <small>M20 Concrete</small>
-              </span>
-            </div>
-            {canViewCost && (
-              <label className="boq-rmc-rate">
-                <span className="boq-rmc-sr-only">
-                  RMC M20 rate per cubic metre
-                </span>
-                <span aria-hidden="true">₹</span>
-                <input
-                  type="number"
-                  inputMode="decimal"
-                  min={0}
-                  step="any"
-                  value={ratePerM3}
-                  aria-label="RMC M20 rate per cubic metre"
-                  onChange={(event) =>
-                    onRateChange(Math.max(0, Number(event.target.value) || 0))
-                  }
-                  disabled={!editable}
-                />
-                <span>/ m³</span>
-              </label>
-            )}
-          </div>
-          <div className="boq-rmc-applied">
-            <span aria-hidden="true">✓</span> Applied to all structural RCC
-          </div>
-          <div
-            className="boq-rmc-tags"
-            aria-label="Works included in structural RMC"
-          >
-            {['Footings', 'Columns', 'Beams', 'Slabs', 'Staircase'].map(
-              (work) => (
-                <span key={work}>
-                  <b aria-hidden="true">✓</b> {work}
-                </span>
-              ),
-            )}
-          </div>
-          <p className="boq-rmc-note">
-            Cement, sand and aggregate for structural RCC are included in RMC.
-          </p>
-        </>
-      ) : (
         <div className="boq-rmc-site">
           <div className="boq-rmc-supply">
             <span className="boq-rmc-supply-symbol" aria-hidden="true">
-              ♧
+              ▰
             </span>
             <span>
-              <strong>Site-Mix Concrete</strong>
-              <small>M20 · Material-wise calculation</small>
+              <strong>Ready-mix concrete</strong>
+              <small>Supply rate per cubic metre</small>
             </span>
           </div>
-          <div
-            className="boq-rmc-recipe"
-            aria-label="M20 site-mix quantities per cubic metre"
-          >
-            <div>
-              <span>Cement</span>
-              <strong>{figure(M20_SITE_MIX_PER_M3.cementBags)} bags/m³</strong>
+          {canViewCost && (
+            <div className="boq-rmc-recipe">
+              {grades.map((grade) => (
+                <label className="boq-rmc-grade-rate" key={grade}>
+                  <span>M{grade} RMC · ₹/m³</span>
+                  <input
+                    type="number"
+                    min={0}
+                    max={10000000}
+                    step="any"
+                    value={rateForGrade(grade)}
+                    aria-label={`RMC M${grade} rate per cubic metre`}
+                    disabled={!editable}
+                    onChange={(e) =>
+                      onRateChange(
+                        grade,
+                        Math.max(0, Number(e.target.value) || 0),
+                      )
+                    }
+                  />
+                </label>
+              ))}
             </div>
-            <div>
-              <span>Sand</span>
-              <strong>
-                {figure(
-                  M20_SITE_MIX_PER_M3.sandCubicMetres * settings.sandTonPerCum,
-                )}{' '}
-                t/m³
-              </strong>
-            </div>
-            <div>
-              <span>20 mm Aggregate</span>
-              <strong>
-                {figure(
-                  M20_SITE_MIX_PER_M3.aggregateCubicMetres *
-                    settings.aggregateTonPerCum,
-                )}{' '}
-                t/m³
-              </strong>
-            </div>
-          </div>
+          )}
+          <p className="boq-rmc-note">
+            Cement, sand and aggregate for structural RCC are included in RMC.
+            PCC, sajjas, shelves, brickwork and plaster remain separate.
+          </p>
         </div>
-      )}
-
-      {onCementSelectionChange && (
-        <div className="boq-rmc-other">
-          <strong>Cement grade &amp; purchase specification</strong>
-          <small>
-            Grades and brands from the selected quotation and rate card. Confirm
-            the approved mix separately.
-          </small>
-          <div className="boq-stage-input-grid">
-            {(['cement', 'cement_masonry'] as const).map((use: CementUse) => {
-              const variants = variantsFor(cementRates, use).filter(
-                (rate) => rate.variant !== CUSTOM_CEMENT_VARIANT,
-              );
-              const selected = selectedVariant(
-                cementRates,
-                use,
-                cementSelections,
-              );
-              const value =
-                cementSelections[use] === CUSTOM_CEMENT_VARIANT
-                  ? CUSTOM_CEMENT_VARIANT
-                  : (selected?.variant ?? '');
-              return (
-                <div key={use} className="boq-stage-field">
-                  <label>
-                    <span>
-                      {use === 'cement'
-                        ? 'RCC / concrete cement'
-                        : 'Brickwork & plaster cement'}
-                    </span>
-                    <select
-                      value={value}
-                      onChange={(event) =>
-                        onCementSelectionChange(use, event.target.value)
-                      }
-                      disabled={!editable}
+      ) : (
+        grades.map((grade) => {
+          const recipe = mixRecipe(mix, grade);
+          return (
+            <div className="boq-rmc-site" key={grade}>
+              <div className="boq-rmc-estimate-head">
+                <div className="boq-rmc-supply">
+                  <span className="boq-rmc-supply-symbol" aria-hidden="true">
+                    <svg
+                      viewBox="0 0 40 36"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
                     >
-                      {!value && <option value="">Select cement</option>}
-                      {variants.map((rate) => (
-                        <option key={rate.key} value={rate.variant}>
-                          {rate.label}
-                          {canViewCost
-                            ? ' · ₹' + figure(rate.rate) + '/bag'
-                            : ''}
-                        </option>
-                      ))}
-                      <option value={CUSTOM_CEMENT_VARIANT}>
-                        Custom brand / grade
-                      </option>
-                    </select>
-                  </label>
-                  {value === CUSTOM_CEMENT_VARIANT && (
-                    <>
-                      <label>
-                        <span>Custom cement brand and grade</span>
-                        <input
-                          value={
-                            cementSelections[customCementNameKey(use)] ?? ''
-                          }
-                          maxLength={100}
-                          placeholder="e.g. OPC 53 / PPC"
-                          onChange={(event) =>
-                            onCementSelectionChange(
-                              customCementNameKey(use),
-                              event.target.value,
-                            )
-                          }
-                          disabled={!editable}
-                        />
-                      </label>
-                      {canViewCost && (
-                        <label>
-                          <span>Custom purchase rate (₹/bag)</span>
-                          <input
-                            type="number"
-                            min={0}
-                            step="any"
-                            value={
-                              cementSelections[customCementRateKey(use)] ?? ''
-                            }
-                            onChange={(event) =>
-                              onCementSelectionChange(
-                                customCementRateKey(use),
-                                event.target.value,
-                              )
-                            }
-                            disabled={!editable}
-                          />
-                        </label>
-                      )}
-                    </>
-                  )}
+                      <path d="M5 23h20V10h7l5 10v7H5zM25 19h11M14 8l9 5-4 11H7L3 15l5-8zM12 8l-4 7 7 9M6 28h11M23 28h5" />
+                      <circle cx="12" cy="29" r="3" fill="#fce0c9" />
+                      <circle cx="32" cy="29" r="3" fill="#fce0c9" />
+                    </svg>
+                  </span>
+                  <span>
+                    <strong>Site-mix material estimate</strong>
+                    <small>Per m³ · M{grade}</small>
+                  </span>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+                <button
+                  type="button"
+                  disabled={!editable}
+                  aria-expanded={editingGrade === grade}
+                  onClick={() =>
+                    setEditingGrade(editingGrade === grade ? null : grade)
+                  }
+                  className={`boq-rmc-badge ${recipe?.confirmed ? 'confirmed' : ''}`}
+                >
+                  {recipe?.confirmed
+                    ? '✓ Mix confirmed'
+                    : '⚠ Verify mix design'}
+                </button>
+              </div>
+              {recipe ? (
+                <div
+                  className="boq-rmc-recipe"
+                  aria-label={`M${grade} site-mix quantities per cubic metre`}
+                >
+                  <div>
+                    <span>Cement</span>
+                    <strong>{figure(recipe.cementBags)} bags/m³</strong>
+                  </div>
+                  <div>
+                    <span>Sand</span>
+                    <strong>
+                      {figure(recipe.sandCubicMetres * settings.sandTonPerCum)}{' '}
+                      t/m³
+                    </strong>
+                  </div>
+                  <div>
+                    <span>20 mm Aggregate</span>
+                    <strong>
+                      {figure(
+                        recipe.aggregateCubicMetres *
+                          settings.aggregateTonPerCum,
+                      )}{' '}
+                      t/m³
+                    </strong>
+                  </div>
+                </div>
+              ) : (
+                <p className="boq-rmc-warning">
+                  No mix recipe specified. M{grade} quantities remain unpriced
+                  until a recipe is entered.
+                </p>
+              )}
+              {(editingGrade === grade || !recipe) && (
+                <RecipeEditor
+                  key={`${grade}:${JSON.stringify(recipe)}`}
+                  grade={grade}
+                  recipe={recipe}
+                  disabled={!editable}
+                  onSave={(next) => {
+                    onMixChange({
+                      ...mix,
+                      recipes: { ...mix.recipes, [grade]: next },
+                    });
+                    setEditingGrade(null);
+                  }}
+                />
+              )}
+            </div>
+          );
+        })
       )}
-      <div className="boq-rmc-other">
-        <div>
-          <strong>Other work — unchanged</strong>
-          <small>PCC · Sajjas · Shelves · Brickwork · Plaster</small>
-        </div>
-        {autoSaveLabel && (
-          <span className="boq-rmc-autosave" role="status">
-            {autoSaveLabel}
-          </span>
-        )}
-      </div>
+      {autoSaveLabel && (
+        <span className="boq-rmc-autosave" role="status">
+          {autoSaveLabel}
+        </span>
+      )}
     </section>
   );
 }

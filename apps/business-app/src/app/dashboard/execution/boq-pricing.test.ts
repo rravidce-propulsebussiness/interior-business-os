@@ -262,7 +262,7 @@ describe('BOQ default prices and quoted brands', () => {
         fresh,
       ),
     ).toBe(400);
-    expect(costHead('concrete_m20')).toBe('Concrete (M20)');
+    expect(costHead('concrete_m20')).toBe('Concrete (RMC)');
     expect(costHead('shuttering')).toBe('Structural labour');
     expect(costHead('cpvc_half')).toBe('Plumbing');
     expect(costHead('sanitary_cp')).toBe('Sanitary & CP fittings');
