@@ -4,7 +4,10 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import type { SupabaseClient } from '@business-os/database';
 import { executionServices } from './service';
-import { normalizeStructuralSettings } from '@business-os/core/construction-boq';
+import {
+  normalizeConcreteMix,
+  normalizeStructuralSettings,
+} from '@business-os/core/construction-boq';
 import { LABOUR_WORKS } from './boq-labour';
 import { structuralDesignSchema } from './boq-structural-design-schema';
 import { BOQ_SCOPE_WORKS } from './boq-scope-coverage';
@@ -51,6 +54,10 @@ const generatorSchema = z.object({
   generatedAt: z.string().max(40),
   settings: z.record(z.string(), z.number().finite()),
   rmcRatePerM3: z.number().finite().nonnegative().max(10000000).optional(),
+  concreteMix: z
+    .unknown()
+    .transform((raw) => normalizeConcreteMix(raw))
+    .optional(),
   counts: z.object({
     floors: z
       .record(

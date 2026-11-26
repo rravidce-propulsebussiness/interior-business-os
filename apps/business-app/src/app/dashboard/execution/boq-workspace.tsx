@@ -28,6 +28,12 @@ import {
   generateQuotationBoq,
   normalizeStructuralSettings,
   normalizeDesign,
+  normalizeConcreteMix,
+  quotedSteelSpecification,
+  rmcMaterialKey,
+  rmcGradeForMaterial,
+  type ConcreteMix,
+  type ConcreteGrade,
   parseBars,
   type BoqCounts,
   type BoqFloor,
@@ -81,6 +87,7 @@ type Generator = {
   settings: Record<string, number>;
   /** Optional per-BOQ RMC rate; if absent use the selected material rate card. */
   rmcRatePerM3?: number;
+  concreteMix?: ConcreteMix;
   counts: BoqCounts;
   floors: BoqFloor[];
   design?: StructuralDesign | null;
@@ -95,7 +102,7 @@ type Generator = {
 };
 /** Bump when the quotation generator adds or reprices generated lines, so
  * saved BOQs regenerate once on edit (manual items and edits are kept). */
-const BOQ_ENGINE_VERSION = 4;
+const BOQ_ENGINE_VERSION = 5;
 type SavedLine = {
   id: string;
   name: string;
@@ -293,8 +300,11 @@ export function BoqWorkspace({
       (saved ?? normalizeStructuralSettings(structural).readyMixConcrete) !== 0
     );
   });
-  const [rmcRateOverride, setRmcRateOverride] = useState<number | null>(
-    initialDocument?.document?.generator?.rmcRatePerM3 ?? null,
+  const [concreteMix, setConcreteMix] = useState(() =>
+    normalizeConcreteMix(
+      initialDocument?.document?.generator?.concreteMix,
+      initialDocument?.document?.generator?.rmcRatePerM3,
+    ),
   );
   const [generator, setGenerator] = useState<Generator | null>(
     initialDocument?.document?.generator ?? null,
@@ -325,6 +335,23 @@ export function BoqWorkspace({
       ...projectCementRates(selections),
     ],
     [savedRates, quoteSections, selections],
+  );
+  const steelSpec = useMemo(
+    () => quotedSteelSpecification(quoteSections),
+    [quoteSections],
+  );
+  const quoteMaterialSelections = useMemo(() => {
+    const picked = brandSelectionsFromQuote(quoteSections, initialRates);
+    return Object.fromEntries(
+      ['steel', 'cement', 'cement_masonry'].flatMap((key) =>
+        picked[key] ? [[key, picked[key]]] : [],
+      ),
+    );
+  }, [quoteSections, initialRates]);
+  // Contract material choices are authoritative; unrelated rate selections remain editable.
+  const effectiveSelections = useMemo(
+    () => ({ ...selections, ...quoteMaterialSelections }),
+    [selections, quoteMaterialSelections],
   );
   const [unit, setUnitState] = useState<LengthUnit>(defaultUnit);
   useEffect(() => {
@@ -369,17 +396,28 @@ export function BoqWorkspace({
     () => ({ ...settings, readyMixConcrete: rmcEnabled ? 1 : 0 }),
     [settings, rmcEnabled],
   );
-  const rmcRatePerM3 =
-    rmcRateOverride ??
+  const rmcRateForGrade = (grade: ConcreteGrade) =>
+    concreteMix.rmcRates[grade] ??
     rateForOutput(
       {
-        name: 'M20 concrete (ready-mix)',
-        material: 'concrete_m20',
+        name: `M${grade} concrete (ready-mix)`,
+        material: rmcMaterialKey(grade),
         unit: 'm³',
       },
       initialRates,
-      selections,
+      effectiveSelections,
     );
+  const rmcRatePerM3 = rmcRateForGrade(concreteMix.defaultGrade);
+  function setGradeRate(grade: ConcreteGrade, rate: number) {
+    if (!canEdit || !canViewCost) return;
+    setConcreteMix((prior) => ({
+      ...prior,
+      rmcRates: {
+        ...prior.rmcRates,
+        [grade]: Number.isFinite(rate) ? Math.max(0, rate) : 0,
+      },
+    }));
+  }
   const labourGroups = new Set(
     initialRates
       .filter((rate) => rate.category === 'labour')
@@ -401,7 +439,7 @@ export function BoqWorkspace({
     (output.unit === 'm³' && output.name.endsWith(' · volume only')) ||
     (labour && isOldLabour(output))
       ? 0
-      : rateForOutput(output, initialRates, selections);
+      : rateForOutput(output, initialRates, effectiveSelections);
   const currentQuote = quotes.find((quote) => quote.id === quoteId);
   const schedule = currentQuote?.schedule ?? null;
   const scheduleFloors = useMemo(
@@ -671,7 +709,7 @@ export function BoqWorkspace({
     setProjectCosts({ ...DEFAULT_BOQ_PROJECT_COSTS });
     setScopeReviews({});
     setRmcEnabled(settings.readyMixConcrete !== 0);
-    setRmcRateOverride(null);
+    setConcreteMix(normalizeConcreteMix(null));
     setGenerator(null);
     setGenFloors([]);
     setGenCounts(null);
@@ -710,7 +748,12 @@ export function BoqWorkspace({
       (document.document?.generator?.settings?.readyMixConcrete ??
         settings.readyMixConcrete) !== 0,
     );
-    setRmcRateOverride(document.document?.generator?.rmcRatePerM3 ?? null);
+    setConcreteMix(
+      normalizeConcreteMix(
+        document.document?.generator?.concreteMix,
+        document.document?.generator?.rmcRatePerM3,
+      ),
+    );
     setGenerator(document.document?.generator ?? null);
     setGenFloors(document.document?.generator?.floors ?? []);
     setGenCounts(document.document?.generator?.counts ?? null);
@@ -729,6 +772,7 @@ export function BoqWorkspace({
     const result = generateQuotationBoq({
       details: schedule,
       settings: concreteSettings,
+      concreteMix,
       floors: floorsForGeneration,
       counts: countsForGeneration,
       design: genDesign,
@@ -864,8 +908,9 @@ export function BoqWorkspace({
         // measured PCC, sajjas, shelves, brickwork or other non-RCC work.
         if (output.unit === 'm³' && output.name.endsWith(' · volume only'))
           return { ...measured, rate: 0 };
-        return output.material === 'concrete_m20' && rmcRateOverride !== null
-          ? { ...measured, rate: rmcRateOverride }
+        return rmcGradeForMaterial(output.material) !== undefined ||
+          output.material === 'concrete_mix_pending'
+          ? output
           : measured;
       }),
     }));
@@ -906,7 +951,7 @@ export function BoqWorkspace({
       revisionId: quoteId,
       generatedAt: new Date().toISOString(),
       settings: result.settings,
-      ...(rmcRateOverride !== null ? { rmcRatePerM3: rmcRateOverride } : {}),
+      concreteMix,
       counts: result.counts,
       floors: result.floors,
       design: result.design,
@@ -1017,7 +1062,7 @@ export function BoqWorkspace({
     genCounts,
     genDesign,
     rmcEnabled,
-    rmcRateOverride,
+    concreteMix,
   ]);
   const [lastLiveKey, setLastLiveKey] = useState(liveKey);
   useEffect(() => {
@@ -1045,7 +1090,7 @@ export function BoqWorkspace({
       quotationRevisionId: quoteId || null,
       currency: 'INR',
       items: lines,
-      selections,
+      selections: effectiveSelections,
       ...(labour && canViewCost ? { labour } : {}),
       ...(canViewCost ? { projectCosts } : {}),
       scopeReviews,
@@ -1058,7 +1103,7 @@ export function BoqWorkspace({
       projectId,
       quoteId,
       lines,
-      selections,
+      effectiveSelections,
       labour,
       projectCosts,
       scopeReviews,
@@ -1281,11 +1326,12 @@ export function BoqWorkspace({
   ) {
     const target = lines[lineIndex];
     const output = target?.outputs[outputIndex];
-    if (target?.origin && output?.material === 'concrete_m20') {
-      // The price belongs to the whole structural RCC package.
-      setRmcRateOverride(Number.isFinite(rate) ? Math.max(0, rate) : 0);
+    const grade = rmcGradeForMaterial(output?.material);
+    if (target?.origin && grade !== undefined) {
+      setGradeRate(grade, rate);
       return;
     }
+    if (output?.material === 'concrete_mix_pending') return;
     if (target?.origin && output) {
       const key = overrideKey(target, output);
       const next = {
@@ -1355,7 +1401,7 @@ export function BoqWorkspace({
         quotationRevisionId: quoteId || null,
         currency: 'INR',
         items: lines,
-        selections,
+        selections: effectiveSelections,
         ...(labour && canViewCost ? { labour } : {}),
         ...(canViewCost ? { projectCosts } : {}),
         scopeReviews,
@@ -2396,15 +2442,14 @@ export function BoqWorkspace({
             onCountsChange={updateStageCounts}
             structuralSettings={concreteSettings}
             materialRates={initialRates}
-            cementSelections={selections}
-            onCementSelectionChange={(key, value) => {
-              if (canEdit && canViewCost)
-                setSelections((prior) => ({ ...prior, [key]: value }));
-            }}
+            concreteMix={concreteMix}
+            onConcreteMixChange={setConcreteMix}
+            steelSpec={steelSpec}
+            rmcRateForGrade={rmcRateForGrade}
             structuralRmcEnabled={rmcEnabled}
             structuralRmcRate={rmcRatePerM3}
             onStructuralRmcToggle={setRmcEnabled}
-            onStructuralRmcRateChange={setRmcRateOverride}
+            onStructuralRmcRateChange={setGradeRate}
             onAddGeometry={addStageGeometry}
             onUpdateGeometry={updateStageGeometry}
             onFloorChange={setGenFloors}

@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { STEEL_GRADES } from '@business-os/core/construction-boq';
 import type {
   ConstructionPackage,
   ConstructionSpecSection,
@@ -618,7 +619,9 @@ export function PremiumPackageEditor({
                       </label>
                       {!isBrandless(spec.title) && (
                         <label className={label}>
-                          Brand / manufacturer
+                          {/\b(steel|tmt|reinforcement)\b/i.test(spec.title)
+                            ? 'Steel brand'
+                            : 'Brand / manufacturer'}
                           <input
                             className={field}
                             maxLength={120}
@@ -632,16 +635,36 @@ export function PremiumPackageEditor({
                       )}
                       {!isBrandless(spec.title) && (
                         <label className={label}>
-                          Grade / size / finish
+                          {/\b(steel|tmt|reinforcement)\b/i.test(spec.title)
+                            ? 'Steel grade'
+                            : 'Grade / size / finish'}
                           <input
                             className={field}
                             maxLength={120}
                             value={spec.grade}
+                            list={
+                              /\b(steel|tmt|reinforcement)\b/i.test(spec.title)
+                                ? 'package-steel-grades-' + index
+                                : undefined
+                            }
                             onChange={(e) =>
                               update(index, { grade: e.target.value })
                             }
-                            placeholder="Fe 550D, 2×2, etc."
+                            placeholder={
+                              /\b(steel|tmt|reinforcement)\b/i.test(spec.title)
+                                ? 'Select steel grade'
+                                : 'Grade / size / finish'
+                            }
                           />
+                          {/\b(steel|tmt|reinforcement)\b/i.test(
+                            spec.title,
+                          ) && (
+                            <datalist id={'package-steel-grades-' + index}>
+                              {STEEL_GRADES.map((grade) => (
+                                <option key={grade} value={grade} />
+                              ))}
+                            </datalist>
+                          )}
                         </label>
                       )}
                       <label className={label}>

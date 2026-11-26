@@ -6,6 +6,12 @@
  * Steel: JSW, Vizag; Cement: UltraTech, Maha. Each BOQ chooses one variant per
  * material group; the group's default variant is used otherwise.
  */
+import {
+  CONCRETE_GRADES,
+  rmcGradeForMaterial,
+  rmcMaterialKey,
+} from '@business-os/core/construction-boq';
+
 export type RateCategory = 'material' | 'labour' | 'other';
 export type Rate = {
   key: string;
@@ -164,16 +170,18 @@ const BASE_GROUPS: readonly GroupDef[] = [
       note: 'Estimate per sq ft of external plaster face; confirm with the scaffolding supplier.',
     },
   ),
-  group(
-    'concrete_m20',
-    'M20 concrete (ready-mix)',
-    'm³',
-    'Structure materials',
-    ['Ready-mix M20'],
-    {
-      defaultRate: 5000,
-      note: 'Per m³ delivered, for footings, columns, beams, slabs and stairs.',
-    },
+  ...CONCRETE_GRADES.map((grade) =>
+    group(
+      rmcMaterialKey(grade),
+      `M${grade} concrete (ready-mix)`,
+      'm³',
+      'Structure materials',
+      [`Ready-mix M${grade}`],
+      {
+        defaultRate: grade === 20 ? 5000 : 0,
+        note: 'Per m³ delivered. Confirm the supplier price for this grade.',
+      },
+    ),
   ),
   group(
     'binding_wire',
@@ -1018,6 +1026,7 @@ export function rateForOutput(
   rates: readonly Rate[],
   selections: Readonly<Record<string, string>> = {},
 ): number {
+  if (output.material === 'concrete_mix_pending') return 0;
   if (output.rate !== undefined && Number.isFinite(output.rate))
     return output.rate;
   const material = materialForOutput(output);
@@ -1054,6 +1063,7 @@ export function isBoqCostUnpriced<
   T extends PricedOutput & { quantity: number; kind?: string },
 >(output: T, resolveCost: (output: T) => number): boolean {
   if (!(output.quantity > 0)) return false;
+  if (output.material === 'concrete_mix_pending') return true;
   if (/reference only|volume only/i.test(output.name)) return false;
   const costBearing =
     Boolean(output.material) ||
@@ -1425,7 +1435,7 @@ export function projectCementRates(
 
 /** Simple cost heads for the floor-wise estimate, one per trade. */
 export const COST_HEADS = [
-  'Concrete (M20)',
+  'Concrete (RMC)',
   'Cement',
   'Sand',
   'Aggregate',
@@ -1455,7 +1465,7 @@ export const COST_HEADS = [
 export type CostHead = (typeof COST_HEADS)[number];
 /** Heads shown as quantity × rate (bought by m³, bag, tonne, kg, number). */
 export const QUANTITY_HEADS: Partial<Record<CostHead, string>> = {
-  'Concrete (M20)': 'm³',
+  'Concrete (RMC)': 'm³',
   Cement: 'bag',
   Sand: 't',
   Aggregate: 't',
@@ -1466,7 +1476,7 @@ export const QUANTITY_HEADS: Partial<Record<CostHead, string>> = {
   'Parking tiles': 'sqft',
 };
 const HEAD_BY_GROUP: Readonly<Record<string, CostHead>> = {
-  concrete_m20: 'Concrete (M20)',
+  concrete_m20: 'Concrete (RMC)',
   binding_wire: 'Steel',
   sand: 'Sand',
   aggregate: 'Aggregate',
@@ -1525,6 +1535,11 @@ const HEAD_BY_GROUP: Readonly<Record<string, CostHead>> = {
 };
 export function costHead(group: string | undefined): CostHead {
   if (!group) return 'Other';
+  if (
+    rmcGradeForMaterial(group) !== undefined ||
+    group === 'concrete_mix_pending'
+  )
+    return 'Concrete (RMC)';
   const direct = HEAD_BY_GROUP[group];
   if (direct) return direct;
   if (group.startsWith('steel_')) return 'Steel';

@@ -53,6 +53,12 @@ import { beamTotalRunAfterCountChange } from './boq-beam-run-calculation';
 import {
   MEASURED_SERVICE_FIELDS,
   parseBars,
+  mixRecipe,
+  usedConcreteGrades,
+  rmcGradeForMaterial,
+  type ConcreteMix,
+  type ConcreteGrade,
+  type SteelSpecification,
 } from '@business-os/core/construction-boq';
 import { BoqStructuralConcreteCard } from './boq-structural-concrete-card';
 import {
@@ -103,12 +109,14 @@ type Props = {
   onCountsChange: (next: BoqCounts) => void;
   structuralSettings: StructuralSettings;
   materialRates?: readonly Rate[];
-  cementSelections?: Readonly<Record<string, string>>;
-  onCementSelectionChange?: (key: string, value: string) => void;
+  concreteMix: ConcreteMix;
+  onConcreteMixChange: (mix: ConcreteMix) => void;
+  steelSpec: SteelSpecification | null;
+  rmcRateForGrade: (grade: ConcreteGrade) => number;
   structuralRmcEnabled: boolean;
   structuralRmcRate: number;
   onStructuralRmcToggle: (enabled: boolean) => void;
-  onStructuralRmcRateChange: (rate: number) => void;
+  onStructuralRmcRateChange: (grade: ConcreteGrade, rate: number) => void;
   onAddGeometry: (
     stage: string,
     kind: MeasuredKind,
@@ -2494,7 +2502,10 @@ export function BoqStageBuilder(props: Props) {
                         isColumns ||
                         isBeams ||
                         (entry.line.origin &&
-                          entry.output.material === 'concrete_m20') ||
+                          (rmcGradeForMaterial(entry.output.material) !==
+                            undefined ||
+                            entry.output.material ===
+                              'concrete_mix_pending')) ||
                         props.isOldLabourOutput?.(entry.output);
                       const canExclude =
                         !derived &&
@@ -2794,7 +2805,25 @@ export function BoqStageBuilder(props: Props) {
       )
     : [];
   const pendingGroups = previewGroups.filter((group) => group.pending);
+  const mixNeedsReview =
+    guidedStep === 3 &&
+    !props.structuralRmcEnabled &&
+    usedConcreteGrades(props.concreteMix).some(
+      (grade) => !mixRecipe(props.concreteMix, grade)?.confirmed,
+    );
+  const rmcNeedsRate =
+    guidedStep === 3 &&
+    props.canViewCost &&
+    props.structuralRmcEnabled &&
+    usedConcreteGrades(props.concreteMix).some(
+      (grade) => !(props.rmcRateForGrade(grade) > 0),
+    );
+  const steelNeedsReview =
+    guidedStep === 3 && (!props.steelSpec?.brand || !props.steelSpec?.grade);
   const pendingCount =
+    Number(mixNeedsReview) +
+    Number(rmcNeedsRate) +
+    Number(steelNeedsReview) +
     pendingGroups.length +
     missingRates.length +
     (guidedStep === 2
@@ -2840,9 +2869,13 @@ export function BoqStageBuilder(props: Props) {
         <span aria-hidden="true">{pendingCount ? '!' : '✓'}</span>
         {props.calculating
           ? 'Calculating…'
-          : pendingCount
-            ? pendingCount + ' items need review'
-            : 'No outstanding checks for this stage'}
+          : mixNeedsReview
+            ? 'Mix design needs confirmation'
+            : rmcNeedsRate
+              ? 'RMC rates need confirmation'
+              : pendingCount
+                ? pendingCount + ' items need review'
+                : 'No outstanding checks for this stage'}
         <span aria-hidden="true">›</span>
       </button>
       {props.canViewCost && guidedStep !== 2 && guidedStep !== 3 && (
@@ -2900,6 +2933,32 @@ export function BoqStageBuilder(props: Props) {
             <dt>Concrete method</dt>
             <dd>{props.structuralRmcEnabled ? 'RMC' : 'Site mix'}</dd>
           </div>
+          <div>
+            <dt>Mix grade</dt>
+            <dd>M{props.concreteMix.defaultGrade}</dd>
+          </div>
+          <div>
+            <dt>Steel specification</dt>
+            <dd
+              title={
+                props.steelSpec
+                  ? [props.steelSpec.brand, props.steelSpec.grade]
+                      .filter(Boolean)
+                      .join(' · ')
+                  : undefined
+              }
+            >
+              {steelNeedsReview ? 'Quote needs review' : 'From quotation'}
+            </dd>
+          </div>
+          {Object.entries(props.concreteMix.overrides).map(
+            ([member, grade]) => (
+              <div key={member}>
+                <dt>{member}</dt>
+                <dd>M{grade}</dd>
+              </div>
+            ),
+          )}
           {props.canViewCost && props.structuralRmcEnabled && (
             <div>
               <dt>Rate / m³</dt>
@@ -2919,6 +2978,32 @@ export function BoqStageBuilder(props: Props) {
       {showReview && (
         <div className="boq-premium-details">
           <h4>Measurement & Rate Review</h4>
+          {mixNeedsReview &&
+            usedConcreteGrades(props.concreteMix)
+              .filter(
+                (grade) => !mixRecipe(props.concreteMix, grade)?.confirmed,
+              )
+              .map((grade) => (
+                <div key={grade} className="boq-premium-check-row">
+                  <span>M{grade} site mix</span>
+                  <strong>Confirm mix design</strong>
+                </div>
+              ))}
+          {rmcNeedsRate &&
+            usedConcreteGrades(props.concreteMix)
+              .filter((grade) => props.rmcRateForGrade(grade) <= 0)
+              .map((grade) => (
+                <div key={grade} className="boq-premium-check-row">
+                  <span>M{grade} ready-mix</span>
+                  <strong>Rate pending</strong>
+                </div>
+              ))}
+          {steelNeedsReview && (
+            <div className="boq-premium-check-row">
+              <span>Steel specification</span>
+              <strong>Confirm brand and grade in quotation</strong>
+            </div>
+          )}
           {pendingGroups.map((group) => (
             <div
               key={group.stage + group.key}
@@ -2975,6 +3060,9 @@ export function BoqStageBuilder(props: Props) {
                 </div>
               ))}
           {guidedStep !== 2 &&
+            !mixNeedsReview &&
+            !rmcNeedsRate &&
+            !steelNeedsReview &&
             !previewEntries.length &&
             !pendingGroups.length && <small>No stage items to review.</small>}
         </div>
@@ -3051,17 +3139,12 @@ export function BoqStageBuilder(props: Props) {
           {guidedStep === 3 && (
             <BoqStructuralConcreteCard
               enabled={props.structuralRmcEnabled}
-              ratePerM3={props.structuralRmcRate}
+              mix={props.concreteMix}
+              onMixChange={props.onConcreteMixChange}
+              rateForGrade={props.rmcRateForGrade}
               onToggle={props.onStructuralRmcToggle}
               onRateChange={props.onStructuralRmcRateChange}
               settings={props.structuralSettings}
-              cementRates={props.materialRates ?? []}
-              {...(props.cementSelections
-                ? { cementSelections: props.cementSelections }
-                : {})}
-              {...(props.onCementSelectionChange
-                ? { onCementSelectionChange: props.onCementSelectionChange }
-                : {})}
               canEdit={props.canSave}
               canViewCost={props.canViewCost}
               autoSaveLabel={

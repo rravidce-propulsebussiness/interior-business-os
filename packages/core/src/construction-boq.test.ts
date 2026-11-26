@@ -7,6 +7,8 @@ import {
   lapFeet,
   normalizeStructuralSettings,
   normalizeDesign,
+  normalizeConcreteMix,
+  quotedSteelSpecification,
   parseBars,
   parseFeet,
   parseOpenings,
@@ -2566,5 +2568,88 @@ describe('drawing-specific footing bends and stock cuts', () => {
     expect(bent).toEqual(
       footingMeshPieces({ ...footing, thicknessIn: 36 }, 50 / 304.8),
     );
+  });
+});
+
+describe('structural concrete grade selection', () => {
+  it('uses distinct RMC grades and does not duplicate constituent materials', () => {
+    const result = generateQuotationBoq({
+      details: quote(),
+      concreteMix: normalizeConcreteMix({
+        defaultGrade: 25,
+        overrides: { Column: 30, Footing: 20 },
+      }),
+    });
+    for (const [kind, grade] of [
+      ['quote-columns', 30],
+      ['quote-slab', 25],
+      ['quote-plinth-beam', 25],
+    ] as const) {
+      const line = result.lines.find((l) => l.kind === kind);
+      expect(line).toBeDefined();
+      expect(
+        line!.outputs.some((o) => o.material === 'concrete_m' + grade),
+      ).toBe(true);
+      expect(
+        line!.outputs.some((o) =>
+          ['cement', 'sand', 'aggregate'].includes(o.material ?? ''),
+        ),
+      ).toBe(false);
+    }
+    const footing = result.lines.find((l) => l.kind === 'quote-foundation')!;
+    expect(footing.outputs.some((o) => o.material === 'concrete_m20')).toBe(
+      true,
+    );
+  });
+  it('does not silently use an M20 recipe for a higher grade', () => {
+    const result = generateQuotationBoq({
+      details: quote(),
+      settings: { readyMixConcrete: 0 },
+      concreteMix: normalizeConcreteMix({ defaultGrade: 25 }),
+    });
+    const slab = result.lines.find((l) => l.kind === 'quote-slab')!;
+    expect(
+      slab.outputs.some((o) => o.material === 'concrete_mix_pending'),
+    ).toBe(true);
+    expect(slab.outputs.some((o) => o.material === 'cement')).toBe(false);
+    expect(result.warnings.some((w) => w.includes('M25 site mix'))).toBe(true);
+  });
+  it('uses the grade-specific approved mix, and migrates the previous RMC rate', () => {
+    const mix = normalizeConcreteMix({
+      defaultGrade: 25,
+      recipes: {
+        25: {
+          cementBags: 9,
+          sandCubicMetres: 0.4,
+          aggregateCubicMetres: 0.75,
+          confirmed: true,
+        },
+      },
+    });
+    const result = generateQuotationBoq({
+      details: quote(),
+      settings: { readyMixConcrete: 0 },
+      concreteMix: mix,
+    });
+    const slab = result.lines.find((l) => l.kind === 'quote-slab')!;
+    expect(slab.outputs.some((o) => o.material === 'cement')).toBe(true);
+    expect(
+      slab.outputs.some((o) => o.material === 'concrete_mix_pending'),
+    ).toBe(false);
+    expect(normalizeConcreteMix(undefined, 6300).rmcRates[20]).toBe(6300);
+  });
+  it('reads quoted grade and brand without assuming a ductility suffix', () => {
+    expect(
+      quotedSteelSpecification([
+        { title: 'Steel / TMT', brand: 'JSW', grade: 'Fe 500D' },
+      ]),
+    ).toEqual({ brand: 'JSW', grade: 'Fe500D' });
+    expect(
+      quotedSteelSpecification([{ title: 'Steel', brand: 'Tata 550 TMT' }])
+        ?.grade,
+    ).toBe('Fe550');
+    expect(
+      quotedSteelSpecification([{ title: 'Steel', brand: 'JSW' }])?.grade,
+    ).toBeNull();
   });
 });

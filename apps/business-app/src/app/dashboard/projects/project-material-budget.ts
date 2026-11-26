@@ -33,7 +33,10 @@ export type ProcurementBudgetRow = {
 const HEAD_PATTERNS: readonly [RegExp, string][] = [
   [/scaffold/, 'Scaffolding'],
   [/waterproof/, 'Waterproofing'],
-  [/\brmc\b|ready.?mix|\bm\s?20\b|\bm\s?25\b/, 'Concrete (M20)'],
+  [
+    /\brmc\b|ready.?mix|\bm\s?(?:20|25|30|35|40|45|50|55|60)\b/,
+    'Concrete (RMC)',
+  ],
   [/steel|tmt|\brods?\b|\bbars?\b|binding wire|fe\s?500/, 'Steel'],
   [/cement|\bopc\b|\bppc\b/, 'Cement'],
   [/\bsand\b|m-?sand|robo/, 'Sand'],
@@ -108,7 +111,9 @@ export function procurementVsBoq(
     return created;
   };
   for (const item of budget ?? []) {
-    const target = row(item.head);
+    const target = row(
+      item.head === 'Concrete (M20)' ? 'Concrete (RMC)' : item.head,
+    );
     target.boqAmount += item.amount;
     target.boqQuantity = item.quantity;
     target.unit = item.unit;
