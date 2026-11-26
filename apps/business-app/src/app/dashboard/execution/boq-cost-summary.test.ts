@@ -99,7 +99,7 @@ describe('material-wise BOQ cost', () => {
     const read = (path: string) =>
       readFileSync(new URL(path, import.meta.url), 'utf8');
     const workspace = read('./boq-workspace.tsx');
-    expect(workspace).toContain('const BOQ_ENGINE_VERSION = 5;');
+    expect(workspace).toContain('const BOQ_ENGINE_VERSION = 6;');
     expect(workspace).toContain('engineVersion: BOQ_ENGINE_VERSION,');
     expect(workspace).toContain(
       '(generator.engineVersion ?? 1) >= BOQ_ENGINE_VERSION',
@@ -134,4 +134,23 @@ describe('structural units and binding wire', () => {
     ).toBe(4.6);
     expect(withMeasuredBindingWire(result, 8, 40)).toEqual(result);
   });
+});
+
+it('allows binding wire for installed column bars cut from previous-stage offcuts', () => {
+  const outputs = [
+    {
+      name: '12 mm TMT',
+      material: 'steel',
+      quantity: 0,
+      unit: 'rod',
+      weightKg: 0,
+      rods: 0,
+      installedWeightKg: 125,
+    },
+  ];
+  expect(
+    withMeasuredBindingWire(outputs, 8, 40).find(
+      (o) => o.material === 'binding_wire',
+    )?.quantity,
+  ).toBe(1);
 });

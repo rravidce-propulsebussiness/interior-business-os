@@ -551,3 +551,71 @@ describe('shared compact work editors', () => {
     },
   );
 });
+
+describe('floor-wise column cutting editor', () => {
+  it('displays inherited grades, editable BBS dimensions and a zero-purchase cutting plan', () => {
+    const html = renderToStaticMarkup(
+      createElement(BoqStageBuilder, {
+        ...base,
+        initialEditor: { stage: 'Foundation', category: 'columns' },
+        design: {
+          footings: [{ ...newFootingType(0), columnRefs: 'C1', count: 4 }],
+          columns: [
+            {
+              label: 'C1',
+              count: 4,
+              floors: 0,
+              widthIn: 9,
+              depthIn: 12,
+              bars: '4-12',
+              tieDia: 8,
+              tieSpacingIn: 6,
+              footingLengthFeet: 5,
+              footingWidthFeet: 5,
+              footingThicknessIn: 12,
+              footingBarDia: 12,
+              footingBarSpacingIn: 6,
+              bbs: {
+                footingRef: 'F1',
+                meshOffsetMm: 51,
+                baseExtraMm: 0,
+                roofExtraMm: 0,
+              },
+            },
+          ],
+          beams: [],
+          plinthRunFeet: 0,
+        },
+        lines: [
+          {
+            id: 'column',
+            name: 'Foundation columns',
+            section: 'Foundation',
+            kind: 'quote-columns',
+            inputs: {},
+            notes: 'C1-G1: 7265 mm × 8 nos',
+            outputs: [
+              {
+                name: '12 mm TMT',
+                quantity: 0,
+                unit: 'rod',
+                material: 'steel',
+                source: 'Cut from opening offcuts',
+                installedWeightKg: 15,
+                order: '0 new rods',
+              },
+            ],
+          },
+        ],
+      }),
+    );
+    expect(html).toContain('Floor-wise cutting &amp; procurement');
+    expect(html).toContain('JSW');
+    expect(html).toContain('Fe500D');
+    expect(html).toContain('Linked footing type');
+    expect(html).toContain('Mesh start above footing bottom');
+    expect(html).toContain('Drawing ring cutting length');
+    expect(html).toContain('7265 mm');
+    expect(html).toContain('0 new rods');
+  });
+});

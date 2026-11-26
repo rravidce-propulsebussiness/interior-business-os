@@ -70,6 +70,7 @@ export type LabourLine = {
     quantity: number;
     unit: string;
     weightKg?: number;
+    installedWeightKg?: number;
   }[];
 };
 export type LabourMeasure = {
@@ -186,8 +187,16 @@ export function labourMeasurements(
       const qty = finite(output.quantity);
       // Steel purchase outputs carry a calculated weight; count that once as a
       // separate bar-bending measurement, not as a second material charge.
-      if (material === 'steel' && finite(output.weightKg ?? 0) > 0) {
-        push(line.section, 'bar-bending', output.weightKg ?? 0, 'kg');
+      if (
+        material === 'steel' &&
+        finite(output.installedWeightKg ?? output.weightKg ?? 0) > 0
+      ) {
+        push(
+          line.section,
+          'bar-bending',
+          output.installedWeightKg ?? output.weightKg ?? 0,
+          'kg',
+        );
         continue;
       }
       if (

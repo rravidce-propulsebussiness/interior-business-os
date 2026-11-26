@@ -58,6 +58,8 @@ import {
   rmcGradeForMaterial,
   type ConcreteMix,
   type ConcreteGrade,
+  type ColumnBbsDetails,
+  gradeForMember,
   type SteelSpecification,
 } from '@business-os/core/construction-boq';
 import { BoqStructuralConcreteCard } from './boq-structural-concrete-card';
@@ -74,6 +76,8 @@ export type StageBoqOutput = {
   rate?: number;
   quotedRate?: number;
   weightKg?: number;
+  installedWeightKg?: number;
+  order?: string;
   source?: string;
 };
 export type StageBoqLine = {
@@ -85,6 +89,7 @@ export type StageBoqLine = {
   origin?: string;
   inputs: Record<string, string | number | boolean>;
   outputs: StageBoqOutput[];
+  notes?: string;
 };
 type Category = { key: string; label: string; icon: string };
 type Entry = {
@@ -283,7 +288,9 @@ export function isDerivedQuantityReadOnly(kind: string, name: string) {
     kind === 'quote-window-sajjas' ||
     isAutoPlasterQuantity(kind, name) ||
     name === 'Binding wire' ||
-    (kind === 'quote-footings' && /\bTMT\b/.test(name))
+    ((kind === 'quote-footings' || kind === 'quote-columns') &&
+      /\bTMT\b/.test(name)) ||
+    (kind === 'quote-columns' && name === 'Column BBS — review required')
   );
 }
 
@@ -1591,6 +1598,63 @@ export function BoqStageBuilder(props: Props) {
                   + Add column type
                 </button>
               </div>
+              <div className="boq-stage-subcard">
+                <strong>Floor-wise cutting &amp; procurement</strong>
+                <p>
+                  Floor heights follow Site Setup / quotation. Column steel
+                  starts at the footing mesh. Lap groups are staggered in
+                  eligible central-half storey zones; usable offcuts carry
+                  forward by diameter. All automatic quantities are preliminary
+                  until the engineer approves the BBS.
+                </p>
+                <p>
+                  Concrete: M{gradeForMember(props.concreteMix, 'Column')} ·
+                  Steel: {props.steelSpec?.brand || 'Package brand missing'} /{' '}
+                  {props.steelSpec?.grade || 'Grade missing'}
+                </p>
+                <div className="boq-stage-input-grid">
+                  <InputNumber
+                    label="Column stock length"
+                    unit="mm"
+                    min={6000}
+                    value={drawing.columnStockLengthMm ?? 12000}
+                    onChange={(value) =>
+                      props.onDesignChange({
+                        ...drawing,
+                        columnStockLengthMm: Math.min(
+                          24000,
+                          Math.max(6000, Math.round(value)),
+                        ),
+                      })
+                    }
+                  />
+                  <InputNumber
+                    label="Cut loss per piece"
+                    unit="mm"
+                    value={drawing.columnCutLossMm ?? 0}
+                    onChange={(value) =>
+                      props.onDesignChange({
+                        ...drawing,
+                        columnCutLossMm: Math.min(
+                          20,
+                          Math.max(0, Math.round(value)),
+                        ),
+                      })
+                    }
+                  />
+                </div>
+                {drawing.columnStockLengthMm &&
+                drawing.columnStockLengthMm !== 12000 ? (
+                  <small>
+                    Confirm the supplier rate per rod matches this stock length.
+                  </small>
+                ) : null}
+                <small>
+                  {props.floors
+                    .map((f) => f.name + ': ' + f.heightFeet + ' ft')
+                    .join(' · ')}
+                </small>
+              </div>
               {drawing.columns.map((col, ci) => (
                 <div className="boq-stage-subcard" key={ci}>
                   <div className="boq-stage-subhead">
@@ -1658,6 +1722,111 @@ export function BoqStageBuilder(props: Props) {
                       }
                     />
                   </div>
+                  <BoqAdvanced label="Footing, lap & ring cutting details">
+                    <div className="boq-stage-input-grid">
+                      <label className="boq-stage-field">
+                        <span>Linked footing type</span>
+                        <select
+                          value={col.bbs?.footingRef ?? ''}
+                          onChange={(e) =>
+                            updateCol(ci, {
+                              bbs: { ...col.bbs, footingRef: e.target.value },
+                            })
+                          }
+                        >
+                          <option value="">Auto from column references</option>
+                          {(drawing.footings ?? []).map((f, i) => (
+                            <option key={i} value={f.label}>
+                              {f.label} — {f.columnRefs}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      {(
+                        [
+                          [
+                            'footingBottomDepthMm',
+                            'Depth to footing bottom (mm)',
+                            'Site depth',
+                          ],
+                          [
+                            'meshOffsetMm',
+                            'Mesh start above footing bottom (mm)',
+                            'Auto from mesh',
+                          ],
+                          [
+                            'jointDepthMm',
+                            'Beam / joint depth (mm)',
+                            'Auto from beams',
+                          ],
+                          [
+                            'baseExtraMm',
+                            'Footing anchorage extra cut length (mm)',
+                            'Drawing required',
+                          ],
+                          [
+                            'roofExtraMm',
+                            'Roof anchorage extra cut length (mm)',
+                            'Drawing required',
+                          ],
+                          [
+                            'lapMm',
+                            'Minimum drawing lap length (mm)',
+                            'Calculated by grade',
+                          ],
+                          [
+                            'ringCutLengthMm',
+                            'Drawing ring cutting length (mm)',
+                            'Auto, verify bends',
+                          ],
+                          [
+                            'crossTieCount',
+                            'Cross-ties per ring (nos)',
+                            'Confirm arrangement',
+                          ],
+                          [
+                            'crossTieCutLengthMm',
+                            'Cross-tie cutting length (mm)',
+                            'Drawing required',
+                          ],
+                        ] as const
+                      ).map(([key, label, placeholder]) => (
+                        <label className="boq-stage-field" key={key}>
+                          <span>{label}</span>
+                          <input
+                            type="number"
+                            min={0}
+                            max={30000}
+                            step={1}
+                            placeholder={placeholder}
+                            value={col.bbs?.[key] ?? ''}
+                            onChange={(e) => {
+                              const next: ColumnBbsDetails = { ...col.bbs };
+                              if (e.target.value === '') delete next[key];
+                              else
+                                next[key] = Math.min(
+                                  30000,
+                                  Math.max(
+                                    0,
+                                    Math.round(Number(e.target.value)),
+                                  ),
+                                );
+                              updateCol(ci, { bbs: next });
+                            }}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                    <small>
+                      Use actual mesh centreline level and approved anchorage
+                      extra lengths; 0 means explicitly straight. Lap length
+                      will not be reduced below the calculated tension
+                      development requirement. Ring auto length uses 135° hook
+                      tails max(8 × diameter, 75 mm); enter the verified BBS
+                      cutting length including bends. Check joints, confinement
+                      and cross-ties with the structural engineer.
+                    </small>
+                  </BoqAdvanced>
                 </div>
               ))}
             </>
@@ -2468,6 +2637,21 @@ export function BoqStageBuilder(props: Props) {
           {!isGeometry(category.key) && (
             <div className="boq-compact-results">
               <h4>Materials & labour</h4>
+              {isColumns &&
+                [
+                  ...new Map(
+                    foundEntries.map((entry) => [entry.line.id, entry.line]),
+                  ).values(),
+                ]
+                  .filter((line) => line.notes)
+                  .map((line) => (
+                    <BoqAdvanced
+                      key={line.id}
+                      label={line.name + ' — cutting plan'}
+                    >
+                      <div style={{ whiteSpace: 'pre-line' }}>{line.notes}</div>
+                    </BoqAdvanced>
+                  ))}
               <div className="boq-volume-scroll">
                 <table
                   className="boq-volume-table boq-cost-table"
@@ -2524,10 +2708,21 @@ export function BoqStageBuilder(props: Props) {
                           <td>
                             {entry.output.name}
                             <small>{entry.line.name}</small>
-                            {entry.line.kind === 'quote-footings' &&
-                              entry.output.material === 'steel' &&
+                            {(entry.line.kind === 'quote-footings' ||
+                              entry.line.kind === 'quote-columns') &&
+                              (entry.output.material === 'steel' ||
+                                entry.output.material ===
+                                  'column_bbs_pending') &&
                               entry.output.source && (
                                 <small>{entry.output.source}</small>
+                              )}
+                            {entry.line.kind === 'quote-columns' &&
+                              entry.output.installedWeightKg !== undefined && (
+                                <small>
+                                  Installed cut steel:{' '}
+                                  {entry.output.installedWeightKg} kg ·{' '}
+                                  {entry.output.order}
+                                </small>
                               )}
                           </td>
                           <td>

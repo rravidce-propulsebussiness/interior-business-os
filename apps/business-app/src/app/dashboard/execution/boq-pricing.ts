@@ -1026,7 +1026,11 @@ export function rateForOutput(
   rates: readonly Rate[],
   selections: Readonly<Record<string, string>> = {},
 ): number {
-  if (output.material === 'concrete_mix_pending') return 0;
+  if (
+    output.material === 'concrete_mix_pending' ||
+    output.material === 'column_bbs_pending'
+  )
+    return 0;
   if (output.rate !== undefined && Number.isFinite(output.rate))
     return output.rate;
   const material = materialForOutput(output);
@@ -1063,7 +1067,11 @@ export function isBoqCostUnpriced<
   T extends PricedOutput & { quantity: number; kind?: string },
 >(output: T, resolveCost: (output: T) => number): boolean {
   if (!(output.quantity > 0)) return false;
-  if (output.material === 'concrete_mix_pending') return true;
+  if (
+    output.material === 'concrete_mix_pending' ||
+    output.material === 'column_bbs_pending'
+  )
+    return true;
   if (/reference only|volume only/i.test(output.name)) return false;
   const costBearing =
     Boolean(output.material) ||
@@ -1542,7 +1550,8 @@ export function costHead(group: string | undefined): CostHead {
     return 'Concrete (RMC)';
   const direct = HEAD_BY_GROUP[group];
   if (direct) return direct;
-  if (group.startsWith('steel_')) return 'Steel';
+  if (group === 'column_bbs_pending' || group.startsWith('steel_'))
+    return 'Steel';
   if (group.startsWith('cement')) return 'Cement';
   if (group.startsWith('door_')) return 'Doors & windows';
   if (group.startsWith('paint_')) return 'Painting';

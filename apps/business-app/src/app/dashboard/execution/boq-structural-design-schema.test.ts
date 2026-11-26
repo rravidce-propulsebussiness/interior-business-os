@@ -13,6 +13,13 @@ describe('saved BOQ structural drawing persistence', () => {
           bars: '4-16+2-12',
           widthIn: 9,
           depthIn: 12,
+          bbs: {
+            footingRef: 'F1',
+            meshOffsetMm: 51,
+            baseExtraMm: 0,
+            roofExtraMm: 0,
+            lapMm: 914,
+          },
         },
       ],
       beams: [
@@ -38,6 +45,8 @@ describe('saved BOQ structural drawing persistence', () => {
         },
       ],
       plinthRunFeet: 0,
+      columnStockLengthMm: 12000,
+      columnCutLossMm: 3,
       plinthBeams: [
         {
           label: 'PB1',
@@ -88,6 +97,9 @@ describe('saved BOQ structural drawing persistence', () => {
     );
     expect(reopened).toEqual(input);
     const normalized = normalizeDesign(reopened)!;
+    expect(normalized.columns[0]?.bbs).toEqual(input.columns[0]?.bbs);
+    expect(normalized.columnStockLengthMm).toBe(12000);
+    expect(normalized.columnCutLossMm).toBe(3);
     expect(normalized.beams[0]?.countsByFloor).toEqual([3, 4]);
     expect(normalized.plinthBeams?.[0]?.bars).toBe('4-16+2-12');
     expect(normalized.slabPanels?.[0]?.reinforcement).toHaveLength(2);
