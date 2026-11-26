@@ -25,6 +25,7 @@ import {
   footingConcreteCft,
   pedestalConcreteCft,
   footingMeshPieces,
+  footingBendFeet,
   barsAcross,
   padCount,
 } from './footing-takeoff';
@@ -2280,6 +2281,7 @@ export type StructuralDesign = {
 
 /** Structural rules a drawing can set for its own project. */
 export const DESIGN_SETTING_KEYS = [
+  'stockBarFeet',
   'slabThicknessIn',
   'slabMainDia',
   'slabMainSpacingIn',
@@ -2385,6 +2387,12 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
         mesh: mesh === 'double' ? 'double' : 'single',
         bottomBarDia: num(entry.bottomBarDia, 12, 6, 40),
         bottomSpacingIn: num(entry.bottomSpacingIn, 6, 2, 24),
+        ...(entry.bottomBendIn !== undefined
+          ? { bottomBendIn: num(entry.bottomBendIn, 0, 0, 120) }
+          : {}),
+        ...(entry.topBendIn !== undefined
+          ? { topBendIn: num(entry.topBendIn, 0, 0, 120) }
+          : {}),
         topBarDia: num(entry.topBarDia, 12, 6, 40),
         topSpacingIn: num(entry.topSpacingIn, 6, 2, 24),
         ...(Array.isArray(entry.reinforcement)
@@ -3373,6 +3381,14 @@ export function generateQuotationBoq(
         const tally: SteelTally = new Map();
         // An explicit directional mesh replaces (never supplements) the
         // legacy two-direction, single-diameter mesh for this footing type.
+        if (
+          footing.bottomBendIn === undefined &&
+          (footing.bottomBarDia > 0 ||
+            footing.reinforcement?.some((set) => set.layer === 'bottom'))
+        )
+          warnings.push(
+            `${footing.label}: bottom bar bend length uses the legacy full-depth estimate. Confirm straight bars or actual cutting length from the approved BBS.`,
+          );
         const meshPieces = Array.isArray(footing.reinforcement)
           ? footing.reinforcement.flatMap((set) => {
               if (!(set.dia > 0 && set.spacingIn > 0)) return [];
@@ -3381,10 +3397,7 @@ export function generateQuotationBoq(
               const span = set.direction === 'length' ? length : width;
               const across = set.direction === 'length' ? width : length;
               if (!(span > 0 && across > 0)) return [];
-              const bendUp =
-                set.layer === 'bottom'
-                  ? Math.max(0, footing.thicknessIn / 12 - 2 * footingCover)
-                  : 0;
+              const bendUp = footingBendFeet(footing, set.layer, footingCover);
               return [
                 {
                   diameter: set.dia,
@@ -3396,14 +3409,27 @@ export function generateQuotationBoq(
               ];
             })
           : footingMeshPieces(footing, footingCover);
+        // Pool identical cuts across directions/layers of this footing type.
+        // Separate ceilings otherwise buy an unnecessary rod for each direction.
+        const cuts = new Map<string, (typeof meshPieces)[number]>();
         for (const piece of meshPieces) {
+          const key = piece.diameter + ':' + piece.lengthFeet.toFixed(8);
+          const previous = cuts.get(key);
+          cuts.set(
+            key,
+            previous
+              ? { ...previous, pieces: previous.pieces + piece.pieces }
+              : { ...piece },
+          );
+        }
+        for (const piece of cuts.values()) {
           const plan = cutPlan(piece.lengthFeet, piece.pieces, stock, 0);
           addSteel(
             tally,
             piece.diameter,
             plan.bars * stock * M_PER_FT,
             plan.bars,
-            `${footing.label} ${piece.layer} mesh ${piece.pieces} pcs × ${ft(piece.lengthFeet)}`,
+            `${footing.label} mesh ${piece.pieces} pcs × ${ft(piece.lengthFeet)} (${plan.piecesPerBar} cuts/rod)`,
           );
         }
         mergeSteel(tally);

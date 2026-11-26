@@ -2520,3 +2520,51 @@ describe('measured detailed BOQ finishes', () => {
     ).toBe(true);
   });
 });
+
+describe('drawing-specific footing bends and stock cuts', () => {
+  const footing = {
+    ...newFootingType(0),
+    count: 12,
+    lengthFeet: 5,
+    widthFeet: 5,
+    thicknessIn: 24,
+    bottomBarDia: 12,
+    bottomSpacingIn: 6,
+    bottomBendIn: 12,
+  };
+  it('counts 264 pieces and 53 stock rods for the 12-pad schedule', () => {
+    const mesh = footingMeshPieces(footing, 50 / 304.8);
+    expect(mesh.reduce((sum, row) => sum + row.pieces, 0)).toBe(264);
+    expect(mesh[0]?.lengthFeet).toBeCloseTo(6.671916, 5);
+    const result = generateQuotationBoq({
+      details: quote(),
+      settings: { coverFootingMm: 50, stockBarFeet: 40 },
+      design: {
+        footings: [footing],
+        columns: [],
+        beams: [],
+        plinthRunFeet: 0,
+        settings: { stockBarFeet: 40 },
+      },
+      splitBeamSlab: true,
+    });
+    expect(
+      result.lines
+        .find((line) => line.kind === 'quote-footings')
+        ?.outputs.find((output) => output.diameter === 12)?.quantity,
+    ).toBe(53);
+    expect(result.design?.footings[0]?.bottomBendIn).toBe(12);
+    expect(result.design?.settings?.stockBarFeet).toBe(40);
+  });
+  it('does not infer bend length from footing depth after the drawing value is entered', () => {
+    const straight = footingMeshPieces(
+      { ...footing, bottomBendIn: 0 },
+      50 / 304.8,
+    );
+    const bent = footingMeshPieces(footing, 50 / 304.8);
+    expect(straight[0]?.lengthFeet).toBeCloseTo(4.671916, 5);
+    expect(bent).toEqual(
+      footingMeshPieces({ ...footing, thicknessIn: 36 }, 50 / 304.8),
+    );
+  });
+});

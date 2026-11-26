@@ -7,6 +7,8 @@ import {
   isBoqCostUnpriced,
   rateForOutput,
 } from './boq-pricing';
+import { editorUnit } from './boq-compact-editor';
+import { withMeasuredBindingWire } from './boq-binding-wire';
 import { fillingOutput } from './boq-stage-measurements';
 
 describe('material-wise BOQ cost', () => {
@@ -97,11 +99,39 @@ describe('material-wise BOQ cost', () => {
     const read = (path: string) =>
       readFileSync(new URL(path, import.meta.url), 'utf8');
     const workspace = read('./boq-workspace.tsx');
-    expect(workspace).toContain('const BOQ_ENGINE_VERSION = 3;');
+    expect(workspace).toContain('const BOQ_ENGINE_VERSION = 4;');
     expect(workspace).toContain('engineVersion: BOQ_ENGINE_VERSION,');
     expect(workspace).toContain(
       '(generator.engineVersion ?? 1) >= BOQ_ENGINE_VERSION',
     );
     expect(read('./boq-actions.ts')).toContain('engineVersion: z');
+  });
+});
+
+describe('structural units and binding wire', () => {
+  it('converts millimetres back to saved inches', () => {
+    const view = editorUnit('in', 'm');
+    expect(view.unit).toBe('mm');
+    expect(6 * view.factor).toBeCloseTo(152.4);
+    expect(304.8 / view.factor).toBeCloseTo(12);
+    expect(editorUnit('in', 'ft')).toEqual({ unit: 'in', factor: 1 });
+    expect(editorUnit('mm', 'm')).toEqual({ unit: 'mm', factor: 1 });
+  });
+  it('adds binding wire only once for measured reinforcement', () => {
+    const outputs = [
+      {
+        name: '12 mm TMT',
+        material: 'steel',
+        quantity: 53,
+        unit: 'rod',
+        weightKg: 570,
+        rods: 53,
+      },
+    ];
+    const result = withMeasuredBindingWire(outputs, 8, 40);
+    expect(
+      result.find((output) => output.material === 'binding_wire')?.quantity,
+    ).toBe(4.6);
+    expect(withMeasuredBindingWire(result, 8, 40)).toEqual(result);
   });
 });

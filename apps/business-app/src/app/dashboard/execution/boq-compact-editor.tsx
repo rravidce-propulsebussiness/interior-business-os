@@ -19,8 +19,9 @@ export function useBoqEditorUnit() {
 
 export function editorUnit(unit: string | undefined, selected: Unit) {
   const source = unit ?? '';
-  // Retain engineering bar diameters and inch-based reinforcement spacing.
+  // Metric mode uses millimetres for short structural dimensions.
   if (selected === 'm') {
+    if (source === 'in') return { unit: 'mm', factor: 25.4 };
     if (source === 'ft' || source === 'rft')
       return { unit: 'm', factor: 0.3048 };
     if (source === 'sqft' || source === 'sq ft')
