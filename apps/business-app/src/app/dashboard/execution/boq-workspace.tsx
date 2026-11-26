@@ -102,7 +102,7 @@ type Generator = {
 };
 /** Bump when the quotation generator adds or reprices generated lines, so
  * saved BOQs regenerate once on edit (manual items and edits are kept). */
-const BOQ_ENGINE_VERSION = 5;
+const BOQ_ENGINE_VERSION = 6;
 type SavedLine = {
   id: string;
   name: string;
@@ -122,6 +122,7 @@ type SavedLine = {
     rods?: number;
     diameter?: number;
     weightKg?: number;
+    installedWeightKg?: number;
   }[];
   quotedPrice?: number;
   quoteLineId?: string;
@@ -773,6 +774,7 @@ export function BoqWorkspace({
       details: schedule,
       settings: concreteSettings,
       concreteMix,
+      steelGrade: steelSpec?.grade ?? null,
       floors: floorsForGeneration,
       counts: countsForGeneration,
       design: genDesign,
@@ -889,7 +891,8 @@ export function BoqWorkspace({
         const edit = cleanEdits[overrideKey(line, output)];
         const lockedPlaster = isAutoPlasterQuantity(line.kind, output.name);
         const lockedSteel =
-          line.kind === 'quote-footings' && output.material === 'steel';
+          (line.kind === 'quote-footings' || line.kind === 'quote-columns') &&
+          output.material === 'steel';
         const measured = edit
           ? {
               ...output,
@@ -909,7 +912,8 @@ export function BoqWorkspace({
         if (output.unit === 'm³' && output.name.endsWith(' · volume only'))
           return { ...measured, rate: 0 };
         return rmcGradeForMaterial(output.material) !== undefined ||
-          output.material === 'concrete_mix_pending'
+          output.material === 'concrete_mix_pending' ||
+          output.material === 'column_bbs_pending'
           ? output
           : measured;
       }),
@@ -1260,7 +1264,10 @@ export function BoqWorkspace({
       (output.name === 'Binding wire' ||
         (target?.origin &&
           (isAutoPlasterQuantity(target.kind, output.name) ||
-            (target.kind === 'quote-footings' && output.material === 'steel'))))
+            ((target.kind === 'quote-footings' ||
+              target.kind === 'quote-columns') &&
+              output.material === 'steel') ||
+            output.material === 'column_bbs_pending')))
     )
       return;
     if (target?.origin && output) {
@@ -1331,7 +1338,11 @@ export function BoqWorkspace({
       setGradeRate(grade, rate);
       return;
     }
-    if (output?.material === 'concrete_mix_pending') return;
+    if (
+      output?.material === 'concrete_mix_pending' ||
+      output?.material === 'column_bbs_pending'
+    )
+      return;
     if (target?.origin && output) {
       const key = overrideKey(target, output);
       const next = {

@@ -7,8 +7,9 @@
  * editable company settings; they are not a substitute for the structural
  * engineer's bar bending schedule.
  *
- * Steel weights are for whole stock bars bought; offcuts are wastage.
- * Steel is planned the way it is cut on site: stock bars (40 ft / 12 m by
+ * The measured column BBS uses actual cut lengths and carries usable
+ * offcuts into later stages. Legacy estimates and other members use stock
+ * bars (40 ft / 12 m by
  * default) are cut into column "lifts". The foundation lift (footing up through
  * the ground floor, plus lap) is normally one half bar, and each upper floor
  * lift (floor height + lap) is normally one third bar. When a floor height plus
@@ -21,12 +22,22 @@ import {
   gradeForMember,
   mixRecipe,
   normalizeConcreteMix,
+  quotedSteelSpecification,
   rmcMaterialKey,
   usedConcreteGrades,
   M20_SITE_MIX_PER_M3,
   type ConcreteMix,
 } from './structural-concrete';
 export * from './structural-concrete';
+import {
+  allocateColumnStock,
+  columnTensionLapMm,
+  normalizeColumnBbs,
+  planColumnCuts,
+  type ColumnBbsDetails,
+  type ColumnCut,
+} from './column-bbs';
+export * from './column-bbs';
 import { parseSftEstimate, type SftEstimateDetails } from './sft-quotation';
 import type { DesignFootingType } from './footing-takeoff';
 import {
@@ -65,6 +76,8 @@ export type GeneratedOutput = {
   diameter?: number;
   /** Weight of those rods, for reinforcement outputs. */
   weightKg?: number;
+  /** Installed cut length weight, excluding offcuts; for labour and binding wire. */
+  installedWeightKg?: number;
   /** What to order, e.g. "312 tiles of 2×2 ft · 78 boxes of 4". */
   order?: string;
 };
@@ -2208,6 +2221,7 @@ export type DesignColumnType = {
   footingThicknessIn: number;
   footingBarDia: number;
   footingBarSpacingIn: number;
+  bbs?: ColumnBbsDetails;
 };
 /** One beam type of the drawing; running feet under each floor's roof. */
 export type DesignBeamType = {
@@ -2276,6 +2290,8 @@ export type StructuralDesign = {
   /** Older saved schedules carried footing geometry on C1/C2 rows. */
   legacyFootings?: boolean;
   columns: DesignColumnType[];
+  columnStockLengthMm?: number;
+  columnCutLossMm?: number;
   beams: DesignBeamType[];
   /** Measured PB1/PB2 schedules, replacing the single legacy plinth run. */
   plinthBeams?: DesignPlinthBeamType[];
@@ -2348,6 +2364,7 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
       footingThicknessIn: num(item?.footingThicknessIn, 12, 6, 48),
       footingBarDia: num(item?.footingBarDia, 12, 8, 25),
       footingBarSpacingIn: num(item?.footingBarSpacingIn, 6, 3, 12),
+      ...(item?.bbs ? { bbs: normalizeColumnBbs(item.bbs) } : {}),
     })); // Preserve incomplete drawing rows for the next autosave.
   const hasFootingSchedule = Array.isArray(value.footings);
   const legacyFootings =
@@ -2550,6 +2567,16 @@ export function normalizeDesign(raw: unknown): StructuralDesign | null {
     footings,
     ...(legacyFootings ? { legacyFootings: true } : {}),
     columns,
+    ...(value.columnStockLengthMm !== undefined
+      ? {
+          columnStockLengthMm: Math.round(
+            num(value.columnStockLengthMm, 12000, 6000, 24000),
+          ),
+        }
+      : {}),
+    ...(value.columnCutLossMm !== undefined
+      ? { columnCutLossMm: Math.round(num(value.columnCutLossMm, 0, 0, 20)) }
+      : {}),
     beams,
     ...(plinthBeams.length ? { plinthBeams } : {}),
     ...(slabPanels.length ? { slabPanels } : {}),
@@ -2988,6 +3015,7 @@ export type QuotationBoqInput = {
   details: SftEstimateDetails;
   settings?: unknown;
   concreteMix?: ConcreteMix;
+  steelGrade?: string | null;
   /** Edited floors (e.g. corrected heights); defaults come from the quote. */
   floors?: BoqFloor[];
   /** Edited counts per floor; missing values are estimated. */
@@ -3535,8 +3563,281 @@ export function generateQuotationBoq(
       }
     }
 
-    // --- Columns, one lift per stage so steel is brought floor by floor ---
-    {
+    // --- Drawing-based floor-wise column BBS; retain legacy engine for
+    // historical non-measured documents. Concrete and bar lengths use
+    // different datums: concrete begins at top of footing/pedestal,
+    // longitudinal reinforcement starts at the actual bottom mesh.
+    if (splitBeamSlab && enteredColumns.length) {
+      const columnStock = design?.columnStockLengthMm ?? 12000;
+      const loss = design?.columnCutLossMm ?? 0;
+      const cuts: ColumnCut[] = [];
+      const stageRows = floors.map(() => ({
+        concrete: 0,
+        columns: 0,
+        notes: [] as string[],
+        pending: [] as string[],
+        heights: [] as string[],
+      }));
+      const grade = gradeForMember(mix, 'Column');
+      const steelGrade =
+        input.steelGrade ??
+        quotedSteelSpecification(input.details.sections)?.grade;
+      const fy = Number(steelGrade?.match(/\d+/)?.[0] ?? 0);
+      for (const col of enteredColumns) {
+        const bbs = col.bbs ?? {};
+        const bars = parseBars(col.bars);
+        const selectedFloors = floors.slice(0, col.floors || floors.length);
+        const linked =
+          design?.footings.filter(
+            (f) =>
+              f.count > 0 &&
+              (bbs.footingRef
+                ? f.label === bbs.footingRef
+                : f.columnRefs
+                    .split(/[,;]+/)
+                    .some(
+                      (ref) =>
+                        ref.trim().toLowerCase() ===
+                        col.label.trim().toLowerCase(),
+                    )),
+          ) ?? [];
+        const footing = linked.length === 1 ? linked[0] : undefined;
+        const footingHeight = footing
+          ? (footing.thicknessIn +
+              (footing.geometry === 'stepped' ? footing.stepThicknessIn : 0)) *
+              25.4 +
+            (footing.pedestal ? footing.pedestalHeightFeet * 304.8 : 0)
+          : col.footingThicknessIn * 25.4;
+        const depth = bbs.footingBottomDepthMm || s.foundationDepthFeet * 304.8;
+        const bottomMesh =
+          footing?.reinforcement?.filter((r) => r.layer === 'bottom') ?? [];
+        const meshOffset =
+          bbs.meshOffsetMm ??
+          Math.round(
+            footingCover / FT_PER_MM +
+              (bottomMesh.length
+                ? bottomMesh.reduce((n, r) => n + r.dia, 0)
+                : 2 * (footing?.bottomBarDia ?? col.footingBarDia)),
+          );
+        const plinthMm = s.plinthHeightFeet * 304.8;
+        const concreteToPlinth = depth + plinthMm - footingHeight;
+        const meshToPlinth = depth + plinthMm - meshOffset;
+        const maxDia = Math.max(...bars.map((b) => b.dia));
+        const codeLap = columnTensionLapMm(maxDia, grade, fy);
+        const lap = Math.max(
+          codeLap ?? Math.ceil(s.lapDiameters * maxDia),
+          bbs.lapMm ?? 0,
+        );
+        const setupWarnings = [
+          ...(!footing
+            ? [
+                'Link exactly one footing type; using legacy thickness provisionally.',
+              ]
+            : []),
+          ...(bbs.meshOffsetMm === undefined
+            ? ['Mesh level estimated from bottom cover and mesh bars.']
+            : []),
+          ...(!codeLap
+            ? [
+                'Steel grade missing from package; provisional company lap multiplier.',
+              ]
+            : []),
+          ...(bbs.jointDepthMm === undefined
+            ? ['Joint depth estimated from beam schedule/company setting.']
+            : []),
+          ...(s.topStarters
+            ? [
+                'Future roof starters require separate approved continuation schedule.',
+              ]
+            : []),
+        ];
+        const valid =
+          concreteToPlinth >= 0 &&
+          meshToPlinth >= concreteToPlinth &&
+          meshOffset >= 0;
+        if (!valid)
+          setupWarnings.push(
+            'Footing/mesh levels conflict with plinth level; verify dimensions.',
+          );
+        const plan = valid
+          ? planColumnCuts({
+              mark: col.label,
+              count: col.count,
+              bars,
+              floors: selectedFloors.map((f, i) => ({
+                heightMm: Math.round(f.heightFeet * 304.8),
+                jointDepthMm:
+                  bbs.jointDepthMm ??
+                  Math.round(
+                    Math.max(
+                      s.beamDepthIn,
+                      ...(design?.beams
+                        .filter((b) => (b.runFeet[i] ?? 0) > 0)
+                        .map((b) => b.depthIn) ?? []),
+                    ) * 25.4,
+                  ),
+              })),
+              meshToPlinthMm: Math.round(meshToPlinth),
+              concreteToPlinthMm: Math.round(concreteToPlinth),
+              widthMm: col.widthIn * 25.4,
+              depthMm: col.depthIn * 25.4,
+              coverMm: columnCover / FT_PER_MM,
+              ringDia: col.tieDia,
+              ringSpacingMm: col.tieSpacingIn * 25.4,
+              lapMm: lap,
+              stockMm: columnStock,
+              cutLossMm: loss,
+              bbs,
+            })
+          : null;
+        const allWarnings = [...setupWarnings, ...(plan?.warnings ?? [])];
+        warnings.push(...allWarnings.map((w) => col.label + ': ' + w));
+        if (plan) cuts.push(...plan.cuts);
+        for (const [i, f] of selectedFloors.entries()) {
+          const stage = stageRows[i]!;
+          const heightMm =
+            f.heightFeet * 304.8 +
+            (i === 0 ? Math.max(0, concreteToPlinth) : 0);
+          stage.columns += col.count;
+          stage.concrete +=
+            col.count *
+            (heightMm / 304.8) *
+            (col.widthIn / 12) *
+            (col.depthIn / 12) *
+            CUM_PER_CFT;
+          stage.heights.push(col.label + ' ' + ft(heightMm / 304.8));
+          stage.notes.push(
+            col.label +
+              ': ' +
+              col.count +
+              ' columns; concrete height ' +
+              ft(heightMm / 304.8) +
+              '; lap ' +
+              lap +
+              ' mm (' +
+              (codeLap ? 'M' + grade + ' / ' + steelGrade : 'provisional') +
+              ').' +
+              (i === 0
+                ? ' Mesh to plinth ' +
+                  Math.round(meshToPlinth) +
+                  ' mm; footing/pedestal height ' +
+                  Math.round(footingHeight) +
+                  ' mm.'
+                : ''),
+            ...(plan?.notes[i] ?? []),
+          );
+          if (
+            !plan ||
+            plan.pending ||
+            setupWarnings.length ||
+            plan.warnings.length
+          )
+            stage.pending.push(col.label + ': ' + allWarnings.join(' '));
+        }
+      }
+      const orders = allocateColumnStock(cuts, columnStock, loss);
+      if (columnStock !== 12000)
+        warnings.push(
+          'Column stock is not 12 m; confirm supplier per-rod rate.',
+        );
+      for (const [i, stage] of stageRows.entries()) {
+        if (!stage.columns) continue;
+        const section = i === 0 ? 'Foundation' : floors[i]!.name;
+        const steel: GeneratedOutput[] = orders
+          .filter((r) => r.stage === i)
+          .map((r) => {
+            stage.notes.push(
+              'Ø' +
+                r.diameter +
+                ' cutting sequence: ' +
+                r.moves
+                  .map(
+                    (m) =>
+                      m.count +
+                      ' × [' +
+                      m.fromMm +
+                      ' → ' +
+                      m.cutMm +
+                      ' + ' +
+                      m.remainderMm +
+                      ' mm remainder]',
+                  )
+                  .join('; ') +
+                '. Remaining individual offcuts: ' +
+                (r.remnants
+                  .map((m) => m.count + ' × ' + m.lengthMm + ' mm')
+                  .join(', ') || 'none') +
+                '.',
+            );
+            const kgPerM = steelKgPerMetre(r.diameter);
+            const purchased = (r.rods * r.stockMm) / 1000;
+            if (r.rods)
+              addSteel(totalSteel, r.diameter, purchased, r.rods, 'Column BBS');
+            return {
+              name: r.diameter + ' mm TMT',
+              material: 'steel',
+              quantity: r.rods,
+              unit: 'rod',
+              rods: r.rods,
+              diameter: r.diameter,
+              weightKg: round(purchased * kgPerM, 2),
+              installedWeightKg: round((r.installedMm / 1000) * kgPerM, 2),
+              source:
+                'Column cutting plan · ' +
+                r.stockMm +
+                ' mm stock · cut ' +
+                round(r.installedMm / 1000, 2) +
+                ' m · opening offcuts ' +
+                round(r.openingMm / 1000, 2) +
+                ' m · closing offcuts ' +
+                round(r.closingMm / 1000, 2) +
+                ' m · cutting loss ' +
+                round(r.lossMm / 1000, 2) +
+                ' m',
+              order:
+                r.rods +
+                ' new rods · ' +
+                round(r.closingMm / 1000, 2) +
+                ' m carried forward',
+            };
+          });
+        drafts.push({
+          origin: 'quotation-structure',
+          draft: {
+            name:
+              (i === 0 ? 'Foundation → ' + ground.name + ' roof' : section) +
+              ': ' +
+              stage.columns +
+              ' columns',
+            section,
+            kind: 'quote-columns',
+            unit: 'm³',
+            inputs: {
+              columns: stage.columns,
+              liftHeightFeet: stage.heights.join(' · ').slice(0, 200),
+              stockLengthMm: columnStock,
+              cuttingPlan: 'Floor-wise; provisional until approved BBS',
+            },
+            outputs: [
+              ...concreteOutputs(stage.concrete, 'Column', s, mix),
+              ...steel,
+              ...(stage.pending.length
+                ? [
+                    {
+                      name: 'Column BBS — review required',
+                      quantity: 1,
+                      unit: 'review',
+                      material: 'column_bbs_pending',
+                      source: stage.pending.join(' · ').slice(0, 300),
+                    },
+                  ]
+                : []),
+            ],
+            notes: [...stage.notes, ...stage.pending].join('\n').slice(0, 2000),
+          },
+        });
+      }
+    } else {
       const allBars = columnTypes.flatMap((type) => type.bars);
       const maxDia = Math.max(0, ...allBars.map((bar) => bar.dia));
       const maxLap = lapFeet(maxDia, s.lapDiameters);
@@ -4625,10 +4926,14 @@ export function generateQuotationBoq(
     const stageKg = new Map<string, number>();
     for (const { draft } of drafts)
       for (const output of draft.outputs)
-        if (output.material === 'steel' && output.weightKg)
+        if (
+          output.material === 'steel' &&
+          (output.installedWeightKg ?? output.weightKg)
+        )
           stageKg.set(
             draft.section,
-            (stageKg.get(draft.section) ?? 0) + output.weightKg,
+            (stageKg.get(draft.section) ?? 0) +
+              (output.installedWeightKg ?? output.weightKg ?? 0),
           );
     for (const [stage, kg] of stageKg) {
       const index = drafts.reduce(

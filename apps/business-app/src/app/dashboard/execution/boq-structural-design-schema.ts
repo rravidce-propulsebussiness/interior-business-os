@@ -8,6 +8,8 @@ import { z } from 'zod';
 export const structuralDesignSchema = z.object({
   footings: z.array(z.record(z.string(), z.unknown())).max(40).optional(),
   legacyFootings: z.boolean().optional(),
+  columnStockLengthMm: z.number().int().min(6000).max(24000).optional(),
+  columnCutLossMm: z.number().int().min(0).max(20).optional(),
   columns: z.array(z.record(z.string(), z.unknown())).max(20),
   beams: z.array(z.record(z.string(), z.unknown())).max(20),
   plinthBeams: z.array(z.record(z.string(), z.unknown())).max(40).optional(),

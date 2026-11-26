@@ -4,6 +4,7 @@ type SteelOutput = {
   unit: string;
   material?: string;
   weightKg?: number;
+  installedWeightKg?: number;
   rods?: number;
   diameter?: number;
   source?: string;
@@ -27,7 +28,10 @@ export function withMeasuredBindingWire<T extends SteelOutput>(
   if (retained.some((output) => output.material === 'binding_wire'))
     return retained;
   const steelKg = retained.reduce((sum, output) => {
-    if (output.material !== 'steel' || !(output.quantity > 0)) return sum;
+    if (output.material !== 'steel') return sum;
+    if (output.installedWeightKg !== undefined)
+      return sum + output.installedWeightKg;
+    if (!(output.quantity > 0)) return sum;
     if (output.unit === 'kg') return sum + output.quantity;
     if (output.unit !== 'rod') return sum;
     const kgPerRod =

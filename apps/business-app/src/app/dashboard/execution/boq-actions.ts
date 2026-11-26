@@ -35,6 +35,7 @@ const lineSchema = z.object({
         rods: z.number().int().nonnegative().optional(),
         diameter: z.number().finite().nonnegative().optional(),
         weightKg: z.number().finite().nonnegative().optional(),
+        installedWeightKg: z.number().finite().nonnegative().optional(),
       }),
     )
     .max(100),

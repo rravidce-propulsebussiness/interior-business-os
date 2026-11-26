@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   cutPlan,
+  planColumnCuts,
+  allocateColumnStock,
+  columnTensionLapMm,
   DEFAULT_STRUCTURAL_SETTINGS,
   floorsFromQuote,
   generateQuotationBoq,
@@ -1430,7 +1433,18 @@ describe('entering the drawings by hand', () => {
       expect(slabs[0]!.name).not.toContain('beams');
       expect(beams[0]!.name).toContain('beams');
     }
-    expect(separated.steel).toEqual(legacy.steel);
+    // The measured column engine now purchases actual cuts instead of legacy
+    // half/third rods. Beam/slab equality above remains the invariant.
+    const stockByDia = new Map<number, number>();
+    for (const row of separated.lines.flatMap((line) => line.outputs))
+      if (row.material === 'steel' && row.diameter)
+        stockByDia.set(
+          row.diameter,
+          (stockByDia.get(row.diameter) ?? 0) + (row.rods ?? 0),
+        );
+    expect(separated.steel.map((row) => [row.diameter, row.bars])).toEqual(
+      [...stockByDia].filter(([, n]) => n > 0).sort(([a], [b]) => a - b),
+    );
   });
 
   it('prices structural labour on the exact built-up area', () => {
@@ -2651,5 +2665,151 @@ describe('structural concrete grade selection', () => {
     expect(
       quotedSteelSpecification([{ title: 'Steel', brand: 'JSW' }])?.grade,
     ).toBeNull();
+  });
+});
+
+describe('Measured column floor-wise bending schedule', () => {
+  const planInput = {
+    mark: 'C1',
+    count: 12,
+    bars: [{ dia: 12, count: 4 }],
+    floors: [
+      { heightMm: 3353, jointDepthMm: 0 },
+      { heightMm: 3353, jointDepthMm: 0 },
+    ],
+    meshToPlinthMm: 1778,
+    concreteToPlinthMm: 1524,
+    widthMm: 300,
+    depthMm: 305,
+    coverMm: 40,
+    ringDia: 8,
+    ringSpacingMm: 152,
+    lapMm: 914,
+    stockMm: 12000,
+    cutLossMm: 0,
+    bbs: { baseExtraMm: 0, roofExtraMm: 0, crossTieCount: 0 },
+  };
+  it('calculates tension lap by actual concrete and TMT grade', () => {
+    expect(columnTensionLapMm(12, 20, 500)).toBe(680);
+    expect(columnTensionLapMm(12, 25, 500)).toBe(583);
+    expect(columnTensionLapMm(12, 20, 0)).toBeUndefined();
+  });
+  it('runs one group from mesh to next-storey central lap and the other continuously', () => {
+    const plan = planColumnCuts(planInput);
+    const main = plan.cuts.filter((c) => c.diameter === 12);
+    expect(main.filter((c) => c.stage === 0)).toEqual([
+      expect.objectContaining({ lengthMm: 7265, count: 24 }),
+      expect.objectContaining({ lengthMm: 8484, count: 24 }),
+    ]);
+    expect(main.filter((c) => c.stage === 1)).toEqual([
+      expect.objectContaining({ lengthMm: 2133, count: 24 }),
+    ]);
+    expect(plan.pending).toBe(false);
+    expect(plan.cuts.find((c) => c.mark === 'C1-R')?.lengthMm).toBe(1008);
+    expect(plan.notes[0]?.join(' ')).toContain('2 hook tails × 75 mm');
+  });
+  it('rejects impossible splice layouts rather than inventing additional laps', () => {
+    const plan = planColumnCuts({ ...planInput, stockMm: 6000, lapMm: 2000 });
+    expect(plan.pending).toBe(true);
+    expect(plan.cuts.filter((c) => c.diameter === 12)).toEqual([]);
+    expect(plan.warnings.join(' ')).toContain('no non-overlapping');
+  });
+  it('does not pool incompatible short remnants and reuses usable lengths once', () => {
+    const cuts = [
+      { stage: 0, diameter: 12, lengthMm: 7000, count: 2, mark: 'base' },
+      { stage: 1, diameter: 12, lengthMm: 4900, count: 2, mark: 'upper' },
+      { stage: 2, diameter: 12, lengthMm: 300, count: 1, mark: 'next' },
+      { stage: 1, diameter: 8, lengthMm: 4900, count: 1, mark: 'ring' },
+    ];
+    const rows = allocateColumnStock(cuts, 12000, 10);
+    const main = rows.filter((r) => r.diameter === 12);
+    expect(main.map((r) => r.rods)).toEqual([2, 0, 1]);
+    expect(main[1]).toMatchObject({
+      openingMm: 9980,
+      closingMm: 160,
+      installedMm: 9800,
+      lossMm: 20,
+    });
+    for (const r of rows)
+      expect(r.openingMm + r.rods * r.stockMm).toBe(
+        r.closingMm + r.installedMm + r.lossMm,
+      );
+  });
+  it('keeps footing-specific concrete height, quotation floor height, grade and mesh datum independent', () => {
+    const base = {
+      label: 'C1',
+      count: 12,
+      floors: 0,
+      widthIn: 9,
+      depthIn: 12,
+      bars: '4-12',
+      tieDia: 8,
+      tieSpacingIn: 6,
+      footingLengthFeet: 5,
+      footingWidthFeet: 5,
+      footingThicknessIn: 12,
+      footingBarDia: 12,
+      footingBarSpacingIn: 6,
+      bbs: {
+        footingRef: 'F1',
+        meshOffsetMm: 51,
+        jointDepthMm: 0,
+        baseExtraMm: 0,
+        roofExtraMm: 0,
+        lapMm: 914,
+        crossTieCount: 0,
+      },
+    };
+    const result = generateQuotationBoq({
+      details: quote(['11', '11']),
+      steelGrade: 'Fe500D',
+      splitBeamSlab: true,
+      design: {
+        footings: [
+          {
+            ...newFootingType(0),
+            label: 'F1',
+            columnRefs: 'C1',
+            count: 12,
+            thicknessIn: 12,
+            lengthFeet: 5,
+            widthFeet: 5,
+          },
+          {
+            ...newFootingType(1),
+            label: 'F2',
+            columnRefs: 'C2',
+            count: 1,
+            thicknessIn: 24,
+            lengthFeet: 5,
+            widthFeet: 5,
+          },
+        ],
+        columns: [base],
+        beams: [],
+        plinthRunFeet: 0,
+        settings: {
+          foundationDepthFeet: 5,
+          plinthHeightFeet: 1,
+          coverColumnMm: 40,
+        },
+      },
+    });
+    const columns = result.lines.filter((l) => l.kind === 'quote-columns');
+    expect(columns.map((l) => l.section)).toEqual([
+      'Foundation',
+      'First Floor',
+    ]);
+    expect(columns[0]?.notes).toContain('concrete height 16 ft');
+    expect(columns[0]?.notes).toContain('7265 mm');
+    expect(columns[0]?.notes).toContain('M20 / Fe500D');
+    expect(columns[1]?.notes).toContain('concrete height 11 ft');
+    const steel = columns.flatMap((l) =>
+      l.outputs.filter((o) => o.material === 'steel'),
+    );
+    expect(steel.every((o) => o.installedWeightKg !== undefined)).toBe(true);
+    expect(columns[1]?.outputs.find((o) => o.diameter === 12)?.quantity).toBe(
+      0,
+    );
   });
 });
