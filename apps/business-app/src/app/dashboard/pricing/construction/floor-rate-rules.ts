@@ -40,17 +40,41 @@ export function readFloorRateDefaults(
   }
 }
 
-/** Default floor-to-floor height, stored alongside existing package metadata. */
+/** Recognize the existing company package specification, never the plinth
+ * height, bathroom tile height or an ambiguous range. */
+const FLOOR_HEIGHT_SPEC_TITLE = 'plinth and floor-to-floor heights';
+const floorHeightPattern = () =>
+  /\bfloor[- ]to[- ]floor(?:\s+finished)?\s+height\s*(?:(?:is|of)\s+|[:=]\s*)?([0-9]+(?:\.[0-9]{1,2})?)\s*(?:ft\b|feet\b)(?=\s*(?:[.;,]|$))/gi;
+const isHeightSpec = (section: SpecLike) =>
+  section.title.trim().toLowerCase() === FLOOR_HEIGHT_SPEC_TITLE;
+const validHeight = (value: string) =>
+  valid(value) && Number(value) > 0 && Number(value) <= 9999.99;
+
+export function readSpecificationFloorHeight(
+  sections: readonly SpecLike[],
+): string {
+  const values = sections
+    .filter(isHeightSpec)
+    .flatMap((section) =>
+      Array.from(
+        section.description.matchAll(floorHeightPattern()),
+        (match) => match[1] ?? '',
+      ).filter(validHeight),
+    );
+  const unique = new Set(values.map(Number));
+  return unique.size === 1 ? String([...unique][0]) : '';
+}
+
+/** Prefer an explicit numeric field, then the original package specification. */
 export function readPackageFloorHeight(sections: readonly SpecLike[]): string {
   const spec = sections.find((section) => section.title === FLOOR_RATE_TITLE);
   try {
-    const value = JSON.parse(spec?.description ?? '{}')?.heightFeet;
-    return typeof value === 'string' && valid(value) && Number(value) <= 9999.99
-      ? value
-      : '';
+    const value: unknown = JSON.parse(spec?.description ?? '{}')?.heightFeet;
+    if (typeof value === 'string' && validHeight(value)) return value;
   } catch {
-    return '';
+    // Older package metadata may not contain a machine-readable height.
   }
+  return readSpecificationFloorHeight(sections);
 }
 
 export function writeFloorRateDefaults<T extends SpecLike>(
@@ -65,7 +89,19 @@ export function writeFloorRateDefaults<T extends SpecLike>(
     throw new Error(
       'Enter valid positive parking and penthouse rates per SFT.',
     );
-  const rows = source.filter((s) => s.title !== FLOOR_RATE_TITLE);
+  const rows = source
+    .filter((s) => s.title !== FLOOR_RATE_TITLE)
+    .map((section) =>
+      heightFeet && isHeightSpec(section)
+        ? {
+            ...section,
+            description: section.description.replace(
+              floorHeightPattern(),
+              (match, value: string) => match.replace(value, heightFeet),
+            ),
+          }
+        : section,
+    );
   if (!rates.parking && !rates.penthouse && !heightFeet) return [...rows];
   if (rows.length >= maximum)
     throw new Error(

@@ -181,3 +181,49 @@ describe('legacy quotation package height recovery', () => {
     expect(applyPackageFloorHeight(rows, '')).toBe(rows);
   });
 });
+
+describe('existing written package height specifications', () => {
+  const specification = (height: string) => ({
+    ...steel,
+    title: 'Plinth and floor-to-floor heights',
+    description:
+      'Plinth up to 2 ft above existing road level; floor-to-floor finished height ' +
+      height +
+      ' ft. Quote structural slab thickness separately from approved drawing.',
+  });
+  it('reads the original 10 ft and 11 ft package heights, not the 2 ft plinth', () => {
+    expect(readPackageFloorHeight([specification('10')])).toBe('10');
+    expect(readPackageFloorHeight([specification('11')])).toBe('11');
+    expect(readPackageFloorHeight([specification('10.5')])).toBe('10.5');
+    expect(
+      readPackageFloorHeight([specification('10'), specification('11')]),
+    ).toBe('');
+    expect(
+      readPackageFloorHeight([
+        { ...steel, description: 'floor-to-floor finished height 10 ft.' },
+      ]),
+    ).toBe('');
+    expect(
+      readPackageFloorHeight([
+        {
+          ...specification('10'),
+          description: 'floor-to-floor height 10 ft to 12 ft.',
+        },
+      ]),
+    ).toBe('');
+  });
+  it('synchronizes the written specification when a package height is edited', () => {
+    const saved = writeFloorRateDefaults(
+      [specification('10')],
+      { parking: '', penthouse: '' },
+      32,
+      '11',
+    );
+    expect(readPackageFloorHeight(saved)).toBe('11');
+    expect(saved[0]?.description).toContain('finished height 11 ft.');
+    expect(saved[0]?.description).toContain('Plinth up to 2 ft');
+    expect(
+      readPackageFloorHeight(saved.filter((s) => s.title !== FLOOR_RATE_TITLE)),
+    ).toBe('11');
+  });
+});
