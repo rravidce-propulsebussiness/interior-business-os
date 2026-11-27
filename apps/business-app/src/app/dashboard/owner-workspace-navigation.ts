@@ -27,6 +27,12 @@ export function ownerWorkspaceNavigation(
       href: '/dashboard/crm/leads',
       icon: 'leads',
     });
+  if (has('crm.source.manage', 'crm'))
+    items.push({
+      label: 'Meta Lead Ads',
+      href: '/dashboard/meta-leads',
+      icon: 'zap',
+    });
   if (has('website.view', 'website'))
     items.push({
       label: 'Website Studio',
@@ -221,6 +227,7 @@ export function ownerWorkspaceNavigation(
     'Dashboard',
     'WhatsApp',
     'Leads',
+    'Meta Lead Ads',
     'Quotations',
     'BOQ & Estimating',
     'Finance',

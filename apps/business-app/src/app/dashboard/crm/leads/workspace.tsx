@@ -29,7 +29,6 @@ import {
   type ProPulseConnectionView,
 } from './propulse-connect-panel';
 import { syncPropulseLeads } from './propulse-actions';
-import { MetaLeadPanel } from './meta-lead-panel';
 import type { MetaLeadView } from './meta-lead-view';
 
 export type LeadOption = { value: string; label: string };
@@ -443,14 +442,7 @@ export function LeadsWorkspace({
                   ? 'ProPulse connection'
                   : 'Connect ProPulse'}
               </button>
-              <button
-                type="button"
-                onClick={() =>
-                  setLeadTool(leadTool === 'meta' ? 'none' : 'meta')
-                }
-              >
-                Facebook &amp; Instagram lead forms
-              </button>
+              <a href="/dashboard/meta-leads">Facebook &amp; Instagram lead forms</a>
               <a href={viewLink(viewMode === 'list' ? 'board' : 'list')}>
                 {viewMode === 'list' ? 'Board view' : 'List view'}
               </a>
@@ -486,9 +478,6 @@ export function LeadsWorkspace({
               .map((stage) => ({ value: stage.id, label: stage.name }))}
             onClose={() => setLeadTool('none')}
           />
-        )}
-        {leadTool === 'meta' && (
-          <MetaLeadPanel view={metaLeads} onClose={() => setLeadTool('none')} />
         )}
         {leadTool === 'propulse' && (
           <ProPulseConnectPanel
