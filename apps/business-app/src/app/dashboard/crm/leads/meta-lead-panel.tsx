@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   DEFAULT_CONFIRMATION_TEMPLATE,
   DEFAULT_QUOTE_MESSAGE,
@@ -25,6 +25,22 @@ type Run = (
   task: () => Promise<{ ok: boolean; message: string }>,
   reload?: boolean,
 ) => Promise<boolean>;
+
+const templateRequests = new Map<
+  string,
+  ReturnType<typeof listMetaLeadTemplates>
+>();
+
+function requestTemplates(connectionId: string) {
+  const existing = templateRequests.get(connectionId);
+  if (existing) return existing;
+  const request = listMetaLeadTemplates(connectionId).catch((error) => {
+    templateRequests.delete(connectionId);
+    throw error;
+  });
+  templateRequests.set(connectionId, request);
+  return request;
+}
 
 function FollowUp({
   form,
@@ -50,16 +66,35 @@ function FollowUp({
   );
   const [countryCode, setCountryCode] = useState(form.countryCode);
   const [templates, setTemplates] = useState<MetaTemplateOption[] | null>(null);
+  const [templatesLoading, setTemplatesLoading] = useState(false);
   const [starterStatus, setStarterStatus] = useState('');
   const [note, setNote] = useState('');
 
   async function loadTemplates(id = connectionId) {
     if (!id) return;
-    const result = await listMetaLeadTemplates(id);
-    setTemplates(result.templates);
-    setStarterStatus(result.starterStatus);
-    setNote(result.ok ? '' : result.message);
+    setTemplatesLoading(true);
+    try {
+      const result = await requestTemplates(id);
+      setTemplates(result.templates);
+      setStarterStatus(result.starterStatus);
+      setNote(result.ok ? '' : result.message);
+    } catch (error) {
+      setTemplates([]);
+      setStarterStatus('');
+      setNote(
+        error instanceof Error
+          ? error.message
+          : 'Could not load WhatsApp templates.',
+      );
+    } finally {
+      setTemplatesLoading(false);
+    }
   }
+
+  useEffect(() => {
+    if (confirm && connectionId && templates === null && !templatesLoading)
+      void loadTemplates(connectionId);
+  }, [confirm, connectionId, templates, templatesLoading]);
   const chosen = templates?.find(
     (item) => `${item.name}|${item.language}` === template,
   );
@@ -120,7 +155,9 @@ function FollowUp({
               onChange={(event) => setTemplate(event.target.value)}
             >
               <option value="">
-                {templates ? 'Choose a template' : 'Loading templates…'}
+                {templatesLoading
+                  ? 'Loading templates…'
+                  : 'Choose a template'}
               </option>
               {template && !chosen && (
                 <option value={template}>{template.split('|')[0]}</option>
