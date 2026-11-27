@@ -29,7 +29,6 @@ import {
   type ProPulseConnectionView,
 } from './propulse-connect-panel';
 import { syncPropulseLeads } from './propulse-actions';
-import type { MetaLeadView } from './meta-lead-view';
 
 export type LeadOption = { value: string; label: string };
 export type LeadStage = { id: string; name: string; outcome: string };
@@ -241,7 +240,6 @@ export function LeadsWorkspace({
   organizationName,
   timeZone,
   propulseConnection,
-  metaLeads,
   activityPanel,
   initialTool,
 }: {
@@ -282,7 +280,6 @@ export function LeadsWorkspace({
   timeZone: string;
   asOf: string;
   propulseConnection: ProPulseConnectionView;
-  metaLeads: MetaLeadView;
   activityPanel: ReactNode;
   initialTool: 'none' | 'add' | 'propulse' | 'meta';
 }) {
