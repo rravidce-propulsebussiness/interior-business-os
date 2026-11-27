@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   const back = (reason: string) =>
     NextResponse.redirect(
       new URL(
-        '/dashboard/crm/leads?panel=meta&meta=' + reason,
+        '/dashboard/meta-leads?meta=' + reason,
         origin || publicAuthOrigin(request.url),
       ),
       { status: 303, headers: { 'Cache-Control': 'private, no-store' } },

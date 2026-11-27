@@ -111,7 +111,7 @@ export function LeadBrochureAutomationPanel({
           </p>
         </div>
         <Link
-          href="/dashboard/crm/leads?panel=meta"
+          href="/dashboard/meta-leads"
           className="rounded-xl border border-stone-200 px-4 py-2.5 text-sm font-semibold text-stone-800 hover:bg-stone-50"
         >
           Manage Meta forms
@@ -164,7 +164,7 @@ export function LeadBrochureAutomationPanel({
               configured here.
             </p>
             <Link
-              href="/dashboard/crm/leads?panel=meta"
+              href="/dashboard/meta-leads"
               className="mt-5 inline-flex rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
             >
               Connect Meta lead form

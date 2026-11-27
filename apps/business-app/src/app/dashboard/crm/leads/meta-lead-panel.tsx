@@ -258,7 +258,8 @@ export function MetaLeadPanel({
   onClose,
 }: {
   view: MetaLeadView;
-  onClose: () => void;
+  /** Optional: a Server Component page cannot pass a function here. */
+  onClose?: () => void;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -274,7 +275,7 @@ export function MetaLeadPanel({
       const result = await task();
       setFeedback(result.message);
       if (result.ok && reload) {
-        router.replace('/dashboard/crm/leads?panel=meta');
+        router.replace('/dashboard/meta-leads');
         router.refresh();
       }
       return result.ok;
@@ -300,9 +301,11 @@ export function MetaLeadPanel({
             details and share your quotation automatically.
           </p>
         </div>
-        <button type="button" className="crm-outline" onClick={onClose}>
-          Close
-        </button>
+        {onClose && (
+          <button type="button" className="crm-outline" onClick={onClose}>
+            Close
+          </button>
+        )}
       </div>
       {feedback && (
         <p className="crm-integration-message" role="status">

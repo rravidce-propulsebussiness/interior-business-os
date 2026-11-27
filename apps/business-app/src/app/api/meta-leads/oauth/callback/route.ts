@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   const finish = (reason: string) => {
     const response = NextResponse.redirect(
       new URL(
-        '/dashboard/crm/leads?panel=meta&meta=' + reason,
+        '/dashboard/meta-leads?meta=' + reason,
         origin || publicAuthOrigin(request.url),
       ),
       { status: 303, headers: { 'Cache-Control': 'private, no-store' } },
@@ -66,6 +66,7 @@ export async function GET(request: Request) {
       userId: user.id,
     });
     revalidatePath('/dashboard/crm/leads');
+    revalidatePath('/dashboard/meta-leads');
     return finish(saved ? 'connected' : 'no_pages');
   } catch (error) {
     // Meta's raw response can contain sensitive data. Only log the error
