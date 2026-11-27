@@ -24,6 +24,8 @@ Leads → **More** → **Facebook & Instagram lead forms**.
 2. Choose the Page → **Show lead forms** → **Connect this form**. New leads
    now arrive in All Leads automatically. **Import last 30 days** brings in
    older leads (it never sends WhatsApp messages).
+   **Check connection** verifies the Page token, lead-form access and the
+   `leadgen` app subscription before an App Review recording or live launch.
 3. Optional **WhatsApp follow-up** per form:
    - tick _Message each new lead…_, choose the WhatsApp number and an approved
      template. A ready-made template (`lead_details_confirmation`) can be sent

@@ -8,6 +8,7 @@ import {
   DEFAULT_QUOTE_MESSAGE,
 } from '@/lib/meta-lead-fields';
 import {
+  checkMetaLeadPage,
   connectMetaLeadForm,
   createMetaLeadTemplate,
   disconnectMetaAccount,
@@ -17,6 +18,7 @@ import {
   listMetaLeadTemplates,
   saveMetaLeadFollowUp,
   type MetaFormOption,
+  type MetaPageHealth,
   type MetaTemplateOption,
 } from './meta-lead-actions';
 import type { MetaLeadFormView, MetaLeadView } from './meta-lead-view';
@@ -92,9 +94,29 @@ function FollowUp({
   }
 
   useEffect(() => {
-    if (confirm && connectionId && templates === null && !templatesLoading)
-      void loadTemplates(connectionId);
-  }, [confirm, connectionId, templates, templatesLoading]);
+    if (!confirm || !connectionId || templates !== null) return;
+    let active = true;
+    void requestTemplates(connectionId)
+      .then((result) => {
+        if (!active) return;
+        setTemplates(result.templates);
+        setStarterStatus(result.starterStatus);
+        setNote(result.ok ? '' : result.message);
+      })
+      .catch((error: unknown) => {
+        if (!active) return;
+        setTemplates([]);
+        setStarterStatus('');
+        setNote(
+          error instanceof Error
+            ? error.message
+            : 'Could not load WhatsApp templates.',
+        );
+      });
+    return () => {
+      active = false;
+    };
+  }, [confirm, connectionId, templates]);
   const chosen = templates?.find(
     (item) => `${item.name}|${item.language}` === template,
   );
@@ -155,9 +177,7 @@ function FollowUp({
               onChange={(event) => setTemplate(event.target.value)}
             >
               <option value="">
-                {templatesLoading
-                  ? 'Loading templates…'
-                  : 'Choose a template'}
+                {templatesLoading ? 'Loading templates…' : 'Choose a template'}
               </option>
               {template && !chosen && (
                 <option value={template}>{template.split('|')[0]}</option>
@@ -306,6 +326,7 @@ export function MetaLeadPanel({
   const [pageId, setPageId] = useState(view.pages[0]?.id ?? '');
   const [forms, setForms] = useState<MetaFormOption[] | null>(null);
   const [formId, setFormId] = useState('');
+  const [pageHealth, setPageHealth] = useState<MetaPageHealth | null>(null);
 
   const run: Run = async (task, reload = false) => {
     if (busy) return false;
@@ -450,6 +471,7 @@ export function MetaLeadPanel({
                       setPageId(event.target.value);
                       setForms(null);
                       setFormId('');
+                      setPageHealth(null);
                     }}
                   >
                     {view.pages.map((page) => (
@@ -459,6 +481,23 @@ export function MetaLeadPanel({
                     ))}
                   </select>
                 </label>
+                <button
+                  type="button"
+                  className="crm-outline"
+                  disabled={busy || !pageId}
+                  onClick={async () => {
+                    setBusy(true);
+                    try {
+                      const result = await checkMetaLeadPage(pageId);
+                      setPageHealth(result.health);
+                      setFeedback(result.message);
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                >
+                  Check connection
+                </button>
                 <button
                   type="button"
                   className="crm-outline"
@@ -484,6 +523,19 @@ export function MetaLeadPanel({
                   {busy ? 'Loading…' : 'Show lead forms'}
                 </button>
               </div>
+              {pageHealth && (
+                <div className="crm-meta-health" role="status">
+                  <strong>{pageHealth.pageName}</strong>
+                  <span>Page access: Ready</span>
+                  <span>Lead forms visible: {pageHealth.forms}</span>
+                  <span>
+                    Lead webhook:{' '}
+                    {pageHealth.webhookSubscribed
+                      ? 'Subscribed'
+                      : 'Connect a form to subscribe'}
+                  </span>
+                </div>
+              )}
               {forms && forms.length > 0 && (
                 <div className="crm-meta-row">
                   <label>
@@ -545,6 +597,28 @@ export function MetaLeadPanel({
             contact them on WhatsApp. Anyone who replies STOP is never messaged
             again.
           </p>
+          <details className="crm-meta-review">
+            <summary>Meta setup and App Review checklist</summary>
+            <ol>
+              <li>Connect Facebook and select only Pages you manage.</li>
+              <li>
+                Choose a Page, show its lead forms, then connect one form.
+              </li>
+              <li>
+                In Meta Webhooks, subscribe the Page object to the leadgen field
+                using this callback URL:
+                <code>{view.webhookUrl}</code>
+              </li>
+              <li>
+                Use Check connection to prove Page access, form access and the
+                webhook subscription before recording the App Review video.
+              </li>
+            </ol>
+            <p>
+              Permissions used here: pages_show_list, pages_read_engagement,
+              pages_manage_ads, pages_manage_metadata and leads_retrieval.
+            </p>
+          </details>
         </div>
       )}
     </section>

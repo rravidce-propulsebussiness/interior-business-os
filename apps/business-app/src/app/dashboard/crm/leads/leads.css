@@ -3276,6 +3276,52 @@ body:has(.crm-leads-root) .crm-shared-navigation {
 .crm-meta-row label {
   flex: 1 1 260px;
 }
+.crm-meta-health {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #b8dec1;
+  border-radius: 9px;
+  background: #f1f8f2;
+  color: #1f4a2c;
+  font-size: 12px;
+}
+.crm-meta-health strong {
+  width: 100%;
+}
+.crm-meta-health span:not(:last-child)::after {
+  content: ' ·';
+  color: #7a947f;
+}
+.crm-meta-review {
+  padding: 12px 14px;
+  border: 1px solid var(--crm-border);
+  border-radius: 10px;
+  color: #425879;
+  font-size: 12px;
+}
+.crm-meta-review summary {
+  cursor: pointer;
+  color: #15223e;
+  font-weight: 800;
+}
+.crm-meta-review ol {
+  display: grid;
+  gap: 7px;
+  margin: 12px 0;
+  padding-left: 20px;
+}
+.crm-meta-review code {
+  display: block;
+  overflow-wrap: anywhere;
+  margin-top: 5px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  background: #eef2f7;
+  color: #20314d;
+  user-select: all;
+}
 .crm-meta-panel .crm-meta-preview {
   max-width: 620px;
   padding: 10px 12px;

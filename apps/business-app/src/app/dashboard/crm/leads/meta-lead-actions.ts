@@ -9,6 +9,7 @@ import {
   decryptPageToken,
   metaGraph,
   metaGraphList,
+  metaLeadConfig,
   metaLeadMissingConfig,
   processMetaLead,
   recentFormLeads,
@@ -30,6 +31,11 @@ export type MetaTemplateOption = {
   language: string;
   body: string;
   parameters: number;
+};
+export type MetaPageHealth = {
+  pageName: string;
+  forms: number;
+  webhookSubscribed: boolean;
 };
 
 const uuid = z.uuid();
@@ -119,6 +125,59 @@ export async function listMetaLeadForms(
     };
   } catch (error) {
     return { ...failure(error, 'Could not load lead forms.'), forms: [] };
+  }
+}
+
+/** Verify the saved Page token and the two Graph capabilities used at runtime. */
+export async function checkMetaLeadPage(
+  pageRowId: string,
+): Promise<Result & { health: MetaPageHealth | null }> {
+  try {
+    const { s, database } = await manager();
+    const page = await pageWithToken(database, s.org, uuid.parse(pageRowId));
+    const identity = await metaGraph<{ id?: string; name?: string }>(
+      page.page_id,
+      {
+        params: { fields: 'id,name' },
+        token: page.token,
+      },
+    );
+    if (identity.id !== page.page_id)
+      throw new MetaLeadError('Meta returned a different Facebook Page.');
+    const [forms, subscriptions] = await Promise.all([
+      metaGraphList<{ id?: string }>(`${page.page_id}/leadgen_forms`, {
+        params: { fields: 'id' },
+        token: page.token,
+        maxItems: 200,
+      }),
+      metaGraphList<{ id?: string }>(`${page.page_id}/subscribed_apps`, {
+        params: { fields: 'id' },
+        token: page.token,
+        maxItems: 200,
+      }),
+    ]);
+    const webhookSubscribed = subscriptions.some(
+      (subscription) => subscription.id === metaLeadConfig().appId,
+    );
+    return {
+      ok: true,
+      message: webhookSubscribed
+        ? 'Page access, lead forms and the leadgen webhook are ready.'
+        : 'Page access works, but the leadgen webhook is not active yet. Connect a lead form below.',
+      health: {
+        pageName: (identity.name || page.page_name || 'Facebook Page').slice(
+          0,
+          255,
+        ),
+        forms: forms.length,
+        webhookSubscribed,
+      },
+    };
+  } catch (error) {
+    return {
+      ...failure(error, 'Could not verify this Facebook Page.'),
+      health: null,
+    };
   }
 }
 
