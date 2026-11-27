@@ -48,6 +48,7 @@ export async function POST(request: Request) {
   let body: {
     object?: string;
     entry?: Array<{
+      id?: unknown;
       changes?: Array<{
         field?: string;
         value?: { leadgen_id?: unknown; form_id?: unknown };
