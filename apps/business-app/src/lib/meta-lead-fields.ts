@@ -232,6 +232,27 @@ export function areaSqft(projectSize: string) {
     : null;
 }
 
+export type AreaInputMode = 'length_width' | 'sqft' | 'sqyard';
+
+/** Convert a customer's WhatsApp measurement answer to square feet. */
+export function parseAreaAnswer(mode: AreaInputMode, answer: string) {
+  const values = [...answer.matchAll(/\d[\d,]*(?:\.\d+)?/g)].map((match) =>
+    Number(match[0].replace(/,/g, '')),
+  );
+  let sqft: number | null = null;
+  if (mode === 'length_width' && values.length >= 2)
+    sqft = values[0]! * values[1]!;
+  if (mode === 'sqft' && values.length >= 1) sqft = values[0]!;
+  if (mode === 'sqyard' && values.length >= 1) sqft = values[0]! * 9;
+  if (!sqft || !Number.isFinite(sqft) || sqft < 100 || sqft > 100000)
+    return null;
+  return Math.round(sqft * 100) / 100;
+}
+
+export function areaProjectSize(sqft: number) {
+  return `${sqft.toLocaleString('en-IN', { maximumFractionDigits: 2 })} sq ft`;
+}
+
 export function packageLines(
   packages: Array<{ name: string; rate_per_sqft: number }>,
   projectSize: string,

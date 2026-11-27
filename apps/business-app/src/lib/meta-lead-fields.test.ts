@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  areaProjectSize,
+  parseAreaAnswer,
   areaSqft,
   buildQuoteMessage,
   confirmationParameters,
@@ -237,5 +239,20 @@ describe('Meta lead quotation PDF', () => {
     expect(metaLeadQuoteFilename('SG Homes & Interiors')).toBe(
       'SG_Homes_Interiors_Indicative_Quotation.pdf',
     );
+  });
+});
+
+describe('WhatsApp project area answers', () => {
+  it('accepts length × width, square feet and square yards', () => {
+    expect(parseAreaAnswer('length_width', '30 x 40 ft')).toBe(1200);
+    expect(parseAreaAnswer('sqft', '1,250 square feet')).toBe(1250);
+    expect(parseAreaAnswer('sqyard', '150 sq yd')).toBe(1350);
+    expect(areaProjectSize(1350)).toBe('1,350 sq ft');
+  });
+
+  it('rejects incomplete and unsafe measurements', () => {
+    expect(parseAreaAnswer('length_width', '40 ft')).toBeNull();
+    expect(parseAreaAnswer('sqft', '20')).toBeNull();
+    expect(parseAreaAnswer('sqyard', '20000')).toBeNull();
   });
 });

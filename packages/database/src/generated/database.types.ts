@@ -5159,6 +5159,7 @@ export interface Database {
           wa_id: string | null;
           whatsapp_status: string;
           whatsapp_error: string | null;
+          whatsapp_area_mode: string | null;
           confirmation_sent_at: string | null;
           confirmed_at: string | null;
           created_at: string;
@@ -5176,6 +5177,7 @@ export interface Database {
           wa_id?: string | null;
           whatsapp_status?: string;
           whatsapp_error?: string | null;
+          whatsapp_area_mode?: string | null;
           confirmation_sent_at?: string | null;
           confirmed_at?: string | null;
           created_at?: string;
@@ -5193,6 +5195,7 @@ export interface Database {
           wa_id?: string | null;
           whatsapp_status?: string;
           whatsapp_error?: string | null;
+          whatsapp_area_mode?: string | null;
           confirmation_sent_at?: string | null;
           confirmed_at?: string | null;
           created_at?: string;
@@ -12697,6 +12700,14 @@ export interface Database {
           p_error?: string;
         };
         Returns: undefined;
+      };
+      meta_lead_area_confirmed: {
+        Args: {
+          p_organization_id: string;
+          p_leadgen_id: string;
+          p_project_size: string;
+        };
+        Returns: Json;
       };
       meta_lead_confirmation_logged: {
         Args: {
