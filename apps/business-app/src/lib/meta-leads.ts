@@ -422,6 +422,87 @@ export type MetaLeadOutcome = {
   whatsapp?: 'sent' | 'skipped' | 'failed';
 };
 
+/**
+ * Meta sends leadgen events for every form on a subscribed Page. Keep the
+ * Page subscription useful when the owner creates a new form later: create a
+ * CRM form row on first delivery and inherit the latest form's follow-up
+ * settings for that Page.
+ */
+export async function ensureMetaLeadForm(input: {
+  pageId: string;
+  formId: string;
+  database?: Database;
+}) {
+  if (!/^\d{5,32}$/.test(input.pageId) || !/^\d{5,32}$/.test(input.formId))
+    return null;
+  const database = input.database ?? createOwnerProvisioningDatabase();
+  const page = await database
+    .from('meta_lead_pages')
+    .select('id,organization_id,token_ciphertext,token_iv,token_tag')
+    .eq('page_id', input.pageId)
+    .maybeSingle();
+  if (page.error) throw new Error('META_LEAD_PAGE_LOOKUP_FAILED');
+  if (!page.data) return null;
+
+  const existing = await database
+    .from('meta_lead_forms')
+    .select('id')
+    .eq('organization_id', page.data.organization_id)
+    .eq('form_id', input.formId)
+    .eq('status', 'active')
+    .maybeSingle();
+  if (existing.error) throw new Error('META_LEAD_FORM_LOOKUP_FAILED');
+  if (existing.data) return existing.data.id;
+
+  const token = decryptPageToken(page.data);
+  const metaForm = await metaGraph<{ id?: string; name?: string }>(
+    input.formId,
+    { params: { fields: 'id,name' }, token },
+  );
+  if (metaForm.id !== input.formId) return null;
+
+  const source = await database
+    .from('meta_lead_forms')
+    .select(
+      'whatsapp_connection_id,confirm_enabled,template_name,template_language,template_parameters,quote_enabled,quote_message,default_country_code,brochure_automation_enabled,brochure_automation_connection_id,brochure_service_template_name,brochure_service_template_language,brochure_carousel_template_name,brochure_carousel_template_language,construction_brochure_url,interiors_brochure_url,construction_brochure_image_url,interiors_brochure_image_url',
+    )
+    .eq('organization_id', page.data.organization_id)
+    .eq('page_row_id', page.data.id)
+    .eq('status', 'active')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (source.error) throw new Error('META_LEAD_FORM_DEFAULTS_LOOKUP_FAILED');
+  const defaults = source.data ?? {};
+  const inserted = await database
+    .from('meta_lead_forms')
+    .insert({
+      organization_id: page.data.organization_id,
+      page_row_id: page.data.id,
+      page_id: input.pageId,
+      form_id: input.formId,
+      form_name: (metaForm.name ?? 'Meta lead form').slice(0, 255),
+      ...defaults,
+    })
+    .select('id')
+    .single();
+  if (inserted.error) {
+    // A duplicate event can race this first-delivery provisioning. Re-read it.
+    if (inserted.error.code === '23505') {
+      const raced = await database
+        .from('meta_lead_forms')
+        .select('id')
+        .eq('organization_id', page.data.organization_id)
+        .eq('form_id', input.formId)
+        .eq('status', 'active')
+        .maybeSingle();
+      if (raced.data) return raced.data.id;
+    }
+    throw new Error('META_LEAD_FORM_AUTOCREATE_FAILED');
+  }
+  return inserted.data.id;
+}
+
 type FormRow = {
   id: string;
   organization_id: string;
