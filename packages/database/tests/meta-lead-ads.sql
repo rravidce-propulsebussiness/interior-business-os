@@ -84,22 +84,23 @@ select private.meta_lead_assert(
  and (select count(*)=1 from public.leads where organization_id=:'org' and email_normalized='asha@example.test'),
  'a second form from the same person does not create a second lead');
 select private.meta_lead_assert(
- (:'bad'::jsonb->>'status')='failed'
- and (select status='failed' and error is not null from public.meta_lead_events where leadgen_id='300000000000003'),
- 'a lead without a valid phone is recorded as failed, not created');
+ (:'bad'::jsonb->>'status')='imported'
+ and (select phone='Not provided' from public.leads where id=(:'bad'::jsonb->>'lead_id')::uuid)
+ and (select status='imported' and error is null from public.meta_lead_events where leadgen_id='300000000000003'),
+ 'a lead without a valid phone is still created and visible in CRM');
 select private.meta_lead_assert(
- (select leads_received=3 and leads_created=1 and leads_duplicate=1 and leads_failed=1 and last_error is not null
+ (select leads_received=3 and leads_created=2 and leads_duplicate=1 and leads_failed=0
     from public.meta_lead_forms where id=:'form'),
  'form counters reflect each outcome once');
 
--- A failed lead may be retried (for example after the form is corrected).
+-- An imported lead remains idempotent even if a later retry includes a phone.
 set local role service_role;
 select public.meta_lead_ingest(:'org',:'form','300000000000003','{"name":"Now Valid","phone":"+919000000003","wa_id":"919000000003"}') as fixed \gset
 select public.meta_lead_reply(:'org',:'wa','919000000001','YES') is null as before_send \gset
 select public.meta_lead_confirmation_logged(:'org','300000000000001',:'wa',true,null);
 select public.meta_lead_confirmation_logged(:'org','300000000000003',:'wa',false,'Template is not approved');
 reset role;
-select private.meta_lead_assert((:'fixed'::jsonb->>'status')='imported','a previously failed Meta lead can be imported later');
+select private.meta_lead_assert((:'fixed'::jsonb->>'status')='already_processed','an imported Meta lead is never duplicated by a retry');
 select private.meta_lead_assert(:'before_send','a reply before any confirmation was sent is left to normal automations');
 select private.meta_lead_assert(
  (select whatsapp_status='awaiting_confirmation' from public.meta_lead_events where leadgen_id='300000000000001')
