@@ -38,7 +38,7 @@ export default async function MetaLeadsPage({
           while WhatsApp follow-up is configured separately from this page.
         </p>
       </header>
-      <MetaLeadPanel view={view} onClose={() => undefined} />
+      <MetaLeadPanel view={view} />
     </main>
   );
 }
