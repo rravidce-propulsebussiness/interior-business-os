@@ -721,6 +721,13 @@ export async function createMetaLeadTemplate(
                 ],
               },
             },
+            {
+              type: 'BUTTONS',
+              buttons: DEFAULT_CONFIRMATION_TEMPLATE.buttons.map((text) => ({
+                type: 'QUICK_REPLY',
+                text,
+              })),
+            },
           ],
         }),
       },

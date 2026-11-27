@@ -18,6 +18,10 @@ import {
   type MetaLead,
 } from './meta-lead-fields';
 import { classifyLeadServiceInterest } from './meta-lead-brochure-automation';
+import {
+  metaLeadQuoteFilename,
+  renderMetaLeadQuotePdf,
+} from './meta-lead-quote-pdf';
 
 /**
  * Meta (Facebook/Instagram) Lead Ads → CRM.
@@ -961,6 +965,71 @@ export async function handleMetaLeadReply(
         p_provider_id: providerId,
         p_body: body,
         p_type: 'text',
+      });
+
+      const pdf = await renderMetaLeadQuotePdf({
+        companyName: result.company_name ?? '',
+        leadName: result.lead_name ?? '',
+        projectSize: result.project_size ?? '',
+        packages: (result.packages ?? []).map((item) => ({
+          name: String(item.name),
+          rate_per_sqft: Number(item.rate_per_sqft),
+        })),
+      });
+      const filename = metaLeadQuoteFilename(result.company_name ?? '');
+      const version = env('META_GRAPH_API_VERSION');
+      if (!/^v\d{1,3}\.\d{1,2}$/.test(version))
+        throw new Error('META_API_UNAVAILABLE');
+      const upload = new FormData();
+      upload.append('messaging_product', 'whatsapp');
+      upload.append('type', 'application/pdf');
+      const pdfBytes = new Uint8Array(pdf.byteLength);
+      pdfBytes.set(pdf);
+      upload.append(
+        'file',
+        new File([pdfBytes.buffer], filename, { type: 'application/pdf' }),
+        filename,
+      );
+      const uploadResponse = await fetch(
+        `${GRAPH_ORIGIN}/${version}/${connected.phone_number_id}/media`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${connected.accessToken}` },
+          body: upload,
+          cache: 'no-store',
+          signal: AbortSignal.timeout(30000),
+        },
+      );
+      const uploaded = (await uploadResponse.json().catch(() => null)) as {
+        id?: string;
+      } | null;
+      if (!uploadResponse.ok || !uploaded?.id)
+        throw new Error('MEDIA_UPLOAD_FAILED');
+      const document = await graphRequest<{
+        messages?: Array<{ id?: string }>;
+      }>(`${connected.phone_number_id}/messages`, connected.accessToken, {
+        method: 'POST',
+        body: JSON.stringify({
+          messaging_product: 'whatsapp',
+          recipient_type: 'individual',
+          to: waId,
+          type: 'document',
+          document: {
+            id: uploaded.id,
+            filename,
+            caption: 'Your indicative quotation PDF',
+          },
+        }),
+      });
+      const documentId = document.messages?.[0]?.id ?? '';
+      if (!documentId) throw new Error('META_MESSAGE_ID_MISSING');
+      await database.rpc('whatsapp_message_log_outbound', {
+        p_organization_id: connection.organization_id,
+        p_connection_id: connection.id,
+        p_to: waId,
+        p_provider_id: documentId,
+        p_body: `[[WA_MEDIA:${uploaded.id}:document]]\n${filename}`,
+        p_type: 'document',
       });
       await database.rpc('meta_lead_quote_logged', {
         p_organization_id: connection.organization_id,

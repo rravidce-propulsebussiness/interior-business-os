@@ -139,7 +139,9 @@ function FollowUp({
           <p className="crm-integration-caption">
             WhatsApp only allows a first message from a Meta-approved template.
             Variables are filled in this order: {'{{1}}'} lead name, {'{{2}}'}{' '}
-            the details they submitted, {'{{3}}'} your company name.
+            the details they submitted, {'{{3}}'} your company name. The
+            ready-made template includes Confirm details, Change details and
+            Talk to team buttons so leads give an exact answer.
           </p>
           {templates &&
             !templates.some(
@@ -181,7 +183,7 @@ function FollowUp({
               checked={quote}
               onChange={(event) => setQuote(event.target.checked)}
             />
-            <span>When they reply YES, share the quotation message</span>
+            <span>After confirmation, share the quotation message and PDF</span>
           </label>
           {quote && (
             <label>

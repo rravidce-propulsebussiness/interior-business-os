@@ -7,11 +7,16 @@ import {
   mapMetaLead,
   templateValue,
   whatsappId,
+  DEFAULT_CONFIRMATION_TEMPLATE,
 } from './meta-lead-fields';
 import {
   brochureTemplateForInterest,
   classifyLeadServiceInterest,
 } from './meta-lead-brochure-automation';
+import {
+  metaLeadQuoteFilename,
+  renderMetaLeadQuotePdf,
+} from './meta-lead-quote-pdf';
 
 const lead = {
   id: '300000000000001',
@@ -123,6 +128,13 @@ describe('whatsappId', () => {
 });
 
 describe('confirmation template values', () => {
+  it('offers exact quick-reply choices in the starter template', () => {
+    expect(DEFAULT_CONFIRMATION_TEMPLATE.buttons).toEqual([
+      'Confirm details',
+      'Change details',
+      'Talk to team',
+    ]);
+  });
   it('never sends new lines, tabs or blanks to Meta', () => {
     expect(templateValue('a\n\tb    c')).toBe('a b c');
     expect(templateValue('   ')).toBe('-');
@@ -206,5 +218,24 @@ describe('quotation message', () => {
         packages: [],
       }),
     ).toBe('Our team will share your package options shortly.');
+  });
+});
+
+describe('Meta lead quotation PDF', () => {
+  it('renders a real PDF containing indicative packages', async () => {
+    const pdf = await renderMetaLeadQuotePdf({
+      companyName: 'SG Homes',
+      leadName: 'Ravi',
+      projectSize: '1800 sqft',
+      packages: [{ name: 'Premium', rate_per_sqft: 2100 }],
+    });
+    expect(pdf.subarray(0, 5).toString()).toBe('%PDF-');
+    expect(pdf.byteLength).toBeGreaterThan(1000);
+  });
+
+  it('creates a safe customer-facing filename', () => {
+    expect(metaLeadQuoteFilename('SG Homes & Interiors')).toBe(
+      'SG_Homes_Interiors_Indicative_Quotation.pdf',
+    );
   });
 });
