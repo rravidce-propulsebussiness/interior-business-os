@@ -439,7 +439,9 @@ export function LeadsWorkspace({
                   ? 'ProPulse connection'
                   : 'Connect ProPulse'}
               </button>
-              <a href="/dashboard/meta-leads">Facebook &amp; Instagram lead forms</a>
+              <a href="/dashboard/meta-leads">
+                Facebook &amp; Instagram lead forms
+              </a>
               <a href={viewLink(viewMode === 'list' ? 'board' : 'list')}>
                 {viewMode === 'list' ? 'Board view' : 'List view'}
               </a>

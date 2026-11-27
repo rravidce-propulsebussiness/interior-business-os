@@ -27,7 +27,11 @@ export default async function MetaLeadsPage({
   });
 
   return (
-    <main id="main-content" tabIndex={-1} className="mx-auto max-w-6xl space-y-5 p-6">
+    <main
+      id="main-content"
+      tabIndex={-1}
+      className="mx-auto max-w-6xl space-y-5 p-6"
+    >
       <header className="space-y-2">
         <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#a24b3c]">
           Meta Lead Ads

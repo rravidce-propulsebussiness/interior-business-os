@@ -503,8 +503,6 @@ export default async function Leads({
     // Do not stop the CRM if an optional integration has not been deployed.
   }
 
-
-
   const stats = [
     {
       label: 'Total Leads',

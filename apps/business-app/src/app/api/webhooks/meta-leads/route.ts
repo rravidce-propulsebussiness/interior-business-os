@@ -1,5 +1,9 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { metaLeadConfig, processMetaLead } from '@/lib/meta-leads';
+import {
+  ensureMetaLeadForm,
+  metaLeadConfig,
+  processMetaLead,
+} from '@/lib/meta-leads';
 
 export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'no-store' };
@@ -44,6 +48,7 @@ export async function POST(request: Request) {
   let body: {
     object?: string;
     entry?: Array<{
+      id?: unknown;
       changes?: Array<{
         field?: string;
         value?: { leadgen_id?: unknown; form_id?: unknown };
@@ -62,9 +67,16 @@ export async function POST(request: Request) {
     for (const entry of body.entry) {
       for (const change of Array.isArray(entry?.changes) ? entry.changes : []) {
         if (change?.field !== 'leadgen') continue;
+        const pageId = String(entry?.id ?? '');
+        const leadgenId = String(change.value?.leadgen_id ?? '');
+        const formId = String(change.value?.form_id ?? '');
+        // Provision a newly-created form on first delivery. This keeps the
+        // Page subscription working for future forms without requiring the
+        // owner to reconnect every form manually.
+        await ensureMetaLeadForm({ pageId, formId });
         await processMetaLead({
-          leadgenId: String(change.value?.leadgen_id ?? ''),
-          formId: String(change.value?.form_id ?? ''),
+          leadgenId,
+          formId,
           notify: true,
         });
       }
