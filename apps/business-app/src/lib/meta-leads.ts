@@ -14,7 +14,10 @@ import { MetaApiError, metaErrorMessage } from './whatsapp-meta-error';
 import {
   buildQuoteMessage,
   confirmationParameters,
+  areaProjectSize,
   mapMetaLead,
+  parseAreaAnswer,
+  type AreaInputMode,
   type MetaLead,
 } from './meta-lead-fields';
 import { classifyLeadServiceInterest } from './meta-lead-brochure-automation';
@@ -922,7 +925,106 @@ export async function handleMetaLeadReply(
       quote_message?: string;
       company_name?: string;
       packages?: Array<{ name: string; rate_per_sqft: number }>;
+      area_mode?: AreaInputMode;
     };
+    let activeConnection: Awaited<ReturnType<typeof getConnection>> | null =
+      null;
+    const connected = async () =>
+      (activeConnection ??= await getConnection(
+        connection.organization_id,
+        connection.id,
+      ));
+    const send = async (
+      payload: Record<string, unknown>,
+      body: string,
+      type = 'text',
+    ) => {
+      const active = await connected();
+      const sent = await graphRequest<{ messages?: Array<{ id?: string }> }>(
+        `${active.phone_number_id}/messages`,
+        active.accessToken,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            messaging_product: 'whatsapp',
+            recipient_type: 'individual',
+            to: waId,
+            ...payload,
+          }),
+        },
+      );
+      const providerId = sent.messages?.[0]?.id ?? '';
+      if (!providerId) throw new Error('META_MESSAGE_ID_MISSING');
+      await database.rpc('whatsapp_message_log_outbound', {
+        p_organization_id: connection.organization_id,
+        p_connection_id: connection.id,
+        p_to: waId,
+        p_provider_id: providerId,
+        p_body: body,
+        p_type: type,
+      });
+    };
+    if (result.action === 'ask_area_method') {
+      const body = 'How would you like to provide the project area?';
+      await send(
+        {
+          type: 'interactive',
+          interactive: {
+            type: 'button',
+            body: { text: `${body}\n\nYou can tap an option below.` },
+            action: {
+              buttons: [
+                {
+                  type: 'reply',
+                  reply: { id: 'area:length_width', title: 'Length × width' },
+                },
+                {
+                  type: 'reply',
+                  reply: { id: 'area:sqft', title: 'Square feet' },
+                },
+                {
+                  type: 'reply',
+                  reply: { id: 'area:sqyard', title: 'Square yards' },
+                },
+              ],
+            },
+          },
+        },
+        body,
+        'interactive',
+      );
+      return true;
+    }
+    if (result.action === 'ask_area_value') {
+      const prompts: Record<AreaInputMode, string> = {
+        length_width:
+          'Please reply with length × width in feet, for example: 30 × 40 ft.',
+        sqft: 'Please reply with the total square feet, for example: 1200 sq ft.',
+        sqyard:
+          'Please reply with the total square yards, for example: 150 sq yd.',
+      };
+      const body = prompts[result.area_mode ?? 'sqft'];
+      await send({ type: 'text', text: { preview_url: false, body } }, body);
+      return true;
+    }
+    if (result.action === 'area_value') {
+      const sqft = parseAreaAnswer(result.area_mode ?? 'sqft', text);
+      if (!sqft || !result.leadgen_id) {
+        const body =
+          'I could not read that measurement. Please enter only the measurement, such as 30 × 40 ft, 1200 sq ft, or 150 sq yd.';
+        await send({ type: 'text', text: { preview_url: false, body } }, body);
+        return true;
+      }
+      const measured = areaProjectSize(sqft);
+      const saved = await database.rpc('meta_lead_area_confirmed', {
+        p_organization_id: connection.organization_id,
+        p_leadgen_id: result.leadgen_id,
+        p_project_size: measured,
+      });
+      if (saved.error || !saved.data)
+        throw new Error('META_LEAD_AREA_SAVE_FAILED');
+      Object.assign(result, saved.data as object);
+    }
     if (result.action === 'confirmed') return true;
     if (result.action !== 'send_quote' || !result.leadgen_id) return false;
 
@@ -937,14 +1039,11 @@ export async function handleMetaLeadReply(
       })),
     });
     try {
-      const connected = await getConnection(
-        connection.organization_id,
-        connection.id,
-      );
+      const active = await connected();
       // The lead has just written to us, so a normal text is allowed.
       const sent = await graphRequest<{ messages?: Array<{ id?: string }> }>(
-        `${connected.phone_number_id}/messages`,
-        connected.accessToken,
+        `${active.phone_number_id}/messages`,
+        active.accessToken,
         {
           method: 'POST',
           body: JSON.stringify({
@@ -991,10 +1090,10 @@ export async function handleMetaLeadReply(
         filename,
       );
       const uploadResponse = await fetch(
-        `${GRAPH_ORIGIN}/${version}/${connected.phone_number_id}/media`,
+        `${GRAPH_ORIGIN}/${version}/${active.phone_number_id}/media`,
         {
           method: 'POST',
-          headers: { Authorization: `Bearer ${connected.accessToken}` },
+          headers: { Authorization: `Bearer ${active.accessToken}` },
           body: upload,
           cache: 'no-store',
           signal: AbortSignal.timeout(30000),
@@ -1007,7 +1106,7 @@ export async function handleMetaLeadReply(
         throw new Error('MEDIA_UPLOAD_FAILED');
       const document = await graphRequest<{
         messages?: Array<{ id?: string }>;
-      }>(`${connected.phone_number_id}/messages`, connected.accessToken, {
+      }>(`${active.phone_number_id}/messages`, active.accessToken, {
         method: 'POST',
         body: JSON.stringify({
           messaging_product: 'whatsapp',
