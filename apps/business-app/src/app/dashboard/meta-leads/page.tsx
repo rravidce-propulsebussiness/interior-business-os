@@ -1,6 +1,8 @@
 import { automationServices } from '../automations/service';
 import { loadMetaLeadView } from '../crm/leads/meta-lead-view';
 import { MetaLeadPanel } from '../crm/leads/meta-lead-panel';
+import '../crm/leads/leads.css';
+import '../crm/leads/leads-premium.css';
 
 export const dynamic = 'force-dynamic';
 
@@ -38,7 +40,10 @@ export default async function MetaLeadsPage({
           while WhatsApp follow-up is configured separately from this page.
         </p>
       </header>
-      <MetaLeadPanel view={view} />
+      {/* The panel's styles and colour variables are scoped to .crm-leads-root. */}
+      <div className="crm-leads-root" style={{ minHeight: 0, padding: 0 }}>
+        <MetaLeadPanel view={view} />
+      </div>
     </main>
   );
 }
