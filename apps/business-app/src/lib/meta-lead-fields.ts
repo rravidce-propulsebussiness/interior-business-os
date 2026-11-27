@@ -212,9 +212,10 @@ export const DEFAULT_QUOTE_MESSAGE = [
 ].join('\n');
 
 export const DEFAULT_CONFIRMATION_TEMPLATE = {
-  name: 'lead_details_confirmation',
+  name: 'lead_details_confirmation_v2',
   language: 'en',
-  body: 'Hi {{1}}, thank you for your enquiry with {{3}}. We received these details: {{2}}. Reply YES to confirm and we will share our quotation.',
+  body: 'Hi {{1}}, thank you for your enquiry with {{3}}. We received these details: {{2}}. Choose an option below so we can assist you accurately.',
+  buttons: ['Confirm details', 'Change details', 'Talk to team'],
 };
 
 const rupees = (value: number) =>
