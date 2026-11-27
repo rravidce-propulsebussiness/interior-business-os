@@ -267,7 +267,28 @@ export async function importRecentMetaLeads(id: string): Promise<Result> {
     if (error || !form)
       throw new MetaLeadError('This lead form is not connected.');
     const page = await pageWithToken(database, s.org, form.page_row_id);
-    const leads = await recentFormLeads(page.token, form.form_id, 30);
+    let leads: Awaited<ReturnType<typeof recentFormLeads>> = [];
+    let failedLeadIds: string[] = [];
+    try {
+      leads = await recentFormLeads(page.token, form.form_id, 30);
+    } catch {
+      // Some Meta forms reject the bulk /{form-id}/leads listing even though
+      // their individual lead IDs remain readable. Retry webhook failures one
+      // by one so the owner can still recover them from this button.
+      const cutoff = new Date(Date.now() - 30 * 86400000).toISOString();
+      const pending = await database
+        .from('meta_lead_events')
+        .select('leadgen_id')
+        .eq('organization_id', s.org)
+        .eq('form_row_id', form.id)
+        .eq('status', 'failed')
+        .gte('created_at', cutoff)
+        .order('created_at');
+      if (pending.error) throw new Error('META_LEAD_RECOVERY_LOOKUP_FAILED');
+      failedLeadIds = (pending.data ?? []).map((row) => row.leadgen_id);
+      if (!failedLeadIds.length)
+        throw new MetaLeadError('Meta did not return recent leads.');
+    }
     let added = 0;
     let existing = 0;
     let failed = 0;
@@ -283,10 +304,22 @@ export async function importRecentMetaLeads(id: string): Promise<Result> {
       else if (outcome.status === 'failed') failed++;
       else existing++;
     }
+    for (const leadgenId of failedLeadIds) {
+      const outcome = await processMetaLead({
+        leadgenId,
+        formId: form.form_id,
+        notify: false,
+        database,
+      });
+      if (outcome.status === 'imported') added++;
+      else if (outcome.status === 'failed') failed++;
+      else existing++;
+    }
     if (added) revalidatePath('/dashboard/crm/leads');
+    const checked = leads.length + failedLeadIds.length;
     return {
       ok: true,
-      message: `Checked ${leads.length} leads from the last 30 days: ${added} added, ${existing} already in CRM${failed ? `, ${failed} could not be added (no valid phone)` : ''}.`,
+      message: `Checked ${checked} leads from the last 30 days: ${added} added, ${existing} already in CRM${failed ? `, ${failed} could not be added` : ''}.`,
     };
   } catch (error) {
     return failure(error, 'Could not import recent leads.');
