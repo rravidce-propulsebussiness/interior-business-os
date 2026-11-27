@@ -438,7 +438,9 @@ export async function ensureMetaLeadForm(input: {
   const database = input.database ?? createOwnerProvisioningDatabase();
   const page = await database
     .from('meta_lead_pages')
-    .select('id,organization_id,token_ciphertext,token_iv,token_tag')
+    .select(
+      'id,organization_id,connected_by,token_ciphertext,token_iv,token_tag',
+    )
     .eq('page_id', input.pageId)
     .maybeSingle();
   if (page.error) throw new Error('META_LEAD_PAGE_LOOKUP_FAILED');
@@ -482,6 +484,7 @@ export async function ensureMetaLeadForm(input: {
       page_id: input.pageId,
       form_id: input.formId,
       form_name: (metaForm.name ?? 'Meta lead form').slice(0, 255),
+      created_by: page.data.connected_by,
       ...defaults,
     })
     .select('id')
