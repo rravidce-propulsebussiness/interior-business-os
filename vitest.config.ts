@@ -49,6 +49,7 @@ export default defineConfig({
       'apps/business-app/src/workspace-paths.test.ts',
       'apps/business-app/src/lib/whatsapp-broadcast-policy.test.ts',
       'apps/business-app/src/lib/whatsapp-fixes.test.ts',
+      'apps/business-app/src/lib/whatsapp-onboarding.test.ts',
       'apps/business-app/src/lib/whatsapp-origin.test.ts',
       'apps/business-app/src/lib/whatsapp-calling-permission.test.ts',
       'apps/business-app/src/lib/whatsapp-calling-events.test.ts',

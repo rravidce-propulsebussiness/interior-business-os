@@ -13,6 +13,11 @@ export default async function WhatsAppPage({
 }) {
   const query = await searchParams;
   const services = await automationServices('automation.view', true);
+  const { data: workspace } = await services.client
+    .from('organizations')
+    .select('name')
+    .eq('id', services.context.organizationId)
+    .maybeSingle();
   const { data, error } = await services.client
     .from('whatsapp_business_connections')
     .select(
@@ -39,6 +44,9 @@ export default async function WhatsAppPage({
   const settingsPanel = (
     <div className="space-y-5">
       <WhatsAppSetup
+        key={services.context.organizationId}
+        organizationId={services.context.organizationId}
+        workspaceName={workspace?.name ?? 'this company'}
         configured={configured}
         appId={process.env.META_APP_ID ?? ''}
         configurationId={process.env.META_EMBEDDED_SIGNUP_CONFIG_ID ?? ''}
@@ -78,7 +86,13 @@ export default async function WhatsAppPage({
   return (
     <main id="main-content" tabIndex={-1}>
       <WhatsAppHub
-        initialTab={query.tab === 'automations' ? 'automations' : 'inbox'}
+        initialTab={
+          query.tab === 'settings'
+            ? 'settings'
+            : query.tab === 'automations'
+              ? 'automations'
+              : 'inbox'
+        }
         canManage={services.context.grants.some(
           (grant) => grant.permission === 'automation.manage',
         )}
