@@ -8,6 +8,7 @@ const FINISH_EVENTS = new Set([
   'FINISH',
   'FINISH_ONLY_WABA',
   'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING',
+  'FINISH_GRANT_ONLY_API_ACCESS',
 ]);
 
 export function isMetaOrigin(origin: string) {
