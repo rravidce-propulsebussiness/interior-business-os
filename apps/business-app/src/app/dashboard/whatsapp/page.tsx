@@ -86,6 +86,7 @@ export default async function WhatsAppPage({
   return (
     <main id="main-content" tabIndex={-1}>
       <WhatsAppHub
+        key={services.context.organizationId}
         initialTab={
           query.tab === 'settings'
             ? 'settings'
