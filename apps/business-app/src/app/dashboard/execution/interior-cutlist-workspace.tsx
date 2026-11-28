@@ -1,0 +1,464 @@
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  CUTLIST_ITEMS,
+  cutlistPanels,
+  type CutlistItemKey,
+  type CutlistPanel,
+} from './interior-cutlist';
+import {
+  BOARD_SIZES,
+  optimizeBoardLayout,
+  type BoardPlacement,
+} from './board-optimizer';
+
+const STORAGE_KEY = 'business-os-interior-cutlist-v1';
+
+export function InteriorCutlistWorkspace({
+  canCreate,
+}: {
+  canCreate: boolean;
+}) {
+  const [projectName, setProjectName] = useState('Interior project');
+  const [itemKey, setItemKey] = useState<CutlistItemKey>('wardrobe');
+  const [width, setWidth] = useState(1200);
+  const [height, setHeight] = useState(2100);
+  const [depth, setDepth] = useState(600);
+  const [cabinetCount, setCabinetCount] = useState(1);
+  const [panels, setPanels] = useState<CutlistPanel[]>([]);
+  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [boardKey, setBoardKey] = useState('2440x1220');
+  const [allowRotation, setAllowRotation] = useState(true);
+  const item = useMemo(
+    () =>
+      CUTLIST_ITEMS.find((entry) => entry.key === itemKey) ?? CUTLIST_ITEMS[0]!,
+    [itemKey],
+  );
+  const board =
+    BOARD_SIZES.find((entry) => entry.key === boardKey) ?? BOARD_SIZES[0]!;
+  const layout = useMemo(
+    () => optimizeBoardLayout(panels, board, 10, 3, allowRotation),
+    [allowRotation, board, panels],
+  );
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') as {
+        projectName?: string;
+        panels?: CutlistPanel[];
+      } | null;
+      if (saved?.projectName) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydrate the browser-only draft after SSR.
+        setProjectName(saved.projectName);
+      }
+      if (Array.isArray(saved?.panels)) {
+        setPanels(saved.panels);
+      }
+    } catch {
+      // A corrupt browser draft should not block the cutlist.
+    } finally {
+      setDraftLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!draftLoaded) return;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ projectName, panels }));
+  }, [draftLoaded, projectName, panels]);
+
+  const chooseItem = (key: CutlistItemKey) => {
+    const next = CUTLIST_ITEMS.find((entry) => entry.key === key)!;
+    setItemKey(key);
+    setWidth(next.defaults.width);
+    setHeight(next.defaults.height);
+    setDepth(next.defaults.depth);
+  };
+  const addItem = () => {
+    if (!canCreate || width <= 0 || height <= 0 || depth <= 0) return;
+    setPanels((current) => [
+      ...current,
+      ...cutlistPanels(item, { width, height, depth }, cabinetCount),
+    ]);
+  };
+  const totalPanels = panels.reduce((sum, row) => sum + row.quantity, 0);
+  const exportCsv = () => {
+    const rows = [
+      [
+        'Code',
+        'Item',
+        'Panel',
+        'Length (mm)',
+        'Width (mm)',
+        'Qty',
+        'Material',
+        'Thickness (mm)',
+        'Edge',
+        'Grain',
+        'Board',
+        'X (mm)',
+        'Y (mm)',
+        'Rotated',
+      ],
+      ...layout.flatMap((boardLayout) =>
+        boardLayout.placements.map((placement) => {
+          const row = panels.find(
+            (entry) => entry.id === placement.sourcePanelId,
+          );
+          return [
+            placement.code,
+            row?.item ?? '',
+            placement.label,
+            String(placement.length),
+            String(placement.width),
+            '1',
+            row?.material ?? '',
+            String(row?.thickness ?? placement.thickness),
+            row?.edge ?? '',
+            placement.grain,
+            String(placement.board),
+            String(placement.x),
+            String(placement.y),
+            placement.rotated ? 'Yes' : 'No',
+          ];
+        }),
+      ),
+    ];
+    const csv = rows
+      .map((row) =>
+        row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(','),
+      )
+      .join('\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = `${projectName.trim() || 'interior-cutlist'}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <main className="erp-page interior-cutlist-page">
+      <header className="interior-cutlist-hero">
+        <div>
+          <p className="boq-register-eyebrow">
+            BOQ &amp; Estimating / Interior
+          </p>
+          <h1>Interior Cutlist</h1>
+          <p>
+            Prepare cabinet panel schedules from the same Business OS workspace.
+          </p>
+        </div>
+        <div className="interior-cutlist-actions">
+          <Link className="erp-button" href="/dashboard/execution/boq">
+            ← BOQ &amp; Estimating
+          </Link>
+          <button
+            className="erp-button"
+            type="button"
+            onClick={exportCsv}
+            disabled={!panels.length}
+          >
+            Export CSV
+          </button>
+          <button
+            className="erp-button"
+            type="button"
+            onClick={() => window.print()}
+          >
+            Print factory cutlist
+          </button>
+        </div>
+      </header>
+      <section className="interior-cutlist-layout">
+        <div className="interior-cutlist-card">
+          <div className="interior-cutlist-card-heading">
+            <span>01</span>
+            <div>
+              <h2>Cabinet details</h2>
+              <p>Choose a unit and enter finished dimensions in millimetres.</p>
+            </div>
+          </div>
+          <label className="boq-stage-field">
+            <span>Project / customer</span>
+            <input
+              value={projectName}
+              onChange={(event) => setProjectName(event.target.value)}
+            />
+          </label>
+          <label className="boq-stage-field">
+            <span>Interior unit</span>
+            <select
+              value={itemKey}
+              onChange={(event) =>
+                chooseItem(event.target.value as CutlistItemKey)
+              }
+            >
+              {CUTLIST_ITEMS.map((entry) => (
+                <option key={entry.key} value={entry.key}>
+                  {entry.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="interior-cutlist-fields">
+            <label className="boq-stage-field">
+              <span>Width (mm)</span>
+              <input
+                type="number"
+                min="1"
+                value={width}
+                onChange={(event) => setWidth(Number(event.target.value))}
+              />
+            </label>
+            <label className="boq-stage-field">
+              <span>Height (mm)</span>
+              <input
+                type="number"
+                min="1"
+                value={height}
+                onChange={(event) => setHeight(Number(event.target.value))}
+              />
+            </label>
+            <label className="boq-stage-field">
+              <span>Depth (mm)</span>
+              <input
+                type="number"
+                min="1"
+                value={depth}
+                onChange={(event) => setDepth(Number(event.target.value))}
+              />
+            </label>
+            <label className="boq-stage-field">
+              <span>Cabinet quantity</span>
+              <input
+                type="number"
+                min="1"
+                value={cabinetCount}
+                onChange={(event) =>
+                  setCabinetCount(Number(event.target.value))
+                }
+              />
+            </label>
+          </div>
+          <button
+            className="boq-guided-primary"
+            type="button"
+            onClick={addItem}
+            disabled={!canCreate}
+          >
+            ＋ Add to cutlist
+          </button>
+        </div>
+        <aside className="interior-cutlist-card interior-cutlist-summary">
+          <span className="interior-cutlist-summary-number">{totalPanels}</span>
+          <strong>Panels in cutlist</strong>
+          <small>{panels.length} cabinet entries · saved in this browser</small>
+        </aside>
+      </section>
+      <section className="interior-cutlist-card interior-cutlist-table-card">
+        <div className="interior-cutlist-card-heading">
+          <span>02</span>
+          <div>
+            <h2>Factory cutlist / Panel schedule</h2>
+            <p>
+              Review the generated cutting list before sending it to production.
+            </p>
+          </div>
+        </div>
+        {panels.length ? (
+          <div className="boq-volume-scroll">
+            <table className="boq-volume-table">
+              <thead>
+                <tr>
+                  <th>Code</th>
+                  <th>Item / panel</th>
+                  <th>Length</th>
+                  <th>Width</th>
+                  <th>Qty</th>
+                  <th>Material</th>
+                  <th>Thickness</th>
+                  <th>Grain</th>
+                  <th>Edge banding</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {panels.map((row) => (
+                  <tr key={row.id}>
+                    <td>
+                      <strong>{row.code}</strong>
+                    </td>
+                    <td>
+                      {row.item}
+                      <small>{row.panel}</small>
+                    </td>
+                    <td>{row.length} mm</td>
+                    <td>{row.width} mm</td>
+                    <td>{row.quantity}</td>
+                    <td>{row.material}</td>
+                    <td>{row.thickness} mm</td>
+                    <td>{row.grain}</td>
+                    <td>{row.edge}</td>
+                    <td>
+                      <button
+                        className="boq-stage-outline"
+                        type="button"
+                        onClick={() =>
+                          setPanels((current) =>
+                            current.filter((entry) => entry.id !== row.id),
+                          )
+                        }
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="boq-volume-empty">
+            No panels added yet. Start with a wardrobe, kitchen base or TV unit.
+          </div>
+        )}
+        {panels.length > 0 && (
+          <button
+            className="boq-stage-outline"
+            type="button"
+            onClick={() => setPanels([])}
+          >
+            Clear cutlist
+          </button>
+        )}
+      </section>
+      <section className="interior-cutlist-card interior-cutlist-table-card">
+        <div className="interior-cutlist-card-heading">
+          <span>03</span>
+          <div>
+            <h2>Board layout optimization</h2>
+            <p>
+              Rotation-aware nesting using a largest-first cutting heuristic.
+            </p>
+          </div>
+        </div>
+        <div className="interior-cutlist-optimizer-toolbar">
+          <label className="boq-stage-field">
+            <span>Board size</span>
+            <select
+              value={boardKey}
+              onChange={(event) => setBoardKey(event.target.value)}
+            >
+              {BOARD_SIZES.map((entry) => (
+                <option key={entry.key} value={entry.key}>
+                  {entry.label} · {entry.length} × {entry.width} mm
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="interior-cutlist-rotation-toggle">
+            <input
+              type="checkbox"
+              checked={allowRotation}
+              onChange={(event) => setAllowRotation(event.target.checked)}
+            />
+            <span>
+              <strong>Allow rotation</strong>
+              <small>Turn off for fixed wood grain direction.</small>
+            </span>
+          </label>
+          <div className="interior-cutlist-optimizer-stat">
+            <strong>{layout.length}</strong>
+            <span>Boards required</span>
+          </div>
+          <div className="interior-cutlist-optimizer-stat">
+            <strong>
+              {layout.length
+                ? Math.round(
+                    (layout.reduce((sum, entry) => sum + entry.usedArea, 0) /
+                      (layout.length * board.length * board.width)) *
+                      100,
+                  )
+                : 0}
+              %
+            </strong>
+            <span>Average utilization</span>
+          </div>
+          <div className="interior-cutlist-optimizer-stat">
+            <strong>
+              {layout.reduce(
+                (sum, entry) =>
+                  sum +
+                  entry.placements.filter((placement) => placement.rotated)
+                    .length,
+                0,
+              )}
+            </strong>
+            <span>Rotated panels</span>
+          </div>
+        </div>
+        {layout.length ? (
+          <div className="interior-cutlist-board-grid">
+            {layout.map((entry) => (
+              <div className="interior-cutlist-board-card" key={entry.board}>
+                <div className="interior-cutlist-board-head">
+                  <strong>Board {entry.board}</strong>
+                  <span>{entry.wastePercent.toFixed(1)}% waste</span>
+                </div>
+                <div
+                  className="interior-cutlist-board"
+                  style={{ aspectRatio: `${board.length} / ${board.width}` }}
+                  aria-label={`Board ${entry.board} layout`}
+                >
+                  {entry.placements.map((placement) => (
+                    <BoardPlacementBox
+                      key={placement.id}
+                      placement={placement}
+                      board={board}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="boq-volume-empty">
+            Add panels above to calculate the board layout.
+          </div>
+        )}
+        <small className="interior-cutlist-optimizer-note">
+          Layout includes a 10 mm trim allowance and 3 mm saw kerf. Confirm the
+          final nesting with the workshop saw/CNC operator before cutting.
+        </small>
+      </section>
+    </main>
+  );
+}
+
+function BoardPlacementBox({
+  placement,
+  board,
+}: {
+  placement: BoardPlacement;
+  board: { length: number; width: number };
+}) {
+  return (
+    <span
+      className="interior-cutlist-board-piece"
+      style={{
+        left: `${(placement.x / board.length) * 100}%`,
+        top: `${(placement.y / board.width) * 100}%`,
+        width: `${(placement.length / board.length) * 100}%`,
+        height: `${(placement.width / board.width) * 100}%`,
+      }}
+      title={`${placement.code}: ${placement.length} × ${placement.width} mm`}
+    >
+      <b>{placement.code}</b>
+      <small>
+        {placement.length}×{placement.width}
+      </small>
+    </span>
+  );
+}
