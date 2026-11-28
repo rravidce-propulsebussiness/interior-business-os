@@ -16,28 +16,14 @@ export function InteriorCutlistWorkspace({
 }: {
   canCreate: boolean;
 }) {
-  const savedDraft = useMemo(() => {
-    if (typeof window === 'undefined') return null;
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') as {
-        projectName?: string;
-        panels?: CutlistPanel[];
-      } | null;
-    } catch {
-      return null;
-    }
-  }, []);
-  const [projectName, setProjectName] = useState(
-    savedDraft?.projectName || 'Interior project',
-  );
+  const [projectName, setProjectName] = useState('Interior project');
   const [itemKey, setItemKey] = useState<CutlistItemKey>('wardrobe');
   const [width, setWidth] = useState(1200);
   const [height, setHeight] = useState(2100);
   const [depth, setDepth] = useState(600);
   const [cabinetCount, setCabinetCount] = useState(1);
-  const [panels, setPanels] = useState<CutlistPanel[]>(
-    Array.isArray(savedDraft?.panels) ? savedDraft.panels : [],
-  );
+  const [panels, setPanels] = useState<CutlistPanel[]>([]);
+  const [draftLoaded, setDraftLoaded] = useState(false);
   const item = useMemo(
     () =>
       CUTLIST_ITEMS.find((entry) => entry.key === itemKey) ?? CUTLIST_ITEMS[0]!,
@@ -45,8 +31,29 @@ export function InteriorCutlistWorkspace({
   );
 
   useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') as {
+        projectName?: string;
+        panels?: CutlistPanel[];
+      } | null;
+      if (saved?.projectName) {
+        setProjectName(saved.projectName);
+      }
+      if (Array.isArray(saved?.panels)) {
+        setPanels(saved.panels);
+      }
+    } catch {
+      // A corrupt browser draft should not block the cutlist.
+    } finally {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Allow saving only after the browser draft has been read.
+      setDraftLoaded(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!draftLoaded) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ projectName, panels }));
-  }, [projectName, panels]);
+  }, [draftLoaded, projectName, panels]);
 
   const chooseItem = (key: CutlistItemKey) => {
     const next = CUTLIST_ITEMS.find((entry) => entry.key === key)!;
