@@ -46,4 +46,32 @@ describe('interior cutlist generators', () => {
       ),
     ).toBe(true);
   });
+
+  it('supports the complete interior unit catalog', () => {
+    const keys = CUTLIST_ITEMS.map((item) => item.key);
+    expect(keys).toEqual([
+      'wardrobe',
+      'kitchen_base',
+      'kitchen_overhead',
+      'kitchen_platform',
+      'kitchen_loft',
+      'loft',
+      'individual',
+      'crockery',
+      'overhead',
+      'tall_unit',
+      'shoe_unit',
+      'tv_unit',
+      'pooja_unit',
+      'study_unit',
+    ]);
+    for (const item of CUTLIST_ITEMS) {
+      const rows = cutlistPanels(item, item.defaults, 1);
+      expect(rows.length, item.key).toBeGreaterThan(0);
+      expect(
+        rows.every((row) => row.quantity > 0),
+        item.key,
+      ).toBe(true);
+    }
+  });
 });
