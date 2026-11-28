@@ -15,7 +15,9 @@ export type CutlistPanel = {
   width: number;
   quantity: number;
   material: string;
+  thickness: number;
   edge: string;
+  grain: 'length' | 'width' | 'none';
 };
 
 export const CUTLIST_ITEMS: readonly CutlistItem[] = [
@@ -60,7 +62,9 @@ export function cutlistPanels(
     width: Math.round(panelWidth),
     quantity: Math.max(0, Math.round(quantity * count)),
     material: '18 mm plywood',
+    thickness: 18,
     edge: '0.8 mm edge band',
+    grain: name === 'Back panel' ? 'none' : 'length',
   });
   if (item.key === 'kitchen_base') {
     return [

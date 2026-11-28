@@ -17,6 +17,10 @@ export type BoardPlacement = {
   rotated: boolean;
   code: string;
   label: string;
+  material: string;
+  thickness: number;
+  edge: string;
+  grain: CutlistPanel['grain'];
 };
 export type BoardLayout = {
   board: number;
@@ -42,6 +46,7 @@ export function optimizeBoardLayout(
   board: BoardSize,
   trim = 10,
   kerf = 3,
+  allowRotation = true,
 ): BoardLayout[] {
   const usableLength = Math.max(0, board.length - trim * 2);
   const usableWidth = Math.max(0, board.width - trim * 2);
@@ -56,7 +61,7 @@ export function optimizeBoardLayout(
   pieces.sort((a, b) => b.area - a.area);
   const orientations = (length: number, width: number) => [
     { length, width, rotated: false },
-    ...(length === width
+    ...(!allowRotation || length === width
       ? []
       : [{ length: width, width: length, rotated: true }]),
   ];
@@ -89,6 +94,10 @@ export function optimizeBoardLayout(
               rotated: orientation.rotated,
               code: piece.panel.code,
               label: piece.panel.panel,
+              material: piece.panel.material,
+              thickness: piece.panel.thickness,
+              edge: piece.panel.edge,
+              grain: piece.panel.grain,
             });
             shelf.used += orientation.length + kerf;
             placed = true;
@@ -126,6 +135,10 @@ export function optimizeBoardLayout(
             rotated: orientation.rotated,
             code: piece.panel.code,
             label: piece.panel.panel,
+            material: piece.panel.material,
+            thickness: piece.panel.thickness,
+            edge: piece.panel.edge,
+            grain: piece.panel.grain,
           });
           placed = true;
           break;
@@ -157,6 +170,10 @@ export function optimizeBoardLayout(
         rotated: created.rotated,
         code: piece.panel.code,
         label: piece.panel.panel,
+        material: piece.panel.material,
+        thickness: piece.panel.thickness,
+        edge: piece.panel.edge,
+        grain: piece.panel.grain,
       });
     }
   }

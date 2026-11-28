@@ -30,6 +30,7 @@ export function InteriorCutlistWorkspace({
   const [panels, setPanels] = useState<CutlistPanel[]>([]);
   const [draftLoaded, setDraftLoaded] = useState(false);
   const [boardKey, setBoardKey] = useState('2440x1220');
+  const [allowRotation, setAllowRotation] = useState(true);
   const item = useMemo(
     () =>
       CUTLIST_ITEMS.find((entry) => entry.key === itemKey) ?? CUTLIST_ITEMS[0]!,
@@ -38,8 +39,8 @@ export function InteriorCutlistWorkspace({
   const board =
     BOARD_SIZES.find((entry) => entry.key === boardKey) ?? BOARD_SIZES[0]!;
   const layout = useMemo(
-    () => optimizeBoardLayout(panels, board),
-    [board, panels],
+    () => optimizeBoardLayout(panels, board, 10, 3, allowRotation),
+    [allowRotation, board, panels],
   );
 
   useEffect(() => {
@@ -92,7 +93,9 @@ export function InteriorCutlistWorkspace({
         'Width (mm)',
         'Qty',
         'Material',
+        'Thickness (mm)',
         'Edge',
+        'Grain',
         'Board',
         'X (mm)',
         'Y (mm)',
@@ -111,7 +114,9 @@ export function InteriorCutlistWorkspace({
             String(placement.width),
             '1',
             row?.material ?? '',
+            String(row?.thickness ?? placement.thickness),
             row?.edge ?? '',
+            placement.grain,
             String(placement.board),
             String(placement.x),
             String(placement.y),
@@ -156,6 +161,13 @@ export function InteriorCutlistWorkspace({
             disabled={!panels.length}
           >
             Export CSV
+          </button>
+          <button
+            className="erp-button"
+            type="button"
+            onClick={() => window.print()}
+          >
+            Print factory cutlist
           </button>
         </div>
       </header>
@@ -249,7 +261,7 @@ export function InteriorCutlistWorkspace({
         <div className="interior-cutlist-card-heading">
           <span>02</span>
           <div>
-            <h2>Panel schedule</h2>
+            <h2>Factory cutlist / Panel schedule</h2>
             <p>
               Review the generated cutting list before sending it to production.
             </p>
@@ -266,6 +278,9 @@ export function InteriorCutlistWorkspace({
                   <th>Width</th>
                   <th>Qty</th>
                   <th>Material</th>
+                  <th>Thickness</th>
+                  <th>Grain</th>
+                  <th>Edge banding</th>
                   <th>Action</th>
                 </tr>
               </thead>
@@ -282,10 +297,10 @@ export function InteriorCutlistWorkspace({
                     <td>{row.length} mm</td>
                     <td>{row.width} mm</td>
                     <td>{row.quantity}</td>
-                    <td>
-                      {row.material}
-                      <small>{row.edge}</small>
-                    </td>
+                    <td>{row.material}</td>
+                    <td>{row.thickness} mm</td>
+                    <td>{row.grain}</td>
+                    <td>{row.edge}</td>
                     <td>
                       <button
                         className="boq-stage-outline"
@@ -342,6 +357,17 @@ export function InteriorCutlistWorkspace({
                 </option>
               ))}
             </select>
+          </label>
+          <label className="interior-cutlist-rotation-toggle">
+            <input
+              type="checkbox"
+              checked={allowRotation}
+              onChange={(event) => setAllowRotation(event.target.checked)}
+            />
+            <span>
+              <strong>Allow rotation</strong>
+              <small>Turn off for fixed wood grain direction.</small>
+            </span>
           </label>
           <div className="interior-cutlist-optimizer-stat">
             <strong>{layout.length}</strong>

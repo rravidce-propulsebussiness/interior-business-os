@@ -190,6 +190,29 @@
   color: #7d5960;
   font-size: 12px;
 }
+.interior-cutlist-rotation-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 43px;
+  padding: 8px 11px;
+  border: 1px solid #eaded9;
+  border-radius: 10px;
+  background: #fff8f3;
+  color: #6d4e54;
+  font-size: 12px;
+}
+.interior-cutlist-rotation-toggle input {
+  accent-color: #94372e;
+}
+.interior-cutlist-rotation-toggle strong,
+.interior-cutlist-rotation-toggle small {
+  display: block;
+}
+.interior-cutlist-rotation-toggle small {
+  margin-top: 2px;
+  color: #8a6c70;
+}
 .interior-cutlist-board-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -259,5 +282,24 @@
   }
   .interior-cutlist-optimizer-toolbar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media print {
+  .erp-crumbs,
+  .interior-cutlist-actions,
+  .interior-cutlist-layout,
+  .interior-cutlist-optimizer-toolbar,
+  .boq-stage-outline,
+  .interior-cutlist-table-card:first-of-type th:last-child,
+  .interior-cutlist-table-card:first-of-type td:last-child {
+    display: none !important;
+  }
+  .interior-cutlist-page {
+    max-width: none;
+    padding: 0;
+  }
+  .interior-cutlist-card {
+    border: 0;
+    box-shadow: none;
   }
 }
