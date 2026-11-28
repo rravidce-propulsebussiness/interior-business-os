@@ -98,6 +98,7 @@ if (!initializeOnly) {
   // Exercises actual company data deletion in an isolated transaction,
   // ending with ROLLBACK so demo fixtures are retained for later checks.
   assertionFile('test-data-reset');
+  assertionFile('crm-history-retention');
   assertionFile('client-payment-proof-approval');
   assertionFile('deployment');
   assertionFile('whatsapp-read-permissions');

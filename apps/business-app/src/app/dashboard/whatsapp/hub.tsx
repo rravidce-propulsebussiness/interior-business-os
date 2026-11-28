@@ -14,6 +14,7 @@ import Link from 'next/link';
 import './whatsapp-inbox.css';
 import { WhatsAppCalling } from './calling';
 import { readApiResponse } from '@/lib/whatsapp-response';
+import { createLatestRequest } from '@/lib/latest-request';
 import {
   parseWhatsAppRichMessage,
   whatsappMessagePreview,
@@ -1132,14 +1133,18 @@ function useWorkspaceRows(
   const [search, setSearch] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const requests = useRef(createLatestRequest());
   const load = useCallback(
     async (quiet = false) => {
       if (!connectionId) return;
+      const request = requests.current.start(quiet);
+      if (!request) return;
       if (!quiet) setBusy(true);
       try {
         const params = new URLSearchParams({ section, connectionId, search });
         const response = await fetch(`/api/whatsapp/inbox?${params}`, {
           cache: 'no-store',
+          signal: request.signal,
         });
         const data = (await readApiResponse(response)) as {
           rows?: Contact[];
@@ -1149,21 +1154,25 @@ function useWorkspaceRows(
         };
         if (!response.ok)
           throw new Error(data.message ?? 'Could not load contacts.');
+        if (!requests.current.isCurrent(request)) return;
         setRows(data.rows ?? []);
         setTotal(data.total ?? 0);
         setUnread(data.unread ?? 0);
         setError('');
       } catch (cause) {
-        setError(friendlyError(cause, 'Could not load WhatsApp data.'));
+        if (requests.current.isCurrent(request))
+          setError(friendlyError(cause, 'Could not load WhatsApp data.'));
       } finally {
-        if (!quiet) setBusy(false);
+        if (requests.current.finish(request)) setBusy(false);
       }
     },
     [connectionId, search, section],
   );
   useEffect(() => {
+    const pending = requests.current;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- This effect synchronizes browser, server, or event state with the component.
     void load();
+    return () => pending.cancel();
   }, [load, refreshKey]);
   return { rows, total, unread, search, setSearch, busy, error, reload: load };
 }

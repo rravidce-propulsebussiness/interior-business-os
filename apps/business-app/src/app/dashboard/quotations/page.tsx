@@ -9,6 +9,7 @@ import { QuotationStudioFrame } from './studio-frame';
 import { QuotationRemovalButton } from './quotation-removal-button';
 import { QuotationReviseButton } from './quotation-revise-button';
 import { QuotationFinalButton } from './quotation-final-button';
+import { filterSharedQuotations } from './sharing-filter';
 import {
   QuotationMobileMore,
   QuotationMobileFooter,
@@ -166,7 +167,9 @@ export default async function Quotations({
       : Promise.resolve({ data: [], error: null }),
   ]);
   const sharingAvailable =
-    !shareResponse.error && Array.isArray(shareResponse.data);
+    !shareResponse.error &&
+    Array.isArray(shareResponse.data) &&
+    shareResponse.data.every((id) => typeof id === 'string');
   if (!sharingAvailable)
     console.error(
       '[quotations:list] Sharing metadata unavailable',
@@ -192,8 +195,11 @@ export default async function Quotations({
     if (!current || (row.revision_number ?? 0) > (current.revision_number ?? 0))
       latestByQuote.set(parentId, row);
   }
-  const quotes = [...latestByQuote.values()].filter(
-    (row) => viewStatus !== 'shared' || sharedIds.has(row.id),
+  const quotes = filterSharedQuotations(
+    [...latestByQuote.values()],
+    viewStatus === 'shared',
+    sharingAvailable,
+    sharedIds,
   );
   const canCreate = s.allowed('quotation.create', 'quotation');
   const canEdit = s.allowed('quotation.edit', 'quotation');
