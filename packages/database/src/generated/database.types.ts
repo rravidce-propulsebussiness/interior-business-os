@@ -5162,11 +5162,11 @@ export interface Database {
           wa_id: string | null;
           whatsapp_status: string;
           whatsapp_error: string | null;
-          whatsapp_area_mode: string | null;
           confirmation_sent_at: string | null;
           confirmed_at: string | null;
           created_at: string;
           processed_at: string | null;
+          whatsapp_area_mode: string | null;
         };
         Insert: {
           leadgen_id: string;
@@ -5180,11 +5180,11 @@ export interface Database {
           wa_id?: string | null;
           whatsapp_status?: string;
           whatsapp_error?: string | null;
-          whatsapp_area_mode?: string | null;
           confirmation_sent_at?: string | null;
           confirmed_at?: string | null;
           created_at?: string;
           processed_at?: string | null;
+          whatsapp_area_mode?: string | null;
         };
         Update: {
           leadgen_id?: string;
@@ -5198,11 +5198,11 @@ export interface Database {
           wa_id?: string | null;
           whatsapp_status?: string;
           whatsapp_error?: string | null;
-          whatsapp_area_mode?: string | null;
           confirmation_sent_at?: string | null;
           confirmed_at?: string | null;
           created_at?: string;
           processed_at?: string | null;
+          whatsapp_area_mode?: string | null;
         };
         Relationships: [
           {
