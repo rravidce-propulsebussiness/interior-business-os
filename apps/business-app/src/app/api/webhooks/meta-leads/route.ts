@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
+import { after } from 'next/server';
 import {
   ensureMetaLeadForm,
   metaLeadConfig,
@@ -34,8 +35,8 @@ export async function GET(request: Request) {
 
 /**
  * Meta pushes a `leadgen` change the moment someone submits a lead form.
- * Each lead is fetched and stored before answering; a 503 asks Meta to retry,
- * and retries are harmless because every Meta lead ID is imported once.
+ * The signed envelope is acknowledged immediately, then each lead is fetched
+ * and imported once after the response so Meta never times out on automation.
  */
 export async function POST(request: Request) {
   const secret = metaLeadConfig().appSecret;
@@ -66,13 +67,28 @@ export async function POST(request: Request) {
   if (body.object !== 'page' || !Array.isArray(body.entry))
     return Response.json({ received: true }, { status: 200, headers });
 
-  try {
-    for (const entry of body.entry) {
-      for (const change of Array.isArray(entry?.changes) ? entry.changes : []) {
-        if (change?.field !== 'leadgen') continue;
-        const pageId = String(entry?.id ?? '');
-        const leadgenId = String(change.value?.leadgen_id ?? '');
-        const formId = String(change.value?.form_id ?? '');
+  const deliveries: Array<{
+    pageId: string;
+    leadgenId: string;
+    formId: string;
+  }> = [];
+  for (const entry of body.entry) {
+    for (const change of Array.isArray(entry?.changes) ? entry.changes : []) {
+      if (change?.field !== 'leadgen') continue;
+      deliveries.push({
+        pageId: String(entry?.id ?? ''),
+        leadgenId: String(change.value?.leadgen_id ?? ''),
+        formId: String(change.value?.form_id ?? ''),
+      });
+    }
+  }
+
+  // Meta treats a webhook as rejected when acknowledgement takes too long.
+  // Verify and acknowledge the signed envelope immediately, then finish the
+  // Graph fetch, CRM import and optional WhatsApp automation after the response.
+  after(async () => {
+    for (const { pageId, leadgenId, formId } of deliveries) {
+      try {
         // Provision a newly-created form on first delivery. This keeps the
         // Page subscription working for future forms without requiring the
         // owner to reconnect every form manually.
@@ -82,10 +98,18 @@ export async function POST(request: Request) {
           formId,
           notify: true,
         });
+      } catch (error) {
+        console.error('Meta lead processing failed after acknowledgement', {
+          pageId,
+          formId,
+          leadgenId,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        });
       }
     }
-    return Response.json({ received: true }, { status: 200, headers });
-  } catch {
-    return new Response('Unavailable', { status: 503, headers });
-  }
+  });
+  return Response.json(
+    { received: true, deliveries: deliveries.length },
+    { status: 200, headers },
+  );
 }
