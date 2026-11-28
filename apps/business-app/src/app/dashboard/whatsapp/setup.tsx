@@ -45,6 +45,8 @@ const inputClass =
   'rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm font-semibold text-neutral-900 shadow-sm disabled:cursor-not-allowed disabled:opacity-50';
 
 export function WhatsAppSetup({
+  organizationId,
+  workspaceName,
   configured,
   appId,
   configurationId,
@@ -53,6 +55,8 @@ export function WhatsAppSetup({
   initialMessage,
   connections,
 }: {
+  organizationId: string;
+  workspaceName: string;
   configured: boolean;
   appId: string;
   configurationId: string;
@@ -79,6 +83,16 @@ export function WhatsAppSetup({
   const codeRef = useRef<string | null>(null);
   const assetRef = useRef<SignupAsset | null>(null);
   const submittedRef = useRef(false);
+  const attemptRef = useRef(0);
+  const activeAttemptRef = useRef<number | null>(null);
+
+  function endSignup() {
+    activeAttemptRef.current = null;
+    codeRef.current = null;
+    assetRef.current = null;
+    submittedRef.current = false;
+    setBusy(false);
+  }
 
   useEffect(() => {
     if (!configured) return;
@@ -110,24 +124,22 @@ export function WhatsAppSetup({
 
   useEffect(() => {
     const receive = (event: MessageEvent) => {
+      if (activeAttemptRef.current === null || submittedRef.current) return;
       if (!isMetaOrigin(event.origin)) return;
       const signup = parseSignupEvent(event.data);
       if (!signup) return;
       if (signup.kind === 'cancel') {
-        codeRef.current = null;
-        setBusy(false);
+        endSignup();
         setMessage('WhatsApp setup was cancelled before completion.');
         return;
       }
       if (signup.kind === 'error') {
-        codeRef.current = null;
-        setBusy(false);
+        endSignup();
         setMessage(signup.message);
         return;
       }
       if (signup.kind === 'missing-assets') {
-        codeRef.current = null;
-        setBusy(false);
+        endSignup();
         setMessage(
           'Meta did not return a WhatsApp account and phone number. Try the connection again.',
         );
@@ -144,7 +156,13 @@ export function WhatsAppSetup({
   });
 
   async function completeIfReady() {
-    if (!codeRef.current || !assetRef.current || submittedRef.current) return;
+    if (
+      activeAttemptRef.current === null ||
+      !codeRef.current ||
+      !assetRef.current ||
+      submittedRef.current
+    )
+      return;
     submittedRef.current = true;
     setBusy(true);
     setMessage('Securely verifying your WhatsApp account with Meta…');
@@ -153,6 +171,7 @@ export function WhatsAppSetup({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          organizationId,
           code: codeRef.current,
           wabaId: assetRef.current.wabaId,
           phoneNumberId: assetRef.current.phoneNumberId,
@@ -163,10 +182,11 @@ export function WhatsAppSetup({
         throw new Error(
           result.message ?? 'Could not connect this WhatsApp account.',
         );
-      window.location.reload();
+      const destination = new URL(window.location.href);
+      destination.searchParams.set('tab', 'settings');
+      window.location.assign(destination.toString());
     } catch (error) {
-      submittedRef.current = false;
-      setBusy(false);
+      endSignup();
       setMessage(
         error instanceof Error
           ? error.message
@@ -259,13 +279,16 @@ export function WhatsAppSetup({
     codeRef.current = null;
     assetRef.current = null;
     submittedRef.current = false;
+    const attempt = ++attemptRef.current;
+    activeAttemptRef.current = attempt;
     setBusy(true);
     setMessage('Complete the secure WhatsApp signup window from Meta.');
     window.FB.login(
       (response) => {
+        if (activeAttemptRef.current !== attempt) return;
         const code = response.authResponse?.code;
         if (!code) {
-          setBusy(false);
+          endSignup();
           setMessage(
             response.status === 'unknown'
               ? 'Meta login was cancelled.'
@@ -277,8 +300,13 @@ export function WhatsAppSetup({
         void completeIfReady();
         // Meta sends the account details separately. Do not wait forever for them.
         window.setTimeout(() => {
-          if (codeRef.current !== code || assetRef.current) return;
-          setBusy(false);
+          if (
+            activeAttemptRef.current !== attempt ||
+            codeRef.current !== code ||
+            assetRef.current
+          )
+            return;
+          endSignup();
           setMessage(
             'Meta finished signup but did not send the WhatsApp account details. Try the connection again.',
           );
@@ -289,7 +317,7 @@ export function WhatsAppSetup({
         auth_type: 'rerequest',
         response_type: 'code',
         override_default_response_type: true,
-        extras: {},
+        extras: { version: 'v4', sessionInfoVersion: '3' },
       },
     );
   }
@@ -298,10 +326,13 @@ export function WhatsAppSetup({
     <section className="space-y-5 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold">WhatsApp API connection</h2>
+          <h2 className="text-xl font-semibold">
+            WhatsApp for {workspaceName}
+          </h2>
           <p className="mt-1 text-sm text-neutral-600">
-            Each company connects its own Meta Business Portfolio and WhatsApp
-            Business Account.
+            Connect your company’s own WhatsApp account through ProPulse
+            Business OS. Messages, contacts and automations belong to this
+            workspace.
           </p>
         </div>
         <button
@@ -313,6 +344,20 @@ export function WhatsAppSetup({
           {busy ? 'Connecting…' : 'Connect WhatsApp with Meta'}
         </button>
       </div>
+
+      {canManage && (
+        <ol className="list-decimal space-y-1 pl-5 text-sm text-neutral-600">
+          <li>Continue with the Facebook account that manages your company.</li>
+          <li>
+            Verify your phone number and select your own business assets in
+            Meta.
+          </li>
+          <li>
+            Return here to finish phone registration if needed, then check
+            billing and send a test message.
+          </li>
+        </ol>
+      )}
 
       {!configured && (
         <p

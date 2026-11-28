@@ -1,14 +1,32 @@
 # WhatsApp Cloud API onboarding
 
+ProPulse Business OS is the software platform. SG Homes and every other company
+are separate customer workspaces, each with its own website, leads, projects,
+WhatsApp account, numbers and automations. The shared provider app is Propulse
+Messaging; using it does not give a customer access to any other workspace.
+
 This integration connects each company workspace to its own WhatsApp Business Account through Meta Embedded Signup. It does not ask customers for a Facebook password or verification code.
+
+## Customer onboarding
+
+1. Register and verify a Business OS account, then create or select the customer's own company workspace.
+2. Open **WhatsApp**. A new workspace displays the connection screen immediately. Existing workspaces can open **Settings**, or use `/dashboard/whatsapp?tab=settings`.
+3. Confirm the company name shown above **Connect WhatsApp with Meta**.
+4. The customer uses their own Facebook administrator account in Meta's popup, verifies their business phone, and selects their own business portfolio and WhatsApp assets.
+5. Business OS exchanges the code on its server, checks the selected assets, subscribes to webhooks, and encrypts the customer's token in that company's connection row.
+6. Finish phone registration if Meta requires it, configure the payment method in Meta, and test an inbound message and reply before enabling automations.
+
+Do not share SG Homes' login, WhatsApp token, number or connection with another
+customer. The signup request includes the initiating workspace ID; the server
+rejects it if the selected company changes while the Meta popup is open.
 
 ## Server configuration
 
 Set these on the Business OS server only:
 
-- `META_APP_ID`: Propulse Messaging app ID.
+- `META_APP_ID`: Propulse Messaging app ID (`1600905461082113` for the verified production provider).
 - `META_APP_SECRET`: Meta App Secret. Keep private.
-- `META_EMBEDDED_SIGNUP_CONFIG_ID`: WhatsApp Embedded Signup v4 configuration ID.
+- `META_EMBEDDED_SIGNUP_CONFIG_ID`: WhatsApp Embedded Signup v4 configuration ID (`2157491381506792`, ES Config, as observed in the production app's Integration Helper on 2026-11-28). Keep this distinct from a Lead Ads login configuration.
 - `META_GRAPH_API_VERSION`: supported Graph version in the form `vNN.0`.
 - `WHATSAPP_TOKEN_ENCRYPTION_KEY`: 32 random bytes encoded as 64 hexadecimal characters. Generate a new value for each environment and store it only in the host's secret/environment settings.
 - `WHATSAPP_WEBHOOK_VERIFY_TOKEN`: a separate random verification string; do not reuse the app secret.
@@ -17,10 +35,10 @@ The signup route exchanges the one-time Meta code on the server, verifies the WA
 
 ## Meta configuration and release gates
 
-- Keep the app in Development mode while testing; add test users as app roles.
+- Use Development mode and app roles for pre-release tests. Customer onboarding requires the app to be Live and the relevant permissions approved for Advanced Access.
 - Configure the app webhook callback as `https://sghomesinterior.in/api/webhooks/whatsapp`, use the server verification token, and subscribe the WhatsApp product to `messages` and status fields needed by the product.
 - Embedded Signup and Graph API calls require HTTPS.
-- Meta requires App Review and advanced access for the permissions needed to release a Tech Provider integration to customers. The current app and signup configuration still need those gates completed.
+- On 2026-11-28, Meta showed **Verified Tech Provider**, **Completed Onboarding**, and **You can use this app in production now** for Propulse Messaging. The previously approved WhatsApp permissions are separate from the Lead Ads/Page permission request, which is under review. Recheck these gates in Meta before release; approval does not prove a new customer's signup works end to end.
 - App Privacy Policy, Terms, and Data Deletion URLs must be publicly reachable and reviewed against actual data handling before production release. The related Business OS pages are in a separate review pull request.
 
 ## Current product boundary
@@ -32,7 +50,7 @@ The WhatsApp workspace handles the inbox, templates, and WhatsApp automation rep
 - Each connected phone number has its own row and encrypted token, so one WhatsApp Business Account can hold several numbers.
 - A number can be connected to only one company at a time. Disconnect it there before connecting it to another company. Disconnected rows stay so message history keeps its connection.
 - Webhook changes go to the number named in `metadata.phone_number_id`. Numbers with no live connection are ignored. Changes with no number are stored as account-level events and never enter an inbox.
-- Apply migration `20261107000000_whatsapp_multi_number_connections.sql` before or with this code.
+- Apply `20261128125937_whatsapp_customer_onboarding_connections.sql` before or with this code. It also upgrades legacy WABA-scoped deployments without deleting disconnected duplicate connection/history rows. The earlier `20261107000000_whatsapp_multi_number_connections.sql` alone cannot upgrade such duplicates.
 
 ## Troubleshooting Meta errors
 

@@ -17,6 +17,7 @@ export const dynamic = 'force-dynamic';
 const headers = { 'Cache-Control': 'private, no-store' };
 const inputSchema = z
   .object({
+    organizationId: z.string().uuid(),
     code: z.string().min(8).max(4096),
     wabaId: z.string().regex(/^[0-9]{5,32}$/),
     phoneNumberId: z.string().regex(/^[0-9]{5,32}$/),
@@ -88,6 +89,16 @@ export async function POST(request: Request) {
         { message: 'Choose a company workspace first.' },
         { status: 403, headers },
       );
+    // The Meta popup can outlive a company switch in another browser tab.
+    // Never attach its account to whichever company happens to be active now.
+    if (parsed.data.organizationId !== context.organizationId)
+      return Response.json(
+        {
+          message:
+            'Your company workspace changed during signup. Return to the company you want to connect and start WhatsApp setup again.',
+        },
+        { status: 409, headers },
+      );
     const { authorization, client } = await serverServices();
     await authorization.requirePermission(
       context.organizationId,
@@ -156,7 +167,7 @@ export async function POST(request: Request) {
     );
     if (!phone) throw new Error('META_PHONE_NOT_IN_WABA');
 
-    await graphRequest<{ success?: boolean }>(
+    const subscription = await graphRequest<{ success?: boolean }>(
       `${parsed.data.wabaId}/subscribed_apps`,
       token,
       {
@@ -164,6 +175,14 @@ export async function POST(request: Request) {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       },
     );
+    if (subscription.success !== true)
+      return Response.json(
+        {
+          message:
+            'Meta did not confirm the WhatsApp webhook subscription. Please reconnect your account.',
+        },
+        { status: META_FAILURE_STATUS, headers },
+      );
     const encrypted = encryptToken(token);
     const saved = await client.rpc('whatsapp_connection_save', {
       p_organization_id: context.organizationId,

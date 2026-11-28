@@ -81,6 +81,7 @@ describe('Embedded Signup events', () => {
     'FINISH',
     'FINISH_ONLY_WABA',
     'FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING',
+    'FINISH_GRANT_ONLY_API_ACCESS',
   ])('accepts %s', (event) => {
     expect(parseSignupEvent(JSON.stringify(finish(event)))).toEqual({
       kind: 'finish',
