@@ -4314,6 +4314,7 @@ export interface Database {
           converted_project_id: string | null;
           converted_at: string | null;
           converted_by: string | null;
+          archived_at: string | null;
         };
         Insert: {
           id?: string;
@@ -4359,6 +4360,7 @@ export interface Database {
           converted_project_id?: string | null;
           converted_at?: string | null;
           converted_by?: string | null;
+          archived_at?: string | null;
         };
         Update: {
           id?: string;
@@ -4404,6 +4406,7 @@ export interface Database {
           converted_project_id?: string | null;
           converted_at?: string | null;
           converted_by?: string | null;
+          archived_at?: string | null;
         };
         Relationships: [
           {
