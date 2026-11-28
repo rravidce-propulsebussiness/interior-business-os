@@ -38,48 +38,73 @@ export function BoqRegisterLanding({
 
   return (
     <main className="erp-page manual-boq boq-register-landing">
-      {canCreate &&
-        (canStartNew ? (
-          <Link
-            href="/dashboard/execution/boq/new"
-            className="boq-register-create"
-          >
-            <svg
-              width="23"
-              height="23"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              aria-hidden="true"
+      {canCreate && (
+        <section
+          className="boq-register-create-options"
+          aria-label="Create estimate"
+        >
+          <div className="boq-register-create-heading">
+            <div>
+              <p className="boq-register-eyebrow">BOQ &amp; Estimating</p>
+              <h1>Choose a work type</h1>
+              <span>Start the right quantity workflow for this project.</span>
+            </div>
+          </div>
+          <div className="boq-register-create-grid">
+            {canStartNew ? (
+              <Link
+                href="/dashboard/execution/boq/new"
+                className="boq-register-mode construction"
+              >
+                <span className="boq-register-mode-icon" aria-hidden="true">
+                  ⌂
+                </span>
+                <span>
+                  <strong>Construction BOQ</strong>
+                  <small>
+                    Floor-wise civil quantities, materials, rates and labour.
+                  </small>
+                </span>
+                <b aria-hidden="true">→</b>
+              </Link>
+            ) : (
+              <button
+                type="button"
+                className="boq-register-mode construction"
+                disabled
+                title="A project with a saved quotation and no existing BOQ is required."
+              >
+                <span className="boq-register-mode-icon" aria-hidden="true">
+                  ⌂
+                </span>
+                <span>
+                  <strong>Construction BOQ</strong>
+                  <small>
+                    Create this after a project has a final quotation.
+                  </small>
+                </span>
+                <b aria-hidden="true">→</b>
+              </button>
+            )}
+            <Link
+              href="/dashboard/execution/cutlist"
+              className="boq-register-mode interior"
             >
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            Create New BOQ
-          </Link>
-        ) : (
-          <button
-            type="button"
-            className="boq-register-create"
-            disabled
-            title="A project with a saved quotation and no existing BOQ is required."
-          >
-            <svg
-              width="23"
-              height="23"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              aria-hidden="true"
-            >
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            Create New BOQ
-          </button>
-        ))}
+              <span className="boq-register-mode-icon" aria-hidden="true">
+                ▥
+              </span>
+              <span>
+                <strong>Interior Cutlist</strong>
+                <small>
+                  Wardrobe, kitchen, TV unit and cabinet panel cutting
+                  schedules.
+                </small>
+              </span>
+              <b aria-hidden="true">→</b>
+            </Link>
+          </div>
+        </section>
+      )}
       <section className="boq-register-list" aria-labelledby="completed-boqs">
         <h2 id="completed-boqs">Completed BOQs</h2>
         {documents.length ? (
