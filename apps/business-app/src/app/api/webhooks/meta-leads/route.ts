@@ -6,7 +6,10 @@ import {
 } from '@/lib/meta-leads';
 
 export const dynamic = 'force-dynamic';
-const headers = { 'Cache-Control': 'no-store' };
+const headers = {
+  'Cache-Control': 'no-store',
+  'X-Business-OS-Webhook': 'meta-leads-v2',
+};
 
 function equalSecret(left: string, right: string) {
   const a = Buffer.from(left);
