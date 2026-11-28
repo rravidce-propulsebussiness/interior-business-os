@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CUTLIST_ITEMS, cutlistPanels } from './interior-cutlist';
+import { BOARD_SIZES, optimizeBoardLayout } from './board-optimizer';
 
 describe('interior cutlist generators', () => {
   it('creates wardrobe sides, tops, shelves and shutters', () => {
@@ -27,5 +28,22 @@ describe('interior cutlist generators', () => {
     );
     expect(rows.find((row) => row.code === 'KB-SIDE')?.quantity).toBe(6);
     expect(rows.find((row) => row.code === 'KB-SHUTTER')?.quantity).toBe(6);
+  });
+
+  it('packs panels into boards, records placements and rotates when required', () => {
+    const item = CUTLIST_ITEMS.find((entry) => entry.key === 'wardrobe')!;
+    const panels = cutlistPanels(
+      item,
+      { width: 1200, height: 2100, depth: 600 },
+      1,
+    );
+    const layouts = optimizeBoardLayout(panels, BOARD_SIZES[0]!);
+    expect(layouts.length).toBeGreaterThan(0);
+    expect(layouts.flatMap((layout) => layout.placements)).toHaveLength(10);
+    expect(
+      layouts.every(
+        (layout) => layout.wastePercent >= 0 && layout.wastePercent <= 100,
+      ),
+    ).toBe(true);
   });
 });

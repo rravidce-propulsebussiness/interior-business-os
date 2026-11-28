@@ -8,6 +8,11 @@ import {
   type CutlistItemKey,
   type CutlistPanel,
 } from './interior-cutlist';
+import {
+  BOARD_SIZES,
+  optimizeBoardLayout,
+  type BoardPlacement,
+} from './board-optimizer';
 
 const STORAGE_KEY = 'business-os-interior-cutlist-v1';
 
@@ -24,10 +29,17 @@ export function InteriorCutlistWorkspace({
   const [cabinetCount, setCabinetCount] = useState(1);
   const [panels, setPanels] = useState<CutlistPanel[]>([]);
   const [draftLoaded, setDraftLoaded] = useState(false);
+  const [boardKey, setBoardKey] = useState('2440x1220');
   const item = useMemo(
     () =>
       CUTLIST_ITEMS.find((entry) => entry.key === itemKey) ?? CUTLIST_ITEMS[0]!,
     [itemKey],
+  );
+  const board =
+    BOARD_SIZES.find((entry) => entry.key === boardKey) ?? BOARD_SIZES[0]!;
+  const layout = useMemo(
+    () => optimizeBoardLayout(panels, board),
+    [board, panels],
   );
 
   useEffect(() => {
@@ -37,6 +49,7 @@ export function InteriorCutlistWorkspace({
         panels?: CutlistPanel[];
       } | null;
       if (saved?.projectName) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- Hydrate the browser-only draft after SSR.
         setProjectName(saved.projectName);
       }
       if (Array.isArray(saved?.panels)) {
@@ -45,7 +58,6 @@ export function InteriorCutlistWorkspace({
     } catch {
       // A corrupt browser draft should not block the cutlist.
     } finally {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Allow saving only after the browser draft has been read.
       setDraftLoaded(true);
     }
   }, []);
@@ -81,17 +93,32 @@ export function InteriorCutlistWorkspace({
         'Qty',
         'Material',
         'Edge',
+        'Board',
+        'X (mm)',
+        'Y (mm)',
+        'Rotated',
       ],
-      ...panels.map((row) => [
-        row.code,
-        row.item,
-        row.panel,
-        String(row.length),
-        String(row.width),
-        String(row.quantity),
-        row.material,
-        row.edge,
-      ]),
+      ...layout.flatMap((boardLayout) =>
+        boardLayout.placements.map((placement) => {
+          const row = panels.find(
+            (entry) => entry.id === placement.sourcePanelId,
+          );
+          return [
+            placement.code,
+            row?.item ?? '',
+            placement.label,
+            String(placement.length),
+            String(placement.width),
+            '1',
+            row?.material ?? '',
+            row?.edge ?? '',
+            String(placement.board),
+            String(placement.x),
+            String(placement.y),
+            placement.rotated ? 'Yes' : 'No',
+          ];
+        }),
+      ),
     ];
     const csv = rows
       .map((row) =>
@@ -292,6 +319,120 @@ export function InteriorCutlistWorkspace({
           </button>
         )}
       </section>
+      <section className="interior-cutlist-card interior-cutlist-table-card">
+        <div className="interior-cutlist-card-heading">
+          <span>03</span>
+          <div>
+            <h2>Board layout optimization</h2>
+            <p>
+              Rotation-aware nesting using a largest-first cutting heuristic.
+            </p>
+          </div>
+        </div>
+        <div className="interior-cutlist-optimizer-toolbar">
+          <label className="boq-stage-field">
+            <span>Board size</span>
+            <select
+              value={boardKey}
+              onChange={(event) => setBoardKey(event.target.value)}
+            >
+              {BOARD_SIZES.map((entry) => (
+                <option key={entry.key} value={entry.key}>
+                  {entry.label} · {entry.length} × {entry.width} mm
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="interior-cutlist-optimizer-stat">
+            <strong>{layout.length}</strong>
+            <span>Boards required</span>
+          </div>
+          <div className="interior-cutlist-optimizer-stat">
+            <strong>
+              {layout.length
+                ? Math.round(
+                    (layout.reduce((sum, entry) => sum + entry.usedArea, 0) /
+                      (layout.length * board.length * board.width)) *
+                      100,
+                  )
+                : 0}
+              %
+            </strong>
+            <span>Average utilization</span>
+          </div>
+          <div className="interior-cutlist-optimizer-stat">
+            <strong>
+              {layout.reduce(
+                (sum, entry) =>
+                  sum +
+                  entry.placements.filter((placement) => placement.rotated)
+                    .length,
+                0,
+              )}
+            </strong>
+            <span>Rotated panels</span>
+          </div>
+        </div>
+        {layout.length ? (
+          <div className="interior-cutlist-board-grid">
+            {layout.map((entry) => (
+              <div className="interior-cutlist-board-card" key={entry.board}>
+                <div className="interior-cutlist-board-head">
+                  <strong>Board {entry.board}</strong>
+                  <span>{entry.wastePercent.toFixed(1)}% waste</span>
+                </div>
+                <div
+                  className="interior-cutlist-board"
+                  style={{ aspectRatio: `${board.length} / ${board.width}` }}
+                  aria-label={`Board ${entry.board} layout`}
+                >
+                  {entry.placements.map((placement) => (
+                    <BoardPlacementBox
+                      key={placement.id}
+                      placement={placement}
+                      board={board}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="boq-volume-empty">
+            Add panels above to calculate the board layout.
+          </div>
+        )}
+        <small className="interior-cutlist-optimizer-note">
+          Layout includes a 10 mm trim allowance and 3 mm saw kerf. Confirm the
+          final nesting with the workshop saw/CNC operator before cutting.
+        </small>
+      </section>
     </main>
+  );
+}
+
+function BoardPlacementBox({
+  placement,
+  board,
+}: {
+  placement: BoardPlacement;
+  board: { length: number; width: number };
+}) {
+  return (
+    <span
+      className="interior-cutlist-board-piece"
+      style={{
+        left: `${(placement.x / board.length) * 100}%`,
+        top: `${(placement.y / board.width) * 100}%`,
+        width: `${(placement.length / board.length) * 100}%`,
+        height: `${(placement.width / board.width) * 100}%`,
+      }}
+      title={`${placement.code}: ${placement.length} × ${placement.width} mm`}
+    >
+      <b>{placement.code}</b>
+      <small>
+        {placement.length}×{placement.width}
+      </small>
+    </span>
   );
 }
