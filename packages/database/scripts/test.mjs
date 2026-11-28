@@ -21,6 +21,7 @@ console.log(
 console.log(psql(['-f', file('tests/quotations.sql')]));
 console.log(psql(['-f', file('tests/crm-starter-defaults.sql')]));
 console.log(psql(['-f', file('tests/crm.sql')]));
+console.log(psql(['-f', file('tests/crm-history-retention.sql')]));
 console.log(psql(['-f', file('tests/finance.sql')]));
 console.log(psql(['-f', file('tests/project-agreement.sql')]));
 console.log(psql(['-f', file('tests/construction-project-workflows.sql')]));

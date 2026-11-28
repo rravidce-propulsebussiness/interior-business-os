@@ -4314,6 +4314,7 @@ export interface Database {
           converted_project_id: string | null;
           converted_at: string | null;
           converted_by: string | null;
+          archived_at: string | null;
         };
         Insert: {
           id?: string;
@@ -4359,6 +4360,7 @@ export interface Database {
           converted_project_id?: string | null;
           converted_at?: string | null;
           converted_by?: string | null;
+          archived_at?: string | null;
         };
         Update: {
           id?: string;
@@ -4404,6 +4406,7 @@ export interface Database {
           converted_project_id?: string | null;
           converted_at?: string | null;
           converted_by?: string | null;
+          archived_at?: string | null;
         };
         Relationships: [
           {
@@ -5159,11 +5162,11 @@ export interface Database {
           wa_id: string | null;
           whatsapp_status: string;
           whatsapp_error: string | null;
-          whatsapp_area_mode: string | null;
           confirmation_sent_at: string | null;
           confirmed_at: string | null;
           created_at: string;
           processed_at: string | null;
+          whatsapp_area_mode: string | null;
         };
         Insert: {
           leadgen_id: string;
@@ -5177,11 +5180,11 @@ export interface Database {
           wa_id?: string | null;
           whatsapp_status?: string;
           whatsapp_error?: string | null;
-          whatsapp_area_mode?: string | null;
           confirmation_sent_at?: string | null;
           confirmed_at?: string | null;
           created_at?: string;
           processed_at?: string | null;
+          whatsapp_area_mode?: string | null;
         };
         Update: {
           leadgen_id?: string;
@@ -5195,11 +5198,11 @@ export interface Database {
           wa_id?: string | null;
           whatsapp_status?: string;
           whatsapp_error?: string | null;
-          whatsapp_area_mode?: string | null;
           confirmation_sent_at?: string | null;
           confirmed_at?: string | null;
           created_at?: string;
           processed_at?: string | null;
+          whatsapp_area_mode?: string | null;
         };
         Relationships: [
           {
@@ -12691,6 +12694,14 @@ export interface Database {
         Args: { p_status?: string };
         Returns: Json;
       };
+      meta_lead_area_confirmed: {
+        Args: {
+          p_organization_id: string;
+          p_leadgen_id: string;
+          p_project_size: string;
+        };
+        Returns: Json;
+      };
       meta_lead_brochure_logged: {
         Args: {
           p_organization_id: string;
@@ -12700,14 +12711,6 @@ export interface Database {
           p_error?: string;
         };
         Returns: undefined;
-      };
-      meta_lead_area_confirmed: {
-        Args: {
-          p_organization_id: string;
-          p_leadgen_id: string;
-          p_project_size: string;
-        };
-        Returns: Json;
       };
       meta_lead_confirmation_logged: {
         Args: {

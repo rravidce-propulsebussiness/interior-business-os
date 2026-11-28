@@ -45,6 +45,9 @@ describe('public website hostname routing', () => {
     expect(isPublicWebsiteHost('www.customer.com', base)).toBe(true);
     expect(isPublicWebsiteHost('shop.customer.co.uk', base)).toBe(true);
     expect(isPublicWebsiteHost('customer.com:443', base)).toBe(true);
+    // Syntax cannot establish ownership. Even a lookalike must go through
+    // HMAC verification and the exact active-domain lookup in the database.
+    expect(isPublicWebsiteHost('customer.com.attacker.test', base)).toBe(true);
     expect(
       isPublicWebsiteHost('neelima-constructions.sghomesinterior.in', base),
     ).toBe(true);
@@ -60,7 +63,6 @@ describe('public website hostname routing', () => {
       'localhost',
       '127.0.0.1',
       'customer.1',
-      'customer.com.attacker.test',
     ])
       expect(isPublicWebsiteHost(host, base)).toBe(false);
     expect(isPublicWebsiteHost('customer.com', '')).toBe(false);
