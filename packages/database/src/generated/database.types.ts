@@ -12694,6 +12694,14 @@ export interface Database {
         Args: { p_status?: string };
         Returns: Json;
       };
+      meta_lead_area_confirmed: {
+        Args: {
+          p_organization_id: string;
+          p_leadgen_id: string;
+          p_project_size: string;
+        };
+        Returns: Json;
+      };
       meta_lead_brochure_logged: {
         Args: {
           p_organization_id: string;
@@ -12703,14 +12711,6 @@ export interface Database {
           p_error?: string;
         };
         Returns: undefined;
-      };
-      meta_lead_area_confirmed: {
-        Args: {
-          p_organization_id: string;
-          p_leadgen_id: string;
-          p_project_size: string;
-        };
-        Returns: Json;
       };
       meta_lead_confirmation_logged: {
         Args: {

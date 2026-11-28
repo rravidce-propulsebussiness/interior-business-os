@@ -9,7 +9,7 @@ Base commit: `8863d5037612b52d39228231e33738f2db4774e9`.
 - Quotation search results remain accessible when the optional sharing lookup fails. Unknown sharing state is not reported as a confirmed empty Shared list; existing unavailable-state labels and warning remain.
 - CRM history retains the owner-authorized reset exception. Retention deletion is restricted to the exact expired lead, trusted purge execution and its history; active and recoverable leads remain protected. Purge workers lock candidates, skip concurrent locks and restore their scoped flag.
 - The missing measurement-status migration from open PR #569 is included unchanged, using the filename already recorded in production. Fresh installations can enter both area collection states.
-- Generated database types include the lead recycle-bin `archived_at` column introduced by the retention migration.
+- Generated database types match the migration-added lead and Meta event columns and the CRM area-confirmation RPC.
 - Meta confirmations and corrections are recorded in CRM history again. Confirmation-only forms stop after confirmation, and area-method replies tolerate surrounding whitespace. SQL regression coverage follows confirmation → area method → area value → quotation and verifies idempotency.
 - Dashboard overview requests use the intended static logging category.
 - Regular test discovery now includes all shared WhatsApp/automation helpers, auth provider, ingress and additional quotation regressions. The hostname test now distinguishes valid external-host syntax from actual ownership, which is enforced by HMAC and exact database lookup.
