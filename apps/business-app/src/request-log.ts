@@ -1,5 +1,6 @@
 /** Logs static route categories only; never tenant slugs, IDs or query strings. */
 const sections = new Set([
+  'overview',
   'billing',
   'crm',
   'quotations',

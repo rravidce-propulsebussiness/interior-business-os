@@ -3217,6 +3217,50 @@ body:has(.crm-leads-root) .crm-shared-navigation {
 .crm-meta-panel .crm-meta-error {
   color: #b42318;
 }
+.crm-meta-followup-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 13px;
+  border: 1px solid var(--crm-border);
+  border-radius: 10px;
+  background: #fffaf8;
+  color: #27364f;
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+.crm-meta-followup-toggle:hover {
+  border-color: #d59a8a;
+  background: #fff5f1;
+}
+.crm-meta-followup-toggle:focus-visible {
+  outline: 3px solid rgb(189 92 63 / 28%);
+  outline-offset: 2px;
+}
+.crm-meta-followup-state {
+  margin-left: auto;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #f4ece8;
+  color: #8a554b;
+  font-size: 11px;
+  font-weight: 700;
+}
+.crm-meta-followup-chevron {
+  width: 22px;
+  color: #a24b3c;
+  font-size: 19px;
+  line-height: 1;
+  text-align: center;
+}
 .crm-meta-followup {
   display: flex;
   flex-direction: column;

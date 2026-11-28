@@ -10,6 +10,16 @@ export default defineConfig({
     fileParallelism: !process.env.TEST_DATABASE_URL,
     include: [
       'packages/*/src/**/*.test.ts',
+      // All shared automation, auth and ingress behavior suites must run,
+      // including new files that were previously omitted by the allow-list.
+      'apps/business-app/src/lib/**/*.test.ts',
+      'apps/business-app/src/app/auth/**/*.test.ts',
+      'apps/business-app/src/*.test.ts',
+      'apps/business-app/src/app/dashboard/layout-auth.test.ts',
+      'apps/business-app/src/app/dashboard/quotations/quotation-editor-regressions.test.ts',
+      'apps/business-app/src/app/dashboard/quotations/customer-match.test.ts',
+      'apps/business-app/src/app/dashboard/quotations/sharing-filter.test.ts',
+      'apps/business-app/src/app/dashboard/quotations/construction-package-selection.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-flow.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-creation-quotation.test.ts',
       'apps/business-app/src/app/dashboard/projects/project-stage-status.test.ts',

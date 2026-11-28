@@ -327,6 +327,7 @@ export function MetaLeadPanel({
   const [forms, setForms] = useState<MetaFormOption[] | null>(null);
   const [formId, setFormId] = useState('');
   const [pageHealth, setPageHealth] = useState<MetaPageHealth | null>(null);
+  const [expandedFollowUp, setExpandedFollowUp] = useState<string | null>(null);
 
   const run: Run = async (task, reload = false) => {
     if (busy) return false;
@@ -354,11 +355,10 @@ export function MetaLeadPanel({
     >
       <div className="crm-integrations-top">
         <div>
-          <h2>Facebook &amp; Instagram lead forms</h2>
+          <h2>Connected lead forms</h2>
           <p>
-            Leads from your Meta lead ads arrive in this CRM the moment they are
-            submitted. You can also greet each lead on WhatsApp, confirm their
-            details and share your quotation automatically.
+            New submissions are added to this company&apos;s CRM. Configure an
+            optional WhatsApp confirmation and quotation for each form.
           </p>
         </div>
         {onClose && (
@@ -440,7 +440,30 @@ export function MetaLeadPanel({
                   </button>
                 </div>
               </header>
-              <FollowUp form={form} view={view} busy={busy} run={run} />
+              <button
+                type="button"
+                className="crm-meta-followup-toggle"
+                aria-expanded={expandedFollowUp === form.id}
+                aria-controls={`meta-followup-${form.id}`}
+                onClick={() =>
+                  setExpandedFollowUp((current) =>
+                    current === form.id ? null : form.id,
+                  )
+                }
+              >
+                <span>WhatsApp follow-up</span>
+                <span className="crm-meta-followup-state">
+                  {form.confirmEnabled ? 'Enabled' : 'Not configured'}
+                </span>
+                <span aria-hidden="true" className="crm-meta-followup-chevron">
+                  {expandedFollowUp === form.id ? '−' : '+'}
+                </span>
+              </button>
+              {expandedFollowUp === form.id && (
+                <div id={`meta-followup-${form.id}`}>
+                  <FollowUp form={form} view={view} busy={busy} run={run} />
+                </div>
+              )}
             </article>
           ))}
 

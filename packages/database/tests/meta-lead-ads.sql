@@ -111,18 +111,31 @@ set local role service_role;
 select public.meta_lead_reply(:'org','aaaaaaaa-0000-4000-8000-00000000a009','919000000001','YES') is null as other_number \gset
 select public.meta_lead_reply(:'org',:'wa','919000000003','YES') is null as failed_send \gset
 select public.meta_lead_reply(:'org',:'wa','919000000001',' yes. ') as confirmed \gset
-select public.meta_lead_reply(:'org',:'wa','919000000001','YES') is null as second_yes \gset
+select public.meta_lead_reply(:'org',:'wa','919000000001','YES') as repeated_yes \gset
+select public.meta_lead_reply(:'org',:'wa','919000000001',' square yards ') as area_method \gset
+select public.meta_lead_reply(:'org',:'wa','919000000001','200') as area_value \gset
+select public.meta_lead_area_confirmed(:'org','300000000000001','1,800 sq ft') as quotation \gset
+select public.meta_lead_area_confirmed(:'org','300000000000001','1,800 sq ft') is null as second_area \gset
 reset role;
 select private.meta_lead_assert(:'other_number','a reply on another WhatsApp number does not confirm');
 select private.meta_lead_assert(:'failed_send','a lead whose confirmation failed is not treated as awaiting');
 select private.meta_lead_assert(
- (:'confirmed'::jsonb->>'action')='send_quote'
- and (:'confirmed'::jsonb->>'lead_name')='Asha Rao'
- and (:'confirmed'::jsonb->>'project_size')='1800'
- and (:'confirmed'::jsonb->'packages') @> '[{"name":"Meta Test Standard","rate_per_sqft":1650}]'
- and (select whatsapp_status='confirmed' and confirmed_at is not null from public.meta_lead_events where leadgen_id='300000000000001'),
- 'YES confirms the details and returns the quotation to send');
-select private.meta_lead_assert(:'second_yes','a confirmation is consumed once');
+ (:'confirmed'::jsonb->>'action')='ask_area_method'
+ and (:'repeated_yes'::jsonb->>'action')='ask_area_method'
+ and (:'area_method'::jsonb->>'action')='ask_area_value'
+ and (:'area_method'::jsonb->>'area_mode')='sqyard'
+ and (:'area_value'::jsonb->>'action')='area_value',
+ 'YES starts area collection; repeated YES never sends an unmeasured quotation');
+select private.meta_lead_assert(
+ (:'quotation'::jsonb->>'action')='send_quote'
+ and (:'quotation'::jsonb->>'lead_name')='Asha Rao'
+ and (:'quotation'::jsonb->>'project_size')='1,800 sq ft'
+ and (:'quotation'::jsonb->'packages') @> '[{"name":"Meta Test Standard","rate_per_sqft":1650}]'
+ and (select whatsapp_status='confirmed' and confirmed_at is not null from public.meta_lead_events where leadgen_id='300000000000001')
+ and exists(select 1 from public.lead_activities where lead_id=(:'first'::jsonb->>'lead_id')::uuid
+   and body='Lead confirmed their form details on WhatsApp'),
+ 'area confirmation returns quotation packages and preserves confirmation history');
+select private.meta_lead_assert(:'second_area','area confirmation is consumed once');
 
 set local role service_role;
 select public.meta_lead_quote_logged(:'org','300000000000001',true,'Hi Asha Rao, our packages: ...',null);
@@ -145,6 +158,20 @@ select private.meta_lead_assert(
  and exists(select 1 from public.lead_activities where lead_id=(:'kiran'::jsonb->>'lead_id')::uuid
    and body like '%My flat is 1200 sqft not 1800%'),
  'a correction is logged on the lead for a person to follow up');
+
+-- Confirmation-only forms must not start the quotation measurement flow.
+update public.meta_lead_forms set quote_enabled=false where id=:'form';
+set local role service_role;
+select public.meta_lead_ingest(:'org',:'form','300000000000005','{"name":"Confirmation Only","phone":"+919000000005","wa_id":"919000000005"}') as no_quote \gset
+select public.meta_lead_confirmation_logged(:'org','300000000000005',:'wa',true,null);
+select public.meta_lead_reply(:'org',:'wa','919000000005','YES') as no_quote_reply \gset
+select public.meta_lead_reply(:'org',:'wa','919000000005','YES') is null as no_quote_repeat \gset
+reset role;
+select private.meta_lead_assert(
+ (:'no_quote_reply'::jsonb->>'action')='confirmed'
+ and :'no_quote_repeat'::boolean
+ and (select whatsapp_status='confirmed' from public.meta_lead_events where leadgen_id='300000000000005'),
+ 'confirmation-only forms stop after confirmation and consume it once');
 
 -- One lead form can feed only one company at a time.
 do $$ begin

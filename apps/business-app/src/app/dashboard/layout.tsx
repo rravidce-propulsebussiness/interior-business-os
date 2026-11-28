@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { activeOrganization } from '@business-os/auth/server';
 import { DomainError } from '@business-os/shared';
+import { redirect } from 'next/navigation';
 import { CompanyNavigationProvider } from './company-navigation-provider';
 import { ownerWorkspaceNavigation } from './owner-workspace-navigation';
 import './dashboard-shared-theme.css';
@@ -22,8 +23,11 @@ export default async function DashboardLayout({
   try {
     context = await activeOrganization();
   } catch (error) {
-    if (!(error instanceof DomainError && error.code === 'UNAUTHENTICATED'))
-      throw error;
+    // Expired/missing sessions go to sign in; provider outages and tenant
+    // access errors must remain errors, not render an anonymous workspace.
+    if (error instanceof DomainError && error.code === 'UNAUTHENTICATED')
+      redirect('/login');
+    throw error;
   }
   return (
     <CompanyNavigationProvider navigation={ownerWorkspaceNavigation(context)}>
